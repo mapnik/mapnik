@@ -10,6 +10,8 @@ env:
   global:
    - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
+   - JAVA_HOME=/usr/lib/jvm/java-7-oracle
+   - LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${JAVA_HOME}/jre/lib/amd64/server
 addons:
   postgresql: "9.4"
   apt:

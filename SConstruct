@@ -79,6 +79,8 @@ pretty_dep_names = {
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
+    'java':'Java JNI Library | configure with JAVA_INCLUDE_PATH, JAVA_INCLUDE_PATH2 & JAVA_JVM_LIB | more info: https://github.com/mapnik/mapnik/wiki/Java',
+    'geowave':'GeoWave database library | configure with GEOWAVE_LIBS, GEOWAVE_INCLUDES & GEOWAVE_RUNTIME_JAR | more info: https://github.com/mapnik/mapnik/wiki/GeoWave',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -114,6 +116,8 @@ PLUGINS = { # plugins with external dependencies
             'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'clntsh','lang':'C++'},
             'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
+            'java':    {'default':False,'path':'JAVA','inc':'jni.h','lib':'jvm','lang':'C++'},
+            'geowave': {'default':False,'path':'GEOWAVE','inc':None,'lib':'jace','lang':'C++'},
 
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
             'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C'},
@@ -385,6 +389,12 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('JAVA_INCLUDE_PATH', 'Search path for Java Virtual Machine include files', '', PathVariable.PathAccept),
+    PathVariable('JAVA_INCLUDE_PATH2', 'Search path for platform specific Java Virtual Machine include files', '', PathVariable.PathAccept),
+    PathVariable('JAVA_JVM_LIB', 'Search path for Java Virtual Machine library files', '', PathVariable.PathAccept),
+    PathVariable('GEOWAVE_INCLUDES', 'Search path for GeoWave include files', '', PathVariable.PathAccept),
+    PathVariable('GEOWAVE_LIBS', 'Search path for GeoWave library files', '', PathVariable.PathAccept),
+    PathVariable('GEOWAVE_RUNTIME_JAR', 'Full path to GeoWave Runtime Jar', '', PathVariable.PathAccept),
 
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
@@ -1090,6 +1100,22 @@ def GetMapnikLibVersion():
         version_string += '-pre'
     return version_string
 
+JAVA_ENABLED = False
+def EnableJava(env):
+    global JAVA_ENABLED
+    details = env['PLUGINS']['java']
+    if (not JAVA_ENABLED) and (env.get('JAVA_INCLUDE_PATH') or env.get('JAVA_INCLUDE_PATH2') or env.get('JAVA_JVM_LIB')):
+        backup = env.Clone().Dictionary()
+        incpath = [env.get('JAVA_INCLUDE_PATH2'), env.get('JAVA_INCLUDE_PATH')]
+        libpath = env.get('JAVA_JVM_LIB')
+        env.Append(CPPPATH = copy(incpath))
+        env.Append(LIBPATH = copy(libpath))
+        if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
+            env.Replace(**backup)
+            env['SKIPPED_DEPS'].append('java')
+        else:
+            JAVA_ENABLED = True
+
 if not preconfigured:
 
     color_print(4,'Configuring build environment...')
@@ -1525,6 +1551,22 @@ if not preconfigured:
                                          env['LIBS'].remove(libname)
                                 else:
                                     details['lib'] = libname
+                elif plugin == 'java':
+                    EnableJava(env)
+                elif plugin == 'geowave':
+                    EnableJava(env)
+                    if env.get('GEOWAVE_LIBS') or env.get('GEOWAVE_INCLUDES') or env.get('GEOWAVE_RUNTIME_JAR'):
+                        backup = env.Clone().Dictionary()
+                        incpath = env['%s_INCLUDES' % details['path']]
+                        libpath = env['%s_LIBS' % details['path']]
+                        includes = [os.path.relpath(y, incpath) for x in os.walk(incpath+'/jace') for y in glob(os.path.join(x[0], '*.h'))]
+                        env.PrependUnique(CPPPATH = copy(incpath))
+                        env.PrependUnique(LIBPATH = copy(libpath))
+                        if (not conf.CheckLibWithHeader(details['lib'], includes, details['lang'])):
+                            env.Replace(**backup)
+                            env['SKIPPED_DEPS'].append('geowave')
+                        else:
+                            print 'Checking for GeoWave... yes'
                 elif details['path'] and details['lib'] and details['inc']:
                     backup = env.Clone().Dictionary()
                     # Note, the 'delete_existing' keyword makes sure that these paths are prepended
@@ -1905,6 +1947,8 @@ if not HELP_REQUESTED:
     GDAL_BUILT = False
     OGR_BUILT = False
     for plugin in env['PLUGINS']:
+        if plugin == 'java':
+            continue;
         if env['PLUGIN_LINKING'] == 'static' or plugin not in env['REQUESTED_PLUGINS']:
             if os.path.exists('plugins/input/%s.input' % plugin):
                 os.unlink('plugins/input/%s.input' % plugin)
