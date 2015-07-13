@@ -23,6 +23,7 @@
 #include "connection_manager.hpp"
 #include "postgis_datasource.hpp"
 #include "postgis_featureset.hpp"
+#include "postgis_utils.hpp"
 #include "asyncresultset.hpp"
 
 
@@ -85,6 +86,15 @@ postgis_datasource::postgis_datasource(parameters const& params)
       extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
+      twkb_encoding_(false),
+      simplify_snap_ratio_(*params_.get<value_double>("simplify_snap_ratio", 1.0/40.0)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
+      // See http://trac.osgeo.org/postgis/ticket/2093
+      simplify_dp_ratio_(*params_.get<value_double>("simplify_dp_ratio", 1.0/20.0)),
+      simplify_dp_preserve_(false),
+      simplify_clip_resolution_(*params_.get<value_double>("simplify_clip_resolution", 0.0)),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
@@ -123,6 +133,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
     estimate_extent_ = estimate_extent && *estimate_extent;
     boost::optional<mapnik::boolean> simplify_opt = params.get<mapnik::boolean>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
+    boost::optional<mapnik::boolean> twkb_opt = params.get<mapnik::boolean>("twkb_encoding", false);
+    twkb_encoding_ = twkb_opt && *twkb_opt;
+
+    boost::optional<mapnik::boolean> simplify_preserve_opt = params.get<mapnik::boolean>("simplify_dp_preserve", false);
+    simplify_dp_preserve_ = simplify_preserve_opt && *simplify_preserve_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -162,7 +177,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             if (geometryColumn_.empty() || srid_ == 0)
             {
 #ifdef MAPNIK_STATS
-                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column)");
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column) <start>");
 #endif
                 std::ostringstream s;
 
@@ -235,13 +250,16 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     }
                     rs->close();
                 }
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column) <end>");
+#endif
             }
 
             // detect primary key
             if (*autodetect_key_field && key_field_.empty())
             {
 #ifdef MAPNIK_STATS
-                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_primary_key)");
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_primary_key) <start>");
 #endif
 
                 std::ostringstream s;
@@ -305,6 +323,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     }
                 }
                 rs_key->close();
+
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_primary_key) <end>");
+#endif
             }
 
             // if a globally unique key field/primary key is required
@@ -330,7 +352,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
             // collect attribute desc
 #ifdef MAPNIK_STATS
-            mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_column_description)");
+            mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_column_description) <start>");
 #endif
 
             std::ostringstream s;
@@ -427,6 +449,9 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     }
                 }
             }
+#ifdef MAPNIK_STATS
+            mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_column_description) <end>");
+#endif
 
             rs->close();
 
@@ -482,20 +507,17 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
 
-    if (srid_ > 0)
-    {
-        b << "ST_SetSRID(";
-    }
-
-    b << "'BOX3D(";
+    b << "ST_MakeEnvelope(";
     b << std::setprecision(16);
-    b << env.minx() << " " << env.miny() << ",";
-    b << env.maxx() << " " << env.maxy() << ")'::box3d";
+    b << env.minx() << "," << env.miny() << ",";
+    b << env.maxx() << "," << env.maxy();
 
     if (srid_ > 0)
     {
-        b << ", " << srid_ << ")";
+        b << "," << srid_;
     }
+
+    b << ")";
 
     return b.str();
 }
@@ -673,7 +695,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 {
 
 #ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context");
+    mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context<start>");
 #endif
 
 
@@ -733,24 +755,78 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         const double px_gw = 1.0 / boost::get<0>(q.resolution());
         const double px_gh = 1.0 / boost::get<1>(q.resolution());
+        const double px_sz = std::min(px_gw, px_gh);
 
-        s << "SELECT ST_AsBinary(";
-
-        if (simplify_geometries_) {
-          s << "ST_Simplify(";
+        if (twkb_encoding_) {
+            s << "SELECT ST_AsTWKB(";
+        }
+        else {
+            s << "SELECT ST_AsBinary(";
         }
 
+        if (simplify_geometries_) {
+            s << "ST_Simplify(";
+        }
+
+        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
+            s << "ST_ClipByBox2D(";
+        }
+
+        if (simplify_geometries_) {
+            s<< "ST_SnapToGrid(";
+        }
+
+        // Geometry column!
         s << "\"" << geometryColumn_ << "\"";
 
+        // ! ST_SnapToGrid()
         if (simplify_geometries_) {
           // 1/20 of pixel seems to be a good compromise to avoid
           // drop of collapsed polygons.
           // See https://github.com/mapnik/mapnik/issues/1639
-          const double tolerance = std::min(px_gw, px_gh) / 20.0;
-          s << ", " << tolerance << ")";
+          // See http://trac.osgeo.org/postgis/ticket/2093
+          const double grid_tolerance = px_sz * simplify_snap_ratio_;
+          s << ", " << grid_tolerance << ")";
         }
 
-        s << ") AS geom";
+        // ! ST_ClipByBox2D()
+        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
+            s << "," << sql_bbox(box) << ")";
+        }
+
+        // ! ST_Simplify()
+        if (simplify_geometries_) {
+          const double tolerance = px_sz * simplify_dp_ratio_;
+          s << ", " << tolerance;
+          // Add parameter to ST_Simplify to keep collapsed geometries
+          if (simplify_dp_preserve_) {
+            s << ", true";
+          }
+          s << ")";
+        }
+
+        // ! ST_TWKB()
+        if ( twkb_encoding_ ) {
+            // Depending on where resolution falls relative to rounding levels,
+            // we get a rounding to either 1 pixel down to 1/10 of a pixel.
+            // (When rouding levels jump by factors of 10, hard to choose a "perfect" 
+            // rounding level)
+            const double tolerance = px_sz;
+            // Figure out number of decimals of rounding that implies
+            if ( tolerance > 0 ) {
+                const int i = -1 * lround(log10(tolerance) + 0.5) + 1;
+                // Write the SQL
+                s << "," << i << ") AS geom";
+            }
+            // Hopefully we're never fed a negative tolerance...
+            else {
+                s << ") AS geom";
+            }
+        }
+        // ! ST_AsBinary()
+        else {
+            s << ") AS geom";
+        }
 
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
         std::set<std::string> const& props = q.property_names();
@@ -790,9 +866,17 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context<end>");
+#endif
+        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), twkb_encoding_);
 
     }
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context<end>");
+#endif
 
     return featureset_ptr();
 }
@@ -873,7 +957,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), twkb_encoding_);
         }
     }
 

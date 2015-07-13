@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "postgis_featureset.hpp"
+#include "postgis_utils.hpp"
 #include "resultset.hpp"
 #include "cursorresultset.hpp"
 
@@ -47,19 +48,22 @@
 using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
+using mapnik::postgis_utils;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 
 postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
-                                       bool key_field)
+                                       bool key_field,
+                                       bool twkb_encoding)
     : rs_(rs),
       ctx_(ctx),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
       feature_id_(1),
-      key_field_(key_field)
+      key_field_(key_field),
+      twkb_encoding_(twkb_encoding)
 {
 }
 
@@ -128,8 +132,14 @@ feature_ptr postgis_featureset::next()
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
 
-        if (!geometry_utils::from_wkb(feature->paths(), data, size))
-            continue;
+        if ( twkb_encoding_ ) {
+            if (!postgis_utils::from_twkb(feature->paths(), data, size))
+                continue;
+        }
+        else {            
+            if (!geometry_utils::from_wkb(feature->paths(), data, size))
+                continue;
+        }
 
         totalGeomSize_ += size;
         unsigned num_attrs = ctx_->size() + 1;
