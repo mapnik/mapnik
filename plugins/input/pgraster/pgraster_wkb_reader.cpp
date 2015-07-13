@@ -65,12 +65,12 @@ read_uint16(const boost::uint8_t** from, boost::uint8_t littleEndian) {
     return ret;
 }
 
-int16_t
-read_int16(const uint8_t** from, uint8_t littleEndian) {
-    assert(NULL != from);
-
-    return read_uint16(from, littleEndian);
-}
+// int16_t
+// read_int16(const uint8_t** from, uint8_t littleEndian) {
+//     assert(NULL != from);
+//
+//     return read_uint16(from, littleEndian);
+// }
 
 double
 read_float64(const boost::uint8_t** from, boost::uint8_t littleEndian) {
@@ -185,10 +185,6 @@ void read_data_band(mapnik::raster_ptr raster,
 {
   mapnik::image_data_32 & image = raster->data_;
 
-  // Start with plain white (ABGR or RGBA depending on endiannes)
-  // TODO: set to transparent instead?
-  image.set(0xffffffff);
-
   raster->premultiplied_alpha_ = true;
 
   float* data = (float*)image.getBytes();
@@ -196,8 +192,8 @@ void read_data_band(mapnik::raster_ptr raster,
   double val = reader(); // read nodata value, whether we use it or not (here, we don't)
   
   if ( hasnodata ) {
-    raster->set_nodata(nodataval);
     nodataval = val;
+    raster->set_nodata(nodataval);
   }
 
   for (int y=0; y<height; ++y) {
@@ -284,6 +280,9 @@ void read_grayscale_band(mapnik::raster_ptr raster,
   mapnik::image_data_32 & image = raster->data_;
 
   raster->premultiplied_alpha_ = true;
+
+  // Start with black and transparent full on
+  image.set(0x00000000);
 
   int val;
   int nodataval;
@@ -379,8 +378,8 @@ pgraster_wkb_reader::read_rgba(mapnik::raster_ptr raster)
 {
   mapnik::image_data_32 & image = raster->data_;
 
-  // Start with plain white (ABGR or RGBA depending on endiannes)
-  image.set(0xffffffff);
+  // Start with white and transparent full on
+  image.set(0xffffff00);
  
   raster->premultiplied_alpha_ = true;
 

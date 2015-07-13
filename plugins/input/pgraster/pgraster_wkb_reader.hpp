@@ -50,7 +50,7 @@ class pgraster_wkb_reader
 public:
 
   pgraster_wkb_reader(const uint8_t* wkb, int size, int bnd=0)
-    : wkbsize_(size), wkb_(wkb), wkbend_(wkb+size), ptr_(wkb), bandno_(bnd) 
+    : ptr_(wkb), bandno_(bnd) 
   {}
 
   mapnik::raster_ptr get_raster();
@@ -72,9 +72,6 @@ private:
   void read_grayscale(mapnik::raster_ptr raster);
   void read_rgba(mapnik::raster_ptr raster);
 
-  int wkbsize_;
-  const uint8_t* wkb_;
-  const uint8_t* wkbend_;
   const uint8_t* ptr_;
   uint8_t endian_;
   int bandno_;
