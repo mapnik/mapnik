@@ -45,7 +45,7 @@ color parse_color(std::string const& str)
     }
     else
     {
-        throw config_error("Failed to a parse color: \"" + str + "\"");
+        throw config_error("Failed to parse color: \"" + str + "\"");
     }
 }
 
