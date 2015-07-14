@@ -9,6 +9,7 @@ For a complete change history, see the git log.
 ## Future
 
 - Fixed parsing of GeoJSON when properties contained `{}` (#2964)
+- Fixed potential hang due to invalid use of `line-geometry-transform` (6d6cb15)
 
 ## 3.0.0
 
