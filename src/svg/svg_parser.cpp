@@ -26,7 +26,7 @@
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/safe_cast.hpp>
-
+#include <mapnik/svg/svg_parser_exception.hpp>
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
@@ -99,7 +99,8 @@ struct key_value_sequence_ordered
     qi::rule<Iterator, std::string(), SkipType> key, value;
 };
 
-agg::rgba8 parse_color(const char* str)
+template <typename T>
+agg::rgba8 parse_color(T & error_messages, const char* str)
 {
     mapnik::color c(100,100,100);
     try
@@ -108,7 +109,7 @@ agg::rgba8 parse_color(const char* str)
     }
     catch (mapnik::config_error const& ex)
     {
-        MAPNIK_LOG_ERROR(svg_parser) << ex.what();
+        error_messages.emplace_back(ex.what());
     }
     return agg::rgba8(c.red(), c.green(), c.blue(), c.alpha());
 }
@@ -330,12 +331,14 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
             }
             else
             {
-                MAPNIK_LOG_ERROR(svg_parser) << "Failed to find gradient fill: " << id;
+                std::stringstream ss;
+                ss << "Failed to find gradient fill: " << id;
+                parser.error_messages_.push_back(ss.str());
             }
         }
         else
         {
-            parser.path_.fill(parse_color((const char*) value));
+            parser.path_.fill(parse_color(parser.error_messages_, (const char*) value));
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "fill-opacity"))
@@ -367,12 +370,14 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
             }
             else
             {
-                MAPNIK_LOG_ERROR(svg_parser) << "Failed to find gradient fill: " << id;
+                std::stringstream ss;
+                ss << "Failed to find gradient fill: " << id;
+                parser.error_messages_.push_back(ss.str());
             }
         }
         else
         {
-            parser.path_.stroke(parse_color((const char*) value));
+            parser.path_.stroke(parse_color(parser.error_messages_, (const char*) value));
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke-width"))
@@ -519,7 +524,6 @@ void parse_path(svg_parser & parser, xmlTextReaderPtr reader)
 void parse_polygon(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
-
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "points");
     if (value)
     {
@@ -815,7 +819,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
                 }
                 catch (mapnik::config_error const& ex)
                 {
-                    MAPNIK_LOG_ERROR(svg_parser) << ex.what();
+                    parser.error_messages_.emplace_back(ex.what());
                 }
             }
             else if (kv.first == "stop-opacity")
@@ -835,7 +839,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
         }
         catch (mapnik::config_error const& ex)
         {
-            MAPNIK_LOG_ERROR(svg_parser) << ex.what();
+            parser.error_messages_.emplace_back(ex.what());
         }
         xmlFree(value);
     }
@@ -893,7 +897,9 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
             }
             else
             {
-                MAPNIK_LOG_ERROR(svg_parser) << "Failed to find linked gradient " << linkid;
+                std::stringstream ss;
+                ss << "Failed to find linked gradient " << linkid;
+                parser.error_messages_.push_back(ss.str());
             }
         }
         xmlFree(value);
@@ -1062,32 +1068,40 @@ svg_parser::svg_parser(svg_converter<svg_path_adapter,
 
 svg_parser::~svg_parser() {}
 
-void svg_parser::parse(std::string const& filename)
+bool svg_parser::parse(std::string const& filename)
 {
     xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
     if (reader == nullptr)
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
+        std::stringstream ss;
+        ss << "Unable to open '" << filename << "'";
+        error_messages_.push_back(ss.str());
     }
     else if (!parse_reader(*this,reader))
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << filename << "'";
+        std::stringstream ss;
+        ss << "Unable to parse '" << filename << "'";
+        error_messages_.push_back(ss.str());
     }
+    return error_messages_.empty() ? true : false;
 }
 
-void svg_parser::parse_from_string(std::string const& svg)
+bool svg_parser::parse_from_string(std::string const& svg)
 {
     xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),safe_cast<int>(svg.size()),nullptr,nullptr,
         (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
-    if (reader == nullptr)
+    if (reader == nullptr ||!parse_reader(*this,reader))
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+        std::stringstream ss;
+        ss << "Unable to parse '" << svg << "'";
+        error_messages_.push_back(ss.str());
     }
-    else if (!parse_reader(*this,reader))
-    {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
-    }
+    return error_messages_.empty() ? true : false;
 }
 
+svg_parser::error_message_container const& svg_parser::error_messages() const
+{
+    return error_messages_;
+}
 
 }}

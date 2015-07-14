@@ -20,39 +20,35 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_PARSER_HPP
-#define MAPNIK_SVG_PARSER_HPP
+#ifndef MAPNIK_SVG_PARSER_EXCEPTION_HPP
+#define MAPNIK_SVG_PARSER_EXCEPTION_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/gradient.hpp>
-#include <mapnik/util/noncopyable.hpp>
+#include <exception>
 
 // stl
 #include <map>
 
 namespace  mapnik { namespace svg {
 
-    class MAPNIK_DECL svg_parser : private util::noncopyable
+class MAPNIK_DECL svg_parser_exception : public std::exception
+{
+public:
+    svg_parser_exception(std::string const& message)
+      : message_(message) {}
+
+    ~svg_parser_exception() throw() {}
+
+    virtual const char* what() const throw()
     {
-        using error_message_container = std::vector<std::string> ;
-    public:
-        explicit svg_parser(svg_converter_type & path);
-        ~svg_parser();
-        error_message_container const& error_messages() const;
-        bool parse(std::string const& filename);
-        bool parse_from_string(std::string const& svg);
-        svg_converter_type & path_;
-        bool is_defs_;
-        std::map<std::string, gradient> gradient_map_;
-        std::pair<std::string, gradient> temporary_gradient_;
-        error_message_container error_messages_;
-    };
+        return message_.c_str();
+    }
+private:
+    std::string message_;
+};
 
 }}
 
 
-#endif // MAPNIK_SVG_PARSER_HPP
+#endif // MAPNIK_SVG_PARSER_EXCEPTION_HPP
