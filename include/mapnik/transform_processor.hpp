@@ -31,6 +31,10 @@
 #include <mapnik/util/variant.hpp>
 // agg
 #include <agg_trans_affine.h>
+// boost
+#include <boost/algorithm/clamp.hpp>
+// stl
+#include <cmath>
 
 namespace mapnik {
 
@@ -149,13 +153,15 @@ struct transform_processor
 
         void operator() (skewX_node const& node)
         {
-            double angle = deg2rad(eval(node.angle_));
+            auto degrees = std::fmod(eval(node.angle_),90.0);
+            auto angle = deg2rad(boost::algorithm::clamp(degrees, -89.0, 89.0));
             transform_.multiply(agg::trans_affine_skewing(angle, 0.0));
         }
 
         void operator() (skewY_node const& node)
         {
-            double angle = deg2rad(eval(node.angle_));
+            auto degrees = std::fmod(eval(node.angle_),90.0);
+            auto angle = deg2rad(boost::algorithm::clamp(degrees, -89.0, 89.0));
             transform_.multiply(agg::trans_affine_skewing(0.0, angle));
         }
 
