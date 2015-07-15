@@ -26,6 +26,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/make_unique.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_render_vector.hpp>
 

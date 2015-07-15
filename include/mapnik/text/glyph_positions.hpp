@@ -26,6 +26,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/rotation.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/text/glyph_info.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -36,8 +37,6 @@
 
 namespace mapnik
 {
-
-struct glyph_info;
 
 struct glyph_position
 {

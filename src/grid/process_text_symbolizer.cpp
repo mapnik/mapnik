@@ -28,6 +28,7 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/renderer.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 
 namespace mapnik {

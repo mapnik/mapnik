@@ -32,6 +32,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
