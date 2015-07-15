@@ -169,7 +169,7 @@ void text_layout::add_child(text_layout_ptr const& child_layout)
 
 evaluated_format_properties_ptr & text_layout::new_child_format_ptr(evaluated_format_properties_ptr const& p)
 {
-    format_ptrs_.emplace_back(std::make_unique<detail::evaluated_format_properties>(*p));
+    format_ptrs_.emplace_back(std::make_shared<detail::evaluated_format_properties>(*p));
     return format_ptrs_.back();
 }
 
