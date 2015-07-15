@@ -54,7 +54,7 @@ struct glyph_info : util::noncopyable
     glyph_info(glyph_info && rhs)
         : glyph_index(std::move(rhs.glyph_index)),
           char_index(std::move(rhs.char_index)),
-          format(rhs.format), // take ref
+          format(std::move(rhs.format)), //shared_ptr
           face(std::move(rhs.face)), // shared_ptr move just ref counts, right?
           unscaled_ymin(std::move(rhs.unscaled_ymin)),
           unscaled_ymax(std::move(rhs.unscaled_ymax)),

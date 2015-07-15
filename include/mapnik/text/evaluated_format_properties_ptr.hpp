@@ -28,7 +28,7 @@
 namespace mapnik { namespace detail {
 struct evaluated_format_properties;
 }
-using evaluated_format_properties_ptr = std::unique_ptr<detail::evaluated_format_properties>;
+using evaluated_format_properties_ptr = std::shared_ptr<detail::evaluated_format_properties>;
 }
 
 #endif // EVALUATED_FORMAT_PROPERTIES_PTR_HPP
