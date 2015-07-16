@@ -182,7 +182,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 {
                     std::cerr << "SVG PARSING ERROR:\"" << msg << "\"" << std::endl;
                 }
-                return std::make_shared<mapnik::marker const>(mapnik::marker_null());
+                //return std::make_shared<mapnik::marker const>(mapnik::marker_null());
             }
             //svg.arrange_orientations();
             double lox,loy,hix,hiy;
@@ -223,7 +223,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     {
                         std::cerr << "SVG PARSING ERROR:\"" << msg << "\"" << std::endl;
                     }
-                    return std::make_shared<mapnik::marker const>(mapnik::marker_null());
+                    //return std::make_shared<mapnik::marker const>(mapnik::marker_null());
                 }
                 //svg.arrange_orientations();
                 double lox,loy,hix,hiy;

@@ -923,6 +923,8 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
                 std::stringstream ss;
                 ss << "Failed to find linked gradient " << linkid;
                 parser.error_messages_.push_back(ss.str());
+                xmlFree(value);
+                return false;
             }
         }
         xmlFree(value);
@@ -968,9 +970,9 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 */
 void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 {
-    if (!parse_common_gradient(parser,reader))
-        return;
-
+    //if (!parse_common_gradient(parser,reader))
+    //    return;
+    parse_common_gradient(parser, reader);
     xmlChar *value;
     double cx = 0.5;
     double cy = 0.5;
