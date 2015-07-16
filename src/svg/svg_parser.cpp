@@ -501,18 +501,17 @@ void parse_path(svg_parser & parser, xmlTextReaderPtr reader)
 
             if (!mapnik::svg::parse_path((const char*) value, parser.path_))
             {
-                xmlFree(value);
                 xmlChar *id_value;
                 id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
                 if (id_value)
                 {
                     std::string id_string((const char *) id_value);
                     xmlFree(id_value);
-                    throw std::runtime_error(std::string("unable to parse invalid svg <path> with id '") + id_string + "'");
+                    parser.error_messages_.push_back(std::string("unable to parse invalid svg <path> with id '") + id_string + "'");
                 }
                 else
                 {
-                    throw std::runtime_error("unable to parse invalid svg <path>");
+                    parser.error_messages_.push_back(std::string("unable to parse invalid svg <path>"));
                 }
             }
             parser.path_.end_path();
@@ -530,8 +529,7 @@ void parse_polygon(svg_parser & parser, xmlTextReaderPtr reader)
         parser.path_.begin_path();
         if (!mapnik::svg::parse_points((const char*) value, parser.path_))
         {
-            xmlFree(value);
-            throw std::runtime_error("Failed to parse <polygon>");
+            parser.error_messages_.push_back(std::string("Failed to parse <polygon>"));
         }
         parser.path_.close_subpath();
         parser.path_.end_path();
@@ -549,10 +547,8 @@ void parse_polyline(svg_parser & parser, xmlTextReaderPtr reader)
         parser.path_.begin_path();
         if (!mapnik::svg::parse_points((const char*) value, parser.path_))
         {
-            xmlFree(value);
-            throw std::runtime_error("Failed to parse <polygon>");
+            parser.error_messages_.push_back(std::string("Failed to parse <polyline>"));
         }
-
         parser.path_.end_path();
         xmlFree(value);
     }
@@ -632,9 +628,15 @@ void parse_circle(svg_parser & parser, xmlTextReaderPtr reader)
 
     if(r != 0.0)
     {
-        if(r < 0.0) throw std::runtime_error("parse_circle: Invalid radius");
-        agg::ellipse c(cx, cy, r, r);
-        parser.path_.storage().concat_path(c);
+        if (r < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_circle: Invalid radius");
+        }
+        else
+        {
+            agg::ellipse c(cx, cy, r, r);
+            parser.path_.storage().concat_path(c);
+        }
     }
 
     parser.path_.end_path();
@@ -678,12 +680,21 @@ void parse_ellipse(svg_parser & parser, xmlTextReaderPtr reader)
 
     parser.path_.begin_path();
 
-    if(rx != 0.0 && ry != 0.0)
+    if (rx != 0.0 && ry != 0.0)
     {
-        if(rx < 0.0) throw std::runtime_error("parse_ellipse: Invalid rx");
-        if(ry < 0.0) throw std::runtime_error("parse_ellipse: Invalid ry");
-        agg::ellipse c(cx, cy, rx, ry);
-        parser.path_.storage().concat_path(c);
+        if (rx < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_ellipse: Invalid rx");
+        }
+        else if (ry < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_ellipse: Invalid ry");
+        }
+        else
+        {
+            agg::ellipse c(cx, cy, rx, ry);
+            parser.path_.storage().concat_path(c);
+        }
     }
 
     parser.path_.end_path();
@@ -754,10 +765,22 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
 
     if(w != 0.0 && h != 0.0)
     {
-        if(w < 0.0) throw std::runtime_error("parse_rect: Invalid width");
-        if(h < 0.0) throw std::runtime_error("parse_rect: Invalid height");
-        if(rx < 0.0) throw std::runtime_error("parse_rect: Invalid rx");
-        if(ry < 0.0) throw std::runtime_error("parse_rect: Invalid ry");
+        if(w < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_rect: Invalid width");
+        }
+        else if(h < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_rect: Invalid height");
+        }
+        else if(rx < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_rect: Invalid rx");
+        }
+        else if(ry < 0.0)
+        {
+            parser.error_messages_.emplace_back("parse_rect: Invalid ry");
+        }
         parser.path_.begin_path();
 
         if(rounded)
