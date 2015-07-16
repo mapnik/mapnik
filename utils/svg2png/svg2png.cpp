@@ -61,18 +61,6 @@ struct main_marker_visitor
           verbose_(verbose),
           auto_open_(auto_open) {}
 
-    void operator() (mapnik::marker_null const&)
-    {
-        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
-        return_value_ = -1;
-    }
-
-    void operator() (mapnik::marker_rgba8 const&)
-    {
-        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
-        return_value_ = -1;
-    }
-
     void operator() (mapnik::marker_svg const& marker)
     {
         using pixfmt = agg::pixfmt_rgba32_pre;
@@ -128,6 +116,14 @@ struct main_marker_visitor
         }
         std::clog << "rendered to: " << svg_name_ << "\n";
 
+    }
+
+    // default
+    template <typename T>
+    void operator() (T const&)
+    {
+        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
+        return_value_ = -1;
     }
 
   private:
