@@ -271,18 +271,30 @@ mapnik::raster_ptr read_grayscale_band(mapnik::box2d<double> const& bbox,
 
 
   int val;
+  int nodataval;
   uint8_t * data = image.bytes();
   int ps = 4; // sizeof(image::pixel_type)
   int off;
-  val = reader(); // nodata value, need to read anyway
+  nodataval = reader(); // nodata value, need to read anyway
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
       val = reader();
+      // Apply harsh type clipping rules ala GDAL
+      if ( val < 0 ) val = 0;
+      if ( val > 255 ) val = 255;
+      // Calculate pixel offset
       off = y * width * ps + x * ps;
-      // Pixel space is RGBA
+      // Pixel space is RGBA, fill all w/ same value for Grey
       data[off+0] = val;
       data[off+1] = val;
       data[off+2] = val;
+      // Set the alpha channel for transparent nodata values
+      // Nodata handling is *manual* at the driver level
+      if ( hasnodata && val == nodataval ) {
+          data[off+3] = 0x00; // transparent
+      } else {
+          data[off+3] = 0xFF; // opaque
+      }
     }
   }
   mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(bbox, image, 1.0);

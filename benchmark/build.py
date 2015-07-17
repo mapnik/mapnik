@@ -46,6 +46,7 @@ benchmarks = [
     "test_offset_converter.cpp",
     "test_marker_cache.cpp",
     "test_quad_tree.cpp",
+    "test_noop_rendering.cpp",
 #    "test_numeric_cast_vs_static_cast.cpp",
 ]
 for cpp_test in benchmarks:
