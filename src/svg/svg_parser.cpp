@@ -136,7 +136,7 @@ double parse_double_optional_percent(const char* str, bool &percent)
 
     double val = 0.0;
     char unit='\0';
-    parse(str, str + std::strlen(str),double_[ref(val)=_1] >> *char_('%')[ref(unit)=_1]);
+    parse(str, str + std::strlen(str),double_[ref(val)=_1] >> -char_('%')[ref(unit)=_1]);
     if (unit =='%')
     {
         percent = true;
