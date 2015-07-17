@@ -73,5 +73,49 @@ TEST_CASE("geojson") {
             REQUIRE(feature != nullptr);
         }
 
+        mapnik::datasource_cache::instance().register_datasources("plugins/input/geojson.input");
+        SECTION("json extra properties cache-feature=\"true\"")
+        {
+            // Create datasource
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            params["file"] = "./test/data/json/feature_collection_extra_properties.json";
+            params["cache-features"] = true;
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(bool(ds));
+            auto fields = ds->get_descriptor().get_descriptors();
+            mapnik::query query(ds->envelope());
+            for (auto const &field : fields)
+            {
+                query.add_property_name(field.get_name());
+            }
+            auto features = ds->features(query);
+            auto feature = features->next();
+            REQUIRE(feature != nullptr);
+            REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
+        }
+
+        mapnik::datasource_cache::instance().register_datasources("plugins/input/geojson.input");
+        SECTION("json extra properties cache-feature=\"false\"")
+        {
+            // Create datasource
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            params["file"] = "./test/data/json/feature_collection_extra_properties.json";
+            params["cache-features"] = false;
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(bool(ds));
+            auto fields = ds->get_descriptor().get_descriptors();
+            mapnik::query query(ds->envelope());
+            for (auto const &field : fields)
+            {
+                query.add_property_name(field.get_name());
+            }
+            auto features = ds->features(query);
+            auto feature = features->next();
+            REQUIRE(feature != nullptr);
+            REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
+        }
+
     }
 }
