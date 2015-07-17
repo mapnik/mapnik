@@ -1035,9 +1035,9 @@ void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 
 void parse_linear_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 {
-    if (!parse_common_gradient(parser,reader))
-        return;
-
+    //if (!parse_common_gradient(parser,reader))
+    //    return;
+    parse_common_gradient(parser,reader);
     xmlChar *value;
     double x1 = 0.0;
     double x2 = 1.0;
