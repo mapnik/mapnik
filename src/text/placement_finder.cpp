@@ -399,7 +399,9 @@ bool placement_finder::collision(const box2d<double> &box, const value_unicode_s
         margin = (text_props_->margin != 0 ? text_props_->margin : text_props_->minimum_distance) * scale_factor_;
         repeat_distance = text_props_->repeat_distance * scale_factor_;
     }
-    return (text_props_->avoid_edges && !extent_.contains(box))
+    return !detector_.extent().intersects(box)
+        ||
+        (text_props_->avoid_edges && !extent_.contains(box))
         ||
         (text_props_->minimum_padding > 0 &&
          !extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))

@@ -232,7 +232,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     {
         for (auto const& n : *common_.detector_)
         {
-            draw_rect(pixmap_, n.get().box);
+            draw_rect(pixmap_, std::get<1>(n).box);
         }
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)

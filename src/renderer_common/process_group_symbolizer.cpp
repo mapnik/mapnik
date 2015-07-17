@@ -215,15 +215,15 @@ void render_thunk_extractor::update_box() const
 {
     label_collision_detector4 & detector = *common_.detector_;
 
-    for (auto const& label : detector)
+    for (auto const& node : detector)
     {
         if (box_.width() > 0 && box_.height() > 0)
         {
-            box_.expand_to_include(label.get().box);
+            box_.expand_to_include(std::get<1>(node).box);
         }
         else
         {
-            box_ = label.get().box;
+            box_ = std::get<1>(node).box;
         }
     }
 

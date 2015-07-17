@@ -27,12 +27,38 @@
 #include <mapnik/quad_tree.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
-
+#include <mapnik/geometry_adapters.hpp>
+// boost
+#include <boost/version.hpp>
+#include <boost/geometry/index/rtree.hpp>
 // icu
 #include <unicode/unistr.h>
 
 // stl
 #include <vector>
+
+template <std::size_t Max, std::size_t Min>
+struct detector_linear : boost::geometry::index::linear<Max,Min> {};
+
+namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree {
+
+template <std::size_t Max, std::size_t Min>
+struct options_type<detector_linear<Max,Min> >
+{
+    using type = options<detector_linear<Max, Min>,
+                         insert_default_tag,
+                         choose_by_content_diff_tag,
+                         split_default_tag,
+                         linear_tag,
+#if BOOST_VERSION >= 105700
+                         node_variant_static_tag>;
+#else
+                         node_s_mem_static_tag>;
+
+#endif
+};
+
+}}}}}
 
 namespace mapnik
 {
@@ -139,52 +165,42 @@ public:
     };
 
 private:
-    using tree_t = quad_tree< label >;
-    tree_t tree_;
 
+    using box_type = mapnik::box2d<double>;
+    using item_type = std::pair<box_type, label>;
+    using tree_t = boost::geometry::index::rtree<item_type,detector_linear<16,4> >;
+    tree_t tree_;
+    box2d<double> extent_;
 public:
-    using query_iterator = tree_t::query_iterator;
+    using query_iterator = tree_t::const_query_iterator;
 
     explicit label_collision_detector4(box2d<double> const& extent)
-        : tree_(extent) {}
+        : tree_(), extent_(extent) {}
 
     bool has_placement(box2d<double> const& box)
     {
-        tree_t::query_iterator itr = tree_.query_in_box(box);
-        tree_t::query_iterator end = tree_.query_end();
-
-        for ( ;itr != end; ++itr)
-        {
-            if (itr->get().box.intersects(box)) return false;
-        }
-
-        return true;
+        auto itr = tree_.qbegin(boost::geometry::index::intersects(box));
+        auto end = tree_.qend();
+        return (itr != end);
     }
 
     bool has_placement(box2d<double> const& box, double margin)
     {
         box2d<double> const& margin_box = (margin > 0
-                                               ? box2d<double>(box.minx() - margin, box.miny() - margin,
-                                                               box.maxx() + margin, box.maxy() + margin)
-                                               : box);
+                                           ? box2d<double>(box.minx() - margin, box.miny() - margin,
+                                                           box.maxx() + margin, box.maxy() + margin)
+                                           : box);
 
-        tree_t::query_iterator itr = tree_.query_in_box(margin_box);
-        tree_t::query_iterator end = tree_.query_end();
-
-        for (;itr != end; ++itr)
-        {
-            if (itr->get().box.intersects(margin_box))
-            {
-                return false;
-            }
-        }
-        return true;
+        auto itr = tree_.qbegin(boost::geometry::index::intersects(margin_box));
+        auto end = tree_.qend();
+        return (itr != end);
     }
 
     bool has_placement(box2d<double> const& box, double margin, mapnik::value_unicode_string const& text, double repeat_distance)
     {
         // Don't bother with any of the repeat checking unless the repeat distance is greater than the margin
-        if (repeat_distance <= margin) {
+        if (repeat_distance <= margin)
+        {
             return has_placement(box, margin);
         }
 
@@ -196,12 +212,16 @@ public:
                                                                box.maxx() + margin, box.maxy() + margin)
                                                : box);
 
-        tree_t::query_iterator itr = tree_.query_in_box(repeat_box);
-        tree_t::query_iterator end = tree_.query_end();
+        auto itr = tree_.qbegin(boost::geometry::index::intersects(margin_box));
+        auto end = tree_.qend();
 
         for ( ;itr != end; ++itr)
         {
-            if (itr->get().box.intersects(margin_box) || (text == itr->get().text && itr->get().box.intersects(repeat_box)))
+            auto const& node = *itr;
+            auto const& b = std::get<0>(node);
+            auto const& lab = std::get<1>(node);
+
+            if (b.intersects(margin_box) || (text == lab.text && b.intersects(repeat_box)))
             {
                 return false;
             }
@@ -212,12 +232,18 @@ public:
 
     void insert(box2d<double> const& box)
     {
-        tree_.insert(label(box), box);
+        //if (tree_.extent().intersects(box))
+        //{
+        tree_.insert(std::make_pair(box, label(box)));
+        //}
     }
 
     void insert(box2d<double> const& box, mapnik::value_unicode_string const& text)
     {
-        tree_.insert(label(box, text), box);
+        //if (tree_.extent().intersects(box))
+        // {
+        tree_.insert(std::make_pair(box, label(box, text)));
+        //}
     }
 
     void clear()
@@ -227,11 +253,12 @@ public:
 
     box2d<double> const& extent() const
     {
-        return tree_.extent();
+        //auto const& b = tree_.bounds();
+        return extent_;
     }
 
-    query_iterator begin() { return tree_.query_in_box(extent()); }
-    query_iterator end() { return tree_.query_end(); }
+    query_iterator begin() const { return tree_.qbegin(boost::geometry::index::intersects(extent_)); }
+    query_iterator end() const { return tree_.qend(); }
 };
 }
 

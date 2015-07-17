@@ -106,9 +106,9 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
 
     if (mode == DEBUG_SYM_MODE_COLLISION)
     {
-        for (auto & n : *common_.detector_)
+        for (auto const& n : *common_.detector_)
         {
-            render_debug_box(context_, n.get().box);
+            render_debug_box(context_, std::get<1>(n).box);
         }
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
