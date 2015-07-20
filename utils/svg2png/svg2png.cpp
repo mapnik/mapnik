@@ -126,7 +126,7 @@ struct main_marker_visitor
             if (ret != 0)
                 status = ret;
         }
-        std::clog << "rendered to: " << svg_name_ << "\n";
+        std::clog << "rendered to: " << png_name << "\n";
         return status;
     }
 
