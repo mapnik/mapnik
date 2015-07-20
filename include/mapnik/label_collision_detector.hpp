@@ -212,12 +212,18 @@ public:
 
     void insert(box2d<double> const& box)
     {
-        tree_.insert(label(box), box);
+        if (tree_.extent().intersects(box))
+        {
+            tree_.insert(label(box), box);
+        }
     }
 
     void insert(box2d<double> const& box, mapnik::value_unicode_string const& text)
     {
-        tree_.insert(label(box, text), box);
+        if (tree_.extent().intersects(box))
+        {
+            tree_.insert(label(box, text), box);
+        }
     }
 
     void clear()
