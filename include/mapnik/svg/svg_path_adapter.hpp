@@ -45,7 +45,7 @@ using namespace agg;
 template<class VertexContainer> class path_adapter : util::noncopyable
 {
 public:
-    using container_type = VertexContainer           ;
+    using container_type = VertexContainer;
     using self_type = path_adapter<VertexContainer>;
 
     //--------------------------------------------------------------------
