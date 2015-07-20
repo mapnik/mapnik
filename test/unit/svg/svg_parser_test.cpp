@@ -74,7 +74,11 @@ TEST_CASE("SVG parser") {
             vec.emplace_back(x, y, cmd);
             //std::cerr << x << "," << y << " cmd=" << cmd << std::endl;
         }
-        std::vector<std::tuple<double,double,unsigned>> expected = { {0, 0, 1}, {20, 0, 2}, {20, 15, 2}, {0, 15, 2}, {0, 0, 79} };
+        std::vector<std::tuple<double,double,unsigned>> expected = { std::make_tuple(0, 0, 1),
+                                                                     std::make_tuple(20, 0, 2),
+                                                                     std::make_tuple(20, 15, 2),
+                                                                     std::make_tuple(0, 15, 2),
+                                                                     std::make_tuple(0, 0, 79) };
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
     }
     SECTION("SVG rounded <rect>")
@@ -100,7 +104,27 @@ TEST_CASE("SVG parser") {
             vec.emplace_back(x, y, cmd);
         }
 
-        std::vector<std::tuple<double,double,unsigned>> expected = {{0, 5,1},{0.481856, 2.85842,2},{1.83455, 1.12961,2},{3.79736, 0.146789,2},{5, 0,2},{15, 0,2},{17.1416, 0.481856,2},{18.8704, 1.83455,2},{19.8532, 3.79736,2},{20, 5,2},{20, 10,2},{19.5181, 12.1416,2},{18.1654, 13.8704,2},{16.2026, 14.8532,2},{15, 15,2},{5, 15,2},{2.85842, 14.5181,2},{1.12961, 13.1654,2},{0.146789, 11.2026,2},{0, 10,2},{0, 10,95}};
+        std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(0, 5,1),
+                                                                    std::make_tuple(0.481856, 2.85842,2),
+                                                                    std::make_tuple(1.83455, 1.12961,2),
+                                                                    std::make_tuple(3.79736, 0.146789,2),
+                                                                    std::make_tuple(5, 0,2),
+                                                                    std::make_tuple(15, 0,2),
+                                                                    std::make_tuple(17.1416, 0.481856,2),
+                                                                    std::make_tuple(18.8704, 1.83455,2),
+                                                                    std::make_tuple(19.8532, 3.79736,2),
+                                                                    std::make_tuple(20, 5,2),
+                                                                    std::make_tuple(20, 10,2),
+                                                                    std::make_tuple(19.5181, 12.1416,2),
+                                                                    std::make_tuple(18.1654, 13.8704,2),
+                                                                    std::make_tuple(16.2026, 14.8532,2),
+                                                                    std::make_tuple(15, 15,2),
+                                                                    std::make_tuple(5, 15,2),
+                                                                    std::make_tuple(2.85842, 14.5181,2),
+                                                                    std::make_tuple(1.12961, 13.1654,2),
+                                                                    std::make_tuple(0.146789, 11.2026,2),
+                                                                    std::make_tuple(0, 10,2),
+                                                                    std::make_tuple(0, 10,95)};
 
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),detail::vertex_equal<3>()));
     }
@@ -129,7 +153,34 @@ TEST_CASE("SVG parser") {
             vec.emplace_back(x, y, cmd);
         }
 
-        std::vector<std::tuple<double,double,unsigned>> expected = {{1, 1, 1},{1199, 1, 2},{1199, 399, 2},{1, 399, 2},{1, 1, 79},{0, 0, 0},{50, 375, 1},{150, 375, 2},{150, 325, 2},{250, 325, 2},{250, 375, 2},{350, 375, 2},{350, 250, 2},{450, 250, 2},{450, 375, 2},{550, 375, 2},{550, 175, 2},{650, 175, 2},{650, 375, 2},{750, 375, 2},{750, 100, 2},{850, 100, 2},{850, 375, 2},{950, 375, 2},{950, 25, 2},{1050, 25, 2},{1050, 375, 2},{1150, 375, 2}};
+        std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
+                                                                    std::make_tuple(1199, 1, 2),
+                                                                    std::make_tuple(1199, 399, 2),
+                                                                    std::make_tuple(1, 399, 2),
+                                                                    std::make_tuple(1, 1, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(50, 375, 1),
+                                                                    std::make_tuple(150, 375, 2),
+                                                                    std::make_tuple(150, 325, 2),
+                                                                    std::make_tuple(250, 325, 2),
+                                                                    std::make_tuple(250, 375, 2),
+                                                                    std::make_tuple(350, 375, 2),
+                                                                    std::make_tuple(350, 250, 2),
+                                                                    std::make_tuple(450, 250, 2),
+                                                                    std::make_tuple(450, 375, 2),
+                                                                    std::make_tuple(550, 375, 2),
+                                                                    std::make_tuple(550, 175, 2),
+                                                                    std::make_tuple(650, 175, 2),
+                                                                    std::make_tuple(650, 375, 2),
+                                                                    std::make_tuple(750, 375, 2),
+                                                                    std::make_tuple(750, 100, 2),
+                                                                    std::make_tuple(850, 100, 2),
+                                                                    std::make_tuple(850, 375, 2),
+                                                                    std::make_tuple(950, 375, 2),
+                                                                    std::make_tuple(950, 25, 2),
+                                                                    std::make_tuple(1050, 25, 2),
+                                                                    std::make_tuple(1050, 375, 2),
+                                                                    std::make_tuple(1150, 375, 2)};
 
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
     }
@@ -163,7 +214,31 @@ TEST_CASE("SVG parser") {
         }
         //std::cerr << "}" << std::endl;
 
-        std::vector<std::tuple<double,double,unsigned>> expected = {{1, 1, 1},{1199, 1, 2},{1199, 399, 2},{1, 399, 2},{1, 1, 79},{0, 0, 0},{350, 75, 1},{379, 161, 2},{469, 161, 2},{397, 215, 2},{423, 301, 2},{350, 250, 2},{277, 301, 2},{303, 215, 2},{231, 161, 2},{321, 161, 2},{350, 75, 79},{0, 0, 0},{850, 75, 1},{958, 137.5, 2},{958, 262.5, 2},{850, 325, 2},{742, 262.6, 2},{742, 137.5, 2},{850, 75, 79}};
+        std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
+                                                                    std::make_tuple(1199, 1, 2),
+                                                                    std::make_tuple(1199, 399, 2),
+                                                                    std::make_tuple(1, 399, 2),
+                                                                    std::make_tuple(1, 1, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(350, 75, 1),
+                                                                    std::make_tuple(379, 161, 2),
+                                                                    std::make_tuple(469, 161, 2),
+                                                                    std::make_tuple(397, 215, 2),
+                                                                    std::make_tuple(423, 301, 2),
+                                                                    std::make_tuple(350, 250, 2),
+                                                                    std::make_tuple(277, 301, 2),
+                                                                    std::make_tuple(303, 215, 2),
+                                                                    std::make_tuple(231, 161, 2),
+                                                                    std::make_tuple(321, 161, 2),
+                                                                    std::make_tuple(350, 75, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(850, 75, 1),
+                                                                    std::make_tuple(958, 137.5, 2),
+                                                                    std::make_tuple(958, 262.5, 2),
+                                                                    std::make_tuple(850, 325, 2),
+                                                                    std::make_tuple(742, 262.6, 2),
+                                                                    std::make_tuple(742, 137.5, 2),
+                                                                    std::make_tuple(850, 75, 79)};
 
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
     }
