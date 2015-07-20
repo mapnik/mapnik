@@ -129,6 +129,59 @@ TEST_CASE("SVG parser") {
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),detail::vertex_equal<3>()));
     }
 
+    SECTION("SVG <line>")
+    {
+        //
+        std::string svg_name("./test/data/svg/line.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+        auto bbox = svg.bounding_box();
+        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        auto storage = svg.get_data();
+        REQUIRE(storage);
+        mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
+        mapnik::svg::svg_path_adapter path(stl_storage);
+        double x,y;
+        unsigned cmd;
+        std::vector<std::tuple<double,double,unsigned>> vec;
+        std::size_t num_vertices = path.total_vertices();
+        //std::cerr << "Num vertices = " << num_vertices << std::endl;
+        //std::cerr << "{";
+        for (std::size_t i = 0; i < num_vertices; ++i)
+        {
+            cmd = path.vertex(&x,&y);
+            vec.emplace_back(x, y, cmd);
+            //if (vec.size() > 1) std::cerr << ",";
+            //std::cerr << std::setprecision(6) << "std::make_tuple(" << x << ", " << y << ", " << cmd << ")";
+        }
+        //std::cerr << "}" << std::endl;
+
+        std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
+                                                                    std::make_tuple(1199, 1, 2),
+                                                                    std::make_tuple(1199, 399, 2),
+                                                                    std::make_tuple(1, 399, 2),
+                                                                    std::make_tuple(1, 1, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(100, 300, 1),
+                                                                    std::make_tuple(300, 100, 2),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(300, 300, 1),
+                                                                    std::make_tuple(500, 100, 2),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(500, 300, 1),
+                                                                    std::make_tuple(700, 100, 2),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(700, 300, 1),
+                                                                    std::make_tuple(900, 100, 2),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(900, 300, 1),
+                                                                    std::make_tuple(1100, 100, 2)};
+
+        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
+    }
+
     SECTION("SVG <polyline>")
     {
         //
@@ -203,16 +256,11 @@ TEST_CASE("SVG parser") {
         unsigned cmd;
         std::vector<std::tuple<double,double,unsigned>> vec;
         std::size_t num_vertices = path.total_vertices();
-        //std::cerr << "Num vertices = " << num_vertices << std::endl;
-        //std::cerr << "{";
         for (std::size_t i = 0; i < num_vertices; ++i)
         {
             cmd = path.vertex(&x,&y);
             vec.emplace_back(x, y, cmd);
-            //if (vec.size() > 1) std::cerr << ",";
-            //std::cerr << std::setprecision(6) << "{" << x << ", " << y << ", " << cmd << "}";
         }
-        //std::cerr << "}" << std::endl;
 
         std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
                                                                     std::make_tuple(1199, 1, 2),
