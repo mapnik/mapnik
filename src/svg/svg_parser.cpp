@@ -489,7 +489,8 @@ void parse_path(svg_parser & parser, xmlTextReaderPtr reader)
             {
                 xmlFree(value);
                 xmlChar *id_value;
-                id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+                id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "xml:id");
+                if (!id_value) id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
                 if (id_value)
                 {
                     std::string id_string((const char *) id_value);
@@ -859,7 +860,9 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     xmlChar *value;
 
     std::string id;
-    value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+    value = xmlTextReaderGetAttribute(reader, BAD_CAST "xml:id");
+    if (!value) value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+
     if (value)
     {
         // start a new gradient
