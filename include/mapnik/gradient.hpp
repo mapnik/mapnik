@@ -79,7 +79,8 @@ class MAPNIK_DECL gradient
 public:
     gradient();
     gradient(gradient const& other);
-    gradient& operator=(const gradient& rhs);
+    gradient(gradient && other);
+    gradient& operator=(gradient rhs);
 
     void set_gradient_type(gradient_e grad);
     gradient_e get_gradient_type() const;
@@ -100,7 +101,7 @@ public:
     void get_control_points(double &x1, double &y1, double &x2, double &y2) const;
 
 private:
-    void swap(const gradient& other) throw();
+    void swap(gradient& other) throw();
 };
 }
 
