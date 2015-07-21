@@ -100,7 +100,7 @@ struct key_value_sequence_ordered
 };
 
 template <typename T>
-agg::rgba8 parse_color(T & error_messages, const char* str)
+mapnik::color parse_color(T & error_messages, const char* str)
 {
     mapnik::color c(100,100,100);
     try
@@ -111,6 +111,13 @@ agg::rgba8 parse_color(T & error_messages, const char* str)
     {
         error_messages.emplace_back(ex.what());
     }
+    return c;
+}
+
+template <typename T>
+agg::rgba8 parse_color_agg(T & error_messages, const char* str)
+{
+    auto c = parse_color(error_messages, str);
     return agg::rgba8(c.red(), c.green(), c.blue(), c.alpha());
 }
 
@@ -337,7 +344,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
         }
         else
         {
-            parser.path_.fill(parse_color(parser.error_messages_, (const char*) value));
+            parser.path_.fill(parse_color_agg(parser.error_messages_, (const char*) value));
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "fill-opacity"))
@@ -376,7 +383,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
         }
         else
         {
-            parser.path_.stroke(parse_color(parser.error_messages_, (const char*) value));
+            parser.path_.stroke(parse_color_agg(parser.error_messages_, (const char*) value));
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke-width"))
@@ -836,14 +843,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
         {
             if (kv.first == "stop-color")
             {
-                try
-                {
-                    stop_color = mapnik::parse_color(kv.second.c_str());
-                }
-                catch (mapnik::config_error const& ex)
-                {
-                    parser.error_messages_.emplace_back(ex.what());
-                }
+                stop_color = parse_color(parser.error_messages_, kv.second.c_str());
             }
             else if (kv.first == "stop-opacity")
             {
@@ -856,14 +856,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "stop-color");
     if (value)
     {
-        try
-        {
-            stop_color = mapnik::parse_color((const char *) value);
-        }
-        catch (mapnik::config_error const& ex)
-        {
-            parser.error_messages_.emplace_back(ex.what());
-        }
+        stop_color = parse_color(parser.error_messages_,(const char *) value);
         xmlFree(value);
     }
 
