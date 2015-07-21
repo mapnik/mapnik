@@ -149,6 +149,16 @@ bool parse_style (const char* str, pairs_type & v)
     return phrase_parse(str, str + std::strlen(str), kv_parser, skip_type(), v);
 }
 
+bool parse_id_from_url (char const* str, std::string & id)
+{
+    using namespace boost::spirit::qi;
+    using skip_type = boost::spirit::ascii::space_type;
+    qi::_1_type _1;
+    qi::char_type char_;
+    qi::lit_type lit;
+    return phrase_parse(str, str + std::strlen(str), lit("url") > "(" > "#" > *(char_ - lit(')'))[boost::phoenix::ref(id) += _1] > ")" , skip_type());
+}
+
 bool parse_reader(svg_parser & parser, xmlTextReaderPtr reader)
 {
     int ret = xmlTextReaderRead(reader);
@@ -306,16 +316,14 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     }
     else if (xmlStrEqual(name, BAD_CAST "fill"))
     {
+        std::string id;
         if (xmlStrEqual(value, BAD_CAST "none"))
         {
             parser.path_.fill_none();
         }
-        else if (boost::starts_with((const char*)value, "url(#"))
+        else if (parse_id_from_url((const char*)value, id))
         {
             // see if we have a known gradient fill
-            std::string id = std::string((const char*)&value[5]);
-            // get rid of the trailing )
-            id.erase(id.end()-1);
             if (parser.gradient_map_.count(id) > 0)
             {
                 parser.path_.add_fill_gradient(parser.gradient_map_[id]);
