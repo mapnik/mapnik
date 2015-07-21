@@ -679,6 +679,7 @@ void parse_ellipse(svg_parser & parser, xmlTextReaderPtr reader)
 
 void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
 {
+    // http://www.w3.org/TR/SVGTiny12/shapes.html#RectElement
     xmlChar *value;
     double x = 0.0;
     double y = 0.0;
@@ -719,6 +720,7 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
     if (value)
     {
         rx = parse_double((const char*)value);
+        if ( rx > 0.5 * w ) rx = 0.5 * w;
         xmlFree(value);
     }
     else rounded = false;
@@ -727,6 +729,7 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
     if (value)
     {
         ry = parse_double((const char*)value);
+        if ( ry > 0.5 * h ) ry = 0.5 * h;
         if (!rounded)
         {
             rx = ry;
