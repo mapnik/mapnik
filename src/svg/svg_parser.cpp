@@ -360,16 +360,14 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke"))
     {
+        std::string id;
         if (xmlStrEqual(value, BAD_CAST "none"))
         {
             parser.path_.stroke_none();
         }
-        else if (boost::starts_with((const char*)value, "url(#"))
+        else if (parse_id_from_url((const char*)value, id))
         {
             // see if we have a known gradient fill
-            std::string id = std::string((const char*)&value[5]);
-            // get rid of the trailing )
-            id.erase(id.end()-1);
             if (parser.gradient_map_.count(id) > 0)
             {
                 parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
