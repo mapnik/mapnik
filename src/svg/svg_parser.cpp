@@ -136,17 +136,8 @@ double parse_double_optional_percent(const char* str, bool &percent)
     qi::char_type char_;
 
     double val = 0.0;
-    char unit='\0';
-    parse(str, str + std::strlen(str),double_[ref(val)=_1] >> *char_('%')[ref(unit)=_1]);
-    if (unit =='%')
-    {
-        percent = true;
-        val/=100.0;
-    }
-    else
-    {
-        percent = false;
-    }
+    parse(str, str + std::strlen(str),double_[ref(val)=_1, ref(percent) = false]
+          >> -char_('%')[ref(val)/100.0, ref(percent) = true]);
     return val;
 }
 

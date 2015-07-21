@@ -110,14 +110,7 @@ PLUGINS = { # plugins with external dependencies
             'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
-            # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
-            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'clntsh','lang':'C++'},
             'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
-            'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
-
-            # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C'},
-
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
