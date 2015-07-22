@@ -27,11 +27,21 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/vertex.hpp>
+
+//#include <mapnik/svg/svg_path_adapter.hpp>
+//#include <mapnik/svg/svg_renderer_agg.hpp>
+//#include <mapnik/svg/svg_path_attributes.hpp>
+
+#include <mapnik/svg/svg_parser.hpp>
+#include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
+
 #include <libxml/parser.h> // for xmlInitParser(), xmlCleanupParser()
 #include <cmath>
+#include <fstream>
+#include <streambuf>
 
 namespace detail {
 
@@ -52,6 +62,38 @@ struct vertex_equal
 TEST_CASE("SVG parser") {
 
     xmlInitParser();
+    SECTION("SVG i/o")
+    {
+        std::string svg_name("FAIL");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_null>());
+    }
+
+    SECTION("SVG parser color <fail>")
+    {
+
+        std::string svg_name("./test/data/svg/color_fail.svg");
+        std::ifstream in(svg_name.c_str());
+        std::string svg_str((std::istreambuf_iterator<char>(in)),
+                        std::istreambuf_iterator<char>());
+
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+
+        if (!p.parse_from_string(svg_str))
+        {
+            for (auto const& msg : p.error_messages())
+            {
+                REQUIRE(msg == "Failed to parse color: \"fail\"");
+            }
+        }
+    }
+
     SECTION("SVG <rect>")
     {
         //<rect width="20" height="15" style="fill:rgb(0,0,255);stroke-width:1;stroke:rgb(0,0,0)" />
