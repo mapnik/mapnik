@@ -342,7 +342,7 @@ TEST_CASE("SVG parser") {
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,399.0));
+        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -357,17 +357,25 @@ TEST_CASE("SVG parser") {
             cmd = path.vertex(&x,&y);
             vec.emplace_back(x, y, cmd);
         }
+
         std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
                                                                     std::make_tuple(799, 1, 2),
-                                                                    std::make_tuple(799, 399, 2),
-                                                                    std::make_tuple(1, 399, 2),
+                                                                    std::make_tuple(799, 599, 2),
+                                                                    std::make_tuple(1, 599, 2),
                                                                     std::make_tuple(1, 1, 79),
                                                                     std::make_tuple(0, 0, 0),
                                                                     std::make_tuple(100, 100, 1),
                                                                     std::make_tuple(700, 100, 2),
                                                                     std::make_tuple(700, 300, 2),
                                                                     std::make_tuple(100, 300, 2),
-                                                                    std::make_tuple(100, 100, 79)};
+                                                                    std::make_tuple(100, 100, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(100, 320, 1),
+                                                                    std::make_tuple(700, 320, 2),
+                                                                    std::make_tuple(700, 520, 2),
+                                                                    std::make_tuple(100, 520, 2),
+                                                                    std::make_tuple(100, 320, 79)};
+
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
     }
 
