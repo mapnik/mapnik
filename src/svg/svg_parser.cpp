@@ -376,7 +376,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
             else
             {
                 std::stringstream ss;
-                ss << "Failed to find gradient fill: " << id;
+                ss << "Failed to find gradient stroke: " << id;
                 parser.error_messages_.push_back(ss.str());
             }
         }
