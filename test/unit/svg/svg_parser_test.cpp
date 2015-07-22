@@ -94,6 +94,24 @@ TEST_CASE("SVG parser") {
         }
     }
 
+    SECTION("SVG parser display=none")
+    {
+
+        std::string svg_name("./test/data/svg/invisible.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+        auto bbox = svg.bounding_box();
+        REQUIRE(bbox == mapnik::box2d<double>(0, 0, 1, 1));
+        auto storage = svg.get_data();
+        REQUIRE(storage);
+        mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
+        mapnik::svg::svg_path_adapter path(stl_storage);
+        double x,y;
+        REQUIRE(path.vertex(&x,&y) == mapnik::SEG_END);
+    }
+
     SECTION("SVG <rect>")
     {
         //<rect width="20" height="15" style="fill:rgb(0,0,255);stroke-width:1;stroke:rgb(0,0,0)" />
