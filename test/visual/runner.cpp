@@ -244,6 +244,7 @@ result_list runner::test_range(files_iterator begin,
                 r.state = STATE_ERROR;
                 r.name = file.string();
                 r.error_message = ex.what();
+                r.duration = std::chrono::high_resolution_clock::duration::zero();
                 results.emplace_back(r);
                 mapnik::util::apply_visitor(report_visitor(r), report.get());
                 ++fail_count.get();
