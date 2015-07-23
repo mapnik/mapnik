@@ -442,7 +442,7 @@ TEST_CASE("SVG parser") {
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
     }
 
-    SECTION("SVG missing <gradient> def")
+    SECTION("SVG missing <gradient> inheritance")
     {
         //
         std::string svg_name("./test/data/svg/gradient-inherit.svg");
