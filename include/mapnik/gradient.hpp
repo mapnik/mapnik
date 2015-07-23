@@ -81,7 +81,7 @@ public:
     gradient(gradient const& other);
     gradient(gradient && other);
     gradient& operator=(gradient rhs);
-
+    bool operator==(gradient const& other) const;
     void set_gradient_type(gradient_e grad);
     gradient_e get_gradient_type() const;
 
