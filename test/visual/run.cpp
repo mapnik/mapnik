@@ -56,6 +56,7 @@ int main(int argc, char** argv)
         ("duration,d", "output rendering duration")
         ("iterations,i", po::value<std::size_t>()->default_value(1), "number of iterations for benchmarking")
         ("jobs,j", po::value<std::size_t>()->default_value(1), "number of parallel threads")
+        ("limit,l", po::value<std::size_t>()->default_value(0), "limit number of failures")
         ("styles-dir", po::value<std::string>()->default_value("test/data-visual/styles"), "directory with styles")
         ("images-dir", po::value<std::string>()->default_value("test/data-visual/images"), "directory with reference images")
         ("output-dir", po::value<std::string>()->default_value("/tmp/mapnik-visual-images"), "directory for output files")
@@ -111,6 +112,7 @@ int main(int argc, char** argv)
                vm["images-dir"].as<std::string>(),
                vm.count("overwrite"),
                vm["iterations"].as<std::size_t>(),
+               vm["limit"].as<std::size_t>(),
                vm["jobs"].as<std::size_t>());
     bool show_duration = vm.count("duration");
     report_type report(vm.count("verbose") ? report_type((console_report(show_duration))) : report_type((console_short_report(show_duration))));
