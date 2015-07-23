@@ -393,10 +393,6 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     {
         parser.path_.stroke_opacity(parse_double((const char*)value));
     }
-    else if(xmlStrEqual(name,BAD_CAST "stroke-width"))
-    {
-        parser.path_.stroke_width(parse_double((const char*) value));
-    }
     else if(xmlStrEqual(name,BAD_CAST "stroke-linecap"))
     {
         if(xmlStrEqual(value,BAD_CAST "butt"))
