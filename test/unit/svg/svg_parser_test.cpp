@@ -442,6 +442,55 @@ TEST_CASE("SVG parser") {
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
     }
 
+    SECTION("SVG missing <gradient> def")
+    {
+        //
+        std::string svg_name("./test/data/svg/gradient-inherit.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+        auto bbox = svg.bounding_box();
+        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,699.0,199.0));
+        auto storage = svg.get_data();
+        REQUIRE(storage);
+        mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
+
+        auto const& attrs = storage->attributes();
+
+        REQUIRE( attrs[1].fill_gradient == attrs[2].fill_gradient);
+
+        mapnik::svg::svg_path_adapter path(stl_storage);
+        double x,y;
+        unsigned cmd;
+        std::vector<std::tuple<double,double,unsigned>> vec;
+        std::size_t num_vertices = path.total_vertices();
+        for (std::size_t i = 0; i < num_vertices; ++i)
+        {
+            cmd = path.vertex(&x,&y);
+            vec.emplace_back(x, y, cmd);
+        }
+
+        std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
+                                                                    std::make_tuple(699, 1, 2),
+                                                                    std::make_tuple(699, 199, 2),
+                                                                    std::make_tuple(1, 199, 2),
+                                                                    std::make_tuple(1, 1, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(100, 50, 1),
+                                                                    std::make_tuple(300, 50, 2),
+                                                                    std::make_tuple(300, 150, 2),
+                                                                    std::make_tuple(100, 150, 2),
+                                                                    std::make_tuple(100, 50, 79),
+                                                                    std::make_tuple(0, 0, 0),
+                                                                    std::make_tuple(400, 50, 1),
+                                                                    std::make_tuple(600, 50, 2),
+                                                                    std::make_tuple(600, 150, 2),
+                                                                    std::make_tuple(400, 150, 2),
+                                                                    std::make_tuple(400, 50, 79)};
+
+        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
+    }
 
     xmlCleanupParser();
 }
