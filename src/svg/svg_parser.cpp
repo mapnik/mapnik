@@ -122,20 +122,25 @@ agg::rgba8 parse_color_agg(T & error_messages, const char* str)
     return agg::rgba8(c.red(), c.green(), c.blue(), c.alpha());
 }
 
-double parse_double(const char* str)
+template <typename T>
+double parse_double(T & error_messages, const char* str)
 {
     using namespace boost::spirit::qi;
     qi::double_type double_;
     double val = 0.0;
-    parse(str, str + std::strlen(str),double_,val);
+    if (!parse(str, str + std::strlen(str),double_,val))
+    {
+        error_messages.emplace_back("Failed to parse double: \"" + std::string(str) + "\"");
+    }
     return val;
 }
 
-/*
- * parse a double that might end with a %
- * if it does then set the ref bool true and divide the result by 100
- */
-double parse_double_optional_percent(const char* str, bool &percent)
+
+// parse a double that might end with a %
+// if it does then set the ref bool true and divide the result by 100
+
+template <typename T>
+double parse_double_optional_percent(T & error_messages, const char* str, bool &percent)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
@@ -144,8 +149,11 @@ double parse_double_optional_percent(const char* str, bool &percent)
     qi::char_type char_;
 
     double val = 0.0;
-    parse(str, str + std::strlen(str),double_[ref(val)=_1, ref(percent) = false]
-          >> -char_('%')[ref(val)/100.0, ref(percent) = true]);
+    if (!parse(str, str + std::strlen(str),double_[ref(val)=_1, ref(percent) = false]
+               >> -char_('%')[ref(val)/100.0, ref(percent) = true]))
+    {
+        error_messages.emplace_back("Failed to parse double (optional %) from " + std::string(str));
+    }
     return val;
 }
 
@@ -350,7 +358,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     }
     else if (xmlStrEqual(name, BAD_CAST "fill-opacity"))
     {
-        parser.path_.fill_opacity(parse_double((const char*) value));
+        parser.path_.fill_opacity(parse_double(parser.error_messages_, (const char*) value));
     }
     else if (xmlStrEqual(name, BAD_CAST "fill-rule"))
     {
@@ -387,11 +395,11 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke-width"))
     {
-        parser.path_.stroke_width(parse_double((const char*)value));
+        parser.path_.stroke_width(parse_double(parser.error_messages_, (const char*)value));
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke-opacity"))
     {
-        parser.path_.stroke_opacity(parse_double((const char*)value));
+        parser.path_.stroke_opacity(parse_double(parser.error_messages_, (const char*)value));
     }
     else if(xmlStrEqual(name,BAD_CAST "stroke-linecap"))
     {
@@ -413,12 +421,12 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
     }
     else if(xmlStrEqual(name,BAD_CAST "stroke-miterlimit"))
     {
-        parser.path_.miter_limit(parse_double((const char*)value));
+        parser.path_.miter_limit(parse_double(parser.error_messages_, (const char*)value));
     }
 
     else if(xmlStrEqual(name, BAD_CAST "opacity"))
     {
-        double opacity = parse_double((const char*)value);
+        double opacity = parse_double(parser.error_messages_, (const char*)value);
         parser.path_.opacity(opacity);
     }
     else if (xmlStrEqual(name, BAD_CAST "visibility"))
@@ -471,14 +479,14 @@ void parse_dimensions(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
     if (value)
     {
-        width = parse_double((const char*)value);
+        width = parse_double(parser.error_messages_, (const char*)value);
         xmlFree(value);
     }
     xmlChar *value2;
     value2 = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
     if (value2)
     {
-        height = parse_double((const char*)value2);
+        height = parse_double(parser.error_messages_, (const char*)value2);
         xmlFree(value2);
     }
     parser.path_.set_dimensions(width,height);
@@ -567,28 +575,28 @@ void parse_line(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x1");
     if (value)
     {
-        x1 = parse_double((const char*)value);
+        x1 = parse_double(parser.error_messages_, (const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y1");
     if (value)
     {
-        y1 = parse_double((const char*)value);
+        y1 = parse_double(parser.error_messages_, (const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x2");
     if (value)
     {
-        x2 = parse_double((const char*)value);
+        x2 = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y2");
     if (value)
     {
-        y2 = parse_double((const char*)value);
+        y2 = parse_double(parser.error_messages_, (const char*)value);
         xmlFree(value);
     }
 
@@ -608,21 +616,21 @@ void parse_circle(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
     if (value)
     {
-        cx = parse_double((const char*)value);
+        cx = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
     if (value)
     {
-        cy = parse_double((const char*)value);
+        cy = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "r");
     if (value)
     {
-        r = parse_double((const char*)value);
+        r = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
@@ -655,28 +663,28 @@ void parse_ellipse(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
     if (value)
     {
-        cx = parse_double((const char*)value);
+        cx = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
     if (value)
     {
-        cy = parse_double((const char*)value);
+        cy = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "rx");
     if (value)
     {
-        rx = parse_double((const char*)value);
+        rx = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "ry");
     if (value)
     {
-        ry = parse_double((const char*)value);
+        ry = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
@@ -717,27 +725,27 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x");
     if (value)
     {
-        x = parse_double((const char*)value);
+        x = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y");
     if (value)
     {
-        y = parse_double((const char*)value);
+        y = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
     if (value)
     {
-        w = parse_double((const char*)value);
+        w = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "height");
     if (value)
     {
-        h = parse_double((const char*)value);
+        h = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
@@ -745,7 +753,7 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "rx");
     if (value)
     {
-        rx = parse_double((const char*)value);
+        rx = parse_double(parser.error_messages_,(const char*)value);
         if ( rx > 0.5 * w ) rx = 0.5 * w;
         xmlFree(value);
     }
@@ -754,7 +762,7 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "ry");
     if (value)
     {
-        ry = parse_double((const char*)value);
+        ry = parse_double(parser.error_messages_,(const char*)value);
         if ( ry > 0.5 * h ) ry = 0.5 * h;
         if (!rounded)
         {
@@ -825,7 +833,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "offset");
     if (value)
     {
-        offset = parse_double((const char*)value);
+        offset = parse_double(parser.error_messages_,(const char*)value);
         xmlFree(value);
     }
 
@@ -845,7 +853,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
             }
             else if (kv.first == "stop-opacity")
             {
-                opacity = parse_double(kv.second.c_str());
+                opacity = parse_double(parser.error_messages_,kv.second.c_str());
             }
         }
         xmlFree(value);
@@ -861,7 +869,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "stop-opacity");
     if (value)
     {
-        opacity = parse_double((const char *) value);
+        opacity = parse_double(parser.error_messages_,(const char *) value);
         xmlFree(value);
     }
 
@@ -977,21 +985,21 @@ void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
     if (value)
     {
-        cx = parse_double_optional_percent((const char*)value, has_percent);
+        cx = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
     if (value)
     {
-        cy = parse_double_optional_percent((const char*)value, has_percent);
+        cy = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "fx");
     if (value)
     {
-        fx = parse_double_optional_percent((const char*)value, has_percent);
+        fx = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
     else
@@ -1000,7 +1008,7 @@ void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "fy");
     if (value)
     {
-        fy = parse_double_optional_percent((const char*)value, has_percent);
+        fy = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
     else
@@ -1009,7 +1017,7 @@ void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "r");
     if (value)
     {
-        r = parse_double_optional_percent((const char*)value, has_percent);
+        r = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
     // this logic for detecting %'s will not support mixed coordinates.
@@ -1041,28 +1049,28 @@ void parse_linear_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x1");
     if (value)
     {
-        x1 = parse_double_optional_percent((const char*)value, has_percent);
+        x1 = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x2");
     if (value)
     {
-        x2 = parse_double_optional_percent((const char*)value, has_percent);
+        x2 = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y1");
     if (value)
     {
-        y1 = parse_double_optional_percent((const char*)value, has_percent);
+        y1 = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y2");
     if (value)
     {
-        y2 = parse_double_optional_percent((const char*)value, has_percent);
+        y2 = parse_double_optional_percent(parser.error_messages_,(const char*)value, has_percent);
         xmlFree(value);
     }
     // this logic for detecting %'s will not support mixed coordinates.
