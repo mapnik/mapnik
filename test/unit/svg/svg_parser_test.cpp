@@ -87,10 +87,11 @@ TEST_CASE("SVG parser") {
 
         if (!p.parse_from_string(svg_str))
         {
-            for (auto const& msg : p.error_messages())
-            {
-                REQUIRE(msg == "Failed to parse color: \"fail\"");
-            }
+            auto const& errors = p.error_messages();
+            REQUIRE(errors.size() == 3);
+            REQUIRE(errors[0] ==  "Failed to parse color: \"fail\"");
+            REQUIRE(errors[1] ==  "Failed to parse double: \"fail\"");
+            REQUIRE(errors[2] ==  "Failed to parse color: \"fail\"");
         }
     }
 
@@ -457,8 +458,8 @@ TEST_CASE("SVG parser") {
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
 
         auto const& attrs = storage->attributes();
-
-        REQUIRE( attrs[1].fill_gradient == attrs[2].fill_gradient);
+        REQUIRE(attrs.size() == 3 );
+        REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
 
         mapnik::svg::svg_path_adapter path(stl_storage);
         double x,y;
