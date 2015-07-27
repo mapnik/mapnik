@@ -181,7 +181,6 @@ struct largest_bbox_first
 
 void base_symbolizer_helper::initialize_geometries() const
 {
-    double minimum_path_length = text_props_->minimum_path_length;
     auto const& geom = feature_.get_geometry();
     util::apply_visitor(detail::split_multi_geometries<geometry_container_type>
                         (geometries_to_process_, t_, prj_trans_), geom);
