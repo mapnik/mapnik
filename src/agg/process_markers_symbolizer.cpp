@@ -50,7 +50,6 @@
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_path_storage.h"
-#include "agg_conv_clip_polyline.h"
 #include "agg_conv_transform.h"
 
 

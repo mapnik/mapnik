@@ -31,6 +31,7 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/renderer.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 
 // agg
 #include "agg_trans_affine.h"
