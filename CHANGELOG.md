@@ -8,6 +8,7 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Fixed handling of `xml:id` in SVG parsing (#2989)
 - Fixed handling of out of range `rx` and `ry` in SVG `rect` (#2991)
 - Fixed reporting of envelope from `mapnik::memory_datasource` when new features are added (#2985)
 - Fixed parsing of GeoJSON when unknown properties encountered at `FeatureCollection` level (#2983)
