@@ -1897,6 +1897,8 @@ if not HELP_REQUESTED:
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
     OGR_BUILT = False
+    POSTGIS_BUILT = False
+    PGRASTER_BUILT = False
     for plugin in env['PLUGINS']:
         if env['PLUGIN_LINKING'] == 'static' or plugin not in env['REQUESTED_PLUGINS']:
             if os.path.exists('plugins/input/%s.input' % plugin):
@@ -1906,10 +1908,16 @@ if not HELP_REQUESTED:
             if details['lib'] in env['LIBS']:
                 if env['PLUGIN_LINKING'] == 'shared':
                     SConscript('plugins/input/%s/build.py' % plugin)
+                # hack to avoid breaking on plugins with the same dep
                 if plugin == 'ogr': OGR_BUILT = True
                 if plugin == 'gdal': GDAL_BUILT = True
+                if plugin == 'postgis': POSTGIS_BUILT = True
+                if plugin == 'pgraster': PGRASTER_BUILT = True
                 if plugin == 'ogr' or plugin == 'gdal':
                     if GDAL_BUILT and OGR_BUILT:
+                        env['LIBS'].remove(details['lib'])
+                elif plugin == 'postgis' or plugin == 'pgraster':
+                    if POSTGIS_BUILT and PGRASTER_BUILT:
                         env['LIBS'].remove(details['lib'])
                 else:
                     env['LIBS'].remove(details['lib'])
