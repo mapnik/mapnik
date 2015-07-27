@@ -62,7 +62,6 @@ SECTION("handling") {
     std::string csv_plugin("./plugins/input/csv.input");
     if (mapnik::util::exists(csv_plugin)) {
         try {
-            mapnik::datasource_cache::instance().register_datasource(csv_plugin);
             mapnik::parameters p;
             p["type"]="csv";
             p["inline"]="x,y\n0,0";
@@ -88,7 +87,6 @@ SECTION("handling") {
     std::string shape_plugin("./plugins/input/shape.input");
     if (mapnik::util::exists(shape_plugin)) {
         try {
-            mapnik::datasource_cache::instance().register_datasource(shape_plugin);
             mapnik::parameters p2;
             p2["type"]="shape";
             p2["file"]="foo";
