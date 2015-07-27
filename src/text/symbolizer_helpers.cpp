@@ -41,8 +41,6 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 
-//agg
-#include "agg_conv_clip_polyline.h"
 
 namespace mapnik { namespace detail {
 
