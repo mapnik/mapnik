@@ -24,6 +24,20 @@
 #define MAPNIK_UTIL_SPIRIT_TRANSFORM_ATTRIBUTE_HPP
 
 #include <mapnik/geometry.hpp>
+#include <mapnik/util/variant.hpp>
+
+#include <vector>
+#include <cstdint>
+
+// boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
+#include <boost/spirit/include/karma.hpp>
+#pragma GCC diagnostic pop
 
 namespace boost { namespace spirit { namespace traits {
 
