@@ -185,7 +185,10 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
         if (std::strcmp(name, "defs") == 0)
         {
-            parser.is_defs_ = true;
+            if (node->first_node() != nullptr)
+            {
+                parser.is_defs_ = true;
+            }
         }
         // the gradient tags *should* be in defs, but illustrator seems not to put them in there so
         // accept them anywhere
@@ -206,8 +209,11 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             if (std::strcmp(name, "g") == 0)
             {
-                parser.path_.push_attr();
-                parse_attr(parser, node);
+                if (node->first_node() != nullptr)
+                {
+                    parser.path_.push_attr();
+                    parse_attr(parser, node);
+                }
             }
             else
             {
@@ -294,11 +300,17 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
     auto const* name = node->name();
     if (!parser.is_defs_ && std::strcmp(name, "g") == 0)
     {
-        parser.path_.pop_attr();
+        if (node->first_node() != nullptr)
+        {
+            parser.path_.pop_attr();
+        }
     }
     else if (std::strcmp(name,  "defs") == 0)
     {
-        parser.is_defs_ = false;
+        if (node->first_node() != nullptr)
+        {
+            parser.is_defs_ = false;
+        }
     }
     else if (std::strcmp(name, "linearGradient") == 0 || std::strcmp(name, "radialGradient") == 0)
     {
@@ -415,7 +427,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
     }
     else if (std::strcmp(name,  "visibility") == 0)
     {
-        parser.path_.visibility(!std::strcmp(value,  "hidden"));
+        parser.path_.visibility(std::strcmp(value,  "hidden") != 0);
     }
     else if (std::strcmp(name,  "display") == 0  && std::strcmp(value,  "none") == 0)
     {
