@@ -8,6 +8,7 @@ else
 fi
 
 export PATH=$(pwd)/utils/nik2img/:${PATH}
+export PATH=$(pwd)/utils/mapnik-config/:${PATH}
 
 # mapnik-settings.env is an optional file to store
 # environment variables that should be used before

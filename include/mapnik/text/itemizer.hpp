@@ -72,7 +72,7 @@ struct MAPNIK_DECL text_item : util::noncopyable
 // - format
 // - script (http://en.wikipedia.org/wiki/Scripts_in_Unicode)
 
-class MAPNIK_DECL text_itemizer
+class MAPNIK_DECL text_itemizer : util::noncopyable
 {
 public:
     text_itemizer();

@@ -50,7 +50,6 @@
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
-#include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
 

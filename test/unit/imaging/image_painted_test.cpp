@@ -21,8 +21,6 @@ SECTION("painting") {
         std::string csv_plugin("./plugins/input/csv.input");
         if (mapnik::util::exists(csv_plugin))
         {
-            datasource_cache::instance().register_datasources(csv_plugin);
-
             Map m(256, 256);
 
             feature_type_style lines_style;

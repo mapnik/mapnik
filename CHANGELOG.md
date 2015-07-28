@@ -6,10 +6,25 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## Future
+## 3.0.1
 
+Released: July 27th, 2015
+
+(Packaged from 28f6f4d)
+
+#### Summary
+
+The 3.0.1 fixes a few bugs in geojson parsing, svg parsing, and rendering. It also avoids a potential hang when using `line-geometry-transform` and includes a speedup for text rendering compared to v3.0.0. It is fully back compatibility with v3.0.0 and everyone is encouraged to upgrade.
+
+- Fixed text placement performance after #2949 (#2963)
+- Fixed rendering behavior for `text-minimum-path-length` which regressed in 3.0.0 (#2990)
+- Fixed handling of `xml:id` in SVG parsing (#2989)
+- Fixed handling of out of range `rx` and `ry` in SVG `rect` (#2991)
+- Fixed reporting of envelope from `mapnik::memory_datasource` when new features are added (#2985)
+- Fixed parsing of GeoJSON when unknown properties encountered at `FeatureCollection` level (#2983)
 - Fixed parsing of GeoJSON when properties contained `{}` (#2964)
 - Fixed potential hang due to invalid use of `line-geometry-transform` (6d6cb15)
+- Moved unmaintained plugins out of core: `osm`, `occi`, and `rasterlite` (#2980)
 
 ## 3.0.0
 
