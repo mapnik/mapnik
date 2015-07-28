@@ -23,13 +23,21 @@
 // mapnik
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/util/spirit_transform_attribute.hpp>
+#include <mapnik/geometry_types.hpp>
 
 // boost
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/fusion/include/at.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 
