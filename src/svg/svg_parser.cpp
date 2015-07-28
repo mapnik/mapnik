@@ -156,7 +156,7 @@ double parse_double_optional_percent(T & error_messages, const char* str, bool &
     return val;
 }
 
-bool parse_style (const char* str, pairs_type & v)
+bool parse_style (char const* str, pairs_type & v)
 {
     using namespace boost::spirit::qi;
     using skip_type = boost::spirit::ascii::space_type;
@@ -337,12 +337,12 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         }
         else
         {
-            parser.path_.fill(parse_color_agg(parser.error_messages_, (const char*) value));
+            parser.path_.fill(parse_color_agg(parser.error_messages_, value));
         }
     }
     else if (std::strcmp(name,"fill-opacity") == 0)
     {
-        parser.path_.fill_opacity(parse_double(parser.error_messages_, (const char*) value));
+        parser.path_.fill_opacity(parse_double(parser.error_messages_, value));
     }
     else if (std::strcmp(name, "fill-rule") == 0)
     {
@@ -405,12 +405,12 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
     }
     else if(std::strcmp(name, "stroke-miterlimit") == 0)
     {
-        parser.path_.miter_limit(parse_double(parser.error_messages_, (const char*)value));
+        parser.path_.miter_limit(parse_double(parser.error_messages_,value));
     }
 
     else if(std::strcmp(name,  "opacity") == 0)
     {
-        double opacity = parse_double(parser.error_messages_, (const char*)value);
+        double opacity = parse_double(parser.error_messages_, value);
         parser.path_.opacity(opacity);
     }
     else if (std::strcmp(name,  "visibility") == 0)
@@ -426,7 +426,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
 
 void parse_attr(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    for (rapidxml::xml_attribute<char> *attr = node->first_attribute();
+    for (rapidxml::xml_attribute<char> const* attr = node->first_attribute();
          attr; attr = attr->next_attribute())
     {
         auto const* name = attr->name();
@@ -448,7 +448,7 @@ void parse_attr(svg_parser & parser, rapidxml::xml_node<char> const* node)
     }
 }
 
-void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const  * node)
+void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     double width = 0;
     double height = 0;
