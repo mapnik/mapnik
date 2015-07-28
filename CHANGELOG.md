@@ -24,6 +24,7 @@ The 3.0.1 fixes a few bugs in geojson parsing, svg parsing, and rendering. It al
 - Fixed parsing of GeoJSON when unknown properties encountered at `FeatureCollection` level (#2983)
 - Fixed parsing of GeoJSON when properties contained `{}` (#2964)
 - Fixed potential hang due to invalid use of `line-geometry-transform` (6d6cb15)
+- Moved unmaintained plugins out of core: `osm`, `occi`, and `rasterlite` (#2980)
 
 ## 3.0.0
 
