@@ -8,6 +8,7 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Fixed text placement performance after #2949 (#2963)
 - Fixed rendering behavior for `text-minimum-path-length` which regressed in 3.0.0 (#2990)
 - Fixed handling of `xml:id` in SVG parsing (#2989)
 - Fixed handling of out of range `rx` and `ry` in SVG `rect` (#2991)
