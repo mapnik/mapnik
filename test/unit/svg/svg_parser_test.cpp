@@ -112,7 +112,7 @@ TEST_CASE("SVG parser") {
         if (!p.parse_from_string(svg_str))
         {
             auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 10);
+            REQUIRE(errors.size() == 12);
         }
     }
 
