@@ -213,6 +213,12 @@ int main (int argc,char** argv)
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
     }
+    catch (std::exception const& ex)
+    {
+        std::clog << "Exception caught:" << ex.what() << std::endl;
+        xmlCleanupParser();
+        return -1;
+    }
     catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
