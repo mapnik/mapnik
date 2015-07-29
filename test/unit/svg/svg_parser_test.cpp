@@ -95,6 +95,27 @@ TEST_CASE("SVG parser") {
         }
     }
 
+    SECTION("SVG - cope with erroneous geometries")
+    {
+        std::string svg_name("./test/data/svg/errors.svg");
+        std::ifstream in(svg_name.c_str());
+        std::string svg_str((std::istreambuf_iterator<char>(in)),
+                        std::istreambuf_iterator<char>());
+
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+
+        if (!p.parse_from_string(svg_str))
+        {
+            auto const& errors = p.error_messages();
+            REQUIRE(errors.size() == 10);
+        }
+    }
+
     SECTION("SVG parser display=none")
     {
 
