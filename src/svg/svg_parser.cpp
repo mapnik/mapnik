@@ -631,9 +631,9 @@ void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
         ry = parse_double(parser.error_messages_, attr->value());
     }
 
-    parser.path_.begin_path();
     if (rx != 0.0 && ry != 0.0)
     {
+
         if (rx < 0.0)
         {
             parser.error_messages_.emplace_back("parse_ellipse: Invalid rx");
@@ -644,11 +644,12 @@ void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
         }
         else
         {
+            parser.path_.begin_path();
             agg::ellipse c(cx, cy, rx, ry);
             parser.path_.storage().concat_path(c);
+            parser.path_.end_path();
         }
     }
-    parser.path_.end_path();
 }
 
 void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
@@ -727,25 +728,27 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             parser.error_messages_.emplace_back("parse_rect: Invalid ry");
         }
-
-        parser.path_.begin_path();
-
-        if(rounded)
-        {
-            agg::rounded_rect r;
-            r.rect(x,y,x+w,y+h);
-            r.radius(rx,ry);
-            parser.path_.storage().concat_path(r);
-        }
         else
         {
-            parser.path_.move_to(x,     y);
-            parser.path_.line_to(x + w, y);
-            parser.path_.line_to(x + w, y + h);
-            parser.path_.line_to(x,     y + h);
-            parser.path_.close_subpath();
+            parser.path_.begin_path();
+
+            if(rounded)
+            {
+                agg::rounded_rect r;
+                r.rect(x,y,x+w,y+h);
+                r.radius(rx,ry);
+                parser.path_.storage().concat_path(r);
+            }
+            else
+            {
+                parser.path_.move_to(x,     y);
+                parser.path_.line_to(x + w, y);
+                parser.path_.line_to(x + w, y + h);
+                parser.path_.line_to(x,     y + h);
+                parser.path_.close_subpath();
+            }
+            parser.path_.end_path();
         }
-        parser.path_.end_path();
     }
 }
 
