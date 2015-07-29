@@ -55,5 +55,5 @@ run test_offset_converter 10 1000
   --threads 1
 
 ./benchmark/out/test_quad_tree \
-  --iterations 10000 \
+  --iterations 1000 \
   --threads 10
