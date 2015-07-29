@@ -271,12 +271,12 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         end_element(parser, node);
     }
     break;
-
+#if 0 //
     // Data nodes
     case rapidxml::node_data:
     case rapidxml::node_cdata:
     {
-#if 0
+
         if (node->value_size() > 0) // Don't add empty text nodes
         {
             // parsed text values should have leading and trailing
@@ -285,9 +285,9 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             //mapnik::util::trim(trimmed);
             std::cerr << "CDATA:" << node->value() << std::endl;
         }
-#endif
     }
     break;
+#endif
     default:
         break;
     }
@@ -566,22 +566,22 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double cy = 0.0;
     double r = 0.0;
 
-    auto const* cx_attr = node->first_attribute("cx");
-    if (cx_attr != nullptr)
+    auto * attr = node->first_attribute("cx");
+    if (attr != nullptr)
     {
-        cx = parse_double(parser.error_messages_, cx_attr->value());
+        cx = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* cy_attr = node->first_attribute("cy");
-    if (cy_attr != nullptr)
+    attr = node->first_attribute("cy");
+    if (attr != nullptr)
     {
-        cy = parse_double(parser.error_messages_, cy_attr->value());
+        cy = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* r_attr = node->first_attribute("r");
-    if (r_attr != nullptr)
+    attr = node->first_attribute("r");
+    if (attr != nullptr)
     {
-        r = parse_double(parser.error_messages_, r_attr->value());
+        r = parse_double(parser.error_messages_, attr->value());
     }
 
     parser.path_.begin_path();
@@ -607,28 +607,28 @@ void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
     double rx = 0.0;
     double ry = 0.0;
 
-    auto const* cx_attr = node->first_attribute("cx");
-    if (cx_attr != nullptr)
+    auto * attr = node->first_attribute("cx");
+    if (attr != nullptr)
     {
-        cx = parse_double(parser.error_messages_, cx_attr->value());
+        cx = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* cy_attr = node->first_attribute("cy");
-    if (cy_attr)
+    attr = node->first_attribute("cy");
+    if (attr)
     {
-        cy = parse_double(parser.error_messages_, cy_attr->value());
+        cy = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* rx_attr = node->first_attribute("rx");
-    if (rx_attr != nullptr)
+    attr = node->first_attribute("rx");
+    if (attr != nullptr)
     {
-        rx = parse_double(parser.error_messages_, rx_attr->value());
+        rx = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* ry_attr = node->first_attribute("ry");
-    if (ry_attr != nullptr)
+    attr = node->first_attribute("ry");
+    if (attr != nullptr)
     {
-        ry = parse_double(parser.error_messages_, ry_attr->value());
+        ry = parse_double(parser.error_messages_, attr->value());
     }
 
     parser.path_.begin_path();
@@ -661,42 +661,42 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double rx = 0.0;
     double ry = 0.0;
 
-    auto const* x_attr = node->first_attribute("x");
-    if (x_attr != nullptr)
+    auto * attr = node->first_attribute("x");
+    if (attr != nullptr)
     {
-        x = parse_double(parser.error_messages_, x_attr->value());
+        x = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* y_attr = node->first_attribute("y");
-    if (y_attr != nullptr)
+    attr = node->first_attribute("y");
+    if (attr != nullptr)
     {
-        y = parse_double(parser.error_messages_, y_attr->value());
+        y = parse_double(parser.error_messages_, attr->value());
     }
 
-    auto const* width_attr = node->first_attribute("width");
-    if (width_attr != nullptr)
+    attr = node->first_attribute("width");
+    if (attr != nullptr)
     {
-        w = parse_double(parser.error_messages_, width_attr->value());
+        w = parse_double(parser.error_messages_, attr->value());
     }
-    auto const* height_attr = node->first_attribute("height");
-    if (height_attr)
+    attr = node->first_attribute("height");
+    if (attr)
     {
-        h = parse_double(parser.error_messages_, height_attr->value());
+        h = parse_double(parser.error_messages_, attr->value());
     }
 
     bool rounded = true;
-    auto const* rx_attr = node->first_attribute("rx");
-    if (rx_attr != nullptr)
+    attr = node->first_attribute("rx");
+    if (attr != nullptr)
     {
-        rx = parse_double(parser.error_messages_, rx_attr->value());
+        rx = parse_double(parser.error_messages_, attr->value());
         if ( rx > 0.5 * w ) rx = 0.5 * w;
     }
     else rounded = false;
 
-    auto const* ry_attr = node->first_attribute("ry");
-    if (ry_attr != nullptr)
+    attr = node->first_attribute("ry");
+    if (attr != nullptr)
     {
-        ry = parse_double(parser.error_messages_, ry_attr->value());
+        ry = parse_double(parser.error_messages_, attr->value());
         if ( ry > 0.5 * h ) ry = 0.5 * h;
         if (!rounded)
         {
@@ -928,28 +928,28 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     double y2 = 1.0;
 
     bool has_percent=true;
-    auto const* x1_attr = node->first_attribute("x1");
-    if (x1_attr != nullptr)
+    auto * attr = node->first_attribute("x1");
+    if (attr != nullptr)
     {
-        x1 = parse_double_optional_percent(parser.error_messages_, x1_attr->value(), has_percent);
+        x1 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
     }
 
-    auto const* x2_attr = node->first_attribute("x2");
-    if (x2_attr != nullptr)
+    attr = node->first_attribute("x2");
+    if (attr != nullptr)
     {
-        x2 = parse_double_optional_percent(parser.error_messages_, x2_attr->value(), has_percent);
+        x2 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
     }
 
-    auto const* y1_attr = node->first_attribute("y1");
-    if (y1_attr != nullptr)
+    attr = node->first_attribute("y1");
+    if (attr != nullptr)
     {
-        y1 = parse_double_optional_percent(parser.error_messages_, y1_attr->value(), has_percent);
+        y1 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
     }
 
-    auto const* y2_attr = node->first_attribute("y2");
-    if (y2_attr != nullptr)
+    attr = node->first_attribute("y2");
+    if (attr != nullptr)
     {
-        y2 = parse_double_optional_percent(parser.error_messages_, y2_attr->value(), has_percent);
+        y2 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
     }
     // this logic for detecting %'s will not support mixed coordinates.
     if (has_percent && parser.temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)
