@@ -866,7 +866,6 @@ bool parse_common_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
 void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     parse_common_gradient(parser, node);
-
     double cx = 0.5;
     double cy = 0.5;
     double fx = 0.0;
@@ -886,7 +885,7 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
         cy = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
     }
 
-    attr = node->first_attribute(  "fx");
+    attr = node->first_attribute("fx");
     if (attr != nullptr)
     {
         fx = parse_double_optional_percent(parser.error_messages_,attr->value(), has_percent);
