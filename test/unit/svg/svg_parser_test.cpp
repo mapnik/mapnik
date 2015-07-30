@@ -79,6 +79,9 @@ TEST_CASE("SVG parser") {
 
         if (!p.parse_from_string(svg_str))
         {
+            auto const& errors = p.error_messages();
+            REQUIRE(errors.size() == 1);
+            REQUIRE(errors[0] ==  "Unable to parse '<?xml version=\"1.0\"?>\n<svg width=\"12cm\" height=\"4cm\" viewBox=\"0 0 1200 400\"\nxmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\">\n'");
         }
     }
 
