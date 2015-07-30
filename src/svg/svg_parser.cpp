@@ -1002,7 +1002,7 @@ bool svg_parser::parse(std::string const& filename)
         return false;
     }
 
-    for (rapidxml::xml_node<char> *child = doc.first_node();
+    for (rapidxml::xml_node<char> const* child = doc.first_node();
          child; child = child->next_sibling())
     {
         traverse_tree(*this, child);
@@ -1027,7 +1027,7 @@ bool svg_parser::parse_from_string(std::string const& svg)
         error_messages_.push_back(ss.str());
         return false;
     }
-    for (rapidxml::xml_node<char> *child = doc.first_node();
+    for (rapidxml::xml_node<char> const* child = doc.first_node();
          child; child = child->next_sibling())
     {
         traverse_tree(*this, child);
