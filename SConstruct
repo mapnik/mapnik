@@ -1266,18 +1266,19 @@ if not preconfigured:
 
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
-    if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
-        REQUIRED_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
-        if env.get('XML2_INCLUDES'):
-            inc_path = env['XML2_INCLUDES']
-            env.AppendUnique(CPPPATH = fix_path(inc_path))
-        if env.get('XML2_LIBS'):
-            lib_path = env['XML2_LIBS']
-            env.AppendUnique(LIBPATH = fix_path(lib_path))
-    elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
-        env['HAS_LIBXML2'] = True
-    else:
-        env['MISSING_DEPS'].append('libxml2')
+    if env.get('XMLPARSER') and env['XMLPARSER'] == 'libxml2':
+        if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
+            OPTIONAL_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
+            if env.get('XML2_INCLUDES'):
+                inc_path = env['XML2_INCLUDES']
+                env.AppendUnique(CPPPATH = fix_path(inc_path))
+            if env.get('XML2_LIBS'):
+                lib_path = env['XML2_LIBS']
+                env.AppendUnique(LIBPATH = fix_path(lib_path))
+        elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
+            env['HAS_LIBXML2'] = True
+        else:
+            env['MISSING_DEPS'].append('libxml2')
 
     if not env['HOST']:
         if conf.CheckHasDlfcn():
