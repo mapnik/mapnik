@@ -63,7 +63,26 @@ TEST_CASE("SVG parser") {
         REQUIRE(marker->is<mapnik::marker_null>());
     }
 
-    SECTION("SVG syntax")
+    SECTION("SVG::parse i/o")
+    {
+        std::string svg_name("FAIL");
+
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+
+        if (!p.parse(svg_name))
+        {
+            auto const& errors = p.error_messages();
+            REQUIRE(errors.size() == 1);
+            REQUIRE(errors[0] ==  "Unable to open 'FAIL'");
+        }
+    }
+
+    SECTION("SVG::parse_from_string syntax error")
     {
         std::string svg_name("./test/data/svg/invalid.svg");
         std::ifstream in(svg_name.c_str());
@@ -82,6 +101,25 @@ TEST_CASE("SVG parser") {
             auto const& errors = p.error_messages();
             REQUIRE(errors.size() == 1);
             REQUIRE(errors[0] ==  "Unable to parse '<?xml version=\"1.0\"?>\n<svg width=\"12cm\" height=\"4cm\" viewBox=\"0 0 1200 400\"\nxmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\">\n'");
+        }
+    }
+
+    SECTION("SVG::parse_from_string syntax error")
+    {
+        std::string svg_name("./test/data/svg/invalid.svg");
+
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+
+        if (!p.parse(svg_name))
+        {
+            auto const& errors = p.error_messages();
+            REQUIRE(errors.size() == 1);
+            REQUIRE(errors[0] ==  "svg_parser::parse - Unable to parse './test/data/svg/invalid.svg'");
         }
     }
 
