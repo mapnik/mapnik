@@ -490,7 +490,7 @@ void parse_path(svg_parser & parser, rapidxml::xml_node<char> const* node)
             if (!mapnik::svg::parse_path(value, parser.path_))
             {
                 auto const* id_attr = node->first_attribute("xml:id");
-                if (id_attr != nullptr) id_attr = node->first_attribute("id");
+                if (id_attr == nullptr) id_attr = node->first_attribute("id");
                 if (id_attr)
                 {
                     parser.error_messages_.push_back(std::string("unable to parse invalid svg <path> with id '")

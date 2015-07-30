@@ -112,7 +112,7 @@ TEST_CASE("SVG parser") {
         if (!p.parse_from_string(svg_str))
         {
             auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 13);
+            REQUIRE(errors.size() == 14);
             REQUIRE(errors[0] == "parse_rect: Invalid width");
             REQUIRE(errors[1] == "Failed to parse double: \"FAIL\"");
             REQUIRE(errors[2] == "parse_rect: Invalid height");
@@ -120,12 +120,13 @@ TEST_CASE("SVG parser") {
             REQUIRE(errors[4] == "parse_rect: Invalid ry");
             REQUIRE(errors[5] == "unable to parse invalid svg <path>");
             REQUIRE(errors[6] == "unable to parse invalid svg <path> with id 'fail-path'");
-            REQUIRE(errors[7] == "parse_circle: Invalid radius");
-            REQUIRE(errors[8] == "Failed to parse <polygon> 'points'");
-            REQUIRE(errors[9] == "Failed to parse <polyline> 'points'");
-            REQUIRE(errors[10] == "parse_ellipse: Invalid rx");
-            REQUIRE(errors[11] == "parse_ellipse: Invalid ry");
-            REQUIRE(errors[12] == "parse_rect: Invalid height");
+            REQUIRE(errors[7] == "unable to parse invalid svg <path> with id 'fail-path'");
+            REQUIRE(errors[8] == "parse_circle: Invalid radius");
+            REQUIRE(errors[9] == "Failed to parse <polygon> 'points'");
+            REQUIRE(errors[10] == "Failed to parse <polyline> 'points'");
+            REQUIRE(errors[11] == "parse_ellipse: Invalid rx");
+            REQUIRE(errors[12] == "parse_ellipse: Invalid ry");
+            REQUIRE(errors[13] == "parse_rect: Invalid height");
         }
     }
 
