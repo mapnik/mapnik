@@ -48,8 +48,6 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
 
-#include <libxml/parser.h> // for xmlInitParser(), xmlCleanupParser()
-
 struct main_marker_visitor
 {
     main_marker_visitor(std::string const& svg_name,
@@ -198,8 +196,6 @@ int main (int argc,char** argv)
             return 0;
         }
 
-        xmlInitParser();
-
         while (itr != svg_files.end())
         {
             std::string svg_name (*itr++);
@@ -216,19 +212,12 @@ int main (int argc,char** argv)
     catch (std::exception const& ex)
     {
         std::clog << "Exception caught:" << ex.what() << std::endl;
-        xmlCleanupParser();
         return -1;
     }
     catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
-        xmlCleanupParser();
         return -1;
     }
-
-    // only call this once, on exit
-    // to make sure valgrind output is clean
-    // http://xmlsoft.org/xmlmem.html
-    xmlCleanupParser();
     return status;
 }

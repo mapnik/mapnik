@@ -27,18 +27,12 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/vertex.hpp>
-
-//#include <mapnik/svg/svg_path_adapter.hpp>
-//#include <mapnik/svg/svg_renderer_agg.hpp>
-//#include <mapnik/svg/svg_path_attributes.hpp>
-
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 
-#include <libxml/parser.h> // for xmlInitParser(), xmlCleanupParser()
 #include <cmath>
 #include <fstream>
 #include <streambuf>
@@ -61,7 +55,6 @@ struct vertex_equal
 
 TEST_CASE("SVG parser") {
 
-    xmlInitParser();
     SECTION("SVG i/o")
     {
         std::string svg_name("FAIL");
@@ -688,7 +681,4 @@ TEST_CASE("SVG parser") {
         transform *= agg::trans_affine_translation(240,155);
         REQUIRE(attrs[1].fill_gradient.get_transform() == transform);
     }
-
-
-    xmlCleanupParser();
 }
