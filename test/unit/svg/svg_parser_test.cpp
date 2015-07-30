@@ -681,4 +681,22 @@ TEST_CASE("SVG parser") {
         transform *= agg::trans_affine_translation(240,155);
         REQUIRE(attrs[1].fill_gradient.get_transform() == transform);
     }
+    SECTION("SVG <gradient> with xlink:href")
+    {
+        std::string svg_name("./test/data/svg/gradient-xhref.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+        auto bbox = svg.bounding_box();
+        REQUIRE(bbox == mapnik::box2d<double>(20,20,460,230));
+        auto storage = svg.get_data();
+        REQUIRE(storage);
+
+        auto const& attrs = storage->attributes();
+        REQUIRE(attrs.size() == 2 );
+        REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::LINEAR);
+        REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::LINEAR);
+        REQUIRE(attrs[1].fill_gradient.has_stop());
+    }
 }
