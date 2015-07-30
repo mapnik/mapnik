@@ -363,17 +363,11 @@ TEST_CASE("SVG parser") {
         unsigned cmd;
         std::vector<std::tuple<double,double,unsigned>> vec;
         std::size_t num_vertices = path.total_vertices();
-        //std::cerr << "Num vertices = " << num_vertices << std::endl;
-        //std::cerr << "{";
         for (std::size_t i = 0; i < num_vertices; ++i)
         {
             cmd = path.vertex(&x,&y);
             vec.emplace_back(x, y, cmd);
-            //if (vec.size() > 1) std::cerr << ",";
-            //std::cerr << std::setprecision(6) << "std::make_tuple(" << x << ", " << y << ", " << cmd << ")";
         }
-        //std::cerr << "}" << std::endl;
-
         std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
                                                                     std::make_tuple(1199, 1, 2),
                                                                     std::make_tuple(1199, 399, 2),
