@@ -63,6 +63,25 @@ TEST_CASE("SVG parser") {
         REQUIRE(marker->is<mapnik::marker_null>());
     }
 
+    SECTION("SVG syntax")
+    {
+        std::string svg_name("./test/data/svg/invalid.svg");
+        std::ifstream in(svg_name.c_str());
+        std::string svg_str((std::istreambuf_iterator<char>(in)),
+                        std::istreambuf_iterator<char>());
+
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+
+        if (!p.parse_from_string(svg_str))
+        {
+        }
+    }
+
     SECTION("SVG parser color <fail>")
     {
 
@@ -681,6 +700,7 @@ TEST_CASE("SVG parser") {
         transform *= agg::trans_affine_translation(240,155);
         REQUIRE(attrs[1].fill_gradient.get_transform() == transform);
     }
+
     SECTION("SVG <gradient> with xlink:href")
     {
         std::string svg_name("./test/data/svg/gradient-xhref.svg");
@@ -698,5 +718,30 @@ TEST_CASE("SVG parser") {
         REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::LINEAR);
         REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::LINEAR);
         REQUIRE(attrs[1].fill_gradient.has_stop());
+    }
+
+    SECTION("SVG <gradient> with radial percents")
+    {
+        std::string svg_name("./test/data/svg/gradient-radial-percents.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+        auto bbox = svg.bounding_box();
+        REQUIRE(bbox == mapnik::box2d<double>(0,0,200,200));
+        auto storage = svg.get_data();
+        REQUIRE(storage);
+
+        double x1, x2, y1, y2, r;
+        auto const& attrs = storage->attributes();
+        REQUIRE(attrs.size() == 1 );
+        REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::RADIAL);
+        REQUIRE(attrs[0].fill_gradient.has_stop());
+        attrs[0].fill_gradient.get_control_points(x1, y1, x2, y2, r);
+        REQUIRE(x1 == 0);
+        REQUIRE(y1 == 25);
+        REQUIRE(x2 == 10);
+        REQUIRE(y2 == 10);
+        REQUIRE(r == 75);
     }
 }
