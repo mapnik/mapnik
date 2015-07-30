@@ -254,10 +254,10 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
     typename Src::x_iterator dst_it = dst_view.row_begin(0);
 
     // top row
-    for (std::size_t x = 0 ; x < static_cast<std::size_t>(src_view.width()); ++x)
+    for (std::ptrdiff_t x = 0 ; x < src_view.width(); ++x)
     {
         (*dst_it)[3] = src_loc[loc11][3]; // Dst.a = Src.a
-        for (std::size_t i = 0; i < 3; ++i)
+        for (std::ptrdiff_t i = 0; i < 3; ++i)
         {
             bits32f p[9];
 
@@ -275,7 +275,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
                 p[6] = src_loc[loc02][i];
             }
 
-            if ( x == static_cast<std::size_t>(src_view.width())-1)
+            if ( x == (src_view.width())-1)
             {
                 p[5] = p[4];
                 p[8] = p[7];
@@ -296,15 +296,15 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
         ++dst_it;
     }
     // carrige-return
-    src_loc += point2<std::ptrdiff_t>(-static_cast<std::size_t>(src_view.width()),1);
+    src_loc += point2<std::ptrdiff_t>(-src_view.width(),1);
 
     // 1... height-1 rows
-    for (std::size_t y = 1; y<static_cast<std::size_t>(src_view.height())-1; ++y)
+    for (std::ptrdiff_t y = 1; y < src_view.height()-1; ++y)
     {
-        for (std::size_t x = 0; x < static_cast<std::size_t>(src_view.width()); ++x)
+        for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
         {
             (*dst_it)[3] = src_loc[loc11][3]; // Dst.a = Src.a
-            for (std::size_t i = 0; i < 3; ++i)
+            for (std::ptrdiff_t i = 0; i < 3; ++i)
             {
                 bits32f p[9];
 
@@ -325,7 +325,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
                     p[6] = src_loc[loc02][i];
                 }
 
-                if ( x == static_cast<std::size_t>(src_view.width()) - 1)
+                if ( x == (src_view.width()) - 1)
                 {
                     p[2] = p[1];
                     p[5] = p[4];
@@ -343,15 +343,15 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
             ++src_loc.x();
         }
         // carrige-return
-        src_loc += point2<std::ptrdiff_t>(-static_cast<std::size_t>(src_view.width()),1);
+        src_loc += point2<std::ptrdiff_t>(-src_view.width(),1);
     }
 
     // bottom row
-    //src_loc = src_view.xy_at(0,static_cast<std::size_t>(src_view.height())-1);
-    for (std::size_t x = 0 ; x < static_cast<std::size_t>(src_view.width()); ++x)
+    //src_loc = src_view.xy_at(0,src_view.height()-1);
+    for (std::ptrdiff_t x = 0 ; x < src_view.width(); ++x)
     {
         (*dst_it)[3] = src_loc[loc11][3]; // Dst.a = Src.a
-        for (std::size_t i = 0; i < 3; ++i)
+        for (std::ptrdiff_t i = 0; i < 3; ++i)
         {
             bits32f p[9];
 
@@ -369,7 +369,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
                 p[3] = src_loc[loc01][i];
             }
 
-            if ( x == static_cast<std::size_t>(src_view.width())-1)
+            if ( x == (src_view.width())-1)
             {
                 p[2] = p[1];
                 p[5] = p[4];
@@ -431,10 +431,10 @@ void apply_filter(Src & src, color_to_alpha const& op)
     double cr = static_cast<double>(op.color.red())/255.0;
     double cg = static_cast<double>(op.color.green())/255.0;
     double cb = static_cast<double>(op.color.blue())/255.0;
-    for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+    for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
         rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
-        for (std::size_t x=0; x<static_cast<std::size_t>(src_view.width()); ++x)
+        for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
         {
             uint8_t & r = get_color(src_it[x], red_t());
             uint8_t & g = get_color(src_it[x], green_t());
@@ -485,17 +485,17 @@ template <typename Src>
 void apply_filter(Src & src, colorize_alpha const& op)
 {
     using namespace boost::gil;
-    std::size_t size = op.size();
+    std::ptrdiff_t size = op.size();
     if (op.size() == 1)
     {
         // no interpolation if only one stop
         mapnik::filter::color_stop const& stop = op[0];
         mapnik::color const& c = stop.color;
         rgba8_view_t src_view = rgba8_view(src);
-        for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+        for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
         {
             rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
-            for (std::size_t x=0; x<static_cast<std::size_t>(src_view.width()); ++x)
+            for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
             {
                 uint8_t & r = get_color(src_it[x], red_t());
                 uint8_t & g = get_color(src_it[x], green_t());
@@ -533,10 +533,10 @@ void apply_filter(Src & src, colorize_alpha const& op)
         if (grad_lut.build_lut())
         {
             rgba8_view_t src_view = rgba8_view(src);
-            for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+            for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
             {
                 rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
-                for (std::size_t x=0; x<static_cast<std::size_t>(src_view.width()); ++x)
+                for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
                 {
                     uint8_t & r = get_color(src_it[x], red_t());
                     uint8_t & g = get_color(src_it[x], green_t());
@@ -598,10 +598,10 @@ void apply_filter(Src & src, scale_hsla const& transform)
     if (tinting || set_alpha)
     {
         rgba8_view_t src_view = rgba8_view(src);
-        for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+        for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
         {
             rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
-            for (std::size_t x=0; x<static_cast<std::size_t>(src_view.width()); ++x)
+            for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
             {
                 uint8_t & r = get_color(src_it[x], red_t());
                 uint8_t & g = get_color(src_it[x], green_t());
@@ -681,10 +681,10 @@ void apply_filter(Src & src, gray const& /*op*/)
 
     rgba8_view_t src_view = rgba8_view(src);
 
-    for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+    for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
         rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
-        for (std::size_t x=0; x<static_cast<std::size_t>(src_view.width()); ++x)
+        for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
         {
             // formula taken from boost/gil/color_convert.hpp:rgb_to_luminance
             uint8_t & r = get_color(src_it[x], red_t());
@@ -699,7 +699,7 @@ void apply_filter(Src & src, gray const& /*op*/)
 template <typename Src, typename Dst>
 void x_gradient_impl(Src const& src_view, Dst const& dst_view)
 {
-    for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+    for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
         typename Src::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
         typename Dst::x_iterator dst_it = dst_view.row_begin(static_cast<long>(y));
@@ -708,13 +708,13 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
         dst_it[0][1] = 128 + (src_it[0][1] - src_it[1][1]) / 2;
         dst_it[0][2] = 128 + (src_it[0][2] - src_it[1][2]) / 2;
 
-        dst_it[dst_view.width()-1][0] = 128 + (src_it[static_cast<std::size_t>(src_view.width())-2][0] - src_it[static_cast<std::size_t>(src_view.width())-1][0]) / 2;
-        dst_it[dst_view.width()-1][1] = 128 + (src_it[static_cast<std::size_t>(src_view.width())-2][1] - src_it[static_cast<std::size_t>(src_view.width())-1][1]) / 2;
-        dst_it[dst_view.width()-1][2] = 128 + (src_it[static_cast<std::size_t>(src_view.width())-2][2] - src_it[static_cast<std::size_t>(src_view.width())-1][2]) / 2;
+        dst_it[dst_view.width()-1][0] = 128 + (src_it[(src_view.width())-2][0] - src_it[(src_view.width())-1][0]) / 2;
+        dst_it[dst_view.width()-1][1] = 128 + (src_it[(src_view.width())-2][1] - src_it[(src_view.width())-1][1]) / 2;
+        dst_it[dst_view.width()-1][2] = 128 + (src_it[(src_view.width())-2][2] - src_it[(src_view.width())-1][2]) / 2;
 
-        dst_it[0][3] = dst_it[static_cast<std::size_t>(src_view.width())-1][3] = 255;
+        dst_it[0][3] = dst_it[(src_view.width())-1][3] = 255;
 
-        for (std::size_t x=1; x<static_cast<std::size_t>(src_view.width())-1; ++x)
+        for (std::ptrdiff_t x = 1; x < src_view.width()-1; ++x)
         {
             dst_it[x][0] = 128 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
             dst_it[x][1] = 128 + (src_it[x-1][1] - src_it[x+1][1]) / 2;
@@ -746,10 +746,10 @@ void apply_filter(Src & src, invert const& /*op*/)
 
     rgba8_view_t src_view = rgba8_view(src);
 
-    for (std::size_t y=0; y<static_cast<std::size_t>(src_view.height()); ++y)
+    for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
         rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
-        for (std::size_t x=0; x<static_cast<std::size_t>(src_view.width()); ++x)
+        for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
         {
             // we only work with premultiplied source,
             // thus all color values must be <= alpha
