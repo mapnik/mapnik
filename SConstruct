@@ -395,7 +395,7 @@ opts.AddVariables(
     BoolVariable('FULL_LIB_PATH', 'Embed the full and absolute path to libmapnik when linking ("install_name" on OS X/rpath on Linux)', 'True'),
     BoolVariable('ENABLE_SONAME', 'Embed a soname in libmapnik on Linux', 'True'),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
-    EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
+    EnumVariable('XMLPARSER','Set xml parser','ptree', ['libxml2','ptree']),
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
