@@ -1,7 +1,7 @@
 #ifndef TEST_MEMORY_CLEANUP
 #define TEST_MEMORY_CLEANUP
 
-#if defined(HAS_XML2)
+#if defined(HAVE_LIBXML2)
 #include <libxml/parser.h>
 #include <libxml/entities.h>
 #include <libxml/globals.h>
@@ -23,7 +23,7 @@ inline void run_cleanup()
     // only call this once, on exit
     // to make sure valgrind output is clean
     // http://xmlsoft.org/xmlmem.html
-#if defined(HAS_XML2)
+#if defined(HAVE_LIBXML2)
     xmlCleanupCharEncodingHandlers();
     xmlCleanupEncodingAliases();
     xmlCleanupGlobals();
