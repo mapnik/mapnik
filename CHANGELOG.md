@@ -14,7 +14,7 @@ Released: July 27th, 2015
 
 #### Summary
 
-The 3.0.1 fixes a few bugs in geojson parsing, svg parsing, and rendering. It also avoids a potential hang when using `line-geometry-transform` and includes a speedup for text rendering compared to v3.0.0. It is fully back compatibility with v3.0.0 and everyone is encouraged to upgrade.
+The 3.0.1 fixes a few bugs in geojson parsing, svg parsing, and rendering. It also avoids a potential hang when using `line-geometry-transform` and includes a speedup for text rendering compared to v3.0.0. It is fully back compatible with v3.0.0 and everyone is encouraged to upgrade.
 
 - Fixed text placement performance after #2949 (#2963)
 - Fixed rendering behavior for `text-minimum-path-length` which regressed in 3.0.0 (#2990)
