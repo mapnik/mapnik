@@ -60,7 +60,6 @@ function install_mason_deps() {
     install freetype 2.5.5 libfreetype &
     install harfbuzz 0.9.40 libharfbuzz &
     install jpeg_turbo 1.4.0 libjpeg &
-    install libxml2 2.9.2 libxml2 &
     install libpng 1.6.17 libpng &
     install webp 0.4.2 libwebp &
     install icu 54.1 &
@@ -117,8 +116,6 @@ PG_INCLUDES = '${MASON_LINKED_REL}/include'
 PG_LIBS = '${MASON_LINKED_REL}/lib'
 FREETYPE_INCLUDES = '${MASON_LINKED_REL}/include/freetype2'
 FREETYPE_LIBS = '${MASON_LINKED_REL}/lib'
-XML2_INCLUDES = '${MASON_LINKED_REL}/include/libxml2'
-XML2_LIBS = '${MASON_LINKED_REL}/lib'
 SVG_RENDERER = True
 CAIRO_INCLUDES = '${MASON_LINKED_REL}/include'
 CAIRO_LIBS = '${MASON_LINKED_REL}/lib'

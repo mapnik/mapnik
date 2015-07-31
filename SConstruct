@@ -395,7 +395,7 @@ opts.AddVariables(
     BoolVariable('FULL_LIB_PATH', 'Embed the full and absolute path to libmapnik when linking ("install_name" on OS X/rpath on Linux)', 'True'),
     BoolVariable('ENABLE_SONAME', 'Embed a soname in libmapnik on Linux', 'True'),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
-    EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
+    EnumVariable('XMLPARSER','Set xml parser','ptree', ['libxml2','ptree']),
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
@@ -1266,18 +1266,19 @@ if not preconfigured:
 
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
-    if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
-        REQUIRED_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
-        if env.get('XML2_INCLUDES'):
-            inc_path = env['XML2_INCLUDES']
-            env.AppendUnique(CPPPATH = fix_path(inc_path))
-        if env.get('XML2_LIBS'):
-            lib_path = env['XML2_LIBS']
-            env.AppendUnique(LIBPATH = fix_path(lib_path))
-    elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
-        env['HAS_LIBXML2'] = True
-    else:
-        env['MISSING_DEPS'].append('libxml2')
+    if env.get('XMLPARSER') and env['XMLPARSER'] == 'libxml2':
+        if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
+            OPTIONAL_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
+            if env.get('XML2_INCLUDES'):
+                inc_path = env['XML2_INCLUDES']
+                env.AppendUnique(CPPPATH = fix_path(inc_path))
+            if env.get('XML2_LIBS'):
+                lib_path = env['XML2_LIBS']
+                env.AppendUnique(LIBPATH = fix_path(lib_path))
+        elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
+            env['HAS_LIBXML2'] = True
+        else:
+            env['MISSING_DEPS'].append('libxml2')
 
     if not env['HOST']:
         if conf.CheckHasDlfcn():
