@@ -149,7 +149,7 @@ double parse_double_optional_percent(T & error_messages, const char* str, bool &
 
     double val = 0.0;
     if (!parse(str, str + std::strlen(str),double_[ref(val)=_1, ref(percent) = false]
-               >> -char_('%')[ref(val)/100.0, ref(percent) = true]))
+               >> -char_('%')[ref(val) /= 100.0, ref(percent) = true]))
     {
         error_messages.emplace_back("Failed to parse double (optional %) from " + std::string(str));
     }

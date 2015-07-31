@@ -750,9 +750,9 @@ TEST_CASE("SVG parser") {
         REQUIRE(attrs[0].fill_gradient.has_stop());
         attrs[0].fill_gradient.get_control_points(x1, y1, x2, y2, r);
         REQUIRE(x1 == 0);
-        REQUIRE(y1 == 25);
-        REQUIRE(x2 == 10);
-        REQUIRE(y2 == 10);
-        REQUIRE(r == 75);
+        REQUIRE(y1 == 0.25);
+        REQUIRE(x2 == 0.10);
+        REQUIRE(y2 == 0.10);
+        REQUIRE(r == 0.75);
     }
 }
