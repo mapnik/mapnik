@@ -57,10 +57,12 @@ TEST_CASE("SVG parser") {
 
     SECTION("SVG i/o")
     {
+        mapnik::logger::instance().set_severity(mapnik::logger::none);
         std::string svg_name("FAIL");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_null>());
+        mapnik::logger::instance().set_severity(mapnik::logger::error);
     }
 
     SECTION("SVG::parse i/o")
