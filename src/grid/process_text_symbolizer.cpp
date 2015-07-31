@@ -28,6 +28,7 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/renderer.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 
 namespace mapnik {
@@ -66,7 +67,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
     placements_list const& placements = helper.get();
     value_integer feature_id = feature.id();
 
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         ren.render(*glyphs, feature_id);
         placement_found = true;

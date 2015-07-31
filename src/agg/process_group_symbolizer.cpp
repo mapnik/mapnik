@@ -32,6 +32,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
@@ -120,7 +121,7 @@ struct thunk_renderer<image_rgba8>
         render_offset_placements(
             thunk.placements_,
             offset_,
-            [&] (glyph_positions_ptr glyphs)
+            [&] (glyph_positions_ptr const& glyphs)
             {
                 marker_info_ptr mark = glyphs->get_marker();
                 if (mark)

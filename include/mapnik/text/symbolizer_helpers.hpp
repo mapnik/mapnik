@@ -22,10 +22,13 @@
 #ifndef SYMBOLIZER_HELPERS_HPP
 #define SYMBOLIZER_HELPERS_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/text/placement_finder.hpp>
+#include <mapnik/text/placements/base.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/text/glyph_positions.hpp>
+#include <mapnik/text/text_properties.hpp>
 
 namespace mapnik {
 

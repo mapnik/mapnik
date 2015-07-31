@@ -56,8 +56,8 @@ public:
     text_renderer (halo_rasterizer_e rasterizer,
                    composite_mode_e comp_op = src_over,
                    composite_mode_e halo_comp_op = src_over,
-                   double scale_factor=1.0,
-                   stroker_ptr stroker=stroker_ptr());
+                   double scale_factor = 1.0,
+                   stroker_ptr stroker = stroker_ptr());
     void set_transform(agg::trans_affine const& transform);
     void set_halo_transform(agg::trans_affine const& halo_transform);
 protected:

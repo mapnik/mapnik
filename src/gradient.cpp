@@ -66,11 +66,34 @@ gradient::gradient(gradient const& other)
       units_(other.units_),
       gradient_type_(other.gradient_type_) {}
 
-gradient & gradient::operator=(const gradient& rhs)
+gradient::gradient(gradient && other)
+    : transform_(std::move(other.transform_)),
+      x1_(std::move(other.x1_)),
+      y1_(std::move(other.y1_)),
+      x2_(std::move(other.x2_)),
+      y2_(std::move(other.y2_)),
+      r_(std::move(other.r_)),
+      stops_(std::move(other.stops_)),
+      units_(std::move(other.units_)),
+      gradient_type_(std::move(other.gradient_type_)) {}
+
+gradient & gradient::operator=(gradient rhs)
 {
-    gradient tmp(rhs);
-    swap(tmp);
+    swap(rhs);
     return *this;
+}
+
+bool gradient::operator==(gradient const& other) const
+{
+    return transform_ == other.transform_ &&
+        x1_ == other.x1_ &&
+        y1_ == other.y1_ &&
+        x2_ == other.x2_ &&
+        y2_ == other.y2_ &&
+        r_  == other.r_  &&
+        std::equal(stops_.begin(),stops_.end(), other.stops_.begin()),
+        units_ == other.units_ &&
+        gradient_type_ == other.gradient_type_;
 }
 
 void gradient::set_gradient_type(gradient_e grad)
@@ -108,7 +131,7 @@ void gradient::add_stop(double offset,mapnik::color const& c)
 
 bool gradient::has_stop() const
 {
-    return ! stops_.empty();
+    return !stops_.empty();
 }
 
 stop_array const& gradient::get_stop_array() const
@@ -116,13 +139,17 @@ stop_array const& gradient::get_stop_array() const
     return stops_;
 }
 
-void gradient::swap(const gradient& other) throw()
+void gradient::swap(gradient& other) throw()
 {
-    gradient_type_=other.gradient_type_;
-    stops_=other.stops_;
-    units_=other.units_;
-    transform_=other.transform_;
-    other.get_control_points(x1_,y1_,x2_,y2_,r_);
+    std::swap(gradient_type_, other.gradient_type_);
+    std::swap(stops_, other.stops_);
+    std::swap(units_, other.units_);
+    std::swap(transform_, other.transform_);
+    std::swap(x1_, other.x1_);
+    std::swap(y1_, other.y1_);
+    std::swap(x2_, other.x2_);
+    std::swap(y2_, other.y2_);
+    std::swap(r_, other.r_);
 }
 
 void gradient::set_control_points(double x1, double y1, double x2, double y2, double r)

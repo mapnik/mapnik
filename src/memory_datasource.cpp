@@ -82,6 +82,7 @@ void memory_datasource::push(feature_ptr feature)
     // TODO - collect attribute descriptors?
     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
     features_.push_back(feature);
+    dirty_extent_ = true;
 }
 
 datasource::datasource_t memory_datasource::type() const
@@ -110,10 +111,11 @@ void memory_datasource::set_envelope(box2d<double> const& box)
 
 box2d<double> memory_datasource::envelope() const
 {
-    if (!extent_.valid())
+    if (!extent_.valid() || dirty_extent_)
     {
         accumulate_extent func(extent_);
         std::for_each(features_.begin(),features_.end(),func);
+        dirty_extent_ = false;
     }
     return extent_;
 }

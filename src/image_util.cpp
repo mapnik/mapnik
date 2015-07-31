@@ -368,6 +368,13 @@ template MAPNIK_DECL void save_to_file<image_view_any> (image_view_any const&,
                                                         std::string const&,
                                                         rgba_palette const& palette);
 
+template MAPNIK_DECL std::string save_to_string<image_view_rgba8> (image_view_rgba8 const&,
+                                                                 std::string const&);
+
+template MAPNIK_DECL std::string save_to_string<image_view_rgba8> (image_view_rgba8 const&,
+                                                                 std::string const&,
+                                                                 rgba_palette const& palette);
+
 template MAPNIK_DECL std::string save_to_string<image_view_any> (image_view_any const&,
                                                                  std::string const&);
 

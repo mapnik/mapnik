@@ -155,8 +155,14 @@ vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
 
     // find the point on the offset line closest to the current position,
     // which we'll use to make the offset line aligned to this one.
-    double seek = offseted_line->position_closest_to(current_position_);
+    // TODO: `position_closest_to` is disable since it is too expensive:
+    // https://github.com/mapnik/mapnik/issues/2937
+    //double seek = offseted_line->position_closest_to(current_position_);
+    double seek = (position_ + region_width/2.0) * offseted_line->length() / length() - region_width/2.0;
+    if (seek < 0) seek = 0;
+    if (seek > offseted_line->length()) seek = offseted_line->length();
     offseted_line->move(seek);
+
     return *offseted_line;
 }
 

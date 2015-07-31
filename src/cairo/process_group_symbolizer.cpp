@@ -26,6 +26,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/make_unique.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_render_vector.hpp>
 
@@ -95,7 +96,7 @@ struct thunk_renderer
         render_offset_placements(
             thunk.placements_,
             offset_,
-            [&] (glyph_positions_ptr glyphs)
+            [&] (glyph_positions_ptr const& glyphs)
             {
                 marker_info_ptr mark = glyphs->get_marker();
                 if (mark)

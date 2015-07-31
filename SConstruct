@@ -110,14 +110,7 @@ PLUGINS = { # plugins with external dependencies
             'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
-            # configured with custom paths, hence 'path': PREFIX/INCLUDES/LIBS
-            'occi':    {'default':False,'path':'OCCI','inc':'occi.h','lib':'clntsh','lang':'C++'},
             'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
-            'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
-
-            # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':None,'lib':None,'lang':'C'},
-
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
@@ -402,7 +395,7 @@ opts.AddVariables(
     BoolVariable('FULL_LIB_PATH', 'Embed the full and absolute path to libmapnik when linking ("install_name" on OS X/rpath on Linux)', 'True'),
     BoolVariable('ENABLE_SONAME', 'Embed a soname in libmapnik on Linux', 'True'),
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
-    EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
+    EnumVariable('XMLPARSER','Set xml parser','ptree', ['libxml2','ptree']),
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
@@ -1273,18 +1266,19 @@ if not preconfigured:
 
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
-    if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
-        REQUIRED_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
-        if env.get('XML2_INCLUDES'):
-            inc_path = env['XML2_INCLUDES']
-            env.AppendUnique(CPPPATH = fix_path(inc_path))
-        if env.get('XML2_LIBS'):
-            lib_path = env['XML2_LIBS']
-            env.AppendUnique(LIBPATH = fix_path(lib_path))
-    elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
-        env['HAS_LIBXML2'] = True
-    else:
-        env['MISSING_DEPS'].append('libxml2')
+    if env.get('XMLPARSER') and env['XMLPARSER'] == 'libxml2':
+        if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
+            OPTIONAL_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
+            if env.get('XML2_INCLUDES'):
+                inc_path = env['XML2_INCLUDES']
+                env.AppendUnique(CPPPATH = fix_path(inc_path))
+            if env.get('XML2_LIBS'):
+                lib_path = env['XML2_LIBS']
+                env.AppendUnique(LIBPATH = fix_path(lib_path))
+        elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
+            env['HAS_LIBXML2'] = True
+        else:
+            env['MISSING_DEPS'].append('libxml2')
 
     if not env['HOST']:
         if conf.CheckHasDlfcn():
@@ -1904,6 +1898,8 @@ if not HELP_REQUESTED:
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
     OGR_BUILT = False
+    POSTGIS_BUILT = False
+    PGRASTER_BUILT = False
     for plugin in env['PLUGINS']:
         if env['PLUGIN_LINKING'] == 'static' or plugin not in env['REQUESTED_PLUGINS']:
             if os.path.exists('plugins/input/%s.input' % plugin):
@@ -1913,10 +1909,16 @@ if not HELP_REQUESTED:
             if details['lib'] in env['LIBS']:
                 if env['PLUGIN_LINKING'] == 'shared':
                     SConscript('plugins/input/%s/build.py' % plugin)
+                # hack to avoid breaking on plugins with the same dep
                 if plugin == 'ogr': OGR_BUILT = True
                 if plugin == 'gdal': GDAL_BUILT = True
+                if plugin == 'postgis': POSTGIS_BUILT = True
+                if plugin == 'pgraster': PGRASTER_BUILT = True
                 if plugin == 'ogr' or plugin == 'gdal':
                     if GDAL_BUILT and OGR_BUILT:
+                        env['LIBS'].remove(details['lib'])
+                elif plugin == 'postgis' or plugin == 'pgraster':
+                    if POSTGIS_BUILT and PGRASTER_BUILT:
                         env['LIBS'].remove(details['lib'])
                 else:
                     env['LIBS'].remove(details['lib'])

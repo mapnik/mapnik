@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,31 +20,35 @@
  *
  *****************************************************************************/
 
-#ifndef OSMTAGTYPES_H
-#define OSMTAGTYPES_H
-
-// osmtagtypes.h
-// for finding the types of particular tags
+#ifndef MAPNIK_SVG_PARSER_EXCEPTION_HPP
+#define MAPNIK_SVG_PARSER_EXCEPTION_HPP
 
 // mapnik
-#include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/config.hpp>
+#include <exception>
 
-class osm_tag_types
+// stl
+#include <map>
+
+namespace  mapnik { namespace svg {
+
+class MAPNIK_DECL svg_parser_exception : public std::exception
 {
 public:
-    void add_type(std::string tag, mapnik::eAttributeType type)
-    {
-        types[tag] = type;
-    }
+    svg_parser_exception(std::string const& message)
+      : message_(message) {}
 
-    mapnik::eAttributeType get_type(std::string tag)
-    {
-        std::map<std::string, mapnik::eAttributeType>::iterator i = types.find(tag);
-        return (i == types.end()) ? mapnik::String : i->second;
-    }
+    ~svg_parser_exception() throw() {}
 
+    virtual const char* what() const throw()
+    {
+        return message_.c_str();
+    }
 private:
-    std::map<std::string, mapnik::eAttributeType> types;
+    std::string message_;
 };
-  
-#endif // OSMTAGTYPES_H
+
+}}
+
+
+#endif // MAPNIK_SVG_PARSER_EXCEPTION_HPP

@@ -48,32 +48,16 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
 
-#include <libxml/parser.h> // for xmlInitParser(), xmlCleanupParser()
-
 struct main_marker_visitor
 {
-    main_marker_visitor(std::string & svg_name,
-                        int & return_value,
+    main_marker_visitor(std::string const& svg_name,
                         bool verbose,
                         bool auto_open)
         : svg_name_(svg_name),
-          return_value_(return_value),
           verbose_(verbose),
           auto_open_(auto_open) {}
 
-    void operator() (mapnik::marker_null const&)
-    {
-        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
-        return_value_ = -1;
-    }
-
-    void operator() (mapnik::marker_rgba8 const&)
-    {
-        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
-        return_value_ = -1;
-    }
-
-    void operator() (mapnik::marker_svg const& marker)
+    int operator() (mapnik::marker_svg const& marker)
     {
         using pixfmt = agg::pixfmt_rgba32_pre;
         using renderer_base = agg::renderer_base<pixfmt>;
@@ -111,28 +95,37 @@ struct main_marker_visitor
 
         svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 
-        boost::algorithm::ireplace_last(svg_name_,".svg",".png");
+        std::string png_name(svg_name_);
+        boost::algorithm::ireplace_last(png_name,".svg",".png");
         demultiply_alpha(im);
-        mapnik::save_to_file<mapnik::image_rgba8>(im,svg_name_,"png");
+        mapnik::save_to_file<mapnik::image_rgba8>(im,png_name,"png");
+        int status = 0;
         if (auto_open_)
         {
             std::ostringstream s;
 #ifdef DARWIN
-            s << "open " << svg_name_;
+            s << "open " << png_name;
 #else
-            s << "xdg-open " << svg_name_;
+            s << "xdg-open " << png_name;
 #endif
             int ret = system(s.str().c_str());
             if (ret != 0)
-                return_value_ = ret;
+                status = ret;
         }
-        std::clog << "rendered to: " << svg_name_ << "\n";
+        std::clog << "rendered to: " << png_name << "\n";
+        return status;
+    }
 
+    // default
+    template <typename T>
+    int operator() (T const&)
+    {
+        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
+        return -1;
     }
 
   private:
-    std::string & svg_name_;
-    int & return_value_;
+    std::string const& svg_name_;
     bool verbose_;
     bool auto_open_;
 };
@@ -143,7 +136,7 @@ int main (int argc,char** argv)
 
     bool verbose = false;
     bool auto_open = false;
-    int return_value = 0;
+    int status = 0;
     std::vector<std::string> svg_files;
     mapnik::logger::instance().set_severity(mapnik::logger::error);
 
@@ -203,8 +196,6 @@ int main (int argc,char** argv)
             return 0;
         }
 
-        xmlInitParser();
-
         while (itr != svg_files.end())
         {
             std::string svg_name (*itr++);
@@ -214,20 +205,19 @@ int main (int argc,char** argv)
             }
 
             std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
-            main_marker_visitor visitor(svg_name, return_value, verbose, auto_open);
-            mapnik::util::apply_visitor(visitor, *marker);
+            main_marker_visitor visitor(svg_name, verbose, auto_open);
+            status = mapnik::util::apply_visitor(visitor, *marker);
         }
+    }
+    catch (std::exception const& ex)
+    {
+        std::clog << "Exception caught:" << ex.what() << std::endl;
+        return -1;
     }
     catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
-        xmlCleanupParser();
         return -1;
     }
-
-    // only call this once, on exit
-    // to make sure valgrind output is clean
-    // http://xmlsoft.org/xmlmem.html
-    xmlCleanupParser();
-    return return_value;
+    return status;
 }

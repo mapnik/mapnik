@@ -31,6 +31,18 @@
 
 #include "cleanup.hpp" // run_cleanup()
 
+#ifdef MAPNIK_LOG
+using log_levels_map = std::map<std::string, mapnik::logger::severity_type>;
+
+log_levels_map log_levels
+{
+    { "debug", mapnik::logger::severity_type::debug },
+    { "warn",  mapnik::logger::severity_type::warn },
+    { "error", mapnik::logger::severity_type::error },
+    { "none",  mapnik::logger::severity_type::none }
+};
+#endif
+
 int main(int argc, char** argv)
 {
     using namespace visual_tests;
@@ -41,6 +53,8 @@ int main(int argc, char** argv)
         ("help,h", "produce usage message")
         ("verbose,v", "verbose output")
         ("overwrite,o", "overwrite reference image")
+        ("duration,d", "output rendering duration")
+        ("iterations,i", po::value<std::size_t>()->default_value(1), "number of iterations for benchmarking")
         ("jobs,j", po::value<std::size_t>()->default_value(1), "number of parallel threads")
         ("styles-dir", po::value<std::string>()->default_value("test/data-visual/styles"), "directory with styles")
         ("images-dir", po::value<std::string>()->default_value("test/data-visual/images"), "directory with reference images")
@@ -49,6 +63,11 @@ int main(int argc, char** argv)
         ("styles", po::value<std::vector<std::string>>(), "selected styles to test")
         ("fonts", po::value<std::string>()->default_value("fonts"), "font search path")
         ("plugins", po::value<std::string>()->default_value("plugins/input"), "input plugins search path")
+#ifdef MAPNIK_LOG
+        ("log", po::value<std::string>()->default_value(std::find_if(log_levels.begin(), log_levels.end(),
+             [](log_levels_map::value_type const & level) { return level.second == mapnik::logger::get_severity(); } )->first),
+             "log level (debug, warn, error, none)")
+#endif
         ;
 
     po::positional_options_description p;
@@ -62,6 +81,20 @@ int main(int argc, char** argv)
         std::clog << desc << std::endl;
         return 1;
     }
+
+#ifdef MAPNIK_LOG
+    std::string log_level(vm["log"].as<std::string>());
+    log_levels_map::const_iterator level_iter = log_levels.find(log_level);
+    if (level_iter == log_levels.end())
+    {
+        std::cerr << "Error: Unknown log level: " << log_level << std::endl;
+        return 1;
+    }
+    else
+    {
+        mapnik::logger::set_severity(level_iter->second);
+    }
+#endif
 
     mapnik::freetype_engine::register_fonts(vm["fonts"].as<std::string>(), true);
     mapnik::datasource_cache::instance().register_datasources(vm["plugins"].as<std::string>());
@@ -77,8 +110,10 @@ int main(int argc, char** argv)
                output_dir,
                vm["images-dir"].as<std::string>(),
                vm.count("overwrite"),
+               vm["iterations"].as<std::size_t>(),
                vm["jobs"].as<std::size_t>());
-    report_type report = vm.count("verbose") ? report_type((console_report())) : report_type((console_short_report()));
+    bool show_duration = vm.count("duration");
+    report_type report(vm.count("verbose") ? report_type((console_report(show_duration))) : report_type((console_short_report(show_duration))));
     result_list results;
 
     try

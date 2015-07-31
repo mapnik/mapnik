@@ -63,10 +63,9 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     start = features(_r1)
         ;
 
-    features = iter_pos[_a = _1] >> -(lit('{') >> -lit("\"type\"")
-                                      >> lit(':') >> lit("\"FeatureCollection\"")
-                                      >> *(lit(',') >> (json.key_value - lit("\"features\"")))
-                                      >> lit(',') >> lit("\"features\"")
+    features = iter_pos[_a = _1] >> -(lit('{')
+                                      >> *((json.key_value - lit("\"features\"")) >> lit(','))
+                                      >> lit("\"features\"")
                                       >> lit(':'))
                                  >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
         ;
@@ -77,6 +76,8 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
                                        lit('}')[_a -=1]
                                        |
                                        coords[_b = _1]
+                                       |
+                                       json.string_
                                        |
                                        char_))][push_box(_r1, _r2, _b, _1)]
         ;

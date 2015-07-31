@@ -50,7 +50,6 @@ public:
     image(image<null_t> const&) {}
     image(image<null_t> &&) noexcept {}
     image<null_t>& operator=(image<null_t>) { return *this; }
-    image<null_t>const& operator=(image<null_t> const& rhs) const { return rhs; }
     bool operator==(image<null_t> const&) const { return true; }
     bool operator<(image<null_t> const&) const { return false; }
 

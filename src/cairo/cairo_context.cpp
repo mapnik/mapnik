@@ -28,8 +28,8 @@
 #include <mapnik/text/face.hpp>
 
 #include <cairo-ft.h>
+#include <vector>
 
-#include <valarray>
 namespace mapnik {
 
 cairo_face::cairo_face(std::shared_ptr<font_library> const& library, face_ptr const& face)
@@ -227,17 +227,13 @@ void cairo_context::set_line_width(double width)
 
 void cairo_context::set_dash(dash_array const& dashes, double scale_factor)
 {
-    std::valarray<double> d(dashes.size() * 2);
-    dash_array::const_iterator itr = dashes.begin();
-    dash_array::const_iterator end = dashes.end();
-    std::size_t index = 0;
-
-    for (; itr != end; ++itr)
+    std::vector<double> d;
+    d.reserve(dashes.size() * 2);
+    for (auto const& dash : dashes)
     {
-        d[index++] = itr->first * scale_factor;
-        d[index++] = itr->second * scale_factor;
+        d.emplace_back(dash.first * scale_factor);
+        d.emplace_back(dash.second * scale_factor);
     }
-
     cairo_set_dash(cairo_.get() , &d[0], static_cast<int>(d.size()), 0/*offset*/);
     check_object_status_and_throw_exception(*this);
 }

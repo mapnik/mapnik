@@ -56,6 +56,7 @@ private:
     datasource::datasource_t type_;
     bool bbox_check_;
     mutable box2d<double> extent_;
+    mutable bool dirty_extent_ = true;
 };
 
 }

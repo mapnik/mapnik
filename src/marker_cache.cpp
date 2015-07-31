@@ -175,7 +175,15 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             svg_path_adapter svg_path(stl_storage);
             svg_converter_type svg(svg_path, marker_path->attributes());
             svg_parser p(svg);
-            p.parse_from_string(known_svg_string);
+
+            if (!p.parse_from_string(known_svg_string))
+            {
+                for (auto const& msg : p.error_messages())
+                {
+                    MAPNIK_LOG_ERROR(marker_cache) <<  "SVG PARSING ERROR:\"" << msg << "\"";
+                }
+                return std::make_shared<mapnik::marker const>(mapnik::marker_null());
+            }
             //svg.arrange_orientations();
             double lox,loy,hix,hiy;
             svg.bounding_rect(&lox, &loy, &hix, &hiy);
@@ -207,7 +215,16 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
                 svg_parser p(svg);
-                p.parse(uri);
+
+
+                if (!p.parse(uri))
+                {
+                    for (auto const& msg : p.error_messages())
+                    {
+                        MAPNIK_LOG_ERROR(marker_cache) <<  "SVG PARSING ERROR:\"" << msg << "\"";
+                    }
+                    return std::make_shared<mapnik::marker const>(mapnik::marker_null());
+                }
                 //svg.arrange_orientations();
                 double lox,loy,hix,hiy;
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);

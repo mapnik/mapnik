@@ -54,6 +54,7 @@ public:
            path_type const & output_dir,
            path_type const & reference_dir,
            bool overwrite,
+           std::size_t iterations,
            std::size_t jobs);
 
     result_list test_all(report_type & report) const;
@@ -70,6 +71,7 @@ private:
     const path_type output_dir_;
     const path_type reference_dir_;
     const std::size_t jobs_;
+    const std::size_t iterations_;
     const renderer_type renderers_[boost::mpl::size<renderer_type::types>::value];
 };
 
