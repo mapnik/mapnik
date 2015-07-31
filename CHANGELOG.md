@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released: July 31, 2015
 
-(Packaged from f5cf669)
+(Packaged from 8305e74)
 
 #### Summary
 
