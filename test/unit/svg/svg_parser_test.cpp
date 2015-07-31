@@ -602,48 +602,18 @@ TEST_CASE("SVG parser") {
 
     SECTION("SVG missing <gradient> def")
     {
-        //
         std::string svg_name("./test/data/svg/gradient-nodef.svg");
-        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
-        REQUIRE(marker);
-        REQUIRE(marker->is<mapnik::marker_svg>());
-        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
-        auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
-        auto storage = svg.get_data();
-        REQUIRE(storage);
-        mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
-        mapnik::svg::svg_path_adapter path(stl_storage);
-        double x,y;
-        unsigned cmd;
-        std::vector<std::tuple<double,double,unsigned>> vec;
-        std::size_t num_vertices = path.total_vertices();
-
-        for (std::size_t i = 0; i < num_vertices; ++i)
-        {
-            cmd = path.vertex(&x,&y);
-            vec.emplace_back(x, y, cmd);
-        }
-
-        std::vector<std::tuple<double,double,unsigned>> expected = {std::make_tuple(1, 1, 1),
-                                                                    std::make_tuple(799, 1, 2),
-                                                                    std::make_tuple(799, 599, 2),
-                                                                    std::make_tuple(1, 599, 2),
-                                                                    std::make_tuple(1, 1, 79),
-                                                                    std::make_tuple(0, 0, 0),
-                                                                    std::make_tuple(100, 100, 1),
-                                                                    std::make_tuple(700, 100, 2),
-                                                                    std::make_tuple(700, 300, 2),
-                                                                    std::make_tuple(100, 300, 2),
-                                                                    std::make_tuple(100, 100, 79),
-                                                                    std::make_tuple(0, 0, 0),
-                                                                    std::make_tuple(100, 320, 1),
-                                                                    std::make_tuple(700, 320, 2),
-                                                                    std::make_tuple(700, 520, 2),
-                                                                    std::make_tuple(100, 520, 2),
-                                                                    std::make_tuple(100, 320, 79)};
-
-        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin()));
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+        REQUIRE(!p.parse(svg_name));
+        auto const& errors = p.error_messages();
+        REQUIRE(errors.size() == 2);
+        REQUIRE(errors[0] == "Failed to find gradient fill: MyGradient");
+        REQUIRE(errors[1] == "Failed to find gradient stroke: MyGradient");
     }
 
     SECTION("SVG missing <gradient> id")
