@@ -80,6 +80,12 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         |
         lit("invert") >> no_args [push_back(_val,construct<mapnik::filter::invert>())]
         |
+        lit("color-blind-protanope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_protanope>())]
+        |
+        lit("color-blind-deuteranope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_deuteranope>())]
+        |
+        lit("color-blind-tritanope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_tritanope>())]
+        |
         agg_blur_filter(_val)
         |
         scale_hsla_filter(_val)

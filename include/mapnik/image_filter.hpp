@@ -674,6 +674,81 @@ void apply_filter(Src & src, scale_hsla const& transform)
     }
 }
 
+template <typename Src, typename ColorBlindFilter>
+void color_blind_filter(Src & src, ColorBlindFilter const& op)
+{
+    using namespace boost::gil;
+    rgba8_view_t src_view = rgba8_view(src);
+    
+    for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
+    {
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
+        for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
+        {
+            // formula taken from boost/gil/color_convert.hpp:rgb_to_luminance
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            double dr = static_cast<double>(r);
+            double dg = static_cast<double>(g);
+            double db = static_cast<double>(b);
+            // RGB to LMS matrix conversion
+            double L = (17.8824 * dr) + (43.5161 * dg) + (4.11935 * db);
+            double M = (3.45565 * dr) + (27.1554 * dg) + (3.86714 * db);
+            double S = (0.0299566 * dr) + (0.184309 * dg) + (1.46709 * db);
+            // Simulate color blindness
+            double l = (op.f0 * L) + (op.f1 * M) + (op.f2 * S);
+            double m = (op.f3 * L) + (op.f4 * M) + (op.f5 * S);
+            double s = (op.f6 * L) + (op.f7 * M) + (op.f8 * S);
+            // LMS to RGB matrix conversion
+            double R = (0.0809444479 * l) + (-0.130504409 * m) + (0.116721066 * s);
+            double G = (-0.0102485335 * l) + (0.0540193266 * m) + (-0.113614708 * s);
+            double B = (-0.000365296938 * l) + (-0.00412161469 * m) + (0.693511405 * s);
+            // Isolate invisible colors to color vision deficiency (calculate error matrix)
+            R = dr - R;
+            G = dg - G;
+            B = db - B;
+            // Shift colors towards visible spectrum (apply error modifications)
+            double RR = (0.0 * R) + (0.0 * G) + (0.0 * B);
+            double GG = (0.7 * R) + (1.0 * G) + (0.0 * B);
+            double BB = (0.7 * R) + (0.0 * G) + (1.0 * B);
+            // Add compensation to original values
+            R = RR + dr;
+            G = GG + dg;
+            B = BB + db;
+            // Clamp values
+            if(R < 0.0) R = 0.0;
+            if(R > 255.0) R = 255.0;
+            if(G < 0.0) G = 0.0;
+            if(G > 255.0) G = 255.0;
+            if(B < 0.0) B = 0.0;
+            if(B > 255.0) B = 255.0;
+            r = static_cast<uint8_t>(R);
+            g = static_cast<uint8_t>(G);
+            b = static_cast<uint8_t>(B);
+        }
+    }
+
+}
+
+template <typename Src>
+void apply_filter(Src & src, color_blind_protanope const& op)
+{
+    color_blind_filter(src, op);
+}
+
+template <typename Src>
+void apply_filter(Src & src, color_blind_deuteranope const& op)
+{
+    color_blind_filter(src, op);
+}
+
+template <typename Src>
+void apply_filter(Src & src, color_blind_tritanope const& op)
+{
+    color_blind_filter(src, op);
+}
+
 template <typename Src>
 void apply_filter(Src & src, gray const& /*op*/)
 {

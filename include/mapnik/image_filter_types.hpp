@@ -55,6 +55,47 @@ struct x_gradient : image_filter_base {};
 struct y_gradient : image_filter_base {};
 struct invert : image_filter_base {};
 
+
+// http://vision.psychol.cam.ac.uk/jdmollon/papers/colourmaps.pdf
+struct color_blind_protanope : image_filter_base 
+{
+     const double f0 = 0.0;
+     const double f1 = 2.02344;
+     const double f2 = -2.52581;
+     const double f3 = 0.0;
+     const double f4 = 1.0;
+     const double f5 = 0.0;
+     const double f6 = 0.0;
+     const double f7 = 0.0;
+     const double f8 = 1.0;
+};
+
+struct color_blind_deuteranope : image_filter_base
+{
+     const double f0 = 1.0;
+     const double f1 = 0.0;
+     const double f2 = 0.0;
+     const double f3 = 0.494207;
+     const double f4 = 0.0;
+     const double f5 = 1.24827;
+     const double f6 = 0.0;
+     const double f7 = 0.0;
+     const double f8 = 1.0;
+};
+
+struct color_blind_tritanope : image_filter_base
+{
+     const double f0 = 1.0;
+     const double f1 = 0.0;
+     const double f2 = 0.0;
+     const double f3 = 0.0;
+     const double f4 = 1.0;
+     const double f5 = 0.0;
+     const double f6 = -0.395913;
+     const double f7 = 0.801109;
+     const double f8 = 0.0;
+};
+
 struct agg_stack_blur : image_filter_base
 {
     agg_stack_blur(unsigned rx_, unsigned ry_)
@@ -169,7 +210,10 @@ using filter_type =  util::variant<filter::blur,
                                    filter::invert,
                                    filter::scale_hsla,
                                    filter::colorize_alpha,
-                                   filter::color_to_alpha>;
+                                   filter::color_to_alpha,
+                                   filter::color_blind_protanope,
+                                   filter::color_blind_deuteranope,
+                                   filter::color_blind_tritanope>;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {
@@ -244,6 +288,24 @@ inline std::ostream& operator<< (std::ostream& os, y_gradient)
 inline std::ostream& operator<< (std::ostream& os, invert)
 {
     os << "invert";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_blind_protanope)
+{
+    os << "color-blind-protanope";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_blind_deuteranope)
+{
+    os << "color-blind-deuteranope";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_blind_tritanope)
+{
+    os << "color-blind-tritanope";
     return os;
 }
 
