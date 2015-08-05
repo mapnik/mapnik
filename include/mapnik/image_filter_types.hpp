@@ -55,45 +55,29 @@ struct x_gradient : image_filter_base {};
 struct y_gradient : image_filter_base {};
 struct invert : image_filter_base {};
 
-
 // http://vision.psychol.cam.ac.uk/jdmollon/papers/colourmaps.pdf
 struct color_blind_protanope : image_filter_base 
 {
-     const double f0 = 0.0;
-     const double f1 = 2.02344;
-     const double f2 = -2.52581;
-     const double f3 = 0.0;
-     const double f4 = 1.0;
-     const double f5 = 0.0;
-     const double f6 = 0.0;
-     const double f7 = 0.0;
-     const double f8 = 1.0;
+    const double x = 0.7465;
+    const double y = 0.2535;
+    const double m = 1.273463;
+    const double yint = -0.073894;
 };
 
 struct color_blind_deuteranope : image_filter_base
 {
-     const double f0 = 1.0;
-     const double f1 = 0.0;
-     const double f2 = 0.0;
-     const double f3 = 0.494207;
-     const double f4 = 0.0;
-     const double f5 = 1.24827;
-     const double f6 = 0.0;
-     const double f7 = 0.0;
-     const double f8 = 1.0;
+    const double x = 1.4;
+    const double y = -0.4;
+    const double m = 0.968437;
+    const double yint = 0.003331;
 };
 
 struct color_blind_tritanope : image_filter_base
 {
-     const double f0 = 1.0;
-     const double f1 = 0.0;
-     const double f2 = 0.0;
-     const double f3 = 0.0;
-     const double f4 = 1.0;
-     const double f5 = 0.0;
-     const double f6 = -0.395913;
-     const double f7 = 0.801109;
-     const double f8 = 0.0;
+    const double x = 0.1748;
+    const double y = 0.0;
+    const double m = 0.062921;
+    const double yint = 0.292119;
 };
 
 struct agg_stack_blur : image_filter_base

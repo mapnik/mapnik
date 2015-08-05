@@ -196,6 +196,15 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
             {
                 map.set_background(*bgcolor);
             }
+            
+            optional<std::string> filters = map_node.get_opt_attr<std::string>("image-filters");
+            if (filters)
+            {
+                if (!parse_image_filters(*filters, map.image_filters())) 
+                {
+                    throw config_error("failed to parse image-filters: '" + *filters + "'");
+                }
+            }
 
             optional<std::string> image_filename = map_node.get_opt_attr<std::string>("background-image");
             if (image_filename)

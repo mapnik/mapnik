@@ -197,8 +197,17 @@ void agg_renderer<T0,T1>::start_map_processing(Map const& map)
 }
 
 template <typename T0, typename T1>
-void agg_renderer<T0,T1>::end_map_processing(Map const& )
+void agg_renderer<T0,T1>::end_map_processing(Map const& map)
 {
+    if (map.image_filters().size() > 0)
+    {
+        mapnik::filter::filter_visitor<buffer_type> visitor(pixmap_);
+        for (mapnik::filter::filter_type const& filter_tag : map.image_filters())
+        {
+            util::apply_visitor(visitor, filter_tag);
+        }
+    }
+
     mapnik::demultiply_alpha(pixmap_);
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }

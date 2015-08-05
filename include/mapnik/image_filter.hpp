@@ -689,43 +689,105 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
             uint8_t & r = get_color(src_it[x], red_t());
             uint8_t & g = get_color(src_it[x], green_t());
             uint8_t & b = get_color(src_it[x], blue_t());
-            double dr = static_cast<double>(r);
-            double dg = static_cast<double>(g);
-            double db = static_cast<double>(b);
-            // RGB to LMS matrix conversion
-            double L = (17.8824 * dr) + (43.5161 * dg) + (4.11935 * db);
-            double M = (3.45565 * dr) + (27.1554 * dg) + (3.86714 * db);
-            double S = (0.0299566 * dr) + (0.184309 * dg) + (1.46709 * db);
-            // Simulate color blindness
-            double l = (op.f0 * L) + (op.f1 * M) + (op.f2 * S);
-            double m = (op.f3 * L) + (op.f4 * M) + (op.f5 * S);
-            double s = (op.f6 * L) + (op.f7 * M) + (op.f8 * S);
-            // LMS to RGB matrix conversion
-            double R = (0.0809444479 * l) + (-0.130504409 * m) + (0.116721066 * s);
-            double G = (-0.0102485335 * l) + (0.0540193266 * m) + (-0.113614708 * s);
-            double B = (-0.000365296938 * l) + (-0.00412161469 * m) + (0.693511405 * s);
-            // Isolate invisible colors to color vision deficiency (calculate error matrix)
-            R = dr - R;
-            G = dg - G;
-            B = db - B;
-            // Shift colors towards visible spectrum (apply error modifications)
-            double RR = (0.0 * R) + (0.0 * G) + (0.0 * B);
-            double GG = (0.7 * R) + (1.0 * G) + (0.0 * B);
-            double BB = (0.7 * R) + (0.0 * G) + (1.0 * B);
-            // Add compensation to original values
-            R = RR + dr;
-            G = GG + dg;
-            B = BB + db;
+            uint8_t & a = get_color(src_it[x], alpha_t());
+            double dr = static_cast<double>(r)/255.0;
+            double dg = static_cast<double>(g)/255.0;
+            double db = static_cast<double>(b)/255.0;
+            double da = static_cast<double>(a)/255.0;
+            // demultiply
+            if (da <= 0.0)
+            {
+                r = g = b = 0;
+                continue;
+            }
+            else
+            {
+                dr /= da;
+                dg /= da;
+                db /= da;
+            }
+            // Convert source color into XYZ color space
+            double pow_r = std::pow(dr, 2.2);
+            double pow_g = std::pow(dg, 2.2);
+            double pow_b = std::pow(db, 2.2);
+            double X = (0.412424 * pow_r) + (0.357579 * pow_g) + (0.180464 * pow_b);
+            double Y = (0.212656 * pow_r) + (0.715158 * pow_g) + (0.0721856 * pow_b);
+            double Z = (0.0193324 * pow_r) + (0.119193 * pow_g) + (0.950444 * pow_b);
+            // Convert XYZ into xyY Chromacity Coordinates (xy) and Luminance (Y)
+            double chroma_x = X / (X + Y + Z);
+            double chroma_y = Y / (X + Y + Z);
+            // Generate the "Confusion Line" between the source color and the Confusion Point
+            double m_div = chroma_x - op.x;
+            if (std::abs(m_div) < (std::numeric_limits<double>::epsilon())) continue;
+            double m = (chroma_y - op.y) / (chroma_x - op.x); // slope of Confusion Line
+            double yint = chroma_y - chroma_x * m; // y-intercept of confusion line (x-intercept = 0.0)
+            // How far the xy coords deviate from the simulation
+            double m_div2 = m - op.m;
+            if (std::abs(m_div2) < (std::numeric_limits<double>::epsilon())) continue;
+            double deviate_x = (op.yint - yint) / (m - op.m);
+            double deviate_y = (m * deviate_x) + yint;
+            if (std::abs(deviate_y) < (std::numeric_limits<double>::epsilon()))
+            {
+                deviate_y = std::numeric_limits<double>::epsilon() * 2.0;
+            }
+            // Compute the simulated color's XYZ coords
+            X = deviate_x * Y / deviate_y;
+            Z = (1.0 - (deviate_x + deviate_y)) * Y / deviate_y;
+            // Neutral grey calculated from luminance (in D65)
+            double neutral_X = 0.312713 * Y / 0.329016; 
+            double neutral_Z = 0.358271 * Y / 0.329016;
+            // Difference between simulated color and neutral grey
+            double diff_X = neutral_X - X;
+            double diff_Z = neutral_Z - Z;
+            double diff_r = diff_X * 3.24071 + diff_Z * -0.498571; // XYZ->RGB (sRGB:D65)
+            double diff_g = diff_X * -0.969258 + diff_Z * 0.0415557;
+            double diff_b = diff_X * 0.0556352 + diff_Z * 1.05707;
+            if (std::abs(diff_r) < (std::numeric_limits<double>::epsilon()))
+            {
+                diff_r = std::numeric_limits<double>::epsilon() * 2.0;
+            }
+            if (std::abs(diff_g) < (std::numeric_limits<double>::epsilon()))
+            {
+                diff_g = std::numeric_limits<double>::epsilon() * 2.0;
+            }
+            if (std::abs(diff_b) < (std::numeric_limits<double>::epsilon()))
+            {
+                diff_b = std::numeric_limits<double>::epsilon() * 2.0;
+            }
+            // Convert to RGB color space
+            dr = X * 3.24071 + Y * -1.53726 + Z * -0.498571; // XYZ->RGB (sRGB:D65)
+            dg = X * -0.969258 + Y * 1.87599 + Z * 0.0415557;
+            db = X * 0.0556352 + Y * -0.203996 + Z * 1.05707;            
+            // Compensate simulated color towards a neutral fit in RGB space
+            double fit_r = ((dr < 0.0 ? 0.0 : 1.0) - dr) / diff_r;
+            double fit_g = ((dg < 0.0 ? 0.0 : 1.0) - dg) / diff_g;
+            double fit_b = ((db < 0.0 ? 0.0 : 1.0) - db) / diff_b;
+            double adjust = std::max( (fit_r > 1.0 || fit_r < 0.0) ? 0.0 : fit_r, 
+                                      (fit_g > 1.0 || fit_g < 0.0) ? 0.0 : fit_g
+                                    );
+            adjust = std::max((fit_b > 1.0 || fit_b < 0.0) ? 0.0 : fit_b, adjust);
+            // Shift proportional to the greatest shift
+            dr = dr + (adjust * diff_r);
+            dg = dg + (adjust * diff_g);
+            db = db + (adjust * diff_b);
+            // Apply gamma correction
+            dr = std::pow(dr, 1.0 / 2.2);
+            dg = std::pow(dg, 1.0 / 2.2);
+            db = std::pow(db, 1.0 / 2.2);            
+            // premultiply
+            dr *= da;
+            dg *= da;
+            db *= da;
             // Clamp values
-            if(R < 0.0) R = 0.0;
-            if(R > 255.0) R = 255.0;
-            if(G < 0.0) G = 0.0;
-            if(G > 255.0) G = 255.0;
-            if(B < 0.0) B = 0.0;
-            if(B > 255.0) B = 255.0;
-            r = static_cast<uint8_t>(R);
-            g = static_cast<uint8_t>(G);
-            b = static_cast<uint8_t>(B);
+            if(dr < 0.0)  dr = 0.0;
+            if(dr > 1.0) dr = 1.0;
+            if(dg < 0.0) dg = 0.0;
+            if(dg > 1.0) dg = 1.0;
+            if(db < 0.0) db = 0.0;
+            if(db > 1.0) db = 1.0;
+            r = static_cast<uint8_t>(dr * 255.0);
+            g = static_cast<uint8_t>(dg * 255.0);
+            b = static_cast<uint8_t>(db * 255.0);
         }
     }
 
