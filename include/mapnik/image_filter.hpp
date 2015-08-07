@@ -931,6 +931,20 @@ struct filter_radius_visitor
     }
 };
 
-}}
+template<typename Src>
+void filter_image(Src & src, std::string const& filter)
+{
+    std::vector<filter_type> filter_vector;
+    parse_image_filters(filter, filter_vector);
+    filter_visitor<Src> visitor(src);
+    for (filter_type const& filter_tag : filter_vector)
+    {
+        util::apply_visitor(visitor, filter_tag);
+    }
+}
+
+} // End Namespace Filter
+
+} // End Namespace Mapnik
 
 #endif // MAPNIK_IMAGE_FILTER_HPP
