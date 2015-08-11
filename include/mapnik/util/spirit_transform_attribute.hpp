@@ -26,7 +26,6 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/variant.hpp>
 
-#include <vector>
 #include <cstdint>
 
 // boost
@@ -76,9 +75,9 @@ namespace boost { namespace spirit { namespace traits {
 
     template <>
     struct transform_attribute<mapnik::geometry::polygon<double> const,
-                               std::vector<mapnik::geometry::linear_ring<double> > const&, karma::domain>
+                               mapnik::geometry::polygon<double>::rings_container const&, karma::domain>
     {
-        using type = std::vector<mapnik::geometry::linear_ring<double> > const&;
+        using type = mapnik::geometry::polygon<double>::rings_container const&;
         static type pre(mapnik::geometry::polygon<double> const& poly)
         {
             return poly.interior_rings;
@@ -164,9 +163,9 @@ namespace boost { namespace spirit { namespace traits {
 
     template <>
     struct transform_attribute<mapnik::geometry::polygon<std::int64_t> const,
-                               std::vector<mapnik::geometry::linear_ring<std::int64_t> > const&, karma::domain>
+                               mapnik::geometry::polygon<std::int64_t>::rings_container const&, karma::domain>
     {
-        using type = std::vector<mapnik::geometry::linear_ring<std::int64_t> > const&;
+        using type = mapnik::geometry::polygon<std::int64_t>::rings_container const&;
         static type pre(mapnik::geometry::polygon<std::int64_t> const& poly)
         {
             return poly.interior_rings;
