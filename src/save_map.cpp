@@ -624,16 +624,6 @@ void serialize_map(ptree & pt, Map const& map, bool explicit_defaults)
         set_attr(map_node, "background-image-opacity", opacity);
     }
 
-    if (map.image_filters().size() > 0)
-    {
-        std::string filters_str;
-        std::back_insert_iterator<std::string> sink(filters_str);
-        if (generate_image_filters(sink, map.image_filters()))
-        {
-            set_attr(map_node, "image-filters", filters_str);
-        }
-    }
-
     int buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
