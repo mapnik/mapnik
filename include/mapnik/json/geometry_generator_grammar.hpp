@@ -104,7 +104,7 @@ struct geometry_generator_grammar :
     karma::rule<OutputIterator, geometry::geometry<double> const&()> polygon;
     karma::rule<OutputIterator, geometry::polygon<double> const&()> polygon_coord;
     karma::rule<OutputIterator, geometry::linear_ring<double> const&()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<double> > const&()> interior_ring_coord;
+    karma::rule<OutputIterator, geometry::polygon<double>::rings_container const&()> interior_ring_coord;
     karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_point;
     karma::rule<OutputIterator, geometry::multi_point<double> const& ()> multi_point_coord;
     karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_linestring;

@@ -320,12 +320,12 @@ public:
         svg_height_ = h;
     }
 
-    double width()
+    double width() const
     {
         return svg_width_;
     }
 
-    double height()
+    double height() const
     {
         return svg_height_;
     }

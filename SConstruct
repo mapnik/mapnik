@@ -301,6 +301,7 @@ opts.AddVariables(
     ('HOST', 'Set the target host for cross compiling', ''),
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
+    BoolVariable('NO_ATEXIT', 'Will prevent Singletons from being deleted atexit of main thread', 'False'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
     BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
@@ -1705,6 +1706,9 @@ if not preconfigured:
         env.Append(CPPDEFINES = '-D%s' % env['PLATFORM'].upper())
         if env['THREADING'] == 'multi':
             env.Append(CPPDEFINES = '-DMAPNIK_THREADSAFE')
+
+        if env['NO_ATEXIT']:
+            env.Append(CPPDEFINES = '-DMAPNIK_NO_ATEXIT')
 
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':

@@ -6,6 +6,19 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Future
+
+Released: YYYY XX, 2015
+
+(Packaged from xxxx)
+
+#### Summary
+
+- Fixed an issue with fields over size of int32 in OGR plugin (https://github.com/mapnik/node-mapnik/issues/499)
+- Added 3 new image-filters to simulate types of colorblindness (`color-blind-protanope`,`color-blind-deuteranope`,`color-blind-tritanope`)
+- Fix so that null text boxes have no bounding boxes when attempting placement ( 162f82cba5b0fb984c425586c6a4b354917abc47 )
+- Patch to add legacy method for setting JPEG quality in images ( #3024 )
+
 ## 3.0.2
 
 Released: July 31, 2015
