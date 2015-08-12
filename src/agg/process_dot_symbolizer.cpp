@@ -106,8 +106,8 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     {
         width = height = get<double>(sym, keys::height, feature, common_.vars_, 0.0);
     }
-    double rx = width/2.0;
-    double ry = height/2.0;
+    double rx = width/2.0 * common_.scale_factor_;
+    double ry = height/2.0 * common_.scale_factor_;
     double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
     color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
     ras_ptr->reset();
