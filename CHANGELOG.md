@@ -16,7 +16,7 @@ Released: YYYY XX, 2015
 
 Released: August 12, 2015
 
-(Packaged from 1f6c44a)
+(Packaged from 3d262c7)
 
 #### Summary
 
@@ -25,6 +25,7 @@ Released: August 12, 2015
 - Fix so that null text boxes have no bounding boxes when attempting placement ( 162f82cba5b0fb984c425586c6a4b354917abc47 )
 - Patch to add legacy method for setting JPEG quality in images ( #3024 )
 - Added `filter_image` method which can modify an image in place or return a new image that is filtered.
+- Added missing typedef's in mapnik::geometry to allow experiementing with different containers 
 
 ## 3.0.2
 
