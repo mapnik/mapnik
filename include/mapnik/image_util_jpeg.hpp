@@ -29,7 +29,7 @@
 
 namespace mapnik {
 namespace detail {
-int parse_jpeg_quality(std::string params);
+int parse_jpeg_quality(std::string const& params);
 }
 struct jpeg_saver
 {
