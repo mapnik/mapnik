@@ -12,6 +12,12 @@ Released: YYYY XX, 2015
 
 (Packaged from xxxx)
 
+## 3.0.3
+
+Released: August 12, 2015
+
+(Packaged from 1f6c44a)
+
 #### Summary
 
 - Fixed an issue with fields over size of int32 in OGR plugin (https://github.com/mapnik/node-mapnik/issues/499)
