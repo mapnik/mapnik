@@ -1,4 +1,60 @@
+Changes from 2.34 to 2.35
+
+* Sans, SansMono, Serif: added U+0E3F, U+A7F8-U+A7F9 (by Gee Fung Sit 薛至峰)
+* Sans, SansMono, Serif: moved inverted marks U+00A1, U+00BF, U+2E18 to x-height
+  and added 'case' feature using original glyphs+hints (by Gee Fung Sit 薛至峰)
+* Sans, SansMono, Serif: fixed glyph heights in Box Drawing block (by Gee Fung
+  Sit 薛至峰)
+* SansMono, Serif: adjusted U+016E to prevent cut-off (by Gee Fung Sit 薛至峰)
+* Sans: added U+269E-U+269F (by Lars Næsbye Christensen)
+* Sans: added U+06C7-U+06C8, U+06CB, U+06D0 and their presentation forms
+  U+FBD7-U+FBD8, U+FBDB-U+FBDC, U+FBDE-U+FBDF, U+FBE4-U+FBE7 (by MihailJP)
+* Sans: added isolated, initial and stretched forms in the Arabic Mathematical
+  Alphabetic Symbols block, U+1EE00 et seq. (by Gee Fung Sit 薛至峰)
+* Sans: restored GSUB tables for Hebrew (by Gee Fung Sit 薛至峰)
+* Sans: fixed U+1D301-U+1D303 (bug 73532) (by Gee Fung Sit 薛至峰)
+* Sans: fixed instructions for U+0394, U+039B in Bold (bug 16442) (by Gee Fung
+  Sit 薛至峰)
+* Sans: minor improvements/fixes to U+07D4, U+203D, U+20A6, U+20BA, U+2E18,
+  U+A782-U+A783 (by Gee Fung Sit 薛至峰)
+* Sans: moved U+2E1F to correct code point, was off by one (by Gee Fung Sit
+  薛至峰)
+* SansExtraLight: added U+0184-U+0185, U+019B, U+01B7-U+01B9, U+01EE-U+01EF,
+  U+0292, U+0298, U+0E3F, U+04E0-U+04E1, U+0516-U+0519 (by Gee Fung Sit 薛至峰)
+* SansMono: added U+203F, U+2150-U+2151, U+2189, U+220E, U+2210, U+2223,
+  U+228D-U+228E, U+2293-U+2294, U+22B2-U+22B5, U+22B8, U+22C2-U+22C3,
+  U+22CE-U+22D1, U+27DC, U+27EA-U+27EB, U+27F5-U+27F7, U+2987-U+2988,
+  U+2997-U+2998, U+2A00 (by Gee Fung Sit 薛至峰)
+* SansMono: minor improvements/fixes to U+018C and U+018D, U+026F-U+0270 (by
+  Gee Fung Sit 薛至峰)
+* SansMono: fixed glyph heights in Block Elements block (bug 14316) (by Gee
+  Fung Sit 薛至峰)
+* Serif: replaced inverted breve on U+0202, U+0206, U+020A, U+020E, U+0212,
+  U+0216 with its case form to prevent cut-off (by Gee Fung Sit 薛至峰)
+* Serif: redesigned/redrawn U+01E5, U+025E, U+0262, U+0277-U+0278,
+  U+029A-U+029B (by Gee Fung Sit 薛至峰)
+* Serif: minor improvements/fixes to U+00DF, U+017B, U+01E4, U+0265,
+  U+026F-U+0270, U+0280-U+0281, U+0294-U+0297, U+029F, U+02A1-U+02A2, U+03FB,
+  U+1D0C, U+20A6, U+20B8, U+A731 (by Gee Fung Sit 薛至峰)
+* Serif: added stylistic alternatives for U+0110-U+0111, U+01E4-U+01E5 (by Gee
+  Fung Sit 薛至峰)
+* Serif: added or adjusted anchors for U+0294, U+0256, U+041D (by Denis
+  Jacquerye)
+* Sans, Serif: added OpenType MATH table (by Frédéric Wang)
+* Sans, Serif: added displaystyle math operators (by Frédéric Wang)
+* Serif: added italic mathematical alphanumeric characterd (by Frédéric Wang)
+* Serif: added construction for stretchy radical symbol (by Frédéric Wang)
+* Serif: added stylistic ssty variants for prime symbols
+* Sans, Serif: fixed incorrect glyph for U+22C4 (by Gee Fung Sit 薛至峰)
+* SansMono: added U+22C4 (by Gee Fung Sit 薛至峰)
+* SansMono: added to U+2336, U+233F-U+2340, U+2345-U+2346, U+234A,
+  U+234E-U+234F, U+2351, U+2355-U+2356, U+235D, U+2361-U+2362, U+2366-U+2367,
+  U+236A, U+2371-U+2372 (by Sami Tarazi)
+* Serif: added U+20BA (by Gee Fung Sit 薛至峰)
+* Sans, Serif: added U+20BD (by Gee Fung Sit 薛至峰) 
+
 Changes from 2.33 to 2.34
+
 * Sans, SansMono, Serif: unlinked references of U+2596 for bug 50848
   (by Denis Jacquerye)
 * Sans, SansMono, Serif: added U+A7AA (by Denis Jacquerye)
@@ -1370,4 +1426,4 @@ Changes from 0.9 to 0.9.1:
 - proper caron shape for dcaron and tcaron
 - minor visual changes
 
-$Id: NEWS 2535 2013-08-25 15:21:17Z moyogo $
+$Id: NEWS 2594 2015-05-17 07:54:48Z ben_laenen $
