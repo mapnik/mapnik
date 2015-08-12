@@ -43,7 +43,7 @@ jpeg_saver::jpeg_saver(std::ostream & stream, std::string const& t)
 
 namespace detail {
 
-MAPNIK_DECL int parse_jpeg_quality(std::string const& params)
+int parse_jpeg_quality(std::string const& params)
 {
     int quality = 85;
     if (params != "jpeg")

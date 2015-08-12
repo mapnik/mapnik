@@ -992,6 +992,10 @@ inline bool value::is_null() const
 // support for std::unordered_xxx
 namespace std
 {
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmismatched-tags"
+
 template <>
 struct hash<mapnik::value>
 {
@@ -1000,6 +1004,8 @@ struct hash<mapnik::value>
         return mapnik::mapnik_hash_value(val);
     }
 };
+
+#pragma clang diagnostic pop
 
 }
 
