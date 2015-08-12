@@ -18,6 +18,7 @@ Released: YYYY XX, 2015
 - Added 3 new image-filters to simulate types of colorblindness (`color-blind-protanope`,`color-blind-deuteranope`,`color-blind-tritanope`)
 - Fix so that null text boxes have no bounding boxes when attempting placement ( 162f82cba5b0fb984c425586c6a4b354917abc47 )
 - Patch to add legacy method for setting JPEG quality in images ( #3024 )
+- Added `filter_image` method which can modify an image in place or return a new image that is filtered.
 
 ## 3.0.2
 

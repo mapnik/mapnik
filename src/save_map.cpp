@@ -624,7 +624,6 @@ void serialize_map(ptree & pt, Map const& map, bool explicit_defaults)
         set_attr(map_node, "background-image-opacity", opacity);
     }
 
-
     int buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {

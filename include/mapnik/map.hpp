@@ -33,7 +33,6 @@
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/image_filter_types.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -102,7 +101,6 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-    std::vector<filter::filter_type> filters_;
 
 public:
 
@@ -500,16 +498,6 @@ public:
     freetype_engine::font_memory_cache_type & get_font_memory_cache()
     {
         return font_memory_cache_;
-    }
-
-    std::vector<filter::filter_type> & image_filters()
-    {
-        return filters_;
-    }
-
-    std::vector<filter::filter_type> const& image_filters() const
-    {
-        return filters_;
     }
 
 private:

@@ -26,6 +26,7 @@
 
 //mapnik
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/util/hsl.hpp>
 
 // boost GIL
@@ -394,17 +395,15 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
 template <typename Src, typename Filter>
 void apply_filter(Src & src, Filter const& filter)
 {
-    {
-        demultiply_alpha(src);
-        double_buffer<Src> tb(src);
-        apply_convolution_3x3(tb.src_view, tb.dst_view, filter);
-    } // ensure ~double_buffer() is called before premultiplying
-    premultiply_alpha(src);
+    demultiply_alpha(src);
+    double_buffer<Src> tb(src);
+    apply_convolution_3x3(tb.src_view, tb.dst_view, filter);
 }
 
 template <typename Src>
 void apply_filter(Src & src, agg_stack_blur const& op)
 {
+    premultiply_alpha(src);
     agg::rendering_buffer buf(src.bytes(),src.width(),src.height(), src.row_size());
     agg::pixfmt_rgba32_pre pixf(buf);
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
@@ -427,6 +426,7 @@ template <typename Src>
 void apply_filter(Src & src, color_to_alpha const& op)
 {
     using namespace boost::gil;
+    bool premultiplied = src.get_premultiplied();
     rgba8_view_t src_view = rgba8_view(src);
     double cr = static_cast<double>(op.color.red())/255.0;
     double cg = static_cast<double>(op.color.green())/255.0;
@@ -450,7 +450,7 @@ void apply_filter(Src & src, color_to_alpha const& op)
                 r = g = b = 0;
                 continue;
             }
-            else
+            else if (premultiplied)
             {
                 sr /= sa;
                 sg /= sa;
@@ -479,6 +479,8 @@ void apply_filter(Src & src, color_to_alpha const& op)
             }
         }
     }
+    // set as premultiplied
+    set_premultiplied_alpha(src, true);
 }
 
 template <typename Src>
@@ -509,6 +511,8 @@ void apply_filter(Src & src, colorize_alpha const& op)
                 }
             }
         }
+        // set as premultiplied
+        set_premultiplied_alpha(src, true);
     }
     else if (size > 1)
     {
@@ -584,6 +588,8 @@ void apply_filter(Src & src, colorize_alpha const& op)
                 }
             }
         }
+        // set as premultiplied
+        set_premultiplied_alpha(src, true);
     }
 }
 
@@ -597,6 +603,7 @@ void apply_filter(Src & src, scale_hsla const& transform)
     // should be run to avoid overhead of temp buffer
     if (tinting || set_alpha)
     {
+        bool premultiplied = src.get_premultiplied();
         rgba8_view_t src_view = rgba8_view(src);
         for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
         {
@@ -617,12 +624,13 @@ void apply_filter(Src & src, scale_hsla const& transform)
                     r = g = b = 0;
                     continue;
                 }
-                else
+                else if (premultiplied)
                 {
                     r2 /= a2;
                     g2 /= a2;
                     b2 /= a2;
                 }
+
                 if (set_alpha)
                 {
                     a2 = transform.a0 + (a2 * (transform.a1 - transform.a0));
@@ -671,6 +679,8 @@ void apply_filter(Src & src, scale_hsla const& transform)
                 if (b>a) b=a;
             }
         }
+        // set as premultiplied
+        set_premultiplied_alpha(src, true);
     }
 }
 
@@ -679,6 +689,7 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
 {
     using namespace boost::gil;
     rgba8_view_t src_view = rgba8_view(src);
+    bool premultiplied = src.get_premultiplied();
     
     for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
@@ -700,7 +711,7 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
                 r = g = b = 0;
                 continue;
             }
-            else
+            else if (premultiplied)
             {
                 dr /= da;
                 dg /= da;
@@ -790,7 +801,8 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
             b = static_cast<uint8_t>(db * 255.0);
         }
     }
-
+    // set as premultiplied
+    set_premultiplied_alpha(src, true);
 }
 
 template <typename Src>
@@ -814,6 +826,7 @@ void apply_filter(Src & src, color_blind_tritanope const& op)
 template <typename Src>
 void apply_filter(Src & src, gray const& /*op*/)
 {
+    premultiply_alpha(src);
     using namespace boost::gil;
 
     rgba8_view_t src_view = rgba8_view(src);
@@ -864,6 +877,7 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
 template <typename Src>
 void apply_filter(Src & src, x_gradient const& /*op*/)
 {
+    premultiply_alpha(src);
     double_buffer<Src> tb(src);
     x_gradient_impl(tb.src_view, tb.dst_view);
 }
@@ -871,6 +885,7 @@ void apply_filter(Src & src, x_gradient const& /*op*/)
 template <typename Src>
 void apply_filter(Src & src, y_gradient const& /*op*/)
 {
+    premultiply_alpha(src);
     double_buffer<Src> tb(src);
     x_gradient_impl(rotated90ccw_view(tb.src_view),
                     rotated90ccw_view(tb.dst_view));
@@ -879,6 +894,7 @@ void apply_filter(Src & src, y_gradient const& /*op*/)
 template <typename Src>
 void apply_filter(Src & src, invert const& /*op*/)
 {
+    premultiply_alpha(src);
     using namespace boost::gil;
 
     rgba8_view_t src_view = rgba8_view(src);
@@ -931,6 +947,40 @@ struct filter_radius_visitor
     }
 };
 
-}}
+template<typename Src>
+void filter_image(Src & src, std::string const& filter)
+{
+    std::vector<filter_type> filter_vector;
+    if(!parse_image_filters(filter, filter_vector))
+    {
+        throw std::runtime_error("Failed to parse filter argument in filter_image: '" + filter + "'");
+    }
+    filter_visitor<Src> visitor(src);
+    for (filter_type const& filter_tag : filter_vector)
+    {
+        util::apply_visitor(visitor, filter_tag);
+    }
+}
+
+template<typename Src>
+Src filter_image(Src const& src, std::string const& filter)
+{
+    std::vector<filter_type> filter_vector;
+    if(!parse_image_filters(filter, filter_vector))
+    {
+        throw std::runtime_error("Failed to parse filter argument in filter_image: '" + filter + "'");
+    }
+    Src new_src(src);
+    filter_visitor<Src> visitor(new_src);
+    for (filter_type const& filter_tag : filter_vector)
+    {
+        util::apply_visitor(visitor, filter_tag);
+    }
+    return new_src;
+}
+
+} // End Namespace Filter
+
+} // End Namespace Mapnik
 
 #endif // MAPNIK_IMAGE_FILTER_HPP
