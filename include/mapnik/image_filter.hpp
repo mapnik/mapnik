@@ -951,12 +951,32 @@ template<typename Src>
 void filter_image(Src & src, std::string const& filter)
 {
     std::vector<filter_type> filter_vector;
-    parse_image_filters(filter, filter_vector);
+    if(!parse_image_filters(filter, filter_vector))
+    {
+        throw std::runtime_error("Failed to parse filter argument in filter_image: '" + filter + "'");
+    }
     filter_visitor<Src> visitor(src);
     for (filter_type const& filter_tag : filter_vector)
     {
         util::apply_visitor(visitor, filter_tag);
     }
+}
+
+template<typename Src>
+Src filter_image(Src const& src, std::string const& filter)
+{
+    std::vector<filter_type> filter_vector;
+    if(!parse_image_filters(filter, filter_vector))
+    {
+        throw std::runtime_error("Failed to parse filter argument in filter_image: '" + filter + "'");
+    }
+    Src new_src(src);
+    filter_visitor<Src> visitor(new_src);
+    for (filter_type const& filter_tag : filter_vector)
+    {
+        util::apply_visitor(visitor, filter_tag);
+    }
+    return new_src;
 }
 
 } // End Namespace Filter

@@ -15,14 +15,17 @@ SECTION("test bad filter input") {
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
     
-    // This will not throw as it is just ignored during parsing
-    // as if no filter is applied
-    mapnik::filter::filter_image(im, "foo,asdfasdf()");
-    mapnik::filter::filter_image(im, "colorize-alpha(");
-    mapnik::filter::filter_image(im, "color-to-alpha(blue");
-    mapnik::filter::filter_image(im, "color-to-alpha(,blue)");
-    mapnik::filter::filter_image(im, "colorize-alpha()");
+    REQUIRE_THROWS( mapnik::filter::filter_image(im, "foo,asdfasdf()"); );
+    REQUIRE_THROWS( mapnik::filter::filter_image(im, "colorize-alpha("); );
+    REQUIRE_THROWS( mapnik::filter::filter_image(im, "color-to-alpha(blue"); );
+    REQUIRE_THROWS( mapnik::filter::filter_image(im, "color-to-alpha(,blue)"); );
+    REQUIRE_THROWS( mapnik::filter::filter_image(im, "colorize-alpha()"); );
 
+    REQUIRE_THROWS( 
+        mapnik::image_rgba8 const& im2 = im;
+        mapnik::image_rgba8 new_im = mapnik::filter::filter_image(im2, "foo");
+    );
+    
     CHECK(im(0,0) == 0xffff0000);
     CHECK(im(0,1) == 0xffff0000);
     CHECK(im(0,2) == 0xffff0000);
@@ -42,6 +45,27 @@ SECTION("test blur") {
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
 
     mapnik::filter::filter_image(im, "blur");
+
+    CHECK(im(0,0) == 0xffc60038);
+    CHECK(im(0,1) == 0xffe2001c);
+    CHECK(im(0,2) == 0xffc60038);
+    CHECK(im(1,0) == 0xffc60038);
+    CHECK(im(1,1) == 0xffe2001c);
+    CHECK(im(1,2) == 0xffc60038);
+    CHECK(im(2,0) == 0xffc60038);
+    CHECK(im(2,1) == 0xffe2001c);
+    CHECK(im(2,2) == 0xffc60038);
+    
+} // END SECTION
+
+SECTION("test blur constant") {
+    
+    mapnik::image_rgba8 im_orig(3,3);
+    mapnik::fill(im_orig,mapnik::color("blue"));
+    mapnik::set_pixel(im_orig, 1, 1, mapnik::color("red"));
+
+    mapnik::image_rgba8 const& im_new = im_orig;
+    mapnik::image_rgba8 im = mapnik::filter::filter_image(im_new, "blur");
 
     CHECK(im(0,0) == 0xffc60038);
     CHECK(im(0,1) == 0xffe2001c);
