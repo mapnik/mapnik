@@ -57,10 +57,12 @@ TEST_CASE("SVG parser") {
 
     SECTION("SVG i/o")
     {
+        mapnik::logger::instance().set_severity(mapnik::logger::none);
         std::string svg_name("FAIL");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_null>());
+        mapnik::logger::instance().set_severity(mapnik::logger::error);
     }
 
     SECTION("SVG::parse i/o")
@@ -750,9 +752,9 @@ TEST_CASE("SVG parser") {
         REQUIRE(attrs[0].fill_gradient.has_stop());
         attrs[0].fill_gradient.get_control_points(x1, y1, x2, y2, r);
         REQUIRE(x1 == 0);
-        REQUIRE(y1 == 25);
-        REQUIRE(x2 == 10);
-        REQUIRE(y2 == 10);
-        REQUIRE(r == 75);
+        REQUIRE(y1 == 0.25);
+        REQUIRE(x2 == 0.10);
+        REQUIRE(y2 == 0.10);
+        REQUIRE(r == 0.75);
     }
 }

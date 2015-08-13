@@ -85,8 +85,8 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
 
-    int width=image.width();
-    int height=image.height();
+    int width = static_cast<int>(image.width());
+    int height = static_cast<int>(image.height());
 
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);

@@ -119,8 +119,10 @@ template <typename T,
                     {
                         tmp = CreatePolicy<T>::create();
                         pInstance_.store(tmp, std::memory_order_release);
+#ifndef MAPNIK_NO_ATEXIT
                         // register destruction
                         std::atexit(&DestroySingleton);
+#endif
                     }
                 }
             }

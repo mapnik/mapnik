@@ -38,22 +38,29 @@
 namespace mapnik
 {
 
-jpeg_saver::jpeg_saver(std::ostream & stream, std::string const& t):
-    stream_(stream), t_(t) {}
+jpeg_saver::jpeg_saver(std::ostream & stream, std::string const& t)
+    : stream_(stream), t_(t) {}
 
-template <typename T>
-void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & stream)
+namespace detail {
+
+int parse_jpeg_quality(std::string const& params)
 {
-#if defined(HAVE_JPEG)
     int quality = 85;
-    if (type != "jpeg")
+    if (params != "jpeg")
     {
-        for (auto const& kv : parse_image_options(type))
+        for (auto const& kv : parse_image_options(params))
         {
             auto const& key = kv.first;
             auto const& val = kv.second;
 
             if ( key == "jpeg" ) continue;
+            else if ( key.size() > 4  && key.substr(0,4) == "jpeg")
+            {
+                if (!mapnik::util::string2int(key.substr(4), quality))
+                {
+                    throw image_writer_exception("invalid jpeg quality: '" + key.substr(4)  + "'");
+                }
+            }
             else if ( key == "quality")
             {
                 if (val && ! (*val).empty())
@@ -66,6 +73,16 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
             }
         }
     }
+    return quality;
+}
+
+}
+
+template <typename T>
+void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & stream)
+{
+#if defined(HAVE_JPEG)
+    int quality = detail::parse_jpeg_quality(type);
     save_as_jpeg(stream, quality, image);
 #else
     throw image_writer_exception("jpeg output is not enabled in your build of Mapnik");
