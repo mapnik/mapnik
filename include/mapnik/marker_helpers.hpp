@@ -232,7 +232,6 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
                 for (geometry::polygon<double> const& poly : multi_poly)
                 {
                     box2d<double> bbox = geometry::envelope(poly);
-                    geometry::polygon_vertex_adapter<double> va(poly);
                     double area = bbox.width() * bbox.height();
                     if (area > maxarea)
                     {
