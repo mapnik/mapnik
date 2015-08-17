@@ -230,6 +230,20 @@ std::tuple<char,bool> autodect_newline(T & stream, std::size_t file_length)
     return std::make_tuple(newline,has_newline);
 }
 
+//
+
+//struct geometry_column
+//{
+//    enum
+//    {
+//        UNKNOWN,
+//        WKT,
+//        GEOJSON,
+//        LON,
+//        LAT
+//    } type;
+//    std::size_t index;
+//};
 } // ns detail
 
 
@@ -304,6 +318,8 @@ void csv_datasource::parse_csv(T & stream,
         for (auto const& header : headers)
         {
             std::string val = mapnik::util::trim_copy(header);
+
+            //detail::add_header(val);
             std::string lower_val = val;
             std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
             if (lower_val == "wkt"
