@@ -93,28 +93,6 @@ csv_datasource::csv_datasource(parameters const& params)
     ctx_(std::make_shared<mapnik::context_type>()),
     extent_initialized_(false)
 {
-    /* TODO:
-       general:
-       - refactor parser into generic class
-       - tests of grid_renderer output
-       - ensure that the attribute desc_ matches the first feature added
-       alternate large file pipeline:
-       - stat file, detect > 15 MB
-       - build up csv line-by-line iterator
-       - creates opportunity to filter attributes by map query
-       speed:
-       - add properties for wkt/json/lon/lat at parse time
-       - add ability to pass 'filter' keyword to drop attributes at layer init
-       - create quad tree on the fly for small/med size files
-       - memory map large files for reading
-       - smaller features (less memory overhead)
-       usability:
-       - enforce column names without leading digit
-       - better error messages (add filepath) if not reading from string
-       - move to spirit to tokenize and add character level error feedback:
-       http://boost-spirit.com/home/articles/qi-example/tracking-the-input-position-while-parsing/
-    */
-
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
     {
@@ -181,7 +159,6 @@ std::string detect_separator(std::string const& str)
         if (num_tabs > num_commas)
         {
             separator = "\t";
-
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
         }
     }
@@ -191,7 +168,6 @@ std::string detect_separator(std::string const& str)
         if (num_pipes > num_commas)
         {
             separator = "|";
-
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
         }
         else // semicolons
@@ -321,25 +297,7 @@ void csv_datasource::parse_csv(T & stream,
                                std::string const& separator,
                                std::string const& quote)
 {
-
     auto file_length = detail::file_length(stream);
-    /*
-    if (filesize_max_ > 0)
-    {
-        double file_mb = static_cast<double>(file_length)/1048576;
-
-        // throw if this is an unreasonably large file to read into memory
-        if (file_mb > filesize_max_)
-        {
-            std::ostringstream s;
-            s << "CSV Plugin: csv file is greater than ";
-            s << filesize_max_ << "MB - you should use a more efficient data format like sqlite,";
-            s << "postgis or a shapefile to render this data (set 'filesize_max=0' to disable this restriction if you have lots of memory)";
-            throw mapnik::datasource_exception(s.str());
-        }
-    }
-    */
-
     // set back to start
     stream.seekg(0, std::ios::beg);
     char newline;
@@ -652,51 +610,20 @@ void csv_datasource::parse_csv(T & stream,
                         }
                     }
                 }
-                bool null_geom = true;
-                if (locator.type == detail::geometry_column_locator::WKT
-                    || locator.type == detail::geometry_column_locator::GEOJSON
-                    || locator.type == detail::geometry_column_locator::LON_LAT)
-                {
-                    //if (parsed_wkt || parsed_json)
-                    //{
-                    if (!extent_initialized_)
-                    {
-                        if (!extent_started)
-                        {
-                            extent_started = true;
-                            extent_ = feature->envelope();
-                        }
-                        else
-                        {
-                            extent_.expand_to_include(feature->envelope());
-                        }
-                    }
-                    features_.push_back(feature);
-                    null_geom = false;
-                }
-                else
-                {
-                    throw "FIXME";
-                }
 
-                if (null_geom)
+                if (!extent_initialized_)
                 {
-                    std::ostringstream s;
-                    s << "CSV Plugin: could not detect and parse valid lat/lon fields or wkt/json geometry for line "
-                      << line_number;
-                    if (strict_)
+                    if (!extent_started)
                     {
-                        throw mapnik::datasource_exception(s.str());
+                        extent_started = true;
+                        extent_ = feature->envelope();
                     }
                     else
                     {
-                        MAPNIK_LOG_ERROR(csv) << s.str();
-                        // with no geometry we will never
-                        // add this feature so drop the count
-                        feature_count--;
-                        continue;
+                        extent_.expand_to_include(feature->envelope());
                     }
                 }
+                features_.push_back(feature);
             }
             else
             {
