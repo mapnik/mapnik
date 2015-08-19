@@ -163,11 +163,10 @@ TEST_CASE("SVG parser") {
         svg_path_adapter svg_path(stl_storage);
         svg_converter_type svg(svg_path, path.attributes());
         svg_parser p(svg);
-
         if (!p.parse_from_string(svg_str))
         {
             auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 14);
+            REQUIRE(errors.size() == 13);
             REQUIRE(errors[0] == "parse_rect: Invalid width");
             REQUIRE(errors[1] == "Failed to parse double: \"FAIL\"");
             REQUIRE(errors[2] == "parse_rect: Invalid height");
@@ -181,7 +180,6 @@ TEST_CASE("SVG parser") {
             REQUIRE(errors[10] == "Failed to parse <polyline> 'points'");
             REQUIRE(errors[11] == "parse_ellipse: Invalid rx");
             REQUIRE(errors[12] == "parse_ellipse: Invalid ry");
-            REQUIRE(errors[13] == "parse_rect: Invalid height");
         }
     }
 
