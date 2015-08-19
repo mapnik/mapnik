@@ -9,12 +9,14 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex_adapters.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/color.hpp>
+// boost geometry
 #include <boost/geometry.hpp>
 // agg
 #include "agg_conv_clip_polygon.h"
@@ -240,8 +242,15 @@ public:
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
 
+        mapnik::geometry::linear_ring<double> bbox;
+        bbox.add_coord(extent_.minx(), extent_.miny());
+        bbox.add_coord(extent_.minx(), extent_.maxy());
+        bbox.add_coord(extent_.maxx(), extent_.maxy());
+        bbox.add_coord(extent_.maxx(), extent_.miny());
+        bbox.add_coord(extent_.minx(), extent_.miny());
+
         std::deque<mapnik::geometry::polygon<double> > result;
-        boost::geometry::intersection(extent_,poly,result);
+        boost::geometry::intersection(bbox, poly, result);
 
         std::string expect = expected_+".png";
         std::string actual = expected_+"_actual.png";
@@ -281,11 +290,18 @@ public:
         mapnik::geometry::polygon<double> & poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geom);
         mapnik::geometry::correct(poly);
 
+        mapnik::geometry::linear_ring<double> bbox;
+        bbox.add_coord(extent_.minx(), extent_.miny());
+        bbox.add_coord(extent_.minx(), extent_.maxy());
+        bbox.add_coord(extent_.maxx(), extent_.maxy());
+        bbox.add_coord(extent_.maxx(), extent_.miny());
+        bbox.add_coord(extent_.minx(), extent_.miny());
+
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)
         {
             std::deque<mapnik::geometry::polygon<double> > result;
-            boost::geometry::intersection(extent_,poly,result);
+            boost::geometry::intersection(bbox, poly, result);
             unsigned count = 0;
             for (auto const& _geom : result)
             {
