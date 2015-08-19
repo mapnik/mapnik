@@ -216,7 +216,6 @@ TEST_CASE("csv") {
             for (auto const &lon_name : {std::string("lon"), std::string("lng")})
             {
                 auto ds = get_csv_ds((boost::format("test/data/csv/%1%_lat.csv") % lon_name).str());
-                std::cerr << (boost::format("test/data/csv/%1%_lat.csv") % lon_name).str() << std::endl;
                 auto fields = ds->get_descriptor().get_descriptors();
                 require_field_names(fields, {lon_name, "lat"});
                 require_field_types(fields, {mapnik::Integer, mapnik::Integer});
