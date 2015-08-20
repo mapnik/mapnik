@@ -29,7 +29,6 @@
 // stl
 #include <string>
 #include <vector>
-#include <deque>
 
 #include "large_geojson_featureset.hpp"
 

@@ -26,9 +26,7 @@
 #include <mapnik/feature.hpp>
 #include "geojson_datasource.hpp"
 
-#include <vector>
 #include <deque>
-#include <fstream>
 #include <cstdio>
 
 class large_geojson_featureset : public mapnik::Featureset
