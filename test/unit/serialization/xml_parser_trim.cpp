@@ -37,9 +37,9 @@ TEST_CASE("xml parser") {
     REQUIRE(datasource.has_child("Parameter"));
     mapnik::xml_node const &parameter = datasource.get_child("Parameter");
 
-    // parser should call mapnik::util::trim on the text content and
-    // this should result in an empty text string in the parameter.
-    REQUIRE(parameter.get_text() == "");
+    // parser should NOT call mapnik::util::trim on the text content and
+    // this should result in a text string consisting of a single space.
+    REQUIRE(parameter.get_text() == " ");
   }
 }
 

@@ -30,7 +30,6 @@
 #include <mapnik/xml_loader.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
-#include <mapnik/util/trim.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 
@@ -85,7 +84,7 @@ public:
             // Parse using appropriate flags
             // https://github.com/mapnik/mapnik/issues/1856
             // const int f_tws = rapidxml::parse_normalize_whitespace;
-            const int f_tws = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
+            const int f_tws = rapidxml::parse_validate_closing_tags;
             rapidxml::xml_document<> doc;
             doc.parse<f_tws>(&array.front());
 
@@ -138,11 +137,7 @@ private:
         {
             if (cur_node->value_size() > 0) // Don't add empty text nodes
             {
-                // parsed text values should have leading and trailing
-                // whitespace trimmed.
-                std::string trimmed = cur_node->value();
-                mapnik::util::trim(trimmed);
-                node.add_child(trimmed.c_str(), 0, true);
+                node.add_child(cur_node->value(), 0, true);
             }
         }
         break;

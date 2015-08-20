@@ -92,6 +92,13 @@ static inline void unquote(std::string & s)
     s.erase(std::find_if(s.rbegin(), s.rend(), not_quoted).base(), s.end());
 }
 
+// returns true if the string `s` consists entirely of whitespace
+// characters, as defined by the `not_whitespace` function. returns
+// false if any character is not whitespace.
+static inline bool is_whitespace(std::string const &s) {
+  return !std::any_of(s.begin(), s.end(), not_whitespace);
+}
+
 }} // end of namespace mapnik
 
 #endif // MAPNIK_TRIM_HPP

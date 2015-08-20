@@ -108,6 +108,11 @@ csv_datasource::csv_datasource(parameters const& params)
     if (inline_string)
     {
         inline_string_ = *inline_string;
+        // trim inline strings, primarily to get rid of whitespace at
+        // the beginning left by the XML parser. see
+        // https://github.com/mapnik/mapnik/pull/2878#issuecomment-108728845
+        // for the discussion of this.
+        mapnik::util::trim(inline_string_);
     }
     else
     {
@@ -168,7 +173,7 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     // set back to start
-    stream.seekg(0, std::ios::beg);
+    stream.seekg(0);
 
     // autodetect newlines
     char newline = '\n';
@@ -190,7 +195,7 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     // set back to start
-    stream.seekg(0, std::ios::beg);
+    stream.seekg(0);
 
     // get first line
     std::string csv_line;
@@ -238,7 +243,7 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     // set back to start
-    stream.seekg(0, std::ios::beg);
+    stream.seekg(0);
 
     using escape_type = boost::escaped_list_separator<char>;
 

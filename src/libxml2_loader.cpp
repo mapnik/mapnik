@@ -26,7 +26,6 @@
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
-#include <mapnik/util/trim.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
 
@@ -174,10 +173,9 @@ private:
             break;
             case XML_TEXT_NODE:
             {
-                std::string trimmed(reinterpret_cast<const char *>(cur_node->content));
-                mapnik::util::trim(trimmed);
-                if (trimmed.empty()) break; //Don't add empty text nodes
-                node.add_child(trimmed.c_str(), cur_node->line, true);
+                const char *content = reinterpret_cast<const char *>(cur_node->content);
+                if (*content == '\0') break; //Don't add empty text nodes
+                node.add_child(content, cur_node->line, true);
             }
             break;
             case XML_COMMENT_NODE:
