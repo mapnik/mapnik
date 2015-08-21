@@ -213,7 +213,7 @@ TEST_CASE("csv") {
 
         SECTION("lon/lat detection")
         {
-            for (auto const &lon_name : {std::string("lon"), std::string("lng")})
+            for (auto const& lon_name : {std::string("lon"), std::string("lng")})
             {
                 auto ds = get_csv_ds((boost::format("test/data/csv/%1%_lat.csv") % lon_name).str());
                 auto fields = ds->get_descriptor().get_descriptors();
