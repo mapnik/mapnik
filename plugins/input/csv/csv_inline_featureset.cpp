@@ -52,7 +52,7 @@ csv_inline_featureset::~csv_inline_featureset() {}
 
 mapnik::feature_ptr csv_inline_featureset::parse_feature(std::string const& str)
 {
-    auto values = mapnik::parse_line(str, separator_);
+    auto values = csv_utils::parse_line(str, separator_);
     auto val_beg = values.begin();
     auto val_end = values.end();
     auto geom = detail::extract_geometry(values, locator_);

@@ -23,12 +23,15 @@
 #ifndef MAPNIK_CSV_UTILS_DATASOURCE_HPP
 #define MAPNIK_CSV_UTILS_DATASOURCE_HPP
 
+// mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/csv/csv_grammar.hpp>
+// boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
@@ -38,66 +41,45 @@
 
 #include <string>
 #include <cstdio>
+#include <algorithm>
 
 namespace csv_utils
 {
-    static inline bool is_likely_number(std::string const& value)
-    {
-        return( strspn( value.c_str(), "e-.+0123456789" ) == value.size() );
-    }
 
-    static inline void fix_json_quoting(std::string & csv_line)
-    {
-        std::string wrapping_char;
-        std::string::size_type j_idx = std::string::npos;
-        std::string::size_type post_idx = std::string::npos;
-        std::string::size_type j_idx_double = csv_line.find("\"{");
-        std::string::size_type j_idx_single = csv_line.find("'{");
-        if (j_idx_double != std::string::npos)
-        {
-            wrapping_char = "\"";
-            j_idx = j_idx_double;
-            post_idx = csv_line.find("}\"");
+static const mapnik::csv_line_grammar<char const*> line_g;
 
-        }
-        else if (j_idx_single != std::string::npos)
-        {
-            wrapping_char = "'";
-            j_idx = j_idx_single;
-            post_idx = csv_line.find("}'");
-        }
-        // we are positive it is valid json
-        if (!wrapping_char.empty())
-        {
-            // grab the json chunk
-            std::string json_chunk = csv_line.substr(j_idx,post_idx+wrapping_char.size());
-            bool does_not_have_escaped_double_quotes = (json_chunk.find("\\\"") == std::string::npos);
-            // ignore properly escaped quotes like \" which need no special handling
-            if (does_not_have_escaped_double_quotes)
-            {
-                std::string pre_json = csv_line.substr(0,j_idx);
-                std::string post_json = csv_line.substr(post_idx+wrapping_char.size());
-                // handle "" in a string wrapped in "
-                // http://tools.ietf.org/html/rfc4180#section-2 item 7.
-                // e.g. "{""type"":""Point"",""coordinates"":[30.0,10.0]}"
-                if (json_chunk.find("\"\"") != std::string::npos)
-                {
-                    boost::algorithm::replace_all(json_chunk,"\"\"","\\\"");
-                    csv_line = pre_json + json_chunk + post_json;
-                }
-                // handle " in a string wrapped in '
-                // e.g. '{"type":"Point","coordinates":[30.0,10.0]}'
-                else
-                {
-                    // escape " because we cannot exchange for single quotes
-                    // https://github.com/mapnik/mapnik/issues/1408
-                    boost::algorithm::replace_all(json_chunk,"\"","\\\"");
-                    boost::algorithm::replace_all(json_chunk,"'","\"");
-                    csv_line = pre_json + json_chunk + post_json;
-                }
-            }
-        }
+static mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator)
+{
+    mapnik::csv_line values;
+    auto start = line_str.c_str();
+    auto end   = start + line_str.length();
+    boost::spirit::standard::blank_type blank;
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank, values))
+    {
+        throw std::runtime_error("Failed to parse CSV line:\n" + line_str);
     }
+    return values;
+}
+
+static inline bool is_likely_number(std::string const& value)
+{
+    return( strspn( value.c_str(), "e-.+0123456789" ) == value.size() );
+}
+
+struct ignore_case_equal_pred
+{
+    bool operator () (unsigned char a, unsigned char b) const
+    {
+        return std::tolower(a) == std::tolower(b);
+    }
+};
+
+inline bool ignore_case_equal(std::string const& s0, std::string const& s1)
+{
+    return std::equal(s0.begin(), s0.end(),
+                      s1.begin(), ignore_case_equal_pred());
+}
+
 }
 
 
@@ -195,7 +177,7 @@ static inline void locate_geometry_column(std::string const& header, std::size_t
         locator.index = index;
     }
     else if (lower_val == "x" || lower_val == "lon"
-        || lower_val == "lng" || lower_val == "long"
+             || lower_val == "lng" || lower_val == "long"
              || (lower_val.find("longitude") != std::string::npos))
     {
         locator.index = index;

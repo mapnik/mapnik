@@ -56,7 +56,7 @@ csv_featureset::~csv_featureset() {}
 
 mapnik::feature_ptr csv_featureset::parse_feature(std::string const& str)
 {
-    auto values = mapnik::parse_line(str, separator_);
+    auto values = csv_utils::parse_line(str, separator_);
     auto val_beg = values.begin();
     auto val_end = values.end();
     auto geom = detail::extract_geometry(values, locator_);
@@ -68,17 +68,14 @@ mapnik::feature_ptr csv_featureset::parse_feature(std::string const& str)
         for (unsigned i = 0; i < num_headers; ++i)
         {
             std::string const& fld_name = headers_.at(i);
-            std::string value;
             if (val_beg == val_end)
             {
-                feature->put(fld_name,tr_.transcode(value.c_str()));
+                feature->put(fld_name,tr_.transcode(""));
                 continue;
             }
-            else
-            {
-                value = mapnik::util::trim_copy(*val_beg++);
-            }
+            std::string value = mapnik::util::trim_copy(*val_beg++);
             int value_length = value.length();
+
             if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
                                         || locator_.type == detail::geometry_column_locator::GEOJSON)  ) continue;
             bool matched = false;
@@ -114,29 +111,16 @@ mapnik::feature_ptr csv_featureset::parse_feature(std::string const& str)
             }
             if (!matched)
             {
-                // NOTE: we don't use mapnik::util::string2bool
-                // here because we don't want to treat 'on' and 'off'
-                // as booleans, only 'true' and 'false'
-                bool bool_val = false;
-                std::string lower_val = value;
-                std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
-                if (lower_val == "true")
+                if (csv_utils::ignore_case_equal(value, "true"))
                 {
-                    matched = true;
-                    bool_val = true;
+                    feature->put(fld_name, true);
                 }
-                else if (lower_val == "false")
+                else if (csv_utils::ignore_case_equal(value, "false"))
                 {
-                    matched = true;
-                    bool_val = false;
+                    feature->put(fld_name, false);
                 }
-                if (matched)
+                else // fallback to string
                 {
-                    feature->put(fld_name,bool_val);
-                }
-                else
-                {
-                    // fallback to normal string
                     feature->put(fld_name,std::move(tr_.transcode(value.c_str())));
                 }
             }
@@ -153,14 +137,12 @@ mapnik::feature_ptr csv_featureset::next()
         csv_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second.first;
         std::size_t size = item.second.second;
-
         std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> record;
         record.resize(size);
         std::fread(record.data(), size, 1, file_.get());
-        using chr_iterator_type = char const*;
-        chr_iterator_type start = record.data();
-        chr_iterator_type end = start + record.size();
+        auto const* start = record.data();
+        auto const*  end = start + record.size();
         std::string str(start, end);
         return parse_feature(str);
     }

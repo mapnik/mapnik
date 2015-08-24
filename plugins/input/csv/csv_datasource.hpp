@@ -35,7 +35,6 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/spirit/include/qi.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -47,30 +46,10 @@
 #include <boost/geometry/index/rtree.hpp>
 #pragma GCC diagnostic pop
 
-#include <mapnik/csv/csv_grammar.hpp>
-
 // stl
 #include <vector>
 #include <deque>
 #include <string>
-
-namespace mapnik {
-
-static const csv_line_grammar<char const*> line_g;
-
-static csv_line parse_line(std::string const& line_str, std::string const& separator)
-{
-    csv_line values;
-    auto start = line_str.c_str();
-    auto end   = start + line_str.length();
-    boost::spirit::standard::blank_type blank;
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank, values))
-    {
-        throw std::runtime_error("Failed to parse CSV line:\n" + line_str);
-    }
-    return values;
-}
-}
 
 template <std::size_t Max, std::size_t Min>
 struct csv_linear : boost::geometry::index::linear<Max,Min> {};

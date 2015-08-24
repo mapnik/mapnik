@@ -26,7 +26,6 @@
 #include "csv_inline_featureset.hpp"
 // boost
 #include <boost/algorithm/string.hpp>
-
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
@@ -50,8 +49,15 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(csv_datasource)
 
+
+namespace {
+
+using cvs_value = mapnik::util::variant<std::string, mapnik::value_integer, mapnik::value_double, mapnik::value_bool>;
+
+}
+
 csv_datasource::csv_datasource(parameters const& params)
-  : datasource(params),
+: datasource(params),
     desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
     extent_(),
     filename_(),
@@ -82,7 +88,6 @@ csv_datasource::csv_datasource(parameters const& params)
     {
         boost::optional<std::string> file = params.get<std::string>("file");
         if (!file) throw mapnik::datasource_exception("CSV Plugin: missing <file> parameter");
-
         boost::optional<std::string> base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
@@ -153,7 +158,7 @@ void csv_datasource::parse_csv(T & stream,
     if (!manual_headers_.empty())
     {
         std::size_t index = 0;
-        auto headers = mapnik::parse_line(manual_headers_, sep);
+        auto headers = csv_utils::parse_line(manual_headers_, sep);
         for (auto const& header : headers)
         {
             std::string val = mapnik::util::trim_copy(header);
@@ -167,7 +172,7 @@ void csv_datasource::parse_csv(T & stream,
         {
             try
             {
-                auto headers = mapnik::parse_line(csv_line, sep);
+                auto headers = csv_utils::parse_line(csv_line, sep);
                 // skip blank lines
                 std::string val;
                 if (headers.size() > 0 && headers[0].empty()) ++line_number;
@@ -267,7 +272,7 @@ void csv_datasource::parse_csv(T & stream,
 
         try
         {
-            auto values = mapnik::parse_line(csv_line, sep);
+            auto values = csv_utils::parse_line(csv_line, sep);
             unsigned num_fields = values.size();
             if (num_fields > num_headers)
             {
@@ -293,142 +298,11 @@ void csv_datasource::parse_csv(T & stream,
                 }
             }
 
-            auto beg = values.begin();
-            auto end = values.end();
             auto geom = detail::extract_geometry(values, locator_);
             if (!geom.is<mapnik::geometry::geometry_empty>())
             {
                 auto box = mapnik::geometry::envelope(geom);
-
                 boxes.emplace_back(std::move(box), make_pair(record_offset, record_size));
-                ++feature_count;
-
-                std::vector<std::string> collected;
-                for (unsigned i = 0; i < num_headers; ++i)
-                {
-                    std::string const& fld_name = headers_.at(i);
-                    collected.push_back(fld_name);
-                    std::string value;
-                    if (beg == end) // there are more headers than column values for this row
-                    {
-                        // add an empty string here to represent a missing value
-                        // not using null type here since nulls are not a csv thing
-                        //feature->put(fld_name,tr.transcode(value.c_str()));
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                        }
-                        // continue here instead of break so that all missing values are
-                        // encoded consistenly as empty strings
-                        continue;
-                    }
-                    else
-                    {
-                        value = mapnik::util::trim_copy(*beg++);
-                    }
-                    int value_length = value.length();
-
-                    // now, add attributes, skipping any WKT or JSON fields
-                    if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
-                                               || locator_.type == detail::geometry_column_locator::GEOJSON)  ) continue;
-
-                    // First we detect likely strings,
-                    // then try parsing likely numbers,
-                    // then try converting to bool,
-                    // finally falling back to string type.
-                    // An empty string or a string of "null" will be parsed
-                    // as a string rather than a true null value.
-                    // Likely strings are either empty values, very long values
-                    // or values with leading zeros like 001 (which are not safe
-                    // to assume are numbers)
-
-                    bool matched = false;
-                    bool has_dot = value.find(".") != std::string::npos;
-                    if (value.empty() ||
-                        (value_length > 20) ||
-                        (value_length > 1 && !has_dot && value[0] == '0'))
-                    {
-                        matched = true;
-                        //feature->put(fld_name,std::move(tr.transcode(value.c_str())));
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                        }
-                    }
-                    else if (csv_utils::is_likely_number(value))
-                    {
-                        bool has_e = value.find("e") != std::string::npos;
-                        if (has_dot || has_e)
-                        {
-                            double float_val = 0.0;
-                            if (mapnik::util::string2double(value,float_val))
-                            {
-                                matched = true;
-                                //feature->put(fld_name,float_val);
-                                if (feature_count == 1)
-                                {
-                                    desc_.add_descriptor(
-                                        mapnik::attribute_descriptor(
-                                            fld_name,mapnik::Double));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            mapnik::value_integer int_val = 0;
-                            if (mapnik::util::string2int(value,int_val))
-                            {
-                                matched = true;
-                                //feature->put(fld_name,int_val);
-                                if (feature_count == 1)
-                                {
-                                    desc_.add_descriptor(
-                                        mapnik::attribute_descriptor(
-                                            fld_name,mapnik::Integer));
-                                }
-                            }
-                        }
-                    }
-                    if (!matched)
-                    {
-                        // NOTE: we don't use mapnik::util::string2bool
-                        // here because we don't want to treat 'on' and 'off'
-                        // as booleans, only 'true' and 'false'
-                        bool bool_val = false;
-                        std::string lower_val = value;
-                        std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
-                        if (lower_val == "true")
-                        {
-                            matched = true;
-                            bool_val = true;
-                        }
-                        else if (lower_val == "false")
-                        {
-                            matched = true;
-                            bool_val = false;
-                        }
-                        if (matched)
-                        {
-                            if (feature_count == 1)
-                            {
-                                desc_.add_descriptor(
-                                    mapnik::attribute_descriptor(
-                                        fld_name,mapnik::Boolean));
-                            }
-                        }
-                        else
-                        {
-                            // fallback to normal string
-                            if (feature_count == 1)
-                            {
-                                desc_.add_descriptor(
-                                    mapnik::attribute_descriptor(
-                                        fld_name,mapnik::String));
-                            }
-                        }
-                    }
-                }
-
                 if (!extent_initialized_)
                 {
                     if (!extent_started)
@@ -439,6 +313,84 @@ void csv_datasource::parse_csv(T & stream,
                     else
                     {
                         extent_.expand_to_include(mapnik::geometry::envelope(geom));
+                    }
+                }
+                if (++feature_count != 1) continue;
+                auto beg = values.begin();
+                auto end = values.end();
+                for (std::size_t i = 0; i < num_headers; ++i)
+                {
+                    std::string const& header = headers_.at(i);
+                    if (beg == end) // there are more headers than column values for this row
+                    {
+                        // add an empty string here to represent a missing value
+                        // not using null type here since nulls are not a csv thing
+                        if (feature_count == 1)
+                        {
+                            desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::String));
+                        }
+                        // continue here instead of break so that all missing values are
+                        // encoded consistenly as empty strings
+                        continue;
+                    }
+                    std::string value = mapnik::util::trim_copy(*beg++);
+                    int value_length = value.length();
+                    if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
+                                                || locator_.type == detail::geometry_column_locator::GEOJSON)) continue;
+
+                    // First we detect likely strings,
+                    // then try parsing likely numbers,
+                    // then try converting to bool,
+                    // finally falling back to string type.
+
+                    // An empty string or a string of "null" will be parsed
+                    // as a string rather than a true null value.
+                    // Likely strings are either empty values, very long values
+                    // or values with leading zeros like 001 (which are not safe
+                    // to assume are numbers)
+
+                    bool matched = false;
+                    bool has_dot = value.find(".") != std::string::npos;
+                    if (value.empty() || (value_length > 20) || (value_length > 1 && !has_dot && value[0] == '0'))
+                    {
+                        matched = true;
+                        desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::String));
+                    }
+                    else if (csv_utils::is_likely_number(value))
+                    {
+                        bool has_e = value.find("e") != std::string::npos;
+                        if (has_dot || has_e)
+                        {
+                            double float_val = 0.0;
+                            if (mapnik::util::string2double(value,float_val))
+                            {
+                                matched = true;
+                                desc_.add_descriptor(mapnik::attribute_descriptor(header,mapnik::Double));
+                            }
+                        }
+                        else
+                        {
+                            mapnik::value_integer int_val = 0;
+                            if (mapnik::util::string2int(value,int_val))
+                            {
+                                matched = true;
+                                desc_.add_descriptor(mapnik::attribute_descriptor(header,mapnik::Integer));
+                            }
+                        }
+                    }
+                    if (!matched)
+                    {
+                        // NOTE: we don't use mapnik::util::string2bool
+                        // here because we don't want to treat 'on' and 'off'
+                        // as booleans, only 'true' and 'false'
+                        if (csv_utils::ignore_case_equal(value, "true") || csv_utils::ignore_case_equal(value, "false"))
+                        {
+                            desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::Boolean));
+                        }
+                        else // fallback to normal string
+                        {
+                            desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::String));
+                        }
                     }
                 }
             }
@@ -461,16 +413,13 @@ void csv_datasource::parse_csv(T & stream,
         }
         catch (mapnik::datasource_exception const& ex )
         {
-            if (strict_)
-            {
-                throw mapnik::datasource_exception(ex.what());
-            }
+            if (strict_) throw ex;
             else
             {
                 MAPNIK_LOG_ERROR(csv) << ex.what();
             }
         }
-        catch(std::exception const& ex)
+        catch (std::exception const& ex)
         {
             std::ostringstream s;
             s << "CSV Plugin: unexpected error parsing line: " << line_number
@@ -486,10 +435,6 @@ void csv_datasource::parse_csv(T & stream,
             }
         }
     }
-    //if (feature_count < 1)
-    //{
-    //   MAPNIK_LOG_ERROR(csv) << "CSV Plugin: could not parse any lines of data";
-    //}
     // bulk insert initialise r-tree
     tree_ = std::make_unique<spatial_index_type>(boxes);
 }
@@ -552,7 +497,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
 
         try
         {
-            auto values = mapnik::parse_line(str, separator_);
+            auto values = csv_utils::parse_line(str, separator_);
             auto geom = detail::extract_geometry(values, locator_);
             result = mapnik::util::to_ds_type(geom);
             if (result)
@@ -568,18 +513,8 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
         }
         catch (std::exception const& ex)
         {
-            //std::ostringstream s;
-            //s << "CSV Plugin: unexpected error parsing line: " << line_number
-            //  << " - found " << headers_.size() << " with values like: " << csv_line << "\n"
-            //  << " and got error like: " << ex.what();
-            if (strict_)
-            {
-                throw ex;
-            }
-            else
-            {
-                MAPNIK_LOG_ERROR(csv) << ex.what();
-            }
+            if (strict_) throw ex;
+            else MAPNIK_LOG_ERROR(csv) << ex.what();
         }
     }
     return result;
