@@ -49,11 +49,12 @@ namespace csv_utils
 
 static const mapnik::csv_line_grammar<char const*> line_g;
 
-static mapnik::csv_line parse_line(char const* start, char const* end, std::string const& separator)
+static mapnik::csv_line parse_line(char const* start, char const* end, std::string const& separator, std::size_t num_columns)
 {
     mapnik::csv_line values;
+    if (num_columns > 0) values.reserve(num_columns);
     boost::spirit::standard::blank_type blank;
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank,values))
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::ref(values), boost::phoenix::cref(separator)), blank))
     {
         throw std::runtime_error("Failed to parse CSV line:\n" + std::string(start, end));
     }
@@ -64,7 +65,7 @@ static mapnik::csv_line parse_line(std::string const& line_str, std::string cons
 {
     auto start = line_str.c_str();
     auto end   = start + line_str.length();
-    return parse_line(start, end, separator);
+    return parse_line(start, end, separator, 0);
 }
 
 static inline bool is_likely_number(std::string const& value)

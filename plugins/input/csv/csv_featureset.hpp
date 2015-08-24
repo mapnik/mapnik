@@ -48,7 +48,7 @@ private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
     file_ptr file_;
     std::string const& separator_;
-    std::vector<std::string> headers_;
+    std::vector<std::string> const& headers_;
     const array_type index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;

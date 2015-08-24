@@ -55,7 +55,7 @@ csv_featureset::~csv_featureset() {}
 
 mapnik::feature_ptr csv_featureset::parse_feature(char const* beg, char const* end)
 {
-    auto values = csv_utils::parse_line(beg, end, separator_);
+    auto values = csv_utils::parse_line(beg, end, separator_, headers_.size());
     auto geom = detail::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
