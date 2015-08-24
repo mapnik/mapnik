@@ -26,7 +26,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
-#include <mapnik/util/trim.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -57,74 +56,12 @@ csv_featureset::~csv_featureset() {}
 mapnik::feature_ptr csv_featureset::parse_feature(std::string const& str)
 {
     auto values = csv_utils::parse_line(str, separator_);
-    auto val_beg = values.begin();
-    auto val_end = values.end();
     auto geom = detail::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, ++feature_id_));
         feature->set_geometry(std::move(geom));
-        auto num_headers = headers_.size();
-        for (unsigned i = 0; i < num_headers; ++i)
-        {
-            std::string const& fld_name = headers_.at(i);
-            if (val_beg == val_end)
-            {
-                feature->put(fld_name,tr_.transcode(""));
-                continue;
-            }
-            std::string value = mapnik::util::trim_copy(*val_beg++);
-            int value_length = value.length();
-
-            if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
-                                        || locator_.type == detail::geometry_column_locator::GEOJSON)  ) continue;
-            bool matched = false;
-            bool has_dot = value.find(".") != std::string::npos;
-            if (value.empty() ||
-                (value_length > 20) ||
-                (value_length > 1 && !has_dot && value[0] == '0'))
-            {
-                matched = true;
-                feature->put(fld_name,std::move(tr_.transcode(value.c_str())));
-            }
-            else if (csv_utils::is_likely_number(value))
-            {
-                bool has_e = value.find("e") != std::string::npos;
-                if (has_dot || has_e)
-                {
-                    double float_val = 0.0;
-                    if (mapnik::util::string2double(value,float_val))
-                    {
-                        matched = true;
-                        feature->put(fld_name,float_val);
-                    }
-                }
-                else
-                {
-                    mapnik::value_integer int_val = 0;
-                    if (mapnik::util::string2int(value,int_val))
-                    {
-                        matched = true;
-                        feature->put(fld_name,int_val);
-                    }
-                }
-            }
-            if (!matched)
-            {
-                if (csv_utils::ignore_case_equal(value, "true"))
-                {
-                    feature->put(fld_name, true);
-                }
-                else if (csv_utils::ignore_case_equal(value, "false"))
-                {
-                    feature->put(fld_name, false);
-                }
-                else // fallback to string
-                {
-                    feature->put(fld_name,std::move(tr_.transcode(value.c_str())));
-                }
-            }
-        }
+        detail::process_properties(*feature, headers_, values, locator_, tr_);
         return feature;
     }
     return mapnik::feature_ptr();

@@ -31,6 +31,7 @@
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/csv/csv_grammar.hpp>
+#include <mapnik/util/trim.hpp>
 // boost
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -232,6 +233,77 @@ static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::stri
     }
     return geom;
 }
+
+template <typename Feature, typename Headers, typename Values, typename Locator, typename Transcoder>
+void process_properties(Feature & feature, Headers const& headers, Values const& values, Locator const& locator, Transcoder const& tr)
+{
+    auto val_beg = values.begin();
+    auto val_end = values.end();
+    auto num_headers = headers.size();
+    for (std::size_t i = 0; i < num_headers; ++i)
+    {
+        std::string const& fld_name = headers.at(i);
+        if (val_beg == val_end)
+        {
+            feature.put(fld_name,tr.transcode(""));
+            continue;
+        }
+        std::string value = mapnik::util::trim_copy(*val_beg++);
+        int value_length = value.length();
+
+        if (locator.index == i && (locator.type == detail::geometry_column_locator::WKT
+                                   || locator.type == detail::geometry_column_locator::GEOJSON)  ) continue;
+
+
+        bool matched = false;
+        bool has_dot = value.find(".") != std::string::npos;
+        if (value.empty() ||
+            (value_length > 20) ||
+            (value_length > 1 && !has_dot && value[0] == '0'))
+        {
+            matched = true;
+            feature.put(fld_name,std::move(tr.transcode(value.c_str())));
+        }
+        else if (csv_utils::is_likely_number(value))
+        {
+            bool has_e = value.find("e") != std::string::npos;
+            if (has_dot || has_e)
+            {
+                double float_val = 0.0;
+                if (mapnik::util::string2double(value,float_val))
+                {
+                    matched = true;
+                    feature.put(fld_name,float_val);
+                }
+            }
+            else
+            {
+                mapnik::value_integer int_val = 0;
+                if (mapnik::util::string2int(value,int_val))
+                {
+                    matched = true;
+                    feature.put(fld_name,int_val);
+                }
+            }
+        }
+        if (!matched)
+        {
+            if (csv_utils::ignore_case_equal(value, "true"))
+            {
+                feature.put(fld_name, true);
+            }
+            else if (csv_utils::ignore_case_equal(value, "false"))
+            {
+                feature.put(fld_name, false);
+            }
+            else // fallback to string
+            {
+                feature.put(fld_name,std::move(tr.transcode(value.c_str())));
+            }
+        }
+    }
+}
+
 
 }// ns detail
 
