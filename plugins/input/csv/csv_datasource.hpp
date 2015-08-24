@@ -121,15 +121,12 @@ private:
     mapnik::box2d<double> extent_;
     std::string filename_;
     std::string inline_string_;
-    mapnik::value_integer row_limit_;
-    std::deque<mapnik::feature_ptr> features_;
     std::string escape_;
     std::string separator_;
     std::string quote_;
     std::vector<std::string> headers_;
     std::string manual_headers_;
     bool strict_;
-    double filesize_max_;
     mapnik::context_ptr ctx_;
     bool extent_initialized_;
     std::unique_ptr<spatial_index_type> tree_;

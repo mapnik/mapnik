@@ -56,15 +56,12 @@ csv_datasource::csv_datasource(parameters const& params)
     extent_(),
     filename_(),
     inline_string_(),
-    row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
-    features_(),
     escape_(*params.get<std::string>("escape", "")),
     separator_(*params.get<std::string>("separator", "")),
     quote_(*params.get<std::string>("quote", "")),
     headers_(),
     manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
     strict_(*params.get<mapnik::boolean_type>("strict", false)),
-    filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
     ctx_(std::make_shared<mapnik::context_type>()),
     extent_initialized_(false),
     tree_(nullptr),
@@ -252,15 +249,8 @@ void csv_datasource::parse_csv(T & stream,
     {
         auto record_offset = pos;
         auto record_size = csv_line.length();
-
         pos = stream.tellg();
         is_first_row = false;
-        if ((row_limit_ > 0) && (line_number > row_limit_))
-        {
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
-            break;
-        }
-
         // skip blank lines
         unsigned line_length = csv_line.length();
         if (line_length <= 10)
@@ -451,7 +441,6 @@ void csv_datasource::parse_csv(T & stream,
                         extent_.expand_to_include(mapnik::geometry::envelope(geom));
                     }
                 }
-                //features_.push_back(feature);
             }
             else
             {
