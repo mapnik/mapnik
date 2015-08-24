@@ -522,6 +522,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
 
 mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 {
+
     for (auto const& name : q.property_names())
     {
         bool found_name = false;
@@ -555,9 +556,13 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
                           return item0.second.first < item1.second.first;
                       });
             if (inline_string_.empty())
+            {
                 return std::make_shared<csv_featureset>(filename_, locator_, separator_, headers_, ctx_, std::move(index_array));
+            }
             else
+            {
                 return std::make_shared<csv_inline_featureset>(inline_string_, locator_, separator_, headers_, ctx_, std::move(index_array));
+            }
         }
     }
     return mapnik::featureset_ptr();
@@ -565,5 +570,13 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    throw mapnik::datasource_exception("CSV Plugin: features_at_point is not supported yet");
+    mapnik::box2d<double> query_bbox(pt, pt);
+    query_bbox.pad(tol);
+    mapnik::query q(query_bbox);
+    std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
+    for (auto const& item : desc)
+    {
+        q.add_property_name(item.get_name());
+    }
+    return features(q);
 }

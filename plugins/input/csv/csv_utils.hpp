@@ -49,17 +49,22 @@ namespace csv_utils
 
 static const mapnik::csv_line_grammar<char const*> line_g;
 
-static mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator)
+static mapnik::csv_line parse_line(char const* start, char const* end, std::string const& separator)
 {
     mapnik::csv_line values;
-    auto start = line_str.c_str();
-    auto end   = start + line_str.length();
     boost::spirit::standard::blank_type blank;
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank, values))
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank,values))
     {
-        throw std::runtime_error("Failed to parse CSV line:\n" + line_str);
+        throw std::runtime_error("Failed to parse CSV line:\n" + std::string(start, end));
     }
     return values;
+}
+
+static mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator)
+{
+    auto start = line_str.c_str();
+    auto end   = start + line_str.length();
+    return parse_line(start, end, separator);
 }
 
 static inline bool is_likely_number(std::string const& value)
@@ -226,7 +231,6 @@ static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::stri
         }
         if (!mapnik::util::string2double(row[locator.index2],y))
         {
-
             throw std::runtime_error("FIXME Lat");
         }
         geom = mapnik::geometry::point<double>(x,y);

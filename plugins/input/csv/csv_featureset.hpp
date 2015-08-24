@@ -45,7 +45,7 @@ public:
     ~csv_featureset();
     mapnik::feature_ptr next();
 private:
-    mapnik::feature_ptr parse_feature(std::string const& str);
+    mapnik::feature_ptr parse_feature(char const* beg, char const* end);
     file_ptr file_;
     std::string const& separator_;
     std::vector<std::string> headers_;

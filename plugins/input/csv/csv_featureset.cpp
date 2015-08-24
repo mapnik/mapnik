@@ -53,9 +53,9 @@ csv_featureset::csv_featureset(std::string const& filename, detail::geometry_col
 
 csv_featureset::~csv_featureset() {}
 
-mapnik::feature_ptr csv_featureset::parse_feature(std::string const& str)
+mapnik::feature_ptr csv_featureset::parse_feature(char const* beg, char const* end)
 {
-    auto values = csv_utils::parse_line(str, separator_);
+    auto values = csv_utils::parse_line(beg, end, separator_);
     auto geom = detail::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
@@ -80,8 +80,7 @@ mapnik::feature_ptr csv_featureset::next()
         std::fread(record.data(), size, 1, file_.get());
         auto const* start = record.data();
         auto const*  end = start + record.size();
-        std::string str(start, end);
-        return parse_feature(str);
+        return parse_feature(start, end);
     }
     return mapnik::feature_ptr();
 }
