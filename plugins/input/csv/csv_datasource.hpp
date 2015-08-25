@@ -99,6 +99,7 @@ private:
     mapnik::layer_descriptor desc_;
     mapnik::box2d<double> extent_;
     std::string filename_;
+    mapnik::value_integer row_limit_;
     std::string inline_string_;
     std::string escape_;
     std::string separator_;

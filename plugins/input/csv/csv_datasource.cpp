@@ -61,6 +61,7 @@ csv_datasource::csv_datasource(parameters const& params)
     desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
     extent_(),
     filename_(),
+    row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
     inline_string_(),
     escape_(*params.get<std::string>("escape", "")),
     separator_(*params.get<std::string>("separator", "")),
@@ -140,7 +141,7 @@ void csv_datasource::parse_csv(T & stream,
 
     std::string sep = mapnik::util::trim_copy(separator);
     if (sep.empty())  sep = detail::detect_separator(csv_line);
-    separator_ = sep; // <------------------- FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    separator_ = sep;
 
     // set back to start
     stream.seekg(0, std::ios::beg);
@@ -252,6 +253,11 @@ void csv_datasource::parse_csv(T & stream,
     auto pos = stream.tellg();
     while (std::getline(stream, csv_line, stream.widen(newline)) || is_first_row)
     {
+        if ((row_limit_ > 0) && (line_number++ > row_limit_))
+        {
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
+            break;
+        }
         auto record_offset = pos;
         auto record_size = csv_line.length();
         pos = stream.tellg();
@@ -264,7 +270,6 @@ void csv_datasource::parse_csv(T & stream,
             boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n "));
             if (trimmed.empty())
             {
-                ++line_number;
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: empty row encountered at line: " << line_number;
                 continue;
             }
@@ -409,7 +414,6 @@ void csv_datasource::parse_csv(T & stream,
                     MAPNIK_LOG_ERROR(csv) << s.str();
                 }
             }
-            ++line_number;
         }
         catch (mapnik::datasource_exception const& ex )
         {

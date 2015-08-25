@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2015 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,26 +31,22 @@
 namespace mapnik {
 
 namespace qi = boost::spirit::qi;
-using column  = std::string;
-using columns = std::vector<column>;
-using csv_line = columns;
+using csv_value  = std::string;
+using csv_line = std::vector<csv_value>;
 using csv_data = std::vector<csv_line>;
 
 template <typename Iterator>
-struct csv_line_grammar : qi::grammar<Iterator, void(csv_line&, std::string const&), qi::blank_type>
+struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi::blank_type>
 {
     csv_line_grammar() : csv_line_grammar::base_type(line)
     {
         using namespace qi;
         qi::_a_type _a;
         qi::_r1_type _r1;
-        qi::_r2_type _r2;
         qi::lit_type lit;
         //qi::eol_type eol;
-        qi::_val_type _val;
         qi::_1_type _1;
         qi::char_type char_;
-        qi::eps_type eps;
         qi::omit_type omit;
         unesc_char.add
             ("\\a", '\a')
@@ -66,21 +62,21 @@ struct csv_line_grammar : qi::grammar<Iterator, void(csv_line&, std::string cons
             ("\"\"", '\"') // double quote
             ;
 
-        line = column(_r2)[boost::phoenix::push_back(_r1,_1)]  % char_(_r2)
+        line = column(_r1)  % char_(_r1)
             ;
         column = quoted | *(char_ - (lit(_r1) /*| eol*/))
             ;
-        quoted = omit[char_("\"'")[_a = _1]] > text(_a)[boost::phoenix::swap(_val,_1)] > -lit(_a)
+        quoted = omit[char_("\"'")[_a = _1]] > text(_a) > -lit(_a)
             ;
         text = *(unesc_char | (char_ - char_(_r1)))
             ;
-        //BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
+        BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
     }
   private:
-    qi::rule<Iterator, void(csv_line&,std::string const&), qi::blank_type> line;
-    qi::rule<Iterator, column(std::string const&)> column; // no-skip
-    qi::rule<Iterator, std::string(char)> text;
-    qi::rule<Iterator, qi::locals<char>, std::string()> quoted;
+    qi::rule<Iterator, csv_line(std::string const&), qi::blank_type> line;
+    qi::rule<Iterator, csv_value(std::string const&)> column; // no-skip
+    qi::rule<Iterator, csv_value(char)> text;
+    qi::rule<Iterator, qi::locals<char>, csv_value()> quoted;
     qi::symbols<char const, char const> unesc_char;
 };
 

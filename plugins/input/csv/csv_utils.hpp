@@ -49,19 +49,20 @@ namespace csv_utils
 
 static const mapnik::csv_line_grammar<char const*> line_g;
 
-static mapnik::csv_line parse_line(char const* start, char const* end, std::string const& separator, std::size_t num_columns)
+template <typename Iterator>
+static mapnik::csv_line parse_line(Iterator start, Iterator end, std::string const& separator, std::size_t num_columns)
 {
     mapnik::csv_line values;
     if (num_columns > 0) values.reserve(num_columns);
     boost::spirit::standard::blank_type blank;
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::ref(values), boost::phoenix::cref(separator)), blank))
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank, values))
     {
         throw std::runtime_error("Failed to parse CSV line:\n" + std::string(start, end));
     }
     return values;
 }
 
-static mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator)
+static inline mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator)
 {
     auto start = line_str.c_str();
     auto end   = start + line_str.length();
@@ -212,7 +213,7 @@ static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::stri
         }
         else
         {
-            throw std::runtime_error("FIXME WKT");
+            throw std::runtime_error("Failed to parse WKT:" + row[locator.index]);
         }
     }
     else if (locator.type == geometry_column_locator::GEOJSON)
@@ -220,7 +221,7 @@ static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::stri
 
         if (!mapnik::json::from_geojson(row[locator.index], geom))
         {
-            throw std::runtime_error("FIXME GEOJSON");
+            throw std::runtime_error("Failed to parse GeoJSON:" + row[locator.index]);
         }
     }
     else if (locator.type == geometry_column_locator::LON_LAT)
@@ -228,11 +229,11 @@ static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::stri
         double x, y;
         if (!mapnik::util::string2double(row[locator.index],x))
         {
-            throw std::runtime_error("FIXME Lon");
+            throw std::runtime_error("Failed to parse Longitude(Easting):" + row[locator.index]);
         }
         if (!mapnik::util::string2double(row[locator.index2],y))
         {
-            throw std::runtime_error("FIXME Lat");
+            throw std::runtime_error("Failed to parse Latitude(Northing):" + row[locator.index2]);
         }
         geom = mapnik::geometry::point<double>(x,y);
     }
