@@ -30,6 +30,8 @@ plugin_env = plugin_base.Clone()
 plugin_sources = Split(
   """
   %(PLUGIN_NAME)s_datasource.cpp
+  %(PLUGIN_NAME)s_featureset.cpp
+  %(PLUGIN_NAME)s_inline_featureset.cpp
   """ % locals()
 )
 

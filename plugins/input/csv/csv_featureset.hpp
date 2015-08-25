@@ -20,33 +20,43 @@
  *
  *****************************************************************************/
 
-#ifndef LARGE_GEOJSON_FEATURESET_HPP
-#define LARGE_GEOJSON_FEATURESET_HPP
+#ifndef CSV_FEATURESET_HPP
+#define CSV_FEATURESET_HPP
 
 #include <mapnik/feature.hpp>
-#include "geojson_datasource.hpp"
-
+#include <mapnik/unicode.hpp>
+#include "csv_utils.hpp"
+#include "csv_datasource.hpp"
 #include <deque>
 #include <cstdio>
 
-class large_geojson_featureset : public mapnik::Featureset
+class csv_featureset : public mapnik::Featureset
 {
-public:
-    using array_type = std::deque<geojson_datasource::item_type>;
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
-
-    large_geojson_featureset(std::string const& filename,
-                             array_type && index_array);
-    virtual ~large_geojson_featureset();
+    using locator_type = detail::geometry_column_locator;
+public:
+    using array_type = std::deque<csv_datasource::item_type>;
+    csv_featureset(std::string const& filename,
+                   locator_type const& locator,
+                   std::string const& separator,
+                   std::vector<std::string> const& headers,
+                   mapnik::context_ptr const& ctx,
+                   array_type && index_array);
+    ~csv_featureset();
     mapnik::feature_ptr next();
-
 private:
+    mapnik::feature_ptr parse_feature(char const* beg, char const* end);
     file_ptr file_;
-
+    std::string const& separator_;
+    std::vector<std::string> const& headers_;
     const array_type index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;
     mapnik::context_ptr ctx_;
+    mapnik::value_integer feature_id_ = 0;
+    detail::geometry_column_locator const& locator_;
+    mapnik::transcoder tr_;
 };
 
-#endif // LARGE_GEOJSON_FEATURESET_HPP
+
+#endif // CSV_FEATURESET_HPP
