@@ -31,16 +31,20 @@
 namespace mapnik {
 
 namespace qi = boost::spirit::qi;
-using csv_value  = std::string;
-using csv_line = std::vector<csv_value>;
-using csv_data = std::vector<csv_line>;
+using csv_value = boost::iterator_range<char const*>;
+using csv_record = std::vector<csv_value>;
+using csv_data = std::vector<csv_record>;
 
 template <typename Iterator>
-struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi::blank_type>
+struct csv_record_grammar : qi::grammar<Iterator, csv_record(std::string const&), qi::blank_type>
 {
-    csv_line_grammar() : csv_line_grammar::base_type(line)
+    using iterator_range = boost::iterator_range<Iterator>;
+
+    csv_record_grammar()
+        : csv_record_grammar::base_type(line)
     {
         using namespace qi;
+        qi::raw_type raw;
         qi::_a_type _a;
         qi::_r1_type _r1;
         qi::lit_type lit;
@@ -61,24 +65,24 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi
             ("\\\"", '\"')
             ("\"\"", '\"') // double quote
             ;
-
-        line = column(_r1)  % char_(_r1)
+        line = column(_r1) % char_(_r1)
             ;
-        column = quoted | *(char_ - (lit(_r1) /*| eol*/))
+        column = quoted | raw[*(char_ - (lit(_r1) /*| eol*/))]
             ;
         quoted = omit[char_("\"'")[_a = _1]] > text(_a) > -lit(_a)
             ;
-        text = *(unesc_char | (char_ - char_(_r1)))
+        text = raw[*(unesc_char | (char_ - char_(_r1)))]
             ;
         BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
     }
   private:
-    qi::rule<Iterator, csv_line(std::string const&), qi::blank_type> line;
+    qi::rule<Iterator, csv_record(std::string const&), qi::blank_type> line;
     qi::rule<Iterator, csv_value(std::string const&)> column; // no-skip
     qi::rule<Iterator, csv_value(char)> text;
     qi::rule<Iterator, qi::locals<char>, csv_value()> quoted;
     qi::symbols<char const, char const> unesc_char;
 };
+
 
 template <typename Iterator>
 struct csv_file_grammar : qi::grammar<Iterator, csv_data(std::string const&), qi::blank_type>
@@ -94,9 +98,8 @@ struct csv_file_grammar : qi::grammar<Iterator, csv_data(std::string const&), qi
     }
   private:
     qi::rule<Iterator, csv_data(std::string const&), qi::blank_type> start;
-    csv_line_grammar<Iterator> line;
+    csv_record_grammar<Iterator> line;
 };
-
 
 }
 

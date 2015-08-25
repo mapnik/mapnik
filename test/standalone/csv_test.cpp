@@ -534,7 +534,7 @@ TEST_CASE("csv") {
             using mapnik::geometry::geometry_types;
 
             for (auto const &file : {
-                    std::string("test/data/csv/geojson_double_quote_escape.csv")
+                          std::string("test/data/csv/geojson_double_quote_escape.csv")
                         , std::string("test/data/csv/geojson_single_quote.csv")
                         , std::string("test/data/csv/geojson_2x_double_quote_filebakery_style.csv")
                         }) {

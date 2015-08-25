@@ -162,7 +162,7 @@ void csv_datasource::parse_csv(T & stream,
         auto headers = csv_utils::parse_line(manual_headers_, sep);
         for (auto const& header : headers)
         {
-            std::string val = mapnik::util::trim_copy(header);
+            std::string val = mapnik::util::trim_copy(std::string(header.begin(), header.end()));
             detail::locate_geometry_column(val, index++, locator_);
             headers_.push_back(val);
         }
@@ -176,13 +176,13 @@ void csv_datasource::parse_csv(T & stream,
                 auto headers = csv_utils::parse_line(csv_line, sep);
                 // skip blank lines
                 std::string val;
-                if (headers.size() > 0 && headers[0].empty()) ++line_number;
+                if (headers.size() > 0 && headers[0].begin() == headers[0].end()) ++line_number;
                 else
                 {
                     std::size_t index = 0;
                     for (auto const& header : headers)
                     {
-                        val = mapnik::util::trim_copy(header);
+                        val = mapnik::util::trim_copy(std::string(header.begin(), header.end()));
                         if (val.empty())
                         {
                             if (strict_)
@@ -338,7 +338,8 @@ void csv_datasource::parse_csv(T & stream,
                         // encoded consistenly as empty strings
                         continue;
                     }
-                    std::string value = mapnik::util::trim_copy(*beg++);
+                    std::string value = mapnik::util::trim_copy(std::string(beg->begin(),beg->end()));
+                    ++beg;
                     int value_length = value.length();
                     if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
                                                 || locator_.type == detail::geometry_column_locator::GEOJSON)) continue;
@@ -404,7 +405,7 @@ void csv_datasource::parse_csv(T & stream,
                 std::ostringstream s;
                 s << "CSV Plugin: expected geometry column: could not parse row "
                   << line_number << " "
-                  << values[locator_.index] << "'";
+                  << "FIXME values[locator_.index]" << "'";
                 if (strict_)
                 {
                     throw mapnik::datasource_exception(s.str());

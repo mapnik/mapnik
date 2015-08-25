@@ -39,8 +39,8 @@ inline bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> 
     using namespace boost::spirit;
     static const mapnik::wkt::wkt_grammar<std::string::const_iterator> g;
     ascii::space_type space;
-    std::string::const_iterator first = wkt.begin();
-    std::string::const_iterator last =  wkt.end();
+    auto first = wkt.begin();
+    auto last =  wkt.end();
     return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(geom)), space);
 }
 

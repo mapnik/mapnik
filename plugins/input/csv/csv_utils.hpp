@@ -47,12 +47,12 @@
 namespace csv_utils
 {
 
-static const mapnik::csv_line_grammar<char const*> line_g;
+static const mapnik::csv_record_grammar<char const*> line_g;
 
 template <typename Iterator>
-static mapnik::csv_line parse_line(Iterator start, Iterator end, std::string const& separator, std::size_t num_columns)
+static mapnik::csv_record parse_line(Iterator start, Iterator end, std::string const& separator, std::size_t num_columns)
 {
-    mapnik::csv_line values;
+    mapnik::csv_record values;
     if (num_columns > 0) values.reserve(num_columns);
     boost::spirit::standard::blank_type blank;
     if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator)), blank, values))
@@ -62,7 +62,7 @@ static mapnik::csv_line parse_line(Iterator start, Iterator end, std::string con
     return values;
 }
 
-static inline mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator)
+static inline mapnik::csv_record parse_line(std::string const& line_str, std::string const& separator)
 {
     auto start = line_str.c_str();
     auto end   = start + line_str.length();
@@ -201,39 +201,47 @@ static inline void locate_geometry_column(std::string const& header, std::size_t
     }
 }
 
-static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
+static mapnik::geometry::geometry<double> extract_geometry(std::vector<boost::iterator_range<char const*> > const& row,
+                                                           geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
     if (locator.type == geometry_column_locator::WKT)
     {
-        if (mapnik::from_wkt(row[locator.index], geom))
+        std::string wkt(row[locator.index].begin(), row[locator.index].end());
+        //auto itr = row[locator.index].begin();
+        //auto end = row[locator.index].end();
+        if (mapnik::from_wkt(wkt, geom))
         {
             // correct orientations ..
             mapnik::geometry::correct(geom);
         }
         else
         {
-            throw std::runtime_error("Failed to parse WKT:" + row[locator.index]);
+            throw std::runtime_error("Failed to parse WKT:" + std::string(row[locator.index].begin(),row[locator.index].end()));
         }
     }
     else if (locator.type == geometry_column_locator::GEOJSON)
     {
 
-        if (!mapnik::json::from_geojson(row[locator.index], geom))
+        std::string json(row[locator.index].begin(), row[locator.index].end());
+        //if (!mapnik::json::from_geojson(row[locator.index].begin(), row[locator.index].end(), geom))
+        if (!mapnik::json::from_geojson(json, geom))
         {
-            throw std::runtime_error("Failed to parse GeoJSON:" + row[locator.index]);
+            throw std::runtime_error("Failed to parse geojson:" + std::string(row[locator.index].begin(),row[locator.index].end()));
         }
+
     }
     else if (locator.type == geometry_column_locator::LON_LAT)
     {
         double x, y;
-        if (!mapnik::util::string2double(row[locator.index],x))
+        if (!mapnik::util::string2double(row[locator.index].begin(),row[locator.index].end(), x))
         {
-            throw std::runtime_error("Failed to parse Longitude(Easting):" + row[locator.index]);
+            throw std::runtime_error("Failed to parser longitude (easting)" + std::string(row[locator.index].begin(),row[locator.index].end()));
         }
-        if (!mapnik::util::string2double(row[locator.index2],y))
+        if (!mapnik::util::string2double(row[locator.index2].begin(), row[locator.index2].end(), y))
         {
-            throw std::runtime_error("Failed to parse Latitude(Northing):" + row[locator.index2]);
+
+            throw std::runtime_error("Failed to parser latitude (northing)" + std::string(row[locator.index2].begin(),row[locator.index2].end()));
         }
         geom = mapnik::geometry::point<double>(x,y);
     }
@@ -254,7 +262,8 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
             feature.put(fld_name,tr.transcode(""));
             continue;
         }
-        std::string value = mapnik::util::trim_copy(*val_beg++);
+        std::string value = mapnik::util::trim_copy(std::string(val_beg->begin(),val_beg->end()));
+        ++val_beg;
         int value_length = value.length();
 
         if (locator.index == i && (locator.type == detail::geometry_column_locator::WKT
