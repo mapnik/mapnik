@@ -88,7 +88,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
     // add scope to ensure lock is released asap
     {
 #ifdef MAPNIK_THREADSAFE
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
         itr=plugins_.find(*type);
         if (itr == plugins_.end())
@@ -132,6 +132,9 @@ datasource_ptr datasource_cache::create(parameters const& params)
 
 std::string datasource_cache::plugin_directories()
 {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
+#endif
     return boost::algorithm::join(plugin_directories_,", ");
 }
 
@@ -141,6 +144,10 @@ std::vector<std::string> datasource_cache::plugin_names()
 
 #ifdef MAPNIK_STATIC_PLUGINS
     names = get_static_datasource_names();
+#endif
+
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
 
     std::map<std::string,std::shared_ptr<PluginInfo> >::const_iterator itr;
@@ -155,7 +162,7 @@ std::vector<std::string> datasource_cache::plugin_names()
 bool datasource_cache::register_datasources(std::string const& dir, bool recurse)
 {
 #ifdef MAPNIK_THREADSAFE
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
     if (!mapnik::util::exists(dir))
     {
@@ -202,6 +209,9 @@ bool datasource_cache::register_datasources(std::string const& dir, bool recurse
 
 bool datasource_cache::register_datasource(std::string const& filename)
 {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
+#endif
     try
     {
         if (!mapnik::util::exists(filename))
