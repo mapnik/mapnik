@@ -134,7 +134,7 @@ struct agg_renderer_process_visitor_l
 
         vertex_converter_type converter(clip_box,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
-        if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
+        if (clip) converter.set<clip_line_tag>();
         converter.set<transform_tag>(); //always transform
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -204,7 +204,7 @@ struct agg_renderer_process_visitor_l
 
         vertex_converter_type converter(clip_box,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
-        if (clip) converter.set<clip_line_tag>(); //optional clip (default: true)
+        if (clip) converter.set<clip_line_tag>();
         converter.set<transform_tag>(); //always transform
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
         if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset

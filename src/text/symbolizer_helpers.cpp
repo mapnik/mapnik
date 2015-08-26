@@ -288,7 +288,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
     value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
 
-    if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
+    if (clip) converter_.template set<clip_line_tag>();
     converter_.template set<transform_tag>(); //always transform
     converter_.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
@@ -413,7 +413,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
     value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
 
-    if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
+    if (clip) converter_.template set<clip_line_tag>();
     converter_.template set<transform_tag>(); //always transform
     converter_.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
