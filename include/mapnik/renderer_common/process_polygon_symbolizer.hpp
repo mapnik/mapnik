@@ -54,7 +54,7 @@ void render_polygon_symbolizer(polygon_symbolizer const &sym,
     vertex_converter_type converter(clip_box, sym, common.t_, prj_trans, tr,
                                     feature,common.vars_,common.scale_factor_);
 
-    if (prj_trans.equal() && clip) converter.template set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && clip) converter.template set<clip_poly_tag>();
     converter.template set<transform_tag>(); //always transform
     converter.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter

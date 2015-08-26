@@ -115,7 +115,7 @@ struct render_marker_symbolizer_visitor
                                             feature_,
                                             common_.vars_,
                                             common_.scale_factor_);
-            if (clip) // optional clip (default: true)
+            if (clip)
             {
                 geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
                 if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
@@ -161,7 +161,7 @@ struct render_marker_symbolizer_visitor
                                             feature_,
                                             common_.vars_,
                                             common_.scale_factor_);
-            if (clip) // optional clip (default: true)
+            if (clip)
             {
                 geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
                 if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
@@ -220,7 +220,7 @@ struct render_marker_symbolizer_visitor
                                         common_.vars_,
                                         common_.scale_factor_);
 
-        if (clip) // optional clip (default: true)
+        if (clip)
         {
             geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
             if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)

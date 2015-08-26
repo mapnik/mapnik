@@ -150,7 +150,7 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     vertex_converter_type converter(clipping_extent,sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
 
-    if (clip) converter.set<clip_line_tag>(); // optional clip (default: true)
+    if (clip) converter.set<clip_line_tag>();
     converter.set<transform_tag>(); // always transform
     if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform

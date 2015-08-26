@@ -165,7 +165,7 @@ struct agg_renderer_process_visitor_p
         vertex_converter_type converter(clip_box,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
 
-        if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
+        if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>();
         converter.set<transform_tag>(); //always transform
         converter.set<affine_transform_tag>(); // optional affine transform
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
@@ -264,7 +264,7 @@ struct agg_renderer_process_visitor_p
 
         vertex_converter_type converter(clip_box, sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
 
-        if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
+        if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>();
         converter.set<transform_tag>(); //always transform
         converter.set<affine_transform_tag>(); // optional affine transform
         if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
