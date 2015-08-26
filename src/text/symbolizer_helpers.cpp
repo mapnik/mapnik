@@ -76,11 +76,8 @@ template <typename T>
 struct split_multi_geometries
 {
     using container_type = T;
-    split_multi_geometries(container_type & cont, view_transform const& t,
-                           proj_transform const& prj_trans)
-        : cont_(cont),
-          t_(t),
-          prj_trans_(prj_trans) { }
+    split_multi_geometries(container_type & cont)
+        : cont_(cont) { }
 
     void operator() (geometry::geometry_empty const&) const {}
     void operator() (geometry::multi_point<double> const& multi_pt) const
@@ -131,8 +128,6 @@ struct split_multi_geometries
     }
 
     container_type & cont_;
-    view_transform const& t_;
-    proj_transform const& prj_trans_;
 };
 
 } // ns detail
@@ -182,8 +177,7 @@ struct largest_bbox_first
 void base_symbolizer_helper::initialize_geometries() const
 {
     auto const& geom = feature_.get_geometry();
-    util::apply_visitor(detail::split_multi_geometries<geometry_container_type>
-                        (geometries_to_process_, t_, prj_trans_), geom);
+    util::apply_visitor(detail::split_multi_geometries<geometry_container_type>(geometries_to_process_), geom);
     if (!geometries_to_process_.empty())
     {
         auto type = geometry::geometry_type(geom);
