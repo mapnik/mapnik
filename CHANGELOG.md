@@ -12,6 +12,20 @@ Released: YYYY XX, 2015
 
 (Packaged from xxxx)
 
+## 3.0.4
+
+Released: August 26, 2015
+
+(Packaged from 10e6128)
+
+#### Summary
+
+- CSV.input: plug-in has been refactored to minimise memory usage and to improve handling of larger input.
+  (NOTE: [large_csv](https://github.com/mapnik/mapnik/tree/large_csv) branch adds experimental trunsduction parser with deferred string initialisation)
+- CSV.input: added internal spatial index (boost::geometry::index::tree) for fast `bounding box` queries (https://github.com/mapnik/mapnik/pull/3010)
+- Fixed deadlock in recursive datasource registration via @zerebubuth (https://github.com/mapnik/mapnik/pull/3038)
+- Introduced new command line argument `--limit` or `-l` to limit number of failed tests via @talaj (https://github.com/mapnik/mapnik/pull/2996)
+
 ## 3.0.3
 
 Released: August 12, 2015
@@ -127,7 +141,7 @@ The 3.0 release is a major milestone for Mapnik and includes many performance an
 
 - Shield icons are now pixel snapped for crisp rendering
 
-- `MarkersSymbolizer` now supports `avoid-edges`, `offset`, `geometry-transform`, `simplify` for `line` placement and two new `placement` options called `vertex-last` and `vertex-first` to place a single marker at the end or beginning of a path. Also `clip` is now respected when rendering markers on a LineString 
+- `MarkersSymbolizer` now supports `avoid-edges`, `offset`, `geometry-transform`, `simplify` for `line` placement and two new `placement` options called `vertex-last` and `vertex-first` to place a single marker at the end or beginning of a path. Also `clip` is now respected when rendering markers on a LineString
 geometry.
 
 - `TextSymbolizer` now supports `smooth`, `simplify`, `halo-opacity`, `halo-comp-op`, and `halo-transform`
@@ -208,7 +222,7 @@ geometry.
 
 - Optimized expression evaluation of text by avoiding extra copy (1dd1275)
 
-- Added Map level `background-image-comp-op` to control the compositing operation used to blend the 
+- Added Map level `background-image-comp-op` to control the compositing operation used to blend the
 `background-image` onto the `background-color`. Has no meaning if `background-color` or `background-image`
 are not set. (#1966)
 
@@ -396,8 +410,8 @@ Summary: The 2.2.0 release is primarily a performance and stability release. The
 
 - Enabled default input plugin directory and fonts path to be set inherited from environment settings in
   python bindings to make it easier to run tests locally (#1594). New environment settings are:
-    - MAPNIK_INPUT_PLUGINS_DIRECTORY
-    - MAPNIK_FONT_DIRECTORY
+	- MAPNIK_INPUT_PLUGINS_DIRECTORY
+	- MAPNIK_FONT_DIRECTORY
 
 - Added support for controlling rendering behavior of markers on multi-geometries `marker-multi-policy` (#1555,#1573)
 
@@ -789,7 +803,7 @@ Released January, 19 2010
 
 - Gdal Plugin: Added support for Gdal overviews, enabling fast loading of > 1GB rasters (#54)
 
-    * Use the gdaladdo utility to add overviews to existing GDAL datasets
+	* Use the gdaladdo utility to add overviews to existing GDAL datasets
 
 - PostGIS: Added an optional `geometry_table` parameter. The `geometry_table` used by Mapnik to look up
   metadata in the geometry_columns and calculate extents (when the `geometry_field` and `srid` parameters
@@ -814,23 +828,23 @@ Released January, 19 2010
   complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
   query to be used by indexes. (#415)
 
-    * Pass the bbox token inside a subquery like: !bbox!
+	* Pass the bbox token inside a subquery like: !bbox!
 
-    * Valid Usages include:
+	* Valid Usages include:
 
-        <Parameter name="table">
-          (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
-        </Parameter>
+		<Parameter name="table">
+		  (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
+		</Parameter>
 
-        <Parameter name="table">
-          (Select * from table where geom &amp;&amp; !bbox!) as map
-        </Parameter>
+		<Parameter name="table">
+		  (Select * from table where geom &amp;&amp; !bbox!) as map
+		</Parameter>
 
 - PostGIS Plugin: Added `scale_denominator` substitution ability in sql query string (#415/#465)
 
-    * Pass the scale_denominator token inside a subquery like: !scale_denominator!
+	* Pass the scale_denominator token inside a subquery like: !scale_denominator!
 
-    * e.g. (Select * from table where field_value > !scale_denominator!) as map
+	* e.g. (Select * from table where field_value > !scale_denominator!) as map
 
 - PostGIS Plugin: Added support for quoted table names (r1454) (#393)
 
@@ -862,14 +876,14 @@ Released January, 19 2010
 - TextSymbolizer: Large set of new attributes: `text_transform`, `line_spacing`, `character_spacing`,
   `wrap_character`, `wrap_before`, `horizontal_alignment`, `justify_alignment`, and `opacity`.
 
-    * More details at changesets: r1254 and r1341
+	* More details at changesets: r1254 and r1341
 
 - SheildSymbolizer: Added special new attributes: `unlock_image`, `VERTEX` placement, `no_text` and many
   attributes previously only supported in the TextSymbolizer: `allow_overlap`, `vertical_alignment`,
   `horizontal_alignment`, `justify_alignment`, `wrap_width`, `wrap_character`, `wrap_before`, `text_transform`,
   `line_spacing`, `character_spacing`, and `opacity`.
 
-    * More details at changeset r1341
+	* More details at changeset r1341
 
 - XML: Added support for using CDATA with libxml2 parser (r1364)
 
