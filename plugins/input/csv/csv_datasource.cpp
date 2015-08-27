@@ -242,6 +242,7 @@ void csv_datasource::parse_csv(T & stream,
     bool is_first_row = false;
     if (!has_newline)
     {
+        stream.setstate(std::ios::failbit);
         pos = 0;
         if (!csv_line.empty())
         {
