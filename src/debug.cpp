@@ -86,7 +86,7 @@ std::string logger::format_ = __xstr__(MAPNIK_LOG_FORMAT);
 
 std::string logger::str()
 {
-#if MAPNIK_CHECK_ENV
+#ifdef MAPNIK_CHECK_ENV
     // update the format from getenv if this is the first time
     if (logger::format_env_check_)
     {
