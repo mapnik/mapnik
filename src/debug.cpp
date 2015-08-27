@@ -27,6 +27,7 @@
 #include <ctime>
 #include <stdexcept>
 #include <fstream>
+#include <cstdlib>
 
 #ifndef MAPNIK_LOG_FORMAT
   #define MAPNIK_LOG_FORMAT  Mapnik LOG> %Y-%m-%d %H:%M:%S:
@@ -85,13 +86,13 @@ std::string logger::format_ = __xstr__(MAPNIK_LOG_FORMAT);
 
 std::string logger::str()
 {
-#if 0
+#if MAPNIK_CHECK_ENV
     // update the format from getenv if this is the first time
     if (logger::format_env_check_)
     {
         logger::format_env_check_ = false;
 
-        const char* log_format = getenv("MAPNIK_LOG_FORMAT");
+        const char* log_format = std::getenv("MAPNIK_LOG_FORMAT");
         if (log_format != nullptr)
         {
             logger::format_ = log_format;
@@ -101,7 +102,7 @@ std::string logger::str()
 
     char buf[256];
     const time_t tm = time(0);
-    strftime(buf, sizeof(buf), logger::format_.c_str(), localtime(&tm));
+    std::strftime(buf, sizeof(buf), logger::format_.c_str(), localtime(&tm));
     return buf;
 }
 
