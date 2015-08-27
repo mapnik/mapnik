@@ -96,6 +96,9 @@ public:
                    std::string const& quote);
 
 private:
+    template <typename T>
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type_impl(T & stream) const;
+
     mapnik::layer_descriptor desc_;
     mapnik::box2d<double> extent_;
     std::string filename_;
