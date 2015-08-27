@@ -612,6 +612,7 @@ TEST_CASE("csv") {
                 require_attributes(all_features(ds)->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"name", ustring("data_name")} });
                 REQUIRE(count_features(all_features(ds)) == r.second);
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
             }
         } // END SECTION
 
