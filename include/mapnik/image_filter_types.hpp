@@ -116,19 +116,8 @@ struct scale_hsla : image_filter_base
       l0(_l0),
       l1(_l1),
       a0(_a0),
-      a1(_a1) {
-          if (h0 < 0 || h0 > 1 ||
-              h1 < 0 || h1 > 1 ||
-              s0 < 0 || s0 > 1 ||
-              s1 < 0 || s1 > 1 ||
-              l0 < 0 || l0 > 1 ||
-              l1 < 0 || l1 > 1 ||
-              a0 < 0 || a0 > 1 ||
-              a1 < 0 || a1 > 1)
-          {
-              throw std::runtime_error("scale-hsla values must be between 0 and 1");
-          }
-      }
+      a1(_a1) { }
+
     inline bool is_identity() const {
         return (h0 == 0 &&
                 h1 == 1 &&
