@@ -528,10 +528,10 @@ void apply_filter(Src & src, colorize_alpha const& op)
             {
                 stop_offset = offset;
             }
-            grad_lut.add_color(stop_offset, agg::rgba(c.red()/256.0,
-                                                      c.green()/256.0,
-                                                      c.blue()/256.0,
-                                                      c.alpha()/256.0));
+            grad_lut.add_color(stop_offset, agg::rgba(c.red()/255.0,
+                                                      c.green()/255.0,
+                                                      c.blue()/255.0,
+                                                      c.alpha()/255.0));
             offset += step;
         }
         if (grad_lut.build_lut())
