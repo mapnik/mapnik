@@ -12,6 +12,10 @@ Released: YYYY XX, 2015
 
 (Packaged from xxxx)
 
+#### Summary
+
+- `scale-hsla` image filter: parameters are no longer limited by interval [0, 1] (https://github.com/mapnik/mapnik/pull/3054)
+
 ## 3.0.4
 
 Released: August 26, 2015
