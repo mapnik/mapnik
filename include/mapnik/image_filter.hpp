@@ -552,9 +552,6 @@ void apply_filter(Src & src, colorize_alpha const& op)
                         r = (c.r * a + 255) >> 8;
                         g = (c.g * a + 255) >> 8;
                         b = (c.b * a + 255) >> 8;
-                        if (r>a) r=a;
-                        if (g>a) g=a;
-                        if (b>a) b=a;
         #if 0
                         // rainbow
                         r = 0;
