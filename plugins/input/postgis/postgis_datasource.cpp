@@ -814,7 +814,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             const double tolerance = px_sz;
             // Figure out number of decimals of rounding that implies
             if ( tolerance > 0 ) {
-                const int i = -1 * lround(log10(tolerance) + 0.5) + 1;
+                const int i = -1 * lround(log10(tolerance)) + 1;
                 // Write the SQL
                 s << "," << i << ") AS geom";
             }
