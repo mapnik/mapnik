@@ -30,15 +30,15 @@
 #include <cstdlib>
 
 #ifndef MAPNIK_LOG_FORMAT
-  #define MAPNIK_LOG_FORMAT  Mapnik LOG> %Y-%m-%d %H:%M:%S:
+#define MAPNIK_LOG_FORMAT  Mapnik LOG> %Y-%m-%d %H:%M:%S:
 #endif
 
 #ifndef MAPNIK_DEFAULT_LOG_SEVERITY
-  #ifdef MAPNIK_DEBUG
-    #define MAPNIK_DEFAULT_LOG_SEVERITY 0
-  #else
-    #define MAPNIK_DEFAULT_LOG_SEVERITY 2
-  #endif
+#ifdef MAPNIK_DEBUG
+#define MAPNIK_DEFAULT_LOG_SEVERITY 0
+#else
+#define MAPNIK_DEFAULT_LOG_SEVERITY 2
+#endif
 #endif
 
 namespace mapnik {
@@ -53,25 +53,24 @@ std::mutex logger::format_mutex_;
 
 // first time checks
 
-bool logger::severity_env_check_ = true;
-bool logger::format_env_check_ = true;
-
+std::atomic<bool> logger::severity_env_check_ {true};
+std::atomic<bool> logger::format_env_check_ {true};
 
 // severity
 
-logger::severity_type logger::severity_level_ =
-    #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
-        logger::debug
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
-        logger::warn
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
-        logger::error
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
-        logger::none
-    #else
-        #error "Wrong default log severity level specified!"
-    #endif
-;
+std::atomic<logger::severity_type> logger::severity_level_ {
+#if MAPNIK_DEFAULT_LOG_SEVERITY == 0
+    logger::debug
+#elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
+    logger::warn
+#elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
+    logger::error
+#elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
+    logger::none
+#else
+#error "Wrong default log severity level specified!"
+#endif
+};
 
 logger::severity_map logger::object_severity_level_ = logger::severity_map();
 
