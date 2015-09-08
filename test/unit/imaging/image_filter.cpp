@@ -336,15 +336,15 @@ SECTION("test colorize-alpha - two color") {
 
     mapnik::filter::filter_image(im, "colorize-alpha(green,blue)");
 
-    CHECK(im(0,0) == 0xfffc0000);
-    CHECK(im(0,1) == 0xfffc0000);
-    CHECK(im(0,2) == 0xfffc0000);
-    CHECK(im(1,0) == 0xfffc0000);
-    CHECK(im(1,1) == 0xfffc0000);
-    CHECK(im(1,2) == 0xfffc0000);
-    CHECK(im(2,0) == 0xfffc0000);
-    CHECK(im(2,1) == 0xfffc0000);
-    CHECK(im(2,2) == 0xfffc0000);
+    CHECK(im(0,0) == 0xfffd0000);
+    CHECK(im(0,1) == 0xfffd0000);
+    CHECK(im(0,2) == 0xfffd0000);
+    CHECK(im(1,0) == 0xfffd0000);
+    CHECK(im(1,1) == 0xfffd0000);
+    CHECK(im(1,2) == 0xfffd0000);
+    CHECK(im(2,0) == 0xfffd0000);
+    CHECK(im(2,1) == 0xfffd0000);
+    CHECK(im(2,2) == 0xfffd0000);
     
 } // END SECTION
 
