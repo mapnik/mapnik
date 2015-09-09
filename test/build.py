@@ -11,8 +11,8 @@ if not env['CPP_TESTS']:
         os.unlink(cpp_test_bin)
 else:
     test_env['LIBS'] = [env['MAPNIK_NAME']]
-    test_env.AppendUnique(LIBS='mapnik-wkt')
-    test_env.AppendUnique(LIBS='mapnik-json')
+    test_env.AppendUnique(LIBS=('%s-wkt' % env['MAPNIK_NAME']))
+    test_env.AppendUnique(LIBS=('%s-json' % env['MAPNIK_NAME']))
     test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
     if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
         test_env.AppendUnique(LIBS='dl')
@@ -34,8 +34,8 @@ else:
     sources.extend(glob.glob('./unit/*.cpp'))
     test_program = test_env_local.Program("./unit/run", source=sources)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
-    Depends(test_program, env.subst('../src/json/libmapnik-json${LIBSUFFIX}'))
-    Depends(test_program, env.subst('../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
+    Depends(test_program, env.subst('../src/json/%s' % env['MAPNIK_JSON_LIB_NAME']))
+    Depends(test_program, env.subst('../src/wkt/%s' % env['MAPNIK_WKT_LIB_NAME']))
     if 'install' in COMMAND_LINE_TARGETS:
         env.Alias('install',test_program)
 
