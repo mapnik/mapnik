@@ -37,6 +37,13 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value_types.hpp>
+
+#ifdef CSV_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
+#endif
+
 // stl
 #include <sstream>
 #include <fstream>
@@ -102,17 +109,36 @@ csv_datasource::csv_datasource(parameters const& params)
     }
     else
     {
-#if defined (_WINDOWS)
+#if defined (CSV_MEMORY_MAPPED_FILE)
+        using file_source_type = boost::interprocess::ibufferstream;
+        file_source_type in;
+        mapnik::mapped_region_ptr mapped_region;
+        boost::optional<mapnik::mapped_region_ptr> memory =
+            mapnik::mapped_memory_cache::instance().find(filename_, true);
+        if (memory)
+        {
+            mapped_region = *memory;
+            in.buffer(static_cast<char*>(mapped_region->get_address()),mapped_region->get_size());
+        }
+        else
+        {
+            throw std::runtime_error("could not create file mapping for " + filename_);
+        }
+#elif defined (_WINDOWS)
         std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
-#else
-        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
-#endif
         if (!in.is_open())
         {
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
         }
+#else
+        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+        if (!in.is_open())
+        {
+            throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
+        }
+#endif
         parse_csv(in, escape_, separator_, quote_);
-        in.close();
+        //in.close(); no need to call close, rely on dtor
     }
 }
 
@@ -556,11 +582,13 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         if (tree_)
         {
             tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+#if 0
             std::sort(index_array.begin(),index_array.end(),
                       [] (item_type const& item0, item_type const& item1)
                       {
                           return item0.second.first < item1.second.first;
                       });
+#endif
             if (inline_string_.empty())
             {
                 return std::make_shared<csv_featureset>(filename_, locator_, separator_, headers_, ctx_, std::move(index_array));

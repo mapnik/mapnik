@@ -44,6 +44,10 @@
 #include <cstdio>
 #include <algorithm>
 
+#ifndef _WINDOWS
+#define CSV_MEMORY_MAPPED_FILE
+#endif
+
 namespace csv_utils
 {
 

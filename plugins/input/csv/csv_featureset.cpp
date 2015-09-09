@@ -34,7 +34,9 @@
 csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, std::string const& separator,
                                std::vector<std::string> const& headers, mapnik::context_ptr const& ctx, array_type && index_array)
     :
-#ifdef _WINDOWS
+#if defined(CSV_MEMORY_MAPPED_FILE)
+    //
+#elif defined( _WINDOWS)
     file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
 #else
     file_(std::fopen(filename.c_str(),"rb"), std::fclose),
@@ -48,7 +50,20 @@ csv_featureset::csv_featureset(std::string const& filename, detail::geometry_col
     locator_(locator),
     tr_("utf8")
 {
+#if defined (CSV_MEMORY_MAPPED_FILE)
+    boost::optional<mapnik::mapped_region_ptr> memory =
+            mapnik::mapped_memory_cache::instance().find(filename, true);
+    if (memory)
+    {
+        mapped_region_ = *memory;
+    }
+    else
+    {
+        throw std::runtime_error("could not create file mapping for " + filename);
+    }
+#else
     if (!file_) throw std::runtime_error("Can't open " + filename);
+#endif
 }
 
 csv_featureset::~csv_featureset() {}
@@ -74,12 +89,17 @@ mapnik::feature_ptr csv_featureset::next()
         csv_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second.first;
         std::size_t size = item.second.second;
+#if defined(CSV_MEMORY_MAPPED_FILE)
+        char const* start = (char const*)mapped_region_->get_address() + file_offset;
+        char const*  end = start + size;
+#else
         std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> record;
         record.resize(size);
         std::fread(record.data(), size, 1, file_.get());
         auto const* start = record.data();
         auto const*  end = start + record.size();
+#endif
         return parse_feature(start, end);
     }
     return mapnik::feature_ptr();

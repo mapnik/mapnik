@@ -30,9 +30,15 @@
 #include <deque>
 #include <cstdio>
 
+#ifdef CSV_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
+#endif
+
 class csv_featureset : public mapnik::Featureset
 {
-    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+
     using locator_type = detail::geometry_column_locator;
 public:
     using array_type = std::deque<csv_datasource::item_type>;
@@ -46,7 +52,13 @@ public:
     mapnik::feature_ptr next();
 private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
+#if defined (CSV_MEMORY_MAPPED_FILE)
+    using file_source_type = boost::interprocess::ibufferstream;
+    mapnik::mapped_region_ptr mapped_region_;
+#else
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
     file_ptr file_;
+#endif
     std::string const& separator_;
     std::vector<std::string> const& headers_;
     const array_type index_array_;

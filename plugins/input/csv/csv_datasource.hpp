@@ -45,7 +45,6 @@
 #include <boost/version.hpp>
 #include <boost/geometry/index/rtree.hpp>
 #pragma GCC diagnostic pop
-
 // stl
 #include <vector>
 #include <deque>
