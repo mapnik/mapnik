@@ -135,7 +135,7 @@ template <typename T,
     template <typename T,
               template <typename U> class CreatePolicy> std::atomic<T*> singleton<T,CreatePolicy>::pInstance_;
     template <typename T,
-              template <typename U> class CreatePolicy> std::atomic<bool> singleton<T,CreatePolicy>::destroyed_ { false };
+              template <typename U> class CreatePolicy> std::atomic<bool> singleton<T,CreatePolicy>::destroyed_(false);
 }
 
 #endif // MAPNIK_UTIL_SINGLETON_HPP
