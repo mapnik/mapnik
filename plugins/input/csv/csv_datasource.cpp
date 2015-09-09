@@ -578,17 +578,15 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
     mapnik::box2d<double> const& box = q.get_bbox();
     if (extent_.intersects(box))
     {
-        csv_featureset::array_type index_array;
         if (tree_)
         {
+            csv_featureset::array_type index_array;
             tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
-#if 0
             std::sort(index_array.begin(),index_array.end(),
                       [] (item_type const& item0, item_type const& item1)
                       {
                           return item0.second.first < item1.second.first;
                       });
-#endif
             if (inline_string_.empty())
             {
                 return std::make_shared<csv_featureset>(filename_, locator_, separator_, headers_, ctx_, std::move(index_array));
