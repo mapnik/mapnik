@@ -141,7 +141,8 @@ std::tuple<char,bool> autodect_newline(T & stream, std::size_t file_length)
     // autodetect newlines
     char newline = '\n';
     bool has_newline = false;
-    std::size_t size = std::min(file_length, 4000UL);
+    static std::size_t const max_size = 4000;
+    std::size_t size = std::min(file_length, max_size);
     for (std::size_t lidx = 0; lidx < size; ++lidx)
     {
         char c = static_cast<char>(stream.get());
