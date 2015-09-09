@@ -505,6 +505,7 @@ void apply_filter(Src & src, colorize_alpha const& op)
                 uint8_t & a = get_color(src_it[x], alpha_t());
                 if ( a > 0)
                 {
+                    a = (c.alpha() * a + 255) >> 8;
                     r = (c.red() * a + 255) >> 8;
                     g = (c.green() * a + 255) >> 8;
                     b = (c.blue() * a + 255) >> 8;
@@ -549,6 +550,7 @@ void apply_filter(Src & src, colorize_alpha const& op)
                     if ( a > 0)
                     {
                         agg::rgba8 c = grad_lut[a];
+                        a = (c.a * a + 255) >> 8;
                         r = (c.r * a + 255) >> 8;
                         g = (c.g * a + 255) >> 8;
                         b = (c.b * a + 255) >> 8;

@@ -17,6 +17,7 @@ Released: YYYY XX, 2015
 - `scale-hsla` image filter: parameters are no longer limited by interval \[0, 1\] (https://github.com/mapnik/mapnik/pull/3054)
 - Windows: Fixed SVG file loading from unicode paths
 - `colorize-alpha` image filter: fixed normalization of color components (https://github.com/mapnik/mapnik/pull/3058)
+- `colorize-alpha` image filter: added support for transparent colors (https://github.com/mapnik/mapnik/pull/3061)
 
 ## 3.0.4
 
