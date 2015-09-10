@@ -14,7 +14,8 @@ Released: YYYY XX, 2015
 
 #### Summary
 
-- `scale-hsla` image filter: parameters are no longer limited by interval [0, 1] (https://github.com/mapnik/mapnik/pull/3054)
+- `scale-hsla` image filter: parameters are no longer limited by interval [0, 1](https://github.com/mapnik/mapnik/pull/3054)
+- Windows: Fixed SVG file loading from unicode paths
 
 ## 3.0.4
 
