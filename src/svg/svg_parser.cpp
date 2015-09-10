@@ -28,6 +28,7 @@
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/svg/svg_parser_exception.hpp>
 #include <mapnik/util/file_io.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
@@ -974,7 +975,11 @@ svg_parser::~svg_parser() {}
 
 bool svg_parser::parse(std::string const& filename)
 {
+#ifdef _WINDOWS
+    std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
+#else
     std::basic_ifstream<char> stream(filename.c_str());
+#endif
     if (!stream)
     {
         std::stringstream ss;
