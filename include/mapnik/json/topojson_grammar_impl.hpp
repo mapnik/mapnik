@@ -73,7 +73,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     // topo json
     topology = lit('{') >> lit("\"type\"") >> lit(':') >> lit("\"Topology\"")
-                        >> ( (lit(',') >> objects) ^ ( lit(',') >> arcs) ^ (lit(',') >> transform) ^ (lit(',') >> bbox))
+                        >> ( (lit(',') >> objects ) ^ ( lit(',') >> arcs) ^ (lit(',') >> transform) ^ (lit(',') >> bbox))
                         >> lit('}')
         ;
 

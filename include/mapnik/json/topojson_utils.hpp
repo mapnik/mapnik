@@ -238,12 +238,6 @@ struct bounding_box_visitor
         }
         return bbox;
     }
-
-    box2d<double> operator() (mapnik::topojson::invalid const&) const
-    {
-        return box2d<double>();
-    }
-
 private:
     topology const& topo_;
     std::size_t num_arcs_;

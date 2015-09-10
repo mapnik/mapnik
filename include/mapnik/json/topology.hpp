@@ -86,10 +86,7 @@ struct multi_polygon
     boost::optional<properties> props;
 };
 
-struct invalid {};
-
-using geometry =  util::variant<invalid,
-                                point,
+using geometry =  util::variant<point,
                                 linestring,
                                 polygon,
                                 multi_point,

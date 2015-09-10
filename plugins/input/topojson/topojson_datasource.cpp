@@ -109,10 +109,6 @@ struct geometry_type_visitor
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
-    int operator() (mapnik::topojson::invalid const&) const
-    {
-        return -1;
-    }
 };
 
 struct collect_attributes_visitor
@@ -120,8 +116,6 @@ struct collect_attributes_visitor
     mapnik::layer_descriptor & desc_;
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
       desc_(desc) {}
-
-    void operator() (mapnik::topojson::invalid const&) {}
 
     template <typename GeomType>
     void operator() (GeomType const& g)
