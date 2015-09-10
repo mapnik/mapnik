@@ -203,14 +203,15 @@ void topojson_datasource::parse_topojson(T const& buffer)
     values.reserve(topo_.geometries.size());
 
     std::size_t geometry_index = 0;
-
+    bool first = true;
     for (auto const& geom : topo_.geometries)
     {
         mapnik::box2d<double> box = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
         if (box.valid())
         {
-            if (geometry_index == 0)
+            if (first)
             {
+                first = false;
                 extent_ = box;
                 collect_attributes_visitor assessor(desc_);
                 mapnik::util::apply_visitor( std::ref(assessor), geom);
