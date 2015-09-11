@@ -76,6 +76,8 @@ bool placement_finder::next_position()
                                                                info_.properties,
                                                                info_.properties.layout_defaults,
                                                                info_.properties.format_tree());
+        // ensure layouts stay in scope after layouts_.clear()
+        processed_layouts_.emplace_back(layout);
         // TODO: why is this call needed?
         // https://github.com/mapnik/mapnik/issues/2525
         text_props_ = evaluate_text_properties(info_.properties,feature_,attr_);

@@ -91,7 +91,7 @@ private:
     face_manager_freetype &font_manager_;
 
     placements_list placements_;
-
+    std::vector<text_layout_ptr> processed_layouts_;
     //ShieldSymbolizer
     bool has_marker_;
     marker_info_ptr marker_;
