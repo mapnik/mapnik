@@ -21,48 +21,57 @@
 
 Import ('env')
 
-Import ('plugin_base')
+can_build = False
 
-PLUGIN_NAME = 'csv'
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header >= 56:
+        can_build = True
 
-plugin_env = plugin_base.Clone()
+if not can_build:
+    print 'WARNING: skipping building the optional topojson datasource plugin which requires boost >= 1.56'
+else:
+    Import ('plugin_base')
 
-plugin_sources = Split(
-  """
-  %(PLUGIN_NAME)s_datasource.cpp
-  %(PLUGIN_NAME)s_featureset.cpp
-  %(PLUGIN_NAME)s_inline_featureset.cpp
-  """ % locals()
-)
+    PLUGIN_NAME = 'csv'
 
-# Link Library to Dependencies
-libraries = []
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append(env['ICU_LIB_NAME'])
-libraries.append('mapnik-json')
-libraries.append('mapnik-wkt')
+    plugin_env = plugin_base.Clone()
 
-if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append(env['MAPNIK_NAME'])
+    plugin_sources = Split(
+        """
+        %(PLUGIN_NAME)s_datasource.cpp
+        %(PLUGIN_NAME)s_featureset.cpp
+        %(PLUGIN_NAME)s_inline_featureset.cpp
+        """ % locals()
+    )
 
-    TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
-                                      SHLIBPREFIX='',
-                                      SHLIBSUFFIX='.input',
-                                      source=plugin_sources,
-                                      LIBS=libraries)
+    # Link Library to Dependencies
+    libraries = []
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.append(env['ICU_LIB_NAME'])
+    libraries.append('mapnik-json')
+    libraries.append('mapnik-wkt')
 
-    # if the plugin links to libmapnik ensure it is built first
-    Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
-    Depends(TARGET, env.subst('../../../src/json/libmapnik-json${LIBSUFFIX}'))
-    Depends(TARGET, env.subst('../../../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
+    if env['PLUGIN_LINKING'] == 'shared':
+        libraries.append(env['MAPNIK_NAME'])
 
-    if 'uninstall' not in COMMAND_LINE_TARGETS:
-        env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
-        env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+        TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
+                                          SHLIBPREFIX='',
+                                          SHLIBSUFFIX='.input',
+                                          source=plugin_sources,
+                                          LIBS=libraries)
 
-plugin_obj = {
-  'LIBS': libraries,
-  'SOURCES': plugin_sources,
-}
+        # if the plugin links to libmapnik ensure it is built first
+        Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+        Depends(TARGET, env.subst('../../../src/json/libmapnik-json${LIBSUFFIX}'))
+        Depends(TARGET, env.subst('../../../src/wkt/libmapnik-wkt${LIBSUFFIX}'))
 
-Return('plugin_obj')
+        if 'uninstall' not in COMMAND_LINE_TARGETS:
+            env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
+            env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+
+    plugin_obj = {
+        'LIBS': libraries,
+        'SOURCES': plugin_sources,
+    }
+    Return('plugin_obj')
