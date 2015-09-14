@@ -64,7 +64,7 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi
 
         line = column(_r1)  % char_(_r1)
             ;
-        column = quoted | *(char_ - (lit(_r1) /*| eol*/))
+        column = -omit[char_("\n\r")] >> quoted | *(char_ - (lit(_r1) /*| eol*/))
             ;
         quoted = omit[char_("\"'")[_a = _1]] > text(_a) > -lit(_a)
             ;
