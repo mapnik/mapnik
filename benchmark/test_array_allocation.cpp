@@ -386,61 +386,62 @@ public:
 
 int main(int argc, char** argv)
 {
+    int retVal = 0;
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
     {
         test4 test_runner4(params);
-        run(test_runner4,"calloc");
+        retVal = retVal | run(test_runner4,"calloc");
     }
     {
         test1 test_runner(params);
-        run(test_runner,"malloc/memcpy");
+        retVal = retVal | run(test_runner,"malloc/memcpy");
     }
     {
         test1b test_runner(params);
-        run(test_runner,"malloc/memset");
+        retVal = retVal | run(test_runner,"malloc/memset");
     }
     {
         test1c test_runner(params);
-        run(test_runner,"operator new/std::fill");
+        retVal = retVal | run(test_runner,"operator new/std::fill");
     }
     {
         test2 test_runner(params);
-        run(test_runner,"operator new/memcpy");
+        retVal = retVal | run(test_runner,"operator new/memcpy");
     }
     {
         test3 test_runner(params);
-        run(test_runner,"vector(N)");
+        retVal = retVal | run(test_runner,"vector(N)");
     }
     {
         test3b test_runner(params);
-        run(test_runner,"vector/resize");
+        retVal = retVal | run(test_runner,"vector/resize");
     }
     {
         test3c test_runner(params);
-        run(test_runner,"vector/assign");
+        retVal = retVal | run(test_runner,"vector/assign");
     }
     {
         test3d test_runner(params);
-        run(test_runner,"deque(N)");
+        retVal = retVal | run(test_runner,"deque(N)");
     }
     {
         test5 test_runner(params);
-        run(test_runner,"std::string range");
+        retVal = retVal | run(test_runner,"std::string range");
     }
     {
         test5b test_runner(params);
-        run(test_runner,"std::string &[0]");
+        retVal = retVal | run(test_runner,"std::string &[0]");
     }
     {
         test6 test_runner(params);
-        run(test_runner,"valarray");
+        retVal = retVal | run(test_runner,"valarray");
     }
 #if BOOST_VERSION >= 105400
     {
         test7 test_runner(params);
-        run(test_runner,"static_vector");
+        retVal = retVal | run(test_runner,"static_vector");
     }
 #endif
-    return 0;
+    return retVal;
 }

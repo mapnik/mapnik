@@ -97,14 +97,16 @@ int main(int argc, char** argv)
 {
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
+    int retVal = 0;
 #ifndef __linux__
     test test_runner(params);
-    run(test_runner,"utf encode std::codecvt");
+    retVal = retVal | run(test_runner,"utf encode std::codecvt");
 #else
     std::clog << "skipping 'utf encode std::codecvt' test since <codecvt> is not supported on __linux__\n";
 #endif
     test2 test_runner2(params);
-    run(test_runner2,"utf encode boost::locale");
+    retVal = retVal | run(test_runner2,"utf encode boost::locale");
     test3 test_runner3(params);
-    return run(test_runner3,"utf encode ICU");
+    retVal = retVal | run(test_runner3,"utf encode ICU");
+    return retVal;
 }
