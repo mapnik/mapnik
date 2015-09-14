@@ -145,6 +145,7 @@ public:
 
 int main(int argc, char** argv)
 {
+    int return_value = 0;
     try
     {
         mapnik::parameters params;
@@ -159,7 +160,7 @@ int main(int argc, char** argv)
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         {
             test test_runner(params);
-            run(test_runner,*name);
+            return_value = run(test_runner,*name);
         }
     }
     catch (std::exception const& ex)
@@ -167,5 +168,5 @@ int main(int argc, char** argv)
         std::clog << ex.what() << "\n";
         return -1;
     }
-    return 0;
+    return return_value;
 }
