@@ -34,6 +34,7 @@ namespace detail {
 struct MAPNIK_DECL buffer
 {
     explicit buffer(std::size_t size);
+    explicit buffer(unsigned char* data, std::size_t size);
     buffer(buffer && rhs) noexcept;
     buffer(buffer const& rhs);
     ~buffer();
@@ -51,6 +52,7 @@ struct MAPNIK_DECL buffer
 private:
     std::size_t size_;
     unsigned char* data_;
+    bool owns_;
 
 };
 
@@ -91,6 +93,11 @@ public:
     image(int width,
           int height,
           bool initialize = true,
+          bool premultiplied = false,
+          bool painted = false);
+    image(int width,
+          int height,
+          detail::buffer && buf,
           bool premultiplied = false,
           bool painted = false);
     image(image<T> const& rhs);
