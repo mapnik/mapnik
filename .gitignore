@@ -11,6 +11,7 @@
 *.a
 *.swp
 *.dylib
+mapnik-gyp
 plugins/input/*.input
 plugins/input/templates/*.input
 demo/c++/rundemo

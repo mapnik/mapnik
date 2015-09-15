@@ -67,32 +67,34 @@ int main(int argc, char** argv)
     std::string to_str("+init=epsg:3857");
     std::string from_str2("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
     std::string to_str2("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over");
+    int return_value = 0;
     test test_runner(params,
                      from_str,
                      to_str,
                      from,
                      to,
                      true);
-    run(test_runner,"lonlat->merc epsg");
+    return_value = return_value | run(test_runner,"lonlat->merc epsg");
     test test_runner2(params,
                      from_str2,
                      to_str2,
                      from,
                      to,
                      true);
-    run(test_runner2,"lonlat->merc literal");
+    return_value = return_value | run(test_runner2,"lonlat->merc literal");
     test test_runner3(params,
                      to_str,
                      from_str,
                      to,
                      from,
                      true);
-    run(test_runner3,"merc->lonlat epsg");
+    return_value = return_value | run(test_runner3,"merc->lonlat epsg");
     test test_runner4(params,
                      to_str2,
                      from_str2,
                      to,
                      from,
                      true);
-    return run(test_runner4,"merc->lonlat literal");
+    return_value = return_value | run(test_runner4,"merc->lonlat literal");
+    return return_value;
 }

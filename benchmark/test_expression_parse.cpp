@@ -37,5 +37,5 @@ int main(int argc, char** argv)
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
     test test_runner(params);
-    run(test_runner,"expr parsing");
+    return run(test_runner,"expr parsing");
 }

@@ -528,19 +528,20 @@ int main(int argc, char** argv)
         throw std::runtime_error("could not open: '" + filename_ + "'");
     std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                (std::istreambuf_iterator<char>()) );
+    int return_value = 0;
     {
         test1 test_runner(params,wkt_in,clipping_box);
-        run(test_runner,"clipping polygon with agg");
+        return_value = return_value | run(test_runner,"clipping polygon with agg");
     }
     {
         test3 test_runner(params,wkt_in,clipping_box);
-        run(test_runner,"clipping polygon with boost");
+        return_value = return_value | run(test_runner,"clipping polygon with boost");
     }
     /*
     {
         test4 test_runner(params,wkt_in,clipping_box);
-        run(test_runner,"clipping polygon with clipper_tree");
+        return_value = return_value | run(test_runner,"clipping polygon with clipper_tree");
     }
     */
-    return 0;
+    return return_value;
 }
