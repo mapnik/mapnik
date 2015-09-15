@@ -73,7 +73,7 @@ int main (int argc,char** argv)
 
         if (vm.count("version"))
         {
-            clog<<"version 0.3.0" <<std::endl;
+            clog << "version 0.3.0" <<std::endl;
             return 1;
         }
 
