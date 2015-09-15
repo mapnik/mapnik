@@ -36,27 +36,37 @@ namespace detail
 // BUFFER
 buffer::buffer(std::size_t size)
     : size_(size),
-      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
+      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr)),
+      owns_(true)
+{}
+
+buffer::buffer(unsigned char* data, std::size_t size)
+    : size_(size),
+      data_(data),
+      owns_(false)
 {}
 
 buffer::buffer(buffer && rhs) noexcept
 : size_(std::move(rhs.size_)),
-    data_(std::move(rhs.data_))
+    data_(std::move(rhs.data_)),
+    owns_(std::move(rhs.owns_))
 {
     rhs.size_ = 0;
     rhs.data_ = nullptr;
+    rhs.owns_ = true;
 }
 
 buffer::buffer(buffer const& rhs)
     : size_(rhs.size_),
-      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
+      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr)),
+      owns_(rhs.owns_)
 {
     if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
 }
 
 buffer::~buffer()
 {
-    ::operator delete(data_);
+    if (owns_) ::operator delete(data_);
 }
 
 buffer& buffer::operator=(buffer rhs)
@@ -69,6 +79,7 @@ void buffer::swap(buffer & rhs)
 {
     std::swap(size_, rhs.size_);
     std::swap(data_, rhs.data_);
+    std::swap(owns_, rhs.owns_);
 }
 
 unsigned char* buffer::data()
