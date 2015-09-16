@@ -78,9 +78,9 @@ image<T>::image()
 {}
 
 template <typename T>
-image<T>::image(int width, int height, detail::buffer && buf, bool premultiplied, bool painted)
+image<T>::image(int width, int height, unsigned char* data, bool premultiplied, bool painted)
     : dimensions_(width, height),
-      buffer_(std::move(buf)),
+      buffer_(data, width * height * sizeof(pixel_size)),
       pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
       offset_(0.0),
       scaling_(1.0),

@@ -82,21 +82,6 @@ void buffer::swap(buffer & rhs)
     std::swap(owns_, rhs.owns_);
 }
 
-unsigned char* buffer::data()
-{
-    return data_;
-}
-
-unsigned char const* buffer::data() const
-{
-    return data_;
-}
-
-std::size_t buffer::size() const
-{
-    return size_;
-}
-
 template struct MAPNIK_DECL image_dimensions<65535>;
 
 } // end ns detail
