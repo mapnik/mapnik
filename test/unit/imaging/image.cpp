@@ -292,9 +292,9 @@ SECTION("Image Buffer")
 
 SECTION("Image copy/move")
 {
-    mapnik::detail::buffer buf(256 * 256 * 4); // large enough to hold 256*256 RGBA image
-    CHECK(buf.size() == 256 * 256 * 4);
-    mapnik::image_rgba8 im(256, 256, buf.data()); // shallow copy
+    mapnik::detail::buffer buf(16 * 16 * 4); // large enough to hold 16*16 RGBA image
+    CHECK(buf.size() == 16 * 16 * 4);
+    mapnik::image_rgba8 im(16, 16, buf.data()); // shallow copy
     // fill buffer with 0xff
     std::fill(buf.data(), buf.data() + buf.size(), 0xff);
     std::size_t count = 0;
@@ -306,6 +306,7 @@ SECTION("Image copy/move")
         ++count;
     }
     CHECK( count == im.width() * im.height());
+    CHECK( buf.size() == im.width() * im.height() * sizeof( mapnik::image_rgba8::pixel_type));
 
     // mutate buffer
     // fill buffer with 0x7f - semi-transparent grey
