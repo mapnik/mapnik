@@ -108,6 +108,7 @@ int main(int argc, char** argv)
              [](log_levels_map::value_type const & level) { return level.second == mapnik::logger::get_severity(); } )->first),
              "log level (debug, warn, error, none)")
 #endif
+        ("scale-factor,s", po::value<std::vector<double>>()->default_value({ 1.0, 2.0 }, "1.0, 2.0"), "scale factor")
         (agg_renderer::name, "render with AGG renderer")
 #if defined(HAVE_CAIRO)
         (cairo_renderer::name, "render with Cairo renderer")
@@ -156,7 +157,11 @@ int main(int argc, char** argv)
         output_dir /= boost::filesystem::unique_path();
     }
 
+    config defaults;
+    defaults.scales = vm["scale-factor"].as<std::vector<double>>();
+
     runner run(vm["styles-dir"].as<std::string>(),
+               defaults,
                vm["iterations"].as<std::size_t>(),
                vm["limit"].as<std::size_t>(),
                vm["jobs"].as<std::size_t>(),

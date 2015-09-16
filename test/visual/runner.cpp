@@ -126,11 +126,13 @@ private:
 };
 
 runner::runner(runner::path_type const & styles_dir,
+               config const & defaults,
                std::size_t iterations,
                std::size_t fail_limit,
                std::size_t jobs,
                runner::renderer_container const & renderers)
     : styles_dir_(styles_dir),
+      defaults_(defaults),
       jobs_(jobs),
       iterations_(iterations),
       fail_limit_(fail_limit),
@@ -211,7 +213,6 @@ result_list runner::test_range(files_iterator begin,
                                std::reference_wrapper<report_type> report,
                                std::reference_wrapper<std::atomic<std::size_t>> fail_count) const
 {
-    config defaults;
     result_list results;
 
     for (runner::files_iterator i = begin; i != end; i++)
@@ -221,7 +222,7 @@ result_list runner::test_range(files_iterator begin,
         {
             try
             {
-                result_list r = test_one(file, defaults, report, fail_count.get());
+                result_list r = test_one(file, report, fail_count.get());
                 std::move(r.begin(), r.end(), std::back_inserter(results));
             }
             catch (std::exception const& ex)
@@ -246,10 +247,10 @@ result_list runner::test_range(files_iterator begin,
 }
 
 result_list runner::test_one(runner::path_type const& style_path,
-                             config cfg,
                              report_type & report,
                              std::atomic<std::size_t> & fail_count) const
 {
+    config cfg(defaults_);
     mapnik::Map map(cfg.sizes.front().width, cfg.sizes.front().height);
     result_list results;
 
