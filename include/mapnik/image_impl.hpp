@@ -226,6 +226,20 @@ inline unsigned char* image<T>::bytes()
     return buffer_.data();
 }
 
+// iterator interface
+template <typename T>
+inline typename image<T>::iterator image<T>::begin() { return pData_; }
+
+template <typename T>
+inline typename image<T>::iterator image<T>::end() { return pData_ + dimensions_.width() * dimensions_.height(); }
+
+template <typename T>
+inline typename image<T>::const_iterator image<T>::begin() const { return pData_; }
+
+template <typename T>
+inline typename image<T>::const_iterator image<T>::end() const{ return pData_ + dimensions_.width() * dimensions_.height(); }
+
+
 template <typename T>
 inline typename image<T>::pixel_type const* image<T>::get_row(std::size_t row) const
 {

@@ -72,6 +72,8 @@ class image
 public:
     using pixel = T;
     using pixel_type = typename T::type;
+    using iterator = pixel_type*;
+    using const_iterator = pixel_type const*;
     static constexpr image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
@@ -110,6 +112,12 @@ public:
     void set(pixel_type const& t);
     pixel_type const* data() const;
     pixel_type* data();
+    // simple iterator inteface
+    const_iterator begin() const;
+    const_iterator end() const;
+    iterator begin();
+    iterator end();
+    //
     unsigned char const* bytes() const;
     unsigned char* bytes();
     pixel_type const* get_row(std::size_t row) const;
