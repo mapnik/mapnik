@@ -12,12 +12,24 @@ Released: YYYY XX, 2015
 
 (Packaged from xxxx)
 
+## 3.0.5
+
+Released: September 16, 2015
+
 #### Summary
 
 - `scale-hsla` image filter: parameters are no longer limited by interval \[0, 1\] (https://github.com/mapnik/mapnik/pull/3054)
 - Windows: Fixed SVG file loading from unicode paths
 - `colorize-alpha` image filter: fixed normalization of color components (https://github.com/mapnik/mapnik/pull/3058)
 - `colorize-alpha` image filter: added support for transparent colors (https://github.com/mapnik/mapnik/pull/3061)
+- Enable reading optional `MAPNIK_LOG_FORMAT` environment variable(https://github.com/mapnik/mapnik/commit/6d1ffc8a93008b8c0a89d87d68b59afb2cb3757f)
+- CSV.input uses memory mapped file by default on *nix.
+- Updated bundled fonts to the latest version
+- Topojson.input - fixed geometry_index logic which was causing missing features
+- Fixed SVG file loading from unicode paths (https://github.com/mapnik/node-mapnik/issues/517)
+- CSV.input - improved support for LF/CR/CRLF line endings on all platforms (https://github.com/mapnik/mapnik/issues/3065)
+- Revive `zero allocation image interface` and add unit tests
+- Benchmark: use return values of test runner.
 
 ## 3.0.4
 
