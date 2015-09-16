@@ -111,18 +111,17 @@ image<T>::image(image<T> const& rhs)
       offset_(rhs.offset_),
       scaling_(rhs.scaling_),
       premultiplied_alpha_(rhs.premultiplied_alpha_),
-      painted_(rhs.painted_)
-{}
+      painted_(rhs.painted_) {}
 
 template <typename T>
 image<T>::image(image<T> && rhs) noexcept
     : dimensions_(std::move(rhs.dimensions_)),
-    buffer_(std::move(rhs.buffer_)),
-    pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-    offset_(rhs.offset_),
-    scaling_(rhs.scaling_),
-    premultiplied_alpha_(rhs.premultiplied_alpha_),
-    painted_(rhs.painted_)
+      buffer_(std::move(rhs.buffer_)),
+      pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+      offset_(rhs.offset_),
+      scaling_(rhs.scaling_),
+      premultiplied_alpha_(rhs.premultiplied_alpha_),
+      painted_(rhs.painted_)
 {
     rhs.dimensions_ = { 0, 0 };
     rhs.pData_ = nullptr;

@@ -294,9 +294,15 @@ SECTION("Image copy/move")
 {
     mapnik::detail::buffer buf(16 * 16 * 4); // large enough to hold 16*16 RGBA image
     CHECK(buf.size() == 16 * 16 * 4);
-    mapnik::image_rgba8 im(16, 16, buf.data()); // shallow copy
     // fill buffer with 0xff
     std::fill(buf.data(), buf.data() + buf.size(), 0xff);
+
+    // move buffer
+    mapnik::detail::buffer buf2(std::move(buf));
+    CHECK (buf.size() == 0);
+    CHECK (buf.data() == nullptr);
+
+    mapnik::image_rgba8 im(16, 16, buf2.data()); // shallow copy
     std::size_t count = 0;
     for (auto const& pixel : im)
     {
@@ -306,18 +312,18 @@ SECTION("Image copy/move")
         ++count;
     }
     CHECK( count == im.width() * im.height());
-    CHECK( buf.size() == im.width() * im.height() * sizeof( mapnik::image_rgba8::pixel_type));
+    CHECK( buf2.size() == im.width() * im.height() * sizeof( mapnik::image_rgba8::pixel_type));
 
     // mutate buffer
     // fill buffer with 0x7f - semi-transparent grey
-    std::fill(buf.data(), buf.data() + buf.size(), 0x7f);
+    std::fill(buf2.data(), buf2.data() + buf2.size(), 0x7f);
     for (auto const& pixel : im)
     {
         // expect rgba(127,127,127,0.5)
         CHECK( pixel == 0x7f7f7f7f);
     }
 
-    // mutate image directly (mutates buf)
+    // mutate image directly (buf)
     for (auto & pixel : im)
     {
         pixel = mapnik::color(0,255,0).rgba(); // green
@@ -325,6 +331,10 @@ SECTION("Image copy/move")
 
     // move
     mapnik::image_rgba8 im2(std::move(im));
+    CHECK (im.data() == nullptr);
+    CHECK (im.bytes() == nullptr);
+    CHECK (im.width() == 0);
+    CHECK (im.height() == 0);
     for (auto const& pixel : im2)
     {
         // expect `green`
@@ -340,14 +350,23 @@ SECTION("Image copy/move")
         // mutate
         pixel = mapnik::color(255,0,0).rgba(); //red
     }
-    // original buffer (holds green pixels)
-    unsigned char* itr = buf.data();
-    unsigned char* end = itr + buf.size();
+
+    // im2 (green)
+    for (auto const& pixel : im2)
+    {
+        // expect `green`
+        CHECK( pixel == mapnik::color(0,255,0).rgba());
+    }
+
+    //buf2 still holds green pixels
+    CHECK(buf2.size() == 16 * 16 * 4);
+
+    unsigned char* itr = buf2.data();
+    unsigned char* end = itr + buf2.size();
     count = 0;
     for ( ;itr!= end; ++itr)
     {
-        CHECK( *itr == ((count % 2 == 0) ? 0 : 0xff)); // green
-        ++count;
+        CHECK( *itr == ((count++ % 2 == 0) ? 0 : 0xff)); // green
     }
 }
 
