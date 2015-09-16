@@ -126,29 +126,15 @@ private:
 };
 
 runner::runner(runner::path_type const & styles_dir,
-               runner::path_type const & output_dir,
-               runner::path_type const & reference_dir,
-               bool overwrite,
                std::size_t iterations,
                std::size_t fail_limit,
-               std::size_t jobs)
+               std::size_t jobs,
+               runner::renderer_container const & renderers)
     : styles_dir_(styles_dir),
-      output_dir_(output_dir),
-      reference_dir_(reference_dir),
       jobs_(jobs),
       iterations_(iterations),
       fail_limit_(fail_limit),
-      renderers_{ renderer<agg_renderer>(output_dir_, reference_dir_, overwrite)
-#if defined(HAVE_CAIRO)
-                  ,renderer<cairo_renderer>(output_dir_, reference_dir_, overwrite)
-#endif
-#if defined(SVG_RENDERER)
-                  ,renderer<svg_renderer>(output_dir_, reference_dir_, overwrite)
-#endif
-#if defined(GRID_RENDERER)
-                  ,renderer<grid_renderer>(output_dir_, reference_dir_, overwrite)
-#endif
-                }
+      renderers_(renderers)
 {
 }
 

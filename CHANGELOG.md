@@ -12,6 +12,10 @@ Released: YYYY XX, 2015
 
 (Packaged from xxxx)
 
+#### Summary
+
+- Visual tests: new command line arguments `--agg`, `--cairo`, `--svg`, `--grid` for selecting renderers (https://github.com/mapnik/mapnik/pull/3074)
+
 ## 3.0.5
 
 Released: September 16, 2015
