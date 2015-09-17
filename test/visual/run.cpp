@@ -43,11 +43,50 @@ log_levels_map log_levels
 };
 #endif
 
+using namespace visual_tests;
+namespace po = boost::program_options;
+
+runner::renderer_container create_renderers(po::variables_map const & args,
+                                            boost::filesystem::path const & output_dir,
+                                            bool append_all = false)
+{
+    boost::filesystem::path reference_dir(args["images-dir"].as<std::string>());
+    bool overwrite = args.count("overwrite");
+    runner::renderer_container renderers;
+
+    if (append_all || args.count(agg_renderer::name))
+    {
+        renderers.emplace_back(renderer<agg_renderer>(output_dir, reference_dir, overwrite));
+    }
+#if defined(HAVE_CAIRO)
+    if (append_all || args.count(cairo_renderer::name))
+    {
+        renderers.emplace_back(renderer<cairo_renderer>(output_dir, reference_dir, overwrite));
+    }
+#endif
+#if defined(SVG_RENDERER)
+    if (append_all || args.count(svg_renderer::name))
+    {
+        renderers.emplace_back(renderer<svg_renderer>(output_dir, reference_dir, overwrite));
+    }
+#endif
+#if defined(GRID_RENDERER)
+    if (append_all || args.count(grid_renderer::name))
+    {
+        renderers.emplace_back(renderer<grid_renderer>(output_dir, reference_dir, overwrite));
+    }
+#endif
+
+    if (renderers.empty())
+    {
+        return create_renderers(args, output_dir, true);
+    }
+
+    return renderers;
+}
+
 int main(int argc, char** argv)
 {
-    using namespace visual_tests;
-    namespace po = boost::program_options;
-
     po::options_description desc("visual test runner");
     desc.add_options()
         ("help,h", "produce usage message")
@@ -68,6 +107,17 @@ int main(int argc, char** argv)
         ("log", po::value<std::string>()->default_value(std::find_if(log_levels.begin(), log_levels.end(),
              [](log_levels_map::value_type const & level) { return level.second == mapnik::logger::get_severity(); } )->first),
              "log level (debug, warn, error, none)")
+#endif
+        ("scale-factor,s", po::value<std::vector<double>>()->default_value({ 1.0, 2.0 }, "1.0, 2.0"), "scale factor")
+        (agg_renderer::name, "render with AGG renderer")
+#if defined(HAVE_CAIRO)
+        (cairo_renderer::name, "render with Cairo renderer")
+#endif
+#if defined(SVG_RENDERER)
+        (svg_renderer::name, "render with SVG renderer")
+#endif
+#if defined(GRID_RENDERER)
+        (grid_renderer::name, "render with Grid renderer")
 #endif
         ;
 
@@ -107,13 +157,15 @@ int main(int argc, char** argv)
         output_dir /= boost::filesystem::unique_path();
     }
 
+    config defaults;
+    defaults.scales = vm["scale-factor"].as<std::vector<double>>();
+
     runner run(vm["styles-dir"].as<std::string>(),
-               output_dir,
-               vm["images-dir"].as<std::string>(),
-               vm.count("overwrite"),
+               defaults,
                vm["iterations"].as<std::size_t>(),
                vm["limit"].as<std::size_t>(),
-               vm["jobs"].as<std::size_t>());
+               vm["jobs"].as<std::size_t>(),
+               create_renderers(vm, output_dir));
     bool show_duration = vm.count("duration");
     report_type report(vm.count("verbose") ? report_type((console_report(show_duration))) : report_type((console_short_report(show_duration))));
     result_list results;
