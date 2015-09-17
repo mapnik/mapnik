@@ -36,27 +36,38 @@ namespace detail
 // BUFFER
 buffer::buffer(std::size_t size)
     : size_(size),
-      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
+      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr)),
+      owns_(true)
 {}
 
+buffer::buffer(unsigned char* data, std::size_t size)
+    : size_(size),
+      data_(data),
+      owns_(false)
+{}
+
+// move
 buffer::buffer(buffer && rhs) noexcept
-: size_(std::move(rhs.size_)),
-    data_(std::move(rhs.data_))
+: size_(rhs.size_),
+    data_(rhs.data_),
+    owns_(rhs.owns_)
 {
     rhs.size_ = 0;
     rhs.data_ = nullptr;
+    rhs.owns_ = false;
 }
-
+// copy
 buffer::buffer(buffer const& rhs)
     : size_(rhs.size_),
-      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr))
+      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr)),
+      owns_(true)
 {
     if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
 }
 
 buffer::~buffer()
 {
-    ::operator delete(data_);
+    if (owns_) ::operator delete(data_);
 }
 
 buffer& buffer::operator=(buffer rhs)
@@ -69,21 +80,7 @@ void buffer::swap(buffer & rhs)
 {
     std::swap(size_, rhs.size_);
     std::swap(data_, rhs.data_);
-}
-
-unsigned char* buffer::data()
-{
-    return data_;
-}
-
-unsigned char const* buffer::data() const
-{
-    return data_;
-}
-
-std::size_t buffer::size() const
-{
-    return size_;
+    std::swap(owns_, rhs.owns_);
 }
 
 template struct MAPNIK_DECL image_dimensions<65535>;

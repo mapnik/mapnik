@@ -33,6 +33,7 @@
 #include <mapnik/map.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/util/variant.hpp>
 #include <mapnik/agg_renderer.hpp>
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
@@ -326,10 +327,22 @@ private:
     }
 
     const Renderer ren;
-    boost::filesystem::path const & output_dir;
-    boost::filesystem::path const & reference_dir;
+    const boost::filesystem::path output_dir;
+    const boost::filesystem::path reference_dir;
     const bool overwrite;
 };
+
+using renderer_type = mapnik::util::variant<renderer<agg_renderer>
+#if defined(HAVE_CAIRO)
+                                            ,renderer<cairo_renderer>
+#endif
+#if defined(SVG_RENDERER)
+                                            ,renderer<svg_renderer>
+#endif
+#if defined(GRID_RENDERER)
+                                            ,renderer<grid_renderer>
+#endif
+                                            >;
 
 }
 

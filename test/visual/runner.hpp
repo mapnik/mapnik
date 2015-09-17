@@ -23,8 +23,6 @@
 #ifndef VISUAL_TEST_RUNNER_HPP
 #define VISUAL_TEST_RUNNER_HPP
 
-#include <mapnik/util/variant.hpp>
-
 #include "config.hpp"
 #include "report.hpp"
 #include "renderer.hpp"
@@ -35,28 +33,18 @@ namespace visual_tests
 
 class runner
 {
-    using renderer_type = mapnik::util::variant<renderer<agg_renderer>
-#if defined(HAVE_CAIRO)
-                                                ,renderer<cairo_renderer>
-#endif
-#if defined(SVG_RENDERER)
-                                                ,renderer<svg_renderer>
-#endif
-#if defined(GRID_RENDERER)
-                                                ,renderer<grid_renderer>
-#endif
-                                                >;
     using path_type = boost::filesystem::path;
     using files_iterator = std::vector<path_type>::const_iterator;
 
 public:
+    using renderer_container = std::vector<renderer_type>;
+
     runner(path_type const & styles_dir,
-           path_type const & output_dir,
-           path_type const & reference_dir,
-           bool overwrite,
+           config const & cfg,
            std::size_t iterations,
            std::size_t fail_limit,
-           std::size_t jobs);
+           std::size_t jobs,
+           renderer_container const & renderers);
 
     result_list test_all(report_type & report) const;
     result_list test(std::vector<std::string> const & style_names, report_type & report) const;
@@ -68,18 +56,17 @@ private:
                            std::reference_wrapper<report_type> report,
                            std::reference_wrapper<std::atomic<std::size_t>> fail_limit) const;
     result_list test_one(path_type const & style_path,
-                         config cfg, report_type & report,
+                         report_type & report,
                          std::atomic<std::size_t> & fail_limit) const;
     void parse_map_sizes(std::string const & str, std::vector<map_size> & sizes) const;
 
     const map_sizes_grammar<std::string::const_iterator> map_sizes_parser_;
     const path_type styles_dir_;
-    const path_type output_dir_;
-    const path_type reference_dir_;
+    const config defaults_;
     const std::size_t jobs_;
     const std::size_t iterations_;
     const std::size_t fail_limit_;
-    const renderer_type renderers_[boost::mpl::size<renderer_type::types>::value];
+    const renderer_container renderers_;
 };
 
 }

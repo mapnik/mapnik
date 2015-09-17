@@ -21,6 +21,11 @@ SECTION("readers") {
     boost::optional<std::string> type;
     try
     {
+        mapnik::image_rgba8 im_og;
+        auto im_size = mapnik::image_rgba8::pixel_size * im_og.width() * im_og.height();
+        mapnik::detail::buffer buf(im_og.bytes(), im_size);
+        mapnik::image_rgba8 im2(im_og.width(), im_og.height(), buf.data());
+        CHECK( im2.bytes() == im_og.bytes() );
 #if defined(HAVE_JPEG)
         should_throw = "./test/data/images/blank.jpg";
         REQUIRE( mapnik::util::exists( should_throw ) );

@@ -10,7 +10,7 @@
 TEST_CASE("image class") {
 
 SECTION("test gray16") {
-    
+
     const mapnik::image_gray16 im(4,4);
     mapnik::image_gray16 im2(im);
     mapnik::image_gray16 im3(5,5);
@@ -20,11 +20,11 @@ SECTION("test gray16") {
     CHECK_FALSE(im2 == im3);
     CHECK(im < im3);
     CHECK_FALSE(im < im2);
-    
+
     // Check that width is correct
     CHECK(im.width() == 4);
     CHECK(im2.width() == 4);
-    
+
     // Check that height is correct
     CHECK(im.height() == 4);
     CHECK(im2.height() == 4);
@@ -40,11 +40,11 @@ SECTION("test gray16") {
     // Check that size is correct
     CHECK(im.size() == 32);
     CHECK(im2.size() == 32);
-    
+
     // Check that row_size is correct
     CHECK(im.row_size() == 8);
     CHECK(im2.row_size() == 8);
-    
+
     // Check that get_premultiplied is correct
     CHECK_FALSE(im.get_premultiplied());
     CHECK_FALSE(im2.get_premultiplied());
@@ -52,7 +52,7 @@ SECTION("test gray16") {
     // Check that set premultiplied works
     im2.set_premultiplied(true);
     CHECK(im2.get_premultiplied());
-    
+
     // Check that painted is correct
     CHECK_FALSE(im.painted());
     CHECK_FALSE(im2.painted());
@@ -64,15 +64,15 @@ SECTION("test gray16") {
     // Check that offset is correct
     CHECK(im.get_offset() == 0.0);
     CHECK(im2.get_offset() == 0.0);
-    
+
     // Check that set offset works
     im2.set_offset(2.3);
     CHECK(im2.get_offset() == 2.3);
-    
+
     // Check that scaling is correct
     CHECK(im.get_scaling() == 1.0);
     CHECK(im2.get_scaling() == 1.0);
-    
+
     // Check that set scaling works
     im2.set_scaling(1.1);
     CHECK(im2.get_scaling() == 1.1);
@@ -140,7 +140,7 @@ SECTION("test gray16") {
     CHECK(im2(0,0) == 30);
     CHECK(im2(0,1) == 514);
     CHECK(im2(1,1) == 50);
-    
+
 } // END SECTION
 
 SECTION("image_null")
@@ -149,11 +149,11 @@ SECTION("image_null")
     const mapnik::image_null im_null2(2,2); // Actually doesn't really set any size
     mapnik::image_null im_null3(im_null2);
     mapnik::image_null im_null4(std::move(im_null3));
-    
+
     // All nulls are equal
     CHECK(im_null == im_null4);
     CHECK(im_null == im_null2);
-    
+
     // No null is greater
     CHECK_FALSE(im_null < im_null4);
     CHECK_FALSE(im_null < im_null2);
@@ -289,5 +289,85 @@ SECTION("Image Buffer")
 
 } // END SECTION
 
-} // END TEST CASE
 
+SECTION("Image copy/move")
+{
+    mapnik::detail::buffer buf(16 * 16 * 4); // large enough to hold 16*16 RGBA image
+    CHECK(buf.size() == 16 * 16 * 4);
+    // fill buffer with 0xff
+    std::fill(buf.data(), buf.data() + buf.size(), 0xff);
+
+    // move buffer
+    mapnik::detail::buffer buf2(std::move(buf));
+    CHECK (buf.size() == 0);
+    CHECK (buf.data() == nullptr);
+
+    mapnik::image_rgba8 im(16, 16, buf2.data()); // shallow copy
+    std::size_t count = 0;
+    for (auto const& pixel : im)
+    {
+        // expect rgba(255,255,255,1.0)
+        CHECK( sizeof(pixel) == sizeof(mapnik::image_rgba8::pixel_type));
+        CHECK( pixel == 0xffffffff);
+        ++count;
+    }
+    CHECK( count == im.width() * im.height());
+    CHECK( buf2.size() == im.width() * im.height() * sizeof( mapnik::image_rgba8::pixel_type));
+
+    // mutate buffer
+    // fill buffer with 0x7f - semi-transparent grey
+    std::fill(buf2.data(), buf2.data() + buf2.size(), 0x7f);
+    for (auto const& pixel : im)
+    {
+        // expect rgba(127,127,127,0.5)
+        CHECK( pixel == 0x7f7f7f7f);
+    }
+
+    // mutate image directly (buf)
+    for (auto & pixel : im)
+    {
+        pixel = mapnik::color(0,255,0).rgba(); // green
+    }
+
+    // move
+    mapnik::image_rgba8 im2(std::move(im));
+    CHECK (im.data() == nullptr);
+    CHECK (im.bytes() == nullptr);
+    CHECK (im.width() == 0);
+    CHECK (im.height() == 0);
+    for (auto const& pixel : im2)
+    {
+        // expect `green`
+        CHECK( pixel == mapnik::color(0,255,0).rgba());
+    }
+
+    // deep copy
+    mapnik::image_rgba8 im3(im2); // allocates new internal buffer
+    for (auto & pixel : im3)
+    {
+        // expect `green`
+        CHECK( pixel == mapnik::color(0,255,0).rgba());
+        // mutate
+        pixel = mapnik::color(255,0,0).rgba(); //red
+    }
+
+    // im2 (green)
+    for (auto const& pixel : im2)
+    {
+        // expect `green`
+        CHECK( pixel == mapnik::color(0,255,0).rgba());
+    }
+
+    //buf2 still holds green pixels
+    CHECK(buf2.size() == 16 * 16 * 4);
+
+    unsigned char* itr = buf2.data();
+    unsigned char* end = itr + buf2.size();
+    count = 0;
+    for ( ;itr!= end; ++itr)
+    {
+        CHECK( *itr == ((count++ % 2 == 0) ? 0 : 0xff)); // green
+    }
+}
+
+} // END TEST CASE

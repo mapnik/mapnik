@@ -78,6 +78,16 @@ image<T>::image()
 {}
 
 template <typename T>
+image<T>::image(int width, int height, unsigned char* data, bool premultiplied, bool painted)
+    : dimensions_(width, height),
+      buffer_(data, width * height * sizeof(pixel_size)),
+      pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+      offset_(0.0),
+      scaling_(1.0),
+      premultiplied_alpha_(premultiplied),
+      painted_(painted) {}
+
+template <typename T>
 image<T>::image(int width, int height, bool initialize, bool premultiplied, bool painted)
     : dimensions_(width, height),
       buffer_(dimensions_.width() * dimensions_.height() * pixel_size),
@@ -101,18 +111,17 @@ image<T>::image(image<T> const& rhs)
       offset_(rhs.offset_),
       scaling_(rhs.scaling_),
       premultiplied_alpha_(rhs.premultiplied_alpha_),
-      painted_(rhs.painted_)
-{}
+      painted_(rhs.painted_) {}
 
 template <typename T>
 image<T>::image(image<T> && rhs) noexcept
     : dimensions_(std::move(rhs.dimensions_)),
-    buffer_(std::move(rhs.buffer_)),
-    pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
-    offset_(rhs.offset_),
-    scaling_(rhs.scaling_),
-    premultiplied_alpha_(rhs.premultiplied_alpha_),
-    painted_(rhs.painted_)
+      buffer_(std::move(rhs.buffer_)),
+      pData_(reinterpret_cast<pixel_type*>(buffer_.data())),
+      offset_(rhs.offset_),
+      scaling_(rhs.scaling_),
+      premultiplied_alpha_(rhs.premultiplied_alpha_),
+      painted_(rhs.painted_)
 {
     rhs.dimensions_ = { 0, 0 };
     rhs.pData_ = nullptr;
@@ -215,6 +224,20 @@ inline unsigned char* image<T>::bytes()
 {
     return buffer_.data();
 }
+
+// iterator interface
+template <typename T>
+inline typename image<T>::iterator image<T>::begin() { return pData_; }
+
+template <typename T>
+inline typename image<T>::iterator image<T>::end() { return pData_ + dimensions_.width() * dimensions_.height(); }
+
+template <typename T>
+inline typename image<T>::const_iterator image<T>::begin() const { return pData_; }
+
+template <typename T>
+inline typename image<T>::const_iterator image<T>::end() const{ return pData_ + dimensions_.width() * dimensions_.height(); }
+
 
 template <typename T>
 inline typename image<T>::pixel_type const* image<T>::get_row(std::size_t row) const
