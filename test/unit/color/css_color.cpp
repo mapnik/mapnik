@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include <mapnik/css_color_grammar.hpp>
+#include <mapnik/css_color_grammar_impl.hpp>
 #include <mapnik/safe_cast.hpp>
 
 TEST_CASE("css color") {
@@ -34,5 +35,133 @@ TEST_CASE("css color") {
         CHECK( c.red() == 0 );
         CHECK( c.green() == 0 );
         CHECK( c.blue() == 0 );
+    }
+
+    SECTION("hex colors")
+    {
+        mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
+        boost::spirit::qi::ascii::space_type space;
+
+        {
+            std::string s("#abcdef");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xff );
+            CHECK( c.red() == 0xab );
+            CHECK( c.green() == 0xcd );
+            CHECK( c.blue() == 0xef );
+        }
+
+        {
+            std::string s("#abcdef12");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0x12 );
+            CHECK( c.red() == 0xab );
+            CHECK( c.green() == 0xcd );
+            CHECK( c.blue() == 0xef );
+        }
+
+        {
+            std::string s("  #abcdef");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xff );
+            CHECK( c.red() == 0xab );
+            CHECK( c.green() == 0xcd );
+            CHECK( c.blue() == 0xef );
+        }
+
+        {
+            std::string s("   #abcdef12");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0x12 );
+            CHECK( c.red() == 0xab );
+            CHECK( c.green() == 0xcd );
+            CHECK( c.blue() == 0xef );
+        }
+
+        {
+            std::string s("# abcdef");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        {
+            std::string s("# abcdef12");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        {
+            std::string s("#ab cdef");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        {
+            std::string s("#ab cdef12");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        // hex_color_small
+
+        {
+            std::string s("#abc");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xff );
+            CHECK( c.red() == 0xaa );
+            CHECK( c.green() == 0xbb );
+            CHECK( c.blue() == 0xcc );
+        }
+
+        {
+            std::string s("#abcd");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xdd );
+            CHECK( c.red() == 0xaa );
+            CHECK( c.green() == 0xbb );
+            CHECK( c.blue() == 0xcc );
+        }
+
+        {
+            std::string s("   #abc");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xff );
+            CHECK( c.red() == 0xaa );
+            CHECK( c.green() == 0xbb );
+            CHECK( c.blue() == 0xcc );
+        }
+
+        {
+            std::string s("   #abcd");
+            mapnik::color c;
+            CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xdd );
+            CHECK( c.red() == 0xaa );
+            CHECK( c.green() == 0xbb );
+            CHECK( c.blue() == 0xcc );
+        }
+
+        {
+            std::string s("# abc");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        {
+            std::string s("# abcd");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        {
+            std::string s("#a bc");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
+
+        {
+            std::string s("#a bcd");
+            CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
+        }
     }
 }
