@@ -56,13 +56,6 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(csv_datasource)
 
-
-namespace {
-
-using cvs_value = mapnik::util::variant<std::string, mapnik::value_integer, mapnik::value_double, mapnik::value_bool>;
-
-}
-
 csv_datasource::csv_datasource(parameters const& params)
 : datasource(params),
     desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
