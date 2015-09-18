@@ -27,7 +27,7 @@
 #include <fstream>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/geometry_envelope.hpp>
-#include "../shapeindex/quadtree.hpp"
+
 #include "../../plugins/input/csv/csv_utils.hpp"
 
 #pragma GCC diagnostic push
@@ -37,8 +37,22 @@
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
 
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
+
+//#include <mapnik/util/file_io.hpp>
+
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;
+
+std::ostream& operator<<(std::ostream & out, std::pair<std::size_t,std::size_t> const& item)
+{
+    out << "offset=" << std::get<0>(item) << " size=" << std::get<1>(item);
+    return out;
+}
+
+#include "../shapeindex/quadtree.hpp"
 
 int main (int argc, char** argv)
 {
@@ -137,6 +151,7 @@ int main (int argc, char** argv)
         clog << "no csv files to index" << endl;
         return 0;
     }
+
     for (auto const& filename : csv_files)
     {
         clog << "processing " << filename << endl;
@@ -147,11 +162,22 @@ int main (int argc, char** argv)
             continue;
         }
 
-        std::ifstream csv_file(csvname.c_str(),std::ios_base::in | std::ios_base::binary);
+        //std::ifstream csv_file(csvname.c_str(),std::ios_base::in | std::ios_base::binary);
 
-        if (!csv_file.is_open())
+        using file_source_type = boost::interprocess::ibufferstream;
+        file_source_type csv_file;
+
+        mapnik::mapped_region_ptr mapped_region;
+        boost::optional<mapnik::mapped_region_ptr> memory =
+            mapnik::mapped_memory_cache::instance().find(csvname, true);
+        if (memory)
         {
-            clog << "Error : cannot open " << csvname << endl;
+            mapped_region = *memory;
+            csv_file.buffer(static_cast<char*>(mapped_region->get_address()),mapped_region->get_size());
+        }
+        else
+        {
+            clog << "Error : cannot mmap " << csvname << endl;
             continue;
         }
 
@@ -261,8 +287,10 @@ int main (int argc, char** argv)
             }
         }
 
-        //quadtree<int> tree(extent,depth,ratio);
         mapnik::box2d<double> extent;
+        using box_type = mapnik::box2d<double>;
+        using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
+        std::vector<item_type> boxes;
 
         while (is_first_row || std::getline(csv_file, csv_line, csv_file.widen(newline)))
         {
@@ -282,7 +310,6 @@ int main (int argc, char** argv)
                     continue;
                 }
             }
-#if 1
             try
             {
                 auto values = csv_utils::parse_line(csv_line, separator);
@@ -313,7 +340,7 @@ int main (int argc, char** argv)
                     if (!extent.valid()) extent = box;
                     else extent.expand_to_include(box);
                         //std::clog << box << " " << record_offset << "," << record_size << std::endl;
-                    //boxes.emplace_back(std::move(box), make_pair(record_offset, record_size));
+                    boxes.emplace_back(std::move(box), make_pair(record_offset, record_size));
                 }
                 else
                 {
@@ -333,24 +360,29 @@ int main (int argc, char** argv)
                 std::clog << s.str() << std::endl;
                 return 1;
             }
-#endif
         }
-        // TODO
 
         std::clog << extent << std::endl;
+        quadtree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
+        for (auto const& item : boxes)
+        {
+            tree.insert(std::get<1>(item), std::get<0>(item));
+        }
+
         std::fstream file((csvname + ".index").c_str(),
                           std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
         if (!file)
         {
             clog << "cannot open index file for writing file \""
-                 << (csvname+".index") << "\"" << endl;
+                 << (csvname + ".index") << "\"" << endl;
         }
         else
         {
-            //tree.trim();
-            //std::clog<<" number nodes="<<tree.count()<<std::endl;
+            tree.trim();
+            std::clog <<  "number nodes=" << tree.count() << std::endl;
+            tree.print();
             file.exceptions(std::ios::failbit | std::ios::badbit);
-            //tree.write(file);
+            tree.write(file);
             file.flush();
             file.close();
         }
