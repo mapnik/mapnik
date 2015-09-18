@@ -39,6 +39,7 @@ css_color_grammar<Iterator>::css_color_grammar()
     qi::_a_type _a;
     qi::_b_type _b;
     qi::_c_type _c;
+    qi::lexeme_type lexeme;
     ascii::no_case_type no_case;
     using phoenix::at_c;
 
@@ -49,18 +50,18 @@ css_color_grammar<Iterator>::css_color_grammar()
         | hex_color_small
         | no_case[named];
 
-    hex_color = lit('#')
+    hex_color = lexeme[ lit('#')
         >> hex2 [ at_c<0>(_val) = _1 ]
         >> hex2 [ at_c<1>(_val) = _1 ]
         >> hex2 [ at_c<2>(_val) = _1 ]
-        >>-hex2 [ at_c<3>(_val) = _1 ]
+        >>-hex2 [ at_c<3>(_val) = _1 ] ]
         ;
 
-    hex_color_small = lit('#')
+    hex_color_small = lexeme[ lit('#')
         >> hex1 [ at_c<0>(_val) = _1 | _1 << 4 ]
         >> hex1 [ at_c<1>(_val) = _1 | _1 << 4 ]
         >> hex1 [ at_c<2>(_val) = _1 | _1 << 4 ]
-        >>-hex1 [ at_c<3>(_val) = _1 | _1 << 4 ]
+        >>-hex1 [ at_c<3>(_val) = _1 | _1 << 4 ] ]
         ;
 
     rgba_color = lit("rgb") >> -lit('a')

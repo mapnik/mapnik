@@ -6,6 +6,9 @@
 #include <mapnik/color.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_filter_grammar.hpp>
+#include <mapnik/image_filter_grammar_impl.hpp>
+#include <mapnik/css_color_grammar_impl.hpp>
 
 TEST_CASE("image filter") {
 
@@ -385,6 +388,49 @@ SECTION("test colorize-alpha - two color with transparency") {
     CHECK(im(2,0) == 0x70264a00);
     CHECK(im(2,1) == 0x70264a00);
     CHECK(im(2,2) == 0x70264a00);
+
+} // END SECTION
+
+SECTION("test colorize-alpha - parsing correct input") {
+
+    mapnik::image_filter_grammar<std::string::const_iterator, std::vector<mapnik::filter::filter_type>> filter_grammar;
+    boost::spirit::qi::ascii::space_type space;
+    std::vector<mapnik::filter::filter_type> f;
+    std::string s("colorize-alpha(#0000ff 0%, #00ff00 100%)");
+    CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), filter_grammar, space, f) );
+    mapnik::filter::colorize_alpha const & ca = mapnik::util::get<mapnik::filter::colorize_alpha>(f.front());
+
+    {
+        mapnik::filter::color_stop const & s = ca[0];
+        CHECK( s.color.alpha() == 0xff );
+        CHECK( s.color.red() == 0x00 );
+        CHECK( s.color.green() == 0x00 );
+        CHECK( s.color.blue() == 0xff );
+        CHECK( s.offset == 0.0 );
+    }
+
+    {
+        mapnik::filter::color_stop const & s = ca[1];
+        CHECK( s.color.alpha() == 0xff );
+        CHECK( s.color.red() == 0x00 );
+        CHECK( s.color.green() == 0xff );
+        CHECK( s.color.blue() == 0x00 );
+        CHECK( s.offset == 1.0 );
+    }
+
+} // END SECTION
+
+SECTION("test colorize-alpha - parsing incorrect input") {
+
+    mapnik::image_filter_grammar<std::string::const_iterator, std::vector<mapnik::filter::filter_type>> filter_grammar;
+    boost::spirit::qi::ascii::space_type space;
+    std::string s("colorize-alpha(#0000ff 0%, #00ff00 00 100%)");
+    std::string::const_iterator itr = s.cbegin();
+    std::string::const_iterator end = s.cend();
+    std::vector<mapnik::filter::filter_type> f;
+    CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), filter_grammar, space, f) );
+    CHECK( f.empty() );
+    CHECK( itr != end );
 
 } // END SECTION
 
