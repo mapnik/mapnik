@@ -7,6 +7,18 @@ ECHO =========== %~f0 ===========
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
 
+::cloning mapnik-gyp
+if EXIST mapnik-gyp ECHO mapnik-gyp already cloned && GOTO MAPNIK_GYP_ALREADY_HERE
+CALL git clone https://github.com/mapnik/mapnik-gyp.git
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+:MAPNIK_GYP_ALREADY_HERE
+CD mapnik-gyp
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git pull
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+
+::cloning gyp
 if EXIST gyp ECHO gyp already cloned && GOTO GYP_ALREADY_HERE
 CALL git clone https://chromium.googlesource.com/external/gyp.git gyp
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
@@ -14,6 +26,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CD gyp
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 git pull
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CD ..
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
@@ -25,20 +38,11 @@ ECHO extracting binary deps
 IF EXIST mapnik-sdk (ECHO already extracted) ELSE (7z -y x deps.7z | %windir%\system32\FIND "ing archive")
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-SET MAPNIK_SDK=%APPVEYOR_BUILD_FOLDER%\mapnik-sdk
+CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-ECHO generating solution file, calling gyp...
-CALL gyp\gyp.bat mapnik.gyp --depth=. ^
- --debug=all ^
- -Dincludes=%MAPNIK_SDK%/include ^
- -Dlibs=%MAPNIK_SDK%/lib ^
- -Dconfiguration=%configuration% ^
- -Dplatform=%platform% ^
- -Dboost_version=1_%BOOST_VERSION% ^
- -f msvs -G msvs_version=2015 ^
- --generator-output=build
-IF %ERRORLEVEL% NEQ 0 (ECHO error during solution file generation && GOTO ERROR) ELSE (ECHO solution file generated)
-
+ECHO calling build.bat of mapnik-gyp && CALL build.bat
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 GOTO DONE
 

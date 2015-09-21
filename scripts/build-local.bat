@@ -6,6 +6,7 @@ ECHO =========== %~f0 ===========
 
 SET MAPNIK_GIT=3.0.5
 SET BOOST_VERSION=58
+SET FASTBUILD=1
 SET msvs_toolset=14
 SET platform=x64
 SET APPVEYOR_BUILD_FOLDER=%CD%
