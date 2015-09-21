@@ -21,6 +21,8 @@ ECHO msvs_toolset^: %msvs_toolset%
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
+IF DEFINED APPVEYOR (ECHO on AppVeyor) ELSE (ECHO NOT on AppVeyor)
+ECHO ========
 
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
