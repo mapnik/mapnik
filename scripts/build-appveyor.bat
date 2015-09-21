@@ -6,6 +6,8 @@ ECHO =========== %~f0 ===========
 
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
+:: *nix style find command:
+SET PATH=C:\Program Files (x86)\Git\bin\find.exe;%PATH%
 
 ::cloning mapnik-gyp
 if EXIST mapnik-gyp ECHO mapnik-gyp already cloned && GOTO MAPNIK_GYP_ALREADY_HERE
