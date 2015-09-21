@@ -4,11 +4,13 @@ SET EL=0
 
 ECHO =========== %~f0 ===========
 
-SET APPVEYOR_REPO_COMMIT_MESSAGE=das ist ein test
+SET APPVEYOR_REPO_COMMIT_MESSAGE=this is a [build appveyor] test
+SET APPVEYOR=true
 
 SET MAPNIK_GIT=3.0.5
 SET BOOST_VERSION=58
 SET FASTBUILD=1
+SET configuration=Release
 SET msvs_toolset=14
 SET platform=x64
 SET APPVEYOR_BUILD_FOLDER=%CD%

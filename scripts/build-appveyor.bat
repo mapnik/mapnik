@@ -15,6 +15,9 @@ SET BUILD_ON_APPVEYOR=0
 for /F "tokens=1 usebackq" %%i in (`powershell .\scripts\parse-commit-message.ps1 '[build appveyor]'`) DO SET BUILD_ON_APPVEYOR=%%i
 IF %BUILD_ON_APPVEYOR% EQU 0 ECHO not building, commit with [build appveyor] && GOTO DONE
 
+ECHO configuration^: %configuration%
+ECHO platform^: %platform%
+ECHO msvs_toolset^: %msvs_toolset%
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
@@ -48,8 +51,11 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+SET AV_MAPNIK_GYP_STARTTIME=%TIME%
 ECHO calling build.bat of mapnik-gyp && CALL build.bat
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+ECHO %AV_MAPNIK_GYP_STARTTIME% started mapnik-gyp build.bat
+ECHO %TIME% finished mapnik-gyp build.bat
 
 GOTO DONE
 
