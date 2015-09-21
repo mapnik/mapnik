@@ -4,6 +4,11 @@ SET EL=0
 
 ECHO =========== %~f0 ===========
 
+ECHO NUMBER_OF_PROCESSORS^: %NUMBER_OF_PROCESSORS%
+ECHO RAM [MB]:
+powershell "get-ciminstance -class "cim_physicalmemory" | % {$_.Capacity / 1024 / 1024}"
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
@@ -19,6 +24,8 @@ CALL git clone https://github.com/mapnik/mapnik-gyp.git
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 :MAPNIK_GYP_ALREADY_HERE
 CD mapnik-gyp
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git checkout windows-performance
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 git pull
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
