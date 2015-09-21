@@ -6,6 +6,7 @@ ECHO =========== %~f0 ===========
 
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
+SET TOOLS_VERSION=%msvs_toolset%.0
 
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
