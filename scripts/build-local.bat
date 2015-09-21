@@ -4,6 +4,8 @@ SET EL=0
 
 ECHO =========== %~f0 ===========
 
+SET APPVEYOR_REPO_COMMIT_MESSAGE=das ist ein test
+
 SET MAPNIK_GIT=3.0.5
 SET BOOST_VERSION=58
 SET FASTBUILD=1

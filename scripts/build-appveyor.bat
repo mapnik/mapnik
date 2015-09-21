@@ -5,9 +5,15 @@ SET EL=0
 ECHO =========== %~f0 ===========
 
 ECHO NUMBER_OF_PROCESSORS^: %NUMBER_OF_PROCESSORS%
-ECHO RAM [MB]:
-powershell "get-ciminstance -class 'cim_physicalmemory' | % {$_.Capacity / 1024 / 1024}"
+ECHO RAM [MB]^:
+powershell "get-ciminstance -class 'cim_physicalmemory' | %% { $_.Capacity/1024/1024}"
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+::only build on AppVeyor, if explicitly stated
+ECHO APPVEYOR_REPO_COMMIT_MESSAGE^: %APPVEYOR_REPO_COMMIT_MESSAGE%
+SET BUILD_ON_APPVEYOR=0
+for /F "tokens=1 usebackq" %%i in (`powershell .\scripts\parse-commit-message.ps1 '[build appveyor]'`) DO SET BUILD_ON_APPVEYOR=%%i
+IF %BUILD_ON_APPVEYOR% EQU 0 ECHO not building, commit with [build appveyor] && GOTO DONE
 
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
