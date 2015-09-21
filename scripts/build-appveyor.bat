@@ -7,7 +7,7 @@ ECHO =========== %~f0 ===========
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
 :: *nix style find command:
-SET PATH=C:\Program Files (x86)\Git\bin\find.exe;%PATH%
+SET PATH=C:\Program Files (x86)\Git\bin;%PATH%
 
 ::cloning mapnik-gyp
 if EXIST mapnik-gyp ECHO mapnik-gyp already cloned && GOTO MAPNIK_GYP_ALREADY_HERE
@@ -19,18 +19,6 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 git pull
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-
-::cloning gyp
-if EXIST gyp ECHO gyp already cloned && GOTO GYP_ALREADY_HERE
-CALL git clone https://chromium.googlesource.com/external/gyp.git gyp
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-:GYP_ALREADY_HERE
-CD gyp
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-git pull
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-CD ..
-IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 SET DEPS_URL=https://mapbox.s3.amazonaws.com/windows-builds/windows-build-deps/mapnik-win-sdk-binary-deps-%msvs_toolset%.0-%platform%.7z
 ECHO fetching binary deps^: %DEPS_URL%
