@@ -6,7 +6,7 @@ ECHO =========== %~f0 ===========
 
 ECHO NUMBER_OF_PROCESSORS^: %NUMBER_OF_PROCESSORS%
 ECHO RAM [MB]:
-powershell "get-ciminstance -class "cim_physicalmemory" | % {$_.Capacity / 1024 / 1024}"
+powershell "get-ciminstance -class 'cim_physicalmemory' | % {$_.Capacity / 1024 / 1024}"
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 SET BUILD_TYPE=%configuration%
