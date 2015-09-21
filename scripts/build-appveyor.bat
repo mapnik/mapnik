@@ -4,6 +4,9 @@ SET EL=0
 
 ECHO =========== %~f0 ===========
 
+SET BUILD_TYPE=%configuration%
+SET BUILDPLATFORM=%platform%
+
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
 :: *nix style find command:
