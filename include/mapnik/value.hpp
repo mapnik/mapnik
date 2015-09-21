@@ -86,7 +86,7 @@ struct equals
 
     bool operator() (value_double lhs, value_integer rhs) const
     {
-        return  lhs == static_cast<value_bool>(rhs);
+        return  lhs == static_cast<value_double>(rhs);
     }
 
     bool operator() (value_bool lhs, value_integer rhs) const
@@ -160,7 +160,7 @@ struct not_equals
 
     bool operator() (value_integer lhs, value_bool rhs) const
     {
-        return  lhs != rhs;
+        return  lhs != static_cast<value_integer>(rhs);
     }
 
     bool operator() (value_double lhs, value_bool rhs) const
