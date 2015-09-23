@@ -158,19 +158,20 @@ double parse_double_optional_percent(T & error_messages, const char* str, bool &
 }
 
 template <typename T>
-bool parse_integer_list(T & error_messages, const char* str, int* list)
+bool parse_double_list(T & error_messages, const char* str, double* list)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
     qi::_1_type _1;
-    qi::int_type int_;
+    qi::double_type double_;
+    qi::char_type char_;
 
-    if (!parse(str, str + std::strlen(str), int_[ref(list[0])=_1] >> ' ' | ','
-                >> int_[ref(list[1])=_1] >> ' ' | ','
-                >> int_[ref(list[2])=_1] >> ' ' | ','
-                >> int_[ref(list[3])=_1]))
+    if (!parse(str, str + std::strlen(str), double_[ref(list[0])=_1] >> char_(' ') | char_(',')
+                >> double_[ref(list[1])=_1] >> char_(' ') | char_(',')
+                >> double_[ref(list[2])=_1] >> char_(' ') | char_(',')
+                >> double_[ref(list[3])=_1]))
     {
-        error_messages.emplace_back("failed to parse list of integers from " + std::string(str));
+        error_messages.emplace_back("failed to parse list of doubles from " + std::string(str));
         return false;
     }
     return true;
@@ -484,16 +485,51 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     double width = 0;
     double height = 0;
+    double aspect_ratio = 1;
+    double viewbox[4] = {0,0,0,0};
+    bool has_viewbox = false;
+    bool has_percent_height = true;
+    bool has_percent_width = true;
+
     auto const* width_attr = node->first_attribute("width");
     if (width_attr)
     {
-        width = parse_double(parser.error_messages_, width_attr->value());
+        width = parse_double_optional_percent(parser.error_messages_, width_attr->value(), has_percent_width);
     }
     auto const* height_attr = node->first_attribute("height");
     if (height_attr)
     {
-        height = parse_double(parser.error_messages_, height_attr->value());
+        height = parse_double_optional_percent(parser.error_messages_, height_attr->value(), has_percent_height);
     }
+    auto const* viewbox_attr = node->first_attribute("viewBox");
+    if (viewbox_attr)
+    {
+        has_viewbox = parse_double_list(parser.error_messages_, viewbox_attr->value(), viewbox);
+    }
+
+    std::cout << "Width = " << width << std::endl;
+    std::cout << "Width has percent = " << has_percent_width << std::endl;
+    std::cout << "Height has percent = " << has_percent_height << std::endl;
+    std::cout << "Viewbox = " << viewbox[0] << "," << viewbox[1] << "," << viewbox[2] << "," << viewbox[3] << std::endl;
+    std::cout << "Viewbox exists = " << has_viewbox << std::endl;
+
+
+    if (has_percent_width && !has_percent_height && has_viewbox)
+    {
+        aspect_ratio = viewbox[2] / viewbox[3];
+        width = aspect_ratio * height;
+    }
+    else if (!has_percent_width && has_percent_height && has_viewbox)
+    {
+        aspect_ratio = viewbox[2] / viewbox[3];
+        height = height / aspect_ratio;
+    }
+    else if (has_percent_width && has_percent_height && has_viewbox)
+    {
+        width = viewbox[2];
+        height = viewbox[3];
+    }
+    
     parser.path_.set_dimensions(width, height);
 }
 
