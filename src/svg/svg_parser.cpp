@@ -166,9 +166,9 @@ bool parse_double_list(T & error_messages, const char* str, double* list)
     qi::double_type double_;
     qi::char_type char_;
 
-    if (!parse(str, str + std::strlen(str), double_[ref(list[0])=_1] >> char_(' ') | char_(',')
-                >> double_[ref(list[1])=_1] >> char_(' ') | char_(',')
-                >> double_[ref(list[2])=_1] >> char_(' ') | char_(',')
+    if (!parse(str, str + std::strlen(str), double_[ref(list[0])=_1] >> (char_(' ') | char_(','))
+                >> double_[ref(list[1])=_1] >> (char_(' ') | char_(','))
+                >> double_[ref(list[2])=_1] >> (char_(' ') | char_(','))
                 >> double_[ref(list[3])=_1]))
     {
         error_messages.emplace_back("failed to parse list of doubles from " + std::string(str));
@@ -506,13 +506,6 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
         has_viewbox = parse_double_list(parser.error_messages_, viewbox_attr->value(), viewbox);
     }
-
-    std::cout << "Width = " << width << std::endl;
-    std::cout << "Width has percent = " << has_percent_width << std::endl;
-    std::cout << "Height has percent = " << has_percent_height << std::endl;
-    std::cout << "Viewbox = " << viewbox[0] << "," << viewbox[1] << "," << viewbox[2] << "," << viewbox[3] << std::endl;
-    std::cout << "Viewbox exists = " << has_viewbox << std::endl;
-
 
     if (has_percent_width && !has_percent_height && has_viewbox)
     {
