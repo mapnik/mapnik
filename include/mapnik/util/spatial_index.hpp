@@ -20,29 +20,26 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SPATIAL_INDEX_HPP
-#define MAPNIK_SPATIAL_INDEX_HPP
-
+#ifndef MAPNIK_UTIL_SPATIAL_INDEX_HPP
+#define MAPNIK_UTIL_SPATIAL_INDEX_HPP
 
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/geom_util.hpp>
 
-#include <fstream>
-
 using mapnik::box2d;
 using mapnik::query;
 
 namespace mapnik { namespace util {
 
-template <typename Filter, typename InputStream>
+template <typename Value, typename Filter, typename InputStream>
 class spatial_index
 {
 public:
-    static void query(Filter const& filter, InputStream& file, std::string const& indexname, std::vector<std::pair<std::size_t, std::size_t>>& pos);
-    static void query_node(const Filter& filter, InputStream& in, std::vector<std::pair<std::size_t, std::size_t>> & results);
-    static box2d<double> bounding_box( InputStream& file );
+    static void query(Filter const& filter, InputStream& in, std::string const& indexname, std::vector<std::pair<std::size_t, std::size_t>>& pos);
+    static void query_node(const Filter& filter, InputStream& in, std::vector<Value> & results);
+    static box2d<double> bounding_box( InputStream& in );
 private:
     spatial_index();
     ~spatial_index();
@@ -52,105 +49,88 @@ private:
     static void read_envelope(InputStream& in, box2d<double>& envelope);
 };
 
-template <typename Filter, typename Stream>
-struct query_node_op
+template <typename Value, typename Filter, typename InputStream>
+box2d<double> spatial_index<Value, Filter, InputStream>::bounding_box(InputStream& in)
 {
-    query_node_op(Filter const& filter, Stream & in, std::vector<std::pair<std::size_t, std::size_t>>& results)
-        : filter_(filter),
-          in_(in),
-          results_(results) {}
-
-    bool operator() ()
-    {
-        spatial_index<filter_in_box, Stream>::query_node(filter_, in_, results_);
-    }
-
-    Filter const& filter_;
-    Stream & in_;
-    std::vector<std::pair<std::size_t, std::size_t>> & results_;
-};
-
-
-template <typename Filter, typename InputStream>
-box2d<double> spatial_index<Filter, InputStream>::bounding_box(InputStream& file)
-{
-    file.seekg(16 + 4, std::ios::beg);
+    in.seekg(16 + 4, std::ios::beg);
     box2d<double> box;
-    read_envelope(file, box);
-    file.seekg(0, std::ios::beg);
+    read_envelope(in, box);
+    in.seekg(0, std::ios::beg);
     return box;
 }
 
-template <typename Filter, typename InputStream>
-void spatial_index<Filter, InputStream>::query(Filter const& filter, InputStream& file,
-                                            std::string const& indexname, std::vector<std::pair<std::size_t, std::size_t>>& results)
+template <typename Value, typename Filter, typename InputStream>
+void spatial_index<Value, Filter, InputStream>::query(Filter const& filter,
+                                                      InputStream& in,
+                                                      std::string const& indexname,
+                                                      std::vector<std::pair<std::size_t,std::size_t>>& results)
 {
-    file.seekg(16, std::ios::beg);
-    int offset = read_ndr_integer(file);
+    in.seekg(16, std::ios::beg);
+    int offset = read_ndr_integer(in);
     box2d<double> node_ext;
-    read_envelope(file, node_ext);
-    int num_shapes = read_ndr_integer(file);
+    read_envelope(in, node_ext);
+    int num_shapes = read_ndr_integer(in);
     if (!filter.pass(node_ext))
     {
-        file.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
+        in.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
         return;
     }
     for (int i = 0; i < num_shapes; ++i)
     {
-        std::pair<std::size_t, std::size_t> item;
-        file.read(reinterpret_cast<char*>(&item), sizeof(item));
+        Value item;
+        in.read(reinterpret_cast<char*>(&item), sizeof(item));
         results.push_back(item);
     }
 
-    int children = read_ndr_integer(file);
+    int children = read_ndr_integer(in);
     for (int j = 0; j < children; ++j)
     {
-        query_node(filter, file, results);
+        query_node(filter, in, results);
     }
-    query_node(filter, file, results);
+    query_node(filter, in, results);
 }
 
-template <typename Filter, typename InputStream>
-void spatial_index<Filter, InputStream>::query_node(Filter const& filter, InputStream& file, std::vector<std::pair<std::size_t, std::size_t>>& ids)
+template <typename Value, typename Filter, typename InputStream>
+void spatial_index<Value, Filter, InputStream>::query_node(Filter const& filter, InputStream& in, std::vector<Value>& results)
 {
-    int offset = read_ndr_integer(file);
+    int offset = read_ndr_integer(in);
     box2d<double> node_ext;
-    read_envelope(file, node_ext);
-    int num_shapes = read_ndr_integer(file);
+    read_envelope(in, node_ext);
+    int num_shapes = read_ndr_integer(in);
     if (! filter.pass(node_ext))
     {
-        file.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
+        in.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
         return;
     }
 
     for (int i = 0; i < num_shapes; ++i)
     {
-        std::pair<std::size_t, std::size_t> item;
-        //file >> item;
-        //int id = read_ndr_integer(file);
-        file.read(reinterpret_cast<char*>(&item), sizeof(item));
-        ids.push_back(item);
+        Value item;
+        in.read(reinterpret_cast<char*>(&item), sizeof(item)); // FIXME : use operator>>
+        results.push_back(item);
     }
 
-    int children = read_ndr_integer(file);
+    int children = read_ndr_integer(in);
     for (int j = 0; j < children; ++j)
     {
-        query_node(filter, file, ids);
+        query_node(filter, in, results);
     }
 }
 
-template <typename Filter, typename InputStream>
-int spatial_index<Filter, InputStream>::read_ndr_integer(InputStream& file)
+template <typename Value, typename Filter, typename InputStream>
+int spatial_index<Value, Filter, InputStream>::read_ndr_integer(InputStream& in)
 {
     char b[4];
-    file.read(b, 4);
+    in.read(b, 4);
     return (b[0] & 0xff) | (b[1] & 0xff) << 8 | (b[2] & 0xff) << 16 | (b[3] & 0xff) << 24;
 }
 
-template <typename Filter, typename InputStream>
-void spatial_index<Filter, InputStream>::read_envelope(InputStream& file, box2d<double>& envelope)
+template <typename Value, typename Filter, typename InputStream>
+void spatial_index<Value, Filter, InputStream>::read_envelope(InputStream& in, box2d<double>& envelope)
 {
-    file.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
+    in.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
 }
 
 }} // mapnik/util
+
+#endif // MAPNIK_UTIL_SPATIAL_INDEX_HPP
