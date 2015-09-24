@@ -157,6 +157,25 @@ double parse_double_optional_percent(T & error_messages, const char* str, bool &
     return val;
 }
 
+template <typename T>
+bool parse_integer_list(T & error_messages, const char* str, int* list)
+{
+    using namespace boost::spirit::qi;
+    using boost::phoenix::ref;
+    qi::_1_type _1;
+    qi::int_type int_;
+
+    if (!parse(str, str + std::strlen(str), int_[ref(list[0])=_1] >> ' ' | ','
+                >> int_[ref(list[1])=_1] >> ' ' | ','
+                >> int_[ref(list[2])=_1] >> ' ' | ','
+                >> int_[ref(list[3])=_1]))
+    {
+        error_messages.emplace_back("failed to parse list of integers from " + std::string(str));
+        return false;
+    }
+    return true;
+}
+
 bool parse_style (char const* str, pairs_type & v)
 {
     using namespace boost::spirit::qi;
