@@ -1,0 +1,26 @@
+environment:
+  msvs_toolset: 14
+  BOOST_VERSION: 58
+  FASTBUILD: 1
+  matrix:
+    - platform: x64
+      configuration: Release
+
+os: Visual Studio 2015
+
+shallow_clone: true
+
+install:
+  - scripts\build-appveyor.bat
+
+artifacts:
+  - path: mapnik-gyp\msbuild-summary.txt
+    name: msbuild-summary.txt
+  - path: mapnik-gyp\msbuild-errors.txt
+    name: msbuild-errors.txt
+  - path: mapnik-gyp\msbuild-warnings.txt
+    name: msbuild-warnings.txt
+
+build: off
+test: off
+deploy: off
