@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -29,6 +28,7 @@
 #include <mapnik/geometry_envelope.hpp>
 
 #include "../../plugins/input/csv/csv_utils.hpp"
+#include "../shapeindex/quadtree.hpp"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -40,19 +40,10 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
-
-//#include <mapnik/util/file_io.hpp>
+#include <boost/version.hpp>
 
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;
-
-std::ostream& operator<<(std::ostream & out, std::pair<std::size_t,std::size_t> const& item)
-{
-    out << "offset=" << std::get<0>(item) << " size=" << std::get<1>(item);
-    return out;
-}
-
-#include "../shapeindex/quadtree.hpp"
 
 int main (int argc, char** argv)
 {
@@ -182,13 +173,11 @@ int main (int argc, char** argv)
         }
 
         auto file_length = detail::file_length(csv_file);
-        std::clog << "FILE LENGTH=" << file_length << std::endl;
         // set back to start
         csv_file.seekg(0, std::ios::beg);
         char newline;
         bool has_newline;
         std::tie(newline, has_newline) = detail::autodect_newline(csv_file, file_length);
-        std::clog << "NEW_LINE=" << int(newline) << std::endl;
 
         // set back to start
         csv_file.seekg(0, std::ios::beg);
@@ -204,9 +193,6 @@ int main (int argc, char** argv)
 
         mapnik::util::trim(quote);
         if (quote.empty()) quote = "\"";
-
-        std::clog << "SEP=" << separator << " ESC=" << escape << " QUO=" << quote <<std::endl;
-
         int line_number = 1;
         detail::geometry_column_locator locator;
         std::vector<std::string> headers;
@@ -245,7 +231,6 @@ int main (int argc, char** argv)
                             }
                             else
                             {
-                                std::clog << "HEAD=" << header << std::endl;
                                 detail::locate_geometry_column(header, index, locator);
                             }
                             ++index;
@@ -339,7 +324,6 @@ int main (int argc, char** argv)
                     auto box = mapnik::geometry::envelope(geom);
                     if (!extent.valid()) extent = box;
                     else extent.expand_to_include(box);
-                        //std::clog << box << " " << record_offset << "," << record_size << std::endl;
                     boxes.emplace_back(std::move(box), make_pair(record_offset, record_size));
                 }
                 else
@@ -380,14 +364,13 @@ int main (int argc, char** argv)
         {
             tree.trim();
             std::clog <<  "number nodes=" << tree.count() << std::endl;
-            tree.print();
+            //tree.print();
             file.exceptions(std::ios::failbit | std::ios::badbit);
             tree.write(file);
             file.flush();
             file.close();
         }
     }
-
     clog << "done!" << endl;
     return 0;
 }
