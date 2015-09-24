@@ -37,7 +37,7 @@ template <typename Value, typename Filter, typename InputStream>
 class spatial_index
 {
 public:
-    static void query(Filter const& filter, InputStream& in, std::string const& indexname, std::vector<std::pair<std::size_t, std::size_t>>& pos);
+    static void query(Filter const& filter, InputStream& in,std::vector<Value>& pos);
     static void query_node(const Filter& filter, InputStream& in, std::vector<Value> & results);
     static box2d<double> bounding_box( InputStream& in );
 private:
@@ -60,10 +60,7 @@ box2d<double> spatial_index<Value, Filter, InputStream>::bounding_box(InputStrea
 }
 
 template <typename Value, typename Filter, typename InputStream>
-void spatial_index<Value, Filter, InputStream>::query(Filter const& filter,
-                                                      InputStream& in,
-                                                      std::string const& indexname,
-                                                      std::vector<std::pair<std::size_t,std::size_t>>& results)
+void spatial_index<Value, Filter, InputStream>::query(Filter const& filter, InputStream& in, std::vector<Value>& results)
 {
     in.seekg(16, std::ios::beg);
     int offset = read_ndr_integer(in);
