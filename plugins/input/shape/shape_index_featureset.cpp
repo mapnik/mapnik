@@ -36,10 +36,9 @@
 #include <boost/interprocess/streams/bufferstream.hpp>
 #endif
 #pragma GCC diagnostic pop
-
 #include "shape_index_featureset.hpp"
 #include "shape_utils.hpp"
-#include "shp_index.hpp"
+#include <mapnik/util/spatial_index.hpp>
 
 using mapnik::feature_factory;
 
@@ -52,11 +51,11 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                                         int row_limit)
     : filter_(filter),
       ctx_(std::make_shared<mapnik::context_type>()),
-    shape_ptr_(std::move(shape_ptr)),
-    tr_(new mapnik::transcoder(encoding)),
-    row_limit_(row_limit),
-    count_(0),
-    feature_bbox_()
+      shape_ptr_(std::move(shape_ptr)),
+      tr_(new mapnik::transcoder(encoding)),
+      row_limit_(row_limit),
+      count_(0),
+      feature_bbox_()
 {
     shape_ptr_->shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, *shape_ptr_,attr_ids_);
@@ -65,17 +64,14 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     if (index)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        //shp_index<filterT,stream<mapped_file_source> >::query(filter, index->file(), offsets_);
-        shp_index<filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
+        //spatial_index<unsigned, filterT,stream<mapped_file_source> >::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<std::streampos, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
 #else
-        shp_index<filterT,std::ifstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<std::streampos, std::ifstream>::query(filter, index->file(), offsets_);
 #endif
     }
-
     std::sort(offsets_.begin(), offsets_.end());
-
     MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << offsets_.size();
-
     itr_ = offsets_.begin();
 }
 
