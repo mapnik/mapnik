@@ -28,8 +28,18 @@
 #include <mapnik/geom_util.hpp>
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
-#include <deque>
-#include <cstdio>
+#include <fstream>
+
+using value_type = std::pair<std::size_t, std::size_t>;
+namespace std {
+template <typename InputStream>
+InputStream & operator>>(InputStream & in, value_type & value)
+{
+    in.read(reinterpret_cast<char*>(&value), sizeof(value_type));
+    return in;
+}
+}
+
 
 class csv_index_featureset : public mapnik::Featureset
 {
@@ -45,16 +55,16 @@ public:
     ~csv_index_featureset();
     mapnik::feature_ptr next();
 private:
-    //mapnik::feature_ptr parse_feature(std::string const& str);
+    mapnik::feature_ptr parse_feature(std::string const& str);
     std::string const& separator_;
     std::vector<std::string> headers_;
-    //const array_type index_array_;
-    //array_type::const_iterator index_itr_;
-    //array_type::const_iterator index_end_;
     mapnik::context_ptr ctx_;
     mapnik::value_integer feature_id_ = 0;
     detail::geometry_column_locator const& locator_;
     mapnik::transcoder tr_;
+    std::ifstream in_;
+    std::vector<value_type> positions_;
+    std::vector<value_type>::iterator itr_;
 };
 
 

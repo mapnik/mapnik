@@ -28,23 +28,14 @@
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/spatial_index.hpp>
+#include <mapnik/geometry.hpp>
 // stl
 #include <string>
 #include <vector>
 #include <deque>
 #include <fstream>
 
-using value_type = std::pair<std::size_t, std::size_t>;
-namespace std {
-template <typename InputStream>
-InputStream & operator>>(InputStream & in, value_type & value)
-{
-    in.read(reinterpret_cast<char*>(&value), sizeof(value_type));
-    return in;
-}
-}
-
-csv_index_featureset::csv_index_featureset(std::string const& filename_,
+csv_index_featureset::csv_index_featureset(std::string const& filename,
                                            mapnik::filter_in_box const& filter,
                                            detail::geometry_column_locator const& locator,
                                            std::string const& separator,
@@ -54,29 +45,27 @@ csv_index_featureset::csv_index_featureset(std::string const& filename_,
       headers_(headers),
       ctx_(ctx),
       locator_(locator),
-      tr_("utf8")
+      tr_("utf8"),
+      in_(filename.c_str(), std::ios::binary)
+
 {
-    std::string indexname = filename_ + ".index";
-    std::ifstream in(indexname.c_str(), std::ios::binary);
-    if (!in) throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
-
-
-    std::vector<value_type> positions;
+    if (!in_) throw mapnik::datasource_exception("CSV Plugin: can't open file " + filename);
+    std::string indexname = filename + ".index";
+    std::ifstream index(indexname.c_str(), std::ios::binary);
+    if (!index) throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
     mapnik::util::spatial_index<value_type,
                                 mapnik::filter_in_box,
-                                std::ifstream>::query(filter, in, positions);
+                                std::ifstream>::query(filter, index, positions_);
 
-    std::sort(positions.begin(), positions.end(),
+    std::sort(positions_.begin(), positions_.end(),
               [](value_type const& lhs, value_type const& rhs) { return lhs.first < rhs.first;});
-    for (auto const& pos : positions)
-    {
-        std::cerr << "OFF=" << pos.first << " SIZE=" << pos.second << std::endl;
-    }
+    itr_ = positions_.begin();
 }
 
 csv_index_featureset::~csv_index_featureset() {}
 
-/*
+
+
 mapnik::feature_ptr csv_index_featureset::parse_feature(std::string const& str)
 {
     auto values = csv_utils::parse_line(str, separator_);
@@ -90,8 +79,25 @@ mapnik::feature_ptr csv_index_featureset::parse_feature(std::string const& str)
     }
     return mapnik::feature_ptr();
 }
-*/
+
 mapnik::feature_ptr csv_index_featureset::next()
 {
+    /*
+    if (row_limit_ && count_ >= row_limit_)
+    {
+        return feature_ptr();
+    }
+    */
+
+    while( itr_ != positions_.end())
+    {
+        auto pos = *itr_++;
+        in_.seekg(pos.first, std::ios::beg);
+        std::unique_ptr<char[]> buf(new char[pos.second]);
+        in_.read(buf.get(),pos.second);
+        std::string line(buf.get(), pos.second);
+        auto feature = parse_feature(line);
+        if (feature) return feature;
+    }
     return mapnik::feature_ptr();
 }
