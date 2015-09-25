@@ -36,13 +36,14 @@ using mapnik::coord2d;
 template <typename T>
 struct quadtree_node
 {
+    using value_type = T;
     box2d<double> ext_;
-    std::vector<T> data_;
-    quadtree_node<T>* children_[4];
-    quadtree_node(const box2d<double>& ext)
+    std::vector<value_type> data_;
+    quadtree_node<value_type>* children_[4];
+    quadtree_node(box2d<double> const& ext)
         : ext_(ext),data_()
     {
-        std::memset(children_,0,sizeof(quadtree_node<T>*)*4);
+        std::memset(children_, 0, sizeof(quadtree_node<value_type>*)*4);
     }
 
     ~quadtree_node()
@@ -73,13 +74,15 @@ struct quadtree_node
 template <typename T>
 class quadtree
 {
+    using value_type = T;
 private:
-    quadtree_node<T>* root_;
+    quadtree_node<value_type>* root_;
     const int maxdepth_;
     const double ratio_;
 public:
-    quadtree(const box2d<double>& extent,int maxdepth,double ratio)
-        : root_(new quadtree_node<T>(extent)),
+
+    quadtree(box2d<double> const& extent, int maxdepth, double ratio)
+        : root_(new quadtree_node<value_type>(extent)),
           maxdepth_(maxdepth),
           ratio_(ratio) {}
 
@@ -88,7 +91,7 @@ public:
         if (root_) delete root_;
     }
 
-    void insert(const T& data,const box2d<double>& item_ext)
+    void insert(value_type const& data,box2d<double> const& item_ext)
     {
         insert(data,item_ext,root_,maxdepth_);
     }
@@ -131,7 +134,7 @@ public:
 
 private:
 
-    void trim_tree(quadtree_node<T>*&  node)
+    void trim_tree(quadtree_node<value_type>*&  node)
     {
         if (node)
         {
@@ -154,7 +157,7 @@ private:
         }
     }
 
-    int count_nodes(const quadtree_node<T>*  node) const
+    int count_nodes(quadtree_node<value_type> const*  node) const
     {
         if (!node)
         {
@@ -171,7 +174,7 @@ private:
         }
     }
 
-    void count_items(const quadtree_node<T>* node,int& count) const
+    void count_items(quadtree_node<value_type> const* node,int& count) const
     {
         if (node)
         {
@@ -183,62 +186,60 @@ private:
         }
     }
 
-    int subnode_offset(const quadtree_node<T>* node) const
+    int subnode_offset(quadtree_node<value_type> const* node) const
     {
         int offset=0;
-        for (int i=0;i<4;i++)
+        for (int i = 0; i < 4; i++)
         {
             if (node->children_[i])
             {
-                offset +=sizeof(box2d<double>)+(node->children_[i]->data_.size()*sizeof(T))+3*sizeof(int);
+                offset +=sizeof(box2d<double>)+(node->children_[i]->data_.size()*sizeof(value_type))+3*sizeof(int);
                 offset +=subnode_offset(node->children_[i]);
             }
         }
         return offset;
     }
 
-    void write_node(std::ostream& out,const quadtree_node<T>* node) const
+    void write_node(std::ostream& out, quadtree_node<value_type> const* node) const
     {
         if (node)
         {
             int offset=subnode_offset(node);
             int shape_count=node->data_.size();
-            int recsize=sizeof(box2d<double>) + 3 * sizeof(int) + shape_count * sizeof(T);
-            char* node_record=new char[recsize];
-            std::memset(node_record,0,recsize);
-            std::memcpy(node_record,&offset,4);
-            std::memcpy(node_record+4,&node->ext_,sizeof(box2d<double>));
-            std::memcpy(node_record+36,&shape_count,4);
-            for (int i=0;i<shape_count;++i)
+            int recsize=sizeof(box2d<double>) + 3 * sizeof(int) + shape_count * sizeof(value_type);
+            std::unique_ptr<char[]> node_record(new char[recsize]);
+            std::memset(node_record.get(), 0, recsize);
+            std::memcpy(node_record.get(), &offset, 4);
+            std::memcpy(node_record.get() + 4, &node->ext_, sizeof(box2d<double>));
+            std::memcpy(node_record.get() + 36, &shape_count, 4);
+            for (int i=0; i < shape_count; ++i)
             {
-                memcpy(node_record + 40 + i * sizeof(T),&(node->data_[i]),sizeof(T));
+                memcpy(node_record.get() + 40 + i * sizeof(value_type), &(node->data_[i]),sizeof(value_type));
             }
             int num_subnodes=0;
-            for (int i=0;i<4;++i)
+            for (int i = 0; i < 4; ++i)
             {
                 if (node->children_[i])
                 {
                     ++num_subnodes;
                 }
             }
-            std::memcpy(node_record + 40 + shape_count * sizeof(T),&num_subnodes,4);
-            out.write(node_record,recsize);
-            delete [] node_record;
-
-            for (int i=0;i<4;++i)
+            std::memcpy(node_record.get() + 40 + shape_count * sizeof(value_type),&num_subnodes,4);
+            out.write(node_record.get(),recsize);
+            for (int i = 0;i<4;++i)
             {
                 write_node(out,node->children_[i]);
             }
         }
     }
 
-    void print(const quadtree_node<T>* node,int level=0) const
+    void print(quadtree_node<value_type> const* node,int level=0) const
     {
         if (node)
         {
-            typename std::vector<T>::const_iterator itr=node->data_.begin();
+            typename std::vector<value_type>::const_iterator itr=node->data_.begin();
             std::string pad;
-            for (int i=0;i<level;++i)
+            for (int i = 0; i < level; ++i)
             {
                 pad+=" ";
             }
@@ -250,14 +251,14 @@ private:
                 ++itr;
             }
             std::clog<<std::endl;
-            for (int i=0;i<4;++i)
+            for (int i = 0; i < 4; ++i)
             {
                 print(node->children_[i],level+4);
             }
         }
     }
 
-    void insert(const T& data,const box2d<double>& item_ext,quadtree_node<T>*  node,int maxdepth)
+    void insert(value_type const& data,const box2d<double>& item_ext, quadtree_node<value_type> *  node,int maxdepth)
     {
         if (node && node->ext_.contains(item_ext))
         {
@@ -277,13 +278,13 @@ private:
 
             if (maxdepth > 1)
             {
-                for (int i=0;i<4;++i)
+                for (int i = 0; i < 4; ++i)
                 {
                     if (ext[i].contains(item_ext))
                     {
                         if (!node->children_[i])
                         {
-                            node->children_[i]=new quadtree_node<T>(ext[i]);
+                            node->children_[i]=new quadtree_node<value_type>(ext[i]);
                         }
                         insert(data,item_ext,node->children_[i],maxdepth-1);
                         return;
