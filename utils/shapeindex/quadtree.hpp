@@ -27,6 +27,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <memory>
 // mapnik
 #include <mapnik/box2d.hpp>
 
