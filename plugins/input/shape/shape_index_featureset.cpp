@@ -40,6 +40,15 @@
 #include "shape_utils.hpp"
 #include <mapnik/util/spatial_index.hpp>
 
+
+// operator>> needed by mapnik::spatial_index<Value, Filter, InputStream>
+template <typename InputStream>
+InputStream & operator>>(InputStream & in, std::streampos pos)
+{
+    in.read(reinterpret_cast<char*>(&pos), sizeof(std::streampos));
+    return in;
+}
+
 using mapnik::feature_factory;
 
 template <typename filterT>

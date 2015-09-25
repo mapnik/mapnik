@@ -103,8 +103,8 @@ void spatial_index<Value, Filter, InputStream>::query_node(Filter const& filter,
     for (int i = 0; i < num_shapes; ++i)
     {
         Value item;
-        in.read(reinterpret_cast<char*>(&item), sizeof(item)); // FIXME : use operator>>
-        results.push_back(item);
+        in >> item;
+        results.push_back(std::move(item));
     }
 
     int children = read_ndr_integer(in);
