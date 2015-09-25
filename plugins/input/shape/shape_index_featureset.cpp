@@ -43,7 +43,7 @@
 
 // operator>> needed by mapnik::spatial_index<Value, Filter, InputStream>
 template <typename InputStream>
-InputStream & operator>>(InputStream & in, std::streampos pos)
+InputStream & operator>>(InputStream & in, std::streampos & pos)
 {
     in.read(reinterpret_cast<char*>(&pos), sizeof(std::streampos));
     return in;
