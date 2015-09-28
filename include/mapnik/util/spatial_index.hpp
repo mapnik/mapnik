@@ -38,15 +38,16 @@ class spatial_index
 {
 public:
     static void query(Filter const& filter, InputStream& in,std::vector<Value>& pos);
-    static void query_node(const Filter& filter, InputStream& in, std::vector<Value> & results);
     static box2d<double> bounding_box( InputStream& in );
 private:
+
     spatial_index();
     ~spatial_index();
     spatial_index(const spatial_index&);
     spatial_index& operator=(const spatial_index&);
     static int read_ndr_integer(InputStream& in);
     static void read_envelope(InputStream& in, box2d<double>& envelope);
+    static void query_node(const Filter& filter, InputStream& in, std::vector<Value> & results);
 };
 
 template <typename Value, typename Filter, typename InputStream>
@@ -63,27 +64,6 @@ template <typename Value, typename Filter, typename InputStream>
 void spatial_index<Value, Filter, InputStream>::query(Filter const& filter, InputStream& in, std::vector<Value>& results)
 {
     in.seekg(16, std::ios::beg);
-    int offset = read_ndr_integer(in);
-    box2d<double> node_ext;
-    read_envelope(in, node_ext);
-    int num_shapes = read_ndr_integer(in);
-    if (!filter.pass(node_ext))
-    {
-        in.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
-        return;
-    }
-    for (int i = 0; i < num_shapes; ++i)
-    {
-        Value item;
-        in.read(reinterpret_cast<char*>(&item), sizeof(item));
-        results.push_back(item);
-    }
-
-    int children = read_ndr_integer(in);
-    for (int j = 0; j < children; ++j)
-    {
-        query_node(filter, in, results);
-    }
     query_node(filter, in, results);
 }
 
@@ -94,9 +74,9 @@ void spatial_index<Value, Filter, InputStream>::query_node(Filter const& filter,
     box2d<double> node_ext;
     read_envelope(in, node_ext);
     int num_shapes = read_ndr_integer(in);
-    if (! filter.pass(node_ext))
+    if (!filter.pass(node_ext))
     {
-        in.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
+        in.seekg(offset + num_shapes * sizeof(Value) + 4, std::ios::cur);
         return;
     }
 
