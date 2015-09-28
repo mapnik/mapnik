@@ -94,9 +94,6 @@ Additional optional dependencies:
     - pg_config - PostgreSQL installation capabilities
  * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
- * libocci - Oracle input plugin support
- * libcurl - OSM input plugin support
- * librasterlite - Rasterlite input plugin support
 
 Instructions for installing many of these dependencies on
 various platforms can be found at the Mapnik Wiki:
