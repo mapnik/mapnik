@@ -164,12 +164,14 @@ bool parse_double_list(T & error_messages, const char* str, double* list)
     using boost::phoenix::ref;
     qi::_1_type _1;
     qi::double_type double_;
-    qi::char_type char_;
+    qi::lit_type lit;
+    using skip_type = boost::spirit::ascii::space_type;
 
-    if (!parse(str, str + std::strlen(str), double_[ref(list[0])=_1] >> (char_(' ') | char_(','))
-                >> double_[ref(list[1])=_1] >> (char_(' ') | char_(','))
-                >> double_[ref(list[2])=_1] >> (char_(' ') | char_(','))
-                >> double_[ref(list[3])=_1]))
+    if (!phrase_parse(str, str + std::strlen(str),
+                      double_[ref(list[0])=_1] >> -lit(',') >>
+                      double_[ref(list[1])=_1] >> -lit(',') >>
+                      double_[ref(list[2])=_1] >> -lit(',') >>
+                      double_[ref(list[3])=_1], skip_type()))
     {
         error_messages.emplace_back("failed to parse list of doubles from " + std::string(str));
         return false;
@@ -522,7 +524,7 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
         width = viewbox[2];
         height = viewbox[3];
     }
-    
+
     parser.path_.set_dimensions(width, height);
 }
 
