@@ -333,6 +333,26 @@ TEST_CASE("SVG parser") {
         REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),detail::vertex_equal<3>()));
     }
 
+    SECTION("SVG viewbox fallback")
+    {
+        std::string svg_name("./test/data/svg/viewbox-missing-width-and-height.svg");
+        std::ifstream in(svg_name.c_str());
+        std::string svg_str((std::istreambuf_iterator<char>(in)),
+                        std::istreambuf_iterator<char>());
+
+        using namespace mapnik::svg;
+        mapnik::svg_storage_type path;
+        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
+        svg_path_adapter svg_path(stl_storage);
+        svg_converter_type svg(svg_path, path.attributes());
+        svg_parser p(svg);
+        p.parse_from_string(svg_str);
+        auto width = svg.width();
+        auto height = svg.height();
+        REQUIRE(width == 100);
+        REQUIRE(height == 100);
+    }
+
     SECTION("SVG rounded <rect>s missing rx or ry")
     {
         std::string svg_name("./test/data/svg/rounded_rect-missing-one-radius.svg");
