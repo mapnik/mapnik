@@ -35,18 +35,9 @@
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 
-using value_type = std::pair<std::size_t, std::size_t>;
-namespace std {
-template <typename InputStream>
-InputStream & operator>>(InputStream & in, value_type & value)
-{
-    in.read(reinterpret_cast<char*>(&value), sizeof(value_type));
-    return in;
-}
-}
-
 class csv_index_featureset : public mapnik::Featureset
 {
+    using value_type = std::pair<std::size_t, std::size_t>;
     using locator_type = detail::geometry_column_locator;
 public:
 

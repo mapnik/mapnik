@@ -610,6 +610,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         }
         else if (has_disk_index_)
         {
+            std::cerr << "DISK_INDEX" << std::endl;
             mapnik::filter_in_box filter(q.get_bbox());
             return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, headers_, ctx_);
         }

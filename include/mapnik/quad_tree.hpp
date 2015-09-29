@@ -30,6 +30,7 @@
 // stl
 #include <algorithm>
 #include <vector>
+#include <type_traits>
 
 namespace mapnik
 {
@@ -172,6 +173,8 @@ public:
     template <typename OutputStream>
     void write(OutputStream & out)
     {
+        static_assert(std::is_standard_layout<value_type>::value,
+                      "Values stored in quad-tree must be standard layout types to allow serialisation");
         char header[16];
         std::memset(header,0,16);
         header[0]='m';

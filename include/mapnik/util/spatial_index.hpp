@@ -23,10 +23,13 @@
 #ifndef MAPNIK_UTIL_SPATIAL_INDEX_HPP
 #define MAPNIK_UTIL_SPATIAL_INDEX_HPP
 
+//mapnik
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/geom_util.hpp>
+// stl
+#include <type_traits>
 
 using mapnik::box2d;
 using mapnik::query;
@@ -43,16 +46,17 @@ private:
 
     spatial_index();
     ~spatial_index();
-    spatial_index(const spatial_index&);
-    spatial_index& operator=(const spatial_index&);
+    spatial_index(spatial_index const&);
+    spatial_index& operator=(spatial_index const&);
     static int read_ndr_integer(InputStream& in);
     static void read_envelope(InputStream& in, box2d<double>& envelope);
-    static void query_node(const Filter& filter, InputStream& in, std::vector<Value> & results);
+    static void query_node(Filter const& filter, InputStream& in, std::vector<Value> & results);
 };
 
 template <typename Value, typename Filter, typename InputStream>
 box2d<double> spatial_index<Value, Filter, InputStream>::bounding_box(InputStream& in)
 {
+    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout type");
     in.seekg(16 + 4, std::ios::beg);
     box2d<double> box;
     read_envelope(in, box);
@@ -63,6 +67,7 @@ box2d<double> spatial_index<Value, Filter, InputStream>::bounding_box(InputStrea
 template <typename Value, typename Filter, typename InputStream>
 void spatial_index<Value, Filter, InputStream>::query(Filter const& filter, InputStream& in, std::vector<Value>& results)
 {
+    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout types");
     in.seekg(16, std::ios::beg);
     query_node(filter, in, results);
 }
@@ -83,7 +88,7 @@ void spatial_index<Value, Filter, InputStream>::query_node(Filter const& filter,
     for (int i = 0; i < num_shapes; ++i)
     {
         Value item;
-        in >> item;
+        in.read(reinterpret_cast<char*>(&item), sizeof(Value));
         results.push_back(std::move(item));
     }
 
