@@ -24,11 +24,11 @@
 #include <vector>
 #include <string>
 #include <fstream>
+
 #include <mapnik/util/fs.hpp>
 #include <mapnik/geometry_envelope.hpp>
-
+#include <mapnik/quad_tree.hpp>
 #include "../../plugins/input/csv/csv_utils.hpp"
-#include "../shapeindex/quadtree.hpp"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -347,7 +347,7 @@ int main (int argc, char** argv)
         }
 
         std::clog << extent << std::endl;
-        quadtree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
+        mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
         for (auto const& item : boxes)
         {
             tree.insert(std::get<1>(item), std::get<0>(item));
