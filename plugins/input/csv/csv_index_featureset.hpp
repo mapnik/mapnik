@@ -28,7 +28,12 @@
 #include <mapnik/geom_util.hpp>
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
-#include <fstream>
+
+#ifdef CSV_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
+#endif
 
 using value_type = std::pair<std::size_t, std::size_t>;
 namespace std {
@@ -39,7 +44,6 @@ InputStream & operator>>(InputStream & in, value_type & value)
     return in;
 }
 }
-
 
 class csv_index_featureset : public mapnik::Featureset
 {
@@ -55,14 +59,20 @@ public:
     ~csv_index_featureset();
     mapnik::feature_ptr next();
 private:
-    mapnik::feature_ptr parse_feature(std::string const& str);
+    mapnik::feature_ptr parse_feature(char const* beg, char const* end);
     std::string const& separator_;
     std::vector<std::string> headers_;
     mapnik::context_ptr ctx_;
     mapnik::value_integer feature_id_ = 0;
     detail::geometry_column_locator const& locator_;
     mapnik::transcoder tr_;
-    std::ifstream in_;
+#if defined (CSV_MEMORY_MAPPED_FILE)
+    using file_source_type = boost::interprocess::ibufferstream;
+    mapnik::mapped_region_ptr mapped_region_;
+#else
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    file_ptr file_;
+#endif
     std::vector<value_type> positions_;
     std::vector<value_type>::iterator itr_;
 };

@@ -45,11 +45,31 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
       headers_(headers),
       ctx_(ctx),
       locator_(locator),
-      tr_("utf8"),
-      in_(filename.c_str(), std::ios::binary)
+      tr_("utf8")
+#if defined(CSV_MEMORY_MAPPED_FILE)
+      //
+#elif defined( _WINDOWS)
+    ,file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
+#else
+    ,file_(std::fopen(filename.c_str(),"rb"), std::fclose)
+#endif
 
 {
-    if (!in_) throw mapnik::datasource_exception("CSV Plugin: can't open file " + filename);
+#if defined (CSV_MEMORY_MAPPED_FILE)
+    boost::optional<mapnik::mapped_region_ptr> memory =
+        mapnik::mapped_memory_cache::instance().find(filename, true);
+    if (memory)
+    {
+        mapped_region_ = *memory;
+    }
+    else
+    {
+        throw std::runtime_error("could not create file mapping for " + filename);
+    }
+#else
+    if (!file_) throw mapnik::datasource_exception("CSV Plugin: can't open file " + filename);
+#endif
+
     std::string indexname = filename + ".index";
     std::ifstream index(indexname.c_str(), std::ios::binary);
     if (!index) throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
@@ -64,11 +84,9 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
 
 csv_index_featureset::~csv_index_featureset() {}
 
-
-
-mapnik::feature_ptr csv_index_featureset::parse_feature(std::string const& str)
+mapnik::feature_ptr csv_index_featureset::parse_feature(char const* beg, char const* end)
 {
-    auto values = csv_utils::parse_line(str, separator_);
+    auto values = csv_utils::parse_line(beg, end, separator_, headers_.size());
     auto geom = detail::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
@@ -92,11 +110,18 @@ mapnik::feature_ptr csv_index_featureset::next()
     while( itr_ != positions_.end())
     {
         auto pos = *itr_++;
-        in_.seekg(pos.first, std::ios::beg);
-        std::unique_ptr<char[]> buf(new char[pos.second]);
-        in_.read(buf.get(),pos.second);
-        std::string line(buf.get(), pos.second);
-        auto feature = parse_feature(line);
+#if defined(CSV_MEMORY_MAPPED_FILE)
+        char const* start = (char const*)mapped_region_->get_address() + pos.first;
+        char const*  end = start + pos.second;
+#else
+        std::fseek(file_.get(), pos.first, SEEK_SET);
+        std::vector<char> record;
+        record.resize(pos.second);
+        std::fread(record.data(), pos.second, 1, file_.get());
+        auto const* start = record.data();
+        auto const*  end = start + record.size();
+#endif
+        auto feature = parse_feature(start, end);
         if (feature) return feature;
     }
     return mapnik::feature_ptr();

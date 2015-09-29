@@ -38,7 +38,6 @@
 
 class csv_featureset : public mapnik::Featureset
 {
-
     using locator_type = detail::geometry_column_locator;
 public:
     using array_type = std::deque<csv_datasource::item_type>;
