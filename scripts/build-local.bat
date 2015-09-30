@@ -6,6 +6,8 @@ ECHO =========== %~f0 ===========
 
 SET APPVEYOR_REPO_COMMIT_MESSAGE=this is a [build appveyor] test
 SET APPVEYOR=true
+::comment this to get complete AppVeyor behaviour
+SET LOCAL_BUILD_DONT_SKIP_TESTS=true
 
 SET MAPNIK_GIT=3.0.5
 SET BOOST_VERSION=58
