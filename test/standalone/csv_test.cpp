@@ -555,20 +555,6 @@ TEST_CASE("csv") {
             }
         } // END SECTION
 
-        SECTION("blank undelimited rows are still parsed") {
-            using ustring = mapnik::value_unicode_string;
-
-            // TODO: does this mean this CSV file should be in the warnings
-            // subdirectory, since it doesn't work in strict mode?
-            auto ds = get_csv_ds("test/data/csv/more_headers_than_column_values.csv", false);
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "one", "two", "three"});
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::String, mapnik::String});
-
-            require_attributes(all_features(ds)->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"one", ustring("")}, attr{"two", ustring("")}, attr{"three", ustring("")} });
-        } // END SECTION
-
         SECTION("fewer headers than rows throws") {
             REQUIRE_THROWS(get_csv_ds("test/data/csv/more_column_values_than_headers.csv"));
         } // END SECTION
