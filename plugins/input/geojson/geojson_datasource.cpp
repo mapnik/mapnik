@@ -281,11 +281,10 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
             {
                 extent_.expand_to_include(box);
             }
+            values.emplace_back(box, std::make_pair(geometry_index,0));
         }
-        values.emplace_back(box, std::make_pair(geometry_index,0));
         ++geometry_index;
     }
-
     // packing algorithm
     tree_ = std::make_unique<spatial_index_type>(values);
 
