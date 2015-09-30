@@ -318,14 +318,7 @@ void csv_datasource::parse_csv(T & stream,
                 s << "CSV Plugin: # of headers("
                   << num_headers << ") > # of columns("
                   << num_fields << ") parsed for row " << line_number << "\n";
-                if (strict_)
-                {
-                    throw mapnik::datasource_exception(s.str());
-                }
-                else
-                {
-                    MAPNIK_LOG_WARN(csv) << s.str();
-                }
+                throw mapnik::datasource_exception(s.str());
             }
 
             auto geom = detail::extract_geometry(values, locator_);
@@ -430,14 +423,7 @@ void csv_datasource::parse_csv(T & stream,
                 s << "CSV Plugin: expected geometry column: could not parse row "
                   << line_number << " "
                   << values[locator_.index] << "'";
-                if (strict_)
-                {
-                    throw mapnik::datasource_exception(s.str());
-                }
-                else
-                {
-                    MAPNIK_LOG_ERROR(csv) << s.str();
-                }
+                throw mapnik::datasource_exception(s.str());
             }
         }
         catch (mapnik::datasource_exception const& ex )
