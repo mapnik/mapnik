@@ -31,10 +31,10 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/timer.hpp>
-#include <mapnik/cairo/cairo_image_util.hpp>
 
 #ifdef HAVE_CAIRO
 // cairo
+#include <mapnik/cairo/cairo_image_util.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 
