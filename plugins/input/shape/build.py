@@ -39,8 +39,6 @@ plugin_sources = Split(
 
 # Link Library to Dependencies
 libraries = []
-libraries.append(env['ICU_LIB_NAME'])
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
 cppdefines = []
 cxxflags = []
@@ -49,7 +47,9 @@ plugin_env.Append(CXXFLAGS=cxxflags)
 plugin_env.Append(CPPDEFINES=cppdefines)
 
 if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append(env['MAPNIK_NAME'])
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.insert(0,env['MAPNIK_NAME'])
+    libraries.append(env['ICU_LIB_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../shape',
                                       SHLIBSUFFIX='.input',
