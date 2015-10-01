@@ -69,10 +69,9 @@ struct layer_rendering_material
         lay_(lay),
         proj0_(dest),
         proj1_(lay.srs(),true) {}
+
+    layer_rendering_material(layer_rendering_material && rhs) = default;
 };
-
-using layer_rendering_material_ptr = std::shared_ptr<layer_rendering_material>;
-
 
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
@@ -102,7 +101,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
     // in a second time, we fetch the results and
     // do the actual rendering
 
-    std::vector<layer_rendering_material_ptr> mat_list;
+    std::vector<layer_rendering_material> mat_list;
 
     // Define processing context map used by datasources
     // implementing asynchronous queries
@@ -113,9 +112,9 @@ void feature_style_processor<Processor>::apply(double scale_denom)
         if (lyr.visible(scale_denom))
         {
             std::set<std::string> names;
-            layer_rendering_material_ptr mat = std::make_shared<layer_rendering_material>(lyr, proj);
+            layer_rendering_material mat(lyr, proj);
 
-            prepare_layer(*mat,
+            prepare_layer(mat,
                           ctx_map,
                           p,
                           m_.scale(),
@@ -127,18 +126,18 @@ void feature_style_processor<Processor>::apply(double scale_denom)
                           names);
 
             // Store active material
-            if (!mat->active_styles_.empty())
+            if (!mat.active_styles_.empty())
             {
-                mat_list.push_back(mat);
+                mat_list.emplace_back(std::move(mat));
             }
         }
     }
 
-    for ( layer_rendering_material_ptr mat : mat_list )
+    for ( layer_rendering_material & mat : mat_list )
     {
-        if (!mat->active_styles_.empty())
+        if (!mat.active_styles_.empty())
         {
-            render_material(*mat,p);
+            render_material(mat, p);
         }
     }
 
