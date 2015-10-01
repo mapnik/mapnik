@@ -133,7 +133,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
         }
     }
 
-    for ( layer_rendering_material & mat : mat_list )
+    for ( layer_rendering_material const & mat : mat_list )
     {
         if (!mat.active_styles_.empty())
         {
@@ -442,11 +442,11 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
 
 
 template <typename Processor>
-void feature_style_processor<Processor>::render_material(layer_rendering_material & mat,
+void feature_style_processor<Processor>::render_material(layer_rendering_material const & mat,
                                                          Processor & p )
 {
-    std::vector<feature_type_style const*> & active_styles = mat.active_styles_;
-    std::vector<featureset_ptr> & featureset_ptr_list = mat.featureset_ptr_list_;
+    std::vector<feature_type_style const*> const & active_styles = mat.active_styles_;
+    std::vector<featureset_ptr> const & featureset_ptr_list = mat.featureset_ptr_list_;
     if (featureset_ptr_list.empty())
     {
         // The datasource wasn't queried because of early return
@@ -463,7 +463,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
 
     layer const& lay = mat.lay_;
 
-    std::vector<rule_cache> & rule_caches = mat.rule_caches_;
+    std::vector<rule_cache> const & rule_caches = mat.rule_caches_;
 
     proj_transform prj_trans(mat.proj0_,mat.proj1_);
 
@@ -543,7 +543,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     else
     {
         std::size_t i = 0;
-        std::vector<featureset_ptr>::iterator featuresets = featureset_ptr_list.begin();
+        std::vector<featureset_ptr>::const_iterator featuresets = featureset_ptr_list.cbegin();
         for (feature_type_style const* style : active_styles)
         {
             featureset_ptr features = *featuresets++;
