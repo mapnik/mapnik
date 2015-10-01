@@ -23,15 +23,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "src/script/sconsign.py rel_2.3.5:3347:d31d5a4e74b6 2015/07/31 14:36:10 bdbaddog"
+__revision__ = "src/script/sconsign.py rel_2.4.0:3365:9259ea1c13d7 2015/09/21 14:03:43 bdbaddog"
 
-__version__ = "2.3.6"
+__version__ = "2.4.0"
 
-__build__ = "rel_2.3.5:3347:d31d5a4e74b6[MODIFIED]"
+__build__ = "rel_2.4.0:3365:9259ea1c13d7"
 
 __buildsys__ = "hpmicrodog"
 
-__date__ = "2015/07/31 14:36:10"
+__date__ = "2015/09/21 14:03:43"
 
 __developer__ = "bdbaddog"
 
@@ -278,7 +278,7 @@ def field(name, entry, verbose=Verbose):
 def nodeinfo_raw(name, ninfo, prefix=""):
     # This just formats the dictionary, which we would normally use str()
     # to do, except that we want the keys sorted for deterministic output.
-    d = ninfo.__dict__
+    d = ninfo.__getstate__()
     try:
         keys = ninfo.field_list + ['_version_id']
     except AttributeError:

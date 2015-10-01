@@ -32,7 +32,7 @@
 from __future__ import division
 from __future__ import nested_scopes
 
-__revision__ = "src/script/scons-time.py rel_2.3.5:3347:d31d5a4e74b6 2015/07/31 14:36:10 bdbaddog"
+__revision__ = "src/script/scons-time.py rel_2.4.0:3365:9259ea1c13d7 2015/09/21 14:03:43 bdbaddog"
 
 import getopt
 import glob
