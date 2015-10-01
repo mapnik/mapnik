@@ -273,9 +273,6 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
     return out;
 }
 
-// TODO - remove at Mapnik 3.x
-using Feature = feature_impl;
-
 using feature_ptr = std::shared_ptr<feature_impl>;
 
 }
