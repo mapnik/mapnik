@@ -992,8 +992,8 @@ inline bool value::is_null() const
 namespace std
 {
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmismatched-tags"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmismatched-tags"
 
 template <>
 struct hash<mapnik::value>
@@ -1004,7 +1004,7 @@ struct hash<mapnik::value>
     }
 };
 
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
 }
 

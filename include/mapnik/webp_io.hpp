@@ -28,13 +28,13 @@
 #include <mapnik/util/conversions.hpp>
 
 // webp
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 extern "C"
 {
 #include <webp/encode.h>
 }
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
 // stl
 #include <algorithm>
