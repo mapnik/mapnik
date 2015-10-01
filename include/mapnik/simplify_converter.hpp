@@ -268,11 +268,11 @@ private:
     }
 
     template <typename Iterator>
-    bool fit_sleeve(Iterator itr,Iterator end, vertex2d const& v)
+    bool fit_sleeve(Iterator itr, Iterator itr_end, vertex2d const& v)
     {
         sleeve s(*itr,v,tolerance_);
         ++itr; // skip first vertex
-        for (; itr!=end; ++itr)
+        for (; itr!=itr_end; ++itr)
         {
             if (!s.inside(*itr))
             {
