@@ -32,6 +32,8 @@
 #include <vector>
 #include <type_traits>
 
+#include <cstring>
+
 namespace mapnik
 {
 template <typename T>
