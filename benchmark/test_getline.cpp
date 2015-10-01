@@ -42,9 +42,10 @@ public:
         std::string csv_line;
         std::stringstream s;
         s << line_data_;
+        auto newline_widened = s.widen(newline);
         for (unsigned i=0;i<iterations_;++i)
         {
-            std::getline(s,csv_line,s.widen(newline));
+            std::getline(s,csv_line,newline_widened);
         }
         return true;
     }
@@ -90,9 +91,10 @@ public:
         std::string csv_line;
         std::stringstream s;
         s << line_data_;
+        auto newline_widened = s.widen(newline);
         for (unsigned i=0;i<iterations_;++i)
         {
-            csv_utils::getline_csv(s,csv_line,s.widen(newline));
+            csv_utils::getline_csv(s,csv_line,newline_widened);
         }
         return true;
     }
