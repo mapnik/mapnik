@@ -45,7 +45,7 @@ class MAPNIK_DECL text_placement_info : util::noncopyable
 public:
     // Constructor. Takes the parent text_placements object as a parameter
     // to read defaults from it.
-    text_placement_info(text_placements const* parent, double scale_factor_);
+    text_placement_info(text_placements const* parent, double _scale_factor);
     // Get next placement.
     // This function is also called before the first placement is tried.
     // Each class has to return at least one position!
@@ -87,7 +87,7 @@ public:
     //     return text_placement_info_ptr(new text_placement_info_XXX(this));
     // }
 
-    virtual text_placement_info_ptr get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const = 0;
+    virtual text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const = 0;
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
 

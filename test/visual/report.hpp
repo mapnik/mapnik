@@ -59,7 +59,7 @@ public:
     {
     }
 
-    console_short_report(std::ostream & s) : console_report(s)
+    console_short_report(std::ostream & _s) : console_report(_s)
     {
     }
 
