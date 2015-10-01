@@ -42,8 +42,12 @@
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>
 #ifdef CSV_MEMORY_MAPPED_FILE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 

@@ -37,8 +37,12 @@
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
 #include <boost/version.hpp>
 
