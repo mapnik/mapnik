@@ -191,6 +191,7 @@ TEST_CASE("csv") {
 
                 for (auto const &path : broken)
                 {
+                    INFO(path);
                     REQUIRE_THROWS(get_csv_ds(path.native()));
                 }
             }
