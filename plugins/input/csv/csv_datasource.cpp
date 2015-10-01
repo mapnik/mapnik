@@ -170,7 +170,7 @@ void csv_datasource::parse_csv(T & stream,
     stream.seekg(0, std::ios::beg);
     // get first line
     std::string csv_line;
-    std::getline(stream,csv_line,stream.widen(newline));
+    csv_utils::getline_csv(stream,csv_line,stream.widen(newline));
     // if user has not passed a separator manually
     // then attempt to detect by reading first line
 
@@ -204,7 +204,7 @@ void csv_datasource::parse_csv(T & stream,
     }
     else // parse first line as headers
     {
-        while (std::getline(stream,csv_line,stream.widen(newline)))
+        while (csv_utils::getline_csv(stream,csv_line,stream.widen(newline)))
         {
             try
             {
@@ -274,7 +274,7 @@ void csv_datasource::parse_csv(T & stream,
     auto pos = stream.tellg();
 
     // handle rare case of a single line of data and user-provided headers
-    // where a lack of a newline will mean that std::getline returns false
+    // where a lack of a newline will mean that csv_utils::getline_csv returns false
     bool is_first_row = false;
     if (!has_newline)
     {
@@ -289,7 +289,7 @@ void csv_datasource::parse_csv(T & stream,
     if (has_disk_index_) return;
 
     std::vector<item_type> boxes;
-    while (is_first_row || std::getline(stream, csv_line, stream.widen(newline)))
+    while (is_first_row || csv_utils::getline_csv(stream, csv_line, stream.widen(newline)))
     {
         if ((row_limit_ > 0) && (line_number++ > row_limit_))
         {
