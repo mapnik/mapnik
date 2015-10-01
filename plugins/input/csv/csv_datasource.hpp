@@ -113,6 +113,7 @@ private:
     bool extent_initialized_;
     std::unique_ptr<spatial_index_type> tree_;
     detail::geometry_column_locator locator_;
+    bool has_disk_index_;
 };
 
 #endif // MAPNIK_CSV_DATASOURCE_HPP

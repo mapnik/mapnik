@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 #include <mapnik/util/fs.hpp>
-#include "quadtree.hpp"
+#include <mapnik/quad_tree.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 
@@ -73,7 +73,7 @@ int main (int argc,char** argv)
 
         if (vm.count("version"))
         {
-            clog<<"version 0.3.0" <<std::endl;
+            clog << "version 0.3.0" <<std::endl;
             return 1;
         }
 
@@ -153,7 +153,7 @@ int main (int argc,char** argv)
 
         int pos=50;
         shp.seek(pos*2);
-        quadtree<int> tree(extent,depth,ratio);
+        mapnik::quad_tree<int> tree(extent,depth,ratio);
         int count=0;
         while (true) {
 

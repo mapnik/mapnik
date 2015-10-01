@@ -20,41 +20,43 @@
  *
  *****************************************************************************/
 
-#ifndef CSV_FEATURESET_HPP
-#define CSV_FEATURESET_HPP
+#ifndef CSV_INDEX_FEATURESET_HPP
+#define CSV_INDEX_FEATURESET_HPP
 
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/geom_util.hpp>
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
-#include <deque>
-#include <cstdio>
 
 #ifdef CSV_MEMORY_MAPPED_FILE
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
-#pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 
-class csv_featureset : public mapnik::Featureset
+class csv_index_featureset : public mapnik::Featureset
 {
+    using value_type = std::pair<std::size_t, std::size_t>;
     using locator_type = detail::geometry_column_locator;
 public:
-    using array_type = std::deque<csv_datasource::item_type>;
-    csv_featureset(std::string const& filename,
-                   locator_type const& locator,
-                   std::string const& separator,
-                   std::vector<std::string> const& headers,
-                   mapnik::context_ptr const& ctx,
-                   array_type && index_array);
-    ~csv_featureset();
+
+    csv_index_featureset(std::string const& filename,
+                         mapnik::filter_in_box const& filter,
+                         locator_type const& locator,
+                         std::string const& separator,
+                         std::vector<std::string> const& headers,
+                         mapnik::context_ptr const& ctx);
+    ~csv_index_featureset();
     mapnik::feature_ptr next();
 private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
+    std::string const& separator_;
+    std::vector<std::string> headers_;
+    mapnik::context_ptr ctx_;
+    mapnik::value_integer feature_id_ = 0;
+    detail::geometry_column_locator const& locator_;
+    mapnik::transcoder tr_;
 #if defined (CSV_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
@@ -62,16 +64,9 @@ private:
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
     file_ptr file_;
 #endif
-    std::string const& separator_;
-    std::vector<std::string> const& headers_;
-    const array_type index_array_;
-    array_type::const_iterator index_itr_;
-    array_type::const_iterator index_end_;
-    mapnik::context_ptr ctx_;
-    mapnik::value_integer feature_id_ = 0;
-    detail::geometry_column_locator const& locator_;
-    mapnik::transcoder tr_;
+    std::vector<value_type> positions_;
+    std::vector<value_type>::iterator itr_;
 };
 
 
-#endif // CSV_FEATURESET_HPP
+#endif // CSV_INDEX_FEATURESET_HPP
