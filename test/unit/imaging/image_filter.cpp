@@ -401,21 +401,21 @@ SECTION("test colorize-alpha - parsing correct input") {
     mapnik::filter::colorize_alpha const & ca = mapnik::util::get<mapnik::filter::colorize_alpha>(f.front());
 
     {
-        mapnik::filter::color_stop const & s = ca[0];
-        CHECK( s.color.alpha() == 0xff );
-        CHECK( s.color.red() == 0x00 );
-        CHECK( s.color.green() == 0x00 );
-        CHECK( s.color.blue() == 0xff );
-        CHECK( s.offset == 0.0 );
+        mapnik::filter::color_stop const & s2 = ca[0];
+        CHECK( s2.color.alpha() == 0xff );
+        CHECK( s2.color.red() == 0x00 );
+        CHECK( s2.color.green() == 0x00 );
+        CHECK( s2.color.blue() == 0xff );
+        CHECK( s2.offset == 0.0 );
     }
 
     {
-        mapnik::filter::color_stop const & s = ca[1];
-        CHECK( s.color.alpha() == 0xff );
-        CHECK( s.color.red() == 0x00 );
-        CHECK( s.color.green() == 0xff );
-        CHECK( s.color.blue() == 0x00 );
-        CHECK( s.offset == 1.0 );
+        mapnik::filter::color_stop const & s2 = ca[1];
+        CHECK( s2.color.alpha() == 0xff );
+        CHECK( s2.color.red() == 0x00 );
+        CHECK( s2.color.green() == 0xff );
+        CHECK( s2.color.blue() == 0x00 );
+        CHECK( s2.offset == 1.0 );
     }
 
 } // END SECTION

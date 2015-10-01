@@ -198,7 +198,7 @@ const mapnik::json::extract_bounding_box_grammar<base_iterator_type> geojson_dat
 template <typename Iterator>
 void geojson_datasource::initialise_index(Iterator start, Iterator end)
 {
-    mapnik::json::boxes boxes;
+    mapnik::json::boxes_type boxes;
     boost::spirit::standard::space_type space;
     Iterator itr = start;
     if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
@@ -281,11 +281,10 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
             {
                 extent_.expand_to_include(box);
             }
+            values.emplace_back(box, std::make_pair(geometry_index,0));
         }
-        values.emplace_back(box, std::make_pair(geometry_index,0));
         ++geometry_index;
     }
-
     // packing algorithm
     tree_ = std::make_unique<spatial_index_type>(values);
 

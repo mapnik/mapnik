@@ -55,8 +55,8 @@ struct MAPNIK_DECL image_any : image_base
               bool painted = false);
 
     template <typename T>
-        image_any(T && data) noexcept
-        : image_base(std::move(data)) {}
+        image_any(T && _data) noexcept
+        : image_base(std::move(_data)) {}
 
     unsigned char const* bytes() const;
     unsigned char* bytes();

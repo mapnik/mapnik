@@ -43,22 +43,22 @@
 
 namespace mapnik {
 
-// mutexes
-
 #ifdef MAPNIK_THREADSAFE
+
 std::mutex logger::severity_mutex_;
 std::mutex logger::format_mutex_;
-#endif
-
-
-// first time checks
 
 std::atomic<bool> logger::severity_env_check_ {true};
 std::atomic<bool> logger::format_env_check_ {true};
 
-// severity
-
 std::atomic<logger::severity_type> logger::severity_level_ {
+#else
+
+bool logger::severity_env_check_ {true};
+bool logger::format_env_check_ {true};
+
+logger::severity_type logger::severity_level_ {
+#endif
 #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
     logger::debug
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
