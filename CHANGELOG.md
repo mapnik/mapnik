@@ -17,6 +17,7 @@ Released: YYYY XX, 2015
 - Visual tests: new command line arguments `--agg`, `--cairo`, `--svg`, `--grid` for selecting renderers (https://github.com/mapnik/mapnik/pull/3074)
 - Visual tests: new command line argument `--scale-factor` or abbreviated `-s` for setting scale factor (https://github.com/mapnik/mapnik/pull/3074)
 - Fixed parsing colors in hexadecimal notation (https://github.com/mapnik/mapnik/pull/3075)
+- Removed mapnik::Feature type alias of mapnik::feature_impl (https://github.com/mapnik/mapnik/pull/3099)
 
 ## 3.0.5
 

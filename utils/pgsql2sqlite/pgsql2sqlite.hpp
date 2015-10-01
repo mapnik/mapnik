@@ -388,7 +388,7 @@ void pgsql2sqlite(Connection conn,
                 {
                     if (oid == geometry_oid)
                     {
-                        mapnik::Feature feat(ctx,pkid);
+                        mapnik::feature_impl feat(ctx,pkid);
                         mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
                         if (!mapnik::geometry::is_empty(geom))
                         {
