@@ -8,14 +8,14 @@ class test : public benchmark::test_case
 public:
     std::string line_data_;
     test(mapnik::parameters const& params)
-     : test_case(params)
+     : test_case(params),
+       line_data_("this is one line\nand this is a second line\nand a third line")
        {
           boost::optional<std::string> line_data = params.get<std::string>("line");
-          if (!line_data)
+          if (line_data)
           {
-              throw std::runtime_error("please provide a --line \"one line\ntwo line\"");
+              line_data_ = *line_data;
           }
-          line_data_ = *line_data;
        }
 
     bool validate() const
@@ -56,14 +56,14 @@ class test2 : public benchmark::test_case
 public:
     std::string line_data_;
     test2(mapnik::parameters const& params)
-     : test_case(params)
+     : test_case(params),
+       line_data_("this is one line\nand this is a second line\nand a third line")
        {
           boost::optional<std::string> line_data = params.get<std::string>("line");
-          if (!line_data)
+          if (line_data)
           {
-              throw std::runtime_error("please provide a --line \"one line\ntwo line\"");
+              line_data_ = *line_data;
           }
-          line_data_ = *line_data;
        }
 
     bool validate() const

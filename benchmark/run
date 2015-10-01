@@ -9,7 +9,7 @@ function run {
     ${BASE}/$1 --threads 0 --iterations $3;
     ${BASE}/$1 --threads $2 --iterations $(expr $3 / $2);
 }
-
+run test_getline 30 10000000
 #run test_array_allocation 20 100000
 #run test_png_encoding1 10 1000
 #run test_png_encoding2 10 50
