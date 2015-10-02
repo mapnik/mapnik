@@ -28,7 +28,7 @@ public:
         boost::optional<std::string> map = params.get<std::string>("map");
         if (!map)
         {
-            throw std::runtime_error("please provide a --map=<path to xml> arg");
+            throw std::runtime_error("please provide a --map <path to xml> arg");
         }
         xml_ = *map;
 

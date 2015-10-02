@@ -291,6 +291,7 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
     if (has_disk_index_) return;
 
     std::vector<item_type> boxes;
+
     while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
         if ((row_limit_ > 0) && (line_number++ > row_limit_))
