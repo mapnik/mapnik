@@ -87,6 +87,7 @@ raster_datasource::raster_datasource(parameters const& params)
     else //bounding box from image_reader
     {
         std::unique_ptr<image_reader> reader(mapnik::get_image_reader(*file));
+        if (!reader) throw datasource_exception("Raster Plugin: failed to create reader for " + *file);
         auto bbox = reader->bounding_box();
         if (bbox)
         {
