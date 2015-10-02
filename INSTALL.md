@@ -94,7 +94,7 @@ Additional optional dependencies:
     - pg_config - PostgreSQL installation capabilities
  * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
- 
+
 Instructions for installing many of these dependencies on
 various platforms can be found at the Mapnik Wiki:
 
@@ -160,7 +160,7 @@ You can run the Mapnik tests locally (without installing) like:
 
 Python bindings are not included by default. You'll need to add those separately. 
 
-    * Build from source: https://github.com/mapnik/python-mapnik
+ * Build from source: https://github.com/mapnik/python-mapnik
 
 ## Learning Mapnik
 
