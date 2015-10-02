@@ -93,7 +93,7 @@ inline bool ignore_case_equal(std::string const& s0, std::string const& s1)
 }
 
 template <class CharT, class Traits, class Allocator>
-std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_string<CharT,Traits,Allocator>& s, CharT delim)
+std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_string<CharT,Traits,Allocator>& s, CharT delim, CharT quote)
 {
     typename std::basic_string<CharT,Traits,Allocator>::size_type nread = 0;
     typename std::basic_istream<CharT, Traits>::sentry sentry(is, true);
@@ -101,7 +101,7 @@ std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_stri
     {
         std::basic_streambuf<CharT, Traits>* buf = is.rdbuf();
         s.clear();
-        bool quote = false;
+        bool has_quote = false;
         while (nread < s.max_size())
         {
             int c1 = buf->sbumpc();
@@ -114,9 +114,9 @@ std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_stri
             {
                 ++nread;
                 CharT c = Traits::to_char_type(c1);
-                if (Traits::eq(c,'"') || Traits::eq(c,'\''))
-                    quote = !quote;
-                if (!Traits::eq(c, delim) || quote)
+                if (Traits::eq(c, quote))
+                    has_quote = !has_quote;
+                if (!Traits::eq(c, delim) || has_quote)
                     s.push_back(c);
                 else
                     break;// Character is extracted but not appended.

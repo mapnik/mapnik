@@ -187,7 +187,7 @@ int main (int argc, char** argv)
         csv_file.seekg(0, std::ios::beg);
         // get first line
         std::string csv_line;
-        csv_utils::getline_csv(csv_file, csv_line, csv_file.widen(newline));
+        csv_utils::getline_csv(csv_file, csv_line, newline, quote[0] );
         mapnik::util::trim(separator);
         if (separator.empty())  separator = detail::detect_separator(csv_line);
         csv_file.seekg(0, std::ios::beg);
@@ -213,7 +213,7 @@ int main (int argc, char** argv)
         }
         else // parse first line as headers
         {
-            while (csv_utils::getline_csv(csv_file,csv_line,csv_file.widen(newline)))
+            while (csv_utils::getline_csv(csv_file,csv_line,newline, quote[0]))
             {
                 try
                 {
@@ -281,7 +281,7 @@ int main (int argc, char** argv)
         using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
         std::vector<item_type> boxes;
 
-        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, csv_file.widen(newline)))
+        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, csv_file.widen(newline), quote[0]))
         {
             auto record_offset = pos;
             auto record_size = csv_line.length();

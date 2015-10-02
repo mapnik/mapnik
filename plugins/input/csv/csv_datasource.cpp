@@ -172,9 +172,13 @@ void csv_datasource::parse_csv(T & stream,
     std::tie(newline, has_newline) = detail::autodect_newline(stream, file_length);
     // set back to start
     stream.seekg(0, std::ios::beg);
+
+    std::string quo = mapnik::util::trim_copy(quote);
+    if (quo.empty()) quo = "\"";
+
     // get first line
     std::string csv_line;
-    csv_utils::getline_csv(stream,csv_line,stream.widen(newline));
+    csv_utils::getline_csv(stream, csv_line, newline, quo[0]);
     // if user has not passed a separator manually
     // then attempt to detect by reading first line
 
@@ -187,9 +191,6 @@ void csv_datasource::parse_csv(T & stream,
 
     std::string esc = mapnik::util::trim_copy(escape);
     if (esc.empty()) esc = "\\";
-
-    std::string quo = mapnik::util::trim_copy(quote);
-    if (quo.empty()) quo = "\"";
 
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
                           << "' quo: '" << quo << "' esc: '" << esc << "'";
@@ -208,7 +209,7 @@ void csv_datasource::parse_csv(T & stream,
     }
     else // parse first line as headers
     {
-        while (csv_utils::getline_csv(stream,csv_line,stream.widen(newline)))
+        while (csv_utils::getline_csv(stream,csv_line,newline, quo[0]))
         {
             try
             {
@@ -293,7 +294,7 @@ void csv_datasource::parse_csv(T & stream,
     if (has_disk_index_) return;
 
     std::vector<item_type> boxes;
-    while (is_first_row || csv_utils::getline_csv(stream, csv_line, stream.widen(newline)))
+    while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quo[0]))
     {
         if ((row_limit_ > 0) && (line_number++ > row_limit_))
         {
