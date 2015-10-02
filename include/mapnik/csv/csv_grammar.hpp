@@ -36,13 +36,14 @@ using csv_line = std::vector<csv_value>;
 using csv_data = std::vector<csv_line>;
 
 template <typename Iterator>
-struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi::blank_type>
+struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&, char), qi::blank_type>
 {
     csv_line_grammar() : csv_line_grammar::base_type(line)
     {
         using namespace qi;
         qi::_a_type _a;
         qi::_r1_type _r1;
+        qi::_r2_type _r2;
         qi::lit_type lit;
         //qi::eol_type eol;
         qi::_1_type _1;
@@ -62,21 +63,21 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&), qi
             ("\"\"", '\"') // double quote
             ;
 
-        line = column(_r1)  % char_(_r1)
+        line = column(_r1, _r2)  % char_(_r1)
             ;
-        column = -omit[char_("\n\r")] >> quoted | *(char_ - (lit(_r1) /*| eol*/))
+        column = -omit[char_("\n\r")] >> quoted(_r2) | *(char_ - (lit(_r1) /*| eol*/))
             ;
-        quoted = omit[char_("\"'")[_a = _1]] > text(_a) > -lit(_a)
+        quoted = omit[char_(_r1)[_a = _1]] > text(_a) > -lit(_a)
             ;
         text = *(unesc_char | (char_ - char_(_r1)))
             ;
         BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
     }
   private:
-    qi::rule<Iterator, csv_line(std::string const&), qi::blank_type> line;
-    qi::rule<Iterator, csv_value(std::string const&)> column; // no-skip
+    qi::rule<Iterator, csv_line(std::string const&, char), qi::blank_type> line;
+    qi::rule<Iterator, csv_value(std::string const&, char)> column; // no-skip
     qi::rule<Iterator, csv_value(char)> text;
-    qi::rule<Iterator, qi::locals<char>, csv_value()> quoted;
+    qi::rule<Iterator, qi::locals<char>, csv_value(char)> quoted;
     qi::symbols<char const, char const> unesc_char;
 };
 
