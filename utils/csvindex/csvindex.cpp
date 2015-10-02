@@ -63,7 +63,6 @@ int main (int argc, char** argv)
     double ratio = DEFAULT_RATIO;
     vector<string> csv_files;
     std::string separator;
-    std::string escape;
     std::string quote;
     std::string manual_headers;
     try
@@ -76,7 +75,6 @@ int main (int argc, char** argv)
             ("depth,d", po::value<unsigned int>(), "max tree depth\n(default 8)")
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
             ("separator,s", po::value<std::string>(), "CSV columns separator")
-            ("escape,e", po::value<std::string>(), "CSV columns escape")
             ("quote,q", po::value<std::string>(), "CSV columns quote")
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
             ("csv_files",po::value<vector<string> >(),"CSV files to index: file1 file2 ...fileN")
@@ -114,10 +112,6 @@ int main (int argc, char** argv)
         if (vm.count("separator"))
         {
             separator = vm["separator"].as<std::string>();
-        }
-        if (vm.count("escape"))
-        {
-            separator = vm["escape"].as<std::string>();
         }
         if (vm.count("quote"))
         {
@@ -176,6 +170,9 @@ int main (int argc, char** argv)
             continue;
         }
 
+        mapnik::util::trim(quote);
+        if (quote.empty()) quote = "\"";
+
         auto file_length = detail::file_length(csv_file);
         // set back to start
         csv_file.seekg(0, std::ios::beg);
@@ -187,23 +184,17 @@ int main (int argc, char** argv)
         csv_file.seekg(0, std::ios::beg);
         // get first line
         std::string csv_line;
-        csv_utils::getline_csv(csv_file, csv_line, newline, quote[0] );
+        csv_utils::getline_csv(csv_file, csv_line, newline, quote.front());
         mapnik::util::trim(separator);
         if (separator.empty())  separator = detail::detect_separator(csv_line);
         csv_file.seekg(0, std::ios::beg);
-
-        mapnik::util::trim(escape);
-        if (escape.empty()) escape = "\\";
-
-        mapnik::util::trim(quote);
-        if (quote.empty()) quote = "\"";
         int line_number = 1;
         detail::geometry_column_locator locator;
         std::vector<std::string> headers;
         if (!manual_headers.empty())
         {
             std::size_t index = 0;
-            headers = csv_utils::parse_line(manual_headers, separator);
+            headers = csv_utils::parse_line(manual_headers, separator, quote.front());
             for (auto const& header : headers)
             {
                 std::string val = mapnik::util::trim_copy(header);
@@ -213,11 +204,11 @@ int main (int argc, char** argv)
         }
         else // parse first line as headers
         {
-            while (csv_utils::getline_csv(csv_file,csv_line,newline, quote[0]))
+            while (csv_utils::getline_csv(csv_file,csv_line,newline, quote.front()))
             {
                 try
                 {
-                    headers = csv_utils::parse_line(csv_line, separator);
+                    headers = csv_utils::parse_line(csv_line, separator,quote.front());
                     // skip blank lines
                     if (headers.size() > 0 && headers[0].empty()) ++line_number;
                     else
@@ -281,7 +272,7 @@ int main (int argc, char** argv)
         using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
         std::vector<item_type> boxes;
 
-        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, csv_file.widen(newline), quote[0]))
+        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, csv_file.widen(newline), quote.front()))
         {
             auto record_offset = pos;
             auto record_size = csv_line.length();
@@ -301,7 +292,7 @@ int main (int argc, char** argv)
             }
             try
             {
-                auto values = csv_utils::parse_line(csv_line, separator);
+                auto values = csv_utils::parse_line(csv_line, separator, quote.front());
                 unsigned num_fields = values.size();
                 if (num_fields > num_headers)
                 {

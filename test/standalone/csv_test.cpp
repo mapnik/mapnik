@@ -536,8 +536,8 @@ TEST_CASE("csv") {
 
             for (auto const &file : {
                     std::string("test/data/csv/geojson_double_quote_escape.csv")
-                        , std::string("test/data/csv/geojson_single_quote.csv")
-                        , std::string("test/data/csv/geojson_2x_double_quote_filebakery_style.csv")
+                        //, std::string("test/data/csv/geojson_single_quote.csv")
+                        //, std::string("test/data/csv/geojson_2x_double_quote_filebakery_style.csv")
                         }) {
                 auto ds = get_csv_ds(file);
                 auto fields = ds->get_descriptor().get_descriptors();
@@ -657,6 +657,7 @@ TEST_CASE("csv") {
             mapnik::parameters params;
             params["type"] = std::string("csv");
             params["inline"] = csv_string;
+            params["quote"] = "'";
             auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(bool(ds));
 

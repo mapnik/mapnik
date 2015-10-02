@@ -48,6 +48,7 @@ public:
     csv_featureset(std::string const& filename,
                    locator_type const& locator,
                    std::string const& separator,
+                   char quote,
                    std::vector<std::string> const& headers,
                    mapnik::context_ptr const& ctx,
                    array_type && index_array);
@@ -63,6 +64,7 @@ private:
     file_ptr file_;
 #endif
     std::string const& separator_;
+    char quote_;
     std::vector<std::string> const& headers_;
     const array_type index_array_;
     array_type::const_iterator index_itr_;

@@ -70,9 +70,8 @@ csv_datasource::csv_datasource(parameters const& params)
     filename_(),
     row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
     inline_string_(),
-    escape_(*params.get<std::string>("escape", "")),
-    separator_(*params.get<std::string>("separator", "")),
-    quote_(*params.get<std::string>("quote", "")),
+    separator_(*params.get<std::string>("separator", "\n")),
+    quote_('"'),
     headers_(),
     manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
     strict_(*params.get<mapnik::boolean_type>("strict", false)),
@@ -82,6 +81,13 @@ csv_datasource::csv_datasource(parameters const& params)
     locator_(),
     has_disk_index_(false)
 {
+    auto quote_param = params.get<std::string>("quote");
+    if (quote_param)
+    {
+        auto val = mapnik::util::trim_copy(*quote_param);
+        if (!val.empty()) quote_ = val.front();// we pick pick first non-space char
+    }
+
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
     {
@@ -108,7 +114,7 @@ csv_datasource::csv_datasource(parameters const& params)
     if (!inline_string_.empty())
     {
         std::istringstream in(inline_string_);
-        parse_csv(in, escape_, separator_, quote_);
+        parse_csv(in, separator_);
     }
     else
     {
@@ -140,7 +146,7 @@ csv_datasource::csv_datasource(parameters const& params)
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
         }
 #endif
-        parse_csv(in, escape_, separator_, quote_);
+        parse_csv(in, separator_);
 
         if (has_disk_index_ && !extent_initialized_)
         {
@@ -159,10 +165,7 @@ csv_datasource::csv_datasource(parameters const& params)
 csv_datasource::~csv_datasource() {}
 
 template <typename T>
-void csv_datasource::parse_csv(T & stream,
-                               std::string const& escape,
-                               std::string const& separator,
-                               std::string const& quote)
+void csv_datasource::parse_csv(T & stream, std::string const& separator)
 {
     auto file_length = detail::file_length(stream);
     // set back to start
@@ -173,12 +176,9 @@ void csv_datasource::parse_csv(T & stream,
     // set back to start
     stream.seekg(0, std::ios::beg);
 
-    std::string quo = mapnik::util::trim_copy(quote);
-    if (quo.empty()) quo = "\"";
-
     // get first line
     std::string csv_line;
-    csv_utils::getline_csv(stream, csv_line, newline, quo[0]);
+    csv_utils::getline_csv(stream, csv_line, newline, quote_);
     // if user has not passed a separator manually
     // then attempt to detect by reading first line
 
@@ -189,17 +189,14 @@ void csv_datasource::parse_csv(T & stream,
     // set back to start
     stream.seekg(0, std::ios::beg);
 
-    std::string esc = mapnik::util::trim_copy(escape);
-    if (esc.empty()) esc = "\\";
-
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
-                          << "' quo: '" << quo << "' esc: '" << esc << "'";
+                          << "' quote: '" << quote_ << "'";
 
     int line_number = 1;
     if (!manual_headers_.empty())
     {
         std::size_t index = 0;
-        auto headers = csv_utils::parse_line(manual_headers_, sep);
+        auto headers = csv_utils::parse_line(manual_headers_, sep, quote_);
         for (auto const& header : headers)
         {
             std::string val = mapnik::util::trim_copy(header);
@@ -209,11 +206,11 @@ void csv_datasource::parse_csv(T & stream,
     }
     else // parse first line as headers
     {
-        while (csv_utils::getline_csv(stream,csv_line,newline, quo[0]))
+        while (csv_utils::getline_csv(stream,csv_line,newline, quote_))
         {
             try
             {
-                auto headers = csv_utils::parse_line(csv_line, sep);
+                auto headers = csv_utils::parse_line(csv_line, sep, quote_);
                 // skip blank lines
                 std::string val;
                 if (headers.size() > 0 && headers[0].empty()) ++line_number;
@@ -294,7 +291,7 @@ void csv_datasource::parse_csv(T & stream,
     if (has_disk_index_) return;
 
     std::vector<item_type> boxes;
-    while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quo[0]))
+    while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
         if ((row_limit_ > 0) && (line_number++ > row_limit_))
         {
@@ -320,7 +317,7 @@ void csv_datasource::parse_csv(T & stream,
 
         try
         {
-            auto values = csv_utils::parse_line(csv_line, sep);
+            auto values = csv_utils::parse_line(csv_line, sep, quote_);
             unsigned num_fields = values.size();
             if (num_fields > num_headers)
             {
@@ -511,7 +508,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
         std::string str(record.begin(), record.end());
         try
         {
-            auto values = csv_utils::parse_line(str, separator_);
+            auto values = csv_utils::parse_line(str, separator_, quote_);
             auto geom = detail::extract_geometry(values, locator_);
             result = mapnik::util::to_ds_type(geom);
             if (result)
@@ -592,17 +589,17 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
                       });
             if (inline_string_.empty())
             {
-                return std::make_shared<csv_featureset>(filename_, locator_, separator_, headers_, ctx_, std::move(index_array));
+                return std::make_shared<csv_featureset>(filename_, locator_, separator_, quote_, headers_, ctx_, std::move(index_array));
             }
             else
             {
-                return std::make_shared<csv_inline_featureset>(inline_string_, locator_, separator_, headers_, ctx_, std::move(index_array));
+                return std::make_shared<csv_inline_featureset>(inline_string_, locator_, separator_, quote_, headers_, ctx_, std::move(index_array));
             }
         }
         else if (has_disk_index_)
         {
             mapnik::filter_in_box filter(q.get_bbox());
-            return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, headers_, ctx_);
+            return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, quote_, headers_, ctx_);
         }
     }
     return mapnik::featureset_ptr();

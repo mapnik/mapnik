@@ -49,6 +49,7 @@ public:
                          mapnik::filter_in_box const& filter,
                          locator_type const& locator,
                          std::string const& separator,
+                         char quote,
                          std::vector<std::string> const& headers,
                          mapnik::context_ptr const& ctx);
     ~csv_index_featureset();
@@ -56,6 +57,7 @@ public:
 private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
     std::string const& separator_;
+    char quote_;
     std::vector<std::string> headers_;
     mapnik::context_ptr ctx_;
     mapnik::value_integer feature_id_ = 0;

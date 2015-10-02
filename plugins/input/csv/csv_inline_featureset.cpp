@@ -35,11 +35,13 @@
 csv_inline_featureset::csv_inline_featureset(std::string const& inline_string,
                                              detail::geometry_column_locator const& locator,
                                              std::string const& separator,
+                                             char quote,
                                              std::vector<std::string> const& headers,
                                              mapnik::context_ptr const& ctx,
                                              array_type && index_array)
     : inline_string_(inline_string),
       separator_(separator),
+      quote_(quote),
       headers_(headers),
       index_array_(std::move(index_array)),
       index_itr_(index_array_.begin()),
@@ -52,7 +54,7 @@ csv_inline_featureset::~csv_inline_featureset() {}
 
 mapnik::feature_ptr csv_inline_featureset::parse_feature(std::string const& str)
 {
-    auto values = csv_utils::parse_line(str, separator_);
+    auto values = csv_utils::parse_line(str, separator_, quote_);
     auto geom = detail::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {

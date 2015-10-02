@@ -31,7 +31,7 @@
 #include <vector>
 #include <deque>
 
-csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, std::string const& separator,
+csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, std::string const& separator, char quote,
                                std::vector<std::string> const& headers, mapnik::context_ptr const& ctx, array_type && index_array)
     :
 #if defined(CSV_MEMORY_MAPPED_FILE)
@@ -42,6 +42,7 @@ csv_featureset::csv_featureset(std::string const& filename, detail::geometry_col
     file_(std::fopen(filename.c_str(),"rb"), std::fclose),
 #endif
     separator_(separator),
+    quote_(quote),
     headers_(headers),
     index_array_(std::move(index_array)),
     index_itr_(index_array_.begin()),
@@ -70,7 +71,7 @@ csv_featureset::~csv_featureset() {}
 
 mapnik::feature_ptr csv_featureset::parse_feature(char const* beg, char const* end)
 {
-    auto values = csv_utils::parse_line(beg, end, separator_, headers_.size());
+    auto values = csv_utils::parse_line(beg, end, separator_, quote_, headers_.size());
     auto geom = detail::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
