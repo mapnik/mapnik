@@ -161,16 +161,18 @@ void html_report::report(result const & r, boost::filesystem::path const & outpu
       copy_file(r.reference_image_path, reference);
       copy_file(r.actual_image_path, actual);
 
-       s << "<div class=\"expected\">\n"
-            "  <a href=" << reference.filename() << ">\n"
-            "    <img src=" << reference.filename() << " width=\"100\%\">\n"
-            "  </a>\n"
-            "</div>\n"
-            "<div class=\"text\">" << r.diff << "</div>\n"
-            "<div class=\"actual\">\n"
-            "  <a href=" << actual.filename() << ">\n"
-            "    <img src=" << actual.filename() << " width=\"100\%\">\n"
-            "  </a>\n"
+       s << "<p>" << r.diff << "</p>\n"
+            "<div class=\"r\">"
+            "  <div class=\"i\">"
+            "    <a href=" << reference.filename() << ">\n"
+            "      <img src=" << reference.filename() << " width=\"100\%\">\n"
+            "    </a>\n"
+            "  </div>\n"
+            "  <div class=\"i2\">\n"
+            "    <a href=" << actual.filename() << ">\n"
+            "      <img src=" << actual.filename() << " width=\"100\%\">\n"
+            "    </a>\n"
+            "  </div>\n"
             "</div>\n";
     }
 }
@@ -179,31 +181,21 @@ constexpr const char * html_header = R"template(<!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { margin:10; padding:10; }
-    .expected {
-       float:left;
-       border-width:1px;
-       border-style:solid;
-       width:45%;
-    }    
-    .actual {
-       float:right;
-       border-width:1px;
-       border-style:solid;
-       width:45%;
+    .r {
+      width:100%;
+      display: flex;
+      position: relative;
+      border:1px solid black;
+      margin-bottom: 20px;
     }
-    .text {
-       float:left;
-    }
+    .i2 { max-width: 50%; width:50%; }
+    .i { max-width: 50%; width:50%; }
+    .i:hover{ position: absolute; top:0; left:0; }
+    .i img, .i2 img { width: 100%; }
+    .i img:hover { mix-blend-mode: difference; }
   </style>
 </head>
 <body>
-<script>
-</script>
-<div id='results'>
-     <div class="expected">expected</div>
-     <div class="text">% difference</div>
-     <div class="actual">actual</div>
 )template";
 
 constexpr const char * html_footer = R"template(</div>
