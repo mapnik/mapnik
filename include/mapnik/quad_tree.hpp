@@ -253,7 +253,7 @@ private:
         ext[3]=box2d<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
     }
 
-    void trim_tree(node * n)
+    void trim_tree(node *& n)
     {
         if (n)
         {
