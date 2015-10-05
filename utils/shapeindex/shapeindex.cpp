@@ -240,7 +240,7 @@ int main (int argc,char** argv)
                  << (shapename+".index") << "\"" << endl;
         } else {
             tree.trim();
-            std::clog<<" number nodes="<<tree.count()<<std::endl;
+            std::clog << " number nodes=" << tree.count() << std::endl;
             file.exceptions(std::ios::failbit | std::ios::badbit);
             tree.write(file);
             file.flush();
