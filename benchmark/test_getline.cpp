@@ -25,7 +25,7 @@ public:
         std::string csv_line;
         std::stringstream s;
         s << line_data_;
-        std::getline(s,csv_line,s.widen(newline));
+        std::getline(s,csv_line,newline);
         if (csv_line != first)
         {
             return true;
@@ -42,10 +42,9 @@ public:
         std::string csv_line;
         std::stringstream s;
         s << line_data_;
-        auto newline_widened = s.widen(newline);
         for (unsigned i=0;i<iterations_;++i)
         {
-            std::getline(s,csv_line,newline_widened);
+            std::getline(s,csv_line,newline);
         }
         return true;
     }
@@ -71,10 +70,11 @@ public:
     {
         std::string first = line_data_.substr(line_data_.find_first_not_of('\n'));
         char newline = '\n';
+        char quote = '"';
         std::string csv_line;
         std::stringstream s;
         s << line_data_;
-        csv_utils::getline_csv(s,csv_line,s.widen(newline));
+        csv_utils::getline_csv(s,csv_line,newline,quote);
         if (csv_line != first)
         {
             return true;
@@ -88,13 +88,13 @@ public:
     bool operator()() const
     {
         char newline = '\n';
+        char quote = '"';
         std::string csv_line;
         std::stringstream s;
         s << line_data_;
-        auto newline_widened = s.widen(newline);
         for (unsigned i=0;i<iterations_;++i)
         {
-            csv_utils::getline_csv(s,csv_line,newline_widened);
+            csv_utils::getline_csv(s,csv_line,newline,quote);
         }
         return true;
     }
