@@ -40,15 +40,6 @@
 #include "shape_utils.hpp"
 #include <mapnik/util/spatial_index.hpp>
 
-
-// operator>> needed by mapnik::spatial_index<Value, Filter, InputStream>
-template <typename InputStream>
-InputStream & operator>>(InputStream & in, std::streampos & pos)
-{
-    in.read(reinterpret_cast<char*>(&pos), sizeof(std::streampos));
-    return in;
-}
-
 using mapnik::feature_factory;
 
 template <typename filterT>
@@ -73,10 +64,9 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     if (index)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-        //spatial_index<unsigned, filterT,stream<mapped_file_source> >::query(filter, index->file(), offsets_);
-        mapnik::util::spatial_index<std::streampos, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<int, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
 #else
-        mapnik::util::spatial_index<std::streampos, filterT, std::ifstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<int, filterT, std::ifstream>::query(filter, index->file(), offsets_);
 #endif
     }
     std::sort(offsets_.begin(), offsets_.end());

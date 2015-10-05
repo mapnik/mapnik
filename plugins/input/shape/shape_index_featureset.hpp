@@ -63,8 +63,8 @@ private:
     context_ptr ctx_;
     std::unique_ptr<shape_io> shape_ptr_;
     const std::unique_ptr<mapnik::transcoder> tr_;
-    std::vector<std::streampos> offsets_;
-    std::vector<std::streampos>::iterator itr_;
+    std::vector<int> offsets_;
+    std::vector<int>::iterator itr_;
     std::vector<int> attr_ids_;
     mapnik::value_integer row_limit_;
     mutable int count_;
