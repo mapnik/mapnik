@@ -179,17 +179,20 @@ void csv_datasource::parse_csv(T & stream)
     stream.seekg(0, std::ios::beg);
     char newline;
     bool has_newline;
+
     std::tie(newline, has_newline) = detail::autodect_newline(stream, file_length);
+
     // set back to start
     stream.seekg(0, std::ios::beg);
-
+    std::string csv_line;
+    csv_utils::getline_csv(stream, csv_line, newline, quote_);
     if (separator_ == 0)
     {
-        separator_ = detail::detect_separator(stream, newline, quote_);
+        separator_ = detail::detect_separator(csv_line);
     }
+
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: separator: '" << separator_
                           << "' quote: '" << quote_ << "'";
-
     stream.seekg(0, std::ios::beg);
 
     int line_number = 1;
@@ -206,7 +209,6 @@ void csv_datasource::parse_csv(T & stream)
     }
     else // parse first line as headers
     {
-        std::string csv_line;
         while (csv_utils::getline_csv(stream, csv_line, newline, quote_))
         {
             try
@@ -274,13 +276,12 @@ void csv_datasource::parse_csv(T & stream)
                   [ & ](std::string const& header){ ctx_->push(header); });
 
     mapnik::transcoder tr(desc_.get_encoding());
-    auto pos = stream.tellg();
 
+    auto pos = stream.tellg();
     // handle rare case of a single line of data and user-provided headers
     // where a lack of a newline will mean that csv_utils::getline_csv returns false
-
-#if 0 // FIXME
     bool is_first_row = false;
+
     if (!has_newline)
     {
         stream.setstate(std::ios::failbit);
@@ -290,14 +291,13 @@ void csv_datasource::parse_csv(T & stream)
             is_first_row = true;
         }
     }
-#endif
 
     if (has_disk_index_) return;
 
     std::vector<item_type> boxes;
-    std::string csv_line;
-    while (/*is_first_row || */csv_utils::getline_csv(stream, csv_line, newline, quote_))
+    while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
+
         if ((row_limit_ > 0) && (line_number++ > row_limit_))
         {
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
@@ -306,10 +306,10 @@ void csv_datasource::parse_csv(T & stream)
         auto record_offset = pos;
         auto record_size = csv_line.length();
         pos = stream.tellg();
-        //is_first_row = false; // FIXME
+        is_first_row = false;
+
         // skip blank lines
-        unsigned line_length = csv_line.length();
-        if (line_length <= 10)
+        if (record_size <= 10)
         {
             std::string trimmed = csv_line;
             boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n "));

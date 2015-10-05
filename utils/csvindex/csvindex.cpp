@@ -183,8 +183,7 @@ int main (int argc, char** argv)
         // get first line
         std::string csv_line;
         csv_utils::getline_csv(csv_file, csv_line, newline, quote);
-        //mapnik::util::trim(separator);
-        if (separator == 0) separator = detail::detect_separator(csv_file, newline, quote);
+        if (separator == 0) separator = detail::detect_separator(csv_line);
         csv_file.seekg(0, std::ios::beg);
         int line_number = 1;
         detail::geometry_column_locator locator;

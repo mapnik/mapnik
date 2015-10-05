@@ -141,11 +141,8 @@ std::size_t file_length(T & stream)
     return stream.tellg();
 }
 
-template <typename InputStream>
-static inline char detect_separator(InputStream & stream, char delim, char quote)
+static inline char detect_separator(std::string const& str)
 {
-    std::string str;
-    csv_utils::getline_csv(stream, str, delim, quote);
     char separator = ','; // default
     int num_commas = std::count(str.begin(), str.end(), ',');
     // detect tabs
