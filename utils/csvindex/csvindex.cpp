@@ -62,8 +62,8 @@ int main (int argc, char** argv)
     unsigned int depth = DEFAULT_DEPTH;
     double ratio = DEFAULT_RATIO;
     vector<string> csv_files;
-    char separator;
-    char quote;
+    char separator = 0;
+    char quote = 0;
     std::string manual_headers;
     try
     {
@@ -176,8 +176,9 @@ int main (int argc, char** argv)
         csv_file.seekg(0, std::ios::beg);
         char newline;
         bool has_newline;
-        std::tie(newline, has_newline) = detail::autodect_newline(csv_file, file_length);
-
+        char detected_quote;
+        std::tie(newline, has_newline, detected_quote) = detail::autodect_newline_and_quote(csv_file, file_length);
+        if (quote == 0) quote = detected_quote;
         // set back to start
         csv_file.seekg(0, std::ios::beg);
         // get first line

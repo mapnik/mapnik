@@ -71,7 +71,7 @@ csv_datasource::csv_datasource(parameters const& params)
     row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
     inline_string_(),
     separator_(0),
-    quote_('"'),
+    quote_(0),
     headers_(),
     manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
     strict_(*params.get<mapnik::boolean_type>("strict", false)),
@@ -179,9 +179,9 @@ void csv_datasource::parse_csv(T & stream)
     stream.seekg(0, std::ios::beg);
     char newline;
     bool has_newline;
-
-    std::tie(newline, has_newline) = detail::autodect_newline(stream, file_length);
-
+    char detected_quote;
+    std::tie(newline, has_newline, detected_quote) = detail::autodect_newline_and_quote(stream, file_length);
+    if (quote_ == 0) quote_ = detected_quote;
     // set back to start
     stream.seekg(0, std::ios::beg);
     std::string csv_line;

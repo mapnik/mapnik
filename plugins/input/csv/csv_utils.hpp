@@ -177,11 +177,13 @@ static inline char detect_separator(std::string const& str)
 }
 
 template <typename T>
-std::tuple<char,bool> autodect_newline(T & stream, std::size_t file_length)
+std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t file_length)
 {
     // autodetect newlines
     char newline = '\n';
     bool has_newline = false;
+    char quote = '"';
+    bool has_quote = false;
     static std::size_t const max_size = 4000;
     std::size_t size = std::min(file_length, max_size);
     for (std::size_t lidx = 0; lidx < size; ++lidx)
@@ -191,15 +193,20 @@ std::tuple<char,bool> autodect_newline(T & stream, std::size_t file_length)
         {
             newline = '\r';
             has_newline = true;
-            break;
+            //break;
         }
         if (c == '\n')
         {
             has_newline = true;
-            break;
+            //break;
+        }
+        else if (!has_quote && c == '\'')
+        {
+            quote = '\'';
+            has_quote = true;
         }
     }
-    return std::make_tuple(newline,has_newline);
+    return std::make_tuple(newline, has_newline, quote);
 }
 
 
