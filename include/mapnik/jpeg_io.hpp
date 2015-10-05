@@ -27,10 +27,10 @@
 
 #include <new>
 #include <ostream>
+#include <cstdio>
 
 extern "C"
 {
-#include <stdio.h>
 #include <jpeglib.h>
 }
 
@@ -58,10 +58,10 @@ inline boolean empty_output_buffer (j_compress_ptr cinfo)
 {
     dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
     dest->out->write((char*)dest->buffer, BUFFER_SIZE);
-    if (!*(dest->out)) return false;
+    if (!*(dest->out)) return boolean(0);
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer = BUFFER_SIZE;
-    return true;
+    return boolean(1);
 }
 
 inline void term_destination( j_compress_ptr cinfo)
@@ -105,8 +105,8 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
     jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, quality,1);
-    jpeg_start_compress(&cinfo, 1);
+    jpeg_set_quality(&cinfo, quality, boolean(1));
+    jpeg_start_compress(&cinfo, boolean(1));
     JSAMPROW row_pointer[1];
     JSAMPLE* row=reinterpret_cast<JSAMPLE*>( ::operator new (sizeof(JSAMPLE) * width*3));
     while (cinfo.next_scanline < cinfo.image_height)
