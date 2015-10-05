@@ -76,7 +76,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
         //spatial_index<unsigned, filterT,stream<mapped_file_source> >::query(filter, index->file(), offsets_);
         mapnik::util::spatial_index<std::streampos, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
 #else
-        mapnik::util::spatial_index<std::streampos, std::ifstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<std::streampos, filterT, std::ifstream>::query(filter, index->file(), offsets_);
 #endif
     }
     std::sort(offsets_.begin(), offsets_.end());
