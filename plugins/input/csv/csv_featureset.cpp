@@ -31,7 +31,7 @@
 #include <vector>
 #include <deque>
 
-csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, std::string const& separator, char quote,
+csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, char separator, char quote,
                                std::vector<std::string> const& headers, mapnik::context_ptr const& ctx, array_type && index_array)
     :
 #if defined(CSV_MEMORY_MAPPED_FILE)

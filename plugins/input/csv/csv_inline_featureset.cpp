@@ -34,7 +34,7 @@
 
 csv_inline_featureset::csv_inline_featureset(std::string const& inline_string,
                                              detail::geometry_column_locator const& locator,
-                                             std::string const& separator,
+                                             char separator,
                                              char quote,
                                              std::vector<std::string> const& headers,
                                              mapnik::context_ptr const& ctx,

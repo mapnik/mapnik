@@ -47,7 +47,7 @@ public:
     using array_type = std::deque<csv_datasource::item_type>;
     csv_featureset(std::string const& filename,
                    locator_type const& locator,
-                   std::string const& separator,
+                   char separator,
                    char quote,
                    std::vector<std::string> const& headers,
                    mapnik::context_ptr const& ctx,
@@ -63,7 +63,7 @@ private:
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
     file_ptr file_;
 #endif
-    std::string const& separator_;
+    char separator_;
     char quote_;
     std::vector<std::string> const& headers_;
     const array_type index_array_;

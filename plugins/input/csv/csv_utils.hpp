@@ -54,19 +54,19 @@ namespace csv_utils
 static const mapnik::csv_line_grammar<char const*> line_g;
 
 template <typename Iterator>
-static mapnik::csv_line parse_line(Iterator start, Iterator end, std::string const& separator, char quote, std::size_t num_columns)
+static mapnik::csv_line parse_line(Iterator start, Iterator end, char separator, char quote, std::size_t num_columns)
 {
     mapnik::csv_line values;
     if (num_columns > 0) values.reserve(num_columns);
     boost::spirit::standard::blank_type blank;
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(boost::phoenix::cref(separator), quote), blank, values))
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(separator, quote), blank, values))
     {
         throw std::runtime_error("Failed to parse CSV line:\n" + std::string(start, end));
     }
     return values;
 }
 
-static inline mapnik::csv_line parse_line(std::string const& line_str, std::string const& separator, char quote)
+static inline mapnik::csv_line parse_line(std::string const& line_str, char separator, char quote)
 {
     auto start = line_str.c_str();
     auto end   = start + line_str.length();
@@ -141,9 +141,12 @@ std::size_t file_length(T & stream)
     return stream.tellg();
 }
 
-static inline std::string detect_separator(std::string const& str)
+template <typename InputStream>
+static inline char detect_separator(InputStream & stream, char delim, char quote)
 {
-    std::string separator = ","; // default
+    std::string str;
+    csv_utils::getline_csv(stream, str, delim, quote);
+    char separator = ','; // default
     int num_commas = std::count(str.begin(), str.end(), ',');
     // detect tabs
     int num_tabs = std::count(str.begin(), str.end(), '\t');
@@ -151,7 +154,7 @@ static inline std::string detect_separator(std::string const& str)
     {
         if (num_tabs > num_commas)
         {
-            separator = "\t";
+            separator = '\t';
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
         }
     }
@@ -160,7 +163,7 @@ static inline std::string detect_separator(std::string const& str)
         int num_pipes = std::count(str.begin(), str.end(), '|');
         if (num_pipes > num_commas)
         {
-            separator = "|";
+            separator = '|';
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
         }
         else // semicolons
@@ -168,7 +171,7 @@ static inline std::string detect_separator(std::string const& str)
             int num_semicolons = std::count(str.begin(), str.end(), ';');
             if (num_semicolons > num_commas)
             {
-                separator = ";";
+                separator = ';';
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
             }
         }
@@ -244,7 +247,7 @@ static inline void locate_geometry_column(std::string const& header, std::size_t
     }
 }
 
-static inline mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
+static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
     if (locator.type == geometry_column_locator::WKT)

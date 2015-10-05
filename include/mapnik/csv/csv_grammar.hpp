@@ -36,7 +36,7 @@ using csv_line = std::vector<csv_value>;
 using csv_data = std::vector<csv_line>;
 
 template <typename Iterator>
-struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&, char), qi::blank_type>
+struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), qi::blank_type>
 {
     csv_line_grammar() : csv_line_grammar::base_type(line)
     {
@@ -73,28 +73,29 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(std::string const&, cha
             ;
         BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
     }
-  private:
-    qi::rule<Iterator, csv_line(std::string const&, char), qi::blank_type> line;
-    qi::rule<Iterator, csv_value(std::string const&, char)> column; // no-skip
+private:
+    qi::rule<Iterator, csv_line(char, char), qi::blank_type> line;
+    qi::rule<Iterator, csv_value(char, char)> column; // no-skip
     qi::rule<Iterator, csv_value(char)> text;
     qi::rule<Iterator, qi::locals<char>, csv_value(char)> quoted;
     qi::symbols<char const, char const> unesc_char;
 };
 
 template <typename Iterator>
-struct csv_file_grammar : qi::grammar<Iterator, csv_data(std::string const&), qi::blank_type>
+struct csv_file_grammar : qi::grammar<Iterator, csv_data(char, char), qi::blank_type>
 {
     csv_file_grammar() : csv_file_grammar::base_type(start)
     {
         using namespace qi;
         qi::eol_type eol;
         qi::_r1_type _r1;
-        start  = -line(_r1) % eol
+        qi::_r2_type _r2;
+        start  = -line(_r1, _r2) % eol
             ;
         BOOST_SPIRIT_DEBUG_NODES((start));
     }
   private:
-    qi::rule<Iterator, csv_data(std::string const&), qi::blank_type> start;
+    qi::rule<Iterator, csv_data(char, char), qi::blank_type> start;
     csv_line_grammar<Iterator> line;
 };
 

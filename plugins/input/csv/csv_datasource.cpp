@@ -70,7 +70,7 @@ csv_datasource::csv_datasource(parameters const& params)
     filename_(),
     row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
     inline_string_(),
-    separator_(*params.get<std::string>("separator", "\n")),
+    separator_(0),
     quote_('"'),
     headers_(),
     manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
@@ -85,7 +85,14 @@ csv_datasource::csv_datasource(parameters const& params)
     if (quote_param)
     {
         auto val = mapnik::util::trim_copy(*quote_param);
-        if (!val.empty()) quote_ = val.front();// we pick pick first non-space char
+        if (!val.empty()) quote_ = val.front(); // we pick pick first non-space char
+    }
+
+    auto separator_param = params.get<std::string>("separator");
+    if (separator_param)
+    {
+        auto val = mapnik::util::trim_copy(*separator_param);
+        if (!val.empty()) separator_ = val.front();
     }
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
@@ -114,7 +121,7 @@ csv_datasource::csv_datasource(parameters const& params)
     if (!inline_string_.empty())
     {
         std::istringstream in(inline_string_);
-        parse_csv(in, separator_);
+        parse_csv(in);
     }
     else
     {
@@ -146,7 +153,7 @@ csv_datasource::csv_datasource(parameters const& params)
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
         }
 #endif
-        parse_csv(in, separator_);
+        parse_csv(in);
 
         if (has_disk_index_ && !extent_initialized_)
         {
@@ -165,7 +172,7 @@ csv_datasource::csv_datasource(parameters const& params)
 csv_datasource::~csv_datasource() {}
 
 template <typename T>
-void csv_datasource::parse_csv(T & stream, std::string const& separator)
+void csv_datasource::parse_csv(T & stream)
 {
     auto file_length = detail::file_length(stream);
     // set back to start
@@ -176,27 +183,20 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
     // set back to start
     stream.seekg(0, std::ios::beg);
 
-    // get first line
-    std::string csv_line;
-    csv_utils::getline_csv(stream, csv_line, newline, quote_);
-    // if user has not passed a separator manually
-    // then attempt to detect by reading first line
-
-    std::string sep = mapnik::util::trim_copy(separator);
-    if (sep.empty())  sep = detail::detect_separator(csv_line);
-    separator_ = sep;
-
-    // set back to start
-    stream.seekg(0, std::ios::beg);
-
-    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
+    if (separator_ == 0)
+    {
+        separator_ = detail::detect_separator(stream, newline, quote_);
+    }
+    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: separator: '" << separator_
                           << "' quote: '" << quote_ << "'";
+
+    stream.seekg(0, std::ios::beg);
 
     int line_number = 1;
     if (!manual_headers_.empty())
     {
         std::size_t index = 0;
-        auto headers = csv_utils::parse_line(manual_headers_, sep, quote_);
+        auto headers = csv_utils::parse_line(manual_headers_, separator_, quote_);
         for (auto const& header : headers)
         {
             std::string val = mapnik::util::trim_copy(header);
@@ -206,11 +206,12 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
     }
     else // parse first line as headers
     {
-        while (csv_utils::getline_csv(stream,csv_line,newline, quote_))
+        std::string csv_line;
+        while (csv_utils::getline_csv(stream, csv_line, newline, quote_))
         {
             try
             {
-                auto headers = csv_utils::parse_line(csv_line, sep, quote_);
+                auto headers = csv_utils::parse_line(csv_line, separator_, quote_);
                 // skip blank lines
                 std::string val;
                 if (headers.size() > 0 && headers[0].empty()) ++line_number;
@@ -277,6 +278,8 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
 
     // handle rare case of a single line of data and user-provided headers
     // where a lack of a newline will mean that csv_utils::getline_csv returns false
+
+#if 0 // FIXME
     bool is_first_row = false;
     if (!has_newline)
     {
@@ -287,12 +290,13 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
             is_first_row = true;
         }
     }
+#endif
 
     if (has_disk_index_) return;
 
     std::vector<item_type> boxes;
-
-    while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
+    std::string csv_line;
+    while (/*is_first_row || */csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
         if ((row_limit_ > 0) && (line_number++ > row_limit_))
         {
@@ -302,7 +306,7 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
         auto record_offset = pos;
         auto record_size = csv_line.length();
         pos = stream.tellg();
-        is_first_row = false;
+        //is_first_row = false; // FIXME
         // skip blank lines
         unsigned line_length = csv_line.length();
         if (line_length <= 10)
@@ -318,7 +322,7 @@ void csv_datasource::parse_csv(T & stream, std::string const& separator)
 
         try
         {
-            auto values = csv_utils::parse_line(csv_line, sep, quote_);
+            auto values = csv_utils::parse_line(csv_line, separator_, quote_);
             unsigned num_fields = values.size();
             if (num_fields > num_headers)
             {

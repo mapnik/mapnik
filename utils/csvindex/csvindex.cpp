@@ -62,8 +62,8 @@ int main (int argc, char** argv)
     unsigned int depth = DEFAULT_DEPTH;
     double ratio = DEFAULT_RATIO;
     vector<string> csv_files;
-    std::string separator;
-    std::string quote;
+    char separator;
+    char quote;
     std::string manual_headers;
     try
     {
@@ -74,8 +74,8 @@ int main (int argc, char** argv)
             ("verbose,v","verbose output")
             ("depth,d", po::value<unsigned int>(), "max tree depth\n(default 8)")
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
-            ("separator,s", po::value<std::string>(), "CSV columns separator")
-            ("quote,q", po::value<std::string>(), "CSV columns quote")
+            ("separator,s", po::value<char>(), "CSV columns separator")
+            ("quote,q", po::value<char>(), "CSV columns quote")
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
             ("csv_files",po::value<vector<string> >(),"CSV files to index: file1 file2 ...fileN")
             ;
@@ -111,11 +111,11 @@ int main (int argc, char** argv)
         }
         if (vm.count("separator"))
         {
-            separator = vm["separator"].as<std::string>();
+            separator = vm["separator"].as<char>();
         }
         if (vm.count("quote"))
         {
-            separator = vm["quote"].as<std::string>();
+            quote = vm["quote"].as<char>();
         }
         if (vm.count("manual-headers"))
         {
@@ -170,9 +170,7 @@ int main (int argc, char** argv)
             continue;
         }
 
-        mapnik::util::trim(quote);
-        if (quote.empty()) quote = "\"";
-
+        if (quote == 0) quote = '"';
         auto file_length = detail::file_length(csv_file);
         // set back to start
         csv_file.seekg(0, std::ios::beg);
@@ -184,9 +182,9 @@ int main (int argc, char** argv)
         csv_file.seekg(0, std::ios::beg);
         // get first line
         std::string csv_line;
-        csv_utils::getline_csv(csv_file, csv_line, newline, quote.front());
-        mapnik::util::trim(separator);
-        if (separator.empty())  separator = detail::detect_separator(csv_line);
+        csv_utils::getline_csv(csv_file, csv_line, newline, quote);
+        //mapnik::util::trim(separator);
+        if (separator == 0) separator = detail::detect_separator(csv_file, newline, quote);
         csv_file.seekg(0, std::ios::beg);
         int line_number = 1;
         detail::geometry_column_locator locator;
@@ -194,7 +192,7 @@ int main (int argc, char** argv)
         if (!manual_headers.empty())
         {
             std::size_t index = 0;
-            headers = csv_utils::parse_line(manual_headers, separator, quote.front());
+            headers = csv_utils::parse_line(manual_headers, separator, quote);
             for (auto const& header : headers)
             {
                 std::string val = mapnik::util::trim_copy(header);
@@ -204,11 +202,11 @@ int main (int argc, char** argv)
         }
         else // parse first line as headers
         {
-            while (csv_utils::getline_csv(csv_file,csv_line,newline, quote.front()))
+            while (csv_utils::getline_csv(csv_file,csv_line,newline, quote))
             {
                 try
                 {
-                    headers = csv_utils::parse_line(csv_line, separator,quote.front());
+                    headers = csv_utils::parse_line(csv_line, separator, quote);
                     // skip blank lines
                     if (headers.size() > 0 && headers[0].empty()) ++line_number;
                     else
@@ -272,7 +270,7 @@ int main (int argc, char** argv)
         using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
         std::vector<item_type> boxes;
 
-        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, csv_file.widen(newline), quote.front()))
+        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, newline, quote))
         {
             auto record_offset = pos;
             auto record_size = csv_line.length();
@@ -292,7 +290,7 @@ int main (int argc, char** argv)
             }
             try
             {
-                auto values = csv_utils::parse_line(csv_line, separator, quote.front());
+                auto values = csv_utils::parse_line(csv_line, separator, quote);
                 unsigned num_fields = values.size();
                 if (num_fields > num_headers)
                 {

@@ -88,10 +88,9 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    template <typename T>
-    void parse_csv(T & stream, std::string const& separator);
-
 private:
+    template <typename T>
+    void parse_csv(T & stream);
     template <typename T>
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type_impl(T & stream) const;
 
@@ -100,7 +99,7 @@ private:
     std::string filename_;
     mapnik::value_integer row_limit_;
     std::string inline_string_;
-    std::string separator_;
+    char separator_;
     char quote_;
     std::vector<std::string> headers_;
     std::string manual_headers_;
