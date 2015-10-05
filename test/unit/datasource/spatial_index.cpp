@@ -45,7 +45,7 @@ TEST_CASE("spatial_index")
         tree.insert(4, mapnik::box2d<double>(1,1,2,2));
         tree.trim();
 
-        REQUIRE(tree.count() == 10);
+        REQUIRE(tree.count() == 5);
         REQUIRE(tree.count_items() == 4);
 
         // serialise
@@ -53,7 +53,7 @@ TEST_CASE("spatial_index")
         tree.write(out);
         out.flush();
 
-        REQUIRE(out.str().length() == 472);
+        REQUIRE(out.str().length() == 252);
         REQUIRE(out.str().at(0) == 'm');
 
         // read bounding box
