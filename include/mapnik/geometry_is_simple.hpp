@@ -105,7 +105,11 @@ struct geometry_is_simple
             // https://svn.boost.org/trac/boost/ticket/11710
             return true;
         }
-        return boost::geometry::is_simple(multi_line);
+        for (auto const& line : multi_line)
+        {
+            if (!(*this)(line)) return false;
+        }
+        return true;
     }
     template <typename T>
     result_type operator() (multi_polygon<T> const& multi_poly) const
@@ -116,7 +120,11 @@ struct geometry_is_simple
             // https://svn.boost.org/trac/boost/ticket/11710
             return true;
         }
-        return boost::geometry::is_simple(multi_poly);
+        for (auto const& poly : multi_poly)
+        {
+            if (!(*this)(poly)) return false;
+        }
+        return true;
     }
 
 };
