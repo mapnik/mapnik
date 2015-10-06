@@ -291,8 +291,6 @@ void csv_datasource::parse_csv(T & stream)
         }
     }
 
-    if (has_disk_index_) return;
-
     std::vector<item_type> boxes;
     while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
@@ -460,6 +458,8 @@ void csv_datasource::parse_csv(T & stream)
                 MAPNIK_LOG_ERROR(csv) << s.str();
             }
         }
+        // return early if *.index is present
+        if (has_disk_index_) return;
     }
     // bulk insert initialise r-tree
     tree_ = std::make_unique<spatial_index_type>(boxes);
@@ -542,7 +542,6 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
         int multi_type = 0;
         for (auto const& val : positions)
         {
-            std::cerr << val.first << ":" << val.second << std::endl;
             stream.seekg(val.first);
             std::vector<char> record;
             record.resize(val.second);
