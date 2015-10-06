@@ -323,20 +323,12 @@ void csv_datasource::parse_csv(T & stream)
         {
             auto values = csv_utils::parse_line(csv_line, separator_, quote_);
             unsigned num_fields = values.size();
-            if (num_fields > num_headers)
+            if (num_fields > num_headers || num_fields < num_headers)
             {
                 std::ostringstream s;
                 s << "CSV Plugin: # of columns("
                   << num_fields << ") > # of headers("
                   << num_headers << ") parsed for row " << line_number << "\n";
-                throw mapnik::datasource_exception(s.str());
-            }
-            else if (num_fields < num_headers)
-            {
-                std::ostringstream s;
-                s << "CSV Plugin: # of headers("
-                  << num_headers << ") > # of columns("
-                  << num_fields << ") parsed for row " << line_number << "\n";
                 throw mapnik::datasource_exception(s.str());
             }
 
@@ -497,40 +489,88 @@ template <typename T>
 boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type_impl(T & stream) const
 {
     boost::optional<mapnik::datasource_geometry_t> result;
-    int multi_type = 0;
-    auto itr = tree_->qbegin(boost::geometry::index::intersects(extent_));
-    auto end = tree_->qend();
-    for (std::size_t count = 0; itr !=end &&  count < 5; ++itr, ++count)
+    if (tree_)
     {
-        csv_datasource::item_type const& item = *itr;
-        std::size_t file_offset = item.second.first;
-        std::size_t size = item.second.second;
-        stream.seekg(file_offset);
-        std::vector<char> record;
-        record.resize(size);
-        stream.read(record.data(), size);
-        std::string str(record.begin(), record.end());
-        try
+        int multi_type = 0;
+        auto itr = tree_->qbegin(boost::geometry::index::intersects(extent_));
+        auto end = tree_->qend();
+        for (std::size_t count = 0; itr !=end &&  count < 5; ++itr, ++count)
         {
-            auto values = csv_utils::parse_line(str, separator_, quote_);
-            auto geom = detail::extract_geometry(values, locator_);
-            result = mapnik::util::to_ds_type(geom);
-            if (result)
+            csv_datasource::item_type const& item = *itr;
+            std::size_t file_offset = item.second.first;
+            std::size_t size = item.second.second;
+            stream.seekg(file_offset);
+            std::vector<char> record;
+            record.resize(size);
+            stream.read(record.data(), size);
+            std::string str(record.begin(), record.end());
+            try
             {
-                int type = static_cast<int>(*result);
-                if (multi_type > 0 && multi_type != type)
+                auto values = csv_utils::parse_line(str, separator_, quote_);
+                auto geom = detail::extract_geometry(values, locator_);
+                result = mapnik::util::to_ds_type(geom);
+                if (result)
                 {
-                    result.reset(mapnik::datasource_geometry_t::Collection);
-                    return result;
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
+                    {
+                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        return result;
+                    }
+                    multi_type = type;
                 }
-                multi_type = type;
+            }
+            catch (std::exception const& ex)
+            {
+                if (strict_) throw ex;
+                else MAPNIK_LOG_ERROR(csv) << ex.what();
             }
         }
-        catch (std::exception const& ex)
+    }
+    else
+    {
+        // try reading *.index
+        using value_type = std::pair<std::size_t, std::size_t>;
+        std::ifstream index(filename_ + ".index", std::ios::binary);
+        if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
+
+        mapnik::filter_in_box filter(extent_);
+        std::vector<value_type> positions;
+        mapnik::util::spatial_index<value_type,
+                                    mapnik::filter_in_box,
+                                    std::ifstream>::query_first_n(filter, index, positions, 5);
+        int multi_type = 0;
+        for (auto const& val : positions)
         {
-            if (strict_) throw ex;
-            else MAPNIK_LOG_ERROR(csv) << ex.what();
+            std::cerr << val.first << ":" << val.second << std::endl;
+            stream.seekg(val.first);
+            std::vector<char> record;
+            record.resize(val.second);
+            stream.read(record.data(), val.second);
+            std::string str(record.begin(), record.end());
+            try
+            {
+                auto values = csv_utils::parse_line(str, separator_, quote_);
+                auto geom = detail::extract_geometry(values, locator_);
+                result = mapnik::util::to_ds_type(geom);
+                if (result)
+                {
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
+                    {
+                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        return result;
+                    }
+                    multi_type = type;
+                }
+            }
+            catch (std::exception const& ex)
+            {
+                if (strict_) throw ex;
+                else MAPNIK_LOG_ERROR(csv) << ex.what();
+            }
         }
+
     }
     return result;
 }
