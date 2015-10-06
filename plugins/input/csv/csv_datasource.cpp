@@ -202,9 +202,8 @@ void csv_datasource::parse_csv(T & stream)
         auto headers = csv_utils::parse_line(manual_headers_, separator_, quote_);
         for (auto const& header : headers)
         {
-            std::string val = mapnik::util::trim_copy(header);
-            detail::locate_geometry_column(val, index++, locator_);
-            headers_.push_back(val);
+            detail::locate_geometry_column(header, index++, locator_);
+            headers_.push_back(header);
         }
     }
     else // parse first line as headers
