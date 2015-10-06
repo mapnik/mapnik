@@ -70,5 +70,21 @@ TEST_CASE("spatial_index")
         REQUIRE(results[2] == 3);
         REQUIRE(results[3] == 2);
         REQUIRE(results.size() == 4);
+
+        // query first N elements interface
+        results.clear();
+        in.seekg(0, std::ios::beg);
+        mapnik::util::spatial_index<value_type, filter_in_box, std::istringstream>::query_first_n(filter, in, results, 2);
+        REQUIRE(results.size() == 2);
+        REQUIRE(results[0] == 1);
+        REQUIRE(results[1] == 4);
+        results.clear();
+        in.seekg(0, std::ios::beg);
+        mapnik::util::spatial_index<value_type, filter_in_box, std::istringstream>::query_first_n(filter, in, results, 5);
+        REQUIRE(results[0] == 1);
+        REQUIRE(results[1] == 4);
+        REQUIRE(results[2] == 3);
+        REQUIRE(results[3] == 2);
+        REQUIRE(results.size() == 4);
     }
 }
