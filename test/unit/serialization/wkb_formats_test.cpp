@@ -113,7 +113,9 @@ SECTION("wkb") {
                                                 mapnik::wkbGeneric);
         REQUIRE(geom.is<mapnik::geometry::geometry_empty>()); // returns geometry_empty
 
-    } catch (std::exception const& ex) {
+    }
+    catch (std::exception const& ex)
+    {
         REQUIRE(false);
         std::clog << "threw: " << ex.what() << "\n";
     }

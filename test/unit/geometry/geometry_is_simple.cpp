@@ -1,5 +1,6 @@
 #include "catch.hpp"
 
+#include <boost/version.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_is_simple.hpp>
@@ -308,6 +309,12 @@ SECTION("multi polygon empty") {
     CHECK( mapnik::geometry::is_simple(mp) );
 }
 
-#endif // BOOST_VERSION >= 1.56
+#else // BOOST_VERSION >= 1.58
+
+SECTION("skipped is_simple tests") {
+    WARN( "geometry simple tests disabled due to boost version older that 1.58 used" );
+}
+
+#endif
 
 }
