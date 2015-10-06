@@ -42,6 +42,7 @@ class spatial_index
 public:
     static void query(Filter const& filter, InputStream& in,std::vector<Value>& pos);
     static box2d<double> bounding_box( InputStream& in );
+    static void query_first_n(Filter const& filter, InputStream & in, std::vector<Value>& pos, std::size_t count);
 private:
 
     spatial_index();
@@ -51,6 +52,7 @@ private:
     static int read_ndr_integer(InputStream& in);
     static void read_envelope(InputStream& in, box2d<double>& envelope);
     static void query_node(Filter const& filter, InputStream& in, std::vector<Value> & results);
+    static void query_first_n_impl(Filter const& filter, InputStream& in, std::vector<Value> & results, std::size_t count);
 };
 
 template <typename Value, typename Filter, typename InputStream>
@@ -96,6 +98,41 @@ void spatial_index<Value, Filter, InputStream>::query_node(Filter const& filter,
     for (int j = 0; j < children; ++j)
     {
         query_node(filter, in, results);
+    }
+}
+
+template <typename Value, typename Filter, typename InputStream>
+void spatial_index<Value, Filter, InputStream>::query_first_n(Filter const& filter, InputStream& in, std::vector<Value>& results, std::size_t count)
+{
+    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout types");
+    in.seekg(16, std::ios::beg);
+    query_first_n_impl(filter, in, results, count);
+}
+
+template <typename Value, typename Filter, typename InputStream>
+void spatial_index<Value, Filter, InputStream>::query_first_n_impl(Filter const& filter, InputStream& in, std::vector<Value>& results, std::size_t count)
+{
+    if (results.size() == count) return;
+    int offset = read_ndr_integer(in);
+    box2d<double> node_ext;
+    read_envelope(in, node_ext);
+    int num_shapes = read_ndr_integer(in);
+    if (!filter.pass(node_ext))
+    {
+        in.seekg(offset + num_shapes * sizeof(Value) + 4, std::ios::cur);
+        return;
+    }
+
+    for (int i = 0; i < num_shapes; ++i)
+    {
+        Value item;
+        in.read(reinterpret_cast<char*>(&item), sizeof(Value));
+        if (results.size() < count) results.push_back(std::move(item));
+    }
+    int children = read_ndr_integer(in);
+    for (int j = 0; j < children; ++j)
+    {
+        query_first_n_impl(filter, in, results, count);
     }
 }
 
