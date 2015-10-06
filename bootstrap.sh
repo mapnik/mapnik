@@ -65,7 +65,10 @@ function install_mason_deps() {
     install expat 2.1.0 libexpat &
     install pixman 0.32.6 libpixman-1 &
     install cairo 1.12.18 libcairo &
+    install protobuf 2.6.1 &
     wait
+    # technically protobuf is not a mapnik core dep, but installing
+    # here by default helps make mapnik-vector-tile builds easier
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
