@@ -92,7 +92,6 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    using detector_type = label_collision_detector4;
     cairo_save_restore guard(context_);
 
     debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
