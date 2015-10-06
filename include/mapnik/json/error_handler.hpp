@@ -44,7 +44,7 @@ struct error_handler
         auto start = err_pos;
         std::advance(err_pos,16);
         auto end = err_pos;
-        s << what << " expected but got: " << std::string(start, end);
+        s << "Mapnik geojson parsing error:" << what << " expected but got: " << std::string(start, end);
         throw std::runtime_error(s.str());
     }
 };
