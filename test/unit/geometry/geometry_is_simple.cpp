@@ -6,8 +6,8 @@
 
 TEST_CASE("geometry is_simple") {
 
-// only Boost >= 1.56 has the is_valid function
-#if BOOST_VERSION >= 105600
+// only Boost >= 1.58 has the required is_valid function version
+#if BOOST_VERSION >= 105800
 
 SECTION("point") {
     mapnik::geometry::geometry_empty empty;
