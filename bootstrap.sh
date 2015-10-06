@@ -50,13 +50,8 @@ function install() {
 
 function install_mason_deps() {
     install gdal 1.11.2 libgdal &
-    install boost 1.57.0 &
-    install boost_libsystem 1.57.0 &
-    install boost_libthread 1.57.0 &
-    install boost_libfilesystem 1.57.0 &
-    install boost_libprogram_options 1.57.0 &
-    install boost_libregex 1.57.0 &
-    install boost_libpython 1.57.0 &
+    install boost 1.59.0 &
+    install boost_liball 1.59.0 &
     install freetype 2.5.5 libfreetype &
     install harfbuzz 0.9.40 libharfbuzz &
     install jpeg_turbo 1.4.0 libjpeg &
