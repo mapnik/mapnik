@@ -14,12 +14,13 @@ Released: YYYY XX, 2015
 
 #### Summary
 
-- CSV plugin has been further optimized and has gained experimental support for on-disk indexes (#3089)
-- SVG parser now fallsback to using `viewbox` if explicit dimensions are lacking (#3081)
+- CSV plugin has been further optimized and has gained experimental support for on-disk indexes (https://github.com/mapnik/mapnik/issues/3089)
+- SVG parser now fallsback to using `viewbox` if explicit dimensions are lacking (https://github.com/mapnik/mapnik/issues/3081)
 - Visual tests: new command line arguments `--agg`, `--cairo`, `--svg`, `--grid` for selecting renderers (https://github.com/mapnik/mapnik/pull/3074)
 - Visual tests: new command line argument `--scale-factor` or abbreviated `-s` for setting scale factor (https://github.com/mapnik/mapnik/pull/3074)
 - Fixed parsing colors in hexadecimal notation (https://github.com/mapnik/mapnik/pull/3075)
 - Removed mapnik::Feature type alias of mapnik::feature_impl (https://github.com/mapnik/mapnik/pull/3099)
+- Fixed linking order for plugins to avoid possible linking errors on linux systems (https://github.com/mapnik/mapnik/issues/3105)
 
 ## 3.0.5
 
