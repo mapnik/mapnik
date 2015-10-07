@@ -29,7 +29,7 @@ program_env = env.Clone()
 
 source = Split(
     """
-    csvindex.cpp
+    mapnik-index.cpp
     """
     )
 
@@ -48,12 +48,12 @@ if env['RUNTIME_LINK'] == 'static':
     if env['PLATFORM'] == 'Linux':
         libraries.append('dl')
 
-csvindex = program_env.Program('csvindex', source, CPPPATH=headers, LIBS=libraries)
+mapnik_index = program_env.Program('mapnik-index', source, CPPPATH=headers, LIBS=libraries)
 
-Depends(csvindex, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+Depends(mapnik_index, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), csvindex)
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), mapnik_index)
     env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','csvindex'))
+env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','mapnik-index'))

@@ -30,6 +30,7 @@ tests/python_tests/raster_colorizer_test.png
 tests/python_tests/raster_colorizer_test_save.xml
 utils/mapnik-config/mapnik-config
 utils/shapeindex/shapeindex
+utils/mapnik-index/mapnik-index
 utils/ogrindex/ogrindex
 utils/pgsql2sqlite/pgsql2sqlite
 utils/svg2png/svg2png

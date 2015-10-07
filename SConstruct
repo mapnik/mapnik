@@ -400,7 +400,7 @@ opts.AddVariables(
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
-    BoolVariable('CSVINDEX', 'Compile and install a utility to generate CSV file indexes in the custom format (.index) Mapnik supports', 'True'),
+    BoolVariable('MAPNIK_INDEX', 'Compile and install a utility to generate file indexes for CSV and GeoJSON in the custom format (.index) Mapnik supports', 'True'),
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
     BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
@@ -1964,8 +1964,8 @@ if not HELP_REQUESTED:
 	if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
 	    if env['SHAPEINDEX']:
 		SConscript('utils/shapeindex/build.py')
-	    if env['CSVINDEX']:
-		SConscript('utils/csvindex/build.py')
+	    if env['MAPNIK_INDEX']:
+		SConscript('utils/mapnik-index/build.py')
 	    # Build the pgsql2psqlite app if requested
 	    if env['PGSQL2SQLITE']:
 		SConscript('utils/pgsql2sqlite/build.py')
