@@ -6,11 +6,11 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## Future
+## 3.0.6
 
-Released: YYYY XX, 2015
+Released: October 7, 2015
 
-(Packaged from xxxx)
+(Packaged from 3cebe97)
 
 #### Summary
 
