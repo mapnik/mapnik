@@ -3,6 +3,7 @@
 
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/util/fs.hpp>
 
 #include <iostream>
 #include <vector>
@@ -22,19 +23,24 @@ SECTION("registration") {
         success = cache.register_datasources("test/data/vrt");
         CHECK(success == false);
 
-        // registering a directory for the first time should return true
-        success = cache.register_datasources("plugins/input");
-        REQUIRE(success == true);
+        // use existence of shape.input as proxy for whether any datasource plugins are available
+        std::string shape_plugin("./plugins/input/shape.input");
+        if (mapnik::util::exists(shape_plugin))
+        {
+            // registering a directory for the first time should return true
+            success = cache.register_datasources("plugins/input");
+            REQUIRE(success == true);
 
-        // registering the same directory again should now return false
-        success = cache.register_datasources("plugins/input");
-        CHECK(success == false);
+            // registering the same directory again should now return false
+            success = cache.register_datasources("plugins/input");
+            CHECK(success == false);
 
-        // registering the same directory again, but recursively should
-        // still return false - even though there are subdirectories, they
-        // do not contain any more plugins.
-        success = cache.register_datasources("plugins/input", true);
-        CHECK(success == false);
+            // registering the same directory again, but recursively should
+            // still return false - even though there are subdirectories, they
+            // do not contain any more plugins.
+            success = cache.register_datasources("plugins/input", true);
+            CHECK(success == false);
+        }
     }
     catch (std::exception const & ex)
     {
