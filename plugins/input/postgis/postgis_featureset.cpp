@@ -48,13 +48,15 @@ using mapnik::context_ptr;
 postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
-                                       bool key_field)
+                                       bool key_field,
+                                       bool key_field_as_attribute)
     : rs_(rs),
       ctx_(ctx),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
       feature_id_(1),
-      key_field_(key_field)
+      key_field_(key_field),
+      key_field_as_attribute_(key_field_as_attribute)
 {
 }
 
@@ -97,10 +99,10 @@ feature_ptr postgis_featureset::next()
             }
 
             feature = feature_factory::create(ctx_, val);
-            // TODO - extend feature class to know
-            // that its id is also an attribute to avoid
-            // this duplication
-            feature->put<mapnik::value_integer>(name,val);
+            if (key_field_as_attribute_)
+            {
+                feature->put<mapnik::value_integer>(name,val);
+            }
             ++pos;
         }
         else
