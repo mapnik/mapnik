@@ -209,7 +209,6 @@ int main (int argc, char** argv)
                         std::size_t index = 0;
                         for (auto & header : headers)
                         {
-                            std::cerr << header << std::endl;
                             if (header.empty())
                             {
                                 // create a placeholder for the empty header
