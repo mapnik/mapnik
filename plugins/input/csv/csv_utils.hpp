@@ -52,14 +52,14 @@ namespace csv_utils
 {
 
 static const mapnik::csv_line_grammar<char const*> line_g;
+static const mapnik::csv_white_space_skipper<char const*> skipper;
 
 template <typename Iterator>
 static mapnik::csv_line parse_line(Iterator start, Iterator end, char separator, char quote, std::size_t num_columns)
 {
     mapnik::csv_line values;
     if (num_columns > 0) values.reserve(num_columns);
-    boost::spirit::standard::blank_type blank;
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(separator, quote), blank, values))
+    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(separator, quote), skipper, values))
     {
         throw std::runtime_error("Failed to parse CSV line:\n" + std::string(start, end));
     }
@@ -75,7 +75,7 @@ static inline mapnik::csv_line parse_line(std::string const& line_str, char sepa
 
 static inline bool is_likely_number(std::string const& value)
 {
-    return( strspn( value.c_str(), "e-.+0123456789" ) == value.size() );
+    return (std::strspn( value.c_str(), "e-.+0123456789" ) == value.size());
 }
 
 struct ignore_case_equal_pred
