@@ -67,8 +67,16 @@ namespace path_processor_detail
         void operator() (attribute const& attr) const
         {
             // convert mapnik::value to std::string
-            value const& val = feature_.get(attr.name());
-            filename_ += val.to_string();
+            std::string const& name = attr.name();
+            if (name == "__id__")
+            {
+                std::clog << "TODO\n";
+            }
+            else
+            {
+                value const& val = feature_.get(name);
+                filename_ += val.to_string();                
+            }
         }
 
         std::string & filename_;

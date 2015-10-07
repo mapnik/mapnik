@@ -77,6 +77,10 @@ struct evaluate
 
     value_type operator() (global_attribute const& attr) const
     {
+        if (attr.name == "@id")
+        {
+            return feature_.id();
+        }
         auto itr = vars_.find(attr.name);
         if (itr != vars_.end())
         {

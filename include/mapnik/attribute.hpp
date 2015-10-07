@@ -36,12 +36,15 @@ namespace mapnik {
 struct attribute
 {
     std::string name_;
+    bool is_id_;
     explicit attribute(std::string const& name)
-        : name_(name) {}
+        : name_(name),
+          is_id_(name == "__id__") {}
 
     template <typename V ,typename F>
     V const& value(F const& f) const
     {
+        if (is_id_) return f.id();
         return f.get(name_);
     }
 

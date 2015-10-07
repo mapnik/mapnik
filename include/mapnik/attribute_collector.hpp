@@ -62,7 +62,7 @@ struct expression_attributes
 
     void operator() (attribute const& attr) const
     {
-        names_.emplace(attr.name());
+        if (attr.name() != "__id__") names_.emplace(attr.name());
     }
 
     template <typename Tag>

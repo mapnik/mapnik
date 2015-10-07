@@ -177,7 +177,7 @@ struct grid_renderer : renderer_base<mapnik::image_rgba8>
                 }
                 if (val < 0)
                 {
-                    throw std::runtime_error("grid renderer: feature id is negative.");
+                    val = std::abs(val);
                 }
 
                 val *= 100;
