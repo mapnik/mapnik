@@ -150,9 +150,6 @@ int main (int argc, char** argv)
             clog << "Error : file " << csvname << " does not exist" << endl;
             continue;
         }
-
-        //std::ifstream csv_file(csvname.c_str(),std::ios_base::in | std::ios_base::binary);
-
         using file_source_type = boost::interprocess::ibufferstream;
         file_source_type csv_file;
 
@@ -169,8 +166,6 @@ int main (int argc, char** argv)
             clog << "Error : cannot mmap " << csvname << endl;
             continue;
         }
-
-        if (quote == 0) quote = '"';
         auto file_length = detail::file_length(csv_file);
         // set back to start
         csv_file.seekg(0, std::ios::beg);
@@ -189,15 +184,15 @@ int main (int argc, char** argv)
         int line_number = 1;
         detail::geometry_column_locator locator;
         std::vector<std::string> headers;
+        std::clog << "Parsing CSV using SEPARATOR=" << separator << " QUOTE=" << quote << std::endl;
         if (!manual_headers.empty())
         {
             std::size_t index = 0;
             headers = csv_utils::parse_line(manual_headers, separator, quote);
             for (auto const& header : headers)
             {
-                std::string val = mapnik::util::trim_copy(header);
-                detail::locate_geometry_column(val, index++, locator);
-                headers.push_back(val);
+                detail::locate_geometry_column(header, index++, locator);
+                headers.push_back(header);
             }
         }
         else // parse first line as headers
@@ -214,7 +209,7 @@ int main (int argc, char** argv)
                         std::size_t index = 0;
                         for (auto & header : headers)
                         {
-                            mapnik::util::trim(header);
+                            std::cerr << header << std::endl;
                             if (header.empty())
                             {
                                 // create a placeholder for the empty header
@@ -277,8 +272,7 @@ int main (int argc, char** argv)
             pos = csv_file.tellg();
             is_first_row = false;
             // skip blank lines
-            unsigned line_length = csv_line.length();
-            if (line_length <= 10)
+            if (record_size <= 10)
             {
                 std::string trimmed = csv_line;
                 boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
@@ -292,21 +286,12 @@ int main (int argc, char** argv)
             {
                 auto values = csv_utils::parse_line(csv_line, separator, quote);
                 unsigned num_fields = values.size();
-                if (num_fields > num_headers)
+                if (num_fields > num_headers || num_fields < num_headers)
                 {
                     std::ostringstream s;
                     s << "CSV Index: # of columns("
                       << num_fields << ") > # of headers("
                       << num_headers << ") parsed for row " << line_number << "\n";
-                    std::clog << s.str() << std::endl;
-                    return 1;
-                }
-                else if (num_fields < num_headers)
-                {
-                    std::ostringstream s;
-                    s << "CSV Index: # of headers("
-                      << num_headers << ") > # of columns("
-                      << num_fields << ") parsed for row " << line_number << "\n";
                     std::clog << s.str() << std::endl;
                     return 1;
                 }
