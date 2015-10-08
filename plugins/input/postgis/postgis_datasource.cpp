@@ -95,7 +95,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
-      key_field_as_attribute_(*params.get<mapnik::value_integer>("key_field_as_attribute", true))
+      key_field_as_attribute_(*params.get<mapnik::boolean_type>("key_field_as_attribute", true))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");
