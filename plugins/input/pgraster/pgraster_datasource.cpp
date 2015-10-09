@@ -1042,28 +1042,29 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-            std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
-            std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
+            auto const& desc = desc_.get_descriptors();
 
-            if (! key_field_.empty())
+            if (!key_field_.empty())
             {
                 mapnik::sql_utils::quote_attr(s, key_field_);
                 ctx->push(key_field_);
-                for (; itr != end; ++itr)
+                for (auto const& attr_info : desc)
                 {
-                    if (itr->get_name() != key_field_)
+                    std::string const& name = attr_info.get_name();
+                    if (name != key_field_)
                     {
-                        mapnik::sql_utils::quote_attr(s, itr->get_name());
-                        ctx->push(itr->get_name());
+                        mapnik::sql_utils::quote_attr(s, name);
+                        ctx->push(name);
                     }
                 }
             }
             else
             {
-                for (; itr != end; ++itr)
+                for (auto const& attr_info : desc)
                 {
-                    mapnik::sql_utils::quote_attr(s, itr->get_name());
-                    ctx->push(itr->get_name());
+                    std::string const& name = attr_info.get_name();
+                    mapnik::sql_utils::quote_attr(s, name);
+                    ctx->push(name);
                 }
             }
 

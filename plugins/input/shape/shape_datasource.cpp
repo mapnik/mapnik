@@ -263,15 +263,12 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
 
     filter_at_point filter(pt,tol);
     // collect all attribute names
-    std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
-    std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
-    std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
+    auto const& desc = desc_.get_descriptors();
     std::set<std::string> names;
 
-    while (itr != end)
+    for (auto const& attr_info : desc)
     {
-        names.insert(itr->get_name());
-        ++itr;
+        names.insert(attr_info.get_name());
     }
 
     if (indexed_)
