@@ -26,9 +26,9 @@
 #include <fstream>
 
 #include <mapnik/util/fs.hpp>
-#include <mapnik/geometry_envelope.hpp>
 #include <mapnik/quad_tree.hpp>
-#include "../../plugins/input/csv/csv_utils.hpp"
+
+#include "process_csv_file.hpp"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -37,37 +37,39 @@
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
-#pragma GCC diagnostic pop
-#include <mapnik/mapped_memory_cache.hpp>
-#include <boost/version.hpp>
-
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;
+
+namespace mapnik { namespace detail {
+
+bool is_csv(std::string const& filename)
+{
+    return boost::iends_with(filename,".csv")
+        || boost::iends_with(filename,".tsv");
+}
+
+bool is_geojson(std::string const& filename)
+{
+    return boost::iends_with(filename,".geojson")
+        || boost::iends_with(filename,".json");
+}
+
+}}
 
 int main (int argc, char** argv)
 {
     //using namespace mapnik;
     namespace po = boost::program_options;
-    using std::string;
-    using std::vector;
-    using std::clog;
-    using std::endl;
-
     bool verbose = false;
     unsigned int depth = DEFAULT_DEPTH;
     double ratio = DEFAULT_RATIO;
-    vector<string> csv_files;
+    std::vector<std::string> files;
     char separator = 0;
     char quote = 0;
     std::string manual_headers;
     try
     {
-        po::options_description desc("csvindex utility");
+        po::options_description desc("Mapnik CSV/GeoJSON index utility");
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
@@ -77,24 +79,23 @@ int main (int argc, char** argv)
             ("separator,s", po::value<char>(), "CSV columns separator")
             ("quote,q", po::value<char>(), "CSV columns quote")
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
-            ("csv_files",po::value<vector<string> >(),"CSV files to index: file1 file2 ...fileN")
+            ("files",po::value<std::vector<std::string> >(),"Files to index: file1 file2 ...fileN")
             ;
 
         po::positional_options_description p;
-        p.add("csv_files",-1);
+        p.add("files",-1);
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
 
         if (vm.count("version"))
         {
-            clog << "version 0.3.0" <<std::endl;
+            std::clog << "version 1.0.0" << std::endl;
             return 1;
         }
-
         if (vm.count("help"))
         {
-            clog << desc << endl;
+            std::clog << desc << std::endl;
             return 1;
         }
         if (vm.count("verbose"))
@@ -121,233 +122,79 @@ int main (int argc, char** argv)
         {
             manual_headers = vm["manual-headers"].as<std::string>();
         }
-        if (vm.count("csv_files"))
+        if (vm.count("files"))
         {
-            csv_files=vm["csv_files"].as< vector<string> >();
+            files=vm["files"].as<std::vector<std::string> >();
         }
     }
     catch (std::exception const& ex)
     {
-        clog << "Error: " << ex.what() << endl;
-        return -1;
+        std::clog << "Error: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
     }
 
-    clog << "max tree depth:" << depth << endl;
-    clog << "split ratio:" << ratio << endl;
+    std::clog << "max tree depth:" << depth << std::endl;
+    std::clog << "split ratio:" << ratio << std::endl;
 
-    if (csv_files.size() == 0)
+    if (files.size() == 0)
     {
-        clog << "no csv files to index" << endl;
-        return 0;
+        std::clog << "no files to index" << std::endl;
+        return EXIT_FAILURE;
     }
 
-    for (auto const& filename : csv_files)
+    using box_type = mapnik::box2d<double>;
+    using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
+
+    for (auto const& filename : files)
     {
-        clog << "processing " << filename << endl;
-        std::string csvname (filename);
-        if (! mapnik::util::exists (csvname))
+        std::clog << "processing " << filename << std::endl;
+        if (!mapnik::util::exists (filename))
         {
-            clog << "Error : file " << csvname << " does not exist" << endl;
+            std::clog << "Error : file " << filename << " does not exist" << std::endl;
             continue;
         }
-        using file_source_type = boost::interprocess::ibufferstream;
-        file_source_type csv_file;
 
-        mapnik::mapped_region_ptr mapped_region;
-        boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(csvname, true);
-        if (memory)
-        {
-            mapped_region = *memory;
-            csv_file.buffer(static_cast<char*>(mapped_region->get_address()),mapped_region->get_size());
-        }
-        else
-        {
-            clog << "Error : cannot mmap " << csvname << endl;
-            continue;
-        }
-        auto file_length = detail::file_length(csv_file);
-        // set back to start
-        csv_file.seekg(0, std::ios::beg);
-        char newline;
-        bool has_newline;
-        char detected_quote;
-        std::tie(newline, has_newline, detected_quote) = detail::autodect_newline_and_quote(csv_file, file_length);
-        if (quote == 0) quote = detected_quote;
-        // set back to start
-        csv_file.seekg(0, std::ios::beg);
-        // get first line
-        std::string csv_line;
-        csv_utils::getline_csv(csv_file, csv_line, newline, quote);
-        if (separator == 0) separator = detail::detect_separator(csv_line);
-        csv_file.seekg(0, std::ios::beg);
-        int line_number = 1;
-        detail::geometry_column_locator locator;
-        std::vector<std::string> headers;
-        std::clog << "Parsing CSV using SEPARATOR=" << separator << " QUOTE=" << quote << std::endl;
-        if (!manual_headers.empty())
-        {
-            std::size_t index = 0;
-            headers = csv_utils::parse_line(manual_headers, separator, quote);
-            for (auto const& header : headers)
-            {
-                detail::locate_geometry_column(header, index++, locator);
-                headers.push_back(header);
-            }
-        }
-        else // parse first line as headers
-        {
-            while (csv_utils::getline_csv(csv_file,csv_line,newline, quote))
-            {
-                try
-                {
-                    headers = csv_utils::parse_line(csv_line, separator, quote);
-                    // skip blank lines
-                    if (headers.size() > 0 && headers[0].empty()) ++line_number;
-                    else
-                    {
-                        std::size_t index = 0;
-                        for (auto & header : headers)
-                        {
-                            if (header.empty())
-                            {
-                                // create a placeholder for the empty header
-                                std::ostringstream s;
-                                s << "_" << index;
-                                header = s.str();
-                            }
-                            else
-                            {
-                                detail::locate_geometry_column(header, index, locator);
-                            }
-                            ++index;
-                        }
-                        ++line_number;
-                        break;
-                    }
-                }
-                catch (std::exception const& ex)
-                {
-                    std::string s("CSV index: error parsing headers: ");
-                    s += ex.what();
-                    std::clog << s << std::endl;
-                    return 1;
-                }
-            }
-        }
-
-        if (locator.type == detail::geometry_column_locator::UNKNOWN)
-        {
-            std::clog << "CSV index: could not detect column headers with the name of wkt, geojson, x/y, or "
-                      << "latitude/longitude - this is required for reading geometry data" << std::endl;
-            return 1;
-        }
-
-        std::size_t num_headers = headers.size();
-        auto pos = csv_file.tellg();
-
-        // handle rare case of a single line of data and user-provided headers
-        // where a lack of a newline will mean that csv_utils::getline_csv returns false
-        bool is_first_row = false;
-        if (!has_newline)
-        {
-            csv_file.setstate(std::ios::failbit);
-            pos = 0;
-            if (!csv_line.empty())
-            {
-                is_first_row = true;
-            }
-        }
-
-        mapnik::box2d<double> extent;
-        using box_type = mapnik::box2d<double>;
-        using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
         std::vector<item_type> boxes;
-
-        while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, newline, quote))
+        mapnik::box2d<double> extent;
+        if (mapnik::detail::is_csv(filename))
         {
-            auto record_offset = pos;
-            auto record_size = csv_line.length();
-            pos = csv_file.tellg();
-            is_first_row = false;
-            // skip blank lines
-            if (record_size <= 10)
-            {
-                std::string trimmed = csv_line;
-                boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
-                if (trimmed.empty())
-                {
-                    std::clog << "CSV index: empty row encountered at line: " << line_number << std::endl;
-                    continue;
-                }
-            }
-            try
-            {
-                auto values = csv_utils::parse_line(csv_line, separator, quote);
-                unsigned num_fields = values.size();
-                if (num_fields > num_headers || num_fields < num_headers)
-                {
-                    std::ostringstream s;
-                    s << "CSV Index: # of columns("
-                      << num_fields << ") > # of headers("
-                      << num_headers << ") parsed for row " << line_number << "\n";
-                    std::clog << s.str() << std::endl;
-                    return 1;
-                }
-
-                auto geom = detail::extract_geometry(values, locator);
-                if (!geom.is<mapnik::geometry::geometry_empty>())
-                {
-                    auto box = mapnik::geometry::envelope(geom);
-                    if (!extent.valid()) extent = box;
-                    else extent.expand_to_include(box);
-                    boxes.emplace_back(std::move(box), make_pair(record_offset, record_size));
-                }
-                else
-                {
-                    std::ostringstream s;
-                    s << "CSV Index: expected geometry column: could not parse row "
-                      << line_number << " "
-                      << values[locator.index] << "'";
-                    std::clog << s.str() << std::endl;;
-                }
-            }
-            catch (std::exception const& ex)
-            {
-                std::ostringstream s;
-                s << "CSV Index: unexpected error parsing line: " << line_number
-                  << " - found " << headers.size() << " with values like: " << csv_line << "\n"
-                  << " and got error like: " << ex.what();
-                std::clog << s.str() << std::endl;
-                return 1;
-            }
+            auto result = mapnik::detail::process_csv_file(boxes, filename, manual_headers, separator, quote);
+            if (!result.first) continue;
+            extent = result.second;
+        }
+        else if (mapnik::detail::is_geojson(filename))
+        {
+            std::clog << "TODO: support GeoJSON" << std::endl;
         }
 
-        std::clog << extent << std::endl;
-        mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
-        for (auto const& item : boxes)
+        if (extent.valid())
         {
-            tree.insert(std::get<1>(item), std::get<0>(item));
-        }
+            std::clog << extent << std::endl;
+            mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
+            for (auto const& item : boxes)
+            {
+                tree.insert(std::get<1>(item), std::get<0>(item));
+            }
 
-        std::fstream file((csvname + ".index").c_str(),
-                          std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
-        if (!file)
-        {
-            clog << "cannot open index file for writing file \""
-                 << (csvname + ".index") << "\"" << endl;
-        }
-        else
-        {
-            tree.trim();
-            std::clog <<  "number nodes=" << tree.count() << std::endl;
-            //tree.print();
-            file.exceptions(std::ios::failbit | std::ios::badbit);
-            tree.write(file);
-            file.flush();
-            file.close();
+            std::fstream file((filename + ".index").c_str(),
+                              std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+            if (!file)
+            {
+                std::clog << "cannot open index file for writing file \""
+                          << (filename + ".index") << "\"" << std::endl;
+            }
+            else
+            {
+                tree.trim();
+                std::clog <<  "number nodes=" << tree.count() << std::endl;
+                //tree.print();
+                file.exceptions(std::ios::failbit | std::ios::badbit);
+                tree.write(file);
+                file.flush();
+                file.close();
+            }
         }
     }
-    clog << "done!" << endl;
-    return 0;
+    std::clog << "done!" << std::endl;
+    return EXIT_SUCCESS;
 }
