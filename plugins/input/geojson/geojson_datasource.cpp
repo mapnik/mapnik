@@ -418,12 +418,9 @@ mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d con
     mapnik::box2d<double> query_bbox(pt, pt);
     query_bbox.pad(tol);
     mapnik::query q(query_bbox);
-    std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
-    std::vector<mapnik::attribute_descriptor>::const_iterator itr = desc.begin();
-    std::vector<mapnik::attribute_descriptor>::const_iterator end = desc.end();
-    for ( ;itr!=end;++itr)
+    for (auto const& attr_info : desc_.get_descriptors())
     {
-        q.add_property_name(itr->get_name());
+        q.add_property_name(attr_info.get_name());
     }
     return features(q);
 }
