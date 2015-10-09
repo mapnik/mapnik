@@ -128,6 +128,10 @@ feature_ptr postgis_featureset::next()
 
         totalGeomSize_ += size;
         unsigned num_attrs = ctx_->size() + 1;
+        if (!key_field_as_attribute_)
+        {
+            num_attrs++;
+        }
         for (; pos < num_attrs; ++pos)
         {
             std::string name = rs_->getFieldName(pos);
