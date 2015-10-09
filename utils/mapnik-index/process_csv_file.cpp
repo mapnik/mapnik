@@ -31,7 +31,6 @@
 #include <boost/interprocess/streams/bufferstream.hpp>
 #pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
-#include <boost/version.hpp>
 
 namespace mapnik { namespace detail {
 
@@ -209,8 +208,8 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
 }
 
 using box_type = mapnik::box2d<double>;
-using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
+using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
 using boxes_type = std::vector<item_type>;
-template std::pair<bool,box2d<double>> process_csv_file(boxes_type&, std::string const&e, std::string const&, char, char);
+template std::pair<bool,box2d<double>> process_csv_file(boxes_type&, std::string const&, std::string const&, char, char);
 
 }}

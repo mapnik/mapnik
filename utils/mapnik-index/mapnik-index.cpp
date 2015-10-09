@@ -29,7 +29,7 @@
 #include <mapnik/quad_tree.hpp>
 
 #include "process_csv_file.hpp"
-
+#include "process_geojson_file.hpp"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
@@ -143,7 +143,7 @@ int main (int argc, char** argv)
     }
 
     using box_type = mapnik::box2d<double>;
-    using item_type = std::pair<box_type, std::pair<unsigned, unsigned>>;
+    using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
 
     for (auto const& filename : files)
     {
@@ -164,7 +164,9 @@ int main (int argc, char** argv)
         }
         else if (mapnik::detail::is_geojson(filename))
         {
-            std::clog << "TODO: support GeoJSON" << std::endl;
+            auto result = mapnik::detail::process_geojson_file(boxes, filename);
+            if (!result.first) continue;
+            extent = result.second;
         }
 
         if (extent.valid())

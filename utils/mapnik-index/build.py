@@ -31,6 +31,7 @@ source = Split(
     """
     mapnik-index.cpp
     process_csv_file.cpp
+    process_geojson_file.cpp
     """
     )
 
