@@ -251,7 +251,7 @@ static inline void locate_geometry_column(std::string const& header, std::size_t
     }
 }
 
-static mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
+static inline mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
     if (locator.type == geometry_column_locator::WKT)
