@@ -114,7 +114,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
   : datasource(params),
     type_(datasource::Vector),
     desc_(geojson_datasource::name(),
-              *params.get<std::string>("encoding","utf-8")),
+          *params.get<std::string>("encoding","utf-8")),
     filename_(),
     inline_string_(),
     extent_(),
