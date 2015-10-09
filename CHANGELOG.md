@@ -6,6 +6,16 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.7
+
+Released: TBD
+
+(Packaged from ...)
+
+#### Summary
+
+ - PostGIS: Fixed handling of all attributes when `key_field_as_attribute=false` (https://github.com/mapnik/mapnik/issues/3120)
+
 ## 3.0.6
 
 Released: October 7, 2015
