@@ -7,7 +7,7 @@ program_env = env.Clone()
 
 source = Split(
     """
-    nik2img.cpp
+    mapnik-render.cpp
     """
     )
 
@@ -24,11 +24,11 @@ libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     libraries.append('dl')
 
-nik2img = program_env.Program('nik2img', source, LIBS=libraries)
-Depends(nik2img, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+mapnik_render = program_env.Program('mapnik-render', source, LIBS=libraries)
+Depends(mapnik-render, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), nik2img)
+    env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), mapnik_render)
     env.Alias('install', os.path.join(env['INSTALL_PREFIX'],'bin'))
 
-env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','nik2img'))
+env['create_uninstall_target'](env, os.path.join(env['INSTALL_PREFIX'],'bin','mapnik-render'))

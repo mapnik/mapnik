@@ -402,7 +402,7 @@ opts.AddVariables(
     BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
     BoolVariable('MAPNIK_INDEX', 'Compile and install a utility to generate file indexes for CSV and GeoJSON in the custom format (.index) Mapnik supports', 'True'),
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
-    BoolVariable('NIK2IMG', 'Compile and install a utility to generate render a map to an image', 'True'),
+    BoolVariable('MAPNIK_RENDER', 'Compile and install a utility to render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
     )
@@ -1971,8 +1971,8 @@ if not HELP_REQUESTED:
 		SConscript('utils/pgsql2sqlite/build.py')
 	    if env['SVG2PNG']:
 		SConscript('utils/svg2png/build.py')
-	    if env['NIK2IMG']:
-		SConscript('utils/nik2img/build.py')
+	    if env['MAPNIK_RENDER']:
+		SConscript('utils/mapnik-render/build.py')
 	    # devtools not ready for public
 	    #SConscript('utils/ogrindex/build.py')
 	    env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])

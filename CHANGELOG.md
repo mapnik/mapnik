@@ -14,6 +14,7 @@ Released: TBD
 
 #### Summary
 
+ - Renamed `nik2img` command to `mapnik-render`
  - PostGIS: Fixed handling of all attributes when `key_field_as_attribute=false` (https://github.com/mapnik/mapnik/issues/3120)
  - PostGIS: Fixed parsing of `key_field_as_attribute` as boolean: now `true/false` can be used in addition to `0/1`
 
