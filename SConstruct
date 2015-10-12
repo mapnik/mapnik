@@ -1692,10 +1692,10 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
         abi = GetMapnikLibVersion()
-        abi_no_pre = abi.replace('-pre','').split('.')
-        env['ABI_VERSION'] = abi_no_pre
+        abi_split = abi.split('.')
+        env['ABI_VERSION'] = abi_split
         env['MAPNIK_VERSION_STRING'] = abi
-        env['MAPNIK_VERSION'] = str(int(abi_no_pre[0])*100000+int(abi_no_pre[1])*100+int(abi_no_pre[2]))
+        env['MAPNIK_VERSION'] = str(int(abi_split[0])*100000+int(abi_split[1])*100+int(abi_split[2]))
 
         # Common DEFINES.
         env.Append(CPPDEFINES = '-D%s' % env['PLATFORM'].upper())
