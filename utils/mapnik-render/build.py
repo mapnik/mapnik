@@ -25,7 +25,7 @@ if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     libraries.append('dl')
 
 mapnik_render = program_env.Program('mapnik-render', source, LIBS=libraries)
-Depends(mapnik-render, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+Depends(mapnik_render, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Install(os.path.join(env['INSTALL_PREFIX'],'bin'), mapnik_render)
