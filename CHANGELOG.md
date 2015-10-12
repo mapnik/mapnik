@@ -8,12 +8,14 @@ For a complete change history, see the git log.
 
 ## 3.0.7
 
-Released: TBD
+Released: October 12, 2015
 
-(Packaged from ...)
+(Packaged from e161253)
 
 #### Summary
 
+ - Removed `MAPNIK_VERSION_IS_RELEASE` define / `mapnik-config --version` not longer reports `-pre` for non-release versions.
+   Use `mapnik-config --git-revision` instead (https://github.com/mapnik/mapnik/issues/3123)
  - Renamed `nik2img` command to `mapnik-render`
  - PostGIS: Fixed handling of all attributes when `key_field_as_attribute=false` (https://github.com/mapnik/mapnik/issues/3120)
  - PostGIS: Fixed parsing of `key_field_as_attribute` as boolean: now `true/false` can be used in addition to `0/1`
