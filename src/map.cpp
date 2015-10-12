@@ -521,21 +521,19 @@ void Map::zoom_all()
         box2d<double> ext;
         bool success = false;
         bool first = true;
-        std::vector<layer>::const_iterator itr = layers_.begin();
-        std::vector<layer>::const_iterator end = layers_.end();
-        while (itr != end)
+        for (auto const& layer : layers_)
         {
-            if (itr->active())
+            if (layer.active())
             {
-                std::string const& layer_srs = itr->srs();
+                std::string const& layer_srs = layer.srs();
                 projection proj1(layer_srs);
                 proj_transform prj_trans(proj0,proj1);
-                box2d<double> layer_ext = itr->envelope();
+                box2d<double> layer_ext = layer.envelope();
                 if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
                     success = true;
-                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
-                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
+                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << layer.name() << " original ext=" << layer.envelope();
+                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << layer.name() << " transformed to map srs=" << layer_ext;
                     if (first)
                     {
                         ext = layer_ext;
@@ -547,7 +545,6 @@ void Map::zoom_all()
                     }
                 }
             }
-            ++itr;
         }
         if (success)
         {
