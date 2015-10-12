@@ -1069,7 +1069,6 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
 
 def GetMapnikLibVersion():
     ver = []
-    is_pre = False
     for line in open('include/mapnik/version.hpp').readlines():
 	if line.startswith('#define MAPNIK_MAJOR_VERSION'):
 	    ver.append(line.split(' ')[2].strip())
@@ -1077,12 +1076,7 @@ def GetMapnikLibVersion():
 	    ver.append(line.split(' ')[2].strip())
 	if line.startswith('#define MAPNIK_PATCH_VERSION'):
 	    ver.append(line.split(' ')[2].strip())
-	if line.startswith('#define MAPNIK_VERSION_IS_RELEASE'):
-	    if line.split(' ')[2].strip() == "0":
-		is_pre = True
     version_string = ".".join(ver)
-    if is_pre:
-	version_string += '-pre'
     return version_string
 
 if not preconfigured:
