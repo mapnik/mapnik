@@ -89,29 +89,21 @@ struct image_dispatcher
     template <typename T>
     void operator() (T const& data_in) const
     {
-        image_rgba8 colorized(data_in.width(), data_in.height());
+        using image_type = T;
+        image_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
-        if (colorizer)
-        {
-            colorizer->colorize(colorized, data_in, nodata_, feature_);
-        }
-        else
-        {
-            // TODO: Apply some decent auto colorization...
-            return;
-        }
         if (need_scaling_)
         {
-            image_rgba8 scaled(width_, height_);
-            scale_image_agg(scaled, colorized, method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
-            premultiply_alpha(scaled);
-            composite_(scaled, comp_op_, opacity_, start_x_, start_y_);
+            image_type data_out(width_, height_);
+            scale_image_agg(data_out, data_in,  method_, scale_x_, scale_y_, 0.0, 0.0, filter_factor_);
+            if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
         }
         else
         {
-            premultiply_alpha(colorized);
-            composite_(colorized, comp_op_, opacity_, start_x_, start_y_);
+            if (colorizer) colorizer->colorize(dst, data_in, nodata_, feature_);
         }
+        premultiply_alpha(dst);
+        composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
     int start_x_;
@@ -172,21 +164,15 @@ struct image_warp_dispatcher
     template <typename T>
     void operator() (T const& data_in) const
     {
-        image_rgba8 colorized(data_in.width(), data_in.height());
+        using image_type = T;
+        image_type data_out(width_, height_);
+        if (nodata_) data_out.set(*nodata_);
+        warp_image(data_out, data_in, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
+        image_rgba8 dst(width_, height_);
         raster_colorizer_ptr colorizer = get<raster_colorizer_ptr>(sym_, keys::colorizer);
-        if (colorizer)
-        {
-            colorizer->colorize(colorized, data_in, nodata_, feature_);
-        }
-        else
-        {
-            // TODO: Apply some decent auto colorization...
-            return;
-        }
-        image_rgba8 warped(width_, height_);
-        warp_image(warped, colorized, prj_trans_, target_ext_, source_ext_, offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
-        premultiply_alpha(warped);
-        composite_(warped, comp_op_, opacity_, start_x_, start_y_);
+        if (colorizer) colorizer->colorize(dst, data_out, nodata_, feature_);
+        premultiply_alpha(dst);
+        composite_(dst, comp_op_, opacity_, start_x_, start_y_);
     }
 private:
     proj_transform const& prj_trans_;
