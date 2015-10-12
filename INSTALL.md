@@ -156,6 +156,12 @@ You can run the Mapnik tests locally (without installing) like:
 
     make test
 
+## Python Bindings
+
+Python bindings are not included by default. You'll need to add those separately. 
+
+ * Build from source: https://github.com/mapnik/python-mapnik
+
 ## Learning Mapnik
 
 ### Help
