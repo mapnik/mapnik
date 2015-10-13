@@ -189,7 +189,7 @@ int main (int argc, char** argv)
             {
                 tree.trim();
                 std::clog <<  "number nodes=" << tree.count() << std::endl;
-                //tree.print();
+                std::clog <<  "number element=" << tree.count_items() << std::endl;
                 file.exceptions(std::ios::failbit | std::ios::badbit);
                 tree.write(file);
                 file.flush();
