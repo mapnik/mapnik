@@ -117,6 +117,15 @@ TEST_CASE("geojson") {
             REQUIRE(feature != nullptr);
             REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
         }
-
+        SECTION("json - ensure input fully consumed and throw exception otherwise")
+        {
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            params["file"] = "./test/data/json/points-malformed.geojson"; // mismatched parentheses
+            params["cache-features"] = false;
+            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+            params["cache-features"] = true;
+            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+        }
     }
 }
