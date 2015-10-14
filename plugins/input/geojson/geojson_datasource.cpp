@@ -202,7 +202,8 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
     mapnik::json::boxes_type boxes;
     boost::spirit::standard::space_type space;
     Iterator itr = start;
-    if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
+    if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space)
+        || itr != end)
     {
         throw mapnik::datasource_exception("GeoJSON Plugin: could not parse: '" + filename_ + "'");
     }
@@ -222,7 +223,9 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             Iterator end2 = itr2 + geometry_index.second;
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            if (!boost::spirit::qi::phrase_parse(itr2, end2, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
+            if (!boost::spirit::qi::phrase_parse(itr2, end2,
+                                                 (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space)
+                || itr2 != end2)
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
@@ -252,7 +255,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
     bool result = boost::spirit::qi::phrase_parse(start, end, (geojson_datasource_static_fc_grammar)
                                                   (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
                                                   space);
-    if (!result)
+    if (!result || start != end)
     {
         if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
         else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");

@@ -65,13 +65,12 @@ mapnik::feature_ptr large_geojson_featureset::next()
         using chr_iterator_type = char const*;
         chr_iterator_type start = json.data();
         chr_iterator_type end = start + json.size();
-
         static const mapnik::transcoder tr("utf8");
         static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
         using namespace boost::spirit;
         standard::space_type space;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,1));
-        if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space))
+        if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space) || start != end)
         {
             throw std::runtime_error("Failed to parse geojson feature");
         }
