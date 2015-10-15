@@ -203,43 +203,89 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
     mapnik::json::boxes_type boxes;
     boost::spirit::standard::space_type space;
     Iterator itr = start;
-    if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space)
-        /*|| itr != end*/)
+    if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
     {
-        throw mapnik::datasource_exception("GeoJSON Plugin: (Initialise index) could not parse: '" + filename_ + "'");
-    }
-    // bulk insert initialise r-tree
-    tree_ = std::make_unique<spatial_index_type>(boxes);
-    // calculate total extent
-    for (auto const& item : boxes)
-    {
-        auto const& box = std::get<0>(item);
-        auto const& geometry_index = std::get<1>(item);
-        if (!extent_.valid())
+        cache_features_ = true; // force caching single feature
+        itr = start; // reset iteraror
+        // try parsing as single Feature or single Geometry JSON
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+        std::size_t start_id = 1;
+        mapnik::json::default_feature_callback callback(features_);
+        bool result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_callback_grammar)
+                                                 (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                 space);
+        if (!result || itr != end)
         {
-            extent_ = box;
-            // parse first feature to extract attributes schema.
-            // NOTE: this doesn't yield correct answer for geoJSON in general, just an indication
-            Iterator itr2 = start + geometry_index.first;
-            Iterator end2 = itr2 + geometry_index.second;
-            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
-            if (!boost::spirit::qi::phrase_parse(itr2, end2,
-                                                 (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space)
-                || itr2 != end2)
-            {
-                throw std::runtime_error("Failed to parse geojson feature");
-            }
-            for ( auto const& kv : *feature)
-            {
-                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
-                                                                  mapnik::util::apply_visitor(attr_value_converter(),
-                                                                                              std::get<1>(kv))));
-            }
+            if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
+            else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
         }
-        else
+
+        using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
+        values_container values;
+        values.reserve(features_.size());
+
+        std::size_t geometry_index = 0;
+        for (mapnik::feature_ptr const& f : features_)
         {
-            extent_.expand_to_include(box);
+            mapnik::box2d<double> box = f->envelope();
+            if (box.valid())
+            {
+                if (geometry_index == 0)
+                {
+                    extent_ = box;
+                    for ( auto const& kv : *f)
+                    {
+                        desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
+                                                                          mapnik::util::apply_visitor(attr_value_converter(),
+                                                                                                      std::get<1>(kv))));
+                    }
+                }
+                else
+                {
+                    extent_.expand_to_include(box);
+                }
+                values.emplace_back(box, std::make_pair(geometry_index,0));
+            }
+            ++geometry_index;
+        }
+        // packing algorithm
+        tree_ = std::make_unique<spatial_index_type>(values);
+    }
+    else
+    {
+        // bulk insert initialise r-tree
+        tree_ = std::make_unique<spatial_index_type>(boxes);
+        // calculate total extent
+        for (auto const& item : boxes)
+        {
+            auto const& box = std::get<0>(item);
+            auto const& geometry_index = std::get<1>(item);
+            if (!extent_.valid())
+            {
+                extent_ = box;
+                // parse first feature to extract attributes schema.
+                // NOTE: this doesn't yield correct answer for geoJSON in general, just an indication
+                Iterator itr2 = start + geometry_index.first;
+                Iterator end2 = itr2 + geometry_index.second;
+                mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+                mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+                if (!boost::spirit::qi::phrase_parse(itr2, end2,
+                                                     (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space)
+                    || itr2 != end2)
+                {
+                    throw std::runtime_error("Failed to parse geojson feature");
+                }
+                for ( auto const& kv : *feature)
+                {
+                    desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
+                                                                      mapnik::util::apply_visitor(attr_value_converter(),
+                                                                                                  std::get<1>(kv))));
+                }
+            }
+            else
+            {
+                extent_.expand_to_include(box);
+            }
         }
     }
 }
