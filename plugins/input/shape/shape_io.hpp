@@ -61,6 +61,7 @@ public:
     ~shape_io();
 
     shape_file& shp();
+    shape_file& shx();
     dbf_file& dbf();
 
     inline boost::optional<shape_file&> index()
@@ -81,13 +82,15 @@ public:
 
     shapeType type_;
     shape_file shp_;
+    shape_file shx_;
     dbf_file   dbf_;
     std::unique_ptr<shape_file> index_;
-    unsigned reclength_;
-    unsigned id_;
+    int reclength_;
+    int id_;
     box2d<double> cur_extent_;
 
     static const std::string SHP;
+    static const std::string SHX;
     static const std::string DBF;
     static const std::string INDEX;
 };

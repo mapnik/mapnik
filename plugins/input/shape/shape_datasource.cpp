@@ -64,6 +64,7 @@ shape_datasource::shape_datasource(parameters const& params)
     : datasource (params),
       type_(datasource::Vector),
       file_length_(0),
+      shx_file_length_(0),
       indexed_(false),
       row_limit_(*params.get<mapnik::value_integer>("row_limit",0)),
       desc_(shape_datasource::name(), *params.get<std::string>("encoding","utf-8"))
@@ -104,7 +105,7 @@ shape_datasource::shape_datasource(parameters const& params)
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
-            field_descriptor const& fd=shape_ref->dbf().descriptor(i);
+            field_descriptor const& fd = shape_ref->dbf().descriptor(i);
             std::string fld_name=fd.name_;
             switch (fd.type_)
             {
@@ -167,36 +168,50 @@ void shape_datasource::init(shape_io& shape)
 #endif
 
     //first read header from *.shp
-    int file_code=shape.shp().read_xdr_integer();
-    if (file_code!=9994)
+    shape_file::record_type header(100);
+    shape.shp().read_record(header);
+
+    int file_code = header.read_xdr_integer();
+    if (file_code != 9994)
     {
         std::ostringstream s;
         s << "Shape Plugin: wrong file code " << file_code;
         throw datasource_exception(s.str());
     }
+    header.skip(5 * 4);
+    file_length_ = header.read_xdr_integer();
+    int version = header.read_ndr_integer();
 
-    shape.shp().skip(5*4);
-    file_length_=shape.shp().read_xdr_integer();
-    int version=shape.shp().read_ndr_integer();
-
-    if (version!=1000)
+    if (version != 1000)
     {
         std::ostringstream s;
         s << "Shape Plugin: nvalid version number " << version;
         throw datasource_exception(s.str());
     }
 
-    shape_type_ = static_cast<shape_io::shapeType>(shape.shp().read_ndr_integer());
+    shape_type_ = static_cast<shape_io::shapeType>(header.read_ndr_integer());
     if (shape_type_ == shape_io::shape_multipatch)
         throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
 
-    shape.shp().read_envelope(extent_);
+    const double lox = header.read_double();
+    const double loy = header.read_double();
+    const double hix = header.read_double();
+    const double hiy = header.read_double();
+    extent_.init(lox, loy, hix, hiy);
+
+    if (shape.shx().is_open())
+    {
+        shape_file::record_type shx_header(100);
+        shape.shx().read_record(shx_header);
+        shx_header.skip(6 * 4);
+        shx_file_length_ = shx_header.read_xdr_integer();
+    }
 
 #ifdef MAPNIK_LOG
-    const double zmin = shape.shp().read_double();
-    const double zmax = shape.shp().read_double();
-    const double mmin = shape.shp().read_double();
-    const double mmax = shape.shp().read_double();
+    const double zmin = header.read_double();
+    const double zmax = header.read_double();
+    const double mmin = header.read_double();
+    const double mmax = header.read_double();
 
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Z min/max=" << zmin << "," << zmax;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: M min/max=" << mmin << "," << mmax;
@@ -250,7 +265,7 @@ featureset_ptr shape_datasource::features(query const& q) const
                                                                   shape_name_,
                                                                   q.property_names(),
                                                                   desc_.get_encoding(),
-                                                                  file_length_,
+                                                                  shx_file_length_,
                                                                   row_limit_);
     }
 }
