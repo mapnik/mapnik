@@ -41,19 +41,18 @@ shape_featureset<filterT>::shape_featureset(filterT const& filter,
                                             std::string const& shape_name,
                                             std::set<std::string> const& attribute_names,
                                             std::string const& encoding,
-                                            long file_length,
+                                            long shx_file_length,
                                             int row_limit)
     : filter_(filter),
       shape_(shape_name, false),
       query_ext_(),
       feature_bbox_(),
       tr_(new transcoder(encoding)),
-      file_length_(file_length),
+      shx_file_length_(shx_file_length),
       row_limit_(row_limit),
       count_(0),
       ctx_(std::make_shared<mapnik::context_type>())
 {
-    shape_.shp().skip(100);
     shape_.shx().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_, attr_ids_);
 }
@@ -65,7 +64,8 @@ feature_ptr shape_featureset<filterT>::next()
     {
         return feature_ptr();
     }
-    while  (!shape_.shx().is_eof())
+
+    while  (shape_.shx().pos() < 2 * shx_file_length_)
     {
         int offset = shape_.shx().read_xdr_integer();
         int record_length = shape_.shx().read_xdr_integer();

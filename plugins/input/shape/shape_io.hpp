@@ -85,8 +85,8 @@ public:
     shape_file shx_;
     dbf_file   dbf_;
     std::unique_ptr<shape_file> index_;
-    unsigned reclength_;
-    unsigned id_;
+    int reclength_;
+    int id_;
     box2d<double> cur_extent_;
 
     static const std::string SHP;
