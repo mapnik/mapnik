@@ -101,6 +101,10 @@ static void shape_text(text_line & line,
             hb_buffer_set_direction(buffer.get(), (text_item.dir == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
+            // https://github.com/mapnik/test-data-visual/pull/25
+            #if HB_VERSION_ATLEAST(1, 0 , 5)
+            hb_ft_font_set_load_flags(font,FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
+            #endif
             hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
             hb_font_destroy(font);
 
