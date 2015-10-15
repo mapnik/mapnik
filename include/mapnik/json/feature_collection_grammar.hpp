@@ -66,18 +66,39 @@ struct feature_collection_grammar :
     feature_collection_grammar(mapnik::transcoder const& tr);
     // grammars
     feature_grammar<Iterator,FeatureType> feature_g;
-    geometry_grammar<Iterator> geometry_g;
+    //geometry_grammar<Iterator> geometry_g;
     // rules
     qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> start; // START
     qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> feature_collection;
     qi::rule<Iterator, space_type> type;
     qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> features;
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
+    //qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature_from_geometry;
+    // phoenix functions
+    //phoenix::function<json::set_geometry_impl> set_geometry;
+    phoenix::function<apply_feature_callback> on_feature;
+};
+
+template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback>
+struct feature_grammar_callback :
+        qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
+{
+    feature_grammar_callback(mapnik::transcoder const& tr);
+    // grammars
+    feature_grammar<Iterator, FeatureType> feature_g;
+    geometry_grammar<Iterator> geometry_g;
+    // rules
+    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> start; // START
+    //qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> feature_collection;
+    //qi::rule<Iterator, space_type> type;
+    //qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> features;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature_from_geometry;
     // phoenix functions
     phoenix::function<json::set_geometry_impl> set_geometry;
     phoenix::function<apply_feature_callback> on_feature;
 };
+
 
 }}
 

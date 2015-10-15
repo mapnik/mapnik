@@ -20,10 +20,33 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/json/feature_collection_grammar_impl.hpp>
+#include <mapnik/feature_factory.hpp>
+#include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/json/feature_grammar.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
+// stl
 #include <string>
+#include <vector>
 
-using iterator_type = char const*;
-template struct mapnik::json::feature_collection_grammar<iterator_type,mapnik::feature_impl, mapnik::json::default_feature_callback> ;
-template struct mapnik::json::feature_grammar_callback<iterator_type,mapnik::feature_impl, mapnik::json::default_feature_callback> ;
+#include "geojson_index_featureset.hpp"
+
+geojson_index_featureset::geojson_index_featureset(std::string const& filename)
+:
+#ifdef _WINDOWS
+    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
+#else
+    file_(std::fopen(filename.c_str(),"rb"), std::fclose),
+#endif
+    ctx_(std::make_shared<mapnik::context_type>())
+{
+    if (!file_) throw std::runtime_error("Can't open " + filename);
+}
+
+geojson_index_featureset::~geojson_index_featureset() {}
+
+mapnik::feature_ptr geojson_index_featureset::next()
+{
+    return mapnik::feature_ptr();
+}

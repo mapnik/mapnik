@@ -20,10 +20,26 @@
  *
  *****************************************************************************/
 
-#include <mapnik/feature.hpp>
-#include <mapnik/json/feature_collection_grammar_impl.hpp>
-#include <string>
+#ifndef GEOJSON_INDEX_FEATURESET_HPP
+#define GEOJSON_INDEX_FEATURESET_HPP
 
-using iterator_type = char const*;
-template struct mapnik::json::feature_collection_grammar<iterator_type,mapnik::feature_impl, mapnik::json::default_feature_callback> ;
-template struct mapnik::json::feature_grammar_callback<iterator_type,mapnik::feature_impl, mapnik::json::default_feature_callback> ;
+#include <mapnik/feature.hpp>
+#include "geojson_datasource.hpp"
+
+#include <deque>
+#include <cstdio>
+
+class geojson_index_featureset : public mapnik::Featureset
+{
+public:
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    geojson_index_featureset(std::string const& filename);
+    virtual ~geojson_index_featureset();
+    mapnik::feature_ptr next();
+
+private:
+    file_ptr file_;
+    mapnik::context_ptr ctx_;
+};
+
+#endif // GEOJSON_INDEX_FEATURESE_HPP
