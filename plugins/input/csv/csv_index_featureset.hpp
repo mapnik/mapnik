@@ -29,7 +29,7 @@
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
 
-#ifdef CSV_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -63,7 +63,7 @@ private:
     mapnik::value_integer feature_id_ = 0;
     detail::geometry_column_locator const& locator_;
     mapnik::transcoder tr_;
-#if defined (CSV_MEMORY_MAPPED_FILE)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
 #else

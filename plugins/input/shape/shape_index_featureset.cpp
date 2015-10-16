@@ -32,7 +32,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <boost/interprocess/streams/bufferstream.hpp>
 #endif
 #pragma GCC diagnostic pop
@@ -63,7 +63,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     auto index = shape_ptr_->index();
     if (index)
     {
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         mapnik::util::spatial_index<int, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
 #else
         mapnik::util::spatial_index<int, filterT, std::ifstream>::query(filter, index->file(), offsets_);

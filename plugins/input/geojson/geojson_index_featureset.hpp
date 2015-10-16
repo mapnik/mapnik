@@ -23,13 +23,11 @@
 #ifndef GEOJSON_INDEX_FEATURESET_HPP
 #define GEOJSON_INDEX_FEATURESET_HPP
 
-#define GEOJSON_MEMORY_MAPPED_FILE
-
 #include "geojson_datasource.hpp"
 #include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
 
-#ifdef GEOJSON_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -51,7 +49,7 @@ public:
     mapnik::feature_ptr next();
 
 private:
-#if defined (GEOJSON_MEMORY_MAPPED_FILE)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
 #else

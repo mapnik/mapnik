@@ -30,7 +30,7 @@
 #include <deque>
 #include <cstdio>
 
-#ifdef CSV_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -56,7 +56,7 @@ public:
     mapnik::feature_ptr next();
 private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
-#if defined (CSV_MEMORY_MAPPED_FILE)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
 #else

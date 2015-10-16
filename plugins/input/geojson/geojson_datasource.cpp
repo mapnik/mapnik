@@ -62,7 +62,7 @@
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>
 
-#if defined(SHAPE_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -156,7 +156,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
     else
     {
         cache_features_ = *params.get<mapnik::boolean_type>("cache_features", true);
-#if !defined(SHAPE_MEMORY_MAPPED_FILE)
+#if !defined(MAPNIK_MEMORY_MAPPED_FILE)
         mapnik::util::file file(filename_);
         if (!file.open())
         {

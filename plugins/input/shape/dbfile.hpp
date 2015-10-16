@@ -27,7 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/unicode.hpp>
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <mapnik/mapped_memory_cache.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
@@ -59,7 +59,7 @@ private:
     int num_fields_;
     std::size_t record_length_;
     std::vector<field_descriptor> fields_;
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     boost::interprocess::ibufferstream file_;
     mapnik::mapped_region_ptr mapped_region_;
 #else

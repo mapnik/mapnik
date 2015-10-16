@@ -6,6 +6,17 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.8
+
+Released: ...
+
+(Packaged from )
+
+#### Summary
+
+ - Renamed `SHAPE_MEMORY_MAPPED_FILE` define to `MAPNIK_MEMORY_MAPPED_FILE`. Pass `./configure MEMORY_MAPPED_FILE=True|False` to request
+   support for memory mapped files across Mapnik plugins.
+
 ## 3.0.7
 
 Released: October 12, 2015

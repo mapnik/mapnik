@@ -48,7 +48,7 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
       ctx_(ctx),
       locator_(locator),
       tr_("utf8")
-#if defined(CSV_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
       //
 #elif defined( _WINDOWS)
     ,file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
@@ -57,7 +57,7 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
 #endif
 
 {
-#if defined (CSV_MEMORY_MAPPED_FILE)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
     boost::optional<mapnik::mapped_region_ptr> memory =
         mapnik::mapped_memory_cache::instance().find(filename, true);
     if (memory)
@@ -112,7 +112,7 @@ mapnik::feature_ptr csv_index_featureset::next()
     while( itr_ != positions_.end())
     {
         auto pos = *itr_++;
-#if defined(CSV_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         char const* start = (char const*)mapped_region_->get_address() + pos.first;
         char const*  end = start + pos.second;
 #else

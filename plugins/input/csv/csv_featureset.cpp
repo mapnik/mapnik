@@ -34,7 +34,7 @@
 csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, char separator, char quote,
                                std::vector<std::string> const& headers, mapnik::context_ptr const& ctx, array_type && index_array)
     :
-#if defined(CSV_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     //
 #elif defined( _WINDOWS)
     file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
@@ -51,7 +51,7 @@ csv_featureset::csv_featureset(std::string const& filename, detail::geometry_col
     locator_(locator),
     tr_("utf8")
 {
-#if defined (CSV_MEMORY_MAPPED_FILE)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
     boost::optional<mapnik::mapped_region_ptr> memory =
             mapnik::mapped_memory_cache::instance().find(filename, true);
     if (memory)
@@ -90,7 +90,7 @@ mapnik::feature_ptr csv_featureset::next()
         csv_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second.first;
         std::size_t size = item.second.second;
-#if defined(CSV_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         char const* start = (char const*)mapped_region_->get_address() + file_offset;
         char const*  end = start + size;
 #else

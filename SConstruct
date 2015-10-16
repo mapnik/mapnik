@@ -389,7 +389,7 @@ opts.AddVariables(
     EnumVariable('PLUGIN_LINKING', "Set plugin linking with libmapnik", 'shared', ['shared','static']),
 
     # Other variables
-    BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
+    BoolVariable('MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if provided then the bundled DejaVu fonts are not installed)',''),
     ('LIB_DIR_NAME','Name to use for the subfolder beside libmapnik where fonts and plugins are installed','mapnik'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
@@ -1209,8 +1209,8 @@ if not preconfigured:
         thread_suffix = ''
         env.Append(LIBS = 'pthread')
 
-    if env['SHAPE_MEMORY_MAPPED_FILE']:
-        env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
+    if env['MEMORY_MAPPED_FILE']:
+        env.Append(CPPDEFINES = '-DMAPNIK_MEMORY_MAPPED_FILE')
 
     # allow for mac osx /usr/lib/libicucore.dylib compatibility
     # requires custom supplied headers since Apple does not include them

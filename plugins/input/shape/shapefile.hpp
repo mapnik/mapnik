@@ -33,7 +33,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/box2d.hpp>
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -141,7 +141,7 @@ class shape_file : mapnik::util::noncopyable
 {
 public:
 
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     using record_type = shape_record<MappedRecordTag>;
     mapnik::mapped_region_ptr mapped_region_;
@@ -155,7 +155,7 @@ public:
     shape_file() {}
 
     shape_file(std::string  const& file_name) :
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         file_()
 #elif defined (_WINDOWS)
         file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
@@ -163,7 +163,7 @@ public:
         file_(file_name.c_str(), std::ios::in | std::ios::binary)
 #endif
     {
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         boost::optional<mapnik::mapped_region_ptr> memory =
             mapnik::mapped_memory_cache::instance().find(file_name,true);
 
@@ -188,7 +188,7 @@ public:
 
     inline bool is_open() const
     {
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         return (file_.buffer().second > 0);
 #else
         return file_.is_open();
@@ -197,7 +197,7 @@ public:
 
     inline void read_record(record_type& rec)
     {
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         rec.set_data(file_.buffer().first + file_.tellg());
         file_.seekg(rec.size, std::ios::cur);
 #else

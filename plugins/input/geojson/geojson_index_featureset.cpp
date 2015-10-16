@@ -35,7 +35,7 @@
 
 geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::filter_in_box const& filter)
     :
-#if defined(GEOJSON_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     //
 #elif defined _WINDOWS
     file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
@@ -45,7 +45,7 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
     ctx_(std::make_shared<mapnik::context_type>())
 {
 
-#if defined (GEOJSON_MEMORY_MAPPED_FILE)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
     boost::optional<mapnik::mapped_region_ptr> memory =
         mapnik::mapped_memory_cache::instance().find(filename, true);
     if (memory)
@@ -78,7 +78,7 @@ mapnik::feature_ptr geojson_index_featureset::next()
     while( itr_ != positions_.end())
     {
         auto pos = *itr_++;
-#if defined(GEOJSON_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
         char const* start = (char const*)mapped_region_->get_address() + pos.first;
         char const*  end = start + pos.second;
 #else

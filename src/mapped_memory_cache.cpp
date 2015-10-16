@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#if defined(SHAPE_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 
 // mapnik
 #include <mapnik/debug.hpp>
