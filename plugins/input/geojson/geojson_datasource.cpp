@@ -442,7 +442,49 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
     int multi_type = 0;
     if (has_disk_index_)
     {
+        using value_type = std::pair<std::size_t, std::size_t>;
+        std::ifstream index(filename_ + ".index", std::ios::binary);
+        if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
+        mapnik::filter_in_box filter(extent_);
+        std::vector<value_type> positions;
+        mapnik::util::spatial_index<value_type,
+                                    mapnik::filter_in_box,
+                                    std::ifstream>::query_first_n(filter, index, positions, 5);
 
+        mapnik::util::file file(filename_);
+
+        if (!file.open()) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
+
+        for (auto const& pos : positions)
+        {
+            std::fseek(file.get(), pos.first, SEEK_SET);
+            std::vector<char> record;
+            record.resize(pos.second);
+            std::fread(record.data(), pos.second, 1, file.get());
+            auto const* start = record.data();
+            auto const*  end = start + record.size();
+            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+            using namespace boost::spirit;
+            standard::space_type space;
+            if (!boost::spirit::qi::phrase_parse(start, end,
+                                                 (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space)
+                || start != end)
+            {
+                throw std::runtime_error("Failed to parse geojson feature");
+            }
+            result = mapnik::util::to_ds_type(feature->get_geometry());
+            if (result)
+            {
+                int type = static_cast<int>(*result);
+                if (multi_type > 0 && multi_type != type)
+                {
+                    result.reset(mapnik::datasource_geometry_t::Collection);
+                    return result;
+                }
+                multi_type = type;
+            }
+        }
     }
     else if (cache_features_)
     {
