@@ -98,6 +98,7 @@ public:
     void parse_geojson(Iterator start, Iterator end);
     template <typename Iterator>
     void initialise_index(Iterator start, Iterator end);
+    void initialise_disk_index(std::string const& filename);
 private:
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;
@@ -107,6 +108,7 @@ private:
     std::vector<mapnik::feature_ptr> features_;
     std::unique_ptr<spatial_index_type> tree_;
     bool cache_features_ = true;
+    bool has_disk_index_ = false;
 };
 
 
