@@ -30,6 +30,7 @@
 // stl
 #include <iosfwd>
 #include <vector>
+#include <algorithm>
 
 namespace mapnik
 {
@@ -40,13 +41,13 @@ public:
     layer_descriptor(std::string const& name, std::string const& encoding)
         : name_(name),
           encoding_(encoding),
-          desc_ar_(),
+          descriptors_(),
           extra_params_() {}
 
     layer_descriptor(layer_descriptor const& other)
         : name_(other.name_),
           encoding_(other.encoding_),
-          desc_ar_(other.desc_ar_),
+          descriptors_(other.descriptors_),
           extra_params_(other.extra_params_) {}
 
     void set_name(std::string const& name)
@@ -71,17 +72,17 @@ public:
 
     void add_descriptor(attribute_descriptor const& desc)
     {
-        desc_ar_.push_back(desc);
+        descriptors_.push_back(desc);
     }
 
     std::vector<attribute_descriptor> const& get_descriptors() const
     {
-        return desc_ar_;
+        return descriptors_;
     }
 
     std::vector<attribute_descriptor>& get_descriptors()
     {
-        return desc_ar_;
+        return descriptors_;
     }
 
     parameters const& get_extra_parameters() const
@@ -93,11 +94,16 @@ public:
     {
         return extra_params_;
     }
-
+    bool has_name(std::string const& name) const
+    {
+        auto result = std::find_if(std::begin(descriptors_), std::end(descriptors_),
+                                [&name](attribute_descriptor const& desc) { return name == desc.get_name();});
+        return result != std::end(descriptors_);
+    }
 private:
     std::string name_;
     std::string encoding_;
-    std::vector<attribute_descriptor> desc_ar_;
+    std::vector<attribute_descriptor> descriptors_;
     parameters extra_params_;
 };
 
