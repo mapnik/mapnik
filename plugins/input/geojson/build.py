@@ -42,7 +42,9 @@ else:
       """
       %(PLUGIN_NAME)s_datasource.cpp
       %(PLUGIN_NAME)s_featureset.cpp
+      %(PLUGIN_NAME)s_index_featureset.cpp
       large_%(PLUGIN_NAME)s_featureset.cpp
+
       """ % locals()
     )
 

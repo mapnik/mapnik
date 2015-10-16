@@ -48,7 +48,7 @@ public:
           type_(type),
           size_(size),
           precision_(precision),
-          primary_key_(primary_key) {}
+            primary_key_(primary_key) {}
 
     attribute_descriptor(attribute_descriptor const& other)
         : name_(other.name_),
@@ -57,21 +57,15 @@ public:
           precision_(other.precision_),
           primary_key_(other.primary_key_) {}
 
-    attribute_descriptor& operator=(attribute_descriptor const& other)
+    attribute_descriptor& operator=(attribute_descriptor rhs)
     {
-        if (this == &other)
-        {
-            return *this;
-        }
-        else
-        {
-            name_=other.name_;
-            type_=other.type_;
-            size_=other.size_;
-            precision_=other.precision_;
-            primary_key_=other.primary_key_;
-            return *this;
-        }
+        using std::swap;
+        std::swap(name_, rhs.name_);
+        std::swap(type_, rhs.type_);
+        std::swap(size_, rhs.size_);
+        std::swap(precision_, rhs.precision_);
+        std::swap(primary_key_, rhs.primary_key_);
+        return *this;
     }
 
     std::string const& get_name() const
