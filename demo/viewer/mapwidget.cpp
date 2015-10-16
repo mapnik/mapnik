@@ -511,7 +511,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     //{
     //    std::cerr << ex.what() << std::endl;
     //}
-    catch (const std::exception & ex)
+    catch (std::exception const& ex)
     {
         std::cerr << "exception: " << ex.what() << std::endl;
     }
