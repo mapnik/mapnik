@@ -52,7 +52,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
         mapnik::mapped_memory_cache::instance().find(filename, true);
     if (!memory)
     {
-        std::clog << "Error : cannot mmap " << filename << std::endl;
+        std::clog << "Error : cannot memory map " << filename << std::endl;
         return std::make_pair(false, extent);
     }
     else
@@ -66,7 +66,8 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     {
         if (!boost::spirit::qi::phrase_parse(start, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
         {
-            std::clog << "mapnik-index (GeoJSON) : could not parse: '" <<  filename <<  "'";
+            std::clog << "mapnik-index (GeoJSON) : could extract bounding boxes from : '" <<  filename <<  "'";
+            std::clog << " expected FeatureCollection" << std::endl;
             return std::make_pair(false, extent);
         }
     }
