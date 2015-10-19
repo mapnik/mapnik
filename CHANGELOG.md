@@ -15,7 +15,7 @@ Released: ...
 #### Summary
 
  - Renamed `SHAPE_MEMORY_MAPPED_FILE` define to `MAPNIK_MEMORY_MAPPED_FILE`. Pass `./configure MEMORY_MAPPED_FILE=True|False` to request
-   support for memory mapped files across Mapnik plugins.
+   support for memory mapped files across Mapnik plugins (currently shape, csv, and geojson).
 
 ## 3.0.7
 
