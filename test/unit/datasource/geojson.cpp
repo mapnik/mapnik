@@ -28,7 +28,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/util/fs.hpp>
-
+#include <cstdlib>
 
 namespace detail {
 
@@ -48,6 +48,20 @@ mapnik::feature_ptr fetch_first_feature(std::string const& filename, bool cache_
     auto features = ds->features(query);
     auto feature = features->next();
     return feature;
+}
+
+int create_disk_index(std::string const& filename, bool silent)
+{
+    std::string cmd = "mapnik-index " + filename;
+    if (silent)
+    {
+#ifndef _WINDOWS
+        cmd += " 2>/dev/null";
+#else
+        cmd += "2> nul";
+#endif
+    }
+    return std::system(cmd.c_str());
 }
 
 }
@@ -252,6 +266,42 @@ TEST_CASE("geojson") {
                 REQUIRE(mapnik::geometry::geometry_type(collection[0]) == mapnik::geometry::Point);
                 REQUIRE(mapnik::geometry::geometry_type(collection[1]) == mapnik::geometry::LineString);
                 REQUIRE(mapnik::geometry::envelope(collection) == mapnik::box2d<double>(100,0,102,1));
+            }
+        }
+
+        SECTION("GeoJSON FeatureCollection *.index")
+        {
+            std::string filename("./test/data/json/featurecollection.json");
+            if (detail::create_disk_index(filename, true) == 0)
+            {
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    mapnik::parameters params;
+                    params["type"] = "geojson";
+                    params["file"] = filename;
+                    auto ds = mapnik::datasource_cache::instance().create(params);
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    mapnik::query query(ds->envelope());
+                    for (auto const& field : fields)
+                    {
+                        query.add_property_name(field.get_name());
+                    }
+                    auto features = ds->features(query);
+                    auto bounding_box = ds->envelope();
+                    mapnik::box2d<double> bbox;
+                    std::size_t count = 0;
+                    while (true)
+                    {
+                        auto feature = features->next();
+                        if (!feature) break;
+                        if (!bbox.valid()) bbox = feature->envelope();
+                        else bbox.expand_to_include(feature->envelope());
+                        ++count;
+                    }
+                    REQUIRE(count == 3);
+                    REQUIRE(bounding_box == bbox);
+                    CHECK(mapnik::util::remove(filename + ".index"));
+                }
             }
         }
 
