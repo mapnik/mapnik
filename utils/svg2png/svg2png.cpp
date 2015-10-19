@@ -108,7 +108,7 @@ struct main_marker_visitor
 #else
             s << "xdg-open " << png_name;
 #endif
-            int ret = system(s.str().c_str());
+            int ret = std::system(s.str().c_str());
             if (ret != 0)
                 status = ret;
         }
