@@ -23,7 +23,7 @@
 #include "geojson_datasource.hpp"
 #include "geojson_featureset.hpp"
 #include "geojson_index_featureset.hpp"
-#include "large_geojson_featureset.hpp"
+#include "geojson_memory_index_featureset.hpp"
 #include <fstream>
 #include <algorithm>
 
@@ -574,7 +574,7 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
                           {
                               return item0.second.first < item1.second.first;
                           });
-                return std::make_shared<large_geojson_featureset>(filename_, std::move(index_array));
+                return std::make_shared<geojson_memory_index_featureset>(filename_, std::move(index_array));
             }
         }
         else if (has_disk_index_)

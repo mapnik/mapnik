@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef LARGE_GEOJSON_FEATURESET_HPP
-#define LARGE_GEOJSON_FEATURESET_HPP
+#ifndef GEOJSON_MEMORY_INDEX_FEATURESET_HPP
+#define GEOJSON_MEMORY_INDEX_FEATURESET_HPP
 
 #include <mapnik/feature.hpp>
 #include "geojson_datasource.hpp"
@@ -29,15 +29,15 @@
 #include <deque>
 #include <cstdio>
 
-class large_geojson_featureset : public mapnik::Featureset
+class geojson_memory_index_featureset : public mapnik::Featureset
 {
 public:
     using array_type = std::deque<geojson_datasource::item_type>;
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
 
-    large_geojson_featureset(std::string const& filename,
+    geojson_memory_index_featureset(std::string const& filename,
                              array_type && index_array);
-    virtual ~large_geojson_featureset();
+    virtual ~geojson_memory_index_featureset();
     mapnik::feature_ptr next();
 
 private:
@@ -49,4 +49,4 @@ private:
     mapnik::context_ptr ctx_;
 };
 
-#endif // LARGE_GEOJSON_FEATURESET_HPP
+#endif // GEOJSON_MEMORY_INDEX_FEATURESET_HPP

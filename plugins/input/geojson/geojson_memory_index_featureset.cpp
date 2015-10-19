@@ -30,9 +30,9 @@
 #include <string>
 #include <vector>
 
-#include "large_geojson_featureset.hpp"
+#include "geojson_memory_index_featureset.hpp"
 
-large_geojson_featureset::large_geojson_featureset(std::string const& filename,
+geojson_memory_index_featureset::geojson_memory_index_featureset(std::string const& filename,
                                                    array_type && index_array)
 :
 #ifdef _WINDOWS
@@ -48,9 +48,9 @@ large_geojson_featureset::large_geojson_featureset(std::string const& filename,
     if (!file_) throw std::runtime_error("Can't open " + filename);
 }
 
-large_geojson_featureset::~large_geojson_featureset() {}
+geojson_memory_index_featureset::~geojson_memory_index_featureset() {}
 
-mapnik::feature_ptr large_geojson_featureset::next()
+mapnik::feature_ptr geojson_memory_index_featureset::next()
 {
     if (index_itr_ != index_end_)
     {
