@@ -177,16 +177,26 @@ TEST_CASE("geojson") {
             }
         }
 
-        SECTION("GeoJSON FeatureCollection *.index")
+        SECTION("GeoJSON FeatureCollection")
         {
             std::string filename("./test/data/json/featurecollection.json");
-            if (detail::create_disk_index(filename, true) == 0)
+
+            for (auto create_index : { true, false })
             {
-                if (mapnik::util::exists(filename + ".index"))
+                if (create_index)
                 {
-                    mapnik::parameters params;
-                    params["type"] = "geojson";
-                    params["file"] = filename;
+                    REQUIRE(detail::create_disk_index(filename, true) == 0);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+
+                mapnik::parameters params;
+                params["type"] = "geojson";
+                params["file"] = filename;
+
+                for (auto cache_features : {true, false})
+                {
+                    params["cache_features"] = cache_features;
+
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     auto fields = ds->get_descriptor().get_descriptors();
                     mapnik::query query(ds->envelope());
@@ -197,7 +207,7 @@ TEST_CASE("geojson") {
                     auto features = ds->features(query);
                     auto bounding_box = ds->envelope();
                     mapnik::box2d<double> bbox;
-                    std::size_t count = 0;
+                    mapnik::value_integer count = 0;
                     while (true)
                     {
                         auto feature = features->next();
@@ -205,9 +215,13 @@ TEST_CASE("geojson") {
                         if (!bbox.valid()) bbox = feature->envelope();
                         else bbox.expand_to_include(feature->envelope());
                         ++count;
+                        REQUIRE(feature->id() == count);
                     }
                     REQUIRE(count == 3);
                     REQUIRE(bounding_box == bbox);
+                }
+                if (mapnik::util::exists(filename + ".index"))
+                {
                     CHECK(mapnik::util::remove(filename + ".index"));
                 }
             }
