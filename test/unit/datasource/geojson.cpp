@@ -73,20 +73,9 @@ TEST_CASE("geojson") {
     {
         SECTION("GeoJSON Point")
         {
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/point.json", true);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Point);
-                auto const& pt = mapnik::util::get<mapnik::geometry::point<double> >(geometry);
-                REQUIRE(pt.x == 100);
-                REQUIRE(pt.y == 0);
-            }
-            {
-                // on-fly in-memory r-tree index + read features from disk
-                auto feature = detail::fetch_first_feature("./test/data/json/point.json", false);
-                // test
+                auto feature = detail::fetch_first_feature("./test/data/json/point.json", cache_features);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Point);
                 auto const& pt = mapnik::util::get<mapnik::geometry::point<double> >(geometry);
@@ -97,43 +86,23 @@ TEST_CASE("geojson") {
 
         SECTION("GeoJSON LineString")
         {
-            mapnik::parameters params;
-            params["type"] = "geojson";
-            params["file"] = "./test/data/json/linestring.json";
-
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/linestring.json", true);
-                // test
+                auto feature = detail::fetch_first_feature("./test/data/json/linestring.json", cache_features);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::LineString);
                 auto const& line = mapnik::util::get<mapnik::geometry::line_string<double> >(geometry);
                 REQUIRE(line.size() == 2);
                 REQUIRE(mapnik::geometry::envelope(line) == mapnik::box2d<double>(100,0,101,1));
 
-            }
-            {
-                // on-fly in-memory r-tree index + read features from disk
-                auto feature = detail::fetch_first_feature("./test/data/json/linestring.json", false);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::LineString);
-                auto const& line = mapnik::util::get<mapnik::geometry::line_string<double> >(geometry);
-                REQUIRE(line.size() == 2);
-                REQUIRE(mapnik::geometry::envelope(line) == mapnik::box2d<double>(100,0,101,1));
             }
         }
 
         SECTION("GeoJSON Polygon")
         {
-            mapnik::parameters params;
-            params["type"] = "geojson";
-            params["file"] = "./test/data/json/polygon.json";
-
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/polygon.json", true);
-                // test
+                auto feature = detail::fetch_first_feature("./test/data/json/polygon.json", cache_features);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Polygon);
                 auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geometry);
@@ -143,38 +112,14 @@ TEST_CASE("geojson") {
                 REQUIRE(poly.interior_rings[0].size() == 5);
                 REQUIRE(mapnik::geometry::envelope(poly) == mapnik::box2d<double>(100,0,101,1));
 
-            }
-            {
-                // on-fly in-memory r-tree index + read features from disk
-                auto feature = detail::fetch_first_feature("./test/data/json/polygon.json", false);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Polygon);
-                auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geometry);
-                REQUIRE(poly.num_rings() == 2);
-                REQUIRE(poly.exterior_ring.size() == 5);
-                REQUIRE(poly.interior_rings.size() == 1);
-                REQUIRE(poly.interior_rings[0].size() == 5);
-                REQUIRE(mapnik::geometry::envelope(poly) == mapnik::box2d<double>(100,0,101,1));
             }
         }
 
         SECTION("GeoJSON MultiPoint")
         {
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/multipoint.json", true);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPoint);
-                auto const& multi_pt = mapnik::util::get<mapnik::geometry::multi_point<double> >(geometry);
-                REQUIRE(multi_pt.size() == 2);
-                REQUIRE(mapnik::geometry::envelope(multi_pt) == mapnik::box2d<double>(100,0,101,1));
-            }
-            {
-                // on-fly in-memory r-tree index + read features from disk
-                auto feature = detail::fetch_first_feature("./test/data/json/multipoint.json", false);
-                // test
+                auto feature = detail::fetch_first_feature("./test/data/json/multipoint.json", cache_features);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPoint);
                 auto const& multi_pt = mapnik::util::get<mapnik::geometry::multi_point<double> >(geometry);
@@ -185,10 +130,9 @@ TEST_CASE("geojson") {
 
         SECTION("GeoJSON MultiLineString")
         {
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/multilinestring.json", true);
-                // test
+                auto feature = detail::fetch_first_feature("./test/data/json/multilinestring.json", cache_features);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiLineString);
                 auto const& multi_line = mapnik::util::get<mapnik::geometry::multi_line_string<double> >(geometry);
@@ -197,26 +141,14 @@ TEST_CASE("geojson") {
                 REQUIRE(multi_line[1].size() == 2);
                 REQUIRE(mapnik::geometry::envelope(multi_line) == mapnik::box2d<double>(100,0,103,3));
 
-            }
-            {
-                // on-fly in-memory r-tree index + read features from disk
-                auto feature = detail::fetch_first_feature("./test/data/json/multilinestring.json", false);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiLineString);
-                auto const& multi_line = mapnik::util::get<mapnik::geometry::multi_line_string<double> >(geometry);
-                REQUIRE(multi_line.size() == 2);
-                REQUIRE(multi_line[0].size() == 2);
-                REQUIRE(multi_line[1].size() == 2);
-                REQUIRE(mapnik::geometry::envelope(multi_line) == mapnik::box2d<double>(100,0,103,3));
             }
         }
 
         SECTION("GeoJSON MultiPolygon")
         {
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/multipolygon.json", true);
+                auto feature = detail::fetch_first_feature("./test/data/json/multipolygon.json", cache_features);
                 // test
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPolygon);
@@ -226,38 +158,14 @@ TEST_CASE("geojson") {
                 REQUIRE(multi_poly[1].num_rings() == 2);
                 REQUIRE(mapnik::geometry::envelope(multi_poly) == mapnik::box2d<double>(100,0,103,3));
 
-            }
-            {
-                // on-fly in-memory r-tree index + read features from disk
-                auto feature = detail::fetch_first_feature("./test/data/json/multipolygon.json", false);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPolygon);
-                auto const& multi_poly = mapnik::util::get<mapnik::geometry::multi_polygon<double> >(geometry);
-                REQUIRE(multi_poly.size() == 2);
-                REQUIRE(multi_poly[0].num_rings() == 1);
-                REQUIRE(multi_poly[1].num_rings() == 2);
-                REQUIRE(mapnik::geometry::envelope(multi_poly) == mapnik::box2d<double>(100,0,103,3));
             }
         }
 
         SECTION("GeoJSON GeometryCollection")
         {
+            for (auto cache_features : {true, false})
             {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/geometrycollection.json", true);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::GeometryCollection);
-                auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double> >(geometry);
-                REQUIRE(collection.size() == 2);
-                REQUIRE(mapnik::geometry::geometry_type(collection[0]) == mapnik::geometry::Point);
-                REQUIRE(mapnik::geometry::geometry_type(collection[1]) == mapnik::geometry::LineString);
-                REQUIRE(mapnik::geometry::envelope(collection) == mapnik::box2d<double>(100,0,102,1));
-            }
-            {
-                // cache features in memory
-                auto feature = detail::fetch_first_feature("./test/data/json/geometrycollection.json", false);
+                auto feature = detail::fetch_first_feature("./test/data/json/geometrycollection.json", cache_features);
                 // test
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::GeometryCollection);
