@@ -110,8 +110,6 @@ public:
 
     inline mapnik::value_integer id() const { return id_;}
 
-    inline void set_id(mapnik::value_integer id) { id_ = id;}
-
     template <typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {
@@ -259,7 +257,7 @@ public:
     }
 
 private:
-    mapnik::value_integer id_;
+    const mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
     geometry::geometry<double> geom_;
