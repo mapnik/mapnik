@@ -209,7 +209,7 @@ TEST_CASE("geojson") {
             {
                 if (create_index)
                 {
-                    REQUIRE(detail::create_disk_index(filename, true) == 0);
+                    detail::create_disk_index(filename, true);
                     CHECK(mapnik::util::exists(filename + ".index"));
                 }
 
