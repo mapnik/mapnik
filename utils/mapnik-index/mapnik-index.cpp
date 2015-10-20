@@ -147,8 +147,7 @@ int main (int argc, char** argv)
 
     for (auto const& filename : files)
     {
-        std::clog << "processing " << filename << std::endl;
-        if (!mapnik::util::exists (filename))
+        if (!mapnik::util::exists(filename))
         {
             std::clog << "Error : file " << filename << " does not exist" << std::endl;
             continue;
@@ -158,12 +157,14 @@ int main (int argc, char** argv)
         mapnik::box2d<double> extent;
         if (mapnik::detail::is_csv(filename))
         {
+            std::clog << "processing '" << filename << "' as CSV\n";
             auto result = mapnik::detail::process_csv_file(boxes, filename, manual_headers, separator, quote);
             if (!result.first) continue;
             extent = result.second;
         }
         else if (mapnik::detail::is_geojson(filename))
         {
+            std::clog << "processing '" << filename << "' as GeoJSON\n";
             auto result = mapnik::detail::process_geojson_file(boxes, filename);
             if (!result.first) continue;
             extent = result.second;
