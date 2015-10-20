@@ -69,7 +69,8 @@ feature_ptr shape_featureset<filterT>::next()
     {
         int offset = shape_.shx().read_xdr_integer();
         int record_length = shape_.shx().read_xdr_integer();
-        shape_.move_to(2*offset);
+        shape_.move_to(2 * offset);
+        mapnik::value_integer feature_id = shape_.id();
         assert(record_length == shape_.reclength_);
         shape_file::record_type record(record_length * 2);
         shape_.shp().read_record(record);
@@ -78,7 +79,7 @@ feature_ptr shape_featureset<filterT>::next()
         // skip null shapes
         if (type == shape_io::shape_null) continue;
 
-        feature_ptr feature(feature_factory::create(ctx_, shape_.id_));
+        feature_ptr feature(feature_factory::create(ctx_, feature_id));
         switch (type)
         {
         case shape_io::shape_point:
@@ -133,8 +134,6 @@ feature_ptr shape_featureset<filterT>::next()
             return feature_ptr();
         }
 
-        // FIXME: https://github.com/mapnik/mapnik/issues/1020
-        feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);

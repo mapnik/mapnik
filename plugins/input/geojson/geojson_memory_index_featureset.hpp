@@ -42,7 +42,7 @@ public:
 
 private:
     file_ptr file_;
-
+    mapnik::value_integer feature_id_ = 1;
     const array_type index_array_;
     array_type::const_iterator index_itr_;
     array_type::const_iterator index_end_;

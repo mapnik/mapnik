@@ -75,6 +75,7 @@ public:
         return (index_ && index_->is_open());
     }
 
+    inline int id() const { return id_;}
     void move_to(std::streampos pos);
     static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
     static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
