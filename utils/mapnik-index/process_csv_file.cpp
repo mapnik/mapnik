@@ -23,7 +23,9 @@
 #include "process_csv_file.hpp"
 #include "../../plugins/input/csv/csv_utils.hpp"
 #include <mapnik/geometry_envelope.hpp>
+#include <mapnik/util/utf_conv_win.hpp>
 
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -31,15 +33,19 @@
 #include <boost/interprocess/streams/bufferstream.hpp>
 #pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
+
+#include <fstream>
 
 namespace mapnik { namespace detail {
 
 template <typename T>
 std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote)
 {
+    mapnik::box2d<double> extent;
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     file_source_type csv_file;
-    mapnik::box2d<double> extent;
     mapnik::mapped_region_ptr mapped_region;
     boost::optional<mapnik::mapped_region_ptr> memory =
         mapnik::mapped_memory_cache::instance().find(filename, true);
@@ -53,6 +59,18 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
         std::clog << "Error : cannot mmap " << filename << std::endl;
         return std::make_pair(false, extent);
     }
+#else
+ #if defined(_WINDOWS)
+    std::ifstream csv_file(mapnik::utf8_to_utf16(filename),std::ios_base::in | std::ios_base::binary);
+ #else
+    std::ifstream csv_file(filename.c_str(),std::ios_base::in | std::ios_base::binary);
+ #endif
+    if (!csv_file.is_open())
+    {
+        std::clog << "Error : cannot open " << filename << std::endl;
+        return std::make_pair(false, extent);
+    }
+#endif
     auto file_length = ::detail::file_length(csv_file);
     // set back to start
     csv_file.seekg(0, std::ios::beg);
