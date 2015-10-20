@@ -177,6 +177,30 @@ TEST_CASE("geojson") {
             }
         }
 
+        SECTION("GeoJSON Feature")
+        {
+            // Create datasource
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            params["file"] = "./test/data/json/feature.json";
+            for (auto cache_features : {true, false})
+            {
+                params["cache-features"] = cache_features;
+                auto ds = mapnik::datasource_cache::instance().create(params);
+                REQUIRE(bool(ds));
+                auto fields = ds->get_descriptor().get_descriptors();
+                mapnik::query query(ds->envelope());
+                for (auto const& field : fields)
+                {
+                    query.add_property_name(field.get_name());
+                }
+                auto features = ds->features(query);
+                REQUIRE(features != nullptr);
+                auto feature = features->next();
+                REQUIRE(feature != nullptr);
+            }
+        }
+
         SECTION("GeoJSON FeatureCollection")
         {
             std::string filename("./test/data/json/featurecollection.json");
@@ -227,99 +251,43 @@ TEST_CASE("geojson") {
             }
         }
 
-        SECTION("json feature cache-feature=\"true\"")
-        {
-            // Create datasource
-            mapnik::parameters params;
-            params["type"] = "geojson";
-            params["file"] = "./test/data/json/feature.json";
-            params["cache-features"] = true;
-            auto ds = mapnik::datasource_cache::instance().create(params);
-            REQUIRE(bool(ds));
-            auto fields = ds->get_descriptor().get_descriptors();
-            mapnik::query query(ds->envelope());
-            for (auto const& field : fields)
-            {
-                query.add_property_name(field.get_name());
-            }
-            auto features = ds->features(query);
-            REQUIRE(features != nullptr);
-            auto feature = features->next();
-            REQUIRE(feature != nullptr);
-        }
-
-        SECTION("json feature cache-feature=\"false\"")
-        {
-            mapnik::parameters params;
-            params["type"] = "geojson";
-            params["file"] = "./test/data/json/feature.json";
-            params["cache-features"] = false;
-            auto ds = mapnik::datasource_cache::instance().create(params);
-            REQUIRE(bool(ds));
-            auto fields = ds->get_descriptor().get_descriptors();
-            mapnik::query query(ds->envelope());
-            for (auto const& field : fields)
-            {
-                query.add_property_name(field.get_name());
-            }
-            auto features = ds->features(query);
-            REQUIRE(features != nullptr);
-            auto feature = features->next();
-            REQUIRE(feature != nullptr);
-        }
-
-        SECTION("json extra properties cache-feature=\"true\"")
+        SECTION("GeoJSON extra properties")
         {
             // Create datasource
             mapnik::parameters params;
             params["type"] = "geojson";
             params["file"] = "./test/data/json/feature_collection_extra_properties.json";
-            params["cache-features"] = true;
-            auto ds = mapnik::datasource_cache::instance().create(params);
-            REQUIRE(bool(ds));
-            auto fields = ds->get_descriptor().get_descriptors();
-            mapnik::query query(ds->envelope());
-            for (auto const& field : fields)
+            for (auto cache_features : {true, false})
             {
-                query.add_property_name(field.get_name());
+                params["cache-features"] = cache_features;
+                auto ds = mapnik::datasource_cache::instance().create(params);
+                REQUIRE(bool(ds));
+                auto fields = ds->get_descriptor().get_descriptors();
+                mapnik::query query(ds->envelope());
+                for (auto const& field : fields)
+                {
+                    query.add_property_name(field.get_name());
+                }
+                auto features = ds->features(query);
+                REQUIRE(features != nullptr);
+                auto feature = features->next();
+                REQUIRE(feature != nullptr);
+                REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
             }
-            auto features = ds->features(query);
-            REQUIRE(features != nullptr);
-            auto feature = features->next();
-            REQUIRE(feature != nullptr);
-            REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
         }
 
-        SECTION("json extra properties cache-feature=\"false\"")
-        {
-            // Create datasource
-            mapnik::parameters params;
-            params["type"] = "geojson";
-            params["file"] = "./test/data/json/feature_collection_extra_properties.json";
-            params["cache-features"] = false;
-            auto ds = mapnik::datasource_cache::instance().create(params);
-            REQUIRE(bool(ds));
-            auto fields = ds->get_descriptor().get_descriptors();
-            mapnik::query query(ds->envelope());
-            for (auto const& field : fields)
-            {
-                query.add_property_name(field.get_name());
-            }
-            auto features = ds->features(query);
-            REQUIRE(features != nullptr);
-            auto feature = features->next();
-            REQUIRE(feature != nullptr);
-            REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
-        }
-        SECTION("json - ensure input fully consumed and throw exception otherwise")
+        SECTION("GeoJSON ensure input fully consumed and throw exception otherwise")
         {
             mapnik::parameters params;
             params["type"] = "geojson";
             params["file"] = "./test/data/json/points-malformed.geojson"; // mismatched parentheses
-            params["cache-features"] = false;
-            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
-            params["cache-features"] = true;
-            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+            for (auto cache_features : {true, false})
+            {
+                params["cache-features"] = cache_features;
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+                params["cache-features"] = true;
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+            }
         }
     }
 }
