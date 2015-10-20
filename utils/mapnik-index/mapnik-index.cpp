@@ -133,19 +133,34 @@ int main (int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    std::clog << "max tree depth:" << depth << std::endl;
-    std::clog << "split ratio:" << ratio << std::endl;
+    std::vector<std::string> files_to_process;
 
-    if (files.size() == 0)
+    for (auto const& filename : files)
+    {
+        if (!mapnik::util::exists(filename))
+        {
+            continue;
+        }
+
+        if (mapnik::detail::is_csv(filename) || mapnik::detail::is_geojson(filename))
+        {
+            files_to_process.push_back(filename);
+        }
+    }
+
+    if (files_to_process.size() == 0)
     {
         std::clog << "no files to index" << std::endl;
         return EXIT_FAILURE;
     }
 
+    std::clog << "max tree depth:" << depth << std::endl;
+    std::clog << "split ratio:" << ratio << std::endl;
+
     using box_type = mapnik::box2d<double>;
     using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
 
-    for (auto const& filename : files)
+    for (auto const& filename : files_to_process)
     {
         if (!mapnik::util::exists(filename))
         {
