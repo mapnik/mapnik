@@ -56,6 +56,7 @@ private:
     using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
     file_ptr file_;
 #endif
+    std::size_t feature_id_ = 1;
     mapnik::context_ptr ctx_;
     std::vector<value_type> positions_;
     std::vector<value_type>::iterator itr_;
