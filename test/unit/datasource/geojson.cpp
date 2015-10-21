@@ -400,7 +400,7 @@ TEST_CASE("geojson") {
                     msg << "testcase: create index " << create_index << " cache-features " << cache_features;
                     params["cache-features"] = cache_features;
                     INFO(msg.str());
-                    CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
+                    if (!create_index) CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
                 }
 
                 // cleanup
