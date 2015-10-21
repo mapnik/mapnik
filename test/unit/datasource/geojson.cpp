@@ -52,7 +52,12 @@ mapnik::feature_ptr fetch_first_feature(std::string const& filename, bool cache_
 
 int create_disk_index(std::string const& filename, bool silent)
 {
-    std::string cmd = "mapnik-index " + filename;
+    std::string cmd;
+    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
+    {
+        cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
+    }
+    cmd += "mapnik-index " + filename;
     if (silent)
     {
 #ifndef _WINDOWS
