@@ -72,13 +72,14 @@ script:
      ./configure;
    fi
  - make
- - make test
+ - make test || TEST_RESULT=$?
  - if [[ ${COVERAGE} == true ]]; then
      ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
    fi
  - if [[ ${COVERAGE} != true ]]; then
      make bench;
    fi
+ - if [[ ${TEST_RESULT} != 0 ]]; then exit $TEST_RESULT ; fi;
  - if [[ ${MASON_PUBLISH} == true ]]; then
      ./mason_latest.sh build;
      ./mason_latest.sh link;
