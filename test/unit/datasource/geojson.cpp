@@ -31,10 +31,11 @@
 #include <cstdlib>
 
 #include <boost/filesystem/operations.hpp>
+#include <boost/optional/optional_io.hpp>
 
 namespace detail {
 
-mapnik::feature_ptr fetch_first_feature(std::string const& filename, bool cache_features)
+std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::string const& filename, bool cache_features)
 {
     mapnik::parameters params;
     params["type"] = "geojson";
@@ -49,7 +50,7 @@ mapnik::feature_ptr fetch_first_feature(std::string const& filename, bool cache_
     }
     auto features = ds->features(query);
     auto feature = features->next();
-    return feature;
+    return std::make_pair(ds,feature);
 }
 
 int create_disk_index(std::string const& filename, bool silent)
@@ -82,7 +83,10 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/point.json", cache_features);
+                auto result = detail::fetch_first_feature("./test/data/json/point.json", cache_features);
+                auto feature = result.second;
+                auto ds = result.first;
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Point);
                 auto const& pt = mapnik::util::get<mapnik::geometry::point<double> >(geometry);
@@ -95,7 +99,10 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/linestring.json", cache_features);
+                auto result = detail::fetch_first_feature("./test/data/json/linestring.json", cache_features);
+                auto feature = result.second;
+                auto ds = result.first;
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::LineString);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::LineString);
                 auto const& line = mapnik::util::get<mapnik::geometry::line_string<double> >(geometry);
@@ -109,7 +116,10 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/polygon.json", cache_features);
+                auto result = detail::fetch_first_feature("./test/data/json/polygon.json", cache_features);
+                auto feature = result.second;
+                auto ds = result.first;
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Polygon);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Polygon);
                 auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geometry);
@@ -126,7 +136,10 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/multipoint.json", cache_features);
+                auto result = detail::fetch_first_feature("./test/data/json/multipoint.json", cache_features);
+                auto feature = result.second;
+                auto ds = result.first;
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPoint);
                 auto const& multi_pt = mapnik::util::get<mapnik::geometry::multi_point<double> >(geometry);
@@ -139,7 +152,10 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/multilinestring.json", cache_features);
+                auto result = detail::fetch_first_feature("./test/data/json/multilinestring.json", cache_features);
+                auto feature = result.second;
+                auto ds = result.first;
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::LineString);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiLineString);
                 auto const& multi_line = mapnik::util::get<mapnik::geometry::multi_line_string<double> >(geometry);
@@ -155,7 +171,10 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/multipolygon.json", cache_features);
+                auto result = detail::fetch_first_feature("./test/data/json/multipolygon.json", cache_features);
+                auto feature = result.second;
+                auto ds = result.first;
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Polygon);
                 // test
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPolygon);
@@ -185,7 +204,10 @@ TEST_CASE("geojson") {
 
                 for (auto cache_features : {true, false})
                 {
-                    auto feature = detail::fetch_first_feature(filename, cache_features);
+                    auto result = detail::fetch_first_feature(filename, cache_features);
+                    auto feature = result.second;
+                    auto ds = result.first;
+                    CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Collection);
                     // test
                     auto const& geometry = feature->get_geometry();
                     REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::GeometryCollection);
