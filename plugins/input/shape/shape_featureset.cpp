@@ -71,7 +71,8 @@ feature_ptr shape_featureset<filterT>::next()
         return feature_ptr();
     }
 
-    while  (shape_.shx().pos() < 2 * shx_file_length_)
+    std::streampos position_limit =  2 * shx_file_length_ - 2 * sizeof(int);
+    while  (shape_.shx().is_good() && shape_.shx().pos() <= position_limit)
     {
         int offset = shape_.shx().read_xdr_integer();
         int record_length = shape_.shx().read_xdr_integer();

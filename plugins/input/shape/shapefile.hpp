@@ -259,6 +259,11 @@ public:
     {
         return file_.eof();
     }
+
+    inline bool is_good()
+    {
+        return file_.good();
+    }
 };
 
 #endif // SHAPEFILE_HPP
