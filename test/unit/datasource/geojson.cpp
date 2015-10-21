@@ -253,9 +253,21 @@ TEST_CASE("geojson") {
                         query.add_property_name(field.get_name());
                     }
                     auto features = ds->features(query);
+                    auto features2 = ds->features_at_point(ds->envelope().center(),0);
                     REQUIRE(features != nullptr);
+                    REQUIRE(features2 != nullptr);
                     auto feature = features->next();
+                    auto feature2 = features2->next();
                     REQUIRE(feature != nullptr);
+                    REQUIRE(feature2 != nullptr);
+                    CHECK(feature->id() == 1);
+                    CHECK(feature2->id() == 1);
+                    mapnik::value val = feature->get("name");
+                    CHECK(val.to_string() == "Dinagat Islands");
+                    mapnik::value val2 = feature2->get("name");
+                    CHECK(val2.to_string() == "Dinagat Islands");
+                    REQUIRE(features->next() == nullptr);
+                    REQUIRE(features2->next() == nullptr);
                 }
             }
         }
@@ -298,17 +310,20 @@ TEST_CASE("geojson") {
                         query.add_property_name(field.get_name());
                     }
                     auto features = ds->features(query);
+                    auto features2 = ds->features_at_point(ds->envelope().center(),10);
                     auto bounding_box = ds->envelope();
                     mapnik::box2d<double> bbox;
                     mapnik::value_integer count = 0;
                     while (true)
                     {
                         auto feature = features->next();
-                        if (!feature) break;
+                        auto feature2 = features2->next();
+                        if (!feature || !feature2) break;
                         if (!bbox.valid()) bbox = feature->envelope();
                         else bbox.expand_to_include(feature->envelope());
                         ++count;
                         REQUIRE(feature->id() == count);
+                        REQUIRE(feature2->id() == count);
                     }
                     REQUIRE(count == 3);
                     REQUIRE(bounding_box == bbox);
