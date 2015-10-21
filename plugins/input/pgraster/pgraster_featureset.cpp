@@ -107,7 +107,7 @@ feature_ptr pgraster_featureset::next()
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
-            feature->put<mapnik::value_integer>(name,val);
+            feature->put(name,val);
             ++pos;
         }
         else
@@ -161,19 +161,19 @@ feature_ptr pgraster_featureset::next()
 
                     case 23: //int4
                     {
-                        feature->put<mapnik::value_integer>(name, int4net(buf));
+                        feature->put(name, int4net(buf));
                         break;
                     }
 
                     case 21: //int2
                     {
-                        feature->put<mapnik::value_integer>(name, int2net(buf));
+                        feature->put(name, int2net(buf));
                         break;
                     }
 
                     case 20: //int8/BigInt
                     {
-                        feature->put<mapnik::value_integer>(name, int8net(buf));
+                        feature->put(name, int8net(buf));
                         break;
                     }
 

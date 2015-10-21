@@ -101,7 +101,7 @@ feature_ptr postgis_featureset::next()
             feature = feature_factory::create(ctx_, val);
             if (key_field_as_attribute_)
             {
-                feature->put<mapnik::value_integer>(name,val);
+                feature->put(name,val);
             }
             ++pos;
         }
@@ -152,19 +152,19 @@ feature_ptr postgis_featureset::next()
 
                     case 23: //int4
                     {
-                        feature->put<mapnik::value_integer>(name, int4net(buf));
+                        feature->put(name, int4net(buf));
                         break;
                     }
 
                     case 21: //int2
                     {
-                        feature->put<mapnik::value_integer>(name, int2net(buf));
+                        feature->put(name, int2net(buf));
                         break;
                     }
 
                     case 20: //int8/BigInt
                     {
-                        feature->put<mapnik::value_integer>(name, int8net(buf));
+                        feature->put(name, int8net(buf));
                         break;
                     }
 
@@ -188,14 +188,14 @@ feature_ptr postgis_featureset::next()
                     case 1043: //varchar
                     case 705:  //literal
                     {
-                        feature->put(name, tr_->transcode(buf));
+                        feature->put(name, std::move(tr_->transcode(buf)));
                         break;
                     }
 
                     case 1042: //bpchar
                     {
                         std::string str = mapnik::util::trim_copy(buf);
-                        feature->put(name, tr_->transcode(str.c_str()));
+                        feature->put(name, std::move(tr_->transcode(str.c_str())));
                         break;
                     }
 

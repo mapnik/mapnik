@@ -305,14 +305,14 @@ void render_group_symbolizer(group_symbolizer const& sym,
                     {
                         std::string col_idx_name = col_name;
                         boost::replace_all(col_idx_name, "%", col_idx_str);
-                        sub_feature->put(col_name, feature.get(col_idx_name));
+                        sub_feature->put(col_name, mapnik::value(feature.get(col_idx_name)));
                     }
                 }
             }
             else
             {
                 // non-indexed column
-                sub_feature->put(col_name, feature.get(col_name));
+                sub_feature->put(col_name, mapnik::value(feature.get(col_name)));
             }
         }
 

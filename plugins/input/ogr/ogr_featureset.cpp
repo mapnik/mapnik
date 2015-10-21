@@ -126,13 +126,13 @@ feature_ptr ogr_featureset::next()
             {
             case OFTInteger:
             {
-                feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger(i));
+                feature->put( fld_name, poFeature->GetFieldAsInteger(i));
                 break;
             }
 #if GDAL_VERSION_MAJOR >= 2
             case OFTInteger64:
             {
-                feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger64(i));
+                feature->put( fld_name, poFeature->GetFieldAsInteger64(i));
                 break;
             }
 #endif
