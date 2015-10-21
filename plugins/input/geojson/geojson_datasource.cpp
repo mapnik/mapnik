@@ -327,7 +327,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
                 Iterator itr2 = start + geometry_index.first;
                 Iterator end2 = itr2 + geometry_index.second;
                 mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-                mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+                mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,-1)); // temp feature
                 if (!boost::spirit::qi::phrase_parse(itr2, end2,
                                                      (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space)
                     || itr2 != end2)
@@ -464,7 +464,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             auto const* start = record.data();
             auto const*  end = start + record.size();
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp feature
             using namespace boost::spirit;
             standard::space_type space;
             if (!boost::spirit::qi::phrase_parse(start, end,
@@ -531,7 +531,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
 
             using namespace boost::spirit;
             standard::space_type space;
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp feature
             if (!qi::phrase_parse(start2, end2, (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space))
             {
                 throw std::runtime_error("Failed to parse geojson feature");
