@@ -42,6 +42,7 @@ std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::s
     params["file"] = filename;
     params["cache-features"] = cache_features;
     auto ds = mapnik::datasource_cache::instance().create(params);
+    CHECK(ds->type() == mapnik::datasource::datasource_t::Vector);
     auto fields = ds->get_descriptor().get_descriptors();
     mapnik::query query(ds->envelope());
     for (auto const& field : fields)
@@ -244,6 +245,7 @@ TEST_CASE("geojson") {
                     params["cache-features"] = cache_features;
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     REQUIRE(bool(ds));
+                    CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                     auto fields = ds->get_descriptor().get_descriptors();
                     mapnik::query query(ds->envelope());
                     for (auto const& field : fields)
@@ -288,6 +290,7 @@ TEST_CASE("geojson") {
                     params["cache_features"] = cache_features;
 
                     auto ds = mapnik::datasource_cache::instance().create(params);
+                    CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Collection);
                     auto fields = ds->get_descriptor().get_descriptors();
                     mapnik::query query(ds->envelope());
                     for (auto const& field : fields)
@@ -346,6 +349,7 @@ TEST_CASE("geojson") {
                 {
                     params["cache-features"] = cache_features;
                     auto ds = mapnik::datasource_cache::instance().create(params);
+                    CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                     REQUIRE(bool(ds));
                     auto fields = ds->get_descriptor().get_descriptors();
                     mapnik::query query(ds->envelope());
