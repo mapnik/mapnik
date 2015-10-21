@@ -431,7 +431,7 @@ void csv_datasource::parse_csv(T & stream)
                 std::ostringstream s;
                 s << "CSV Plugin: expected geometry column: could not parse row "
                   << line_number << " "
-                  << values[locator_.index] << "'";
+                  << values.at(locator_.index) << "'";
                 throw mapnik::datasource_exception(s.str());
             }
         }

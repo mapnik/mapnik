@@ -250,36 +250,38 @@ static inline void locate_geometry_column(std::string const& header, std::size_t
 static inline mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
+    auto idx1 = row.at(locator.index);
     if (locator.type == geometry_column_locator::WKT)
     {
-        if (mapnik::from_wkt(row[locator.index], geom))
+        if (mapnik::from_wkt(idx1, geom))
         {
             // correct orientations ..
             mapnik::geometry::correct(geom);
         }
         else
         {
-            throw std::runtime_error("Failed to parse WKT:" + row[locator.index]);
+            throw std::runtime_error("Failed to parse WKT:" + idx1);
         }
     }
     else if (locator.type == geometry_column_locator::GEOJSON)
     {
 
-        if (!mapnik::json::from_geojson(row[locator.index], geom))
+        if (!mapnik::json::from_geojson(idx1, geom))
         {
-            throw std::runtime_error("Failed to parse GeoJSON:" + row[locator.index]);
+            throw std::runtime_error("Failed to parse GeoJSON:" + idx1);
         }
     }
     else if (locator.type == geometry_column_locator::LON_LAT)
     {
         double x, y;
-        if (!mapnik::util::string2double(row[locator.index],x))
+        auto idx2 = row.at(locator.index2);
+        if (!mapnik::util::string2double(idx1,x))
         {
-            throw std::runtime_error("Failed to parse Longitude(Easting):" + row[locator.index]);
+            throw std::runtime_error("Failed to parse Longitude(Easting):" + idx1);
         }
-        if (!mapnik::util::string2double(row[locator.index2],y))
+        if (!mapnik::util::string2double(idx2,y))
         {
-            throw std::runtime_error("Failed to parse Latitude(Northing):" + row[locator.index2]);
+            throw std::runtime_error("Failed to parse Latitude(Northing):" + idx2);
         }
         geom = mapnik::geometry::point<double>(x,y);
     }
