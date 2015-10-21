@@ -303,7 +303,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
                                                                     shape_name_,
                                                                     names,
                                                                     desc_.get_encoding(),
-                                                                    file_length_,
+                                                                    shx_file_length_,
                                                                     row_limit_);
     }
 }
