@@ -50,7 +50,6 @@ public:
                      std::string const& shape_file,
                      std::set<std::string> const& attribute_names,
                      std::string const& encoding,
-                     long shx_file_length,
                      int row_limit);
     virtual ~shape_featureset();
     feature_ptr next();

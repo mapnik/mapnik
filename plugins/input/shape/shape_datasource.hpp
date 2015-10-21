@@ -69,7 +69,6 @@ private:
     std::string shape_name_;
     shape_io::shapeType shape_type_;
     long file_length_;
-    long shx_file_length_;
     box2d<double> extent_;
     bool indexed_;
     const int row_limit_;

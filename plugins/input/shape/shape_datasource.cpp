@@ -64,7 +64,6 @@ shape_datasource::shape_datasource(parameters const& params)
     : datasource (params),
       type_(datasource::Vector),
       file_length_(0),
-      shx_file_length_(0),
       indexed_(false),
       row_limit_(*params.get<mapnik::value_integer>("row_limit",0)),
       desc_(shape_datasource::name(), *params.get<std::string>("encoding","utf-8"))
@@ -199,14 +198,6 @@ void shape_datasource::init(shape_io& shape)
     const double hiy = header.read_double();
     extent_.init(lox, loy, hix, hiy);
 
-    if (shape.shx().is_open())
-    {
-        shape_file::record_type shx_header(100);
-        shape.shx().read_record(shx_header);
-        shx_header.skip(6 * 4);
-        shx_file_length_ = shx_header.read_xdr_integer();
-    }
-
 #ifdef MAPNIK_LOG
     const double zmin = header.read_double();
     const double zmax = header.read_double();
@@ -265,7 +256,6 @@ featureset_ptr shape_datasource::features(query const& q) const
                                                                   shape_name_,
                                                                   q.property_names(),
                                                                   desc_.get_encoding(),
-                                                                  shx_file_length_,
                                                                   row_limit_);
     }
 }
@@ -303,7 +293,6 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
                                                                     shape_name_,
                                                                     names,
                                                                     desc_.get_encoding(),
-                                                                    shx_file_length_,
                                                                     row_limit_);
     }
 }
