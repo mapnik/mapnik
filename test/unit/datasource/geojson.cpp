@@ -30,6 +30,8 @@
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
 
+#include <boost/filesystem/operations.hpp>
+
 namespace detail {
 
 mapnik::feature_ptr fetch_first_feature(std::string const& filename, bool cache_features)
@@ -168,17 +170,31 @@ TEST_CASE("geojson") {
 
         SECTION("GeoJSON GeometryCollection")
         {
-            for (auto cache_features : {true, false})
+            std::string filename("./test/data/json/geometrycollection.json");
+            for (auto create_index : { true, false })
             {
-                auto feature = detail::fetch_first_feature("./test/data/json/geometrycollection.json", cache_features);
-                // test
-                auto const& geometry = feature->get_geometry();
-                REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::GeometryCollection);
-                auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double> >(geometry);
-                REQUIRE(collection.size() == 2);
-                REQUIRE(mapnik::geometry::geometry_type(collection[0]) == mapnik::geometry::Point);
-                REQUIRE(mapnik::geometry::geometry_type(collection[1]) == mapnik::geometry::LineString);
-                REQUIRE(mapnik::geometry::envelope(collection) == mapnik::box2d<double>(100,0,102,1));
+                if (create_index)
+                {
+                    int ret = detail::create_disk_index(filename, true);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    // index will not exist because this is not a featurecollection
+                    CHECK(!mapnik::util::exists(filename + ".index"));
+                }
+
+                for (auto cache_features : {true, false})
+                {
+                    auto feature = detail::fetch_first_feature(filename, cache_features);
+                    // test
+                    auto const& geometry = feature->get_geometry();
+                    REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::GeometryCollection);
+                    auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double> >(geometry);
+                    REQUIRE(collection.size() == 2);
+                    REQUIRE(mapnik::geometry::geometry_type(collection[0]) == mapnik::geometry::Point);
+                    REQUIRE(mapnik::geometry::geometry_type(collection[1]) == mapnik::geometry::LineString);
+                    REQUIRE(mapnik::geometry::envelope(collection) == mapnik::box2d<double>(100,0,102,1));
+                }
             }
         }
 
@@ -187,28 +203,48 @@ TEST_CASE("geojson") {
             // Create datasource
             mapnik::parameters params;
             params["type"] = "geojson";
-            params["file"] = "./test/data/json/feature.json";
-            for (auto cache_features : {true, false})
+            std::string filename("./test/data/json/feature.json");
+            params["file"] = filename;
+            for (auto create_index : { true, false })
             {
-                params["cache-features"] = cache_features;
-                auto ds = mapnik::datasource_cache::instance().create(params);
-                REQUIRE(bool(ds));
-                auto fields = ds->get_descriptor().get_descriptors();
-                mapnik::query query(ds->envelope());
-                for (auto const& field : fields)
+                if (create_index)
                 {
-                    query.add_property_name(field.get_name());
+                    int ret = detail::create_disk_index(filename, true);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    // index will not exist because this is not a featurecollection
+                    CHECK(!mapnik::util::exists(filename + ".index"));
                 }
-                auto features = ds->features(query);
-                REQUIRE(features != nullptr);
-                auto feature = features->next();
-                REQUIRE(feature != nullptr);
+
+                for (auto cache_features : {true, false})
+                {
+                    params["cache-features"] = cache_features;
+                    auto ds = mapnik::datasource_cache::instance().create(params);
+                    REQUIRE(bool(ds));
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    mapnik::query query(ds->envelope());
+                    for (auto const& field : fields)
+                    {
+                        query.add_property_name(field.get_name());
+                    }
+                    auto features = ds->features(query);
+                    REQUIRE(features != nullptr);
+                    auto feature = features->next();
+                    REQUIRE(feature != nullptr);
+                }
             }
         }
 
         SECTION("GeoJSON FeatureCollection")
         {
             std::string filename("./test/data/json/featurecollection.json");
+
+            // cleanup in the case of a failed previous run
+            if (mapnik::util::exists(filename + ".index"))
+            {
+                boost::filesystem::remove(filename + ".index");
+            }
 
             for (auto create_index : { true, false })
             {
@@ -264,23 +300,50 @@ TEST_CASE("geojson") {
             // Create datasource
             mapnik::parameters params;
             params["type"] = "geojson";
-            params["file"] = "./test/data/json/feature_collection_extra_properties.json";
-            for (auto cache_features : {true, false})
+            std::string filename("./test/data/json/feature_collection_extra_properties.json");
+            params["file"] = filename;
+
+            // cleanup in the case of a failed previous run
+            if (mapnik::util::exists(filename + ".index"))
             {
-                params["cache-features"] = cache_features;
-                auto ds = mapnik::datasource_cache::instance().create(params);
-                REQUIRE(bool(ds));
-                auto fields = ds->get_descriptor().get_descriptors();
-                mapnik::query query(ds->envelope());
-                for (auto const& field : fields)
+                boost::filesystem::remove(filename + ".index");
+            }
+
+            for (auto create_index : { true, false })
+            {
+                if (create_index)
                 {
-                    query.add_property_name(field.get_name());
+                    int ret = detail::create_disk_index(filename, true);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
                 }
-                auto features = ds->features(query);
-                REQUIRE(features != nullptr);
-                auto feature = features->next();
-                REQUIRE(feature != nullptr);
-                REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
+
+                for (auto cache_features : {true, false})
+                {
+                    params["cache-features"] = cache_features;
+                    auto ds = mapnik::datasource_cache::instance().create(params);
+                    REQUIRE(bool(ds));
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    mapnik::query query(ds->envelope());
+                    for (auto const& field : fields)
+                    {
+                        query.add_property_name(field.get_name());
+                    }
+                    auto features = ds->features(query);
+                    REQUIRE(features != nullptr);
+                    auto feature = features->next();
+                    REQUIRE(feature != nullptr);
+                    REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
+                }
+
+                // cleanup
+                if (create_index && mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+
             }
         }
 
@@ -288,13 +351,41 @@ TEST_CASE("geojson") {
         {
             mapnik::parameters params;
             params["type"] = "geojson";
-            params["file"] = "./test/data/json/points-malformed.geojson"; // mismatched parentheses
-            for (auto cache_features : {true, false})
+            std::string filename("./test/data/json/points-malformed.geojson");
+            params["file"] = filename; // mismatched parentheses
+
+            // cleanup in the case of a failed previous run
+            if (mapnik::util::exists(filename + ".index"))
             {
-                params["cache-features"] = cache_features;
-                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
-                params["cache-features"] = true;
-                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+                boost::filesystem::remove(filename + ".index");
+            }
+
+            for (auto create_index : { true, false })
+            {
+                if (create_index)
+                {
+                    CHECK(!mapnik::util::exists(filename + ".index"));
+                    int ret = detail::create_disk_index(filename, true);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+
+                for (auto cache_features : {true, false})
+                {
+                    std::stringstream msg;
+                    msg << "testcase: create index " << create_index << " cache-features " << cache_features;
+                    params["cache-features"] = cache_features;
+                    INFO(msg.str());
+                    CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
+                }
+
+                // cleanup
+                if (create_index && mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
             }
         }
     }
