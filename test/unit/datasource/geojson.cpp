@@ -242,7 +242,7 @@ TEST_CASE("geojson") {
 
                 for (auto cache_features : {true, false})
                 {
-                    params["cache-features"] = cache_features;
+                    params["cache_features"] = cache_features;
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     REQUIRE(bool(ds));
                     CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
@@ -362,7 +362,7 @@ TEST_CASE("geojson") {
 
                 for (auto cache_features : {true, false})
                 {
-                    params["cache-features"] = cache_features;
+                    params["cache_features"] = cache_features;
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                     REQUIRE(bool(ds));
@@ -416,7 +416,7 @@ TEST_CASE("geojson") {
                 for (auto cache_features : {true, false})
                 {
                     std::stringstream msg;
-                    msg << "testcase: create index " << create_index << " cache-features " << cache_features;
+                    msg << "testcase: create index " << create_index << " cache_features " << cache_features;
                     params["cache-features"] = cache_features;
                     INFO(msg.str());
                     if (!create_index) CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
