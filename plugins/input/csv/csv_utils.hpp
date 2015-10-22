@@ -259,38 +259,40 @@ static inline bool valid(geometry_column_locator const& locator, std::size_t max
 static inline mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
-    auto idx1 = row.at(locator.index);
     if (locator.type == geometry_column_locator::WKT)
     {
-        if (mapnik::from_wkt(idx1, geom))
+        auto wkt_value = row.at(locator.index);
+        if (mapnik::from_wkt(wkt_value, geom))
         {
             // correct orientations ..
             mapnik::geometry::correct(geom);
         }
         else
         {
-            throw mapnik::datasource_exception("Failed to parse WKT:" + idx1);
+            throw mapnik::datasource_exception("Failed to parse WKT: '" + wkt_value + "'");
         }
     }
     else if (locator.type == geometry_column_locator::GEOJSON)
     {
 
-        if (!mapnik::json::from_geojson(idx1, geom))
+        auto json_value = row.at(locator.index);
+        if (!mapnik::json::from_geojson(json_value, geom))
         {
-            throw mapnik::datasource_exception("Failed to parse GeoJSON:" + idx1);
+            throw mapnik::datasource_exception("Failed to parse GeoJSON: '" + json_value + "'");
         }
     }
     else if (locator.type == geometry_column_locator::LON_LAT)
     {
         double x, y;
-        auto idx2 = row.at(locator.index2);
-        if (!mapnik::util::string2double(idx1,x))
+        auto long_value = row.at(locator.index);
+        auto lat_value = row.at(locator.index2);
+        if (!mapnik::util::string2double(long_value,x))
         {
-            throw mapnik::datasource_exception("Failed to parse Longitude(Easting):" + idx1);
+            throw mapnik::datasource_exception("Failed to parse Longitude: '" + long_value + "'");
         }
-        if (!mapnik::util::string2double(idx2,y))
+        if (!mapnik::util::string2double(lat_value,y))
         {
-            throw mapnik::datasource_exception("Failed to parse Latitude(Northing):" + idx2);
+            throw mapnik::datasource_exception("Failed to parse Latitude: '" + lat_value + "'");
         }
         geom = mapnik::geometry::point<double>(x,y);
     }
