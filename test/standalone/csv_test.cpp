@@ -531,6 +531,47 @@ TEST_CASE("csv") {
             }
         } // END SECTION
 
+        SECTION("creation of CSV from in-memory strings with bogus headers")
+        {
+            std::string csv =
+                "latitude, longtitude, Name\n" // misspellt (!)
+                "120.15,48.47,Winhrop"
+                ;
+
+            mapnik::parameters params;
+            params["type"] = std::string("csv");
+
+            // should throw
+            params["inline"] = "latitude, longtitude, Name\n" // misspellt (!)
+                "120.15,48.47,Winhrop";
+            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+
+            // should throw
+            params["strict"] = true;
+            params["inline"] = "latitude, longitude\n" // -- missing header
+                "120.15,48.47,Winhrop";
+            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+
+            // should not throw
+            params["strict"] = false;
+            params["inline"] = "latitude, longitude,Name\n"
+                "0,0,Unknown, extra bogus field\n"
+                "120.15,48.47,Winhrop\n";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(bool(ds));
+            REQUIRE(ds->envelope() == mapnik::box2d<double>(48.47,120.15,48.47,120.15));
+            auto feature = all_features(ds)->next();
+            REQUIRE(bool(feature));
+            REQUIRE(feature->has_key("Name"));
+
+            // should throw
+            params["strict"] = false;
+            params["inline"] = "x, Name\n" // -- missing required *geometry* header
+                "120.15,Winhrop";
+            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+
+        } // END SECTION
+
         SECTION("geojson quoting") {
             using mapnik::geometry::geometry_types;
 
