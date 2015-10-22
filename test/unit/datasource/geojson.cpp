@@ -226,8 +226,11 @@ TEST_CASE("geojson") {
             // Create datasource
             mapnik::parameters params;
             params["type"] = "geojson";
-            std::string filename("./test/data/json/feature.json");
-            params["file"] = filename;
+            std::string base("./test/data/json/");
+            std::string file("feature.json");
+            params["base"] = base;
+            params["file"] = file;
+            std::string filename = base + file;
             for (auto create_index : { true, false })
             {
                 if (create_index)
