@@ -415,11 +415,14 @@ TEST_CASE("geojson") {
 
                 for (auto cache_features : {true, false})
                 {
-                    std::stringstream msg;
-                    msg << "testcase: create index " << create_index << " cache_features " << cache_features;
-                    params["cache-features"] = cache_features;
-                    INFO(msg.str());
-                    if (!create_index) CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
+                    if (!create_index)
+                    {
+                        std::stringstream msg;
+                        msg << "testcase: create index " << create_index << " cache_features " << cache_features;
+                        params["cache_features"] = cache_features;
+                        INFO(msg.str());
+                        CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
+                    }
                 }
 
                 // cleanup
