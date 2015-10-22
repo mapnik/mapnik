@@ -86,7 +86,7 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
     csv_utils::getline_csv(csv_file, csv_line, newline, quote);
     if (separator == 0) separator = ::detail::detect_separator(csv_line);
     csv_file.seekg(0, std::ios::beg);
-    int line_number = 1;
+    int line_number = 0;
     ::detail::geometry_column_locator locator;
     std::vector<std::string> headers;
     std::clog << "Parsing CSV using SEPARATOR=" << separator << " QUOTE=" << quote << std::endl;
@@ -141,14 +141,17 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
         }
     }
 
-    if (locator.type == ::detail::geometry_column_locator::UNKNOWN)
+    std::size_t num_headers = headers.size();
+    if (!::detail::valid(locator, num_headers))
     {
-        std::clog << "CSV index: could not detect column headers with the name of wkt, geojson, x/y, or "
-                  << "latitude/longitude - this is required for reading geometry data" << std::endl;
+        std::clog << "CSV index: could not detect column(s) with the name(s) of wkt, geojson, x/y, or "
+                  << "latitude/longitude in:\n"
+                  << csv_line
+                  << "\n - this is required for reading geometry data"
+                  << std::endl;
         return std::make_pair(false, extent);
     }
 
-    std::size_t num_headers = headers.size();
     auto pos = csv_file.tellg();
 
     // handle rare case of a single line of data and user-provided headers
@@ -163,36 +166,37 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
             is_first_row = true;
         }
     }
-
     while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, newline, quote))
     {
         auto record_offset = pos;
         auto record_size = csv_line.length();
         pos = csv_file.tellg();
         is_first_row = false;
-        // skip blank lines
-        if (record_size <= 10)
-        {
-            std::string trimmed = csv_line;
-            boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
-            if (trimmed.empty())
-            {
-                std::clog << "CSV index: empty row encountered at line: " << line_number << std::endl;
-                continue;
-            }
-        }
+        ++line_number;
         try
         {
+            // skip blank lines
+            if (record_size <= 10)
+            {
+                std::string trimmed = csv_line;
+                boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
+                if (trimmed.empty())
+                {
+                    std::clog << "CSV index: empty row encountered at line: " << line_number << std::endl;
+                    continue;
+                }
+            }
             auto values = csv_utils::parse_line(csv_line, separator, quote);
             unsigned num_fields = values.size();
             if (num_fields > num_headers || num_fields < num_headers)
             {
+                // skip this row
                 std::ostringstream s;
                 s << "CSV Index: # of columns("
                   << num_fields << ") > # of headers("
                   << num_headers << ") parsed for row " << line_number << "\n";
                 std::clog << s.str() << std::endl;
-                return std::make_pair(false, extent);
+                continue;
             }
 
             auto geom = ::detail::extract_geometry(values, locator);
@@ -209,7 +213,7 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
                 s << "CSV Index: expected geometry column: could not parse row "
                   << line_number << " "
                   << values[locator.index] << "'";
-                std::clog << s.str() << std::endl;;
+                std::clog << s.str() << std::endl;
             }
         }
         catch (std::exception const& ex)
@@ -219,7 +223,6 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
               << " - found " << headers.size() << " with values like: " << csv_line << "\n"
               << " and got error like: " << ex.what();
             std::clog << s.str() << std::endl;
-            return std::make_pair(false, extent);
         }
     }
     return std::make_pair(true, extent);;

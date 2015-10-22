@@ -195,7 +195,7 @@ void csv_datasource::parse_csv(T & stream)
                           << "' quote: '" << quote_ << "'";
     stream.seekg(0, std::ios::beg);
 
-    int line_number = 1;
+    int line_number = 0;
     if (!manual_headers_.empty())
     {
         std::size_t index = 0;
@@ -261,16 +261,19 @@ void csv_datasource::parse_csv(T & stream)
         }
     }
 
-    if (locator_.type == detail::geometry_column_locator::UNKNOWN)
+    std::size_t num_headers = headers_.size();
+    if (!detail::valid(locator_, num_headers))
     {
-        throw mapnik::datasource_exception("CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or "
-                                           "latitude/longitude - this is required for reading geometry data");
+        std::string str("CSV Plugin: could not detect column(s) with the name(s) of wkt, geojson, x/y, or ");
+        str += "latitude/longitude in:\n";
+        str += csv_line;
+        str += "\n - this is required for reading geometry data";
+        throw mapnik::datasource_exception(str);
     }
 
     mapnik::value_integer feature_count = 0;
     bool extent_started = false;
 
-    std::size_t num_headers = headers_.size();
     std::for_each(headers_.begin(), headers_.end(),
                   [ & ](std::string const& header){ ctx_->push(header); });
 
@@ -294,8 +297,8 @@ void csv_datasource::parse_csv(T & stream)
     std::vector<item_type> boxes;
     while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
-
-        if ((row_limit_ > 0) && (line_number++ > row_limit_))
+        ++line_number;
+        if ((row_limit_ > 0) && (line_number > row_limit_))
         {
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
             break;
