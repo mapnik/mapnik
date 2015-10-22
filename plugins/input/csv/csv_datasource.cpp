@@ -443,7 +443,7 @@ void csv_datasource::parse_csv(T & stream)
             if (strict_) throw ex;
             else
             {
-                MAPNIK_LOG_ERROR(csv) << ex.what();
+                MAPNIK_LOG_ERROR(csv) << ex.what() << " at line: " << line_number;
             }
         }
         catch (std::exception const& ex)
