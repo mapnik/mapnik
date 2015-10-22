@@ -230,7 +230,7 @@ void csv_datasource::parse_csv(T & stream)
                                 s << "CSV Plugin: expected a column header at line ";
                                 s << line_number << ", column " << index;
                                 s << " - ensure this row contains valid header fields: '";
-                                s << csv_line << "'\n";
+                                s << csv_line;
                                 throw mapnik::datasource_exception(s.str());
                             }
                             else
@@ -329,7 +329,7 @@ void csv_datasource::parse_csv(T & stream)
                 std::ostringstream s;
                 s << "CSV Plugin: # of columns("
                   << num_fields << ") > # of headers("
-                  << num_headers << ") parsed for row " << line_number << "\n";
+                  << num_headers << ") parsed for row " << line_number;
                 throw mapnik::datasource_exception(s.str());
             }
 
