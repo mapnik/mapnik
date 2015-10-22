@@ -418,7 +418,12 @@ TEST_CASE("geojson") {
 
                 for (auto cache_features : {true, false})
                 {
-                    if (!create_index)
+                    // unfortunately when using an index or not
+                    // caching features we use the bbox grammar
+                    // which is not strict (and would be a perf hit if it were strict).
+                    // So this is one known hole where invalid data may silently parse okay
+                    // refs https://github.com/mapnik/mapnik/issues/3125
+                    if (!create_index && cache_features == true)
                     {
                         std::stringstream msg;
                         msg << "testcase: create index " << create_index << " cache_features " << cache_features;
