@@ -40,7 +40,7 @@ std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::s
     mapnik::parameters params;
     params["type"] = "geojson";
     params["file"] = filename;
-    params["cache-features"] = cache_features;
+    params["cache_features"] = cache_features;
     auto ds = mapnik::datasource_cache::instance().create(params);
     CHECK(ds->type() == mapnik::datasource::datasource_t::Vector);
     auto fields = ds->get_descriptor().get_descriptors();
