@@ -533,11 +533,6 @@ TEST_CASE("csv") {
 
         SECTION("creation of CSV from in-memory strings with bogus headers")
         {
-            std::string csv =
-                "latitude, longtitude, Name\n" // misspellt (!)
-                "120.15,48.47,Winhrop"
-                ;
-
             mapnik::parameters params;
             params["type"] = std::string("csv");
 
