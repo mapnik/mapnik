@@ -223,6 +223,27 @@ TEST_CASE("csv") {
         const bool have_csv_plugin =
             std::find(plugin_names.begin(), plugin_names.end(), "csv") != plugin_names.end();
 
+        SECTION("CSV I/O errors")
+        {
+            std::string filename = "does_not_exist.csv";
+            for (auto create_index : { true, false })
+            {
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    // index wont be created
+                    CHECK(!mapnik::util::exists(filename + ".index"));
+                }
+                mapnik::parameters params;
+                params["type"] = "csv";
+                params["file"] = filename;
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+            }
+        }
+
         SECTION("broken files")
         {
             for (auto create_index : { false, true })

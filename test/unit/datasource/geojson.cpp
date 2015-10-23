@@ -80,6 +80,31 @@ TEST_CASE("geojson") {
     std::string geojson_plugin("./plugins/input/geojson.input");
     if (mapnik::util::exists(geojson_plugin))
     {
+        SECTION("GeoJSON I/O errors")
+        {
+            std::string filename = "does_not_exist.geojson";
+            for (auto create_index : { true, false })
+            {
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    // index wont be created
+                    CHECK(!mapnik::util::exists(filename + ".index"));
+                }
+
+                for (auto cache_features : {true, false})
+                {
+                    mapnik::parameters params;
+                    params["type"] = "geojson";
+                    params["file"] = filename;
+                    params["cache_features"] = cache_features;
+                    REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+                }
+            }
+        }
         SECTION("GeoJSON Point")
         {
             for (auto cache_features : {true, false})
