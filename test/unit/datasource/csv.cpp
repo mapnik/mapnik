@@ -257,10 +257,10 @@ TEST_CASE("csv") {
                         else
                         {
                             CHECK(bool(get_csv_ds(path.native())));
-                            if (mapnik::util::exists(path.native() + ".index"))
-                            {
-                                CHECK(mapnik::util::remove(path.native() + ".index"));
-                            }
+                        }
+                        if (mapnik::util::exists(path.native() + ".index"))
+                        {
+                            CHECK(mapnik::util::remove(path.native() + ".index"));
                         }
                     }
                 }
