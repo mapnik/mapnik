@@ -33,7 +33,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/optional/optional_io.hpp>
 
-namespace detail {
+namespace {
 
 std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::string const& filename, bool cache_features)
 {
@@ -54,7 +54,7 @@ std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::s
     return std::make_pair(ds,feature);
 }
 
-int create_disk_index(std::string const& filename, bool silent)
+int create_disk_index(std::string const& filename, bool silent = true)
 {
     std::string cmd;
     if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
@@ -67,7 +67,7 @@ int create_disk_index(std::string const& filename, bool silent)
 #ifndef _WINDOWS
         cmd += " 2>/dev/null";
 #else
-        cmd += "2> nul";
+        cmd += " 2> nul";
 #endif
     }
     return std::system(cmd.c_str());
@@ -84,7 +84,7 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto result = detail::fetch_first_feature("./test/data/json/point.json", cache_features);
+                auto result = fetch_first_feature("./test/data/json/point.json", cache_features);
                 auto feature = result.second;
                 auto ds = result.first;
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
@@ -100,7 +100,7 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto result = detail::fetch_first_feature("./test/data/json/linestring.json", cache_features);
+                auto result = fetch_first_feature("./test/data/json/linestring.json", cache_features);
                 auto feature = result.second;
                 auto ds = result.first;
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::LineString);
@@ -117,7 +117,7 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto result = detail::fetch_first_feature("./test/data/json/polygon.json", cache_features);
+                auto result = fetch_first_feature("./test/data/json/polygon.json", cache_features);
                 auto feature = result.second;
                 auto ds = result.first;
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Polygon);
@@ -137,7 +137,7 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto result = detail::fetch_first_feature("./test/data/json/multipoint.json", cache_features);
+                auto result = fetch_first_feature("./test/data/json/multipoint.json", cache_features);
                 auto feature = result.second;
                 auto ds = result.first;
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
@@ -153,7 +153,7 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto result = detail::fetch_first_feature("./test/data/json/multilinestring.json", cache_features);
+                auto result = fetch_first_feature("./test/data/json/multilinestring.json", cache_features);
                 auto feature = result.second;
                 auto ds = result.first;
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::LineString);
@@ -172,7 +172,7 @@ TEST_CASE("geojson") {
         {
             for (auto cache_features : {true, false})
             {
-                auto result = detail::fetch_first_feature("./test/data/json/multipolygon.json", cache_features);
+                auto result = fetch_first_feature("./test/data/json/multipolygon.json", cache_features);
                 auto feature = result.second;
                 auto ds = result.first;
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Polygon);
@@ -195,7 +195,7 @@ TEST_CASE("geojson") {
             {
                 if (create_index)
                 {
-                    int ret = detail::create_disk_index(filename, true);
+                    int ret = create_disk_index(filename);
                     int ret_posix = (ret >> 8) & 0x000000ff;
                     INFO(ret);
                     INFO(ret_posix);
@@ -205,7 +205,7 @@ TEST_CASE("geojson") {
 
                 for (auto cache_features : {true, false})
                 {
-                    auto result = detail::fetch_first_feature(filename, cache_features);
+                    auto result = fetch_first_feature(filename, cache_features);
                     auto feature = result.second;
                     auto ds = result.first;
                     CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Collection);
@@ -235,7 +235,7 @@ TEST_CASE("geojson") {
             {
                 if (create_index)
                 {
-                    int ret = detail::create_disk_index(filename, true);
+                    int ret = create_disk_index(filename);
                     int ret_posix = (ret >> 8) & 0x000000ff;
                     INFO(ret);
                     INFO(ret_posix);
@@ -289,7 +289,7 @@ TEST_CASE("geojson") {
             {
                 if (create_index)
                 {
-                    int ret = detail::create_disk_index(filename, true);
+                    int ret = create_disk_index(filename);
                     int ret_posix = (ret >> 8) & 0x000000ff;
                     INFO(ret);
                     INFO(ret_posix);
@@ -356,7 +356,7 @@ TEST_CASE("geojson") {
             {
                 if (create_index)
                 {
-                    int ret = detail::create_disk_index(filename, true);
+                    int ret = create_disk_index(filename);
                     int ret_posix = (ret >> 8) & 0x000000ff;
                     INFO(ret);
                     INFO(ret_posix);
@@ -409,7 +409,7 @@ TEST_CASE("geojson") {
                 if (create_index)
                 {
                     CHECK(!mapnik::util::exists(filename + ".index"));
-                    int ret = detail::create_disk_index(filename, true);
+                    int ret = create_disk_index(filename);
                     int ret_posix = (ret >> 8) & 0x000000ff;
                     INFO(ret);
                     INFO(ret_posix);
