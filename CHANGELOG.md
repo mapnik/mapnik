@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.8
 
-Released: ...
+Released: October 23, 2015
 
-(Packaged from )
+(Packaged from 2d15567)
 
 #### Summary
 
