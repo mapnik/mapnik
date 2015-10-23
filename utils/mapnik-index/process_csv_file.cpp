@@ -114,6 +114,7 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
                     std::size_t index = 0;
                     for (auto & header : headers)
                     {
+                        mapnik::util::trim(header);
                         if (header.empty())
                         {
                             // create a placeholder for the empty header
@@ -168,24 +169,24 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
     }
     while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, newline, quote))
     {
+        ++line_number;
         auto record_offset = pos;
         auto record_size = csv_line.length();
         pos = csv_file.tellg();
         is_first_row = false;
-        ++line_number;
+        // skip blank lines
+        if (record_size <= 10)
+        {
+            std::string trimmed = csv_line;
+            boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
+            if (trimmed.empty())
+            {
+                std::clog << "CSV index: empty row encountered at line: " << line_number << std::endl;
+                continue;
+            }
+        }
         try
         {
-            // skip blank lines
-            if (record_size <= 10)
-            {
-                std::string trimmed = csv_line;
-                boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
-                if (trimmed.empty())
-                {
-                    std::clog << "CSV index: empty row encountered at line: " << line_number << std::endl;
-                    continue;
-                }
-            }
             auto values = csv_utils::parse_line(csv_line, separator, quote);
             unsigned num_fields = values.size();
             if (num_fields > num_headers || num_fields < num_headers)
@@ -194,9 +195,8 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
                 std::ostringstream s;
                 s << "CSV Index: # of columns("
                   << num_fields << ") > # of headers("
-                  << num_headers << ") parsed for row " << line_number << "\n";
-                std::clog << s.str() << std::endl;
-                continue;
+                  << num_headers << ") parsed for row " << line_number;
+                throw mapnik::datasource_exception(s.str());
             }
 
             auto geom = ::detail::extract_geometry(values, locator);
@@ -213,8 +213,12 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
                 s << "CSV Index: expected geometry column: could not parse row "
                   << line_number << " "
                   << values[locator.index] << "'";
-                std::clog << s.str() << std::endl;
+                throw mapnik::datasource_exception(s.str());
             }
+        }
+        catch (mapnik::datasource_exception const& ex )
+        {
+            std::clog << ex.what() << " at line: " << line_number << std::endl;
         }
         catch (std::exception const& ex)
         {
