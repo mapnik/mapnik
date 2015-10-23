@@ -105,7 +105,20 @@ TEST_CASE("geojson") {
                 }
             }
         }
-        SECTION("GeoJSON Point")
+
+        SECTION("GeoJSON invalid Point")
+        {
+            for (auto cache_features : {true, false})
+            {
+                mapnik::parameters params;
+                params["type"] = "geojson";
+                params["file"] = "./test/data/json/point-invalid.json";
+                params["cache_features"] = cache_features;
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+            }
+        }
+
+        SECTION("GeoJSON Point ")
         {
             for (auto cache_features : {true, false})
             {
