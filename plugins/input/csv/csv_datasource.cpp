@@ -352,7 +352,6 @@ void csv_datasource::parse_csv(T & stream)
                 }
                 if (++feature_count != 1) continue;
                 auto beg = values.begin();
-                auto end = values.end();
                 for (std::size_t i = 0; i < num_headers; ++i)
                 {
                     std::string const& header = headers_.at(i);
