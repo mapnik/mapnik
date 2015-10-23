@@ -356,18 +356,6 @@ void csv_datasource::parse_csv(T & stream)
                 for (std::size_t i = 0; i < num_headers; ++i)
                 {
                     std::string const& header = headers_.at(i);
-                    if (beg == end) // there are more headers than column values for this row
-                    {
-                        // add an empty string here to represent a missing value
-                        // not using null type here since nulls are not a csv thing
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::String));
-                        }
-                        // continue here instead of break so that all missing values are
-                        // encoded consistenly as empty strings
-                        continue;
-                    }
                     std::string value = mapnik::util::trim_copy(*beg++);
                     int value_length = value.length();
                     if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
