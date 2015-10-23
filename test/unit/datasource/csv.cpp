@@ -32,23 +32,33 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/util/fs.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range_core.hpp>
 #include <boost/format.hpp>
 #include <boost/optional/optional_io.hpp>
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <boost/algorithm/string.hpp>
+#include <boost/program_options.hpp>
+#pragma GCC diagnostic pop
+
 #include <iostream>
 
-namespace bfs = boost::filesystem;
 
 namespace {
-void add_csv_files(bfs::path dir, std::vector<bfs::path> &csv_files)
+
+bool is_csv(std::string const& filename)
 {
-    for (auto const &entry : boost::make_iterator_range(
-             bfs::directory_iterator(dir), bfs::directory_iterator()))
+    return boost::iends_with(filename,".csv")
+        || boost::iends_with(filename,".tsv");
+}
+
+void add_csv_files(std::string dir, std::vector<std::string> &csv_files)
+{
+    for (auto const& path : mapnik::util::list_directory(dir))
     {
-        auto path = entry.path();
-        if (path.extension().native() == ".csv")
+        if (is_csv(path))
         {
             csv_files.emplace_back(path);
         }
@@ -250,7 +260,7 @@ TEST_CASE("csv") {
             {
                 if (have_csv_plugin)
                 {
-                    std::vector<bfs::path> broken;
+                    std::vector<std::string> broken;
                     add_csv_files("test/data/csv/fails", broken);
                     add_csv_files("test/data/csv/warns", broken);
                     broken.emplace_back("test/data/csv/fails/does_not_exist.csv");
@@ -260,28 +270,28 @@ TEST_CASE("csv") {
                         bool require_fail = true;
                         if (create_index)
                         {
-                            int ret = create_disk_index(path.native());
+                            int ret = create_disk_index(path);
                             int ret_posix = (ret >> 8) & 0x000000ff;
                             INFO(ret);
                             INFO(ret_posix);
-                            require_fail = (path.native() == "test/data/csv/warns/feature_id_counting.csv") ? false : true;
+                            require_fail = (path == "test/data/csv/warns/feature_id_counting.csv") ? false : true;
                             if (!require_fail)
                             {
-                                REQUIRE(mapnik::util::exists(path.native() + ".index"));
+                                REQUIRE(mapnik::util::exists(path + ".index"));
                             }
                         }
                         INFO(path);
                         if (require_fail)
                         {
-                            REQUIRE_THROWS(get_csv_ds(path.native()));
+                            REQUIRE_THROWS(get_csv_ds(path));
                         }
                         else
                         {
-                            CHECK(bool(get_csv_ds(path.native())));
+                            CHECK(bool(get_csv_ds(path)));
                         }
-                        if (mapnik::util::exists(path.native() + ".index"))
+                        if (mapnik::util::exists(path + ".index"))
                         {
-                            CHECK(mapnik::util::remove(path.native() + ".index"));
+                            CHECK(mapnik::util::remove(path + ".index"));
                         }
                     }
                 }
@@ -292,36 +302,36 @@ TEST_CASE("csv") {
         {
             if (have_csv_plugin)
             {
-                std::vector<bfs::path> good;
+                std::vector<std::string> good;
                 add_csv_files("test/data/csv", good);
                 add_csv_files("test/data/csv/warns", good);
 
                 for (auto const& path : good)
                 {
                     // cleanup in the case of a failed previous run
-                    if (mapnik::util::exists(path.native() + ".index"))
+                    if (mapnik::util::exists(path + ".index"))
                     {
-                        boost::filesystem::remove(path.native() + ".index");
+                        mapnik::util::remove(path + ".index");
                     }
                     for (auto create_index : { false, true })
                     {
                         if (create_index)
                         {
-                            int ret = create_disk_index(path.native());
+                            int ret = create_disk_index(path);
                             int ret_posix = (ret >> 8) & 0x000000ff;
                             INFO(ret);
                             INFO(ret_posix);
-                            if (path.native() != "test/data/csv/more_headers_than_column_values.csv") // mapnik-index won't create *.index for 0 features
+                            if (path != "test/data/csv/more_headers_than_column_values.csv") // mapnik-index won't create *.index for 0 features
                             {
-                                CHECK(mapnik::util::exists(path.native() + ".index"));
+                                CHECK(mapnik::util::exists(path + ".index"));
                             }
                         }
-                        auto ds = get_csv_ds(path.native(), false);
+                        auto ds = get_csv_ds(path, false);
                         // require a non-null pointer returned
                         REQUIRE(bool(ds));
-                        if (mapnik::util::exists(path.native() + ".index"))
+                        if (mapnik::util::exists(path + ".index"))
                         {
-                            CHECK(mapnik::util::remove(path.native() + ".index"));
+                            CHECK(mapnik::util::remove(path + ".index"));
                         }
                     }
                 }
@@ -338,7 +348,7 @@ TEST_CASE("csv") {
                     // cleanup in the case of a failed previous run
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                     if (create_index)
                     {
@@ -369,7 +379,7 @@ TEST_CASE("csv") {
                         });
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                 }
             }
@@ -383,7 +393,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -413,7 +423,7 @@ TEST_CASE("csv") {
                     });
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -426,7 +436,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -444,7 +454,7 @@ TEST_CASE("csv") {
                 CHECK(count_features(all_features(ds)) == 2);
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -457,7 +467,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -497,7 +507,7 @@ TEST_CASE("csv") {
                 }
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -510,7 +520,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -541,7 +551,7 @@ TEST_CASE("csv") {
                         , attr{"name", mapnik::value_unicode_string("c/c") } });
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -554,7 +564,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -581,7 +591,7 @@ TEST_CASE("csv") {
                 require_geometry(featureset->next(), 2, geometry_types::MultiPolygon);
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -594,7 +604,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -615,7 +625,7 @@ TEST_CASE("csv") {
                 CHECK(feature->get("_4") == mapnik::value_unicode_string("missing"));
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -628,7 +638,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -657,7 +667,7 @@ TEST_CASE("csv") {
                 CHECK(value == true);
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -671,7 +681,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -698,7 +708,7 @@ TEST_CASE("csv") {
                         attr{"x", 2.5}, attr{"y", 2.5}, attr{"label", ustring("2.5,2.5") } });
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -713,7 +723,7 @@ TEST_CASE("csv") {
                     // cleanup in the case of a failed previous run
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                     if (create_index)
                     {
@@ -730,7 +740,7 @@ TEST_CASE("csv") {
                             attr{"x", 1}, attr{"y", 10}, attr{"z", 9999.9999} });
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                 }
             }
@@ -751,7 +761,7 @@ TEST_CASE("csv") {
                     // cleanup in the case of a failed previous run
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                     if (create_index)
                     {
@@ -769,7 +779,7 @@ TEST_CASE("csv") {
                             , attr{"line", ustring("many\n  lines\n  of text\n  with unix newlines")} });
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                 }
             }
@@ -782,7 +792,7 @@ TEST_CASE("csv") {
                 std::string filename = "test/data/csv/tabs_in_csv.csv";
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -799,7 +809,7 @@ TEST_CASE("csv") {
                         attr{"x", -122}, attr{"y", 48}, attr{"z", 0} });
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -817,7 +827,7 @@ TEST_CASE("csv") {
                     // cleanup in the case of a failed previous run
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                     if (create_index)
                     {
@@ -834,7 +844,7 @@ TEST_CASE("csv") {
                             attr{"x", 0}, attr{"y", 0}, attr{"z", ustring("hello")} });
                     if (mapnik::util::exists(filename + ".index"))
                     {
-                        boost::filesystem::remove(filename + ".index");
+                        mapnik::util::remove(filename + ".index");
                     }
                 }
             }
@@ -849,7 +859,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -872,7 +882,7 @@ TEST_CASE("csv") {
 
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -885,7 +895,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -910,7 +920,7 @@ TEST_CASE("csv") {
                 REQUIRE_THROWS(ds->features(query));
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
@@ -924,7 +934,7 @@ TEST_CASE("csv") {
                 // cleanup in the case of a failed previous run
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
                 if (create_index)
                 {
@@ -948,7 +958,7 @@ TEST_CASE("csv") {
                         attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("005")}});
                 if (mapnik::util::exists(filename + ".index"))
                 {
-                    boost::filesystem::remove(filename + ".index");
+                    mapnik::util::remove(filename + ".index");
                 }
             }
         } // END SECTION
