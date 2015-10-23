@@ -20,7 +20,7 @@ Released: ...
  - Increased unit test coverage for GeoJSON and CSV plugins
  - shape.input - refactor to support *.shx and improve handling various bogus shapefiles
  - geojson.input - make JSON parser stricter + support single Feature/Geometry as well as FeatureCollection
- - maintain 'FT_LOAD_NO_HINTING' (harfbuzz 1.0.5)
+ - maintain 'FT_LOAD_NO_HINTING' + support >= harfbuzz 1.0.5
  - geojson.input - implement on-disk-index support
 
 ## 3.0.7
