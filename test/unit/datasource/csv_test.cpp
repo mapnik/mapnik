@@ -182,6 +182,26 @@ void require_geometry(mapnik::feature_ptr feature,
     CHECK(mapnik::geometry::geometry_type(feature->get_geometry()) == type);
     CHECK(feature_count(feature->get_geometry()) == num_parts);
 }
+
+int create_disk_index(std::string const& filename, bool silent = true)
+{
+    std::string cmd;
+    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
+    {
+        cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
+    }
+    cmd += "mapnik-index " + filename;
+    if (silent)
+    {
+#ifndef _WINDOWS
+        cmd += " 2>/dev/null";
+#else
+        cmd += " 2> nul";
+#endif
+    }
+    return std::system(cmd.c_str());
+}
+
 } // anonymous namespace
 
 static const std::string csv_plugin("./plugins/input/csv.input");
@@ -203,320 +223,718 @@ TEST_CASE("csv") {
         const bool have_csv_plugin =
             std::find(plugin_names.begin(), plugin_names.end(), "csv") != plugin_names.end();
 
-        SECTION("broken files") {
-            if (have_csv_plugin) {
-                std::vector<bfs::path> broken;
-                add_csv_files("test/data/csv/fails", broken);
-                add_csv_files("test/data/csv/warns", broken);
-                broken.emplace_back("test/data/csv/fails/does_not_exist.csv");
-
-                for (auto const &path : broken)
+        SECTION("broken files")
+        {
+            for (auto create_index : { false, true })
+            {
+                if (have_csv_plugin)
                 {
-                    INFO(path);
-                    REQUIRE_THROWS(get_csv_ds(path.native()));
+                    std::vector<bfs::path> broken;
+                    add_csv_files("test/data/csv/fails", broken);
+                    add_csv_files("test/data/csv/warns", broken);
+                    broken.emplace_back("test/data/csv/fails/does_not_exist.csv");
+
+                    for (auto const& path : broken)
+                    {
+                        bool require_fail = true;
+                        if (create_index)
+                        {
+                            int ret = create_disk_index(path.native());
+                            int ret_posix = (ret >> 8) & 0x000000ff;
+                            INFO(ret);
+                            INFO(ret_posix);
+                            require_fail = (path.native() == "test/data/csv/warns/feature_id_counting.csv") ? false : true;
+                            if (!require_fail)
+                            {
+                                REQUIRE(mapnik::util::exists(path.native() + ".index"));
+                            }
+                        }
+                        INFO(path);
+                        if (require_fail)
+                        {
+                            REQUIRE_THROWS(get_csv_ds(path.native()));
+                        }
+                        else
+                        {
+                            CHECK(bool(get_csv_ds(path.native())));
+                            if (mapnik::util::exists(path.native() + ".index"))
+                            {
+                                CHECK(mapnik::util::remove(path.native() + ".index"));
+                            }
+                        }
+                    }
                 }
             }
         } // END SECTION
 
-        SECTION("good files") {
-            if (have_csv_plugin) {
+        SECTION("good files")
+        {
+            if (have_csv_plugin)
+            {
                 std::vector<bfs::path> good;
                 add_csv_files("test/data/csv", good);
                 add_csv_files("test/data/csv/warns", good);
 
                 for (auto const& path : good)
                 {
-                    auto ds = get_csv_ds(path.native(), false);
-                    // require a non-null pointer returned
-                    REQUIRE(bool(ds));
+                    // cleanup in the case of a failed previous run
+                    if (mapnik::util::exists(path.native() + ".index"))
+                    {
+                        boost::filesystem::remove(path.native() + ".index");
+                    }
+                    for (auto create_index : { false, true })
+                    {
+                        if (create_index)
+                        {
+                            int ret = create_disk_index(path.native());
+                            int ret_posix = (ret >> 8) & 0x000000ff;
+                            INFO(ret);
+                            INFO(ret_posix);
+                            if (path.native() != "test/data/csv/more_headers_than_column_values.csv") // mapnik-index won't create *.index for 0 features
+                            {
+                                CHECK(mapnik::util::exists(path.native() + ".index"));
+                            }
+                        }
+                        auto ds = get_csv_ds(path.native(), false);
+                        // require a non-null pointer returned
+                        REQUIRE(bool(ds));
+                        if (mapnik::util::exists(path.native() + ".index"))
+                        {
+                            CHECK(mapnik::util::remove(path.native() + ".index"));
+                        }
+                    }
                 }
             }
         } // END SECTION
 
         SECTION("lon/lat detection")
         {
-            for (auto const& lon_name : {std::string("lon"), std::string("lng")})
+            for (auto create_index : { false, true })
             {
-                auto ds = get_csv_ds((boost::format("test/data/csv/%1%_lat.csv") % lon_name).str());
+                for (auto const& lon_name : {std::string("lon"), std::string("lng")})
+                {
+                    std::string filename = (boost::format("test/data/csv/%1%_lat.csv") % lon_name).str();
+                    // cleanup in the case of a failed previous run
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                    if (create_index)
+                    {
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(mapnik::util::exists(filename + ".index"));
+                    }
+                    auto ds = get_csv_ds(filename);
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    require_field_names(fields, {lon_name, "lat"});
+                    require_field_types(fields, {mapnik::Integer, mapnik::Integer});
+
+                    CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+
+                    mapnik::query query(ds->envelope());
+                    for (auto const &field : fields)
+                    {
+                        query.add_property_name(field.get_name());
+                    }
+                    auto features = ds->features(query);
+                    auto feature = features->next();
+
+                    require_attributes(feature, {
+                            attr { lon_name, mapnik::value_integer(0) },
+                                attr { "lat", mapnik::value_integer(0) }
+                        });
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                }
+            }
+        } // END SECTION
+
+        SECTION("type detection")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/nypd.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
                 auto fields = ds->get_descriptor().get_descriptors();
-                require_field_names(fields, {lon_name, "lat"});
-                require_field_types(fields, {mapnik::Integer, mapnik::Integer});
+                require_field_names(fields, {"Precinct", "Phone", "Address", "City", "geo_longitude", "geo_latitude", "geo_accuracy"});
+                require_field_types(fields, {mapnik::String, mapnik::String, mapnik::String, mapnik::String, mapnik::Double, mapnik::Double, mapnik::String});
 
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+                CHECK(count_features(all_features(ds)) == 2);
+
+                auto feature = all_features(ds)->next();
+                require_attributes(feature, {
+                        attr { "City", mapnik::value_unicode_string("New York, NY") }
+                        , attr { "geo_accuracy", mapnik::value_unicode_string("house") }
+                        , attr { "Phone", mapnik::value_unicode_string("(212) 334-0711") }
+                        , attr { "Address", mapnik::value_unicode_string("19 Elizabeth Street") }
+                        , attr { "Precinct", mapnik::value_unicode_string("5th Precinct") }
+                        , attr { "geo_longitude", mapnik::value_integer(-70) }
+                        , attr { "geo_latitude", mapnik::value_integer(40) }
+                    });
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("skipping blank rows")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/blank_rows.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "name"});
+                require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+                CHECK(count_features(all_features(ds)) == 2);
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("empty rows")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/empty_rows.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "text", "date", "integer", "boolean", "float", "time", "datetime", "empty_column"});
+                require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::String,
+                            mapnik::Integer, mapnik::Boolean, mapnik::Double, mapnik::String, mapnik::String, mapnik::String});
+                CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+                CHECK(count_features(all_features(ds)) == 4);
+
+                auto featureset = all_features(ds);
+                auto feature = featureset->next();
+                require_attributes(feature, {
+                        attr { "x", mapnik::value_integer(0) }
+                        , attr { "empty_column", mapnik::value_unicode_string("") }
+                        , attr { "text", mapnik::value_unicode_string("a b") }
+                        , attr { "float", mapnik::value_double(1.0) }
+                        , attr { "datetime", mapnik::value_unicode_string("1971-01-01T04:14:00") }
+                        , attr { "y", mapnik::value_integer(0) }
+                        , attr { "boolean", mapnik::value_bool(true) }
+                        , attr { "time", mapnik::value_unicode_string("04:14:00") }
+                        , attr { "date", mapnik::value_unicode_string("1971-01-01") }
+                        , attr { "integer", mapnik::value_integer(40) }
+                    });
+
+                while (bool(feature = featureset->next())) {
+                    CHECK(feature->size() == 10);
+                    CHECK(feature->get("empty_column") == mapnik::value_unicode_string(""));
+                }
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("slashes")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/has_attributes_with_slashes.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "name"});
+                // NOTE: y column is integer, even though a double value is used below in the test?
+                require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
+
+                auto featureset = all_features(ds);
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}
+                        , attr{"y", 0}
+                        , attr{"name", mapnik::value_unicode_string("a/a") } });
+                require_attributes(featureset->next(), {
+                        attr{"x", 1}
+                        , attr{"y", 4}
+                        , attr{"name", mapnik::value_unicode_string("b/b") } });
+                require_attributes(featureset->next(), {
+                        attr{"x", 10}
+                        , attr{"y", 2.5}
+                        , attr{"name", mapnik::value_unicode_string("c/c") } });
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("wkt field")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/wkt.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                using mapnik::geometry::geometry_types;
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"type"});
+                require_field_types(fields, {mapnik::String});
+
+                auto featureset = all_features(ds);
+                require_geometry(featureset->next(), 1, geometry_types::Point);
+                require_geometry(featureset->next(), 1, geometry_types::LineString);
+                require_geometry(featureset->next(), 1, geometry_types::Polygon);
+                require_geometry(featureset->next(), 1, geometry_types::Polygon);
+                require_geometry(featureset->next(), 4, geometry_types::MultiPoint);
+                require_geometry(featureset->next(), 2, geometry_types::MultiLineString);
+                require_geometry(featureset->next(), 2, geometry_types::MultiPolygon);
+                require_geometry(featureset->next(), 2, geometry_types::MultiPolygon);
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("handling of missing header")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/missing_header.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                // TODO: does this mean 'missing_header.csv' should be in the warnings
+                // subdirectory, since it doesn't work in strict mode?
+                auto ds = get_csv_ds(filename, false);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"one", "two", "x", "y", "_4", "aftermissing"});
+                auto feature = all_features(ds)->next();
+                REQUIRE(feature);
+                REQUIRE(feature->has_key("_4"));
+                CHECK(feature->get("_4") == mapnik::value_unicode_string("missing"));
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("handling of headers that are numbers")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/numbers_for_headers.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "1990", "1991", "1992"});
+                auto feature = all_features(ds)->next();
+                require_attributes(feature, {
+                        attr{"x", 0}
+                        , attr{"y", 0}
+                        , attr{"1990", 1}
+                        , attr{"1991", 2}
+                        , attr{"1992", 3}
+                    });
+                auto expression = mapnik::parse_expression("[1991]=2");
+                REQUIRE(bool(expression));
+                auto value = mapnik::util::apply_visitor(
+                    mapnik::evaluate<mapnik::feature_impl, mapnik::value_type, mapnik::attributes>(
+                        *feature, mapnik::attributes()), *expression);
+                CHECK(value == true);
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("quoted numbers")
+        {
+            using ustring = mapnik::value_unicode_string;
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/quoted_numbers.csv";
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "label"});
+                auto featureset = all_features(ds);
+
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 0}, attr{"label", ustring("0,0") } });
+                require_attributes(featureset->next(), {
+                        attr{"x", 5}, attr{"y", 5}, attr{"label", ustring("5,5") } });
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 5}, attr{"label", ustring("0,5") } });
+                require_attributes(featureset->next(), {
+                        attr{"x", 5}, attr{"y", 0}, attr{"label", ustring("5,0") } });
+                require_attributes(featureset->next(), {
+                        attr{"x", 2.5}, attr{"y", 2.5}, attr{"label", ustring("2.5,2.5") } });
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("reading newlines")
+        {
+            for (auto create_index : { false, true })
+            {
+                for (auto const& platform : {std::string("windows"), std::string("mac")})
+                {
+                    std::string filename = (boost::format("test/data/csv/%1%_newlines.csv") % platform).str();
+                    // cleanup in the case of a failed previous run
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                    if (create_index)
+                    {
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(mapnik::util::exists(filename + ".index"));
+                    }
+                    auto ds = get_csv_ds(filename);
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    require_field_names(fields, {"x", "y", "z"});
+                    require_attributes(all_features(ds)->next(), {
+                            attr{"x", 1}, attr{"y", 10}, attr{"z", 9999.9999} });
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                }
+            }
+        } // END SECTION
+
+        SECTION("mixed newlines")
+        {
+            using ustring = mapnik::value_unicode_string;
+            for (auto create_index : { false, true })
+            {
+                for (auto const& filename : {
+                        std::string("test/data/csv/mac_newlines_with_unix_inline.csv")
+                            , std::string("test/data/csv/mac_newlines_with_unix_inline_escaped.csv")
+                            , std::string("test/data/csv/windows_newlines_with_unix_inline.csv")
+                            , std::string("test/data/csv/windows_newlines_with_unix_inline_escaped.csv")
+                            })
+                {
+                    // cleanup in the case of a failed previous run
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                    if (create_index)
+                    {
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(mapnik::util::exists(filename + ".index"));
+                    }
+                    auto ds = get_csv_ds(filename);
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    require_field_names(fields, {"x", "y", "line"});
+                    require_attributes(all_features(ds)->next(), {
+                            attr{"x", 0}, attr{"y", 0}
+                            , attr{"line", ustring("many\n  lines\n  of text\n  with unix newlines")} });
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                }
+            }
+        } // END SECTION
+
+        SECTION("tabs")
+        {
+            for (auto create_index : { false, true })
+            {
+                std::string filename = "test/data/csv/tabs_in_csv.csv";
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "z"});
+                require_attributes(all_features(ds)->next(), {
+                        attr{"x", -122}, attr{"y", 48}, attr{"z", 0} });
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("separators")
+        {
+            using ustring = mapnik::value_unicode_string;
+            for (auto const& filename : {
+                    std::string("test/data/csv/pipe_delimiters.csv")
+                        , std::string("test/data/csv/semicolon_delimiters.csv")
+                        })
+            {
+                for (auto create_index : { false, true })
+                {
+                    // cleanup in the case of a failed previous run
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                    if (create_index)
+                    {
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(mapnik::util::exists(filename + ".index"));
+                    }
+                    auto ds = get_csv_ds(filename);
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    require_field_names(fields, {"x", "y", "z"});
+                    require_attributes(all_features(ds)->next(), {
+                            attr{"x", 0}, attr{"y", 0}, attr{"z", ustring("hello")} });
+                    if (mapnik::util::exists(filename + ".index"))
+                    {
+                        boost::filesystem::remove(filename + ".index");
+                    }
+                }
+            }
+        } // END SECTION
+
+        SECTION("null and bool keywords are empty strings")
+        {
+            using ustring = mapnik::value_unicode_string;
+            std::string filename = "test/data/csv/nulls_and_booleans_as_strings.csv";
+            for (auto create_index : { false, true })
+            {
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"x", "y", "null", "boolean"});
+                require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::Boolean});
+
+                auto featureset = all_features(ds);
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 0}, attr{"null", ustring("null")}, attr{"boolean", true}});
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 0}, attr{"null", ustring("")}, attr{"boolean", false}});
+
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+            }
+        } // END SECTION
+
+        SECTION("nonexistent query fields throw")
+        {
+            std::string filename = "test/data/csv/lon_lat.csv";
+            for (auto create_index : { false, true })
+            {
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
+                auto fields = ds->get_descriptor().get_descriptors();
+                require_field_names(fields, {"lon", "lat"});
+                require_field_types(fields, {mapnik::Integer, mapnik::Integer});
 
                 mapnik::query query(ds->envelope());
                 for (auto const &field : fields)
                 {
                     query.add_property_name(field.get_name());
                 }
-                auto features = ds->features(query);
-                auto feature = features->next();
-
-                require_attributes(feature, {
-                        attr { lon_name, mapnik::value_integer(0) },
-                            attr { "lat", mapnik::value_integer(0) }
-                    });
+                // also add an invalid one, triggering throw
+                query.add_property_name("bogus");
+                REQUIRE_THROWS(ds->features(query));
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
             }
         } // END SECTION
 
-        SECTION("type detection") {
-            auto ds = get_csv_ds("test/data/csv/nypd.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"Precinct", "Phone", "Address", "City", "geo_longitude", "geo_latitude", "geo_accuracy"});
-            require_field_types(fields, {mapnik::String, mapnik::String, mapnik::String, mapnik::String, mapnik::Double, mapnik::Double, mapnik::String});
-
-            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
-            CHECK(count_features(all_features(ds)) == 2);
-
-            auto feature = all_features(ds)->next();
-            require_attributes(feature, {
-                    attr { "City", mapnik::value_unicode_string("New York, NY") }
-                    , attr { "geo_accuracy", mapnik::value_unicode_string("house") }
-                    , attr { "Phone", mapnik::value_unicode_string("(212) 334-0711") }
-                    , attr { "Address", mapnik::value_unicode_string("19 Elizabeth Street") }
-                    , attr { "Precinct", mapnik::value_unicode_string("5th Precinct") }
-                    , attr { "geo_longitude", mapnik::value_integer(-70) }
-                    , attr { "geo_latitude", mapnik::value_integer(40) }
-                });
-        } // END SECTION
-
-        SECTION("skipping blank rows") {
-            auto ds = get_csv_ds("test/data/csv/blank_rows.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "name"});
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
-
-            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
-            CHECK(count_features(all_features(ds)) == 2);
-        } // END SECTION
-
-        SECTION("empty rows") {
-            auto ds = get_csv_ds("test/data/csv/empty_rows.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "text", "date", "integer", "boolean", "float", "time", "datetime", "empty_column"});
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::String, mapnik::Integer, mapnik::Boolean, mapnik::Double, mapnik::String, mapnik::String, mapnik::String});
-
-            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
-            CHECK(count_features(all_features(ds)) == 4);
-
-            auto featureset = all_features(ds);
-            auto feature = featureset->next();
-            require_attributes(feature, {
-                    attr { "x", mapnik::value_integer(0) }
-                    , attr { "empty_column", mapnik::value_unicode_string("") }
-                    , attr { "text", mapnik::value_unicode_string("a b") }
-                    , attr { "float", mapnik::value_double(1.0) }
-                    , attr { "datetime", mapnik::value_unicode_string("1971-01-01T04:14:00") }
-                    , attr { "y", mapnik::value_integer(0) }
-                    , attr { "boolean", mapnik::value_bool(true) }
-                    , attr { "time", mapnik::value_unicode_string("04:14:00") }
-                    , attr { "date", mapnik::value_unicode_string("1971-01-01") }
-                    , attr { "integer", mapnik::value_integer(40) }
-                });
-
-            while (bool(feature = featureset->next())) {
-                CHECK(feature->size() == 10);
-                CHECK(feature->get("empty_column") == mapnik::value_unicode_string(""));
-            }
-        } // END SECTION
-
-        SECTION("slashes") {
-            auto ds = get_csv_ds("test/data/csv/has_attributes_with_slashes.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "name"});
-            // NOTE: y column is integer, even though a double value is used below in the test?
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
-
-            auto featureset = all_features(ds);
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}
-                    , attr{"y", 0}
-                    , attr{"name", mapnik::value_unicode_string("a/a") } });
-            require_attributes(featureset->next(), {
-                    attr{"x", 1}
-                    , attr{"y", 4}
-                    , attr{"name", mapnik::value_unicode_string("b/b") } });
-            require_attributes(featureset->next(), {
-                    attr{"x", 10}
-                    , attr{"y", 2.5}
-                    , attr{"name", mapnik::value_unicode_string("c/c") } });
-        } // END SECTION
-
-        SECTION("wkt field") {
-            using mapnik::geometry::geometry_types;
-
-            auto ds = get_csv_ds("test/data/csv/wkt.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"type"});
-            require_field_types(fields, {mapnik::String});
-
-            auto featureset = all_features(ds);
-            require_geometry(featureset->next(), 1, geometry_types::Point);
-            require_geometry(featureset->next(), 1, geometry_types::LineString);
-            require_geometry(featureset->next(), 1, geometry_types::Polygon);
-            require_geometry(featureset->next(), 1, geometry_types::Polygon);
-            require_geometry(featureset->next(), 4, geometry_types::MultiPoint);
-            require_geometry(featureset->next(), 2, geometry_types::MultiLineString);
-            require_geometry(featureset->next(), 2, geometry_types::MultiPolygon);
-            require_geometry(featureset->next(), 2, geometry_types::MultiPolygon);
-        } // END SECTION
-
-        SECTION("handling of missing header") {
-            // TODO: does this mean 'missing_header.csv' should be in the warnings
-            // subdirectory, since it doesn't work in strict mode?
-            auto ds = get_csv_ds("test/data/csv/missing_header.csv", false);
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"one", "two", "x", "y", "_4", "aftermissing"});
-            auto feature = all_features(ds)->next();
-            REQUIRE(feature);
-            REQUIRE(feature->has_key("_4"));
-            CHECK(feature->get("_4") == mapnik::value_unicode_string("missing"));
-        } // END SECTION
-
-        SECTION("handling of headers that are numbers") {
-            auto ds = get_csv_ds("test/data/csv/numbers_for_headers.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "1990", "1991", "1992"});
-            auto feature = all_features(ds)->next();
-            require_attributes(feature, {
-                    attr{"x", 0}
-                    , attr{"y", 0}
-                    , attr{"1990", 1}
-                    , attr{"1991", 2}
-                    , attr{"1992", 3}
-                });
-            auto expression = mapnik::parse_expression("[1991]=2");
-            REQUIRE(bool(expression));
-            auto value = mapnik::util::apply_visitor(
-                mapnik::evaluate<mapnik::feature_impl, mapnik::value_type, mapnik::attributes>(
-                    *feature, mapnik::attributes()), *expression);
-            CHECK(value == true);
-        } // END SECTION
-
-        SECTION("quoted numbers") {
+        SECTION("leading zeros mean strings")
+        {
             using ustring = mapnik::value_unicode_string;
-
-            auto ds = get_csv_ds("test/data/csv/quoted_numbers.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "label"});
-            auto featureset = all_features(ds);
-
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"label", ustring("0,0") } });
-            require_attributes(featureset->next(), {
-                    attr{"x", 5}, attr{"y", 5}, attr{"label", ustring("5,5") } });
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 5}, attr{"label", ustring("0,5") } });
-            require_attributes(featureset->next(), {
-                    attr{"x", 5}, attr{"y", 0}, attr{"label", ustring("5,0") } });
-            require_attributes(featureset->next(), {
-                    attr{"x", 2.5}, attr{"y", 2.5}, attr{"label", ustring("2.5,2.5") } });
-
-        } // END SECTION
-
-        SECTION("reading newlines") {
-            for (auto const &platform : {std::string("windows"), std::string("mac")}) {
-                std::string file_name = (boost::format("test/data/csv/%1%_newlines.csv") % platform).str();
-                auto ds = get_csv_ds(file_name);
+            std::string filename = "test/data/csv/leading_zeros.csv";
+            for (auto create_index : { false, true })
+            {
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
+                if (create_index)
+                {
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+                auto ds = get_csv_ds(filename);
                 auto fields = ds->get_descriptor().get_descriptors();
-                require_field_names(fields, {"x", "y", "z"});
-                require_attributes(all_features(ds)->next(), {
-                        attr{"x", 1}, attr{"y", 10}, attr{"z", 9999.9999} });
+                require_field_names(fields, {"x", "y", "fips"});
+                require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
+
+                auto featureset = all_features(ds);
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("001")}});
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("003")}});
+                require_attributes(featureset->next(), {
+                        attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("005")}});
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    boost::filesystem::remove(filename + ".index");
+                }
             }
         } // END SECTION
 
-        SECTION("mixed newlines") {
-            using ustring = mapnik::value_unicode_string;
-
-            for (auto const &file : {
-                    std::string("test/data/csv/mac_newlines_with_unix_inline.csv")
-                        , std::string("test/data/csv/mac_newlines_with_unix_inline_escaped.csv")
-                        , std::string("test/data/csv/windows_newlines_with_unix_inline.csv")
-                        , std::string("test/data/csv/windows_newlines_with_unix_inline_escaped.csv")
-                        }) {
-                auto ds = get_csv_ds(file);
-                auto fields = ds->get_descriptor().get_descriptors();
-                require_field_names(fields, {"x", "y", "line"});
-                require_attributes(all_features(ds)->next(), {
-                        attr{"x", 0}, attr{"y", 0}
-                        , attr{"line", ustring("many\n  lines\n  of text\n  with unix newlines")} });
-            }
-        } // END SECTION
-
-        SECTION("tabs") {
-            auto ds = get_csv_ds("test/data/csv/tabs_in_csv.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "z"});
-            require_attributes(all_features(ds)->next(), {
-                    attr{"x", -122}, attr{"y", 48}, attr{"z", 0} });
-        } // END SECTION
-
-        SECTION("separators") {
-            using ustring = mapnik::value_unicode_string;
-
-            for (auto const &file : {
-                    std::string("test/data/csv/pipe_delimiters.csv")
-                        , std::string("test/data/csv/semicolon_delimiters.csv")
-                        }) {
-                auto ds = get_csv_ds(file);
-                auto fields = ds->get_descriptor().get_descriptors();
-                require_field_names(fields, {"x", "y", "z"});
-                require_attributes(all_features(ds)->next(), {
-                        attr{"x", 0}, attr{"y", 0}, attr{"z", ustring("hello")} });
-            }
-        } // END SECTION
-
-        SECTION("null and bool keywords are empty strings") {
-            using ustring = mapnik::value_unicode_string;
-
-            auto ds = get_csv_ds("test/data/csv/nulls_and_booleans_as_strings.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "null", "boolean"});
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::Boolean});
-
-            auto featureset = all_features(ds);
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"null", ustring("null")}, attr{"boolean", true}});
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"null", ustring("")}, attr{"boolean", false}});
-        } // END SECTION
-
-        SECTION("nonexistent query fields throw") {
-            auto ds = get_csv_ds("test/data/csv/lon_lat.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"lon", "lat"});
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer});
-
-            mapnik::query query(ds->envelope());
-            for (auto const &field : fields) {
-                query.add_property_name(field.get_name());
-            }
-            // also add an invalid one, triggering throw
-            query.add_property_name("bogus");
-
-            REQUIRE_THROWS(ds->features(query));
-        } // END SECTION
-
-        SECTION("leading zeros mean strings") {
-            using ustring = mapnik::value_unicode_string;
-
-            auto ds = get_csv_ds("test/data/csv/leading_zeros.csv");
-            auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, {"x", "y", "fips"});
-            require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
-
-            auto featureset = all_features(ds);
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("001")}});
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("003")}});
-            require_attributes(featureset->next(), {
-                    attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("005")}});
-        } // END SECTION
-
-        SECTION("advanced geometry detection") {
+        SECTION("advanced geometry detection")
+        {
             using row = std::pair<std::string, mapnik::datasource_geometry_t>;
-
             for (row r : {
                     row{"point", mapnik::datasource_geometry_t::Point}
                     , row{"poly", mapnik::datasource_geometry_t::Polygon}
@@ -529,7 +947,8 @@ TEST_CASE("csv") {
             }
         } // END SECTION
 
-        SECTION("creation of CSV from in-memory strings") {
+        SECTION("creation of CSV from in-memory strings")
+        {
             using ustring = mapnik::value_unicode_string;
 
             for (auto const &name : {std::string("Winthrop, WA"), std::string(u8"Qu\u00e9bec")}) {
