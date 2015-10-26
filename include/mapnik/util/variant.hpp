@@ -25,7 +25,6 @@
 
 #include <mapnik/config.hpp>
 
-#include <utility> // swap
 #include <typeinfo>
 #include <type_traits>
 #include <stdexcept> // runtime_error
@@ -595,16 +594,17 @@ public:
         helper_type::move(old.type_index, &old.data, &data);
     }
 
-    friend void swap(variant<Types...> & first, variant<Types...> & second)
+    friend void copy(variant<Types...> & target, variant<Types...> & source)
     {
-        using std::swap; //enable ADL
-        swap(first.type_index, second.type_index);
-        swap(first.data, second.data);
+        helper_type::destroy(target.type_index, &target.data);
+        target.type_index = detail::invalid_value;
+        helper_type::copy(source.type_index, &source.data, &target.data);
+        target.type_index = source.type_index;
     }
 
     VARIANT_INLINE variant<Types...>& operator=(variant<Types...> other)
     {
-        swap(*this, other);
+        copy(*this, other);
         return *this;
     }
 
@@ -614,7 +614,7 @@ public:
     VARIANT_INLINE variant<Types...>& operator=(T && rhs) noexcept
     {
         variant<Types...> temp(std::forward<T>(rhs));
-        swap(*this, temp);
+        copy(*this, temp);
         return *this;
     }
 
@@ -623,7 +623,7 @@ public:
     VARIANT_INLINE variant<Types...>& operator=(T const& rhs)
     {
         variant<Types...> temp(rhs);
-        swap(*this, temp);
+        copy(*this, temp);
         return *this;
     }
 
