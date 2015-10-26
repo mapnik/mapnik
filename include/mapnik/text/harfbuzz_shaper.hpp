@@ -93,6 +93,15 @@ static void shape_text(text_line & line,
         std::size_t pos = 0;
         font_feature_settings const& ff_settings = text_item.format_->ff_settings;
         int ff_count = safe_cast<int>(ff_settings.count());
+
+        struct glyph_face_info
+        {
+            face_ptr face;
+            hb_glyph_info_t glyph;
+            hb_glyph_position_t position;
+        };
+        std::map<unsigned, glyph_face_info> gfaceinfos;
+
         for (auto const& face : *face_set)
         {
             ++pos;
@@ -115,17 +124,15 @@ static void shape_text(text_line & line,
             hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer.get(), nullptr);
             hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer.get(), nullptr);
 
-            bool font_has_all_glyphs = true;
             // Check if all glyphs are valid.
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                if (!glyphs[i].codepoint)
+                if (glyphs[i].codepoint && gfaceinfos.find(i)==gfaceinfos.end())
                 {
-                    font_has_all_glyphs = false;
-                    break;
+                    gfaceinfos[i] = { face, glyphs[i], positions[i] };
                 }
             }
-            if (!font_has_all_glyphs && (pos < num_faces))
+            if (gfaceinfos.size()<num_glyphs && (pos < num_faces))
             {
                 //Try next font in fontset
                 continue;
@@ -134,14 +141,16 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                auto const& gpos = positions[i];
-                auto const& glyph = glyphs[i];
+                glyph_face_info const* gfi = gfaceinfos.find(i)!=gfaceinfos.end()? &gfaceinfos[i]: nullptr;
+                auto const& gpos = gfi? gfi->position: positions[i];
+                auto const& glyph = gfi? gfi->glyph: glyphs[i];
+                auto const& theface = gfi? gfi->face: face;
                 unsigned char_index = glyph.cluster;
                 glyph_info g(glyph.codepoint,char_index,text_item.format_);
-                if (face->glyph_dimensions(g))
+                if (theface->glyph_dimensions(g))
                 {
-                    g.face = face;
-                    g.scale_multiplier = size / face->get_face()->units_per_EM;
+                    g.face = theface;
+                    g.scale_multiplier = size / theface->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
                     g.unscaled_advance = gpos.x_advance;
                     g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
