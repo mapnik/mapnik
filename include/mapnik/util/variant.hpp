@@ -597,6 +597,7 @@ public:
     friend void copy(variant<Types...> & target, variant<Types...> & source)
     {
         helper_type::destroy(target.type_index, &target.data);
+        target.type_index = detail::invalid_value;
         helper_type::copy(source.type_index, &source.data, &target.data);
         target.type_index = source.type_index;
     }
