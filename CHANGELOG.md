@@ -24,6 +24,7 @@ Released:
  - Improved 'offseting` algorithm implementation for complex polygons (https://github.com/mapnik/mapnik/pull/3160) (via @winni159)
  - JSON : unified error_handler accross all grammars
  - Improved unit test coverage
+ - Raster scaling: fixed nodata handling, acurracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
 
 ## 3.0.8
 
