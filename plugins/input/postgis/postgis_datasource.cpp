@@ -87,12 +87,14 @@ postgis_datasource::postgis_datasource(parameters const& params)
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
       twkb_encoding_(false),
+      twkb_rounding_adjustment_(*params_.get<value_double>("twkb_rounding_adjustment", 0.0)),
       simplify_snap_ratio_(*params_.get<value_double>("simplify_snap_ratio", 1.0/40.0)),
       // 1/20 of pixel seems to be a good compromise to avoid
       // drop of collapsed polygons.
       // See https://github.com/mapnik/mapnik/issues/1639
       // See http://trac.osgeo.org/postgis/ticket/2093
       simplify_dp_ratio_(*params_.get<value_double>("simplify_dp_ratio", 1.0/20.0)),
+      simplify_prefilter_(*params_.get<value_double>("simplify_prefilter", 0.0)),
       simplify_dp_preserve_(false),
       simplify_clip_resolution_(*params_.get<value_double>("simplify_clip_resolution", 0.0)),
       // params below are for testing purposes only and may be removed at any time
@@ -758,75 +760,73 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         const double px_sz = std::min(px_gw, px_gh);
 
         if (twkb_encoding_) {
+            
+            // This will only work against PostGIS 2.2, or a back-patched version
+            // that has (a) a ST_Simplify with a "preserve collapsed" flag and 
+            // (b) a ST_RemoveRepeatedPoints with a tolerance parameter and
+            // (c) a ST_AsTWKB implementation
+            
+            // What number of decimals of rounding does the pixel size imply?
+            const int twkb_rounding = -1 * lround(log10(px_sz) + twkb_rounding_adjustment_) + 1;
+            // And what's that in map units?
+            const double twkb_tolerance = pow(10.0, -1.0 * twkb_rounding);
+            
             s << "SELECT ST_AsTWKB(";
+            s << "ST_Simplify(";
+            s << "ST_RemoveRepeatedPoints(";
+            s << "\"" << geometryColumn_ << "\"";
+            // ! ST_RemoveRepeatedPoints()
+            s << "," << twkb_tolerance << ")";
+            // ! ST_Simplify(), with parameter to keep collapsed geometries
+            s << "," << twkb_tolerance << ",true)";
+            // ! ST_TWKB()
+            s << "," << twkb_rounding << ") AS geom";
         }
         else {
             s << "SELECT ST_AsBinary(";
-        }
 
-        if (simplify_geometries_) {
-            s << "ST_Simplify(";
-        }
-
-        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
-            s << "ST_ClipByBox2D(";
-        }
-
-        if (simplify_geometries_) {
-            s<< "ST_SnapToGrid(";
-        }
-
-        // Geometry column!
-        s << "\"" << geometryColumn_ << "\"";
-
-        // ! ST_SnapToGrid()
-        if (simplify_geometries_) {
-          // 1/20 of pixel seems to be a good compromise to avoid
-          // drop of collapsed polygons.
-          // See https://github.com/mapnik/mapnik/issues/1639
-          // See http://trac.osgeo.org/postgis/ticket/2093
-          const double grid_tolerance = px_sz * simplify_snap_ratio_;
-          s << ", " << grid_tolerance << ")";
-        }
-
-        // ! ST_ClipByBox2D()
-        if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
-            s << "," << sql_bbox(box) << ")";
-        }
-
-        // ! ST_Simplify()
-        if (simplify_geometries_) {
-          const double tolerance = px_sz * simplify_dp_ratio_;
-          s << ", " << tolerance;
-          // Add parameter to ST_Simplify to keep collapsed geometries
-          if (simplify_dp_preserve_) {
-            s << ", true";
-          }
-          s << ")";
-        }
-
-        // ! ST_TWKB()
-        if ( twkb_encoding_ ) {
-            // Depending on where resolution falls relative to rounding levels,
-            // we get a rounding to either 1 pixel down to 1/10 of a pixel.
-            // (When rouding levels jump by factors of 10, hard to choose a "perfect" 
-            // rounding level)
-            const double tolerance = px_sz;
-            // Figure out number of decimals of rounding that implies
-            if ( tolerance > 0 ) {
-                const int i = -1 * lround(log10(tolerance) + 0.5) + 1;
-                // Write the SQL
-                s << "," << i << ") AS geom";
+            if (simplify_geometries_) {
+                s << "ST_Simplify(";
             }
-            // Hopefully we're never fed a negative tolerance...
-            else {
-                s << ") AS geom";
+
+            if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
+                s << "ST_ClipByBox2D(";
             }
-        }
-        // ! ST_AsBinary()
-        else {
+
+            if (simplify_prefilter_ > 0.0) {
+                s<< "ST_SnapToGrid(";
+            }
+
+            // Geometry column!
+            s << "\"" << geometryColumn_ << "\"";
+
+            // ! ST_SnapToGrid()
+            if (simplify_geometries_ && simplify_snap_ratio_ > 0.0) {
+                const double tolerance = px_sz * simplify_snap_ratio_;
+                s << "," << tolerance << ")";
+            }
+
+            // ! ST_ClipByBox2D()
+            if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
+                s << "," << sql_bbox(box) << ")";
+            }
+
+            // ! ST_Simplify()
+            if (simplify_geometries_) {
+              const double tolerance = px_sz * simplify_dp_ratio_;
+              s << ", " << tolerance;
+              // Add parameter to ST_Simplify to keep collapsed geometries
+              if (simplify_dp_preserve_) {
+                s << ", true";
+              }
+              s << ")";
+            }
+
+            // ! ST_AsBinary()
             s << ") AS geom";
+
         }
+
 
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
         std::set<std::string> const& props = q.property_names();
