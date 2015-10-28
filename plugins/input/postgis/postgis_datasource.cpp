@@ -87,7 +87,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
       max_async_connections_(*params_.get<int>("max_async_connection", 1)),
       asynchronous_request_(false),
       twkb_encoding_(false),
-      twkb_rounding_adjustment_(*params_.get<value_double>("twkb_rounding_adjustment", 0.0)),
       simplify_snap_ratio_(*params_.get<value_double>("simplify_snap_ratio", 1.0/40.0)),
       // 1/20 of pixel seems to be a good compromise to avoid
       // drop of collapsed polygons.
@@ -815,7 +814,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             const double tolerance = px_sz;
             // Figure out number of decimals of rounding that implies
             if ( tolerance > 0 ) {
-                const int i = -1 * lround(log10(tolerance) + twkb_rounding_adjustment_) + 1;
+                const int i = -1 * lround(log10(tolerance) + 0.5) + 1;
                 // Write the SQL
                 s << "," << i << ") AS geom";
             }

@@ -115,7 +115,6 @@ private:
     int max_async_connections_;
     bool asynchronous_request_;
     bool twkb_encoding_;
-    mapnik::value_double twkb_rounding_adjustment_;
     mapnik::value_double simplify_snap_ratio_;
     mapnik::value_double simplify_dp_ratio_;
     bool simplify_dp_preserve_;
