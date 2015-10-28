@@ -793,7 +793,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
                 s << "ST_ClipByBox2D(";
             }
 
-            if (simplify_prefilter_ > 0.0) {
+            if (simplify_geometries_ && simplify_snap_ratio_ > 0.0) {
                 s<< "ST_SnapToGrid(";
             }
 
