@@ -609,24 +609,33 @@ public:
         helper_type::move(old.type_index, &old.data, &data);
     }
 
-    void assign(variant<Types...> & rhs)
+private:
+    VARIANT_INLINE void copy_assign(variant<Types...> const& rhs)
     {
-        if (type_index == rhs.type_index)
-        {
-            helper_type::direct_swap(rhs.type_index, &rhs.data, &data);
-        }
-        else
-        {
-            helper_type::destroy(type_index, &data);
-            type_index = detail::invalid_value;
-            helper_type::copy(rhs.type_index, &rhs.data, &data);
-            type_index = rhs.type_index;
-        }
+        helper_type::destroy(type_index, &data);
+        type_index = detail::invalid_value;
+        helper_type::copy(rhs.type_index, &rhs.data, &data);
+        type_index = rhs.type_index;
     }
 
-    VARIANT_INLINE variant<Types...>& operator=(variant<Types...> other)
+    VARIANT_INLINE void move_assign(variant<Types...> && rhs)
     {
-        assign(other);
+        helper_type::destroy(type_index, &data);
+        type_index = detail::invalid_value;
+        helper_type::move(rhs.type_index, &rhs.data, &data);
+        type_index = rhs.type_index;
+    }
+
+public:
+    VARIANT_INLINE variant<Types...>& operator=(variant<Types...> && other)
+    {
+        move_assign(std::move(other));
+        return *this;
+    }
+
+    VARIANT_INLINE variant<Types...>& operator=(variant<Types...> const& other)
+    {
+        copy_assign(other);
         return *this;
     }
 
@@ -636,7 +645,7 @@ public:
     VARIANT_INLINE variant<Types...>& operator=(T && rhs) noexcept
     {
         variant<Types...> temp(std::forward<T>(rhs));
-        assign(temp);
+        move_assign(std::move(temp));
         return *this;
     }
 
@@ -645,7 +654,7 @@ public:
     VARIANT_INLINE variant<Types...>& operator=(T const& rhs)
     {
         variant<Types...> temp(rhs);
-        assign(temp);
+        copy_assign(temp);
         return *this;
     }
 
