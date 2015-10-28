@@ -18,14 +18,13 @@
 * `simplify_geometries`: Use PostGIS ST_Simplify call on the geometry to make input data smaller. (default: false)
 * `simplify_dp_ratio`: Use a PostGIS simplification factor of this proportion of the ground size of a pixel. For example, if pixels are 40m square for this rendering, and the ratio is set to 1/20, then `ST_Simplify(geom, 2)` would be used. (default: 1/20)
 
-## 2.3.x.cartodb
+## 2.3.x.twkb
 
 * `simplify_snap_ratio`: Use PostGIS `ST_SnapToGrid` call to make the input data smaller. This is applied to geometry **before** any `ST_Simplify` is called, so should use a tolerance smaller than the simplify tolerance. Tolerance is expressed as a proportion of a pixel, as with `simplify_dp_ratio`. (default: 1/40)
 
 These features all require PostGIS 2.2+, as they use features that do not appear in earlier PostGIS versions.
 
 * `twkb_encoding`: Use TWKB to encode geometries for transport from the database to the renderer instead of standard WKB? (default: false)
-* `twkb_rounding_adjustment`: Controls how the units-per-pixel of a rendering gets mapped to the TWKB rounding level. Move upwards (very gently) to increase the severity of rounding, move downwards (gently) to decrease severity. Should not need to ever get beyond +1/-1. (default: 0.0)
 * `simplify_dp_preserve`: Set the `preserve` option in `ST_Simplify` when in `simplify_geometries` mode? This will ensure that features that get simplified down to nothing aren't dropped but are retained in point-like form. Useful for rendering to avoid gaps where small feature "disappear". (default: false)
 * `simplify_clip_resolution`: In non-zero, sets the map scale at which geometries start getting clipped to the rendering window. (default: 0.0)
 
