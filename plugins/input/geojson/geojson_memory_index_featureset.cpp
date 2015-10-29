@@ -26,6 +26,7 @@
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -52,7 +53,7 @@ geojson_memory_index_featureset::~geojson_memory_index_featureset() {}
 
 mapnik::feature_ptr geojson_memory_index_featureset::next()
 {
-    if (index_itr_ != index_end_)
+    while (index_itr_ != index_end_)
     {
         geojson_datasource::item_type const& item = *index_itr_++;
         std::size_t file_offset = item.second.first;
@@ -61,7 +62,6 @@ mapnik::feature_ptr geojson_memory_index_featureset::next()
         std::vector<char> json;
         json.resize(size);
         std::fread(json.data(), size, 1, file_.get());
-
         using chr_iterator_type = char const*;
         chr_iterator_type start = json.data();
         chr_iterator_type end = start + json.size();
@@ -74,6 +74,9 @@ mapnik::feature_ptr geojson_memory_index_featureset::next()
         {
             throw std::runtime_error("Failed to parse geojson feature");
         }
+        // skip empty geometries
+        if (mapnik::geometry::is_empty(feature->get_geometry()))
+            continue;
         return feature;
     }
     return mapnik::feature_ptr();

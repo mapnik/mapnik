@@ -28,6 +28,7 @@
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/spatial_index.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -96,8 +97,11 @@ mapnik::feature_ptr geojson_index_featureset::next()
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
         if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space) || start != end)
         {
-            throw std::runtime_error("Failed to parse geojson feature");
+            throw std::runtime_error("Failed to parse GeoJSON feature");
         }
+        // skip empty geometries
+        if (mapnik::geometry::is_empty(feature->get_geometry()))
+            continue;
         return feature;
     }
     return mapnik::feature_ptr();
