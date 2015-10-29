@@ -271,12 +271,12 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
         std::size_t start_id = 1;
         mapnik::json::default_feature_callback callback(features_);
         bool result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_callback_grammar)
-                                                 (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                 (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
                                                  space);
         if (!result || itr != end)
         {
-            if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
-            else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
+            if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file from in-memory string");
+            else throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file '" + filename_ + "'");
         }
 
         using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
@@ -363,8 +363,8 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
                                                   space);
     if (!result || itr != end)
     {
-        if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
-        else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
+        if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file from in-memory string");
+        else throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file '" + filename_ + "'");
     }
 
     if (features_.size() == 0)
