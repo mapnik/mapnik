@@ -141,7 +141,7 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                glyph_face_info const* gfi = gfaceinfos.find(i) != gfaceinfos.end()? &gfaceinfos[i]: nullptr;
+                glyph_face_info const* gfi = gfaceinfos.find(i) != gfaceinfos.end() ? &gfaceinfos[i] : nullptr;
                 auto const& gpos = gfi ? gfi->position : positions[i];
                 auto const& glyph = gfi ? gfi->glyph : glyphs[i];
                 auto const& theface = gfi ? gfi->face : face;
