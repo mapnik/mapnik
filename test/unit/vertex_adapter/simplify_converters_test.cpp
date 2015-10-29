@@ -1,15 +1,9 @@
 #include "catch.hpp"
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-
-#include <mapnik/layer.hpp>
-#include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/wkt/wkt_generator_grammar.hpp>
-#include <mapnik/simplify.hpp>
-#include <mapnik/simplify_converter.hpp>
+//#include <mapnik/wkt/wkt_factory.hpp>
+//#include <mapnik/wkt/wkt_generator_grammar.hpp>
+//#include <mapnik/simplify.hpp>
+//#include <mapnik/simplify_converter.hpp>
 
 // stl
 #include <stdexcept>

@@ -40,7 +40,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/algorithm/string.hpp>
-#include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
 
 #include <iostream>

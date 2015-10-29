@@ -6,10 +6,6 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/geometry_reprojection.hpp>
-#include <mapnik/geometry_correct.hpp>
-
-// std
-#include <iostream>
 
 TEST_CASE("geometry reprojection") {
 

@@ -17,10 +17,8 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 
 // agg
-#include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"
 
 template <typename T>
