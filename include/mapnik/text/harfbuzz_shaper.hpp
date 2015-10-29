@@ -127,12 +127,12 @@ static void shape_text(text_line & line,
             // Check if all glyphs are valid.
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                if (glyphs[i].codepoint && gfaceinfos.find(i)==gfaceinfos.end())
+                if (glyphs[i].codepoint && gfaceinfos.find(i) == gfaceinfos.end())
                 {
                     gfaceinfos[i] = { face, glyphs[i], positions[i] };
                 }
             }
-            if (gfaceinfos.size()<num_glyphs && (pos < num_faces))
+            if (gfaceinfos.size() < num_glyphs && (pos < num_faces))
             {
                 //Try next font in fontset
                 continue;
@@ -141,10 +141,10 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                glyph_face_info const* gfi = gfaceinfos.find(i)!=gfaceinfos.end()? &gfaceinfos[i]: nullptr;
-                auto const& gpos = gfi? gfi->position: positions[i];
-                auto const& glyph = gfi? gfi->glyph: glyphs[i];
-                auto const& theface = gfi? gfi->face: face;
+                glyph_face_info const* gfi = gfaceinfos.find(i) != gfaceinfos.end()? &gfaceinfos[i]: nullptr;
+                auto const& gpos = gfi ? gfi->position : positions[i];
+                auto const& glyph = gfi ? gfi->glyph : glyphs[i];
+                auto const& theface = gfi ? gfi->face : face;
                 unsigned char_index = glyph.cluster;
                 glyph_info g(glyph.codepoint,char_index,text_item.format_);
                 if (theface->glyph_dimensions(g))
