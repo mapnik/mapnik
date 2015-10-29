@@ -22,7 +22,6 @@
 
 #include "catch.hpp"
 
-#include <mapnik/map.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
@@ -31,6 +30,15 @@
 #include <cstdlib>
 
 #include <boost/optional/optional_io.hpp>
+
+/*
+
+Compile and run just this test:
+
+clang++ -o test-geojson -g -I./test/ test/unit/run.cpp test/unit/datasource/geojson.cpp `mapnik-config --all-flags`
+./test-geojson -d yes
+
+*/
 
 namespace {
 
