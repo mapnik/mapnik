@@ -1,6 +1,5 @@
 #include "catch.hpp"
 
-#include <iostream>
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 

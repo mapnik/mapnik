@@ -22,20 +22,18 @@
 
 #include "catch.hpp"
 
-#include <mapnik/version.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/svg/svg_parser.hpp>
-#include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 
 #include <cmath>
 #include <fstream>
-#include <streambuf>
+#include <iterator>
 
 namespace detail {
 

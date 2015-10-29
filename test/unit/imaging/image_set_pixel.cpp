@@ -1,9 +1,7 @@
 #include "catch.hpp"
 
 // mapnik
-#include <mapnik/image_any.hpp>
-#include <mapnik/image_view_any.hpp>
-#include <mapnik/color.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 
 

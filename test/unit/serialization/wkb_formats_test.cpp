@@ -1,15 +1,12 @@
 #include "catch.hpp"
 
 #include <iostream>
-#include <mapnik/params.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/geometry_is_valid.hpp>
 #include <mapnik/geometry_is_simple.hpp>
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <vector>
-#include <algorithm>
 #include <boost/version.hpp>
 
 TEST_CASE("geometry formats") {
