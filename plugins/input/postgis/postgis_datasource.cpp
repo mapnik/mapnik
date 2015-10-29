@@ -774,7 +774,18 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             s << "SELECT ST_AsTWKB(";
             s << "ST_Simplify(";
             s << "ST_RemoveRepeatedPoints(";
+
+            if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
+                s << "ST_ClipByBox2D(";
+            }
+
             s << "\"" << geometryColumn_ << "\"";
+
+            // ! ST_ClipByBox2D()
+            if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz) {
+                s << "," << sql_bbox(box) << ")";
+            }
+
             // ! ST_RemoveRepeatedPoints()
             s << "," << twkb_tolerance << ")";
             // ! ST_Simplify(), with parameter to keep collapsed geometries
