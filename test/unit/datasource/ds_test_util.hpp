@@ -30,9 +30,32 @@
 
 namespace {
 
-void require_field_names(std::vector<mapnik::attribute_descriptor> const &fields,
+template <typename T>
+std::string vector_to_string(T const& vec)
+{
+    std::stringstream s;
+    for (auto const& item : vec)
+    {
+        s << item << "\n";
+    }
+    return s.str();
+}
+
+template <>
+std::string vector_to_string(std::vector<mapnik::attribute_descriptor> const& vec)
+{
+    std::stringstream s;
+    for (auto const& item : vec)
+    {
+        s << item.get_name() << "\n";
+    }
+    return s.str();
+}
+
+inline void require_field_names(std::vector<mapnik::attribute_descriptor> const &fields,
                          std::initializer_list<std::string> const &names)
 {
+    INFO("fields: " + vector_to_string(fields) + " names: " +  vector_to_string(names));
     REQUIRE(fields.size() == names.size());
     auto itr_a = fields.begin();
     auto const end_a = fields.end();
@@ -43,7 +66,7 @@ void require_field_names(std::vector<mapnik::attribute_descriptor> const &fields
     }
 }
 
-void require_field_types(std::vector<mapnik::attribute_descriptor> const &fields,
+inline void require_field_types(std::vector<mapnik::attribute_descriptor> const &fields,
                          std::initializer_list<mapnik::eAttributeType> const &types) {
     REQUIRE(fields.size() == types.size());
     auto itr_a = fields.begin();
@@ -54,7 +77,7 @@ void require_field_types(std::vector<mapnik::attribute_descriptor> const &fields
     }
 }
 
-mapnik::featureset_ptr all_features(mapnik::datasource_ptr ds) {
+inline mapnik::featureset_ptr all_features(mapnik::datasource_ptr ds) {
     auto fields = ds->get_descriptor().get_descriptors();
     mapnik::query query(ds->envelope());
     for (auto const &field : fields) {
@@ -63,7 +86,7 @@ mapnik::featureset_ptr all_features(mapnik::datasource_ptr ds) {
     return ds->features(query);
 }
 
-std::size_t count_features(mapnik::featureset_ptr features) {
+inline std::size_t count_features(mapnik::featureset_ptr features) {
     std::size_t count = 0;
     while (features->next()) {
         ++count;
@@ -72,7 +95,7 @@ std::size_t count_features(mapnik::featureset_ptr features) {
 }
 
 using attr = std::tuple<std::string, mapnik::value>;
-void require_attributes(mapnik::feature_ptr feature,
+inline void require_attributes(mapnik::feature_ptr feature,
                         std::initializer_list<attr> const &attrs) {
     REQUIRE(bool(feature));
     for (auto const &kv : attrs) {
@@ -134,11 +157,11 @@ struct feature_count {
 } // namespace detail
 
 template <typename T>
-std::size_t feature_count(mapnik::geometry::geometry<T> const &g) {
+inline std::size_t feature_count(mapnik::geometry::geometry<T> const &g) {
     return detail::feature_count()(g);
 }
 
-void require_geometry(mapnik::feature_ptr feature,
+inline void require_geometry(mapnik::feature_ptr feature,
                       std::size_t num_parts,
                       mapnik::geometry::geometry_types type) {
     REQUIRE(bool(feature));
