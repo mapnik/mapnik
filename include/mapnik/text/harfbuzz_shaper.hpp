@@ -100,7 +100,8 @@ static void shape_text(text_line & line,
             hb_glyph_info_t glyph;
             hb_glyph_position_t position;
         };
-        std::map<unsigned, glyph_face_info> gfaceinfos;
+        std::vector<glyph_face_info> glyphinfos;
+        unsigned valid_glyphs = 0;
 
         for (auto const& face : *face_set)
         {
@@ -120,6 +121,11 @@ static void shape_text(text_line & line,
             hb_font_destroy(font);
 
             unsigned num_glyphs = hb_buffer_get_length(buffer.get());
+            
+            if (num_glyphs > glyphinfos.size())
+            {
+                glyphinfos.resize(num_glyphs);
+            }
 
             hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer.get(), nullptr);
             hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer.get(), nullptr);
@@ -127,12 +133,13 @@ static void shape_text(text_line & line,
             // Check if all glyphs are valid.
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                if (glyphs[i].codepoint && gfaceinfos.find(i) == gfaceinfos.end())
+                if (glyphs[i].codepoint && !glyphinfos[i].glyph.codepoint)
                 {
-                    gfaceinfos[i] = { face, glyphs[i], positions[i] };
+                    glyphinfos[i] = { face, glyphs[i], positions[i] };
+                    ++valid_glyphs;
                 }
             }
-            if (gfaceinfos.size() < num_glyphs && (pos < num_faces))
+            if (valid_glyphs < num_glyphs && (pos < num_faces))
             {
                 //Try next font in fontset
                 continue;
@@ -141,7 +148,7 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                glyph_face_info const* gfi = gfaceinfos.find(i) != gfaceinfos.end() ? &gfaceinfos[i] : nullptr;
+                glyph_face_info const* gfi = glyphinfos[i].glyph.codepoint ? &glyphinfos[i] : nullptr;
                 auto const& gpos = gfi ? gfi->position : positions[i];
                 auto const& glyph = gfi ? gfi->glyph : glyphs[i];
                 auto const& theface = gfi ? gfi->face : face;
