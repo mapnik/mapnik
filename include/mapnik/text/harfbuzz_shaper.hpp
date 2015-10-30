@@ -121,7 +121,7 @@ static void shape_text(text_line & line,
             hb_font_destroy(font);
 
             unsigned num_glyphs = hb_buffer_get_length(buffer.get());
-            
+
             if (num_glyphs > glyphinfos.size())
             {
                 glyphinfos.resize(num_glyphs);
@@ -148,10 +148,15 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                glyph_face_info const* gfi = glyphinfos[i].glyph.codepoint ? &glyphinfos[i] : nullptr;
-                auto const& gpos = gfi ? gfi->position : positions[i];
-                auto const& glyph = gfi ? gfi->glyph : glyphs[i];
-                auto const& theface = gfi ? gfi->face : face;
+                auto& gpos = positions[i];
+                auto& glyph = glyphs[i];
+                face_ptr theface = face;
+                if (glyphinfos[i].glyph.codepoint)
+                {
+                    gpos = glyphinfos[i].position;
+                    glyph = glyphinfos[i].glyph;
+                    theface = glyphinfos[i].face;
+                }
                 unsigned char_index = glyph.cluster;
                 glyph_info g(glyph.codepoint,char_index,text_item.format_);
                 if (theface->glyph_dimensions(g))
