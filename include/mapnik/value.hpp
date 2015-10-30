@@ -100,7 +100,7 @@ struct equals
 
     bool operator() (value_double lhs, value_bool rhs) const
     {
-        return static_cast<value_double>(lhs) == rhs;
+        return lhs == static_cast<value_double>(rhs);
     }
 
     bool operator() (value_unicode_string const& lhs,
