@@ -59,10 +59,11 @@ buffer::buffer(buffer && rhs) noexcept
 // copy
 buffer::buffer(buffer const& rhs)
     : size_(rhs.size_),
-      data_(static_cast<unsigned char*>(size_ != 0 ? ::operator new(size_) : nullptr)),
-      owns_(true)
+      data_(static_cast<unsigned char*>((rhs.owns_ && size_ != 0) ? ::operator new(size_) : nullptr)),
+      owns_(rhs.owns_)
 {
     if (data_) std::copy(rhs.data_, rhs.data_ + rhs.size_, data_);
+    else data_ = rhs.data_;
 }
 
 buffer::~buffer()
