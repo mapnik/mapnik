@@ -341,8 +341,7 @@ SECTION("Image copy/move")
         CHECK( pixel == mapnik::color(0,255,0).rgba());
     }
 
-    // deep copy
-    mapnik::image_rgba8 im3(im2); // allocates new internal buffer
+    mapnik::image_rgba8 im3(im2); // shallow copy
     for (auto & pixel : im3)
     {
         // expect `green`
@@ -351,22 +350,15 @@ SECTION("Image copy/move")
         pixel = mapnik::color(255,0,0).rgba(); //red
     }
 
-    // im2 (green)
+    for (auto const& pixel : im3)
+    {
+        // expect `red`
+        CHECK( pixel == mapnik::color(255,0,0).rgba());
+    }
     for (auto const& pixel : im2)
     {
-        // expect `green`
-        CHECK( pixel == mapnik::color(0,255,0).rgba());
-    }
-
-    //buf2 still holds green pixels
-    CHECK(buf2.size() == 16 * 16 * 4);
-
-    unsigned char* itr = buf2.data();
-    unsigned char* end = itr + buf2.size();
-    count = 0;
-    for ( ;itr!= end; ++itr)
-    {
-        CHECK( *itr == ((count++ % 2 == 0) ? 0 : 0xff)); // green
+        // expect `red`
+        CHECK( pixel == mapnik::color(255,0,0).rgba());
     }
 }
 
