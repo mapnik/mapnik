@@ -78,7 +78,7 @@ struct feature_collection_grammar :
     boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
-template <typename Iterator, typename FeatureType,typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
+template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
 struct feature_grammar_callback :
         qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
 {
