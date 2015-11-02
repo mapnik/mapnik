@@ -59,13 +59,13 @@ struct apply_feature_callback
     }
 };
 
-template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback>
+template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
 struct feature_collection_grammar :
         qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
 {
     feature_collection_grammar(mapnik::transcoder const& tr);
     // grammars
-    feature_grammar<Iterator,FeatureType> feature_g;
+    feature_grammar<Iterator, FeatureType, ErrorHandler> feature_g;
     // rules
     qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> start; // START
     qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> feature_collection;
@@ -74,9 +74,11 @@ struct feature_collection_grammar :
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
     // phoenix functions
     phoenix::function<apply_feature_callback> on_feature;
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
-template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback>
+template <typename Iterator, typename FeatureType,typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
 struct feature_grammar_callback :
         qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
 {
@@ -91,6 +93,8 @@ struct feature_grammar_callback :
     // phoenix functions
     phoenix::function<json::set_geometry_impl> set_geometry;
     phoenix::function<apply_feature_callback> on_feature;
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
 
