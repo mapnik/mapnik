@@ -23,34 +23,42 @@
 #ifndef MAPNIK_JSON_ERROR_HANDLER_HPP
 #define MAPNIK_JSON_ERROR_HANDLER_HPP
 
-#include <string>
-#include <sstream>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <boost/spirit/home/qi.hpp>
 #include <boost/spirit/home/support/info.hpp>
 #pragma GCC diagnostic pop
+// mapnik
+#include <mapnik/debug.hpp>
+// stl
 #include <cassert>
+#include <string>
+#include <sstream>
+
 
 namespace mapnik { namespace json {
 
 template <typename Iterator>
 struct error_handler
 {
-    using result_type = void;
-    void operator() (
+    using result_type = boost::spirit::qi::error_handler_result;
+    result_type operator() (
         Iterator,
         Iterator end,
         Iterator err_pos,
         boost::spirit::info const& what) const
     {
+#ifdef MAPNIK_LOG
         std::stringstream s;
         using difference_type = typename std::iterator_traits<Iterator>::difference_type;
-        auto start_err= err_pos;
+        auto start_err = err_pos;
         std::advance(err_pos, std::min(std::distance(err_pos, end), difference_type(16)));
         auto end_err = err_pos;
         assert(end_err <= end);
         s << "Mapnik GeoJSON parsing error:" << what << " expected but got: " << std::string(start_err, end_err);
-        throw std::runtime_error(s.str());
+        MAPNIK_LOG_ERROR(error_handler) << s.str();
+#endif
+        return boost::spirit::qi::fail;
     }
 };
 
