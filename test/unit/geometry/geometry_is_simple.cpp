@@ -2,7 +2,6 @@
 
 #include <boost/version.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_is_simple.hpp>
 
 TEST_CASE("geometry is_simple") {

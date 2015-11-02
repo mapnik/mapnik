@@ -20,9 +20,6 @@
  *
  *****************************************************************************/
 
-#include <iostream>
-#include <fstream>
-
 #include "catch.hpp"
 
 #include <mapnik/quad_tree.hpp>

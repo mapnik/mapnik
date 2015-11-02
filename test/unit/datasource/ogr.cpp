@@ -28,7 +28,6 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/util/fs.hpp>
 
 TEST_CASE("ogr") {

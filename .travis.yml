@@ -46,14 +46,18 @@ before_install:
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
-     psql -U postgres -c 'create database template_postgis;' -U postgres;
-     psql -U postgres -c 'create extension postgis;' -d template_postgis -U postgres;
      export CXX="ccache clang++-3.5 -Qunused-arguments";
      export CC="ccache clang-3.5 -Qunused-arguments";
      export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
    else
+     brew rm postgis --force;
+     brew install postgis --force;
+     pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres;
+     createuser -s postgres;
      export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
    fi
+ - psql -c 'create database template_postgis;' -U postgres;
+ - psql -c 'create extension postgis;' -d template_postgis -U postgres;
  - if [[ ${COVERAGE} == true ]]; then
      PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
    fi

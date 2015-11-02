@@ -6,9 +6,6 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/fs.hpp>
 
-#include <vector>
-#include <algorithm>
-
 #include "catch.hpp"
 
 

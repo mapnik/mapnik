@@ -29,6 +29,7 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/home/support/info.hpp>
 #pragma GCC diagnostic pop
+#include <cassert>
 
 namespace mapnik { namespace json {
 
@@ -37,14 +38,18 @@ struct error_handler
 {
     using result_type = void;
     void operator() (
-        Iterator, Iterator,
-        Iterator err_pos, boost::spirit::info const& what) const
+        Iterator,
+        Iterator end,
+        Iterator err_pos,
+        boost::spirit::info const& what) const
     {
         std::stringstream s;
-        auto start = err_pos;
-        std::advance(err_pos,16);
-        auto end = err_pos;
-        s << "Mapnik geojson parsing error:" << what << " expected but got: " << std::string(start, end);
+        using difference_type = typename std::iterator_traits<Iterator>::difference_type;
+        auto start_err= err_pos;
+        std::advance(err_pos, std::min(std::distance(err_pos, end), difference_type(16)));
+        auto end_err = err_pos;
+        assert(end_err <= end);
+        s << "Mapnik GeoJSON parsing error:" << what << " expected but got: " << std::string(start_err, end_err);
         throw std::runtime_error(s.str());
     }
 };

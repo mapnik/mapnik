@@ -3,8 +3,7 @@
 
 #include "catch.hpp"
 
-#include <mapnik/image_util.hpp>
-#include <mapnik/image_view_any.hpp>
+#include <mapnik/image_view.hpp>
 #include <mapnik/webp_io.hpp>
 
 TEST_CASE("webp io") {

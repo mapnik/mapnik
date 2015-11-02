@@ -6,8 +6,6 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_util_jpeg.hpp>
 #include <mapnik/util/fs.hpp>
-#include <vector>
-#include <algorithm>
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_context.hpp>
 #include <mapnik/cairo/cairo_image_util.hpp>

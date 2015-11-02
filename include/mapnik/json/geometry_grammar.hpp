@@ -45,8 +45,8 @@ struct geometry_grammar :
     geometry_grammar();
     qi::rule<Iterator, mapnik::geometry::geometry<double>(), space_type> start;
     qi::rule<Iterator, qi::locals<int, mapnik::json::coordinates>, mapnik::geometry::geometry<double>(), space_type> geometry;
-    qi::symbols<char, int> geometry_type_dispatch;
     qi::rule<Iterator, mapnik::geometry::geometry_collection<double>(), space_type> geometry_collection;
+    qi::symbols<char, int> geometry_type_dispatch;
     positions_grammar<Iterator> coordinates;
     boost::phoenix::function<create_geometry_impl> create_geometry;
     // error handler

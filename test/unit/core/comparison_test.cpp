@@ -2,7 +2,6 @@
 
 #include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/unicode.hpp>
 
 TEST_CASE("comparison")
 {

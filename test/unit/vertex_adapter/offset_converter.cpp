@@ -1,18 +1,13 @@
 #include "catch.hpp"
 
 // mapnik
-#include <mapnik/global.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/offset_converter.hpp>
 
 // stl
-#include <stdexcept>
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <tuple>
-#include <algorithm>
 
 namespace offset_test {
 

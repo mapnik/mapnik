@@ -50,7 +50,7 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback>::feature_colle
         using phoenix::new_;
         using phoenix::val;
 
-        start = /*feature_from_geometry(_r1, _r2, _r3) | feature(_r1, _r2, _r3) | */feature_collection(_r1, _r2, _r3)
+        start = feature_collection(_r1, _r2, _r3)
             ;
 
         feature_collection = lit('{') >> (type | features(_r1, _r2, _r3) | feature_g.json_.key_value) % lit(',') >> lit('}')
@@ -70,18 +70,11 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback>::feature_colle
             >> feature_g(*_a)[on_feature(_r3,_a)]
             ;
 
-        //feature_from_geometry =
-        //    eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
-        //    >> geometry_g[set_geometry(*_a, _1)] [on_feature(_r3, _a)]
-        //    ;
-
         start.name("start");
         type.name("type");
         features.name("features");
         feature.name("feature");
-        //feature_from_geometry.name("feature-from-geometry");
         feature_g.name("feature-grammar");
-        //geometry_g.name("geometry-grammar");
 
         qi::on_error<qi::fail>
             (
@@ -95,8 +88,6 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback>::feature_colle
                 << std::endl
                 );
 }
-
-//
 
 
 template <typename Iterator, typename FeatureType, typename FeatureCallback>
