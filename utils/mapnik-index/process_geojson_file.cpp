@@ -99,8 +99,11 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     }
     for (auto const& item : boxes)
     {
-        if (!extent.valid()) extent = item.first;
-        else extent.expand_to_include(item.first);
+        if (item.first.valid())
+        {
+            if (!extent.valid()) extent = item.first;
+            else extent.expand_to_include(item.first);
+        }
     }
     return std::make_pair(true, extent);
 }
