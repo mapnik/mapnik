@@ -23,6 +23,7 @@
 #ifndef MAPNIK_JSON_ERROR_HANDLER_HPP
 #define MAPNIK_JSON_ERROR_HANDLER_HPP
 
+#include <mapnik/config.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/spirit/home/qi.hpp>

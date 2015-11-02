@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/positions_grammar_impl.hpp>
