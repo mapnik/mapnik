@@ -995,25 +995,21 @@ inline const value operator+(value const& p1,value const& p2)
 
 inline const value operator-(value const& p1,value const& p2)
 {
-
     return value(util::apply_visitor(impl::sub<value>(),p1, p2));
 }
 
 inline const value operator*(value const& p1,value const& p2)
 {
-
     return value(util::apply_visitor(impl::mult<value>(),p1, p2));
 }
 
 inline const value operator/(value const& p1,value const& p2)
 {
-
     return value(util::apply_visitor(impl::div<value>(),p1, p2));
 }
 
 inline const value operator%(value const& p1,value const& p2)
 {
-
     return value(util::apply_visitor(impl::mod<value>(),p1, p2));
 }
 
