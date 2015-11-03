@@ -11,6 +11,10 @@ TEST_CASE("comparison")
         mapnik::value v1 = 1.001; // mapnik::value_double
         mapnik::value v2 = true; // mapnik::value_boolean
 
+        CHECK(v0.is<mapnik::value_integer>());
+        CHECK(v1.is<mapnik::value_double>());
+        CHECK(v2.is<mapnik::value_bool>());
+
         REQUIRE(!(v0 == v1));
         REQUIRE(!(v1 == v0));
 
@@ -27,6 +31,11 @@ TEST_CASE("comparison")
         mapnik::value v1 = 1.001; // mapnik::value_double
         mapnik::value v2 = true; // mapnik::value_boolean
         mapnik::value v3 = mapnik::value_null(); //
+
+        CHECK(v0.is<mapnik::value_integer>());
+        CHECK(v1.is<mapnik::value_double>());
+        CHECK(v2.is<mapnik::value_bool>());
+        CHECK(v3.is<mapnik::value_null>());
 
         REQUIRE(v0 != v1);
         REQUIRE(v1 != v0);
@@ -51,6 +60,11 @@ TEST_CASE("comparison")
         mapnik::value v1 = 1.01;
         mapnik::value v2 = true;
         mapnik::value v3 = 2;
+
+        CHECK(v0.is<mapnik::value_integer>());
+        CHECK(v1.is<mapnik::value_double>());
+        CHECK(v2.is<mapnik::value_bool>());
+        CHECK(v3.is<mapnik::value_integer>());
         // value_integer | value_double
         // 1 < 1.01 => true
         // 1.01 > 1 => true
