@@ -123,7 +123,6 @@ struct equals
 };
 
 struct not_equals
-
 {
     template <typename T, typename U>
     bool operator() (const T &, const U &) const
@@ -295,7 +294,6 @@ struct greater_or_equal
 };
 
 struct less_than
-
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
@@ -352,7 +350,6 @@ struct less_than
 };
 
 struct less_or_equal
-
 {
     template <typename T, typename U>
     bool operator()(const T &, const U &) const
