@@ -65,22 +65,25 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
         ;
 
     features = no_skip[iter_pos[_a = _1]] >> -(lit('{')
-                                      >> *((json.key_value - lit("\"features\"")) >> lit(','))
-                                      >> lit("\"features\"")
-                                      >> lit(':'))
-                                 >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
+                                               >> *((json.key_value - lit("\"features\"")) >> lit(','))
+                                               >> lit("\"features\"")
+                                               >> lit(':'))
+                                          >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
         ;
 
     feature = raw[lit('{')[_a = 1]
-                  >> *(eps(_a > 0) >> (lit('{')[_a += 1]
-                                       |
-                                       lit('}')[_a -=1]
-                                       |
-                                       coords[_b = _1]
-                                       |
-                                       json.string_
-                                       |
-                                       char_))][push_box(_r1, _r2, _b, _1)]
+                  >> *(eps(_a > 0) >> (
+                           lit("\"FeatureCollection\"") > eps(false) // fail if nested FeatureCollection
+                           |
+                           lit('{')[_a += 1]
+                           |
+                           lit('}')[_a -= 1]
+                           |
+                           coords[_b = _1]
+                           |
+                           json.string_
+                           |
+                           char_))][push_box(_r1, _r2, _b, _1)]
         ;
 
     coords = lit("\"coordinates\"")

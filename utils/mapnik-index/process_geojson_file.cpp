@@ -94,7 +94,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     }
     catch (std::exception const& ex)
     {
-        std::clog << "mapnik-index:" << ex.what() << std::endl;
+        std::clog << "mapnik-index (GeoJSON): " << ex.what() << std::endl;
     }
     for (auto const& item : boxes)
     {
