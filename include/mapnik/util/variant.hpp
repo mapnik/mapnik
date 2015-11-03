@@ -116,6 +116,21 @@ struct value_traits
         (direct_index == invalid_value) ? convertible_type<T, Types...>::index : direct_index;
 };
 
+// check if T is in Types...
+template <typename T, typename...Types>
+struct has_type;
+
+template <typename T, typename First, typename... Types>
+struct has_type<T, First, Types...>
+{
+    static constexpr bool value = std::is_same<T, First>::value
+        || has_type<T, Types...>::value;
+};
+
+template <typename T>
+struct has_type<T> : std::false_type {};
+//
+
 template <typename T, typename...Types>
 struct is_valid_type;
 
@@ -661,6 +676,7 @@ public:
     template<typename T>
     VARIANT_INLINE bool is() const
     {
+        static_assert(detail::has_type<T, Types...>::value, "invalid type in T in `is<T>()` for this variant");
         return (type_index == detail::direct_type<T, Types...>::index);
     }
 
