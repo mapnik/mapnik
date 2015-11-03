@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys
 import mapnik
 
@@ -19,5 +19,5 @@ elif len(sys.argv) == 3:
 elif len(sys.argv) == 5:
     render(sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
 else:
-    print "usage: %s style_file [output_file] [width height]" % sys.argv[0]
+    print ("usage: %s style_file [output_file] [width height]" % sys.argv[0])
     sys.exit(1)
