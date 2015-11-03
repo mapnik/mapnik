@@ -2,6 +2,7 @@
 
 // mapnik
 #include <mapnik/vertex_cache.hpp>
+#include <mapnik/global.hpp>
 
 // stl
 #include <iostream>
