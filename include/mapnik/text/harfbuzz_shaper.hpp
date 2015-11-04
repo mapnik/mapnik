@@ -133,10 +133,13 @@ static void shape_text(text_line & line,
             // Check if all glyphs are valid.
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                if (glyphs[i].codepoint && !glyphinfos[i].glyph.codepoint)
+                if (glyphs[i].codepoint)
                 {
+                    if (!glyphinfos[i].glyph.codepoint)
+                    {
+                        ++valid_glyphs;
+                    }
                     glyphinfos[i] = { face, glyphs[i], positions[i] };
-                    ++valid_glyphs;
                 }
             }
             if (valid_glyphs < num_glyphs && (pos < num_faces))
