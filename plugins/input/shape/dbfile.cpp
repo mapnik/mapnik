@@ -35,6 +35,7 @@
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #include <boost/spirit/include/qi.hpp>
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <boost/interprocess/mapped_region.hpp>

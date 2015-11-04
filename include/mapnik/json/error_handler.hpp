@@ -26,6 +26,7 @@
 #include <mapnik/config.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #include <boost/spirit/home/qi.hpp>
 #include <boost/spirit/home/support/info.hpp>
 #pragma GCC diagnostic pop
