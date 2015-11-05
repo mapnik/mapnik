@@ -78,7 +78,7 @@ template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct positions_grammar :
         qi::grammar<Iterator,coordinates(),space_type>
 {
-    positions_grammar();
+    positions_grammar(ErrorHandler & error_handler);
     qi::rule<Iterator, coordinates(),space_type> coords;
     qi::rule<Iterator, boost::optional<position>(), space_type> pos;
     qi::rule<Iterator, positions(), space_type> ring;
@@ -86,8 +86,6 @@ struct positions_grammar :
     qi::rule<Iterator, std::vector<std::vector<positions> >(), space_type> rings_array;
     boost::phoenix::function<set_position_impl> set_position;
     boost::phoenix::function<push_position_impl> push_position;
-    // error handler
-    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
 }}

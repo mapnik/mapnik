@@ -28,7 +28,7 @@ namespace mapnik { namespace json {
 
 template <typename Iterator, typename FeatureType, typename ErrorHandler>
 feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::transcoder const& tr)
-    : feature_grammar::base_type(feature,"feature"),
+    : feature_grammar::base_type(start,"feature"),
       json_(),
       put_property_(put_property(tr))
 {
@@ -56,16 +56,16 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     json_.pairs = json_.key_value % lit(',')
         ;
 
-    json_.key_value = (json_.string_ >> lit(':') >> json_.value)
+    json_.key_value = (json_.string_ > lit(':') > json_.value)
         ;
 
     json_.object = lit('{')
-        >> *json_.pairs
-        >> lit('}')
+        > *json_.pairs
+        > lit('}')
         ;
     json_.array = lit('[')
-        >> json_.value >> *(lit(',') >> json_.value)
-        >> lit(']')
+        > json_.value > *(lit(',') > json_.value)
+        > lit(']')
         ;
     json_.number = json_.strict_double[_val = json_.double_converter(_1)]
         | json_.int__[_val = json_.integer_converter(_1)]
@@ -75,15 +75,20 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
         ;
 
     // geojson types
-    feature_type = lit("\"type\"")
-        >> lit(':')
-        >> lit("\"Feature\"")
+    feature_type = lit("\"type\"") > lit(':') > lit("\"Feature\"")
         ;
 
-    feature = lit('{')
-        >> (feature_type | (lit("\"geometry\"") >> lit(':')
-                            >> geometry_grammar_[set_geometry(_r1, _1)]) | properties(_r1) | json_.key_value) % lit(',')
-                            >> lit('}')
+    start = feature(_r1);
+
+    feature = eps[_a = false] > lit('{') >
+        (feature_type[_a = true]
+         |
+         (lit("\"geometry\"") > lit(':') > geometry_grammar_[set_geometry(_r1, _1)])
+         |
+         properties(_r1)
+         |
+         json_.key_value) % lit(',')
+        > eps(_a) > lit('}')
         ;
 
     properties = lit("\"properties\"")
@@ -96,10 +101,10 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     attribute_value %= json_.number | json_.string_ | stringify_object | stringify_array
         ;
 
-    stringify_object %= char_('{')[_a = 1 ] >> *(eps(_a > 0) >> (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))
+    stringify_object %= char_('{')[_a = 1 ] > *(eps(_a > 0) > (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))
         ;
 
-    stringify_array %= char_('[')[_a = 1 ] >> *(eps(_a > 0) >> (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))
+    stringify_array %= char_('[')[_a = 1 ] > *(eps(_a > 0) > (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))
         ;
 
     feature.name("Feature");

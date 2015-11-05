@@ -37,7 +37,8 @@ namespace mapnik { namespace json {
 
 template <typename Iterator, typename ErrorHandler >
 geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
-    : geometry_grammar::base_type(start,"geometry")
+    : geometry_grammar::base_type(start,"geometry"),
+      coordinates(error_handler)
 {
     qi::lit_type lit;
     qi::int_type int_;
@@ -56,13 +57,13 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
 
     start = geometry.alias() | lit("null");
 
-    geometry = lit('{')[_a = 0 ]
-        >> (-lit(',') >> (lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1])
-                    ^
-            (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
-            ^
-            (-lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> geometry_collection[_val = _1] >> lit(']')))[create_geometry(_val,_a,_b)]
-        >> lit('}')
+    geometry = lit('{')[_a = 0]
+        > (-lit(',') >> (lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
+           ^
+           (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
+           ^
+           (-lit(',') >> (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))))[create_geometry(_val,_a,_b)]
+        > lit('}')
         ;
 
     geometry_collection = geometry[push_back(_val, _1)] % lit(',')
@@ -83,7 +84,8 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     geometry_type_dispatch.name("type: (Point|LineString|Polygon|MultiPoint|MultiLineString|MultiPolygon|GeometryCollection)");
     coordinates.name("coordinates");
     // error handler
-    on_error<fail>(start, error_handler(_1, _2, _3, _4));
+    auto error_handler_function = boost::phoenix::function<ErrorHandler>(error_handler);
+    on_error<fail>(start, error_handler_function(_1, _2, _3, _4));
 }
 
 }}

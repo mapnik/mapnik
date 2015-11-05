@@ -50,7 +50,7 @@ struct geometry_grammar :
     positions_grammar<Iterator> coordinates;
     boost::phoenix::function<create_geometry_impl> create_geometry;
     // error handler
-    boost::phoenix::function<ErrorHandler> const error_handler;
+    ErrorHandler error_handler;
 };
 
 }}

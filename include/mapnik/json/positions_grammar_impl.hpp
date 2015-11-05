@@ -35,7 +35,7 @@
 namespace mapnik { namespace json {
 
 template <typename Iterator, typename ErrorHandler>
-positions_grammar<Iterator, ErrorHandler>::positions_grammar()
+positions_grammar<Iterator, ErrorHandler>::positions_grammar(ErrorHandler & error_handler)
     : positions_grammar::base_type(coords,"coordinates")
 {
     qi::lit_type lit;
@@ -66,7 +66,8 @@ positions_grammar<Iterator, ErrorHandler>::positions_grammar()
     rings_array.name("Rings array");
 
     // error handler
-    on_error<fail>(coords, error_handler(_1, _2, _3, _4));
+    auto error_handler_function = boost::phoenix::function<ErrorHandler>(error_handler);
+    on_error<fail>(coords, error_handler_function(_1, _2, _3, _4));
 }
 
 }}
