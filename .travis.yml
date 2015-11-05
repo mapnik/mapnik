@@ -34,11 +34,9 @@ matrix:
     - os: osx
       compiler: clang
       env: JOBS=8 MASON_PUBLISH=true
-      osx_image: xcode7
     - os: osx
       compiler: clang
       env: JOBS=8 COVERAGE=true
-      osx_image: xcode7
 
 before_install:
  - export COVERAGE=${COVERAGE:-false}
