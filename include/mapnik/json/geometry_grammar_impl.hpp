@@ -54,16 +54,15 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     using qi::on_error;
     using phoenix::push_back;
 
-    start = geometry.alias(); // | geometry_collection;
+    start = geometry.alias() | lit("null");
 
-    geometry = (lit('{')[_a = 0 ]
-                >> (-lit(',') >> (lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1])
+    geometry = lit('{')[_a = 0 ]
+        >> (-lit(',') >> (lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1])
                     ^
-                    (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
-                    ^
-                    (-lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> geometry_collection[_val = _1] >> lit(']')))[create_geometry(_val,_a,_b)]
-                >> lit('}'))
-        | lit("null")
+            (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
+            ^
+            (-lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> geometry_collection[_val = _1] >> lit(']')))[create_geometry(_val,_a,_b)]
+        >> lit('}')
         ;
 
     geometry_collection = geometry[push_back(_val, _1)] % lit(',')
