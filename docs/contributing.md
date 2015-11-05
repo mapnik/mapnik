@@ -276,8 +276,9 @@ To auto-convert to the above syntax you can put this in an .emacs file:
 
 ### Generating *.gcov files with LLVM/clang toolchain to check tests coverage
 
-* Ensure `llvm-cov` is available 
-* Build and link mapnik with `--coverage` and ensure optimisation is off and profile flags is present. For example pass following options to Scons: `CUSTOM_CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage'`
-* Run test(s) e.g `./test/unit/run`
+* Ensure `llvm-cov` is available
+ * On OS X do `xcrun -f llvm-cov` to see the location of the binary
+* Build and link mapnik with `--coverage` and ensure optimization is off and profile flags are present. For example pass following options to Scons: `CUSTOM_CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage'`
+* Run test(s) e.g `make test`
 * To generate *.gcov file(s) run `llvm-cov gcov <path-to-cpp-file>` 
 * *.gcov files can be viewed in text editor 
