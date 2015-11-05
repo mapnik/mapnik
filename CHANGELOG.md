@@ -6,6 +6,16 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.9
+
+Released:
+
+(Packaged from )
+
+#### Summary
+
+ - Fixed offsetting of complex paths and sharp angles (https://github.com/mapnik/mapnik/pull/3160)
+
 ## 3.0.8
 
 Released: October 23, 2015
