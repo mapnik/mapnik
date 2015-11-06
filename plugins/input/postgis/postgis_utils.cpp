@@ -202,32 +202,28 @@ private:
     	int nShift = 0;
     	uint8_t nByte;
 
-    	/* Check so we don't read beyond the twkb */
-    	while( pos_ < size_ )
-    	{
-    		nByte = twkb_[pos_];
-    		/* Hibit is set, so this isn't the last byte */
-    		if (nByte & 0x80)
-    		{
-    			/* We get here when there is more to read in the input varInt */
-    			/* Here we take the least significant 7 bits of the read */
-    			/* byte and put it in the most significant place in the result variable. */
-    			nVal |= ((uint64_t)(nByte & 0x7f)) << nShift; 
-    			/* move the "cursor" of the input buffer step (8 bits) */
-    			pos_++; 
-    			/* move the cursor in the resulting variable (7 bits) */
-    			nShift += 7;
-    		}
-    		else
-    		{
-    			/* move the "cursor" one step */
-    			pos_++; 
-    			/* Move the last read byte to the most significant */
-    			/* place in the result and return the whole result */
-    			//*size = ptr - the_start;
-    			return nVal | (uint64_t)(nByte << nShift);
-    		}
-    	}
+        /* Check so we don't read beyond the twkb */
+        while ( pos_ < size_ )
+        {
+            nByte = twkb_[pos_];
+
+            /* We get here when there is more to read in the input varInt */
+            /* Here we take the least significant 7 bits of the read */
+            /* byte and put it in the most significant place in the result variable. */
+            nVal |= ((uint64_t)(nByte & 0x7f)) << nShift;
+
+            /* move the "cursor" of the input buffer step (8 bits) */
+            pos_++;
+
+            /* move the cursor in the resulting variable (7 bits) */
+            nShift += 7;
+
+            /* Hibit isn't set, so this is the last byte */
+            if ( !(nByte & 0x80) )
+            {
+                return nVal;
+            }
+        }
                 
         // lwerror("%s: varint extends past end of buffer", __func__);
     	return 0;
