@@ -125,7 +125,7 @@ TEST_CASE("geojson") {
             }
         }
 
-        SECTION("GeoJSON Point ")
+        SECTION("GeoJSON Point")
         {
             for (auto cache_features : {true, false})
             {
@@ -436,10 +436,55 @@ TEST_CASE("geojson") {
             }
         }
 
+        SECTION("GeoJSON ensure mapnik::datasource_cache::instance().create() throws on malformed input")
+        {
+            mapnik::parameters params;
+            params["type"] = "geojson";
+
+            for (auto const& c_str : {"./test/data/json/feature-malformed-1.geojson",
+                        "./test/data/json/feature-malformed-2.geojson",
+                        "./test/data/json/feature-malformed-3.geojson"})
+            {
+                std::string filename(c_str);
+                params["file"] = filename; // mismatched parentheses
+
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    mapnik::util::remove(filename + ".index");
+                }
+
+                for (auto create_index : { true, false })
+                {
+                    if (create_index)
+                    {
+                        CHECK(!mapnik::util::exists(filename + ".index"));
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(!mapnik::util::exists(filename + ".index"));
+                    }
+
+                    for (auto cache_features : {true, false})
+                    {
+                        CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
+                    }
+
+                    // cleanup
+                    if (create_index && mapnik::util::exists(filename + ".index"))
+                    {
+                        mapnik::util::remove(filename + ".index");
+                    }
+                }
+            }
+        }
+
         SECTION("GeoJSON ensure input fully consumed and throw exception otherwise")
         {
             mapnik::parameters params;
             params["type"] = "geojson";
+
             std::string filename("./test/data/json/points-malformed.geojson");
             params["file"] = filename; // mismatched parentheses
 
