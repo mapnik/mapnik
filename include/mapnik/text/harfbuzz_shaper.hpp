@@ -94,12 +94,15 @@ static void shape_text(text_line & line,
         font_feature_settings const& ff_settings = text_item.format_->ff_settings;
         int ff_count = safe_cast<int>(ff_settings.count());
 
+        // rendering information for a single glyph
         struct glyph_face_info
         {
             face_ptr face;
             hb_glyph_info_t glyph;
             hb_glyph_position_t position;
         };
+        // this table is filled with information for rendering each glyph, so that 
+        // several font faces can be used in a single text_item
         std::vector<glyph_face_info> glyphinfos;
         unsigned valid_glyphs = 0;
 
@@ -122,6 +125,7 @@ static void shape_text(text_line & line,
 
             unsigned num_glyphs = hb_buffer_get_length(buffer.get());
 
+            // if the number of rendered glyphs has increased, we need to resize the table 
             if (num_glyphs > glyphinfos.size())
             {
                 glyphinfos.resize(num_glyphs);
@@ -133,6 +137,7 @@ static void shape_text(text_line & line,
             // Check if all glyphs are valid.
             for (unsigned i=0; i<num_glyphs; ++i)
             {
+                // if we have a valid codepoint, save rendering info.
                 if (glyphs[i].codepoint)
                 {
                     if (!glyphinfos[i].glyph.codepoint)
