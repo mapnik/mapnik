@@ -29,11 +29,7 @@ struct fake_path
     template <typename Itr>
     fake_path(Itr itr, size_t sz, bool make_invalid = false) {
         size_t num_coords = sz >> 1;
-        if (make_invalid)
-        {
-            num_coords++;
-        }
-        vertices_.reserve(num_coords);
+        vertices_.reserve(num_coords + (make_invalid ? 1 : 0));
         if (make_invalid)
         {
             vertices_.push_back(std::make_tuple(0,0,mapnik::SEG_END));
