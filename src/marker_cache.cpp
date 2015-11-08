@@ -33,10 +33,8 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/util/fs.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop

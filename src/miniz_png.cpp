@@ -31,8 +31,7 @@
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 extern "C" {
 #include "miniz.c"
 }

@@ -24,11 +24,9 @@
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
 
-// boost
-#include <boost/version.hpp>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
+#include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 

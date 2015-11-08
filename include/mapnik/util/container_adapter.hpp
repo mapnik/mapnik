@@ -24,16 +24,10 @@
 #define CONTAINER_ADAPTER_HPP
 
 // mapnik
-
-
 #include <mapnik/util/path_iterator.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/support_container.hpp>
 #pragma GCC diagnostic pop
 

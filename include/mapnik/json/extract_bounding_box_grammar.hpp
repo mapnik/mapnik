@@ -28,13 +28,9 @@
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
-// boost
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>

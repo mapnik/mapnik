@@ -36,9 +36,8 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
 #pragma GCC diagnostic pop
 

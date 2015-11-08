@@ -33,11 +33,9 @@
 #include <mapnik/csv/csv_grammar.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/datasource.hpp>
-// boost
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 

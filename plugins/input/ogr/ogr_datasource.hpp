@@ -40,9 +40,8 @@
 #include <vector>
 #include <string>
 
-// ogr
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
+#include <mapnik/warning_ignore.hpp>
 #include <ogrsf_frmts.h>
 #pragma GCC diagnostic pop
 #include "ogr_layer_ptr.hpp"

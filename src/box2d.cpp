@@ -29,12 +29,10 @@
 #include <sstream>
 #include <iomanip>
 
-// boost
+#include <mapnik/config.hpp>
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/include/adapt_adt.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_adapt_adt_attributes.hpp>

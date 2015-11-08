@@ -9,8 +9,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop

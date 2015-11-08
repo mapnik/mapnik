@@ -1766,11 +1766,6 @@ if not preconfigured:
         # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion viable
         common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
 
-        if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unknown-pragmas -Wno-unsequenced '
-        elif 'g++' in env['CXX']:
-            common_cxx_flags += ' -Wno-pragmas '
-
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:

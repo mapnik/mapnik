@@ -27,7 +27,7 @@
 #include <mapnik/util/variant.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/optional.hpp>

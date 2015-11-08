@@ -20,24 +20,16 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GRID_RENDERER_BASE_HPP
-#define MAPNIK_GRID_RENDERER_BASE_HPP
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include "agg_renderer_base.h"
-#include <mapnik/grid/grid_pixel.hpp>
-#pragma GCC diagnostic pop
-#include <mapnik/grid/grid_pixfmt.hpp>
-
-namespace mapnik {
-
-#ifdef BIGINT
-using grid_renderer_base_type = agg::renderer_base<mapnik::pixfmt_gray64>;
-#else
-using grid_renderer_base_type = agg::renderer_base<mapnik::pixfmt_gray32>;
-#endif
-
-}
-
-#endif //MAPNIK_AGG_RASTERIZER_HPP
+#pragma GCC diagnostic ignored "-Wno-unknown-pragmas" // clang
+#pragma GCC diagnostic ignored "-Wno-pragmas" // gcc
+#pragma GCC diagnostic ignored "-Wno-unsequenced"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wredeclared-class-member"
+#pragma GCC diagnostic ignored "-Wunused-local-typedef" 
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wc++11-narrowing"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wconversion"

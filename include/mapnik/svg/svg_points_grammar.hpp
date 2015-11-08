@@ -25,11 +25,14 @@
 
 // mapnik
 #include <mapnik/svg/svg_path_commands.hpp>
-// spirit
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace svg {
 

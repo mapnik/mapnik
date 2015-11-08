@@ -33,11 +33,8 @@
 #include <vector>
 #include <fstream>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #pragma GCC diagnostic pop
 

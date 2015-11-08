@@ -48,16 +48,14 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/variant_io.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
-#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#pragma GCC diagnostic pop
 #include <boost/optional.hpp>
 #include <boost/version.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <iostream>

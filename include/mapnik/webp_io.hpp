@@ -27,9 +27,8 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 
-// webp
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
+#include <mapnik/warning_ignore.hpp>
 extern "C"
 {
 #include <webp/encode.h>
