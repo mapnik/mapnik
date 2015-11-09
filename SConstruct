@@ -1237,6 +1237,7 @@ if not preconfigured:
         ['z', 'zlib.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
+        ['harfbuzz with freetype support', 'harfbuzz/hb-ft.h',True,'C++']
     ]
 
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
