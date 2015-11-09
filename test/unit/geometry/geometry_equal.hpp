@@ -5,8 +5,7 @@
 #include <iterator>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
