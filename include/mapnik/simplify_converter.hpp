@@ -486,7 +486,7 @@ private:
         return status_ = process;
     }
 
-    void RDP(std::vector<vertex2d>& vertices, const size_t start, const size_t end)
+    void RDP(std::vector<vertex2d>& vertices, const size_t start, const size_t itr_end)
     {
         // Squared length of a vector
         auto sqlen = [] (vertex2d const& vec) { return vec.x*vec.x + vec.y*vec.y; };
@@ -525,15 +525,15 @@ private:
         };
 
         // Compute the directional vector along the segment
-        vertex2d dir = vertex2d(vertices[end].x - vertices[start].x, vertices[end].y - vertices[start].y, SEG_END);
+        vertex2d dir = vertex2d(vertices[itr_end].x - vertices[start].x, vertices[itr_end].y - vertices[start].y, SEG_END);
         double dir_sq_len = sqlen(dir);
 
         // Find the point with the maximum distance from this line segment
         double max = std::numeric_limits<double>::min();
         size_t keeper = 0;
-        for (size_t i = start + 1; i < end; ++i)
+        for (size_t i = start + 1; i < itr_end; ++i)
         {
-            double d = segment_distance(vertices[i], vertices[start], vertices[end], dir, dir_sq_len);
+            double d = segment_distance(vertices[i], vertices[start], vertices[itr_end], dir, dir_sq_len);
             if (d > max)
             {
                 keeper = i;
@@ -550,15 +550,15 @@ private:
             {
                 RDP(vertices, start, keeper);
             }
-            if (end - keeper != 1)
+            if (itr_end - keeper != 1)
             {
-                RDP(vertices, keeper, end);
+                RDP(vertices, keeper, itr_end);
             }
         }// Everyone between the start and the end was close enough to the line
         else
         {
             // Mark each of them as discarded
-            for (size_t i = start + 1; i < end; ++i)
+            for (size_t i = start + 1; i < itr_end; ++i)
             {
                 vertices[i].cmd = SEG_END;
             }
