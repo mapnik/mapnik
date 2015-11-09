@@ -63,7 +63,7 @@ void add_csv_files(std::string dir, std::vector<std::string> &csv_files)
     }
 }
 
-mapnik::datasource_ptr get_csv_ds(std::string const &file_name, bool strict = true)
+mapnik::datasource_ptr get_csv_ds(std::string const& file_name, bool strict = true, std::string const& base="")
 {
     mapnik::parameters params;
     params["type"] = std::string("csv");
@@ -129,6 +129,10 @@ TEST_CASE("csv") {
                 mapnik::parameters params;
                 params["type"] = "csv";
                 params["file"] = filename;
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+                params["base"] = "";
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+                params["base"] = "/";
                 REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
             }
         }
@@ -268,21 +272,24 @@ TEST_CASE("csv") {
         {
             for (auto create_index : { false, true })
             {
-                std::string filename = "test/data/csv/nypd.csv";
+                std::string base = "test/data/csv/";
+                std::string filename = "nypd.csv";
+                std::string filepath = base + filename;
                 // cleanup in the case of a failed previous run
-                if (mapnik::util::exists(filename + ".index"))
+                if (mapnik::util::exists(filepath + ".index"))
                 {
-                    mapnik::util::remove(filename + ".index");
+                    mapnik::util::remove(filepath + ".index");
                 }
                 if (create_index)
                 {
-                    int ret = create_disk_index(filename);
+                    int ret = create_disk_index(filepath);
                     int ret_posix = (ret >> 8) & 0x000000ff;
                     INFO(ret);
                     INFO(ret_posix);
-                    CHECK(mapnik::util::exists(filename + ".index"));
+                    CHECK(mapnik::util::exists(filepath + ".index"));
                 }
-                auto ds = get_csv_ds(filename);
+                auto ds = get_csv_ds(filepath,true,base);
+                CHECK(ds->type() == mapnik::datasource::datasource_t::Vector);
                 auto fields = ds->get_descriptor().get_descriptors();
                 require_field_names(fields, {"Precinct", "Phone", "Address", "City", "geo_longitude", "geo_latitude", "geo_accuracy"});
                 require_field_types(fields, {mapnik::String, mapnik::String, mapnik::String, mapnik::String, mapnik::Double, mapnik::Double, mapnik::String});
@@ -290,8 +297,14 @@ TEST_CASE("csv") {
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                 CHECK(count_features(all_features(ds)) == 2);
 
-                auto feature = all_features(ds)->next();
-                require_attributes(feature, {
+                auto fs = all_features(ds);
+                auto fs2 = ds->features_at_point(ds->envelope().center(),10000);
+                REQUIRE(fs != nullptr);
+                auto feature = fs->next();
+                auto feature2 = fs2->next();
+                REQUIRE(feature != nullptr);
+                REQUIRE(feature2 != nullptr);
+                auto expected_attr = {
                         attr { "City", mapnik::value_unicode_string("New York, NY") }
                         , attr { "geo_accuracy", mapnik::value_unicode_string("house") }
                         , attr { "Phone", mapnik::value_unicode_string("(212) 334-0711") }
@@ -299,10 +312,12 @@ TEST_CASE("csv") {
                         , attr { "Precinct", mapnik::value_unicode_string("5th Precinct") }
                         , attr { "geo_longitude", mapnik::value_integer(-70) }
                         , attr { "geo_latitude", mapnik::value_integer(40) }
-                    });
-                if (mapnik::util::exists(filename + ".index"))
+                    };
+                require_attributes(feature, expected_attr);
+                require_attributes(feature2, expected_attr);
+                if (mapnik::util::exists(filepath + ".index"))
                 {
-                    mapnik::util::remove(filename + ".index");
+                    mapnik::util::remove(filepath + ".index");
                 }
             }
         } // END SECTION
