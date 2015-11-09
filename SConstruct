@@ -940,6 +940,24 @@ int main()
     color_print(1,'\nHarfbuzz >= %s required but found ... %s' % (HARFBUZZ_MIN_VERSION_STRING,items[1]))
     return False
 
+def harfbuzz_with_freetype_support(context):
+    ret = context.TryRun("""
+
+#include "harfbuzz/hb-ft.h"
+#include <iostream>
+
+int main()
+{
+    return 0;
+}
+
+""", '.cpp')
+    context.Message('Checking for HarfBuzz with freetype support\n')
+    context.Result(ret[0])
+    if ret[0]:
+        return True
+    return False
+
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
         # re-order icu libs to ensure linux linker is happy
@@ -1061,6 +1079,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'rollback_option'       : rollback_option,
                'icu_at_least_four_two' : icu_at_least_four_two,
                'harfbuzz_version'      : harfbuzz_version,
+               'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
                'supports_cxx11'        : supports_cxx11,
@@ -1237,7 +1256,6 @@ if not preconfigured:
         ['z', 'zlib.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
-        ['harfbuzz with freetype support', 'harfbuzz/hb-ft.h',True,'C++']
     ]
 
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
@@ -1357,6 +1375,8 @@ if not preconfigured:
                 elif libname == 'harfbuzz':
                     if not conf.harfbuzz_version():
                         env['SKIPPED_DEPS'].append('harfbuzz-min-version')
+                    if not conf.harfbuzz_with_freetype_support():
+                        env['MISSING_DEPS'].append('harfbuzz-with-freetype-support')
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
