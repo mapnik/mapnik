@@ -106,7 +106,7 @@ public:
         initial,
         process,
         closing,
-        end,
+        done,
         cache
     };
 
@@ -210,7 +210,7 @@ private:
         if (status_ == closing)
         {
             *x = *y = 0.0;
-            status_ = end;
+            status_ = done;
             return SEG_CLOSE;
         }
 
@@ -237,7 +237,7 @@ private:
                 {
                     // The previous vertex was already output in the previous call.
                     // We can now safely output SEG_CLOSE.
-                    status_ = end;
+                    status_ = done;
                 }
                 else
                 {
@@ -268,11 +268,11 @@ private:
     }
 
     template <typename Iterator>
-    bool fit_sleeve(Iterator itr, Iterator itr_end, vertex2d const& v)
+    bool fit_sleeve(Iterator itr, Iterator end, vertex2d const& v)
     {
         sleeve s(*itr,v,tolerance_);
         ++itr; // skip first vertex
-        for (; itr!=itr_end; ++itr)
+        for (; itr != end; ++itr)
         {
             if (!s.inside(*itr))
             {
@@ -486,14 +486,14 @@ private:
         return status_ = process;
     }
 
-    void RDP(std::vector<vertex2d>& vertices, const size_t start, const size_t itr_end)
+    void RDP(std::vector<vertex2d>& vertices, const size_t first, const size_t last)
     {
         // Squared length of a vector
         auto sqlen = [] (vertex2d const& vec) { return vec.x*vec.x + vec.y*vec.y; };
         // Compute square distance of p to a line segment
         auto segment_distance = [&sqlen] (vertex2d const& p, vertex2d const& a, vertex2d const& b, vertex2d const& dir, double dir_sq_len)
         {
-            // Special case where segment has same start and end point at which point we are just doing a radius check
+            // Special case where segment has same first and last point at which point we are just doing a radius check
             if (dir_sq_len == 0)
             {
                 return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
@@ -525,15 +525,15 @@ private:
         };
 
         // Compute the directional vector along the segment
-        vertex2d dir = vertex2d(vertices[itr_end].x - vertices[start].x, vertices[itr_end].y - vertices[start].y, SEG_END);
+        vertex2d dir = vertex2d(vertices[last].x - vertices[first].x, vertices[last].y - vertices[first].y, SEG_END);
         double dir_sq_len = sqlen(dir);
 
         // Find the point with the maximum distance from this line segment
         double max = std::numeric_limits<double>::min();
         size_t keeper = 0;
-        for (size_t i = start + 1; i < itr_end; ++i)
+        for (size_t i = first + 1; i < last; ++i)
         {
-            double d = segment_distance(vertices[i], vertices[start], vertices[itr_end], dir, dir_sq_len);
+            double d = segment_distance(vertices[i], vertices[first], vertices[last], dir, dir_sq_len);
             if (d > max)
             {
                 keeper = i;
@@ -546,19 +546,19 @@ private:
         if (max > tolerance_ * tolerance_)
         {
             // Make sure not to smooth out the biggest outlier (keeper)
-            if (keeper - start != 1)
+            if (keeper - first != 1)
             {
-                RDP(vertices, start, keeper);
+                RDP(vertices, first, keeper);
             }
-            if (itr_end - keeper != 1)
+            if (last - keeper != 1)
             {
-                RDP(vertices, keeper, itr_end);
+                RDP(vertices, keeper, last);
             }
-        }// Everyone between the start and the end was close enough to the line
+        }// Everyone between the first and the last was close enough to the line
         else
         {
             // Mark each of them as discarded
-            for (size_t i = start + 1; i < itr_end; ++i)
+            for (size_t i = first + 1; i < last; ++i)
             {
                 vertices[i].cmd = SEG_END;
             }
