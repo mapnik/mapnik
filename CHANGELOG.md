@@ -10,11 +10,20 @@ For a complete change history, see the git log.
 
 Released:
 
-(Packaged from )
+(Work-in-progress)
 
 #### Summary
 
  - Fixed offsetting of complex paths and sharp angles (https://github.com/mapnik/mapnik/pull/3160)
+ - Fixed mapnik.util.variant issue when compiling with gcc-5.x and SSO enabled by default (https://github.com/mapnik/mapnik/issues/3103) (via @nkovacs)
+ - Fixed issue with complex sctipts where some character sequences weren't rendered correctly (https://github.com/mapnik/mapnik/issues/3050) (via @jkroll20)
+ - Revived postgis.input tests
+ - JSON: geometry grammar has been refactored and optimised to have expectation points
+ - Filled missing specialisations for value_bool in mapnik::value comparison operators
+ - mapnik.Image - fixed copy semantics implementation for internal buffer
+ - Improved 'offseting` algorithm implementation for complex polygons (https://github.com/mapnik/mapnik/pull/3160) (via @winni159)
+ - JSON : unified error_handler accross all grammars
+ - Improved unit test coverage
 
 ## 3.0.8
 
