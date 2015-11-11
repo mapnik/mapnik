@@ -26,6 +26,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/centroid.hpp>
+#include <mapnik/geometry_is_empty.hpp>
 
 namespace mapnik { namespace geometry {
 
@@ -63,30 +64,50 @@ struct geometry_centroid
 
     result_type operator() (line_string<T> const& geom) const
     {
+        if (mapnik::geometry::is_empty(geom))
+        {
+            return false;
+        }
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
     result_type operator() (polygon<T> const& geom) const
     {
+        if (mapnik::geometry::is_empty(geom))
+        {
+            return false;
+        }
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
     result_type operator() (multi_point<T> const& geom) const
     {
+        if (mapnik::geometry::is_empty(geom))
+        {
+            return false;
+        }
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
     result_type operator() (multi_line_string<T> const& geom) const
     {
+        if (mapnik::geometry::is_empty(geom) || mapnik::geometry::has_empty(geom))
+        {
+            return false;
+        }
         boost::geometry::centroid(geom, pt_);
         return true;
     }
 
     result_type operator() (multi_polygon<T> const& geom) const
     {
+        if (mapnik::geometry::is_empty(geom) || mapnik::geometry::has_empty(geom))
+        {
+            return false;
+        }
         boost::geometry::centroid(geom, pt_);
         return true;
     }
