@@ -29,16 +29,24 @@ def test_record(_type, record) :
         test_polygon(record)
 
 def test_pointz(record):
+    _type, = struct.unpack("<i", record[0:4])
+    if _type == 0:
+        print "NULL shape"
+        return
     if len(record) != 36 :
         print>>sys.stderr,"BAD SHAPE FILE: expected 36 bytes got",len(record)
         sys.exit(1)
-    _type,x,y,z,m = struct.unpack("<idddd",record)
+    x,y,z,m = struct.unpack("<dddd",record[4:36])
     if _type != 11:
         print>>sys.stderr,"BAD SHAPE FILE: expected PointZ or NullShape got",_type
         sys.exit(1)
 
 def test_polygon(record):
-    _type, x0, y0, x1, y0, num_parts, num_points = struct.unpack("<iddddii", record[0:44])
+    _type, = struct.unpack("<i", record[0:4])
+    if _type == 0:
+        print "NULL shape"
+        return
+    x0, y0, x1, y0, num_parts, num_points = struct.unpack("<ddddii", record[4:44])
     if _type != 5:
         print>>sys.stderr, "BAD SHAPE FILE: expected Polygon or NullShape got", _type
         sys.exit(1)
@@ -85,7 +93,7 @@ if __name__ == "__main__" :
     record = struct.Struct(">II")
     calc_total_size = 50
     count = 0
-    while shx.tell() < shx_file_length * 2 :
+    while shx.tell() <= shx_file_length * 2 - 4 * 2 :
         offset,shx_content_length = record.unpack_from(shx.read(8))
         shp.seek(offset*2, os.SEEK_SET)
         record_number,content_length = record_header.unpack_from(shp.read(8))
