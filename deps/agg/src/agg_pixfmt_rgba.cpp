@@ -1,14 +1,8 @@
 
 #include "agg_pixfmt_rgba.h"
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wc++11-narrowing"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/gil/gil_all.hpp>
 #include <boost/gil/extension/toolbox/hsv.hpp>
 #include <boost/gil/extension/toolbox/hsl.hpp>
