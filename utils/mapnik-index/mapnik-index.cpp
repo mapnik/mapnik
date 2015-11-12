@@ -61,6 +61,7 @@ int main (int argc, char** argv)
     //using namespace mapnik;
     namespace po = boost::program_options;
     bool verbose = false;
+    bool validate_features = false;
     unsigned int depth = DEFAULT_DEPTH;
     double ratio = DEFAULT_RATIO;
     std::vector<std::string> files;
@@ -80,6 +81,7 @@ int main (int argc, char** argv)
             ("quote,q", po::value<char>(), "CSV columns quote")
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
             ("files",po::value<std::vector<std::string> >(),"Files to index: file1 file2 ...fileN")
+            ("validate-features", "Validate GeoJSON features")
             ;
 
         po::positional_options_description p;
@@ -101,6 +103,10 @@ int main (int argc, char** argv)
         if (vm.count("verbose"))
         {
             verbose = true;
+        }
+        if (vm.count("validate-features"))
+        {
+            validate_features = true;
         }
         if (vm.count("depth"))
         {
@@ -180,7 +186,7 @@ int main (int argc, char** argv)
         else if (mapnik::detail::is_geojson(filename))
         {
             std::clog << "processing '" << filename << "' as GeoJSON\n";
-            auto result = mapnik::detail::process_geojson_file(boxes, filename);
+            auto result = mapnik::detail::process_geojson_file(boxes, filename, validate_features);
             if (!result.first) continue;
             extent = result.second;
         }

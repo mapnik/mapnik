@@ -39,16 +39,30 @@
 
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
+#include <mapnik/json/feature_collection_grammar_impl.hpp>
 
 namespace {
+struct feature_validate_callback
+{
+    feature_validate_callback() {}
+
+    void operator() (mapnik::feature_ptr const& f) const
+    {
+        auto bbox = f->envelope();
+        std::cerr << bbox << std::endl;
+    }
+};
+
 using base_iterator_type = char const*;
 const mapnik::json::extract_bounding_box_grammar<base_iterator_type> geojson_datasource_static_bbox_grammar;
+const mapnik::transcoder tr("utf8");
+const mapnik::json::feature_grammar_callback<base_iterator_type, mapnik::feature_impl, feature_validate_callback> fc_grammar(tr);
 }
 
 namespace mapnik { namespace detail {
 
 template <typename T>
-std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const& filename)
+std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const& filename, bool validate_features)
 {
     mapnik::box2d<double> extent;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
@@ -81,9 +95,10 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
 #endif
 
     boost::spirit::standard::space_type space;
+    auto const* itr = start;
     try
     {
-        if (!boost::spirit::qi::phrase_parse(start, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
+        if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
         {
             std::clog << "mapnik-index (GeoJSON) : could not extract bounding boxes from : '" <<  filename <<  "'" << std::endl;
             return std::make_pair(false, extent);
@@ -93,12 +108,28 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     {
         std::clog << "mapnik-index (GeoJSON): " << ex.what() << std::endl;
     }
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+    std::size_t start_id = 1;
     for (auto const& item : boxes)
     {
         if (item.first.valid())
         {
             if (!extent.valid()) extent = item.first;
             else extent.expand_to_include(item.first);
+
+            if (validate_features)
+            {
+                base_iterator_type feat_itr = start + item.second.first;
+                base_iterator_type feat_end = feat_itr + item.second.second;
+                feature_validate_callback callback;
+                bool result = boost::spirit::qi::phrase_parse(feat_itr, feat_end, (fc_grammar)
+                                                              (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                              space);
+                if (!result || feat_itr != feat_end)
+                {
+                    return std::make_pair(false, extent);
+                }
+            }
         }
     }
     return std::make_pair(true, extent);
@@ -107,6 +138,6 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
 using box_type = mapnik::box2d<double>;
 using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
 using boxes_type = std::vector<item_type>;
-template std::pair<bool,box2d<double>> process_geojson_file(boxes_type&, std::string const&);
+template std::pair<bool,box2d<double>> process_geojson_file(boxes_type&, std::string const&, bool);
 
 }}
