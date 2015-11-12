@@ -44,13 +44,17 @@
 namespace {
 struct feature_validate_callback
 {
-    feature_validate_callback() {}
+    feature_validate_callback(mapnik::box2d<double> const& box)
+        : box_(box) {}
 
     void operator() (mapnik::feature_ptr const& f) const
     {
-        auto bbox = f->envelope();
-        std::cerr << bbox << std::endl;
+        if (box_ != f->envelope())
+        {
+            throw std::runtime_error("Bounding boxes mismatch validation feature");
+        }
     }
+    mapnik::box2d<double> const& box_;
 };
 
 using base_iterator_type = char const*;
@@ -121,7 +125,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
             {
                 base_iterator_type feat_itr = start + item.second.first;
                 base_iterator_type feat_end = feat_itr + item.second.second;
-                feature_validate_callback callback;
+                feature_validate_callback callback(item.first);
                 bool result = boost::spirit::qi::phrase_parse(feat_itr, feat_end, (fc_grammar)
                                                               (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
                                                               space);
