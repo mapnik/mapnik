@@ -197,12 +197,13 @@ struct grid_render_marker_visitor
         else
         {
             image_rgba8 target(data.width(), data.height());
+            boost::optional<double> nodata;
             mapnik::scale_image_agg(target,
                                     data,
                                     SCALING_NEAR,
                                     1,
                                     1,
-                                    0.0, 0.0, 1.0); // TODO: is 1.0 a valid default here, and do we even care in grid_renderer what the image looks like?
+                                    0.0, 0.0, 1.0, nodata); // TODO: is 1.0 a valid default here, and do we even care in grid_renderer what the image looks like?
             pixmap_.set_rectangle(feature_.id(), target,
                                   boost::math::iround(pos_.x - cx),
                                   boost::math::iround(pos_.y - cy));

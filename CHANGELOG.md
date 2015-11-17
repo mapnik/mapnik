@@ -23,6 +23,7 @@ Released:
  - `mapnik.Image` - fixed copy semantics implementation for internal buffer
  - JSON parsing: unified error_handler across all grammars
  - Improved unit test coverage
+ - Raster scaling: fixed nodata handling, acurracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
 
 ## 3.0.8
 
