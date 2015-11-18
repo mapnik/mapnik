@@ -345,28 +345,40 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
 template <typename Iterator>
 void geojson_datasource::parse_geojson(Iterator start, Iterator end)
 {
+    using boost::spirit::qi::expectation_failure;
     boost::spirit::standard::space_type space;
     mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     std::size_t start_id = 1;
 
     mapnik::json::default_feature_callback callback(features_);
     Iterator itr = start;
-    bool result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_fc_grammar)
-                                                  (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
-                                                  space);
-    if (!result || itr != end)
-    {
-        if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file from in-memory string");
-        else throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file '" + filename_ + "'");
-    }
 
-    if (features_.size() == 0)
+    try
+    {
+        bool result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_fc_grammar)
+                                                      (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                      space);
+        if (!result || itr != end)
+        {
+            itr = start;
+            // try parsing as single Feature or single Geometry JSON
+            result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_callback_grammar)
+                                                     (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                     space);
+            if (!result || itr != end)
+            {
+                if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
+                else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
+            }
+        }
+    }
+    catch (expectation_failure<char const*> const& ex)
     {
         itr = start;
         // try parsing as single Feature or single Geometry JSON
-        result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_callback_grammar)
-                                                 (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
-                                                 space);
+        bool result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_callback_grammar)
+                                                      (boost::phoenix::ref(ctx),boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                      space);
         if (!result || itr != end)
         {
             if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
