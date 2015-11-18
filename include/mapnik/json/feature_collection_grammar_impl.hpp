@@ -54,24 +54,23 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback,ErrorHandler>::
         start = feature_collection(_r1, _r2, _r3)
             ;
 
-        feature_collection = lit('{') >> (type | features(_r1, _r2, _r3) | feature_g.json_.key_value) % lit(',') >> lit('}')
+        feature_collection = lit('{') > (type | features(_r1, _r2, _r3) | feature_g.json_.key_value) % lit(',') > lit('}')
             ;
 
-        type = lit("\"type\"") >> lit(':') >> lit("\"FeatureCollection\"")
+        type = lit("\"type\"") > lit(':') > lit("\"FeatureCollection\"")
             ;
 
         features = lit("\"features\"")
-            >> lit(':')
-            >> lit('[')
-            >> -(feature(_r1, _r2, _r3) [_r2 +=1] % lit(','))
-            >> lit(']')
+            > lit(':') > lit('[') >
+            ( lit(']') | ((feature(_r1, _r2, _r3) [_r2 +=1] % lit(',')) > lit(']')))
             ;
 
         feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
-            >> feature_g(*_a)[on_feature(_r3,_a)]
+            > feature_g(*_a)[on_feature(_r3,_a)]
             ;
 
         start.name("start");
+        feature_collection.name("FeatureCollection");
         type.name("type");
         features.name("features");
         feature.name("feature");
