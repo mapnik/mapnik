@@ -221,6 +221,20 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     util::apply_visitor(warper, source.data_);
 }
 
+void reproject_and_scale_raster(raster & target, raster const& source,
+                                            proj_transform const& prj_trans,
+                                            double offset_x, double offset_y,
+                                            unsigned mesh_size,
+                                            scaling_method_e scaling_method)
+{
+    reproject_and_scale_raster(target, source, prj_trans,
+                               offset_x, offset_y,
+                               mesh_size,
+                               scaling_method,
+                               boost::optional<double>());
+}
+
+
 template MAPNIK_DECL void warp_image (image_rgba8&, image_rgba8 const&, proj_transform const&,
                                       box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
 

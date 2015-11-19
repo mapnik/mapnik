@@ -580,7 +580,7 @@ void Map::zoom_all()
 
 void Map::zoom_to_box(box2d<double> const& box)
 {
-    current_extent_=box;
+    current_extent_= box;
     fixAspectRatio();
 }
 
