@@ -42,9 +42,9 @@ boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 libraries =  [env['MAPNIK_NAME'], boost_program_options, boost_system]
 # need on linux: https://github.com/mapnik/mapnik/issues/3145
-libraries.append(env['ICU_LIB_NAME'])
 libraries.append('mapnik-json')
 libraries.append('mapnik-wkt')
+libraries.append(env['ICU_LIB_NAME'])
 
 if env['RUNTIME_LINK'] == 'static':
     libraries.extend(copy(env['LIBMAPNIK_LIBS']))
