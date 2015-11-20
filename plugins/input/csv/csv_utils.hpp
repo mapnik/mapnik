@@ -181,8 +181,6 @@ std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t fi
     char quote = '"';
     static std::size_t const max_size = 4000;
     std::size_t size = std::min(file_length, max_size);
-    int num_single_quotes = 0;
-    int num_double_quotes = 0;
     for (std::size_t lidx = 0; lidx < size; ++lidx)
     {
         char c = static_cast<char>(stream.get());
