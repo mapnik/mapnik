@@ -72,7 +72,7 @@ struct geometry_is_empty
     }
 
     template <typename T>
-    bool operator() (T const& geom) const
+    bool operator() (T const&) const
     {
         return true;
     }
@@ -96,17 +96,17 @@ struct geometry_has_empty
         return false;
     }
 
-    bool operator() (mapnik::geometry::line_string<double> const& geom) const
+    bool operator() (mapnik::geometry::line_string<double> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::polygon<double> const& geom) const
+    bool operator() (mapnik::geometry::polygon<double> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::multi_point<double> const& geom) const
+    bool operator() (mapnik::geometry::multi_point<double> const&) const
     {
         return false;
     }
@@ -134,7 +134,7 @@ struct geometry_has_empty
     }
 
     template <typename T>
-    bool operator() (T const& geom) const
+    bool operator() (T const&) const
     {
         return true;
     }
