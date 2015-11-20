@@ -70,7 +70,7 @@ MAPNIK_DECL void scale_image_agg(T & target, T const& source,
                                  double filter_factor,
                                  boost::optional<double> const & nodata_value);
 template <typename T>
-MAPNIK_DECL void scale_image_agg(T & target, T const& source,
+inline void scale_image_agg(T & target, T const& source,
                                  scaling_method_e scaling_method,
                                  double image_ratio_x,
                                  double image_ratio_y,
