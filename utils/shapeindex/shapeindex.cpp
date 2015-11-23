@@ -162,7 +162,7 @@ int main (int argc,char** argv)
         mapnik::quad_tree<int> tree(extent, depth, ratio);
         int count = 0;
 
-        while (shx.is_good() && pos <= file_length + 4)
+        while (shx.is_good() && pos <= file_length - 4)
         {
             int offset = shx.read_xdr_integer();
             int content_length = shx.read_xdr_integer();
