@@ -567,18 +567,18 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
         if (tree_)
         {
             tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
-
+            // sort index array to preserve original feature ordering in GeoJSON
+            std::sort(index_array.begin(),index_array.end(),
+                      [] (item_type const& item0, item_type const& item1)
+                      {
+                          return item0.second.first < item1.second.first;
+                      });
             if (cache_features_)
             {
                 return std::make_shared<geojson_featureset>(features_, std::move(index_array));
             }
             else
             {
-                std::sort(index_array.begin(),index_array.end(),
-                          [] (item_type const& item0, item_type const& item1)
-                          {
-                              return item0.second.first < item1.second.first;
-                          });
                 return std::make_shared<geojson_memory_index_featureset>(filename_, std::move(index_array));
             }
         }
