@@ -162,7 +162,7 @@ int main (int argc,char** argv)
         mapnik::quad_tree<int> tree(extent, depth, ratio);
         int count = 0;
 
-        while (true)
+        while (shx.is_good() && pos <= file_length + 4)
         {
             int offset = shx.read_xdr_integer();
             int content_length = shx.read_xdr_integer();
@@ -189,34 +189,40 @@ int main (int argc,char** argv)
             {
                 shp.read_envelope(item_ext);
             }
-
-            tree.insert(offset * 2,item_ext);
-
             if (verbose)
             {
                 std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
             }
-            ++count;
-            if (pos >= file_length) break;
+            if (item_ext.valid())
+            {
+                tree.insert(offset * 2,item_ext);
+                ++count;
+            }
         }
 
-        std::clog << " number shapes=" << count << std::endl;
-
-        std::fstream file((shapename+".index").c_str(),
-                          std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
-        if (!file)
+        if (count > 0)
         {
-            std::clog << "cannot open index file for writing file \""
-                 << (shapename+".index") << "\"" << std::endl;
+            std::clog << " number shapes=" << count << std::endl;
+            std::fstream file((shapename+".index").c_str(),
+                              std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+            if (!file)
+            {
+                std::clog << "cannot open index file for writing file \""
+                          << (shapename+".index") << "\"" << std::endl;
+            }
+            else
+            {
+                tree.trim();
+                std::clog << " number nodes=" << tree.count() << std::endl;
+                file.exceptions(std::ios::failbit | std::ios::badbit);
+                tree.write(file);
+                file.flush();
+                file.close();
+            }
         }
         else
         {
-            tree.trim();
-            std::clog << " number nodes=" << tree.count() << std::endl;
-            file.exceptions(std::ios::failbit | std::ios::badbit);
-            tree.write(file);
-            file.flush();
-            file.close();
+            std::clog << "No non-empty geometries in shapefile" << std::endl;
         }
     }
 
