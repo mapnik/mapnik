@@ -23,15 +23,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "src/script/scons.py rel_2.4.0:3365:9259ea1c13d7 2015/09/21 14:03:43 bdbaddog"
+__revision__ = "src/script/scons.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
-__version__ = "2.4.0"
+__version__ = "2.4.1"
 
-__build__ = "rel_2.4.0:3365:9259ea1c13d7"
+__build__ = "rel_2.4.1:3453:73fefd3ea0b0"
 
-__buildsys__ = "hpmicrodog"
+__buildsys__ = "ubuntu1404-32bit"
 
-__date__ = "2015/09/21 14:03:43"
+__date__ = "2015/11/09 03:25:05"
 
 __developer__ = "bdbaddog"
 
