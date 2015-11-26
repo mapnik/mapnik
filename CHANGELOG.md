@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.9
 
-Released:
+Released: November 26, 2015
 
-(Work-in-progress)
+(Packaged from 03a0926)
 
 #### Summary
 
@@ -24,7 +24,12 @@ Released:
  - JSON parsing: unified error_handler across all grammars
  - Improved unit test coverage
  - Raster scaling: fixed nodata handling, acurracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
+ - Added [`code of conduct`](http://contributor-covenant.org)
+ - GeoJSON plug-in is updated to skip feature with empty geometries
+ - GeoJSON plug-in : ensure original order of features is preserved (fixed) (https://github.com/mapnik/mapnik/issues/3182)
+ - Shapeindex utility: fixed `empty` shapes handling and ported tests to c++
  - Centroid algorithm: fixed invalid input handling, particularly empty geometries (https://github.com/mapnik/mapnik/pull/3185)
+ - Updated SCons build system to the latest version 2.4.1 (http://scons.org/)
 
 ## 3.0.8
 
