@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/positions_grammar_impl.hpp>
@@ -36,9 +37,9 @@ namespace mapnik { namespace json {
 
 template <typename Iterator, typename ErrorHandler >
 geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
-    : geometry_grammar::base_type(start,"geometry")
+    : geometry_grammar::base_type(start,"geometry"),
+      coordinates(error_handler)
 {
-
     qi::lit_type lit;
     qi::int_type int_;
     qi::double_type double_;
@@ -53,25 +54,20 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
-    start = geometry  | geometry_collection;
 
-    geometry = (lit('{')[_a = 0 ]
-                >> (-lit(',') >> lit("\"type\"") >> lit(':') >> geometry_type_dispatch[_a = _1]
-                    ^
-                    (-lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinates[_b = _1]))[create_geometry(_val,_a,_b)]
-                >> lit('}'))
-        | lit("null")
+    start = geometry.alias() | lit("null");
+
+    geometry = lit('{')[_a = 0]
+        > (-lit(',') >> (lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
+           ^
+           (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
+           ^
+           (-lit(',') >> (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))))[create_geometry(_val,_a,_b)]
+        > lit('}')
         ;
 
-    geometry_collection = (lit('{')
-                           >> (-lit(',') >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
-                               ^
-                               -lit(',') >> lit("\"geometries\"") >> lit(':')
-                               >> lit('[') >> geometry[push_back(_val, _1)] % lit(',') >> lit(']'))
-                           >> lit('}'))
-        | lit("null")
+    geometry_collection = geometry[push_back(_val, _1)] % lit(',')
         ;
-
     geometry_type_dispatch.add
         ("\"Point\"",1)
         ("\"LineString\"",2)
@@ -79,15 +75,17 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
         ("\"MultiPoint\"",4)
         ("\"MultiLineString\"",5)
         ("\"MultiPolygon\"",6)
+        ("\"GeometryCollection\"",7)
         ;
 
     // give some rules names
     geometry.name("Geometry");
     geometry_collection.name("GeometryCollection");
-    geometry_type_dispatch.name("type");
+    geometry_type_dispatch.name("type: (Point|LineString|Polygon|MultiPoint|MultiLineString|MultiPolygon|GeometryCollection)");
     coordinates.name("coordinates");
     // error handler
-    on_error<fail>(start, error_handler(_1, _2, _3, _4));
+    auto error_handler_function = boost::phoenix::function<ErrorHandler>(error_handler);
+    on_error<fail>(start, error_handler_function(_1, _2, _3, _4));
 }
 
 }}

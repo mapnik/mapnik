@@ -50,7 +50,6 @@ public:
                      std::string const& shape_file,
                      std::set<std::string> const& attribute_names,
                      std::string const& encoding,
-                     long file_length,
                      int row_limit);
     virtual ~shape_featureset();
     feature_ptr next();
@@ -61,7 +60,7 @@ private:
     box2d<double> query_ext_;
     mutable box2d<double> feature_bbox_;
     const std::unique_ptr<transcoder> tr_;
-    long file_length_;
+    long shx_file_length_;
     std::vector<int> attr_ids_;
     mapnik::value_integer row_limit_;
     mutable int count_;

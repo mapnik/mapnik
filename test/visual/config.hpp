@@ -26,6 +26,7 @@
 // stl
 #include <vector>
 #include <string>
+#include <chrono>
 
 // boost
 #include <boost/filesystem.hpp>
@@ -35,21 +36,23 @@ namespace visual_tests
 
 struct map_size
 {
-    map_size(int _width, int _height) : width(_width), height(_height) { }
+    map_size(std::size_t _width, std::size_t _height) : width(_width), height(_height) { }
     map_size() { }
-    unsigned width = 0;
-    unsigned height = 0;
+    std::size_t width = 0;
+    std::size_t height = 0;
 };
 
 struct config
 {
     config() : status(true),
                scales({ 1.0, 2.0 }),
-               sizes({ { 500, 100 } }) { }
+               sizes({ { 500, 100 } }),
+               tiles({ { 1, 1 } }) { }
 
     bool status;
     std::vector<double> scales;
     std::vector<map_size> sizes;
+    std::vector<map_size> tiles;
 };
 
 enum result_state : std::uint8_t
@@ -66,11 +69,13 @@ struct result
     result_state state;
     std::string renderer_name;
     map_size size;
+    map_size tiles;
     double scale_factor;
     boost::filesystem::path actual_image_path;
     boost::filesystem::path reference_image_path;
     std::string error_message;
     unsigned diff;
+    std::chrono::high_resolution_clock::duration duration;
 };
 
 using result_list = std::vector<result>;

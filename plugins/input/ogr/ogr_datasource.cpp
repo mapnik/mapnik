@@ -34,10 +34,8 @@
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/trim.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 
@@ -492,12 +490,9 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
     {
         bool found_name = false;
 
-        std::vector<attribute_descriptor>::const_iterator itr = names.begin();
-        std::vector<attribute_descriptor>::const_iterator end = names.end();
-
-        for (; itr!=end; ++itr)
+        for (auto const& attr_info : names)
         {
-            if (itr->get_name() == *pos)
+            if (attr_info.get_name() == *pos)
             {
                 found_name = true;
                 break;
@@ -508,11 +503,9 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
         {
             std::ostringstream s;
             s << "OGR Plugin: no attribute named '" << *pos << "'. Valid attributes are: ";
-            std::vector<attribute_descriptor>::const_iterator e_itr = names.begin();
-            std::vector<attribute_descriptor>::const_iterator e_end = names.end();
-            for ( ;e_itr!=e_end;++e_itr)
+            for (auto const& attr_info2 : names)
             {
-                s << e_itr->get_name() << std::endl;
+                s << attr_info2.get_name() << std::endl;
             }
             throw mapnik::datasource_exception(s.str());
         }
@@ -533,10 +526,10 @@ featureset_ptr ogr_datasource::features(query const& q) const
         // feature context (schema)
         mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
-        std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
-        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
-
-        for (; itr!=end; ++itr) ctx->push(itr->get_name()); // TODO only push query attributes
+        for (auto const& attr_info : desc_ar)
+        {
+            ctx->push(attr_info.get_name()); // TODO only push query attributes
+        }
 
         validate_attribute_names(q, desc_ar);
 
@@ -576,9 +569,10 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
         // feature context (schema)
         mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
-        std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
-        std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
-        for (; itr!=end; ++itr) ctx->push(itr->get_name());
+        for (auto const& attr_info : desc_ar)
+        {
+            ctx->push(attr_info.get_name()); // TODO only push query attributes
+        }
 
         OGRLayer* layer = layer_.layer();
 

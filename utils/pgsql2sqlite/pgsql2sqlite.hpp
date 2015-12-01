@@ -35,10 +35,8 @@
 #include "connection_manager.hpp"
 #include "cursorresultset.hpp"
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 
@@ -388,7 +386,7 @@ void pgsql2sqlite(Connection conn,
                 {
                     if (oid == geometry_oid)
                     {
-                        mapnik::Feature feat(ctx,pkid);
+                        mapnik::feature_impl feat(ctx,pkid);
                         mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
                         if (!mapnik::geometry::is_empty(geom))
                         {

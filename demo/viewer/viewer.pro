@@ -1,6 +1,7 @@
 ######################################################################
 # Mapnik viewer - Copyright (C) 2007 Artem Pavlenko
 ######################################################################
+QMAKE_MAC_SDK = macosx10.11
 TEMPLATE = app
 QT += core gui widgets
 QMAKE_CXX = $$system(mapnik-config --cxx)

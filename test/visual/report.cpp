@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <fstream>
 #include <numeric>
+#include <map>
 
 #include "report.hpp"
 
@@ -32,8 +33,12 @@ namespace visual_tests
 
 void console_report::report(result const & r)
 {
-    s << '"' << r.name << '-' << r.size.width << '-' << r.size.height << '-' << std::fixed <<
-        std::setprecision(1) << r.scale_factor << "\" with " << r.renderer_name << "... ";
+    s << '"' << r.name << '-' << r.size.width << '-' << r.size.height;
+    if (r.tiles.width > 1 || r.tiles.height > 1)
+    {
+        s << '-' << r.tiles.width << 'x' << r.tiles.height;
+    }
+    s << '-' << std::fixed << std::setprecision(1) << r.scale_factor << "\" with " << r.renderer_name << "... ";
 
     switch (r.state)
     {
@@ -51,6 +56,11 @@ void console_report::report(result const & r)
             break;
     }
 
+    if (show_duration)
+    {
+        s << " (" << std::chrono::duration_cast<std::chrono::milliseconds>(r.duration).count() << " milliseconds)";
+    }
+
     s << std::endl;
 }
 
@@ -61,6 +71,10 @@ unsigned console_report::summary(result_list const & results)
     unsigned fail = 0;
     unsigned overwrite = 0;
 
+    using namespace std::chrono;
+    using duration_map_type = std::map<std::string, high_resolution_clock::duration>;
+    duration_map_type durations;
+
     for (auto const & r : results)
     {
         switch (r.state)
@@ -70,11 +84,36 @@ unsigned console_report::summary(result_list const & results)
             case STATE_ERROR: error++; break;
             case STATE_OVERWRITE: overwrite++; break;
         }
+
+        if (show_duration)
+        {
+            duration_map_type::iterator duration = durations.find(r.renderer_name);
+            if (duration == durations.end())
+            {
+                durations.emplace(r.renderer_name, r.duration);
+            }
+            else
+            {
+                duration->second += r.duration;
+            }
+        }
     }
 
     s << std::endl;
     s << "Visual rendering: " << fail << " failed / " << ok << " passed / "
         << overwrite << " overwritten / " << error << " errors" << std::endl;
+
+    if (show_duration)
+    {
+        high_resolution_clock::duration total(0);
+        for (auto const & duration : durations)
+        {
+            s << duration.first << ": \t" << duration_cast<milliseconds>(duration.second).count()
+              << " milliseconds" << std::endl;
+            total += duration.second;
+        }
+        s << "total: \t" << duration_cast<milliseconds>(total).count() << " milliseconds" << std::endl;
+    }
 
     return fail + error;
 }
@@ -122,16 +161,18 @@ void html_report::report(result const & r, boost::filesystem::path const & outpu
       copy_file(r.reference_image_path, reference);
       copy_file(r.actual_image_path, actual);
 
-       s << "<div class=\"expected\">\n"
-            "  <a href=" << reference.filename() << ">\n"
-            "    <img src=" << reference.filename() << " width=\"100\%\">\n"
-            "  </a>\n"
-            "</div>\n"
-            "<div class=\"text\">" << r.diff << "</div>\n"
-            "<div class=\"actual\">\n"
-            "  <a href=" << actual.filename() << ">\n"
-            "    <img src=" << actual.filename() << " width=\"100\%\">\n"
-            "  </a>\n"
+       s << "<p>" << r.diff << "</p>\n"
+            "<div class=\"r\">"
+            "  <div class=\"i\">"
+            "    <a href=" << reference.filename() << ">\n"
+            "      <img src=" << reference.filename() << " width=\"100\%\">\n"
+            "    </a>\n"
+            "  </div>\n"
+            "  <div class=\"i2\">\n"
+            "    <a href=" << actual.filename() << ">\n"
+            "      <img src=" << actual.filename() << " width=\"100\%\">\n"
+            "    </a>\n"
+            "  </div>\n"
             "</div>\n";
     }
 }
@@ -140,31 +181,21 @@ constexpr const char * html_header = R"template(<!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { margin:10; padding:10; }
-    .expected {
-       float:left;
-       border-width:1px;
-       border-style:solid;
-       width:45%;
-    }    
-    .actual {
-       float:right;
-       border-width:1px;
-       border-style:solid;
-       width:45%;
+    .r {
+      width:100%;
+      display: flex;
+      position: relative;
+      border:1px solid black;
+      margin-bottom: 20px;
     }
-    .text {
-       float:left;
-    }
+    .i2 { max-width: 50%; width:50%; }
+    .i { max-width: 50%; width:50%; }
+    .i:hover{ position: absolute; top:0; left:0; }
+    .i img, .i2 img { width: 100%; }
+    .i img:hover { mix-blend-mode: difference; }
   </style>
 </head>
 <body>
-<script>
-</script>
-<div id='results'>
-     <div class="expected">expected</div>
-     <div class="text">% difference</div>
-     <div class="actual">actual</div>
 )template";
 
 constexpr const char * html_footer = R"template(</div>

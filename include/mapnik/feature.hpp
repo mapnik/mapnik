@@ -109,9 +109,7 @@ public:
         raster_() {}
 
     inline mapnik::value_integer id() const { return id_;}
-
     inline void set_id(mapnik::value_integer id) { id_ = id;}
-
     template <typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {
@@ -272,9 +270,6 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
     out << f.to_string();
     return out;
 }
-
-// TODO - remove at Mapnik 3.x
-using Feature = feature_impl;
 
 using feature_ptr = std::shared_ptr<feature_impl>;
 

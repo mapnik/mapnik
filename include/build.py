@@ -27,6 +27,7 @@ Import('env')
 base = './mapnik/'
 subdirs = [
     '',
+    'csv',
     'svg',
     'wkt',
     'cairo',

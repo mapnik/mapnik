@@ -34,24 +34,20 @@ namespace detail {
 struct MAPNIK_DECL buffer
 {
     explicit buffer(std::size_t size);
+    explicit buffer(unsigned char* data, std::size_t size);
     buffer(buffer && rhs) noexcept;
     buffer(buffer const& rhs);
     ~buffer();
-
     buffer& operator=(buffer rhs);
-    inline bool operator!() const
-    {
-        return (data_ == nullptr)? true : false;
-    }
-
-    void swap(buffer & rhs);
-    unsigned char* data();
-    unsigned char const* data() const;
-    std::size_t size() const;
+    inline bool operator!() const {return (data_ == nullptr)? true : false;}
+    inline unsigned char* data() {return data_;}
+    inline unsigned char const* data() const {return data_;}
+    inline std::size_t size() const {return size_;}
 private:
+    void swap(buffer & rhs);
     std::size_t size_;
     unsigned char* data_;
-
+    bool owns_;
 };
 
 template <std::size_t max_size>
@@ -76,6 +72,8 @@ class image
 public:
     using pixel = T;
     using pixel_type = typename T::type;
+    using iterator = pixel_type*;
+    using const_iterator = pixel_type const*;
     static constexpr image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
@@ -91,6 +89,11 @@ public:
     image(int width,
           int height,
           bool initialize = true,
+          bool premultiplied = false,
+          bool painted = false);
+    image(int width,
+          int height,
+          unsigned char* data,
           bool premultiplied = false,
           bool painted = false);
     image(image<T> const& rhs);
@@ -109,6 +112,12 @@ public:
     void set(pixel_type const& t);
     pixel_type const* data() const;
     pixel_type* data();
+    // simple iterator inteface
+    const_iterator begin() const;
+    const_iterator end() const;
+    iterator begin();
+    iterator end();
+    //
     unsigned char const* bytes() const;
     unsigned char* bytes();
     pixel_type const* get_row(std::size_t row) const;

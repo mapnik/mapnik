@@ -19,23 +19,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//mapnik
-#include <mapnik/debug.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/view_transform.hpp>
-#include <mapnik/expression_evaluator.hpp>
+
+// mapnik
+//#include <mapnik/label_collision_detector.hpp>
+//#include <mapnik/view_transform.hpp>
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/text_properties.hpp>
-#include <mapnik/text/glyph_positions.hpp>
+//#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/tolerance_iterator.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
 
-// agg
-#include "agg_conv_clip_polyline.h"
-
-// stl
-#include <vector>
+#include <memory>
 
 namespace mapnik
 {

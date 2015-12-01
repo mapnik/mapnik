@@ -34,9 +34,6 @@
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/tolerance_iterator.hpp>
 
-//agg
-#include "agg_conv_clip_polyline.h"
-
 namespace mapnik { namespace detail {
 
 template <typename Helper>

@@ -9,7 +9,7 @@
 #
 
 #
-# Copyright (c) 2001 - 2014 The SCons Foundation
+# Copyright (c) 2001 - 2015 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -32,7 +32,7 @@
 from __future__ import division
 from __future__ import nested_scopes
 
-__revision__ = "src/script/scons-time.py  2014/09/27 12:51:43 garyo"
+__revision__ = "src/script/scons-time.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
 
 import getopt
 import glob

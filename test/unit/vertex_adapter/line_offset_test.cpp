@@ -1,17 +1,13 @@
 #include "catch.hpp"
 
 // mapnik
-#include <mapnik/global.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/vertex_cache.hpp>
+#include <mapnik/global.hpp>
 
 // stl
-#include <stdexcept>
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <tuple>
-#include <algorithm>
 
 struct fake_path
 {

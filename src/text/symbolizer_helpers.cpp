@@ -41,8 +41,6 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 
-//agg
-#include "agg_conv_clip_polyline.h"
 
 namespace mapnik { namespace detail {
 
@@ -78,12 +76,8 @@ template <typename T>
 struct split_multi_geometries
 {
     using container_type = T;
-    split_multi_geometries(container_type & cont, view_transform const& t,
-                           proj_transform const& prj_trans, double minimum_path_length)
-        : cont_(cont),
-          t_(t),
-          prj_trans_(prj_trans),
-          minimum_path_length_(minimum_path_length) {}
+    split_multi_geometries(container_type & cont)
+        : cont_(cont) { }
 
     void operator() (geometry::geometry_empty const&) const {}
     void operator() (geometry::multi_point<double> const& multi_pt) const
@@ -95,18 +89,7 @@ struct split_multi_geometries
     }
     void operator() (geometry::line_string<double> const& line) const
     {
-        if (minimum_path_length_ > 0)
-        {
-            box2d<double> bbox = t_.forward(geometry::envelope(line), prj_trans_);
-            if (bbox.width() >= minimum_path_length_)
-            {
-                cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
-            }
-        }
-        else
-        {
-            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
-        }
+        cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(line)));
     }
 
     void operator() (geometry::multi_line_string<double> const& multi_line) const
@@ -119,18 +102,7 @@ struct split_multi_geometries
 
     void operator() (geometry::polygon<double> const& poly) const
     {
-        if (minimum_path_length_ > 0)
-        {
-            box2d<double> bbox = t_.forward(geometry::envelope(poly), prj_trans_);
-            if (bbox.width() >= minimum_path_length_)
-            {
-                cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(poly)));
-            }
-        }
-        else
-        {
-            cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(poly)));
-        }
+        cont_.push_back(base_symbolizer_helper::geometry_cref(std::cref(poly)));
     }
 
     void operator() (geometry::multi_polygon<double> const& multi_poly) const
@@ -156,9 +128,6 @@ struct split_multi_geometries
     }
 
     container_type & cont_;
-    view_transform const& t_;
-    proj_transform const& prj_trans_;
-    double minimum_path_length_;
 };
 
 } // ns detail
@@ -207,10 +176,8 @@ struct largest_bbox_first
 
 void base_symbolizer_helper::initialize_geometries() const
 {
-    double minimum_path_length = text_props_->minimum_path_length;
     auto const& geom = feature_.get_geometry();
-    util::apply_visitor(detail::split_multi_geometries<geometry_container_type>
-                        (geometries_to_process_, t_, prj_trans_, minimum_path_length ), geom);
+    util::apply_visitor(detail::split_multi_geometries<geometry_container_type>(geometries_to_process_), geom);
     if (!geometries_to_process_.empty())
     {
         auto type = geometry::geometry_type(geom);
@@ -321,7 +288,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
     value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
 
-    if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
+    if (clip) converter_.template set<clip_line_tag>();
     converter_.template set<transform_tag>(); //always transform
     converter_.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
@@ -446,7 +413,7 @@ text_symbolizer_helper::text_symbolizer_helper(
     value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
     value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
 
-    if (clip) converter_.template set<clip_line_tag>(); //optional clip (default: true)
+    if (clip) converter_.template set<clip_line_tag>();
     converter_.template set<transform_tag>(); //always transform
     converter_.template set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter

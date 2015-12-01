@@ -25,17 +25,17 @@
 //stl
 #include <vector>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/config.hpp>
+#include <mapnik/text/glyph_info.hpp>
 
 namespace mapnik
 {
-
-struct glyph_info;
 
 // This class stores all glyphs of a line in left to right order.
 // It can be used for rendering but no text processing (like line breaking)
 // should be done!
 
-class text_line : util::noncopyable
+class MAPNIK_DECL text_line : util::noncopyable
 {
 public:
     using glyph_vector = std::vector<glyph_info>;
@@ -97,6 +97,6 @@ private:
     unsigned space_count_;
 };
 
-} //namespace mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_TEXT_LINE_HPP

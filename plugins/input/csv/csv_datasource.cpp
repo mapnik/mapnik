@@ -20,34 +20,39 @@
  *
  *****************************************************************************/
 
-#include "csv_datasource.hpp"
 #include "csv_utils.hpp"
-
+#include "csv_datasource.hpp"
+#include "csv_featureset.hpp"
+#include "csv_inline_featureset.hpp"
+#include "csv_index_featureset.hpp"
 // boost
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_correct.hpp>
 #include <mapnik/memory_featureset.hpp>
-#include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/json/geometry_parser.hpp>
-#include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/util/fs.hpp>
+#include <mapnik/util/spatial_index.hpp>
+#include <mapnik/geom_util.hpp>
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
+#include <mapnik/mapped_memory_cache.hpp>
+#endif
 
 // stl
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -58,45 +63,36 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(csv_datasource)
 
 csv_datasource::csv_datasource(parameters const& params)
-  : datasource(params),
+: datasource(params),
     desc_(csv_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
     extent_(),
     filename_(),
-    inline_string_(),
-    file_length_(0),
     row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
-    features_(),
-    escape_(*params.get<std::string>("escape", "")),
-    separator_(*params.get<std::string>("separator", "")),
-    quote_(*params.get<std::string>("quote", "")),
+    inline_string_(),
+    separator_(0),
+    quote_(0),
     headers_(),
     manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
     strict_(*params.get<mapnik::boolean_type>("strict", false)),
-    filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
     ctx_(std::make_shared<mapnik::context_type>()),
-    extent_initialized_(false)
+    extent_initialized_(false),
+    tree_(nullptr),
+    locator_(),
+    has_disk_index_(false)
 {
-    /* TODO:
-       general:
-       - refactor parser into generic class
-       - tests of grid_renderer output
-       - ensure that the attribute desc_ matches the first feature added
-       alternate large file pipeline:
-       - stat file, detect > 15 MB
-       - build up csv line-by-line iterator
-       - creates opportunity to filter attributes by map query
-       speed:
-       - add properties for wkt/json/lon/lat at parse time
-       - add ability to pass 'filter' keyword to drop attributes at layer init
-       - create quad tree on the fly for small/med size files
-       - memory map large files for reading
-       - smaller features (less memory overhead)
-       usability:
-       - enforce column names without leading digit
-       - better error messages (add filepath) if not reading from string
-       - move to spirit to tokenize and add character level error feedback:
-       http://boost-spirit.com/home/articles/qi-example/tracking-the-input-position-while-parsing/
-    */
+    auto quote_param = params.get<std::string>("quote");
+    if (quote_param)
+    {
+        auto val = mapnik::util::trim_copy(*quote_param);
+        if (!val.empty()) quote_ = val.front(); // we pick pick first non-space char
+    }
+
+    auto separator_param = params.get<std::string>("separator");
+    if (separator_param)
+    {
+        auto val = mapnik::util::trim_copy(*separator_param);
+        if (!val.empty()) separator_ = val.front();
+    }
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
@@ -113,293 +109,149 @@ csv_datasource::csv_datasource(parameters const& params)
     {
         boost::optional<std::string> file = params.get<std::string>("file");
         if (!file) throw mapnik::datasource_exception("CSV Plugin: missing <file> parameter");
-
         boost::optional<std::string> base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
             filename_ = *file;
+
+        has_disk_index_ = mapnik::util::exists(filename_ + ".index");
     }
     if (!inline_string_.empty())
     {
         std::istringstream in(inline_string_);
-        parse_csv(in,escape_, separator_, quote_);
+        parse_csv(in);
     }
     else
     {
-#if defined (_WINDOWS)
+#if defined (MAPNIK_MEMORY_MAPPED_FILE)
+        using file_source_type = boost::interprocess::ibufferstream;
+        file_source_type in;
+        mapnik::mapped_region_ptr mapped_region;
+        boost::optional<mapnik::mapped_region_ptr> memory =
+            mapnik::mapped_memory_cache::instance().find(filename_, true);
+        if (memory)
+        {
+            mapped_region = *memory;
+            in.buffer(static_cast<char*>(mapped_region->get_address()),mapped_region->get_size());
+        }
+        else
+        {
+            throw std::runtime_error("could not create file mapping for " + filename_);
+        }
+#elif defined (_WINDOWS)
         std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
-#else
-        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
-#endif
         if (!in.is_open())
         {
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
         }
-        parse_csv(in,escape_, separator_, quote_);
-        in.close();
+#else
+        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+        if (!in.is_open())
+        {
+            throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
+        }
+#endif
+        parse_csv(in);
+
+        if (has_disk_index_ && !extent_initialized_)
+        {
+            // read bounding box from *.index
+            using value_type = std::pair<std::size_t, std::size_t>;
+            std::ifstream index(filename_ + ".index", std::ios::binary);
+            if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
+            extent_ = mapnik::util::spatial_index<value_type,
+                                                  mapnik::filter_in_box,
+                                                  std::ifstream>::bounding_box(index);
+        }
+        //in.close(); no need to call close, rely on dtor
     }
 }
 
-
-csv_datasource::~csv_datasource() { }
+csv_datasource::~csv_datasource() {}
 
 template <typename T>
-void csv_datasource::parse_csv(T & stream,
-                               std::string const& escape,
-                               std::string const& separator,
-                               std::string const& quote)
+void csv_datasource::parse_csv(T & stream)
 {
-    stream.seekg(0, std::ios::end);
-    file_length_ = stream.tellg();
-
-    if (filesize_max_ > 0)
-    {
-        double file_mb = static_cast<double>(file_length_)/1048576;
-
-        // throw if this is an unreasonably large file to read into memory
-        if (file_mb > filesize_max_)
-        {
-            std::ostringstream s;
-            s << "CSV Plugin: csv file is greater than ";
-            s << filesize_max_ << "MB - you should use a more efficient data format like sqlite, postgis or a shapefile to render this data (set 'filesize_max=0' to disable this restriction if you have lots of memory)";
-            throw mapnik::datasource_exception(s.str());
-        }
-    }
-
+    auto file_length = detail::file_length(stream);
     // set back to start
     stream.seekg(0, std::ios::beg);
-
-    // autodetect newlines
-    char newline = '\n';
-    bool has_newline = false;
-    for (unsigned lidx = 0; lidx < file_length_ && lidx < 4000; lidx++)
-    {
-        char c = static_cast<char>(stream.get());
-        if (c == '\r')
-        {
-            newline = '\r';
-            has_newline = true;
-            break;
-        }
-        if (c == '\n')
-        {
-            has_newline = true;
-            break;
-        }
-    }
-
+    char newline;
+    bool has_newline;
+    char detected_quote;
+    std::tie(newline, has_newline, detected_quote) = detail::autodect_newline_and_quote(stream, file_length);
+    if (quote_ == 0) quote_ = detected_quote;
     // set back to start
     stream.seekg(0, std::ios::beg);
-
-    // get first line
     std::string csv_line;
-    std::getline(stream,csv_line,newline);
-
-    // if user has not passed a separator manually
-    // then attempt to detect by reading first line
-    std::string sep = mapnik::util::trim_copy(separator);
-    if (sep.empty())
+    csv_utils::getline_csv(stream, csv_line, newline, quote_);
+    if (separator_ == 0)
     {
-        // default to ','
-        sep = ",";
-        int num_commas = std::count(csv_line.begin(), csv_line.end(), ',');
-        // detect tabs
-        int num_tabs = std::count(csv_line.begin(), csv_line.end(), '\t');
-        if (num_tabs > 0)
-        {
-            if (num_tabs > num_commas)
-            {
-                sep = "\t";
-
-                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
-            }
-        }
-        else // pipes
-        {
-            int num_pipes = std::count(csv_line.begin(), csv_line.end(), '|');
-            if (num_pipes > num_commas)
-            {
-                sep = "|";
-
-                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
-            }
-            else // semicolons
-            {
-                int num_semicolons = std::count(csv_line.begin(), csv_line.end(), ';');
-                if (num_semicolons > num_commas)
-                {
-                    sep = ";";
-
-                    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
-                }
-            }
-        }
+        separator_ = detail::detect_separator(csv_line);
     }
 
-    // set back to start
+    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: separator: '" << separator_
+                          << "' quote: '" << quote_ << "'";
     stream.seekg(0, std::ios::beg);
 
-    using escape_type = boost::escaped_list_separator<char>;
-
-    std::string esc = mapnik::util::trim_copy(escape);
-    if (esc.empty()) esc = "\\";
-
-    std::string quo = mapnik::util::trim_copy(quote);
-    if (quo.empty()) quo = "\"";
-
-    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
-                          << "' quo: '" << quo << "' esc: '" << esc << "'";
-
-    boost::escaped_list_separator<char> grammer;
-    try
-    {
-        //  grammer = boost::escaped_list_separator<char>('\\', ',', '\"');
-        grammer = boost::escaped_list_separator<char>(esc, sep, quo);
-    }
-    catch(std::exception const& ex)
-    {
-        std::string s("CSV Plugin: ");
-        s += ex.what();
-        throw mapnik::datasource_exception(s);
-    }
-
-    using Tokenizer = boost::tokenizer< escape_type >;
-
-    int line_number = 1;
-    bool has_wkt_field = false;
-    bool has_json_field = false;
-    bool has_lat_field = false;
-    bool has_lon_field = false;
-    unsigned wkt_idx = 0;
-    unsigned json_idx = 0;
-    unsigned lat_idx = 0;
-    unsigned lon_idx = 0;
-
+    int line_number = 0;
     if (!manual_headers_.empty())
     {
-        Tokenizer tok(manual_headers_, grammer);
-        Tokenizer::iterator beg = tok.begin();
-        unsigned idx = 0;
-        for (; beg != tok.end(); ++beg)
+        std::size_t index = 0;
+        auto headers = csv_utils::parse_line(manual_headers_, separator_, quote_);
+        for (auto const& header : headers)
         {
-            std::string val = mapnik::util::trim_copy(*beg);
-            std::string lower_val = val;
-            std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
-            if (lower_val == "wkt"
-                || (lower_val.find("geom") != std::string::npos))
-            {
-                wkt_idx = idx;
-                has_wkt_field = true;
-            }
-            if (lower_val == "geojson")
-            {
-                json_idx = idx;
-                has_json_field = true;
-            }
-            if (lower_val == "x"
-                || lower_val == "lon"
-                || lower_val == "lng"
-                || lower_val == "long"
-                || (lower_val.find("longitude") != std::string::npos))
-            {
-                lon_idx = idx;
-                has_lon_field = true;
-            }
-            if (lower_val == "y"
-                || lower_val == "lat"
-                || (lower_val.find("latitude") != std::string::npos))
-            {
-                lat_idx = idx;
-                has_lat_field = true;
-            }
-            ++idx;
-            headers_.push_back(val);
+            detail::locate_geometry_column(header, index++, locator_);
+            headers_.push_back(header);
         }
     }
     else // parse first line as headers
     {
-        while (std::getline(stream,csv_line,newline))
+        while (csv_utils::getline_csv(stream, csv_line, newline, quote_))
         {
             try
             {
-                Tokenizer tok(csv_line, grammer);
-                Tokenizer::iterator beg = tok.begin();
-                std::string val;
-                if (beg != tok.end())
-                    val = mapnik::util::trim_copy(*beg);
-
+                auto headers = csv_utils::parse_line(csv_line, separator_, quote_);
                 // skip blank lines
-                if (val.empty())
-                {
-                    // do nothing
-                    ++line_number;
-                }
+                std::string val;
+                if (headers.size() > 0 && headers[0].empty()) ++line_number;
                 else
                 {
-                    int idx = -1;
-                    for (; beg != tok.end(); ++beg)
+                    std::size_t index = 0;
+                    for (auto const& header : headers)
                     {
-                        ++idx;
-                        val = mapnik::util::trim_copy(*beg);
+                        val = mapnik::util::trim_copy(header);
                         if (val.empty())
                         {
                             if (strict_)
                             {
                                 std::ostringstream s;
                                 s << "CSV Plugin: expected a column header at line ";
-                                s << line_number << ", column " << idx;
+                                s << line_number << ", column " << index;
                                 s << " - ensure this row contains valid header fields: '";
-                                s << csv_line << "'\n";
+                                s << csv_line;
                                 throw mapnik::datasource_exception(s.str());
                             }
                             else
                             {
                                 // create a placeholder for the empty header
                                 std::ostringstream s;
-                                s << "_" << idx;
+                                s << "_" << index;
                                 headers_.push_back(s.str());
                             }
                         }
                         else
                         {
-                            std::string lower_val = val;
-                            std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
-                            if (lower_val == "wkt"
-                                || (lower_val.find("geom") != std::string::npos))
-                            {
-                                wkt_idx = idx;
-                                has_wkt_field = true;
-                            }
-                            if (lower_val == "geojson")
-                            {
-                                json_idx = idx;
-                                has_json_field = true;
-                            }
-                            if (lower_val == "x"
-                                || lower_val == "lon"
-                                || lower_val == "lng"
-                                || lower_val == "long"
-                                || (lower_val.find("longitude") != std::string::npos))
-                            {
-                                lon_idx = idx;
-                                has_lon_field = true;
-                            }
-                            if (lower_val == "y"
-                                || lower_val == "lat"
-                                || (lower_val.find("latitude") != std::string::npos))
-                            {
-                                lat_idx = idx;
-                                has_lat_field = true;
-                            }
+                            detail::locate_geometry_column(val, index, locator_);
                             headers_.push_back(val);
                         }
+                        ++index;
                     }
                     ++line_number;
                     break;
                 }
             }
-            catch(const std::exception & ex)
+            catch (std::exception const& ex)
             {
                 std::string s("CSV Plugin: error parsing headers: ");
                 s += ex.what();
@@ -408,50 +260,60 @@ void csv_datasource::parse_csv(T & stream,
         }
     }
 
-    if (!has_wkt_field && !has_json_field && (!has_lon_field || !has_lat_field) )
+    std::size_t num_headers = headers_.size();
+    if (!detail::valid(locator_, num_headers))
     {
-        throw mapnik::datasource_exception("CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data");
+        std::string str("CSV Plugin: could not detect column(s) with the name(s) of wkt, geojson, x/y, or ");
+        str += "latitude/longitude in:\n";
+        str += csv_line;
+        str += "\n - this is required for reading geometry data";
+        throw mapnik::datasource_exception(str);
     }
 
     mapnik::value_integer feature_count = 0;
     bool extent_started = false;
-
-    std::size_t num_headers = headers_.size();
 
     std::for_each(headers_.begin(), headers_.end(),
                   [ & ](std::string const& header){ ctx_->push(header); });
 
     mapnik::transcoder tr(desc_.get_encoding());
 
+    auto pos = stream.tellg();
     // handle rare case of a single line of data and user-provided headers
-    // where a lack of a newline will mean that std::getline returns false
+    // where a lack of a newline will mean that csv_utils::getline_csv returns false
     bool is_first_row = false;
+
     if (!has_newline)
     {
-        stream >> csv_line;
+        stream.setstate(std::ios::failbit);
+        pos = 0;
         if (!csv_line.empty())
         {
             is_first_row = true;
         }
     }
-    while (std::getline(stream,csv_line,newline) || is_first_row)
+
+    std::vector<item_type> boxes;
+    while (is_first_row || csv_utils::getline_csv(stream, csv_line, newline, quote_))
     {
-        is_first_row = false;
+        ++line_number;
         if ((row_limit_ > 0) && (line_number > row_limit_))
         {
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
             break;
         }
+        auto record_offset = pos;
+        auto record_size = csv_line.length();
+        pos = stream.tellg();
+        is_first_row = false;
 
         // skip blank lines
-        unsigned line_length = csv_line.length();
-        if (line_length <= 10)
+        if (record_size <= 10)
         {
             std::string trimmed = csv_line;
             boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n "));
             if (trimmed.empty())
             {
-                ++line_number;
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: empty row encountered at line: " << line_number;
                 continue;
             }
@@ -459,441 +321,118 @@ void csv_datasource::parse_csv(T & stream,
 
         try
         {
-            // special handling for varieties of quoting that we will enounter with json
-            // TODO - test with custom "quo" option
-            if (has_json_field && (quo == "\"") && (std::count(csv_line.begin(), csv_line.end(), '"') >= 6))
-            {
-                csv_utils::fix_json_quoting(csv_line);
-            }
-
-            Tokenizer tok(csv_line, grammer);
-            Tokenizer::iterator beg = tok.begin();
-
-            unsigned num_fields = std::distance(beg,tok.end());
-            if (num_fields > num_headers)
+            auto values = csv_utils::parse_line(csv_line, separator_, quote_);
+            unsigned num_fields = values.size();
+            if (num_fields > num_headers || num_fields < num_headers)
             {
                 std::ostringstream s;
                 s << "CSV Plugin: # of columns("
                   << num_fields << ") > # of headers("
-                  << num_headers << ") parsed for row " << line_number << "\n";
+                  << num_headers << ") parsed for row " << line_number;
                 throw mapnik::datasource_exception(s.str());
             }
-            else if (num_fields < num_headers)
+
+            auto geom = detail::extract_geometry(values, locator_);
+            if (!geom.is<mapnik::geometry::geometry_empty>())
             {
-                std::ostringstream s;
-                s << "CSV Plugin: # of headers("
-                  << num_headers << ") > # of columns("
-                  << num_fields << ") parsed for row " << line_number << "\n";
-                if (strict_)
+                auto box = mapnik::geometry::envelope(geom);
+                boxes.emplace_back(std::move(box), make_pair(record_offset, record_size));
+                if (!extent_initialized_)
                 {
-                    throw mapnik::datasource_exception(s.str());
-                }
-                else
-                {
-                    MAPNIK_LOG_WARN(csv) << s.str();
-                }
-            }
-
-            // NOTE: we use ++feature_count here because feature id's should start at 1;
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,++feature_count));
-            double x = 0;
-            double y = 0;
-            bool parsed_x = false;
-            bool parsed_y = false;
-            bool parsed_wkt = false;
-            bool parsed_json = false;
-            std::vector<std::string> collected;
-            for (unsigned i = 0; i < num_headers; ++i)
-            {
-                std::string fld_name(headers_.at(i));
-                collected.push_back(fld_name);
-                std::string value;
-                if (beg == tok.end()) // there are more headers than column values for this row
-                {
-                    // add an empty string here to represent a missing value
-                    // not using null type here since nulls are not a csv thing
-                    feature->put(fld_name,tr.transcode(value.c_str()));
-                    if (feature_count == 1)
+                    if (!extent_started)
                     {
-                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                    }
-                    // continue here instead of break so that all missing values are
-                    // encoded consistenly as empty strings
-                    continue;
-                }
-                else
-                {
-                    value = mapnik::util::trim_copy(*beg);
-                    ++beg;
-                }
-
-                int value_length = value.length();
-
-                // parse wkt
-                if (has_wkt_field)
-                {
-                    if (i == wkt_idx)
-                    {
-                        // skip empty geoms
-                        if (value.empty())
-                        {
-                            break;
-                        }
-                        mapnik::geometry::geometry<double> geom;
-                        if (mapnik::from_wkt(value, geom))
-                        {
-                            // correct orientations etc
-                            mapnik::geometry::correct(geom);
-                            // set geometry
-                            feature->set_geometry(std::move(geom));
-                            parsed_wkt = true;
-                        }
-                        else
-                        {
-                            std::ostringstream s;
-                            s << "CSV Plugin: expected well known text geometry: could not parse row "
-                              << line_number
-                              << ",column "
-                              << i << " - found: '"
-                              << value << "'";
-                            if (strict_)
-                            {
-                                throw mapnik::datasource_exception(s.str());
-                            }
-                            else
-                            {
-                                MAPNIK_LOG_ERROR(csv) << s.str();
-                            }
-                        }
-                    }
-                }
-                // TODO - support both wkt/geojson columns
-                // at once to create multi-geoms?
-                // parse as geojson
-                else if (has_json_field)
-                {
-                    if (i == json_idx)
-                    {
-                        // skip empty geoms
-                        if (value.empty())
-                        {
-                            break;
-                        }
-                        mapnik::geometry::geometry<double> geom;
-                        if (mapnik::json::from_geojson(value, geom))
-                        {
-                            feature->set_geometry(std::move(geom));
-                            parsed_json = true;
-                        }
-                        else
-                        {
-                            std::ostringstream s;
-                            s << "CSV Plugin: expected geojson geometry: could not parse row "
-                              << line_number
-                              << ",column "
-                              << i << " - found: '"
-                              << value << "'";
-                            if (strict_)
-                            {
-                                throw mapnik::datasource_exception(s.str());
-                            }
-                            else
-                            {
-                                MAPNIK_LOG_ERROR(csv) << s.str();
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // longitude
-                    if (i == lon_idx)
-                    {
-                        // skip empty geoms
-                        if (value.empty())
-                        {
-                            break;
-                        }
-
-                        if (mapnik::util::string2double(value,x))
-                        {
-                            parsed_x = true;
-                        }
-                        else
-                        {
-                            std::ostringstream s;
-                            s << "CSV Plugin: expected a float value for longitude: could not parse row "
-                              << line_number
-                              << ", column "
-                              << i << " - found: '"
-                              << value << "'";
-                            if (strict_)
-                            {
-                                throw mapnik::datasource_exception(s.str());
-                            }
-                            else
-                            {
-                                MAPNIK_LOG_ERROR(csv) << s.str();
-                            }
-                        }
-                    }
-                    // latitude
-                    else if (i == lat_idx)
-                    {
-                        // skip empty geoms
-                        if (value.empty())
-                        {
-                            break;
-                        }
-
-                        if (mapnik::util::string2double(value,y))
-                        {
-                            parsed_y = true;
-                        }
-                        else
-                        {
-                            std::ostringstream s;
-                            s << "CSV Plugin: expected a float value for latitude: could not parse row "
-                              << line_number
-                              << ", column "
-                              << i << " - found: '"
-                              << value << "'";
-                            if (strict_)
-                            {
-                                throw mapnik::datasource_exception(s.str());
-                            }
-                            else
-                            {
-                                MAPNIK_LOG_ERROR(csv) << s.str();
-                            }
-                        }
-                    }
-                }
-
-                // now, add attributes, skipping any WKT or JSON fields
-                if ((has_wkt_field) && (i == wkt_idx)) continue;
-                if ((has_json_field) && (i == json_idx)) continue;
-                /* First we detect likely strings,
-                   then try parsing likely numbers,
-                   then try converting to bool,
-                   finally falling back to string type.
-                   An empty string or a string of "null" will be parsed
-                   as a string rather than a true null value.
-                   Likely strings are either empty values, very long values
-                   or values with leading zeros like 001 (which are not safe
-                   to assume are numbers)
-                */
-
-                bool matched = false;
-                bool has_dot = value.find(".") != std::string::npos;
-                if (value.empty() ||
-                    (value_length > 20) ||
-                    (value_length > 1 && !has_dot && value[0] == '0'))
-                {
-                    matched = true;
-                    feature->put(fld_name,std::move(tr.transcode(value.c_str())));
-                    if (feature_count == 1)
-                    {
-                        desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
-                    }
-                }
-                else if (csv_utils::is_likely_number(value))
-                {
-                    bool has_e = value.find("e") != std::string::npos;
-                    if (has_dot || has_e)
-                    {
-                        double float_val = 0.0;
-                        if (mapnik::util::string2double(value,float_val))
-                        {
-                            matched = true;
-                            feature->put(fld_name,float_val);
-                            if (feature_count == 1)
-                            {
-                                desc_.add_descriptor(
-                                    mapnik::attribute_descriptor(
-                                        fld_name,mapnik::Double));
-                            }
-                        }
+                        extent_started = true;
+                        extent_ = mapnik::geometry::envelope(geom);
                     }
                     else
                     {
-                        mapnik::value_integer int_val = 0;
-                        if (mapnik::util::string2int(value,int_val))
-                        {
-                            matched = true;
-                            feature->put(fld_name,int_val);
-                            if (feature_count == 1)
-                            {
-                                desc_.add_descriptor(
-                                    mapnik::attribute_descriptor(
-                                        fld_name,mapnik::Integer));
-                            }
-                        }
+                        extent_.expand_to_include(mapnik::geometry::envelope(geom));
                     }
                 }
-                if (!matched)
+                if (++feature_count != 1) continue;
+                auto beg = values.begin();
+                for (std::size_t i = 0; i < num_headers; ++i)
                 {
-                    // NOTE: we don't use mapnik::util::string2bool
-                    // here because we don't want to treat 'on' and 'off'
-                    // as booleans, only 'true' and 'false'
-                    bool bool_val = false;
-                    std::string lower_val = value;
-                    std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
-                    if (lower_val == "true")
+                    std::string const& header = headers_.at(i);
+                    std::string value = mapnik::util::trim_copy(*beg++);
+                    int value_length = value.length();
+                    if (locator_.index == i && (locator_.type == detail::geometry_column_locator::WKT
+                                                || locator_.type == detail::geometry_column_locator::GEOJSON)) continue;
+
+                    // First we detect likely strings,
+                    // then try parsing likely numbers,
+                    // then try converting to bool,
+                    // finally falling back to string type.
+
+                    // An empty string or a string of "null" will be parsed
+                    // as a string rather than a true null value.
+                    // Likely strings are either empty values, very long values
+                    // or values with leading zeros like 001 (which are not safe
+                    // to assume are numbers)
+
+                    bool matched = false;
+                    bool has_dot = value.find(".") != std::string::npos;
+                    if (value.empty() || (value_length > 20) || (value_length > 1 && !has_dot && value[0] == '0'))
                     {
                         matched = true;
-                        bool_val = true;
+                        desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::String));
                     }
-                    else if (lower_val == "false")
+                    else if (csv_utils::is_likely_number(value))
                     {
-                        matched = true;
-                        bool_val = false;
-                    }
-                    if (matched)
-                    {
-                        feature->put(fld_name,bool_val);
-                        if (feature_count == 1)
+                        bool has_e = value.find("e") != std::string::npos;
+                        if (has_dot || has_e)
                         {
-                            desc_.add_descriptor(
-                                mapnik::attribute_descriptor(
-                                    fld_name,mapnik::Boolean));
-                        }
-                    }
-                    else
-                    {
-                        // fallback to normal string
-                        feature->put(fld_name,std::move(tr.transcode(value.c_str())));
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(
-                                mapnik::attribute_descriptor(
-                                    fld_name,mapnik::String));
-                        }
-                    }
-                }
-            }
-
-            bool null_geom = true;
-            if (has_wkt_field || has_json_field)
-            {
-                if (parsed_wkt || parsed_json)
-                {
-                    if (!extent_initialized_)
-                    {
-                        if (!extent_started)
-                        {
-                            extent_started = true;
-                            extent_ = feature->envelope();
+                            double float_val = 0.0;
+                            if (mapnik::util::string2double(value,float_val))
+                            {
+                                matched = true;
+                                desc_.add_descriptor(mapnik::attribute_descriptor(header,mapnik::Double));
+                            }
                         }
                         else
                         {
-                            extent_.expand_to_include(feature->envelope());
+                            mapnik::value_integer int_val = 0;
+                            if (mapnik::util::string2int(value,int_val))
+                            {
+                                matched = true;
+                                desc_.add_descriptor(mapnik::attribute_descriptor(header,mapnik::Integer));
+                            }
                         }
                     }
-                    features_.push_back(feature);
-                    null_geom = false;
-                }
-                else
-                {
-                    std::ostringstream s;
-                    s << "CSV Plugin: could not read WKT or GeoJSON geometry "
-                      << "for line " << line_number << " - found " <<  headers_.size()
-                      << " with values like: " << csv_line << "\n";
-                    if (strict_)
+                    if (!matched)
                     {
-                        throw mapnik::datasource_exception(s.str());
-                    }
-                    else
-                    {
-                        MAPNIK_LOG_ERROR(csv) << s.str();
-                        continue;
-                    }
-                }
-            }
-            else if (has_lat_field || has_lon_field)
-            {
-                if (parsed_x && parsed_y)
-                {
-                    mapnik::geometry::point<double> pt(x,y);
-                    feature->set_geometry(std::move(pt));
-                    features_.push_back(feature);
-                    null_geom = false;
-                    if (!extent_initialized_)
-                    {
-                        if (!extent_started)
+                        // NOTE: we don't use mapnik::util::string2bool
+                        // here because we don't want to treat 'on' and 'off'
+                        // as booleans, only 'true' and 'false'
+                        if (csv_utils::ignore_case_equal(value, "true") || csv_utils::ignore_case_equal(value, "false"))
                         {
-                            extent_started = true;
-                            extent_ = feature->envelope();
+                            desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::Boolean));
                         }
-                        else
+                        else // fallback to normal string
                         {
-                            extent_.expand_to_include(feature->envelope());
+                            desc_.add_descriptor(mapnik::attribute_descriptor(header, mapnik::String));
                         }
                     }
                 }
-                else if (parsed_x || parsed_y)
-                {
-                    std::ostringstream s;
-                    s << "CSV Plugin: does your csv have valid headers?\n";
-                    if (!parsed_x)
-                    {
-                        s << "Could not detect or parse any rows named 'x' or 'longitude' "
-                          << "for line " << line_number << " but found " <<  headers_.size()
-                          << " with values like: " << csv_line << "\n"
-                          << "for: " << boost::algorithm::join(collected, ",") << "\n";
-                    }
-                    if (!parsed_y)
-                    {
-                        s << "Could not detect or parse any rows named 'y' or 'latitude' "
-                          << "for line " << line_number << " but found " <<  headers_.size()
-                          << " with values like: " << csv_line << "\n"
-                          << "for: " << boost::algorithm::join(collected, ",") << "\n";
-                    }
-                    if (strict_)
-                    {
-                        throw mapnik::datasource_exception(s.str());
-                    }
-                    else
-                    {
-                        MAPNIK_LOG_ERROR(csv) << s.str();
-                        continue;
-                    }
-                }
-            }
-
-            if (null_geom)
-            {
-                std::ostringstream s;
-                s << "CSV Plugin: could not detect and parse valid lat/lon fields or wkt/json geometry for line "
-                  << line_number;
-                if (strict_)
-                {
-                    throw mapnik::datasource_exception(s.str());
-                }
-                else
-                {
-                    MAPNIK_LOG_ERROR(csv) << s.str();
-                    // with no geometry we will never
-                    // add this feature so drop the count
-                    feature_count--;
-                    continue;
-                }
-            }
-
-            ++line_number;
-        }
-        catch(mapnik::datasource_exception const& ex )
-        {
-            if (strict_)
-            {
-                throw mapnik::datasource_exception(ex.what());
             }
             else
             {
-                MAPNIK_LOG_ERROR(csv) << ex.what();
+                std::ostringstream s;
+                s << "CSV Plugin: expected geometry column: could not parse row "
+                  << line_number << " "
+                  << values.at(locator_.index) << "'";
+                throw mapnik::datasource_exception(s.str());
             }
         }
-        catch(std::exception const& ex)
+        catch (mapnik::datasource_exception const& ex )
+        {
+            if (strict_) throw ex;
+            else
+            {
+                MAPNIK_LOG_ERROR(csv) << ex.what() << " at line: " << line_number;
+            }
+        }
+        catch (std::exception const& ex)
         {
             std::ostringstream s;
             s << "CSV Plugin: unexpected error parsing line: " << line_number
@@ -908,11 +447,11 @@ void csv_datasource::parse_csv(T & stream,
                 MAPNIK_LOG_ERROR(csv) << s.str();
             }
         }
+        // return early if *.index is present
+        if (has_disk_index_) return;
     }
-    if (feature_count < 1)
-    {
-        MAPNIK_LOG_ERROR(csv) << "CSV Plugin: could not parse any lines of data";
-    }
+    // bulk insert initialise r-tree
+    tree_ = std::make_unique<spatial_index_type>(boxes);
 }
 
 const char * csv_datasource::name()
@@ -935,56 +474,178 @@ mapnik::layer_descriptor csv_datasource::get_descriptor() const
     return desc_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type() const
+template <typename T>
+boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type_impl(T & stream) const
 {
     boost::optional<mapnik::datasource_geometry_t> result;
-    int multi_type = 0;
-    unsigned num_features = features_.size();
-    for (unsigned i = 0; i < num_features && i < 5; ++i)
+    if (tree_)
     {
-        result = mapnik::util::to_ds_type(features_[i]->get_geometry());
-        if (result)
+        int multi_type = 0;
+        auto itr = tree_->qbegin(boost::geometry::index::intersects(extent_));
+        auto end = tree_->qend();
+        for (std::size_t count = 0; itr !=end &&  count < 5; ++itr, ++count)
         {
-            int type = static_cast<int>(*result);
-            if (multi_type > 0 && multi_type != type)
+            csv_datasource::item_type const& item = *itr;
+            std::size_t file_offset = item.second.first;
+            std::size_t size = item.second.second;
+            stream.seekg(file_offset);
+            std::vector<char> record;
+            record.resize(size);
+            stream.read(record.data(), size);
+            std::string str(record.begin(), record.end());
+            try
             {
-                result.reset(mapnik::datasource_geometry_t::Collection);
-                return result;
+                auto values = csv_utils::parse_line(str, separator_, quote_);
+                auto geom = detail::extract_geometry(values, locator_);
+                result = mapnik::util::to_ds_type(geom);
+                if (result)
+                {
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
+                    {
+                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        return result;
+                    }
+                    multi_type = type;
+                }
             }
-            multi_type = type;
+            catch (std::exception const& ex)
+            {
+                if (strict_) throw ex;
+                else MAPNIK_LOG_ERROR(csv) << ex.what();
+            }
         }
+    }
+    else
+    {
+        // try reading *.index
+        using value_type = std::pair<std::size_t, std::size_t>;
+        std::ifstream index(filename_ + ".index", std::ios::binary);
+        if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
+
+        mapnik::filter_in_box filter(extent_);
+        std::vector<value_type> positions;
+        mapnik::util::spatial_index<value_type,
+                                    mapnik::filter_in_box,
+                                    std::ifstream>::query_first_n(filter, index, positions, 5);
+        int multi_type = 0;
+        for (auto const& val : positions)
+        {
+            stream.seekg(val.first);
+            std::vector<char> record;
+            record.resize(val.second);
+            stream.read(record.data(), val.second);
+            std::string str(record.begin(), record.end());
+            try
+            {
+                auto values = csv_utils::parse_line(str, separator_, quote_);
+                auto geom = detail::extract_geometry(values, locator_);
+                result = mapnik::util::to_ds_type(geom);
+                if (result)
+                {
+                    int type = static_cast<int>(*result);
+                    if (multi_type > 0 && multi_type != type)
+                    {
+                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        return result;
+                    }
+                    multi_type = type;
+                }
+            }
+            catch (std::exception const& ex)
+            {
+                if (strict_) throw ex;
+                else MAPNIK_LOG_ERROR(csv) << ex.what();
+            }
+        }
+
     }
     return result;
 }
 
+boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type() const
+{
+    if (inline_string_.empty())
+    {
+#if defined (_WINDOWS)
+        std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
+#else
+        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+#endif
+        if (!in.is_open())
+        {
+            throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
+        }
+        return get_geometry_type_impl(in);
+    }
+    else
+    {
+        std::stringstream in(inline_string_);
+        return get_geometry_type_impl(in);
+    }
+}
+
 mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 {
-    const std::set<std::string>& attribute_names = q.property_names();
-    std::set<std::string>::const_iterator pos = attribute_names.begin();
-    while (pos != attribute_names.end())
+    for (auto const& name : q.property_names())
     {
         bool found_name = false;
-        for (std::size_t i = 0; i < headers_.size(); ++i)
+        for (auto const& header : headers_)
         {
-            if (headers_[i] == *pos)
+            if (header == name)
             {
                 found_name = true;
                 break;
             }
         }
-        if (! found_name)
+        if (!found_name)
         {
             std::ostringstream s;
-            s << "CSV Plugin: no attribute '" << *pos << "'. Valid attributes are: "
+            s << "CSV Plugin: no attribute '" << name << "'. Valid attributes are: "
               << boost::algorithm::join(headers_, ",") << ".";
             throw mapnik::datasource_exception(s.str());
         }
-        ++pos;
     }
-    return std::make_shared<mapnik::memory_featureset>(q.get_bbox(),features_);
+
+    mapnik::box2d<double> const& box = q.get_bbox();
+    if (extent_.intersects(box))
+    {
+        if (tree_)
+        {
+            csv_featureset::array_type index_array;
+            tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+            std::sort(index_array.begin(),index_array.end(),
+                      [] (item_type const& item0, item_type const& item1)
+                      {
+                          return item0.second.first < item1.second.first;
+                      });
+            if (inline_string_.empty())
+            {
+                return std::make_shared<csv_featureset>(filename_, locator_, separator_, quote_, headers_, ctx_, std::move(index_array));
+            }
+            else
+            {
+                return std::make_shared<csv_inline_featureset>(inline_string_, locator_, separator_, quote_, headers_, ctx_, std::move(index_array));
+            }
+        }
+        else if (has_disk_index_)
+        {
+            mapnik::filter_in_box filter(q.get_bbox());
+            return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, quote_, headers_, ctx_);
+        }
+    }
+    return mapnik::featureset_ptr();
 }
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    throw mapnik::datasource_exception("CSV Plugin: features_at_point is not supported yet");
+    mapnik::box2d<double> query_bbox(pt, pt);
+    query_bbox.pad(tol);
+    mapnik::query q(query_bbox);
+    std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
+    for (auto const& item : desc)
+    {
+        q.add_property_name(item.get_name());
+    }
+    return features(q);
 }

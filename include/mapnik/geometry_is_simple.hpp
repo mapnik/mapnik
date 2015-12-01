@@ -48,7 +48,9 @@ struct geometry_is_simple
 
     result_type operator() (geometry_empty const& ) const
     {
-        return false;
+        // An empty geometry has no anomalous geometric points, such as self intersection or self tangency.
+        // Therefore, we will return true
+        return true;
     }
 
     template <typename T>
@@ -69,6 +71,13 @@ struct geometry_is_simple
     template <typename T>
     result_type operator() (line_string<T> const& line) const
     {
+        if (line.empty())
+        {
+            // Prevent an empty line_string from segfaulting in boost geometry 1.58
+            // once it is fixed this can be removed
+            // https://svn.boost.org/trac/boost/ticket/11709
+            return true;
+        }
         return boost::geometry::is_simple(line);
     }
     template <typename T>
@@ -79,17 +88,43 @@ struct geometry_is_simple
     template <typename T>
     result_type operator() (multi_point<T> const& multi_pt) const
     {
+        if (multi_pt.empty())
+        {
+            // This return is due to bug in boost geometry once it is fixed it can be removed
+            // https://svn.boost.org/trac/boost/ticket/11710
+            return true;
+        }
         return boost::geometry::is_simple(multi_pt);
     }
     template <typename T>
     result_type operator() (multi_line_string<T> const& multi_line) const
     {
-        return boost::geometry::is_simple(multi_line);
+        if (multi_line.empty())
+        {
+            // This return is due to bug in boost geometry once it is fixed it can be removed
+            // https://svn.boost.org/trac/boost/ticket/11710
+            return true;
+        }
+        for (auto const& line : multi_line)
+        {
+            if (!(*this)(line)) return false;
+        }
+        return true;
     }
     template <typename T>
     result_type operator() (multi_polygon<T> const& multi_poly) const
     {
-        return boost::geometry::is_simple(multi_poly);
+        if (multi_poly.empty())
+        {
+            // This return is due to bug in boost geometry once it is fixed it can be removed
+            // https://svn.boost.org/trac/boost/ticket/11710
+            return true;
+        }
+        for (auto const& poly : multi_poly)
+        {
+            if (!(*this)(poly)) return false;
+        }
+        return true;
     }
 
 };
@@ -100,6 +135,12 @@ template <typename T>
 inline bool is_simple(T const& geom)
 {
     return detail::geometry_is_simple() (geom);
+}
+
+template <typename T>
+inline bool is_simple(mapnik::geometry::geometry<T> const& geom)
+{
+    return util::apply_visitor(detail::geometry_is_simple(), geom);
 }
 
 }}

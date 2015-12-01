@@ -196,7 +196,7 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
             {
                 map.set_background(*bgcolor);
             }
-
+            
             optional<std::string> image_filename = map_node.get_opt_attr<std::string>("background-image");
             if (image_filename)
             {

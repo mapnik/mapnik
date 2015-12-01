@@ -1,8 +1,6 @@
 #include "catch.hpp"
 
-#include <iostream>
 #include <mapnik/memory_datasource.hpp>
-#include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/unicode.hpp>
@@ -13,16 +11,10 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/image_util.hpp>
-#include <mapnik/color_factory.hpp>
-#include <mapnik/save_map.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/text/formatting/text.hpp>
-#include <vector>
-#include <algorithm>
-#include <mapnik/make_unique.hpp>
 
 TEST_CASE("fontset") {
 
@@ -38,8 +30,6 @@ SECTION("error") {
         mapnik::transcoder tr("utf-8");
         mapnik::value_unicode_string ustr = tr.transcode("hello world!");
         feature->put("name",ustr);
-        //auto pt = std::make_unique<mapnik::geometry_type>(mapnik::geometry::geometry_types::Point);
-        //pt->move_to(128,128);
         mapnik::geometry::point<double> pt(128,128);
         feature->set_geometry(std::move(pt));
 

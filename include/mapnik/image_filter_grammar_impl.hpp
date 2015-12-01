@@ -24,9 +24,8 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_filter_grammar.hpp>
 
-// spirit
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #pragma GCC diagnostic pop
 
@@ -79,6 +78,12 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         lit("y-gradient") >> no_args [push_back(_val,construct<mapnik::filter::y_gradient>())]
         |
         lit("invert") >> no_args [push_back(_val,construct<mapnik::filter::invert>())]
+        |
+        lit("color-blind-protanope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_protanope>())]
+        |
+        lit("color-blind-deuteranope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_deuteranope>())]
+        |
+        lit("color-blind-tritanope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_tritanope>())]
         |
         agg_blur_filter(_val)
         |

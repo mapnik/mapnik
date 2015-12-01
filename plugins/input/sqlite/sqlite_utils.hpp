@@ -38,10 +38,8 @@
 #include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/geometry_envelope.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 

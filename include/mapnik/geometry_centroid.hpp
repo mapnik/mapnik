@@ -26,6 +26,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/centroid.hpp>
+#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry_remove_empty.hpp>
 
 namespace mapnik { namespace geometry {
 
@@ -57,40 +59,64 @@ struct geometry_centroid
 
     result_type operator() (point<T> const& geom) const
     {
-        boost::geometry::centroid(geom, pt_);
-        return true;
+        return centroid_simple(geom);
     }
 
     result_type operator() (line_string<T> const& geom) const
     {
-        boost::geometry::centroid(geom, pt_);
-        return true;
+        return centroid_simple(geom);
     }
 
     result_type operator() (polygon<T> const& geom) const
     {
-        boost::geometry::centroid(geom, pt_);
-        return true;
+        return centroid_simple(geom);
     }
 
     result_type operator() (multi_point<T> const& geom) const
     {
-        boost::geometry::centroid(geom, pt_);
-        return true;
+        return centroid_simple(geom);
     }
 
     result_type operator() (multi_line_string<T> const& geom) const
     {
-        boost::geometry::centroid(geom, pt_);
-        return true;
+        return centroid_multi(geom);
     }
 
     result_type operator() (multi_polygon<T> const& geom) const
     {
-        boost::geometry::centroid(geom, pt_);
-        return true;
+        return centroid_multi(geom);
     }
+
     point<T> & pt_;
+
+private:
+    template <typename Geom>
+    result_type centroid_simple(Geom const & geom) const
+    {
+        try
+        {
+            boost::geometry::centroid(geom, pt_);
+            return true;
+        }
+        catch (boost::geometry::centroid_exception const & e)
+        {
+            return false;
+        }
+    }
+
+    template <typename Geom>
+    result_type centroid_multi(Geom const & geom) const
+    {
+// https://github.com/mapnik/mapnik/issues/3169
+#if BOOST_VERSION <= 105900
+        if (mapnik::geometry::has_empty(geom))
+        {
+            Geom stripped = mapnik::geometry::remove_empty(geom);
+            return centroid_simple(stripped);
+        }
+#endif
+        return centroid_simple(geom);
+    }
 };
 
 }

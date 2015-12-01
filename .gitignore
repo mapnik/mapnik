@@ -11,6 +11,7 @@
 *.a
 *.swp
 *.dylib
+mapnik-gyp
 plugins/input/*.input
 plugins/input/templates/*.input
 demo/c++/rundemo
@@ -29,10 +30,11 @@ tests/python_tests/raster_colorizer_test.png
 tests/python_tests/raster_colorizer_test_save.xml
 utils/mapnik-config/mapnik-config
 utils/shapeindex/shapeindex
+utils/mapnik-index/mapnik-index
 utils/ogrindex/ogrindex
 utils/pgsql2sqlite/pgsql2sqlite
 utils/svg2png/svg2png
-utils/nik2img/nik2img
+utils/mapnik-render/mapnik-render
 demo/python/demo*
 demo/python/map.xml
 tests/data/sqlite/*index

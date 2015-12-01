@@ -6,9 +6,6 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/fs.hpp>
 
-#include <vector>
-#include <algorithm>
-
 #include "catch.hpp"
 
 
@@ -23,7 +20,6 @@ SECTION("layers") {
         std::string shape_plugin("./plugins/input/shape.input");
         if (mapnik::util::exists(shape_plugin))
         {
-            mapnik::datasource_cache::instance().register_datasources("plugins/input/shape.input");
             mapnik::parameters p;
             p["type"]="shape";
             p["file"]="demo/data/boundaries";

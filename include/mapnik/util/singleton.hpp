@@ -31,7 +31,10 @@
 #include <new> // operator new
 #include <type_traits>
 #include <atomic>
+
+#ifdef MAPNIK_THREADSAFE
 #include <mutex>
+#endif
 
 namespace mapnik
 {
@@ -80,7 +83,7 @@ template <typename T,
 #endif
         friend class CreatePolicy<T>;
         static std::atomic<T*> pInstance_;
-        static bool destroyed_;
+        static std::atomic<bool> destroyed_;
         singleton(const singleton &rhs);
         singleton& operator=(const singleton&);
 
@@ -97,7 +100,9 @@ template <typename T,
         }
 
     protected:
+#ifdef MAPNIK_THREADSAFE
         static std::mutex mutex_;
+#endif
         singleton() {}
 
     public:
@@ -106,7 +111,9 @@ template <typename T,
             T * tmp = pInstance_.load(std::memory_order_acquire);
             if (tmp == nullptr)
             {
+#ifdef MAPNIK_THREADSAFE
                 std::lock_guard<std::mutex> lock(mutex_);
+#endif
                 tmp = pInstance_.load(std::memory_order_relaxed);
                 if (tmp == nullptr)
                 {
@@ -119,8 +126,10 @@ template <typename T,
                     {
                         tmp = CreatePolicy<T>::create();
                         pInstance_.store(tmp, std::memory_order_release);
+#ifndef MAPNIK_NO_ATEXIT
                         // register destruction
                         std::atexit(&DestroySingleton);
+#endif
                     }
                 }
             }
@@ -128,12 +137,14 @@ template <typename T,
         }
     };
 
+#ifdef MAPNIK_THREADSAFE
     template <typename T,
               template <typename U> class CreatePolicy> std::mutex singleton<T,CreatePolicy>::mutex_;
+#endif
     template <typename T,
               template <typename U> class CreatePolicy> std::atomic<T*> singleton<T,CreatePolicy>::pInstance_;
     template <typename T,
-              template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_ = false;
+              template <typename U> class CreatePolicy> std::atomic<bool> singleton<T,CreatePolicy>::destroyed_(false);
 }
 
 #endif // MAPNIK_UTIL_SINGLETON_HPP

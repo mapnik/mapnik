@@ -1,12 +1,9 @@
 #include "catch.hpp"
 
 #include <iostream>
-#include <cstdio>
 #include <cstring>
 #include <sstream>
 #include <string>
-#include <vector>
-#include <algorithm>
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rendering_buffer.h"

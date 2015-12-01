@@ -32,6 +32,9 @@
 // agg
 #include <agg_trans_affine.h>
 
+// stl
+#include <cmath>
+
 namespace mapnik {
 
 class feature_impl;
@@ -149,13 +152,19 @@ struct transform_processor
 
         void operator() (skewX_node const& node)
         {
-            double angle = deg2rad(eval(node.angle_));
+            auto degrees = std::fmod(eval(node.angle_),90.0);
+            if (degrees < -89.0) degrees = -89.0;
+            else if (degrees > 89.0) degrees = 89.0;
+            auto angle = deg2rad(degrees);
             transform_.multiply(agg::trans_affine_skewing(angle, 0.0));
         }
 
         void operator() (skewY_node const& node)
         {
-            double angle = deg2rad(eval(node.angle_));
+            auto degrees = std::fmod(eval(node.angle_),90.0);
+            if (degrees < -89.0) degrees = -89.0;
+            else if (degrees > 89.0) degrees = 89.0;
+            auto angle = deg2rad(degrees);
             transform_.multiply(agg::trans_affine_skewing(0.0, angle));
         }
 

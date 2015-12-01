@@ -29,13 +29,9 @@
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_fusion_adapted.hpp>
-// boost
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
@@ -78,7 +74,7 @@ template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct positions_grammar :
         qi::grammar<Iterator,coordinates(),space_type>
 {
-    positions_grammar();
+    positions_grammar(ErrorHandler & error_handler);
     qi::rule<Iterator, coordinates(),space_type> coords;
     qi::rule<Iterator, boost::optional<position>(), space_type> pos;
     qi::rule<Iterator, positions(), space_type> ring;
@@ -86,8 +82,6 @@ struct positions_grammar :
     qi::rule<Iterator, std::vector<std::vector<positions> >(), space_type> rings_array;
     boost::phoenix::function<set_position_impl> set_position;
     boost::phoenix::function<push_position_impl> push_position;
-    // error handler
-    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
 }}

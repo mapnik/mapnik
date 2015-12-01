@@ -51,7 +51,8 @@ namespace mapnik {
 template <typename T>
 MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& prj_trans,
                  box2d<double> const& target_ext, box2d<double> const& source_ext,
-                 double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method, double filter_factor)
+                 double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method, double filter_factor,
+                 boost::optional<double> const & nodata_value)
 {
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
@@ -147,7 +148,12 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
                     using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_resample_affine;
                     agg::image_filter_lut filter;
                     detail::set_scaling_method(filter, scaling_method, filter_factor);
-                    span_gen_type sg(ia, interpolator, filter);
+                    boost::optional<typename span_gen_type::value_type> nodata;
+                    if (nodata_value)
+                    {
+                        nodata = nodata_value;
+                    }
+                    span_gen_type sg(ia, interpolator, filter, nodata);
                     agg::render_scanlines_bin(rasterizer, scanline, rb, sa, sg);
                 }
             }
@@ -162,7 +168,8 @@ struct warp_image_visitor
 {
     warp_image_visitor (raster & target_raster, proj_transform const& prj_trans, box2d<double> const& source_ext,
                         double offset_x, double offset_y, unsigned mesh_size,
-                        scaling_method_e scaling_method, double filter_factor)
+                        scaling_method_e scaling_method, double filter_factor,
+                        boost::optional<double> const & nodata_value)
         : target_raster_(target_raster),
           prj_trans_(prj_trans),
           source_ext_(source_ext),
@@ -170,7 +177,9 @@ struct warp_image_visitor
           offset_y_(offset_y),
           mesh_size_(mesh_size),
           scaling_method_(scaling_method),
-        filter_factor_(filter_factor) {}
+          filter_factor_(filter_factor),
+          nodata_value_(nodata_value)
+    {}
 
     void operator() (image_null const&) {}
 
@@ -183,7 +192,7 @@ struct warp_image_visitor
         {
             image_type & target = util::get<image_type>(target_raster_.data_);
             warp_image (target, source, prj_trans_, target_raster_.ext_, source_ext_,
-                        offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_);
+                        offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_, nodata_value_);
         }
     }
 
@@ -195,6 +204,7 @@ struct warp_image_visitor
     unsigned mesh_size_;
     scaling_method_e scaling_method_;
     double filter_factor_;
+    boost::optional<double> const & nodata_value_;
 };
 
 }
@@ -203,24 +213,39 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                                 proj_transform const& prj_trans,
                                 double offset_x, double offset_y,
                                 unsigned mesh_size,
-                                scaling_method_e scaling_method)
+                                scaling_method_e scaling_method,
+                                boost::optional<double> const & nodata_value)
 {
     detail::warp_image_visitor warper(target, prj_trans, source.ext_, offset_x, offset_y, mesh_size,
-                                      scaling_method, source.get_filter_factor());
+                                      scaling_method, source.get_filter_factor(), nodata_value);
     util::apply_visitor(warper, source.data_);
 }
 
+void reproject_and_scale_raster(raster & target, raster const& source,
+                                            proj_transform const& prj_trans,
+                                            double offset_x, double offset_y,
+                                            unsigned mesh_size,
+                                            scaling_method_e scaling_method)
+{
+    reproject_and_scale_raster(target, source, prj_trans,
+                               offset_x, offset_y,
+                               mesh_size,
+                               scaling_method,
+                               boost::optional<double>());
+}
+
+
 template MAPNIK_DECL void warp_image (image_rgba8&, image_rgba8 const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
 
 template MAPNIK_DECL void warp_image (image_gray8&, image_gray8 const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
 
 template MAPNIK_DECL void warp_image (image_gray16&, image_gray16 const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
 
 template MAPNIK_DECL void warp_image (image_gray32f&, image_gray32f const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double);
+                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
 
 
 }// namespace mapnik

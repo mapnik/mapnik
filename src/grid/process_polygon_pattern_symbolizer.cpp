@@ -79,7 +79,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     using vertex_converter_type = vertex_converter<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag>;
     vertex_converter_type converter(common_.query_extent_,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
 
-    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && clip) converter.set<clip_poly_tag>();
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter

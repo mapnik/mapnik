@@ -27,14 +27,13 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 
-// webp
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 extern "C"
 {
 #include <webp/encode.h>
 }
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 
 // stl
 #include <algorithm>
@@ -80,20 +79,20 @@ inline int import_image(T2 const& im_in,
     image<typename T2::pixel> const& data = im_in.data();
     std::size_t width = im_in.width();
     std::size_t height = im_in.height();
-    int stride = sizeof(typename T2::pixel_type) * width;
+    std::size_t stride = sizeof(typename T2::pixel_type) * width;
     if (data.width() == width &&
         data.height() == height)
     {
         if (alpha)
         {
-            return WebPPictureImportRGBA(&pic, data.bytes(), stride);
+            return WebPPictureImportRGBA(&pic, data.bytes(), static_cast<int>(stride));
         }
         else
         {
     #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, data.bytes(), stride);
+            return WebPPictureImportRGBX(&pic, data.bytes(), static_cast<int>(stride));
     #else
-            return WebPPictureImportRGBA(&pic, data.bytes(), stride);
+            return WebPPictureImportRGBA(&pic, data.bytes(), static_cast<int>(stride));
     #endif
         }
     }
@@ -109,14 +108,14 @@ inline int import_image(T2 const& im_in,
         }
         if (alpha)
         {
-            return WebPPictureImportRGBA(&pic, im.bytes(), stride);
+            return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
         }
         else
         {
     #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, im.bytes(), stride);
+            return WebPPictureImportRGBX(&pic, im.bytes(), static_cast<int>(stride));
     #else
-            return WebPPictureImportRGBA(&pic, im.bytes(), stride);
+            return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
     #endif
         }
     }
@@ -127,17 +126,17 @@ inline int import_image(image_rgba8 const& im,
                              WebPPicture & pic,
                              bool alpha)
 {
-    int stride = sizeof(image_rgba8::pixel_type) * im.width();
+    std::size_t stride = sizeof(image_rgba8::pixel_type) * im.width();
     if (alpha)
     {
-        return WebPPictureImportRGBA(&pic, im.bytes(), stride);
+        return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
     }
     else
     {
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        return WebPPictureImportRGBX(&pic, im.bytes(), stride);
+        return WebPPictureImportRGBX(&pic, im.bytes(), static_cast<int>(stride));
 #else
-        return WebPPictureImportRGBA(&pic, im.bytes(), stride);
+        return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
 #endif
     }
 }

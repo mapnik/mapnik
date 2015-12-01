@@ -1582,7 +1582,6 @@ struct visitor_get_pixel
     template <typename T2>
     T1 operator() (T2 const& data) const
     {
-        using pixel_type = T1;
         if (check_bounds(data, x_, y_))
         {
             return safe_cast<T1>(data(x_, y_));

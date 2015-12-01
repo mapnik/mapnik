@@ -29,6 +29,23 @@ Import('env')
 
 config_env = env.Clone()
 
+
+def GetMapnikLibVersion():
+    ver = []
+    for line in open('../../include/mapnik/version.hpp').readlines():
+        if line.startswith('#define MAPNIK_MAJOR_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_MINOR_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+        if line.startswith('#define MAPNIK_PATCH_VERSION'):
+            ver.append(line.split(' ')[2].strip())
+    version_string = ".".join(ver)
+    return version_string
+
+if (GetMapnikLibVersion() != config_env['MAPNIK_VERSION_STRING']):
+    print 'Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING'])
+    Exit(1)
+
 config_variables = '''#!/usr/bin/env bash
 
 ## variables
@@ -153,6 +170,7 @@ target_path = os.path.normpath(os.path.join(config_env['INSTALL_PREFIX'],'bin'))
 full_target = os.path.join(target_path,config_file)
 
 Depends(full_target, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+Depends(full_target, '../../include/mapnik/version.hpp')
 
 if 'install' in COMMAND_LINE_TARGETS:
     # we must add 'install' catch here because otherwise

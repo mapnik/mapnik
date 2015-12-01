@@ -27,6 +27,7 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/renderer.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 
 namespace mapnik {
@@ -60,7 +61,7 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
     double opacity = get<double>(sym,keys::opacity, feature, common_.vars_, 1.0);
 
     placements_list const& placements = helper.get();
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         marker_info_ptr mark = glyphs->get_marker();
         if (mark)

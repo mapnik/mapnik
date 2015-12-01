@@ -29,9 +29,8 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/geom_util.hpp>
 
-// ogr
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
+#include <mapnik/warning_ignore.hpp>
 #include <ogrsf_frmts.h>
 #pragma GCC diagnostic pop
 

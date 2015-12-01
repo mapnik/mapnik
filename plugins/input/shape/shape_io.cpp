@@ -31,18 +31,20 @@
 
 using mapnik::datasource_exception;
 const std::string shape_io::SHP = ".shp";
+const std::string shape_io::SHX = ".shx";
 const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
 shape_io::shape_io(std::string const& shape_name, bool open_index)
     : type_(shape_null),
       shp_(shape_name + SHP),
+      shx_(shape_name + SHX),
       dbf_(shape_name + DBF),
       reclength_(0),
       id_(0)
 {
     bool ok = (shp_.is_open() && dbf_.is_open());
-    if (! ok)
+    if (!ok)
     {
         throw datasource_exception("Shape Plugin: cannot read shape file '" + shape_name + "'");
     }
@@ -58,6 +60,10 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
             MAPNIK_LOG_WARN(shape) << "shape_io: Could not open index=" << shape_name << INDEX;
         }
     }
+    if  (!index_ && !shx_.is_open())
+    {
+        throw datasource_exception("Shape Plugin: cannot read shape index file '" + shape_name + ".shx'");
+    }
 }
 
 shape_io::~shape_io() {}
@@ -72,6 +78,11 @@ void shape_io::move_to(std::streampos pos)
 shape_file& shape_io::shp()
 {
     return shp_;
+}
+
+shape_file& shape_io::shx()
+{
+    return shx_;
 }
 
 dbf_file& shape_io::dbf()

@@ -75,13 +75,14 @@ int main(int argc, char** argv)
 {
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
+    int return_value = 0;
     {
         test_static test_runner(params);
-        run(test_runner,"static_cast");
+        return_value = return_value | run(test_runner,"static_cast");
     }
     {
         test_numeric test_runner(params);
-        run(test_runner,"numeric_cast");
+        return_value = return_value | run(test_runner,"numeric_cast");
     }
-    return 0;
+    return return_value;
 }

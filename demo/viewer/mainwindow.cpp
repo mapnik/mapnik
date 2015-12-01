@@ -196,10 +196,10 @@ void MainWindow::load_map_file(QString const& filename)
         mapnik::auto_cpu_timer t(std::clog, "loading map took: ");
         mapnik::load_map(*map,filename.toStdString());
     }
-    //catch (mapnik::config_error & ex)
-    //{
-    //    std::cout << ex.what() << "\n";
-    //}
+    catch (std::exception const& ex)
+    {
+        std::cout << ex.what() << "\n";
+    }
     catch (...)
     {
         std::cerr << "Exception caught in load_map\n";

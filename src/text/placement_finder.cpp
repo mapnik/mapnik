@@ -25,15 +25,13 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text/placement_finder_impl.hpp>
+#include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/util/math.hpp>
-
-// agg
-#include "agg_conv_clip_polyline.h"
 
 // stl
 #include <vector>
@@ -78,6 +76,8 @@ bool placement_finder::next_position()
                                                                info_.properties,
                                                                info_.properties.layout_defaults,
                                                                info_.properties.format_tree());
+        // ensure layouts stay in scope after layouts_.clear()
+        processed_layouts_.emplace_back(layout);
         // TODO: why is this call needed?
         // https://github.com/mapnik/mapnik/issues/2525
         text_props_ = evaluate_text_properties(info_.properties,feature_,attr_);
@@ -118,7 +118,7 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
 
 bool placement_finder::find_point_placement(pixel_position const& pos)
 {
-    glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
+    glyph_positions_ptr glyphs = std::make_unique<glyph_positions>();
     std::vector<box2d<double> > bboxes;
 
     glyphs->reserve(layouts_.glyphs_count());
@@ -145,7 +145,7 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         /* For point placements it is faster to just check the bounding box. */
         if (collision(bbox, layouts_.text(), false)) return false;
 
-        if (layout.num_lines()) bboxes.push_back(std::move(bbox));
+        if (layout.glyphs_count()) bboxes.push_back(std::move(bbox));
 
         pixel_position layout_offset = layout_center - glyphs->get_base_point();
         layout_offset.y = -layout_offset.y;
@@ -180,13 +180,28 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
     }
 
     // add_marker first checks for collision and then updates the detector.
-    if (has_marker_ && !add_marker(glyphs, pos)) return false;
+    if (has_marker_ && !add_marker(glyphs, pos, bboxes)) return false;
 
-    for (box2d<double> const& bbox : bboxes)
+    box2d<double> label_box;
+    bool first = true;
+    for (box2d<double> const& box : bboxes)
     {
-        detector_.insert(bbox, layouts_.text());
+        if (first)
+        {
+            label_box = box;
+            first = false;
+        }
+        else
+        {
+            label_box.expand_to_include(box);
+        }
+        detector_.insert(box, layouts_.text());
     }
-    placements_.push_back(glyphs);
+    // do not render text off the canvas
+    if (extent_.intersects(label_box))
+    {
+        placements_.push_back(std::move(glyphs));
+    }
 
     return true;
 }
@@ -200,7 +215,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     vertex_cache::scoped_state begin(pp);
     text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
 
-    glyph_positions_ptr glyphs = std::make_shared<glyph_positions>();
+    glyph_positions_ptr glyphs = std::make_unique<glyph_positions>();
     std::vector<box2d<double> > bboxes;
     glyphs->reserve(layouts_.glyphs_count());
     bboxes.reserve(layouts_.glyphs_count());
@@ -326,11 +341,26 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
     }
 
+    box2d<double> label_box;
+    bool first = true;
     for (box2d<double> const& box : bboxes)
     {
+        if (first)
+        {
+            label_box = box;
+            first = false;
+        }
+        else
+        {
+            label_box.expand_to_include(box);
+        }
         detector_.insert(box, layouts_.text());
     }
-    placements_.push_back(glyphs);
+    // do not render text off the canvas
+    if (extent_.intersects(label_box))
+    {
+        placements_.push_back(std::move(glyphs));
+    }
 
     return true;
 }
@@ -369,9 +399,7 @@ bool placement_finder::collision(const box2d<double> &box, const value_unicode_s
         margin = (text_props_->margin != 0 ? text_props_->margin : text_props_->minimum_distance) * scale_factor_;
         repeat_distance = text_props_->repeat_distance * scale_factor_;
     }
-    return !detector_.extent().intersects(box)
-        ||
-        (text_props_->avoid_edges && !extent_.contains(box))
+    return (text_props_->avoid_edges && !extent_.contains(box))
         ||
         (text_props_->minimum_padding > 0 &&
          !extent_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
@@ -392,14 +420,15 @@ void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool mar
 }
 
 
-bool placement_finder::add_marker(glyph_positions_ptr glyphs, pixel_position const& pos) const
+bool placement_finder::add_marker(glyph_positions_ptr & glyphs, pixel_position const& pos, std::vector<box2d<double>> & bboxes) const
 {
     pixel_position real_pos = (marker_unlocked_ ? pos : glyphs->get_base_point()) + marker_displacement_;
     box2d<double> bbox = marker_box_;
     bbox.move(real_pos.x, real_pos.y);
-    glyphs->set_marker(marker_, real_pos);
     if (collision(bbox, layouts_.text(), false)) return false;
     detector_.insert(bbox);
+    bboxes.push_back(std::move(bbox));
+    glyphs->set_marker(marker_, real_pos);
     return true;
 }
 

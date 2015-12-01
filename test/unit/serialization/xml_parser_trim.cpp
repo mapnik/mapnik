@@ -1,10 +1,8 @@
 #include "catch.hpp"
 
-#include <mapnik/debug.hpp>
-#include <mapnik/value.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_loader.hpp>
-#include <mapnik/attribute.hpp>
+#include <mapnik/attribute.hpp> // needed due to fwd declare in value_types.hpp
 
 TEST_CASE("xml parser") {
 

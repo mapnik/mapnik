@@ -113,7 +113,7 @@ private:
 
 public:
 
-    bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize)
+    bool registerPool(ConnectionCreator<Connection> const& creator,unsigned initialSize,unsigned maxSize)
     {
         ContType::const_iterator itr = pools_.find(creator.id());
 

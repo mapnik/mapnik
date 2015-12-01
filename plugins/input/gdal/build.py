@@ -45,9 +45,9 @@ if env['RUNTIME_LINK'] == 'static':
 libraries = copy(plugin_env['LIBS'])
 
 if env['PLUGIN_LINKING'] == 'shared':
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.insert(0,env['MAPNIK_NAME'])
     libraries.append(env['ICU_LIB_NAME'])
-    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                       SHLIBPREFIX='',

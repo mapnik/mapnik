@@ -27,11 +27,7 @@
 
 // undef B0 to workaround https://svn.boost.org/trac/boost/ticket/10467
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <mapnik/warning_ignore.hpp>
 #undef B0
 #include <boost/geometry/geometries/register/linestring.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
@@ -47,7 +43,6 @@
 #include <mapnik/box2d.hpp>
 
 #include <cstdint>
-#include <vector>
 
 // register point
 BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
@@ -180,13 +175,13 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename std::vector<mapnik::geometry::linear_ring<CoordinateType> > const&;
+    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container const&;
 };
 
 template <typename CoordinateType>
 struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename std::vector<mapnik::geometry::linear_ring<CoordinateType> >&;
+    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container&;
 };
 
 // exterior
@@ -207,7 +202,7 @@ struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 {
-    using holes_type = std::vector<mapnik::geometry::linear_ring<CoordinateType> >;
+    using holes_type = typename mapnik::geometry::polygon<CoordinateType>::rings_container;
     static holes_type&  get(mapnik::geometry::polygon<CoordinateType> & p)
     {
         return p.interior_rings;

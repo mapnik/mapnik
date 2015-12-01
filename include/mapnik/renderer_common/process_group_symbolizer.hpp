@@ -211,7 +211,7 @@ void render_offset_placements(placements_list const& placements,
                               pixel_position const& offset,
                               F render_text) {
 
-    for (glyph_positions_ptr glyphs : placements)
+    for (auto const& glyphs : placements)
     {
         // move the glyphs to the correct offset
         pixel_position base_point = glyphs->get_base_point();
@@ -329,7 +329,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())
         {
-             if (util::apply_visitor(evaluate<Feature,value_type,attributes>(*sub_feature,common.vars_),
+             if (util::apply_visitor(evaluate<feature_impl,value_type,attributes>(*sub_feature,common.vars_),
                                                *(rule->get_filter())).to_bool())
              {
                 // add matched rule and feature to the list of things to draw
@@ -380,7 +380,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
         // evaluate the repeat key with the matched sub feature if we have one
         if (rpt_key_expr)
         {
-            rpt_key_value = util::apply_visitor(evaluate<Feature,value_type,attributes>(*match_feature,common.vars_),
+            rpt_key_value = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(*match_feature,common.vars_),
                                                 *rpt_key_expr).to_unicode();
         }
         helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);

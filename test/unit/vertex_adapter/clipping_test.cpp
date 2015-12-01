@@ -4,10 +4,9 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/path.hpp>
-// boost
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 
@@ -17,10 +16,8 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 
 // agg
-#include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"
 
 template <typename T>

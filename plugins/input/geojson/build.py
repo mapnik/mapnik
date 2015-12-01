@@ -42,18 +42,20 @@ else:
       """
       %(PLUGIN_NAME)s_datasource.cpp
       %(PLUGIN_NAME)s_featureset.cpp
-      large_%(PLUGIN_NAME)s_featureset.cpp
+      %(PLUGIN_NAME)s_index_featureset.cpp
+      %(PLUGIN_NAME)s_memory_index_featureset.cpp
+
       """ % locals()
     )
 
     # Link Library to Dependencies
     libraries = []
-    libraries.append(env['ICU_LIB_NAME'])
-    libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.append('mapnik-json')
 
     if env['PLUGIN_LINKING'] == 'shared':
-        libraries.append(env['MAPNIK_NAME'])
+        libraries.append('boost_system%s' % env['BOOST_APPEND'])
+        libraries.insert(0,env['MAPNIK_NAME'])
+        libraries.append(env['ICU_LIB_NAME'])
 
         TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                           SHLIBPREFIX='',

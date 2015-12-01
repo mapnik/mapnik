@@ -35,10 +35,8 @@
 #include <mapnik/timer.hpp>
 #include <mapnik/value_types.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
@@ -94,7 +92,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
       pattern_(boost::regex("(@\\w+)",boost::regex::normal | boost::regbase::icase)),
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
-      intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0))
+      intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
+      key_field_as_attribute_(*params.get<mapnik::boolean_type>("key_field_as_attribute", true))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");
@@ -372,7 +371,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     if (type_oid == 20 || type_oid == 21 || type_oid == 23)
                     {
                         found_key_field = true;
-                        desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
+                        if (key_field_as_attribute_)
+                        {
+                            desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
+                        }
                     }
                     else
                     {
@@ -819,7 +821,10 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         if (! key_field_.empty())
         {
             mapnik::sql_utils::quote_attr(s, key_field_);
-            ctx->push(key_field_);
+            if (key_field_as_attribute_)
+            {
+                ctx->push(key_field_);
+            }
 
             for (; pos != end; ++pos)
             {
@@ -849,7 +854,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+        return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), key_field_as_attribute_);
 
     }
 
@@ -896,28 +901,32 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-            std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
-            std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
+            auto const& desc = desc_.get_descriptors();
 
-            if (! key_field_.empty())
+            if (!key_field_.empty())
             {
                 mapnik::sql_utils::quote_attr(s, key_field_);
-                ctx->push(key_field_);
-                for (; itr != end; ++itr)
+                if (key_field_as_attribute_)
                 {
-                    if (itr->get_name() != key_field_)
+                    ctx->push(key_field_);
+                }
+                for (auto const& attr_info : desc)
+                {
+                    std::string const& name = attr_info.get_name();
+                    if (name != key_field_)
                     {
-                        mapnik::sql_utils::quote_attr(s, itr->get_name());
-                        ctx->push(itr->get_name());
+                        mapnik::sql_utils::quote_attr(s, name);
+                        ctx->push(name);
                     }
                 }
             }
             else
             {
-                for (; itr != end; ++itr)
+                for (auto const& attr_info : desc)
                 {
-                    mapnik::sql_utils::quote_attr(s, itr->get_name());
-                    ctx->push(itr->get_name());
+                    std::string const& name = attr_info.get_name();
+                    mapnik::sql_utils::quote_attr(s, name);
+                    ctx->push(name);
                 }
             }
 
@@ -932,7 +941,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(), key_field_as_attribute_);
         }
     }
 

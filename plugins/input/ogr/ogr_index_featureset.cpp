@@ -33,11 +33,10 @@
 #include <mapnik/geometry_correct.hpp>
 
 // boost
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <mapnik/mapped_memory_cache.hpp>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #pragma GCC diagnostic pop
@@ -72,7 +71,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
       feature_envelope_()
 {
 
-#ifdef SHAPE_MEMORY_MAPPED_FILE
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file, true);
     if (memory)
     {
@@ -148,13 +147,17 @@ feature_ptr ogr_index_featureset<filterT>::next()
             switch (type_oid)
             {
             case OFTInteger:
-#if GDAL_VERSION_MAJOR >= 2
-            case OFTInteger64:
-#endif
             {
                 feature->put<mapnik::value_integer>(fld_name,poFeature->GetFieldAsInteger (i));
                 break;
             }
+#if GDAL_VERSION_MAJOR >= 2
+            case OFTInteger64:
+            {
+                feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger64(i));
+                break;
+            }
+#endif
 
             case OFTReal:
             {

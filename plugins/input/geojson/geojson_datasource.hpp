@@ -33,15 +33,9 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
 
-// boost
-#include <boost/optional.hpp>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
 #include <boost/version.hpp>
 #include <boost/geometry/index/rtree.hpp>
 #pragma GCC diagnostic pop
@@ -98,6 +92,7 @@ public:
     void parse_geojson(Iterator start, Iterator end);
     template <typename Iterator>
     void initialise_index(Iterator start, Iterator end);
+    void initialise_disk_index(std::string const& filename);
 private:
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;
@@ -107,6 +102,7 @@ private:
     std::vector<mapnik::feature_ptr> features_;
     std::unique_ptr<spatial_index_type> tree_;
     bool cache_features_ = true;
+    bool has_disk_index_ = false;
 };
 
 

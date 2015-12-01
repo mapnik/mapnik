@@ -20,18 +20,16 @@
  *
  *****************************************************************************/
 
-#if defined(SHAPE_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 
-// boost
-#include <boost/assert.hpp>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
+#include <boost/assert.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/file_mapping.hpp>
 #pragma GCC diagnostic pop

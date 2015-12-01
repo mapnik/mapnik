@@ -31,10 +31,10 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/timer.hpp>
-#include <mapnik/cairo/cairo_image_util.hpp>
 
 #ifdef HAVE_CAIRO
 // cairo
+#include <mapnik/cairo/cairo_image_util.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
 #endif
 
@@ -180,9 +180,6 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                    feature_ptr feat  = fs->next();
                    if (feat)
                    {
-
-// FIXME
-#if 0
                        feature_kv_iterator itr(*feat,true);
                        feature_kv_iterator end(*feat);
 
@@ -192,9 +189,10 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                  std::get<1>(*itr).to_string().c_str()));
                        }
 
+#if 0 //
                        using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
 
-                       for  (unsigned i=0; i<feat->num_geometries();++i)
+                       for  (unsigned i=0; i < feat->num_geometries();++i)
                        {
                            mapnik::geometry_type const& geom = feat->get_geometry(i);
                            mapnik::vertex_adapter va(geom);
@@ -219,9 +217,9 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                painter.drawPath(qpath);
                                update();
                            }
-               }
+                       }
 #endif
-               }
+                   }
                }
 
                if (info.size() > 0)
@@ -513,7 +511,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     //{
     //    std::cerr << ex.what() << std::endl;
     //}
-    catch (const std::exception & ex)
+    catch (std::exception const& ex)
     {
         std::cerr << "exception: " << ex.what() << std::endl;
     }

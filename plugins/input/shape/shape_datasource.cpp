@@ -24,11 +24,9 @@
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
 
-// boost
-#include <boost/version.hpp>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
+#include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 
@@ -104,7 +102,7 @@ shape_datasource::shape_datasource(parameters const& params)
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
-            field_descriptor const& fd=shape_ref->dbf().descriptor(i);
+            field_descriptor const& fd = shape_ref->dbf().descriptor(i);
             std::string fld_name=fd.name_;
             switch (fd.type_)
             {
@@ -167,36 +165,42 @@ void shape_datasource::init(shape_io& shape)
 #endif
 
     //first read header from *.shp
-    int file_code=shape.shp().read_xdr_integer();
-    if (file_code!=9994)
+    shape_file::record_type header(100);
+    shape.shp().read_record(header);
+
+    int file_code = header.read_xdr_integer();
+    if (file_code != 9994)
     {
         std::ostringstream s;
         s << "Shape Plugin: wrong file code " << file_code;
         throw datasource_exception(s.str());
     }
+    header.skip(5 * 4);
+    file_length_ = header.read_xdr_integer();
+    int version = header.read_ndr_integer();
 
-    shape.shp().skip(5*4);
-    file_length_=shape.shp().read_xdr_integer();
-    int version=shape.shp().read_ndr_integer();
-
-    if (version!=1000)
+    if (version != 1000)
     {
         std::ostringstream s;
         s << "Shape Plugin: nvalid version number " << version;
         throw datasource_exception(s.str());
     }
 
-    shape_type_ = static_cast<shape_io::shapeType>(shape.shp().read_ndr_integer());
+    shape_type_ = static_cast<shape_io::shapeType>(header.read_ndr_integer());
     if (shape_type_ == shape_io::shape_multipatch)
         throw datasource_exception("Shape Plugin: shapefile multipatch type is not supported");
 
-    shape.shp().read_envelope(extent_);
+    const double lox = header.read_double();
+    const double loy = header.read_double();
+    const double hix = header.read_double();
+    const double hiy = header.read_double();
+    extent_.init(lox, loy, hix, hiy);
 
 #ifdef MAPNIK_LOG
-    const double zmin = shape.shp().read_double();
-    const double zmax = shape.shp().read_double();
-    const double mmin = shape.shp().read_double();
-    const double mmax = shape.shp().read_double();
+    const double zmin = header.read_double();
+    const double zmax = header.read_double();
+    const double mmin = header.read_double();
+    const double mmax = header.read_double();
 
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Z min/max=" << zmin << "," << zmax;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: M min/max=" << mmin << "," << mmax;
@@ -250,7 +254,6 @@ featureset_ptr shape_datasource::features(query const& q) const
                                                                   shape_name_,
                                                                   q.property_names(),
                                                                   desc_.get_encoding(),
-                                                                  file_length_,
                                                                   row_limit_);
     }
 }
@@ -263,15 +266,12 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
 
     filter_at_point filter(pt,tol);
     // collect all attribute names
-    std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
-    std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();
-    std::vector<attribute_descriptor>::const_iterator end = desc_vector.end();
+    auto const& desc = desc_.get_descriptors();
     std::set<std::string> names;
 
-    while (itr != end)
+    for (auto const& attr_info : desc)
     {
-        names.insert(itr->get_name());
-        ++itr;
+        names.insert(attr_info.get_name());
     }
 
     if (indexed_)
@@ -291,7 +291,6 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
                                                                     shape_name_,
                                                                     names,
                                                                     desc_.get_encoding(),
-                                                                    file_length_,
                                                                     row_limit_);
     }
 }

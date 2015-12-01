@@ -39,7 +39,7 @@ transcoder::transcoder (std::string const& encoding)
     conv_ = ucnv_open(encoding.c_str(),&err);
     if (!U_SUCCESS(err))
     {
-        // NOT: conv_ should be null on error so no need to call ucnv_close
+        // NOTE: conv_ should be null on error so no need to call ucnv_close
         throw std::runtime_error(std::string("could not create converter for ") + encoding);
     }
 }

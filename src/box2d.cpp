@@ -29,12 +29,10 @@
 #include <sstream>
 #include <iomanip>
 
-// boost
+#include <mapnik/config.hpp>
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/include/adapt_adt.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_adapt_adt_attributes.hpp>
@@ -55,7 +53,10 @@ namespace mapnik
 {
 template <typename T>
 box2d<T>::box2d()
-    :minx_(0),miny_(0),maxx_(-1),maxy_(-1) {}
+    :minx_( std::numeric_limits<T>::max()),
+     miny_( std::numeric_limits<T>::max()),
+     maxx_(-std::numeric_limits<T>::max()),
+     maxy_(-std::numeric_limits<T>::max()) {}
 
 template <typename T>
 box2d<T>::box2d(T minx,T miny,T maxx,T maxy)
@@ -266,15 +267,16 @@ bool box2d<T>::intersects(box2d<T> const& other) const
 template <typename T>
 box2d<T> box2d<T>::intersect(box2d_type const& other) const
 {
-    if (intersects(other)) {
+    if (intersects(other))
+    {
         T x0=std::max(minx_,other.minx_);
         T y0=std::max(miny_,other.miny_);
-
         T x1=std::min(maxx_,other.maxx_);
         T y1=std::min(maxy_,other.maxy_);
-
         return box2d<T>(x0,y0,x1,y1);
-    } else {
+    }
+    else
+    {
         return box2d<T>();
     }
 }

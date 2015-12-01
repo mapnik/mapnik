@@ -109,10 +109,6 @@ struct geometry_type_visitor
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
-    int operator() (mapnik::topojson::invalid const&) const
-    {
-        return -1;
-    }
 };
 
 struct collect_attributes_visitor
@@ -120,8 +116,6 @@ struct collect_attributes_visitor
     mapnik::layer_descriptor & desc_;
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
       desc_(desc) {}
-
-    void operator() (mapnik::topojson::invalid const&) {}
 
     template <typename GeomType>
     void operator() (GeomType const& g)
@@ -203,14 +197,15 @@ void topojson_datasource::parse_topojson(T const& buffer)
     values.reserve(topo_.geometries.size());
 
     std::size_t geometry_index = 0;
-
+    bool first = true;
     for (auto const& geom : topo_.geometries)
     {
         mapnik::box2d<double> box = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
         if (box.valid())
         {
-            if (geometry_index == 0)
+            if (first)
             {
+                first = false;
                 extent_ = box;
                 collect_attributes_visitor assessor(desc_);
                 mapnik::util::apply_visitor( std::ref(assessor), geom);
@@ -220,8 +215,8 @@ void topojson_datasource::parse_topojson(T const& buffer)
                 extent_.expand_to_include(box);
             }
             values.emplace_back(box, geometry_index);
-            ++geometry_index;
         }
+        ++geometry_index;
     }
 
     // packing algorithm

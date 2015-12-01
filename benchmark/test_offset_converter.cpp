@@ -93,9 +93,10 @@ int main(int argc, char** argv)
 {
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
+    int return_value = 0;
     {
         test_offset test_runner(params);
-        run(test_runner,"offset_test");
+        return_value = run(test_runner,"offset_test");
     }
-    return 0;
+    return return_value;
 }

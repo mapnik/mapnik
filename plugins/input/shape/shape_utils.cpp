@@ -26,10 +26,8 @@
 #include <mapnik/util/conversions.hpp>
 #include "shape_utils.hpp"
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 

@@ -110,7 +110,7 @@ private:
     /*!
      * \brief render features list queued when they are available.
      */
-    void render_material(layer_rendering_material & mat, Processor & p );
+    void render_material(layer_rendering_material const & mat, Processor & p );
 
     Map const& m_;
 };

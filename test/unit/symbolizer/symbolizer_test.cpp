@@ -2,8 +2,6 @@
 
 #include <iostream>
 #include <mapnik/symbolizer.hpp>
-#include <vector>
-#include <algorithm>
 
 using namespace mapnik;
 

@@ -30,11 +30,7 @@
 #include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
@@ -104,7 +100,7 @@ struct geometry_generator_grammar :
     karma::rule<OutputIterator, geometry::geometry<double> const&()> polygon;
     karma::rule<OutputIterator, geometry::polygon<double> const&()> polygon_coord;
     karma::rule<OutputIterator, geometry::linear_ring<double> const&()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<double> > const&()> interior_ring_coord;
+    karma::rule<OutputIterator, geometry::polygon<double>::rings_container const&()> interior_ring_coord;
     karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_point;
     karma::rule<OutputIterator, geometry::multi_point<double> const& ()> multi_point_coord;
     karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_linestring;

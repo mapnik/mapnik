@@ -56,6 +56,7 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     qi::eps_type eps;
     qi::raw_type raw;
     qi::char_type char_;
+    qi::no_skip_type no_skip;
     boost::spirit::repository::qi::iter_pos_type iter_pos;
     using qi::fail;
     using qi::on_error;
@@ -63,22 +64,26 @@ extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_gramm
     start = features(_r1)
         ;
 
-    features = iter_pos[_a = _1] >> -(lit('{') >> -lit("\"type\"")
-                                      >> lit(':') >> lit("\"FeatureCollection\"")
-                                      >> *(lit(',') >> (json.key_value - lit("\"features\"")))
-                                      >> lit(',') >> lit("\"features\"")
-                                      >> lit(':'))
-                                 >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
+    features = no_skip[iter_pos[_a = _1]] >> -(lit('{')
+                                               >> *((json.key_value - lit("\"features\"")) >> lit(','))
+                                               >> lit("\"features\"")
+                                               >> lit(':'))
+                                          >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
         ;
 
     feature = raw[lit('{')[_a = 1]
-                  >> *(eps(_a > 0) >> (lit('{')[_a += 1]
-                                       |
-                                       lit('}')[_a -=1]
-                                       |
-                                       coords[_b = _1]
-                                       |
-                                       char_))][push_box(_r1, _r2, _b, _1)]
+                  >> *(eps(_a > 0) >> (
+                           lit("\"FeatureCollection\"") > eps(false) // fail if nested FeatureCollection
+                           |
+                           lit('{')[_a += 1]
+                           |
+                           lit('}')[_a -= 1]
+                           |
+                           coords[_b = _1]
+                           |
+                           json.string_
+                           |
+                           char_))][push_box(_r1, _r2, _b, _1)]
         ;
 
     coords = lit("\"coordinates\"")

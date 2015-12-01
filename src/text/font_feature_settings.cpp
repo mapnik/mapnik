@@ -24,15 +24,12 @@
 #include <mapnik/text/font_feature_settings.hpp>
 #include <mapnik/config_error.hpp>
 
-// boost
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/version.hpp>
 #pragma GCC diagnostic pop
+
 
 // stl
 #include <algorithm>

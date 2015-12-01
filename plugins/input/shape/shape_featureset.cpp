@@ -22,7 +22,7 @@
 
 // stl
 #include <iostream>
-
+#include <cassert>
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -41,20 +41,26 @@ shape_featureset<filterT>::shape_featureset(filterT const& filter,
                                             std::string const& shape_name,
                                             std::set<std::string> const& attribute_names,
                                             std::string const& encoding,
-                                            long file_length,
                                             int row_limit)
     : filter_(filter),
       shape_(shape_name, false),
       query_ext_(),
       feature_bbox_(),
       tr_(new transcoder(encoding)),
-      file_length_(file_length),
+      shx_file_length_(0),
       row_limit_(row_limit),
       count_(0),
       ctx_(std::make_shared<mapnik::context_type>())
 {
-    shape_.shp().skip(100);
-    setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
+    if (!shape_.shx().is_open())
+    {
+        throw mapnik::datasource_exception("Shape Plugin: can't open '" + shape_name + ".shx' file");
+    }
+    shape_file::record_type shx_header(100);
+    shape_.shx().read_record(shx_header);
+    shx_header.skip(6 * 4);
+    shx_file_length_ = shx_header.read_xdr_integer();
+    setup_attributes(ctx_, attribute_names, shape_name, shape_, attr_ids_);
 }
 
 template <typename filterT>
@@ -65,18 +71,22 @@ feature_ptr shape_featureset<filterT>::next()
         return feature_ptr();
     }
 
-
-    while (shape_.shp().pos() < std::streampos(file_length_ * 2))
+    std::streampos position_limit =  2 * shx_file_length_ - 2 * sizeof(int);
+    while  (shape_.shx().is_good() && shape_.shx().pos() <= position_limit)
     {
-        shape_.move_to(shape_.shp().pos());
-        shape_file::record_type record(shape_.reclength_ * 2);
+        int offset = shape_.shx().read_xdr_integer();
+        int record_length = shape_.shx().read_xdr_integer();
+        shape_.move_to(2 * offset);
+        mapnik::value_integer feature_id = shape_.id();
+        assert(record_length == shape_.reclength_);
+        shape_file::record_type record(record_length * 2);
         shape_.shp().read_record(record);
         int type = record.read_ndr_integer();
 
         // skip null shapes
         if (type == shape_io::shape_null) continue;
 
-        feature_ptr feature(feature_factory::create(ctx_, shape_.id_));
+        feature_ptr feature(feature_factory::create(ctx_, feature_id));
         switch (type)
         {
         case shape_io::shape_point:
@@ -131,18 +141,14 @@ feature_ptr shape_featureset<filterT>::next()
             return feature_ptr();
         }
 
-        // FIXME: https://github.com/mapnik/mapnik/issues/1020
-        feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {
             shape_.dbf().move_to(shape_.id_);
-            std::vector<int>::const_iterator itr = attr_ids_.begin();
-            std::vector<int>::const_iterator end = attr_ids_.end();
             try
             {
-                for (; itr != end; ++itr)
+                for (auto id : attr_ids_)
                 {
-                    shape_.dbf().add_attribute(*itr, *tr_, *feature); //TODO optimize!!!
+                    shape_.dbf().add_attribute(id, *tr_, *feature); //TODO optimize!!!
                 }
             }
             catch (...)

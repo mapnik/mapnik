@@ -28,7 +28,9 @@
 #include <mapnik/text/text_line.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
+#include <mapnik/text/itemizer.hpp>
 #include <mapnik/safe_cast.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // stl
 #include <list>
@@ -37,6 +39,9 @@
 // harfbuzz
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
+
+// icu
+#include <unicode/uscript.h>
 
 namespace mapnik
 {
@@ -88,6 +93,19 @@ static void shape_text(text_line & line,
         std::size_t pos = 0;
         font_feature_settings const& ff_settings = text_item.format_->ff_settings;
         int ff_count = safe_cast<int>(ff_settings.count());
+
+        // rendering information for a single glyph
+        struct glyph_face_info
+        {
+            face_ptr face;
+            hb_glyph_info_t glyph;
+            hb_glyph_position_t position;
+        };
+        // this table is filled with information for rendering each glyph, so that 
+        // several font faces can be used in a single text_item
+        std::vector<glyph_face_info> glyphinfos;
+        unsigned valid_glyphs = 0;
+
         for (auto const& face : *face_set)
         {
             ++pos;
@@ -96,25 +114,40 @@ static void shape_text(text_line & line,
             hb_buffer_set_direction(buffer.get(), (text_item.dir == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
+            // https://github.com/mapnik/test-data-visual/pull/25
+            #if HB_VERSION_MAJOR > 0
+             #if HB_VERSION_ATLEAST(1, 0 , 5)
+            hb_ft_font_set_load_flags(font,FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
+             #endif
+            #endif
             hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
             hb_font_destroy(font);
 
             unsigned num_glyphs = hb_buffer_get_length(buffer.get());
 
+            // if the number of rendered glyphs has increased, we need to resize the table 
+            if (num_glyphs > glyphinfos.size())
+            {
+                glyphinfos.resize(num_glyphs);
+            }
+
             hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer.get(), nullptr);
             hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer.get(), nullptr);
 
-            bool font_has_all_glyphs = true;
             // Check if all glyphs are valid.
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                if (!glyphs[i].codepoint)
+                // if we have a valid codepoint, save rendering info.
+                if (glyphs[i].codepoint)
                 {
-                    font_has_all_glyphs = false;
-                    break;
+                    if (!glyphinfos[i].glyph.codepoint)
+                    {
+                        ++valid_glyphs;
+                    }
+                    glyphinfos[i] = { face, glyphs[i], positions[i] };
                 }
             }
-            if (!font_has_all_glyphs && (pos < num_faces))
+            if (valid_glyphs < num_glyphs && (pos < num_faces))
             {
                 //Try next font in fontset
                 continue;
@@ -123,14 +156,21 @@ static void shape_text(text_line & line,
             double max_glyph_height = 0;
             for (unsigned i=0; i<num_glyphs; ++i)
             {
-                auto const& gpos = positions[i];
-                auto const& glyph = glyphs[i];
+                auto& gpos = positions[i];
+                auto& glyph = glyphs[i];
+                face_ptr theface = face;
+                if (glyphinfos[i].glyph.codepoint)
+                {
+                    gpos = glyphinfos[i].position;
+                    glyph = glyphinfos[i].glyph;
+                    theface = glyphinfos[i].face;
+                }
                 unsigned char_index = glyph.cluster;
                 glyph_info g(glyph.codepoint,char_index,text_item.format_);
-                if (face->glyph_dimensions(g))
+                if (theface->glyph_dimensions(g))
                 {
-                    g.face = face;
-                    g.scale_multiplier = size / face->get_face()->units_per_EM;
+                    g.face = theface;
+                    g.scale_multiplier = size / theface->get_face()->units_per_EM;
                     //Overwrite default advance with better value provided by HarfBuzz
                     g.unscaled_advance = gpos.x_advance;
                     g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);

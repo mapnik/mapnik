@@ -40,7 +40,7 @@ public:
     text_placements_simple(symbolizer_base::value_type const& positions,
                            std::vector<directions_e> && direction,
                            std::vector<int> && text_sizes);
-    text_placement_info_ptr get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const;
+    text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
     std::string get_positions() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
     void init_positions(std::string const& positions) const;
@@ -58,7 +58,7 @@ class text_placement_info_simple : public text_placement_info
 public:
     text_placement_info_simple(text_placements_simple const* parent,
                                std::string const& evaluated_positions,
-                               double scale_factor);
+                               double _scale_factor);
     bool next() const;
 protected:
     bool next_position_only() const;

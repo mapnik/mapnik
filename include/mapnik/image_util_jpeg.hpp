@@ -28,7 +28,9 @@
 #include <iostream>
 
 namespace mapnik {
-
+namespace detail {
+MAPNIK_DECL int parse_jpeg_quality(std::string const& params);
+}
 struct jpeg_saver
 {
     jpeg_saver(std::ostream &, std::string const&);

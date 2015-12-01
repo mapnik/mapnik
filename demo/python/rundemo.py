@@ -19,10 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+from __future__ import print_function
 import sys
 from os import path
-
 import mapnik
 
 # Instanciate a map, giving it a width and height. Remember: the word "map" is
@@ -370,11 +369,11 @@ if  mapnik.has_cairo():
     mapnik.render_to_file(m,'demo_cairo_argb32.png','ARGB32')
     images_.append('demo_cairo_argb.png')
 
-print "\n\n", len(images_), "maps have been rendered in the current directory:"
+print ("\n\n", len(images_), "maps have been rendered in the current directory:")
 
 for im_ in images_:
-    print "-", im_
+    print ("-", im_)
 
-print "\n\nHave a look!\n\n"
+print ("\n\nHave a look!\n\n")
 
 mapnik.save_map(m,"map.xml")

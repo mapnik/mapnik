@@ -31,11 +31,7 @@
 #define MAPNIK_KARMA_TO_STRING
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #ifdef MAPNIK_KARMA_TO_STRING
   #include <boost/spirit/include/karma.hpp>

@@ -55,6 +55,31 @@ struct x_gradient : image_filter_base {};
 struct y_gradient : image_filter_base {};
 struct invert : image_filter_base {};
 
+// http://vision.psychol.cam.ac.uk/jdmollon/papers/colourmaps.pdf
+struct color_blind_protanope : image_filter_base 
+{
+    const double x = 0.7465;
+    const double y = 0.2535;
+    const double m = 1.273463;
+    const double yint = -0.073894;
+};
+
+struct color_blind_deuteranope : image_filter_base
+{
+    const double x = 1.4;
+    const double y = -0.4;
+    const double m = 0.968437;
+    const double yint = 0.003331;
+};
+
+struct color_blind_tritanope : image_filter_base
+{
+    const double x = 0.1748;
+    const double y = 0.0;
+    const double m = 0.062921;
+    const double yint = 0.292119;
+};
+
 struct agg_stack_blur : image_filter_base
 {
     agg_stack_blur(unsigned rx_, unsigned ry_)
@@ -91,19 +116,8 @@ struct scale_hsla : image_filter_base
       l0(_l0),
       l1(_l1),
       a0(_a0),
-      a1(_a1) {
-          if (h0 < 0 || h0 > 1 ||
-              h1 < 0 || h1 > 1 ||
-              s0 < 0 || s0 > 1 ||
-              s1 < 0 || s1 > 1 ||
-              l0 < 0 || l0 > 1 ||
-              l1 < 0 || l1 > 1 ||
-              a0 < 0 || a0 > 1 ||
-              a1 < 0 || a1 > 1)
-          {
-              throw std::runtime_error("scale-hsla values must be between 0 and 1");
-          }
-      }
+      a1(_a1) { }
+
     inline bool is_identity() const {
         return (h0 == 0 &&
                 h1 == 1 &&
@@ -169,7 +183,10 @@ using filter_type =  util::variant<filter::blur,
                                    filter::invert,
                                    filter::scale_hsla,
                                    filter::colorize_alpha,
-                                   filter::color_to_alpha>;
+                                   filter::color_to_alpha,
+                                   filter::color_blind_protanope,
+                                   filter::color_blind_deuteranope,
+                                   filter::color_blind_tritanope>;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {
@@ -244,6 +261,24 @@ inline std::ostream& operator<< (std::ostream& os, y_gradient)
 inline std::ostream& operator<< (std::ostream& os, invert)
 {
     os << "invert";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_blind_protanope)
+{
+    os << "color-blind-protanope";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_blind_deuteranope)
+{
+    os << "color-blind-deuteranope";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_blind_tritanope)
+{
+    os << "color-blind-tritanope";
     return os;
 }
 

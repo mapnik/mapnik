@@ -27,6 +27,7 @@
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/config.hpp>
 
 // stl
 #include <string>
@@ -41,7 +42,7 @@
 namespace mapnik
 {
 
-struct text_item : util::noncopyable
+struct MAPNIK_DECL text_item : util::noncopyable
 {
     text_item(unsigned s,
               unsigned e,
@@ -71,7 +72,7 @@ struct text_item : util::noncopyable
 // - format
 // - script (http://en.wikipedia.org/wiki/Scripts_in_Unicode)
 
-class text_itemizer
+class MAPNIK_DECL text_itemizer : util::noncopyable
 {
 public:
     text_itemizer();

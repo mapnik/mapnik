@@ -67,7 +67,22 @@ MAPNIK_DECL void scale_image_agg(T & target, T const& source,
                                  double image_ratio_y,
                                  double x_off_f,
                                  double y_off_f,
-                                 double filter_factor);
+                                 double filter_factor,
+                                 boost::optional<double> const & nodata_value);
+template <typename T>
+inline void scale_image_agg(T & target, T const& source,
+                                 scaling_method_e scaling_method,
+                                 double image_ratio_x,
+                                 double image_ratio_y,
+                                 double x_off_f,
+                                 double y_off_f,
+                                 double filter_factor)
+{
+    scale_image_agg(target, source, scaling_method,
+                    image_ratio_x,image_ratio_y,
+                    x_off_f, y_off_f, filter_factor,
+                    boost::optional<double>());
+}
 }
 
 #endif // MAPNIK_IMAGE_SCALING_HPP

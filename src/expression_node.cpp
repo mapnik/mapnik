@@ -26,7 +26,7 @@
 #include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include <mapnik/warning_ignore.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #else

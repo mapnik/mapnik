@@ -61,6 +61,7 @@ public:
     ~shape_io();
 
     shape_file& shp();
+    shape_file& shx();
     dbf_file& dbf();
 
     inline boost::optional<shape_file&> index()
@@ -74,6 +75,7 @@ public:
         return (index_ && index_->is_open());
     }
 
+    inline int id() const { return id_;}
     void move_to(std::streampos pos);
     static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
     static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
@@ -81,13 +83,15 @@ public:
 
     shapeType type_;
     shape_file shp_;
+    shape_file shx_;
     dbf_file   dbf_;
     std::unique_ptr<shape_file> index_;
-    unsigned reclength_;
-    unsigned id_;
+    int reclength_;
+    int id_;
     box2d<double> cur_extent_;
 
     static const std::string SHP;
+    static const std::string SHX;
     static const std::string DBF;
     static const std::string INDEX;
 };

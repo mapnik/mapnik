@@ -44,7 +44,7 @@ extern "C"
 namespace mapnik
 {
 
-class font_face : util::noncopyable
+class MAPNIK_DECL font_face : util::noncopyable
 {
 public:
     font_face(FT_Face face);

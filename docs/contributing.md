@@ -44,6 +44,20 @@ We host our code on github.com/mapnik and encourage anyone interested to fork th
 
 If you just have a question about the code, or a feature you want to discuss then feel free to create a new issue at github.com/mapnik-support.
 
+## Plugins
+
+Mapnik has a plugin interface for reading various geodata formats. Plugins are both viable inside of Mapnik core and also able to be used outside of Mapnik.
+
+Plugins should be developed outside of core except in rare cases when most of the following are met:
+
+  - The plugin has no external dependencies or dependencies are easily installed
+  - The plugin has excellent unit tests
+  - The plugin has a maintainer willing to support the plugin over time
+  - Setup and testing of the plugin is easy on travis.ci (see .travis.yml)
+
+
+Therefore plugins that depend on proprietary, unmaintained, or difficult to test third-party dependencies are not viable for Mapnik core. However they are still likely very valuable for the Mapnik community, so get in touch via https://github.com/mapnik/mapnik-support if we can help you develop your plugin outside of core.
+
 
 ## Code Philosophy
 
@@ -260,3 +274,11 @@ To auto-convert to the above syntax you can put this in an .emacs file:
     ;;
     (c-set-offset 'template-args-cont 'c-lineup-template-args)
 
+### Generating *.gcov files with LLVM/clang toolchain to check tests coverage
+
+* Ensure `llvm-cov` is available
+ * On OS X do `xcrun -f llvm-cov` to see the location of the binary
+* Build and link mapnik with `--coverage` and ensure optimization is off and profile flags are present. For example pass following options to Scons: `CUSTOM_CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage'`
+* Run test(s) e.g `make test`
+* To generate *.gcov file(s) run `llvm-cov gcov <path-to-cpp-file>` 
+* *.gcov files can be viewed in text editor 

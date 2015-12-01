@@ -6,8 +6,6 @@
 #include <mapnik/util/conversions.hpp>
 
 #include <iostream>
-#include <vector>
-#include <algorithm>
 #include <unordered_map>
 #include <sstream>
 

@@ -27,7 +27,7 @@
 #include <mapnik/util/variant.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
+#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/optional.hpp>
@@ -86,10 +86,7 @@ struct multi_polygon
     boost::optional<properties> props;
 };
 
-struct invalid {};
-
-using geometry =  util::variant<invalid,
-                                point,
+using geometry =  util::variant<point,
                                 linestring,
                                 polygon,
                                 multi_point,

@@ -25,18 +25,14 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 extern "C"
 {
 #include <webp/types.h>
 #include <webp/decode.h>
 }
-#pragma clang diagnostic pop
 
-// boost
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>

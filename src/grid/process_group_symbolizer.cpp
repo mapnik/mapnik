@@ -33,6 +33,7 @@
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
+#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -129,7 +130,7 @@ struct thunk_renderer
         render_offset_placements(
             thunk.placements_,
             offset_,
-            [&] (glyph_positions_ptr glyphs)
+            [&] (glyph_positions_ptr const& glyphs)
             {
                 marker_info_ptr mark = glyphs->get_marker();
                 if (mark)

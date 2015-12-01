@@ -30,10 +30,12 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/function_call.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
+#pragma GCC diagnostic pop
 
 // fwd declare
 namespace mapnik {
