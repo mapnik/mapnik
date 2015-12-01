@@ -59,11 +59,17 @@ namespace mapnik { namespace grammar {
     using x3::no_case;
     using x3::alpha;
     using x3::alnum;
+    using x3::hex;
     struct transcoder_tag;
 
     auto do_assign = [] (auto & ctx)
     {
         _val(ctx) = std::move(_attr(ctx));
+    };
+
+    auto do_negate = [] (auto & ctx)
+    {
+        _val(ctx) = std::move(unary_node<mapnik::tags::negate>(_attr(ctx)));
     };
 
     auto do_attribute = [] (auto & ctx)
@@ -238,7 +244,6 @@ namespace mapnik { namespace grammar {
     } binary_func_types;
 
 // geometry types
-
     struct geometry_types_ : x3::symbols<mapnik::value_integer>
     {
         geometry_types_()
@@ -251,6 +256,25 @@ namespace mapnik { namespace grammar {
                 ;
         }
     } geometry_type;
+
+    struct unesc_chars_ : x3::symbols<char>
+    {
+        unesc_chars_()
+        {
+            add
+                ("\\a", '\a')
+                ("\\b", '\b')
+                ("\\f", '\f')
+                ("\\n", '\n')
+                ("\\r", '\r')
+                ("\\t", '\t')
+                ("\\v", '\v')
+                ("\\\\", '\\')
+                ("\\\'", '\'')
+                ("\\\"", '\"')
+                ;
+        }
+    } unesc_char;
 
     x3::rule<class logical_expression, mapnik::expr_node> const logical_expression("logical expression");
     x3::rule<class not_expression, mapnik::expr_node> const not_expression("not expression");
@@ -266,11 +290,10 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_match_expression, std::string> const regex_match_expression("regex match expression");
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
-    //auto const quote_char = char_('\'') | char_('"');
-
-    auto const quoted_string = lexeme['"'> *(char_ - '"') > '"'];
-    auto const single_quoted_string = lexeme['\''> *(char_ - '\'') > '\''];
+    auto const quoted_string = x3::rule<class ustring, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" >> hex) | (char_ - '"')) >> '"'];
+    auto const single_quoted_string = x3::rule<class ustring, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" >> hex) | (char_ - '\'')) >> '\''];
     auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha >> *alnum];
+    // start
     auto const expression = logical_expression;
 
     auto const logical_expression_def = not_expression[do_assign] >
@@ -310,10 +333,8 @@ namespace mapnik { namespace grammar {
 
     auto const attr = '[' > no_skip[+~char_(']')] > ']';
     auto const global_attr = x3::rule<class ustring, std::string> {} = '@' > no_skip[alpha > *(alnum | char_('-'))];
-
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
-
     auto const multiplicative_expression_def = unary_expression [do_assign]
         > *( '*' > unary_expression [do_mult]
              |
@@ -330,11 +351,11 @@ namespace mapnik { namespace grammar {
     auto const binary_func_expression_def = binary_func_types > '(' > expression > ',' > expression > ')';
 
     auto const unary_expression_def =
-        primary_expression
+        primary_expression[do_assign]
         |
-        '+' > primary_expression
+        '+' > primary_expression[do_assign]
         |
-        '-' > primary_expression
+        '-' > primary_expression[do_negate]
         ;
 
     auto const primary_expression_def =
@@ -350,8 +371,6 @@ namespace mapnik { namespace grammar {
         |
         float_const[do_assign]
         |
-        double_[do_assign]
-        |
         quoted_string[do_unicode]
         |
         single_quoted_string[do_unicode]
@@ -361,6 +380,8 @@ namespace mapnik { namespace grammar {
         attr[do_attribute]
         |
         global_attr[do_global_attribute]
+        |
+        lit("not") > expression[do_not]
         |
         unary_func_expression[do_assign]
         |
