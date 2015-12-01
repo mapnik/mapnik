@@ -57,6 +57,8 @@ namespace mapnik { namespace grammar {
     using x3::_val;
     using x3::no_skip;
     using x3::no_case;
+    using x3::alpha;
+    using x3::alnum;
     struct transcoder_tag;
 
     auto do_assign = [] (auto & ctx)
@@ -67,6 +69,11 @@ namespace mapnik { namespace grammar {
     auto do_attribute = [] (auto & ctx)
     {
         _val(ctx) = std::move(attribute(_attr(ctx)));
+    };
+
+    auto do_global_attribute = [] (auto & ctx)
+    {
+        _val(ctx) = std::move(global_attribute(_attr(ctx)));
     };
 
     auto do_add = [] (auto & ctx)
@@ -241,8 +248,9 @@ namespace mapnik { namespace grammar {
 
 //auto const quote_char = char_('\'') | char_('"');
 
-    auto const quoted_string = lexeme['\''> *(char_ - '\'') > '\''];
-
+    auto const quoted_string = lexeme['"'> *(char_ - '"') > '"'];
+    auto const single_quoted_string = lexeme['\''> *(char_ - '\'') > '\''];
+    auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha >> *alnum];
     auto const expression = logical_expression;
 
     auto const logical_expression_def = not_expression[do_assign] >
@@ -281,6 +289,7 @@ namespace mapnik { namespace grammar {
              ('-' > multiplicative_expression[do_subt]));
 
     auto const attr = '[' > no_skip[+~char_(']')] > ']';
+    auto const global_attr = x3::rule<class ustring, std::string> {} = '@' > no_skip[alpha > *(alnum | char_('-'))];
 
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
@@ -323,14 +332,20 @@ namespace mapnik { namespace grammar {
         |
         quoted_string[do_unicode]
         |
+        single_quoted_string[do_unicode]
+        |
         attr[do_attribute]
+        |
+        global_attr[do_global_attribute]
         |
         unary_func_expression[do_assign]
         |
         binary_func_expression[do_assign]
         |
-        ('(' > expression[do_assign] > ')');
-
+        ('(' > expression[do_assign] > ')')
+        |
+        ustring[do_unicode]
+        ;
 
     BOOST_SPIRIT_DEFINE (
         logical_expression,
