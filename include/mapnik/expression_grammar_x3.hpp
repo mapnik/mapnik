@@ -76,6 +76,11 @@ namespace mapnik { namespace grammar {
         _val(ctx) = std::move(global_attribute(_attr(ctx)));
     };
 
+    auto do_geometry_type_attribute = [] (auto & ctx)
+    {
+        _val(ctx) = std::move(geometry_type_attribute());
+    };
+
     auto do_add = [] (auto & ctx)
     {
         _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::plus>(std::move(_val(ctx)), std::move(_attr(ctx))));
@@ -232,6 +237,21 @@ namespace mapnik { namespace grammar {
         }
     } binary_func_types;
 
+// geometry types
+
+    struct geometry_types_ : x3::symbols<mapnik::value_integer>
+    {
+        geometry_types_()
+        {
+            add
+                ("point", 1)
+                ("linestring", 2)
+                ("polygon",3)
+                ("collection",4)
+                ;
+        }
+    } geometry_type;
+
     x3::rule<class logical_expression, mapnik::expr_node> const logical_expression("logical expression");
     x3::rule<class not_expression, mapnik::expr_node> const not_expression("not expression");
     x3::rule<class conditional_expression, mapnik::expr_node> const conditional_expression("conditional expression");
@@ -246,7 +266,7 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_match_expression, std::string> const regex_match_expression("regex match expression");
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
-//auto const quote_char = char_('\'') | char_('"');
+    //auto const quote_char = char_('\'') | char_('"');
 
     auto const quoted_string = lexeme['"'> *(char_ - '"') > '"'];
     auto const single_quoted_string = lexeme['\''> *(char_ - '\'') > '\''];
@@ -326,6 +346,8 @@ namespace mapnik { namespace grammar {
         |
         no_case["null"][do_null]
         |
+        no_case[geometry_type][do_assign]
+        |
         float_const[do_assign]
         |
         double_[do_assign]
@@ -333,6 +355,8 @@ namespace mapnik { namespace grammar {
         quoted_string[do_unicode]
         |
         single_quoted_string[do_unicode]
+        |
+        lit("[mapnik::geometry_type]")[do_geometry_type_attribute]
         |
         attr[do_attribute]
         |
