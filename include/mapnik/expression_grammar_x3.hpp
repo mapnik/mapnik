@@ -25,11 +25,15 @@
 
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
+#include <mapnik/unicode.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <mapnik/unicode.hpp>
+#pragma GCC diagnostic pop
 
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
@@ -331,7 +335,7 @@ namespace mapnik { namespace grammar {
              |
              ('-' > multiplicative_expression[do_subt]));
 
-    auto const attr = '[' > no_skip[+~char_(']')] > ']';
+    auto const mattr = '[' > no_skip[+~char_(']')] > ']';
     auto const global_attr = x3::rule<class ustring, std::string> {} = '@' > no_skip[alpha > *(alnum | char_('-'))];
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
@@ -377,7 +381,7 @@ namespace mapnik { namespace grammar {
         |
         lit("[mapnik::geometry_type]")[do_geometry_type_attribute]
         |
-        attr[do_attribute]
+        mattr[do_attribute]
         |
         global_attr[do_global_attribute]
         |
