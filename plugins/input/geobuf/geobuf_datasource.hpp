@@ -32,20 +32,14 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/util/boost_geometry_adapters.hpp>
-// boost
-#include <boost/optional.hpp>
+#include <mapnik/geometry_adapters.hpp>
+
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
 #include <boost/geometry.hpp>
 #include <boost/version.hpp>
-#if BOOST_VERSION >= 105600
 #include <boost/geometry/index/rtree.hpp>
-#else
-#include <boost/geometry/extensions/index/rtree/rtree.hpp>
-#endif
 #pragma GCC diagnostic pop
 
 // stl
@@ -55,7 +49,6 @@
 #include <map>
 #include <deque>
 
-#if BOOST_VERSION >= 105600
 template <std::size_t Max, std::size_t Min>
 struct geojson_linear : boost::geometry::index::linear<Max,Min> {};
 
@@ -79,8 +72,6 @@ struct options_type<geojson_linear<Max,Min> >
 
 }}}}}
 
-#endif //BOOST_VERSION >= 105600
-
 class geobuf_datasource : public mapnik::datasource
 {
 public:
@@ -97,7 +88,7 @@ public:
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
-    boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     void parse_geobuf(std::uint8_t const* buffer, std::size_t size);
 private:
     mapnik::datasource::datasource_t type_;

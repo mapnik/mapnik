@@ -28,13 +28,13 @@
 #include <algorithm>
 #include <functional>
 
-// boost
-
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/unicode.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/value_types.hpp>
@@ -144,14 +144,9 @@ void geobuf_datasource::parse_geobuf(std::uint8_t const* data, std::size_t size)
     push_feature_callback callback(features_);
     mapnik::util::geobuf<push_feature_callback> buf(data, size, callback);
     buf.read();
-    std::cerr << "Num of features  = " << features_.size() << std::endl;
-#if BOOST_VERSION >= 105600
     using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
     values_container values;
     values.reserve(features_.size());
-#else
-    tree_ = std::make_unique<spatial_index_type>(16, 4);
-#endif
 
     std::size_t geometry_index = 0;
     for (mapnik::feature_ptr const& f : features_)
@@ -174,18 +169,12 @@ void geobuf_datasource::parse_geobuf(std::uint8_t const* data, std::size_t size)
                 extent_.expand_to_include(box);
             }
         }
-#if BOOST_VERSION >= 105600
         values.emplace_back(box, std::make_pair(geometry_index,0));
-#else
-        tree_->insert(box, std::make_pair(geometry_index));
-#endif
         ++geometry_index;
     }
 
-#if BOOST_VERSION >= 105600
     // packing algorithm
     tree_ = std::make_unique<spatial_index_type>(values);
-#endif
 }
 
 geobuf_datasource::~geobuf_datasource() {}
@@ -195,20 +184,20 @@ const char * geobuf_datasource::name()
     return "geobuf";
 }
 
-boost::optional<mapnik::datasource::geometry_t> geobuf_datasource::get_geometry_type() const
+boost::optional<mapnik::datasource_geometry_t> geobuf_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource::geometry_t> result;
+    boost::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     unsigned num_features = features_.size();
     for (unsigned i = 0; i < num_features && i < 5; ++i)
     {
-        mapnik::util::to_ds_type(features_[i]->paths(),result);
+        result = mapnik::util::to_ds_type(features_[i]->get_geometry());
         if (result)
         {
             int type = static_cast<int>(*result);
             if (multi_type > 0 && multi_type != type)
             {
-                result.reset(mapnik::datasource::Collection);
+                result.reset(mapnik::datasource_geometry_t::Collection);
                 return result;
             }
             multi_type = type;
@@ -238,7 +227,6 @@ mapnik::featureset_ptr geobuf_datasource::features(mapnik::query const& q) const
     mapnik::box2d<double> const& box = q.get_bbox();
     if (extent_.intersects(box))
     {
-#if BOOST_VERSION >= 105600
         geobuf_featureset::array_type index_array;
         if (tree_)
         {
@@ -246,12 +234,6 @@ mapnik::featureset_ptr geobuf_datasource::features(mapnik::query const& q) const
             return std::make_shared<geobuf_featureset>(features_, std::move(index_array));
         }
     }
-#else
-    if (tree_)
-    {
-        return std::make_shared<geobuf_featureset>(features_, tree_->find(box));
-    }
-#endif
     return mapnik::featureset_ptr();
 }
 
@@ -261,11 +243,9 @@ mapnik::featureset_ptr geobuf_datasource::features_at_point(mapnik::coord2d cons
     query_bbox.pad(tol);
     mapnik::query q(query_bbox);
     std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
-    std::vector<mapnik::attribute_descriptor>::const_iterator itr = desc.begin();
-    std::vector<mapnik::attribute_descriptor>::const_iterator end = desc.end();
-    for ( ;itr!=end;++itr)
+    for (auto const& item : desc)
     {
-        q.add_property_name(itr->get_name());
+        q.add_property_name(item.get_name());
     }
     return features(q);
 }

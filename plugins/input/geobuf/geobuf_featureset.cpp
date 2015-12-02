@@ -43,14 +43,10 @@ mapnik::feature_ptr geobuf_featureset::next()
 {
     if (index_itr_ != index_end_)
     {
-#if BOOST_VERSION >= 105600
         geobuf_datasource::item_type const& item = *index_itr_++;
         std::size_t index = item.second.first;
         //std::size_t size = item.second.second;
         //std::cerr << file_offset << " (" << size << ") " << item.first << std::endl;
-#else
-        std::size_t index = *index_itr_++;
-#endif
         if ( index < features_.size())
         {
             return features_.at(index);

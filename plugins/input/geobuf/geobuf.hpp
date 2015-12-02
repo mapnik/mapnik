@@ -58,7 +58,7 @@ struct value_visitor
           tr_(tr),
           name_(name) {}
 
-    void operator() (std::string const& val) // unicode
+    void operator() (std::string const& val)
     {
         feature_.put_new(name_, tr_.transcode(val.c_str()));
     }
@@ -81,7 +81,6 @@ struct geobuf : mapnik::util::noncopyable
     using value_type = mapnik::util::variant<bool, int, double, std::string>;
     unsigned dim = 2;
     double precision = std::pow(10,6);
-    bool is_topo = false;
     bool transformed = false;
     std::size_t lengths = 0;
     std::vector<std::string> keys_;
@@ -91,7 +90,7 @@ struct geobuf : mapnik::util::noncopyable
     mapnik::context_ptr ctx_;
     const std::unique_ptr<mapnik::transcoder> tr_;
 public:
-    //ctor
+
     geobuf (unsigned char const* buf, std::size_t size, FeatureCallback & callback)
         : pbf_(buf, size),
           callback_(callback),
@@ -104,7 +103,7 @@ public:
         {
             switch (pbf_.tag)
             {
-            case 1: // keys
+            case 1:
             {
                 keys_.push_back(pbf_.string());
                 break;
@@ -127,18 +126,15 @@ public:
             }
             case 6:
             {
-                pbf_.message();
-                MAPNIK_LOG_DEBUG(geobuf) << "standalone Geometry is not supported";
-                break;
-            }
-            case 7:
-            {
-                pbf_.message();
-                MAPNIK_LOG_DEBUG(geobuf) << "Topology is not supported";
+
+                auto feature = feature_factory::create(ctx_,1);
+                auto message = pbf_.message();
+                feature->set_geometry(std::move(read_geometry(message)));
+                callback_(feature);
                 break;
             }
             default:
-                MAPNIK_LOG_DEBUG(geobuf) << "FIXME tag=" << pbf_.tag;
+                MAPNIK_LOG_ERROR(geobuf) << "FIXME tag=" << pbf_.tag;
                 break;
             }
         }
@@ -185,7 +181,7 @@ private:
             }
             case 6:
             {
-                values_.emplace_back(pbf.string()); // JSON value
+                values_.emplace_back(pbf.string());
                 break;
             }
             default:
@@ -221,7 +217,7 @@ private:
             case 1:
             {
                 auto message = pbf.message();
-                read_geometry(message, feature->paths());
+                feature->set_geometry(std::move(read_geometry(message)));
                 break;
             }
             case 11:
@@ -242,18 +238,16 @@ private:
             }
             case 14:
             {
-                // feature props
                 read_props(pbf, *feature);
                 break;
             }
             case 15:
             {
-                // generic props
                 read_props(pbf, *feature);
                 break;
             }
             default:
-                MAPNIK_LOG_DEBUG(geobuf) << "FAIL tag=" << pbf.tag;
+                MAPNIK_LOG_ERROR(geobuf) << "FAIL tag=" << pbf.tag;
                 break;
             }
         }
@@ -290,15 +284,14 @@ private:
         }
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_point(T & pbf, GeometryContainer & paths)
+    template <typename T>
+    mapnik::geometry::point<double> read_point(T & pbf)
     {
+        mapnik::geometry::point<double> point;
         auto size = pbf.varint();
-        std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
-
         uint8_t const* end = pbf.data + size;
         std::size_t count = 0;
-        int x, y;
+        double x, y;
         while (pbf.data < end)
         {
             auto p = pbf.svarint();
@@ -310,45 +303,47 @@ private:
             else if (index == 1)
             {
                 y = transform(p);
-                point->move_to(x, y);
+                return mapnik::geometry::point<double>(x, y);
             }
             ++count;
         }
-        paths.push_back(point.release());
+        std::clog << "should not get here\n";
+        return point;
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_coords(T & pbf, geometry_type_e type, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
+    template <typename T>
+    mapnik::geometry::geometry<double> read_coords(T & pbf, geometry_type_e type, boost::optional<std::vector<int>> const& coord_lengths)
     {
+        mapnik::geometry::geometry<double> geom;
         switch (type)
         {
         case Point:
         {
-            read_point(pbf, paths);
+            geom = std::move(read_point(pbf));
             break;
         }
         case Polygon:
         {
-            read_polygon(pbf, lengths, paths);
+            geom = std::move(read_polygon(pbf, coord_lengths));
             break;
         }
         case LineString:
         {
-            read_line_string(pbf,paths);
+            //geom = std::move(read_line_string(pbf));
             break;
         }
         case MultiPoint:
         {
-            read_multi_point(pbf, paths);
+            //geom = std::move(read_multi_point(pbf));
             break;
         }
         case MultiLineString:
         {
-            read_multi_linestring(pbf, lengths, paths);
+            //geom = std::move(read_multi_linestring(pbf, coord_lengths));
         }
         case MultiPolygon:
         {
-            read_multi_polygon(pbf, lengths, paths);
+            //geom = std::move(read_multi_polygon(pbf, coord_lengths));
             break;
         }
         case GeometryCollection:
@@ -360,19 +355,7 @@ private:
             break;
         }
         }
-    }
-
-    template <typename T>
-    std::vector<int> read_lengths(T & pbf)
-    {
-        std::vector<int> lengths;
-        auto size = pbf.varint();
-        uint8_t const* end = pbf.data + size;
-        while (pbf.data < end)
-        {
-            lengths.push_back(pbf.varint());
-        }
-        return lengths;
+        return geom;
     }
 
     template <typename T, typename Geometry>
@@ -391,19 +374,42 @@ private:
                 else if (d == 1) y += delta;
             }
             if (i == 0)
-                geom.move_to(transform(x), transform(y));
+                geom.exterior_ring.add_coord(transform(x), transform(y));
             else
-                geom.line_to(transform(x), transform(y));
+                geom.exterior_ring.add_coord(transform(x), transform(y));
             ++i;
         }
+        /*
         if (polygon)
         {
             geom.close_path();
         }
+        */
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_multi_point(T & pbf, GeometryContainer & paths)
+    template <typename T>
+    mapnik::geometry::polygon<double> read_polygon(T & pbf, boost::optional<std::vector<int>> const& coord_lengths)
+    {
+        mapnik::geometry::polygon<double> poly;
+        auto size = pbf.varint();
+        if (!coord_lengths)
+        {
+            read_linear_ring(pbf, 0, size, poly, true);
+        }
+        else
+        {
+            for (auto len : *coord_lengths)
+            {
+                read_linear_ring(pbf, len, size, poly, true);
+            }
+        }
+        return poly;
+    }
+
+    /*
+
+    template <typename T>
+    void read_multi_point(T & pbf)
     {
         int x = 0.0;
         int y = 0.0;
@@ -411,7 +417,7 @@ private:
         uint8_t const* end = pbf.data + size;
         while (pbf.data < end)
         {
-            std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
+            auto point = std::make_shared<mapnik::geometry::geometry<double>>(mapnik::geometry::geometry_type::Point);
             for (int d = 0; d < dim; ++d)
             {
                 if (d == 0) x += pbf.svarint();
@@ -422,22 +428,22 @@ private:
         }
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_line_string(T & pbf, GeometryContainer & paths)
+    template <typename T>
+    void read_line_string(T & pbf)
     {
-        std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+        auto line = std::make_shared<mapnik::geometry::geometry<double>>(mapnik::geometry::geometry_type::LineString);
         auto size = pbf.varint();
         read_linear_ring(pbf, 0, size, *line);
         paths.push_back(line.release());
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_multi_linestring(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
+    template <typename T>
+    void read_multi_linestring(T & pbf, boost::optional<std::vector<int>> const& lengths)
     {
         auto size = pbf.varint();
         if (!lengths)
         {
-            std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+            auto line = std::make_shared<mapnik::geometry::geometry<double>>(mapnik::geometry::geometry_type::LineString);
             read_linear_ring(pbf, 0, size, *line);
             paths.push_back(line.release());
         }
@@ -445,39 +451,21 @@ private:
         {
             for (auto len : *lengths)
             {
-                std::unique_ptr<geometry_type> line(new geometry_type(mapnik::geometry_type::types::LineString));
+                auto line = std::make_shared<mapnik::geometry::geometry<double>>(mapnik::geometry::geometry_type::LineString);
                 read_linear_ring(pbf, len, size, *line);
                 paths.push_back(line.release());
             }
         }
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_polygon(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
-    {
-        std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
-        auto size = pbf.varint();
-        if (!lengths)
-        {
-            read_linear_ring(pbf, 0, size, *poly, true);
-        }
-        else
-        {
-            for (auto len : *lengths)
-            {
-                read_linear_ring(pbf, len, size, *poly, true);
-            }
-        }
-        paths.push_back(poly.release());
-    }
 
-    template <typename T, typename GeometryContainer>
-    void read_multi_polygon(T & pbf, boost::optional<std::vector<int>> const& lengths, GeometryContainer & paths)
+    template <typename T>
+    void read_multi_polygon(T & pbf, boost::optional<std::vector<int>> const& lengths)
     {
         auto size = pbf.varint();
         if (!lengths)
         {
-            std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
+            auto poly = std::make_shared<mapnik::geometry::geometry<double>>(mapnik::geometry::geometry_type::Polygon);
             read_linear_ring(pbf, 0, size, *poly, true);
             paths.push_back(poly.release());
         }
@@ -486,7 +474,7 @@ private:
             int j = 1;
             for (int i = 0; i < (*lengths)[0]; ++i)
             {
-                std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
+                auto poly = std::make_shared<mapnik::geometry::geometry<double>>(mapnik::geometry::geometry_type::Polygon);
                 for (int k = 0; k < (*lengths)[j]; ++k)
                 {
                     read_linear_ring(pbf, (*lengths)[j + 1 + k], size, *poly, true);
@@ -497,45 +485,62 @@ private:
         }
     }
 
-    template <typename T, typename GeometryContainer>
-    void read_geometry(T & pbf, GeometryContainer & paths)
+    */
+
+
+    template <typename T>
+    std::vector<int> read_lengths(T & pbf)
     {
+        std::vector<int> coord_lengths;
+        auto size = pbf.varint();
+        uint8_t const* end = pbf.data + size;
+        while (pbf.data < end)
+        {
+            coord_lengths.push_back(pbf.varint());
+        }
+        return coord_lengths;
+    }
+
+    template <typename T>
+    mapnik::geometry::geometry<double> read_geometry(T & pbf)
+    {
+        mapnik::geometry::geometry<double> geom;
         geometry_type_e type = Unknown;
-        boost::optional<std::vector<int>> lengths;
+        boost::optional<std::vector<int>> coord_lengths;
         while (pbf.next())
         {
             switch (pbf.tag)
             {
-            case 1: // type
+            case 1:
             {
                 type = static_cast<geometry_type_e>(pbf.varint());
                 break;
             }
             case 2:
             {
-                lengths = std::move(read_lengths(pbf));
+                coord_lengths = std::move(read_lengths(pbf));
                 break;
             }
             case 3:
             {
-                read_coords(pbf, type, lengths, paths);
+                geom = std::move(read_coords(pbf, type, coord_lengths));
                 break;
             }
             case 4:
             {
-                MAPNIK_LOG_DEBUG(geobuf) << "fixme read geometry=?";
+                MAPNIK_LOG_ERROR(geobuf) << "fixme read geometry=?";
                 break;
             }
             case 11:
             {
                 auto geom_id = pbf.string();
-                MAPNIK_LOG_DEBUG(geobuf) << "geometry id's are not supported geom_id=" << geom_id ;
+                MAPNIK_LOG_ERROR(geobuf) << "geometry id's are not supported geom_id=" << geom_id ;
                 break;
             }
             case 12:
             {
                 auto geom_id = pbf.template varint<std::int64_t>();
-                MAPNIK_LOG_DEBUG(geobuf) << "geometry id's are not supported geom_id=" << geom_id ;
+                MAPNIK_LOG_ERROR(geobuf) << "geometry id's are not supported geom_id=" << geom_id ;
                 break;
             }
             case 13:
@@ -554,6 +559,7 @@ private:
                 break;
             }
         }
+        return geom;
     }
 };
 
