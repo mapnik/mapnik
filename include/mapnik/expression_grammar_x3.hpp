@@ -56,7 +56,6 @@ namespace mapnik { namespace grammar {
     using x3::double_;
     using x3::int_;
     using x3::bool_;
-    using x3::lexeme;
     using x3::_attr;
     using x3::_val;
     using x3::no_skip;
@@ -129,7 +128,8 @@ namespace mapnik { namespace grammar {
 
     auto do_not = [] (auto & ctx)
     {
-        _val(ctx) = std::move(mapnik::unary_node<mapnik::tags::logical_not>(std::move(_attr(ctx))));
+        mapnik::unary_node<mapnik::tags::logical_not> node(_attr(ctx));
+        _val(ctx) = std::move(node);
     };
 
     auto do_and = [] (auto & ctx)
@@ -281,7 +281,6 @@ namespace mapnik { namespace grammar {
     } unesc_char;
 
     x3::rule<class logical_expression, mapnik::expr_node> const logical_expression("logical expression");
-    x3::rule<class not_expression, mapnik::expr_node> const not_expression("not expression");
     x3::rule<class conditional_expression, mapnik::expr_node> const conditional_expression("conditional expression");
     x3::rule<class equality_expression, mapnik::expr_node> const equality_expression("equality expression");
     x3::rule<class relational_expression, mapnik::expr_node> const relational_expression("relational expression");
@@ -300,17 +299,12 @@ namespace mapnik { namespace grammar {
     // start
     auto const expression = logical_expression;
 
-    auto const logical_expression_def = not_expression[do_assign] >
-        *(((lit("and") | lit("&&")) > not_expression[do_and])
+    auto const logical_expression_def = conditional_expression[do_assign] >
+        *(((lit("and") | lit("&&")) > conditional_expression[do_and])
           |
-          ((lit("or") | lit("||")) > not_expression[do_or]));
+          ((lit("or") | lit("||")) > conditional_expression[do_or]));
 
-
-    auto const not_expression_def = conditional_expression[do_assign]
-        | ( (lit("not") | lit("!") ) > conditional_expression [ do_not])
-        ;
-
-    auto const conditional_expression_def  = equality_expression[do_assign]
+    auto const conditional_expression_def = equality_expression[do_assign]
         |
         additive_expression[do_assign]
         ;
@@ -385,7 +379,7 @@ namespace mapnik { namespace grammar {
         |
         global_attr[do_global_attribute]
         |
-        lit("not") > expression[do_not]
+        (lit("not") | lit("!") ) > expression[do_not]
         |
         unary_func_expression[do_assign]
         |
@@ -398,7 +392,6 @@ namespace mapnik { namespace grammar {
 
     BOOST_SPIRIT_DEFINE (
         logical_expression,
-        not_expression,
         conditional_expression,
         equality_expression,
         relational_expression,
