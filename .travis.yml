@@ -73,7 +73,7 @@ script:
      source ./.mason/mason.sh;
      ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
    else
-     ./configure;
+     ./configure || cat config.log;
    fi
  - make
  - make test || TEST_RESULT=$?
