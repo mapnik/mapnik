@@ -34,6 +34,8 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 
+#include <memory>
+
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;

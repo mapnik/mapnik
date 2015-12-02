@@ -35,6 +35,8 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
+#include <memory>
+
 namespace mapnik
 {
 

@@ -33,8 +33,10 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
 #include <mapnik/transform_path_adapter.hpp>
+
 // stl
 #include <deque>
+#include <memory>
 
 // agg
 #include "agg_basics.h"

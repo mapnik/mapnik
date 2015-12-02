@@ -33,6 +33,8 @@
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_group_symbolizer.hpp>
 
+#include <memory>
+
 namespace mapnik
 {
 

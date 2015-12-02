@@ -39,6 +39,7 @@
 // stl
 #include <algorithm>
 #include <stdexcept>
+#include <memory>
 
 // freetype2
 extern "C"

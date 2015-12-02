@@ -38,6 +38,7 @@
 
 // stl
 #include <deque>
+#include <memory>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"

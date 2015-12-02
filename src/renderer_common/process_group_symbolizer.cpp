@@ -25,6 +25,8 @@
 #include <mapnik/renderer_common/process_markers_symbolizer.hpp>
 #include <mapnik/make_unique.hpp>
 
+#include <memory>
+
 namespace mapnik {
 
 vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,

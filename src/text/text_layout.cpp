@@ -29,9 +29,9 @@
 #include <mapnik/text/harfbuzz_shaper.hpp>
 #include <mapnik/make_unique.hpp>
 
-// ICU
 #include <unicode/brkiter.h>
 #include <algorithm>
+#include <memory>
 
 namespace mapnik
 {

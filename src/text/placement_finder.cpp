@@ -35,6 +35,7 @@
 
 // stl
 #include <vector>
+#include <memory>
 
 namespace mapnik
 {

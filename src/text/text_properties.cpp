@@ -37,6 +37,8 @@
 // boost
 #include <boost/property_tree/ptree.hpp>
 
+#include <memory>
+
 namespace mapnik
 {
 using boost::optional;
