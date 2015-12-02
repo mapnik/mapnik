@@ -335,7 +335,7 @@ namespace mapnik { namespace grammar {
              |
              ('-' > multiplicative_expression[do_subt]));
 
-    auto const mattr = '[' > no_skip[+~char_(']')] > ']';
+    auto const feature_attr = '[' > no_skip[+~char_(']')] > ']';
     auto const global_attr = x3::rule<class ustring, std::string> {} = '@' > no_skip[alpha > *(alnum | char_('-'))];
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
@@ -381,7 +381,7 @@ namespace mapnik { namespace grammar {
         |
         lit("[mapnik::geometry_type]")[do_geometry_type_attribute]
         |
-        mattr[do_attribute]
+        feature_attr[do_attribute]
         |
         global_attr[do_global_attribute]
         |
