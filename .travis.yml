@@ -1,4 +1,4 @@
-language: cpp
+language: c
 
 sudo: false
 
@@ -15,12 +15,6 @@ env:
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
 addons:
   postgresql: "9.4"
-  apt:
-    sources:
-     - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.5
-    packages:
-     - clang-3.5
 
 cache:
   directories:
@@ -30,10 +24,18 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8 MASON_PUBLISH=true
+      env: JOBS=8 CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" MASON_PUBLISH=true
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+          packages: [ 'clang-3.5', 'libstdc++-4.9-dev', 'libstdc++6' ]
     - os: linux
       compiler: gcc
-      env: JOBS=6
+      env: JOBS=6 CXX="ccache g++-4.9" CC="ccache gcc-4.9"
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+          packages: [ 'gcc-4.9', 'g++-4.9', 'libstdc++-4.9-dev', 'libstdc++6' ]
     - os: osx
       compiler: clang
       env: JOBS=8 MASON_PUBLISH=true
@@ -49,8 +51,6 @@ before_install:
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
-     export CXX="ccache clang++-3.5 -Qunused-arguments";
-     export CC="ccache clang-3.5 -Qunused-arguments";
      export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
    else
      brew rm postgis --force;
