@@ -57,7 +57,10 @@ template <> struct make_op<mapnik::tags::logical_or> { using type =  std::logica
 template <typename Tag>
 struct unary_node
 {
-    unary_node (expr_node const& a)
+    unary_node (expr_node && a)
+        : expr(std::move(a)) {}
+
+    unary_node (expr_node const a)
         : expr(a) {}
 
     static const char* type()
@@ -71,6 +74,10 @@ struct unary_node
 template <typename Tag>
 struct binary_node
 {
+    binary_node(expr_node && a, expr_node && b)
+        : left(std::move(a)),
+          right(std::move(b)) {}
+
     binary_node(expr_node const& a, expr_node const& b)
         : left(a),
           right(b) {}
