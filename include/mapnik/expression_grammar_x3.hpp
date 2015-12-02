@@ -294,9 +294,9 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_match_expression, std::string> const regex_match_expression("regex match expression");
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
-    auto const quoted_string = x3::rule<class ustring, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" >> hex) | (char_ - '"')) >> '"'];
-    auto const single_quoted_string = x3::rule<class ustring, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" >> hex) | (char_ - '\'')) >> '\''];
-    auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha >> *alnum];
+    auto const quoted_string = x3::rule<class ustring, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" > hex) | (char_ - '"')) > '"'];
+    auto const single_quoted_string = x3::rule<class ustring, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" > hex) | (char_ - '\'')) > '\''];
+    auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
     // start
     auto const expression = logical_expression;
 
