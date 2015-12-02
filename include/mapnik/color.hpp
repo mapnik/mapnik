@@ -55,11 +55,11 @@ public:
         premultiplied_(false)
         {}
 
-    color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 0xff, bool premultiplied = false)
-      : red_(red),
-        green_(green),
-        blue_(blue),
-        alpha_(alpha),
+    color(std::uint8_t _red, std::uint8_t _green, std::uint8_t _blue, std::uint8_t _alpha = 0xff, bool premultiplied = false)
+      : red_(_red),
+        green_(_green),
+        blue_(_blue),
+        alpha_(_alpha),
         premultiplied_(premultiplied)
         {}
 

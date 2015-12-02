@@ -70,9 +70,9 @@ public:
 
     box2d<double> bounding_box() const
     {
-        std::size_t width = bitmap_data_.width();
-        std::size_t height = bitmap_data_.height();
-        return box2d<double>(static_cast<double>(0), static_cast<double>(0), static_cast<double>(width), static_cast<double>(height));
+        std::size_t _width = bitmap_data_.width();
+        std::size_t _height = bitmap_data_.height();
+        return box2d<double>(static_cast<double>(0), static_cast<double>(0), static_cast<double>(_width), static_cast<double>(_height));
     }
 
     inline double width() const
@@ -189,8 +189,8 @@ struct marker : marker_base
     marker() = default;
 
     template <typename T>
-    marker(T && data) noexcept
-        : marker_base(std::move(data)) {}
+    marker(T && _data) noexcept
+        : marker_base(std::move(_data)) {}
 
     double width() const
     {
