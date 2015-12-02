@@ -27,8 +27,10 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/make_unique.hpp>
+
 // stl
-#include <algorithm>
+#include <memory>
+#include <new>
 #include <vector>
 #include <type_traits>
 
