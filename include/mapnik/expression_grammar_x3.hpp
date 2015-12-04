@@ -59,6 +59,7 @@ namespace mapnik { namespace grammar {
     using x3::_attr;
     using x3::_val;
     using x3::no_skip;
+    using x3::lexeme;
     using x3::no_case;
     using x3::alpha;
     using x3::alnum;
@@ -329,8 +330,8 @@ namespace mapnik { namespace grammar {
              |
              ('-' > multiplicative_expression[do_subt]));
 
-    auto const feature_attr = '[' > +~char_(']') > ']';
-    auto const global_attr = x3::rule<class global_attr, std::string> {} = lit('@') > alpha > *alnum;
+    auto const feature_attr = lexeme['[' > +~char_(']') > ']'];
+    auto const global_attr = x3::rule<class global_attr, std::string> {} = lexeme[lit('@') > alpha > *alnum];
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
     auto const multiplicative_expression_def = unary_expression [do_assign]
