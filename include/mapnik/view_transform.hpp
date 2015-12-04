@@ -62,9 +62,9 @@ public:
         return offset_;
     }
 
-    inline void set_offset(int offset)
+    inline void set_offset(int _offset)
     {
-        offset_ = offset;
+        offset_ = _offset;
     }
 
     inline double offset_x() const

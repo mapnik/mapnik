@@ -109,7 +109,7 @@ public:
         raster_() {}
 
     inline mapnik::value_integer id() const { return id_;}
-    inline void set_id(mapnik::value_integer id) { id_ = id;}
+    inline void set_id(mapnik::value_integer _id) { id_ = _id;}
     template <typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {

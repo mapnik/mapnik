@@ -186,8 +186,7 @@ void setup_transform_scaling(agg::trans_affine & tr,
 template <typename Converter, typename Processor>
 void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
 {
-    using vertex_converter_type = Converter;
-    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type,Processor>;
+    using apply_vertex_converter_type = detail::apply_vertex_converter<Converter,Processor>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
 
     auto const& geom = feature.get_geometry();

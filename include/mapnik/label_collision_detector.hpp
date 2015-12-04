@@ -145,17 +145,17 @@ private:
 public:
     using query_iterator = tree_t::query_iterator;
 
-    explicit label_collision_detector4(box2d<double> const& extent)
-        : tree_(extent) {}
+    explicit label_collision_detector4(box2d<double> const& _extent)
+        : tree_(_extent) {}
 
     bool has_placement(box2d<double> const& box)
     {
-        tree_t::query_iterator itr = tree_.query_in_box(box);
-        tree_t::query_iterator end = tree_.query_end();
+        tree_t::query_iterator tree_itr = tree_.query_in_box(box);
+        tree_t::query_iterator tree_end = tree_.query_end();
 
-        for ( ;itr != end; ++itr)
+        for ( ;tree_itr != tree_end; ++tree_itr)
         {
-            if (itr->get().box.intersects(box)) return false;
+            if (tree_itr->get().box.intersects(box)) return false;
         }
 
         return true;
@@ -168,12 +168,12 @@ public:
                                                                box.maxx() + margin, box.maxy() + margin)
                                                : box);
 
-        tree_t::query_iterator itr = tree_.query_in_box(margin_box);
-        tree_t::query_iterator end = tree_.query_end();
+        tree_t::query_iterator tree_itr = tree_.query_in_box(margin_box);
+        tree_t::query_iterator tree_end = tree_.query_end();
 
-        for (;itr != end; ++itr)
+        for (;tree_itr != tree_end; ++tree_itr)
         {
-            if (itr->get().box.intersects(margin_box))
+            if (tree_itr->get().box.intersects(margin_box))
             {
                 return false;
             }
@@ -196,12 +196,12 @@ public:
                                                                box.maxx() + margin, box.maxy() + margin)
                                                : box);
 
-        tree_t::query_iterator itr = tree_.query_in_box(repeat_box);
-        tree_t::query_iterator end = tree_.query_end();
+        tree_t::query_iterator tree_itr = tree_.query_in_box(repeat_box);
+        tree_t::query_iterator tree_end = tree_.query_end();
 
-        for ( ;itr != end; ++itr)
+        for ( ;tree_itr != tree_end; ++tree_itr)
         {
-            if (itr->get().box.intersects(margin_box) || (text == itr->get().text && itr->get().box.intersects(repeat_box)))
+            if (tree_itr->get().box.intersects(margin_box) || (text == tree_itr->get().text && tree_itr->get().box.intersects(repeat_box)))
             {
                 return false;
             }

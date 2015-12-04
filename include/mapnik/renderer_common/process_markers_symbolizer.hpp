@@ -91,13 +91,13 @@ struct render_marker_symbolizer_visitor
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse->source());
             svg_path_adapter svg_path(stl_storage);
             build_ellipse(sym_, feature_, common_.vars_, *marker_ellipse, svg_path);
-            svg_attribute_type attributes;
-            bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym_, feature_, common_.vars_);
+            svg_attribute_type s_attributes;
+            bool result = push_explicit_style( (*stock_vector_marker)->attributes(), s_attributes, sym_, feature_, common_.vars_);
             auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
             if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
             vector_dispatch_type rasterizer_dispatch(marker_ellipse,
                                                      svg_path,
-                                                     result ? attributes : (*stock_vector_marker)->attributes(),
+                                                     result ? s_attributes : (*stock_vector_marker)->attributes(),
                                                      image_tr,
                                                      sym_,
                                                      *common_.detector_,
@@ -139,11 +139,11 @@ struct render_marker_symbolizer_visitor
             if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
             vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
             svg_path_adapter svg_path(stl_storage);
-            svg_attribute_type attributes;
-            bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym_, feature_, common_.vars_);
+            svg_attribute_type s_attributes;
+            bool result = push_explicit_style( (*stock_vector_marker)->attributes(), s_attributes, sym_, feature_, common_.vars_);
             vector_dispatch_type rasterizer_dispatch(*stock_vector_marker,
                                                      svg_path,
-                                                     result ? attributes : (*stock_vector_marker)->attributes(),
+                                                     result ? s_attributes : (*stock_vector_marker)->attributes(),
                                                      image_tr,
                                                      sym_,
                                                      *common_.detector_,
