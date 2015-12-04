@@ -63,9 +63,9 @@ struct transform_path_adapter
           geom_(_geom),
           prj_trans_(&prj_trans)  {}
 
-    explicit transform_path_adapter(Geometry & geom)
+    explicit transform_path_adapter(Geometry & _geom)
         : t_(0),
-          geom_(geom),
+          geom_(_geom),
           prj_trans_(0)  {}
 
     void set_proj_trans(proj_transform const& prj_trans)

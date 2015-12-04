@@ -165,9 +165,9 @@ render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
 void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
 {
     auto renderer_context = std::tie(thunks_);
-    using context_type = decltype(renderer_context);
-    using vector_dispatch_type = detail::vector_marker_thunk_dispatch<label_collision_detector4, context_type>;
-    using raster_dispatch_type = detail::raster_marker_thunk_dispatch<label_collision_detector4, context_type>;
+    using thunk_context_type = decltype(renderer_context);
+    using vector_dispatch_type = detail::vector_marker_thunk_dispatch<label_collision_detector4, thunk_context_type>;
+    using raster_dispatch_type = detail::raster_marker_thunk_dispatch<label_collision_detector4, thunk_context_type>;
 
     render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
             sym, feature_, prj_trans_, common_, clipping_extent_, renderer_context);
