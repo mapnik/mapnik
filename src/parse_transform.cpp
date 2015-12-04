@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/parse_transform.hpp>
-#include <mapnik/transform_expression_grammar.hpp>
+#include <mapnik/transform_expression_grammar_x3_def.hpp>
 
 // stl
 #include <string>
@@ -31,14 +31,20 @@ namespace mapnik {
 
 transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
 {
-    static const transform_expression_grammar<std::string::const_iterator> g;
-    transform_list_ptr tl = std::make_shared<transform_list>();
+    using boost::spirit::x3::ascii::space;
+    transform_list_ptr trans_list = std::make_shared<transform_list>();
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space_type(), *tl);
+    mapnik::transcoder const tr(encoding);
+    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+        [
+            mapnik::grammar::transform_list_rule
+        ];
+    // FIXME : try/catch!
+    bool r = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
     if (r && itr == end)
     {
-        return tl;
+        return trans_list;
     }
     else
     {

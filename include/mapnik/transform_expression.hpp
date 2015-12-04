@@ -231,9 +231,9 @@ bool is_null_node (T const& node)
 
 } // namespace detail
 
-using transform_node = detail::transform_node             ;
-using transform_list = std::vector<transform_node>        ;
-using transform_list_ptr = std::shared_ptr<transform_list>  ;
+using transform_node = detail::transform_node;
+using transform_list = std::vector<transform_node>;
+using transform_list_ptr = std::shared_ptr<transform_list>;
 
 MAPNIK_DECL std::string to_expression_string(transform_node const& node);
 MAPNIK_DECL std::string to_expression_string(transform_list const& list);
