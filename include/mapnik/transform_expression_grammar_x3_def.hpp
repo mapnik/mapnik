@@ -23,10 +23,14 @@
 #ifndef MAPNIK_TRANSFORM_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_TRANSFORM_GRAMMAR_X3_DEF_HPP
 
-#include <boost/spirit/home/x3.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#pragma GCC diagnostic pop
 
 // adapt transform nodes
 // martrix

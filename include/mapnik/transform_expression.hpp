@@ -30,11 +30,13 @@
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
-// fusion
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/vector.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

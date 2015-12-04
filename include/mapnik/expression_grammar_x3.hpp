@@ -24,7 +24,11 @@
 #define MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
 
 #include <mapnik/expression_node.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
