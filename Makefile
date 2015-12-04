@@ -44,8 +44,7 @@ src/json/libmapnik-json.a:
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
 		src/css_color_grammar.os \
-		src/expression_grammar.os \
-		src/transform_expression_grammar.os \
+		src/expression_grammar_x3.os \
 		src/image_filter_types.os \
 		src/agg/process_markers_symbolizer.os \
 		src/agg/process_group_symbolizer.os \
