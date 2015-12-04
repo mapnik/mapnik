@@ -293,8 +293,8 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_match_expression, std::string> const regex_match_expression("regex match expression");
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
-    auto const quoted_string = x3::rule<class ustring, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" > hex) | (char_ - '"')) > '"'];
-    auto const single_quoted_string = x3::rule<class ustring, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" > hex) | (char_ - '\'')) > '\''];
+    auto const quoted_string = x3::rule<class quoted_string, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" > hex) | (char_ - '"')) > '"'];
+    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" > hex) | (char_ - '\'')) > '\''];
     auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
     // start
     auto const expression = logical_expression;
@@ -329,8 +329,8 @@ namespace mapnik { namespace grammar {
              |
              ('-' > multiplicative_expression[do_subt]));
 
-    auto const feature_attr = '[' > no_skip[+~char_(']')] > ']';
-    auto const global_attr = x3::rule<class ustring, std::string> {} = '@' > no_skip[alpha > *(alnum | char_('-'))];
+    auto const feature_attr = '[' > +~char_(']') > ']';
+    auto const global_attr = x3::rule<class global_attr, std::string> {} = lit('@') > alpha > *alnum;
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
     auto const multiplicative_expression_def = unary_expression [do_assign]
