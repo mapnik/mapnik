@@ -53,6 +53,8 @@ struct matrix_node
     expr_node e_;
     expr_node f_;
 
+    matrix_node() = default;
+
     template <typename T>
     explicit matrix_node(T const& m)
         : a_(m.sx), b_(m.shy), c_(m.shx), d_(m.sy), e_(m.tx), f_(m.ty) {}
@@ -67,6 +69,8 @@ struct translate_node
     expr_node tx_;
     expr_node ty_;
 
+    translate_node() = default;
+
     translate_node(expr_node const& tx,
                    boost::optional<expr_node> const& ty)
         : tx_(tx)
@@ -77,6 +81,8 @@ struct scale_node
 {
     expr_node sx_;
     expr_node sy_;
+
+    scale_node() = default;
 
     scale_node(expr_node const& sx,
                boost::optional<expr_node> const& sy)
@@ -91,6 +97,8 @@ struct rotate_node
     expr_node angle_;
     expr_node cx_;
     expr_node cy_;
+
+    rotate_node() = default;
 
     explicit rotate_node(expr_node const& angle)
         : angle_(angle) {}
@@ -121,16 +129,16 @@ struct rotate_node
 struct skewX_node
 {
     expr_node angle_;
-
-    explicit skewX_node(expr_node const& angle)
+    skewX_node() = default;
+    skewX_node(expr_node const& angle)
         : angle_(angle) {}
 };
 
 struct skewY_node
 {
     expr_node angle_;
-
-    explicit skewY_node(expr_node const& angle)
+    skewY_node() = default;
+    skewY_node(expr_node const& angle)
         : angle_(angle) {}
 };
 
