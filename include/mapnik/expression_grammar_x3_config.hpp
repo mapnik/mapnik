@@ -20,33 +20,25 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
-#define MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
+#ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP
+#define MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP
 
-#include <mapnik/expression_node.hpp>
 #include <boost/spirit/home/x3.hpp>
+#include <mapnik/expression_grammar_x3.hpp>
+#include <mapnik/unicode.hpp>
+#include <string>
 
-namespace mapnik
-{
+namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
+using iterator_type = std::string::const_iterator;
+using phrase_context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
-namespace grammar
-{
-
-struct transcoder_tag;
-struct expression_class; // top-most ID
-using expression_grammar_type = x3::rule<expression_class, mapnik::expr_node>;
-
-BOOST_SPIRIT_DECLARE(expression_grammar_type);
+// define combined context
+using context_type = x3::with_context<transcoder_tag,
+                                      std::reference_wrapper<mapnik::transcoder const> const,
+                                      phrase_context_type>::type;
 
 }}
 
-
-namespace mapnik
-{
-    grammar::expression_grammar_type expression_grammar();
-}
-
-
-#endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
+#endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP

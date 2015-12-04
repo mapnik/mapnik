@@ -149,6 +149,7 @@ else: # unix, non-macos
 source = Split(
     """
     expression_grammar.cpp
+    expression_grammar_x3.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp

@@ -25,15 +25,8 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node_types.hpp>
-#if 1
 #include <mapnik/expression_grammar_x3.hpp>
-#else
-#include <mapnik/expression_grammar.hpp>
-#include <boost/spirit/include/qi.hpp>
-#endif
-
-// boost
-
+#include <mapnik/expression_grammar_x3_config.hpp>
 
 namespace mapnik
 {
@@ -42,12 +35,15 @@ expression_ptr parse_expression(std::string const& str)
 {
     auto node = std::make_shared<expr_node>();
     using boost::spirit::x3::ascii::space;
-    using mapnik::grammar::expression;
     mapnik::transcoder const tr("utf8");
-    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr)) [expression];
+    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+        [
+            mapnik::expression_grammar()
+        ];
+
     bool r = false;
     std::string::const_iterator itr = str.begin();
-    std::string::const_iterator end = str.end();
+    std::string::const_iterator const end = str.end();
 
     try
     {
