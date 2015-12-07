@@ -323,7 +323,7 @@ namespace mapnik { namespace grammar {
     auto const relational_expression_def = additive_expression[do_assign] >
         *( ( (lit("<=") | lit("le")) >  additive_expression [do_less_equal])
            |
-           ( (lit("<")  | lit("lt")) >> additive_expression[do_less]) // allow backtracking to be able handle '<' and '<>' correctly
+           ( (lit("<")  | lit("lt")) >> additive_expression[do_less]) // allow backtracking to be able to handle '<' and '<>' correctly
            |
            ( (lit(">=") | lit("ge")) > additive_expression [do_greater_equal])
            |
@@ -337,8 +337,9 @@ namespace mapnik { namespace grammar {
 
     auto const feature_attr = lexeme['[' > +~char_(']') > ']'];
     auto const global_attr = x3::rule<class global_attr, std::string> {} = lexeme[lit('@') > alpha > *alnum];
-    auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
-    auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
+    auto const regex_arg = x3::rule<class regex_arg, std::string> {} = quoted_string | single_quoted_string;
+    auto const regex_match_expression_def = lit(".match") > '(' > regex_arg > ')';
+    auto const regex_replace_expression_def = lit(".replace") > '(' > regex_arg > ',' > regex_arg > ')';
     auto const multiplicative_expression_def = unary_expression [do_assign]
         > *( '*' > unary_expression [do_mult]
              |
