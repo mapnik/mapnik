@@ -323,7 +323,7 @@ namespace mapnik { namespace grammar {
     auto const relational_expression_def = additive_expression[do_assign] >
         *( ( (lit("<=") | lit("le")) >  additive_expression [do_less_equal])
            |
-           ( (lit("<")  | lit("lt")) > additive_expression[do_less])
+           ( (lit("<")  | lit("lt")) >> additive_expression[do_less]) // allow backtracking to be able handle '<' and '<>' correctly
            |
            ( (lit(">=") | lit("ge")) > additive_expression [do_greater_equal])
            |
