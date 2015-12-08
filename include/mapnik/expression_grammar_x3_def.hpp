@@ -297,9 +297,10 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_match_expression, std::string> const regex_match_expression("regex match expression");
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
-
-    auto const quoted_string = x3::rule<class quoted_string, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" > hex) | (char_ - '"')) > '"'];
+    // strings
     auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" > hex) | (char_ - '\'')) > '\''];
+    auto const double_quoted_string = x3::rule<class quoted_string, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" > hex) | (char_ - '"')) > '"'];
+    auto const quoted_string = x3::rule<class regex_arg, std::string> {} = single_quoted_string | double_quoted_string;
     auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
 
     // start
@@ -337,9 +338,9 @@ namespace mapnik { namespace grammar {
 
     auto const feature_attr = lexeme['[' > +~char_(']') > ']'];
     auto const global_attr = x3::rule<class global_attr, std::string> {} = lexeme[lit('@') > alpha > *alnum];
-    auto const regex_arg = x3::rule<class regex_arg, std::string> {} = quoted_string | single_quoted_string;
-    auto const regex_match_expression_def = lit(".match") > '(' > regex_arg > ')';
-    auto const regex_replace_expression_def = lit(".replace") > '(' > regex_arg > ',' > regex_arg > ')';
+
+    auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
+    auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
     auto const multiplicative_expression_def = unary_expression [do_assign]
         > *( '*' > unary_expression [do_mult]
              |
@@ -378,8 +379,6 @@ namespace mapnik { namespace grammar {
         |
         quoted_string[do_unicode]
         |
-        single_quoted_string[do_unicode]
-        |
         lit("[mapnik::geometry_type]")[do_geometry_type_attribute]
         |
         feature_attr[do_attribute]
@@ -394,7 +393,7 @@ namespace mapnik { namespace grammar {
         |
         ('(' > expression[do_assign] > ')')
         |
-        ustring[do_unicode]
+        ustring[do_unicode] // parse as un-quoted unicode string if we get here!
         ;
 
     BOOST_SPIRIT_DEFINE (
