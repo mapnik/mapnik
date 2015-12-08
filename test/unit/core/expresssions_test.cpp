@@ -145,6 +145,8 @@ TEST_CASE("expressions")
     // logical
     expr = mapnik::parse_expression("[int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null  && [foo] = 'bar'");
     REQUIRE(evaluate(*feature, *expr) == true);
+    expr = mapnik::parse_expression("[int] = 456 or [foo].match('foo') || length([foo]) = 3");
+    REQUIRE(evaluate(*feature, *expr) == true);
 
     // relational
     expr = mapnik::parse_expression("[int] > 100 and [int] gt 100.0 and [double] < 2 and [double] lt 2.0");
@@ -160,4 +162,5 @@ TEST_CASE("expressions")
     // match
     expr = mapnik::parse_expression("[name].match('Québec')");
     REQUIRE(evaluate(*feature, *expr) == true);
+
 }
