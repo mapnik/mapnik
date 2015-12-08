@@ -45,6 +45,7 @@ TEST_CASE("expressions")
     mapnik::transcoder tr("utf8");
 
     properties_type prop = {{ "foo"   , tr.transcode("bar") },
+                            { "name"  , tr.transcode("Québec")},
                             { "double", mapnik::value_double(1.23456)},
                             { "int"   , mapnik::value_integer(123)},
                             { "bool"  , mapnik::value_bool(true)},
@@ -143,5 +144,20 @@ TEST_CASE("expressions")
 
     // logical
     expr = mapnik::parse_expression("[int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null  && [foo] = 'bar'");
+    REQUIRE(evaluate(*feature, *expr) == true);
+
+    // relational
+    expr = mapnik::parse_expression("[int] > 100 and [int] gt 100.0 and [double] < 2 and [double] lt 2.0");
+    REQUIRE(evaluate(*feature, *expr) == true);
+    expr = mapnik::parse_expression("[int] >= 123 and [int] ge 123.0 and [double] <= 1.23456 and [double] le 1.23456");
+    REQUIRE(evaluate(*feature, *expr) == true);
+
+    // regex
+    // replace
+    expr = mapnik::parse_expression("[foo].replace('(\\B)|( )','$1 ')");
+    REQUIRE(evaluate(*feature, *expr) == tr.transcode("b a r"));
+
+    // match
+    expr = mapnik::parse_expression("[name].match('Québec')");
     REQUIRE(evaluate(*feature, *expr) == true);
 }
