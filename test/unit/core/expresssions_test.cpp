@@ -43,10 +43,16 @@ TEST_CASE("expressions")
 {
     using properties_type = std::vector<std::pair<std::string, mapnik::value> > ;
     mapnik::transcoder tr("utf8");
-    auto expr = mapnik::parse_expression("[foo]='bar'");
-    properties_type prop = {{ "foo", tr.transcode("bar") }};
+
+    properties_type prop = {{ "foo"   , tr.transcode("bar") },
+                            { "double", mapnik::value_double(1.23456)},
+                            { "int"   , mapnik::value_integer(123)},
+                            { "bool"  , mapnik::value_bool(true)},
+                            { "null"  , mapnik::value_null()}};
 
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
+
+    auto expr = mapnik::parse_expression("[foo]='bar'");
     REQUIRE(evaluate(*feature, *expr) == true);
 
     // primary expressions
@@ -135,4 +141,7 @@ TEST_CASE("expressions")
     expr2 = mapnik::parse_expression("(2.0 * 2.0 + 3.0 * 3.0)/((2.0 - 3.0) * (2.0 + 3.0))");
     REQUIRE(evaluate(*feature, *expr).to_double() == evaluate(*feature, *expr2).to_double());
 
+    // logical
+    expr = mapnik::parse_expression("[int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null  && [foo] = 'bar'");
+    REQUIRE(evaluate(*feature, *expr) == true);
 }
