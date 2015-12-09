@@ -411,9 +411,11 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     layer_ext2 = lay.envelope();
     if (fw_success)
     {
-        if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))
+        // keep query_ext unchanged to get res for mapnik::query later
+        box2d<double> query_ext2(query_ext);
+        if (prj_trans.forward(query_ext2, PROJ_ENVELOPE_POINTS))
         {
-            layer_ext2.clip(query_ext);
+            layer_ext2.clip(query_ext2);
         }
     }
     else
