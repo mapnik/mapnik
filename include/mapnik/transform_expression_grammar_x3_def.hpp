@@ -24,6 +24,7 @@
 #define MAPNIK_TRANSFORM_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/transform_expression.hpp>
+#include <mapnik/transform_expression_grammar_x3.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
 
 #pragma GCC diagnostic push
@@ -67,78 +68,92 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node,
 
 namespace mapnik { namespace grammar {
 
-namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
+    namespace x3 = boost::spirit::x3;
+    namespace ascii = boost::spirit::x3::ascii;
 
-// [http://www.w3.org/TR/SVG/coords.html#TransformAttribute]
+    // [http://www.w3.org/TR/SVG/coords.html#TransformAttribute]
 
-// The value of the ‘transform’ attribute is a <transform-list>, which
-// is defined as a list of transform definitions, which are applied in
-// the order provided.  The individual transform definitions are
-// separated by whitespace and/or a comma.
+    // The value of the ‘transform’ attribute is a <transform-list>, which
+    // is defined as a list of transform definitions, which are applied in
+    // the order provided.  The individual transform definitions are
+    // separated by whitespace and/or a comma.
 
-using x3::double_;
-using x3::no_skip;
-using x3::no_case;
-using x3::lit;
-using x3::char_;
+    using x3::double_;
+    using x3::no_skip;
+    using x3::no_case;
+    using x3::lit;
+    using x3::char_;
 
-x3::rule<class transform_list_class, mapnik::transform_list> transform_list_rule("transform list");
-x3::rule<class transform_node_class, mapnik::transform_node> transform_node_rule("transform node");
-x3::rule<class matrix_node_class, mapnik::matrix_node> matrix("matrix node");
-x3::rule<class translate_node_class, mapnik::translate_node> translate("translate node");
-x3::rule<class scale_node_class, mapnik::scale_node> scale("scale node");
-x3::rule<class rotate_node_class, mapnik::rotate_node> rotate("rotate node");
-x3::rule<class skewX_node_class, mapnik::skewX_node> skewX("skew X node");
-x3::rule<class skewY_node_class, mapnik::skewY_node> skewY("skew Y node");
+    // starting rule
+    transform_expression_grammar_type const transform("transform");
+    // rules
+    x3::rule<class transform_list_class, mapnik::transform_list> transform_list_rule("transform list");
+    x3::rule<class transform_node_class, mapnik::transform_node> transform_node_rule("transform node");
+    x3::rule<class matrix_node_class, mapnik::matrix_node> matrix("matrix node");
+    x3::rule<class translate_node_class, mapnik::translate_node> translate("translate node");
+    x3::rule<class scale_node_class, mapnik::scale_node> scale("scale node");
+    x3::rule<class rotate_node_class, mapnik::rotate_node> rotate("rotate node");
+    x3::rule<class skewX_node_class, mapnik::skewX_node> skewX("skew X node");
+    x3::rule<class skewY_node_class, mapnik::skewY_node> skewY("skew Y node");
 
-// Import the expression rule
-namespace { auto const& expr = expression_grammar(); }
+    // Import the expression rule
+    namespace { auto const& expr = expression_grammar(); }
 
-auto const transform_list_rule_def = transform_node_rule % no_skip[char_(", ")];
+    // start
+    auto const transform_def = transform_list_rule;
 
-auto const transform_node_rule_def = matrix | translate  | scale | rotate | skewX | skewY ;
+    auto const transform_list_rule_def = transform_node_rule % no_skip[char_(", ")];
 
-// matrix(<a> <b> <c> <d> <e> <f>)
-auto const matrix_def = no_case[lit("matrix")]
-    > '(' > expr > ',' >  expr > ',' > expr > ',' > expr > ',' > expr > ',' > expr > ')'
-    ;
+    auto const transform_node_rule_def = matrix | translate  | scale | rotate | skewX | skewY ;
 
-// translate(<tx> [<ty>])
-auto const translate_def = no_case[lit("translate")]
-    > '(' > expr > -(',' > expr )  > ')'
-    ;
+    // matrix(<a> <b> <c> <d> <e> <f>)
+    auto const matrix_def = no_case[lit("matrix")]
+        > '(' > expr > ',' >  expr > ',' > expr > ',' > expr > ',' > expr > ',' > expr > ')'
+        ;
 
-// scale(<sx> [<sy>])
-auto const scale_def = no_case[lit("scale")]
-    > '(' > expr >  -(',' > expr )  > ')'
-    ;
+    // translate(<tx> [<ty>])
+    auto const translate_def = no_case[lit("translate")]
+        > '(' > expr > -(',' > expr )  > ')'
+        ;
 
-// rotate(<rotate-angle> [<cx> <cy>])
-auto const rotate_def = no_case[lit("rotate")]
-    > '(' > expr > -(',' > expr > ',' > expr) > ')'
-    ;
+    // scale(<sx> [<sy>])
+    auto const scale_def = no_case[lit("scale")]
+        > '(' > expr >  -(',' > expr )  > ')'
+        ;
 
-// skewX(<skew-angle>)
-auto const skewX_def = no_case[lit("skewX")]
-    > '(' > expr > ')';
+    // rotate(<rotate-angle> [<cx> <cy>])
+    auto const rotate_def = no_case[lit("rotate")]
+        > '(' > expr > -(',' > expr > ',' > expr) > ')'
+        ;
 
-// skewY(<skew-angle>)
-auto const skewY_def = no_case[lit("skewY")]
-    > '(' >  expr  > ')';
+    // skewX(<skew-angle>)
+    auto const skewX_def = no_case[lit("skewX")]
+        > '(' > expr > ')';
+
+    // skewY(<skew-angle>)
+    auto const skewY_def = no_case[lit("skewY")]
+        > '(' >  expr  > ')';
 
 
-BOOST_SPIRIT_DEFINE (
-    transform_list_rule,
-    transform_node_rule,
-    matrix,
-    translate,
-    scale,
-    rotate,
-    skewX,
-    skewY
-    );
+    BOOST_SPIRIT_DEFINE (
+        transform,
+        transform_list_rule,
+        transform_node_rule,
+        matrix,
+        translate,
+        scale,
+        rotate,
+        skewX,
+        skewY);
 
-}} //
+}} // ns
 
-#endif // ns
+namespace mapnik
+{
+grammar::transform_expression_grammar_type transform_expression_grammar()
+{
+    return grammar::transform;
+}
+}
+
+#endif

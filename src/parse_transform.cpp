@@ -21,8 +21,9 @@
  *****************************************************************************/
 
 #include <mapnik/parse_transform.hpp>
-#include <mapnik/transform_expression_grammar_x3_def.hpp>
-
+#include <mapnik/transform_expression_grammar_x3.hpp>
+#include <mapnik/expression_grammar_x3_config.hpp> // transcoder_tag
+#include <mapnik/config_error.hpp>
 // stl
 #include <string>
 #include <stdexcept>
@@ -38,11 +39,19 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
     mapnik::transcoder const tr(encoding);
     auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
         [
-            mapnik::grammar::transform_list_rule
+            mapnik::transform_expression_grammar()
         ];
-    // FIXME : try/catch!
-    bool r = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
-    if (r && itr == end)
+    bool status = false;
+    try
+    {
+        status = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    {
+        throw config_error("Failed to parse transform expression: \"" + str + "\"");
+    }
+
+    if (status && itr == end)
     {
         return trans_list;
     }

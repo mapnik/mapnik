@@ -20,37 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
-#define MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
+#ifndef MAPNIK_TRANSFORM_GRAMMAR_X3_HPP
+#define MAPNIK_TRANSFORM_GRAMMAR_X3_HPP
 
-#include <mapnik/expression_node.hpp>
+#include <mapnik/transform_expression.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #pragma GCC diagnostic pop
 
-namespace mapnik
-{
+namespace mapnik {
 
 namespace x3 = boost::spirit::x3;
 
-namespace grammar
-{
+namespace grammar {
 
-struct transcoder_tag;
-struct expression_class; // top-most ID
-using expression_grammar_type = x3::rule<expression_class, mapnik::expr_node>;
+struct transform_expression_class; // top-most ID
+using transform_expression_grammar_type = x3::rule<transform_expression_class, mapnik::transform_list>;
 
-BOOST_SPIRIT_DECLARE(expression_grammar_type);
+BOOST_SPIRIT_DECLARE(transform_expression_grammar_type);
 
-}}
-
+}}  // ns
 
 namespace mapnik
 {
-grammar::expression_grammar_type expression_grammar();
+grammar::transform_expression_grammar_type transform_expression_grammar();
 }
 
-
-#endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
+#endif

@@ -169,6 +169,7 @@ source = Split(
     expression_string.cpp
     expression.cpp
     transform_expression.cpp
+    transform_expression_grammar_x3.cpp
     feature_kv_iterator.cpp
     feature_style_processor.cpp
     feature_type_style.cpp

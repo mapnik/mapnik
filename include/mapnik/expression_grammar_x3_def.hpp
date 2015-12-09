@@ -304,7 +304,7 @@ namespace mapnik { namespace grammar {
     auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
 
     // start
-    auto const  expression_def = logical_expression;
+    auto const expression_def = logical_expression;
 
     auto const logical_expression_def = conditional_expression[do_assign] >
         *(((lit("and") | lit("&&")) > conditional_expression[do_and])
@@ -416,10 +416,10 @@ namespace mapnik { namespace grammar {
 
 namespace mapnik
 {
-    grammar::expression_grammar_type expression_grammar()
-    {
-        return grammar::expression;
-    }
+grammar::expression_grammar_type expression_grammar()
+{
+    return grammar::expression;
+}
 }
 
 #endif  // MAPNIK_EXPRESSIONS_GRAMMAR_X3_DEF_HPP
