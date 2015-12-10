@@ -29,6 +29,7 @@
 #include <boost/spirit/home/x3.hpp>
 //#include <boost/fusion/adapted/adt.hpp>
 #include <boost/fusion/adapted/struct.hpp>
+#include <mapnik/color.hpp>
 
 BOOST_FUSION_ADAPT_STRUCT (
     mapnik::color,
@@ -60,7 +61,7 @@ using x3::omit;
 using x3::attr;
 using x3::double_;
 using x3::no_case;
-
+using x3::no_skip;
 
 struct named_colors_ : x3::symbols<color>
 {
@@ -222,11 +223,11 @@ x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
 x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
 
-x3::rule<class svg2_color, mapnik::color> const svg2_color("svg2_color");
-x3::rule<class hex2_color, mapnik::color> const hex2_color("hex2_color");
-x3::rule<class hex1_color, mapnik::color> const hex1_color("hex1_color");
-x3::rule<class rgb_color, mapnik::color> const rgb_color("rgb_color");
-x3::rule<class rgba_color, mapnik::color> const rgba_color("rgba_color");
+x3::rule<class svg2_color, color> const svg2_color("svg2_color");
+x3::rule<class hex2_color, color> const hex2_color("hex2_color");
+x3::rule<class hex1_color, color> const hex1_color("hex1_color");
+x3::rule<class rgb_color,  color> const rgb_color("rgb_color");
+x3::rule<class rgba_color, color> const rgba_color("rgba_color");
 
 struct clip_opacity
 {
@@ -278,8 +279,8 @@ auto hex1_opacity = [](auto& ctx)
     _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
-auto const hex1_color_def = lit('#') >> hex1[hex1_red] >> hex1[hex1_green] >> hex1[hex1_blue] >> (hex1[hex1_opacity] | attr(15)[hex1_opacity]);
+auto const hex2_color_def = no_skip[lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255))] ;
+auto const hex1_color_def = no_skip[lit('#') >> hex1[hex1_red] >> hex1[hex1_green] >> hex1[hex1_blue] >> (hex1[hex1_opacity] | attr(15)[hex1_opacity])];
 auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> attr(255) >> lit(')');
 
 auto const rgba_color_def = lit("rgba")
