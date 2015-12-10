@@ -36,16 +36,15 @@
 
 namespace mapnik {
 
-class MAPNIK_DECL color
-    : boost::equality_comparable<color>
+class MAPNIK_DECL color : boost::equality_comparable<color>
 {
-private:
+public:
     std::uint8_t red_;
     std::uint8_t green_;
     std::uint8_t blue_;
     std::uint8_t alpha_;
     bool premultiplied_;
-public:
+
     // default ctor
     color()
       : red_(0xff),
