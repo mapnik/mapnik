@@ -22,8 +22,8 @@
 
 // http://www.w3.org/TR/SVG2/color.html
 
-#ifndef MAPNIK_SVG2_COLOR_GRAMMAR_HPP
-#define MAPNIK_SVG2_COLOR_GRAMMAR_HPP
+#ifndef MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
+#define MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
 
 // boost
 #include <boost/spirit/home/x3.hpp>
@@ -303,4 +303,4 @@ auto const expression = svg2_color;
 }}
 
 
-#endif //MAPNIK_SVG_COLOR_GRAMMAR_DEF_HPP
+#endif //MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
