@@ -28,7 +28,9 @@
 // boost
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/adapted/struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/util/hsl.hpp>
 #include <mapnik/safe_cast.hpp>
 
 BOOST_FUSION_ADAPT_STRUCT (
@@ -296,6 +298,37 @@ auto hex1_opacity = [](auto& ctx)
     _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
+auto hsl_to_rgba = [] (auto& ctx)
+{
+    double h = std::get<0>(_attr(ctx));
+    double s = std::get<1>(_attr(ctx));
+    double l = std::get<2>(_attr(ctx));
+    double m1;
+    double m2;
+    // normalise values
+    h /= 360.0;
+    s /= 100.0;
+    l /= 100.0;
+    if (l <= 0.5)
+    {
+        m2 = l * (s + 1.0);
+    }
+    else
+    {
+        m2 = l + s - l*s;
+    }
+    m1 = l * 2 - m2;
+
+    double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
+    double g = hue_to_rgb(m1, m2, h);
+    double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
+    uint8_t alpha = uint8_t((255.0 * clip_opacity::call(std::get<3>(_attr(ctx)))) + 0.5);
+    _val(ctx) = color(safe_cast<uint8_t>(std::lround(255.0 * r)),
+                      safe_cast<uint8_t>(std::lround(255.0 * g)),
+                      safe_cast<uint8_t>(std::lround(255.0 * b)),
+                      alpha);
+};
+
 auto const hex2_color_def = no_skip[lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255))] ;
 
 auto const hex1_color_def = no_skip[lit('#')
@@ -328,6 +361,25 @@ auto const rgba_color_percent_def = lit("rgba")
     >> lit(',') >> dec3[percent_blue] >> lit('%')
     >> lit(',') >> double_[opacity] >> lit(')');
 
+auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint8_t,std::uint8_t,std::uint8_t, double >> {} =
+    lit("hsl")
+    >> lit('(') >> dec3
+    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> dec3 >> lit('%')
+    >> attr(1.0) >> lit(')')
+    ;
+
+auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint8_t,std::uint8_t,std::uint8_t, double >> {} =
+    lit("hsla")
+    >> lit('(') >> dec3
+    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> double_ >> lit(')')
+    ;
+
+auto const hsl_color = x3::rule<class hsl_color, color> {} = hsl_values[hsl_to_rgba];
+auto const hsla_color = x3::rule<class hsla_color, color> {} = hsla_values[hsl_to_rgba];
+
 auto const svg2_color_def =
     no_case[named_colors]
     |
@@ -342,6 +394,10 @@ auto const svg2_color_def =
     rgb_color_percent
     |
     rgba_color_percent
+    |
+    hsl_color
+    |
+    hsla_color
     ;
 
 BOOST_SPIRIT_DEFINE(
