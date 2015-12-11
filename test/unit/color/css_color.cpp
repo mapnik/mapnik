@@ -9,22 +9,20 @@ TEST_CASE("SVG2 color") {
 
     SECTION("conversions")
     {
+        using namespace  mapnik::svg2_color_grammar;
+        CHECK( percent_converter::call(1.0) == 3 );
+        CHECK( percent_converter::call(60.0) == 153 );
+        // should not overflow on invalid input
+        CHECK( mapnik::svg2_color_grammar::percent_converter::call(100000.0) == 255 );
+        CHECK( mapnik::svg2_color_grammar::percent_converter::call(-100000.0) == 0 );
+
 #if 0
-        mapnik::percent_conv_impl conv;
-        CHECK( conv(1.0) == 3 );
-        CHECK( conv(60.0) == 153 );
+        CHECK( opacity(0.5) == 128 );
+        CHECK( opacity(1.0) == 255 );
         // should not overflow on invalid input
-        CHECK( conv(100000.0) == 255 );
-        CHECK( conv(-100000.0) == 0 );
-
-        mapnik::alpha_conv_impl conv2;
-        CHECK( conv2(0.5) == 128 );
-        CHECK( conv2(1.0) == 255 );
-        // should not overflow on invalid input
-        CHECK( conv2(60.0) == 255 );
-        CHECK( conv2(100000.0) == 255 );
-        CHECK( conv2(-100000.0) == 0 );
-
+        CHECK( opacity(60.0) == 255 );
+        CHECK( opacity(100000.0) == 255 );
+        CHECK( opacity(-100000.0) == 0 );
         mapnik::hsl_conv_impl conv3;
         mapnik::color c;
         conv3(c, 1.0, 1.0, 1.0);
@@ -41,11 +39,62 @@ TEST_CASE("SVG2 color") {
 #endif
     }
 
-    SECTION("hex colors")
+    SECTION("SVG2 colors")
     {
         auto const& color_grammar = mapnik::svg2_color_grammar::expression;
         boost::spirit::x3::ascii::space_type space;
+        {
+            // rgb
+            std::string s("rgb(128,0,255)");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xff );
+            CHECK( c.red() == 0x80 );
+            CHECK( c.green() == 0x00 );
+            CHECK( c.blue() == 0xff );
+        }
+        {
+            // rgb (percent)
+            std::string s("rgb(50%,0%,100%)");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0xff );
+            CHECK( c.red() == 0x80 );
+            CHECK( c.green() == 0x00 );
+            CHECK( c.blue() == 0xff );
+        }
+        {
+            // rgba
+            std::string s("rgba(128,0,255,0.5)");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0x80 );
+            CHECK( c.red() == 0x80 );
+            CHECK( c.green() == 0x00 );
+            CHECK( c.blue() == 0xff );
+        }
+        {
+            // rgba (percent)
+            std::string s("rgba(50%,0%,100%,0.5)");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 0x80 );
+            CHECK( c.red() == 0x80 );
+            CHECK( c.green() == 0x00 );
+            CHECK( c.blue() == 0xff );
+        }
+        {
+            // named colours
+            std::string s("darksalmon");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 255 );
+            CHECK( c.red() == 233 );
+            CHECK( c.green() == 150 );
+            CHECK( c.blue() == 122 );
+        }
 
+        // hex colours
         {
             std::string s("#abcdef");
             mapnik::color c;
