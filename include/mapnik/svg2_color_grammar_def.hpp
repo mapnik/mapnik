@@ -39,14 +39,6 @@ BOOST_FUSION_ADAPT_STRUCT (
     (std::uint8_t, alpha_)
     )
 
-//BOOST_FUSION_ADAPT_ADT(
-//    mapnik::color,
-//    (std::uint8_t, std::uint8_t, obj.red(), obj.set_red(val))
-//    (std::uint8_t, std::uint8_t, obj.green(), obj.set_green(val))
-//    (std::uint8_t, std::uint8_t, obj.blue(), obj.set_blue(val))
-//    (std::uint8_t, std::uint8_t, obj.alpha(), obj.set_alpha(val))
-//    )
-
 namespace mapnik {
 
 namespace x3 = boost::spirit::x3;
