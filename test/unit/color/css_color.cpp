@@ -93,7 +93,26 @@ TEST_CASE("SVG2 color") {
             CHECK( c.green() == 150 );
             CHECK( c.blue() == 122 );
         }
-
+        // hsl
+        {
+            std::string s("hsl(240,50%,50%)");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 255 );
+            CHECK( c.red() == 64 );
+            CHECK( c.green() == 64 );
+            CHECK( c.blue() == 191 );
+        }
+        // hslaza
+        {
+            std::string s("hsla(240,50%,50%,0.5)");
+            mapnik::color c;
+            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK( c.alpha() == 128 );
+            CHECK( c.red() == 64 );
+            CHECK( c.green() == 64 );
+            CHECK( c.blue() == 191 );
+        }
         // hex colours
         {
             std::string s("#abcdef");
