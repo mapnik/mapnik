@@ -30,8 +30,6 @@
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <iostream>                     // for clog, endl, etc
-#include <string>                       // for string
 
 namespace mapnik { namespace json {
 
@@ -51,18 +49,45 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     qi::_a_type _a;
     qi::_b_type _b;
     qi::eps_type eps;
+    qi::omit_type omit;
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
 
     start = geometry.alias() | lit("null");
 
+    // generic json types
+    json_.value =  json_.object | json_.array | json_.string_ | json_.number
+        ;
+
+    json_.pairs = json_.key_value % lit(',')
+        ;
+
+    json_.key_value = (json_.string_ > lit(':') > json_.value)
+        ;
+
+    json_.object = lit('{')
+        > *json_.pairs
+        > lit('}')
+        ;
+    json_.array = lit('[')
+        > json_.value > *(lit(',') > json_.value)
+        > lit(']')
+        ;
+    json_.number = json_.strict_double
+        | json_.int__
+        | lit("true")
+        | lit ("false")
+        | lit("null")
+        ;
     geometry = lit('{')[_a = 0]
-        > (-lit(',') >> (lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
-           ^
-           (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
-           ^
-           (-lit(',') >> (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))))[create_geometry(_val,_a,_b)]
+        > (((lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
+            |
+            (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1])
+            |
+            (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))
+            |
+            omit[json_.key_value]) % lit(',')) [create_geometry(_val,_a,_b)]
         > lit('}')
         ;
 
