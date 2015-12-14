@@ -177,28 +177,30 @@ std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t fi
     // autodetect newlines
     char newline = '\n';
     bool has_newline = false;
-    char quote = '"';
     bool has_quote = false;
+    char quote = '"';
     static std::size_t const max_size = 4000;
     std::size_t size = std::min(file_length, max_size);
     for (std::size_t lidx = 0; lidx < size; ++lidx)
     {
         char c = static_cast<char>(stream.get());
-        if (c == '\r')
+        switch (c)
         {
+        case '\r':
             newline = '\r';
             has_newline = true;
-            //break;
-        }
-        if (c == '\n')
-        {
+            break;
+        case '\n':
             has_newline = true;
-            //break;
-        }
-        else if (!has_quote && c == '\'')
-        {
-            quote = '\'';
-            has_quote = true;
+            break;
+        case '\'':
+        case '"':
+            if (!has_quote)
+            {
+                quote = c;
+                has_quote = true;
+            }
+            break;
         }
     }
     return std::make_tuple(newline, has_newline, quote);

@@ -49,7 +49,7 @@ public:
     using self_type = path_adapter<VertexContainer>;
 
     //--------------------------------------------------------------------
-    path_adapter(VertexContainer & vertices) : vertices_(vertices), iterator_(0) {}
+    path_adapter(VertexContainer & _vertices) : vertices_(_vertices), iterator_(0) {}
     //void remove_all() { vertices_.remove_all(); iterator_ = 0; }
     //void free_all()   { vertices_.free_all();   iterator_ = 0; }
 

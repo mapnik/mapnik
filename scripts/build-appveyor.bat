@@ -26,8 +26,27 @@ ECHO ========
 
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
-:: *nix style find command:
-SET PATH=C:\Program Files (x86)\Git\bin;%PATH%
+
+:: *nix style find command comes with git:
+ECHO checking for unix style 'find'
+find %USERPROFILE% -name "*.blabla"
+IF %ERRORLEVEL% EQU 0 GOTO NIX_FIND_FOUND
+
+IF DEFINED GIT_INSTALL_ROOT SET TEMP_GIT_DIR=%GIT_INSTALL_ROOT%&& GOTO TEST_FIND_AGAIN
+IF EXIST "C:\Program Files (x86)\Git" SET TEMP_GIT_DIR=C:\Program Files (x86)\Git&& GOTO TEST_FIND_AGAIN
+IF EXIST "C:\Program Files\Git" SET TEMP_GIT_DIR=C:\Program Files\Git&& GOTO TEST_FIND_AGAIN
+
+:TEST_FIND_AGAIN
+SET PATH=%TEMP_GIT_DIR%\bin;%PATH%
+SET PATH=%TEMP_GIT_DIR%\usr\bin;%PATH%
+ECHO %PATH%
+::check again
+find %USERPROFILE% -name "*.blabla"
+IF %ERRORLEVEL% NEQ 0 (ECHO unix style find not found && GOTO ERROR)
+
+
+:NIX_FIND_FOUND
+ECHO find was found
 
 ::cloning mapnik-gyp
 if EXIST mapnik-gyp ECHO mapnik-gyp already cloned && GOTO MAPNIK_GYP_ALREADY_HERE

@@ -42,9 +42,9 @@ namespace agg
         conv_clip_polygon(VertexSource& vs) : 
             conv_adaptor_vpgen<VertexSource, vpgen_clip_polygon>(vs) {}
 
-        void clip_box(double x1, double y1, double x2, double y2)
+        void clip_box(double _x1, double _y1, double _x2, double _y2)
         {
-            base_type::vpgen().clip_box(x1, y1, x2, y2);
+            base_type::vpgen().clip_box(_x1, _y1, _x2, _y2);
         }
 
         double x1() const { return base_type::vpgen().x1(); }

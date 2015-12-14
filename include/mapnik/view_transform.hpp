@@ -44,15 +44,15 @@ private:
     int offset_;
 public:
 
-    view_transform(int width, int height, box2d<double> const& extent,
-                   double offset_x = 0.0, double offset_y = 0.0)
-        : width_(width),
-          height_(height),
-          extent_(extent),
+    view_transform(int _width, int _height, box2d<double> const& _extent,
+                   double _offset_x = 0.0, double _offset_y = 0.0)
+        : width_(_width),
+          height_(_height),
+          extent_(_extent),
           sx_(extent_.width() > 0 ? static_cast<double>(width_) / extent_.width() : 1.0),
           sy_(extent_.height() > 0 ? static_cast<double>(height_) / extent_.height() : 1.0),
-          offset_x_(offset_x),
-          offset_y_(offset_y),
+          offset_x_(_offset_x),
+          offset_y_(_offset_y),
           offset_(0) {}
 
     view_transform(view_transform const&) = default;
@@ -62,9 +62,9 @@ public:
         return offset_;
     }
 
-    inline void set_offset(int offset)
+    inline void set_offset(int _offset)
     {
-        offset_ = offset;
+        offset_ = _offset;
     }
 
     inline double offset_x() const

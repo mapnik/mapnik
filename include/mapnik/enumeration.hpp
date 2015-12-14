@@ -41,8 +41,8 @@ public:
     illegal_enum_value():
         what_() {}
 
-    illegal_enum_value( std::string const& what ) :
-        what_( what )
+    illegal_enum_value( std::string const& _what ) :
+        what_( _what )
     {
     }
     virtual ~illegal_enum_value() throw() {}

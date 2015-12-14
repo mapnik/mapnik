@@ -162,61 +162,71 @@ int main (int argc,char** argv)
         mapnik::quad_tree<int> tree(extent, depth, ratio);
         int count = 0;
 
-        while (true)
+        if (shape_type != shape_io::shape_null)
         {
-            int offset = shx.read_xdr_integer();
-            int content_length = shx.read_xdr_integer();
-            pos += 4;
-            box2d<double> item_ext;
-            shp.seek(offset * 2);
-            int record_number = shp.read_xdr_integer();
-            if (content_length != shp.read_xdr_integer())
+            while (shx.is_good() && pos <= file_length - 4)
             {
-                std::clog << "Content length mismatch for record number " << record_number << std::endl;
-                continue;
-            }
-            shape_type = shp.read_ndr_integer();
+                int offset = shx.read_xdr_integer();
+                int shx_content_length = shx.read_xdr_integer();
+                pos += 4;
+                box2d<double> item_ext;
+                shp.seek(offset * 2);
+                int record_number = shp.read_xdr_integer();
+                int shp_content_length = shp.read_xdr_integer();
+                if (shx_content_length != shp_content_length)
+                {
+                    std::clog << "Content length mismatch for record number " << record_number << std::endl;
+                    continue;
+                }
+                shape_type = shp.read_ndr_integer();
 
-            if (shape_type==shape_io::shape_point
-                || shape_type==shape_io::shape_pointm
-                || shape_type == shape_io::shape_pointz)
+                if (shape_type==shape_io::shape_point
+                    || shape_type==shape_io::shape_pointm
+                    || shape_type == shape_io::shape_pointz)
+                {
+                    double x=shp.read_double();
+                    double y=shp.read_double();
+                    item_ext=box2d<double>(x,y,x,y);
+                }
+                else
+                {
+                    shp.read_envelope(item_ext);
+                }
+                if (verbose)
+                {
+                    std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
+                }
+                if (item_ext.valid())
+                {
+                    tree.insert(offset * 2,item_ext);
+                    ++count;
+                }
+            }
+        }
+
+        if (count > 0)
+        {
+            std::clog << " number shapes=" << count << std::endl;
+            std::fstream file((shapename+".index").c_str(),
+                              std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+            if (!file)
             {
-                double x=shp.read_double();
-                double y=shp.read_double();
-                item_ext=box2d<double>(x,y,x,y);
+                std::clog << "cannot open index file for writing file \""
+                          << (shapename+".index") << "\"" << std::endl;
             }
             else
             {
-                shp.read_envelope(item_ext);
+                tree.trim();
+                std::clog << " number nodes=" << tree.count() << std::endl;
+                file.exceptions(std::ios::failbit | std::ios::badbit);
+                tree.write(file);
+                file.flush();
+                file.close();
             }
-
-            tree.insert(offset * 2,item_ext);
-
-            if (verbose)
-            {
-                std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
-            }
-            ++count;
-            if (pos >= file_length) break;
-        }
-
-        std::clog << " number shapes=" << count << std::endl;
-
-        std::fstream file((shapename+".index").c_str(),
-                          std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
-        if (!file)
-        {
-            std::clog << "cannot open index file for writing file \""
-                 << (shapename+".index") << "\"" << std::endl;
         }
         else
         {
-            tree.trim();
-            std::clog << " number nodes=" << tree.count() << std::endl;
-            file.exceptions(std::ios::failbit | std::ios::badbit);
-            tree.write(file);
-            file.flush();
-            file.close();
+            std::clog << "No non-empty geometries in shapefile" << std::endl;
         }
     }
 

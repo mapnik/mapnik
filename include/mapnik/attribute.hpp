@@ -36,8 +36,8 @@ namespace mapnik {
 struct attribute
 {
     std::string name_;
-    explicit attribute(std::string const& name)
-        : name_(name) {}
+    explicit attribute(std::string const& _name)
+        : name_(_name) {}
 
     template <typename V ,typename F>
     V const& value(F const& f) const

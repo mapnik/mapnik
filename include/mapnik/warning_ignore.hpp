@@ -22,9 +22,8 @@
 
 
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wno-unknown-pragmas" // clang
-#pragma GCC diagnostic ignored "-Wno-pragmas" // gcc
-#pragma GCC diagnostic ignored "-Wno-unsequenced"
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
+#pragma GCC diagnostic ignored "-Wunsequenced"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wredeclared-class-member"

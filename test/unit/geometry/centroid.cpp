@@ -132,7 +132,9 @@ SECTION("multi-linestring: one component empty") {
     geom.emplace_back(std::move(line));
     geom.emplace_back();
     mapnik::geometry::point<double> centroid;
-    REQUIRE(!mapnik::geometry::centroid(geom, centroid));
+    REQUIRE(mapnik::geometry::centroid(geom, centroid));
+    REQUIRE(centroid.x == 0);
+    REQUIRE(centroid.y == 25);
 }
 
 SECTION("empty multi-linestring") {
@@ -189,7 +191,9 @@ SECTION("multi-polygon: one component empty") {
     geom.emplace_back();
 
     mapnik::geometry::point<double> centroid;
-    REQUIRE(!mapnik::geometry::centroid(geom, centroid));
+    REQUIRE(mapnik::geometry::centroid(geom, centroid));
+    REQUIRE(centroid.x == 0.5);
+    REQUIRE(centroid.y == 0.5);
 }
 
 SECTION("empty multi-polygon") {

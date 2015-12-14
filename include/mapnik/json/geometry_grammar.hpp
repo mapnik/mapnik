@@ -49,6 +49,8 @@ struct geometry_grammar :
     qi::symbols<char, int> geometry_type_dispatch;
     positions_grammar<Iterator> coordinates;
     boost::phoenix::function<create_geometry_impl> create_geometry;
+    // generic JSON
+    generic_json<Iterator> json_;
     // error handler
     ErrorHandler error_handler;
 };
