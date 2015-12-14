@@ -71,10 +71,10 @@ namespace postgistest {
         {
             //don't add 'true' here, to get error message, when drop fails. If it works nothing is output
             REQUIRE(run("dropdb --if-exists " + dbname));
-            //From postgres 9.1 on template is not necessary anymore, just 'CREATE EXTENSION postgis;'
-            //REQUIRE(run("createdb -T template_postgis " + dbname));
-            REQUIRE(run("createdb " + dbname));
-            REQUIRE(run("psql -c 'CREATE EXTENSION postgis;' " + dbname, true));
+            REQUIRE(run("createdb -T template_postgis " + dbname));
+            //REQUIRE(run("createdb " + dbname));
+            // Breaks when raster support is missing (unfortunately this is common)
+            //REQUIRE(run("psql -c 'CREATE EXTENSION postgis;' " + dbname, true));
             REQUIRE(run("psql -q -f ./test/data/sql/postgis-create-db-and-tables.sql " + dbname));
         }
 
