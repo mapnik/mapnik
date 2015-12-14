@@ -186,7 +186,7 @@ int main (int argc, char** argv)
         else if (mapnik::detail::is_geojson(filename))
         {
             std::clog << "processing '" << filename << "' as GeoJSON\n";
-            auto result = mapnik::detail::process_geojson_file(boxes, filename, validate_features);
+            auto result = mapnik::detail::process_geojson_file(boxes, filename, validate_features, verbose);
             if (!result.first)
             {
                 std::clog << "Error: failed to process " << filename << std::endl;
