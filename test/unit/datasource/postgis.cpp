@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#include <boost/optional/optional_io.hpp>
+
 #include "catch.hpp"
 #include "ds_test_util.hpp"
 
@@ -28,16 +28,16 @@
 #include <mapnik/geometry_type.hpp>
 #include <mapnik/util/fs.hpp>
 
-using namespace mapnik;
-
 /*
 Compile and run just this test:
 clang++ -o test-postgis -g -I./test/ test/unit/run.cpp test/unit/datasource/postgis.cpp `mapnik-config --all-flags` && ./test-postgis -d yes
 */
 
+#include <boost/optional/optional_io.hpp>
+
 namespace postgistest {
 
-    int run(std::string const& command, bool silent = false)
+    int run(std::string const& command, bool okay_to_fail = false)
     {
         std::string cmd;
         if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
@@ -45,7 +45,8 @@ namespace postgistest {
             cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
         }
         cmd += command;
-        if (silent)
+        // silence output unless MAPNIK_TEST_DEBUG is defined
+        if (std::getenv("MAPNIK_TEST_DEBUG") == nullptr)
         {
 #ifndef _WINDOWS
             cmd += " 2>/dev/null";
@@ -53,8 +54,12 @@ namespace postgistest {
             cmd += " 2> nul";
 #endif
         }
+        else
+        {
+            std::clog << "Running " << cmd << "\n";
+        }
         bool worked = (std::system(cmd.c_str()) == 0);
-        if (silent == true) return true;
+        if (okay_to_fail == true) return true;
         return worked;
     }
 
@@ -70,8 +75,7 @@ namespace postgistest {
             //REQUIRE(run("createdb -T template_postgis " + dbname));
             REQUIRE(run("createdb " + dbname));
             REQUIRE(run("psql -c 'CREATE EXTENSION postgis;' " + dbname, true));
-            //REQUIRE(run("psql -q -f ./test/data/sql/postgis-create-db-and-tables.sql " + dbname));
-            REQUIRE(run("psql -q -f ./test/unit/datasource/postgis-create-db-and-tables.sql " + dbname));
+            REQUIRE(run("psql -q -f ./test/data/sql/postgis-create-db-and-tables.sql " + dbname));
         }
 
         mapnik::parameters params;
@@ -80,7 +84,7 @@ namespace postgistest {
 
         SECTION("Postgis should throw without 'table' parameter")
         {
-            CHECK_THROWS(datasource_cache::instance().create(params));
+            CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
         SECTION("Postgis should throw with 'max_async_connection' greater than 'max_size'")
@@ -88,33 +92,33 @@ namespace postgistest {
             params["table"] = "test";
             params["max_async_connection"] = "2";
             params["max_size"] = "1";
-            CHECK_THROWS(datasource_cache::instance().create(params));
+            CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
         SECTION("Postgis should throw with invalid metadata query")
         {
             params["table"] = "does_not_exist";
-            CHECK_THROWS(datasource_cache::instance().create(params));
+            CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
         SECTION("Postgis should throw with invalid key field")
         {
             params["table"] = "test_invalid_id";
             params["key_field"] = "id";
-            CHECK_THROWS(datasource_cache::instance().create(params));
+            CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
         SECTION("Postgis should throw with multicolumn primary key")
         {
             params["table"] = "test_invalid_multi_col_pk";
             params["autodetect_key_field"] = "true";
-            CHECK_THROWS(datasource_cache::instance().create(params));
+            CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
         SECTION("Postgis should throw without geom column")
         {
             params["table"] = "test_no_geom_col";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
             CHECK_THROWS(all_features(ds));
         }
@@ -124,7 +128,7 @@ namespace postgistest {
             params["table"] = "test";
             params["user"] = "not_a_valid_user";
             params["password"] = "not_a_valid_pwd";
-            CHECK_THROWS(datasource_cache::instance().create(params));
+            CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
         SECTION("Postgis initialize dataset with persist_connection, schema, extent, geometry field, autodectect key field, simplify_geometries, row_limit")
@@ -136,13 +140,13 @@ namespace postgistest {
             params["extent"] = "-1 -1, -1 2, 4 3, 3 -1, -1 -1";
             params["simplify_geometries"] = "true";
             params["row_limit"] = "1";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
         }
 
         SECTION("Postgis dataset geometry type")
         {
             params["table"] = "(SELECT * FROM test WHERE gid=1) as data";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
             CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
         }
@@ -150,7 +154,7 @@ namespace postgistest {
         SECTION("Postgis query field names")
         {
             params["table"] = "test";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
             REQUIRE(ds->type() == mapnik::datasource::datasource_t::Vector);
             auto fields = ds->get_descriptor().get_descriptors();
@@ -164,11 +168,11 @@ namespace postgistest {
             params["key_field"] = "gid";
             params["max_async_connection"] = "2";
             //params["cursor_size"] = "2";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
 
             auto featureset = ds->features_at_point(mapnik::coord2d(1, 1));
-            feature_ptr feature;
+            mapnik::feature_ptr feature;
             while ((bool(feature = featureset->next()))) {
                 REQUIRE(feature->get(2).to_string() == feature->get("col_text").to_string());
                 REQUIRE(feature->get(4).to_bool() == feature->get("col+bool").to_bool());
@@ -192,35 +196,34 @@ namespace postgistest {
         {
             params["table"] = "(SELECT * FROM test) as data";
             params["cursor_size"] = "2";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
             auto featureset = all_features(ds);
             CHECK(count_features(featureset) == 8);
 
             featureset = all_features(ds);
-            feature_ptr feature;
+            mapnik::feature_ptr feature;
             while (bool(feature = featureset->next())) {
                 CHECK(feature->size() == 10);
             }
 
             featureset = all_features(ds);
-            using mapnik::geometry::geometry_types;
-            require_geometry(featureset->next(), 1, geometry_types::Point);
-            require_geometry(featureset->next(), 1, geometry_types::Point);
-            require_geometry(featureset->next(), 2, geometry_types::MultiPoint);
-            require_geometry(featureset->next(), 1, geometry_types::LineString);
-            require_geometry(featureset->next(), 2, geometry_types::MultiLineString);
-            require_geometry(featureset->next(), 1, geometry_types::Polygon);
-            require_geometry(featureset->next(), 2, geometry_types::MultiPolygon);
-            require_geometry(featureset->next(), 3, geometry_types::GeometryCollection);
+            require_geometry(featureset->next(), 1, mapnik::geometry::geometry_types::Point);
+            require_geometry(featureset->next(), 1, mapnik::geometry::geometry_types::Point);
+            require_geometry(featureset->next(), 2, mapnik::geometry::geometry_types::MultiPoint);
+            require_geometry(featureset->next(), 1, mapnik::geometry::geometry_types::LineString);
+            require_geometry(featureset->next(), 2, mapnik::geometry::geometry_types::MultiLineString);
+            require_geometry(featureset->next(), 1, mapnik::geometry::geometry_types::Polygon);
+            require_geometry(featureset->next(), 2, mapnik::geometry::geometry_types::MultiPolygon);
+            require_geometry(featureset->next(), 3, mapnik::geometry::geometry_types::GeometryCollection);
         }
 
         SECTION("Postgis bbox query")
         {
             params["table"] = "(SELECT * FROM public.test) as data WHERE geom && !bbox!";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
-            box2d<double> ext = ds->envelope();
+            mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
             INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
             REQUIRE(ext.minx() == -2);
@@ -233,9 +236,9 @@ namespace postgistest {
         {
             //include schema to increase coverage
             params["table"] = "(SELECT * FROM public.test) as data";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
-            box2d<double> ext = ds->envelope();
+            mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
             INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
             REQUIRE(ext.minx() == -2);
@@ -247,9 +250,9 @@ namespace postgistest {
         SECTION("Postgis query extent from subquery")
         {
             params["table"] = "(SELECT * FROM test where gid=4) as data";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
-            box2d<double> ext = ds->envelope();
+            mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
             INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
             REQUIRE(ext.minx() == 0);
@@ -262,9 +265,9 @@ namespace postgistest {
         {
             params["table"] = "(SELECT * FROM test where gid=4) as data";
             params["extent_from_subquery"] = "true";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
-            box2d<double> ext = ds->envelope();
+            mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
             INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
             REQUIRE(ext.minx() == 0);
@@ -279,9 +282,9 @@ namespace postgistest {
             // https://github.com/mapbox/postgis-vt-util/blob/559f073877696a6bfea41baf3e1065f9cf4d18d1/postgis-vt-util.sql#L615-L617
             params["table"] = "(SELECT * FROM test where gid=4 AND z(!scale_denominator!) BETWEEN 0 AND 22) as data";
             params["extent_from_subquery"] = "true";
-            auto ds = datasource_cache::instance().create(params);
+            auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
-            box2d<double> ext = ds->envelope();
+            mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
             INFO("" << std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
             REQUIRE(ext.minx() == 0);
