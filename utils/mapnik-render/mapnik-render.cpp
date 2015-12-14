@@ -32,7 +32,7 @@ int main (int argc,char** argv)
 
     try
     {
-        po::options_description desc("nik2img utility");
+        po::options_description desc("mapnik-render utility");
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
