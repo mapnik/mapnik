@@ -66,7 +66,7 @@ const mapnik::json::feature_grammar_callback<base_iterator_type, mapnik::feature
 namespace mapnik { namespace detail {
 
 template <typename T>
-std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const& filename, bool validate_features)
+std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const& filename, bool validate_features, bool verbose)
 {
     mapnik::box2d<double> extent;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
@@ -131,6 +131,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
                                                               space);
                 if (!result || feat_itr != feat_end)
                 {
+                    if (verbose) std::clog << std::string(start + item.second.first, feat_end ) << std::endl;
                     return std::make_pair(false, extent);
                 }
             }
@@ -142,6 +143,6 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
 using box_type = mapnik::box2d<double>;
 using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
 using boxes_type = std::vector<item_type>;
-template std::pair<bool,box2d<double>> process_geojson_file(boxes_type&, std::string const&, bool);
+template std::pair<bool,box2d<double>> process_geojson_file(boxes_type&, std::string const&, bool, bool);
 
 }}
