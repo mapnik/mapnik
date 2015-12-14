@@ -25,13 +25,16 @@
 #ifndef MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
 #define MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
 
-// boost
-#include <boost/spirit/home/x3.hpp>
-#include <boost/fusion/adapted/struct.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/util/hsl.hpp>
 #include <mapnik/safe_cast.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#pragma GCC diagnostic pop
 
 BOOST_FUSION_ADAPT_STRUCT (
     mapnik::color,
@@ -400,6 +403,8 @@ auto const svg2_color_def =
     hsla_color
     ;
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
     svg2_color,
     hex2_color,
@@ -409,6 +414,7 @@ BOOST_SPIRIT_DEFINE(
     rgb_color_percent,
     rgba_color_percent
     );
+#pragma GCC diagnostic pop
 
 auto const expression = svg2_color;
 
