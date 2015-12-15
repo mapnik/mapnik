@@ -24,13 +24,13 @@
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/config_error.hpp>
-#include <mapnik/svg2_color_grammar_def.hpp>
+#include <mapnik/css_color_grammar_def.hpp>
 namespace mapnik {
 
 color parse_color(std::string const& str)
 {
     // TODO - early return for @color?
-    auto const& grammar = mapnik::svg2_color_grammar::expression;
+    auto const& grammar = mapnik::css_color_grammar::expression;
     color c;
     std::string::const_iterator first = str.begin();
     std::string::const_iterator last =  str.end();

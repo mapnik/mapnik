@@ -2,46 +2,24 @@
 
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/svg2_color_grammar_def.hpp>
+#include <mapnik/css_color_grammar_def.hpp>
 
 
-TEST_CASE("SVG2 color") {
+TEST_CASE("CSS color") {
 
     SECTION("conversions")
     {
-        using namespace  mapnik::svg2_color_grammar;
+        using namespace mapnik::css_color_grammar;
         CHECK( percent_converter::call(1.0) == 3 );
         CHECK( percent_converter::call(60.0) == 153 );
         // should not overflow on invalid input
-        CHECK( mapnik::svg2_color_grammar::percent_converter::call(100000.0) == 255 );
-        CHECK( mapnik::svg2_color_grammar::percent_converter::call(-100000.0) == 0 );
-
-#if 0
-        CHECK( opacity(0.5) == 128 );
-        CHECK( opacity(1.0) == 255 );
-        // should not overflow on invalid input
-        CHECK( opacity(60.0) == 255 );
-        CHECK( opacity(100000.0) == 255 );
-        CHECK( opacity(-100000.0) == 0 );
-        mapnik::hsl_conv_impl conv3;
-        mapnik::color c;
-        conv3(c, 1.0, 1.0, 1.0);
-        CHECK( c.alpha() == 255 );
-        CHECK( c.red() == 3 );
-        CHECK( c.green() == 3 );
-        CHECK( c.blue() == 3 );
-        // invalid
-        conv3(c, -1, -1, -1);
-        CHECK( c.alpha() == 255 ); // should not be touched by hsl converter
-        CHECK( c.red() == 0 );
-        CHECK( c.green() == 0 );
-        CHECK( c.blue() == 0 );
-#endif
+        CHECK( percent_converter::call(100000.0) == 255 );
+        CHECK( percent_converter::call(-100000.0) == 0 );
     }
 
-    SECTION("SVG2 colors")
+    SECTION("CSS colors")
     {
-        auto const& color_grammar = mapnik::svg2_color_grammar::expression;
+        auto const& color_grammar = mapnik::css_color_grammar::expression;
         boost::spirit::x3::ascii::space_type space;
         {
             // rgb
@@ -103,7 +81,7 @@ TEST_CASE("SVG2 color") {
             CHECK( c.green() == 64 );
             CHECK( c.blue() == 191 );
         }
-        // hslaza
+        // hsla
         {
             std::string s("hsla(240,50%,50%,0.5)");
             mapnik::color c;

@@ -22,8 +22,8 @@
 
 // http://www.w3.org/TR/SVG2/color.html
 
-#ifndef MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
-#define MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
+#ifndef MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
+#define MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
 
 #include <mapnik/color.hpp>
 #include <mapnik/util/hsl.hpp>
@@ -48,7 +48,7 @@ namespace mapnik {
 
 namespace x3 = boost::spirit::x3;
 
-namespace svg2_color_grammar {
+namespace css_color_grammar {
 
 using x3::lit;
 using x3::uint_parser;
@@ -220,7 +220,7 @@ x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
 x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
 
-x3::rule<class svg2_color, color> const svg2_color("svg2_color");
+x3::rule<class css_color, color> const css_color("css_color");
 x3::rule<class hex2_color, color> const hex2_color("hex2_color");
 x3::rule<class hex1_color, color> const hex1_color("hex1_color");
 x3::rule<class rgb_color,  color> const rgb_color("rgb_color");
@@ -383,7 +383,7 @@ auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint8_t,std
 auto const hsl_color = x3::rule<class hsl_color, color> {} = hsl_values[hsl_to_rgba];
 auto const hsla_color = x3::rule<class hsla_color, color> {} = hsla_values[hsl_to_rgba];
 
-auto const svg2_color_def =
+auto const css_color_def =
     no_case[named_colors]
     |
     hex2_color
@@ -406,7 +406,7 @@ auto const svg2_color_def =
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
-    svg2_color,
+    css_color,
     hex2_color,
     hex1_color,
     rgb_color,
@@ -416,9 +416,9 @@ BOOST_SPIRIT_DEFINE(
     );
 #pragma GCC diagnostic pop
 
-auto const expression = svg2_color;
+auto const expression = css_color;
 
 }}
 
 
-#endif //MAPNIK_SVG2_COLOR_GRAMMAR_DEF_HPP
+#endif //MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
