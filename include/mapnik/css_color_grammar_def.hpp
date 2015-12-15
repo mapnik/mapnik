@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-// http://www.w3.org/TR/SVG2/color.html
+// REF: http://www.w3.org/TR/css3-color/
 
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
