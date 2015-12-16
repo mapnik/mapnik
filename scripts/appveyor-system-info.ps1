@@ -17,28 +17,33 @@ Write-Host "page file size           : "$PageFileSize
 Write-Host "InitialSize              : "${CurrentPageFile}.InitialSize
 Write-Host "MaximumSize              : "$CurrentPageFile.MaximumSize
 
-#disable automatically managed page file settings
-$c = Get-WmiObject Win32_computersystem -EnableAllPrivileges
-if($c.AutomaticManagedPagefile){
-    Write-Host disabling managed page file settings
-    $c.AutomaticManagedPagefile = $false
-    $c.Put() | Out-Null
-}
+if($env:APPVEYOR -eq "true"){
+    Write-Host !!!!!!! on AppVeyor: changing page file settings !!!!!!!!!!
+    #disable automatically managed page file settings
+    $c = Get-WmiObject Win32_computersystem -EnableAllPrivileges
+    if($c.AutomaticManagedPagefile){
+        Write-Host disabling managed page file settings
+        $c.AutomaticManagedPagefile = $false
+        $c.Put() | Out-Null
+    }
 
-$new_page_size=18000
-$CurrentPageFile = Get-WmiObject -Class Win32_PageFileSetting
-if($CurrentPageFile.InitialSize -ne $new_page_size){
-    Write-Host "settings new page file size to $new_page_size"
-    $CurrentPageFile.InitialSize=$new_page_size
-    $CurrentPageFile.MaximumSize=$new_page_size
-    $CurrentPageFile.Put() | Out-Null
-}
+    $new_page_size=18000
+    $CurrentPageFile = Get-WmiObject -Class Win32_PageFileSetting
+    if($CurrentPageFile.InitialSize -ne $new_page_size){
+        Write-Host "setting new page file size to $new_page_size"
+        $CurrentPageFile.InitialSize=$new_page_size
+        $CurrentPageFile.MaximumSize=$new_page_size
+        $CurrentPageFile.Put() | Out-Null
+    }
 
-Write-Host "new ------------ "
-Write-Host "system managed:" (Get-WmiObject -Class Win32_ComputerSystem | % {$_.AutomaticManagedPagefile})
-Write-Host "page file size:" (gwmi Win32_PageFileUsage).AllocatedBaseSize
-Write-Host "InitialSize: "${CurrentPageFile}.InitialSize
-Write-Host "MaximumSize: "$CurrentPageFile.MaximumSize
+    Write-Host "new ------------ "
+    Write-Host "system managed:" (Get-WmiObject -Class Win32_ComputerSystem | % {$_.AutomaticManagedPagefile})
+    Write-Host "page file size:" (gwmi Win32_PageFileUsage).AllocatedBaseSize
+    Write-Host "InitialSize: "${CurrentPageFile}.InitialSize
+    Write-Host "MaximumSize: "$CurrentPageFile.MaximumSize
+} else {
+    Write-Host not on AppVeyor, leaving page file as is
+}
 
 #list drives
 Get-WmiObject -Class Win32_LogicalDisk |
