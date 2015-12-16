@@ -5,10 +5,10 @@ SET EL=0
 ECHO =========== %~f0 ===========
 
 ECHO NUMBER_OF_PROCESSORS^: %NUMBER_OF_PROCESSORS%
-ECHO RAM [MB]^:
-powershell "get-ciminstance -class 'cim_physicalmemory' | %% { $_.Capacity/1024/1024}"
+powershell Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted -Force
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 powershell .\scripts\appveyor-system-info.ps1
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ::only build on AppVeyor, if explicitly stated
 ECHO APPVEYOR_REPO_COMMIT_MESSAGE^: %APPVEYOR_REPO_COMMIT_MESSAGE%
