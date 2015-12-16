@@ -23,6 +23,8 @@
 #ifndef MAPNIK_IMAGE_UTIL_PNG_HPP
 #define MAPNIK_IMAGE_UTIL_PNG_HPP
 
+#include <mapnik/palette.hpp>
+
 // stl
 #include <string>
 #include <iostream>

@@ -24,7 +24,12 @@
 #define MAPNIK_SYMBOLIZER_DEFAULT_VALUES_HPP
 
 #include <mapnik/symbolizer_keys.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/image_compositing.hpp>
+#include <mapnik/image_scaling.hpp>
+#include <mapnik/simplify.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/value_types.hpp>
 #include <type_traits>
 
 

@@ -23,15 +23,16 @@
 #ifndef MAPNIK_IMAGE_FILITER_GRAMMAR_HPP
 #define MAPNIK_IMAGE_FILITER_GRAMMAR_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/css_color_grammar.hpp>
+#include <mapnik/color.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #pragma GCC diagnostic pop
-
-// mapnik
-#include <mapnik/css_color_grammar.hpp>
-#include <mapnik/color.hpp>
 
 // stl
 #include <cmath>
