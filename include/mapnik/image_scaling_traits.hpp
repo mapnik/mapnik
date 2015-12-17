@@ -24,7 +24,9 @@
 #define MAPNIK_IMAGE_SCALING_TRAITS_HPP
 
 // mapnik
-#include <mapnik/span_image_filter.h>
+#include <mapnik/image.hpp>
+#include <mapnik/image_scaling.hpp>
+#include <mapnik/span_image_filter.hpp>
 
 // agg
 #include "agg_image_accessors.h"
