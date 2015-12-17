@@ -41,7 +41,7 @@ struct geometry_envelope
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
-    
+
     void operator() (mapnik::geometry::geometry_empty const&) const {}
 
     template <typename T>
@@ -60,16 +60,22 @@ struct geometry_envelope
         bool first = true;
         for (auto const& pt : line)
         {
-            if (first && !bbox.valid()) 
+            if (first && !bbox.valid())
             {
                 bbox.init(pt.x, pt.y, pt.x, pt.y);
                 first = false;
             }
-            else 
+            else
             {
                 bbox.expand_to_include(pt.x, pt.y);
             }
         }
+    }
+
+    template <typename T>
+    void operator() (mapnik::geometry::linear_ring<T> const& ring) const
+    {
+        (*this)(static_cast<mapnik::geometry::line_string<T> const&>(ring));
     }
 
     template <typename T>
@@ -78,12 +84,12 @@ struct geometry_envelope
         bool first = true;
         for (auto const& pt : poly.exterior_ring)
         {
-            if (first && !bbox.valid()) 
+            if (first && !bbox.valid())
             {
                 bbox.init(pt.x, pt.y, pt.x, pt.y);
                 first = false;
             }
-            else 
+            else
             {
                 bbox.expand_to_include(pt.x, pt.y);
             }
@@ -96,12 +102,12 @@ struct geometry_envelope
         bool first = true;
         for (auto const& pt : multi_point)
         {
-            if (first && !bbox.valid()) 
+            if (first && !bbox.valid())
             {
                 bbox.init(pt.x, pt.y, pt.x, pt.y);
                 first = false;
             }
-            else 
+            else
             {
                 bbox.expand_to_include(pt.x, pt.y);
             }
@@ -140,7 +146,7 @@ struct geometry_envelope
 
 template <typename T>
 mapnik::box2d<double> envelope(T const& geom)
-{   
+{
     box2d<double> bbox;
     detail::geometry_envelope op(bbox);
     op(geom);
@@ -149,4 +155,3 @@ mapnik::box2d<double> envelope(T const& geom)
 
 } // end ns geometry
 } // end ns mapnik
-

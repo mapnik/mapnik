@@ -31,6 +31,7 @@ template MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_help
 template MAPNIK_DECL mapnik::box2d<double> envelope(geometry_empty const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(point<double> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(line_string<double> const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(linear_ring<double> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(polygon<double> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(multi_point<double> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(multi_line_string<double> const& geom);
@@ -40,6 +41,7 @@ template MAPNIK_DECL mapnik::box2d<double> envelope(geometry_collection<double> 
 template MAPNIK_DECL mapnik::box2d<double> envelope(geometry<std::int64_t> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(point<std::int64_t> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(line_string<std::int64_t> const& geom);
+template MAPNIK_DECL mapnik::box2d<double> envelope(linear_ring<std::int64_t> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(polygon<std::int64_t> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(multi_point<std::int64_t> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(multi_line_string<std::int64_t> const& geom);
