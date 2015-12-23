@@ -33,7 +33,13 @@ SET msvs_toolset=14
 SET platform=x64
 SET APPVEYOR_BUILD_FOLDER=%CD%
 
+IF NOT EXIST bindings\python git clone https://github.com/mapnik/python-mapnik.git bindings/python
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
+CD bindings\python & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git fetch & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git pull & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+CD ..\.. & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ECHO pulling test data
 CALL git submodule update --init
