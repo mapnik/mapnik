@@ -56,7 +56,11 @@ struct set_position_impl
     template <typename T0,typename T1>
     result_type operator() (T0 & coords, T1 const& pos) const
     {
-        if (pos) coords = *pos;
+        if (pos)
+        {
+            auto const& p = *pos;
+            coords = p;
+        }
     }
 };
 
@@ -66,7 +70,12 @@ struct push_position_impl
     template <typename T0,typename T1>
     result_type operator() (T0 & coords, T1 const& pos) const
     {
-        if (pos) coords.push_back(*pos);
+        if (pos)
+        {
+            auto const& p = *pos;
+            typename T0::value_type p1(p);
+            coords.emplace_back(p1);
+        }
     }
 };
 
