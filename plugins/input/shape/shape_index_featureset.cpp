@@ -70,7 +70,6 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     }
     std::sort(offsets_.begin(), offsets_.end(), [](detail::node const& n0, detail::node const& n1)
               {return n0.offset != n1.offset ? n0.offset < n1.offset : n0.start < n1.start;});
-    std::cerr <<  "shape_index_featureset: Query size=" << offsets_.size() << std::endl;
     MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << offsets_.size();
     itr_ = offsets_.begin();
 }
