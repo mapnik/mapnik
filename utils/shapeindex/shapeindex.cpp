@@ -29,7 +29,7 @@
 #include <mapnik/geometry_envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
-
+#include "shape_index_featureset.hpp"
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
@@ -38,20 +38,6 @@
 
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO=0.55;
-
-namespace
-{
-struct node
-{
-    node(int offset_, int start_, int end_)
-        : offset(offset_),
-          start(start_),
-          end(end_) {}
-    int offset;
-    int start;
-    int end;
-};
-}
 
 int main (int argc,char** argv)
 {
@@ -180,7 +166,7 @@ int main (int argc,char** argv)
 
         int pos = 50;
         shx.seek(pos * 2);
-        mapnik::quad_tree<node> tree(extent, depth, ratio);
+        mapnik::quad_tree<mapnik::detail::node> tree(extent, depth, ratio);
         int count = 0;
 
         if (shape_type != shape_io::shape_null)
@@ -241,7 +227,7 @@ int main (int argc,char** argv)
                             {
                                 std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                             }
-                            tree.insert(node(offset * 2, start, end),item_ext);
+                            tree.insert(mapnik::detail::node(offset * 2, start, end),item_ext);
                             ++count;
                         }
                     }
@@ -258,7 +244,7 @@ int main (int argc,char** argv)
                     {
                         std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                     }
-                    tree.insert(node(offset * 2,-1,0),item_ext);
+                    tree.insert(mapnik::detail::node(offset * 2,-1,0),item_ext);
                     ++count;
                 }
             }

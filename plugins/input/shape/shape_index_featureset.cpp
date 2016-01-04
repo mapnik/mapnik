@@ -63,12 +63,12 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     if (index)
     {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        mapnik::util::spatial_index<detail::node, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<mapnik::detail::node, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
 #else
-        mapnik::util::spatial_index<detail::node, filterT, std::ifstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<mapnik::detail::node, filterT, std::ifstream>::query(filter, index->file(), offsets_);
 #endif
     }
-    std::sort(offsets_.begin(), offsets_.end(), [](detail::node const& n0, detail::node const& n1)
+    std::sort(offsets_.begin(), offsets_.end(), [](mapnik::detail::node const& n0, mapnik::detail::node const& n1)
               {return n0.offset != n1.offset ? n0.offset < n1.offset : n0.start < n1.start;});
     MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << offsets_.size();
     itr_ = offsets_.begin();
