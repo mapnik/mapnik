@@ -69,7 +69,6 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
     cmd += "shapeindex";
     if (index_parts) cmd+= " --index-parts ";
     cmd += filename;
-    std::cerr << cmd << std::endl;
     if (silent)
     {
 #ifndef _WINDOWS
