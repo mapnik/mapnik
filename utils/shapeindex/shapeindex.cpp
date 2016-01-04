@@ -46,8 +46,8 @@ int main (int argc,char** argv)
 
     bool verbose=false;
     bool index_parts = false;
-    unsigned int depth=DEFAULT_DEPTH;
-    double ratio=DEFAULT_RATIO;
+    unsigned int depth = DEFAULT_DEPTH;
+    double ratio = DEFAULT_RATIO;
     std::vector<std::string> shape_files;
 
     try
@@ -56,7 +56,7 @@ int main (int argc,char** argv)
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
-            ("index-parts","index individual shape parts")
+            ("index-parts","index individual shape parts (default: no)")
             ("verbose,v","verbose output")
             ("depth,d", po::value<unsigned int>(), "max tree depth\n(default 8)")
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
