@@ -45,6 +45,16 @@ using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::context_ptr;
 
+namespace detail
+{
+struct node
+{
+    int offset;
+    int start;
+    int end;
+};
+}
+
 template <typename filterT>
 class shape_index_featureset : public Featureset
 {
@@ -63,8 +73,8 @@ private:
     context_ptr ctx_;
     std::unique_ptr<shape_io> shape_ptr_;
     const std::unique_ptr<mapnik::transcoder> tr_;
-    std::vector<int> offsets_;
-    std::vector<int>::iterator itr_;
+    std::vector<detail::node> offsets_;
+    std::vector<detail::node>::iterator itr_;
     std::vector<int> attr_ids_;
     mapnik::value_integer row_limit_;
     mutable int count_;

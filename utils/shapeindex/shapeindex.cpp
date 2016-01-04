@@ -26,6 +26,7 @@
 #include <string>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
+#include <mapnik/geometry_envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 
@@ -38,12 +39,27 @@
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO=0.55;
 
+namespace
+{
+struct node
+{
+    node(int offset_, int start_, int end_)
+        : offset(offset_),
+          start(start_),
+          end(end_) {}
+    int offset;
+    int start;
+    int end;
+};
+}
+
 int main (int argc,char** argv)
 {
     using namespace mapnik;
     namespace po = boost::program_options;
 
     bool verbose=false;
+    bool index_parts = false;
     unsigned int depth=DEFAULT_DEPTH;
     double ratio=DEFAULT_RATIO;
     std::vector<std::string> shape_files;
@@ -54,6 +70,7 @@ int main (int argc,char** argv)
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
+            ("index-parts","index individual shape parts")
             ("verbose,v","verbose output")
             ("depth,d", po::value<unsigned int>(), "max tree depth\n(default 8)")
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
@@ -80,6 +97,10 @@ int main (int argc,char** argv)
         if (vm.count("verbose"))
         {
             verbose = true;
+        }
+        if (vm.count("index-parts"))
+        {
+            index_parts = true;
         }
         if (vm.count("depth"))
         {
@@ -159,7 +180,7 @@ int main (int argc,char** argv)
 
         int pos = 50;
         shx.seek(pos * 2);
-        mapnik::quad_tree<int> tree(extent, depth, ratio);
+        mapnik::quad_tree<node> tree(extent, depth, ratio);
         int count = 0;
 
         if (shape_type != shape_io::shape_null)
@@ -188,17 +209,56 @@ int main (int argc,char** argv)
                     double y=shp.read_double();
                     item_ext=box2d<double>(x,y,x,y);
                 }
+                else if (index_parts &&
+                         (shape_type == shape_io::shape_polygon || shape_type == shape_io::shape_polygonm || shape_type == shape_io::shape_polygonz
+                          || shape_type == shape_io::shape_polyline || shape_type == shape_io::shape_polylinem || shape_type == shape_io::shape_polylinez))
+                {
+                    shp.read_envelope(item_ext);
+                    int num_parts = shp.read_ndr_integer();
+                    int num_points = shp.read_ndr_integer();
+                    std::vector<int> parts;
+                    parts.resize(num_parts);
+                    std::for_each(parts.begin(), parts.end(), [&](int & part) { part = shp.read_ndr_integer();});
+                    for (int k = 0; k < num_parts; ++k)
+                    {
+                        int start = parts[k];
+                        int end;
+                        if (k == num_parts - 1) end = num_points;
+                        else end = parts[k + 1];
+
+                        mapnik::geometry::linear_ring<double> ring;
+                        ring.reserve(end - start);
+                        for (int j = start; j < end; ++j)
+                        {
+                            double x = shp.read_double();
+                            double y = shp.read_double();
+                            ring.emplace_back(x, y);
+                        }
+                        item_ext = mapnik::geometry::envelope(ring);
+                        if (item_ext.valid())
+                        {
+                            if (verbose)
+                            {
+                                std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
+                            }
+                            tree.insert(node(offset * 2, start, end),item_ext);
+                            ++count;
+                        }
+                    }
+                    item_ext = mapnik::box2d<double>(); //invalid
+                }
                 else
                 {
                     shp.read_envelope(item_ext);
                 }
-                if (verbose)
-                {
-                    std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
-                }
+
                 if (item_ext.valid())
                 {
-                    tree.insert(offset * 2,item_ext);
+                    if (verbose)
+                    {
+                        std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
+                    }
+                    tree.insert(node(offset * 2,-1,0),item_ext);
                     ++count;
                 }
             }
