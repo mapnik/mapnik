@@ -66,7 +66,7 @@ struct push_position_impl
     template <typename T0, typename T1>
     result_type operator() (T0 & coords, T1 const& pos) const
     {
-        if (pos) coords.empace_back(*pos);
+        if (pos) coords.emplace_back(*pos);
     }
 };
 
