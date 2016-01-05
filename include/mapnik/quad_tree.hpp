@@ -179,12 +179,7 @@ public:
                       "Values stored in quad-tree must be standard layout types to allow serialisation");
         char header[16];
         std::memset(header,0,16);
-        header[0]='m';
-        header[1]='a';
-        header[2]='p';
-        header[3]='n';
-        header[4]='i';
-        header[5]='k';
+        std::strcpy(header,"mapnik-index");
         out.write(header,16);
         write_node(out,root_);
     }
