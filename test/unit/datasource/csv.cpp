@@ -80,7 +80,7 @@ int create_disk_index(std::string const& filename, bool silent = true)
     std::string cmd;
     if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
     {
-        cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
+        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
     cmd += "mapnik-index " + filename;
     if (silent)

@@ -80,6 +80,8 @@ public:
     static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
     static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
     static mapnik::geometry::geometry<double> read_polygon(shape_file::record_type & record);
+    static mapnik::geometry::geometry<double> read_polyline_parts(shape_file::record_type & record,std::vector<std::pair<int,int>> const& parts);
+    static mapnik::geometry::geometry<double> read_polygon_parts(shape_file::record_type & record, std::vector<std::pair<int,int>> const& parts);
 
     shapeType type_;
     shape_file shp_;

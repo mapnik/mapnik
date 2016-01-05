@@ -43,7 +43,7 @@ int run(std::string const& command, bool silent = false)
     std::string cmd;
     if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
     {
-        cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
+        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
     cmd += command;
     if (silent)
