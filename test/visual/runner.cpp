@@ -150,7 +150,8 @@ result_list runner::test_all(report_type & report) const
 
 result_list runner::test(std::vector<std::string> const & style_names, report_type & report) const
 {
-    std::vector<runner::path_type> files(style_names.size());
+    std::vector<runner::path_type> files;
+    files.reserve(style_names.size());
     std::transform(style_names.begin(), style_names.end(), std::back_inserter(files),
         [&](runner::path_type const & name)
         {
