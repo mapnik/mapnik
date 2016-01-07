@@ -36,7 +36,7 @@ geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, 
 }
 
 template <typename T>
-point<T> reproject_internal(point<T> const & p, proj_transform const& proj_trans, unsigned int & n_err)
+point<T> reproject_internal(point<T> const& p, proj_transform const& proj_trans, unsigned int & n_err)
 {
     point<T> new_p(p);
     if (!proj_trans.forward(new_p))
@@ -47,7 +47,7 @@ point<T> reproject_internal(point<T> const & p, proj_transform const& proj_trans
 }
 
 template <typename T>
-line_string<T> reproject_internal(line_string<T> const & ls, proj_transform const& proj_trans, unsigned int & n_err)
+line_string<T> reproject_internal(line_string<T> const& ls, proj_transform const& proj_trans, unsigned int & n_err)
 {
     line_string<T> new_ls(ls);
     unsigned int err = proj_trans.forward(new_ls);
@@ -59,7 +59,7 @@ line_string<T> reproject_internal(line_string<T> const & ls, proj_transform cons
 }
 
 template <typename T>
-polygon<T> reproject_internal(polygon<T> const & poly, proj_transform const& proj_trans, unsigned int & n_err)
+polygon<T> reproject_internal(polygon<T> const& poly, proj_transform const& proj_trans, unsigned int & n_err)
 {
     polygon<T> new_poly;
     linear_ring<T> new_ext(poly.exterior_ring);
@@ -171,7 +171,8 @@ geometry_collection<T> reproject_internal(geometry_collection<T> const & c, proj
 }
 
 template <typename T>
-struct geom_reproj_copy_visitor {
+struct geom_reproj_copy_visitor
+{
 
     geom_reproj_copy_visitor(proj_transform const & proj_trans, unsigned int & n_err)
         : proj_trans_(proj_trans),

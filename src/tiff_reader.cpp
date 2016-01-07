@@ -598,13 +598,9 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(std::size_t, std::size_t, image_rgba8& image)
+void tiff_reader<T>::read_generic(std::size_t, std::size_t, image_rgba8&)
 {
-    TIFF* tif = open(stream_);
-    if (tif)
-    {
-        throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
-    }
+    throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
 }
 
 template <typename T>

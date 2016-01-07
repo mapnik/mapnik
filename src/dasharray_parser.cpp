@@ -36,7 +36,29 @@ namespace mapnik {
 
 namespace util {
 
-bool parse_dasharray(std::string const& value, std::vector<double>& dasharray)
+namespace {
+inline bool setup_dashes(std::vector<double> & buf, dash_array & dash)
+{
+    if (buf.empty()) return false;
+    size_t size = buf.size();
+    if (size % 2 == 1)
+    {
+        buf.insert(buf.end(),buf.begin(),buf.end());
+    }
+    std::vector<double>::const_iterator pos = buf.begin();
+    while (pos != buf.end())
+    {
+        if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
+        {
+            dash.emplace_back(*pos,*(pos + 1));
+        }
+        pos +=2;
+    }
+    return !buf.empty();
+}
+}
+
+bool parse_dasharray(std::string const& value, dash_array & dash)
 {
     using namespace boost::spirit;
     qi::double_type double_;
@@ -49,18 +71,19 @@ bool parse_dasharray(std::string const& value, std::vector<double>& dasharray)
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
     // no support for 'percentage' as viewport is unknown at load_map
     //
+    std::vector<double> buf;
     auto first = value.begin();
     auto last = value.end();
     bool r = qi::phrase_parse(first, last,
-                          (double_[boost::phoenix::push_back(boost::phoenix::ref(dasharray), _1)] %
+                          (double_[boost::phoenix::push_back(boost::phoenix::ref(buf), _1)] %
                           no_skip[char_(", ")]
                           | lit("none")),
                           space);
-    if (first != last)
+    if (r &&  first == last)
     {
-        return false;
+        return setup_dashes(buf, dash);
     }
-    return r;
+    return false;
 }
 
 } // end namespace util

@@ -68,6 +68,10 @@ mapnik::datasource_ptr get_csv_ds(std::string const& file_name, bool strict = tr
     mapnik::parameters params;
     params["type"] = std::string("csv");
     params["file"] = file_name;
+    if (!base.empty())
+    {
+        params["base"] = base;
+    }
     params["strict"] = mapnik::value_bool(strict);
     auto ds = mapnik::datasource_cache::instance().create(params);
     // require a non-null pointer returned
@@ -80,7 +84,7 @@ int create_disk_index(std::string const& filename, bool silent = true)
     std::string cmd;
     if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
     {
-        cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
+        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
     cmd += "mapnik-index " + filename;
     if (silent)
@@ -288,7 +292,7 @@ TEST_CASE("csv") {
                     INFO(ret_posix);
                     CHECK(mapnik::util::exists(filepath + ".index"));
                 }
-                auto ds = get_csv_ds(filepath,true,base);
+                auto ds = get_csv_ds(filename,true,base);
                 CHECK(ds->type() == mapnik::datasource::datasource_t::Vector);
                 auto fields = ds->get_descriptor().get_descriptors();
                 require_field_names(fields, {"Precinct", "Phone", "Address", "City", "geo_longitude", "geo_latitude", "geo_accuracy"});

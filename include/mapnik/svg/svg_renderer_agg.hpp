@@ -60,12 +60,10 @@
 namespace mapnik  {
 namespace svg {
 
+// Arbitrary linear gradient specified by two control points. Gradient
+// value is taken as the normalised distance along the line segment
+// represented by the two points.
 
-/**
- * Arbitrary linear gradient specified by two control points. Gradient
- * value is taken as the normalised distance along the line segment
- * represented by the two points.
- */
 class linear_gradient_from_segment
 {
 public:
@@ -105,14 +103,14 @@ template <typename VertexSource, typename AttributeSource, typename ScanlineRend
 class svg_renderer_agg : util::noncopyable
 {
 public:
-    using curved_type = agg::conv_curve<VertexSource>           ;
-    using curved_stroked_type = agg::conv_stroke<curved_type>           ;
+    using curved_type = agg::conv_curve<VertexSource>;
+    using curved_stroked_type = agg::conv_stroke<curved_type>;
     using curved_stroked_trans_type = agg::conv_transform<curved_stroked_type>;
-    using curved_trans_type = agg::conv_transform<curved_type>        ;
-    using curved_trans_contour_type = agg::conv_contour<curved_trans_type>    ;
-    using renderer_base = agg::renderer_base<PixelFormat>         ;
-    using vertex_source_type = VertexSource                            ;
-    using attribute_source_type = AttributeSource                         ;
+    using curved_trans_type = agg::conv_transform<curved_type>;
+    using curved_trans_contour_type = agg::conv_contour<curved_trans_type>;
+    using renderer_base = agg::renderer_base<PixelFormat>;
+    using vertex_source_type = VertexSource;
+    using attribute_source_type = AttributeSource;
 
     svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
@@ -191,11 +189,11 @@ public:
 
                 // scale everything up since agg turns things into integers a bit too soon
                 int scaleup=255;
-                radius*=scaleup;
-                x1*=scaleup;
-                y1*=scaleup;
-                x2*=scaleup;
-                y2*=scaleup;
+                radius *= scaleup;
+                x1 *= scaleup;
+                y1 *= scaleup;
+                x2 *= scaleup;
+                y2 *= scaleup;
 
                 transform.scale(scaleup,scaleup);
                 interpolator_type     span_interpolator(transform);
@@ -217,10 +215,10 @@ public:
                                                               color_func_type>;
                 // scale everything up since agg turns things into integers a bit too soon
                 int scaleup=255;
-                x1*=scaleup;
-                y1*=scaleup;
-                x2*=scaleup;
-                y2*=scaleup;
+                x1 *= scaleup;
+                y1 *= scaleup;
+                x2 *= scaleup;
+                y2 *= scaleup;
 
                 transform.scale(scaleup,scaleup);
 
@@ -288,7 +286,8 @@ public:
 
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    render_gradient(ras, sl, ren, attr.fill_gradient, transform,
+                                    attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
                 }
                 else
                 {
@@ -324,7 +323,8 @@ public:
 
                 if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
+                                    attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
                 }
                 else
                 {

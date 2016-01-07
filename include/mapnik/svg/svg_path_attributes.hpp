@@ -79,8 +79,7 @@ struct path_attributes
         even_odd_flag(false),
         visibility_flag(true),
         display_flag(true)
-    {
-    }
+    {}
 
     // Copy constructor
     path_attributes(path_attributes const& attr)
