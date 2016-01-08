@@ -108,7 +108,7 @@ public:
     marker_svg(marker_svg && rhs) noexcept
         : vector_data_(rhs.vector_data_) {}
 
-    box2d<double> bounding_box() const
+    inline box2d<double> bounding_box() const
     {
         return vector_data_->bounding_box();
     }
@@ -122,11 +122,15 @@ public:
         return vector_data_->bounding_box().height();
     }
 
-    mapnik::svg_path_ptr get_data() const
+    inline mapnik::svg_path_ptr get_data() const
     {
         return vector_data_;
     }
 
+    inline std::tuple<double,double> dimensions() const
+    {
+        return std::make_tuple(vector_data_->width(), vector_data_->height());
+    }
 private:
     mapnik::svg_path_ptr vector_data_;
 
@@ -136,7 +140,7 @@ struct marker_null
 {
     marker_null() = default;
 public:
-    box2d<double> bounding_box() const
+    inline box2d<double> bounding_box() const
     {
         return box2d<double>();
     }
