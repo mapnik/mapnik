@@ -73,46 +73,29 @@ namespace mapnik { namespace svg {
                 >> *(-lit(',') >> coord [ line_to_(_1,_a) ] ); // *line_to
 
             H = (lit('H')[_a = false] | lit('h')[_a = true])
-                >> +double_[ hline_to_(_1,_a) ] ; // +hline_to
+                >> (double_[ hline_to_(_1,_a) ] % -lit(',')) ; // +hline_to
 
             V = (lit('V')[_a = false] | lit('v')[_a = true])
-                >> +double_ [ vline_to_(_1,_a) ]; // +vline_to
+                >> (double_ [ vline_to_(_1,_a) ] % -lit(',')); // +vline_to
 
             L = (lit('L')[_a = false] | lit('l')[_a = true])
-                >> +coord [ line_to_(_1,_a) ]; // +line_to
+                >> (coord [ line_to_(_1,_a) ] % -lit(',')); // +line_to
 
             C = (lit('C')[_a = false] | lit('c')[_a = true])
-                >> +(coord
-                     >> -lit(',')
-                     >> coord
-                     >> -lit(',')
-                     >> coord) [ curve4_(_1,_2,_3,_a) ]; // +curve4
+                >> ((coord >> -lit(',') >> coord >> -lit(',') >> coord) [ curve4_(_1,_2,_3,_a) ] % -lit(',')); // +curve4
 
             S = (lit('S')[_a = false] | lit('s')[_a = true])
-                >> +(coord
-                     >> -lit(',')
-                     >> coord) [ curve4_smooth_(_1,_2,_a) ]; // +curve4_smooth (smooth curveto)
+                >> ((coord >> -lit(',') >> coord) [ curve4_smooth_(_1,_2,_a) ] % -lit(',')); // +curve4_smooth (smooth curveto)
 
             Q = (lit('Q')[_a = false] | lit('q')[_a = true])
-                >> +(coord
-                     >> -lit(',')
-                     >> coord) [ curve3_(_1,_2,_a) ]; // +curve3 (quadratic-bezier-curveto)
+                >> ((coord >> -lit(',') >> coord) [ curve3_(_1,_2,_a) ] % -lit(',')); // +curve3 (quadratic-bezier-curveto)
 
             T = (lit('T')[_a = false] | lit('t')[_a = true])
-                >> +(coord ) [ curve3_smooth_(_1,_a) ]; // +curve3_smooth (smooth-quadratic-bezier-curveto)
+                >> ((coord ) [ curve3_smooth_(_1,_a) ] % -lit(',')); // +curve3_smooth (smooth-quadratic-bezier-curveto)
 
             A = (lit('A')[_a = false] | lit('a')[_a = true])
-                >> +(coord
-                     >> -lit(',')
-                     >> double_
-                     >> -lit(',')
-                     >> int_
-                     >> -lit(',')
-                     >> int_
-                     >> -lit(',')
-                     >> coord) [arc_to_(_1,_2,_3,_4,_5,_a)]; // arc_to;
-
-
+                >> ((coord >> -lit(',') >> double_ >> -lit(',')
+                     >> int_ >> -lit(',') >> int_ >> -lit(',') >> coord) [arc_to_(_1,_2,_3,_4,_5,_a)] % -lit(',')); // arc_to;
 
             Z = no_case[lit('z')] [close_()]; // close path
 
