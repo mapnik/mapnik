@@ -335,6 +335,7 @@ public:
                     {
                         curved_dashed_.add_dash(std::get<0>(d),std::get<1>(d));
                     }
+                    curved_dashed_.dash_start(attr.dash_offset);
                     ras.add_path(curved_dashed_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {

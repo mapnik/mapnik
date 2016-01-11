@@ -58,6 +58,7 @@ struct path_attributes
     bool         visibility_flag;
     bool         display_flag;
     dash_array   dash;
+    double       dash_offset;
     // Empty constructor
     path_attributes() :
         fill_gradient(),
@@ -80,7 +81,8 @@ struct path_attributes
         even_odd_flag(false),
         visibility_flag(true),
         display_flag(true),
-        dash()
+        dash(),
+        dash_offset(0.0)
     {}
 
     // Copy constructor
@@ -105,7 +107,8 @@ struct path_attributes
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
           display_flag(attr.display_flag),
-          dash(attr.dash)
+          dash(attr.dash),
+          dash_offset(attr.dash_offset)
     {}
     // Copy constructor with new index value
     path_attributes(path_attributes const& attr, unsigned idx)
@@ -129,7 +132,8 @@ struct path_attributes
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
           display_flag(attr.display_flag),
-          dash(attr.dash)
+          dash(attr.dash),
+          dash_offset(attr.dash_offset)
     {}
 };
 

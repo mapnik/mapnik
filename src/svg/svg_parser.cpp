@@ -448,6 +448,11 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             parser.path_.dash_array(std::move(dash));
         }
     }
+    else if (std::strcmp(name,"stroke-dashoffset") == 0)
+    {
+        double offset = parse_double(parser.error_messages_, value);
+        parser.path_.dash_offset(offset);
+    }
     else if(std::strcmp(name,  "opacity") == 0)
     {
         double opacity = parse_double(parser.error_messages_, value);

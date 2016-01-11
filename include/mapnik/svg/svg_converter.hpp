@@ -229,6 +229,10 @@ public:
         path_attributes& attr = cur_attr();
         attr.dash = std::move(dash);
     }
+    void dash_offset(double offset)
+    {
+        cur_attr().dash_offset = offset;
+    }
     void even_odd(bool flag)
     {
         cur_attr().even_odd_flag = flag;
