@@ -28,8 +28,8 @@
 #include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// boost
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <boost/optional.hpp>
 

@@ -23,6 +23,8 @@
 #ifndef MAPNIK_IMAGE_UTIL_JPEG_HPP
 #define MAPNIK_IMAGE_UTIL_JPEG_HPP
 
+#include <mapnik/config.hpp>
+
 // stl
 #include <string>
 #include <iostream>

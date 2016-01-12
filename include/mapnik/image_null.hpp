@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/pixel_types.hpp>
 
 //stl

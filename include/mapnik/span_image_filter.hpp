@@ -26,6 +26,8 @@
 #include "agg_span_image_filter_gray.h"
 #include "agg_span_image_filter_rgba.h"
 
+#include <boost/optional.hpp>
+
 #include <limits>
 
 namespace mapnik

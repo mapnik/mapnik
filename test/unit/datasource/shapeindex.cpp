@@ -58,14 +58,17 @@ std::size_t count_shapefile_features(std::string const& filename)
     return feature_count;
 }
 
-int create_shapefile_index(std::string const& filename, bool silent = true)
+int create_shapefile_index(std::string const& filename, bool index_parts, bool silent = true)
 {
     std::string cmd;
     if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
     {
-        cmd += std::string("export DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " && ";
+        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
-    cmd += "shapeindex " + filename;
+
+    cmd += "shapeindex";
+    if (index_parts) cmd+= " --index-parts ";
+    cmd += filename;
     if (silent)
     {
 #ifndef _WINDOWS
@@ -90,28 +93,31 @@ TEST_CASE("shapeindex")
             {
                 if (boost::iends_with(path,".shp"))
                 {
-                    std::string index_path = path.substr(0, path.rfind(".")) + ".index";
-                    // remove *.index if present
-                    if (mapnik::util::exists(index_path))
+                    for (bool index_parts : {false, true} )
                     {
-                        mapnik::util::remove(index_path);
-                    }
-                    // count features
-                    std::size_t feature_count = count_shapefile_features(path);
-                    // create *.index
-                    create_shapefile_index(path);
-                    if (feature_count == 0)
-                    {
-                        REQUIRE(!mapnik::util::exists(index_path)); // index won't be created if there's no features
-                    }
-                    // count features
-                    std::size_t feature_count_indexed = count_shapefile_features(path);
-                    // ensure number of features are the same
-                    REQUIRE(feature_count == feature_count_indexed);
-                    // remove *.index if present
-                    if (mapnik::util::exists(index_path))
-                    {
-                        mapnik::util::remove(index_path);
+                        std::string index_path = path.substr(0, path.rfind(".")) + ".index";
+                        // remove *.index if present
+                        if (mapnik::util::exists(index_path))
+                        {
+                            mapnik::util::remove(index_path);
+                        }
+                        // count features
+                        std::size_t feature_count = count_shapefile_features(path);
+                        // create *.index
+                        create_shapefile_index(path, index_parts);
+                        if (feature_count == 0)
+                        {
+                            REQUIRE(!mapnik::util::exists(index_path)); // index won't be created if there's no features
+                        }
+                        // count features
+                        std::size_t feature_count_indexed = count_shapefile_features(path);
+                        // ensure number of features are the same
+                        REQUIRE(feature_count == feature_count_indexed);
+                        // remove *.index if present
+                        if (mapnik::util::exists(index_path))
+                        {
+                            mapnik::util::remove(index_path);
+                        }
                     }
                 }
             }

@@ -404,9 +404,8 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
         boost::optional<std::string> str = node.get_opt_attr<std::string>(name);
         if (str)
         {
-            std::vector<double> buf;
             dash_array dash;
-            if (util::parse_dasharray(*str,buf) && util::add_dashes(buf,dash))
+            if (util::parse_dasharray(*str,dash))
             {
                 put(sym,key,dash);
             }

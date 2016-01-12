@@ -23,32 +23,13 @@
 #ifndef MAPNIK_UTIL_DASHARRAY_PARSER_HPP
 #define MAPNIK_UTIL_DASHARRAY_PARSER_HPP
 
+#include <mapnik/symbolizer_base.hpp>
 #include <vector>
 #include <string>
 
 namespace mapnik { namespace util {
 
-bool parse_dasharray(std::string const& value, std::vector<double>& dasharray);
-
-inline bool add_dashes(std::vector<double> & buf, std::vector<std::pair<double,double> > & dash)
-{
-    if (buf.empty()) return false;
-    size_t size = buf.size();
-    if (size % 2 == 1)
-    {
-        buf.insert(buf.end(),buf.begin(),buf.end());
-    }
-    std::vector<double>::const_iterator pos = buf.begin();
-    while (pos != buf.end())
-    {
-        if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
-        {
-            dash.emplace_back(*pos,*(pos + 1));
-        }
-        pos +=2;
-    }
-    return !buf.empty();
-}
+bool parse_dasharray(std::string const& value, dash_array & dash);
 
 }}
 
