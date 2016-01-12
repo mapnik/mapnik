@@ -85,7 +85,7 @@ script:
  - if [[ ${COVERAGE} != true ]]; then
      make bench;
    fi
- - if [[ ${TEST_RESULT} != 0 ]]; then exit $TEST_RESULT ; fi;
+ - if [[ ${TEST_RESULT:-0} != 0 ]]; then exit $TEST_RESULT ; fi;
  - if [[ ${MASON_PUBLISH} == true ]]; then
      ./mason_latest.sh build;
      ./mason_latest.sh link;

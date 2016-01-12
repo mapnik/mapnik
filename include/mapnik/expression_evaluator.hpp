@@ -90,16 +90,16 @@ struct evaluate
         return geom.value<value_type,feature_type>(feature_);
     }
 
-    value_type operator() (binary_node<tags::logical_and> const & x) const
+    value_type operator() (binary_node<tags::logical_and> const& x) const
     {
         return (util::apply_visitor(*this, x.left).to_bool())
             && (util::apply_visitor(*this, x.right).to_bool());
     }
 
-    value_type operator() (binary_node<tags::logical_or> const & x) const
+    value_type operator() (binary_node<tags::logical_or> const& x) const
     {
-        return (util::apply_visitor(*this,x.left).to_bool())
-            || (util::apply_visitor(*this,x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool())
+            || (util::apply_visitor(*this, x.right).to_bool());
     }
 
     template <typename Tag>

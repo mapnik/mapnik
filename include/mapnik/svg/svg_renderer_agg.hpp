@@ -43,6 +43,7 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_contour.h"
 #include "agg_conv_curve.h"
+#include "agg_conv_dash.h"
 #include "agg_color_rgba.h"
 #include "agg_bounding_rect.h"
 #include "agg_rendering_buffer.h"
@@ -60,12 +61,10 @@
 namespace mapnik  {
 namespace svg {
 
+// Arbitrary linear gradient specified by two control points. Gradient
+// value is taken as the normalised distance along the line segment
+// represented by the two points.
 
-/**
- * Arbitrary linear gradient specified by two control points. Gradient
- * value is taken as the normalised distance along the line segment
- * represented by the two points.
- */
 class linear_gradient_from_segment
 {
 public:
@@ -105,19 +104,28 @@ template <typename VertexSource, typename AttributeSource, typename ScanlineRend
 class svg_renderer_agg : util::noncopyable
 {
 public:
-    using curved_type = agg::conv_curve<VertexSource>           ;
-    using curved_stroked_type = agg::conv_stroke<curved_type>           ;
+    using curved_type = agg::conv_curve<VertexSource>;
+    // stroke
+    using curved_stroked_type = agg::conv_stroke<curved_type>;
     using curved_stroked_trans_type = agg::conv_transform<curved_stroked_type>;
-    using curved_trans_type = agg::conv_transform<curved_type>        ;
-    using curved_trans_contour_type = agg::conv_contour<curved_trans_type>    ;
-    using renderer_base = agg::renderer_base<PixelFormat>         ;
-    using vertex_source_type = VertexSource                            ;
-    using attribute_source_type = AttributeSource                         ;
+    // stroke dash-array
+    using curved_dashed_type = agg::conv_dash<curved_type>;
+    using curved_dashed_stroked_type = agg::conv_stroke<curved_dashed_type>;
+    using curved_dashed_stroked_trans_type = agg::conv_transform<curved_dashed_stroked_type>;
+    // fill
+    using curved_trans_type = agg::conv_transform<curved_type>;
+    using curved_trans_contour_type = agg::conv_contour<curved_trans_type>;
+    // renderer
+    using renderer_base = agg::renderer_base<PixelFormat>;
+    using vertex_source_type = VertexSource;
+    using attribute_source_type = AttributeSource;
 
     svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
           curved_(source_),
+          curved_dashed_(curved_),
           curved_stroked_(curved_),
+          curved_dashed_stroked_(curved_dashed_),
           attributes_(attributes) {}
 
     template <typename Rasterizer, typename Scanline, typename Renderer>
@@ -191,11 +199,11 @@ public:
 
                 // scale everything up since agg turns things into integers a bit too soon
                 int scaleup=255;
-                radius*=scaleup;
-                x1*=scaleup;
-                y1*=scaleup;
-                x2*=scaleup;
-                y2*=scaleup;
+                radius *= scaleup;
+                x1 *= scaleup;
+                y1 *= scaleup;
+                x2 *= scaleup;
+                y2 *= scaleup;
 
                 transform.scale(scaleup,scaleup);
                 interpolator_type     span_interpolator(transform);
@@ -217,10 +225,10 @@ public:
                                                               color_func_type>;
                 // scale everything up since agg turns things into integers a bit too soon
                 int scaleup=255;
-                x1*=scaleup;
-                y1*=scaleup;
-                x2*=scaleup;
-                y2*=scaleup;
+                x1 *= scaleup;
+                y1 *= scaleup;
+                x2 *= scaleup;
+                y2 *= scaleup;
 
                 transform.scale(scaleup,scaleup);
 
@@ -247,10 +255,11 @@ public:
 
     {
         using namespace agg;
-
         trans_affine transform;
+
         curved_stroked_trans_type curved_stroked_trans(curved_stroked_,transform);
-        curved_trans_type         curved_trans(curved_,transform);
+        curved_dashed_stroked_trans_type curved_dashed_stroked_trans(curved_dashed_stroked_, transform);
+        curved_trans_type curved_trans(curved_,transform);
         curved_trans_contour_type curved_trans_contour(curved_trans);
 
         curved_trans_contour.auto_detect_orientation(true);
@@ -274,7 +283,6 @@ public:
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
                 ras.reset();
-
                 // https://github.com/mapnik/mapnik/issues/1129
                 if(std::fabs(curved_trans_contour.width()) <= 1)
                 {
@@ -288,7 +296,8 @@ public:
 
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    render_gradient(ras, sl, ren, attr.fill_gradient, transform,
+                                    attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
                 }
                 else
                 {
@@ -304,37 +313,79 @@ public:
 
             if (attr.stroke_flag || attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                curved_stroked_.width(attr.stroke_width);
-                //m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
-                curved_stroked_.line_join(attr.line_join);
-                curved_stroked_.line_cap(attr.line_cap);
-                curved_stroked_.miter_limit(attr.miter_limit);
-                curved_stroked_.inner_join(inner_round);
-                curved_stroked_.approximation_scale(scl);
-
-                // If the *visual* line width is considerable we
-                // turn on processing of curve cusps.
-                //---------------------
-                if(attr.stroke_width * scl > 1.0)
+                if (attr.dash.size() > 0)
                 {
-                    curved_.angle_tolerance(0.2);
-                }
-                ras.reset();
-                ras.add_path(curved_stroked_trans, attr.index);
+                    curved_dashed_stroked_.width(attr.stroke_width);
+                    curved_dashed_stroked_.line_join(attr.line_join);
+                    curved_dashed_stroked_.line_cap(attr.line_cap);
+                    curved_dashed_stroked_.miter_limit(attr.miter_limit);
+                    curved_dashed_stroked_.inner_join(inner_round);
+                    curved_dashed_stroked_.approximation_scale(scl);
 
-                if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
-                {
-                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    // If the *visual* line width is considerable we
+                    // turn on processing of curve cups.
+                    //---------------------
+                    if (attr.stroke_width * scl > 1.0)
+                    {
+                        curved_.angle_tolerance(0.2);
+                    }
+                    ras.reset();
+                    curved_dashed_.remove_all_dashes();
+                    for (auto d : attr.dash)
+                    {
+                        curved_dashed_.add_dash(std::get<0>(d),std::get<1>(d));
+                    }
+                    curved_dashed_.dash_start(attr.dash_offset);
+                    ras.add_path(curved_dashed_stroked_trans, attr.index);
+                    if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
+                    {
+                        render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
+                                        attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    }
+                    else
+                    {
+                        ras.filling_rule(fill_non_zero);
+                        color = attr.stroke_color;
+                        color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
+                        ScanlineRenderer ren_s(ren);
+                        color.premultiply();
+                        ren_s.color(color);
+                        render_scanlines(ras, sl, ren_s);
+                    }
                 }
                 else
                 {
-                    ras.filling_rule(fill_non_zero);
-                    color = attr.stroke_color;
-                    color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
-                    ScanlineRenderer ren_s(ren);
-                    color.premultiply();
-                    ren_s.color(color);
-                    render_scanlines(ras, sl, ren_s);
+                    curved_stroked_.width(attr.stroke_width);
+                    curved_stroked_.line_join(attr.line_join);
+                    curved_stroked_.line_cap(attr.line_cap);
+                    curved_stroked_.miter_limit(attr.miter_limit);
+                    curved_stroked_.inner_join(inner_round);
+                    curved_stroked_.approximation_scale(scl);
+
+                    // If the *visual* line width is considerable we
+                    // turn on processing of curve cups.
+                    //---------------------
+                    if (attr.stroke_width * scl > 1.0)
+                    {
+                        curved_.angle_tolerance(0.2);
+                    }
+                    ras.reset();
+                    ras.add_path(curved_stroked_trans, attr.index);
+                    if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
+                    {
+                        render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
+                                        attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    }
+                    else
+                    {
+                        ras.filling_rule(fill_non_zero);
+                        color = attr.stroke_color;
+                        color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
+                        ScanlineRenderer ren_s(ren);
+                        color.premultiply();
+                        ren_s.color(color);
+                        render_scanlines(ras, sl, ren_s);
+                    }
                 }
             }
         }
@@ -409,7 +460,7 @@ public:
                 // If the *visual* line width is considerable we
                 // turn on processing of curve cusps.
                 //---------------------
-                if(attr.stroke_width * scl > 1.0)
+                if (attr.stroke_width * scl > 1.0)
                 {
                     curved_.angle_tolerance(0.2);
                 }
@@ -431,7 +482,9 @@ private:
 
     VertexSource &         source_;
     curved_type            curved_;
+    curved_dashed_type     curved_dashed_;
     curved_stroked_type    curved_stroked_;
+    curved_dashed_stroked_type curved_dashed_stroked_;
     AttributeSource const& attributes_;
 };
 

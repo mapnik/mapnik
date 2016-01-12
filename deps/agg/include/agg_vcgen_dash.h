@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -21,6 +21,7 @@
 
 #include "agg_basics.h"
 #include "agg_vertex_sequence.h"
+#include <mapnik/config.hpp>
 
 namespace agg
 {
@@ -29,7 +30,7 @@ namespace agg
     //
     // See Implementation agg_vcgen_dash.cpp
     //
-    class vcgen_dash
+    class MAPNIK_DECL vcgen_dash
     {
         enum max_dashes_e
         {

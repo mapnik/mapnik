@@ -30,6 +30,7 @@
 
 // mapnik
 #include <mapnik/gradient.hpp>
+#include <mapnik/symbolizer_base.hpp> // dash_array
 
 namespace mapnik {
 namespace svg {
@@ -56,7 +57,8 @@ struct path_attributes
     bool         even_odd_flag;
     bool         visibility_flag;
     bool         display_flag;
-
+    dash_array   dash;
+    double       dash_offset;
     // Empty constructor
     path_attributes() :
         fill_gradient(),
@@ -78,9 +80,10 @@ struct path_attributes
         stroke_none(false),
         even_odd_flag(false),
         visibility_flag(true),
-        display_flag(true)
-    {
-    }
+        display_flag(true),
+        dash(),
+        dash_offset(0.0)
+    {}
 
     // Copy constructor
     path_attributes(path_attributes const& attr)
@@ -103,7 +106,9 @@ struct path_attributes
           stroke_none(attr.stroke_none),
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
-          display_flag(attr.display_flag)
+          display_flag(attr.display_flag),
+          dash(attr.dash),
+          dash_offset(attr.dash_offset)
     {}
     // Copy constructor with new index value
     path_attributes(path_attributes const& attr, unsigned idx)
@@ -126,7 +131,9 @@ struct path_attributes
           stroke_none(attr.stroke_none),
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
-          display_flag(attr.display_flag)
+          display_flag(attr.display_flag),
+          dash(attr.dash),
+          dash_offset(attr.dash_offset)
     {}
 };
 

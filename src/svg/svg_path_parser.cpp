@@ -44,9 +44,9 @@ namespace mapnik { namespace svg {
         svg_path_grammar<iterator_type,skip_type,PathType> g(p);
         iterator_type first = wkt;
         iterator_type last =  wkt + std::strlen(wkt);
-        return qi::phrase_parse(first, last, g, skip_type());
+        bool status = qi::phrase_parse(first, last, g, skip_type());
+        return (status && (first == last));
     }
+    template bool MAPNIK_DECL parse_path<svg_converter_type>(const char*, svg_converter_type&);
 
-    template bool parse_path<svg_converter_type>(const char*, svg_converter_type&);
-
-    }}
+}}

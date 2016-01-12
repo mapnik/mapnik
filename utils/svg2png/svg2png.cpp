@@ -67,6 +67,11 @@ struct main_marker_visitor
         double opacity = 1;
         int w = marker.width();
         int h = marker.height();
+        if (w == 0 || h == 0)
+        {
+            // fallback to svg width/height or viewBox
+            std::tie(w, h) = marker.dimensions();
+        }
         if (verbose_)
         {
             std::clog << "found width of '" << w << "' and height of '" << h << "'\n";

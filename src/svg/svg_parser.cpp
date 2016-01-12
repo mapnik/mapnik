@@ -29,6 +29,7 @@
 #include <mapnik/svg/svg_parser_exception.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
+#include <mapnik/util/dasharray_parser.hpp>
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
@@ -439,7 +440,19 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
     {
         parser.path_.miter_limit(parse_double(parser.error_messages_,value));
     }
-
+    else if (std::strcmp(name,"stroke-dasharray") == 0)
+    {
+        dash_array dash;
+        if (util::parse_dasharray(value, dash))
+        {
+            parser.path_.dash_array(std::move(dash));
+        }
+    }
+    else if (std::strcmp(name,"stroke-dashoffset") == 0)
+    {
+        double offset = parse_double(parser.error_messages_, value);
+        parser.path_.dash_offset(offset);
+    }
     else if(std::strcmp(name,  "opacity") == 0)
     {
         double opacity = parse_double(parser.error_messages_, value);
