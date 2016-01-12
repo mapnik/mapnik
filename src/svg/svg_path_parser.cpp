@@ -47,6 +47,6 @@ namespace mapnik { namespace svg {
         bool status = qi::phrase_parse(first, last, g, skip_type());
         return (status && (first == last));
     }
-    template bool parse_path<svg_converter_type>(const char*, svg_converter_type&);
+    template bool MAPNIK_DECL parse_path<svg_converter_type>(const char*, svg_converter_type&);
 
 }}
