@@ -89,7 +89,6 @@ function make_config() {
     echo "
 CXX = '$CXX'
 CC = '$CC'
-CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
