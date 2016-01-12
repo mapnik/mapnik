@@ -51,26 +51,28 @@ function install() {
 ICU_VERSION="55.1"
 
 function install_mason_deps() {
+    install jpeg_turbo 1.4.0 libjpeg &
+    install libpng 1.6.20 libpng &
+    install libtiff 4.0.4beta libtiff &
+    install libpq 9.4.1 &
+    install sqlite 3.8.8.3 libsqlite3 &
+    install expat 2.1.0 libexpat &
+    wait
+    install icu ${ICU_VERSION} &
+    install proj 4.8.0 libproj &
+    install pixman 0.32.6 libpixman-1 &
+    install cairo 1.14.2 libcairo &
+    install protobuf 2.6.1 &
+    # technically protobuf is not a mapnik core dep, but installing
+    # here by default helps make mapnik-vector-tile builds easier
+    wait
+    install webp 0.4.2 libwebp &
     install gdal 1.11.2 libgdal &
     install boost 1.59.0 &
     install boost_liball 1.59.0 &
     install freetype 2.6 libfreetype &
-    install harfbuzz 0.9.40 libharfbuzz &
-    install jpeg_turbo 1.4.0 libjpeg &
-    install libpng 1.6.17 libpng &
-    install webp 0.4.2 libwebp &
-    install icu ${ICU_VERSION} &
-    install proj 4.8.0 libproj &
-    install libtiff 4.0.4beta libtiff &
-    install libpq 9.4.0 &
-    install sqlite 3.8.8.1 libsqlite3 &
-    install expat 2.1.0 libexpat &
-    install pixman 0.32.6 libpixman-1 &
-    install cairo 1.14.2 libcairo &
-    install protobuf 2.6.1 &
+    install harfbuzz 0.9.41 libharfbuzz &
     wait
-    # technically protobuf is not a mapnik core dep, but installing
-    # here by default helps make mapnik-vector-tile builds easier
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
@@ -89,7 +91,6 @@ function make_config() {
     echo "
 CXX = '$CXX'
 CC = '$CC'
-CUSTOM_CXXFLAGS = '-fvisibility=hidden -fvisibility-inlines-hidden -DU_CHARSET_IS_UTF8=1'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
