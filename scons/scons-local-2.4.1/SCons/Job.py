@@ -68,7 +68,7 @@ class Jobs(object):
     methods for starting, stopping, and waiting on all N jobs.
     """
 
-    def __init__(self, num, taskmaster):
+    def __init__(self, num, hogs, taskmaster):
         """
         create 'num' jobs using the given taskmaster.
 
@@ -89,7 +89,7 @@ class Jobs(object):
                 stack_size = default_stack_size
                 
             try:
-                self.job = Parallel(taskmaster, num, stack_size)
+                self.job = Parallel(taskmaster, num, hogs, stack_size)
                 self.num_jobs = num
             except NameError:
                 pass
@@ -345,7 +345,7 @@ else:
         This class is thread safe.
         """
 
-        def __init__(self, taskmaster, num, stack_size):
+        def __init__(self, taskmaster, num, hogs, stack_size):
             """Create a new parallel job given a taskmaster.
 
             The taskmaster's next_task() method should return the next
@@ -365,6 +365,7 @@ else:
             self.tp = ThreadPool(num, stack_size, self.interrupted)
 
             self.maxjobs = num
+            self.maxhogs = hogs
 
         def start(self):
             """Start the job. This will begin pulling tasks from the
@@ -373,11 +374,22 @@ else:
             an exception), then the job will stop."""
 
             jobs = 0
+            hogs = 0
+            pendingHogs = []
             
             while True:
                 # Start up as many available tasks as we're
                 # allowed to.
                 while jobs < self.maxjobs:
+                    if hogs < self.maxhogs and pendingHogs:
+                        task = pendingHogs.pop()
+                        task.display("Starting memory-intensive task: %s" % task.node)
+                        # dispatch task
+                        self.tp.put(task)
+                        jobs = jobs + 1
+                        hogs = hogs + 1
+                        continue
+
                     task = self.taskmaster.next_task()
                     if task is None:
                         break
@@ -390,13 +402,16 @@ else:
                         task.failed()
                         task.postprocess()
                     else:
-                        if task.needs_execute():
+                        if not task.needs_execute():
+                            task.executed()
+                            task.postprocess()
+                        elif task.is_memory_hog():
+                            # hold the task
+                            pendingHogs.append(task)
+                        else:
                             # dispatch task
                             self.tp.put(task)
                             jobs = jobs + 1
-                        else:
-                            task.executed()
-                            task.postprocess()
 
                 if not task and not jobs: break
 
@@ -405,6 +420,8 @@ else:
                 while True:
                     task, ok = self.tp.get()
                     jobs = jobs - 1
+                    if task.is_memory_hog():
+                        hogs = hogs - 1
 
                     if ok:
                         task.executed()

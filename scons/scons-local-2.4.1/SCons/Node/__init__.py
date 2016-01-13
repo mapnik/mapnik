@@ -511,6 +511,7 @@ class Node(object):
                  'noclean',
                  'nocache',
                  'cached',
+                 'memory_hog',
                  'always_build',
                  'includes',
                  'attributes',
@@ -574,6 +575,7 @@ class Node(object):
         self.noclean = 0
         self.nocache = 0
         self.cached = 0 # is this node pulled from cache?
+        self.memory_hog = False
         self.always_build = None
         self.includes = None
         self.attributes = self.Attrs() # Generic place to stick information about the Node.
@@ -1171,7 +1173,7 @@ class Node(object):
         self.precious = precious
 
     def set_pseudo(self, pseudo = True):
-        """Set the Node's precious value."""
+        """Set the Node's pseudo value."""
         self.pseudo = pseudo
 
     def set_noclean(self, noclean = 1):
@@ -1185,6 +1187,10 @@ class Node(object):
         # Make sure nocache is an integer so the --debug=stree
         # output in Util.py can use it as an index.
         self.nocache = nocache and 1 or 0
+
+    def set_memory_hog(self, hog = True):
+        """Set the Node's memory_hog value."""
+        self.memory_hog = hog
 
     def set_always_build(self, always_build = 1):
         """Set the Node's always_build value."""
