@@ -89,8 +89,11 @@ function make_config() {
     fi
 
     echo "
-CXX = '$CXX'
-CC = '$CC'
+CXX = '/opt/llvm/bin/clang++ -fsanitize=address -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/'
+CC = '/opt/llvm/bin/clang -fsanitize=address'
+CUSTOM_CXXFLAGS = '--coverage'
+CUSTOM_LDFLAGS = '--coverage'
+DEBUG = True
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
