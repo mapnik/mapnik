@@ -124,7 +124,7 @@ template <typename T>
 double parse_double(T & error_messages, const char* str)
 {
     using namespace boost::spirit::qi;
-    qi::double_type double_;
+    double_type double_;
     double val = 0.0;
     if (!parse(str, str + std::strlen(str),double_,val))
     {
@@ -142,9 +142,9 @@ double parse_double_optional_percent(T & error_messages, const char* str, bool &
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
-    qi::_1_type _1;
-    qi::double_type double_;
-    qi::char_type char_;
+    _1_type _1;
+    double_type double_;
+    char_type char_;
 
     double val = 0.0;
     if (!parse(str, str + std::strlen(str),double_[ref(val)=_1, ref(percent) = false]
@@ -160,9 +160,9 @@ bool parse_double_list(T & error_messages, const char* str, double* list)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
-    qi::_1_type _1;
-    qi::double_type double_;
-    qi::lit_type lit;
+    _1_type _1;
+    double_type double_;
+    lit_type lit;
     using skip_type = boost::spirit::ascii::space_type;
 
     if (!phrase_parse(str, str + std::strlen(str),
