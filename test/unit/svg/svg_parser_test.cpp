@@ -200,7 +200,7 @@ TEST_CASE("SVG parser") {
         {
             auto const& errors = p.error_messages();
             REQUIRE(errors.size() == 1);
-            REQUIRE(errors[0] ==  "Failed to parse double (optional %) from FAIL");
+            REQUIRE(errors[0] ==  "Failed to parse SVG value: \"FAIL\"");
         }
     }
 
