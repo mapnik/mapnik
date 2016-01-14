@@ -24,6 +24,7 @@
 #define MAPNIK_WKB_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
