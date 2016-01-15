@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "catch.hpp"
+#include "ds_test_util.hpp"
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
@@ -621,6 +622,61 @@ TEST_CASE("geojson") {
                         REQUIRE(val.get<mapnik::value_integer>() == ++count);
                         feature = features->next();
                     }
+                }
+                // cleanup
+                if (create_index && mapnik::util::exists(filename + ".index"))
+                {
+                    mapnik::util::remove(filename + ".index");
+                }
+            }
+        }
+
+        SECTION("GeoJSON descriptor returns all field names")
+        {
+            mapnik::parameters params;
+            params["type"] = "geojson";
+
+            std::string filename("./test/data/json/featurecollection-multipleprops.geojson");
+            params["file"] = filename;
+
+            // cleanup in the case of a failed previous run
+            if (mapnik::util::exists(filename + ".index"))
+            {
+                mapnik::util::remove(filename + ".index");
+            }
+
+            for (auto create_index : { true, false })
+            {
+                if (create_index)
+                {
+                    CHECK(!mapnik::util::exists(filename + ".index"));
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+
+                for (auto cache_features : {true, false})
+                {
+                    params["cache_features"] = cache_features;
+                    auto ds = mapnik::datasource_cache::instance().create(params);
+                    REQUIRE(bool(ds));
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    // TODO: this combo (cache_features==false and create_index==false)
+                    // exposes the case where not all field names are reported, which should
+                    // ideally be fixed, but how?
+                    if (cache_features == false && create_index == false) 
+                    {
+                        std::initializer_list<std::string> names = {"one"};
+                        REQUIRE_FIELD_NAMES(fields, names);
+                    } 
+                    else
+                    {
+                        std::initializer_list<std::string> names = {"one", "two"};
+                        REQUIRE_FIELD_NAMES(fields, names);
+                    }
+
                 }
                 // cleanup
                 if (create_index && mapnik::util::exists(filename + ".index"))
