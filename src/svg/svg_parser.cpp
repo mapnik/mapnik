@@ -134,7 +134,7 @@ double parse_double(T & error_messages, const char* str)
 }
 
 // https://www.w3.org/TR/SVG/coords.html#Units
-template <typename T>
+template <typename T, int DPI = 90>
 double parse_svg_value(T & error_messages, const char* str, bool & percent)
 {
     using namespace boost::spirit::qi;
@@ -146,12 +146,11 @@ double parse_svg_value(T & error_messages, const char* str, bool & percent)
     double val = 0.0;
     symbols<char, double> units;
     units.add
-        ("px", 1.0)
-        ("pt", 1.25)
-        ("pc", 15.0)
-        ("mm", 3.543307)
-        ("cm", 35.43307)
-        ("in", 90.0)
+        ("pt", DPI/72.0)
+        ("pc", DPI/6.0)
+        ("mm", DPI/25.4)
+        ("cm", DPI/2.54)
+        ("in", (double)DPI)
         ;
     if (!phrase_parse(str, str + std::strlen(str),
                       double_[ref(val) = _1, ref(percent) = false]
