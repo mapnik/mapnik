@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "catch_ext.hpp"
 
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
@@ -7,6 +7,8 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/unicode.hpp>
+
+#include <functional>
 #include <vector>
 
 namespace {
@@ -38,9 +40,23 @@ mapnik::value_type evaluate(Feature const& feature, Expression const& expr)
     return value;
 }
 
+mapnik::value evaluate_string(mapnik::feature_ptr const& feature, std::string const& str)
+{
+    auto expr = mapnik::parse_expression(str);
+    return evaluate(*feature, *expr);
 }
+
+std::string parse_and_dump(std::string const& str)
+{
+    auto expr = mapnik::parse_expression(str);
+    return mapnik::to_expression_string(*expr);
+}
+
+} // namespace
+
 TEST_CASE("expressions")
 {
+    using namespace std::placeholders;
     using properties_type = std::vector<std::pair<std::string, mapnik::value> > ;
     mapnik::transcoder tr("utf8");
 
@@ -52,115 +68,82 @@ TEST_CASE("expressions")
                             { "null"  , mapnik::value_null()}};
 
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
+    auto eval = std::bind(evaluate_string, feature, _1);
+    auto approx = Approx::custom().epsilon(1e-6);
 
-    auto expr = mapnik::parse_expression("[foo]='bar'");
-    REQUIRE(evaluate(*feature, *expr) == true);
+    TRY_CHECK(eval(" [foo]='bar' ") == true);
 
     // primary expressions
     // null
-    expr = mapnik::parse_expression("null");
-    REQUIRE(mapnik::to_expression_string(*expr) == "null");
+    TRY_CHECK(parse_and_dump("null") == "null");
     // boolean
-    expr = mapnik::parse_expression("true");
-    REQUIRE(mapnik::to_expression_string(*expr) == "true");
-    expr = mapnik::parse_expression("false");
-    REQUIRE(mapnik::to_expression_string(*expr) == "false");
+    TRY_CHECK(parse_and_dump("true") == "true");
+    TRY_CHECK(parse_and_dump("false") == "false");
     // floating point
-    expr = mapnik::parse_expression("3.14159");
-    REQUIRE(mapnik::to_expression_string(*expr) == "3.14159");
+    TRY_CHECK(parse_and_dump("3.14159") == "3.14159");
     // integer
-    expr = mapnik::parse_expression("123");
-    REQUIRE(mapnik::to_expression_string(*expr) == "123");
+    TRY_CHECK(parse_and_dump("123") == "123");
     // unicode
-    expr = mapnik::parse_expression("'single_quoted_string'");
-    REQUIRE(mapnik::to_expression_string(*expr) == "'single_quoted_string'");
-    expr = mapnik::parse_expression("\"double_quoted_string\"");
-    REQUIRE(mapnik::to_expression_string(*expr) == "'double_quoted_string'");
+    TRY_CHECK(parse_and_dump("'single-quoted string'") == "'single-quoted string'");
+    TRY_CHECK(parse_and_dump("\"double-quoted string\"") == "'double-quoted string'");
 
     // floating point constants
-    expr = mapnik::parse_expression("pi");
-    REQUIRE(mapnik::to_expression_string(*expr) == "3.14159");
-    expr = mapnik::parse_expression("deg_to_rad");
-    REQUIRE(mapnik::to_expression_string(*expr) == "0.0174533");
-    expr = mapnik::parse_expression("rad_to_deg");
-    REQUIRE(mapnik::to_expression_string(*expr) == "57.2958");
+    TRY_CHECK(parse_and_dump("pi") == "3.14159");
+    TRY_CHECK(parse_and_dump("deg_to_rad") == "0.0174533");
+    TRY_CHECK(parse_and_dump("rad_to_deg") == "57.2958");
 
     // unary functions
     // sin / cos
-    expr = mapnik::parse_expression("sin(0.25 * pi)/cos(0.25 * pi)");
-    double value = evaluate(*feature, *expr).to_double();
-    REQUIRE(std::fabs(value - 1.0) < 1e-6);
+    TRY_CHECK(eval(" sin(0.25 * pi) / cos(0.25 * pi) ").to_double() == approx(1.0));
     // tan
-    auto expr2 = mapnik::parse_expression("tan(0.25 * pi)");
-    double value2 = evaluate(*feature, *expr).to_double();
-    REQUIRE(value == value2);
+    TRY_CHECK(eval(" tan(0.25 * pi) ").to_double() == approx(1.0));
     // atan
-    expr = mapnik::parse_expression("rad_to_deg * atan(1.0)");
-    REQUIRE(std::fabs(evaluate(*feature, *expr).to_double() -  45.0) < 1e-6);
+    TRY_CHECK(eval(" rad_to_deg * atan(1.0) ").to_double() == approx(45.0));
     // exp
-    expr = mapnik::parse_expression("exp(0.0)");
-    REQUIRE(evaluate(*feature, *expr).to_double() == 1.0);
+    TRY_CHECK(eval(" exp(0.0) ") == 1.0);
     // abs
-    expr = mapnik::parse_expression("abs(cos(-pi))");
-    REQUIRE(evaluate(*feature, *expr).to_double() == 1.0);
+    TRY_CHECK(eval(" abs(cos(-pi)) ") == 1.0);
     // length (string)
-    expr = mapnik::parse_expression("length('1234567890')");
-    REQUIRE(evaluate(*feature, *expr).to_int() == 10);
+    TRY_CHECK(eval(" length('1234567890') ").to_int() == 10);
 
     // binary functions
     // min
-    expr = mapnik::parse_expression("min(-0.01, 0.001)");
-    REQUIRE(evaluate(*feature, *expr).to_double() == -0.01);
+    TRY_CHECK(eval(" min(-0.01, 0.001) ") == -0.01);
     // max
-    expr = mapnik::parse_expression("max(0.01, -0.1)");
-    REQUIRE(evaluate(*feature, *expr).to_double() == 0.01);
+    TRY_CHECK(eval(" max(0.01, -0.1) ") == 0.01);
     // pow
-    expr = mapnik::parse_expression("pow(2, 32)");
-    REQUIRE(evaluate(*feature, *expr).to_double() == 4294967296.0);
+    TRY_CHECK(eval(" pow(2, 32) ") == 4294967296.0);
 
     // geometry types
-    expr = mapnik::parse_expression("[mapnik::geometry_type] = point");
-    REQUIRE(evaluate(*feature, *expr) == true);
-    expr = mapnik::parse_expression("[mapnik::geometry_type] <> linestring");
-    REQUIRE(evaluate(*feature, *expr) == true);
-    expr = mapnik::parse_expression("[mapnik::geometry_type] != polygon");
-    REQUIRE(evaluate(*feature, *expr) == true);
-    expr = mapnik::parse_expression("[mapnik::geometry_type] neq collection");
-    REQUIRE(evaluate(*feature, *expr) == true);
-    expr = mapnik::parse_expression("[mapnik::geometry_type] eq collection");
-    REQUIRE(evaluate(*feature, *expr) == false);
+    TRY_CHECK(eval(" [mapnik::geometry_type] = point ") == true);
+    TRY_CHECK(eval(" [mapnik::geometry_type] <> linestring ") == true);
+    TRY_CHECK(eval(" [mapnik::geometry_type] != polygon ") == true);
+    TRY_CHECK(eval(" [mapnik::geometry_type] neq collection ") == true);
+    TRY_CHECK(eval(" [mapnik::geometry_type] eq collection ") == false);
 
     //unary expression
-    expr = mapnik::parse_expression("-123.456");
-    REQUIRE(evaluate(*feature, *expr).to_double() == -123.456);
-    expr = mapnik::parse_expression("+123.456");
-    REQUIRE(evaluate(*feature, *expr).to_double() == 123.456);
+    TRY_CHECK(eval(" -123.456 ") == -123.456);
+    TRY_CHECK(eval(" +123.456 ") == 123.456);
 
     // multiplicative/additive
-    expr = mapnik::parse_expression("(2.0 * 2.0 + 3.0 * 3.0)/(2.0 * 2.0 - 3.0 * 3.0)");
-    REQUIRE(evaluate(*feature, *expr).to_double() == -2.6);
-    expr2 = mapnik::parse_expression("(2.0 * 2.0 + 3.0 * 3.0)/((2.0 - 3.0) * (2.0 + 3.0))");
-    REQUIRE(evaluate(*feature, *expr).to_double() == evaluate(*feature, *expr2).to_double());
+    auto expr = mapnik::parse_expression("(2.0 * 2.0 + 3.0 * 3.0)/(2.0 * 2.0 - 3.0 * 3.0)");
+    TRY_CHECK(evaluate(*feature, *expr) == -2.6);
+    auto expr2 = mapnik::parse_expression("(2.0 * 2.0 + 3.0 * 3.0)/((2.0 - 3.0) * (2.0 + 3.0))");
+    TRY_CHECK(evaluate(*feature, *expr) == evaluate(*feature, *expr2));
 
     // logical
-    expr = mapnik::parse_expression("[int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null  && [foo] = 'bar'");
-    REQUIRE(evaluate(*feature, *expr) == true);
-    expr = mapnik::parse_expression("[int] = 456 or [foo].match('foo') || length([foo]) = 3");
-    REQUIRE(evaluate(*feature, *expr) == true);
+    TRY_CHECK(eval(" [int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null && [foo] = 'bar' ") == true);
+    TRY_CHECK(eval(" [int] = 456 or [foo].match('foo') || length([foo]) = 3 ") == true);
 
     // relational
-    expr = mapnik::parse_expression("[int] > 100 and [int] gt 100.0 and [double] < 2 and [double] lt 2.0");
-    REQUIRE(evaluate(*feature, *expr) == true);
-    expr = mapnik::parse_expression("[int] >= 123 and [int] ge 123.0 and [double] <= 1.23456 and [double] le 1.23456");
-    REQUIRE(evaluate(*feature, *expr) == true);
+    TRY_CHECK(eval(" [int] > 100 and [int] gt 100.0 and [double] < 2 and [double] lt 2.0 ") == true);
+    TRY_CHECK(eval(" [int] >= 123 and [int] ge 123.0 and [double] <= 1.23456 and [double] le 1.23456 ") == true);
 
     // regex
     // replace
-    expr = mapnik::parse_expression("[foo].replace('(\\B)|( )','$1 ')");
-    REQUIRE(evaluate(*feature, *expr) == tr.transcode("b a r"));
+    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));
 
     // match
-    expr = mapnik::parse_expression("[name].match('Québec')");
-    REQUIRE(evaluate(*feature, *expr) == true);
+    TRY_CHECK(eval(" [name].match('Québec') ") == true);
 
 }
