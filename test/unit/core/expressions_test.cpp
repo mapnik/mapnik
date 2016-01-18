@@ -62,6 +62,9 @@ TEST_CASE("expressions")
 
     properties_type prop = {{ "foo"   , tr.transcode("bar") },
                             { "name"  , tr.transcode("Québec")},
+                            { "grass" , tr.transcode("grow")},
+                            { "wind"  , tr.transcode("blow")},
+                            { "sky"   , tr.transcode("is blue")},
                             { "double", mapnik::value_double(1.23456)},
                             { "int"   , mapnik::value_integer(123)},
                             { "bool"  , mapnik::value_bool(true)},
@@ -134,6 +137,20 @@ TEST_CASE("expressions")
     // logical
     TRY_CHECK(eval(" [int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null && [foo] = 'bar' ") == true);
     TRY_CHECK(eval(" [int] = 456 or [foo].match('foo') || length([foo]) = 3 ") == true);
+    TRY_CHECK(eval(" not true  and not true  ") == eval(" (not true ) and (not true ) "));
+    TRY_CHECK(eval(" not true  or  not true  ") == eval(" (not true ) or  (not true ) "));
+    TRY_CHECK(eval(" not false and not false ") == eval(" (not false) and (not false) "));
+    TRY_CHECK(eval(" not false or  not false ") == eval(" (not false) or  (not false) "));
+
+    // test not/and/or precedence using combinations of "not EQ1 OP1 not EQ2 OP2 not EQ3"
+    TRY_CHECK(eval(" not [grass] = 'grow' and not [wind] = 'blow' and not [sky] = 'is blue' ") == false);
+    TRY_CHECK(eval(" not [grass] = 'grow' and not [wind] = 'blow' or  not [sky] = 'is blue' ") == false);
+    TRY_CHECK(eval(" not [grass] = 'grow' or  not [wind] = 'blow' and not [sky] = 'is blue' ") == false);
+    TRY_CHECK(eval(" not [grass] = 'grow' or  not [wind] = 'blow' or  not [sky] = 'is blue' ") == false);
+    TRY_CHECK(eval(" not [grass] = 'grew' and not [wind] = 'blew' and not [sky] = 'was blue' ") == true);
+    TRY_CHECK(eval(" not [grass] = 'grew' and not [wind] = 'blew' or  not [sky] = 'was blue' ") == true);
+    TRY_CHECK(eval(" not [grass] = 'grew' or  not [wind] = 'blew' and not [sky] = 'was blue' ") == true);
+    TRY_CHECK(eval(" not [grass] = 'grew' or  not [wind] = 'blew' or  not [sky] = 'was blue' ") == true);
 
     // relational
     TRY_CHECK(eval(" [int] > 100 and [int] gt 100.0 and [double] < 2 and [double] lt 2.0 ") == true);
