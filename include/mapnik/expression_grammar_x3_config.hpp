@@ -23,10 +23,14 @@
 #ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP
 #define MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP
 
-#include <boost/spirit/home/x3.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
 #include <mapnik/unicode.hpp>
 #include <string>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace grammar {
 
