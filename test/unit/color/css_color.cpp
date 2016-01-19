@@ -2,6 +2,7 @@
 #include <mapnik/css_color_grammar.hpp>
 #include <mapnik/css_color_grammar_impl.hpp>
 #include <mapnik/safe_cast.hpp>
+#include <sstream>
 
 TEST_CASE("css color") {
 
@@ -163,5 +164,28 @@ TEST_CASE("css color") {
             std::string s("#a bcd");
             CHECK( !boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), color_grammar, space) );
         }
+    }
+    SECTION("operator<< / to_string()")
+    {
+        mapnik::color c("salmon");
+        std::ostringstream ss;
+        ss << c ;
+        CHECK(ss.str() == "rgb(250,128,114)");
+        c.set_alpha(127);
+        ss.seekp(0);
+        ss << c ;
+        CHECK(ss.str() == "rgba(250,128,114,0.498)");
+    }
+    SECTION("premultiply/demultiply")
+    {
+        mapnik::color c("cornflowerblue");
+        c.set_alpha(127);
+        c.premultiply();
+        CHECK(int(c.red()) == 50);
+        CHECK(int(c.green()) == 74);
+        CHECK(int(c.blue()) == 118);
+        CHECK(int(c.alpha()) == 127);
+        c.demultiply();
+        CHECK(c == mapnik::color(100, 148, 236, 127));
     }
 }
