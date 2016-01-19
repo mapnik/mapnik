@@ -36,7 +36,7 @@ std::string vector_to_string(T const& vec)
     std::stringstream s;
     for (auto const& item : vec)
     {
-        s << item << "\n";
+        s << "  " << item << "\n";
     }
     return s.str();
 }
@@ -47,34 +47,41 @@ std::string vector_to_string(std::vector<mapnik::attribute_descriptor> const& ve
     std::stringstream s;
     for (auto const& item : vec)
     {
-        s << item.get_name() << "\n";
+        s << "  " << item.get_name() << "\n";
     }
     return s.str();
 }
 
+#define REQUIRE_FIELD_NAMES(fields, names) \
+    INFO("fields:\n" + vector_to_string(fields) + "names:\n" +  vector_to_string(names)); \
+    REQUIRE(fields.size() == names.size()); \
+    auto itr_a = fields.begin(); \
+    auto const end_a = fields.end(); \
+    auto itr_b = names.begin(); \
+    for (; itr_a != end_a; ++itr_a, ++itr_b) \
+    { \
+        CHECK(itr_a->get_name() == *itr_b); \
+    } \
+
 inline void require_field_names(std::vector<mapnik::attribute_descriptor> const &fields,
                          std::initializer_list<std::string> const &names)
 {
-    INFO("fields: " + vector_to_string(fields) + " names: " +  vector_to_string(names));
-    REQUIRE(fields.size() == names.size());
-    auto itr_a = fields.begin();
-    auto const end_a = fields.end();
-    auto itr_b = names.begin();
-    for (; itr_a != end_a; ++itr_a, ++itr_b)
-    {
-        CHECK(itr_a->get_name() == *itr_b);
-    }
+    REQUIRE_FIELD_NAMES(fields,names);
 }
 
+#define REQUIRE_FIELD_TYPES(fields, types) \
+    REQUIRE(fields.size() == types.size()); \
+    auto itr_a = fields.begin(); \
+    auto const end_a = fields.end(); \
+    auto itr_b = types.begin(); \
+    for (; itr_a != end_a; ++itr_a, ++itr_b) { \
+        CHECK(itr_a->get_type() == *itr_b); \
+    } \
+
 inline void require_field_types(std::vector<mapnik::attribute_descriptor> const &fields,
-                         std::initializer_list<mapnik::eAttributeType> const &types) {
-    REQUIRE(fields.size() == types.size());
-    auto itr_a = fields.begin();
-    auto const end_a = fields.end();
-    auto itr_b = types.begin();
-    for (; itr_a != end_a; ++itr_a, ++itr_b) {
-        CHECK(itr_a->get_type() == *itr_b);
-    }
+                         std::initializer_list<mapnik::eAttributeType> const &types)
+{
+    REQUIRE_FIELD_TYPES(fields, types);
 }
 
 inline mapnik::featureset_ptr all_features(mapnik::datasource_ptr ds) {

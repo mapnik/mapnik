@@ -8,7 +8,9 @@ environment:
 
 os: Visual Studio 2015
 
-shallow_clone: true
+#shallow_clone: true
+# limit clone to latest 5 commits
+clone_depth: 5
 
 install:
   - scripts\build-appveyor.bat

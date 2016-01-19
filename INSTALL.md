@@ -2,6 +2,13 @@
 
 Mapnik runs on Linux, OS X, Windows, and BSD systems.
 
+First clone mapnik from github and initialize submodules
+
+```bash
+git clone https://github.com/mapnik/mapnik.git
+git submodule update --init
+```
+
 To configure and build Mapnik do:
 
 ```bash
@@ -35,7 +42,6 @@ NOTE: the above will not work on windows, rather see https://github.com/mapnik/m
 
 Then to run the tests locally (without needing to install):
 
-    git submodule update --init
     make test
 
 Install like:

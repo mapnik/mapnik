@@ -47,7 +47,6 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/variant_io.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>

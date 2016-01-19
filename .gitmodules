@@ -6,3 +6,6 @@
 	path = test/data-visual
 	url = https://github.com/mapnik/test-data-visual.git
 	branch = master
+[submodule "deps/mapbox/variant"]
+	path = deps/mapbox/variant
+	url = https://github.com/mapbox/variant.git

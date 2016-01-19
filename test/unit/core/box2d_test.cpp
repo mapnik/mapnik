@@ -2,6 +2,7 @@
 
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
+#include "agg_trans_affine.h"
 
 TEST_CASE("box2d") {
 SECTION("coord init") {
@@ -159,4 +160,62 @@ SECTION("envelope clipping") {
   REQUIRE(e1 == e2);
 }
 
+SECTION("mapnik::box2d intersects")
+{
+    mapnik::box2d<double> b0(0,0,100,100);
+    // another box2d
+    mapnik::box2d<double> b1(100,100,200,200);
+    CHECK(b0.intersects(b1));
+    CHECK(b1.intersects(b0));
+    mapnik::box2d<double> b2(100.001,100,200,200);
+    CHECK(!b0.intersects(b2));
+    CHECK(!b2.intersects(b0));
+    // coord
+    CHECK(b0.intersects(mapnik::coord<double,2>(100,100)));
+    CHECK(!b0.intersects(mapnik::coord<double,2>(100.001,100)));
+}
+
+SECTION("mapnik::box2d intersect")
+{
+    mapnik::box2d<double> b0(0,0,100,100);
+    mapnik::box2d<double> b1(100,100,200,200);
+    CHECK(b0.intersect(b1) == mapnik::box2d<double>(100,100,100,100));
+    CHECK(b1.intersect(b0) == mapnik::box2d<double>(100,100,100,100));
+    mapnik::box2d<double> b2(100.001,100,200,200);
+    CHECK(b0.intersect(b2) == mapnik::box2d<double>());
+    CHECK(b2.intersect(b0) == mapnik::box2d<double>());
+}
+
+SECTION("mapnik::box2d re_center")
+{
+    mapnik::box2d<double> b(0, 0, 100, 100);
+    b.re_center(0, 0);
+    CHECK(b == mapnik::box2d<double>(-50, -50, 50, 50));
+    b.re_center(mapnik::coord2d(50,50));
+    CHECK(b == mapnik::box2d<double>(0, 0, 100, 100));
+}
+
+SECTION("mapnik::box2d operator+=")
+{
+    mapnik::box2d<double> b(0, 0, 50, 50);
+    b += mapnik::box2d<double>(100, 100, 200, 200);
+    CHECK(b == mapnik::box2d<double>(0, 0, 200, 200));
+    b += 100;
+    CHECK(b == mapnik::box2d<double>(-100, -100, 300, 300));
+}
+
+SECTION("mapnik::box2d operator*=  operator=/ ")
+{
+    mapnik::box2d<double> b(0, 0, 100, 100);
+    b *= 2.0;
+    CHECK(b == mapnik::box2d<double>(-50, -50, 150, 150));
+    b /= 2.0;
+    CHECK(b == mapnik::box2d<double>(0, 0, 100, 100));
+
+    agg::trans_affine tr;
+    tr.translate(-50,-50);
+    tr.scale(2.0);
+    b *= tr;
+    CHECK(b == mapnik::box2d<double>(-100, -100, 100, 100));
+}
 } // TEST_CASE

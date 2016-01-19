@@ -143,7 +143,7 @@ TEST_CASE("SVG parser") {
             auto const& errors = p.error_messages();
             REQUIRE(errors.size() == 3);
             REQUIRE(errors[0] ==  "Failed to parse color: \"fail\"");
-            REQUIRE(errors[1] ==  "Failed to parse double: \"fail\"");
+            REQUIRE(errors[1] ==  "Failed to parse SVG value: \"fail\"");
             REQUIRE(errors[2] ==  "Failed to parse color: \"fail\"");
         }
     }
@@ -166,7 +166,7 @@ TEST_CASE("SVG parser") {
             auto const& errors = p.error_messages();
             REQUIRE(errors.size() == 13);
             REQUIRE(errors[0] == "parse_rect: Invalid width");
-            REQUIRE(errors[1] == "Failed to parse double: \"FAIL\"");
+            REQUIRE(errors[1] == "Failed to parse SVG value: \"FAIL\"");
             REQUIRE(errors[2] == "parse_rect: Invalid height");
             REQUIRE(errors[3] == "parse_rect: Invalid rx");
             REQUIRE(errors[4] == "parse_rect: Invalid ry");
@@ -200,7 +200,7 @@ TEST_CASE("SVG parser") {
         {
             auto const& errors = p.error_messages();
             REQUIRE(errors.size() == 1);
-            REQUIRE(errors[0] ==  "Failed to parse double (optional %) from FAIL");
+            REQUIRE(errors[0] ==  "Failed to parse SVG value: \"FAIL\"");
         }
     }
 
