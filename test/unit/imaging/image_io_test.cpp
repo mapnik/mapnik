@@ -158,7 +158,7 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
         unsigned h = reader->height();
         auto im2 = reader->read(0, 0, w, h);
         CHECK(im2.size() == im.size());
-        if (format == "png" || format == "tiff")
+        if (extension == "png" || extension == "tiff")
         {
             CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
         }
