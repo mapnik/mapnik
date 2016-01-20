@@ -84,12 +84,12 @@ class quad_tree : util::noncopyable
 
         int num_subnodes() const
         {
-            int count = 0;
+            int _count = 0;
             for (int i = 0; i < 4; ++i)
             {
-                if (children_[i]) ++count;
+                if (children_[i]) ++_count;
             }
-            return count;
+            return _count;
         }
         ~node () {}
     };
@@ -165,9 +165,9 @@ public:
 
     int count_items() const
     {
-        int count = 0;
-        count_items(root_, count);
-        return count;
+        int _count = 0;
+        count_items(root_, _count);
+        return _count;
     }
     void trim()
     {
@@ -278,23 +278,23 @@ private:
         if (!n) return 0;
         else
         {
-            int count = 1;
+            int _count = 1;
             for (int i = 0; i < 4; ++i)
             {
-                count += count_nodes(n->children_[i]);
+                _count += count_nodes(n->children_[i]);
             }
-            return count;
+            return _count;
         }
     }
 
-    void count_items(node const* n,int& count) const
+    void count_items(node const* n, int& _count) const
     {
         if (n)
         {
-            count += n->cont_.size();
+            _count += n->cont_.size();
             for (int i = 0; i < 4; ++i)
             {
-                count_items(n->children_[i],count);
+                count_items(n->children_[i],_count);
             }
         }
     }

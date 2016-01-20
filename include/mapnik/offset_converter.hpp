@@ -482,7 +482,8 @@ private:
         }
         start_v2.x = v2.x;
         start_v2.y = v2.y;
-        bool continue_loop = true;        
+        bool continue_loop;
+        continue_loop = true;
         vertex2d tmp_prev(vertex2d::no_init);
         
         while (i < points.size())
