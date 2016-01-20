@@ -63,7 +63,7 @@ install:
  - psql -c 'create database template_postgis;' -U postgres;
  - psql -c 'create extension postgis;' -d template_postgis -U postgres;
  - if [[ ${COVERAGE} == true ]]; then
-     if [[ ! $(which pip) ]]; then easy_install --user pip; fi;
+     if [[ ! $(which pip) ]]; then easy_install --user pip && export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}; fi;
      pip install --user cpp-coveralls;
    fi
 
