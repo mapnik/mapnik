@@ -64,7 +64,7 @@ install:
  - psql -c 'create extension postgis;' -d template_postgis -U postgres;
  - if [[ ${COVERAGE} == true ]]; then
      if [[ ! $(which pip) ]]; then easy_install --user pip; fi;
-    pip install --user cpp-coveralls;
+     pip install --user cpp-coveralls;
    fi
 
 script:
