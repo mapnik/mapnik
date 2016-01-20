@@ -91,7 +91,7 @@ struct abs_impl
 {
     value_type operator() (value_type const& val) const
     {
-        return std::fabs(val.to_double());
+        return std::abs(val.to_double());
     }
 };
 
