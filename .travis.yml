@@ -61,6 +61,7 @@ install:
  - psql -c 'create database template_postgis;' -U postgres;
  - psql -c 'create extension postgis;' -d template_postgis -U postgres;
  - if [[ ${COVERAGE} == true ]]; then
+     if [[ ! $(which pip) ]]; then curl -O https://bootstrap.pypa.io/get-pip.py && python get-pip.py; fi;
      PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
    fi
 
@@ -73,7 +74,7 @@ script:
      export MASON_VERSION=latest;
      export MASON_LIB_FILE=lib/libmapnik-wkt.a;
      source ./.mason/mason.sh;
-     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
+     ./configure CPP_TESTS=False PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
    else
      ./configure || cat config.log;
    fi
@@ -82,9 +83,9 @@ script:
  - if [[ ${COVERAGE} == true ]]; then
      ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
    fi
- - if [[ ${COVERAGE} != true ]]; then
-     make bench;
-   fi
+ #- if [[ ${COVERAGE} != true ]]; then
+ #    make bench;
+ #  fi
  - if [[ ${TEST_RESULT:-0} != 0 ]]; then exit $TEST_RESULT ; fi;
  - if [[ ${MASON_PUBLISH} == true ]]; then
      ./mason_latest.sh build;
