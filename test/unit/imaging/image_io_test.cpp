@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <iostream>
+#include <cstring>
 #include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
@@ -10,6 +11,8 @@
 #include <mapnik/cairo/cairo_context.hpp>
 #include <mapnik/cairo/cairo_image_util.hpp>
 #endif
+
+#include <boost/format.hpp>
 
 TEST_CASE("image io") {
 
@@ -110,7 +113,46 @@ SECTION("writers options")
     int q1 = mapnik::detail::parse_jpeg_quality("jpeg:quality=50");
     REQUIRE(q0 == q1);
 #endif
-
 } // END SECTION
 
+
+SECTION("image_util : save_to_file/save_to_stream/save_to_string")
+{
+    mapnik::image_rgba8 im(256,256);
+    std::string named_color = "lightblue";
+    mapnik::fill(im, mapnik::color(named_color).rgba());
+    ////////////////////////////////////////////////////
+    std::vector<std::string> supported_types;
+#if defined(HAVE_PNG)
+    supported_types.push_back("png");
+#endif
+#if defined(HAVE_JPEG)
+    supported_types.push_back("jpeg");
+#endif
+#if defined(HAVE_TIFF)
+    supported_types.push_back("tiff");
+#endif
+#if defined(HAVE_WEBP)
+    supported_types.push_back("webp");
+#endif
+
+    for (auto const& type : supported_types)
+    {
+        std::string filename = (boost::format("/tmp/mapnik-%1%.%2%") % named_color % type).str();
+        mapnik::save_to_file(im, filename);
+        std::string str = mapnik::save_to_string(im, type);
+        std::ostringstream ss;
+        mapnik::save_to_stream(im, ss, type);
+        CHECK(str.length() == ss.str().length());
+        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,type));
+        unsigned w = reader->width();
+        unsigned h = reader->height();
+        auto im2 = reader->read(0, 0, w, h);
+        CHECK(im2.size() == im.size());
+        if (type == "png" || type == "tiff")
+        {
+            CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
+        }
+    }
+}
 } // END TEST_CASE
