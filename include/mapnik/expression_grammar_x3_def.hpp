@@ -72,11 +72,6 @@ namespace mapnik { namespace grammar {
         _val(ctx) = std::move(_attr(ctx));
     };
 
-    auto do_copy = [] (auto & ctx)
-    {
-        _val(ctx) = _attr(ctx);
-    };
-
     auto do_negate = [] (auto & ctx)
     {
         _val(ctx) = std::move(unary_node<mapnik::tags::negate>(_attr(ctx)));
@@ -392,7 +387,7 @@ namespace mapnik { namespace grammar {
         |
         (lit("not") | lit("!") ) > expression[do_not]
         |
-        unary_func_expression[do_copy]
+        unary_func_expression[do_assign]
         |
         binary_func_expression[do_assign]
         |
