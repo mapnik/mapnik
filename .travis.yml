@@ -43,6 +43,8 @@ matrix:
       env: JOBS=8 COVERAGE=true
 
 before_install:
+ - export PYTHONUSERBASE=${PYTHONUSERBASE}
+ - export PATH=${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
@@ -50,19 +52,19 @@ before_install:
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
-     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
+     export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages;
    else
      brew rm postgis --force;
      brew install postgis --force;
      pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres;
      createuser -s postgres;
-     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
+     export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages;
    fi
  - psql -c 'create database template_postgis;' -U postgres;
  - psql -c 'create extension postgis;' -d template_postgis -U postgres;
  - if [[ ${COVERAGE} == true ]]; then
-     if [[ ! $(which pip) ]]; then curl -O https://bootstrap.pypa.io/get-pip.py && python get-pip.py; fi;
-     PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
+     if [[ ! $(which pip) ]]; then easy_install --user pip; fi;
+    pip install --user cpp-coveralls;
    fi
 
 script:
