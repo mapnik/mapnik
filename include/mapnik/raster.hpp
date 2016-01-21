@@ -49,9 +49,9 @@ public:
           data_(std::move(data)),
           filter_factor_(filter_factor) {}
 
-    void set_nodata(double nodata)
+    void set_nodata(double _nodata)
     {
-        nodata_ = nodata;
+        nodata_ = _nodata;
     }
 
     boost::optional<double> const& nodata() const

@@ -375,39 +375,39 @@ unsigned Map::height() const
     return height_;
 }
 
-void Map::set_width(unsigned width)
+void Map::set_width(unsigned _width)
 {
-    if (width != width_ &&
-        width >= MIN_MAPSIZE &&
-        width <= MAX_MAPSIZE)
+    if (_width != width_ &&
+        _width >= MIN_MAPSIZE &&
+        _width <= MAX_MAPSIZE)
     {
-        width_=width;
+        width_=_width;
         fixAspectRatio();
     }
 }
 
-void Map::set_height(unsigned height)
+void Map::set_height(unsigned _height)
 {
-    if (height != height_ &&
-        height >= MIN_MAPSIZE &&
-        height <= MAX_MAPSIZE)
+    if (_height != height_ &&
+        _height >= MIN_MAPSIZE &&
+        _height <= MAX_MAPSIZE)
     {
-        height_=height;
+        height_ = _height;
         fixAspectRatio();
     }
 }
 
-void Map::resize(unsigned width,unsigned height)
+void Map::resize(unsigned _width, unsigned _height)
 {
-    if ((width != width_ ||
-         height != height_) &&
-        width >= MIN_MAPSIZE &&
-        width <= MAX_MAPSIZE &&
-        height >= MIN_MAPSIZE &&
-        height <= MAX_MAPSIZE)
+    if ((_width != width_ ||
+         _height != height_) &&
+        _width >= MIN_MAPSIZE &&
+        _width <= MAX_MAPSIZE &&
+        _height >= MIN_MAPSIZE &&
+        _height <= MAX_MAPSIZE)
     {
-        width_=width;
-        height_=height;
+        width_ = _width;
+        height_ = _height;
         fixAspectRatio();
     }
 }
@@ -417,14 +417,14 @@ std::string const&  Map::srs() const
     return srs_;
 }
 
-void Map::set_srs(std::string const& srs)
+void Map::set_srs(std::string const& _srs)
 {
-    srs_ = srs;
+    srs_ = _srs;
 }
 
-void Map::set_buffer_size( int buffer_size)
+void Map::set_buffer_size(int _buffer_size)
 {
-    buffer_size_ = buffer_size;
+    buffer_size_ = _buffer_size;
 }
 
 int Map::buffer_size() const
