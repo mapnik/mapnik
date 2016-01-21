@@ -132,6 +132,7 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double to
 void memory_datasource::set_envelope(box2d<double> const& box)
 {
     extent_ = box;
+    dirty_extent_ = false;
 }
 
 box2d<double> memory_datasource::envelope() const
