@@ -21,17 +21,17 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8 CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" MASON_PUBLISH=true
+      env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=true
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5', 'libstdc++-4.9-dev', 'libstdc++6' ]
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6' ]
+          packages: [ 'clang-3.6', 'libstdc++-4.9-dev', 'libstdc++6' ]
     - os: linux
       compiler: gcc
       env: JOBS=6 CXX="ccache g++-4.9" CC="ccache gcc-4.9"
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+          sources: [ 'ubuntu-toolchain-r-test' ]
           packages: [ 'gcc-4.9', 'g++-4.9', 'libstdc++-4.9-dev', 'libstdc++6' ]
     - os: osx
       compiler: clang
