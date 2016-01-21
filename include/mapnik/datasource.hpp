@@ -69,8 +69,8 @@ public:
         Raster
     };
 
-    datasource (parameters const& params)
-       : params_(params) {}
+    datasource (parameters const& _params)
+       : params_(_params) {}
 
     /*!
      * @brief Get the configuration parameters of the data source.

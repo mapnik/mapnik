@@ -367,10 +367,10 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
             continue;
         }
 
-        std::vector<rule> const& rules = style->get_rules();
+        std::vector<rule> const& style_rules = style->get_rules();
         bool active_rules = false;
         rule_cache rc;
-        for(rule const& r : rules)
+        for(rule const& r : style_rules)
         {
             if (r.active(scale_denom))
             {

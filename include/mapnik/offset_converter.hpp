@@ -338,7 +338,7 @@ private:
     // repeated so many times as to fill up travis logs to the
     // point of failure
     #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+    #include <mapnik/warning_ignore.hpp>
     status init_vertices()
     {
         if (status_ != initial) // already initialized

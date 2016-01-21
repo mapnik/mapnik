@@ -121,12 +121,12 @@ namespace mapnik { namespace svg {
               fill_color_("#000000")
         {}
 
-        rect_output_attributes(const int x, const int y, const unsigned width, const unsigned height, color const& fill_color)
+        rect_output_attributes(const int x, const int y, const unsigned width, const unsigned height, color const& _fill_color)
             : x_(x),
               y_(y),
               width_(width),
               height_(height),
-              fill_color_(fill_color.to_hex_string())
+              fill_color_(_fill_color.to_hex_string())
         {}
 
         void set_x(const int x);
