@@ -122,36 +122,49 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
     std::string named_color = "lightblue";
     mapnik::fill(im, mapnik::color(named_color).rgba());
     ////////////////////////////////////////////////////
-    std::vector<std::string> supported_types;
+    std::vector<std::tuple<std::string, std::string> > supported_types;
 #if defined(HAVE_PNG)
-    supported_types.push_back("png");
+    supported_types.push_back(std::make_tuple("png","png"));
+    supported_types.push_back(std::make_tuple("png","png24"));
+    supported_types.push_back(std::make_tuple("png","png32"));
+    supported_types.push_back(std::make_tuple("png","png8"));
+    supported_types.push_back(std::make_tuple("png","png256"));
 #endif
 #if defined(HAVE_JPEG)
-    supported_types.push_back("jpeg");
+    supported_types.push_back(std::make_tuple("jpeg","jpeg"));
+    supported_types.push_back(std::make_tuple("jpeg","jpeg80"));
+    supported_types.push_back(std::make_tuple("jpeg","jpeg90"));
 #endif
 #if defined(HAVE_TIFF)
-    supported_types.push_back("tiff");
+    supported_types.push_back(std::make_tuple("tiff","tiff"));
 #endif
 #if defined(HAVE_WEBP)
-    supported_types.push_back("webp");
+    supported_types.push_back(std::make_tuple("webp","webp"));
 #endif
 
-    for (auto const& type : supported_types)
+    for (auto const& info : supported_types)
     {
-        std::string filename = (boost::format("/tmp/mapnik-%1%.%2%") % named_color % type).str();
+        std::string extension;
+        std::string format;
+        std::tie(extension, format) = info;
+        std::string filename = (boost::format("/tmp/mapnik-%1%.%2%") % named_color % extension).str();
         mapnik::save_to_file(im, filename);
-        std::string str = mapnik::save_to_string(im, type);
+        std::string str = mapnik::save_to_string(im, format);
         std::ostringstream ss;
-        mapnik::save_to_stream(im, ss, type);
+        mapnik::save_to_stream(im, ss, format);
         CHECK(str.length() == ss.str().length());
-        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,type));
+        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename, extension));
         unsigned w = reader->width();
         unsigned h = reader->height();
         auto im2 = reader->read(0, 0, w, h);
         CHECK(im2.size() == im.size());
-        if (type == "png" || type == "tiff")
+        if (extension == "png" || extension == "tiff")
         {
             CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
+        }
+        if (mapnik::util::exists(filename))
+        {
+            mapnik::util::remove(filename);
         }
     }
 }
