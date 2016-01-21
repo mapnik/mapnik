@@ -651,9 +651,10 @@ struct div
         return lhs / rhs;
     }
 
-    value_type operator() (value_bool, value_bool) const
+    value_type operator() (value_bool lhs, value_bool rhs) const
     {
-        return false;
+        if (rhs == 0) return lhs;
+        return value_integer{ lhs / rhs };
     }
 
     value_type operator() (value_unicode_string const&,
