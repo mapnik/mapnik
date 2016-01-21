@@ -330,8 +330,15 @@ private:
             }
         }
     }
-    
-    
+
+    // Avoid spurious warning from g++ (seen with 4.9)
+    // around continue_loop not being used.
+    // This is important to suppress: because of the template
+    // metaprogramming involved this warning otherwise may be
+    // repeated so many times as to fill up travis logs to the
+    // point of failure
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
     status init_vertices()
     {
         if (status_ != initial) // already initialized
@@ -482,8 +489,7 @@ private:
         }
         start_v2.x = v2.x;
         start_v2.y = v2.y;
-        bool continue_loop;
-        continue_loop = true;
+        bool continue_loop = true;
         vertex2d tmp_prev(vertex2d::no_init);
         
         while (i < points.size())
@@ -629,6 +635,7 @@ private:
         // initialization finished
         return status_ = process;
     }
+    #pragma GCC diagnostic pop
 
     unsigned output_vertex(double* px, double* py)
     {
