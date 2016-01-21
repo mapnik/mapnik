@@ -37,7 +37,7 @@
 #include <iosfwd>
 #include <cstddef>
 #include <new>
-
+#include <type_traits>
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
@@ -415,14 +415,10 @@ struct add
         return lhs + rhs;
     }
 
-    value_type operator() (value_double lhs, value_integer rhs) const
+    value_type operator() (value_null const& lhs ,
+                           value_null const& rhs) const
     {
-        return lhs + rhs;
-    }
-
-    value_type operator() (value_integer lhs, value_double rhs) const
-    {
-        return lhs + rhs;
+        return lhs;
     }
 
     value_type operator() (value_unicode_string const& lhs, value_null) const
@@ -435,13 +431,16 @@ struct add
         return rhs;
     }
 
-    template <typename R>
-    value_type operator() (value_unicode_string const& lhs, R const& rhs) const
+    template <typename L>
+    value_type operator() (L const& lhs, value_null const&) const
     {
-        std::string val;
-        if (util::to_string(val,rhs))
-            return lhs + value_unicode_string(val.c_str());
         return lhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_null const&, R const& rhs) const
+    {
+        return rhs;
     }
 
     template <typename L>
@@ -453,16 +452,19 @@ struct add
         return rhs;
     }
 
-    template <typename T>
-    value_type operator() (T lhs, T rhs) const
+    template <typename R>
+    value_type operator() (value_unicode_string const& lhs, R const& rhs) const
     {
-        return lhs + rhs ;
+        std::string val;
+        if (util::to_string(val,rhs))
+            return lhs + value_unicode_string(val.c_str());
+        return lhs;
     }
 
     template <typename T1, typename T2>
-    value_type operator() (T1 const& lhs, T2 const&) const
+    value_type operator() (T1 const& lhs, T2 const& rhs) const
     {
-        return lhs;
+        return typename std::common_type<T1,T2>::type{ lhs + rhs };
     }
 
     value_type operator() (value_bool lhs, value_bool rhs) const
@@ -475,10 +477,44 @@ template <typename V>
 struct sub
 {
     using value_type = V;
-    template <typename T1, typename T2>
-    value_type operator() (T1 const& lhs, T2 const&) const
+
+    value_type operator() (value_null const& lhs ,
+                           value_null const& rhs) const
     {
         return lhs;
+    }
+
+    value_type operator() (value_null, value_unicode_string const& rhs) const
+    {
+        return rhs;
+    }
+    value_type operator() (value_unicode_string const& lhs, value_null) const
+    {
+        return lhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_unicode_string const& lhs, R const&) const
+    {
+        return lhs;
+    }
+
+    template <typename L>
+    value_type operator() (L const&, value_unicode_string const& rhs) const
+    {
+        return rhs;
+    }
+
+    template <typename L>
+    value_type operator() (L const& lhs, value_null const&) const
+    {
+        return lhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_null const&, R const& rhs) const
+    {
+        return rhs;
     }
 
     template <typename T>
@@ -493,15 +529,12 @@ struct sub
         return value_type();
     }
 
-    value_type operator() (value_double lhs, value_integer rhs) const
+    template <typename T1, typename T2>
+    value_type operator() (T1 const& lhs, T2 const& rhs) const
     {
-        return lhs - rhs;
+        return typename std::common_type<T1,T2>::type{ lhs - rhs };
     }
 
-    value_type operator() (value_integer lhs, value_double rhs) const
-    {
-        return lhs - rhs;
-    }
 
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
@@ -513,11 +546,47 @@ template <typename V>
 struct mult
 {
     using value_type = V;
-    template <typename T1, typename T2>
-    value_type operator() (T1 const& lhs , T2 const& ) const
+
+    value_type operator() (value_null const& lhs ,
+                           value_null const& rhs) const
     {
         return lhs;
     }
+
+    value_type operator() (value_unicode_string const& lhs, value_null) const
+    {
+        return lhs;
+    }
+
+    value_type operator() (value_null, value_unicode_string const& rhs) const
+    {
+        return rhs;
+    }
+
+    template <typename L>
+    value_type operator() (L const& lhs, value_null const&) const
+    {
+        return lhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_null const&, R const& rhs) const
+    {
+        return rhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_unicode_string const& lhs, R const&) const
+    {
+        return lhs;
+    }
+
+    template <typename L>
+    value_type operator() (L const&, value_unicode_string const& rhs) const
+    {
+        return rhs;
+    }
+
     template <typename T>
     value_type operator() (T lhs, T rhs) const
     {
@@ -530,19 +599,15 @@ struct mult
         return value_type();
     }
 
-    value_type operator() (value_double lhs, value_integer rhs) const
+    template <typename T1, typename T2>
+    value_type operator() (T1 const& lhs, T2 const& rhs) const
     {
-        return lhs * rhs;
+        return typename std::common_type<T1,T2>::type{ lhs * rhs };
     }
 
-    value_type operator() (value_integer lhs, value_double rhs) const
+    value_type operator() (value_bool lhs, value_bool rhs) const
     {
-        return lhs * rhs;
-    }
-
-    value_type operator() (value_bool, value_bool) const
-    {
-        return value_integer(0);
+        return value_integer(lhs * rhs);
     }
 };
 
@@ -550,10 +615,33 @@ template <typename V>
 struct div
 {
     using value_type = V;
-    template <typename T1, typename T2>
-    value_type operator() (T1 const& lhs, T2 const&) const
+
+    value_type operator() (value_null const& lhs ,
+                           value_null const& rhs) const
     {
         return lhs;
+    }
+
+    value_type operator() (value_unicode_string const& lhs, value_null) const
+    {
+        return lhs;
+    }
+
+    value_type operator() (value_null, value_unicode_string const& rhs) const
+    {
+        return rhs;
+    }
+
+    template <typename L>
+    value_type operator() (L const& lhs, value_null const&) const
+    {
+        return lhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_null const&, R const& rhs) const
+    {
+        return rhs;
     }
 
     template <typename T>
@@ -563,9 +651,10 @@ struct div
         return lhs / rhs;
     }
 
-    value_type operator() (value_bool, value_bool) const
+    value_type operator() (value_bool lhs, value_bool rhs) const
     {
-        return false;
+        if (rhs == 0) return lhs;
+        return value_integer{ lhs / rhs };
     }
 
     value_type operator() (value_unicode_string const&,
@@ -574,16 +663,23 @@ struct div
         return value_type();
     }
 
-    value_type operator() (value_double lhs, value_integer rhs) const
+    template <typename R>
+    value_type operator() (value_unicode_string const& lhs, R const&) const
     {
-        if (rhs == 0) return value_type();
-        return lhs / rhs;
+        return lhs;
     }
 
-    value_type operator() (value_integer lhs, value_double rhs) const
+    template <typename L>
+    value_type operator() (L const&, value_unicode_string const& rhs) const
+    {
+        return rhs;
+    }
+
+    template <typename T1, typename T2>
+    value_type operator() (T1 const& lhs, T2 const& rhs) const
     {
         if (rhs == 0) return value_type();
-        return lhs / rhs;
+        return typename std::common_type<T1,T2>::type{ lhs / rhs };
     }
 };
 
@@ -591,10 +687,11 @@ template <typename V>
 struct mod
 {
     using value_type = V;
+
     template <typename T1, typename T2>
     value_type operator() (T1 const& lhs, T2 const&) const
     {
-        return lhs;
+       return lhs;
     }
 
     template <typename T>

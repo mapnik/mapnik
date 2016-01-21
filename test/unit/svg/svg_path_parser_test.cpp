@@ -27,21 +27,9 @@
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/marker.hpp>
+#include "util.hpp"
 
 namespace {
-
-template <int N = 6>
-struct vertex_equal
-{
-    template <typename T>
-    bool operator() (T const& lhs, T const& rhs) const
-    {
-        static const double eps = 1.0 / std::pow(10,N);
-        return (std::fabs(std::get<0>(lhs) - std::get<0>(rhs)) < eps)
-            && (std::fabs(std::get<1>(lhs) - std::get<1>(rhs)) < eps)
-            && std::get<2>(lhs) == std::get<2>(rhs);
-    }
-};
 
 template <typename Expected>
 void test_path_parser(std::string const& str, Expected const& expected)
@@ -62,7 +50,7 @@ void test_path_parser(std::string const& str, Expected const& expected)
         vec.emplace_back(x, y, cmd);
         //std::cerr << "std::make_tuple(" << x << ", " << y << ", " << cmd  << ")," << std::endl;
     }
-    REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(), vertex_equal<3>()));
+    REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(), detail::vertex_equal<3>()));
 }
 } // anonymous ns
 
