@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <mapnik/color.hpp>
 #include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
