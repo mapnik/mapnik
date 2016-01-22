@@ -254,7 +254,7 @@ source = Split(
     color_factory.cpp
     renderer_common.cpp
     renderer_common/render_pattern.cpp
-    renderer_common/process_group_symbolizer.cpp
+    renderer_common/render_thunk_extractor.cpp
     math.cpp
     """
     )

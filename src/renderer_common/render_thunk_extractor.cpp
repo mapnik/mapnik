@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,64 +21,32 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/renderer_common/process_group_symbolizer.hpp>
-#include <mapnik/renderer_common/process_markers_symbolizer.hpp>
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/make_unique.hpp>
+#include <mapnik/marker_helpers.hpp>
+#include <mapnik/renderer_common/process_markers_symbolizer.hpp>
+#include <mapnik/renderer_common/render_thunk_extractor.hpp>
 
 namespace mapnik {
 
-vector_marker_render_thunk::vector_marker_render_thunk(svg_path_ptr const& src,
-                                                       svg_attribute_type const& attrs,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), attrs_(attrs), tr_(marker_trans), opacity_(opacity),
-      comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
+virtual_renderer_common::virtual_renderer_common(renderer_common & common)
+    : width_(common.width_),
+      height_(common.height_),
+      scale_factor_(common.scale_factor_),
+      vars_(common.vars_),
+      shared_font_library_(common.shared_font_library_),
+      font_library_(*shared_font_library_),
+      font_manager_(common.font_manager_),
+      query_extent_(common.query_extent_),
+      t_(common.t_),
+      detector_(new label_collision_detector4(common.detector_->extent()))
 {}
 
-vector_marker_render_thunk::vector_marker_render_thunk(vector_marker_render_thunk && rhs)
-  : src_(std::move(rhs.src_)),
-    attrs_(std::move(rhs.attrs_)),
-    tr_(std::move(rhs.tr_)),
-    opacity_(std::move(rhs.opacity_)),
-    comp_op_(std::move(rhs.comp_op_)),
-    snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
-
-
-raster_marker_render_thunk::raster_marker_render_thunk(image_rgba8 const& src,
-                                                       agg::trans_affine const& marker_trans,
-                                                       double opacity,
-                                                       composite_mode_e comp_op,
-                                                       bool snap_to_pixels)
-    : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-      snap_to_pixels_(snap_to_pixels)
-{}
-
-raster_marker_render_thunk::raster_marker_render_thunk(raster_marker_render_thunk && rhs)
-      : src_(rhs.src_),
-        tr_(std::move(rhs.tr_)),
-        opacity_(std::move(rhs.opacity_)),
-        comp_op_(std::move(rhs.comp_op_)),
-        snap_to_pixels_(std::move(rhs.snap_to_pixels_)) {}
-
-
-text_render_thunk::text_render_thunk(helper_ptr && helper,
-                                     double opacity, composite_mode_e comp_op,
-                                     halo_rasterizer_enum halo_rasterizer)
-    : helper_(std::move(helper)),
-      placements_(helper_->get()),
-      opacity_(opacity),
-      comp_op_(comp_op),
-      halo_rasterizer_(halo_rasterizer)
-{}
-
-text_render_thunk::text_render_thunk(text_render_thunk && rhs)
-      : helper_(std::move(rhs.helper_)),
-        placements_(std::move(rhs.placements_)),
-        opacity_(std::move(rhs.opacity_)),
-        comp_op_(std::move(rhs.comp_op_)),
-        halo_rasterizer_(std::move(rhs.halo_rasterizer_)) {}
+virtual_renderer_common::~virtual_renderer_common()
+{
+    // defined in .cpp to make this destructible elsewhere without
+    // having to #include <mapnik/label_collision_detector.hpp>
+}
 
 namespace detail {
 
@@ -147,7 +115,7 @@ private:
     render_thunk_list & thunks_;
 };
 
-} // end detail ns
+} // namespace detail
 
 render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
                                                render_thunk_list & thunks,
@@ -175,32 +143,23 @@ void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
 
 void render_thunk_extractor::operator()(text_symbolizer const& sym) const
 {
-    box2d<double> clip_box = clipping_extent_;
-    helper_ptr helper = std::make_unique<text_symbolizer_helper>(
-        sym, feature_, vars_, prj_trans_,
-        common_.width_, common_.height_,
-        common_.scale_factor_,
-        common_.t_, common_.font_manager_, *common_.detector_,
-        clip_box, agg::trans_affine());
-
-    extract_text_thunk(std::move(helper), sym);
+    extract_text_thunk(sym);
 }
 
 void render_thunk_extractor::operator()(shield_symbolizer const& sym) const
 {
-    box2d<double> clip_box = clipping_extent_;
-    helper_ptr helper = std::make_unique<text_symbolizer_helper>(
+    extract_text_thunk(sym);
+}
+
+void render_thunk_extractor::extract_text_thunk(text_symbolizer const& sym) const
+{
+    auto helper = std::make_unique<text_symbolizer_helper>(
         sym, feature_, vars_, prj_trans_,
         common_.width_, common_.height_,
         common_.scale_factor_,
         common_.t_, common_.font_manager_, *common_.detector_,
-        clip_box, agg::trans_affine());
+        clipping_extent_, agg::trans_affine::identity);
 
-    extract_text_thunk(std::move(helper), sym);
-}
-
-void render_thunk_extractor::extract_text_thunk(helper_ptr && helper, text_symbolizer const& sym) const
-{
     double opacity = get<double>(sym, keys::opacity, feature_, common_.vars_, 1.0);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, common_.vars_, src_over);
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature_, common_.vars_, HALO_RASTERIZER_FULL);
