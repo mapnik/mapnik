@@ -66,9 +66,9 @@ struct percent_offset_impl
 
     double operator() (double val) const
     {
-        double result = std::abs(val/100.0);
-        if (result > 1.0) result = 1.0;
-        return result;
+        double _result = std::abs(val/100.0);
+        if (_result > 1.0) _result = 1.0;
+        return _result;
     }
 };
 

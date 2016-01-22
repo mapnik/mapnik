@@ -68,12 +68,12 @@ const char * memory_datasource::name()
     return "memory";
 }
 
-memory_datasource::memory_datasource(parameters const& params)
-    : datasource(params),
+memory_datasource::memory_datasource(parameters const& _params)
+    : datasource(_params),
       desc_(memory_datasource::name(),
-            *params.get<std::string>("encoding","utf-8")),
+            *params_.get<std::string>("encoding","utf-8")),
       type_(datasource::Vector),
-      bbox_check_(*params.get<boolean_type>("bbox_check", true)),
+      bbox_check_(*params_.get<boolean_type>("bbox_check", true)),
       type_set_(false) {}
 
 memory_datasource::~memory_datasource() {}

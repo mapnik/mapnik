@@ -47,8 +47,8 @@ struct MAPNIK_DECL image_view_any : image_view_base
     image_view_any() = default;
 
     template <typename T>
-    image_view_any(T && data) noexcept
-        : image_view_base(std::move(data)) {}
+    image_view_any(T && _data) noexcept
+        : image_view_base(std::move(_data)) {}
 
     std::size_t width() const;
     std::size_t height() const;
