@@ -4,7 +4,7 @@ sudo: false
 
 git:
   depth: 10
-  submodules: true
+  submodules: false
 
 env:
   global:
@@ -43,6 +43,15 @@ before_install:
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
  - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
+ - git submodule update --init --depth=10 ||
+     git submodule foreach 'test "$sha1" = "`git rev-parse HEAD`" ||
+                            git ls-remote origin "refs/pull/*/head" |
+                            while read hash ref; do
+                                if test "$hash" = "$sha1"; then
+                                    git config --add remote.origin.fetch "+$ref:$ref";
+                                fi
+                            done'
+ - git submodule update --init --depth=10
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
