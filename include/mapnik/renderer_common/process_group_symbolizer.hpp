@@ -170,7 +170,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 matches.emplace_back(rule, sub_feature);
 
                 // construct a bounding box around all symbolizers for the matched rule
-                bound_box bounds;
+                box2d<double> bounds;
                 render_thunk_list thunks;
                 render_thunk_extractor extractor(bounds, thunks, *sub_feature, common.vars_, prj_trans,
                                                  virtual_renderer, clipping_extent);
