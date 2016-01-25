@@ -80,6 +80,26 @@ struct MAPNIK_DECL value_null
         return true;
     }
 
+    bool operator>(value_null) const
+    {
+        return false;
+    }
+
+    bool operator>=(value_null) const
+    {
+        return false;
+    }
+
+    bool operator<(value_null) const
+    {
+        return false;
+    }
+
+    bool operator<=(value_null) const
+    {
+        return false;
+    }
+
     template <typename T>
     value_null operator+ (T const&) const
     {
