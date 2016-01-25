@@ -163,6 +163,36 @@ SECTION("polygon 3 repeated points") {
     CHECK( !mapnik::geometry::is_simple(poly) );
 }
 
+#if BOOST_VERSION >= 106000
+
+SECTION("polygon that is empty") {
+    mapnik::geometry::polygon<double> poly;
+    CHECK( !mapnik::geometry::is_simple(poly) );
+}
+
+SECTION("polygon that has empty exterior ring") {
+    mapnik::geometry::polygon<double> poly;
+    mapnik::geometry::linear_ring<double> ring;
+    poly.set_exterior_ring(std::move(ring));
+    CHECK( !mapnik::geometry::is_simple(poly) );
+}
+
+SECTION("polygon that has empty interior ring") {
+    mapnik::geometry::polygon<double> poly;
+    mapnik::geometry::linear_ring<double> ring;
+    ring.add_coord(0,0);    
+    ring.add_coord(1,0);
+    ring.add_coord(1,1);
+    ring.add_coord(0,1);
+    ring.add_coord(0,0);
+    poly.set_exterior_ring(std::move(ring));
+    mapnik::geometry::linear_ring<double> ring2;
+    poly.add_hole(std::move(ring2));
+    CHECK( !mapnik::geometry::is_simple(poly) );
+}
+
+#else // BOOST_VERSION >= 1.60
+
 SECTION("polygon that is empty") {
     mapnik::geometry::polygon<double> poly;
     CHECK( mapnik::geometry::is_simple(poly) );
@@ -188,6 +218,8 @@ SECTION("polygon that has empty interior ring") {
     poly.add_hole(std::move(ring2));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
+
+#endif // BOOST_VERSION >= 1.60
 
 // A polygon with a spike can still be simple
 SECTION("polygon with spike") {

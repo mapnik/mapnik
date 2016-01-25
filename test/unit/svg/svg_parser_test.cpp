@@ -34,6 +34,42 @@
 #include <fstream>
 #include <iterator>
 
+namespace // internal
+{
+    struct test_parser
+    {
+        mapnik::svg_storage_type path;
+        mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage;
+        mapnik::svg::svg_path_adapter svg_path;
+        mapnik::svg::svg_converter_type svg;
+        mapnik::svg::svg_parser p;
+
+        test_parser()
+            : stl_storage(path.source())
+            , svg_path(stl_storage)
+            , svg(svg_path, path.attributes())
+            , p(svg)
+        {}
+
+        mapnik::svg::svg_parser* operator->()
+        {
+            return &p;
+        }
+    };
+
+    template <typename C>
+    std::string join(C const& container)
+    {
+        std::string result;
+        for (auto const& str : container)
+        {
+            if (!result.empty()) result += "\n ";
+            result += str;
+        }
+        return result;
+    }
+}
+
 TEST_CASE("SVG parser") {
 
     SECTION("SVG i/o")
@@ -49,142 +85,112 @@ TEST_CASE("SVG parser") {
     SECTION("SVG::parse i/o")
     {
         std::string svg_name("FAIL");
-
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-
-        if (!p.parse(svg_name))
+        char const* expected_errors[] =
         {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 1);
-            REQUIRE(errors[0] ==  "Unable to open 'FAIL'");
-        }
+            "Unable to open 'FAIL'"
+        };
+
+        test_parser p;
+        REQUIRE(!p->parse(svg_name));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG::parse_from_string syntax error")
     {
         std::string svg_name("./test/data/svg/invalid.svg");
+        char const* expected_errors[] =
+        {
+            "Unable to parse '<?xml version=\"1.0\"?>\n<svg width=\"12cm\" height=\"4cm\" viewBox=\"0 0 1200 400\"\nxmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\">\n'"
+        };
+
         std::ifstream in(svg_name.c_str());
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-
-        if (!p.parse_from_string(svg_str))
-        {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 1);
-            REQUIRE(errors[0] ==  "Unable to parse '<?xml version=\"1.0\"?>\n<svg width=\"12cm\" height=\"4cm\" viewBox=\"0 0 1200 400\"\nxmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\">\n'");
-        }
+        test_parser p;
+        REQUIRE(!p->parse_from_string(svg_str));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG::parse_from_string syntax error")
     {
         std::string svg_name("./test/data/svg/invalid.svg");
-
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-
-        if (!p.parse(svg_name))
+        char const* expected_errors[] =
         {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 1);
-            REQUIRE(errors[0] ==  "svg_parser::parse - Unable to parse './test/data/svg/invalid.svg'");
-        }
+            "svg_parser::parse - Unable to parse './test/data/svg/invalid.svg'"
+        };
+
+        test_parser p;
+        REQUIRE(!p->parse(svg_name));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG parser color <fail>")
     {
 
         std::string svg_name("./test/data/svg/color_fail.svg");
+        char const* expected_errors[] =
+        {
+            "Failed to parse color: \"fail\"",
+            "Failed to parse SVG value: 'fail'",
+            "Failed to parse color: \"fail\"",
+        };
+
         std::ifstream in(svg_name.c_str());
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-
-        if (!p.parse_from_string(svg_str))
-        {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 3);
-            REQUIRE(errors[0] ==  "Failed to parse color: \"fail\"");
-            REQUIRE(errors[1] ==  "Failed to parse SVG value: \"fail\"");
-            REQUIRE(errors[2] ==  "Failed to parse color: \"fail\"");
-        }
+        test_parser p;
+        REQUIRE(!p->parse_from_string(svg_str));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG - cope with erroneous geometries")
     {
         std::string svg_name("./test/data/svg/errors.svg");
+        char const* expected_errors[] =
+        {
+            "parse_rect: Invalid width",
+            "Failed to parse SVG value: 'FAIL'",
+            "parse_rect: Invalid height",
+            "parse_rect: Invalid rx",
+            "parse_rect: Invalid ry",
+            "Failed to parse SVG value: '100invalidunit', trailing garbage: 'validunit'",
+            "unable to parse invalid svg <path>",
+            "unable to parse invalid svg <path> with id 'fail-path'",
+            "unable to parse invalid svg <path> with id 'fail-path'",
+            "parse_circle: Invalid radius",
+            "Failed to parse <polygon> 'points'",
+            "Failed to parse <polyline> 'points'",
+            "parse_ellipse: Invalid rx",
+            "parse_ellipse: Invalid ry",
+        };
+
         std::ifstream in(svg_name.c_str());
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-        if (!p.parse_from_string(svg_str))
-        {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 13);
-            REQUIRE(errors[0] == "parse_rect: Invalid width");
-            REQUIRE(errors[1] == "Failed to parse SVG value: \"FAIL\"");
-            REQUIRE(errors[2] == "parse_rect: Invalid height");
-            REQUIRE(errors[3] == "parse_rect: Invalid rx");
-            REQUIRE(errors[4] == "parse_rect: Invalid ry");
-            REQUIRE(errors[5] == "unable to parse invalid svg <path>");
-            REQUIRE(errors[6] == "unable to parse invalid svg <path> with id 'fail-path'");
-            REQUIRE(errors[7] == "unable to parse invalid svg <path> with id 'fail-path'");
-            REQUIRE(errors[8] == "parse_circle: Invalid radius");
-            REQUIRE(errors[9] == "Failed to parse <polygon> 'points'");
-            REQUIRE(errors[10] == "Failed to parse <polyline> 'points'");
-            REQUIRE(errors[11] == "parse_ellipse: Invalid rx");
-            REQUIRE(errors[12] == "parse_ellipse: Invalid ry");
-        }
+        test_parser p;
+        REQUIRE(!p->parse_from_string(svg_str));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG parser double % <fail>")
     {
 
         std::string svg_name("./test/data/svg/gradient-radial-error.svg");
+        char const* expected_errors[] =
+        {
+            "Failed to parse SVG value: 'FAIL'"
+        };
+
         std::ifstream in(svg_name.c_str());
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-
-        if (!p.parse_from_string(svg_str))
-        {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 1);
-            REQUIRE(errors[0] ==  "Failed to parse SVG value: \"FAIL\"");
-        }
+        test_parser p;
+        REQUIRE(!p->parse_from_string(svg_str));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG parser display=none")
@@ -320,16 +326,10 @@ TEST_CASE("SVG parser") {
         std::ifstream in(svg_name.c_str());
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
-
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-        p.parse_from_string(svg_str);
-        auto width = svg.width();
-        auto height = svg.height();
+        test_parser p;
+        REQUIRE(p->parse_from_string(svg_str));
+        auto width = p.svg.width();
+        auto height = p.svg.height();
         REQUIRE(width == 100);
         REQUIRE(height == 100);
     }
@@ -604,41 +604,33 @@ TEST_CASE("SVG parser") {
     SECTION("SVG missing <gradient> def")
     {
         std::string svg_name("./test/data/svg/gradient-nodef.svg");
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-        REQUIRE(!p.parse(svg_name));
-        auto const& errors = p.error_messages();
-        REQUIRE(errors.size() == 2);
-        REQUIRE(errors[0] == "Failed to find gradient fill: MyGradient");
-        REQUIRE(errors[1] == "Failed to find gradient stroke: MyGradient");
+        char const* expected_errors[] =
+        {
+            "Failed to find gradient fill: MyGradient",
+            "Failed to find gradient stroke: MyGradient",
+        };
+
+        test_parser p;
+        REQUIRE(!p->parse(svg_name));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG missing <gradient> id")
     {
-
         std::string svg_name("./test/data/svg/gradient-no-id.svg");
+        char const* expected_errors[] =
+        {
+            "Failed to find gradient fill: MyGradient",
+            "Failed to find gradient stroke: MyGradient",
+        };
+
         std::ifstream in(svg_name.c_str());
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        using namespace mapnik::svg;
-        mapnik::svg_storage_type path;
-        vertex_stl_adapter<svg_path_storage> stl_storage(path.source());
-        svg_path_adapter svg_path(stl_storage);
-        svg_converter_type svg(svg_path, path.attributes());
-        svg_parser p(svg);
-
-        if (!p.parse_from_string(svg_str))
-        {
-            auto const& errors = p.error_messages();
-            REQUIRE(errors.size() == 2);
-            REQUIRE(errors[0] ==  "Failed to find gradient fill: MyGradient");
-            REQUIRE(errors[1] ==  "Failed to find gradient stroke: MyGradient");
-        }
+        test_parser p;
+        REQUIRE(!p->parse_from_string(svg_str));
+        REQUIRE(join(p->error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG missing <gradient> inheritance")

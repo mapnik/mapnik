@@ -137,29 +137,36 @@ double parse_double(T & error_messages, const char* str)
 template <typename T, int DPI = 90>
 double parse_svg_value(T & error_messages, const char* str, bool & percent)
 {
-    using namespace boost::spirit::qi;
     using skip_type = boost::spirit::ascii::space_type;
     using boost::phoenix::ref;
-    double_type double_;
-    char_type char_;
-    _1_type _1;
+    qi::double_type double_;
+    qi::lit_type lit;
+    qi::_1_type _1;
     double val = 0.0;
-    symbols<char, double> units;
+    qi::symbols<char, double> units;
     units.add
+        ("px", 1.0)
         ("pt", DPI/72.0)
         ("pc", DPI/6.0)
         ("mm", DPI/25.4)
         ("cm", DPI/2.54)
         ("in", (double)DPI)
         ;
-    if (!phrase_parse(str, str + std::strlen(str),
-                      double_[ref(val) = _1, ref(percent) = false]
+    const char* cur = str; // phrase_parse modifies the first iterator
+    const char* end = str + std::strlen(str);
+    if (!qi::phrase_parse(cur, end,
+                      double_[ref(val) = _1][ref(percent) = false]
                       > - (units[ ref(val) *= _1]
                            |
-                           char_('%')[ref(val) *= 0.01, ref(percent) = true]),
+                           lit('%')[ref(val) *= 0.01][ref(percent) = true]),
                       skip_type()))
     {
-        error_messages.emplace_back("Failed to parse SVG value: \"" + std::string(str) + "\"");
+        error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) + "'");
+    }
+    else if (cur != end)
+    {
+        error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) +
+                                    "', trailing garbage: '" + cur + "'");
     }
     return val;
 }

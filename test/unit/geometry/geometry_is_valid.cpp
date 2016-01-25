@@ -54,6 +54,36 @@ SECTION("point unitialized") {
     CHECK( failure2 == boost::geometry::no_failure );
 }
 
+#if BOOST_VERSION >= 106000
+
+SECTION("point NaN") {
+    mapnik::geometry::point<double> pt(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN());
+    CHECK( std::isnan(pt.x) );
+    CHECK( std::isnan(pt.y) );
+    CHECK( !mapnik::geometry::is_valid(pt) );
+    std::string message;
+    CHECK( !mapnik::geometry::is_valid(pt, message) );
+    CHECK( message == "Geometry has point(s) with invalid coordinate(s)");
+    boost::geometry::validity_failure_type failure;
+    CHECK( !mapnik::geometry::is_valid(pt, failure) );
+    CHECK( failure == boost::geometry::failure_invalid_coordinate );
+}
+
+SECTION("point Infinity") {
+    mapnik::geometry::point<double> pt(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
+    CHECK( std::isinf(pt.x) );
+    CHECK( std::isinf(pt.y) );
+    CHECK( !mapnik::geometry::is_valid(pt) );
+    std::string message;
+    CHECK( !mapnik::geometry::is_valid(pt, message) );
+    CHECK( message == "Geometry has point(s) with invalid coordinate(s)");
+    boost::geometry::validity_failure_type failure;
+    CHECK( !mapnik::geometry::is_valid(pt, failure) );
+    CHECK( failure == boost::geometry::failure_invalid_coordinate );
+}
+
+#else // BOOST_VERSION >= 1.60
+
 // This is funky that boost geometry is_valid does not check for NAN when dealing with a point
 // this test is here in case the logic ever changes
 // Bug report on this: https://svn.boost.org/trac/boost/ticket/11711
@@ -85,6 +115,8 @@ SECTION("point Infinity") {
     CHECK( mapnik::geometry::is_valid(pt, failure) );
     CHECK( failure == boost::geometry::no_failure );
 }
+
+#endif // BOOST_VERSION >= 1.60
 
 SECTION("multi point") {
     mapnik::geometry::multi_point<double> mpt;
