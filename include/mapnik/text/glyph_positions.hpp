@@ -19,8 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef MAPNIK_PLACEMENTS_LIST_HPP
-#define MAPNIK_PLACEMENTS_LIST_HPP
+
+#ifndef MAPNIK_TEXT_GLYPH_POSITIONS_HPP
+#define MAPNIK_TEXT_GLYPH_POSITIONS_HPP
+
 //mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
@@ -79,7 +81,7 @@ public:
     pixel_position const& get_base_point() const;
     void set_base_point(pixel_position const& base_point);
     void set_marker(marker_info_ptr marker, pixel_position const& marker_pos);
-    marker_info_ptr get_marker() const;
+    marker_info_ptr const& get_marker() const;
     pixel_position const& marker_pos() const;
 private:
     std::vector<glyph_position> data_;
@@ -88,8 +90,46 @@ private:
     pixel_position marker_pos_;
     box2d<double> bbox_;
 };
+
 using glyph_positions_ptr = std::unique_ptr<glyph_positions>;
 
 using placements_list = std::list<glyph_positions_ptr>;
-}
-#endif // PLACEMENTS_LIST_HPP
+
+struct scoped_glyph_positions_offset
+{
+    scoped_glyph_positions_offset(glyph_positions & glyphs, pixel_position const& offset)
+        : glyphs_(glyphs)
+        , base_point_(glyphs.get_base_point())
+        , marker_pos_(glyphs.marker_pos())
+    {
+        // move the glyphs to the correct offset
+        glyphs_.set_base_point(base_point_ + offset);
+
+        // update the position of any marker
+        if (auto const& marker_info = glyphs_.get_marker())
+        {
+            glyphs_.set_marker(marker_info, marker_pos_ + offset);
+        }
+    }
+
+    ~scoped_glyph_positions_offset()
+    {
+        // set the base_point back how it was
+        glyphs_.set_base_point(base_point_);
+
+        // restore marker as well, if there is any
+        if (auto const& marker_info = glyphs_.get_marker())
+        {
+            glyphs_.set_marker(marker_info, marker_pos_);
+        }
+    }
+
+private:
+    glyph_positions & glyphs_;
+    pixel_position base_point_;
+    pixel_position marker_pos_;
+};
+
+} // namespace mapnik
+
+#endif // MAPNIK_TEXT_GLYPH_POSITIONS_HPP

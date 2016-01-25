@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,72 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP
-#define MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP
-
 // mapnik
-#include <mapnik/pixel_position.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/feature_factory.hpp>
-#include <mapnik/renderer_common.hpp>
-#include <mapnik/renderer_common/render_thunk_extractor.hpp>
-#include <mapnik/symbolizer.hpp>
 #include <mapnik/attribute_collector.hpp>
+#include <mapnik/feature_factory.hpp>
 #include <mapnik/group/group_layout_manager.hpp>
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
-#include <mapnik/text/glyph_positions.hpp>
+#include <mapnik/renderer_common/render_group_symbolizer.hpp>
+#include <mapnik/renderer_common/render_thunk_extractor.hpp>
 #include <mapnik/util/conversions.hpp>
 
 namespace mapnik {
 
-template <typename F>
-void render_offset_placements(placements_list const& placements,
-                              pixel_position const& offset,
-                              F render_text) {
-
-    for (auto const& glyphs : placements)
-    {
-        // move the glyphs to the correct offset
-        pixel_position base_point = glyphs->get_base_point();
-        glyphs->set_base_point(base_point + offset);
-
-        // update the position of any marker
-        marker_info_ptr marker_info = glyphs->get_marker();
-        pixel_position marker_pos = glyphs->marker_pos();
-        if (marker_info)
-        {
-            glyphs->set_marker(marker_info, marker_pos + offset);
-        }
-
-        render_text(glyphs);
-
-        // Need to put the base_point back how it was in case something else calls this again
-        // (don't want to add offset twice) or calls with a different offset.
-        glyphs->set_base_point(base_point);
-        if (marker_info)
-        {
-            glyphs->set_marker(marker_info, marker_pos);
-        }
-    }
-}
-
-template <typename F>
 void render_group_symbolizer(group_symbolizer const& sym,
                              feature_impl & feature,
                              attributes const& vars,
                              proj_transform const& prj_trans,
                              box2d<double> const& clipping_extent,
                              renderer_common & common,
-                             F render_thunks)
+                             render_thunk_list_dispatch & render_thunks)
 {
     // find all column names referenced in the group rules and symbolizers
     std::set<std::string> columns;
     group_attribute_collector column_collector(columns, false);
     column_collector(sym);
 
-    group_symbolizer_properties_ptr props = get<group_symbolizer_properties_ptr>(sym, keys::group_properties);
+    auto props = get<group_symbolizer_properties_ptr>(sym, keys::group_properties);
 
     // create a new context for the sub features of this group
     context_ptr sub_feature_ctx = std::make_shared<mapnik::context_type>();
@@ -107,10 +67,10 @@ void render_group_symbolizer(group_symbolizer const& sym,
     // keep track of which lists of render thunks correspond to
     // entries in the group_layout_manager.
     std::vector<render_thunk_list> layout_thunks;
-    size_t num_layout_thunks = 0;
 
     // layout manager to store and arrange bboxes of matched features
-    group_layout_manager layout_manager(props->get_layout(), pixel_position(common.width_ / 2.0, common.height_ / 2.0));
+    group_layout_manager layout_manager(props->get_layout());
+    layout_manager.set_input_origin(common.width_ * 0.5, common.height_ * 0.5);
 
     // run feature or sub feature through the group rules & symbolizers
     // for each index value in the range
@@ -184,7 +144,6 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 // add the bounding box to the layout manager
                 layout_manager.add_member_bound_box(bounds);
                 layout_thunks.emplace_back(std::move(thunks));
-                ++num_layout_thunks;
                 break;
             }
         }
@@ -220,18 +179,16 @@ void render_group_symbolizer(group_symbolizer const& sym,
         helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
     }
 
-    pixel_position_list positions = helper.get();
+    pixel_position_list const& positions = helper.get();
     for (pixel_position const& pos : positions)
     {
-        for (size_t layout_i = 0; layout_i < num_layout_thunks; ++layout_i)
+        for (size_t layout_i = 0; layout_i < layout_thunks.size(); ++layout_i)
         {
             pixel_position const& offset = layout_manager.offset_at(layout_i);
             pixel_position render_offset = pos + offset;
-            render_thunks(layout_thunks[layout_i], render_offset);
+            render_thunks.render_list(layout_thunks[layout_i], render_offset);
         }
     }
 }
 
 } // namespace mapnik
-
-#endif // MAPNIK_RENDERER_COMMON_PROCESS_GROUP_SYMBOLIZER_HPP

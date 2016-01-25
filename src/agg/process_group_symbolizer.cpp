@@ -25,20 +25,16 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_render_marker.hpp>
-#include <mapnik/image_util.hpp>
 #include <mapnik/image.hpp>
-#include <mapnik/util/variant.hpp>
 #include <mapnik/text/renderer.hpp>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/pixel_position.hpp>
 #include <mapnik/text/glyph_positions.hpp>
-#include <mapnik/renderer_common/process_group_symbolizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
+#include <mapnik/renderer_common/render_group_symbolizer.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_converter.hpp>
+
 // agg
 #include "agg_trans_affine.h"
 
@@ -55,7 +51,7 @@ template <typename T>
 struct thunk_renderer;
 
 template <>
-struct thunk_renderer<image_rgba8>
+struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 {
     using renderer_type = agg_renderer<image_rgba8>;
     using buffer_type = renderer_type::buffer_type;
@@ -64,12 +60,13 @@ struct thunk_renderer<image_rgba8>
     thunk_renderer(renderer_type &ren,
                    std::unique_ptr<rasterizer> const& ras_ptr,
                    buffer_type *buf,
-                   renderer_common &common,
-                   pixel_position const &offset)
-        : ren_(ren), ras_ptr_(ras_ptr), buf_(buf), common_(common), offset_(offset)
+                   renderer_common &common)
+        : ren_(ren), ras_ptr_(ras_ptr), buf_(buf), common_(common),
+          tex_(*buf, HALO_RASTERIZER_FULL, src_over, src_over,
+               common.scale_factor_, common.font_manager_.get_stroker())
     {}
 
-    void operator()(vector_marker_render_thunk const &thunk) const
+    virtual void operator()(vector_marker_render_thunk const& thunk)
     {
         using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>; // comp blender
         using buf_type = agg::rendering_buffer;
@@ -95,7 +92,7 @@ struct thunk_renderer<image_rgba8>
         render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(), offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
     }
 
-    void operator()(raster_marker_render_thunk const &thunk) const
+    virtual void operator()(raster_marker_render_thunk const& thunk)
     {
         using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>; // comp blender
         using buf_type = agg::rendering_buffer;
@@ -113,32 +110,25 @@ struct thunk_renderer<image_rgba8>
         render_raster_marker(renb, *ras_ptr_, thunk.src_, offset_tr, thunk.opacity_, common_.scale_factor_, thunk.snap_to_pixels_);
     }
 
-    void operator()(text_render_thunk const &thunk) const
+    virtual void operator()(text_render_thunk const& thunk)
     {
-        text_renderer_type ren(*buf_, thunk.halo_rasterizer_, thunk.comp_op_, thunk.comp_op_,
-                               common_.scale_factor_, common_.font_manager_.get_stroker());
+        tex_.set_comp_op(thunk.comp_op_);
+        tex_.set_halo_comp_op(thunk.comp_op_);
+        tex_.set_halo_rasterizer(thunk.halo_rasterizer_);
 
-        render_offset_placements(
-            thunk.placements_,
-            offset_,
-            [&] (glyph_positions_ptr const& glyphs)
+        for (auto const& glyphs : thunk.placements_)
+        {
+            scoped_glyph_positions_offset tmp_off(*glyphs, offset_);
+
+            if (auto const& mark = glyphs->get_marker())
             {
-                marker_info_ptr mark = glyphs->get_marker();
-                if (mark)
-                {
-                    ren_.render_marker(glyphs->marker_pos(),
-                                       *mark->marker_,
-                                       mark->transform_,
-                                       thunk.opacity_, thunk.comp_op_);
-                }
-                ren.render(*glyphs);
-            });
-    }
-
-    template <typename T>
-    void operator()(T const &) const
-    {
-        throw std::runtime_error("Rendering of this data type is not supported currently by the renderer");
+                ren_.render_marker(glyphs->marker_pos(),
+                                   *mark->marker_,
+                                   mark->transform_,
+                                   thunk.opacity_, thunk.comp_op_);
+            }
+            tex_.render(*glyphs);
+        }
     }
 
 private:
@@ -146,7 +136,7 @@ private:
     std::unique_ptr<rasterizer> const& ras_ptr_;
     buffer_type *buf_;
     renderer_common &common_;
-    pixel_position offset_;
+    text_renderer_type tex_;
 };
 
 template <typename T0, typename T1>
@@ -154,16 +144,11 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    thunk_renderer<buffer_type> ren(*this, ras_ptr, current_buffer_, common_);
+
     render_group_symbolizer(
         sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_,
-        [&](render_thunk_list const& thunks, pixel_position const& render_offset)
-        {
-            thunk_renderer<buffer_type> ren(*this, ras_ptr, current_buffer_, common_, render_offset);
-            for (render_thunk_ptr const& thunk : thunks)
-            {
-                util::apply_visitor(ren, *thunk);
-            }
-        });
+        ren);
 }
 
 template void agg_renderer<image_rgba8>::process(group_symbolizer const&,
