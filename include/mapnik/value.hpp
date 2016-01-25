@@ -38,6 +38,7 @@
 #include <cstddef>
 #include <new>
 #include <type_traits>
+
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
@@ -69,339 +70,100 @@ inline void to_utf8(mapnik::value_unicode_string const& input, std::string & tar
 
 using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
 
-namespace impl {
+namespace detail {
+
+namespace {
+template <typename T, typename U>
+struct both_arithmetic : std::integral_constant<bool,
+                                             std::is_arithmetic<T>::value &&
+                                             std::is_arithmetic<U>::value > {};
 
 struct equals
 {
-    bool operator() (value_integer lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) == rhs;
-    }
-
-    bool operator() (value_bool lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) == rhs;
-    }
-
-    bool operator() (value_double lhs, value_integer rhs) const
-    {
-        return lhs == static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_bool lhs, value_integer rhs) const
-    {
-        return static_cast<value_integer>(lhs) == rhs;
-    }
-
-    bool operator() (value_integer lhs, value_bool rhs) const
-    {
-        return lhs == static_cast<value_integer>(rhs);
-    }
-
-    bool operator() (value_double lhs, value_bool rhs) const
-    {
-        return lhs == static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_unicode_string const& lhs,
-                     value_unicode_string const& rhs) const
-    {
-        return (lhs == rhs) ? true: false;
-    }
-
     template <typename T>
-    bool operator() (T lhs, T rhs) const
+    static bool apply(T const& lhs, T const& rhs)
     {
-        return lhs == rhs;
-    }
-
-    template <typename T, typename U>
-    bool operator() (T const&, U const&) const
-    {
-        return false;
+        return std::equal_to<T>()(lhs, rhs);
     }
 };
 
-struct not_equals
+struct not_equal
 {
-    template <typename T, typename U>
-    bool operator() (const T &, const U &) const
-    {
-        return true;
-    }
-
     template <typename T>
-    bool operator() (T lhs, T rhs) const
+    static bool apply(T const& lhs, T const& rhs)
     {
-        return lhs != rhs;
+        return std::not_equal_to<T>()(lhs, rhs);
     }
-
-    bool operator() (value_bool lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) != rhs;
-    }
-
-    bool operator() (value_bool lhs, value_integer rhs) const
-    {
-        return static_cast<value_integer>(lhs) != rhs;
-    }
-
-    bool operator() (value_integer lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) != rhs;
-    }
-
-    bool operator() (value_double lhs, value_integer rhs) const
-    {
-        return  lhs != static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_integer lhs, value_bool rhs) const
-    {
-        return lhs != static_cast<value_integer>(rhs);
-    }
-
-    bool operator() (value_double lhs, value_bool rhs) const
-    {
-        return  lhs != static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_unicode_string const& lhs,
-                     value_unicode_string const& rhs) const
-    {
-        return  (lhs != rhs)? true : false;
-    }
-
-    // back compatibility shim to equate empty string with null for != test
-    // https://github.com/mapnik/mapnik/issues/1859
-    // TODO - consider removing entire specialization at Mapnik 3.x
-    bool operator() (value_null, value_unicode_string const& rhs) const
-    {
-        if (rhs.isEmpty()) return false;
-        return true;
-    }
-
 };
 
 struct greater_than
 {
-    template <typename T, typename U>
-    bool operator()(const T &, const U &) const
-    {
-        return false;
-    }
-
     template <typename T>
-    bool operator()(T lhs, T rhs) const
+    static bool apply(T const& lhs, T const& rhs)
     {
-        return lhs > rhs;
-    }
-
-    bool operator() (value_bool lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) > rhs;
-    }
-
-    bool operator() (value_double lhs, value_bool rhs) const
-    {
-        return lhs > static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_bool lhs, value_integer rhs) const
-    {
-        return static_cast<value_integer>(lhs) > rhs;
-    }
-
-    bool operator() (value_integer lhs, value_bool rhs) const
-    {
-        return lhs > static_cast<value_integer>(rhs);
-    }
-
-    bool operator() (value_integer lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) > rhs;
-    }
-
-    bool operator() (value_double lhs, value_integer rhs) const
-    {
-        return static_cast<value_double>(lhs) > rhs;
-    }
-
-    bool operator() (value_unicode_string const& lhs, value_unicode_string const& rhs) const
-    {
-        return  (lhs > rhs) ? true : false ;
-    }
-
-    bool operator() (value_null, value_null) const
-    {
-        return false;
+        return std::greater<T>()(lhs, rhs);
     }
 };
 
 struct greater_or_equal
 {
-    template <typename T, typename U>
-    bool operator()(const T &, const U &) const
-    {
-        return false;
-    }
-
     template <typename T>
-    bool operator() (T lhs, T rhs) const
+    static bool apply(T const& lhs, T const& rhs)
     {
-        return lhs >= rhs;
-    }
-
-    bool operator() (value_bool lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) >= rhs;
-    }
-
-    bool operator() (value_double lhs, value_bool rhs) const
-    {
-        return lhs >= static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_bool lhs, value_integer rhs) const
-    {
-        return static_cast<value_integer>(lhs) >= rhs;
-    }
-
-    bool operator() (value_integer lhs, value_bool rhs) const
-    {
-        return lhs >= static_cast<value_integer>(rhs);
-    }
-
-    bool operator() (value_integer lhs, value_double rhs) const
-    {
-        return  static_cast<value_double>(lhs) >= rhs;
-    }
-
-    bool operator() (value_double lhs, value_integer rhs) const
-    {
-        return  lhs >= static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_unicode_string const& lhs, value_unicode_string const& rhs) const
-    {
-        return ( lhs >= rhs ) ? true : false ;
-    }
-
-    bool operator() (value_null, value_null) const
-    {
-        return false;
+        return std::greater_equal<T>()(lhs, rhs);
     }
 };
 
 struct less_than
 {
-    template <typename T, typename U>
-    bool operator()(const T &, const U &) const
-    {
-        return false;
-    }
-
     template <typename T>
-    bool operator()(T lhs, T rhs) const
+    static bool apply(T const& lhs, T const& rhs)
     {
-        return lhs < rhs;
-    }
-
-    bool operator() (value_bool lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) < rhs;
-    }
-
-    bool operator() (value_double lhs, value_bool rhs) const
-    {
-        return lhs < static_cast<value_double>(rhs);
-    }
-
-    bool operator() (value_bool lhs, value_integer rhs) const
-    {
-        return static_cast<value_integer>(lhs) < rhs;
-    }
-
-    bool operator() (value_integer lhs, value_bool rhs) const
-    {
-        return lhs < static_cast<value_integer>(rhs);
-    }
-
-    bool operator() (value_integer lhs, value_double rhs) const
-    {
-        return  static_cast<value_double>(lhs) < rhs;
-    }
-
-    bool operator() (value_double lhs, value_integer rhs) const
-    {
-        return  lhs < static_cast<value_double>(rhs);
-    }
-
-    bool operator()(value_unicode_string const& lhs,
-                    value_unicode_string const& rhs ) const
-    {
-        return (lhs < rhs) ? true : false ;
-    }
-
-    bool operator() (value_null, value_null) const
-    {
-        return false;
+        return std::less<T>()(lhs, rhs);
     }
 };
 
 struct less_or_equal
 {
-    template <typename T, typename U>
-    bool operator()(const T &, const U &) const
-    {
-        return false;
-    }
-
     template <typename T>
-    bool operator()(T lhs, T rhs) const
+    static bool apply(T const& lhs, T const& rhs)
     {
-        return lhs <= rhs;
+        return std::less_equal<T>()(lhs, rhs);
+    }
+};
+
+}
+
+template <typename Op, bool default_result>
+struct comparison
+{
+    // special case for unicode_strings
+    bool operator() (value_unicode_string const& lhs,
+                     value_unicode_string const& rhs) const
+    {
+        return Op::apply(lhs, rhs) ? true: false;
     }
 
-    bool operator() (value_bool lhs, value_double rhs) const
+    // same types
+    template <typename T>
+    bool operator() (T lhs, T rhs) const
     {
-        return static_cast<value_double>(lhs) <= rhs;
+        return Op::apply(lhs, rhs);
     }
 
-    bool operator() (value_double lhs, value_bool rhs) const
+    // both types are arithmetic - promote to the common type
+    template <typename T, typename U, typename std::enable_if<both_arithmetic<T,U>::value, int>::type = 0>
+    bool operator() (T const& lhs, U const& rhs) const
     {
-        return lhs <= static_cast<value_double>(rhs);
+        using common_type = typename std::common_type<T,U>::type;
+        return Op::apply(static_cast<common_type>(lhs),static_cast<common_type>(rhs));
     }
 
-    bool operator() (value_bool lhs, value_integer rhs) const
+    //
+    template <typename T, typename U, typename std::enable_if<!both_arithmetic<T,U>::value, int>::type = 0>
+    bool operator() (T const& lhs, U const& rhs) const
     {
-        return static_cast<value_integer>(lhs) <= rhs;
-    }
-
-    bool operator() (value_integer lhs, value_bool rhs) const
-    {
-        return lhs <= static_cast<value_integer>(rhs);
-    }
-
-    bool operator() (value_integer lhs, value_double rhs) const
-    {
-        return static_cast<value_double>(lhs) <= rhs;
-    }
-
-    bool operator() (value_double lhs, value_integer rhs) const
-    {
-        return lhs <= static_cast<value_double>(rhs);
-    }
-
-    bool operator()(value_unicode_string const& lhs,
-                    value_unicode_string const& rhs ) const
-    {
-        return (lhs <= rhs) ? true : false ;
-    }
-
-    bool operator() (value_null, value_null) const
-    {
-        return false;
+        return default_result;
     }
 };
 
@@ -899,7 +661,7 @@ struct convert<std::string>
     }
 };
 
-struct to_unicode
+struct to_unicode_impl
 {
 
     template <typename T>
@@ -939,9 +701,9 @@ struct to_unicode
     }
 };
 
-struct to_expression_string
+struct to_expression_string_impl
 {
-    explicit to_expression_string(char quote = '\'')
+    explicit to_expression_string_impl(char quote = '\'')
         : quote_(quote) {}
 
     std::string operator() (value_unicode_string const& val) const
@@ -967,7 +729,7 @@ struct to_expression_string
 
     std::string operator() (value_bool val) const
     {
-        return val ? "true":"false";
+        return val ? "true" : "false";
     }
 
     std::string operator() (value_null const&) const
@@ -978,7 +740,8 @@ struct to_expression_string
     const char quote_;
 };
 
-} // namespace impl
+
+} // namespace detail
 
 namespace value_adl_barrier {
 
@@ -1010,37 +773,37 @@ public:
 
     bool operator==(value const& other) const
     {
-        return util::apply_visitor(impl::equals(),*this,other);
+        return util::apply_visitor(detail::comparison<detail::equals, false>(), *this, other);
     }
 
     bool operator!=(value const& other) const
     {
-        return util::apply_visitor(impl::not_equals(),*this,other);
+        return util::apply_visitor(detail::comparison<detail::not_equal, true>(), *this, other);
     }
 
     bool operator>(value const& other) const
     {
-        return util::apply_visitor(impl::greater_than(),*this,other);
+        return util::apply_visitor(detail::comparison<detail::greater_than, false>(), *this, other);
     }
 
     bool operator>=(value const& other) const
     {
-        return util::apply_visitor(impl::greater_or_equal(),*this,other);
+        return util::apply_visitor(detail::comparison<detail::greater_or_equal, false>(), *this, other);
     }
 
     bool operator<(value const& other) const
     {
-        return util::apply_visitor(impl::less_than(),*this,other);
+        return util::apply_visitor(detail::comparison<detail::less_than, false>(), *this, other);
     }
 
     bool operator<=(value const& other) const
     {
-        return util::apply_visitor(impl::less_or_equal(),*this,other);
+        return util::apply_visitor(detail::comparison<detail::less_or_equal, false>(), *this, other);
     }
 
     value operator- () const
     {
-        return util::apply_visitor(impl::negate<value>(), *this);
+        return util::apply_visitor(detail::negate<value>(), *this);
     }
 
     bool is_null() const;
@@ -1048,63 +811,63 @@ public:
     template <typename T>
     T convert() const
     {
-        return util::apply_visitor(impl::convert<T>(),*this);
+        return util::apply_visitor(detail::convert<T>(),*this);
     }
 
     value_bool to_bool() const
     {
-        return util::apply_visitor(impl::convert<value_bool>(),*this);
+        return util::apply_visitor(detail::convert<value_bool>(),*this);
     }
 
     std::string to_expression_string(char quote = '\'') const
     {
-        return util::apply_visitor(impl::to_expression_string(quote),*this);
+        return util::apply_visitor(detail::to_expression_string_impl(quote),*this);
     }
 
     std::string to_string() const
     {
-        return util::apply_visitor(impl::convert<std::string>(),*this);
+        return util::apply_visitor(detail::convert<std::string>(),*this);
     }
 
     value_unicode_string to_unicode() const
     {
-        return util::apply_visitor(impl::to_unicode(),*this);
+        return util::apply_visitor(detail::to_unicode_impl(),*this);
     }
 
     value_double to_double() const
     {
-        return util::apply_visitor(impl::convert<value_double>(),*this);
+        return util::apply_visitor(detail::convert<value_double>(),*this);
     }
 
     value_integer to_int() const
     {
-        return util::apply_visitor(impl::convert<value_integer>(),*this);
+        return util::apply_visitor(detail::convert<value_integer>(),*this);
     }
 };
 
 inline const value operator+(value const& p1,value const& p2)
 {
-    return value(util::apply_visitor(impl::add<value>(),p1, p2));
+    return value(util::apply_visitor(detail::add<value>(),p1, p2));
 }
 
 inline const value operator-(value const& p1,value const& p2)
 {
-    return value(util::apply_visitor(impl::sub<value>(),p1, p2));
+    return value(util::apply_visitor(detail::sub<value>(),p1, p2));
 }
 
 inline const value operator*(value const& p1,value const& p2)
 {
-    return value(util::apply_visitor(impl::mult<value>(),p1, p2));
+    return value(util::apply_visitor(detail::mult<value>(),p1, p2));
 }
 
 inline const value operator/(value const& p1,value const& p2)
 {
-    return value(util::apply_visitor(impl::div<value>(),p1, p2));
+    return value(util::apply_visitor(detail::div<value>(),p1, p2));
 }
 
 inline const value operator%(value const& p1,value const& p2)
 {
-    return value(util::apply_visitor(impl::mod<value>(),p1, p2));
+    return value(util::apply_visitor(detail::mod<value>(),p1, p2));
 }
 
 template <typename charT, typename traits>
