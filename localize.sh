@@ -10,6 +10,7 @@ fi
 export PATH=$(pwd)/utils/mapnik-render/:${PATH}
 export PATH=$(pwd)/utils/mapnik-index/:${PATH}
 export PATH=$(pwd)/utils/mapnik-config/:${PATH}
+export PATH=$(pwd)/utils/shapeindex/:${PATH}
 
 # mapnik-settings.env is an optional file to store
 # environment variables that should be used before

@@ -66,8 +66,8 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
         cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
 
-    cmd += "shapeindex";
-    if (index_parts) cmd+= " --index-parts ";
+    cmd += "shapeindex ";
+    if (index_parts) cmd+= "--index-parts ";
     cmd += filename;
     if (silent)
     {
@@ -104,7 +104,7 @@ TEST_CASE("shapeindex")
                         // count features
                         std::size_t feature_count = count_shapefile_features(path);
                         // create *.index
-                        create_shapefile_index(path, index_parts);
+                        REQUIRE(create_shapefile_index(path, index_parts) == 0);
                         if (feature_count == 0)
                         {
                             REQUIRE(!mapnik::util::exists(index_path)); // index won't be created if there's no features
