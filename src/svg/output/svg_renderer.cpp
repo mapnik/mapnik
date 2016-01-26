@@ -27,7 +27,6 @@
 #include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/font_set.hpp>
 

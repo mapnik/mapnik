@@ -29,10 +29,24 @@
 
 namespace mapnik {
 
+// copy constructor exclusively for virtual_renderer_common
+renderer_common::renderer_common(renderer_common const& other)
+    : width_(other.width_),
+      height_(other.height_),
+      scale_factor_(other.scale_factor_),
+      vars_(other.vars_),
+      shared_font_library_(other.shared_font_library_),
+      font_library_(other.font_library_),
+      font_manager_(other.font_manager_),
+      query_extent_(other.query_extent_),
+      t_(other.t_),
+      detector_(other.detector_)
+{}
+
 renderer_common::renderer_common(Map const& map, unsigned width, unsigned height, double scale_factor,
                                  attributes const& vars,
                                  view_transform && t,
-                                 std::shared_ptr<label_collision_detector4> detector)
+                                 detector_ptr detector)
    : width_(width),
      height_(height),
      scale_factor_(scale_factor),
@@ -57,7 +71,7 @@ renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned 
 
 renderer_common::renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                                  unsigned width, unsigned height, double scale_factor,
-                                 std::shared_ptr<label_collision_detector4> detector)
+                                 detector_ptr detector)
    : renderer_common(m, width, height, scale_factor,
                      vars,
                      view_transform(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
@@ -73,5 +87,11 @@ renderer_common::renderer_common(Map const &m, request const &req, attributes co
                         box2d<double>(-req.buffer_size(), -req.buffer_size(),
                                       req.width() + req.buffer_size() ,req.height() + req.buffer_size())))
 {}
+
+renderer_common::~renderer_common()
+{
+    // defined in .cpp to make this destructible elsewhere without
+    // having to #include <mapnik/label_collision_detector.hpp>
+}
 
 }

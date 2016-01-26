@@ -44,22 +44,9 @@ namespace mapnik {
 // being able to interpose our own decisions about whether
 // a collision has occurred or not.
 
-struct virtual_renderer_common : private util::noncopyable
+struct virtual_renderer_common : renderer_common
 {
-    virtual_renderer_common(renderer_common & common);
-    ~virtual_renderer_common();
-
-    unsigned & width_;
-    unsigned & height_;
-    double & scale_factor_;
-    attributes & vars_;
-    // TODO: dirty hack for cairo renderer, figure out how to remove this
-    std::shared_ptr<font_library> & shared_font_library_;
-    font_library & font_library_;
-    face_manager_freetype & font_manager_;
-    box2d<double> & query_extent_;
-    view_transform & t_;
-    std::unique_ptr<label_collision_detector4> detector_;
+    explicit virtual_renderer_common(renderer_common const& other);
 };
 
 // Base class for extracting the bounding boxes associated with placing

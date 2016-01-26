@@ -29,23 +29,11 @@
 
 namespace mapnik {
 
-virtual_renderer_common::virtual_renderer_common(renderer_common & common)
-    : width_(common.width_),
-      height_(common.height_),
-      scale_factor_(common.scale_factor_),
-      vars_(common.vars_),
-      shared_font_library_(common.shared_font_library_),
-      font_library_(*shared_font_library_),
-      font_manager_(common.font_manager_),
-      query_extent_(common.query_extent_),
-      t_(common.t_),
-      detector_(new label_collision_detector4(common.detector_->extent()))
-{}
-
-virtual_renderer_common::~virtual_renderer_common()
+virtual_renderer_common::virtual_renderer_common(renderer_common const& other)
+    : renderer_common(other)
 {
-    // defined in .cpp to make this destructible elsewhere without
-    // having to #include <mapnik/label_collision_detector.hpp>
+    // replace collision detector with my own so that I don't pollute the original
+    detector_ = std::make_shared<label_collision_detector4>(other.detector_->extent());
 }
 
 namespace detail {
