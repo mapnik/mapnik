@@ -301,6 +301,26 @@ auto hex1_opacity = [](auto& ctx)
     _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
+auto hex2_red = [](auto& ctx)
+{
+    _val(ctx).red_ = _attr(ctx);
+};
+
+auto hex2_green = [](auto& ctx)
+{
+    _val(ctx).green_ = _attr(ctx);
+};
+
+auto hex2_blue = [](auto& ctx)
+{
+    _val(ctx).blue_ = _attr(ctx);
+};
+
+auto hex2_opacity = [](auto& ctx)
+{
+    _val(ctx).alpha_ = _attr(ctx);
+};
+
 auto hsl_to_rgba = [] (auto& ctx)
 {
     double h = std::get<0>(_attr(ctx));
@@ -332,7 +352,11 @@ auto hsl_to_rgba = [] (auto& ctx)
                       alpha);
 };
 
-auto const hex2_color_def = no_skip[lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255))] ;
+auto const hex2_color_def = no_skip[lit('#')
+                                    >> hex2[hex2_red]
+                                    >> hex2[hex2_green]
+                                    >> hex2[hex2_blue]
+                                    >> (hex2[hex2_opacity] | attr(255)[hex2_opacity])];
 
 auto const hex1_color_def = no_skip[lit('#')
                                     >> hex1[hex1_red]
@@ -341,9 +365,9 @@ auto const hex1_color_def = no_skip[lit('#')
                                     >> (hex1[hex1_opacity] | attr(15)[hex1_opacity])];
 
 auto const rgb_color_def = lit("rgb")
-    >> lit('(') >> dec3
-    >> lit(',') >> dec3
-    >> lit(',') >> dec3
+    >> lit('(') >> dec3[dec_red]
+    >> lit(',') >> dec3[dec_green]
+    >> lit(',') >> dec3[dec_blue]
     >> attr(255) >> lit(')');
 
 auto const rgb_color_percent_def = lit("rgb")
