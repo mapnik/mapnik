@@ -63,7 +63,7 @@ porting notes -->
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/renderer_common/process_markers_symbolizer.hpp>
+#include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"

@@ -33,7 +33,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
-#include <mapnik/renderer_common/process_markers_symbolizer.hpp>
+#include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
 // agg
 #include "agg/include/agg_array.h"      // for pod_bvector

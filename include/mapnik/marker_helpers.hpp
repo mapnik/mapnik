@@ -35,6 +35,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -47,55 +48,6 @@ namespace mapnik {
 struct clip_poly_tag;
 
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
-
-struct markers_dispatch_params
-{
-    // placement
-    markers_placement_params placement_params;
-    marker_placement_enum placement_method;
-    value_bool ignore_placement;
-    // rendering
-    bool snap_to_pixels;
-    double scale_factor;
-    value_double opacity;
-
-    markers_dispatch_params(box2d<double> const& size,
-                            agg::trans_affine const& tr,
-                            symbolizer_base const& sym,
-                            feature_impl const& feature,
-                            attributes const& vars,
-                            double scale = 1.0,
-                            bool snap = false)
-        : placement_params{
-            .size = size,
-            .tr = tr,
-            .spacing = get<value_double, keys::spacing>(sym, feature, vars),
-            .max_error = get<value_double, keys::max_error>(sym, feature, vars),
-            .allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, vars),
-            .avoid_edges = get<value_bool, keys::avoid_edges>(sym, feature, vars),
-            .direction = get<direction_enum, keys::direction>(sym, feature, vars)}
-        , placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars))
-        , ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars))
-        , snap_to_pixels(snap)
-        , scale_factor(scale)
-        , opacity(get<value_double, keys::opacity>(sym, feature, vars))
-    {
-        placement_params.spacing *= scale;
-    }
-};
-
-struct markers_renderer_context : util::noncopyable
-{
-    virtual void render_marker(image_rgba8 const& src,
-                               markers_dispatch_params const& params,
-                               agg::trans_affine const& marker_tr) = 0;
-
-    virtual void render_marker(svg_path_ptr const& src,
-                               svg_path_adapter & path,
-                               svg_attribute_type const& attrs,
-                               markers_dispatch_params const& params,
-                               agg::trans_affine const& marker_tr) = 0;
-};
 
 template <typename Detector>
 struct vector_markers_dispatch : util::noncopyable
