@@ -48,64 +48,106 @@ struct clip_poly_tag;
 
 using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
+struct markers_dispatch_params
+{
+    // placement
+    markers_placement_params placement_params;
+    marker_placement_enum placement_method;
+    value_bool ignore_placement;
+    // rendering
+    bool snap_to_pixels;
+    double scale_factor;
+    value_double opacity;
+
+    markers_dispatch_params(box2d<double> const& size,
+                            agg::trans_affine const& tr,
+                            symbolizer_base const& sym,
+                            feature_impl const& feature,
+                            attributes const& vars,
+                            double scale = 1.0,
+                            bool snap = false)
+        : placement_params{
+            .size = size,
+            .tr = tr,
+            .spacing = get<value_double, keys::spacing>(sym, feature, vars),
+            .max_error = get<value_double, keys::max_error>(sym, feature, vars),
+            .allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, vars),
+            .avoid_edges = get<value_bool, keys::avoid_edges>(sym, feature, vars),
+            .direction = get<direction_enum, keys::direction>(sym, feature, vars)}
+        , placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars))
+        , ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars))
+        , snap_to_pixels(snap)
+        , scale_factor(scale)
+        , opacity(get<value_double, keys::opacity>(sym, feature, vars))
+    {
+        placement_params.spacing *= scale;
+    }
+};
+
+struct markers_renderer_context : util::noncopyable
+{
+    virtual void render_marker(image_rgba8 const& src,
+                               markers_dispatch_params const& params,
+                               agg::trans_affine const& marker_tr) = 0;
+
+    virtual void render_marker(svg_path_ptr const& src,
+                               svg_path_adapter & path,
+                               svg_attribute_type const& attrs,
+                               markers_dispatch_params const& params,
+                               agg::trans_affine const& marker_tr) = 0;
+};
+
 template <typename Detector>
 struct vector_markers_dispatch : util::noncopyable
 {
     vector_markers_dispatch(svg_path_ptr const& src,
+                            svg_path_adapter & path,
+                            svg_attribute_type const& attrs,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector & detector,
                             double scale_factor,
                             feature_impl const& feature,
-                            attributes const& vars)
-        : src_(src),
-          marker_trans_(marker_trans),
-          sym_(sym),
-          detector_(detector),
-          feature_(feature),
-          vars_(vars),
-          scale_factor_(scale_factor)
+                            attributes const& vars,
+                            bool snap_to_pixels,
+                            markers_renderer_context & renderer_context)
+        : params_(src->bounding_box(), recenter(src) * marker_trans,
+                  sym, feature, vars, scale_factor, snap_to_pixels)
+        , renderer_context_(renderer_context)
+        , src_(src)
+        , path_(path)
+        , attrs_(attrs)
+        , detector_(detector)
     {}
-
-    virtual ~vector_markers_dispatch() {}
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum, keys::markers_placement_type>(sym_, feature_, vars_);
-        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
-        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
-        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
-        value_double opacity = get<value_double,keys::opacity>(sym_, feature_, vars_);
-        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
-        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
-        coord2d center = src_->bounding_box().center();
-        agg::trans_affine_translation recenter(-center.x, -center.y);
-        agg::trans_affine tr = recenter * marker_trans_;
-        direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
-        markers_placement_params params { src_->bounding_box(), tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
         markers_placement_finder<T, Detector> placement_finder(
-            placement_method, path, detector_, params);
+            params_.placement_method, path, detector_, params_.placement_params);
         double x, y, angle = .0;
-        while (placement_finder.get_point(x, y, angle, ignore_placement))
+        while (placement_finder.get_point(x, y, angle, params_.ignore_placement))
         {
-            agg::trans_affine matrix = tr;
+            agg::trans_affine matrix = params_.placement_params.tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            render_marker(matrix, opacity);
+            renderer_context_.render_marker(src_, path_, attrs_, params_, matrix);
         }
     }
 
-    virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
-
 protected:
+    static agg::trans_affine recenter(svg_path_ptr const& src)
+    {
+        coord2d center = src->bounding_box().center();
+        return agg::trans_affine_translation(-center.x, -center.y);
+    }
+
+    markers_dispatch_params params_;
+    markers_renderer_context & renderer_context_;
     svg_path_ptr const& src_;
-    agg::trans_affine const& marker_trans_;
-    symbolizer_base const& sym_;
+    svg_path_adapter & path_;
+    svg_attribute_type const& attrs_;
     Detector & detector_;
-    feature_impl const& feature_;
-    attributes const& vars_;
-    double scale_factor_;
 };
 
 template <typename Detector>
@@ -117,53 +159,35 @@ struct raster_markers_dispatch : util::noncopyable
                             Detector & detector,
                             double scale_factor,
                             feature_impl const& feature,
-                            attributes const& vars)
-    : src_(src),
-        marker_trans_(marker_trans),
-        sym_(sym),
-        detector_(detector),
-        feature_(feature),
-        vars_(vars),
-        scale_factor_(scale_factor)
+                            attributes const& vars,
+                            markers_renderer_context & renderer_context)
+        : params_(box2d<double>(0, 0, src.width(), src.height()),
+                  marker_trans, sym, feature, vars, scale_factor)
+        , renderer_context_(renderer_context)
+        , src_(src)
+        , detector_(detector)
     {}
-
-    virtual ~raster_markers_dispatch() {}
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum, keys::markers_placement_type>(sym_, feature_, vars_);
-        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
-        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
-        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, vars_);
-        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
-        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
-        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
-        box2d<double> bbox(0,0, src_.width(),src_.height());
-        direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
-        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
         markers_placement_finder<T, Detector> placement_finder(
-            placement_method, path, detector_, params);
+            params_.placement_method, path, detector_, params_.placement_params);
         double x, y, angle = .0;
-        while (placement_finder.get_point(x, y, angle, ignore_placement))
+        while (placement_finder.get_point(x, y, angle, params_.ignore_placement))
         {
-            agg::trans_affine matrix = marker_trans_;
+            agg::trans_affine matrix = params_.placement_params.tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            render_marker(matrix, opacity);
+            renderer_context_.render_marker(src_, params_, matrix);
         }
     }
 
-    virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
-
 protected:
+    markers_dispatch_params params_;
+    markers_renderer_context & renderer_context_;
     image_rgba8 const& src_;
-    agg::trans_affine const& marker_trans_;
-    symbolizer_base const& sym_;
     Detector & detector_;
-    feature_impl const& feature_;
-    attributes const& vars_;
-    double scale_factor_;
 };
 
 void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars,

@@ -38,68 +38,38 @@ virtual_renderer_common::virtual_renderer_common(renderer_common const& other)
 
 namespace detail {
 
-template <typename Detector, typename RendererContext>
-struct vector_marker_thunk_dispatch : public vector_markers_dispatch<Detector>
+struct thunk_markers_renderer_context : markers_renderer_context
 {
-    vector_marker_thunk_dispatch(svg_path_ptr const& src,
-                                 svg_path_adapter & path,
-                                 svg_attribute_type const& attrs,
-                                 agg::trans_affine const& marker_trans,
-                                 symbolizer_base const& sym,
-                                 Detector & detector,
-                                 double scale_factor,
-                                 feature_impl & feature,
-                                 attributes const& vars,
-                                 bool snap_to_pixels,
-                                 RendererContext const& renderer_context)
-        : vector_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
-          attrs_(attrs), comp_op_(get<composite_mode_e, keys::comp_op>(sym, feature, vars)),
-          snap_to_pixels_(snap_to_pixels), thunks_(std::get<0>(renderer_context))
+    thunk_markers_renderer_context(symbolizer_base const& sym,
+                                   feature_impl const& feature,
+                                   attributes const& vars,
+                                   render_thunk_list & thunks)
+        : comp_op_(get<composite_mode_e, keys::comp_op>(sym, feature, vars))
+        , thunks_(thunks)
     {}
 
-    ~vector_marker_thunk_dispatch() {}
-
-    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    virtual void render_marker(svg_path_ptr const& src,
+                               svg_path_adapter & path,
+                               svg_attribute_type const& attrs,
+                               markers_dispatch_params const& params,
+                               agg::trans_affine const& marker_tr)
     {
-        vector_marker_render_thunk thunk(this->src_, this->attrs_, marker_tr, opacity, comp_op_, snap_to_pixels_);
+        vector_marker_render_thunk thunk(src, attrs, marker_tr, params.opacity,
+                                         comp_op_, params.snap_to_pixels);
         thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
     }
 
-private:
-    svg_attribute_type const& attrs_;
-    composite_mode_e comp_op_;
-    bool snap_to_pixels_;
-    render_thunk_list & thunks_;
-};
-
-template <typename Detector, typename RendererContext>
-struct raster_marker_thunk_dispatch : public raster_markers_dispatch<Detector>
-{
-    raster_marker_thunk_dispatch(image_rgba8 const& src,
-                                 agg::trans_affine const& marker_trans,
-                                 symbolizer_base const& sym,
-                                 Detector & detector,
-                                 double scale_factor,
-                                 feature_impl & feature,
-                                 attributes const& vars,
-                                 RendererContext const& renderer_context,
-                                 bool snap_to_pixels = false)
-        : raster_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
-          comp_op_(get<composite_mode_e, keys::comp_op>(sym, feature, vars)),
-          snap_to_pixels_(snap_to_pixels), thunks_(std::get<0>(renderer_context))
-    {}
-
-    ~raster_marker_thunk_dispatch() {}
-
-    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    virtual void render_marker(image_rgba8 const& src,
+                               markers_dispatch_params const& params,
+                               agg::trans_affine const& marker_tr)
     {
-        raster_marker_render_thunk thunk(this->src_, marker_tr, opacity, comp_op_, snap_to_pixels_);
+        raster_marker_render_thunk thunk(src, marker_tr, params.opacity,
+                                         comp_op_, params.snap_to_pixels);
         thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
     }
 
 private:
     composite_mode_e comp_op_;
-    bool snap_to_pixels_;
     render_thunk_list & thunks_;
 };
 
@@ -118,12 +88,10 @@ render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
 
 void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
 {
-    auto renderer_context = std::tie(thunks_);
-    using thunk_context_type = decltype(renderer_context);
-    using vector_dispatch_type = detail::vector_marker_thunk_dispatch<label_collision_detector4, thunk_context_type>;
-    using raster_dispatch_type = detail::raster_marker_thunk_dispatch<label_collision_detector4, thunk_context_type>;
+    using context_type = detail::thunk_markers_renderer_context;
+    context_type renderer_context(sym, feature_, vars_, thunks_);
 
-    render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
+    render_markers_symbolizer(
             sym, feature_, prj_trans_, common_, clipping_extent_, renderer_context);
 
     update_box();

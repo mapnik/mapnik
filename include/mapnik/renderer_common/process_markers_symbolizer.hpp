@@ -37,7 +37,6 @@ struct render_marker_symbolizer_visitor
 {
     using vector_dispatch_type = VD;
     using raster_dispatch_type = RD;
-    using buffer_type = typename std::tuple_element<0,ContextType>::type;
 
     using vertex_converter_type = vertex_converter<clip_line_tag,
                                                    clip_poly_tag,
@@ -246,14 +245,19 @@ struct render_marker_symbolizer_visitor
     ContextType const& renderer_context_;
 };
 
-template <typename VD, typename RD, typename RendererType, typename ContextType>
+template <typename RendererType>
 void render_markers_symbolizer(markers_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans,
                                RendererType const& common,
                                box2d<double> const& clip_box,
-                               ContextType const& renderer_context)
+                               markers_renderer_context & renderer_context)
 {
+    using Detector = decltype(*common.detector_);
+    using VD = vector_markers_dispatch<Detector>;
+    using RD = raster_markers_dispatch<Detector>;
+    using ContextType = markers_renderer_context & ;
+
     using namespace mapnik::svg;
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     if (!filename.empty())
