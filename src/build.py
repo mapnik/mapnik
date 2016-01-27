@@ -257,6 +257,11 @@ source = Split(
     math.cpp
     """
     )
+env.MemoryHog(Split(
+    """
+    renderer_common/process_group_symbolizer.cpp
+    """
+    ))
 
 if env['PLUGIN_LINKING'] == 'static':
     hit = False
@@ -317,6 +322,13 @@ if env['HAS_CAIRO']:
     cairo/process_raster_symbolizer.cpp
     cairo/process_building_symbolizer.cpp
     """)
+    env.MemoryHog(Split(
+        """
+        cairo/process_group_symbolizer.cpp
+        cairo/process_line_symbolizer.cpp
+        cairo/process_markers_symbolizer.cpp
+        """
+        ))
 
 for cpp in enabled_imaging_libraries:
     source.append(cpp)
@@ -340,6 +352,13 @@ source += Split(
     agg/process_debug_symbolizer.cpp
     """
     )
+env.MemoryHog(Split(
+    """
+    agg/process_group_symbolizer.cpp
+    agg/process_line_symbolizer.cpp
+    agg/process_markers_symbolizer.cpp
+    """
+    ))
 
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
@@ -367,6 +386,13 @@ if env['GRID_RENDERER']:
         grid/process_shield_symbolizer.cpp
         grid/process_text_symbolizer.cpp
         """)
+    env.MemoryHog(Split(
+        """
+        grid/process_group_symbolizer.cpp
+        grid/process_line_symbolizer.cpp
+        grid/process_markers_symbolizer.cpp
+        """
+        ))
     lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
     libmapnik_defines.append('-DGRID_RENDERER')
 

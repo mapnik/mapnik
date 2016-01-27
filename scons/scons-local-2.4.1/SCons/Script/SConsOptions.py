@@ -123,6 +123,7 @@ class SConsValues(optparse.Values):
         'max_drift',
         'md5_chunksize',
         'no_exec',
+        'num_hogs',
         'num_jobs',
         'random',
         'stack_size',
@@ -136,7 +137,7 @@ class SConsValues(optparse.Values):
         if not name in self.settable:
             raise SCons.Errors.UserError("This option is not settable from a SConscript file: %s"%name)
 
-        if name == 'num_jobs':
+        if name == 'num_jobs' or name == 'num_hogs':
             try:
                 value = int(value)
                 if value < 1:
@@ -752,6 +753,13 @@ def Parser(version):
     op.add_option("-H", "--help-options",
                   action="help",
                   help="Print this message and exit.")
+
+    op.add_option('--hogs',
+                  nargs=1, type="int",
+                  dest="num_hogs", default=1,
+                  action="store",
+                  help="Allow N memory-intensive jobs at once.",
+                  metavar="N")
 
     op.add_option('-i', '--ignore-errors',
                   dest='ignore_errors', default=False,

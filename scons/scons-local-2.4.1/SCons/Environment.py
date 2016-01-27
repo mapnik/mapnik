@@ -2100,6 +2100,18 @@ class Base(SubstitutionEnvironment):
                    ret.append(t)
         return ret
 
+    def MemoryHog(self, *targets):
+        """
+        Mark targets as memory hogs. This will limit the number
+        of parallel jobs used to build their direct parents.
+        """
+        tlist = []
+        for t in targets:
+            tlist.extend(self.arg2nodes(t, self.fs.Entry))
+        for t in tlist:
+            t.set_memory_hog()
+        return tlist
+
     def Precious(self, *targets):
         tlist = []
         for t in targets:

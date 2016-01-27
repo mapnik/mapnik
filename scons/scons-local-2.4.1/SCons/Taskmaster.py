@@ -205,6 +205,9 @@ class Task(object):
         """
         return self.node
 
+    def is_memory_hog(self):
+        raise NotImplementedError
+
     def needs_execute(self):
         # TODO(deprecate):  "return True" is the old default behavior;
         # change it to NotImplementedError (after running through the
@@ -540,6 +543,14 @@ class Task(object):
         raise exc_type, exc_value, exc_traceback
 
 class AlwaysTask(Task):
+    def is_memory_hog(self):
+        """
+        Considering this is the base of CleanTask and QuestionTask,
+        it seems reasonable to return False by default, since these
+        need much less memory than the corresponding BuildTask.
+        """
+        return False
+
     def needs_execute(self):
         """
         Always returns True (indicating this Task should always
@@ -554,7 +565,33 @@ class AlwaysTask(Task):
         """
         return True
 
+def contains_memory_hog(tlist):
+    for t in tlist:
+        if t.memory_hog:
+            return True
+    return False
+
 class OutOfDateTask(Task):
+    def is_memory_hog(self):
+        """
+        Return True if any of this task's targets has a source
+        or an implicit dependency marked as MemoryHog.
+        """
+        try:
+            return self._memory_hog
+        except AttributeError:
+            pass
+        # we don't have previous result
+        for t in self.targets:
+            if not t.has_explicit_builder():
+                continue
+            if ((t.implicit and contains_memory_hog(t.implicit)) or
+                                contains_memory_hog(t.sources)):
+                self._memory_hog = True
+                return True
+        self._memory_hog = False
+        return False
+
     def needs_execute(self):
         """
         Returns True (indicating this Task should be executed) if this

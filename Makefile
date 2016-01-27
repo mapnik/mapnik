@@ -7,10 +7,14 @@ ifeq ($(JOBS),)
 	JOBS:=1
 endif
 
+ifeq ($(HOGS),)
+	HOGS:=1
+endif
+
 all: mapnik
 
 install:
-	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
+	$(PYTHON) scons/scons.py -j$(JOBS) --hogs=$(HOGS) --config=cache --implicit-cache --max-drift=1 install
 
 release:
 	export MAPNIK_VERSION=$(shell ./utils/mapnik-config/mapnik-config --version) && \
@@ -36,27 +40,8 @@ python:
 	make
 	python bindings/python/test/visual.py -q
 
-src/json/libmapnik-json.a:
-	# we first build memory intensive files with -j1
-	$(PYTHON) scons/scons.py -j1 \
-		--config=cache --implicit-cache --max-drift=1 \
-		src/renderer_common/process_group_symbolizer.os \
-		src/json/libmapnik-json.a \
-		src/wkt/libmapnik-wkt.a \
-		src/css_color_grammar.os \
-		src/expression_grammar.os \
-		src/transform_expression_grammar.os \
-		src/image_filter_types.os \
-		src/agg/process_markers_symbolizer.os \
-		src/agg/process_group_symbolizer.os \
-		src/grid/process_markers_symbolizer.os \
-		src/grid/process_group_symbolizer.os \
-		src/cairo/process_markers_symbolizer.os \
-		src/cairo/process_group_symbolizer.os \
-
-mapnik: src/json/libmapnik-json.a
-	# then install the rest with -j$(JOBS)
-	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
+mapnik:
+	$(PYTHON) scons/scons.py -j$(JOBS) --hogs=$(HOGS) --config=cache --implicit-cache --max-drift=1
 
 clean:
 	@$(PYTHON) scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1

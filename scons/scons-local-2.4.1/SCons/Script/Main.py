@@ -1258,7 +1258,7 @@ def _build_targets(fs, options, targets, target_top):
 
     global num_jobs
     num_jobs = options.num_jobs
-    jobs = SCons.Job.Jobs(num_jobs, taskmaster)
+    jobs = SCons.Job.Jobs(num_jobs, options.num_hogs, taskmaster)
     if num_jobs > 1:
         msg = None
         if jobs.num_jobs == 1:
