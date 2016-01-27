@@ -44,38 +44,21 @@ porting notes -->
 */
 
 // mapnik
-#include <mapnik/feature.hpp>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/marker_helpers.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid_render_marker.hpp>
 #include <mapnik/grid/grid.hpp>
-
-#include <mapnik/debug.hpp>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/marker_helpers.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/parse_path.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_rasterizer_scanline_aa.h"
-
-// boost
-#include <boost/optional.hpp>
-
-// stl
-#include <algorithm>
-#include <tuple>
 
 namespace mapnik {
 

@@ -25,19 +25,8 @@
 // mapnik
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_render_vector.hpp>
-#include <mapnik/markers_placement.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/util/noncopyable.hpp>
-#include <mapnik/pixel_position.hpp>
-#include <mapnik/attribute.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/marker_helpers.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
-
-// agg
-#include "agg/include/agg_array.h"      // for pod_bvector
-#include "agg/include/agg_trans_affine.h"  // for trans_affine, etc
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik
 {

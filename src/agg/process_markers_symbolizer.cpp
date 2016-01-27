@@ -24,20 +24,12 @@
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-
-#include <mapnik/debug.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/marker_helpers.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
 #include <mapnik/agg_render_marker.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/parse_path.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
@@ -52,10 +44,6 @@
 #include "agg_scanline_u.h"
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
-
-
-// boost
-#include <boost/optional.hpp>
 
 namespace mapnik {
 
