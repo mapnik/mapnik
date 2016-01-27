@@ -31,7 +31,7 @@ struct apply_vertex_converter
     apply_vertex_converter(VertexConverter & converter, Processor & proc)
         : converter_(converter), proc_(proc) {}
     template <typename Adapter>
-    void operator() (Adapter const& adapter) const
+    void operator() (Adapter const& adapter)
     {
         converter_.apply(adapter, proc_);
     }

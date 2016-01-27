@@ -62,9 +62,9 @@ struct render_marker_symbolizer_visitor
           clip_box_(clip_box),
           renderer_context_(renderer_context) {}
 
-    void operator() (marker_null const&) {}
+    void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const& mark)
+    void operator() (marker_svg const& mark) const
     {
         using namespace mapnik::svg;
         bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);
@@ -179,7 +179,7 @@ struct render_marker_symbolizer_visitor
         }
     }
 
-    void operator() (marker_rgba8 const& mark)
+    void operator() (marker_rgba8 const& mark) const
     {
         using namespace mapnik::svg;
         bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);

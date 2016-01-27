@@ -71,9 +71,9 @@ struct agg_renderer_process_visitor_l
           feature_(feature),
           prj_trans_(prj_trans) {}
 
-    void operator() (marker_null const&) {}
+    void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const& marker)
+    void operator() (marker_svg const& marker) const
     {
         using color = agg::rgba8;
         using order = agg::order_rgba;
@@ -147,7 +147,7 @@ struct agg_renderer_process_visitor_l
         mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
     }
 
-    void operator() (marker_rgba8 const& marker)
+    void operator() (marker_rgba8 const& marker) const
     {
         using color = agg::rgba8;
         using order = agg::order_rgba;
@@ -214,7 +214,7 @@ struct agg_renderer_process_visitor_l
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter, ras);
-        mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
+        mapnik::util::apply_visitor(vertex_processor_type(apply), feature_.get_geometry());
     }
 
   private:

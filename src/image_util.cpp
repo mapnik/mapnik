@@ -2087,7 +2087,7 @@ struct visitor_view_to_stream
         : os_(os) {}
 
     template <typename T>
-    void operator() (T const& view)
+    void operator() (T const& view) const
     {
         for (std::size_t i=0;i<view.height();i++)
         {

@@ -104,10 +104,10 @@ struct setup_marker_visitor
     setup_marker_visitor(cairo_context & context, renderer_common const& common)
         : context_(context), common_(common) {}
 
-    void operator() (marker_null const &) {}
-    void operator() (marker_svg const &) {}
+    void operator() (marker_null const &) const{}
+    void operator() (marker_svg const &) const {}
 
-    void operator() (marker_rgba8 const& marker)
+    void operator() (marker_rgba8 const& marker) const
     {
         mapnik::image_rgba8 const& bg_image = marker.get_data();
         std::size_t w = bg_image.width();

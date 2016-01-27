@@ -683,7 +683,7 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
     using namespace boost::gil;
     rgba8_view_t src_view = rgba8_view(src);
     bool premultiplied = src.get_premultiplied();
-    
+
     for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
         rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
@@ -738,7 +738,7 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
             X = deviate_x * Y / deviate_y;
             Z = (1.0 - (deviate_x + deviate_y)) * Y / deviate_y;
             // Neutral grey calculated from luminance (in D65)
-            double neutral_X = 0.312713 * Y / 0.329016; 
+            double neutral_X = 0.312713 * Y / 0.329016;
             double neutral_Z = 0.358271 * Y / 0.329016;
             // Difference between simulated color and neutral grey
             double diff_X = neutral_X - X;
@@ -761,12 +761,12 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
             // Convert to RGB color space
             dr = X * 3.24071 + Y * -1.53726 + Z * -0.498571; // XYZ->RGB (sRGB:D65)
             dg = X * -0.969258 + Y * 1.87599 + Z * 0.0415557;
-            db = X * 0.0556352 + Y * -0.203996 + Z * 1.05707;            
+            db = X * 0.0556352 + Y * -0.203996 + Z * 1.05707;
             // Compensate simulated color towards a neutral fit in RGB space
             double fit_r = ((dr < 0.0 ? 0.0 : 1.0) - dr) / diff_r;
             double fit_g = ((dg < 0.0 ? 0.0 : 1.0) - dg) / diff_g;
             double fit_b = ((db < 0.0 ? 0.0 : 1.0) - db) / diff_b;
-            double adjust = std::max( (fit_r > 1.0 || fit_r < 0.0) ? 0.0 : fit_r, 
+            double adjust = std::max( (fit_r > 1.0 || fit_r < 0.0) ? 0.0 : fit_r,
                                       (fit_g > 1.0 || fit_g < 0.0) ? 0.0 : fit_g
                                     );
             adjust = std::max((fit_b > 1.0 || fit_b < 0.0) ? 0.0 : fit_b, adjust);
@@ -777,7 +777,7 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
             // Apply gamma correction
             dr = std::pow(dr, 1.0 / 2.2);
             dg = std::pow(dg, 1.0 / 2.2);
-            db = std::pow(db, 1.0 / 2.2);            
+            db = std::pow(db, 1.0 / 2.2);
             // premultiply
             dr *= da;
             dg *= da;
@@ -917,7 +917,7 @@ struct filter_visitor
     : src_(src) {}
 
     template <typename T>
-    void operator () (T const& filter)
+    void operator () (T const& filter) const
     {
         apply_filter(src_, filter);
     }
@@ -931,9 +931,9 @@ struct filter_radius_visitor
     filter_radius_visitor(int & radius)
         : radius_(radius) {}
     template <typename T>
-    void operator () (T const& /*filter*/) {}
+    void operator () (T const& /*filter*/)  const {}
 
-    void operator () (agg_stack_blur const& op)
+    void operator () (agg_stack_blur const& op) const
     {
         if (static_cast<int>(op.rx) > radius_) radius_ = static_cast<int>(op.rx);
         if (static_cast<int>(op.ry) > radius_) radius_ = static_cast<int>(op.ry);

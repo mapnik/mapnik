@@ -181,10 +181,10 @@ struct warp_image_visitor
           nodata_value_(nodata_value)
     {}
 
-    void operator() (image_null const&) {}
+    void operator() (image_null const&) const {}
 
     template <typename T>
-    void operator() (T const& source)
+    void operator() (T const& source) const
     {
         using image_type = T;
         //source and target image data types must match

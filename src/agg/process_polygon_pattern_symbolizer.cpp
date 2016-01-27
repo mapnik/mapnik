@@ -75,9 +75,9 @@ struct agg_renderer_process_visitor_p
         feature_(feature),
         prj_trans_(prj_trans) {}
 
-    void operator() (marker_null const&) {}
+    void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const& marker)
+    void operator() (marker_svg const& marker) const
     {
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
@@ -180,7 +180,7 @@ struct agg_renderer_process_visitor_p
         agg::render_scanlines(*ras_ptr_, sl, rp);
     }
 
-    void operator() (marker_rgba8 const& marker)
+    void operator() (marker_rgba8 const& marker) const
     {
         using color = agg::rgba8;
         using order = agg::order_rgba;

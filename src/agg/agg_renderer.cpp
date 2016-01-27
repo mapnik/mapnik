@@ -121,11 +121,11 @@ struct setup_agg_bg_visitor
            mode_(mode),
            opacity_(opacity) {}
 
-    void operator() (marker_null const&) {}
+    void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const&) {}
+    void operator() (marker_svg const&) const {}
 
-    void operator() (marker_rgba8 const& marker)
+    void operator() (marker_rgba8 const& marker) const
     {
         mapnik::image_rgba8 const& bg_image = marker.get_data();
         std::size_t w = bg_image.width();
@@ -361,9 +361,9 @@ struct agg_render_marker_visitor
           opacity_(opacity),
           comp_op_(comp_op) {}
 
-    void operator() (marker_null const&) {}
+    void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const& marker)
+    void operator() (marker_svg const& marker) const
     {
         using color_type = agg::rgba8;
         using order_type = agg::order_rgba;
@@ -414,7 +414,7 @@ struct agg_render_marker_visitor
         svg_renderer.render(*ras_ptr_, sl, renb, mtx, opacity_, bbox);
     }
 
-    void operator() (marker_rgba8 const& marker)
+    void operator() (marker_rgba8 const& marker) const
     {
         using color_type = agg::rgba8;
         using order_type = agg::order_rgba;

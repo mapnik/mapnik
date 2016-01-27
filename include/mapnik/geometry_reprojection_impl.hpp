@@ -178,12 +178,12 @@ struct geom_reproj_copy_visitor
         : proj_trans_(proj_trans),
           n_err_(n_err) {}
 
-    geometry<T> operator() (geometry_empty const&)
+    geometry<T> operator() (geometry_empty const&) const
     {
         return geometry_empty();
     }
 
-    geometry<T> operator() (point<T> const& p)
+    geometry<T> operator() (point<T> const& p) const
     {
         geometry<T> geom; // default empty
         unsigned int intial_err = n_err_;
@@ -193,7 +193,7 @@ struct geom_reproj_copy_visitor
         return geom;
     }
 
-    geometry<T> operator() (line_string<T> const& ls)
+    geometry<T> operator() (line_string<T> const& ls) const
     {
         geometry<T> geom; // default empty
         unsigned int intial_err = n_err_;
@@ -203,7 +203,7 @@ struct geom_reproj_copy_visitor
         return geom;
     }
 
-    geometry<T> operator() (polygon<T> const& poly)
+    geometry<T> operator() (polygon<T> const& poly) const
     {
         geometry<T> geom; // default empty
         polygon<T> new_poly = reproject_internal(poly, proj_trans_, n_err_);
@@ -212,7 +212,7 @@ struct geom_reproj_copy_visitor
         return geom;
     }
 
-    geometry<T> operator() (multi_point<T> const& mp)
+    geometry<T> operator() (multi_point<T> const& mp) const
     {
         geometry<T> geom; // default empty
         multi_point<T> new_mp = reproject_internal(mp, proj_trans_, n_err_);
@@ -221,7 +221,7 @@ struct geom_reproj_copy_visitor
         return geom;
     }
 
-    geometry<T> operator() (multi_line_string<T> const& mls)
+    geometry<T> operator() (multi_line_string<T> const& mls) const
     {
         geometry<T> geom; // default empty
         multi_line_string<T> new_mls = reproject_internal(mls, proj_trans_, n_err_);
@@ -230,7 +230,7 @@ struct geom_reproj_copy_visitor
         return geom;
     }
 
-    geometry<T> operator() (multi_polygon<T> const& mpoly)
+    geometry<T> operator() (multi_polygon<T> const& mpoly) const
     {
         geometry<T> geom; // default empty
         multi_polygon<T> new_mpoly = reproject_internal(mpoly, proj_trans_, n_err_);
@@ -239,7 +239,7 @@ struct geom_reproj_copy_visitor
         return geom;
     }
 
-    geometry<T> operator() (geometry_collection<T> const& c)
+    geometry<T> operator() (geometry_collection<T> const& c) const
     {
         geometry<T> geom; // default empty
         geometry_collection<T> new_c = reproject_internal(c, proj_trans_, n_err_);
@@ -284,15 +284,15 @@ struct geom_reproj_visitor {
         : proj_trans_(proj_trans) {}
 
     template <typename T>
-    bool operator() (geometry<T> & geom)
+    bool operator() (geometry<T> & geom) const
     {
         return mapnik::util::apply_visitor((*this), geom);
     }
 
-    bool operator() (geometry_empty &) { return true; }
+    bool operator() (geometry_empty &) const { return true; }
 
     template <typename T>
-    bool operator() (point<T> & p)
+    bool operator() (point<T> & p) const
     {
         if (!proj_trans_.forward(p))
         {
@@ -302,7 +302,7 @@ struct geom_reproj_visitor {
     }
 
     template <typename T>
-    bool operator() (line_string<T> & ls)
+    bool operator() (line_string<T> & ls) const
     {
         if (proj_trans_.forward(ls) > 0)
         {
@@ -312,7 +312,7 @@ struct geom_reproj_visitor {
     }
 
     template <typename T>
-    bool operator() (polygon<T> & poly)
+    bool operator() (polygon<T> & poly) const
     {
         if (proj_trans_.forward(poly.exterior_ring) > 0)
         {
@@ -330,13 +330,13 @@ struct geom_reproj_visitor {
     }
 
     template <typename T>
-    bool operator() (multi_point<T> & mp)
+    bool operator() (multi_point<T> & mp) const
     {
         return (*this) (static_cast<line_string<T> &>(mp));
     }
 
     template <typename T>
-    bool operator() (multi_line_string<T> & mls)
+    bool operator() (multi_line_string<T> & mls) const
     {
         for (auto & ls : mls)
         {
@@ -349,7 +349,7 @@ struct geom_reproj_visitor {
     }
 
     template <typename T>
-    bool operator() (multi_polygon<T> & mpoly)
+    bool operator() (multi_polygon<T> & mpoly) const
     {
         for (auto & poly : mpoly)
         {
@@ -362,7 +362,7 @@ struct geom_reproj_visitor {
     }
 
     template <typename T>
-    bool operator() (geometry_collection<T> & c)
+    bool operator() (geometry_collection<T> & c) const
     {
         for (auto & g : c)
         {

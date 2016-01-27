@@ -165,12 +165,12 @@ struct RingRenderer {
 };
 
 template <typename BufferType>
-struct render_ring_visitor {
-
+struct render_ring_visitor
+{
     render_ring_visitor(RingRenderer<BufferType> & renderer)
      : renderer_(renderer) {}
 
-    void operator()(mapnik::geometry::multi_polygon<double> const& geom)
+    void operator()(mapnik::geometry::multi_polygon<double> const& geom) const
     {
         for (auto const& poly : geom)
         {
@@ -178,7 +178,7 @@ struct render_ring_visitor {
         }
     }
 
-    void operator()(mapnik::geometry::polygon<double> const& geom)
+    void operator()(mapnik::geometry::polygon<double> const& geom) const
     {
         agg::rgba8 red(255,0,0,255);
         agg::rgba8 green(0,255,255,255);
@@ -199,7 +199,7 @@ struct render_ring_visitor {
     }
 
     template<typename GeomType>
-    void operator()(GeomType const&) {}
+    void operator()(GeomType const&) const {}
 
     RingRenderer<BufferType> & renderer_;
 };
