@@ -46,7 +46,7 @@ src/json/libmapnik-json.a:
 		src/css_color_grammar.os \
 		src/expression_grammar.os \
 		src/transform_expression_grammar.os \
-		src/image_filter_types.os \
+		src/image_filter_grammar.os \
 		src/agg/process_markers_symbolizer.os \
 		src/agg/process_group_symbolizer.os \
 		src/grid/process_markers_symbolizer.os \
