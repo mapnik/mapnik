@@ -78,7 +78,8 @@ struct render_thunk_extractor
     }
 
 private:
-    void extract_text_thunk(text_symbolizer const& sym) const;
+    void extract_text_thunk(text_render_thunk::helper_ptr && helper,
+                            text_symbolizer const& sym) const;
 
     box2d<double> & box_;
     render_thunk_list & thunks_;

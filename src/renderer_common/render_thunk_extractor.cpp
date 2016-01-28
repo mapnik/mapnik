@@ -98,15 +98,17 @@ void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
 
 void render_thunk_extractor::operator()(text_symbolizer const& sym) const
 {
-    extract_text_thunk(sym);
+    auto helper = std::make_unique<text_symbolizer_helper>(
+        sym, feature_, vars_, prj_trans_,
+        common_.width_, common_.height_,
+        common_.scale_factor_,
+        common_.t_, common_.font_manager_, *common_.detector_,
+        clipping_extent_, agg::trans_affine::identity);
+
+    extract_text_thunk(std::move(helper), sym);
 }
 
 void render_thunk_extractor::operator()(shield_symbolizer const& sym) const
-{
-    extract_text_thunk(sym);
-}
-
-void render_thunk_extractor::extract_text_thunk(text_symbolizer const& sym) const
 {
     auto helper = std::make_unique<text_symbolizer_helper>(
         sym, feature_, vars_, prj_trans_,
@@ -115,6 +117,12 @@ void render_thunk_extractor::extract_text_thunk(text_symbolizer const& sym) cons
         common_.t_, common_.font_manager_, *common_.detector_,
         clipping_extent_, agg::trans_affine::identity);
 
+    extract_text_thunk(std::move(helper), sym);
+}
+
+void render_thunk_extractor::extract_text_thunk(text_render_thunk::helper_ptr && helper,
+                                                text_symbolizer const& sym) const
+{
     double opacity = get<double>(sym, keys::opacity, feature_, common_.vars_, 1.0);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, common_.vars_, src_over);
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature_, common_.vars_, HALO_RASTERIZER_FULL);
