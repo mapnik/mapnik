@@ -1,4 +1,4 @@
-language: cpp
+language: c
 
 sudo: false
 
@@ -27,18 +27,30 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8 MASON_PUBLISH=true
+      env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=true
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6' ]
+          packages: [ 'clang-3.6', 'libstdc++-4.9-dev', 'libstdc++6' ]
     - os: linux
       compiler: gcc
-      env: JOBS=6
+      env: JOBS=6 CXX="ccache g++-4.9" CC="gcc-4.9"
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test' ]
+          packages: [ 'gcc-4.9', 'g++-4.9', 'libstdc++-4.9-dev', 'libstdc++6' ]
     - os: osx
       compiler: clang
+      osx_image: xcode7 # upgrades clang from 6 -> 7
       env: JOBS=8 MASON_PUBLISH=true
     - os: osx
       compiler: clang
+      osx_image: xcode7 # upgrades clang from 6 -> 7
       env: JOBS=8 COVERAGE=true
 
 before_install:
+ - export PYTHONUSERBASE=${PYTHONUSERBASE}
+ - export PATH=${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
@@ -55,20 +67,19 @@ before_install:
 
 install:
  - if [[ $(uname -s) == 'Linux' ]]; then
-     export CXX="ccache clang++-3.5 -Qunused-arguments";
-     export CC="ccache clang-3.5 -Qunused-arguments";
-     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python2.7/site-packages;
+     export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages;
    else
      brew rm postgis --force;
      brew install postgis --force;
      pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres;
      createuser -s postgres;
-     export PYTHONPATH=$(pwd)/mason_packages/.link/lib/python/site-packages;
+     export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages;
    fi
  - psql -c 'create database template_postgis;' -U postgres;
  - psql -c 'create extension postgis;' -d template_postgis -U postgres;
  - if [[ ${COVERAGE} == true ]]; then
-     PYTHONUSERBASE=$(pwd)/mason_packages/.link pip install --user cpp-coveralls;
+     if [[ ! $(which pip) ]]; then easy_install --user pip && export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}; fi;
+     pip install --user cpp-coveralls;
    fi
 
 script:
