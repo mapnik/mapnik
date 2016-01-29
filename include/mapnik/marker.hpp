@@ -182,8 +182,9 @@ struct marker : marker_base
     marker() = default;
 
     template <typename T>
-    marker(T && _data) noexcept
-        : marker_base(std::move(_data)) {}
+    marker(T && _data)
+        noexcept(std::is_nothrow_constructible<marker_base, T && >::value)
+        : marker_base(std::forward<T>(_data)) {}
 
     double width() const
     {
