@@ -41,8 +41,10 @@ namespace mapnik
 struct image_any;
 namespace svg { struct path_attributes; }
 
-using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
-using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;
+using svg::svg_path_adapter;
+
+using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
+using svg_storage_type = svg::svg_storage<svg::svg_path_storage, svg_attribute_type>;
 using svg_path_ptr = std::shared_ptr<svg_storage_type>;
 using image_ptr = std::shared_ptr<image_any>;
 

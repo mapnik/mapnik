@@ -361,7 +361,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
 face_manager::face_manager(font_library & library,
                            freetype_engine::font_file_mapping_type const& font_file_mapping,
                            freetype_engine::font_memory_cache_type const& font_cache)
-    : face_ptr_cache_(),
+    : face_cache_(new face_cache()),
       library_(library),
       font_file_mapping_(font_file_mapping),
       font_memory_cache_(font_cache)
@@ -376,8 +376,8 @@ face_manager::face_manager(font_library & library,
 
 face_ptr face_manager::get_face(std::string const& name)
 {
-    auto itr = face_ptr_cache_.find(name);
-    if (itr != face_ptr_cache_.end())
+    auto itr = face_cache_->find(name);
+    if (itr != face_cache_->end())
     {
         return itr->second;
     }
@@ -391,7 +391,7 @@ face_ptr face_manager::get_face(std::string const& name)
                                                      freetype_engine::get_cache());
         if (face)
         {
-            face_ptr_cache_.emplace(name,face);
+            face_cache_->emplace(name, face);
         }
         return face;
     }

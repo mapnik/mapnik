@@ -58,8 +58,35 @@ public:
                    composite_mode_e halo_comp_op = src_over,
                    double scale_factor = 1.0,
                    stroker_ptr stroker = stroker_ptr());
+
+    void set_comp_op(composite_mode_e comp_op)
+    {
+        comp_op_ = comp_op;
+    }
+
+    void set_halo_comp_op(composite_mode_e halo_comp_op)
+    {
+        halo_comp_op_ = halo_comp_op;
+    }
+
+    void set_halo_rasterizer(halo_rasterizer_e rasterizer)
+    {
+        rasterizer_ = rasterizer;
+    }
+
+    void set_scale_factor(double scale_factor)
+    {
+        scale_factor_ = scale_factor;
+    }
+
+    void set_stroker(stroker_ptr stroker)
+    {
+        stroker_ = stroker;
+    }
+
     void set_transform(agg::trans_affine const& transform);
     void set_halo_transform(agg::trans_affine const& halo_transform);
+
 protected:
     using glyph_vector = std::vector<glyph_t>;
     void prepare_glyphs(glyph_positions const& positions);

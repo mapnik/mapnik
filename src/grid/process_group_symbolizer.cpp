@@ -29,25 +29,13 @@
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/grid/grid_render_marker.hpp>
-#include <mapnik/attribute_collector.hpp>
-#include <mapnik/text/placement_finder.hpp>
-#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/group/group_layout_manager.hpp>
-#include <mapnik/group/group_symbolizer_helper.hpp>
-#include <mapnik/util/variant.hpp>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/pixel_position.hpp>
-#include <mapnik/label_collision_detector.hpp>
-
-#include <mapnik/geom_util.hpp>
-#include <mapnik/renderer_common/process_point_symbolizer.hpp>
-#include <mapnik/renderer_common/process_group_symbolizer.hpp>
+#include <mapnik/renderer_common/render_group_symbolizer.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -61,7 +49,7 @@ namespace mapnik {
  * in the detector from the placement_finder.
  */
 template <typename T0>
-struct thunk_renderer
+struct thunk_renderer : render_thunk_list_dispatch
 {
     using renderer_type = grid_renderer<T0>;
     using buffer_type = typename renderer_type::buffer_type;
@@ -71,13 +59,13 @@ struct thunk_renderer
                    grid_rasterizer &ras,
                    buffer_type &pixmap,
                    renderer_common &common,
-                   feature_impl &feature,
-                   pixel_position const &offset)
+                   feature_impl &feature)
         : ren_(ren), ras_(ras), pixmap_(pixmap),
-          common_(common), feature_(feature), offset_(offset)
+          common_(common), feature_(feature),
+          tex_(pixmap, src_over, common.scale_factor_)
     {}
 
-    void operator()(vector_marker_render_thunk const &thunk) const
+    virtual void operator()(vector_marker_render_thunk const& thunk)
     {
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
@@ -106,7 +94,7 @@ struct thunk_renderer
         pixmap_.add_feature(feature_);
     }
 
-    void operator()(raster_marker_render_thunk const &thunk) const
+    virtual void operator()(raster_marker_render_thunk const& thunk)
     {
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
@@ -122,34 +110,28 @@ struct thunk_renderer
         pixmap_.add_feature(feature_);
     }
 
-    void operator()(text_render_thunk const &thunk) const
+    virtual void operator()(text_render_thunk const &thunk)
     {
-        text_renderer_type ren(pixmap_, thunk.comp_op_, common_.scale_factor_);
+        tex_.set_comp_op(thunk.comp_op_);
+
         value_integer feature_id = feature_.id();
 
-        render_offset_placements(
-            thunk.placements_,
-            offset_,
-            [&] (glyph_positions_ptr const& glyphs)
-            {
-                marker_info_ptr mark = glyphs->get_marker();
-                if (mark)
-                {
-                    ren_.render_marker(feature_,
-                                       glyphs->marker_pos(),
-                                       *mark->marker_,
-                                       mark->transform_,
-                                       thunk.opacity_, thunk.comp_op_);
-                }
-                ren.render(*glyphs, feature_id);
-            });
-        pixmap_.add_feature(feature_);
-    }
+        for (auto const& glyphs : thunk.placements_)
+        {
+            scoped_glyph_positions_offset tmp_off(*glyphs, offset_);
 
-    template <typename T1>
-    void operator()(T1 const &) const
-    {
-        // TODO: warning if unimplemented?
+            if (auto const& mark = glyphs->get_marker())
+            {
+                ren_.render_marker(feature_,
+                                   glyphs->marker_pos(),
+                                   *mark->marker_,
+                                   mark->transform_,
+                                   thunk.opacity_, thunk.comp_op_);
+            }
+            tex_.render(*glyphs, feature_id);
+        }
+
+        pixmap_.add_feature(feature_);
     }
 
 private:
@@ -158,7 +140,7 @@ private:
     buffer_type &pixmap_;
     renderer_common &common_;
     feature_impl &feature_;
-    pixel_position offset_;
+    text_renderer_type tex_;
 };
 
 template <typename T>
@@ -166,16 +148,11 @@ void  grid_renderer<T>::process(group_symbolizer const& sym,
                                 mapnik::feature_impl & feature,
                                 proj_transform const& prj_trans)
 {
+    thunk_renderer<T> ren(*this, *ras_ptr, pixmap_, common_, feature);
+
     render_group_symbolizer(
         sym, feature, common_.vars_, prj_trans, common_.query_extent_, common_,
-        [&](render_thunk_list const& thunks, pixel_position const& render_offset)
-        {
-            thunk_renderer<T> ren(*this, *ras_ptr, pixmap_, common_, feature, render_offset);
-            for (render_thunk_ptr const& thunk : thunks)
-            {
-                util::apply_visitor(ren, *thunk);
-            }
-        });
+        ren);
 }
 
 template void grid_renderer<grid>::process(group_symbolizer const&,
