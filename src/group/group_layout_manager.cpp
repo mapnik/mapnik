@@ -34,19 +34,21 @@ namespace mapnik
 // This visitor will process offsets for the given layout
 struct process_layout
 {
+    using bound_box = box2d<double>;
+
     // The vector containing the existing, centered item bounding boxes
-    vector<bound_box> const& member_boxes_;
+    std::vector<bound_box> const& member_boxes_;
 
     // The vector to populate with item offsets
-    vector<pixel_position> & member_offsets_;
+    std::vector<pixel_position> & member_offsets_;
 
     // The origin point of the member boxes
     // i.e. The member boxes are positioned around input_origin,
     //      and the offset values should position them around (0,0)
     pixel_position const& input_origin_;
 
-    process_layout(vector<bound_box> const& member_bboxes,
-                   vector<pixel_position> &member_offsets,
+    process_layout(std::vector<bound_box> const& member_bboxes,
+                   std::vector<pixel_position> &member_offsets,
                    pixel_position const& input_origin)
        : member_boxes_(member_bboxes),
          member_offsets_(member_offsets),
@@ -54,9 +56,12 @@ struct process_layout
     {
     }
 
-    // arrange group memebers in centered, horizontal row
+    // arrange group members in centered, horizontal row
     void operator()(simple_row_layout const& layout) const
     {
+        member_offsets_.clear();
+        member_offsets_.reserve(member_boxes_.size());
+
         double total_width = (member_boxes_.size() - 1) * layout.get_item_margin();
         for (auto const& box : member_boxes_)
         {
@@ -66,7 +71,7 @@ struct process_layout
         double x_offset = -(total_width / 2.0);
         for (auto const& box : member_boxes_)
         {
-            member_offsets_.push_back(pixel_position(x_offset - box.minx(), -input_origin_.y));
+            member_offsets_.emplace_back(x_offset - box.minx(), -input_origin_.y);
             x_offset += box.width() + layout.get_item_margin();
         }
     }
@@ -150,7 +155,7 @@ private:
     }
 };
 
-bound_box group_layout_manager::offset_box_at(size_t i)
+box2d<double> group_layout_manager::offset_box_at(size_t i)
 {
     handle_update();
     pixel_position const& offset = member_offsets_.at(i);

@@ -42,13 +42,16 @@ namespace mapnik {
 
 struct renderer_common : private util::noncopyable
 {
+    using detector_ptr = std::shared_ptr<label_collision_detector4>;
+
     renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor);
     renderer_common(Map const &m, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor,
-                       std::shared_ptr<label_collision_detector4> detector);
+                       detector_ptr detector);
     renderer_common(Map const &m, request const &req, attributes const& vars, unsigned offset_x, unsigned offset_y,
                        unsigned width, unsigned height, double scale_factor);
+    ~renderer_common();
 
     unsigned width_;
     unsigned height_;
@@ -60,11 +63,18 @@ struct renderer_common : private util::noncopyable
     face_manager_freetype font_manager_;
     box2d<double> query_extent_;
     view_transform t_;
-    std::shared_ptr<label_collision_detector4> detector_;
+    detector_ptr detector_;
+
+protected:
+    // it's desirable to keep this class implicitly noncopyable to prevent
+    // inadvertent copying from other places;
+    // this copy constructor is therefore protected and should only be used
+    // by virtual_renderer_common
+    renderer_common(renderer_common const& other);
 
 private:
     renderer_common(Map const &m, unsigned width, unsigned height, double scale_factor,
-                    attributes const& vars, view_transform &&t, std::shared_ptr<label_collision_detector4> detector);
+                    attributes const& vars, view_transform && t, detector_ptr detector);
 };
 
 }

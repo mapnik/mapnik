@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,25 +20,10 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_APPLY_VERTEX_ADAPTER_HPP
-#define MAPNIK_APPLY_VERTEX_ADAPTER_HPP
+#include <mapnik/image_filter_grammar.hpp>
+#include <mapnik/image_filter_grammar_impl.hpp>
+#include <mapnik/image_filter_types.hpp>
+#include <string>
+#include <vector>
 
-namespace mapnik { namespace detail {
-
-template <typename VertexConverter, typename Processor>
-struct apply_vertex_converter
-{
-    apply_vertex_converter(VertexConverter & converter, Processor & proc)
-        : converter_(converter), proc_(proc) {}
-    template <typename Adapter>
-    void operator() (Adapter const& adapter)
-    {
-        converter_.apply(adapter, proc_);
-    }
-    VertexConverter & converter_;
-    Processor & proc_;
-};
-
-}}
-
-#endif // MAPNIK_APPLY_VERTEX_ADAPTER_HPP
+template struct mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type>>;

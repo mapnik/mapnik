@@ -76,17 +76,19 @@ TEST_CASE("postgis") {
         REQUIRE(run("psql -q -f ./test/data/sql/postgis-create-db-and-tables.sql " + dbname));
     }
 
-    mapnik::parameters params;
-    params["type"] = "postgis";
-    params["dbname"] = dbname;
+    mapnik::parameters base_params;
+    base_params["type"] = "postgis";
+    base_params["dbname"] = dbname;
 
     SECTION("Postgis should throw without 'table' parameter")
     {
+        mapnik::parameters params(base_params);
         CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
     }
 
     SECTION("Postgis should throw with 'max_async_connection' greater than 'max_size'")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test";
         params["max_async_connection"] = "2";
         params["max_size"] = "1";
@@ -95,12 +97,14 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis should throw with invalid metadata query")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "does_not_exist";
         CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
     }
 
     SECTION("Postgis should throw with invalid key field")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test_invalid_id";
         params["key_field"] = "id";
         CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
@@ -108,6 +112,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis should throw with multicolumn primary key")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test_invalid_multi_col_pk";
         params["autodetect_key_field"] = "true";
         CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
@@ -115,6 +120,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis should throw without geom column")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test_no_geom_col";
         auto ds = mapnik::datasource_cache::instance().create(params);
         REQUIRE(ds != nullptr);
@@ -123,6 +129,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis should throw with invalid credentials")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test";
         params["user"] = "not_a_valid_user";
         params["password"] = "not_a_valid_pwd";
@@ -131,6 +138,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis initialize dataset with persist_connection, schema, extent, geometry field, autodectect key field, simplify_geometries, row_limit")
     {
+        mapnik::parameters params(base_params);
         params["persist_connection"] = "false";
         params["table"] = "public.test";
         params["geometry_field"] = "geom";
@@ -143,6 +151,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis dataset geometry type")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "(SELECT * FROM test WHERE gid=1) as data";
         auto ds = mapnik::datasource_cache::instance().create(params);
         REQUIRE(ds != nullptr);
@@ -151,6 +160,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis query field names")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test";
         auto ds = mapnik::datasource_cache::instance().create(params);
         REQUIRE(ds != nullptr);
@@ -162,6 +172,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis iterate features")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "test";
         params["key_field"] = "gid";
         params["max_async_connection"] = "2";
@@ -192,6 +203,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis cursorresultest")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "(SELECT * FROM test) as data";
         params["cursor_size"] = "2";
         auto ds = mapnik::datasource_cache::instance().create(params);
@@ -218,6 +230,7 @@ TEST_CASE("postgis") {
 
     SECTION("Postgis bbox query")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "(SELECT * FROM public.test) as data WHERE geom && !bbox!";
         auto ds = mapnik::datasource_cache::instance().create(params);
         REQUIRE(ds != nullptr);
@@ -233,6 +246,7 @@ TEST_CASE("postgis") {
     SECTION("Postgis query extent: full dataset")
     {
         //include schema to increase coverage
+        mapnik::parameters params(base_params);
         params["table"] = "(SELECT * FROM public.test) as data";
         auto ds = mapnik::datasource_cache::instance().create(params);
         REQUIRE(ds != nullptr);
@@ -247,6 +261,7 @@ TEST_CASE("postgis") {
 /* deactivated for merging: still investigating a proper fix
     SECTION("Postgis query extent from subquery")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "(SELECT * FROM test where gid=4) as data";
         auto ds = mapnik::datasource_cache::instance().create(params);
         REQUIRE(ds != nullptr);
@@ -261,6 +276,7 @@ TEST_CASE("postgis") {
 */
     SECTION("Postgis query extent: from subquery with 'extent_from_subquery=true'")
     {
+        mapnik::parameters params(base_params);
         params["table"] = "(SELECT * FROM test where gid=4) as data";
         params["extent_from_subquery"] = "true";
         auto ds = mapnik::datasource_cache::instance().create(params);
@@ -276,6 +292,7 @@ TEST_CASE("postgis") {
 /* deactivated for merging: still investigating a proper fix
     SECTION("Postgis query extent: subset with 'extent_from_subquery=true' and 'scale_denominator'")
     {
+        mapnik::parameters params(base_params);
         // !!!! postgis-vt-util::z() returns 'null' when 'scale_denominator > 600000000'
         // https://github.com/mapbox/postgis-vt-util/blob/559f073877696a6bfea41baf3e1065f9cf4d18d1/postgis-vt-util.sql#L615-L617
         params["table"] = "(SELECT * FROM test where gid=4 AND z(!scale_denominator!) BETWEEN 0 AND 22) as data";

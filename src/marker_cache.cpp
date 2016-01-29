@@ -118,19 +118,19 @@ namespace detail
 
 struct visitor_create_marker
 {
-    marker operator() (image_rgba8 & data)
+    marker operator() (image_rgba8 & data) const
     {
         mapnik::premultiply_alpha(data);
         return mapnik::marker(mapnik::marker_rgba8(data));
     }
 
-    marker operator() (image_null &)
+    marker operator() (image_null &) const
     {
         throw std::runtime_error("Can not make marker from null image data type");
     }
 
     template <typename T>
-    marker operator() (T &)
+    marker operator() (T &) const
     {
         throw std::runtime_error("Can not make marker from this data type");
     }

@@ -40,8 +40,8 @@ namespace mapnik {
 
 struct markers_placement_params
 {
-    box2d<double> const& size;
-    agg::trans_affine const& tr;
+    box2d<double> size;
+    agg::trans_affine tr;
     double spacing;
     double max_error;
     bool allow_overlap;
@@ -132,23 +132,8 @@ protected:
     // Rotates the size_ box and translates the position.
     box2d<double> perform_transform(double angle, double dx, double dy)
     {
-        double x1 = params_.size.minx();
-        double x2 = params_.size.maxx();
-        double y1 = params_.size.miny();
-        double y2 = params_.size.maxy();
         agg::trans_affine tr = params_.tr * agg::trans_affine_rotation(angle).translate(dx, dy);
-        double xA = x1, yA = y1,
-               xB = x2, yB = y1,
-               xC = x2, yC = y2,
-               xD = x1, yD = y2;
-        tr.transform(&xA, &yA);
-        tr.transform(&xB, &yB);
-        tr.transform(&xC, &yC);
-        tr.transform(&xD, &yD);
-        box2d<double> result(xA, yA, xC, yC);
-        result.expand_to_include(xB, yB);
-        result.expand_to_include(xD, yD);
-        return result;
+        return box2d<double>(params_.size, tr);
     }
 
     bool set_direction(double & angle)

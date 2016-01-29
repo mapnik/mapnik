@@ -46,30 +46,31 @@ public:
 
 // unary visitor interface
 // const
-template <typename V, typename F>
-auto VARIANT_INLINE static apply_visitor(F f, V const& v) -> decltype(V::visit(v, f))
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V const& v) -> decltype(V::visit(v, f))
 {
-    return V::visit(v, f);
+    return V::visit(v, std::forward<F>(f));
 }
 // non-const
-template <typename V, typename F>
-auto VARIANT_INLINE static apply_visitor(F f, V & v) -> decltype(V::visit(v, f))
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V & v) -> decltype(V::visit(v, f))
 {
-    return V::visit(v, f);
+    return V::visit(v, std::forward<F>(f));
 }
 
 // binary visitor interface
 // const
-template <typename V, typename F>
-auto VARIANT_INLINE static apply_visitor(F f, V const& v0, V const& v1) -> decltype(V::binary_visit(v0, v1, f))
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V const& v0, V const& v1) -> decltype(V::binary_visit(v0, v1, f))
 {
-    return V::binary_visit(v0, v1, f);
+    return V::binary_visit(v0, v1, std::forward<F>(f));
 }
+
 // non-const
-template <typename V, typename F>
-auto VARIANT_INLINE static apply_visitor(F f, V & v0, V & v1) -> decltype(V::binary_visit(v0, v1, f))
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V & v0, V & v1) -> decltype(V::binary_visit(v0, v1, f))
 {
-    return V::binary_visit(v0, v1, f);
+    return V::binary_visit(v0, v1, std::forward<F>(f));
 }
 
 // getter interface

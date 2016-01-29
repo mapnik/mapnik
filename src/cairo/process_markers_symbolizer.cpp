@@ -25,90 +25,46 @@
 // mapnik
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_render_vector.hpp>
-#include <mapnik/markers_placement.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/util/noncopyable.hpp>
-#include <mapnik/pixel_position.hpp>
-#include <mapnik/attribute.hpp>
-#include <mapnik/marker.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/marker_helpers.hpp>
-#include <mapnik/renderer_common/process_markers_symbolizer.hpp>
-
-// agg
-#include "agg/include/agg_array.h"      // for pod_bvector
-#include "agg/include/agg_trans_affine.h"  // for trans_affine, etc
+#include <mapnik/renderer_common/render_markers_symbolizer.hpp>
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik
 {
 
-class feature_impl;
-class proj_transform;
-
 namespace detail {
 
-template <typename RendererContext, typename Detector>
-struct vector_markers_dispatch_cairo  : public vector_markers_dispatch<Detector>
+struct cairo_markers_renderer_context : markers_renderer_context
 {
-    vector_markers_dispatch_cairo(svg_path_ptr const& src,
-                                  svg::svg_path_adapter & path,
-                                  svg_attribute_type const& attrs,
-                                  agg::trans_affine const& marker_trans,
-                                  markers_symbolizer const& sym,
-                                  Detector & detector,
-                                  double scale_factor,
-                                  feature_impl & feature,
-                                  mapnik::attributes const& vars,
-                                  bool /* snap_to_pixels */, // only used in agg renderer currently
-                                  RendererContext const& renderer_context)
-    : vector_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
-        path_(path),
-        attr_(attrs),
-        ctx_(std::get<0>(renderer_context))
+    explicit cairo_markers_renderer_context(cairo_context & ctx)
+      : ctx_(ctx)
     {}
 
-    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    virtual void render_marker(svg_path_ptr const& src,
+                               svg_path_adapter & path,
+                               svg_attribute_type const& attrs,
+                               markers_dispatch_params const& params,
+                               agg::trans_affine const& marker_tr)
     {
         render_vector_marker(ctx_,
-                             path_,
-                             attr_,
-                             this->src_->bounding_box(),
+                             path,
+                             attrs,
+                             src->bounding_box(),
                              marker_tr,
-                             opacity);
+                             params.opacity);
     }
 
-private:
-    svg::svg_path_adapter & path_;
-    svg_attribute_type const& attr_;
-    cairo_context & ctx_;
-};
-
-template <typename RendererContext, typename Detector>
-struct raster_markers_dispatch_cairo : public raster_markers_dispatch<Detector>
-{
-    raster_markers_dispatch_cairo(image_rgba8 const& src,
-                                  agg::trans_affine const& marker_trans,
-                                  markers_symbolizer const& sym,
-                                  Detector & detector,
-                                  double scale_factor,
-                                  feature_impl & feature,
-                                  mapnik::attributes const& vars,
-                                  RendererContext const& renderer_context)
-    : raster_markers_dispatch<Detector>(src, marker_trans, sym, detector, scale_factor, feature, vars),
-        ctx_(std::get<0>(renderer_context)) {}
-
-    ~raster_markers_dispatch_cairo() {}
-
-    void render_marker(agg::trans_affine const& marker_tr, double opacity)
+    virtual void render_marker(image_rgba8 const& src,
+                               markers_dispatch_params const& params,
+                               agg::trans_affine const& marker_tr)
     {
-        ctx_.add_image(marker_tr, this->src_, opacity);
+        ctx_.add_image(marker_tr, src, params.opacity);
     }
 
 private:
     cairo_context & ctx_;
 };
 
-}
+} // namespace detail
 
 template <typename T>
 void cairo_renderer<T>::process(markers_symbolizer const& sym,
@@ -120,17 +76,10 @@ void cairo_renderer<T>::process(markers_symbolizer const& sym,
     context_.set_operator(comp_op);
     box2d<double> clip_box = common_.query_extent_;
 
-    auto renderer_context = std::tie(context_);
+    using context_type = detail::cairo_markers_renderer_context;
+    context_type renderer_context(context_);
 
-    using RendererContextType = decltype(renderer_context);
-    using vector_dispatch_type = detail::vector_markers_dispatch_cairo<RendererContextType,
-                                                                       label_collision_detector4>;
-
-    using raster_dispatch_type = detail::raster_markers_dispatch_cairo<RendererContextType,
-                                                                       label_collision_detector4>;
-
-
-    render_markers_symbolizer<vector_dispatch_type, raster_dispatch_type>(
+    render_markers_symbolizer(
         sym, feature, prj_trans, common_, clip_box,
         renderer_context);
 }
@@ -139,6 +88,6 @@ template void cairo_renderer<cairo_ptr>::process(markers_symbolizer const&,
                                                  mapnik::feature_impl &,
                                                  proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

@@ -111,11 +111,11 @@ struct transform_processor
               vars_(v),
               scale_factor_(scale_factor) {}
 
-        void operator() (identity_node const&)
+        void operator() (identity_node const&) const
         {
         }
 
-        void operator() (matrix_node const& node)
+        void operator() (matrix_node const& node) const
         {
             double a = eval(node.a_); // scale x;
             double b = eval(node.b_);
@@ -126,21 +126,21 @@ struct transform_processor
             transform_.multiply(agg::trans_affine(a, b, c, d, e, f));
         }
 
-        void operator() (translate_node const& node)
+        void operator() (translate_node const& node) const
         {
             double tx = eval(node.tx_) * scale_factor_;
             double ty = eval(node.ty_, 0.0) * scale_factor_;
             transform_.translate(tx, ty);
         }
 
-        void operator() (scale_node const& node)
+        void operator() (scale_node const& node) const
         {
             double sx = eval(node.sx_);
             double sy = eval(node.sy_, sx);
             transform_.scale(sx, sy);
         }
 
-        void operator() (rotate_node const& node)
+        void operator() (rotate_node const& node) const
         {
             double angle = deg2rad(eval(node.angle_));
             double cx = eval(node.cx_, 0.0);
@@ -150,7 +150,7 @@ struct transform_processor
             transform_.translate(cx, cy);
         }
 
-        void operator() (skewX_node const& node)
+        void operator() (skewX_node const& node) const
         {
             auto degrees = std::fmod(eval(node.angle_),90.0);
             if (degrees < -89.0) degrees = -89.0;
@@ -159,7 +159,7 @@ struct transform_processor
             transform_.multiply(agg::trans_affine_skewing(angle, 0.0));
         }
 
-        void operator() (skewY_node const& node)
+        void operator() (skewY_node const& node) const
         {
             auto degrees = std::fmod(eval(node.angle_),90.0);
             if (degrees < -89.0) degrees = -89.0;

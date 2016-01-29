@@ -31,41 +31,49 @@
 // stl
 #include <vector>
 
-using std::vector;
-
 namespace mapnik
 {
 
-using bound_box = box2d<double>;
-
 struct group_layout_manager
 {
-    group_layout_manager(group_layout const& layout)
+    using bound_box = box2d<double>;
+
+    group_layout_manager()
+        : update_layout_(false)
+    {}
+
+    explicit group_layout_manager(group_layout const& layout)
         : layout_(layout),
-          input_origin_(0, 0),
-          member_boxes_(vector<bound_box>()),
-          member_offsets_(vector<pixel_position>()),
-          update_layout_(true)
+          update_layout_(false)
     {
     }
 
     group_layout_manager(group_layout const& layout, pixel_position const& input_origin)
         : layout_(layout),
           input_origin_(input_origin),
-          member_boxes_(vector<bound_box>()),
-          member_offsets_(vector<pixel_position>()),
-          update_layout_(true)
+          update_layout_(false)
     {
     }
 
     group_layout_manager(group_layout const& layout, pixel_position const& input_origin,
-                         vector<bound_box> const& item_boxes)
+                         std::vector<bound_box> const& item_boxes)
         : layout_(layout),
           input_origin_(input_origin),
           member_boxes_(item_boxes),
-          member_offsets_(vector<pixel_position>()),
           update_layout_(true)
     {
+    }
+
+    void set_input_origin(double x, double y)
+    {
+        input_origin_.set(x, y);
+        update_layout_ = true;
+    }
+
+    void set_input_origin(pixel_position const& input_origin)
+    {
+        input_origin_ = input_origin;
+        update_layout_ = true;
     }
 
     inline void set_layout(group_layout const& layout)
@@ -94,8 +102,8 @@ private:
 
     group_layout layout_;
     pixel_position input_origin_;
-    vector<bound_box> member_boxes_;
-    vector<pixel_position> member_offsets_;
+    std::vector<bound_box> member_boxes_;
+    std::vector<pixel_position> member_offsets_;
     bool update_layout_;
 };
 

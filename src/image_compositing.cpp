@@ -190,7 +190,7 @@ struct composite_visitor
           dy_(dy) {}
 
     template <typename T>
-    void operator() (T & dst);
+    void operator() (T & dst) const;
 
   private:
     image_any const& src_;
@@ -201,19 +201,19 @@ struct composite_visitor
 };
 
 template <typename T>
-void composite_visitor::operator() (T & dst)
+void composite_visitor::operator() (T & dst) const
 {
     throw std::runtime_error("Error: Composite with " + std::string(typeid(dst).name()) + " is not supported");
 }
 
 template <>
-void composite_visitor::operator()<image_rgba8> (image_rgba8 & dst)
+void composite_visitor::operator()<image_rgba8> (image_rgba8 & dst) const
 {
     composite(dst, util::get<image_rgba8>(src_), mode_, opacity_, dx_, dy_);
 }
 
 template <>
-void composite_visitor::operator()<image_gray32f> (image_gray32f & dst)
+void composite_visitor::operator()<image_gray32f> (image_gray32f & dst) const
 {
     composite(dst, util::get<image_gray32f>(src_), mode_, opacity_, dx_, dy_);
 }
