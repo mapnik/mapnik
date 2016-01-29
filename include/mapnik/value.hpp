@@ -757,13 +757,6 @@ public:
     value () noexcept //-- comment out for VC++11
         : value_base(value_null()) {}
 
-    value (value const& other) = default;
-
-    value( value && other)
-        noexcept (std::is_nothrow_move_constructible<value_base>::value)
-        : value_base(std::move(other))
-    {}
-
     template <typename T>
     value ( T const& val)
         : value_base(typename detail::mapnik_value_type<T>::type(val)) {}
@@ -772,14 +765,6 @@ public:
     value ( T && val)
         noexcept(std::is_nothrow_move_constructible<typename std::remove_const<T>::type>::value)
         : value_base(std::move(typename detail::mapnik_value_type<T>::type(val))) {}
-
-    value & operator=( value && other)
-        noexcept(std::is_nothrow_move_assignable<typename std::remove_const<value_base>::type>::value)
-    {
-        value_base::operator=(std::move(other));
-        return *this;
-    }
-    value & operator=( value const& other) = default;
 
     bool operator==(value const& other) const
     {
