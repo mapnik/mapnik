@@ -54,9 +54,6 @@ template <std::size_t max_size>
 struct image_dimensions
 {
     image_dimensions(int width, int height);
-    image_dimensions(image_dimensions const& other) = default;
-    image_dimensions(image_dimensions && other) = default;
-    image_dimensions& operator= (image_dimensions rhs);
     std::size_t width() const;
     std::size_t height() const;
 private:

@@ -44,14 +44,6 @@ image_dimensions<max_size>::image_dimensions(int width, int height)
 }
 
 template <std::size_t max_size>
-image_dimensions<max_size>& image_dimensions<max_size>::operator= (image_dimensions rhs)
-{
-    std::swap(width_, rhs.width_);
-    std::swap(height_, rhs.height_);
-    return *this;
-}
-
-template <std::size_t max_size>
 std::size_t image_dimensions<max_size>::width() const
 {
     return width_;

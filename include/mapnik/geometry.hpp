@@ -45,9 +45,6 @@ struct point
     point(mapnik::coord<double, 2> const& c)
         : x(c.x), y(c.y) {}
 
-    point(point const& other) = default;
-    point(point && other) noexcept = default;
-    point & operator=(point const& other) = default;
     friend inline bool operator== (point<T> const& a, point<T> const& b)
     {
         return a.x == b.x && a.y == b.y;
@@ -65,12 +62,8 @@ template <typename T>
 struct line_string : std::vector<point<T> >
 {
     line_string() = default;
-    line_string (std::size_t size)
+    explicit line_string(std::size_t size)
         : std::vector<point<T> >(size) {}
-    line_string (line_string && other) = default ;
-    line_string& operator=(line_string &&) = default;
-    line_string (line_string const& ) = default;
-    line_string& operator=(line_string const&) = default;
     inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
     inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
 };
@@ -79,17 +72,12 @@ template <typename T>
 struct linear_ring : line_string<T>
 {
     linear_ring() = default;
-    linear_ring(std::size_t size)
+    explicit linear_ring(std::size_t size)
         : line_string<T>(size) {}
-    linear_ring (linear_ring && other) = default ;
-    linear_ring& operator=(linear_ring &&) = default;
     linear_ring(line_string<T> && other)
-        : line_string<T>(other) {}
-    linear_ring (linear_ring const& ) = default;
+        : line_string<T>(std::move(other)) {}
     linear_ring(line_string<T> const& other)
         : line_string<T>(other) {}
-    linear_ring& operator=(linear_ring const&) = default;
-
 };
 
 template <typename T>
@@ -102,7 +90,6 @@ struct polygon
     using rings_container = InteriorRings<T>;
     rings_container interior_rings;
 
-    polygon() = default;
     inline void set_exterior_ring(linear_ring<T> && ring)
     {
         exterior_ring = std::move(ring);

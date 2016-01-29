@@ -37,11 +37,7 @@ public:
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 
     image_view(std::size_t x, std::size_t y, std::size_t width, std::size_t height, T const& data);
-    ~image_view();
 
-    image_view(image_view<T> const& rhs);
-    image_view(image_view<T> && other) noexcept;
-    image_view<T>& operator=(image_view<T> rhs) = delete;
     bool operator==(image_view<T> const& rhs) const;
     bool operator<(image_view<T> const& rhs) const;
 
