@@ -90,7 +90,7 @@ private:
 using context_type = context<std::map<std::string,std::size_t> >;
 using context_ptr = std::shared_ptr<context_type>;
 
-static const value default_feature_value;
+static const value default_feature_value{};
 
 class MAPNIK_DECL feature_impl : private util::noncopyable
 {
