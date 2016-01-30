@@ -58,17 +58,11 @@ public:
         bitmap_data_.set(0xff000000);
     }
 
-    marker_rgba8(image_rgba8 const & data)
+    explicit marker_rgba8(image_rgba8 const& data)
         : bitmap_data_(data) {}
 
-    marker_rgba8(image_rgba8 && data)
+    explicit marker_rgba8(image_rgba8 && data) noexcept
         : bitmap_data_(std::move(data)) {}
-
-    marker_rgba8(marker_rgba8 const& rhs)
-        : bitmap_data_(rhs.bitmap_data_) {}
-
-    marker_rgba8(marker_rgba8 && rhs) noexcept
-        : bitmap_data_(std::move(rhs.bitmap_data_)) {}
 
     box2d<double> bounding_box() const
     {
@@ -99,16 +93,10 @@ private:
 struct marker_svg
 {
 public:
-    marker_svg() { }
+    marker_svg() = default;
 
-    marker_svg(mapnik::svg_path_ptr data)
+    explicit marker_svg(mapnik::svg_path_ptr data) noexcept
         : vector_data_(data) {}
-
-    marker_svg(marker_svg const& rhs)
-        : vector_data_(rhs.vector_data_) {}
-
-    marker_svg(marker_svg && rhs) noexcept
-        : vector_data_(rhs.vector_data_) {}
 
     inline box2d<double> bounding_box() const
     {
@@ -140,7 +128,6 @@ private:
 
 struct marker_null
 {
-    marker_null() = default;
 public:
     inline box2d<double> bounding_box() const
     {
@@ -195,8 +182,9 @@ struct marker : marker_base
     marker() = default;
 
     template <typename T>
-    marker(T && _data) noexcept
-        : marker_base(std::move(_data)) {}
+    marker(T && _data)
+        noexcept(std::is_nothrow_constructible<marker_base, T && >::value)
+        : marker_base(std::forward<T>(_data)) {}
 
     double width() const
     {

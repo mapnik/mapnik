@@ -61,28 +61,11 @@ struct vertex<T,2>
     vertex(coord_type x_,coord_type y_,unsigned cmd_)
         : x(x_),y(y_),cmd(cmd_) {}
 
-    vertex(vertex<T,2> && rhs) noexcept
-        : x(std::move(rhs.x)),
-          y(std::move(rhs.y)),
-          cmd(std::move(rhs.cmd)) {}
-
-    vertex(vertex<T,2> const& rhs)
-        : x(rhs.x),
-          y(rhs.y),
-          cmd(rhs.cmd) {}
-
     template <typename T2>
     vertex(vertex<T2,2> const& rhs)
         : x(coord_type(rhs.x)),
           y(coord_type(rhs.y)),
           cmd(rhs.cmd) {}
-
-
-    vertex<T,2>& operator=(vertex<T,2> rhs)
-    {
-        swap(rhs);
-        return *this;
-    }
 
     template <typename T2>
     vertex<T,2>& operator=(vertex<T2,2> const& rhs)

@@ -50,7 +50,8 @@ struct value_holder : value_holder_base
 
     // perfect forwarding
     template <typename T>
-    value_holder(T && obj) noexcept
+    value_holder(T && obj)
+        noexcept(std::is_nothrow_constructible<value_holder_base, T && >::value)
         : value_holder_base(std::forward<T>(obj))
     {}
 };

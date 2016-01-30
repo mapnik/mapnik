@@ -754,17 +754,36 @@ class value : public value_base
     friend const value operator%(value const&,value const&);
 
 public:
-    value () noexcept //-- comment out for VC++11
-        : value_base(value_null()) {}
+    value() = default;
 
-    template <typename T>
-    value ( T const& val)
-        : value_base(typename detail::mapnik_value_type<T>::type(val)) {}
+    // conversion from type T is done via a temporary of type U, which
+    // is determined by mapnik_value_type;
+    // enable_if< decay<T> != value > is necessary to avoid ill-formed
+    // recursion in noexcept specifier; and it also prevents using this
+    // constructor where implicitly-declared copy/move should be used
+    // (e.g. value(value&))
+    template <typename T,
+              typename U = typename std::enable_if<
+                                !detail::is_same_decay<T, value>::value,
+                                detail::mapnik_value_type_decay<T>
+                            >::type::type>
+    value(T && val)
+        noexcept(noexcept(U(std::forward<T>(val))) &&
+                 std::is_nothrow_constructible<value_base, U && >::value)
+        : value_base(U(std::forward<T>(val))) {}
 
-    template <typename T>
-    value ( T && val)
-        noexcept(std::is_nothrow_move_constructible<typename std::remove_const<T>::type>::value)
-        : value_base(std::move(typename detail::mapnik_value_type<T>::type(val))) {}
+    template <typename T,
+              typename U = typename std::enable_if<
+                                !detail::is_same_decay<T, value>::value,
+                                detail::mapnik_value_type_decay<T>
+                            >::type::type>
+    value& operator=(T && val)
+        noexcept(noexcept(U(std::forward<T>(val))) &&
+                 std::is_nothrow_assignable<value_base, U && >::value)
+    {
+        value_base::operator=(U(std::forward<T>(val)));
+        return *this;
+    }
 
     bool operator==(value const& other) const
     {
