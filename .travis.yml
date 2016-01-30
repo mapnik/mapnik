@@ -27,7 +27,7 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=true
+      env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=true BENCH=True
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6' ]
@@ -56,6 +56,7 @@ before_install:
  - export PATH=${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
+ - export BENCH=${BENCH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
  - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
  - git submodule update --init --depth=10 ||
@@ -88,22 +89,22 @@ install:
 script:
  - source bootstrap.sh
  - if [[ ${COVERAGE} == true ]]; then
-     ./configure CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
+     ./configure PGSQL2SQLITE=False SVG2PNG=False SAMPLE_INPUT_PLUGINS=False SVG_RENDERER=False BENCHMARK=${BENCH} CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
    elif [[ ${MASON_PUBLISH} == true ]]; then
      export MASON_NAME=mapnik;
      export MASON_VERSION=latest;
      export MASON_LIB_FILE=lib/libmapnik-wkt.a;
      source ./.mason/mason.sh;
-     ./configure PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
+     ./configure BENCHMARK=${BENCH} PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
    else
-     ./configure;
+     ./configure BENCHMARK=${BENCH};
    fi
  - make
  - make test || TEST_RESULT=$?
  - if [[ ${COVERAGE} == true ]]; then
      ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
    fi
- - if [[ ${COVERAGE} != true ]]; then
+ - if [[ ${BENCH} == True ]]; then
      make bench;
    fi
  - if [[ ${TEST_RESULT:-0} != 0 ]]; then exit $TEST_RESULT ; fi;
