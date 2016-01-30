@@ -482,7 +482,6 @@ private:
         }
         start_v2.x = v2.x;
         start_v2.y = v2.y;
-        bool continue_loop = true;        
         vertex2d tmp_prev(vertex2d::no_init);
         
         while (i < points.size())
@@ -515,7 +514,6 @@ private:
             else if (v2.cmd == SEG_END)
             {
                 if (!is_polygon) break;
-                continue_loop = false;
                 v2.x = start_v2.x;
                 v2.y = start_v2.y;
             }
