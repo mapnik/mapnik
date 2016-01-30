@@ -87,7 +87,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         int offset = itr_->offset;
         shape_ptr_->move_to(offset);
         std::vector<std::pair<int,int>> parts;
-        while (itr_->offset == offset && itr_ != offsets_.end())
+        while (itr_ != offsets_.end() && itr_->offset == offset)
         {
             if (itr_->start!= -1) parts.emplace_back(itr_->start, itr_->end);
             ++itr_;
