@@ -68,7 +68,7 @@ template <typename T>
 std::size_t mapnik_hash_value(T const& val)
 {
     std::size_t seed = util::apply_visitor(detail::value_hasher(), val);
-    detail::hash_combine(seed, val.get_type_index());
+    detail::hash_combine(seed, val.which());
     return seed;
 }
 
