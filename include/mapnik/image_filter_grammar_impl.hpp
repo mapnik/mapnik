@@ -26,15 +26,16 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #pragma GCC diagnostic pop
 
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::filter::color_stop,
-    (mapnik::color, color )
-    (double, offset)
-)
+namespace { // internal
+
+    BOOST_PHOENIX_ADAPT_FUNCTION(
+        typename std::remove_reference<A1>::type, ovo, // = optional_value_or
+        boost::get_optional_value_or, 2)
+
+} // namespace internal
 
 namespace mapnik {
 
@@ -48,94 +49,90 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     qi::lit_type lit;
     qi::_val_type _val;
     qi::_1_type _1;
+    qi::_2_type _2;
+    qi::_3_type _3;
+    qi::_4_type _4;
+    qi::_5_type _5;
+    qi::_6_type _6;
+    qi::_7_type _7;
+    qi::_8_type _8;
     qi::_a_type _a;
-    qi::_b_type _b;
-    qi::_c_type _c;
-    qi::_d_type _d;
-    qi::_e_type _e;
-    qi::_f_type _f;
-    qi::_g_type _g;
-    qi::_h_type _h;
-    qi::_r1_type _r1;
+    qi::attr_type attr;
     qi::double_type double_;
+    qi::hold_type hold;
+    qi::omit_type omit;
     using phoenix::push_back;
     using phoenix::construct;
-    using phoenix::at_c;
 
     start = -(filter % *lit(','))
         ;
 
-    filter =
-        lit("emboss") >> no_args [push_back(_val,construct<mapnik::filter::emboss>())]
-        |
-        lit("blur") >> no_args [push_back(_val,construct<mapnik::filter::blur>())]
-        |
-        lit("gray") >> no_args [push_back(_val,construct<mapnik::filter::gray>())]
-        |
-        lit("edge-detect") >> no_args [push_back(_val,construct<mapnik::filter::edge_detect>())]
-        |
-        lit("sobel") >> no_args [push_back(_val,construct<mapnik::filter::sobel>())]
-        |
-        lit("sharpen") >> no_args [push_back(_val,construct<mapnik::filter::sharpen>())]
-        |
-        lit("x-gradient") >> no_args [push_back(_val,construct<mapnik::filter::x_gradient>())]
-        |
-        lit("y-gradient") >> no_args [push_back(_val,construct<mapnik::filter::y_gradient>())]
-        |
-        lit("invert") >> no_args [push_back(_val,construct<mapnik::filter::invert>())]
-        |
-        lit("color-blind-protanope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_protanope>())]
-        |
-        lit("color-blind-deuteranope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_deuteranope>())]
-        |
-        lit("color-blind-tritanope") >> no_args [push_back(_val,construct<mapnik::filter::color_blind_tritanope>())]
-        |
-        agg_blur_filter(_val)
-        |
-        scale_hsla_filter(_val)
-        |
-        colorize_alpha_filter(_val)
-        |
-        color_to_alpha_filter(_val)
+    filter = omit[alternatives[_a = _1]] >> qi::lazy(*_a)
         ;
 
-    agg_blur_filter = (lit("agg-stack-blur")[_a = 1, _b = 1]
-        >> -( lit('(') >> -( radius_[_a = _1][_b = _1]
-                             >> -(lit(',') >> radius_[_b = _1])) >> lit(')')))
-        [push_back(_r1, construct<mapnik::filter::agg_stack_blur>(_a,_b))]
-        ;
+    add("emboss") = no_args >> attr(construct<mapnik::filter::emboss>());
+    add("blur") = no_args >> attr(construct<mapnik::filter::blur>());
+    add("gray") = no_args >> attr(construct<mapnik::filter::gray>());
+    add("edge-detect") = no_args >> attr(construct<mapnik::filter::edge_detect>());
+    add("sobel") = no_args >> attr(construct<mapnik::filter::sobel>());
+    add("sharpen") = no_args >> attr(construct<mapnik::filter::sharpen>());
+    add("x-gradient") = no_args >> attr(construct<mapnik::filter::x_gradient>());
+    add("y-gradient") = no_args >> attr(construct<mapnik::filter::y_gradient>());
+    add("invert") = no_args >> attr(construct<mapnik::filter::invert>());
+    add("color-blind-protanope") = no_args >> attr(construct<mapnik::filter::color_blind_protanope>());
+    add("color-blind-deuteranope") = no_args >> attr(construct<mapnik::filter::color_blind_deuteranope>());
+    add("color-blind-tritanope") = no_args >> attr(construct<mapnik::filter::color_blind_tritanope>());
 
-    scale_hsla_filter = lit("scale-hsla")
-        >> lit('(')
-        >> double_[_a = _1] >> lit(',') >> double_[_b = _1] >> lit(',')
-        >> double_[_c = _1] >> lit(',') >> double_[_d = _1] >> lit(',')
-        >> double_[_e = _1] >> lit(',') >> double_[_f = _1] >> lit(',')
-        >> double_[_g = _1] >> lit(',') >> double_[_h = _1] >> lit(')')
-        [push_back(_r1, construct<mapnik::filter::scale_hsla>(_a,_b,_c,_d,_e,_f,_g,_h))]
-        ;
-
-    colorize_alpha_filter = lit("colorize-alpha")[_a = construct<mapnik::filter::colorize_alpha>()]
-        >> lit('(')
-        >> (css_color_[at_c<0>(_b) = _1, at_c<1>(_b) = 0]
-            >> -color_stop_offset(_b)) [push_back(_a,_b)]
-        >> -(+(lit(',') >> css_color_[at_c<0>(_b) =_1,at_c<1>(_b) = 0]
-             >> -color_stop_offset(_b))[push_back(_a,_b)])
-        >> lit(')') [push_back(_r1,_a)]
-        ;
-
-    color_stop_offset = (double_ >> lit('%'))[at_c<1>(_r1) = percent_offset(_1)]
+    add("agg-stack-blur") =
+        (lit('(') >> radius_ >> -( lit(',') >> radius_ ) >> lit(')'))
+        [push_back(_val, construct<filter::agg_stack_blur>(_1, ovo(_2, _1)))]
         |
-        double_[at_c<1>(_r1) = _1]
+        no_args
+        [push_back(_val, construct<filter::agg_stack_blur>(1, 1))]
         ;
 
-    color_to_alpha_filter = lit("color-to-alpha")
-        >> lit('(')
-        >> css_color_[_a = _1]
-        >> lit(')')
-        [push_back(_r1,construct<mapnik::filter::color_to_alpha>(_a))]
+    add("scale-hsla") =
+        (lit('(')
+          >> double_ >> lit(',') >> double_ >> lit(',')
+          >> double_ >> lit(',') >> double_ >> lit(',')
+          >> double_ >> lit(',') >> double_ >> lit(',')
+          >> double_ >> lit(',') >> double_ >> lit(')'))
+        [push_back(_val, construct<filter::scale_hsla>(_1,_2,_3,_4,_5,_6,_7,_8))]
+        ;
+
+    add("colorize-alpha") = qi::as<filter::colorize_alpha>()
+        [lit('(') >> color_stop_ % lit(',') >> lit(')')]
+        [push_back(_val, _1)]
+        ;
+
+    color_stop_ = (css_color_ >> -color_stop_offset)
+        [_val = construct<filter::color_stop>(_1, ovo(_2, 0.0))]
+        ;
+
+    color_stop_offset = double_[_val = _1]
+        >> -lit('%')[_val = percent_offset(_val)]
+        ;
+
+    add("color-to-alpha") =
+        hold[lit('(') >> css_color_ >> lit(')')]
+        [push_back(_val, construct<filter::color_to_alpha>(_1))]
         ;
 
     no_args = -(lit('(') >> lit(')'));
 }
 
+template <typename Iterator, typename ContType>
+auto image_filter_grammar<Iterator, ContType>::add(std::string const& symbol)
+    -> alternative_type &
+{
+    if (num_alternatives >= max_alternatives)
+    {
+        throw std::length_error("too many alternatives in image_filter_grammar");
+    }
+
+    alternative_storage[num_alternatives].name(symbol);
+    alternatives.add(symbol, &alternative_storage[num_alternatives]);
+    return alternative_storage[num_alternatives++];
 }
+
+} // namespace mapnik
