@@ -41,7 +41,7 @@ python:
 	python bindings/python/test/visual.py -q
 
 src/json/libmapnik-json.a:
-	# we first build memory intensive files with -j1
+	# we first build memory intensive files with -j$(HEAVY_JOBS)
 	$(PYTHON) scons/scons.py -j$(HEAVY_JOBS) \
 		--config=cache --implicit-cache --max-drift=1 \
 		src/renderer_common/render_group_symbolizer.os \

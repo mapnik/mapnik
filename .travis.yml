@@ -99,7 +99,7 @@ script:
    else
      ./configure BENCHMARK=${BENCH};
    fi
- - make
+ - SCONSFLAGS='--debug=time' make
  - make test || TEST_RESULT=$?
  - if [[ ${COVERAGE} == true ]]; then
      ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
