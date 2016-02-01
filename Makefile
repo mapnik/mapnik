@@ -48,10 +48,6 @@ src/json/libmapnik-json.a:
 		src/renderer_common/render_thunk_extractor.os \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
-		src/css_color_grammar.os \
-		src/expression_grammar.os \
-		src/transform_expression_grammar.os \
-		src/image_filter_grammar.os \
 
 mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
