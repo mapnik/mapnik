@@ -321,14 +321,23 @@ void csv_datasource::parse_csv(T & stream)
 
         try
         {
-            auto values = csv_utils::parse_line(csv_line, separator_, quote_);
+            auto const* line_start = csv_line.data();
+            auto const* line_end = line_start + csv_line.size();
+            auto values = csv_utils::parse_line(line_start, line_end, separator_, quote_, num_headers);
             unsigned num_fields = values.size();
-            if (num_fields > num_headers || num_fields < num_headers)
+            if (num_fields != num_headers)
             {
                 std::ostringstream s;
-                s << "CSV Plugin: # of columns("
-                  << num_fields << ") > # of headers("
-                  << num_headers << ") parsed for row " << line_number;
+                s << "CSV Plugin: # of columns(" << num_fields << ")";
+                if (num_fields > num_headers)
+                {
+                    s << " > ";
+                }
+                else
+                {
+                    s << " < ";
+                }
+                s << "# of headers(" << num_headers << ") parsed";
                 throw mapnik::datasource_exception(s.str());
             }
 

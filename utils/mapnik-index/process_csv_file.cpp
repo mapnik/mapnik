@@ -186,15 +186,23 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
         }
         try
         {
-            auto values = csv_utils::parse_line(csv_line, separator, quote);
+            auto const* start_line = csv_line.data();
+            auto const* end_line = start_line + csv_line.size();
+            auto values = csv_utils::parse_line(start_line, end_line, separator, quote, num_headers);
             unsigned num_fields = values.size();
-            if (num_fields > num_headers || num_fields < num_headers)
+            if (num_fields != num_headers)
             {
-                // skip this row
                 std::ostringstream s;
-                s << "CSV Index: # of columns("
-                  << num_fields << ") > # of headers("
-                  << num_headers << ") parsed for row " << line_number;
+                s << "CSV Plugin: # of columns(" << num_fields << ")";
+                if (num_fields > num_headers)
+                {
+                    s << " > ";
+                }
+                else
+                {
+                    s << " < ";
+                }
+                s << "# of headers(" << num_headers << ") parsed";
                 throw mapnik::datasource_exception(s.str());
             }
 
