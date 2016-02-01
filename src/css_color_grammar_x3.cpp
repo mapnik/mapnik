@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,32 +20,14 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/color_factory.hpp>
-#include <mapnik/config_error.hpp>
-#include <mapnik/css_color_grammar_x3.hpp>
+#include <mapnik/css_color_grammar_x3_def.hpp>
 
-namespace mapnik {
+namespace mapnik { namespace css_color_grammar {
 
-color parse_color(std::string const& str)
-{
-    // TODO - early return for @color?
-    auto const& grammar = mapnik::color_grammar();
-    color c;
-    std::string::const_iterator first = str.begin();
-    std::string::const_iterator last =  str.end();
-    using namespace boost::spirit::x3::ascii;
+namespace x3 = boost::spirit::x3;
+using iterator_type = std::string::const_iterator;
+using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
-    bool result = boost::spirit::x3::phrase_parse(first, last, grammar, space, c);
-    if (result && (first == last))
-    {
-        return c;
-    }
-    else
-    {
-        throw config_error("Failed to parse color: \"" + str + "\"");
-    }
-}
+BOOST_SPIRIT_INSTANTIATE(css_color_grammar_type, iterator_type, context_type);
 
-}
+}}

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,10 +22,10 @@
 
 // REF: http://www.w3.org/TR/css3-color/
 
-#ifndef MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
-#define MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
+#ifndef MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
+#define MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
 
-#include <mapnik/color.hpp>
+#include <mapnik/css_color_grammar_x3.hpp>
 #include <mapnik/util/hsl.hpp>
 #include <mapnik/safe_cast.hpp>
 
@@ -220,7 +220,9 @@ x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
 x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
 
-x3::rule<class css_color, color> const css_color("css_color");
+// starting rule
+css_color_grammar_type const css_color("css_color");
+// rules
 x3::rule<class hex2_color, color> const hex2_color("hex2_color");
 x3::rule<class hex1_color, color> const hex1_color("hex1_color");
 x3::rule<class rgb_color,  color> const rgb_color("rgb_color");
@@ -440,9 +442,13 @@ BOOST_SPIRIT_DEFINE(
     );
 #pragma GCC diagnostic pop
 
-auto const expression = css_color;
+} // ns
 
-}}
+css_color_grammar::css_color_grammar_type color_grammar()
+{
+    return css_color_grammar::css_color;
+}
 
+} //ns mapnik
 
-#endif //MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
+#endif //MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP

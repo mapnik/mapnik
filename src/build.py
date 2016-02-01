@@ -221,6 +221,7 @@ source = Split(
     svg/svg_transform_parser.cpp
     warp.cpp
     css_color_grammar.cpp
+    css_color_grammar_x3.cpp
     vertex_cache.cpp
     text/font_library.cpp
     text/text_layout.cpp

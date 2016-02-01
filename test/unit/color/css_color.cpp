@@ -2,7 +2,8 @@
 
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/css_color_grammar_def.hpp>
+#include <mapnik/css_color_grammar_x3.hpp>
+#include <mapnik/css_color_grammar_x3_def.hpp>
 
 #include <sstream>
 
@@ -20,7 +21,7 @@ TEST_CASE("CSS color") {
 
     SECTION("CSS colors")
     {
-        auto const& color_grammar = mapnik::css_color_grammar::expression;
+        auto const& color_grammar = mapnik::color_grammar();
         boost::spirit::x3::ascii::space_type space;
         {
             // rgb
