@@ -256,13 +256,13 @@ markers_dispatch_params::markers_dispatch_params(box2d<double> const& size,
                                                  double scale,
                                                  bool snap)
     : placement_params{
-        .size = size,
-        .tr = tr,
-        .spacing = get<value_double, keys::spacing>(sym, feature, vars),
-        .max_error = get<value_double, keys::max_error>(sym, feature, vars),
-        .allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, vars),
-        .avoid_edges = get<value_bool, keys::avoid_edges>(sym, feature, vars),
-        .direction = get<direction_enum, keys::direction>(sym, feature, vars)}
+        size,
+        tr,
+        get<value_double, keys::spacing>(sym, feature, vars),
+        get<value_double, keys::max_error>(sym, feature, vars),
+        get<value_bool, keys::allow_overlap>(sym, feature, vars),
+        get<value_bool, keys::avoid_edges>(sym, feature, vars),
+        get<direction_enum, keys::direction>(sym, feature, vars)}
     , placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars))
     , ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars))
     , snap_to_pixels(snap)

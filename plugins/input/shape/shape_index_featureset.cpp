@@ -52,6 +52,9 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
       ctx_(std::make_shared<mapnik::context_type>()),
       shape_ptr_(std::move(shape_ptr)),
       tr_(new mapnik::transcoder(encoding)),
+      offsets_(),
+      itr_(),
+      attr_ids_(),
       row_limit_(row_limit),
       count_(0),
       feature_bbox_()
@@ -87,12 +90,11 @@ feature_ptr shape_index_featureset<filterT>::next()
         int offset = itr_->offset;
         shape_ptr_->move_to(offset);
         std::vector<std::pair<int,int>> parts;
-        while (itr_->offset == offset && itr_ != offsets_.end())
+        while (itr_ != offsets_.end() && itr_->offset == offset)
         {
             if (itr_->start!= -1) parts.emplace_back(itr_->start, itr_->end);
             ++itr_;
         }
-        //std::cerr << "PARTS SIZE=" << parts.size() <<" offset=" << offset << std::endl;
         mapnik::value_integer feature_id = shape_ptr_->id();
         shape_file::record_type record(shape_ptr_->reclength_ * 2);
         shape_ptr_->shp().read_record(record);

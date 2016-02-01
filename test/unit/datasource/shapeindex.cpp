@@ -39,6 +39,7 @@ std::size_t count_shapefile_features(std::string const& filename)
     params["type"] = "shape";
     params["file"] = filename;
     auto ds = mapnik::datasource_cache::instance().create(params);
+    REQUIRE(ds != nullptr);
     CHECK(ds->type() == mapnik::datasource::datasource_t::Vector);
     auto fields = ds->get_descriptor().get_descriptors();
     mapnik::query query(ds->envelope());
@@ -47,6 +48,7 @@ std::size_t count_shapefile_features(std::string const& filename)
         query.add_property_name(field.get_name());
     }
     auto features = ds->features(query);
+    REQUIRE(features != nullptr);
 
     std::size_t feature_count = 0;
     auto feature = features->next();
