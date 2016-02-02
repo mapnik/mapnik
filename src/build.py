@@ -155,7 +155,6 @@ source = Split(
     params.cpp
     image_filter_types.cpp
     image_filter_grammar.cpp
-    miniz_png.cpp
     color.cpp
     conversions.cpp
     image_copy.cpp

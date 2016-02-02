@@ -27,7 +27,6 @@
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
-#include <mapnik/miniz_png.hpp>
 #include <mapnik/image.hpp>
 
 // zlib
@@ -53,7 +52,6 @@ struct png_options {
     double gamma;
     bool paletted;
     bool use_hextree;
-    bool use_miniz;
     png_options() :
         colors(256),
         compression(Z_DEFAULT_COMPRESSION),
@@ -61,8 +59,7 @@ struct png_options {
         trans_mode(-1),
         gamma(-1),
         paletted(true),
-        use_hextree(true),
-        use_miniz(false) {}
+        use_hextree(true) {}
 };
 
 template <typename T>
@@ -85,23 +82,6 @@ void save_as_png(T1 & file,
                 png_options const& opts)
 
 {
-    if (opts.use_miniz)
-    {
-        MiniZ::PNGWriter writer(opts.compression,opts.strategy);
-        if (opts.trans_mode == 0)
-        {
-            writer.writeIHDR(image.width(), image.height(), 24);
-            writer.writeIDATStripAlpha(image);
-        }
-        else
-        {
-            writer.writeIHDR(image.width(), image.height(), 32);
-            writer.writeIDAT(image);
-        }
-        writer.writeIEND();
-        writer.toStream(file);
-        return;
-    }
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -273,19 +253,6 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
                  std::vector<unsigned> const&alpha,
                  png_options const& opts)
 {
-    if (opts.use_miniz)
-    {
-        MiniZ::PNGWriter writer(opts.compression,opts.strategy);
-        // image.width()/height() does not reflect the actual image dimensions; it
-        // refers to the quantized scanlines.
-        writer.writeIHDR(width, height, color_depth);
-        writer.writePLTE(palette);
-        writer.writetRNS(alpha);
-        writer.writeIDAT(image);
-        writer.writeIEND();
-        writer.toStream(file);
-        return;
-    }
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
