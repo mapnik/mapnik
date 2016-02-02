@@ -26,8 +26,15 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #pragma GCC diagnostic pop
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::filter::color_stop,
+    (mapnik::color, color )
+    (double, offset)
+)
 
 namespace mapnik {
 

@@ -31,7 +31,6 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #pragma GCC diagnostic pop
 
 // stl
@@ -43,16 +42,6 @@ namespace filter {
 struct color_stop;
 struct colorize_alpha;
 }
-
-}
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::filter::color_stop,
-    (mapnik::color, color )
-    (double, offset)
-)
-
-namespace mapnik {
 
 namespace qi = boost::spirit::qi;
 
