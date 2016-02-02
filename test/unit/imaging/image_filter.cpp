@@ -6,29 +6,27 @@
 #include <mapnik/color.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/image_filter_grammar.hpp>
-#include <mapnik/image_filter_grammar_impl.hpp>
-#include <mapnik/css_color_grammar_impl.hpp>
+#include <mapnik/image_filter_types.hpp>
 
 TEST_CASE("image filter") {
 
 SECTION("test bad filter input") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
-    
+
     REQUIRE_THROWS( mapnik::filter::filter_image(im, "foo,asdfasdf()"); );
     REQUIRE_THROWS( mapnik::filter::filter_image(im, "colorize-alpha("); );
     REQUIRE_THROWS( mapnik::filter::filter_image(im, "color-to-alpha(blue"); );
     REQUIRE_THROWS( mapnik::filter::filter_image(im, "color-to-alpha(,blue)"); );
     REQUIRE_THROWS( mapnik::filter::filter_image(im, "colorize-alpha()"); );
 
-    REQUIRE_THROWS( 
+    REQUIRE_THROWS(
         mapnik::image_rgba8 const& im2 = im;
         mapnik::image_rgba8 new_im = mapnik::filter::filter_image(im2, "foo");
     );
-    
+
     CHECK(im(0,0) == 0xffff0000);
     CHECK(im(0,1) == 0xffff0000);
     CHECK(im(0,2) == 0xffff0000);
@@ -38,11 +36,11 @@ SECTION("test bad filter input") {
     CHECK(im(2,0) == 0xffff0000);
     CHECK(im(2,1) == 0xffff0000);
     CHECK(im(2,2) == 0xffff0000);
-    
+
 } // END SECTION
 
 SECTION("test blur") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
@@ -58,11 +56,11 @@ SECTION("test blur") {
     CHECK(im(2,0) == 0xffc60038);
     CHECK(im(2,1) == 0xffe2001c);
     CHECK(im(2,2) == 0xffc60038);
-    
+
 } // END SECTION
 
 SECTION("test blur constant") {
-    
+
     mapnik::image_rgba8 im_orig(3,3);
     mapnik::fill(im_orig,mapnik::color("blue"));
     mapnik::set_pixel(im_orig, 1, 1, mapnik::color("red"));
@@ -79,11 +77,11 @@ SECTION("test blur constant") {
     CHECK(im(2,0) == 0xffc60038);
     CHECK(im(2,1) == 0xffe2001c);
     CHECK(im(2,2) == 0xffc60038);
-    
+
 } // END SECTION
 
 SECTION("test gray") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
@@ -99,11 +97,11 @@ SECTION("test gray") {
     CHECK(im(2,0) == 0xff1c1c1c);
     CHECK(im(2,1) == 0xff1c1c1c);
     CHECK(im(2,2) == 0xff1c1c1c);
-    
+
 } // END SECTION
 
 SECTION("test agg stack blur") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
@@ -123,7 +121,7 @@ SECTION("test agg stack blur") {
 } // END SECTION
 
 SECTION("test scale-hsla 1") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("red"));
@@ -139,7 +137,7 @@ SECTION("test scale-hsla 1") {
     CHECK(im(2,0) == 0x80004000);
     CHECK(im(2,1) == 0x80004000);
     CHECK(im(2,2) == 0x80004000);
-    
+
 } // END SECTION
 
 SECTION("test scale-hsla 2") {
@@ -172,7 +170,7 @@ SECTION("test scale-hsla 2") {
 } // END SECTION
 
 SECTION("test emboss") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("white"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("orange"));
@@ -188,11 +186,11 @@ SECTION("test emboss") {
     CHECK(im(2,0) == 0xffffffff);
     CHECK(im(2,1) == 0xffffffff);
     CHECK(im(2,2) == 0xffffffff);
-    
+
 } // END SECTION
 
 SECTION("test sharpen") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -208,11 +206,11 @@ SECTION("test sharpen") {
     CHECK(im(2,0) == 0xffff0000);
     CHECK(im(2,1) == 0xffff0000);
     CHECK(im(2,2) == 0xffff0000);
-    
+
 } // END SECTION
 
 SECTION("test edge detect") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -228,11 +226,11 @@ SECTION("test edge detect") {
     CHECK(im(2,0) == 0xff000000);
     CHECK(im(2,1) == 0xff008080);
     CHECK(im(2,2) == 0xff000000);
-    
+
 } // END SECTION
 
 SECTION("test sobel") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -248,11 +246,11 @@ SECTION("test sobel") {
     CHECK(im(2,0) == 0xfffeffff);
     CHECK(im(2,1) == 0xfffeffff);
     CHECK(im(2,2) == 0xfffeffff);
-    
+
 } // END SECTION
 
 SECTION("test x-gradient") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -268,11 +266,11 @@ SECTION("test x-gradient") {
     CHECK(im(2,0) == 0xff808080);
     CHECK(im(2,1) == 0xff41c0c0);
     CHECK(im(2,2) == 0xff808080);
-    
+
 } // END SECTION
 
 SECTION("test y-gradient") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -288,11 +286,11 @@ SECTION("test y-gradient") {
     CHECK(im(2,0) == 0xff808080);
     CHECK(im(2,1) == 0xff808080);
     CHECK(im(2,2) == 0xff808080);
-    
+
 } // END SECTION
 
 SECTION("test invert") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -308,11 +306,11 @@ SECTION("test invert") {
     CHECK(im(2,0) == 0xff00ffff);
     CHECK(im(2,1) == 0xff00ffff);
     CHECK(im(2,2) == 0xff00ffff);
-    
+
 } // END SECTION
 
 SECTION("test colorize-alpha - one color") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -328,11 +326,11 @@ SECTION("test colorize-alpha - one color") {
     CHECK(im(2,0) == 0xffff0000);
     CHECK(im(2,1) == 0xffff0000);
     CHECK(im(2,2) == 0xffff0000);
-    
+
 } // END SECTION
 
 SECTION("test colorize-alpha - two color") {
-    
+
     mapnik::image_rgba8 im(3,3);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 1, 1, mapnik::color("gray"));
@@ -348,7 +346,7 @@ SECTION("test colorize-alpha - two color") {
     CHECK(im(2,0) == 0xfffd0000);
     CHECK(im(2,1) == 0xfffd0000);
     CHECK(im(2,2) == 0xfffd0000);
-    
+
 } // END SECTION
 
 SECTION("test colorize-alpha - one color with transparency") {
@@ -393,13 +391,10 @@ SECTION("test colorize-alpha - two color with transparency") {
 
 SECTION("test colorize-alpha - parsing correct input") {
 
-    mapnik::image_filter_grammar<std::string::const_iterator, std::vector<mapnik::filter::filter_type>> filter_grammar;
-    boost::spirit::qi::ascii::space_type space;
-    std::vector<mapnik::filter::filter_type> f;
     std::string s("colorize-alpha(#0000ff 0%, #00ff00 100%)");
-    CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), filter_grammar, space, f) );
+    std::vector<mapnik::filter::filter_type> f;
+    CHECK(parse_image_filters(s, f));
     mapnik::filter::colorize_alpha const & ca = mapnik::util::get<mapnik::filter::colorize_alpha>(f.front());
-
     {
         mapnik::filter::color_stop const & s2 = ca[0];
         CHECK( s2.color.alpha() == 0xff );
@@ -422,20 +417,15 @@ SECTION("test colorize-alpha - parsing correct input") {
 
 SECTION("test colorize-alpha - parsing incorrect input") {
 
-    mapnik::image_filter_grammar<std::string::const_iterator, std::vector<mapnik::filter::filter_type>> filter_grammar;
-    boost::spirit::qi::ascii::space_type space;
     std::string s("colorize-alpha(#0000ff 0%, #00ff00 00 100%)");
-    std::string::const_iterator itr = s.cbegin();
-    std::string::const_iterator end = s.cend();
     std::vector<mapnik::filter::filter_type> f;
-    CHECK( boost::spirit::qi::phrase_parse(s.cbegin(), s.cend(), filter_grammar, space, f) );
+    CHECK(!parse_image_filters(s, f));
     CHECK( f.empty() );
-    CHECK( itr != end );
 
 } // END SECTION
 
 SECTION("test color-blind-protanope") {
-    
+
     mapnik::image_rgba8 im(2,2);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 0, 1, mapnik::color("green"));
@@ -448,11 +438,11 @@ SECTION("test color-blind-protanope") {
     CHECK(im(0,1) == 0xff006e7c);
     CHECK(im(1,0) == 0xffd9f6ff);
     CHECK(im(1,1) == 0xff1d7e8e);
-    
+
 } // END SECTION
 
 SECTION("test color-blind-deuteranope") {
-    
+
     mapnik::image_rgba8 im(2,2);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 0, 1, mapnik::color("green"));
@@ -465,11 +455,11 @@ SECTION("test color-blind-deuteranope") {
     CHECK(im(0,1) == 0xff1c688b);
     CHECK(im(1,0) == 0xffe9f5ff);
     CHECK(im(1,1) == 0xff0077a0);
-    
+
 } // END SECTION
 
 SECTION("test color-blind-tritanope") {
-    
+
     mapnik::image_rgba8 im(2,2);
     mapnik::fill(im,mapnik::color("blue"));
     mapnik::set_pixel(im, 0, 1, mapnik::color("green"));
@@ -482,8 +472,7 @@ SECTION("test color-blind-tritanope") {
     CHECK(im(0,1) == 0xff80763a);
     CHECK(im(1,0) == 0xfff8f3ff);
     CHECK(im(1,1) == 0xff0017fd);
-    
+
 } // END SECTION
 
 } // END TEST CASE
-
