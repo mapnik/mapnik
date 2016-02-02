@@ -59,9 +59,9 @@ protected:
 
 /** Slim wrapper for enumerations. It creates a new type from a native enum and
  * a char pointer array. It almost exactly behaves like a native enumeration
- * type. It supports string conversion through stream operators. This is usefull
+ * type. It supports string conversion through stream operators. This is useful
  * for debugging, serialization/deserialization and also helps with implementing
- * language bindings. The two convinient macros DEFINE_ENUM() and IMPLEMENT_ENUM()
+ * language bindings. The two convenient macros DEFINE_ENUM() and IMPLEMENT_ENUM()
  * are provided to help with instanciation.
  *
  * @par Limitations:
@@ -215,11 +215,11 @@ public:
         while ( is.peek() != std::char_traits< char >::eof())
         {
             is >> c;
-            if ( isspace(c) && word.empty() )
+            if ( std::isspace(c) && word.empty() )
             {
                 continue;
             }
-            if ( isalnum(c) || (c == '_') || c == '-' )
+            if ( std::isalnum(c) || (c == '_') || c == '-' )
             {
                 word += c;
             }
