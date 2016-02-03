@@ -447,7 +447,8 @@ struct div
     value_type operator() (T1 const& lhs, T2 const& rhs) const
     {
         if (rhs == 0) return value_type();
-        return typename std::common_type<T1,T2>::type{ lhs / rhs };
+        using common_type = typename std::common_type<T1,T2>::type;
+        return common_type(lhs)/common_type(rhs);
     }
 };
 
