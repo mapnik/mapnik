@@ -422,7 +422,7 @@ struct div
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
         if (rhs == 0) return lhs;
-        return value_integer{ lhs / rhs };
+        return value_integer(lhs) / value_integer(rhs);
     }
 
     value_type operator() (value_unicode_string const&,
