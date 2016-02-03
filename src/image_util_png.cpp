@@ -85,7 +85,7 @@ void handle_png_options(std::string const& type,
         }
         else if (key == "e" && val && *val == "miniz")
         {
-            opts.use_miniz = true;
+            throw image_writer_exception("miniz support has been removed from Mapnik");
         }
         else if (key == "c")
         {
@@ -168,7 +168,7 @@ void handle_png_options(std::string const& type,
     {
         throw image_writer_exception("invalid gamma parameter: unavailable for true color (non-paletted) images");
     }
-    if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
+    if (opts.compression > Z_BEST_COMPRESSION)
     {
         throw image_writer_exception("invalid compression value: (only -1 through 9 are valid)");
     }

@@ -81,54 +81,60 @@ struct both_arithmetic : std::integral_constant<bool,
 struct equals
 {
     template <typename T>
-    static bool apply(T const& lhs, T const& rhs)
+    static auto apply(T const& lhs, T const& rhs)
+        -> decltype(lhs == rhs)
     {
-        return std::equal_to<T>()(lhs, rhs);
+        return lhs == rhs;
     }
 };
 
 struct not_equal
 {
     template <typename T>
-    static bool apply(T const& lhs, T const& rhs)
+    static auto apply(T const& lhs, T const& rhs)
+        ->decltype(lhs != rhs)
     {
-        return std::not_equal_to<T>()(lhs, rhs);
+        return lhs != rhs;
     }
 };
 
 struct greater_than
 {
     template <typename T>
-    static bool apply(T const& lhs, T const& rhs)
+    static auto  apply(T const& lhs, T const& rhs)
+        ->decltype(lhs > rhs)
     {
-        return std::greater<T>()(lhs, rhs);
+        return lhs > rhs;
     }
 };
 
 struct greater_or_equal
 {
     template <typename T>
-    static bool apply(T const& lhs, T const& rhs)
+    static auto apply(T const& lhs, T const& rhs)
+        ->decltype(lhs >= rhs)
     {
-        return std::greater_equal<T>()(lhs, rhs);
+        return lhs >= rhs;
     }
 };
 
 struct less_than
 {
     template <typename T>
-    static bool apply(T const& lhs, T const& rhs)
+    static auto apply(T const& lhs, T const& rhs)
+         ->decltype(lhs < rhs)
     {
-        return std::less<T>()(lhs, rhs);
+        return lhs < rhs;
     }
 };
 
 struct less_or_equal
 {
     template <typename T>
-    static bool apply(T const& lhs, T const& rhs)
+    static auto apply(T const& lhs, T const& rhs)
+        ->decltype(lhs <= rhs)
     {
-        return std::less_equal<T>()(lhs, rhs);
+        return lhs <= rhs;
     }
 };
 
@@ -137,7 +143,7 @@ struct less_or_equal
 template <typename Op, bool default_result>
 struct comparison
 {
-    // special case for unicode_strings
+    // special case for unicode_strings (fixes MSVC C4800)
     bool operator() (value_unicode_string const& lhs,
                      value_unicode_string const& rhs) const
     {
@@ -416,7 +422,7 @@ struct div
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
         if (rhs == 0) return lhs;
-        return value_integer{ lhs / rhs };
+        return value_integer(lhs) / value_integer(rhs);
     }
 
     value_type operator() (value_unicode_string const&,
@@ -441,7 +447,8 @@ struct div
     value_type operator() (T1 const& lhs, T2 const& rhs) const
     {
         if (rhs == 0) return value_type();
-        return typename std::common_type<T1,T2>::type{ lhs / rhs };
+        using common_type = typename std::common_type<T1,T2>::type;
+        return common_type(lhs)/common_type(rhs);
     }
 };
 
