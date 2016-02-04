@@ -87,7 +87,7 @@ struct MAPNIK_DECL value_null
 
     bool operator>=(value_null) const
     {
-        return false;
+        return true;
     }
 
     bool operator<(value_null) const
@@ -97,7 +97,7 @@ struct MAPNIK_DECL value_null
 
     bool operator<=(value_null) const
     {
-        return false;
+        return true;
     }
 
     template <typename T>
