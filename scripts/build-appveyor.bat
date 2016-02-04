@@ -11,7 +11,7 @@ powershell .\scripts\appveyor-system-info.ps1
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ::only build on AppVeyor, if explicitly stated
-ECHO APPVEYOR_REPO_COMMIT_MESSAGE^: %APPVEYOR_REPO_COMMIT_MESSAGE%
+ECHO APPVEYOR_REPO_COMMIT_MESSAGE^: "%APPVEYOR_REPO_COMMIT_MESSAGE%"
 ::SET BUILD_ON_APPVEYOR=0
 ::for /F "tokens=1 usebackq" %%i in (`powershell .\scripts\parse-commit-message.ps1 '[build appveyor]'`) DO SET BUILD_ON_APPVEYOR=%%i
 ::IF %BUILD_ON_APPVEYOR% EQU 0 ECHO not building, commit with [build appveyor] && GOTO DONE
