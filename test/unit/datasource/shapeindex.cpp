@@ -97,6 +97,9 @@ TEST_CASE("shapeindex")
                 {
                     for (bool index_parts : {false, true} )
                     {
+                        CAPTURE(path);
+                        CAPTURE(index_parts);
+
                         std::string index_path = path.substr(0, path.rfind(".")) + ".index";
                         // remove *.index if present
                         if (mapnik::util::exists(index_path))
