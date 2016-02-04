@@ -15,9 +15,9 @@ addons:
   apt:
     sources:
      - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.5
+     - llvm-toolchain-precise-3.6
     packages:
-     - clang-3.5
+     - clang-3.6
 
 cache:
   directories:
@@ -27,11 +27,11 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: JOBS=8 CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" MASON_PUBLISH=true BENCH=True
+      env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=true BENCH=True
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5' ]
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6' ]
+          packages: [ 'clang-3.6', 'libstdc++-4.9-dev', 'libstdc++6' ]
     # OOM killer knocking out build on render_markers_symbolizer.cpp
     #
     #- os: linux
