@@ -6,7 +6,7 @@ $user_name = $env:USERNAME
 Write-Host $comp_name $user_name
 
 $on_appveyor = $false
-if($comp_name -eq "appveyor-vm" -And $user_name -eq "appveyor"){
+if($comp_name -like 'APPVYR*' -And $user_name -eq "appveyor"){
     $on_appveyor = $true
 }
 
