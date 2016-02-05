@@ -58,7 +58,7 @@ transform_expression_grammar<Iterator>::transform_expression_grammar()
     // separated by whitespace and/or a comma.
 
     qi::no_skip_type no_skip;
-    start = transform_ % no_skip[char_(", ")] ;
+    start = transform_ % no_skip[*char_(", ")] ;
 
     transform_ = matrix | translate | scale | rotate | skewX | skewY ;
 
