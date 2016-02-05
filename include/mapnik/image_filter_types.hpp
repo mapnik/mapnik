@@ -56,7 +56,7 @@ struct y_gradient : image_filter_base {};
 struct invert : image_filter_base {};
 
 // http://vision.psychol.cam.ac.uk/jdmollon/papers/colourmaps.pdf
-struct color_blind_protanope : image_filter_base 
+struct color_blind_protanope : image_filter_base
 {
     const double x = 0.7465;
     const double y = 0.2535;
@@ -82,6 +82,10 @@ struct color_blind_tritanope : image_filter_base
 
 struct agg_stack_blur : image_filter_base
 {
+    agg_stack_blur()
+        : rx(1), ry(1) {}
+    agg_stack_blur(unsigned r)
+        : rx(r), ry(r) {}
     agg_stack_blur(unsigned rx_, unsigned ry_)
         : rx(rx_),ry(ry_) {}
     inline bool operator==(agg_stack_blur const& rhs) const
