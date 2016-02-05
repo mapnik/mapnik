@@ -1,6 +1,16 @@
 ﻿$PSVersionTable
 $PSVersionTable.PSVersion
 
+$comp_name = $env:COMPUTERNAME
+$user_name = $env:USERNAME
+Write-Host $comp_name $user_name
+
+$on_appveyor = $false
+if($comp_name -eq "appveyor-vm" -And $user_name -eq "appveyor"){
+    $on_appveyor = $true
+}
+
+
 $SystemManaged  = Get-WmiObject -Class Win32_ComputerSystem | % {$_.AutomaticManagedPagefile} 
 $total_physicalmem = gwmi Win32_ComputerSystem | % {[Math]::round($_.TotalPhysicalMemory/1MB,0)} 
 $physical_mem = get-ciminstance -class 'cim_physicalmemory' | % { $_.Capacity/1024/1024}
@@ -17,8 +27,25 @@ Write-Host "page file size           : "$PageFileSize
 Write-Host "InitialSize              : "${CurrentPageFile}.InitialSize
 Write-Host "MaximumSize              : "$CurrentPageFile.MaximumSize
 
-if($env:APPVEYOR -eq "true"){
+if($on_appveyor -eq $true){
+
     Write-Host !!!!!!! on AppVeyor: changing page file settings !!!!!!!!!!
+
+    $dirs = (
+        "C:\qt",
+        "C:\Users\appveyor\AppData\Local\Microsoft\Web Platform Installer",
+        "C:\Program Files\Microsoft SQL Server",
+        "C:\ProgramData\Package Cache"
+    )
+    Foreach($dir in $dirs){
+        if(Test-Path $dir) {
+            Write-Host found $dir
+            Remove-Item $dir -Force -Recurse
+        } else {
+            Write-Host not found $dir
+        }
+    }
+
     #disable automatically managed page file settings
     $c = Get-WmiObject Win32_computersystem -EnableAllPrivileges
     if($c.AutomaticManagedPagefile){
