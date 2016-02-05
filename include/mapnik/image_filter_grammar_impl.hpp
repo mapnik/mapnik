@@ -57,14 +57,12 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     qi::_g_type _g;
     qi::_h_type _h;
     qi::_r1_type _r1;
-    qi::eps_type eps;
-    qi::char_type char_;
     qi::double_type double_;
-    qi::no_skip_type no_skip;
     using phoenix::push_back;
     using phoenix::construct;
     using phoenix::at_c;
-    start = -(filter % no_skip[*char_(", ")])
+
+    start = -(filter % *lit(','))
         ;
 
     filter =
@@ -101,11 +99,10 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         color_to_alpha_filter(_val)
         ;
 
-    agg_blur_filter = lit("agg-stack-blur")[_a = 1, _b = 1]
+    agg_blur_filter = (lit("agg-stack-blur")[_a = 1, _b = 1]
         >> -( lit('(') >> -( radius_[_a = _1][_b = _1]
-                             >> -(lit(',') >> radius_[_b = _1]))
-              >> lit(')'))
-        [push_back(_r1,construct<mapnik::filter::agg_stack_blur>(_a,_b))]
+                             >> -(lit(',') >> radius_[_b = _1])) >> lit(')')))
+        [push_back(_r1, construct<mapnik::filter::agg_stack_blur>(_a,_b))]
         ;
 
     scale_hsla_filter = lit("scale-hsla")

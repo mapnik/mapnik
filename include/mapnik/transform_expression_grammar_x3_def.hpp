@@ -82,7 +82,6 @@ namespace mapnik { namespace grammar {
     using x3::no_skip;
     using x3::no_case;
     using x3::lit;
-    using x3::char_;
 
     // starting rule
     transform_expression_grammar_type const transform("transform");
@@ -102,7 +101,7 @@ namespace mapnik { namespace grammar {
     // start
     auto const transform_def = transform_list_rule;
 
-    auto const transform_list_rule_def = transform_node_rule % no_skip[*char_(", ")];
+    auto const transform_list_rule_def = transform_node_rule % *lit(',');
 
     auto const transform_node_rule_def = matrix | translate  | scale | rotate | skewX | skewY ;
 

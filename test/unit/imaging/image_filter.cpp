@@ -7,6 +7,9 @@
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_filter_types.hpp>
+// stl
+#include <sstream>
+#include <array>
 
 TEST_CASE("image filter") {
 
@@ -388,6 +391,44 @@ SECTION("test colorize-alpha - two color with transparency") {
     CHECK(im(2,2) == 0x70264a00);
 
 } // END SECTION
+
+SECTION("test parsing image-filters") {
+
+    std::string str = ""; // empty string
+    std::vector<mapnik::filter::filter_type> filters;
+    CHECK(parse_image_filters(str, filters));
+    CHECK(filters.size() == 0);
+
+    std::array<std::string,17> expected = {{ "emboss",
+                                             "emboss",
+                                             "blur",
+                                             "gray",
+                                             "edge-detect",
+                                             "sobel",
+                                             "sharpen",
+                                             "x-gradient",
+                                             "y-gradient",
+                                             "invert",
+                                             "color-blind-protanope",
+                                             "color-blind-deuteranope",
+                                             "color-blind-tritanope",
+                                             "agg-stack-blur(1,1)",
+                                             "agg-stack-blur(1,1)",
+                                             "agg-stack-blur(2,2)",
+                                             "agg-stack-blur(2,3)"}};
+
+    str += "emboss emboss() blur,gray ,edge-detect, sobel , , sharpen,,,x-gradient y-gradientinvert";
+    str += "color-blind-protanope color-blind-deuteranope color-blind-tritanope agg-stack-blur,agg-stack-blur(),agg-stack-blur(2),agg-stack-blur(2,3)" ;
+    CHECK(parse_image_filters(str, filters));
+    CHECK(filters.size() == expected.size());
+    std::size_t count = 0;
+    for (auto const& filter : filters)
+    {
+        std::stringstream ss;
+        ss << filter;
+        CHECK (expected[count++] == ss.str());
+    }
+}
 
 SECTION("test colorize-alpha - parsing correct input") {
 
