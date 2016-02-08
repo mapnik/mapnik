@@ -187,6 +187,8 @@ int main (int argc,char** argv)
                 }
                 shape_type = shp.read_ndr_integer();
 
+                if (shape_type == shape_io::shape_null) continue;
+
                 if (shape_type==shape_io::shape_point
                     || shape_type==shape_io::shape_pointm
                     || shape_type == shape_io::shape_pointz)
