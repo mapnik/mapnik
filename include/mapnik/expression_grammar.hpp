@@ -107,43 +107,6 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
-struct geometry_types : qi::symbols<char, mapnik::value_integer>
-{
-    geometry_types()
-    {
-        add
-            ("point", 1)
-            ("linestring", 2)
-            ("polygon",3)
-            ("collection",4)
-            ;
-    }
-};
-
-struct boolean_constants :  qi::symbols<char,mapnik::value_bool>
-{
-    boolean_constants()
-    {
-        add
-            ("true", true)
-            ("false", false)
-            ;
-    }
-};
-
-struct floating_point_constants :  qi::symbols<char,mapnik::value_double>
-{
-    floating_point_constants()
-    {
-        add
-            ("pi", 3.1415926535897932384626433832795)
-            ("deg_to_rad",0.017453292519943295769236907684886)
-            ("rad_to_deg",57.295779513082320876798154814105)
-            ;
-    }
-};
-
-
 template <typename T>
 struct integer_parser
 {
@@ -200,9 +163,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
-    geometry_types geom_type;
-    boolean_constants bool_const;
-    floating_point_constants float_const;
+    qi::symbols<char, expr_node> constant;
     unary_function_types unary_func_type;
     binary_function_types binary_func_type;
 
