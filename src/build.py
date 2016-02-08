@@ -153,8 +153,9 @@ source = Split(
     request.cpp
     well_known_srs.cpp
     params.cpp
-    image_filter_types.cpp
-    image_filter_grammar.cpp
+    parse_image_filters.cpp
+    generate_image_filters.cpp
+    image_filter_grammar_x3.cpp
     color.cpp
     conversions.cpp
     image_copy.cpp
@@ -219,7 +220,6 @@ source = Split(
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
     warp.cpp
-    css_color_grammar.cpp
     css_color_grammar_x3.cpp
     vertex_cache.cpp
     text/font_library.cpp
