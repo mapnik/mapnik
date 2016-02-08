@@ -104,7 +104,9 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     standard_wide::no_case_type no_case;
     using boost::phoenix::construct;
 
-    expr = logical_expr.alias();
+    expr = logical_expr [_val = _1]
+        | ustring [_val = unicode_(_1)]
+        ;
 
     logical_expr = not_expr [_val = _1]
         >>
@@ -167,10 +169,11 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
             )
         ;
 
-    unary_function_expr = unary_func_type > lit('(') > expr > lit(')')
+    unary_function_expr = unary_func_type >> '(' > logical_expr > ')'
         ;
 
-    binary_function_expr = binary_func_type > lit('(') > expr > lit(',') > expr > lit(')')
+    binary_function_expr = binary_func_type >> '(' > logical_expr > ','
+                                                   > logical_expr > ')'
         ;
 
     unary_expr = primary_expr [_val = _1]
@@ -188,11 +191,9 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
         | global_attr [_val = construct<mapnik::global_attribute>( _1 )]
-        | lit("not") >> expr [_val =  !_1]
         | unary_function_expr [_val = _1]
         | binary_function_expr [_val = _1]
-        | '(' >> expr [_val = _1 ] >> ')'
-        | ustring[_val = unicode_(_1)] // if we get here then try parsing as unquoted string
+        | '(' > logical_expr [_val = _1 ] > ')'
         ;
 
     unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
