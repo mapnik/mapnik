@@ -246,6 +246,16 @@ private:
     static bool  our_verified_flag_;
 };
 
+/** ostream operator for enumeration
+ * @relates mapnik::enumeration
+ */
+template <class ENUM, int THE_MAX>
+std::ostream &
+operator<<(std::ostream & os, const mapnik::enumeration<ENUM, THE_MAX> & e)
+{
+    return os << e.as_string();
+}
+
 } // end of namespace
 
 /** Helper macro.
