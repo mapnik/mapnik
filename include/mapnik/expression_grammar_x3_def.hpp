@@ -285,6 +285,7 @@ namespace mapnik { namespace grammar {
     expression_grammar_type const expression("expression");
     // rules
     x3::rule<class logical_expression, mapnik::expr_node> const logical_expression("logical expression");
+    x3::rule<class not_expression, mapnik::expr_node> const not_expression("not expression");
     x3::rule<class conditional_expression, mapnik::expr_node> const conditional_expression("conditional expression");
     x3::rule<class equality_expression, mapnik::expr_node> const equality_expression("equality expression");
     x3::rule<class relational_expression, mapnik::expr_node> const relational_expression("relational expression");
@@ -304,12 +305,20 @@ namespace mapnik { namespace grammar {
     auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
 
     // start
-    auto const expression_def = logical_expression;
+    auto const expression_def = logical_expression [do_assign]
+        |
+        ustring[do_unicode]
+        ;
 
-    auto const logical_expression_def = conditional_expression[do_assign] >
-        *(((lit("and") | lit("&&")) > conditional_expression[do_and])
+    auto const logical_expression_def = not_expression[do_assign] >
+        *(((lit("and") | lit("&&")) > not_expression[do_and])
           |
-          ((lit("or") | lit("||")) > conditional_expression[do_or]));
+          ((lit("or") | lit("||")) > not_expression[do_or]));
+
+    auto const not_expression_def = conditional_expression[do_assign]
+        |
+        (lit("not") | lit('!')) > conditional_expression[do_not]
+        ;
 
     auto const conditional_expression_def = equality_expression[do_assign]
         |
@@ -385,20 +394,17 @@ namespace mapnik { namespace grammar {
         |
         global_attr[do_global_attribute]
         |
-        (lit("not") | lit("!") ) > expression[do_not]
-        |
         unary_func_expression[do_assign]
         |
         binary_func_expression[do_assign]
         |
-        ('(' > expression[do_assign] > ')')
-        |
-        ustring[do_unicode] // parse as un-quoted unicode string if we get here!
+        ('(' > logical_expression[do_assign] > ')')
         ;
 
     BOOST_SPIRIT_DEFINE (
         expression,
         logical_expression,
+        not_expression,
         conditional_expression,
         equality_expression,
         relational_expression,
