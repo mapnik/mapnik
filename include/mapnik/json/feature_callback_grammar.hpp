@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_FEATURE_COLLECTION_GRAMMAR_HPP
-#define MAPNIK_FEATURE_COLLECTION_GRAMMAR_HPP
+#ifndef MAPNIK_FEATURE_CALLBACK_GRAMMAR_HPP
+#define MAPNIK_FEATURE_CALLBACK_GRAMMAR_HPP
 
 // mapnik
 #include <mapnik/unicode.hpp>
@@ -29,7 +29,6 @@
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/json/feature_callback.hpp>
 #include <mapnik/feature.hpp>
-
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
@@ -40,24 +39,25 @@ namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 
 template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
-struct feature_collection_grammar :
+struct feature_grammar_callback :
         qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
 {
-    feature_collection_grammar(mapnik::transcoder const& tr);
+    feature_grammar_callback(mapnik::transcoder const& tr);
     // grammars
-    feature_grammar<Iterator, FeatureType, ErrorHandler> feature_g;
+    feature_grammar<Iterator, FeatureType> feature_g;
+    geometry_grammar<Iterator> geometry_g;
     // rules
     qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> start; // START
-    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> feature_collection;
-    qi::rule<Iterator, space_type> type;
-    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> features;
     qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature_from_geometry;
     // phoenix functions
+    phoenix::function<json::set_geometry_impl> set_geometry;
     phoenix::function<apply_feature_callback> on_feature;
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
+
 }}
 
-#endif // MAPNIK_FEATURE_COLLECTION_GRAMMAR_HPP
+#endif // MAPNIK_FEATURE_CALLBACK_GRAMMAR_HPP

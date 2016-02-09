@@ -23,8 +23,8 @@
 
 // mapnik
 #include <mapnik/json/error_handler.hpp>
-#include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/feature_callback_grammar.hpp>
+
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
@@ -32,9 +32,9 @@
 namespace mapnik { namespace json {
 
 template <typename Iterator, typename FeatureType, typename FeatureCallback, typename ErrorHandler>
-feature_collection_grammar<Iterator,FeatureType, FeatureCallback,ErrorHandler>::feature_collection_grammar(mapnik::transcoder const& tr)
-        : feature_collection_grammar::base_type(start,"start"),
-          feature_g(tr)
+feature_grammar_callback<Iterator,FeatureType, FeatureCallback,ErrorHandler>::feature_grammar_callback(mapnik::transcoder const& tr)
+    : feature_grammar_callback::base_type(start,"start"),
+      feature_g(tr)
 {
         qi::lit_type lit;
         qi::eps_type eps;
@@ -51,31 +51,24 @@ feature_collection_grammar<Iterator,FeatureType, FeatureCallback,ErrorHandler>::
         using phoenix::val;
         using qi::on_error;
         using qi::fail;
-        start = feature_collection(_r1, _r2, _r3)
-            ;
-
-        feature_collection = lit('{') > (type | features(_r1, _r2, _r3) | feature_g.json_.key_value) % lit(',') > lit('}')
-            ;
-
-        type = lit("\"type\"") > lit(':') > lit("\"FeatureCollection\"")
-            ;
-
-        features = lit("\"features\"")
-            > lit(':') > lit('[') >
-            ( lit(']') | ((feature(_r1, _r2, _r3) [_r2 +=1] % lit(',')) > lit(']')))
+        start = feature_from_geometry(_r1, _r2, _r3) | feature(_r1, _r2, _r3)
             ;
 
         feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
-            > feature_g(*_a)[on_feature(_r3,_a)]
+            >> feature_g(*_a)[on_feature(_r3,_a)]
+            ;
+
+        feature_from_geometry =
+            eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(_r1, _r2))]
+            >> geometry_g[set_geometry(*_a, _1)] [on_feature(_r3, _a)]
             ;
 
         start.name("start");
-        feature_collection.name("FeatureCollection");
-        type.name("type");
-        features.name("features");
         feature.name("feature");
+        feature_from_geometry.name("feature-from-geometry");
         feature_g.name("feature-grammar");
-        on_error<fail>(feature_collection, error_handler(_1, _2, _3, _4));
+        geometry_g.name("geometry-grammar");
+        on_error<fail>(feature, error_handler(_1, _2, _3, _4));
 }
 
 }}

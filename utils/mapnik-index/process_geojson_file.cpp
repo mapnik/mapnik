@@ -39,7 +39,7 @@
 
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
-#include <mapnik/json/feature_collection_grammar_impl.hpp>
+#include <mapnik/json/feature_callback_grammar_impl.hpp>
 
 namespace {
 struct feature_validate_callback
