@@ -51,8 +51,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
-#include <mapnik/json/feature_callback_grammar.hpp>
-#include <mapnik/json/extract_bounding_box_grammar.hpp>
+#include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>

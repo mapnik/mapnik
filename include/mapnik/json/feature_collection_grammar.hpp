@@ -27,7 +27,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/feature_grammar.hpp>
-#include <mapnik/json/feature_callback.hpp>
 #include <mapnik/feature.hpp>
 
 // spirit::qi
@@ -38,6 +37,27 @@ namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
+
+struct default_feature_callback
+{
+    default_feature_callback(std::vector<feature_ptr> & features)
+        : features_(features) {}
+    void operator() (feature_ptr const& feature)
+    {
+        features_.push_back(feature);
+    }
+    std::vector<feature_ptr> & features_;
+};
+
+struct apply_feature_callback
+{
+    using result_type = void;
+    template <typename Callback, typename Feature>
+    void operator() (Callback & callback, Feature const& feature) const
+    {
+        callback(feature);
+    }
+};
 
 template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
 struct feature_collection_grammar :
@@ -57,6 +77,26 @@ struct feature_collection_grammar :
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
 };
+
+template <typename Iterator, typename FeatureType, typename FeatureCallback = default_feature_callback, typename ErrorHandler = error_handler<Iterator> >
+struct feature_grammar_callback :
+        qi::grammar<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback &), space_type>
+{
+    feature_grammar_callback(mapnik::transcoder const& tr);
+    // grammars
+    feature_grammar<Iterator, FeatureType> feature_g;
+    geometry_grammar<Iterator> geometry_g;
+    // rules
+    qi::rule<Iterator, void(context_ptr const&, std::size_t&, FeatureCallback&), space_type> start; // START
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(context_ptr const& ctx, std::size_t, FeatureCallback&), space_type> feature_from_geometry;
+    // phoenix functions
+    phoenix::function<json::set_geometry_impl> set_geometry;
+    phoenix::function<apply_feature_callback> on_feature;
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
+};
+
 
 }}
 
