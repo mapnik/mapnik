@@ -37,6 +37,14 @@
 namespace mapnik
 {
 
+#if defined(BOOST_REGEX_HAS_ICU)
+static void fromUTF32toUTF8(std::basic_string<UChar32> const& src, std::string & dst)
+{
+    int32_t len = safe_cast<int32_t>(src.length());
+    value_unicode_string::fromUTF32(src.data(), len).toUTF8String(dst);
+}
+#endif
+
 struct _regex_match_impl : util::noncopyable {
 #if defined(BOOST_REGEX_HAS_ICU)
     _regex_match_impl(value_unicode_string const& ustr) :
@@ -94,10 +102,7 @@ std::string regex_match_node::to_string() const
     str_ +=".match('";
     auto const& pattern = impl_.get()->pattern_;
 #if defined(BOOST_REGEX_HAS_ICU)
-    std::string utf8;
-    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], safe_cast<int>(pattern.str().length()));
-    to_utf8(ustr,utf8);
-    str_ += utf8;
+    fromUTF32toUTF8(pattern.str(), str_);
 #else
     str_ += pattern.str();
 #endif
@@ -141,13 +146,9 @@ std::string regex_replace_node::to_string() const
     auto const& pattern = impl_.get()->pattern_;
     auto const& format = impl_.get()->format_;
 #if defined(BOOST_REGEX_HAS_ICU)
-    std::string utf8;
-    value_unicode_string ustr = value_unicode_string::fromUTF32( &pattern.str()[0], safe_cast<int>(pattern.str().length()));
-    to_utf8(ustr,utf8);
-    str_ += utf8;
+    fromUTF32toUTF8(pattern.str(), str_);
     str_ +="','";
-    to_utf8(format ,utf8);
-    str_ += utf8;
+    format.toUTF8String(str_);
 #else
     str_ += pattern.str();
     str_ +="','";

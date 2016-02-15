@@ -43,30 +43,7 @@
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
 
-namespace mapnik  {
-
-inline void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
-{
-    if (input.isEmpty()) return;
-
-    const int BUF_SIZE = 256;
-    char buf [BUF_SIZE];
-    int len;
-
-    UErrorCode err = U_ZERO_ERROR;
-    u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);
-    if (err == U_BUFFER_OVERFLOW_ERROR || err == U_STRING_NOT_TERMINATED_WARNING )
-    {
-        const std::unique_ptr<char[]> buf_ptr(new char [len+1]);
-        err = U_ZERO_ERROR;
-        u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
-        target.assign(buf_ptr.get() , static_cast<std::size_t>(len));
-    }
-    else
-    {
-        target.assign(buf, static_cast<std::size_t>(len));
-    }
-}
+namespace mapnik {
 
 using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
 
@@ -582,7 +559,7 @@ struct convert<value_double>
     value_double operator() (value_unicode_string const& val) const
     {
         std::string utf8;
-        to_utf8(val,utf8);
+        val.toUTF8String(utf8);
         return operator()(utf8);
     }
 
@@ -621,7 +598,7 @@ struct convert<value_integer>
     value_integer operator() (value_unicode_string const& val) const
     {
         std::string utf8;
-        to_utf8(val,utf8);
+        val.toUTF8String(utf8);
         return operator()(utf8);
     }
 
@@ -646,7 +623,7 @@ struct convert<std::string>
     std::string operator() (value_unicode_string const& val) const
     {
         std::string utf8;
-        to_utf8(val,utf8);
+        val.toUTF8String(utf8);
         return utf8;
     }
 
@@ -664,7 +641,7 @@ struct convert<std::string>
 
     std::string operator() (value_null const&) const
     {
-        return "";
+        return std::string();
     }
 };
 
@@ -694,17 +671,12 @@ struct to_unicode_impl
 
     value_unicode_string operator() (value_bool val) const
     {
-        if (val) {
-            std::string str("true");
-            return value_unicode_string(str.c_str());
-        }
-        std::string str("false");
-        return value_unicode_string(str.c_str());
+        return value_unicode_string(val ? "true" : "false");
     }
 
     value_unicode_string operator() (value_null const&) const
     {
-        return value_unicode_string("");
+        return value_unicode_string();
     }
 };
 
