@@ -35,21 +35,39 @@ using csv_value  = std::string;
 using csv_line = std::vector<csv_value>;
 using csv_data = std::vector<csv_line>;
 
-template <typename Iterator>
-struct csv_white_space_skipper : qi::grammar<Iterator>
+struct csv_white_space_skipper : qi::primitive_parser<csv_white_space_skipper>
 {
-    csv_white_space_skipper()
-        : csv_white_space_skipper::base_type(skip)
+    template <typename Context, typename Iterator>
+    struct attribute
     {
-        using namespace qi;
-        qi::lit_type lit;
-        skip = +lit(' ')
-            ;
+        typedef qi::unused_type type;
+    };
+
+    template <typename Iterator, typename Context
+      , typename Skipper, typename Attribute>
+    bool parse(Iterator& first, Iterator const& last
+      , Context& /*context*/, Skipper const& skipper
+      , Attribute& /*attr*/) const
+    {
+        qi::skip_over(first, last, skipper);
+        if (first != last && *first == ' ')
+        {
+            while (++first != last && *first == ' ')
+                ;
+            return true;
+        }
+        return false;
     }
-    qi::rule<Iterator> skip;
+
+    template <typename Context>
+    qi::info what(Context& /*context*/) const
+    {
+        return qi::info("csv_white_space_skipper");
+    }
 };
 
-template <typename Iterator, typename Skipper = csv_white_space_skipper<Iterator> >
+
+template <typename Iterator, typename Skipper = csv_white_space_skipper>
 struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), Skipper>
 {
     csv_line_grammar()
