@@ -434,8 +434,11 @@ SECTION("test colorize-alpha - parsing correct input") {
 
     std::string s("colorize-alpha(#0000ff 0%, #00ff00 100%)");
     std::vector<mapnik::filter::filter_type> f;
-    CHECK(parse_image_filters(s, f));
+    REQUIRE(parse_image_filters(s, f));
     mapnik::filter::colorize_alpha const & ca = mapnik::util::get<mapnik::filter::colorize_alpha>(f.front());
+    CHECK(ca.size() == 2);
+
+    CHECKED_IF(ca.size() > 0)
     {
         mapnik::filter::color_stop const & s2 = ca[0];
         CHECK( s2.color.alpha() == 0xff );
@@ -445,6 +448,7 @@ SECTION("test colorize-alpha - parsing correct input") {
         CHECK( s2.offset == 0.0 );
     }
 
+    CHECKED_IF(ca.size() > 1)
     {
         mapnik::filter::color_stop const & s2 = ca[1];
         CHECK( s2.color.alpha() == 0xff );

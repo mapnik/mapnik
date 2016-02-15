@@ -710,14 +710,55 @@ struct to_unicode_impl
 
 struct to_expression_string_impl
 {
+    struct EscapingByteSink : U_NAMESPACE_QUALIFIER ByteSink
+    {
+        std::string dest_;
+        char quote_;
+
+        explicit EscapingByteSink(char quote)
+            : quote_(quote)
+        {}
+
+        virtual void Append(const char* data, int32_t n)
+        {
+            // reserve enough room to hold the appended chunk and quotes;
+            // if another chunk follows, or any character needs escaping,
+            // the string will grow naturally
+            if (dest_.empty())
+            {
+                dest_.reserve(2 + static_cast<std::size_t>(n));
+                dest_.append(1, quote_);
+            }
+            else
+            {
+                dest_.reserve(dest_.size() + n + 1);
+            }
+
+            for (auto end = data + n; data < end; ++data)
+            {
+                if (*data == '\\' || *data == quote_)
+                    dest_.append(1, '\\');
+                dest_.append(1, *data);
+            }
+        }
+
+        virtual void Flush()
+        {
+            if (dest_.empty())
+                dest_.append(2, quote_);
+            else
+                dest_.append(1, quote_);
+        }
+    };
+
     explicit to_expression_string_impl(char quote = '\'')
         : quote_(quote) {}
 
     std::string operator() (value_unicode_string const& val) const
     {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return quote_ + utf8 + quote_;
+        EscapingByteSink sink(quote_);
+        val.toUTF8(sink);
+        return sink.dest_;
     }
 
     std::string operator() (value_integer val) const
