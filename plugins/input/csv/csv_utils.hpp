@@ -47,7 +47,7 @@ namespace csv_utils
 {
 
 static const mapnik::csv_line_grammar<char const*> line_g;
-static const mapnik::csv_white_space_skipper<char const*> skipper;
+static const mapnik::csv_white_space_skipper skipper{};
 
 template <typename Iterator>
 static mapnik::csv_line parse_line(Iterator start, Iterator end, char separator, char quote, std::size_t num_columns)
