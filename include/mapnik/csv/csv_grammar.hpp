@@ -80,7 +80,7 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), Skipper>
             ;
         column = quoted(_r2) | *(char_ - (lit(_r1)))
             ;
-        quoted = omit[char_(_r1)[_a = _1]] > text(_a) > -lit(_a) // support unmatched quotes or not (??)
+        quoted = omit[char_(_r1)[_a = _1]] > text(_a) > lit(_a) // support unmatched quotes or not (??)
             ;
         text = *(unesc_char | (char_ - lit(_r1)))
             ;
