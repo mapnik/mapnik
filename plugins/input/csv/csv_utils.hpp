@@ -136,49 +136,21 @@ std::size_t file_length(T & stream)
     return stream.tellg();
 }
 
-static inline char detect_separator(std::string const& str)
-{
-    char separator = ','; // default
-    int num_commas = std::count(str.begin(), str.end(), ',');
-    // detect tabs
-    int num_tabs = std::count(str.begin(), str.end(), '\t');
-    if (num_tabs > 0)
-    {
-        if (num_tabs > num_commas)
-        {
-            separator = '\t';
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
-        }
-    }
-    else // pipes
-    {
-        int num_pipes = std::count(str.begin(), str.end(), '|');
-        if (num_pipes > num_commas)
-        {
-            separator = '|';
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
-        }
-        else // semicolons
-        {
-            int num_semicolons = std::count(str.begin(), str.end(), ';');
-            if (num_semicolons > num_commas)
-            {
-                separator = ';';
-                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
-            }
-        }
-    }
-    return separator;
-}
-
 template <typename T>
-std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t file_length)
+std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t file_length)
 {
-    // autodetect newlines
-    char newline = '\n';
+    // autodetect newlines/quotes/separators
+    char newline = '\n'; // default
     bool has_newline = false;
     bool has_quote = false;
-    char quote = '"';
+    char quote = '"'; // default
+    char separator = ','; // default
+    // local counters
+    int num_commas = 0;
+    int num_tabs = 0;
+    int num_pipes = 0;
+    int num_semicolons = 0;
+
     static std::size_t const max_size = 4000;
     std::size_t size = std::min(file_length, max_size);
     for (std::size_t lidx = 0; lidx < size; ++lidx)
@@ -201,9 +173,40 @@ std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t fi
                 has_quote = true;
             }
             break;
+        case ',':
+            if (!has_newline) ++num_commas;
+            break;
+        case '\t':
+            if (!has_newline) ++num_tabs;
+            break;
+        case '|':
+            if (!has_newline) ++num_pipes;
+            break;
+        case ';':
+            if (!has_newline) ++num_semicolons;
+            break;
         }
     }
-    return std::make_tuple(newline, has_newline, quote);
+    // detect separator
+    if (num_tabs > 0 && num_tabs > num_commas)
+    {
+        separator = '\t';
+        MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
+    }
+    else // pipes/semicolons
+    {
+        if (num_pipes > num_commas)
+        {
+            separator = '|';
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
+        }
+        else  if (num_semicolons > num_commas)
+        {
+            separator = ';';
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
+        }
+    }
+    return std::make_tuple(newline, has_newline, separator, quote);
 }
 
 

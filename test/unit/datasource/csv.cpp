@@ -987,7 +987,7 @@ TEST_CASE("csv") {
             using ustring = mapnik::value_unicode_string;
             using row = std::pair<std::string, std::size_t>;
 
-            for (auto const &r : {
+            for (auto const& r : {
                     row{"test/data/csv/fails/needs_headers_two_lines.csv", 2},
                         row{"test/data/csv/fails/needs_headers_one_line.csv", 1},
                             row{"test/data/csv/fails/needs_headers_one_line_no_newline.csv", 1}})
