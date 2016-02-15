@@ -55,14 +55,10 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), Skipper>
     csv_line_grammar()
         : csv_line_grammar::base_type(line)
     {
-        using namespace qi;
-        qi::_a_type _a;
         qi::_r1_type _r1;
         qi::_r2_type _r2;
         qi::lit_type lit;
-        qi::_1_type _1;
         qi::char_type char_;
-        qi::omit_type omit;
         unesc_char.add
             ("\\a", '\a')
             ("\\b", '\b')
@@ -76,11 +72,11 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), Skipper>
             ("\\\"", '\"')
             ("\"\"", '\"') // double quote
             ;
-        line = -omit[char_("\n\r")] >> column(_r1, _r2) % lit(_r1)
+        line = -lit("\n\r") >> column(_r1, _r2) % lit(_r1)
             ;
-        column = quoted(_r2) | *(char_ - (lit(_r1)))
+        column = quoted(_r2) | *(char_ - lit(_r1))
             ;
-        quoted = omit[char_(_r1)[_a = _1]] > text(_a) > lit(_a) // support unmatched quotes or not (??)
+        quoted = lit(_r1) > text(_r1) > lit(_r1) // support unmatched quotes or not (??)
             ;
         text = *(unesc_char | (char_ - lit(_r1)))
             ;
@@ -90,7 +86,7 @@ private:
     qi::rule<Iterator, csv_line(char, char),  Skipper> line;
     qi::rule<Iterator, csv_value(char, char)> column; // no-skip
     qi::rule<Iterator, csv_value(char)> text; // no-skip
-    qi::rule<Iterator, qi::locals<char>, csv_value(char)> quoted; //no-skip
+    qi::rule<Iterator, csv_value(char)> quoted; // no-skip
     qi::symbols<char const, char const> unesc_char;
 };
 
