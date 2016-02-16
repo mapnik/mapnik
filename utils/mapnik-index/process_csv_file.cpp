@@ -194,7 +194,7 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
             if (num_fields != num_headers)
             {
                 std::ostringstream s;
-                s << "CSV Plugin: # of columns(" << num_fields << ")";
+                s << "CSV Index: # of columns(" << num_fields << ")";
                 if (num_fields > num_headers)
                 {
                     s << " > ";
