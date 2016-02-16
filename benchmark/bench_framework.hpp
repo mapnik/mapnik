@@ -2,6 +2,7 @@
 #define __MAPNIK_BENCH_FRAMEWORK_HPP__
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/safe_cast.hpp>
@@ -43,21 +44,70 @@ public:
     virtual ~test_case() {}
 };
 
-void handle_args(int argc, char** argv, mapnik::parameters & params)
+// gathers --long-option values in 'params';
+// returns the index of the first non-option argument,
+// or negated index of an ill-formed option argument
+inline int parse_args(int argc, char** argv, mapnik::parameters & params)
 {
-    if (argc > 0) {
-        for (int i=1;i<argc;++i) {
-            std::string opt(argv[i]);
-            // parse --foo bar
-            if (!opt.empty() && (opt.find("--") != 0)) {
-                std::string key = std::string(argv[i-1]);
-                if (!key.empty() && (key.find("--") == 0)) {
-                    key = key.substr(key.find_first_not_of("-"));
-                    params[key] = opt;
-                }
-            }
+    for (int i = 1; i < argc; ++i) {
+        const char* opt = argv[i];
+        if (opt[0] != '-') {
+            // non-option argument, return its index
+            return i;
+        }
+        if (opt[1] != '-') {
+            // we only accept --long-options, but instead of throwing,
+            // just issue a warning and let the caller decide what to do
+            std::clog << argv[0] << ": invalid option '" << opt << "'\n";
+            return -i; // negative means ill-formed option #i
+        }
+        if (opt[2] == '\0') {
+            // option-list terminator '--'
+            return i + 1;
+        }
+
+        // take option name without the leading '--'
+        std::string key(opt + 2);
+        size_t eq = key.find('=');
+        if (eq != std::string::npos) {
+            // one-argument form '--foo=bar'
+            params[key.substr(0, eq)] = key.substr(eq + 1);
+        }
+        else if (i + 1 < argc) {
+            // two-argument form '--foo' 'bar'
+            params[key] = std::string(argv[++i]);
+        }
+        else {
+            // missing second argument
+            std::clog << argv[0] << ": missing option '" << opt << "' value\n";
+            return -i; // negative means ill-formed option #i
         }
     }
+    return argc; // there were no non-option arguments
+}
+
+inline void handle_common_args(mapnik::parameters const& params)
+{
+    if (auto severity = params.get<std::string>("log-severity")) {
+        if (*severity == "debug")
+            mapnik::logger::set_severity(mapnik::logger::debug);
+        else if (*severity == "warn")
+            mapnik::logger::set_severity(mapnik::logger::warn);
+        else if (*severity == "error")
+            mapnik::logger::set_severity(mapnik::logger::error);
+        else if (*severity == "none")
+            mapnik::logger::set_severity(mapnik::logger::none);
+        else
+            std::clog << "ignoring option --log-severity='" << *severity
+                      << "' (allowed values are: debug, warn, error, none)\n";
+    }
+}
+
+inline int handle_args(int argc, char** argv, mapnik::parameters & params)
+{
+    int res = parse_args(argc, argv, params);
+    handle_common_args(params);
+    return res;
 }
 
 #define BENCHMARK(test_class,name)                      \
