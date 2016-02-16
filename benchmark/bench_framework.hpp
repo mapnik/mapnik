@@ -186,6 +186,34 @@ int run(T const& test_runner, std::string const& name)
     return 0;
 }
 
+struct sequencer
+{
+    sequencer(int argc, char** argv)
+      : exit_code_(0)
+    {
+        benchmark::handle_args(argc, argv, params_);
+    }
+
+    int done() const
+    {
+        return exit_code_;
+    }
+
+    template <typename Test, typename... Args>
+    sequencer & run(std::string const& name, Args && ...args)
+    {
+        // Test instance lifetime is confined to this function
+        Test test_runner(params_, std::forward<Args>(args)...);
+        // any failing test run will make exit code non-zero
+        exit_code_ |= benchmark::run(test_runner, name);
+        return *this; // allow chaining calls
+    }
+
+protected:
+    mapnik::parameters params_;
+    int exit_code_;
+};
+
 }
 
 #endif // __MAPNIK_BENCH_FRAMEWORK_HPP__
