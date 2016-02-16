@@ -52,7 +52,7 @@ matrix:
       env: JOBS=8 COVERAGE=true HEAVY_JOBS=3
 
 before_install:
- - export PYTHONUSERBASE=${PYTHONUSERBASE}
+ - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
