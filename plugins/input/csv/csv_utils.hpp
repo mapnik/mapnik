@@ -153,9 +153,11 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
 
     static std::size_t const max_size = 4000;
     std::size_t size = std::min(file_length, max_size);
-    for (std::size_t lidx = 0; lidx < size; ++lidx)
+    std::vector<char> buffer;
+    buffer.resize(size);
+    stream.read(buffer.data(), size);
+    for (auto c : buffer)
     {
-        char c = static_cast<char>(stream.get());
         switch (c)
         {
         case '\r':
@@ -206,9 +208,25 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
         }
     }
+
+    if (has_newline)
+    {
+        std::istringstream ss(buffer.data());
+        std::size_t num_columns = 0;
+        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote) && !ss.eof(); )
+        {
+            if (line.size() == 0) continue;
+            auto columns = csv_utils::parse_line(line, separator, quote);
+            if (num_columns > 0 && num_columns != columns.size())
+            {
+                quote = (quote == '"') ? '\'' : '"';
+                break;
+            }
+            num_columns = columns.size();
+        }
+    }
     return std::make_tuple(newline, has_newline, separator, quote);
 }
-
 
 struct geometry_column_locator
 {
