@@ -9,7 +9,7 @@
 
 // stl
 #include <chrono>
-#include <iomanip>
+#include <cstdio> // snprintf
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -96,11 +96,7 @@ int run(T const& test_runner, std::string const& name)
         {
             std::chrono::high_resolution_clock::time_point start;
             std::chrono::high_resolution_clock::duration elapsed;
-            std::stringstream s;
-            s << name << ":"
-                << std::setw(45 - (int)s.tellp()) << std::right
-                << " t:" << test_runner.threads()
-                << " i:" << test_runner.iterations();
+
             if (test_runner.threads() > 0)
             {
                 using thread_group = std::vector<std::unique_ptr<std::thread> >;
@@ -120,9 +116,15 @@ int run(T const& test_runner, std::string const& name)
                 test_runner();
                 elapsed = std::chrono::high_resolution_clock::now() - start;
             }
-            s << std::setw(65 - (int)s.tellp()) << std::right
-                << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " milliseconds\n";
-            std::clog << s.str();
+
+            char msg[200];
+            std::snprintf(msg, sizeof(msg),
+                    "%-43s %3zu threads %9zu iters %6.0f milliseconds",
+                    name.c_str(),
+                    test_runner.threads(),
+                    test_runner.iterations(),
+                    std::chrono::duration<double, std::milli>(elapsed).count());
+            std::clog << msg << "\n";
         }
         return 0;
     }
