@@ -36,7 +36,6 @@
 #include <boost/fusion/include/std_pair.hpp>
 #pragma GCC diagnostic pop
 
-
 BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
                           (mapnik::unary_function_impl, fun)
                           (mapnik::unary_function_call::argument_type, arg))
@@ -299,9 +298,10 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
     // strings
-    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = no_skip['\''>> *(unesc_char | ("\\x" > hex) | (char_ - '\'')) > '\''];
-    auto const double_quoted_string = x3::rule<class quoted_string, std::string> {} = no_skip['"' >> *(unesc_char | ("\\x" > hex) | (char_ - '"')) > '"'];
-    auto const quoted_string = x3::rule<class regex_arg, std::string> {} = single_quoted_string | double_quoted_string;
+    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'') >> no_skip[*(unesc_char | ("\\x" > hex) | (char_ - '\''))] > '\'';
+    auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"') >> no_skip[*(unesc_char | ("\\x" > hex) | (char_ - '"'))] > '"';
+    auto const quoted_string = x3::rule<class quoted_string, std::string> {} = single_quoted_string | double_quoted_string;
+
     auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
 
     // start
