@@ -49,8 +49,7 @@ namespace csv_utils
 static const mapnik::csv_line_grammar<char const*> line_g;
 static const mapnik::csv_white_space_skipper<char const*> skipper;
 
-template <typename Iterator>
-static mapnik::csv_line parse_line(Iterator start, Iterator end, char separator, char quote, std::size_t num_columns)
+static mapnik::csv_line parse_line(char const* start, char const* end, char separator, char quote, std::size_t num_columns)
 {
     mapnik::csv_line values;
     if (num_columns > 0) values.reserve(num_columns);
@@ -85,43 +84,6 @@ inline bool ignore_case_equal(std::string const& s0, std::string const& s1)
 {
     return std::equal(s0.begin(), s0.end(),
                       s1.begin(), ignore_case_equal_pred());
-}
-
-template <class CharT, class Traits, class Allocator>
-std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_string<CharT,Traits,Allocator>& s, CharT delim, CharT quote)
-{
-    typename std::basic_string<CharT,Traits,Allocator>::size_type nread = 0;
-    typename std::basic_istream<CharT, Traits>::sentry sentry(is, true);
-    if (sentry)
-    {
-        std::basic_streambuf<CharT, Traits>* buf = is.rdbuf();
-        s.clear();
-        bool has_quote = false;
-        while (nread < s.max_size())
-        {
-            int c1 = buf->sbumpc();
-            if (Traits::eq_int_type(c1, Traits::eof()))
-            {
-                is.setstate(std::ios_base::eofbit);
-                break;
-            }
-            else
-            {
-                ++nread;
-                CharT c = Traits::to_char_type(c1);
-                if (Traits::eq(c, quote))
-                    has_quote = !has_quote;
-                if (!Traits::eq(c, delim) || has_quote)
-                    s.push_back(c);
-                else
-                    break;// Character is extracted but not appended.
-            }
-        }
-    }
-    if (nread == 0 || nread >= s.max_size())
-        is.setstate(std::ios_base::failbit);
-
-    return is;
 }
 
 }

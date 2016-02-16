@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "csv_utils.hpp"
+#include "csv_getline.hpp"
 #include "csv_datasource.hpp"
 #include "csv_featureset.hpp"
 #include "csv_inline_featureset.hpp"
