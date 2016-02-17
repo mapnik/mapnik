@@ -51,30 +51,10 @@ int main(int argc, char** argv)
     mapnik::box2d<double> z1(-20037508.3428,-8317435.0606,20037508.3428,18399242.7298);
     // bbox for 16/10491/22911.png
     mapnik::box2d<double> z16(-13622912.929097254,6026906.8062295765,-13621689.93664469,6028129.79868214);
-    int return_value = 0;
-    {
-        test test_runner(params,
-                          "benchmark/data/polygon_rendering_clip.xml",
-                          z1);
-        return_value = return_value | run(test_runner,"polygon clip render z1");
-    }
-    {
-        test test_runner(params,
-                          "benchmark/data/polygon_rendering_no_clip.xml",
-                          z1);
-        return_value = return_value | run(test_runner,"polygon noclip render z1");
-    }
-    {
-        test test_runner(params,
-                          "benchmark/data/polygon_rendering_clip.xml",
-                          z16);
-        return_value = return_value | run(test_runner,"polygon clip render z16");
-    }
-    {
-        test test_runner(params,
-                          "benchmark/data/polygon_rendering_no_clip.xml",
-                          z16);
-        return_value = return_value | run(test_runner,"polygon noclip render z16");
-    }
-    return return_value;
+    return benchmark::sequencer(argc, argv)
+        .run<test>("polygon clip render z1", "benchmark/data/polygon_rendering_clip.xml", z1)
+        .run<test>("polygon noclip render z1", "benchmark/data/polygon_rendering_no_clip.xml", z1)
+        .run<test>("polygon clip render z16", "benchmark/data/polygon_rendering_clip.xml", z16)
+        .run<test>("polygon noclip render z16", "benchmark/data/polygon_rendering_no_clip.xml", z16)
+        .done();
 }
