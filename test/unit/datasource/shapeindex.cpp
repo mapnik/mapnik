@@ -26,6 +26,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
+#include <fstream>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
@@ -57,6 +58,7 @@ std::size_t count_shapefile_features(std::string const& filename)
         ++feature_count;
         feature = features->next();
     }
+
     return feature_count;
 }
 
@@ -84,12 +86,49 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
 
 }
 
+TEST_CASE("invalid shapeindex")
+{
+    std::string shape_plugin("./plugins/input/shape.input");
+    if (mapnik::util::exists(shape_plugin))
+    {
+        SECTION("Invalid index")
+        {
+            std::string path = "test/data/shp/boundaries.shp";
+            std::string index_path = path.substr(0, path.rfind(".")) + ".index";
+            // remove *.index if present
+            if (mapnik::util::exists(index_path))
+            {
+                mapnik::util::remove(index_path);
+            }
+            // count features
+
+            std::size_t feature_count = count_shapefile_features(path);
+
+            // create invalid index
+            std::ofstream index(index_path.c_str(), std::ios::binary);
+            std::string buf("mapnik-invalid-index.................");
+            index.write(buf.c_str(), buf.size());
+            index.close();
+
+            // count features
+            std::size_t feature_count_indexed = count_shapefile_features(path);
+            // ensure number of features are the same
+            REQUIRE(feature_count == feature_count_indexed);
+            // remove *.index if present
+            if (mapnik::util::exists(index_path))
+            {
+                mapnik::util::remove(index_path);
+            }
+        }
+    }
+}
+
 TEST_CASE("shapeindex")
 {
     std::string shape_plugin("./plugins/input/shape.input");
     if (mapnik::util::exists(shape_plugin))
     {
-        SECTION("Shapefile index")
+        SECTION("Index")
         {
             for (auto const& path : mapnik::util::list_directory("test/data/shp/"))
             {
