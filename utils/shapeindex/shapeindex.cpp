@@ -255,8 +255,7 @@ int main (int argc,char** argv)
         if (count > 0)
         {
             std::clog << " number shapes=" << count << std::endl;
-            std::fstream file((shapename+".index").c_str(),
-                              std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+            std::ofstream file((shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
             if (!file)
             {
                 std::clog << "cannot open index file for writing file \""
