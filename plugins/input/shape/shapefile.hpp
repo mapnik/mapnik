@@ -159,7 +159,7 @@ public:
 
     shape_file() {}
 
-    shape_file(std::string  const& file_name, bool update_cache = true) :
+    shape_file(std::string  const& file_name) :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
         file_()
 #elif defined (_WINDOWS)
@@ -170,7 +170,7 @@ public:
     {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
         boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(file_name, update_cache);
+            mapnik::mapped_memory_cache::instance().find(file_name,true);
 
         if (memory)
         {

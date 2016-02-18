@@ -72,7 +72,6 @@ private:
     box2d<double> extent_;
     bool indexed_;
     const int row_limit_;
-    const bool update_cache_;
     layer_descriptor desc_;
 };
 

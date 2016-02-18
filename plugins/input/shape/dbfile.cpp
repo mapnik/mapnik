@@ -49,7 +49,7 @@ dbf_file::dbf_file()
       record_length_(0),
       record_(0) {}
 
-dbf_file::dbf_file(std::string const& file_name, bool update_cache)
+dbf_file::dbf_file(std::string const& file_name)
     :num_records_(0),
      num_fields_(0),
      record_length_(0),
@@ -64,7 +64,7 @@ dbf_file::dbf_file(std::string const& file_name, bool update_cache)
 {
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(file_name, update_cache);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(file_name,true);
     if (memory)
     {
         mapped_region_ = *memory;
