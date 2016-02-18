@@ -57,7 +57,7 @@ public:
         shape_multipatch = 31
     };
 
-    shape_io(std::string const& shape_name, bool open_index=true);
+    shape_io(std::string const& shape_name, bool open_index = true, bool update_cache = true);
     ~shape_io();
 
     shape_file& shp();

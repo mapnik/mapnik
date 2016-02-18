@@ -35,11 +35,11 @@ const std::string shape_io::SHX = ".shx";
 const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
-shape_io::shape_io(std::string const& shape_name, bool open_index)
+shape_io::shape_io(std::string const& shape_name, bool open_index, bool update_cache)
     : type_(shape_null),
-      shp_(shape_name + SHP),
-      shx_(shape_name + SHX),
-      dbf_(shape_name + DBF),
+      shp_(shape_name + SHP, update_cache),
+      shx_(shape_name + SHX, update_cache),
+      dbf_(shape_name + DBF, update_cache),
       reclength_(0),
       id_(0)
 {

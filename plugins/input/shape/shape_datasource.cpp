@@ -64,6 +64,7 @@ shape_datasource::shape_datasource(parameters const& params)
       file_length_(0),
       indexed_(false),
       row_limit_(*params.get<mapnik::value_integer>("row_limit",0)),
+      update_cache_(*params.get<mapnik::value_bool>("update-cache", true)),
       desc_(shape_datasource::name(), *params.get<std::string>("encoding","utf-8"))
 {
 #ifdef MAPNIK_STATS
