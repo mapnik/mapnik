@@ -88,7 +88,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef MAPNIK_THREADSAFE
         std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
 #endif
-        itr=plugins_.find(*type);
+        itr = plugins_.find(*type);
         if (itr == plugins_.end())
         {
             std::string s("Could not create datasource for type: '");
@@ -105,7 +105,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
         }
     }
 
-    if (! itr->second->valid())
+    if (!itr->second->valid())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
                                  itr->second->get_error());
