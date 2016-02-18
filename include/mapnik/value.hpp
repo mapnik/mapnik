@@ -47,6 +47,12 @@ namespace mapnik {
 
 using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
 
+inline void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
+{
+    target.clear(); // mimic previous target.assign(...) semantics
+    input.toUTF8String(target); // this appends to target
+}
+
 namespace detail {
 
 namespace {
