@@ -23,16 +23,16 @@
 #ifndef SHAPE_IO_HPP
 #define SHAPE_IO_HPP
 
+// stl
+#include <memory>
+#include <ios>
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
-
+#include <mapnik/util/spatial_index.hpp>
 // boost
 #include <boost/optional.hpp>
-
-// stl
-#include <memory>
-
+//
 #include "dbfile.hpp"
 #include "shapefile.hpp"
 
@@ -72,7 +72,13 @@ public:
 
     inline bool has_index() const
     {
-        return (index_ && index_->is_open());
+        if (index_ && index_->is_open())
+        {
+            bool status = mapnik::util::check_spatial_index(index_->file());
+            index_->seek(0);// rewind
+            return status;
+        }
+        return false;
     }
 
     inline int id() const { return id_;}
