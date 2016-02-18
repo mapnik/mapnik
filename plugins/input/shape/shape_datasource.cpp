@@ -98,11 +98,11 @@ shape_datasource::shape_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "shape_datasource::init(get_column_description)");
 #endif
 
-        std::unique_ptr<shape_io> shape_ref = std::make_unique<shape_io>(shape_name_);
-        init(*shape_ref);
-        for (int i=0;i<shape_ref->dbf().num_fields();++i)
+        shape_io shape(shape_name_);
+        init(shape);
+        for (int i = 0; i < shape.dbf().num_fields(); ++i)
         {
-            field_descriptor const& fd = shape_ref->dbf().descriptor(i);
+            field_descriptor const& fd = shape.dbf().descriptor(i);
             std::string fld_name=fd.name_;
             switch (fd.type_)
             {
