@@ -211,7 +211,7 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
 
     if (has_newline)
     {
-        std::istringstream ss(buffer.data());
+        std::istringstream ss(std::string(buffer.begin(), buffer.end()));
         std::size_t num_columns = 0;
         for (std::string line; csv_utils::getline_csv(ss, line, newline, quote) && !ss.eof(); )
         {
