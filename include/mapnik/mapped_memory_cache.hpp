@@ -52,6 +52,8 @@ public:
     void clear();
 };
 
+extern template class MAPNIK_DECL singleton<mapped_memory_cache, CreateStatic>;
+
 }
 
 #endif // MAPNIK_MAPPED_MEMORY_CACHE_HPP
