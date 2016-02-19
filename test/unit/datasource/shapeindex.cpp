@@ -24,6 +24,7 @@
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
 #include <fstream>
@@ -36,6 +37,9 @@ namespace {
 
 std::size_t count_shapefile_features(std::string const& filename)
 {
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    mapnik::mapped_memory_cache::instance().clear();
+#endif
     mapnik::parameters params;
     params["type"] = "shape";
     params["file"] = filename;
