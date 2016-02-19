@@ -142,7 +142,7 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
     // autodetect newlines/quotes/separators
     char newline = '\n'; // default
     bool has_newline = false;
-    bool has_quote = false;
+    bool has_single_quote = false;
     char quote = '"'; // default
     char separator = ','; // default
     // local counters
@@ -168,11 +168,10 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
             has_newline = true;
             break;
         case '\'':
-        case '"':
-            if (!has_quote)
+            if (!has_single_quote)
             {
                 quote = c;
-                has_quote = true;
+                has_single_quote = true;
             }
             break;
         case ',':
@@ -185,7 +184,7 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
             if (!has_newline) ++num_pipes;
             break;
         case ';':
-            if (!has_newline) ++num_semicolons;
+           if (!has_newline) ++num_semicolons;
             break;
         }
     }
@@ -209,17 +208,29 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
         }
     }
 
-    if (has_newline)
+    if (has_newline && has_single_quote)
     {
         std::istringstream ss(std::string(buffer.begin(), buffer.end()));
         std::size_t num_columns = 0;
-        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote) && !ss.eof(); )
+        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote); )
         {
-            if (line.size() == 0) continue;
+            if (size < file_length && ss.eof())
+            {
+                // we can't be sure last line
+                // is not truncated so skip it
+                break;
+            }
+            if (line.size() == 0) continue; // empty lines are not interesting
+            auto num_quotes = std::count(line.begin(), line.end(), quote);
+            if (num_quotes % 2 != 0)
+            {
+                quote = '"';
+                break;
+            }
             auto columns = csv_utils::parse_line(line, separator, quote);
             if (num_columns > 0 && num_columns != columns.size())
             {
-                quote = (quote == '"') ? '\'' : '"';
+                quote = '"';
                 break;
             }
             num_columns = columns.size();
