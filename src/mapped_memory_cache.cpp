@@ -37,6 +37,8 @@
 namespace mapnik
 {
 
+template class singleton<mapped_memory_cache, CreateStatic>;
+
 void mapped_memory_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
@@ -58,6 +60,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(mutex_);
 #endif
+
     using iterator_type = std::unordered_map<std::string, mapped_region_ptr>::const_iterator;
     boost::optional<mapped_region_ptr> result;
     iterator_type itr = cache_.find(uri);
@@ -76,7 +79,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
             result.reset(region);
             if (update_cache)
             {
-                cache_.emplace(uri,*result);
+                cache_.emplace(uri, *result);
             }
             return result;
         }
