@@ -97,31 +97,41 @@ TEST_CASE("invalid shapeindex")
     {
         SECTION("Invalid index")
         {
-            std::string path = "test/data/shp/boundaries.shp";
-            std::string index_path = path.substr(0, path.rfind(".")) + ".index";
-            // remove *.index if present
-            if (mapnik::util::exists(index_path))
+            for (auto val : {std::make_tuple(true, std::string("mapnik-invalid-index.................")), // invalid header
+                           std::make_tuple(false, std::string("mapnik-index................."))})       // valid header + invalid index
             {
-                mapnik::util::remove(index_path);
-            }
-            // count features
+                std::string path = "test/data/shp/boundaries.shp";
+                std::string index_path = path.substr(0, path.rfind(".")) + ".index";
+                // remove *.index if present
+                if (mapnik::util::exists(index_path))
+                {
+                    mapnik::util::remove(index_path);
+                }
+                // count features
 
-            std::size_t feature_count = count_shapefile_features(path);
+                std::size_t feature_count = count_shapefile_features(path);
 
-            // create invalid index
-            std::ofstream index(index_path.c_str(), std::ios::binary);
-            std::string buf("mapnik-invalid-index.................");
-            index.write(buf.c_str(), buf.size());
-            index.close();
+                // create index
+                std::ofstream index(index_path.c_str(), std::ios::binary);
+                index.write(std::get<1>(val).c_str(), std::get<1>(val).size());
+                index.close();
 
-            // count features
-            std::size_t feature_count_indexed = count_shapefile_features(path);
-            // ensure number of features are the same
-            REQUIRE(feature_count == feature_count_indexed);
-            // remove *.index if present
-            if (mapnik::util::exists(index_path))
-            {
-                mapnik::util::remove(index_path);
+                // count features
+                std::size_t feature_count_indexed = count_shapefile_features(path);
+                if (std::get<0>(val)) // fallback to un-indexed access
+                {
+                    // ensure number of features are the same
+                    CHECK(feature_count == feature_count_indexed);
+                }
+                else // the header is valid but index file itself is not - expect datasource to fail and return 0 features.
+                {
+                    CHECK(feature_count_indexed == 0);
+                }
+                // remove *.index if present
+                if (mapnik::util::exists(index_path))
+                {
+                    mapnik::util::remove(index_path);
+                }
             }
         }
     }
