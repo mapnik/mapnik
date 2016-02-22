@@ -1,5 +1,6 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch.hpp"
+#include "catch_tmp.hpp"
 
 #include <string>
 #include <mapnik/debug.hpp>
@@ -9,8 +10,17 @@
 
 #include "cleanup.hpp" // run_cleanup()
 
+boost::filesystem::path catch_temporary_path::base_dir =
+    boost::filesystem::temp_directory_path() / "mapnik-test-unit";
+bool catch_temporary_path::keep_temporary_files = false;
+
 static std::string plugin_path;
 static std::string working_dir;
+
+static void set_keep_temporary_files(Catch::ConfigData&)
+{
+    catch_temporary_path::keep_temporary_files = true;
+}
 
 static void set_log_severity(Catch::ConfigData&, std::string const& severity)
 {
@@ -41,6 +51,10 @@ int main (int argc, char* const argv[])
     Catch::Session session;
 
     auto & cli = session.cli();
+
+    cli["--keep-temporary-files"]
+        .describe("tests should't delete temporary files they create")
+        .bind(&set_keep_temporary_files);
 
     cli["--log"]
         .describe("mapnik log severity")
@@ -82,6 +96,7 @@ int main (int argc, char* const argv[])
 
     if (result == 0)
     {
+        auto tmp_base_dir = catch_temporary_path::create_dir("");
         result = session.run();
     }
 
