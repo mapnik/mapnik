@@ -30,9 +30,6 @@
 #include <boost/spirit/include/karma.hpp>
 #pragma GCC diagnostic pop
 
-// stl
-#include <sstream>
-
 namespace mapnik {
 
 color::color(std::string const& str, bool premultiplied)
