@@ -24,8 +24,6 @@
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/config_error.hpp>
-// agg
-#include "agg_color_rgba.h"
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -88,14 +86,25 @@ std::string color::to_hex_string() const
     return str;
 }
 
+namespace  {
+
+static std::uint8_t multiply(std::uint8_t c, std::uint8_t a)
+{
+    std::uint32_t t = c * a + 128;
+    return std::uint8_t(((t >> 8) + t) >> 8);
+}
+
+}
+
 bool color::premultiply()
 {
     if (premultiplied_) return false;
-    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
-    pre_c.premultiply();
-    red_ = pre_c.r;
-    green_ = pre_c.g;
-    blue_ = pre_c.b;
+    if (alpha_ != 255)
+    {
+        red_ = multiply(red_, alpha_);
+        green_ = multiply(green_, alpha_);
+        blue_ = multiply(blue_, alpha_);
+    }
     premultiplied_ = true;
     return true;
 }
@@ -103,13 +112,23 @@ bool color::premultiply()
 bool color::demultiply()
 {
     if (!premultiplied_) return false;
-    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
-    pre_c.demultiply();
-    red_ = pre_c.r;
-    green_ = pre_c.g;
-    blue_ = pre_c.b;
+    if (alpha_ < 255)
+    {
+        if (alpha_ == 0)
+        {
+            red_ = green_ = blue_ = 0;
+        }
+        else
+        {
+            std::uint32_t r = (std::uint32_t(red_) * 255) / alpha_;
+            std::uint32_t g = (std::uint32_t(green_) * 255) / alpha_;
+            std::uint32_t b = (std::uint32_t(blue_) * 255) / alpha_;
+            red_ = (r > 255) ? 255 : r;
+            green_ = (g > 255) ? 255 : g;
+            blue_ = (b > 255) ? 255 : b;
+        }
+    }
     premultiplied_ = false;
     return true;
 }
-
 }
