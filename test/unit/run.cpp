@@ -2,30 +2,49 @@
 #include "catch.hpp"
 
 #include <string>
+#include <mapnik/debug.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <boost/filesystem/convenience.hpp>
 
 #include "cleanup.hpp" // run_cleanup()
 
-std::string plugin_path;
+static std::string plugin_path;
+static std::string working_dir;
 
-inline void set_plugin_path(Catch::ConfigData&, std::string const& _plugin_path ) {
+static void set_log_severity(Catch::ConfigData&, std::string const& severity)
+{
+    if (severity == "debug")
+        mapnik::logger::set_severity(mapnik::logger::debug);
+    else if (severity == "warn")
+        mapnik::logger::set_severity(mapnik::logger::warn);
+    else if (severity == "error")
+        mapnik::logger::set_severity(mapnik::logger::error);
+    else if (severity == "none")
+        mapnik::logger::set_severity(mapnik::logger::none);
+    else
+        std::clog << "unknonw log severity '" << severity << "'\n";
+}
+
+static void set_plugin_path(Catch::ConfigData&, std::string const& _plugin_path)
+{
     plugin_path = _plugin_path;
 }
 
-std::string working_dir;
-
-inline void set_working_dir(Catch::ConfigData&, std::string const& _working_dir ) {
+static void set_working_dir(Catch::ConfigData&, std::string const& _working_dir)
+{
     working_dir = _working_dir;
 }
-
 
 int main (int argc, char* const argv[])
 {
     Catch::Session session;
 
     auto & cli = session.cli();
+
+    cli["--log"]
+        .describe("mapnik log severity")
+        .bind(&set_log_severity, "debug|warn|error|none");
 
     cli["-p"]["--plugins"]
         .describe("path to mapnik plugins")
