@@ -205,6 +205,37 @@ void png_saver_pal::operator()<image_view_null> (image_view_null const& image) c
     throw image_writer_exception("null image views not supported for png");
 }
 
+#if defined(HAVE_PNG)
+template <typename T>
+static void save_as_png8_reduce(std::ostream & stream, T const& image, png_options const& opts)
+{
+    if (image.get_premultiplied())
+    {
+        auto demul = copy_image(image);
+        mapnik::demultiply_alpha(demul);
+        if (opts.use_hextree)
+        {
+            save_as_png8_hex(stream, demul, opts);
+        }
+        else
+        {
+            save_as_png8_oct(stream, demul, opts);
+        }
+    }
+    else
+    {
+        if (opts.use_hextree)
+        {
+            save_as_png8_hex(stream, image, opts);
+        }
+        else
+        {
+            save_as_png8_oct(stream, image, opts);
+        }
+    }
+}
+#endif
+
 template <typename T>
 void process_rgba8_png_pal(T const& image,
                           std::string const& t,
@@ -220,14 +251,7 @@ void process_rgba8_png_pal(T const& image,
     }
     else if (opts.paletted)
     {
-        if (opts.use_hextree)
-        {
-            save_as_png8_hex(stream, image, opts);
-        }
-        else
-        {
-            save_as_png8_oct(stream, image, opts);
-        }
+        save_as_png8_reduce(stream, image, opts);
     }
     else
     {
@@ -248,14 +272,7 @@ void process_rgba8_png(T const& image,
     handle_png_options(t, opts);
     if (opts.paletted)
     {
-        if (opts.use_hextree)
-        {
-            save_as_png8_hex(stream, image, opts);
-        }
-        else
-        {
-            save_as_png8_oct(stream, image, opts);
-        }
+        save_as_png8_reduce(stream, image, opts);
     }
     else
     {
