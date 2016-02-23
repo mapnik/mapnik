@@ -25,6 +25,10 @@
 
 #if defined(HAVE_JPEG)
 
+// agg
+#include <agg_pixfmt_rgba.h>
+
+// std
 #include <new>
 #include <ostream>
 #include <cstdio>
@@ -45,11 +49,19 @@ typedef struct
     JOCTET * buffer;
 } dest_mgr;
 
+template <typename T, typename J>
+T* alloc_small(J* info, int pool_id, size_t count = 1)
+{
+    auto cinfo = reinterpret_cast<j_common_ptr>(info);
+    auto size = count * sizeof(T);
+    auto buf = cinfo->mem->alloc_small(cinfo, pool_id, size);
+    return reinterpret_cast<T*>(buf);
+}
+
 inline void init_destination( j_compress_ptr cinfo)
 {
     dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
-    dest->buffer = (JOCTET*) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-                                                         BUFFER_SIZE * sizeof(JOCTET));
+    dest->buffer = alloc_small<JOCTET>(cinfo, JPOOL_IMAGE, BUFFER_SIZE);
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer = BUFFER_SIZE;
 }
@@ -80,20 +92,22 @@ inline void term_destination( j_compress_ptr cinfo)
 namespace mapnik {
 
 template <typename T1, typename T2>
-void save_as_jpeg(T1 & file,int quality, T2 const& image)
+void save_as_jpeg(T1 & file, int quality, T2 const& image, unsigned buf_rows = 1)
 {
+    static_assert(sizeof(typename T2::pixel_type) == 4, "T2 must be rgba8 image/view");
+
+    using jpeg_detail::alloc_small;
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
 
-    int width = static_cast<int>(image.width());
-    int height = static_cast<int>(image.height());
+    JDIMENSION width = static_cast<JDIMENSION>(image.width());
+    JDIMENSION height = static_cast<JDIMENSION>(image.height());
 
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
 
-    cinfo.dest = (struct jpeg_destination_mgr *)(*cinfo.mem->alloc_small)
-        ((j_common_ptr) &cinfo, JPOOL_PERMANENT, sizeof(jpeg_detail::dest_mgr));
-    jpeg_detail::dest_mgr * dest = reinterpret_cast<jpeg_detail::dest_mgr*>(cinfo.dest);
+    auto dest = alloc_small<jpeg_detail::dest_mgr>(&cinfo, JPOOL_PERMANENT);
+    cinfo.dest = &dest->pub;
     dest->pub.init_destination = jpeg_detail::init_destination;
     dest->pub.empty_output_buffer = jpeg_detail::empty_output_buffer;
     dest->pub.term_destination = jpeg_detail::term_destination;
@@ -107,22 +121,43 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, quality, boolean(1));
     jpeg_start_compress(&cinfo, boolean(1));
-    JSAMPROW row_pointer[1];
-    JSAMPLE* row=reinterpret_cast<JSAMPLE*>( ::operator new (sizeof(JSAMPLE) * width*3));
-    while (cinfo.next_scanline < cinfo.image_height)
+
+    JSAMPARRAY scanlines = cinfo.mem->alloc_sarray
+        ((j_common_ptr)&cinfo, JPOOL_IMAGE, 3 * width + 1, buf_rows);
+        // +1 overflow sample on each row for alpha before demultiply
+
+    for (JDIMENSION y = cinfo.next_scanline; y < cinfo.image_height; )
     {
-        const unsigned* imageRow=image.get_row(cinfo.next_scanline);
-        int index=0;
-        for (int i=0;i<width;++i)
+        uint32_t const* src_row = image.get_row(y);
+        uint8_t const* src = reinterpret_cast<uint8_t const*>(src_row);
+        JDIMENSION yy = y++ - cinfo.next_scanline;
+        JSAMPLE* dst = scanlines[yy++];
+        JSAMPLE* dst_end = dst + width * 3;
+
+        if (image.get_premultiplied())
         {
-            row[index++]=(imageRow[i])&0xff;
-            row[index++]=(imageRow[i]>>8)&0xff;
-            row[index++]=(imageRow[i]>>16)&0xff;
+            for (; dst < dst_end; dst += 3, src += 4)
+            {
+                using m = agg::multiplier2_rgba<agg::rgba8, agg::order_rgba>;
+                m::demultiply(dst, src);
+            }
         }
-        row_pointer[0] = &row[0];
-        (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+        else
+        {
+            for (; dst < dst_end; dst += 3, src += 4)
+            {
+                dst[0] = src[0];
+                dst[1] = src[1];
+                dst[2] = src[2];
+            }
+        }
+
+        if (yy >= buf_rows || y >= cinfo.image_height)
+        {
+            jpeg_write_scanlines(&cinfo, scanlines, yy);
+            y = cinfo.next_scanline;
+        }
     }
-    ::operator delete(row);
 
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
