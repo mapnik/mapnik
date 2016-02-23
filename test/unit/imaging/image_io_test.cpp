@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include "catch_tmp.hpp"
 
 #include <iostream>
 #include <cstring>
@@ -14,6 +15,52 @@
 #endif
 
 #include <boost/format.hpp>
+
+struct file_format_info
+{
+    std::string extension;
+    std::string format;
+    std::string fff; // filename-friendly format
+
+    file_format_info(std::string const& ext, std::string const& fmt)
+        : extension(ext), format(fmt), fff(fmt)
+    {
+        // colons are commonly used as list separators on Linux,
+        // forbidden in filenames on Windows
+        std::replace(fff.begin(), fff.end(), ':', '~');
+        // cosmetic, so that filename doesn't look like assignment
+        std::replace(fff.begin(), fff.end(), '=', '+');
+    }
+};
+
+// feeds filename-friendly file-format and extension to boost::format object
+static boost::format & operator%(boost::format & fmt, file_format_info const& info)
+{
+    return fmt % info.fff % info.extension;
+}
+
+static std::vector<file_format_info> const supported_types
+{{
+#if defined(HAVE_PNG)
+    file_format_info("png", "png"),
+    file_format_info("png", "png24"),
+    file_format_info("png", "png32"),
+    file_format_info("png", "png8"),
+    file_format_info("png", "png256"),
+#endif
+#if defined(HAVE_JPEG)
+    file_format_info("jpeg", "jpeg"),
+    file_format_info("jpeg", "jpeg80"),
+    file_format_info("jpeg", "jpeg90"),
+#endif
+#if defined(HAVE_TIFF)
+    file_format_info("tiff", "tiff"),
+#endif
+#if defined(HAVE_WEBP)
+    file_format_info("webp", "webp"),
+    file_format_info("webp", "webp:lossless=1"),
+#endif
+}};
 
 TEST_CASE("image io") {
 
@@ -122,50 +169,26 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
     mapnik::image_rgba8 im(256,256);
     std::string named_color = "lightblue";
     mapnik::fill(im, mapnik::color(named_color).rgba());
-    ////////////////////////////////////////////////////
-    std::vector<std::tuple<std::string, std::string> > supported_types;
-#if defined(HAVE_PNG)
-    supported_types.push_back(std::make_tuple("png","png"));
-    supported_types.push_back(std::make_tuple("png","png24"));
-    supported_types.push_back(std::make_tuple("png","png32"));
-    supported_types.push_back(std::make_tuple("png","png8"));
-    supported_types.push_back(std::make_tuple("png","png256"));
-#endif
-#if defined(HAVE_JPEG)
-    supported_types.push_back(std::make_tuple("jpeg","jpeg"));
-    supported_types.push_back(std::make_tuple("jpeg","jpeg80"));
-    supported_types.push_back(std::make_tuple("jpeg","jpeg90"));
-#endif
-#if defined(HAVE_TIFF)
-    supported_types.push_back(std::make_tuple("tiff","tiff"));
-#endif
-#if defined(HAVE_WEBP)
-    supported_types.push_back(std::make_tuple("webp","webp"));
-#endif
 
     for (auto const& info : supported_types)
     {
-        std::string extension;
-        std::string format;
-        std::tie(extension, format) = info;
-        std::string filename = (boost::format("/tmp/mapnik-%1%.%2%") % named_color % extension).str();
+        CAPTURE(info.format);
+
+        boost::format FNFMT("image_io-%1%.%2%");
+        catch_temporary_path filename = (FNFMT % named_color % info.extension).str();
         mapnik::save_to_file(im, filename);
-        std::string str = mapnik::save_to_string(im, format);
+        std::string str = mapnik::save_to_string(im, info.format);
         std::ostringstream ss;
-        mapnik::save_to_stream(im, ss, format);
+        mapnik::save_to_stream(im, ss, info.format);
         CHECK(str.length() == ss.str().length());
-        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename, extension));
+        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename, info.extension));
         unsigned w = reader->width();
         unsigned h = reader->height();
         auto im2 = reader->read(0, 0, w, h);
         CHECK(im2.size() == im.size());
-        if (extension == "png" || extension == "tiff")
+        if (info.extension == "png" || info.extension == "tiff")
         {
             CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
-        }
-        if (mapnik::util::exists(filename))
-        {
-            mapnik::util::remove(filename);
         }
     }
 }
