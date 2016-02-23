@@ -44,9 +44,18 @@ using image_view_base = util::variant<image_view_null,
 
 struct MAPNIK_DECL image_view_any : image_view_base
 {
+#ifdef _MSC_VER
+    // TODO remove this when MSVC doesn't ICE with inherited constructor
+    //      https://ci.appveyor.com/project/Mapbox/mapnik/build/1.0.670#L288
+    template <typename T>
+    image_view_any(T && data)
+        noexcept(std::is_nothrow_constructible<image_view_base, T && >::value)
+        : image_view_base(std::forward<T>(data)) {}
+#else
     // inherit constructors from variant, in particular conversions
     // from alternatives
     using image_view_base::image_view_base;
+#endif
 
     image_view_any() = default;
 
