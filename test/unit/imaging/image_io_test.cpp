@@ -8,6 +8,7 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_util_jpeg.hpp>
+#include <mapnik/image_view_any.hpp>
 #include <mapnik/util/fs.hpp>
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_context.hpp>
@@ -15,6 +16,8 @@
 #endif
 
 #include <boost/format.hpp>
+
+#include <agg_color_rgba.h>
 
 struct file_format_info
 {
@@ -61,6 +64,27 @@ static std::vector<file_format_info> const supported_types
     file_format_info("webp", "webp:lossless=1"),
 #endif
 }};
+
+static mapnik::image_rgba8 visible_spectrum_with_alpha(int width, int height)
+{
+    mapnik::image_rgba8 im(width, height);
+    auto dst_col = im.bytes();
+    auto stride = im.row_size();
+    for (int x = 0; x < width; ++x, dst_col += 4)
+    {
+        auto wl = 400.0 + x * 300.0 / width;
+        auto c = agg::rgba8::from_wavelength(wl);
+        auto dst = dst_col;
+        for (int y = 0; y < height; ++y, dst += stride)
+        {
+            dst[0] = c.r;
+            dst[1] = c.g;
+            dst[2] = c.b;
+            dst[3] = uint8_t((y * 256 + 128 ) / height);
+        }
+    }
+    return im;
+};
 
 TEST_CASE("image io") {
 
@@ -192,4 +216,55 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
         }
     }
 }
+
+SECTION("saving image_view gives the same result as saving cropped image")
+{
+    mapnik::image_rgba8 im_non = visible_spectrum_with_alpha(300, 256);
+    mapnik::image_rgba8 im_pre = im_non;
+    mapnik::premultiply_alpha(im_pre);
+    // views
+    mapnik::image_view_any iv_non(50, 150, 200, 100, im_non);
+    mapnik::image_view_any iv_pre(50, 150, 200, 100, im_pre);
+    // cropped images
+    mapnik::image_any ic_non = copy_image(iv_non);
+    mapnik::image_any ic_pre = copy_image(iv_pre);
+
+    for (auto const& info : supported_types)
+    {
+        CAPTURE(info.format);
+
+        // this test is not about saving to files, only do it if they're kept
+        if (catch_temporary_path::keep_temporary_files)
+        {
+            boost::format FNFMT("image_io-spectrum-%1%-%3%.%2%");
+            catch_temporary_path fc_non = (FNFMT % info % "non-crop").str();
+            catch_temporary_path fv_non = (FNFMT % info % "non-view").str();
+            catch_temporary_path fc_pre = (FNFMT % info % "pre-crop").str();
+            catch_temporary_path fv_pre = (FNFMT % info % "pre-view").str();
+            mapnik::save_to_file(ic_non, fc_non, info.format);
+            mapnik::save_to_file(iv_non, fv_non, info.format);
+            mapnik::save_to_file(ic_pre, fc_pre, info.format);
+            mapnik::save_to_file(iv_pre, fv_pre, info.format);
+        }
+
+        // non-premultiplied crop vs view
+        auto s_crop = mapnik::save_to_string(ic_non, info.format);
+        auto s_view = mapnik::save_to_string(iv_non, info.format);
+
+        CHECKED_IF(s_crop.size() == s_view.size())
+        {
+            CHECK(std::memcmp(s_crop.data(), s_view.data(), s_view.size()) == 0);
+        }
+
+        // premultiplied crop vs view
+        s_crop = mapnik::save_to_string(ic_pre, info.format);
+        s_view = mapnik::save_to_string(iv_pre, info.format);
+
+        CHECKED_IF(s_crop.size() == s_view.size())
+        {
+            CHECK(std::memcmp(s_crop.data(), s_view.data(), s_view.size()) == 0);
+        }
+    }
+}
+
 } // END TEST_CASE
