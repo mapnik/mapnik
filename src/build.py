@@ -257,6 +257,7 @@ source = Split(
     renderer_common/render_pattern.cpp
     renderer_common/render_thunk_extractor.cpp
     math.cpp
+    value.cpp
     """
     )
 
