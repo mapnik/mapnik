@@ -97,6 +97,12 @@ inline std::size_t image_view<T>::row_size() const
 }
 
 template <typename T>
+inline std::size_t image_view<T>::row_stride() const
+{
+    return data_.row_stride();
+}
+
+template <typename T>
 inline typename image_view<T>::pixel_type const* image_view<T>::get_row(std::size_t row) const
 {
     return data_.get_row(row + y_) + x_;

@@ -62,6 +62,7 @@ static std::vector<file_format_info> const supported_types
 #if defined(HAVE_WEBP)
     file_format_info("webp", "webp"),
     file_format_info("webp", "webp:lossless=1"),
+    file_format_info("webp", "webp:preprocessing=2"), // pseudo-random dithering
 #endif
 }};
 

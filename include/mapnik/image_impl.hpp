@@ -188,6 +188,12 @@ inline std::size_t image<T>::row_size() const
 }
 
 template <typename T>
+inline std::size_t image<T>::row_stride() const
+{
+    return dimensions_.width() * pixel_size;
+}
+
+template <typename T>
 inline void image<T>::set(pixel_type const& t)
 {
     std::fill(pData_, pData_ + dimensions_.width() * dimensions_.height(), t);
