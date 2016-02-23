@@ -63,6 +63,11 @@ struct both_arithmetic : std::integral_constant<bool,
 
 struct equals
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         -> decltype(lhs == rhs)
@@ -73,6 +78,15 @@ struct equals
 
 struct not_equal
 {
+    // back compatibility shim to equate empty string with null for != test
+    // https://github.com/mapnik/mapnik/issues/1859
+    // TODO - consider removing entire specialization at Mapnik 3.1.x
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        if (rhs.isEmpty()) return false;
+        return true;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         ->decltype(lhs != rhs)
@@ -83,6 +97,11 @@ struct not_equal
 
 struct greater_than
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto  apply(T const& lhs, T const& rhs)
         ->decltype(lhs > rhs)
@@ -93,6 +112,11 @@ struct greater_than
 
 struct greater_or_equal
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         ->decltype(lhs >= rhs)
@@ -103,6 +127,11 @@ struct greater_or_equal
 
 struct less_than
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
          ->decltype(lhs < rhs)
@@ -113,6 +142,11 @@ struct less_than
 
 struct less_or_equal
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         ->decltype(lhs <= rhs)
@@ -130,8 +164,19 @@ struct comparison
     bool operator() (value_unicode_string const& lhs,
                      value_unicode_string const& rhs) const
     {
-        return Op::apply(lhs, rhs) ? true: false;
+        return Op::apply(lhs, rhs) ? true : false;
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // special case for unicode_string and value_null
+    //////////////////////////////////////////////////////////////////////////
+
+    bool operator() (value_null const& lhs, value_unicode_string const& rhs) const
+    {
+        return Op::apply(lhs, rhs);
+    }
+    //////////////////////////////////////////////////////////////////////////
+
 
     // same types
     template <typename T>
