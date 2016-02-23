@@ -267,4 +267,44 @@ SECTION("saving image_view gives the same result as saving cropped image")
     }
 }
 
+SECTION("saving image automatically demultiplies if needed")
+{
+    mapnik::image_rgba8 im_non = visible_spectrum_with_alpha(300, 256);
+    mapnik::image_rgba8 im_pre = im_non;
+    mapnik::premultiply_alpha(im_pre);
+    mapnik::image_rgba8 im_de = im_pre;
+    mapnik::demultiply_alpha(im_de);
+
+    for (auto const& info : supported_types)
+    {
+        CAPTURE(info.format);
+
+        boost::format FNFMT("image_io-spectrum-%1%-%3%.%2%");
+        catch_temporary_path fn_non = (FNFMT % info % "non").str();
+        catch_temporary_path fn_pre = (FNFMT % info % "pre").str();
+        catch_temporary_path fn_de = (FNFMT % info % "pre-de").str();
+
+        mapnik::save_to_file(im_non, fn_non, info.format);
+        mapnik::save_to_file(im_pre, fn_pre, info.format);
+        mapnik::save_to_file(im_de, fn_de, info.format);
+
+        if (info.format == "tiff")
+        {
+            // tiff saves premultiplied or non-premultiplied directly,
+            // no conversion needed
+            continue;
+        }
+
+        // saving premultiplied source must yield the same result
+        // as if it were explicitly demultiplied before saving
+        auto s_pre = mapnik::save_to_string(im_pre, info.format);
+        auto s_de = mapnik::save_to_string(im_de, info.format);
+
+        CHECKED_IF(s_de.size() == s_pre.size())
+        {
+            CHECK(std::memcmp(s_de.data(), s_pre.data(), s_pre.size()) == 0);
+        }
+    }
+}
+
 } // END TEST_CASE
