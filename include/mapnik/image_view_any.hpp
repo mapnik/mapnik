@@ -44,12 +44,17 @@ using image_view_base = util::variant<image_view_null,
 
 struct MAPNIK_DECL image_view_any : image_view_base
 {
+    // inherit constructors from variant, in particular conversions
+    // from alternatives
+    using image_view_base::image_view_base;
+
     image_view_any() = default;
 
-    template <typename T>
-    image_view_any(T && data)
-        noexcept(std::is_nothrow_constructible<image_view_base, T && >::value)
-        : image_view_base(std::forward<T>(data)) {}
+    // construct from view coordinates and image
+    template <typename ImageT>
+    image_view_any(std::size_t x, std::size_t y, std::size_t width, std::size_t height,
+                   ImageT const& data)
+        : image_view_base(image_view<ImageT>(x, y, width, height, data)) {}
 
     std::size_t width() const;
     std::size_t height() const;
