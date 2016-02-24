@@ -31,6 +31,8 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/expression_node_types.hpp>
+// stl
+#include <memory>
 
 namespace mapnik
 {
