@@ -27,14 +27,8 @@
 
 // stl
 #include <cmath>
-#include <memory>
 #include <string>
-
-#include <cstddef>
-#include <iosfwd>
-#include <new>
 #include <type_traits>
-
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
