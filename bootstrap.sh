@@ -112,7 +112,6 @@ CPP_TESTS = True
 PGSQL2SQLITE = True
 XMLPARSER = 'ptree'
 SVG2PNG = True
-SAMPLE_INPUT_PLUGINS = True
 "
 }
 

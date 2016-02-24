@@ -52,6 +52,7 @@ matrix:
       env: JOBS=8 COVERAGE=true HEAVY_JOBS=4
 
 before_install:
+ - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
@@ -59,57 +60,34 @@ before_install:
  - export BENCH=${BENCH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
  - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
- - git submodule update --init --depth=10 ||
-     git submodule foreach 'test "$sha1" = "`git rev-parse HEAD`" ||
-                            git ls-remote origin "refs/pull/*/head" |
-                            while read hash ref; do
-                                if test "$hash" = "$sha1"; then
-                                    git config --add remote.origin.fetch "+$ref:$ref";
-                                fi
-                            done'
- - git submodule update --init --depth=10
+ - git_submodule_update --init --depth=10
 
 install:
- - if [[ $(uname -s) == 'Linux' ]]; then
-     export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages;
-   else
-     brew rm postgis --force;
-     brew install postgis --force;
-     pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres;
-     createuser -s postgres;
-     export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages;
-   fi
- - psql -c 'create database template_postgis;' -U postgres;
- - psql -c 'create extension postgis;' -d template_postgis -U postgres;
- - if [[ ${COVERAGE} == true ]]; then
-     if [[ ! $(which pip) ]]; then easy_install --user pip && export PATH=/Users/travis/Library/Python/2.7/bin:${PATH}; fi;
-     pip install --user cpp-coveralls;
-   fi
+ - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
+ - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
+ - on 'osx' brew rm postgis --force
+ - on 'osx' brew install postgis --force
+ - on 'osx' pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres
+ - on 'osx' createuser -s postgres
+ - psql -c 'create database template_postgis;' -U postgres
+ - psql -c 'create extension postgis;' -d template_postgis -U postgres
+ - enabled ${COVERAGE} pip install --user cpp-coveralls
+
+before_script:
+ - source bootstrap.sh
+ - commit_message_parse
 
 script:
- - source bootstrap.sh
- - if [[ ${COVERAGE} == true ]]; then
-     ./configure PGSQL2SQLITE=False SVG2PNG=False SAMPLE_INPUT_PLUGINS=False SVG_RENDERER=False BENCHMARK=${BENCH} CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' CUSTOM_CFLAGS='--coverage' DEBUG=True;
-   elif [[ ${MASON_PUBLISH} == true ]]; then
-     export MASON_NAME=mapnik;
-     export MASON_VERSION=latest;
-     export MASON_LIB_FILE=lib/libmapnik-wkt.a;
-     source ./.mason/mason.sh;
-     ./configure BENCHMARK=${BENCH} PREFIX=${MASON_PREFIX} PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True RUNTIME_LINK='static';
-   else
-     ./configure BENCHMARK=${BENCH};
-   fi
- - SCONSFLAGS='--debug=time' make
- - make test || TEST_RESULT=$?
- - if [[ ${COVERAGE} == true ]]; then
-     ./mason_packages/.link/bin/cpp-coveralls --build-root . --gcov-options '\-lp' --exclude mason_packages --exclude .sconf_temp --exclude benchmark --exclude deps --exclude scons --exclude test --exclude demo --exclude docs --exclude fonts --exclude utils > /dev/null; 
-   fi
- - if [[ ${BENCH} == True ]]; then
-     make bench;
-   fi
- - if [[ ${TEST_RESULT:-0} != 0 ]]; then exit $TEST_RESULT ; fi;
- - if [[ ${MASON_PUBLISH} == true ]]; then
-     ./mason_latest.sh build;
-     ./mason_latest.sh link;
+ - export SCONSFLAGS='--debug=time'
+ - configure BENCHMARK=${BENCH}
+ - make
+ - make test
+ - enabled ${COVERAGE} coverage
+ - enabled ${BENCH} make bench
+
+after_success:
+ - if enabled ${MASON_PUBLISH}; then
+     ./mason_latest.sh build &&
+     ./mason_latest.sh link &&
      ./mason_latest.sh publish;
    fi
