@@ -63,8 +63,7 @@ std::size_t file_length(T & stream)
     return stream.tellg();
 }
 
-template <typename T>
-std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t file_length);
+std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length);
 
 void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator);
 bool valid(geometry_column_locator const& locator, std::size_t max_size);

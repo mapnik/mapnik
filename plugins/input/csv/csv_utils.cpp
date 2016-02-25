@@ -33,14 +33,6 @@
 #include "csv_getline.hpp"
 #include "csv_utils.hpp"
 
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
-#pragma GCC diagnostic pop
-#endif
-
-
 #include <fstream>
 #include <string>
 #include <cstdio>
@@ -95,8 +87,7 @@ bool ignore_case_equal(std::string const& s0, std::string const& s1)
 
 namespace detail {
 
-template <typename T>
-std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t file_length)
+std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length)
 {
     // autodetect newlines/quotes/separators
     char newline = '\n'; // default
@@ -197,10 +188,6 @@ std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t 
     }
     return std::make_tuple(newline, has_newline, separator, quote);
 }
-
-template std::tuple<char, bool, char, char> autodect_csv_flavour(std::istringstream & stream, std::size_t file_length);
-template std::tuple<char, bool, char, char> autodect_csv_flavour(std::ifstream & stream, std::size_t file_length);
-template std::tuple<char, bool, char, char> autodect_csv_flavour(boost::interprocess::ibufferstream & stream, std::size_t file_length);
 
 void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator)
 {
