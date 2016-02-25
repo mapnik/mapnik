@@ -158,6 +158,16 @@ TEST_CASE("expressions")
     TRY_CHECK(eval(" [int] > 100 and [int] gt 100.0 and [double] < 2 and [double] lt 2.0 ") == true);
     TRY_CHECK(eval(" [int] >= 123 and [int] ge 123.0 and [double] <= 1.23456 and [double] le 1.23456 ") == true);
 
+    // empty string/null equality
+    TRY_CHECK(eval("[null] = null") == true);
+    TRY_CHECK(eval("[null] != null") == false);
+    TRY_CHECK(eval("[null] = ''") == false);
+    ///////////////////// ref: https://github.com/mapnik/mapnik/issues/1859
+    TRY_CHECK(eval("[null] != ''") == false); // back compatible - will be changed in 3.1.x
+    //////////////////////
+    TRY_CHECK(eval("'' = [null]") == false);
+    TRY_CHECK(eval("'' != [null]") == true);
+
     // regex
     // replace
     TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));
