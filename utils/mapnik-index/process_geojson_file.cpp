@@ -21,11 +21,6 @@
  *****************************************************************************/
 
 #include "process_geojson_file.hpp"
-#include <mapnik/geometry.hpp>
-#include <mapnik/geometry_envelope.hpp>
-#include <mapnik/geometry_adapters.hpp>
-#include <mapnik/util/file_io.hpp>
-#include <mapnik/util/utf_conv_win.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
@@ -35,9 +30,10 @@
 #include <boost/spirit/include/qi.hpp>
 #pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
+#else
+#include <mapnik/util/file_io.hpp>
 #endif
 
-#include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 #include <mapnik/json/feature_collection_grammar_impl.hpp>
 
