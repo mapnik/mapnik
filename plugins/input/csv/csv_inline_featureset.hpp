@@ -28,7 +28,6 @@
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
 #include <deque>
-#include <cstdio>
 
 class csv_inline_featureset : public mapnik::Featureset
 {

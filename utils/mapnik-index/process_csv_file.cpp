@@ -23,12 +23,15 @@
 #include "process_csv_file.hpp"
 #include "../../plugins/input/csv/csv_getline.hpp"
 #include "../../plugins/input/csv/csv_utils.hpp"
+#include "../../plugins/input/csv/csv_utils.cpp"
+#include <mapnik/datasource.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #pragma GCC diagnostic pop
@@ -36,6 +39,8 @@
 #endif
 
 #include <fstream>
+#include <iostream>
+#include <sstream>
 
 namespace mapnik { namespace detail {
 

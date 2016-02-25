@@ -32,6 +32,7 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/value_types.hpp>
+#include "csv_utils.hpp"
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -42,7 +43,6 @@
 
 // stl
 #include <vector>
-#include <deque>
 #include <string>
 
 template <std::size_t Max, std::size_t Min>

@@ -20,20 +20,16 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CVS_GRAMMAR_HPP
-#define MAPNIK_CVS_GRAMMAR_HPP
+#ifndef MAPNIK_CSV_GRAMMAR_HPP
+#define MAPNIK_CSV_GRAMMAR_HPP
 
-//#define BOOST_SPIRIT_DEBUG
-
+#include <mapnik/csv/csv_types.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
 namespace mapnik {
 
 namespace qi = boost::spirit::qi;
-using csv_value  = std::string;
-using csv_line = std::vector<csv_value>;
-using csv_data = std::vector<csv_line>;
 
 struct csv_white_space_skipper : qi::primitive_parser<csv_white_space_skipper>
 {
@@ -110,4 +106,4 @@ private:
 
 }
 
-#endif // MAPNIK_CVS_GRAMMAR_HPP
+#endif // MAPNIK_CSV_GRAMMAR_HPP

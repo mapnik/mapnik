@@ -28,7 +28,6 @@
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
 #include <deque>
-#include <cstdio>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
