@@ -37,6 +37,16 @@ using mapnik::query;
 
 namespace mapnik { namespace util {
 
+
+template <typename InputStream>
+bool check_spatial_index(InputStream& in)
+{
+    char header[17]; // mapnik-index
+    std::memset(header, 0, 17);
+    in.read(header,16);
+    return (std::strncmp(header, "mapnik-index",12) == 0);
+}
+
 template <typename Value, typename Filter, typename InputStream>
 class spatial_index
 {
@@ -53,23 +63,13 @@ private:
     static void read_envelope(InputStream& in, box2d<double>& envelope);
     static void query_node(Filter const& filter, InputStream& in, std::vector<Value> & results);
     static void query_first_n_impl(Filter const& filter, InputStream& in, std::vector<Value> & results, std::size_t count);
-    static bool check_header(InputStream& in);
 };
-
-template <typename Value, typename Filter, typename InputStream>
-bool spatial_index<Value, Filter, InputStream>::check_header(InputStream& in)
-{
-    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout type");
-    char header[17]; // mapnik-index
-    std::memset(header, 0, 17);
-    in.read(header,16);
-    return (std::strncmp(header, "mapnik-index",12) == 0);
-}
 
 template <typename Value, typename Filter, typename InputStream>
 box2d<double> spatial_index<Value, Filter, InputStream>::bounding_box(InputStream& in)
 {
-    if (!check_header(in)) throw std::runtime_error("Invalid index file (regenerate with shapeindex)");
+    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout type");
+    if (!check_spatial_index(in)) throw std::runtime_error("Invalid index file (regenerate with shapeindex)");
     in.seekg(16 + 4, std::ios::beg);
     box2d<double> box;
     read_envelope(in, box);
@@ -80,7 +80,8 @@ box2d<double> spatial_index<Value, Filter, InputStream>::bounding_box(InputStrea
 template <typename Value, typename Filter, typename InputStream>
 void spatial_index<Value, Filter, InputStream>::query(Filter const& filter, InputStream& in, std::vector<Value>& results)
 {
-    if (!check_header(in)) throw std::runtime_error("Invalid index file (regenerate with shapeindex)");
+    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout type");
+    if (!check_spatial_index(in)) throw std::runtime_error("Invalid index file (regenerate with shapeindex)");
     in.seekg(16, std::ios::beg);
     query_node(filter, in, results);
 }
@@ -115,7 +116,8 @@ void spatial_index<Value, Filter, InputStream>::query_node(Filter const& filter,
 template <typename Value, typename Filter, typename InputStream>
 void spatial_index<Value, Filter, InputStream>::query_first_n(Filter const& filter, InputStream& in, std::vector<Value>& results, std::size_t count)
 {
-    if (!check_header(in)) throw std::runtime_error("Invalid index file (regenerate with shapeindex)");
+    static_assert(std::is_standard_layout<Value>::value, "Values stored in quad-tree must be standard layout type");
+    if (!check_spatial_index(in)) throw std::runtime_error("Invalid index file (regenerate with shapeindex)");
     in.seekg(16, std::ios::beg);
     query_first_n_impl(filter, in, results, count);
 }

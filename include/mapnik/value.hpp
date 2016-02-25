@@ -43,32 +43,15 @@
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
 
-namespace mapnik  {
+namespace mapnik {
+
+using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
 
 inline void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
 {
-    if (input.isEmpty()) return;
-
-    const int BUF_SIZE = 256;
-    char buf [BUF_SIZE];
-    int len;
-
-    UErrorCode err = U_ZERO_ERROR;
-    u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);
-    if (err == U_BUFFER_OVERFLOW_ERROR || err == U_STRING_NOT_TERMINATED_WARNING )
-    {
-        const std::unique_ptr<char[]> buf_ptr(new char [len+1]);
-        err = U_ZERO_ERROR;
-        u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
-        target.assign(buf_ptr.get() , static_cast<std::size_t>(len));
-    }
-    else
-    {
-        target.assign(buf, static_cast<std::size_t>(len));
-    }
+    target.clear(); // mimic previous target.assign(...) semantics
+    input.toUTF8String(target); // this appends to target
 }
-
-using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
 
 namespace detail {
 
@@ -80,6 +63,11 @@ struct both_arithmetic : std::integral_constant<bool,
 
 struct equals
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         -> decltype(lhs == rhs)
@@ -90,6 +78,15 @@ struct equals
 
 struct not_equal
 {
+    // back compatibility shim to equate empty string with null for != test
+    // https://github.com/mapnik/mapnik/issues/1859
+    // TODO - consider removing entire specialization at Mapnik 3.1.x
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        if (rhs.isEmpty()) return false;
+        return true;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         ->decltype(lhs != rhs)
@@ -100,6 +97,11 @@ struct not_equal
 
 struct greater_than
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto  apply(T const& lhs, T const& rhs)
         ->decltype(lhs > rhs)
@@ -110,6 +112,11 @@ struct greater_than
 
 struct greater_or_equal
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         ->decltype(lhs >= rhs)
@@ -120,6 +127,11 @@ struct greater_or_equal
 
 struct less_than
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
          ->decltype(lhs < rhs)
@@ -130,6 +142,11 @@ struct less_than
 
 struct less_or_equal
 {
+    static bool apply(value_null, value_unicode_string const& rhs)
+    {
+        return false;
+    }
+
     template <typename T>
     static auto apply(T const& lhs, T const& rhs)
         ->decltype(lhs <= rhs)
@@ -147,8 +164,19 @@ struct comparison
     bool operator() (value_unicode_string const& lhs,
                      value_unicode_string const& rhs) const
     {
-        return Op::apply(lhs, rhs) ? true: false;
+        return Op::apply(lhs, rhs) ? true : false;
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // special case for unicode_string and value_null
+    //////////////////////////////////////////////////////////////////////////
+
+    bool operator() (value_null const& lhs, value_unicode_string const& rhs) const
+    {
+        return Op::apply(lhs, rhs);
+    }
+    //////////////////////////////////////////////////////////////////////////
+
 
     // same types
     template <typename T>
@@ -582,7 +610,7 @@ struct convert<value_double>
     value_double operator() (value_unicode_string const& val) const
     {
         std::string utf8;
-        to_utf8(val,utf8);
+        val.toUTF8String(utf8);
         return operator()(utf8);
     }
 
@@ -621,7 +649,7 @@ struct convert<value_integer>
     value_integer operator() (value_unicode_string const& val) const
     {
         std::string utf8;
-        to_utf8(val,utf8);
+        val.toUTF8String(utf8);
         return operator()(utf8);
     }
 
@@ -646,7 +674,7 @@ struct convert<std::string>
     std::string operator() (value_unicode_string const& val) const
     {
         std::string utf8;
-        to_utf8(val,utf8);
+        val.toUTF8String(utf8);
         return utf8;
     }
 
@@ -664,7 +692,7 @@ struct convert<std::string>
 
     std::string operator() (value_null const&) const
     {
-        return "";
+        return std::string();
     }
 };
 
@@ -694,30 +722,66 @@ struct to_unicode_impl
 
     value_unicode_string operator() (value_bool val) const
     {
-        if (val) {
-            std::string str("true");
-            return value_unicode_string(str.c_str());
-        }
-        std::string str("false");
-        return value_unicode_string(str.c_str());
+        return value_unicode_string(val ? "true" : "false");
     }
 
     value_unicode_string operator() (value_null const&) const
     {
-        return value_unicode_string("");
+        return value_unicode_string();
     }
 };
 
 struct to_expression_string_impl
 {
+    struct EscapingByteSink : U_NAMESPACE_QUALIFIER ByteSink
+    {
+        std::string dest_;
+        char quote_;
+
+        explicit EscapingByteSink(char quote)
+            : quote_(quote)
+        {}
+
+        virtual void Append(const char* data, int32_t n)
+        {
+            // reserve enough room to hold the appended chunk and quotes;
+            // if another chunk follows, or any character needs escaping,
+            // the string will grow naturally
+            if (dest_.empty())
+            {
+                dest_.reserve(2 + static_cast<std::size_t>(n));
+                dest_.append(1, quote_);
+            }
+            else
+            {
+                dest_.reserve(dest_.size() + n + 1);
+            }
+
+            for (auto end = data + n; data < end; ++data)
+            {
+                if (*data == '\\' || *data == quote_)
+                    dest_.append(1, '\\');
+                dest_.append(1, *data);
+            }
+        }
+
+        virtual void Flush()
+        {
+            if (dest_.empty())
+                dest_.append(2, quote_);
+            else
+                dest_.append(1, quote_);
+        }
+    };
+
     explicit to_expression_string_impl(char quote = '\'')
         : quote_(quote) {}
 
     std::string operator() (value_unicode_string const& val) const
     {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return quote_ + utf8 + quote_;
+        EscapingByteSink sink(quote_);
+        val.toUTF8(sink);
+        return sink.dest_;
     }
 
     std::string operator() (value_integer val) const

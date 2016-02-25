@@ -30,8 +30,8 @@ public:
             out.clear();
             out = mapnik::save_to_string(*im_,"png8:m=h:z=1");
         }
+        return true;
     }
-    return true;
 };
 
 BENCHMARK(test,"encoding multicolor png")

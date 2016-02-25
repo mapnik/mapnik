@@ -47,7 +47,7 @@ namespace csv_utils
 {
 
 static const mapnik::csv_line_grammar<char const*> line_g;
-static const mapnik::csv_white_space_skipper<char const*> skipper;
+static const mapnik::csv_white_space_skipper skipper{};
 
 static mapnik::csv_line parse_line(char const* start, char const* end, char separator, char quote, std::size_t num_columns)
 {
@@ -98,54 +98,28 @@ std::size_t file_length(T & stream)
     return stream.tellg();
 }
 
-static inline char detect_separator(std::string const& str)
-{
-    char separator = ','; // default
-    int num_commas = std::count(str.begin(), str.end(), ',');
-    // detect tabs
-    int num_tabs = std::count(str.begin(), str.end(), '\t');
-    if (num_tabs > 0)
-    {
-        if (num_tabs > num_commas)
-        {
-            separator = '\t';
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
-        }
-    }
-    else // pipes
-    {
-        int num_pipes = std::count(str.begin(), str.end(), '|');
-        if (num_pipes > num_commas)
-        {
-            separator = '|';
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
-        }
-        else // semicolons
-        {
-            int num_semicolons = std::count(str.begin(), str.end(), ';');
-            if (num_semicolons > num_commas)
-            {
-                separator = ';';
-                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
-            }
-        }
-    }
-    return separator;
-}
-
 template <typename T>
-std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t file_length)
+std::tuple<char, bool, char, char> autodect_csv_flavour(T & stream, std::size_t file_length)
 {
-    // autodetect newlines
-    char newline = '\n';
+    // autodetect newlines/quotes/separators
+    char newline = '\n'; // default
     bool has_newline = false;
-    bool has_quote = false;
-    char quote = '"';
+    bool has_single_quote = false;
+    char quote = '"'; // default
+    char separator = ','; // default
+    // local counters
+    int num_commas = 0;
+    int num_tabs = 0;
+    int num_pipes = 0;
+    int num_semicolons = 0;
+
     static std::size_t const max_size = 4000;
     std::size_t size = std::min(file_length, max_size);
-    for (std::size_t lidx = 0; lidx < size; ++lidx)
+    std::vector<char> buffer;
+    buffer.resize(size);
+    stream.read(buffer.data(), size);
+    for (auto c : buffer)
     {
-        char c = static_cast<char>(stream.get());
         switch (c)
         {
         case '\r':
@@ -156,18 +130,76 @@ std::tuple<char,bool,char> autodect_newline_and_quote(T & stream, std::size_t fi
             has_newline = true;
             break;
         case '\'':
-        case '"':
-            if (!has_quote)
+            if (!has_single_quote)
             {
                 quote = c;
-                has_quote = true;
+                has_single_quote = true;
             }
+            break;
+        case ',':
+            if (!has_newline) ++num_commas;
+            break;
+        case '\t':
+            if (!has_newline) ++num_tabs;
+            break;
+        case '|':
+            if (!has_newline) ++num_pipes;
+            break;
+        case ';':
+           if (!has_newline) ++num_semicolons;
             break;
         }
     }
-    return std::make_tuple(newline, has_newline, quote);
-}
+    // detect separator
+    if (num_tabs > 0 && num_tabs > num_commas)
+    {
+        separator = '\t';
+        MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
+    }
+    else // pipes/semicolons
+    {
+        if (num_pipes > num_commas)
+        {
+            separator = '|';
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
+        }
+        else  if (num_semicolons > num_commas)
+        {
+            separator = ';';
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
+        }
+    }
 
+    if (has_newline && has_single_quote)
+    {
+        std::istringstream ss(std::string(buffer.begin(), buffer.end()));
+        std::size_t num_columns = 0;
+        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote); )
+        {
+            if (size < file_length && ss.eof())
+            {
+                // we can't be sure last line
+                // is not truncated so skip it
+                break;
+            }
+            if (line.size() == 0) continue; // empty lines are not interesting
+            auto num_quotes = std::count(line.begin(), line.end(), quote);
+            if (num_quotes % 2 != 0)
+            {
+                quote = '"';
+                break;
+            }
+            auto columns = csv_utils::parse_line(line, separator, quote);
+            if (num_columns > 0 && num_columns != columns.size())
+            {
+                quote = '"';
+                break;
+            }
+            num_columns = columns.size();
+        }
+    }
+    return std::make_tuple(newline, has_newline, separator, quote);
+}
 
 struct geometry_column_locator
 {

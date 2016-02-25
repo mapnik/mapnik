@@ -89,6 +89,8 @@ TEST_CASE("expressions")
     // unicode
     TRY_CHECK(parse_and_dump("'single-quoted string'") == "'single-quoted string'");
     TRY_CHECK(parse_and_dump("\"double-quoted string\"") == "'double-quoted string'");
+    TRY_CHECK(parse_and_dump("'escaped \\' apostrophe'") == "'escaped \\' apostrophe'");
+    TRY_CHECK(parse_and_dump("'escaped \\\\ backslash'") == "'escaped \\\\ backslash'");
 
     // floating point constants
     TRY_CHECK(parse_and_dump("pi") == "3.14159");
@@ -159,8 +161,13 @@ TEST_CASE("expressions")
     // regex
     // replace
     TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));
+    // 'foo' =~ s:(\w)\1:$1x:r
+    TRY_CHECK(eval(" 'foo'.replace('(\\w)\\1', '$1x') ") == tr.transcode("fox"));
+    TRY_CHECK(parse_and_dump(" 'foo'.replace('(\\w)\\1', '$1x') ") == "'foo'.replace('(\\w)\\1','$1x')");
 
     // match
     TRY_CHECK(eval(" [name].match('Québec') ") == true);
-
+    // 'Québec' =~ m:^Q\S*$:
+    TRY_CHECK(eval(" [name].match('^Q\\S*$') ") == true);
+    TRY_CHECK(parse_and_dump(" [name].match('^Q\\S*$') ") == "[name].match('^Q\\S*$')");
 }

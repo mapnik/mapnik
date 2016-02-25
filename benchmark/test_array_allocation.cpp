@@ -231,33 +231,6 @@ public:
     }
 };
 
-class test3d : public benchmark::test_case
-{
-public:
-    uint32_t size_;
-    std::vector<uint8_t> array_;
-    test3d(mapnik::parameters const& params)
-     : test_case(params),
-       size_(*params.get<mapnik::value_integer>("size",256*256)),
-       array_(size_,0) { }
-    bool validate() const
-    {
-        return true;
-    }
-    bool operator()() const
-    {
-         for (std::size_t i=0;i<iterations_;++i) {
-             std::deque<uint8_t> data(size_);
-             for (std::size_t i=0;i<size_;++i) {
-                 if (data[i] != 0) {
-                     throw std::runtime_error("found non zero value");
-                 }
-             }
-         }
-         return true;
-    }
-};
-
 class test4 : public benchmark::test_case
 {
 public:
@@ -386,62 +359,21 @@ public:
 
 int main(int argc, char** argv)
 {
-    int return_value = 0;
-    mapnik::parameters params;
-    benchmark::handle_args(argc,argv,params);
-    {
-        test4 test_runner4(params);
-        return_value = return_value | run(test_runner4,"calloc");
-    }
-    {
-        test1 test_runner(params);
-        return_value = return_value | run(test_runner,"malloc/memcpy");
-    }
-    {
-        test1b test_runner(params);
-        return_value = return_value | run(test_runner,"malloc/memset");
-    }
-    {
-        test1c test_runner(params);
-        return_value = return_value | run(test_runner,"operator new/std::fill");
-    }
-    {
-        test2 test_runner(params);
-        return_value = return_value | run(test_runner,"operator new/memcpy");
-    }
-    {
-        test3 test_runner(params);
-        return_value = return_value | run(test_runner,"vector(N)");
-    }
-    {
-        test3b test_runner(params);
-        return_value = return_value | run(test_runner,"vector/resize");
-    }
-    {
-        test3c test_runner(params);
-        return_value = return_value | run(test_runner,"vector/assign");
-    }
-    {
-        test3d test_runner(params);
-        return_value = return_value | run(test_runner,"deque(N)");
-    }
-    {
-        test5 test_runner(params);
-        return_value = return_value | run(test_runner,"std::string range");
-    }
-    {
-        test5b test_runner(params);
-        return_value = return_value | run(test_runner,"std::string &[0]");
-    }
-    {
-        test6 test_runner(params);
-        return_value = return_value | run(test_runner,"valarray");
-    }
+    return benchmark::sequencer(argc, argv)
+        .run<test4>("calloc")
+        .run<test1>("malloc/memcpy")
+        .run<test1b>("malloc/memset")
+        .run<test1c>("operator new/std::fill")
+        .run<test2>("operator new/memcpy")
+        .run<test3>("vector(N)")
+        .run<test3b>("vector/resize")
+        .run<test3c>("vector/assign")
+        .run<test3d>("deque(N)")
+        .run<test5>("std::string range")
+        .run<test5b>("std::string &[0]")
+        .run<test6>("valarray")
 #if BOOST_VERSION >= 105400
-    {
-        test7 test_runner(params);
-        return_value = return_value | run(test_runner,"static_vector");
-    }
+        .run<test7>("static_vector")
 #endif
-    return return_value;
+        .done();
 }

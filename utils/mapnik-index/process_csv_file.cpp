@@ -77,16 +77,17 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
     char newline;
     bool has_newline;
     char detected_quote;
-    std::tie(newline, has_newline, detected_quote) = ::detail::autodect_newline_and_quote(csv_file, file_length);
+    char detected_separator;
+    std::tie(newline, has_newline, detected_separator, detected_quote) = ::detail::autodect_csv_flavour(csv_file, file_length);
     if (quote == 0) quote = detected_quote;
+    if (separator == 0) separator = detected_separator;
     // set back to start
     csv_file.seekg(0, std::ios::beg);
-    // get first line
     std::string csv_line;
     csv_utils::getline_csv(csv_file, csv_line, newline, quote);
-    if (separator == 0) separator = ::detail::detect_separator(csv_line);
     csv_file.seekg(0, std::ios::beg);
     int line_number = 0;
+
     ::detail::geometry_column_locator locator;
     std::vector<std::string> headers;
     std::clog << "Parsing CSV using SEPARATOR=" << separator << " QUOTE=" << quote << std::endl;

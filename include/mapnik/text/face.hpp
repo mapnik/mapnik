@@ -23,8 +23,8 @@
 #define MAPNIK_FACE_HPP
 
 //mapnik
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 // freetype2
@@ -36,7 +36,6 @@ extern "C"
 }
 
 //stl
-#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
