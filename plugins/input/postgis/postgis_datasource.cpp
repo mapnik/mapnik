@@ -513,22 +513,15 @@ layer_descriptor postgis_datasource::get_descriptor() const
 std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
-
-    if (srid_ > 0)
-    {
-        b << "ST_SetSRID(";
-    }
-
-    b << "'BOX3D(";
+    b << "ST_MakeEnvelope(";
     b << std::setprecision(16);
-    b << env.minx() << " " << env.miny() << ",";
-    b << env.maxx() << " " << env.maxy() << ")'::box3d";
-
+    b << env.minx() << "," << env.miny() << ",";
+    b << env.maxx() << "," << env.maxy();
     if (srid_ > 0)
     {
-        b << ", " << srid_ << ")";
+        b << ", " << srid_;
     }
-
+    b << ")";
     return b.str();
 }
 
