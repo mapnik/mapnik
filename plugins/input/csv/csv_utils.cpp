@@ -82,10 +82,230 @@ bool ignore_case_equal(std::string const& s0, std::string const& s1)
                       s1.begin(), ignore_case_equal_pred());
 }
 
+void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const & )
+{
+    // no-op by default
 }
 
+void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
+{
+    auto file_length = detail::file_length(csv_file);
+    // set back to start
+    csv_file.seekg(0, std::ios::beg);
+    char newline;
+    bool has_newline;
+    char detected_quote;
+    char detected_separator;
+    std::tie(newline, has_newline, detected_separator, detected_quote) = detail::autodect_csv_flavour(csv_file, file_length);
+    if (quote_ == 0) quote_ = detected_quote;
+    if (separator_ == 0) separator_ = detected_separator;
+
+    // set back to start
+    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: separator: '" << separator_
+                          << "' quote: '" << quote_ << "'";
+
+    // rewind stream
+    csv_file.seekg(0, std::ios::beg);
+    //
+    std::string csv_line;
+    csv_utils::getline_csv(csv_file, csv_line, newline, quote_);
+    csv_file.seekg(0, std::ios::beg);
+    int line_number = 0;
+    if (!manual_headers_.empty())
+    {
+        std::size_t index = 0;
+        auto headers = csv_utils::parse_line(manual_headers_, separator_, quote_);
+        for (auto const& header : headers)
+        {
+            detail::locate_geometry_column(header, index++, locator_);
+            headers_.push_back(header);
+        }
+    }
+    else // parse first line as headers
+    {
+        while (csv_utils::getline_csv(csv_file, csv_line, newline, quote_))
+        {
+            try
+            {
+                auto headers = csv_utils::parse_line(csv_line, separator_, quote_);
+                // skip blank lines
+                if (headers.size() > 0 && headers[0].empty()) ++line_number;
+                else
+                {
+                    std::size_t index = 0;
+                    for (auto & header : headers)
+                    {
+                        mapnik::util::trim(header);
+                        if (header.empty())
+                        {
+                            if (strict_)
+                            {
+                                std::ostringstream s;
+                                s << "CSV Plugin: expected a column header at line ";
+                                s << line_number << ", column " << index;
+                                s << " - ensure this row contains valid header fields: '";
+                                s << csv_line;
+                                throw mapnik::datasource_exception(s.str());
+                            }
+                            else
+                            {
+                                // create a placeholder for the empty header
+                                std::ostringstream s;
+                                s << "_" << index;
+                                headers_.push_back(s.str());
+                            }
+                        }
+                        else
+                        {
+                            detail::locate_geometry_column(header, index, locator_);
+                            headers_.push_back(header);
+                        }
+                        ++index;
+                    }
+                    ++line_number;
+                    break;
+                }
+            }
+            catch (std::exception const& ex)
+            {
+                std::string s("CSV Plugin: error parsing headers: ");
+                s += ex.what();
+                throw mapnik::datasource_exception(s);
+            }
+        }
+    }
+
+    std::size_t num_headers = headers_.size();
+    if (!detail::valid(locator_, num_headers))
+    {
+        std::string str("CSV Plugin: could not detect column(s) with the name(s) of wkt, geojson, x/y, or ");
+        str += "latitude/longitude in:\n";
+        str += csv_line;
+        str += "\n - this is required for reading geometry data";
+        throw mapnik::datasource_exception(str);
+    }
+
+    mapnik::value_integer feature_count = 0;
+    auto pos = csv_file.tellg();
+    // handle rare case of a single line of data and user-provided headers
+    // where a lack of a newline will mean that csv_utils::getline_csv returns false
+    bool is_first_row = false;
+
+    if (!has_newline)
+    {
+        csv_file.setstate(std::ios::failbit);
+        pos = 0;
+        if (!csv_line.empty())
+        {
+            is_first_row = true;
+        }
+    }
+
+    while (is_first_row || csv_utils::getline_csv(csv_file, csv_line, newline, quote_))
+    {
+        ++line_number;
+        if ((row_limit_ > 0) && (line_number > row_limit_))
+        {
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
+            break;
+        }
+        auto record_offset = pos;
+        auto record_size = csv_line.length();
+        pos = csv_file.tellg();
+        is_first_row = false;
+
+        // skip blank lines
+        if (record_size <= 10)
+        {
+            std::string trimmed = csv_line;
+            boost::trim_if(trimmed, boost::algorithm::is_any_of("\",'\r\n "));
+            if (trimmed.empty())
+            {
+                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: empty row encountered at line: " << line_number;
+                continue;
+            }
+        }
+
+        try
+        {
+            auto const* line_start = csv_line.data();
+            auto const* line_end = line_start + csv_line.size();
+            auto values = csv_utils::parse_line(line_start, line_end, separator_, quote_, num_headers);
+            unsigned num_fields = values.size();
+            if (num_fields != num_headers)
+            {
+                std::ostringstream s;
+                s << "CSV Plugin: # of columns(" << num_fields << ")";
+                if (num_fields > num_headers)
+                {
+                    s << " > ";
+                }
+                else
+                {
+                    s << " < ";
+                }
+                s << "# of headers(" << num_headers << ") parsed";
+                throw mapnik::datasource_exception(s.str());
+            }
+
+            auto geom = extract_geometry(values, locator_);
+            if (!geom.is<mapnik::geometry::geometry_empty>())
+            {
+                auto box = mapnik::geometry::envelope(geom);
+                if (!extent_initialized_)
+                {
+                    if (extent_.valid())
+                        extent_.expand_to_include(box);
+                    else
+                        extent_ = box;
+                }
+                boxes.emplace_back(box, make_pair(record_offset, record_size));
+                add_feature(++feature_count, values);
+            }
+            else
+            {
+                std::ostringstream s;
+                s << "CSV Plugin: expected geometry column: could not parse row "
+                  << line_number << " "
+                  << values.at(locator_.index) << "'";
+                throw mapnik::datasource_exception(s.str());
+            }
+        }
+        catch (mapnik::datasource_exception const& ex )
+        {
+            if (strict_) throw ex;
+            else
+            {
+                MAPNIK_LOG_ERROR(csv) << ex.what() << " at line: " << line_number;
+            }
+        }
+        catch (std::exception const& ex)
+        {
+            std::ostringstream s;
+            s << "CSV Plugin: unexpected error parsing line: " << line_number
+              << " - found " << headers_.size() << " with values like: " << csv_line << "\n"
+              << " and got error like: " << ex.what();
+            if (strict_)
+            {
+                throw mapnik::datasource_exception(s.str());
+            }
+            else
+            {
+                MAPNIK_LOG_ERROR(csv) << s.str();
+            }
+        }
+        // return early if *.index is present
+        if (has_disk_index_) return;
+    }
+}
 
 namespace detail {
+
+std::size_t file_length(std::istream & stream)
+{
+    stream.seekg(0, std::ios::end);
+    return stream.tellg();
+}
 
 std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length)
 {
@@ -228,6 +448,8 @@ bool valid(geometry_column_locator const& locator, std::size_t max_size)
     return true;
 }
 
+} // namespace detail
+
 mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
@@ -271,4 +493,4 @@ mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> con
     return geom;
 }
 
-}// ns detail
+} // namespace csv_utils
