@@ -624,12 +624,8 @@ std::string pgraster_datasource::sql_bbox(box2d<double> const& env) const
     b << "ST_MakeEnvelope(";
     b << std::setprecision(16);
     b << env.minx() << "," << env.miny() << ",";
-    b << env.maxx() << "," << env.maxy();
-    if (srid_ > 0)
-    {
-        b << ", " << srid_;
-    }
-    b << ")";
+    b << env.maxx() << "," << env.maxy() << ",";
+    b << srid_ << ")";
     return b.str();
 }
 
