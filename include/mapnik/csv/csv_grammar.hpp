@@ -90,7 +90,7 @@ struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), Skipper>
             ("\\\"", '\"')
             ("\"\"", '\"') // double quote
             ;
-        line = -lit("\n\r") >> column(_r1, _r2) % lit(_r1)
+        line = -lit("\r") >> -lit("\n") >> column(_r1, _r2) % lit(_r1)
             ;
         column = quoted(_r2) | *(char_ - lit(_r1))
             ;
