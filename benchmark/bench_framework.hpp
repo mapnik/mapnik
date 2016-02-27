@@ -187,20 +187,41 @@ int run(T const& test_runner, std::string const& name)
         std::chrono::duration<double> min_seconds(*opt_min_duration);
         auto min_duration = std::chrono::duration_cast<decltype(elapsed)>(min_seconds);
         auto num_iters = test_runner.iterations();
+        auto num_threads = test_runner.threads();
         auto total_iters = 0;
 
-        if (test_runner.threads() > 0)
+        if (num_threads > 0)
         {
-            using thread_group = std::vector<std::unique_ptr<std::thread> >;
-            using value_type = thread_group::value_type;
-            thread_group tg;
-            for (std::size_t i=0;i<test_runner.threads();++i)
+            std::mutex mtx_ready;
+            std::unique_lock<std::mutex> lock_ready(mtx_ready);
+
+            auto stub = [&](T const& test_copy)
             {
-                tg.emplace_back(new std::thread(test_runner));
+                // workers will wait on this mutex until the main thread
+                // constructs all of them and starts measuring time
+                std::unique_lock<std::mutex> my_lock(mtx_ready);
+                my_lock.unlock();
+                test_copy();
+            };
+
+            std::vector<std::thread> tg;
+            tg.reserve(num_threads);
+            for (auto i = num_threads; i-- > 0; )
+            {
+                tg.emplace_back(stub, test_runner);
             }
             start = std::chrono::high_resolution_clock::now();
-            std::for_each(tg.begin(), tg.end(), [](value_type & t) {if (t->joinable()) t->join();});
+            lock_ready.unlock();
+            // wait for all workers to finish
+            for (auto & t : tg)
+            {
+                if (t.joinable())
+                    t.join();
+            }
             elapsed = std::chrono::high_resolution_clock::now() - start;
+            // this is actually per-thread count, not total, but I think
+            // reporting average 'iters/thread/second' is more useful
+            // than 'iters/second' multiplied by the number of threads
             total_iters += num_iters;
         }
         else
@@ -215,27 +236,19 @@ int run(T const& test_runner, std::string const& name)
 
         char msg[200];
         double dur_total = milliseconds<double>(elapsed).count();
+        auto elapsed_nonzero = std::max(elapsed, decltype(elapsed){1});
         big_number_fmt itersf(4, total_iters);
+        big_number_fmt ips(5, total_iters / seconds<double>(elapsed_nonzero).count());
 
         std::snprintf(msg, sizeof(msg),
-                "%-43s %3zu threads %*.0f%s iters %6.0f milliseconds",
+                "%-43s %3zu threads %*.0f%s iters %6.0f milliseconds %*.0f%s i/s\n",
                 name.c_str(),
-                test_runner.threads(),
+                num_threads,
                 itersf.w, itersf.v, itersf.u,
-                dur_total);
+                dur_total,
+                ips.w, ips.v, ips.u
+                );
         std::clog << msg;
-
-        // log average # of iterations per second, currently only for
-        // non-threaded runs
-        if (test_runner.threads() == 0)
-        {
-            auto elapsed_nonzero = std::max(elapsed, decltype(elapsed){1});
-            big_number_fmt ips(5, total_iters / seconds<double>(elapsed_nonzero).count());
-            std::snprintf(msg, sizeof(msg), " %*.0f%s i/s", ips.w, ips.v, ips.u);
-            std::clog << msg;
-        }
-
-        std::clog << "\n";
         return 0;
     }
     catch (std::exception const& ex)
