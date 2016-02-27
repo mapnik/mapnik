@@ -10,6 +10,7 @@
 
 // stl
 #include <chrono>
+#include <cmath> // log10
 #include <cstdio> // snprintf
 #include <iostream>
 #include <set>
@@ -18,6 +19,12 @@
 #include <vector>
 
 namespace benchmark {
+
+template <typename T>
+using milliseconds = std::chrono::duration<T, std::milli>;
+
+template <typename T>
+using seconds = std::chrono::duration<T>;
 
 class test_case
 {
@@ -134,6 +141,29 @@ inline int handle_args(int argc, char** argv, mapnik::parameters & params)
         }                                               \
     }                                                   \
 
+struct big_number_fmt
+{
+    int w;
+    double v;
+    const char* u;
+
+    big_number_fmt(int width, double value, int base = 1000)
+        : w(width), v(value), u("")
+    {
+        static const char* suffixes = "\0\0k\0M\0G\0T\0P\0E\0Z\0Y\0\0";
+        u = suffixes;
+
+        while (v > 1 && std::log10(v) >= width && u[2])
+        {
+            v /= base;
+            u += 2;
+        }
+
+        // adjust width for proper alignment without suffix
+        w += (u == suffixes);
+    }
+};
+
 template <typename T>
 int run(T const& test_runner, std::string const& name)
 {
@@ -156,7 +186,8 @@ int run(T const& test_runner, std::string const& name)
         auto opt_min_duration = test_runner.params().template get<double>("min-duration", 0.0);
         std::chrono::duration<double> min_seconds(*opt_min_duration);
         auto min_duration = std::chrono::duration_cast<decltype(elapsed)>(min_seconds);
-        std::size_t loops = 0;
+        auto num_iters = test_runner.iterations();
+        auto total_iters = 0;
 
         if (test_runner.threads() > 0)
         {
@@ -170,7 +201,7 @@ int run(T const& test_runner, std::string const& name)
             start = std::chrono::high_resolution_clock::now();
             std::for_each(tg.begin(), tg.end(), [](value_type & t) {if (t->joinable()) t->join();});
             elapsed = std::chrono::high_resolution_clock::now() - start;
-            loops = 1;
+            total_iters += num_iters;
         }
         else
         {
@@ -178,35 +209,29 @@ int run(T const& test_runner, std::string const& name)
             do {
                 test_runner();
                 elapsed = std::chrono::high_resolution_clock::now() - start;
-                ++loops;
+                total_iters += num_iters;
             } while (elapsed < min_duration);
         }
 
-        double iters = loops * test_runner.iterations();
-        double dur_total = std::chrono::duration<double, std::milli>(elapsed).count();
-        double dur_avg = dur_total / iters;
-        char iters_unit = ' ';
         char msg[200];
-
-        if (iters >= 1e7) iters *= 1e-6, iters_unit = 'M';
-        else if (iters >= 1e4) iters *= 1e-3, iters_unit = 'k';
+        double dur_total = milliseconds<double>(elapsed).count();
+        big_number_fmt itersf(4, total_iters);
 
         std::snprintf(msg, sizeof(msg),
-                "%-43s %3zu threads %4.0f%c iters %6.0f milliseconds",
+                "%-43s %3zu threads %*.0f%s iters %6.0f milliseconds",
                 name.c_str(),
                 test_runner.threads(),
-                iters, iters_unit,
+                itersf.w, itersf.v, itersf.u,
                 dur_total);
         std::clog << msg;
 
-        // log average time per iteration, currently only for non-threaded runs
+        // log average # of iterations per second, currently only for
+        // non-threaded runs
         if (test_runner.threads() == 0)
         {
-            char unit = 'm';
-            if (dur_avg < 1e-5) dur_avg *= 1e+9, unit = 'p';
-            else if (dur_avg < 1e-2) dur_avg *= 1e+6, unit = 'n';
-            else if (dur_avg < 1e+1) dur_avg *= 1e+3, unit = 'u';
-            std::snprintf(msg, sizeof(msg), " %4.0f%cs/iter", dur_avg, unit);
+            auto elapsed_nonzero = std::max(elapsed, decltype(elapsed){1});
+            big_number_fmt ips(5, total_iters / seconds<double>(elapsed_nonzero).count());
+            std::snprintf(msg, sizeof(msg), " %*.0f%s i/s", ips.w, ips.v, ips.u);
             std::clog << msg;
         }
 
