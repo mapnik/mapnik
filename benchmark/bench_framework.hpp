@@ -92,7 +92,7 @@ inline int parse_args(int argc, char** argv, mapnik::parameters & params)
 
 inline void handle_common_args(mapnik::parameters const& params)
 {
-    if (auto severity = params.get<std::string>("log-severity")) {
+    if (auto severity = params.get<std::string>("log")) {
         if (*severity == "debug")
             mapnik::logger::set_severity(mapnik::logger::debug);
         else if (*severity == "warn")
@@ -102,7 +102,7 @@ inline void handle_common_args(mapnik::parameters const& params)
         else if (*severity == "none")
             mapnik::logger::set_severity(mapnik::logger::none);
         else
-            std::clog << "ignoring option --log-severity='" << *severity
+            std::clog << "ignoring option --log='" << *severity
                       << "' (allowed values are: debug, warn, error, none)\n";
     }
 }
