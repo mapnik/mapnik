@@ -123,16 +123,21 @@ For example, if you generate some pattern with AGG (premultiplied) and would lik
 
 */
 
-template <>
-MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_mode_e mode,
-               float opacity,
-               int dx,
-               int dy)
+static agg::cover_type cover_from_opacity(float opacity)
 {
-    using color = agg::rgba8;
-    using order = agg::order_rgba;
+    if (opacity <= 0)
+        return agg::cover_none;
+    if (opacity >= 1)
+        return agg::cover_full;
+    return static_cast<agg::cover_type>(opacity * agg::cover_full);
+}
+
+template <template <typename, typename> class Blender>
+static void composite_rgba8(image_rgba8 & dst, image_rgba8 const& src,
+                            composite_mode_e mode, float opacity, int dx, int dy)
+{
     using const_rendering_buffer = util::rendering_buffer<image_rgba8>;
-    using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+    using blender_type = Blender<agg::rgba8, agg::order_rgba>;
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_type = agg::renderer_base<pixfmt_type>;
 
@@ -140,19 +145,29 @@ MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_
     const_rendering_buffer src_buffer(src);
     pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
-    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_pre, const_rendering_buffer, agg::pixel32_type> pixf_mask(src_buffer);
-#ifdef MAPNIK_DEBUG
-    if (!src.get_premultiplied())
-    {
-        throw std::runtime_error("SOURCE MUST BE PREMULTIPLIED FOR COMPOSITING!");
-    }
+
+    // SrcPixelFormat's blender can be _pre or not, that's irrelevant
+    using src_pixfmt_type = agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32, const_rendering_buffer, agg::pixel32_type>;
+    src_pixfmt_type pixf_mask(src_buffer);
+
     if (!dst.get_premultiplied())
     {
-        throw std::runtime_error("DESTINATION MUST BE PREMULTIPLIED FOR COMPOSITING!");
+        pixf.premultiply();
+        dst.set_premultiplied(true);
     }
-#endif
+
     renderer_type ren(pixf);
-    ren.blend_from(pixf_mask,0,dx,dy,safe_cast<agg::cover_type>(255*opacity));
+    ren.blend_from(pixf_mask, nullptr, dx, dy, cover_from_opacity(opacity));
+}
+
+template <>
+MAPNIK_DECL void composite(image_rgba8 & dst, image_rgba8 const& src, composite_mode_e mode,
+                           float opacity, int dx, int dy)
+{
+    if (src.get_premultiplied())
+        composite_rgba8<agg::comp_op_adaptor_rgba_pre>(dst, src, mode, opacity, dx, dy);
+    else
+        composite_rgba8<agg::comp_op_adaptor_rgba>(dst, src, mode, opacity, dx, dy);
 }
 
 template <>
