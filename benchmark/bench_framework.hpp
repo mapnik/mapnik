@@ -10,7 +10,7 @@
 
 // stl
 #include <chrono>
-#include <cmath> // log10
+#include <cmath> // log10, round
 #include <cstdio> // snprintf
 #include <iostream>
 #include <set>
@@ -153,7 +153,7 @@ struct big_number_fmt
         static const char* suffixes = "\0\0k\0M\0G\0T\0P\0E\0Z\0Y\0\0";
         u = suffixes;
 
-        while (v > 1 && std::log10(v) >= width && u[2])
+        while (v > 1 && std::log10(std::round(v)) >= width && u[2])
         {
             v /= base;
             u += 2;
