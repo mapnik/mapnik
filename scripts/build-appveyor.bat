@@ -22,6 +22,8 @@ ECHO msvs_toolset^: %msvs_toolset%
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
+SET ICU_VERSION=56.1
+ECHO ICU_VERSION^: %ICU_VERSION%
 IF DEFINED APPVEYOR (ECHO on AppVeyor) ELSE (ECHO NOT on AppVeyor)
 ECHO ========
 
