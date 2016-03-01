@@ -23,7 +23,8 @@ release:
 	git clone --depth 1 --branch v$${MAPNIK_VERSION} git@github.com:mapnik/mapnik.git $${TARBALL_NAME} && \
 	cd $${TARBALL_NAME} && \
 	git checkout "tags/v$${MAPNIK_VERSION}" && \
-	git submodule update --depth 1 --init && \
+	git submodule update --depth 100 --init && \
+	rm -rf deps/mapbox/variant/.git && \
 	rm -rf test/data/.git && \
 	rm -rf test/data/.gitignore && \
 	rm -rf test/data-visual/.git && \

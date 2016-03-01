@@ -22,6 +22,8 @@ ECHO msvs_toolset^: %msvs_toolset%
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
+SET ICU_VERSION=56.1
+ECHO ICU_VERSION^: %ICU_VERSION%
 IF DEFINED APPVEYOR (ECHO on AppVeyor) ELSE (ECHO NOT on AppVeyor)
 ECHO ========
 
@@ -31,6 +33,16 @@ SET PATH=C:\Program Files\7-Zip;%PATH%
 ::update submodule variant
 git submodule update --init deps/mapbox/variant
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+
+::python bindings, including test data
+IF NOT EXIST bindings\python git clone --recursive https://github.com/mapnik/python-mapnik.git bindings/python
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+CD bindings\python & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git fetch & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git pull & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+CD ..\.. & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ::cloning mapnik-gyp
 if EXIST mapnik-gyp ECHO mapnik-gyp already cloned && GOTO MAPNIK_GYP_ALREADY_HERE

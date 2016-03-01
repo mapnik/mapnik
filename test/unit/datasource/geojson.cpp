@@ -663,20 +663,8 @@ TEST_CASE("geojson") {
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     REQUIRE(bool(ds));
                     auto fields = ds->get_descriptor().get_descriptors();
-                    // TODO: this combo (cache_features==false and create_index==false)
-                    // exposes the case where not all field names are reported, which should
-                    // ideally be fixed, but how?
-                    if (cache_features == false && create_index == false) 
-                    {
-                        std::initializer_list<std::string> names = {"one"};
-                        REQUIRE_FIELD_NAMES(fields, names);
-                    } 
-                    else
-                    {
-                        std::initializer_list<std::string> names = {"one", "two"};
-                        REQUIRE_FIELD_NAMES(fields, names);
-                    }
-
+                    std::initializer_list<std::string> names = {"one", "two"};
+                    REQUIRE_FIELD_NAMES(fields, names);
                 }
                 // cleanup
                 if (create_index && mapnik::util::exists(filename + ".index"))

@@ -6,6 +6,37 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.10
+
+Released: February 25, 2016
+
+(Packaged from 5c0d496)
+
+#### Summary
+
+ - The `shapeindex` command now has a `--index-parts` option. When used the index will be bigger
+   but will allow the Shapefile datasource to only parse polygon parts within the query bounds.
+ - WARNING: index files generated with this newer Mapnik are invalid for older versions of Mapnik.
+ - Any `.index` files accompanying a `.shp` must now be regenerated otherwise
+   it will be skipped. To avoid this problem you can delete the existing `.index` files, or ideally run `shapeindex` to recreate the `.index`. (https://github.com/mapnik/mapnik/pull/3300)
+   The trigger for this change was an optimization that required a new binary format for the shapefile indexes (https://github.com/mapnik/mapnik/pull/3217).
+ - Shapeindex - another fix for skipping `null` shapes (#3288)
+ - Fixed support for filter expressions starting with `not` (https://github.com/mapnik/mapnik/issues/3017)
+ - Ensure `mapped_memory_cache` acts as singleton across shared objects (#3306)
+ - Removed miniz support in PNG encoder (#3281)
+ - Added `-fvisibility=hidden -fvisibility-inlines-hidden` to default compiler flags
+ - Fixed parsing of SVG `PathElement` (https://github.com/mapnik/mapnik/issues/3225)
+ - JSON parsing now supports arbitrary (nested) attributes in `geometry`
+ - Support for rendering `dash-array` in SVGs
+ - SVG parser is now stricter (fails is all input is not parsable) (#3251)
+ - SVG parser now correctly handles optional separator `(,)` between multiple command parts
+ - Optimized parsing of `png` format string
+ - The `memory_datasource` now dynamically reports correct datasource type (vector or raster)
+ - Upgraded `mapbox::variant v1.1.0`
+ - Compare: https://github.com/mapnik/mapnik/compare/v3.0.9...v3.0.10
+
+
+
 ## 3.0.9
 
 Released: November 26, 2015
@@ -18,12 +49,12 @@ Released: November 26, 2015
  - Fixed mapnik.util.variant issue when compiling with gcc-5.x and SSO enabled by default (https://github.com/mapnik/mapnik/issues/3103) (via @nkovacs)
  - Fixed issue with complex scripts where some character sequences weren't rendered correctly (https://github.com/mapnik/mapnik/issues/3050) (via @jkroll20)
  - Revived postgis.input tests
- - JSON: geometry grammar has been refactored and optimized to have expectation points
+ - JSON: geometry grammar has been re-factored and optimized to have expectation points
  - Filled missing specializations for value_bool in `mapnik::value` comparison operators
  - `mapnik.Image` - fixed copy semantics implementation for internal buffer
  - JSON parsing: unified error_handler across all grammars
  - Improved unit test coverage
- - Raster scaling: fixed nodata handling, acurracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
+ - Raster scaling: fixed nodata handling, accuracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
  - Added [`code of conduct`](http://contributor-covenant.org)
  - GeoJSON plug-in is updated to skip feature with empty geometries
  - GeoJSON plug-in : ensure original order of features is preserved (fixed) (https://github.com/mapnik/mapnik/issues/3182)
@@ -41,9 +72,9 @@ Released: October 23, 2015
 
  - Renamed `SHAPE_MEMORY_MAPPED_FILE` define to `MAPNIK_MEMORY_MAPPED_FILE`. Pass `./configure MEMORY_MAPPED_FILE=True|False` to request
    support for memory mapped files across Mapnik plugins (currently shape, csv, and geojson).
- - Unified `mapnik-index` utility supporing GeoJSON and CSV formats
+ - Unified `mapnik-index` utility supporting GeoJSON and CSV formats
  - Increased unit test coverage for GeoJSON and CSV plugins
- - shape.input - refactor to support *.shx and improve handling various bogus shapefiles
+ - shape.input - re-factor to support *.shx and improve handling various bogus shapefiles
  - geojson.input - make JSON parser stricter + support single Feature/Geometry as well as FeatureCollection
  - maintain 'FT_LOAD_NO_HINTING' + support >= harfbuzz 1.0.5
  - geojson.input - implement on-disk-index support
@@ -109,7 +140,7 @@ Released: August 26, 2015
 
 #### Summary
 
-- CSV.input: plug-in has been refactored to minimise memory usage and to improve handling of larger input.
+- CSV.input: plug-in has been re-factored to minimise memory usage and to improve handling of larger input.
   (NOTE: [large_csv](https://github.com/mapnik/mapnik/tree/large_csv) branch adds experimental trunsduction parser with deferred string initialisation)
 - CSV.input: added internal spatial index (boost::geometry::index::tree) for fast `bounding box` queries (https://github.com/mapnik/mapnik/pull/3010)
 - Fixed deadlock in recursive datasource registration via @zerebubuth (https://github.com/mapnik/mapnik/pull/3038)
@@ -1200,7 +1231,7 @@ Released April 1, 2009
 
 - Plugins: Use memory mapped files for reading shape file (r628)
 
-- Core: Use streams to write images (i/o refactor) (r628) (#15)
+- Core: Use streams to write images (i/o re-factor) (r628) (#15)
 
 # Mapnik 0.5.1
 
