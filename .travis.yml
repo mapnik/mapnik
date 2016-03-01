@@ -45,14 +45,15 @@ matrix:
       compiler: clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.2 # upgrades clang from 6 -> 7
-      env: JOBS=8 MASON_PUBLISH=true HEAVY_JOBS=3
+      env: MASON_PUBLISH=true CXX="ccache clang++" JOBS=8 HEAVY_JOBS=3
     - os: osx
       compiler: clang
       osx_image: xcode7.2 # upgrades clang from 6 -> 7
-      env: JOBS=8 COVERAGE=true HEAVY_JOBS=3
+      env: COVERAGE=true CXX="ccache clang++" JOBS=8 HEAVY_JOBS=3
 
 before_install:
  - source scripts/travis-common.sh
+ - source scripts/travis-rcache.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
@@ -60,11 +61,12 @@ before_install:
  - export BENCH=${BENCH:-false}
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
  - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
- - git_submodule_update --init --depth=10
+ - git_submodule_update --init --depth=50 'deps/mapbox/variant'
 
 install:
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
+ - on 'osx' brew install ccache
  - on 'osx' brew rm postgis --force
  - on 'osx' brew install postgis --force
  - on 'osx' pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres
@@ -76,14 +78,15 @@ install:
 before_script:
  - source bootstrap.sh
  - commit_message_parse
+ - on 'osx' rcache_download || true # failure is not fatal
 
 script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
  - make
- - make test
- - enabled ${COVERAGE} coverage
- - enabled ${BENCH} make bench
+ - good && elapsed_minutes -lt 40 && download_test_data && make test
+ - good && elapsed_minutes -lt 45 && enabled ${COVERAGE} coverage
+ - good && elapsed_minutes -lt 45 && enabled ${BENCH} make bench
 
 after_success:
  - if enabled ${MASON_PUBLISH}; then
@@ -91,3 +94,7 @@ after_success:
      ./mason_latest.sh link &&
      ./mason_latest.sh publish;
    fi
+
+before_cache:
+ - on 'osx' ccache --show-stats --max-size 100M --cleanup
+ - on 'osx' rcache_upload

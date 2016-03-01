@@ -1,5 +1,19 @@
 #! /bin/bash
 
+# elapsed_minutes
+#   - outputs the number of minutes elapsed since this file was sourced
+# elapsed_minutes OP VALUE
+#   - shortcut for: test `elapsed_minutes` OP VALUE
+our_start_time=$(date +%s)
+elapsed_minutes () {
+    local now=$(date +%s)
+    local elapsed=$(( (now - our_start_time) / 60 ))
+    case $# in
+        0) echo $elapsed;;
+        *) test $elapsed "$@";;
+    esac
+}
+
 # enabled VALUE
 #   - if VALUE is empty or falsy, returns 1 (false)
 #   - otherwise returns 0 (true)
@@ -12,6 +26,15 @@ enabled () {
         ''|'0'|[Ff]alse|[Nn]o) test $# -ne 0;;
         *) test $# -eq 0 || "$@";;
     esac
+}
+
+# good
+#   - if all build commands executed so far succeeded, returns 0
+#   - otherwise returns 1
+#   - this tests the conjunction of all previous command results,
+#     not just the immediately preceding one
+good () {
+    return ${TRAVIS_TEST_RESULT:-0}
 }
 
 # on NAME
@@ -106,4 +129,12 @@ coverage () {
         --exclude scons --exclude test --exclude demo --exclude docs \
         --exclude fonts --exclude utils \
         > /dev/null
+}
+
+download_test_data () {
+    if commit_message_contains '[skip tests]'; then
+        return 1
+    else
+        git_submodule_update --init --depth=10
+    fi
 }
