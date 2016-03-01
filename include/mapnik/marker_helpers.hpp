@@ -163,17 +163,24 @@ template <typename Converter, typename Processor>
 void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
 {
     using apply_vertex_converter_type = detail::apply_vertex_converter<Converter,Processor>;
-    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-
+    apply_vertex_converter_type apply(converter, proc);
     auto const& geom = feature.get_geometry();
     geometry::geometry_types type = geometry::geometry_type(geom);
 
-    if (type == geometry::geometry_types::Point
-        || type == geometry::geometry_types::LineString
-        || type == geometry::geometry_types::Polygon)
+    if (type == geometry::geometry_types::Point)
     {
-        apply_vertex_converter_type apply(converter, proc);
-        mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
+        geometry::point_vertex_adapter<double> va(geom.get<geometry::point<double>>());
+        converter.apply(va, proc);
+    }
+    else if (type == geometry::geometry_types::LineString)
+    {
+        geometry::line_string_vertex_adapter<double> va(geom.get<geometry::line_string<double>>());
+        converter.apply(va, proc);
+    }
+    else if (type == geometry::geometry_types::Polygon)
+    {
+        geometry::polygon_vertex_adapter<double> va(geom.get<geometry::polygon<double>>());
+        converter.apply(va, proc);
     }
     else
     {
@@ -231,8 +238,34 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            apply_vertex_converter_type apply(converter, proc);
-            mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
+            if (type == geometry::geometry_types::MultiPoint)
+            {
+                for (auto const& pt : geom.get<geometry::multi_point<double>>())
+                {
+                    geometry::point_vertex_adapter<double> va(pt);
+                    converter.apply(va, proc);
+                }
+            }
+            else if (type == geometry::geometry_types::MultiLineString)
+            {
+                for (auto const& line : geom.get<geometry::multi_line_string<double>>())
+                {
+                    geometry::line_string_vertex_adapter<double> va(line);
+                    converter.apply(va, proc);
+                }
+            }
+            else if (type == geometry::geometry_types::MultiPolygon)
+            {
+                for (auto const& poly : geom.get<geometry::multi_polygon<double>>())
+                {
+                    geometry::polygon_vertex_adapter<double> va(poly);
+                    converter.apply(va, proc);
+                }
+            }
+            else if (type == geometry::geometry_types::GeometryCollection)
+            {
+                // no-op for GeometryCollection
+            }
         }
     }
 }
