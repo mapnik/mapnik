@@ -159,12 +159,9 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              symbolizer_base const& sym);
 
 // Apply markers to a feature with multiple geometries
-
 template <typename Converter, typename Processor>
-void apply_markers_single(Converter & converter, Processor & proc, geometry::geometry<double> const& geom)
+void apply_markers_single(Converter & converter, Processor & proc, geometry::geometry<double> const& geom, geometry::geometry_types type)
 {
-    geometry::geometry_types type = geometry::geometry_type(geom);
-
     if (type == geometry::geometry_types::Point)
     {
         geometry::point_vertex_adapter<double> va(geom.get<geometry::point<double>>());
@@ -220,7 +217,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
         ||
         type == geometry::geometry_types::Polygon)
     {
-        apply_markers_single(converter, proc, geom);
+        apply_markers_single(converter, proc, geom, type);
     }
     else
     {
@@ -282,12 +279,12 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             {
                 for (auto const& g : geom.get<geometry::geometry_collection<double>>())
                 {
-                    apply_markers_single(converter, proc, g);
+                    apply_markers_single(converter, proc, g, geometry::geometry_type(g));
                 }
             }
             else
             {
-                apply_markers_single(converter, proc, geom);
+                apply_markers_single(converter, proc, geom, type);
             }
         }
     }
