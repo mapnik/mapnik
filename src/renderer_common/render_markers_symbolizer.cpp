@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/vertex_converters.hpp>
