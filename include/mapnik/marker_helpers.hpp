@@ -159,12 +159,10 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              symbolizer_base const& sym);
 
 // Apply markers to a feature with multiple geometries
+
 template <typename Converter, typename Processor>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
+void apply_markers_single(Converter & converter, Processor & proc, geometry::geometry<double> const& geom)
 {
-    using apply_vertex_converter_type = detail::apply_vertex_converter<Converter,Processor>;
-    apply_vertex_converter_type apply(converter, proc);
-    auto const& geom = feature.get_geometry();
     geometry::geometry_types type = geometry::geometry_type(geom);
 
     if (type == geometry::geometry_types::Point)
@@ -181,6 +179,48 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
     {
         geometry::polygon_vertex_adapter<double> va(geom.get<geometry::polygon<double>>());
         converter.apply(va, proc);
+    }
+    else if (type == geometry::geometry_types::MultiPoint)
+    {
+        for (auto const& pt : geom.get<geometry::multi_point<double>>())
+        {
+            geometry::point_vertex_adapter<double> va(pt);
+            converter.apply(va, proc);
+        }
+    }
+    else if (type == geometry::geometry_types::MultiLineString)
+    {
+        for (auto const& line : geom.get<geometry::multi_line_string<double>>())
+        {
+            geometry::line_string_vertex_adapter<double> va(line);
+            converter.apply(va, proc);
+        }
+    }
+    else if (type == geometry::geometry_types::MultiPolygon)
+    {
+        for (auto const& poly : geom.get<geometry::multi_polygon<double>>())
+        {
+            geometry::polygon_vertex_adapter<double> va(poly);
+            converter.apply(va, proc);
+        }
+    }
+}
+
+template <typename Converter, typename Processor>
+void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
+{
+    using apply_vertex_converter_type = detail::apply_vertex_converter<Converter,Processor>;
+    apply_vertex_converter_type apply(converter, proc);
+    auto const& geom = feature.get_geometry();
+    geometry::geometry_types type = geometry::geometry_type(geom);
+
+    if (type == geometry::geometry_types::Point
+        ||
+        type == geometry::geometry_types::LineString
+        ||
+        type == geometry::geometry_types::Polygon)
+    {
+        apply_markers_single(converter, proc, geom);
     }
     else
     {
@@ -238,33 +278,16 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars, Co
             {
                 MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
-            if (type == geometry::geometry_types::MultiPoint)
+            if (type == geometry::geometry_types::GeometryCollection)
             {
-                for (auto const& pt : geom.get<geometry::multi_point<double>>())
+                for (auto const& g : geom.get<geometry::geometry_collection<double>>())
                 {
-                    geometry::point_vertex_adapter<double> va(pt);
-                    converter.apply(va, proc);
+                    apply_markers_single(converter, proc, g);
                 }
             }
-            else if (type == geometry::geometry_types::MultiLineString)
+            else
             {
-                for (auto const& line : geom.get<geometry::multi_line_string<double>>())
-                {
-                    geometry::line_string_vertex_adapter<double> va(line);
-                    converter.apply(va, proc);
-                }
-            }
-            else if (type == geometry::geometry_types::MultiPolygon)
-            {
-                for (auto const& poly : geom.get<geometry::multi_polygon<double>>())
-                {
-                    geometry::polygon_vertex_adapter<double> va(poly);
-                    converter.apply(va, proc);
-                }
-            }
-            else if (type == geometry::geometry_types::GeometryCollection)
-            {
-                // no-op for GeometryCollection
+                apply_markers_single(converter, proc, geom);
             }
         }
     }
