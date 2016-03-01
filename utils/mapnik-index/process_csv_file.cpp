@@ -35,6 +35,7 @@
 #endif
 
 #include <fstream>
+#include <iomanip>
 
 namespace mapnik { namespace detail {
 
@@ -89,7 +90,12 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
 
     ::detail::geometry_column_locator locator;
     std::vector<std::string> headers;
-    std::clog << "Parsing CSV using SEPARATOR=" << separator << " QUOTE=" << quote << std::endl;
+    std::clog << std::showbase << std::internal << std::setfill('0') ;
+    std::clog << "Parsing CSV using"
+              << " NEWLINE=" << std::hex << std::setw(4) << int(newline) << std::dec
+              << " SEPARATOR=" << separator
+              << " QUOTE=" << quote << std::endl;
+
     if (!manual_headers.empty())
     {
         std::size_t index = 0;

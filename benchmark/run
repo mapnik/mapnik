@@ -6,8 +6,14 @@ source ./localize.sh
 
 BASE=./benchmark/out
 function run {
-    ${BASE}/$1 --threads 0 --iterations $3;
-    ${BASE}/$1 --threads $2 --iterations $(expr $3 / $2);
+    local runner="$BASE/$1 --log=none"
+    local threads="$2"
+    local iters="$3"
+    shift 3
+    $runner --threads 0 --iterations $iters "$@"
+    if test $threads -gt 0; then
+        $runner --threads $threads --iterations $((iters/threads)) "$@"
+    fi
 }
 run test_getline 30 10000000
 #run test_array_allocation 20 100000
