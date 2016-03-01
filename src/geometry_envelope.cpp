@@ -20,11 +20,10 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_envelope_impl.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
-namespace mapnik {
-namespace geometry {
+
+namespace mapnik { namespace geometry {
 
 template MAPNIK_DECL mapnik::box2d<double> envelope(geometry<double> const& geom);
 template MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
