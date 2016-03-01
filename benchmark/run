@@ -28,6 +28,7 @@ run test_expression_parse 10 10000
 run test_face_ptr_creation 10 1000
 run test_font_registration 10 100
 run test_offset_converter 10 1000
+#run normalize_angle 0 1000000 --min-duration=0.2
 
 # commented since this is really slow on travis
 : '
