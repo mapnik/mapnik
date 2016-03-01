@@ -206,8 +206,6 @@ void apply_markers_single(Converter & converter, Processor & proc, geometry::geo
 template <typename Converter, typename Processor>
 void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
 {
-    using apply_vertex_converter_type = detail::apply_vertex_converter<Converter,Processor>;
-    apply_vertex_converter_type apply(converter, proc);
     auto const& geom = feature.get_geometry();
     geometry::geometry_types type = geometry::geometry_type(geom);
 
