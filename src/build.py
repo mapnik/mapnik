@@ -221,6 +221,7 @@ source = Split(
     warp.cpp
     css_color_grammar.cpp
     vertex_cache.cpp
+    vertex_adapters.cpp
     text/font_library.cpp
     text/text_layout.cpp
     text/text_line.cpp
