@@ -275,7 +275,7 @@ template <typename Dispatcher, typename... ConverterTypes>
 struct converters_helper;
 
 template <typename Dispatcher, typename Current, typename... ConverterTypes>
-struct converters_helper<Dispatcher,Current,ConverterTypes...>
+struct converters_helper<Dispatcher, Current, ConverterTypes...>
 {
     template <typename Converter>
     static void set(Dispatcher & disp, std::size_t state)
