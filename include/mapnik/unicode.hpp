@@ -47,7 +47,7 @@ private:
 };
 
 // convinience method
-void to_utf8(mapnik::value_unicode_string const& input, std::string & target);
+void MAPNIK_DECL to_utf8(mapnik::value_unicode_string const& input, std::string & target);
 
 }
 
