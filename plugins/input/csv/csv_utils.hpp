@@ -24,16 +24,19 @@
 #define MAPNIK_CSV_UTILS_DATASOURCE_HPP
 
 // mapnik
-#include <mapnik/util/conversions.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/csv/csv_types.hpp>
 
+// std
+#include <iosfwd>
 #include <string>
-#include <ios>
+#include <vector>
 
-namespace csv_utils
-{
+namespace csv_utils {
 
 mapnik::csv_line parse_line(char const* start, char const* end, char separator, char quote, std::size_t num_columns);
 mapnik::csv_line parse_line(std::string const& line_str, char separator, char quote);
@@ -41,10 +44,6 @@ mapnik::csv_line parse_line(std::string const& line_str, char separator, char qu
 bool is_likely_number(std::string const& value);
 
 bool ignore_case_equal(std::string const& s0, std::string const& s1);
-
-}
-
-namespace detail {
 
 struct geometry_column_locator
 {
@@ -56,17 +55,17 @@ struct geometry_column_locator
     std::size_t index2;
 };
 
-template <typename T>
-std::size_t file_length(T & stream)
-{
-    stream.seekg(0, std::ios::end);
-    return stream.tellg();
-}
+namespace detail {
+
+std::size_t file_length(std::istream & stream);
 
 std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length);
 
 void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator);
 bool valid(geometry_column_locator const& locator, std::size_t max_size);
+
+} // namespace detail
+
 mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator);
 
 template <typename Feature, typename Headers, typename Values, typename Locator, typename Transcoder>
@@ -139,6 +138,28 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
     }
 }
 
-}// ns detail
+struct csv_file_parser
+{
+    using box_type = mapnik::box2d<double>;
+    using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
+    using boxes_type = std::vector<item_type>;
+
+    void parse_csv(std::istream & csv_file, boxes_type & boxes);
+
+    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const & values);
+
+    std::vector<std::string> headers_;
+    std::string manual_headers_;
+    geometry_column_locator locator_;
+    mapnik::box2d<double> extent_;
+    mapnik::value_integer row_limit_ = 0;
+    char separator_ = '\0';
+    char quote_ = '\0';
+    bool strict_ = false;
+    bool extent_initialized_ = false;
+    bool has_disk_index_ = false;
+};
+
+} // namespace csv_utils
 
 #endif // MAPNIK_CSV_UTILS_DATASOURCE_HPP

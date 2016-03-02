@@ -33,7 +33,7 @@
 #include <deque>
 
 csv_inline_featureset::csv_inline_featureset(std::string const& inline_string,
-                                             detail::geometry_column_locator const& locator,
+                                             locator_type const& locator,
                                              char separator,
                                              char quote,
                                              std::vector<std::string> const& headers,
@@ -57,12 +57,12 @@ mapnik::feature_ptr csv_inline_featureset::parse_feature(std::string const& str)
     auto const* start = str.data();
     auto const* end = start + str.size();
     auto values = csv_utils::parse_line(start, end, separator_, quote_, headers_.size());
-    auto geom = detail::extract_geometry(values, locator_);
+    auto geom = csv_utils::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, ++feature_id_));
         feature->set_geometry(std::move(geom));
-        detail::process_properties(*feature, headers_, values, locator_, tr_);
+        csv_utils::process_properties(*feature, headers_, values, locator_, tr_);
         return feature;
     }
     return mapnik::feature_ptr();
