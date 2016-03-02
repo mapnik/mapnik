@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,24 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_JSON_GEOMETRY_PARSER_HPP
-#define MAPNIK_JSON_GEOMETRY_PARSER_HPP
 
-// mapnik
-#include <mapnik/config.hpp> // for MAPNIK_DECL
-#include <mapnik/geometry.hpp>
+#include <mapnik/json/geometry_parser.hpp>
+#include <mapnik/json/geometry_grammar.hpp>
 
-#include <string>
+// boost
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
 
 namespace mapnik { namespace json {
 
-MAPNIK_DECL bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom);
+bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom)
+{
+    using namespace boost::spirit;
+    static const geometry_grammar<char const*> g;
+    standard::space_type space;
+    char const* start = json.c_str();
+    char const* end = start + json.length();
+    return qi::phrase_parse(start, end, g, space, geom);
+}
 
 }}
-
-#endif // MAPNIK_JSON_GEOMETRY_PARSER_HPP
