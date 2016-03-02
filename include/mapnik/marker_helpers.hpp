@@ -36,7 +36,7 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
-
+#include <mapnik/vertex_converters.hpp>
 // agg
 #include "agg_trans_affine.h"
 
@@ -158,135 +158,29 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              attributes const& vars,
                              symbolizer_base const& sym);
 
+using vertex_converter_type = vertex_converter<clip_line_tag,
+                                               clip_poly_tag,
+                                               transform_tag,
+                                               affine_transform_tag,
+                                               simplify_tag,
+                                               smooth_tag,
+                                               offset_transform_tag>;
+
 // Apply markers to a feature with multiple geometries
-template <typename Converter, typename Processor>
-void apply_markers_single(Converter & converter, Processor & proc, geometry::geometry<double> const& geom, geometry::geometry_types type)
-{
-    if (type == geometry::geometry_types::Point)
-    {
-        geometry::point_vertex_adapter<double> va(geom.get<geometry::point<double>>());
-        converter.apply(va, proc);
-    }
-    else if (type == geometry::geometry_types::LineString)
-    {
-        geometry::line_string_vertex_adapter<double> va(geom.get<geometry::line_string<double>>());
-        converter.apply(va, proc);
-    }
-    else if (type == geometry::geometry_types::Polygon)
-    {
-        geometry::polygon_vertex_adapter<double> va(geom.get<geometry::polygon<double>>());
-        converter.apply(va, proc);
-    }
-    else if (type == geometry::geometry_types::MultiPoint)
-    {
-        for (auto const& pt : geom.get<geometry::multi_point<double>>())
-        {
-            geometry::point_vertex_adapter<double> va(pt);
-            converter.apply(va, proc);
-        }
-    }
-    else if (type == geometry::geometry_types::MultiLineString)
-    {
-        for (auto const& line : geom.get<geometry::multi_line_string<double>>())
-        {
-            geometry::line_string_vertex_adapter<double> va(line);
-            converter.apply(va, proc);
-        }
-    }
-    else if (type == geometry::geometry_types::MultiPolygon)
-    {
-        for (auto const& poly : geom.get<geometry::multi_polygon<double>>())
-        {
-            geometry::polygon_vertex_adapter<double> va(poly);
-            converter.apply(va, proc);
-        }
-    }
-}
+template <typename Processor>
+void apply_markers_multi(feature_impl const& feature, attributes const& vars,
+                         vertex_converter_type & converter, Processor & proc, symbolizer_base const& sym);
 
-template <typename Converter, typename Processor>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
-{
-    auto const& geom = feature.get_geometry();
-    geometry::geometry_types type = geometry::geometry_type(geom);
 
-    if (type == geometry::geometry_types::Point
-        ||
-        type == geometry::geometry_types::LineString
-        ||
-        type == geometry::geometry_types::Polygon)
-    {
-        apply_markers_single(converter, proc, geom, type);
-    }
-    else
-    {
+using vector_dispatch_type = vector_markers_dispatch<mapnik::label_collision_detector4&>;
+using raster_dispatch_type = raster_markers_dispatch<mapnik::label_collision_detector4&>;
 
-        marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
-        marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
+extern template void apply_markers_multi<vector_dispatch_type>(feature_impl const& feature, attributes const& vars,
+                         vertex_converter_type & converter, vector_dispatch_type & proc, symbolizer_base const& sym);
 
-        if (placement == MARKER_POINT_PLACEMENT &&
-            multi_policy == MARKER_WHOLE_MULTI)
-        {
-            geometry::point<double> pt;
-            // test if centroid is contained by bounding box
-            if (geometry::centroid(geom, pt) && converter.disp_.args_.bbox.contains(pt.x, pt.y))
-            {
-                // unset any clipping since we're now dealing with a point
-                converter.template unset<clip_poly_tag>();
-                geometry::point_vertex_adapter<double> va(pt);
-                converter.apply(va, proc);
-            }
-        }
-        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
-                 multi_policy == MARKER_LARGEST_MULTI)
-        {
-            // Only apply to path with largest envelope area
-            // TODO: consider using true area for polygon types
-            if (type == geometry::geometry_types::MultiPolygon)
-            {
-                geometry::multi_polygon<double> const& multi_poly = mapnik::util::get<geometry::multi_polygon<double> >(geom);
-                double maxarea = 0;
-                geometry::polygon<double> const* largest = 0;
-                for (geometry::polygon<double> const& poly : multi_poly)
-                {
-                    box2d<double> bbox = geometry::envelope(poly);
-                    double area = bbox.width() * bbox.height();
-                    if (area > maxarea)
-                    {
-                        maxarea = area;
-                        largest = &poly;
-                    }
-                }
-                if (largest)
-                {
-                    geometry::polygon_vertex_adapter<double> va(*largest);
-                    converter.apply(va, proc);
-                }
-            }
-            else
-            {
-                MAPNIK_LOG_WARN(marker_symbolizer) << "TODO: if you get here -> open an issue";
-            }
-        }
-        else
-        {
-            if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
-            {
-                MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
-            }
-            if (type == geometry::geometry_types::GeometryCollection)
-            {
-                for (auto const& g : geom.get<geometry::geometry_collection<double>>())
-                {
-                    apply_markers_single(converter, proc, g, geometry::geometry_type(g));
-                }
-            }
-            else
-            {
-                apply_markers_single(converter, proc, geom, type);
-            }
-        }
-    }
-}
+extern template void apply_markers_multi<raster_dispatch_type>(feature_impl const& feature, attributes const& vars,
+                         vertex_converter_type & converter, raster_dispatch_type & proc, symbolizer_base const& sym);
+
 
 }
 
