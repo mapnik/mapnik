@@ -45,6 +45,12 @@ using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
 
+static bool GDALAllRegister_once_()
+{
+    static bool const quiet_unused = (GDALAllRegister(), true);
+    return quiet_unused;
+}
+
 gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
       dataset_(nullptr),
@@ -54,11 +60,11 @@ gdal_datasource::gdal_datasource(parameters const& params)
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 
+    GDALAllRegister_once_();
+
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::init");
 #endif
-
-    GDALAllRegister();
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (! file) throw datasource_exception("missing <file> parameter");
