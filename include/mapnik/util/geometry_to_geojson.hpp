@@ -24,14 +24,13 @@
 #define MAPNIK_GEOMETRY_TO_GEOJSON_HPP
 
 // mapnik
-#include <mapnik/config.hpp> // for MAPNIK_DECL
 #include <mapnik/geometry.hpp>
 
 #include <string>
 
 namespace mapnik { namespace util {
 
-MAPNIK_DECL bool to_geojson(std::string & json, mapnik::geometry::geometry<double> const& geom);
+bool to_geojson(std::string & json, mapnik::geometry::geometry<double> const& geom);
 
 }}
 
