@@ -41,7 +41,7 @@
 class csv_index_featureset : public mapnik::Featureset
 {
     using value_type = std::pair<std::size_t, std::size_t>;
-    using locator_type = detail::geometry_column_locator;
+    using locator_type = csv_utils::geometry_column_locator;
 public:
 
     csv_index_featureset(std::string const& filename,
@@ -60,7 +60,7 @@ private:
     std::vector<std::string> headers_;
     mapnik::context_ptr ctx_;
     mapnik::value_integer feature_id_ = 0;
-    detail::geometry_column_locator const& locator_;
+    locator_type const& locator_;
     mapnik::transcoder tr_;
 #if defined (MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;

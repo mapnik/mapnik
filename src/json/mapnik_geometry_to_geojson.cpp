@@ -20,19 +20,18 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_JSON_GEOMETRY_PARSER_HPP
-#define MAPNIK_JSON_GEOMETRY_PARSER_HPP
-
 // mapnik
-#include <mapnik/config.hpp> // for MAPNIK_DECL
-#include <mapnik/geometry.hpp>
+#include <mapnik/util/geometry_to_geojson.hpp>
+#include <mapnik/json/geometry_generator_grammar.hpp>
 
-#include <string>
+namespace mapnik { namespace util {
 
-namespace mapnik { namespace json {
-
-MAPNIK_DECL bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom);
+bool to_geojson(std::string & json, mapnik::geometry::geometry<double> const& geom)
+{
+    using sink_type = std::back_insert_iterator<std::string>;
+    static const mapnik::json::geometry_generator_grammar<sink_type, mapnik::geometry::geometry<double> > grammar;
+    sink_type sink(json);
+    return boost::spirit::karma::generate(sink, grammar, geom);
+}
 
 }}
-
-#endif // MAPNIK_JSON_GEOMETRY_PARSER_HPP
