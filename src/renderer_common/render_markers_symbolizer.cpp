@@ -245,7 +245,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                box2d<double> const& clip_box,
                                markers_renderer_context & renderer_context)
 {
-    using Detector = decltype(*common.detector_);
+    using Detector = label_collision_detector4;
     using RendererType = renderer_common;
     using ContextType = markers_renderer_context;
     using VisitorType = detail::render_marker_symbolizer_visitor<Detector,

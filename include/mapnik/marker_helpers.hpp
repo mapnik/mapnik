@@ -172,8 +172,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars,
                          vertex_converter_type & converter, Processor & proc, symbolizer_base const& sym);
 
 
-using vector_dispatch_type = vector_markers_dispatch<mapnik::label_collision_detector4&>;
-using raster_dispatch_type = raster_markers_dispatch<mapnik::label_collision_detector4&>;
+using vector_dispatch_type = vector_markers_dispatch<mapnik::label_collision_detector4>;
+using raster_dispatch_type = raster_markers_dispatch<mapnik::label_collision_detector4>;
 
 extern template void apply_markers_multi<vector_dispatch_type>(feature_impl const& feature, attributes const& vars,
                          vertex_converter_type & converter, vector_dispatch_type & proc, symbolizer_base const& sym);
