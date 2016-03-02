@@ -30,9 +30,11 @@
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/geometry_util.hpp>
 
-// spirit::qi
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 
