@@ -20,9 +20,9 @@
  *
  *****************************************************************************/
 
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/geometry_type.hpp>
@@ -38,14 +38,6 @@ struct render_marker_symbolizer_visitor
 {
     using vector_dispatch_type = vector_markers_dispatch<Detector>;
     using raster_dispatch_type = raster_markers_dispatch<Detector>;
-
-    using vertex_converter_type = vertex_converter<clip_line_tag,
-                                                   clip_poly_tag,
-                                                   transform_tag,
-                                                   affine_transform_tag,
-                                                   simplify_tag,
-                                                   smooth_tag,
-                                                   offset_transform_tag>;
 
     render_marker_symbolizer_visitor(std::string const& filename,
                                      markers_symbolizer const& sym,
@@ -80,6 +72,15 @@ struct render_marker_symbolizer_visitor
         if (transform) evaluate_transform(geom_tr, feature_, common_.vars_, *transform, common_.scale_factor_);
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
 
+         // converter
+        vertex_converter_type converter(clip_box_,
+                                        sym_,
+                                        common_.t_,
+                                        prj_trans_,
+                                        geom_tr,
+                                        feature_,
+                                        common_.vars_,
+                                        common_.scale_factor_);
         boost::optional<svg_path_ptr> const& stock_vector_marker = mark.get_data();
 
         // special case for simple ellipse markers
@@ -107,14 +108,7 @@ struct render_marker_symbolizer_visitor
                                                      snap_to_pixels,
                                                      renderer_context_);
 
-            vertex_converter_type converter(clip_box_,
-                                            sym_,
-                                            common_.t_,
-                                            prj_trans_,
-                                            geom_tr,
-                                            feature_,
-                                            common_.vars_,
-                                            common_.scale_factor_);
+
             if (clip)
             {
                 geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
@@ -152,15 +146,6 @@ struct render_marker_symbolizer_visitor
                                                      common_.vars_,
                                                      snap_to_pixels,
                                                      renderer_context_);
-
-            vertex_converter_type converter(clip_box_,
-                                            sym_,
-                                            common_.t_,
-                                            prj_trans_,
-                                            geom_tr,
-                                            feature_,
-                                            common_.vars_,
-                                            common_.scale_factor_);
             if (clip)
             {
                 geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
