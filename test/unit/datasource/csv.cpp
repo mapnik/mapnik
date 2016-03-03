@@ -79,31 +79,11 @@ mapnik::datasource_ptr get_csv_ds(std::string const& file_name, bool strict = tr
     return ds;
 }
 
-int create_disk_index(std::string const& filename, bool silent = true)
-{
-    std::string cmd;
-    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
-    {
-        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
-    }
-    cmd += "mapnik-index " + filename;
-    if (silent)
-    {
-#ifndef _WINDOWS
-        cmd += " 2>/dev/null";
-#else
-        cmd += " 2> nul";
-#endif
-    }
-    return std::system(cmd.c_str());
-}
-
 } // anonymous namespace
-
-static const std::string csv_plugin("./plugins/input/csv.input");
 
 TEST_CASE("csv") {
 
+    std::string csv_plugin("./plugins/input/csv.input");
     if (mapnik::util::exists(csv_plugin))
     {
         // make the tests silent since we intentionally test error conditions that are noisy

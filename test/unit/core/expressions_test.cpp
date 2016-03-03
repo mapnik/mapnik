@@ -1,3 +1,4 @@
+
 #include "catch_ext.hpp"
 
 #include <mapnik/expression.hpp>

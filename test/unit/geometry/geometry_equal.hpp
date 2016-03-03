@@ -1,3 +1,7 @@
+
+#ifndef MAPNIK_UNIT_GEOMETRY_EQUAL
+#define MAPNIK_UNIT_GEOMETRY_EQUAL
+
 #include "catch.hpp"
 
 // boost
@@ -214,3 +218,5 @@ void assert_g_equal(T const& g1, T const& g2)
 {
     return geometry_equal_visitor()(g1,g2);
 }
+
+#endif // MAPNIK_UNIT_GEOMETRY_EQUAL

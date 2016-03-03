@@ -317,7 +317,7 @@ TEST_CASE("SVG parser") {
                                                                     std::make_tuple(0, 10,2),
                                                                     std::make_tuple(0, 10,95)};
 
-        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),detail::vertex_equal<3>()));
+        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),vertex_equal<3>()));
     }
 
     SECTION("SVG viewbox fallback")
@@ -377,7 +377,7 @@ TEST_CASE("SVG parser") {
                                                                     std::make_tuple(0, 10,2),
                                                                     std::make_tuple(0, 10,95)};
 
-        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),detail::vertex_equal<3>()));
+        REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(),vertex_equal<3>()));
     }
 
     SECTION("SVG beveled <rect>")

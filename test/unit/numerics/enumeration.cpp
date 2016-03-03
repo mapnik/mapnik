@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 #include <mapnik/enumeration.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>

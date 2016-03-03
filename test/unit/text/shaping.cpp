@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 #include <mapnik/text/icu_shaper.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>

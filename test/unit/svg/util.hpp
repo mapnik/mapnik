@@ -25,7 +25,7 @@
 
 #include <cmath>
 
-namespace detail {
+namespace {
 
 template <int N = 6>
 struct vertex_equal
