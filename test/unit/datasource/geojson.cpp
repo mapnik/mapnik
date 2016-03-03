@@ -62,25 +62,6 @@ std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::s
     return std::make_pair(ds,feature);
 }
 
-int create_disk_index(std::string const& filename, bool silent = true)
-{
-    std::string cmd;
-    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
-    {
-        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
-    }
-    cmd += "mapnik-index " + filename;
-    if (silent)
-    {
-#ifndef _WINDOWS
-        cmd += " 2>/dev/null";
-#else
-        cmd += " 2> nul";
-#endif
-    }
-    return std::system(cmd.c_str());
-}
-
 }
 
 TEST_CASE("geojson") {

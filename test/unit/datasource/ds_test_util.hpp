@@ -20,6 +20,10 @@
  *
  *****************************************************************************/
 
+
+#ifndef MAPNIK_UNIT_DATSOURCE_UTIL
+#define MAPNIK_UNIT_DATSOURCE_UTIL
+
 #include "catch.hpp"
 
 #include <mapnik/datasource.hpp>
@@ -176,4 +180,25 @@ inline void require_geometry(mapnik::feature_ptr feature,
     CHECK(feature_count(feature->get_geometry()) == num_parts);
 }
 
+inline int create_disk_index(std::string const& filename, bool silent = true)
+{
+    std::string cmd;
+    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
+    {
+        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
+    }
+    cmd += "mapnik-index " + filename;
+    if (silent)
+    {
+#ifndef _WINDOWS
+        cmd += " 2>/dev/null";
+#else
+        cmd += " 2> nul";
+#endif
+    }
+    return std::system(cmd.c_str());
 }
+
+}
+
+#endif // MAPNIK_UNIT_DATSOURCE_UTIL

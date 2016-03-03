@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 #include "geometry_equal.hpp"
 

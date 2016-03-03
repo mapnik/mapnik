@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 
 #include <mapnik/value_types.hpp>
