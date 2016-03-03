@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/pixel_types.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/image_null.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -128,6 +129,34 @@ MAPNIK_DECL void set_premultiplied_alpha(image_any & image, bool status);
 
 template <typename T>
 MAPNIK_DECL void set_premultiplied_alpha(T & image, bool status);
+
+//----------------------------------------------------------------------
+// copy_image
+
+template <typename ImageT>
+ImageT copy_image(ImageT const& src)
+{
+    return src;
+}
+
+template <typename ImageT>
+ImageT copy_image(image_view<ImageT> const& src)
+{
+    ImageT dst(src.width(), src.height(), false, src.get_premultiplied());
+    for (std::size_t y = 0; y < src.height(); ++y)
+    {
+        dst.set_row(y, src.get_row(y), src.width());
+    }
+    return dst;
+}
+
+template <> inline
+image_null copy_image(image_view<image_null> const& src)
+{
+    return image_null();
+}
+
+MAPNIK_DECL image_any copy_image(image_view_any const& src);
 
 // IS SOLID
 MAPNIK_DECL bool is_solid (image_any const& image);

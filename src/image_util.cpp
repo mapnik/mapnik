@@ -548,7 +548,21 @@ private:
     bool const status_;
 };
 
+struct copy_image_visitor
+{
+    template <typename ImageT>
+    image_any operator()(image_view<ImageT> const& src)
+    {
+        return copy_image(src);
+    }
+};
+
 } // end detail ns
+
+MAPNIK_DECL image_any copy_image(image_view_any const& src)
+{
+    return util::apply_visitor(detail::copy_image_visitor(), src);
+}
 
 MAPNIK_DECL bool premultiply_alpha(image_any & image)
 {

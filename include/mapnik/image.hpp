@@ -106,6 +106,7 @@ public:
     std::size_t height() const;
     std::size_t size() const;
     std::size_t row_size() const;
+    std::size_t row_stride() const;
     void set(pixel_type const& t);
     pixel_type const* data() const;
     pixel_type* data();

@@ -27,6 +27,9 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 
+// agg
+#include <agg_pixfmt_rgba.h>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 extern "C"
@@ -72,71 +75,22 @@ std::string webp_encoding_error(WebPEncodingError error)
 }
 
 template <typename T2>
-inline int import_image(T2 const& im_in,
-                             WebPPicture & pic,
-                             bool alpha)
+static int import_image(T2 const& image,
+                        WebPPicture & pic,
+                        bool alpha)
 {
-    image<typename T2::pixel> const& data = im_in.data();
-    std::size_t width = im_in.width();
-    std::size_t height = im_in.height();
-    std::size_t stride = sizeof(typename T2::pixel_type) * width;
-    if (data.width() == width &&
-        data.height() == height)
-    {
-        if (alpha)
-        {
-            return WebPPictureImportRGBA(&pic, data.bytes(), static_cast<int>(stride));
-        }
-        else
-        {
-    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, data.bytes(), static_cast<int>(stride));
-    #else
-            return WebPPictureImportRGBA(&pic, data.bytes(), static_cast<int>(stride));
-    #endif
-        }
-    }
-    else
-    {
-        // need to copy: https://github.com/mapnik/mapnik/issues/2024
-        image_rgba8 im(width,height);
-        for (unsigned y = 0; y < height; ++y)
-        {
-            typename T2::pixel_type const * row_from = im_in.get_row(y);
-            image_rgba8::pixel_type * row_to = im.get_row(y);
-            std::copy(row_from, row_from + width, row_to);
-        }
-        if (alpha)
-        {
-            return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
-        }
-        else
-        {
-    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-            return WebPPictureImportRGBX(&pic, im.bytes(), static_cast<int>(stride));
-    #else
-            return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
-    #endif
-        }
-    }
-}
-
-template <>
-inline int import_image(image_rgba8 const& im,
-                             WebPPicture & pic,
-                             bool alpha)
-{
-    std::size_t stride = sizeof(image_rgba8::pixel_type) * im.width();
+    uint8_t const* src = reinterpret_cast<uint8_t const*>(image.get_row(0));
+    int stride = static_cast<int>(image.row_stride());
     if (alpha)
     {
-        return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
+        return WebPPictureImportRGBA(&pic, src, stride);
     }
     else
     {
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        return WebPPictureImportRGBX(&pic, im.bytes(), static_cast<int>(stride));
+        return WebPPictureImportRGBX(&pic, src, stride);
 #else
-        return WebPPictureImportRGBA(&pic, im.bytes(), static_cast<int>(stride));
+        return WebPPictureImportRGBA(&pic, src, stride);
 #endif
     }
 }
@@ -147,6 +101,8 @@ void save_as_webp(T1& file,
                   WebPConfig const& config,
                   bool alpha)
 {
+    static_assert(sizeof(typename T2::pixel_type) == 4, "T2 must be rgba8 image/view");
+
     if (WebPValidateConfig(&config) != 1)
     {
         throw std::runtime_error("Invalid configuration");
@@ -161,34 +117,32 @@ void save_as_webp(T1& file,
     pic.height = image.height();
     int ok = 0;
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-    pic.use_argb = !!config.lossless;
-    // lossless fast track
-    if (pic.use_argb)
+    // always use ARGB input, so that WebPEncode applies proper config.preprocessing
+    // https://chromium.googlesource.com/webm/libwebp/+/a6f23c4/src/enc/webpenc.c#337
+    pic.use_argb = 1;
+    if (!image.get_premultiplied())
     {
-        pic.colorspace = static_cast<WebPEncCSP>(pic.colorspace | WEBP_CSP_ALPHA_BIT);
-        if (WebPPictureAlloc(&pic)) {
-            ok = 1;
-            const int width = pic.width;
-            const int height = pic.height;
-            for (int y = 0; y < height; ++y) {
-                typename T2::pixel_type const * row = image.get_row(y);
-                for (int x = 0; x < width; ++x) {
-                    const unsigned rgba = row[x];
-                    unsigned a = (rgba >> 24) & 0xff;
-                    unsigned r = rgba & 0xff;
-                    unsigned g = (rgba >> 8 ) & 0xff;
-                    unsigned b = (rgba >> 16) & 0xff;
-                    const uint32_t argb = (a << 24) | (r << 16) | (g << 8) | (b);
-                    pic.argb[x + y * pic.argb_stride] = argb;
-                }
+        ok = import_image(image, pic, alpha);
+    }
+    else if ((ok = WebPPictureAlloc(&pic)) != 0)
+    {
+        for (int y = 0; y < pic.height; ++y)
+        {
+            uint32_t const* src_row = image.get_row(y);
+            uint8_t const* src = reinterpret_cast<uint8_t const*>(src_row);
+            uint8_t pix[4];
+            auto dst = pic.argb + y * pic.argb_stride;
+            for (int x = 0; x < pic.width; ++x, src += 4)
+            {
+                using m = agg::multiplier2_rgba<agg::rgba8, agg::order_rgba>;
+                m::demultiply(pix, src);
+                uint32_t r = pix[0];
+                uint32_t g = pix[1];
+                uint32_t b = pix[2];
+                uint32_t a = alpha ? pix[3] : 255;
+                dst[x] = (a << 24) | (r << 16) | (g << 8) | (b);
             }
         }
-    }
-    else
-    {
-        // different approach for lossy since ImportYUVAFromRGBA is needed
-        // to prepare WebPPicture and working with view pixels is not viable
-        ok = import_image(image,pic,alpha);
     }
 #else
     ok = import_image(image,pic,alpha);
