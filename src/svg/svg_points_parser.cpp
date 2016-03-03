@@ -36,6 +36,9 @@ namespace mapnik { namespace svg {
         using namespace boost::spirit;
         using iterator_type = const char* ;
         using skip_type = ascii::space_type;
+        // FIXME! - for best performance this needs to be static const
+        // but for that not to crash the argument needs to be passed to phrase_parse
+        // rather than the grammar ctor - https://github.com/mapnik/mapnik/pull/2231
         svg_points_grammar<iterator_type,skip_type,PathType> g(p);
         iterator_type first = wkt;
         iterator_type last =  wkt + std::strlen(wkt);
