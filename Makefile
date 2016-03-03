@@ -49,6 +49,11 @@ src/json/libmapnik-json.a:
 		src/renderer_common/render_thunk_extractor.os \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
+		src/marker_helpers.os \
+		src/svg/svg_transform_parser.os \
+		src/agg/process_line_symbolizer.os \
+		plugins/input/geojson/geojson_datasource.os \
+		utils/mapnik-index/process_geojson_file.o \
 
 mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
