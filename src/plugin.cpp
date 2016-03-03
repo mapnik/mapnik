@@ -93,7 +93,9 @@ PluginInfo::~PluginInfo()
         */
         if (module_->dl && name_ != "gdal" && name_ != "ogr")
         {
+#ifndef MAPNIK_NO_DLCLOSE
             dlclose(module_->dl),module_->dl=0;
+#endif
         }
 #endif
         delete module_;
