@@ -55,8 +55,7 @@ public:
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
 private:
-    GDALDataset* open_dataset() const;
-    GDALDataset* dataset_;
+    std::unique_ptr<GDALDataset, decltype(&GDALClose)> dataset_;
     mapnik::box2d<double> extent_;
     std::string dataset_name_;
     int band_;

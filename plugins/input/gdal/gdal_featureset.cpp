@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/make_unique.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/image.hpp>
@@ -29,7 +29,6 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/util/variant.hpp>
 
 // stl
 #include <cmath>
@@ -39,8 +38,6 @@
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
 
-using mapnik::query;
-using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
 using mapnik::view_transform;
@@ -77,8 +74,6 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
 
 gdal_featureset::~gdal_featureset()
 {
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << &dataset_;
-
 }
 
 feature_ptr gdal_featureset::next()
