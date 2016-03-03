@@ -24,7 +24,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
-
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>

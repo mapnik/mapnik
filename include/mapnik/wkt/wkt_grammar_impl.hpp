@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#include <mapnik/config.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>

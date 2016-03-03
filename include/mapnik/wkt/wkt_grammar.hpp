@@ -24,9 +24,8 @@
 #define MAPNIK_WKT_GRAMMAR_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/assert.hpp>

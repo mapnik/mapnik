@@ -32,10 +32,20 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/fusion/adapted/struct.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
+
+BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
+                          (mapnik::unary_function_impl, fun)
+                          (mapnik::unary_function_call::argument_type, arg))
+
+BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
+                          (mapnik::binary_function_impl, fun)
+                          (mapnik::binary_function_call::argument_type, arg1)
+                          (mapnik::binary_function_call::argument_type, arg2))
 
 // fwd declare
 namespace mapnik {
@@ -45,6 +55,59 @@ namespace mapnik {
 
 namespace mapnik
 {
+
+struct unicode_impl
+{
+    template <typename T>
+    struct result
+    {
+        using type = mapnik::value_unicode_string;
+    };
+
+    explicit unicode_impl(mapnik::transcoder const& tr)
+        : tr_(tr) {}
+
+    mapnik::value_unicode_string operator()(std::string const& str) const
+    {
+        return tr_.transcode(str.c_str());
+    }
+
+    mapnik::transcoder const& tr_;
+};
+
+struct regex_match_impl
+{
+    template <typename T>
+    struct result
+    {
+        using type = expr_node;
+    };
+
+    explicit regex_match_impl(mapnik::transcoder const& tr)
+        : tr_(tr) {}
+
+    template <typename T0,typename T1>
+    expr_node operator() (T0 & node, T1 const& pattern) const;
+
+    mapnik::transcoder const& tr_;
+};
+
+struct regex_replace_impl
+{
+    template <typename T>
+    struct result
+    {
+        using type = expr_node;
+    };
+
+    explicit regex_replace_impl(mapnik::transcoder const& tr)
+        : tr_(tr) {}
+
+    template <typename T0,typename T1,typename T2>
+    expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const;
+
+    mapnik::transcoder const& tr_;
+};
 
 unary_function_types::unary_function_types()
 {
@@ -83,10 +146,7 @@ expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const
 template <typename Iterator>
 expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     : expression_grammar::base_type(expr),
-      tr_(encoding),
-      unicode_(unicode_impl(tr_)),
-      regex_match_(regex_match_impl(tr_)),
-      regex_replace_(regex_replace_impl(tr_))
+      tr_(encoding)
 {
     qi::_1_type _1;
     qi::_a_type _a;
@@ -105,6 +165,10 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     using boost::phoenix::construct;
     using boost::phoenix::if_else;
 
+    boost::phoenix::function<unicode_impl> unicode = unicode_impl(tr_);
+    boost::phoenix::function<regex_match_impl> regex_match = regex_match_impl(tr_);
+    boost::phoenix::function<regex_replace_impl> regex_replace = regex_replace_impl(tr_);
+
     constant.add
         ("null",        mapnik::value_null())
         ("false",       mapnik::value_bool(false))
@@ -119,7 +183,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         ;
 
     expr = logical_expr [_val = _1]
-        | ustring [_val = unicode_(_1)]
+        | ustring [_val = unicode(_1)]
         ;
 
     logical_expr = not_expr [_val = _1]
@@ -156,7 +220,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         >> quoted_ustring           [_a = _1]
         >> lit(',')
         >> quoted_ustring           [_b = _1]
-        >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
+        >> lit(')')          [_val = regex_replace(_r1,_a,_b)]
         ;
 
     relational_expr = additive_expr[_val = _1]
@@ -178,7 +242,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         >> *(     '*' >> unary_expr [_val *= _1]
                   | '/' >> unary_expr [_val /= _1]
                   | '%' >> unary_expr [_val %= construct<mapnik::expr_node>(_1)] //needed by clang++ with -std=c++11
-                  |  regex_match_expr[_val = regex_match_(_val, _1)]
+                  |  regex_match_expr[_val = regex_match(_val, _1)]
                   |  regex_replace_expr(_val) [_val = _1]
             )
         ;
@@ -198,7 +262,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     primary_expr = strict_double [_val = _1]
         | int__[_val = _1]
         | no_case[constant] [_val = _1]
-        | quoted_ustring [_val = unicode_(_1)]
+        | quoted_ustring [_val = unicode(_1)]
         | attr [if_else(_1 == "mapnik::geometry_type",
                         _val = construct<mapnik::geometry_type_attribute>(),
                         _val = construct<mapnik::attribute>(_1))]

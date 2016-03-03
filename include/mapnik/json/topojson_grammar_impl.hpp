@@ -21,6 +21,84 @@
  *****************************************************************************/
 
 #include <mapnik/json/topojson_grammar.hpp>
+#include <mapnik/json/generic_json.hpp>
+
+#pragma GCC diagnostic push
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::coordinate,
+    (double, x)
+    (double, y)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::arc,
+    (std::list<mapnik::topojson::coordinate>, coordinates)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::transform,
+    (double, scale_x)
+    (double, scale_y)
+    (double, translate_x)
+    (double, translate_y)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::bounding_box,
+    (double, minx)
+    (double, miny)
+    (double, maxx)
+    (double, maxy)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::point,
+    (mapnik::topojson::coordinate, coord)
+    (boost::optional<mapnik::topojson::properties>, props)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::multi_point,
+    (std::vector<mapnik::topojson::coordinate>, points)
+    (boost::optional<mapnik::topojson::properties>, props)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::linestring,
+    (mapnik::topojson::index_type, ring)
+    (boost::optional<mapnik::topojson::properties>, props)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::multi_linestring,
+    (std::vector<mapnik::topojson::index_type>, rings)
+    (boost::optional<mapnik::topojson::properties>, props)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::polygon,
+    (std::vector<std::vector<mapnik::topojson::index_type> >, rings)
+    (boost::optional<mapnik::topojson::properties>, props)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::multi_polygon,
+    (std::vector<std::vector<std::vector<mapnik::topojson::index_type> > >, polygons)
+    (boost::optional<mapnik::topojson::properties>, props)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::topology,
+    (std::vector<mapnik::topojson::geometry>, geometries)
+    (std::vector<mapnik::topojson::arc>, arcs)
+    (boost::optional<mapnik::topojson::transform>, tr)
+    (boost::optional<mapnik::topojson::bounding_box>, bbox)
+   )
 
 namespace mapnik { namespace topojson {
 
@@ -46,26 +124,32 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     using qi::on_error;
     using phoenix::push_back;
     using phoenix::construct;
-    // generic json types
-    json_.value = json_.object | json_.array | json_.string_ | json_.number
+
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
+
+    // generic JSON support
+    json::generic_json<Iterator> json;
+    // generic JSON types
+    json.value = json.object | json.array | json.string_ | json.number
         ;
 
-    json_.pairs = json_.key_value % lit(',')
+    json.pairs = json.key_value % lit(',')
         ;
 
-    json_.key_value = (json_.string_ >> lit(':') >> json_.value)
+    json.key_value = (json.string_ >> lit(':') >> json.value)
         ;
 
-    json_.object = lit('{') >> *json_.pairs >> lit('}')
+    json.object = lit('{') >> *json.pairs >> lit('}')
         ;
 
-    json_.array = lit('[')
-        >> json_.value >> *(lit(',') >> json_.value)
+    json.array = lit('[')
+        >> json.value >> *(lit(',') >> json.value)
         >> lit(']')
         ;
 
-    json_.number = json_.strict_double[_val = json_.double_converter(_1)]
-        | json_.int__[_val = json_.integer_converter(_1)]
+    json.number = json.strict_double[_val = json.double_converter(_1)]
+        | json.int__[_val = json.integer_converter(_1)]
         | lit("true")[_val = true]
         | lit("false")[_val = false]
         | lit("null")[_val = construct<value_null>()]
@@ -96,7 +180,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     objects = lit("\"objects\"")
         >> lit(':')
         >> lit('{')
-        >> -((omit[json_.string_]
+        >> -((omit[json.string_]
               >> lit(':')
               >>  (geometry_collection(_val) | geometry)) % lit(','))
         >> lit('}')
@@ -109,7 +193,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         multi_point |
         multi_linestring |
         multi_polygon |
-        omit[json_.object]
+        omit[json.object]
         ;
 
     geometry_collection =  lit('{')
@@ -171,7 +255,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> lit('}')
         ;
 
-    id = lit("\"id\"") >> lit(':') >> omit[json_.value]
+    id = lit("\"id\"") >> lit(':') >> omit[json.value]
         ;
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
@@ -179,13 +263,13 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     properties = lit("\"properties\"")
         >> lit(':')
-        >> (( lit('{') >> attributes >> lit('}')) | json_.object)
+        >> (( lit('{') >> attributes >> lit('}')) | json.object)
         ;
 
-    attributes = (json_.string_ >> lit(':') >> attribute_value) % lit(',')
+    attributes = (json.string_ >> lit(':') >> attribute_value) % lit(',')
         ;
 
-    attribute_value %= json_.number | json_.string_  ;
+    attribute_value %= json.number | json.string_  ;
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;
@@ -199,7 +283,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     objects.name("objects");
     arc.name("arc");
     arcs.name("arcs");
-    json_.value.name("value");
+    json.value.name("value");
     coordinate.name("coordinate");
 
     point.name("point");
