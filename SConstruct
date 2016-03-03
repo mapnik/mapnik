@@ -293,6 +293,7 @@ opts.AddVariables(
     EnumVariable('OPTIMIZATION','Set compiler optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
+    BoolVariable('COVERAGE', 'Compile a libmapnik and plugins with --coverage', 'False'),
     BoolVariable('DEBUG_UNDEFINED', 'Compile a version of Mapnik using clang/llvm undefined behavior asserts', 'False'),
     BoolVariable('DEBUG_SANITIZE', 'Compile a version of Mapnik using clang/llvm address sanitation', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
@@ -1139,6 +1140,9 @@ if not preconfigured:
     else:
         mode = 'release mode'
 
+    if env['COVERAGE']:
+        mode += ' (with coverage)'
+
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
@@ -1890,6 +1894,10 @@ if not HELP_REQUESTED:
     Export('env')
 
     plugin_base = env.Clone()
+
+    if env['COVERAGE']:
+        plugin_base.Append(LINKFLAGS='--coverage')
+        plugin_base.Append(CXXFLAGS='--coverage')
 
     Export('plugin_base')
 

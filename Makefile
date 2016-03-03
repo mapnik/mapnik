@@ -81,6 +81,8 @@ clean:
 	@find ./src/ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./src/ -name "*.a" -exec rm {} \;
+	@find ./ -name "*.gcda" -exec rm {} \;
+	@find ./ -name "*.gcno" -exec rm {} \;
 
 distclean:
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
