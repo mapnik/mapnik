@@ -24,6 +24,7 @@
 #include <mapnik/json/generic_json.hpp>
 
 #pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
