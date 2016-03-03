@@ -62,6 +62,10 @@ system = 'boost_system%s' % env['BOOST_APPEND']
 lib_env['LIBS'] = [filesystem,
                    regex]
 
+if env['COVERAGE']:
+    lib_env.Append(LINKFLAGS='--coverage')
+    lib_env.Append(CXXFLAGS='--coverage')
+
 if env['HAS_CAIRO']:
     lib_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
 
