@@ -59,6 +59,11 @@ src/json/libmapnik-json.a:
 		src/agg/process_line_symbolizer.os \
 		plugins/input/geojson/geojson_datasource.os \
 		utils/mapnik-index/process_geojson_file.o \
+		src/svg/svg_path_parser.os \
+		src/svg/svg_parser.os \
+		src/svg/svg_points_parser.os \
+		src/svg/svg_transform_parser.os \
+
 
 mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
