@@ -25,14 +25,12 @@
 
 // mapnik
 #include <mapnik/json/error_handler.hpp>
-#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/json/value_converters.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
 
 // stl
@@ -50,8 +48,6 @@ struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>
 {
     topojson_grammar();
 private:
-    // generic JSON support
-    json::generic_json<Iterator> json_;
     // topoJSON
     qi::rule<Iterator, space_type, mapnik::topojson::topology()> topology;
     qi::rule<Iterator, space_type, std::vector<mapnik::topojson::geometry>()> objects;
@@ -68,17 +64,13 @@ private:
     qi::rule<Iterator, space_type, mapnik::topojson::polygon()> polygon;
     qi::rule<Iterator, space_type, mapnik::topojson::multi_polygon()> multi_polygon;
     qi::rule<Iterator, space_type, void(std::vector<mapnik::topojson::geometry>&)> geometry_collection;
-
     qi::rule<Iterator, space_type, std::vector<index_type>()> ring;
-
     // properties
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties;
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> attributes;
     qi::rule<Iterator, space_type, mapnik::json::json_value()> attribute_value;
     // id
     qi::rule<Iterator,space_type> id;
-    // error handler
-    boost::phoenix::function<ErrorHandler> const error_handler;
 };
 
 }}

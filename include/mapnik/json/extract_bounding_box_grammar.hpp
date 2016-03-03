@@ -33,11 +33,7 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
 #pragma GCC diagnostic pop
-
-// stl
-#include <tuple>
 
 namespace mapnik { namespace json {
 

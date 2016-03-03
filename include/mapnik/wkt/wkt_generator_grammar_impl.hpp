@@ -20,9 +20,10 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry.hpp>
+// mapnik
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
 #include <mapnik/util/spirit_transform_attribute.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #include <boost/spirit/include/phoenix.hpp>
 

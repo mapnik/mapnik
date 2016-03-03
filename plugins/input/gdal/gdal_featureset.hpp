@@ -24,12 +24,11 @@
 #define GDAL_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
+#include <mapnik/featureset.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
 #include <boost/optional.hpp>
-
-#include "gdal_datasource.hpp"
 
 class GDALDataset;
 class GDALRasterBand;

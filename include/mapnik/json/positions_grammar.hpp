@@ -25,28 +25,18 @@
 
 // mapnik
 #include <mapnik/util/variant.hpp>
+#include <mapnik/json/positions.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
 #pragma GCC diagnostic pop
 
-// stl
-#include <tuple>
 
 namespace mapnik { namespace json {
-
-struct empty {};
-
-using position = mapnik::geometry::point<double>;
-using positions = std::vector<position>;
-using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;
 
 namespace qi = boost::spirit::qi;
 

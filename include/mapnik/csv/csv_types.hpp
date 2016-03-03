@@ -20,18 +20,18 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_TO_GEOJSON_HPP
-#define MAPNIK_GEOMETRY_TO_GEOJSON_HPP
-
-// mapnik
-#include <mapnik/geometry.hpp>
+#ifndef MAPNIK_CSV_TYPES_HPP
+#define MAPNIK_CSV_TYPES_HPP
 
 #include <string>
+#include <vector>
 
-namespace mapnik { namespace util {
+namespace mapnik {
 
-bool to_geojson(std::string & json, mapnik::geometry::geometry<double> const& geom);
+using csv_value = std::string;
+using csv_line = std::vector<csv_value>;
+using csv_data = std::vector<csv_line>;
 
-}}
+}
 
-#endif // MAPNIK_GEOMETRY_TO_GEOJSON_HPP
+#endif // MAPNIK_CSV_TYPES_HPP

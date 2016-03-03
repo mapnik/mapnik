@@ -27,7 +27,6 @@
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

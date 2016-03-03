@@ -20,18 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_TO_GEOJSON_HPP
-#define MAPNIK_GEOMETRY_TO_GEOJSON_HPP
-
-// mapnik
-#include <mapnik/geometry.hpp>
-
+#include <mapnik/json/positions_grammar_impl.hpp>
 #include <string>
 
-namespace mapnik { namespace util {
-
-bool to_geojson(std::string & json, mapnik::geometry::geometry<double> const& geom);
-
-}}
-
-#endif // MAPNIK_GEOMETRY_TO_GEOJSON_HPP
+using iterator_type = char const*;
+template struct mapnik::json::positions_grammar<iterator_type>;

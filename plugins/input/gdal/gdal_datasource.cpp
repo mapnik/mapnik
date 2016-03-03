@@ -45,20 +45,26 @@ using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
 
+static bool GDALAllRegister_once_()
+{
+    static bool const quiet_unused = (GDALAllRegister(), true);
+    return quiet_unused;
+}
+
 gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
-      dataset_(nullptr),
+      dataset_(nullptr, &GDALClose),
       desc_(gdal_datasource::name(), "utf-8"),
       nodata_value_(params.get<double>("nodata")),
       nodata_tolerance_(*params.get<double>("nodata_tolerance",1e-12))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 
+    GDALAllRegister_once_();
+
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::init");
 #endif
-
-    GDALAllRegister();
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (! file) throw datasource_exception("missing <file> parameter");
@@ -79,12 +85,14 @@ gdal_datasource::gdal_datasource(parameters const& params)
 #if GDAL_VERSION_NUM >= 1600
     if (shared_dataset_)
     {
-        dataset_ = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(), GA_ReadOnly));
+        auto ds = GDALOpenShared(dataset_name_.c_str(), GA_ReadOnly);
+        dataset_.reset(static_cast<GDALDataset*>(ds));
     }
     else
 #endif
     {
-        dataset_ = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(), GA_ReadOnly));
+        auto ds = GDALOpen(dataset_name_.c_str(), GA_ReadOnly);
+        dataset_.reset(static_cast<GDALDataset*>(ds));
     }
 
     if (! dataset_)
@@ -92,7 +100,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
         throw datasource_exception(CPLGetLastErrorMsg());
     }
 
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: opened Dataset=" << dataset_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: opened Dataset=" << dataset_.get();
 
     nbands_ = dataset_->GetRasterCount();
     width_ = dataset_->GetRasterXSize();
@@ -182,8 +190,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
 gdal_datasource::~gdal_datasource()
 {
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << dataset_;
-    GDALClose(dataset_);
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << dataset_.get();
 }
 
 datasource::datasource_t gdal_datasource::type() const
@@ -217,12 +224,9 @@ featureset_ptr gdal_datasource::features(query const& q) const
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features");
 #endif
 
-    gdal_query gq = q;
-
-    // TODO - move to std::make_shared, but must reduce # of args to <= 9
-    return featureset_ptr(new gdal_featureset(*dataset_,
+    return std::make_shared<gdal_featureset>(*dataset_,
                                               band_,
-                                              gq,
+                                              gdal_query(q),
                                               extent_,
                                               width_,
                                               height_,
@@ -230,7 +234,7 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               dx_,
                                               dy_,
                                               nodata_value_,
-                                              nodata_tolerance_));
+                                              nodata_tolerance_);
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -239,12 +243,9 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features_at_point");
 #endif
 
-    gdal_query gq = pt;
-
-    // TODO - move to std::make_shared, but must reduce # of args to <= 9
-    return featureset_ptr(new gdal_featureset(*dataset_,
+    return std::make_shared<gdal_featureset>(*dataset_,
                                               band_,
-                                              gq,
+                                              gdal_query(pt),
                                               extent_,
                                               width_,
                                               height_,
@@ -252,5 +253,5 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
                                               dx_,
                                               dy_,
                                               nodata_value_,
-                                              nodata_tolerance_));
+                                              nodata_tolerance_);
 }

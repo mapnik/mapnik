@@ -24,12 +24,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
-#include <mapnik/json/positions_grammar_impl.hpp>
-
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
-#include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace json {
 

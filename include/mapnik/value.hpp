@@ -38,11 +38,11 @@ namespace value_adl_barrier {
 
 class MAPNIK_DECL value : public value_base
 {
-    friend value operator+(value const&,value const&);
-    friend value operator-(value const&,value const&);
-    friend value operator*(value const&,value const&);
-    friend value operator/(value const&,value const&);
-    friend value operator%(value const&,value const&);
+    friend MAPNIK_DECL value operator+(value const&,value const&);
+    friend MAPNIK_DECL value operator-(value const&,value const&);
+    friend MAPNIK_DECL value operator*(value const&,value const&);
+    friend MAPNIK_DECL value operator/(value const&,value const&);
+    friend MAPNIK_DECL value operator%(value const&,value const&);
 
 public:
     value() = default;

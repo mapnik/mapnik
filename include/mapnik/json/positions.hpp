@@ -20,18 +20,21 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_TO_GEOJSON_HPP
-#define MAPNIK_GEOMETRY_TO_GEOJSON_HPP
+#ifndef MAPNIK_JSON_POSITIONS_HPP
+#define MAPNIK_JSON_POSITIONS_HPP
 
 // mapnik
+#include <mapnik/util/variant.hpp>
 #include <mapnik/geometry.hpp>
 
-#include <string>
+namespace mapnik { namespace json {
 
-namespace mapnik { namespace util {
+struct empty {};
 
-bool to_geojson(std::string & json, mapnik::geometry::geometry<double> const& geom);
+using position = mapnik::geometry::point<double>;
+using positions = std::vector<position>;
+using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;
 
 }}
 
-#endif // MAPNIK_GEOMETRY_TO_GEOJSON_HPP
+#endif // MAPNIK_JSON_POSITIONS_HPP

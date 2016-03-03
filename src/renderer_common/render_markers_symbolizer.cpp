@@ -20,9 +20,9 @@
  *
  *****************************************************************************/
 
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/geometry_type.hpp>
@@ -39,14 +39,6 @@ struct render_marker_symbolizer_visitor
     using vector_dispatch_type = vector_markers_dispatch<Detector>;
     using raster_dispatch_type = raster_markers_dispatch<Detector>;
 
-    using vertex_converter_type = vertex_converter<clip_line_tag,
-                                                   clip_poly_tag,
-                                                   transform_tag,
-                                                   affine_transform_tag,
-                                                   simplify_tag,
-                                                   smooth_tag,
-                                                   offset_transform_tag>;
-
     render_marker_symbolizer_visitor(std::string const& filename,
                                      markers_symbolizer const& sym,
                                      mapnik::feature_impl & feature,
@@ -62,134 +54,131 @@ struct render_marker_symbolizer_visitor
           clip_box_(clip_box),
           renderer_context_(renderer_context) {}
 
+    svg_attribute_type const& get_marker_attributes(svg_path_ptr const& stock_marker,
+                                                    svg_attribute_type & custom_attr) const
+    {
+        auto const& stock_attr = stock_marker->attributes();
+        if (push_explicit_style(stock_attr, custom_attr, sym_, feature_, common_.vars_))
+            return custom_attr;
+        else
+            return stock_attr;
+    }
+
+    template <typename Marker, typename Dispatch>
+    void render_marker(Marker const& mark, Dispatch & rasterizer_dispatch) const
+    {
+        auto const& vars = common_.vars_;
+
+        agg::trans_affine geom_tr;
+        if (auto geometry_transform = get_optional<transform_type>(sym_, keys::geometry_transform))
+        {
+            evaluate_transform(geom_tr, feature_, vars, *geometry_transform, common_.scale_factor_);
+        }
+
+        vertex_converter_type converter(clip_box_,
+                                        sym_,
+                                        common_.t_,
+                                        prj_trans_,
+                                        geom_tr,
+                                        feature_,
+                                        vars,
+                                        common_.scale_factor_);
+
+        bool clip = get<value_bool, keys::clip>(sym_, feature_, vars);
+        double offset = get<value_double, keys::offset>(sym_, feature_, vars);
+        double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, vars);
+        double smooth = get<value_double, keys::smooth>(sym_, feature_, vars);
+
+        if (clip)
+        {
+            geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
+            switch (type)
+            {
+                case geometry::geometry_types::Polygon:
+                case geometry::geometry_types::MultiPolygon:
+                    converter.template set<clip_poly_tag>();
+                    break;
+                case geometry::geometry_types::LineString:
+                case geometry::geometry_types::MultiLineString:
+                    converter.template set<clip_line_tag>();
+                    break;
+                default:
+                    // silence warning: 4 enumeration values not handled in switch
+                    break;
+            }
+        }
+
+        converter.template set<transform_tag>(); //always transform
+        if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
+        converter.template set<affine_transform_tag>(); // optional affine transform
+        if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
+        if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+
+        apply_markers_multi(feature_, vars, converter, rasterizer_dispatch, sym_);
+    }
+
     void operator() (marker_null const&) const {}
 
     void operator() (marker_svg const& mark) const
     {
         using namespace mapnik::svg;
-        bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);
-        double offset = get<value_double, keys::offset>(sym_, feature_, common_.vars_);
-        double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
-        double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
 
         // https://github.com/mapnik/mapnik/issues/1316
         bool snap_to_pixels = !mapnik::marker_cache::instance().is_uri(filename_);
 
-        agg::trans_affine geom_tr;
-        auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
-        if (transform) evaluate_transform(geom_tr, feature_, common_.vars_, *transform, common_.scale_factor_);
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
 
         boost::optional<svg_path_ptr> const& stock_vector_marker = mark.get_data();
+        svg_path_ptr marker_ptr = *stock_vector_marker;
+        bool is_ellipse = false;
+
+        svg_attribute_type s_attributes;
+        auto const& r_attributes = get_marker_attributes(*stock_vector_marker, s_attributes);
 
         // special case for simple ellipse markers
         // to allow for full control over rx/ry dimensions
         if (filename_ == "shape://ellipse"
            && (has_key(sym_,keys::width) || has_key(sym_,keys::height)))
         {
-            svg_path_ptr marker_ellipse = std::make_shared<svg_storage_type>();
-            vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse->source());
-            svg_path_adapter svg_path(stl_storage);
-            build_ellipse(sym_, feature_, common_.vars_, *marker_ellipse, svg_path);
-            svg_attribute_type s_attributes;
-            bool result = push_explicit_style( (*stock_vector_marker)->attributes(), s_attributes, sym_, feature_, common_.vars_);
-            auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-            if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
-            vector_dispatch_type rasterizer_dispatch(marker_ellipse,
-                                                     svg_path,
-                                                     result ? s_attributes : (*stock_vector_marker)->attributes(),
-                                                     image_tr,
-                                                     sym_,
-                                                     *common_.detector_,
-                                                     common_.scale_factor_,
-                                                     feature_,
-                                                     common_.vars_,
-                                                     snap_to_pixels,
-                                                     renderer_context_);
-
-            vertex_converter_type converter(clip_box_,
-                                            sym_,
-                                            common_.t_,
-                                            prj_trans_,
-                                            geom_tr,
-                                            feature_,
-                                            common_.vars_,
-                                            common_.scale_factor_);
-            if (clip)
-            {
-                geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
-                if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
-                    converter.template set<clip_poly_tag>();
-                else if (type == geometry::geometry_types::LineString || type == geometry::geometry_types::MultiLineString)
-                    converter.template set<clip_line_tag>();
-            }
-
-            converter.template set<transform_tag>(); //always transform
-            if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
-            converter.template set<affine_transform_tag>(); // optional affine transform
-            if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
-            if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-            apply_markers_multi(feature_, common_.vars_, converter, rasterizer_dispatch, sym_);
+            marker_ptr = std::make_shared<svg_storage_type>();
+            is_ellipse = true;
         }
         else
         {
             box2d<double> const& bbox = mark.bounding_box();
             setup_transform_scaling(image_tr, bbox.width(), bbox.height(), feature_, common_.vars_, sym_);
-            auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-            if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
-            vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
-            svg_path_adapter svg_path(stl_storage);
-            svg_attribute_type s_attributes;
-            bool result = push_explicit_style( (*stock_vector_marker)->attributes(), s_attributes, sym_, feature_, common_.vars_);
-            vector_dispatch_type rasterizer_dispatch(*stock_vector_marker,
-                                                     svg_path,
-                                                     result ? s_attributes : (*stock_vector_marker)->attributes(),
-                                                     image_tr,
-                                                     sym_,
-                                                     *common_.detector_,
-                                                     common_.scale_factor_,
-                                                     feature_,
-                                                     common_.vars_,
-                                                     snap_to_pixels,
-                                                     renderer_context_);
-
-            vertex_converter_type converter(clip_box_,
-                                            sym_,
-                                            common_.t_,
-                                            prj_trans_,
-                                            geom_tr,
-                                            feature_,
-                                            common_.vars_,
-                                            common_.scale_factor_);
-            if (clip)
-            {
-                geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
-                if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
-                    converter.template set<clip_poly_tag>();
-                else if (type == geometry::geometry_types::LineString || type == geometry::geometry_types::MultiLineString)
-                    converter.template set<clip_line_tag>();
-            }
-
-            converter.template set<transform_tag>(); //always transform
-            if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
-            converter.template set<affine_transform_tag>(); // optional affine transform
-            if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
-            if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-            apply_markers_multi(feature_, common_.vars_, converter, rasterizer_dispatch,  sym_);
         }
+
+        vertex_stl_adapter<svg_path_storage> stl_storage(marker_ptr->source());
+        svg_path_adapter svg_path(stl_storage);
+
+        if (is_ellipse)
+        {
+            build_ellipse(sym_, feature_, common_.vars_, *marker_ptr, svg_path);
+        }
+
+        if (auto image_transform = get_optional<transform_type>(sym_, keys::image_transform))
+        {
+            evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        }
+
+        vector_dispatch_type rasterizer_dispatch(marker_ptr,
+                                                 svg_path,
+                                                 r_attributes,
+                                                 image_tr,
+                                                 sym_,
+                                                 *common_.detector_,
+                                                 common_.scale_factor_,
+                                                 feature_,
+                                                 common_.vars_,
+                                                 snap_to_pixels,
+                                                 renderer_context_);
+
+        render_marker(mark, rasterizer_dispatch);
     }
 
     void operator() (marker_rgba8 const& mark) const
     {
-        using namespace mapnik::svg;
-        bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);
-        double offset = get<value_double, keys::offset>(sym_, feature_, common_.vars_);
-        double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
-        double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
-
-        agg::trans_affine geom_tr;
-        auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
-        if (transform) evaluate_transform(geom_tr, feature_, common_.vars_, *transform, common_.scale_factor_);
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
 
         setup_transform_scaling(image_tr, mark.width(), mark.height(), feature_, common_.vars_, sym_);
@@ -210,30 +199,7 @@ struct render_marker_symbolizer_visitor
                                                  common_.vars_,
                                                  renderer_context_);
 
-
-        vertex_converter_type converter(clip_box_,
-                                        sym_,
-                                        common_.t_,
-                                        prj_trans_,
-                                        geom_tr,
-                                        feature_,
-                                        common_.vars_,
-                                        common_.scale_factor_);
-
-        if (clip)
-        {
-            geometry::geometry_types type = geometry::geometry_type(feature_.get_geometry());
-            if (type == geometry::geometry_types::Polygon || type == geometry::geometry_types::MultiPolygon)
-                converter.template set<clip_poly_tag>();
-            else if (type == geometry::geometry_types::LineString || type == geometry::geometry_types::MultiLineString)
-                converter.template set<clip_line_tag>();
-        }
-        converter.template set<transform_tag>(); //always transform
-        if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
-        converter.template set<affine_transform_tag>(); // optional affine transform
-        if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
-        if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-        apply_markers_multi(feature_, common_.vars_, converter, rasterizer_dispatch, sym_);
+        render_marker(mark, rasterizer_dispatch);
     }
 
   private:
@@ -279,7 +245,7 @@ void render_markers_symbolizer(markers_symbolizer const& sym,
                                box2d<double> const& clip_box,
                                markers_renderer_context & renderer_context)
 {
-    using Detector = decltype(*common.detector_);
+    using Detector = label_collision_detector4;
     using RendererType = renderer_common;
     using ContextType = markers_renderer_context;
     using VisitorType = detail::render_marker_symbolizer_visitor<Detector,

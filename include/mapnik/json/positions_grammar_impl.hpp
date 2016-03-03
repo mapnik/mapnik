@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/json/positions_grammar.hpp>
-
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #include <boost/spirit/include/qi_omit.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
