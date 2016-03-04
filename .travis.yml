@@ -1,23 +1,16 @@
 language: c
 
-sudo: false
-
 git:
   depth: 10
   submodules: false
 
 env:
   global:
+   - HEAVY_JOBS: "2"
    - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
 addons:
   postgresql: "9.4"
-  apt:
-    sources:
-     - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.5
-    packages:
-     - clang-3.5
 
 cache:
   directories:
@@ -26,30 +19,26 @@ cache:
 matrix:
   include:
     - os: linux
+      sudo: false
       compiler: clang
-      env: JOBS=8 CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" MASON_PUBLISH=true BENCH=True
+      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" BENCH=True
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
           packages: [ 'clang-3.5' ]
-    # OOM killer knocking out build on render_markers_symbolizer.cpp
-    #
-    #- os: linux
-    #  compiler: gcc
-    #  env: JOBS=6 CXX="ccache g++-4.9" CC="gcc-4.9"
-    #  addons:
-    #    apt:
-    #      sources: [ 'ubuntu-toolchain-r-test' ]
-    #      packages: [ 'gcc-4.9', 'g++-4.9', 'libstdc++-4.9-dev', 'libstdc++6' ]
+    - os: linux
+      sudo: false
+      compiler: clang
+      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+          packages: [ 'clang-3.5', 'llvm-3.5-dev' ]
     - os: osx
       compiler: clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=true HEAVY_JOBS=2
-    - os: osx
-      compiler: clang
-      osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 COVERAGE=true HEAVY_JOBS=2
+      env: JOBS=4 MASON_PUBLISH=true
 
 before_install:
  - source scripts/travis-common.sh

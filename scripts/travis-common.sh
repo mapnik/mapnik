@@ -100,6 +100,7 @@ configure () {
 
 coverage () {
     ./mason_packages/.link/bin/cpp-coveralls \
+        --gcov /usr/bin/llvm-cov-${LLVM_VERSION} \
         --build-root . --gcov-options '\-lp' \
         --exclude mason_packages \
         --exclude .sconf_temp --exclude benchmark --exclude deps \
