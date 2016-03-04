@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 // mapnik
-//#include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_transform_grammar.hpp>
+#include <mapnik/config.hpp>
+#include <mapnik/svg/svg_transform_grammar_impl.hpp>
 // stl
 #include <string>
 #include <cstring>
@@ -42,7 +42,7 @@ bool parse_svg_transform(const char* wkt, TransformType& tr)
     return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(tr)), skip_type());
 }
 
-template MAPNIK_DECL bool parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
+template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
 
 } // namespace svg
 } // namespace mapnik

@@ -21,14 +21,9 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/svg/svg_path_grammar.hpp>
+
 #include <mapnik/svg/svg_path_parser.hpp>
-
-// agg
-#include "agg_path_storage.h"
-
+#include <mapnik/svg/svg_path_grammar_impl.hpp>
 // stl
 #include <cstring>
 #include <string>

@@ -22,8 +22,7 @@
 
 // mapnik
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_points_grammar.hpp>
-#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_points_grammar_impl.hpp>
 // stl
 #include <string>
 #include <cstring>

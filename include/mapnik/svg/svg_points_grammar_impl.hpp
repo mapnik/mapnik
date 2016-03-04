@@ -20,37 +20,41 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_TRANSFORM_GRAMMAR_HPP
-#define MAPNIK_SVG_TRANSFORM_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
+#include <mapnik/svg/svg_points_grammar.hpp>
+#include <mapnik/svg/svg_path_commands.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 #pragma GCC diagnostic pop
 
 namespace mapnik { namespace svg {
 
 using namespace boost::spirit;
+using namespace boost::phoenix;
 
-template <typename Iterator, typename TransformType, typename SkipType>
-struct svg_transform_grammar : qi::grammar<Iterator, void(TransformType&), SkipType>
+template <typename Iterator, typename PathType, typename SkipType>
+svg_points_grammar<Iterator, PathType,SkipType>::svg_points_grammar()
+    : svg_points_grammar::base_type(start)
 {
-    // ctor
-    svg_transform_grammar();
-    // rules
-    qi::rule<Iterator, void(TransformType&), SkipType> start;
-    qi::rule<Iterator, void(TransformType&), SkipType> transform_;
-    qi::rule<Iterator, void(TransformType&), SkipType> matrix;
-    qi::rule<Iterator, void(TransformType&), SkipType> translate;
-    qi::rule<Iterator, void(TransformType&), SkipType> scale;
-    qi::rule<Iterator, qi::locals<double, double, double>, void(TransformType&), SkipType> rotate;
-    qi::rule<Iterator, void(TransformType&), SkipType> skewX;
-    qi::rule<Iterator, void(TransformType&), SkipType> skewY;
-};
+    qi::_1_type _1;
+    qi::_r1_type _r1;
+    qi::lit_type lit;
+    qi::double_type double_;
+    // commands
+    function<move_to> move_to_;
+    function<line_to> line_to_;
+    function<close> close_;
+
+    start = coord[move_to_(_r1, _1, false)] // move_to
+        >> *(-lit(',') >> coord [ line_to_(_r1, _1,false) ] ); // *line_to
+
+    coord = double_ >> -lit(',') >> double_;
+}
 
 }}
-
-#endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_HPP
