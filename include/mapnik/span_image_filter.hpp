@@ -131,19 +131,27 @@ public:
                 fg_ptr = reinterpret_cast<const value_type*>(base_type::source().next_y());
             }
 
-            fg /= total_weight;
-            if (fg < std::numeric_limits<value_type>::min())
+            if (total_weight == 0)
             {
-                span->v = std::numeric_limits<value_type>::min();
-            }
-            else if (fg > std::numeric_limits<value_type>::max())
-            {
-                span->v = std::numeric_limits<value_type>::max();
+                span->v = *nodata_value_;
             }
             else
             {
-                span->v = static_cast<value_type>(fg);
+                fg /= total_weight;
+                if (fg < std::numeric_limits<value_type>::min())
+                {
+                    span->v = std::numeric_limits<value_type>::min();
+                }
+                else if (fg > std::numeric_limits<value_type>::max())
+                {
+                    span->v = std::numeric_limits<value_type>::max();
+                }
+                else
+                {
+                    span->v = static_cast<value_type>(fg);
+                }
             }
+
             span->a = base_mask;
 
             ++span;
