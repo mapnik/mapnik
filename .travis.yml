@@ -76,7 +76,7 @@ script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
  - make
- - if [[ -d $HOME/.ccache ]]; then du $HOME/.ccache -h --max-depth=1 | sort -hr; fi
+ - on 'linux' du $HOME/.ccache -h --max-depth=1 | sort -hr
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
