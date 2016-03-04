@@ -41,15 +41,15 @@ matrix:
       env: JOBS=4 MASON_PUBLISH=true
 
 before_install:
- - ccache --version
- - ccache -p
- - ccache --show-stats
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
- - export PATH=${PYTHONUSERBASE}/bin:${PATH}
+ - export PATH=$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - export BENCH=${BENCH:-false}
+ - ccache --version
+ - ccache -p || true
+ - ccache --show-stats || true
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
  - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
  - git_submodule_update --init --depth=10
