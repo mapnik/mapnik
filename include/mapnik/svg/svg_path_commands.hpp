@@ -47,13 +47,7 @@ inline double deg2rad(double deg)
 template <typename PathType>
 struct move_to
 {
-
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit move_to(PathType & path)
         : path_(path) {}
 
@@ -69,12 +63,7 @@ struct move_to
 template <typename PathType>
 struct hline_to
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit hline_to(PathType & path)
         : path_(path) {}
 
@@ -91,12 +80,7 @@ struct hline_to
 template <typename PathType>
 struct vline_to
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit vline_to(PathType & path)
         : path_(path) {}
 
@@ -112,12 +96,7 @@ struct vline_to
 template <typename PathType>
 struct line_to
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit line_to(PathType & path)
         : path_(path) {}
 
@@ -134,12 +113,7 @@ struct line_to
 template <typename PathType>
 struct curve4
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit curve4(PathType & path)
         : path_(path) {}
 
@@ -159,12 +133,7 @@ struct curve4
 template <typename PathType>
 struct curve4_smooth
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit curve4_smooth(PathType & path)
         : path_(path) {}
 
@@ -181,12 +150,7 @@ struct curve4_smooth
 template <typename PathType>
 struct curve3
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit curve3(PathType & path)
         : path_(path) {}
 
@@ -204,12 +168,7 @@ struct curve3
 template <typename PathType>
 struct curve3_smooth
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit curve3_smooth(PathType & path)
         : path_(path) {}
 
@@ -226,12 +185,7 @@ struct curve3_smooth
 template <typename PathType>
 struct arc_to
 {
-    template <typename T0>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     explicit arc_to(PathType & path)
         : path_(path) {}
 

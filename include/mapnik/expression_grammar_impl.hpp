@@ -58,12 +58,7 @@ namespace mapnik
 
 struct unicode_impl
 {
-    template <typename T>
-    struct result
-    {
-        using type = mapnik::value_unicode_string;
-    };
-
+    using result_type = mapnik::value_unicode_string;
     explicit unicode_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
@@ -77,12 +72,7 @@ struct unicode_impl
 
 struct regex_match_impl
 {
-    template <typename T>
-    struct result
-    {
-        using type = expr_node;
-    };
-
+    using result_type = expr_node;
     explicit regex_match_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
@@ -94,12 +84,7 @@ struct regex_match_impl
 
 struct regex_replace_impl
 {
-    template <typename T>
-    struct result
-    {
-        using type = expr_node;
-    };
-
+    using result_type = expr_node;
     explicit regex_replace_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 

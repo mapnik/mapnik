@@ -47,12 +47,7 @@ namespace qi = boost::spirit::qi;
 
 struct percent_offset_impl
 {
-    template <typename T>
-    struct result
-    {
-        using type = double;
-    };
-
+    using result_type = double;
     double operator() (double val) const
     {
         double result = std::abs(val/100.0);
