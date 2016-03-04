@@ -49,108 +49,76 @@ inline double deg2rad(double d)
     return M_PI * d / 180.0;
 }
 
-template <typename TransformType>
 struct process_matrix
 {
     using result_type = void;
-    explicit process_matrix( TransformType & tr)
-        :tr_(tr) {}
-
-    void operator () (double a, double b, double c, double d, double e, double f) const
+    template <typename TransformType>
+    void operator () (TransformType & tr, double a, double b, double c, double d, double e, double f) const
     {
-        tr_ = agg::trans_affine(a,b,c,d,e,f) * tr_;
+        tr = agg::trans_affine(a,b,c,d,e,f) * tr;
     }
-
-    TransformType & tr_;
 };
 
-template <typename TransformType>
 struct process_rotate
 {
     using result_type = void;
-    explicit process_rotate( TransformType & tr)
-        :tr_(tr) {}
 
-    template <typename T0,typename T1,typename T2>
-    void operator () (T0 a, T1 cx, T2 cy) const
+    template <typename TransformType, typename T0,typename T1,typename T2>
+    void operator () (TransformType & tr, T0 a, T1 cx, T2 cy) const
     {
         if (cx == 0.0 && cy == 0.0)
         {
-            tr_ = agg::trans_affine_rotation(deg2rad(a)) * tr_;
+            tr = agg::trans_affine_rotation(deg2rad(a)) * tr;
         }
         else
         {
             agg::trans_affine t = agg::trans_affine_translation(-cx,-cy);
             t *= agg::trans_affine_rotation(deg2rad(a));
             t *= agg::trans_affine_translation(cx, cy);
-            tr_ = t * tr_;
+            tr = t * tr;
         }
     }
-
-    TransformType & tr_;
 };
 
-template <typename TransformType>
 struct process_translate
 {
     using result_type = void;
-    explicit process_translate( TransformType & tr)
-        :tr_(tr) {}
-
-    template <typename T0,typename T1>
-    void operator () (T0 tx, T1 ty) const
+    template <typename TransformType, typename T0,typename T1>
+    void operator () (TransformType & tr, T0 tx, T1 ty) const
     {
-        if (ty) tr_ = agg::trans_affine_translation(tx,*ty) * tr_;
-        else tr_ = agg::trans_affine_translation(tx,0.0) * tr_;
+        if (ty) tr = agg::trans_affine_translation(tx,*ty) * tr;
+        else tr = agg::trans_affine_translation(tx,0.0) * tr;
     }
-
-    TransformType & tr_;
 };
 
-template <typename TransformType>
 struct process_scale
 {
     using result_type = void;
-    explicit process_scale( TransformType & tr)
-        :tr_(tr) {}
-
-    template <typename T0,typename T1>
-    void operator () (T0 sx, T1 sy) const
+    template <typename TransformType, typename T0,typename T1>
+    void operator () (TransformType & tr, T0 sx, T1 sy) const
     {
-        if (sy) tr_ = agg::trans_affine_scaling(sx,*sy) * tr_;
-        else tr_ = agg::trans_affine_scaling(sx,sx) * tr_;
+        if (sy) tr = agg::trans_affine_scaling(sx,*sy) * tr;
+        else tr = agg::trans_affine_scaling(sx,sx) * tr;
     }
-
-    TransformType & tr_;
 };
 
 
-template <typename TransformType>
 struct process_skew
 {
     using result_type = void;
-    explicit process_skew( TransformType & tr)
-        :tr_(tr) {}
 
-    template <typename T0,typename T1>
-    void operator () (T0 skew_x, T1 skew_y) const
+    template <typename TransformType, typename T0,typename T1>
+    void operator () (TransformType & tr, T0 skew_x, T1 skew_y) const
     {
-        tr_ = agg::trans_affine_skewing(deg2rad(skew_x),deg2rad(skew_y)) * tr_;
+        tr = agg::trans_affine_skewing(deg2rad(skew_x),deg2rad(skew_y)) * tr;
     }
-
-    TransformType & tr_;
 };
 
-template <typename Iterator, typename SkipType, typename TransformType>
-struct svg_transform_grammar : qi::grammar<Iterator,SkipType>
+template <typename Iterator, typename TransformType, typename SkipType>
+struct svg_transform_grammar : qi::grammar<Iterator, void(TransformType&), SkipType>
 {
-    explicit svg_transform_grammar(TransformType & tr)
-        : svg_transform_grammar::base_type(start),
-          matrix_action(process_matrix<TransformType>(tr)),
-          rotate_action(process_rotate<TransformType>(tr)),
-          translate_action(process_translate<TransformType>(tr)),
-          scale_action(process_scale<TransformType>(tr)),
-          skew_action(process_skew<TransformType>(tr))
+    svg_transform_grammar()
+        : svg_transform_grammar::base_type(start)
     {
         qi::_1_type _1;
         qi::_2_type _2;
@@ -161,66 +129,57 @@ struct svg_transform_grammar : qi::grammar<Iterator,SkipType>
         qi::_a_type _a;
         qi::_b_type _b;
         qi::_c_type _c;
+        qi::_r1_type _r1;
         qi::lit_type lit;
         qi::double_type double_;
         qi::no_case_type no_case;
 
-        start =  +transform_ ;
+        start =  +transform_(_r1) ;
 
-        transform_ = matrix | rotate | translate | scale | rotate | skewX | skewY ;
+        transform_ = matrix(_r1) | rotate(_r1) | translate(_r1) | scale(_r1) | rotate(_r1) | skewX(_r1) | skewY (_r1) ;
 
-        matrix = no_case[lit("matrix")]
-            >> lit('(')
-            >> (
-                double_ >> -lit(',')
-                >> double_ >> -lit(',')
-                >> double_ >> -lit(',')
-                >> double_ >> -lit(',')
-                >> double_ >> -lit(',')
-                >> double_) [ matrix_action(_1,_2,_3,_4,_5,_6) ]
-            >>  lit(')')
-            ;
+        matrix = no_case[lit("matrix")] >> lit('(')
+                                        >> (double_ >> -lit(',')
+                                            >> double_ >> -lit(',')
+                                            >> double_ >> -lit(',')
+                                            >> double_ >> -lit(',')
+                                            >> double_ >> -lit(',')
+                                            >> double_)[matrix_action(_r1, _1, _2, _3, _4, _5, _6)] >> lit(')');
 
         translate = no_case[lit("translate")]
-            >> lit('(')
-            >> (double_ >> -lit(',')
-                >> -double_) [ translate_action(_1,_2) ]
-            >> lit(')');
+            >> lit('(') >> (double_ >> -lit(',') >> -double_)[translate_action(_r1, _1, _2)] >> lit(')');
 
         scale = no_case[lit("scale")]
-            >> lit('(')
-            >> (double_ >> -lit(',')
-                >> -double_ )[ scale_action(_1,_2)]
-            >>  lit(')');
+            >> lit('(') >> (double_ >> -lit(',') >> -double_)[scale_action(_r1, _1, _2)] >> lit(')');
 
         rotate = no_case[lit("rotate")]
             >> lit('(')
             >> double_[_a = _1] >> -lit(',')
             >> -(double_ [_b = _1] >> -lit(',') >> double_[_c = _1])
-            >> lit(')') [ rotate_action(_a,_b,_c)];
+            >> lit(')') [ rotate_action(_r1, _a,_b,_c)];
 
-        skewX = no_case[lit("skewX")] >> lit('(') >> double_ [ skew_action(_1, 0.0)] >> lit(')');
+        skewX = no_case[lit("skewX")] >> lit('(') >> double_ [ skew_action(_r1, _1, 0.0)] >> lit(')');
 
-        skewY = no_case[lit("skewY")] >> lit('(') >> double_ [ skew_action(0.0, _1)] >> lit(')');
+        skewY = no_case[lit("skewY")] >> lit('(') >> double_ [ skew_action(_r1, 0.0, _1)] >> lit(')');
 
     }
 
     // rules
-    qi::rule<Iterator,SkipType> start;
-    qi::rule<Iterator,SkipType> transform_;
-    qi::rule<Iterator,SkipType> matrix;
-    qi::rule<Iterator,SkipType> translate;
-    qi::rule<Iterator,SkipType> scale;
-    qi::rule<Iterator,qi::locals<double,double,double>, SkipType> rotate;
-    qi::rule<Iterator,SkipType> skewX;
-    qi::rule<Iterator,SkipType> skewY;
+    qi::rule<Iterator, void(TransformType&), SkipType> start;
+    qi::rule<Iterator, void(TransformType&), SkipType> transform_;
+    qi::rule<Iterator, void(TransformType&), SkipType> matrix;
+    qi::rule<Iterator, void(TransformType&), SkipType> translate;
+    qi::rule<Iterator, void(TransformType&), SkipType> scale;
+    qi::rule<Iterator, qi::locals<double, double, double>, void(TransformType&), SkipType> rotate;
+    qi::rule<Iterator, void(TransformType&), SkipType> skewX;
+    qi::rule<Iterator, void(TransformType&), SkipType> skewY;
 
     // actions
-    function<process_matrix<TransformType> > matrix_action;
-    function<process_rotate<TransformType> > rotate_action;
-    function<process_translate<TransformType> > translate_action;
-    function<process_scale<TransformType> > scale_action;
-    function<process_skew<TransformType> > skew_action;
+    function<process_matrix> matrix_action;
+    function<process_rotate> rotate_action;
+    function<process_translate> translate_action;
+    function<process_scale> scale_action;
+    function<process_skew> skew_action;
 };
 
 }}
