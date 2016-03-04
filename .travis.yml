@@ -28,7 +28,6 @@ matrix:
   include:
     - os: linux
       sudo: false
-
       compiler: clang
       env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=False BENCH=False
       addons:

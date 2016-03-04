@@ -29,6 +29,8 @@ run test_face_ptr_creation 10 1000
 run test_font_registration 10 100
 run test_offset_converter 10 1000
 
+# commented since this is really slow on travis
+: '
 ./benchmark/out/test_rendering \
   --name "text rendering" \
   --map benchmark/data/roads.xml \
@@ -37,6 +39,7 @@ run test_offset_converter 10 1000
   --height 600 \
   --iterations 20 \
   --threads 10
+'
 
 ./benchmark/out/test_rendering \
   --name "gdal tiff rendering" \
