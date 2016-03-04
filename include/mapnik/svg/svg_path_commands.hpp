@@ -35,189 +35,128 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #pragma GCC diagnostic pop
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
 using namespace boost::fusion;
 
 inline double deg2rad(double deg)
 {
-    return (M_PI * deg)/180.0;
+    return (M_PI * deg) / 180.0;
 }
 
-template <typename PathType>
 struct move_to
 {
     using result_type = void;
-    explicit move_to(PathType & path)
-        : path_(path) {}
 
-    template  <typename T0, typename T1>
-    void operator() (T0 v, T1 rel) const
+    template <typename PathType, typename T0, typename T1>
+    void operator()(PathType& path, T0 v, T1 rel) const
     {
-        path_.move_to(at_c<0>(v),at_c<1>(v),rel); // impl
+        path.move_to(at_c<0>(v), at_c<1>(v), rel); // impl
     }
-
-    PathType & path_;
 };
 
-template <typename PathType>
 struct hline_to
 {
     using result_type = void;
-    explicit hline_to(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1>
-    void operator() (T0 const& x, T1 rel) const
+    template <typename PathType, typename T0, typename T1>
+    void operator()(PathType& path, T0 const& x, T1 rel) const
     {
-        path_.hline_to(x,rel);
+        path.hline_to(x, rel);
     }
-
-    PathType & path_;
 };
 
-
-template <typename PathType>
 struct vline_to
 {
     using result_type = void;
-    explicit vline_to(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1>
-    void operator() (T0 const& y, T1 rel) const
+    template <typename PathType, typename T0, typename T1>
+    void operator()(PathType& path, T0 const& y, T1 rel) const
     {
-        path_.vline_to(y,rel);
+        path.vline_to(y, rel);
     }
-
-    PathType & path_;
 };
 
-template <typename PathType>
 struct line_to
 {
     using result_type = void;
-    explicit line_to(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1>
-    void operator() (T0 const& v, T1 rel) const
+    template <typename PathType, typename T0, typename T1>
+    void operator()(PathType& path, T0 const& v, T1 rel) const
     {
-        path_.line_to(at_c<0>(v),at_c<1>(v),rel); // impl
+        path.line_to(at_c<0>(v), at_c<1>(v), rel); // impl
     }
-
-    PathType & path_;
 };
 
-
-template <typename PathType>
 struct curve4
 {
     using result_type = void;
-    explicit curve4(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1,typename T2, typename T3>
-    void operator() (T0 const& v0, T1 const& v1, T2 const& v2, T3 rel) const
+    template <typename PathType, typename T0, typename T1, typename T2, typename T3>
+    void operator()(PathType& path, T0 const& v0, T1 const& v1, T2 const& v2, T3 rel) const
     {
-        path_.curve4(at_c<0>(v0),at_c<1>(v0),
-                     at_c<0>(v1),at_c<1>(v1),
-                     at_c<0>(v2),at_c<1>(v2),
-                     rel); // impl
+        path.curve4(at_c<0>(v0), at_c<1>(v0),
+                    at_c<0>(v1), at_c<1>(v1),
+                    at_c<0>(v2), at_c<1>(v2),
+                    rel); // impl
     }
-
-    PathType & path_;
 };
 
-
-template <typename PathType>
 struct curve4_smooth
 {
     using result_type = void;
-    explicit curve4_smooth(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1,typename T2>
-    void operator() (T0 const& v0, T1 const& v1, T2 rel) const
+    template <typename PathType, typename T0, typename T1, typename T2>
+    void operator()(PathType& path, T0 const& v0, T1 const& v1, T2 rel) const
     {
-        path_.curve4(at_c<0>(v0),at_c<1>(v0),
-                     at_c<0>(v1),at_c<1>(v1),
-                     rel); // impl
+        path.curve4(at_c<0>(v0), at_c<1>(v0),
+                    at_c<0>(v1), at_c<1>(v1),
+                    rel); // impl
     }
-    PathType & path_;
 };
 
-template <typename PathType>
 struct curve3
 {
     using result_type = void;
-    explicit curve3(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1,typename T2>
-    void operator() (T0 const& v0, T1 const& v1, T2 rel) const
+    template <typename PathType, typename T0, typename T1, typename T2>
+    void operator()(PathType& path, T0 const& v0, T1 const& v1, T2 rel) const
     {
-        path_.curve3(at_c<0>(v0),at_c<1>(v0),
-                     at_c<0>(v1),at_c<1>(v1),
-                     rel); // impl
+        path.curve3(at_c<0>(v0), at_c<1>(v0),
+                    at_c<0>(v1), at_c<1>(v1),
+                    rel); // impl
     }
-
-    PathType & path_;
 };
 
-template <typename PathType>
 struct curve3_smooth
 {
     using result_type = void;
-    explicit curve3_smooth(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1>
-    void operator() (T0 const& v0, T1 rel) const
+    template <typename PathType, typename T0, typename T1>
+    void operator()(PathType& path, T0 const& v0, T1 rel) const
     {
-        path_.curve3(at_c<0>(v0),at_c<1>(v0),
-                     rel); // impl
+        path.curve3(at_c<0>(v0), at_c<1>(v0),
+                    rel); // impl
     }
-
-    PathType & path_;
 };
 
-template <typename PathType>
 struct arc_to
 {
     using result_type = void;
-    explicit arc_to(PathType & path)
-        : path_(path) {}
-
-    template  <typename T0, typename T1,typename T2, typename T3, typename T4, typename T5>
-    void operator() (T0 const& rv, T1 const& angle, T2 large_arc_flag, T3 sweep_flag, T4 const& v, T5 rel) const
+    template <typename PathType, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
+    void operator()(PathType& path, T0 const& rv, T1 const& angle, T2 large_arc_flag, T3 sweep_flag, T4 const& v, T5 rel) const
     {
-        path_.arc_to(at_c<0>(rv),at_c<1>(rv),
-                     deg2rad(angle),large_arc_flag,sweep_flag,
-                     at_c<0>(v),at_c<1>(v),
-                     rel);
+        path.arc_to(at_c<0>(rv), at_c<1>(rv),
+                    deg2rad(angle), large_arc_flag, sweep_flag,
+                    at_c<0>(v), at_c<1>(v),
+                    rel);
     }
-
-    PathType & path_;
 };
 
-template <typename PathType>
 struct close
 {
     using result_type = void;
-
-    explicit close(PathType & path)
-        : path_(path) {}
-
-    void operator()() const
+    template <typename PathType>
+    void operator()(PathType& path) const
     {
-        path_.close_subpath();
+        path.close_subpath();
     }
-
-    PathType & path_;
 };
-
-}}
-
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_COMMANDS_HPP
