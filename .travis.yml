@@ -49,9 +49,6 @@ before_install:
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - export BENCH=${BENCH:-false}
- - ccache --version
- - ccache -p || true
- - ccache --show-stats || true
  - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
  - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
  - git_submodule_update --init --depth=10
