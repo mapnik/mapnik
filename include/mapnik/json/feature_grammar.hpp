@@ -89,13 +89,10 @@ struct set_geometry_impl
     }
 };
 
-template <typename Iterator, typename FeatureType, typename ErrorHandler = error_handler<Iterator> >
-struct feature_grammar :
-        qi::grammar<Iterator, void(FeatureType&),
-                    space_type>
+template <typename Iterator, typename FeatureType, typename ErrorHandler = error_handler<Iterator>>
+struct feature_grammar : qi::grammar<Iterator, void(FeatureType&), space_type>
 {
-    feature_grammar(mapnik::transcoder const& tr);
-
+    explicit feature_grammar(mapnik::transcoder const& tr);
     // generic JSON
     generic_json<Iterator> json_;
     // geoJSON
