@@ -49,12 +49,7 @@ using ascii_space_type = boost::spirit::ascii::space_type;
 
 struct percent_conv_impl
 {
-    template <typename T>
-    struct result
-    {
-        using type = unsigned;
-    };
-
+    using result_type = unsigned;
     unsigned operator() (double val) const
     {
         return safe_cast<uint8_t>(std::lround((255.0 * val)/100.0));
@@ -63,12 +58,7 @@ struct percent_conv_impl
 
 struct alpha_conv_impl
 {
-    template <typename T>
-    struct result
-    {
-        using type = unsigned;
-    };
-
+    using result_type = unsigned;
     unsigned operator() (double val) const
     {
         return safe_cast<uint8_t>(std::lround((255.0 * val)));
@@ -77,12 +67,7 @@ struct alpha_conv_impl
 
 struct hsl_conv_impl
 {
-    template<typename T>
-    struct result
-    {
-        using type = void;
-    };
-
+    using result_type = void;
     template <typename T0,typename T1, typename T2, typename T3>
     void operator() (T0 & c, T1 h, T2 s, T3 l) const
     {

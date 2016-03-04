@@ -132,7 +132,7 @@ namespace mapnik { namespace svg {
         function<close<PathType> > close_;
     };
 
-    }}
+}}
 
 
 #endif // MAPNIK_SVG_PATH_GRAMMAR_HPP
