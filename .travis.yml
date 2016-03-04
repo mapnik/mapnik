@@ -6,7 +6,9 @@ git:
 
 env:
   global:
-   - HEAVY_JOBS: "2"
+   - CCACHE_TEMPDIR=/tmp/.ccache-temp
+   - CCACHE_COMPRESS=1
+   - HEAVY_JOBS="2"
    - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
 addons:
@@ -20,7 +22,7 @@ matrix:
   include:
     - os: linux
       sudo: false
-      compiler: clang
+      compiler: ": clang"
       env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" BENCH=True
       addons:
         apt:
@@ -28,7 +30,7 @@ matrix:
           packages: [ 'clang-3.5' ]
     - os: linux
       sudo: false
-      compiler: clang
+      compiler: ": clang-coverage"
       env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
       addons:
         apt:
@@ -52,6 +54,7 @@ before_install:
  - git_submodule_update --init --depth=10
 
 install:
+ - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export CCACHE_READONLY=1; fi
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
  - on 'osx' brew rm postgis --force
@@ -70,6 +73,7 @@ script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
  - make
+ - if [[ -d $HOME/.ccache ]]; then du $HOME/.ccache -h --max-depth=1 | sort -hr; fi
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
