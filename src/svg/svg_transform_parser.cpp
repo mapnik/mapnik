@@ -21,28 +21,28 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg/svg_path_parser.hpp>
+//#include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/svg/svg_transform_grammar.hpp>
 // stl
 #include <string>
 #include <cstring>
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-    template <typename TransformType>
-    bool parse_svg_transform(const char * wkt, TransformType & p)
-    {
-        using namespace boost::spirit;
-        using iterator_type = const char *;
-        using skip_type = ascii::space_type;
-        // FIXME! - for best performance this needs to be static const
-        // but for that not to crash the argument needs to be passed to phrase_parse
-        // rather than the grammar ctor - https://github.com/mapnik/mapnik/pull/2231
-        svg_transform_grammar<iterator_type,skip_type,TransformType> g(p);
-        iterator_type first = wkt;
-        iterator_type last =  wkt + std::strlen(wkt);
-        return qi::phrase_parse(first, last, g, skip_type());
-    }
+template <typename TransformType>
+bool parse_svg_transform(const char* wkt, TransformType& tr)
+{
+    using namespace boost::spirit;
+    using iterator_type = const char*;
+    using skip_type = ascii::space_type;
+    static const svg_transform_grammar<iterator_type, TransformType, skip_type> g;
+    iterator_type first = wkt;
+    iterator_type last = wkt + std::strlen(wkt);
+    return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(tr)), skip_type());
+}
 
-    template MAPNIK_DECL bool parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
-}}
+template MAPNIK_DECL bool parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
+
+} // namespace svg
+} // namespace mapnik
