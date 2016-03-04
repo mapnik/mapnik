@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+// NOTE: This is an implementation header file and is only meant to be included
+//    from implementation files. It therefore doesn't have an include guard.
 // mapnik
 #include <mapnik/svg/svg_transform_grammar.hpp>
 // agg

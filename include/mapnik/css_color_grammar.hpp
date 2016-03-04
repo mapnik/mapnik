@@ -32,7 +32,6 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
 
 // stl
@@ -43,65 +42,15 @@ namespace mapnik
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
-namespace phoenix = boost::phoenix;
 
 using ascii_space_type = boost::spirit::ascii::space_type;
-
-struct percent_conv_impl
-{
-    using result_type = unsigned;
-    unsigned operator() (double val) const
-    {
-        return safe_cast<uint8_t>(std::lround((255.0 * val)/100.0));
-    }
-};
-
-struct alpha_conv_impl
-{
-    using result_type = unsigned;
-    unsigned operator() (double val) const
-    {
-        return safe_cast<uint8_t>(std::lround((255.0 * val)));
-    }
-};
-
-struct hsl_conv_impl
-{
-    using result_type = void;
-    template <typename T0,typename T1, typename T2, typename T3>
-    void operator() (T0 & c, T1 h, T2 s, T3 l) const
-    {
-        double m1,m2;
-        // normalize values
-        h /= 360.0;
-        s /= 100.0;
-        l /= 100.0;
-
-        if (l <= 0.5)
-        {
-            m2 = l * (s + 1.0);
-        }
-        else
-        {
-            m2 = l + s - l*s;
-        }
-        m1 = l * 2 - m2;
-
-        double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
-        double g = hue_to_rgb(m1, m2, h);
-        double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
-
-        c.set_red(safe_cast<uint8_t>(std::lround(255.0 * r)));
-        c.set_green(safe_cast<uint8_t>(std::lround(255.0 * g)));
-        c.set_blue(safe_cast<uint8_t>(std::lround(255.0 * b)));
-    }
-};
-
 
 template <typename Iterator>
 struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
 {
+    // ctor
     css_color_grammar();
+    // rules
     qi::uint_parser< unsigned, 16, 2, 2 > hex2 ;
     qi::uint_parser< unsigned, 16, 1, 1 > hex1 ;
     qi::uint_parser< unsigned, 10, 1, 3 > dec3 ;
@@ -111,9 +60,6 @@ struct css_color_grammar : qi::grammar<Iterator, color(), ascii_space_type>
     qi::rule<Iterator, color(), ascii_space_type> hex_color;
     qi::rule<Iterator, color(), ascii_space_type> hex_color_small;
     qi::rule<Iterator, color(), ascii_space_type> css_color;
-    phoenix::function<percent_conv_impl> percent_converter;
-    phoenix::function<alpha_conv_impl>   alpha_converter;
-    phoenix::function<hsl_conv_impl>  hsl_converter;
 };
 
 }
