@@ -30,6 +30,8 @@
 
 #include <limits>
 
+#include <mapnik/safe_cast.hpp>
+
 namespace mapnik
 {
 
@@ -140,19 +142,7 @@ public:
             }
             else
             {
-                fg /= total_weight;
-                if (fg < std::numeric_limits<value_type>::min())
-                {
-                    span->v = std::numeric_limits<value_type>::min();
-                }
-                else if (fg > std::numeric_limits<value_type>::max())
-                {
-                    span->v = std::numeric_limits<value_type>::max();
-                }
-                else
-                {
-                    span->v = static_cast<value_type>(fg);
-                }
+                span->v = safe_cast<value_type>(fg / total_weight);
             }
 
             span->a = base_mask;
