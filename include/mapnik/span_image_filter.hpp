@@ -79,16 +79,19 @@ public:
         {
             base_type::interpolator().coordinates(&x, &y);
 
-            int src_x = x >> agg::image_subpixel_shift;
-            int src_y = y >> agg::image_subpixel_shift;
-            const value_type* pix = reinterpret_cast<const value_type*>(base_type::source().span(src_x, src_y, 1));
-            if (nodata_value_ && *nodata_value_ == *pix)
+            if (nodata_value_)
             {
-                span->v = *nodata_value_;
-                span->a = base_mask;
-                ++span;
-                ++base_type::interpolator();
-                continue;
+                int src_x = x >> agg::image_subpixel_shift;
+                int src_y = y >> agg::image_subpixel_shift;
+                const value_type* pix = reinterpret_cast<const value_type*>(base_type::source().span(src_x, src_y, 1));
+                if (*nodata_value_ == *pix)
+                {
+                    span->v = *nodata_value_;
+                    span->a = base_mask;
+                    ++span;
+                    ++base_type::interpolator();
+                    continue;
+                }
             }
 
             x += base_type::filter_dx_int() - radius_x;
