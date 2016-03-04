@@ -43,6 +43,9 @@ matrix:
       env: JOBS=4 MASON_PUBLISH=true
 
 before_install:
+ - ccache --version
+ - ccache -p
+ - ccache --show-stats
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PYTHONUSERBASE}/bin:${PATH}
