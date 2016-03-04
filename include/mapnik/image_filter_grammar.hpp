@@ -74,11 +74,9 @@ struct image_filter_grammar :
     css_color_grammar<Iterator> css_color_;
     qi::rule<Iterator, filter::color_stop(), qi::ascii::space_type> color_stop_;
     qi::rule<Iterator, double(), qi::ascii::space_type> color_stop_offset;
-    phoenix::function<percent_offset_impl> percent_offset;
 
 private:
     alternative_type & add(std::string const& symbol);
-
     static constexpr unsigned max_alternatives = 16;
     unsigned num_alternatives = 0;
     alternative_type alternative_storage[max_alternatives];

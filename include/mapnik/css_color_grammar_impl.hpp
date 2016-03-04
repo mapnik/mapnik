@@ -43,6 +43,57 @@ BOOST_FUSION_ADAPT_ADT(
 
 namespace mapnik
 {
+namespace phoenix = boost::phoenix;
+
+struct percent_conv_impl
+{
+    using result_type = unsigned;
+    unsigned operator() (double val) const
+    {
+        return safe_cast<uint8_t>(std::lround((255.0 * val)/100.0));
+    }
+};
+
+struct alpha_conv_impl
+{
+    using result_type = unsigned;
+    unsigned operator() (double val) const
+    {
+        return safe_cast<uint8_t>(std::lround((255.0 * val)));
+    }
+};
+
+struct hsl_conv_impl
+{
+    using result_type = void;
+    template <typename T0,typename T1, typename T2, typename T3>
+    void operator() (T0 & c, T1 h, T2 s, T3 l) const
+    {
+        double m1,m2;
+        // normalize values
+        h /= 360.0;
+        s /= 100.0;
+        l /= 100.0;
+
+        if (l <= 0.5)
+        {
+            m2 = l * (s + 1.0);
+        }
+        else
+        {
+            m2 = l + s - l*s;
+        }
+        m1 = l * 2 - m2;
+
+        double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
+        double g = hue_to_rgb(m1, m2, h);
+        double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
+
+        c.set_red(safe_cast<uint8_t>(std::lround(255.0 * r)));
+        c.set_green(safe_cast<uint8_t>(std::lround(255.0 * g)));
+        c.set_blue(safe_cast<uint8_t>(std::lround(255.0 * b)));
+    }
+};
 
 struct named_colors : qi::symbols<char,color>
 {
@@ -215,8 +266,12 @@ css_color_grammar<Iterator>::css_color_grammar()
     qi::lexeme_type lexeme;
     ascii::no_case_type no_case;
     using phoenix::at_c;
-
+    // symbols
     named_colors named;
+    // functions
+    phoenix::function<percent_conv_impl> percent_converter;
+    phoenix::function<alpha_conv_impl>   alpha_converter;
+    phoenix::function<hsl_conv_impl>  hsl_converter;
 
     css_color %= rgba_color
         | rgba_percent_color

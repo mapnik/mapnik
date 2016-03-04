@@ -64,6 +64,9 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     using phoenix::push_back;
     using phoenix::construct;
 
+    // functions
+    phoenix::function<percent_offset_impl> percent_offset;
+
     start = -(filter % *lit(','))
         ;
 
