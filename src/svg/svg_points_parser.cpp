@@ -28,23 +28,22 @@
 #include <string>
 #include <cstring>
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-    template <typename PathType>
-    bool parse_points(const char* wkt, PathType & p)
-    {
-        using namespace boost::spirit;
-        using iterator_type = const char* ;
-        using skip_type = ascii::space_type;
-        // FIXME! - for best performance this needs to be static const
-        // but for that not to crash the argument needs to be passed to phrase_parse
-        // rather than the grammar ctor - https://github.com/mapnik/mapnik/pull/2231
-        svg_points_grammar<iterator_type,skip_type,PathType> g(p);
-        iterator_type first = wkt;
-        iterator_type last =  wkt + std::strlen(wkt);
-        return qi::phrase_parse(first, last, g, skip_type());
-    }
+template <typename PathType>
+bool parse_points(const char* wkt, PathType& p)
+{
+    using namespace boost::spirit;
+    using iterator_type = const char*;
+    using skip_type = ascii::space_type;
+    static const svg_points_grammar<iterator_type, PathType, skip_type> g;
+    iterator_type first = wkt;
+    iterator_type last = wkt + std::strlen(wkt);
+    return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(p)), skip_type());
+}
 
-    template bool parse_points<svg_converter_type>(const char*, svg_converter_type&);
+template bool parse_points<svg_converter_type>(const char*, svg_converter_type&);
 
-    }}
+} // namespace svg
+} // namespace mapnik

@@ -36,39 +36,37 @@
 
 namespace mapnik { namespace svg {
 
-    using namespace boost::spirit;
-    using namespace boost::phoenix;
+using namespace boost::spirit;
+using namespace boost::phoenix;
 
-    template <typename Iterator, typename SkipType, typename PathType>
-    struct svg_points_grammar : qi::grammar<Iterator,SkipType>
+template <typename Iterator, typename PathType, typename SkipType>
+struct svg_points_grammar : qi::grammar<Iterator, void(PathType&), SkipType>
+{
+    svg_points_grammar()
+        : svg_points_grammar::base_type(start)
     {
-        explicit svg_points_grammar(PathType & path)
-            : svg_points_grammar::base_type(start),
-              move_to_(move_to<PathType>(path)),
-              line_to_(line_to<PathType>(path)),
-              close_(close<PathType>(path))
-        {
-            qi::_1_type _1;
-            qi::lit_type lit;
-            qi::double_type double_;
+        qi::_1_type _1;
+        qi::_r1_type _r1;
+        qi::lit_type lit;
+        qi::double_type double_;
 
-            start = coord[move_to_(_1,false)] // move_to
-                >> *(-lit(',') >> coord [ line_to_(_1,false) ] ); // *line_to
+        start = coord[move_to_(_r1, _1, false)] // move_to
+            >> *(-lit(',') >> coord [ line_to_(_r1, _1,false) ] ); // *line_to
 
-            coord = double_ >> -lit(',') >> double_;
-        }
+        coord = double_ >> -lit(',') >> double_;
+    }
 
-        // rules
-        qi::rule<Iterator,SkipType> start;
-        qi::rule<Iterator,boost::fusion::vector2<double,double>(),SkipType> coord;
+    // rules
+    qi::rule<Iterator, void(PathType&), SkipType> start;
+    qi::rule<Iterator,boost::fusion::vector2<double,double>(),SkipType> coord;
 
-        // commands
-        function<move_to<PathType> > move_to_;
-        function<line_to<PathType> > line_to_;
-        function<close<PathType> > close_;
-    };
+    // commands
+    function<move_to> move_to_;
+    function<line_to> line_to_;
+    function<close> close_;
+};
 
-    }}
+}}
 
 
 #endif // SVG_POINTS_GRAMMAR_HPP
