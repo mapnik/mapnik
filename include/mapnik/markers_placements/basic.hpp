@@ -46,22 +46,13 @@ struct markers_placement_params
     direction_enum direction;
 };
 
-template <typename Locator, typename Detector>
 class markers_basic_placement : util::noncopyable
 {
 public:
-    markers_basic_placement(Locator & locator, Detector & detector,
-                            markers_placement_params const& params)
-        : locator_(locator),
-          detector_(detector),
-          params_(params),
-          done_(false)
+    markers_basic_placement(markers_placement_params const& params)
+        : params_(params)
     {
-        // no need to rewind locator here, markers_placement_finder
-        // does that after construction
     }
-
-    markers_basic_placement(markers_basic_placement && ) = default;
 
     virtual ~markers_basic_placement()
     {
@@ -69,50 +60,19 @@ public:
     }
 
     // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
-    virtual void rewind()
-    {
-        locator_.rewind(0);
-        done_ = false;
-    }
+    virtual void rewind() = 0;
 
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     virtual bool get_point(double &x, double &y, double &angle, bool ignore_placement) = 0;
 
 protected:
-    Locator & locator_;
-    Detector & detector_;
     markers_placement_params const& params_;
-    bool done_;
 
     // Rotates the size_ box and translates the position.
     box2d<double> perform_transform(double angle, double dx, double dy) const
     {
         auto tr = params_.tr * agg::trans_affine_rotation(angle).translate(dx, dy);
         return box2d<double>(params_.size, tr);
-    }
-
-    // Checks transformed box placement with collision detector.
-    // returns false if the box:
-    //  - a) isn't wholly inside extent and avoid_edges == true
-    //  - b) collides with something and allow_overlap == false
-    // otherwise returns true, and if ignore_placement == true,
-    //  also adds the box to collision detector
-    bool push_to_detector(double x, double y, double angle, bool ignore_placement)
-    {
-        auto box = perform_transform(angle, x, y);
-        if (params_.avoid_edges && !detector_.extent().contains(box))
-        {
-            return false;
-        }
-        if (!params_.allow_overlap && !detector_.has_placement(box))
-        {
-            return false;
-        }
-        if (!ignore_placement)
-        {
-            detector_.insert(box);
-        }
-        return true;
     }
 
     bool set_direction(double & angle) const

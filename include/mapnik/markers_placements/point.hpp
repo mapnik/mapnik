@@ -30,11 +30,26 @@
 namespace mapnik {
 
 template <typename Locator, typename Detector>
-class markers_point_placement : public markers_basic_placement<Locator, Detector>
+class markers_point_placement : public markers_basic_placement
 {
 public:
-    using basic_placement = markers_basic_placement<Locator, Detector>;
-    using basic_placement::basic_placement;
+    markers_point_placement(Locator & locator, Detector & detector,
+                            markers_placement_params const& params)
+        : markers_basic_placement(params),
+          locator_(locator),
+          detector_(detector),
+          done_(false)
+    {
+        // no need to rewind locator here, markers_placement_finder
+        // does that after construction
+    }
+
+    // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
+    void rewind()
+    {
+        locator_.rewind(0);
+        done_ = false;
+    }
 
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
@@ -69,6 +84,35 @@ public:
         }
 
         this->done_ = true;
+        return true;
+    }
+
+protected:
+    Locator & locator_;
+    Detector & detector_;
+    bool done_;
+
+    // Checks transformed box placement with collision detector.
+    // returns false if the box:
+    //  - a) isn't wholly inside extent and avoid_edges == true
+    //  - b) collides with something and allow_overlap == false
+    // otherwise returns true, and if ignore_placement == false,
+    //  also adds the box to collision detector
+    bool push_to_detector(double x, double y, double angle, bool ignore_placement)
+    {
+        auto box = perform_transform(angle, x, y);
+        if (params_.avoid_edges && !detector_.extent().contains(box))
+        {
+            return false;
+        }
+        if (!params_.allow_overlap && !detector_.has_placement(box))
+        {
+            return false;
+        }
+        if (!ignore_placement)
+        {
+            detector_.insert(box);
+        }
         return true;
     }
 };

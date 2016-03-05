@@ -37,8 +37,6 @@ template <typename Locator, typename Detector>
 class markers_placement_finder : util::noncopyable
 {
 public:
-    using basic_placement = markers_basic_placement<Locator, Detector>;
-
     markers_placement_finder(marker_placement_e placement_type,
                              Locator &locator,
                              Detector &detector,
@@ -75,7 +73,7 @@ public:
 
     ~markers_placement_finder()
     {
-        active_placement_->~basic_placement();
+        active_placement_->~markers_basic_placement();
     }
 
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
@@ -85,7 +83,7 @@ public:
     }
 
 private:
-    basic_placement* active_placement_;
+    markers_basic_placement* active_placement_;
 
     union
     {
