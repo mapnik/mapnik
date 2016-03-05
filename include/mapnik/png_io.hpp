@@ -29,11 +29,11 @@
 #include <mapnik/hextree.hpp>
 #include <mapnik/image.hpp>
 
+// agg
+#include <agg_pixfmt_rgba.h>
+
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
-
-// boost
-
 
 extern "C"
 {
@@ -82,6 +82,8 @@ void save_as_png(T1 & file,
                 png_options const& opts)
 
 {
+    static_assert(sizeof(typename T2::pixel_type) == 4, "T2 must be rgba8 image/view");
+
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -117,13 +119,43 @@ void save_as_png(T1 & file,
     png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
                  (opts.trans_mode == 0) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
-    for (unsigned int i = 0; i < image.height(); i++)
+
+    png_write_info(png_ptr, info_ptr);
+
+    if (opts.trans_mode == 0)
     {
-        row_pointers[i] = (png_bytep)image.get_row(i);
+        png_set_filler(png_ptr, 0, PNG_FILLER_AFTER);
     }
-    png_set_rows(png_ptr, info_ptr, row_pointers.get());
-    png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
+
+    if (image.get_premultiplied())
+    {
+        // http://www.libpng.org/pub/png/book/chapter08.html#png.ch08.div.5.8
+        // "Pixels are always stored in RGBA order, and the alpha channel is not premultiplied."
+
+        std::unique_ptr<uint8_t[]> dst_row(new uint8_t[image.row_size()]);
+        auto dst_beg = dst_row.get();
+        auto dst_end = dst_beg + image.row_size();
+
+        for (unsigned y = 0; y < image.height(); ++y)
+        {
+            auto src = reinterpret_cast<uint8_t const*>(image.get_row(y));
+            for (auto dst = dst_beg; dst < dst_end; dst += 4, src += 4)
+            {
+                using m = agg::multiplier2_rgba<agg::rgba8, agg::order_rgba>;
+                m::demultiply(dst, src);
+            }
+            png_write_row(png_ptr, (png_bytep)dst_beg);
+        }
+    }
+    else
+    {
+        for (unsigned y = 0; y < image.height(); ++y)
+        {
+            png_write_row(png_ptr, (png_bytep)image.get_row(y));
+        }
+    }
+
+    png_write_end(png_ptr, info_ptr);
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 

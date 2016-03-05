@@ -186,11 +186,16 @@ struct tag_setter
         : output_(output),
           config_(config) {}
 
-    template <typename T>
-    void operator() (T const&) const
+    template <typename ImageT>
+    void operator() (ImageT const&) const
     {
-        // Assume this would be null type
         throw image_writer_exception("Could not write TIFF - unknown image type provided");
+    }
+
+    template <typename ImageT>
+    void operator() (image_view<ImageT> const& view) const
+    {
+        (*this)(view.data());
     }
 
     inline void operator() (image_rgba8 const& data) const

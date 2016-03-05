@@ -141,27 +141,29 @@ void html_report::report(result const & r, boost::filesystem::path const & outpu
 {
     if (r.state == STATE_ERROR)
     {
-       s << "<div class=\"text\">Failed to render: " << r.name << "<br><em>" << r.error_message << "</em></div>\n";
+        s << "<div class=\"text\">Failed to render: " << r.name << "<br><em>" << r.error_message << "</em></div>\n";
     }
     else if (r.state == STATE_FAIL)
     {
-      using namespace boost::filesystem;
+        namespace fs = boost::filesystem;
 
-      path reference = output_dir / r.reference_image_path.filename();
-      path actual = output_dir / r.actual_image_path.filename();
+        fs::path reference = output_dir / r.reference_image_path.filename();
+        fs::path actual = output_dir / r.actual_image_path.filename();
 
-      if (exists(reference))
-      {
-          remove(reference);
-      }
-      if (exists(actual))
-      {
-          remove(actual);
-      }
-      copy_file(r.reference_image_path, reference);
-      copy_file(r.actual_image_path, actual);
+        fs::remove(reference);
+        fs::remove(actual);
+        copy_file(r.reference_image_path, reference);
+        copy_file(r.actual_image_path, actual);
 
-       s << "<p>" << r.diff << "</p>\n"
+        s << "<h3>" << r.name << "</h3>\n"
+            << "<ul>\n"
+            << "<li>renderer name: " << r.renderer_name << "</li>\n"
+            << "<li>map size: " << r.size.width << " x " << r.size.height << "</li>\n"
+            << "<li>map tiles: " << r.tiles.width << " x " << r.tiles.height << "</li>\n"
+            << "<li>scale factor: " << r.scale_factor << "</li>\n"
+            << "<li>error message: " << r.error_message << "</li>\n"
+            << "<li>different pixels: " << r.diff << "</li>\n"
+            << "</ul>\n" <<
             "<div class=\"r\">"
             "  <div class=\"i\">"
             "    <a href=" << reference.filename() << ">\n"

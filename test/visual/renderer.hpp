@@ -89,6 +89,7 @@ struct agg_renderer : renderer_base<mapnik::image_rgba8>
         image_type image(map.width(), map.height());
         mapnik::agg_renderer<image_type> ren(map, image, scale_factor);
         ren.apply();
+        mapnik::demultiply_alpha(image);
         return image;
     }
 };

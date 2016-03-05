@@ -83,7 +83,14 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
 {
 #if defined(HAVE_JPEG)
     int quality = detail::parse_jpeg_quality(type);
-    save_as_jpeg(stream, quality, image);
+    unsigned buf_rows = 1;
+    if (image.width() <= 1024) {
+        buf_rows = 8;
+        // the width limit of 1024 is arbitrary, while the number of
+        // buf_rows is 8 because jpeg encoding operates on 8x8 blocks;
+        // with these values save_as_jpeg will allocate ~24kB buffer
+    }
+    save_as_jpeg(stream, quality, image, buf_rows);
 #else
     throw image_writer_exception("jpeg output is not enabled in your build of Mapnik");
 #endif

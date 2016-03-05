@@ -56,7 +56,6 @@ template<class ColorT, class Order> struct multiplier_rgba
         }
     }
 
-
     //--------------------------------------------------------------------
     static AGG_INLINE void demultiply(value_type* p)
     {
@@ -75,6 +74,64 @@ template<class ColorT, class Order> struct multiplier_rgba
             p[Order::G] = value_type((g > ColorT::base_mask) ? ColorT::base_mask : g);
             p[Order::B] = value_type((b > ColorT::base_mask) ? ColorT::base_mask : b);
         }
+    }
+};
+
+//========================================================multiplier2_rgba
+template<class ColorT, class Order, class Order2 = Order> struct multiplier2_rgba
+{
+    typedef typename ColorT::value_type value_type;
+    typedef typename ColorT::calc_type calc_type;
+
+    //--------------------------------------------------------------------
+    static AGG_INLINE void premultiply(value_type* p, const value_type* q)
+    {
+        calc_type a = q[Order2::A];
+        if(a < ColorT::base_mask)
+        {
+            if(a == 0)
+            {
+                p[Order::R] = p[Order::G] = p[Order::B] = p[Order::A] = 0;
+                return;
+            }
+            p[Order::R] = value_type((q[Order2::R] * a + ColorT::base_mask) >> ColorT::base_shift);
+            p[Order::G] = value_type((q[Order2::G] * a + ColorT::base_mask) >> ColorT::base_shift);
+            p[Order::B] = value_type((q[Order2::B] * a + ColorT::base_mask) >> ColorT::base_shift);
+        }
+        else
+        {
+            p[Order::R] = q[Order2::R];
+            p[Order::G] = q[Order2::G];
+            p[Order::B] = q[Order2::B];
+        }
+        p[Order::A] = value_type(a);
+    }
+
+    //--------------------------------------------------------------------
+    static AGG_INLINE void demultiply(value_type* p, const value_type* q)
+    {
+        calc_type a = q[Order2::A];
+        if(a < ColorT::base_mask)
+        {
+            if(a == 0)
+            {
+                p[Order::R] = p[Order::G] = p[Order::B] = p[Order::A] = 0;
+                return;
+            }
+            calc_type r = (calc_type(q[Order2::R]) * ColorT::base_mask) / a;
+            calc_type g = (calc_type(q[Order2::G]) * ColorT::base_mask) / a;
+            calc_type b = (calc_type(q[Order2::B]) * ColorT::base_mask) / a;
+            p[Order::R] = value_type((r > ColorT::base_mask) ? ColorT::base_mask : r);
+            p[Order::G] = value_type((g > ColorT::base_mask) ? ColorT::base_mask : g);
+            p[Order::B] = value_type((b > ColorT::base_mask) ? ColorT::base_mask : b);
+        }
+        else
+        {
+            p[Order::R] = q[Order2::R];
+            p[Order::G] = q[Order2::G];
+            p[Order::B] = q[Order2::B];
+        }
+        p[Order::A] = value_type(a);
     }
 };
 
