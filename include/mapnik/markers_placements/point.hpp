@@ -40,8 +40,7 @@ public:
           detector_(detector),
           done_(false)
     {
-        // no need to rewind locator here, markers_placement_finder
-        // does that after construction
+        locator_.rewind(0);
     }
 
     // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.

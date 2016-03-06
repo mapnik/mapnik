@@ -41,49 +41,73 @@ public:
                              Locator &locator,
                              Detector &detector,
                              markers_placement_params const& params)
-        : active_placement_(nullptr)
+        : placement_type_(placement_type)
     {
         switch (placement_type)
         {
         default:
         case MARKER_POINT_PLACEMENT:
-            active_placement_ = construct(&point_, locator, detector, params);
+            construct(&point_, locator, detector, params);
             break;
         case MARKER_INTERIOR_PLACEMENT:
-            active_placement_ = construct(&interior_, locator, detector, params);
+            construct(&interior_, locator, detector, params);
             break;
         case MARKER_LINE_PLACEMENT:
-            active_placement_ = construct(&line_, locator, detector, params);
+            construct(&line_, locator, detector, params);
             break;
         case MARKER_VERTEX_FIRST_PLACEMENT:
-            active_placement_ = construct(&vertex_first_, locator, detector, params);
+            construct(&vertex_first_, locator, detector, params);
             break;
         case MARKER_VERTEX_LAST_PLACEMENT:
-            active_placement_ = construct(&vertex_last_, locator, detector, params);
+            construct(&vertex_last_, locator, detector, params);
             break;
         }
-        // previously placement-type constructors (markers_*_placement)
-        // rewound the locator; reasons for rewinding here instead:
-        //  1) so that nobody is tempted to call now-virtual rewind()
-        //      in placement-type class constructors
-        //  2) it servers as a runtime check that the above switch isn't
-        //      missing cases and active_placement_ points to an object
-        active_placement_->rewind();
     }
 
     ~markers_placement_finder()
     {
-        active_placement_->~markers_basic_placement();
+        switch (placement_type_)
+        {
+        default:
+        case MARKER_POINT_PLACEMENT:
+            destroy(&point_);
+            break;
+        case MARKER_INTERIOR_PLACEMENT:
+            destroy(&interior_);
+            break;
+        case MARKER_LINE_PLACEMENT:
+            destroy(&line_);
+            break;
+        case MARKER_VERTEX_FIRST_PLACEMENT:
+            destroy(&vertex_first_);
+            break;
+        case MARKER_VERTEX_LAST_PLACEMENT:
+            destroy(&vertex_last_);
+            break;
+        }
     }
 
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
-        return active_placement_->get_point(x, y, angle, ignore_placement);
+        switch (placement_type_)
+        {
+        default:
+        case MARKER_POINT_PLACEMENT:
+            return point_.get_point(x, y, angle, ignore_placement);
+        case MARKER_INTERIOR_PLACEMENT:
+            return interior_.get_point(x, y, angle, ignore_placement);
+        case MARKER_LINE_PLACEMENT:
+            return line_.get_point(x, y, angle, ignore_placement);
+        case MARKER_VERTEX_FIRST_PLACEMENT:
+            return vertex_first_.get_point(x, y, angle, ignore_placement);
+        case MARKER_VERTEX_LAST_PLACEMENT:
+            return vertex_last_.get_point(x, y, angle, ignore_placement);
+        }
     }
 
 private:
-    markers_basic_placement* active_placement_;
+    marker_placement_e const placement_type_;
 
     union
     {
@@ -99,6 +123,12 @@ private:
                         markers_placement_params const& params)
     {
         return new(what) T(locator, detector, params);
+    }
+
+    template <typename T>
+    static void destroy(T* what)
+    {
+        what->~T();
     }
 };
 
