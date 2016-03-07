@@ -72,13 +72,13 @@ int main (int argc,char** argv)
         if (vm.count("version"))
         {
             std::clog << "version 0.3.0" <<std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
 
         if (vm.count("help"))
         {
             std::clog << desc << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
         if (vm.count("verbose"))
         {
@@ -105,7 +105,7 @@ int main (int argc,char** argv)
     catch (std::exception const& ex)
     {
         std::clog << "Error: " << ex.what() << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     std::clog << "max tree depth:" << depth << std::endl;
@@ -114,7 +114,7 @@ int main (int argc,char** argv)
     if (shape_files.size() == 0)
     {
         std::clog << "no shape files to index" << std::endl;
-        return 0;
+        return EXIT_FAILURE;
     }
     for (auto const& filename : shape_files)
     {
@@ -164,6 +164,11 @@ int main (int argc,char** argv)
         std::clog << "type=" << shape_type << std::endl;
         std::clog << "extent:" << extent << std::endl;
 
+        if (!extent.valid() || std::isnan(extent.width()) || std::isnan(extent.height()))
+        {
+            std::clog << "Invalid extent aborting..." << std::endl;
+            return EXIT_FAILURE;
+        }
         int pos = 50;
         shx.seek(pos * 2);
         mapnik::quad_tree<mapnik::detail::node> tree(extent, depth, ratio);
@@ -278,5 +283,5 @@ int main (int argc,char** argv)
     }
 
     std::clog << "done!" << std::endl;
-    return 0;
+    return EXIT_SUCCESS;
 }
