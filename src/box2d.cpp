@@ -372,9 +372,16 @@ template <typename T>
 std::string box2d<T>::to_string() const
 {
     std::ostringstream s;
-    s << "box2d(" << std::fixed << std::setprecision(16)
-      << minx_ << ',' << miny_ << ','
-      << maxx_ << ',' << maxy_ << ')';
+    if (valid())
+    {
+        s << "box2d(" << std::fixed << std::setprecision(16)
+          << minx_ << ',' << miny_ << ','
+          << maxx_ << ',' << maxy_ << ')';
+    }
+    else
+    {
+        s << "box2d(INVALID)";
+    }
     return s.str();
 }
 
