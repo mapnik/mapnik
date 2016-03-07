@@ -54,17 +54,6 @@ public:
     {
     }
 
-    virtual ~markers_basic_placement()
-    {
-        // empty but necessary
-    }
-
-    // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
-    virtual void rewind() = 0;
-
-    // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
-    virtual bool get_point(double &x, double &y, double &angle, bool ignore_placement) = 0;
-
 protected:
     markers_placement_params const& params_;
 
