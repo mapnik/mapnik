@@ -6,6 +6,16 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.11
+
+Released:
+
+(Packaged from )
+
+#### Summary
+
+ - Raster scaling: fixed crash and clipping negative pixel values of floating point rasters (https://github.com/mapnik/mapnik/pull/3349)
+
 ## 3.0.10
 
 Released: February 25, 2016
