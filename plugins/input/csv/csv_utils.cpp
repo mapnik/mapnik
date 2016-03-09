@@ -27,9 +27,11 @@
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/conversions.hpp>
-#include <mapnik/csv/csv_grammar.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/datasource.hpp>
+// csv grammar
+#include <mapnik/csv/csv_grammar_impl.hpp>
+//
 #include "csv_getline.hpp"
 #include "csv_utils.hpp"
 
