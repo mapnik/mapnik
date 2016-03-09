@@ -138,7 +138,7 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
     }
 }
 
-struct csv_file_parser
+struct MAPNIK_DECL csv_file_parser
 {
     using box_type = mapnik::box2d<double>;
     using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
