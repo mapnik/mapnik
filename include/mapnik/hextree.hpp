@@ -365,20 +365,20 @@ private:
         if (r->count>0)
         {
             printf("%d: (+%d/%d/%.5f) (%d %d %d %d)\n",
-                   id, (int)r->count, (int)r->pixel_count, r->reduce_cost,
-                   (int)round(gamma(r->reds / r->count, gamma_)),
-                   (int)round(gamma(r->greens / r->count, gamma_)),
-                   (int)round(gamma(r->blues / r->count, gamma_)),
-                   (int)(r->alphas / r->count));
+                   id, static_cast<int>(r->count), static_cast<int>(r->pixel_count), r->reduce_cost,
+                   static_cast<int>(round(gamma(r->reds / r->count, gamma_))),
+                   static_cast<int>(round(gamma(r->greens / r->count, gamma_))),
+                   static_cast<int>(round(gamma(r->blues / r->count, gamma_))),
+                   static_cast<int>((r->alphas / r->count)));
         }
         else
         {
             printf("%d: (%d/%d/%.5f) (%d %d %d %d)\n", id,
-                   (int)r->count, (int)r->pixel_count, r->reduce_cost,
-                   (int)round(gamma(r->reds / r->pixel_count, gamma_)),
-                   (int)round(gamma(r->greens / r->pixel_count, gamma_)),
-                   (int)round(gamma(r->blues / r->pixel_count, gamma_)),
-                   (int)(r->alphas / r->pixel_count));
+                   static_cast<int>(r->count), static_cast<int>(r->pixel_count), r->reduce_cost,
+                   static_cast<int>(round(gamma(r->reds / r->pixel_count, gamma_))),
+                   static_cast<int>(round(gamma(r->greens / r->pixel_count, gamma_))),
+                   static_cast<int>(round(gamma(r->blues / r->pixel_count, gamma_))),
+                   static_cast<int>((r->alphas / r->pixel_count)));
         }
         for (unsigned idx=0; idx < 16; ++idx)
         {
@@ -399,9 +399,9 @@ private:
             std::uint8_t a = std::uint8_t(itr->alphas/float(count));
             if (a > InsertPolicy::MAX_ALPHA) a = 255;
             if (a < InsertPolicy::MIN_ALPHA) a = 0;
-            palette.push_back(rgba((std::uint8_t)round(gamma(itr->reds   / count, gamma_)),
-                                   (std::uint8_t)round(gamma(itr->greens / count, gamma_)),
-                                   (std::uint8_t)round(gamma(itr->blues  / count, gamma_)), a));
+            palette.push_back(rgba(static_cast<std::uint8_t>(round(gamma(itr->reds   / count, gamma_))),
+                                   static_cast<std::uint8_t>(round(gamma(itr->greens / count, gamma_))),
+                                   static_cast<std::uint8_t>(round(gamma(itr->blues  / count, gamma_))), a));
         }
         for (unsigned idx=0; idx < 16; ++idx)
         {

@@ -37,8 +37,8 @@ rgb::rgb(rgba const& c)
 // ordering by mean(a,r,g,b), a, r, g, b
 bool rgba::mean_sort_cmp::operator() (const rgba& x, const rgba& y) const
 {
-    int t1 = (int)x.a + x.r + x.g + x.b;
-    int t2 = (int)y.a + y.r + y.g + y.b;
+    int t1 = x.a + x.r + x.g + x.b;
+    int t2 = y.a + y.r + y.g + y.b;
     if (t1 != t2) return t1 < t2;
 
     // https://github.com/mapnik/mapnik/issues/1087
@@ -97,9 +97,9 @@ std::string rgba_palette::to_string() const
     str << std::hex << std::setfill('0');
     for (unsigned i = 0; i < length; i++) {
         str << " #";
-        str << std::setw(2) << (unsigned)rgb_pal_[i].r;
-        str << std::setw(2) << (unsigned)rgb_pal_[i].g;
-        str << std::setw(2) << (unsigned)rgb_pal_[i].b;
+        str << std::setw(2) << static_cast<unsigned>(rgb_pal_[i].r);
+        str << std::setw(2) << static_cast<unsigned>(rgb_pal_[i].g);
+        str << std::setw(2) << static_cast<unsigned>(rgb_pal_[i].b);
         if (i < alphaLength) str << std::setw(2) << alpha_pal_[i];
     }
     str << "]";

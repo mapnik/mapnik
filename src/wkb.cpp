@@ -103,13 +103,13 @@ public:
         switch (format_)
         {
         case wkbSpatiaLite:
-            byteOrder_ = (wkbByteOrder) wkb_[1];
+            byteOrder_ = static_cast<wkbByteOrder>(wkb_[1]);
             pos_ = 39;
             break;
 
         case wkbGeneric:
         default:
-            byteOrder_ = (wkbByteOrder) wkb_[0];
+            byteOrder_ = static_cast<wkbByteOrder>(wkb_[0]);
             pos_ = 1;
             break;
         }

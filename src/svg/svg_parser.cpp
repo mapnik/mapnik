@@ -154,7 +154,7 @@ double parse_svg_value(T & error_messages, const char* str, bool & percent)
         ("pc", DPI/6.0)
         ("mm", DPI/25.4)
         ("cm", DPI/2.54)
-        ("in", (double)DPI)
+        ("in", static_cast<double>(DPI))
         ;
     const char* cur = str; // phrase_parse modifies the first iterator
     const char* end = str + std::strlen(str);
