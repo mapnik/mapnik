@@ -28,6 +28,9 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 // freetype2
 extern "C"
 {
@@ -35,6 +38,8 @@ extern "C"
 #include FT_FREETYPE_H
 #include FT_MODULE_H
 }
+
+#pragma GCC diagnostic pop
 
 namespace {
 

@@ -55,10 +55,12 @@ porting notes -->
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_rasterizer_scanline_aa.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

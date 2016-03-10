@@ -34,10 +34,12 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

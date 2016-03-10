@@ -33,8 +33,11 @@
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/text/glyph_positions.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#include "agg_gamma_functions.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

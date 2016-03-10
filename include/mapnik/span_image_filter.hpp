@@ -23,14 +23,20 @@
 #ifndef MAPNIK_SPAN_IMAGE_FILTER_INCLUDED
 #define MAPNIK_SPAN_IMAGE_FILTER_INCLUDED
 
+#include <mapnik/safe_cast.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_span_image_filter_gray.h"
 #include "agg_span_image_filter_rgba.h"
-
-#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 #include <limits>
-
-#include <mapnik/safe_cast.hpp>
 
 namespace mapnik
 {

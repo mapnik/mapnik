@@ -39,7 +39,9 @@
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/pattern_alignment.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -52,6 +54,7 @@
 #include "agg_span_pattern_rgba.h"
 #include "agg_image_accessors.h"
 #include "agg_conv_clip_polygon.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

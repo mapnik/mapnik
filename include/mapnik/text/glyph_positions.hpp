@@ -30,8 +30,10 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/text/glyph_info.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 //stl
 #include <vector>

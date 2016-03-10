@@ -26,11 +26,14 @@
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
-#include <boost/optional.hpp>
+
 #include <string>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace detail {
 

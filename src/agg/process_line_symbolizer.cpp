@@ -32,7 +32,9 @@
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/geometry_type.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -45,6 +47,7 @@
 #include "agg_conv_dash.h"
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

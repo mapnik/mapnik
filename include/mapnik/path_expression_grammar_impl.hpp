@@ -24,10 +24,13 @@
 #include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/attribute.hpp>
 
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

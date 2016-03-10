@@ -37,7 +37,8 @@
 #pragma GCC diagnostic pop
 #endif
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -57,6 +58,7 @@
 #include "agg_gradient_lut.h"
 #include "agg_gamma_lut.h"
 #include "agg_span_interpolator_linear.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik  {
 namespace svg {

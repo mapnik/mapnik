@@ -28,8 +28,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

@@ -33,11 +33,6 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
-#pragma GCC diagnostic pop
-
-// stl
-#include <algorithm>
-#include <stdexcept>
 
 // freetype2
 extern "C"
@@ -47,6 +42,11 @@ extern "C"
 #include FT_STROKER_H
 #include FT_MODULE_H
 }
+#pragma GCC diagnostic pop
+
+// stl
+#include <algorithm>
+#include <stdexcept>
 
 
 namespace mapnik

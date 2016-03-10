@@ -28,8 +28,10 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

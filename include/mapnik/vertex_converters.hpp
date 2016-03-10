@@ -37,7 +37,8 @@
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"
 #include "agg_conv_clip_polygon.h"
@@ -46,6 +47,7 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <type_traits>

@@ -30,8 +30,10 @@
 // stl
 #include <functional>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace detail {
 

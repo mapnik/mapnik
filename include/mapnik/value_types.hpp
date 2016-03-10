@@ -27,8 +27,11 @@
 #include <mapnik/config.hpp>
 #include <mapnik/pixel_types.hpp>
 
-// icu
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/uversion.h> // for U_NAMESPACE_QUALIFIER
+#pragma GCC diagnostic pop
 
 // stl
 #include <type_traits>

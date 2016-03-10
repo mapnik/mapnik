@@ -23,10 +23,15 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/debug.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 extern "C"
 {
 #include FT_GLYPH_H
 }
+
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

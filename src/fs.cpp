@@ -24,9 +24,12 @@
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/fs.hpp>
 
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/filesystem/operations.hpp>  // for absolute, exists, etc
 #include <boost/filesystem/path.hpp>    // for path, operator/
+#pragma GCC diagnostic pop
 
 // stl
 #include <stdexcept>

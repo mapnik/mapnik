@@ -27,13 +27,17 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// freetype2
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 extern "C"
 {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 }
+
+#pragma GCC diagnostic pop
 
 //stl
 #include <memory>

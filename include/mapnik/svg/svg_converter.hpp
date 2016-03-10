@@ -29,7 +29,8 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -37,6 +38,7 @@
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
 #include "agg_bounding_rect.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <stdexcept>

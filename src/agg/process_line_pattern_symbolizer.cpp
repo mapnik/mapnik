@@ -37,7 +37,10 @@
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
-// agg
+
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
@@ -50,6 +53,7 @@
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

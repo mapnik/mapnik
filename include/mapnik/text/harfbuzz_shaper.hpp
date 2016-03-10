@@ -36,12 +36,12 @@
 #include <list>
 #include <type_traits>
 
-// harfbuzz
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
-
-// icu
 #include <unicode/uscript.h>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

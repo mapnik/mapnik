@@ -30,10 +30,14 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

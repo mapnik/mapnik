@@ -24,8 +24,12 @@
 #define MAPNIK_UTIL_VARIANT_HPP
 
 #include <mapnik/config.hpp>
-#include <boost/mpl/vector.hpp> // spirit support
 #include <mapbox/variant/variant.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/mpl/vector.hpp> // spirit support
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace util {
 

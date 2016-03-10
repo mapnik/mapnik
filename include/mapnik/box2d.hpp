@@ -27,8 +27,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/operators.hpp>
+#pragma GCC diagnostic pop
 
 // agg
 // forward declare so that apps using mapnik do not need agg headers
