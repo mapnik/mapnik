@@ -30,9 +30,11 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
 
-//boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace formatting {
 

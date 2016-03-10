@@ -25,8 +25,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 using boost::property_tree::ptree;

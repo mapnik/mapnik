@@ -28,11 +28,15 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/xml_loader.hpp>
-#include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <iostream>
