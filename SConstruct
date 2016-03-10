@@ -1798,7 +1798,7 @@ if not preconfigured:
         common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unsequenced -Wtautological-compare -Wold-style-cast -Wreserved-id-macro -Wheader-hygiene -Wmissing-noreturn '
+            common_cxx_flags += ' -Wno-unsequenced -Wtautological-compare -Wheader-hygiene '
 
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
