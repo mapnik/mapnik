@@ -24,8 +24,11 @@
 #include <mapnik/util/variant.hpp>
 // boost
 #include <memory>
-//sqlite3
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <sqlite3.h>
+#pragma GCC diagnostic pop
 
 //stl
 #ifdef MAPNIK_DEBUG
