@@ -29,16 +29,18 @@
 #include <mapnik/hextree.hpp>
 #include <mapnik/image.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
-
-// boost
-
 
 extern "C"
 {
 #include <png.h>
 }
+
+#pragma GCC diagnostic pop
 
 #define MAX_OCTREE_LEVELS 4
 
