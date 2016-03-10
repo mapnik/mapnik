@@ -30,17 +30,33 @@ matrix:
           packages: [ 'clang-3.5' ]
     - os: linux
       sudo: false
-      compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
+      compiler: ": clang-address"
+      env: JOBS=8 SANITIZE_ADDRESS=True CXX="ccache clang++-3.7 -Qunused-arguments" CC="clang-3.7"
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5', 'llvm-3.5-dev' ]
-    - os: osx
-      compiler: clang
-      # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
-      osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=true
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7' ]
+          packages: [ 'clang-3.7' ]
+    - os: linux
+      sudo: false
+      compiler: ": clang-thread"
+      env: JOBS=8 SANITIZE_THREAD=True CXX="ccache clang++-3.7 -Qunused-arguments" CC="clang-3.7"
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7' ]
+          packages: [ 'clang-3.7' ]
+    # - os: linux
+    #   sudo: false
+    #   compiler: ": clang-coverage"
+    #   env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
+    #   addons:
+    #     apt:
+    #       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+    #       packages: [ 'clang-3.5', 'llvm-3.5-dev' ]
+    # - os: osx
+    #   compiler: clang
+    #   # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
+    #   osx_image: xcode7.3 # upgrades clang from 6 -> 7
+    #   env: JOBS=4 MASON_PUBLISH=true
 
 before_install:
  - source scripts/travis-common.sh
