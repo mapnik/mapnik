@@ -31,11 +31,11 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang-address"
-      env: JOBS=8 SANITIZE_ADDRESS=True CXX="ccache clang++-3.7 -Qunused-arguments" CC="clang-3.7"
+      env: JOBS=8 SANITIZE_ADDRESS=True CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6"
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7' ]
-          packages: [ 'clang-3.7' ]
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6' ]
+          packages: [ 'clang-3.6' ]
     - os: linux
       sudo: false
       compiler: ": clang-thread"
