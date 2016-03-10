@@ -165,7 +165,7 @@ public:
 
     void set_default_mode(colorizer_mode mode)
     {
-        default_mode_ = (mode == COLORIZER_INHERIT) ? COLORIZER_LINEAR:(colorizer_mode_enum)mode;
+        default_mode_ = (mode == COLORIZER_INHERIT) ? COLORIZER_LINEAR : static_cast<colorizer_mode_enum>(mode);
     }
 
     void set_default_mode_enum(colorizer_mode_enum mode) { set_default_mode(mode); }
