@@ -23,8 +23,10 @@
 #ifndef MAPNIK_GRADIENT_HPP
 #define MAPNIK_GRADIENT_HPP
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include <agg_trans_affine.h>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/color.hpp>
