@@ -15,7 +15,7 @@ MASON_VERSION="694d08c"
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
         git clone https://github.com/mapbox/mason.git ./.mason
-        git checkout ${MASON_VERSION}
+        (cd ./.mason && git checkout ${MASON_VERSION})
     else
         echo "Updating to latest mason"
         (cd ./.mason && git fetch && git checkout ${MASON_VERSION})
