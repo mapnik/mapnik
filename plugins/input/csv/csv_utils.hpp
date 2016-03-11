@@ -55,16 +55,6 @@ struct geometry_column_locator
     std::size_t index2;
 };
 
-namespace detail {
-
-std::size_t file_length(std::istream & stream);
-
-std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length);
-
-void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator);
-bool valid(geometry_column_locator const& locator, std::size_t max_size);
-
-} // namespace detail
 
 mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator);
 
