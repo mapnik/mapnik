@@ -92,9 +92,9 @@ configure () {
             PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True \
             RUNTIME_LINK='static' WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     elif enabled ${SANITIZE_ADDRESS}; then
-        ./configure "$@" DEBUG=True DEBUG_SANITIZE=True
+        ./configure "$@" OPTIMIZATION=1 CUSTOM_CXXFLAGS="-fsanitize=address -fno-omit-frame-pointer" CUSTOM_LDFLAGS="-fsanitize=address"
     elif enabled ${SANITIZE_THREAD}; then
-        ./configure "$@" DEBUG=True CUSTOM_CXXFLAGS="-fsanitize=thread" CUSTOM_LDFLAGS="-fsanitize=thread"
+        ./configure "$@" OPTIMIZATION=1 CUSTOM_CXXFLAGS="-fsanitize=thread -fno-omit-frame-pointer" CUSTOM_LDFLAGS="-fsanitize=thread"
     else
         ./configure "$@" WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     fi
