@@ -205,6 +205,7 @@ source = Split(
     rule.cpp
     save_map.cpp
     wkb.cpp
+    twkb.cpp
     projection.cpp
     proj_transform.cpp
     scale_denominator.cpp
