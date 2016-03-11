@@ -169,7 +169,7 @@ csv_datasource::~csv_datasource() {}
 void csv_datasource::parse_csv(std::istream & csv_file)
 {
     std::vector<item_type> boxes;
-    csv_utils::csv_file_parser::parse_csv(csv_file, boxes);
+    csv_utils::csv_file_parser::parse_csv_and_boxes(csv_file, boxes);
 
     std::for_each(headers_.begin(), headers_.end(),
                   [ & ](std::string const& header){ ctx_->push(header); });

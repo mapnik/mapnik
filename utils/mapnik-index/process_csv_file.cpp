@@ -81,7 +81,7 @@ std::pair<bool,box2d<double>> process_csv_file(T & boxes, std::string const& fil
 #endif
     try
     {
-        p.parse_csv(csv_file, boxes);
+        p.parse_csv_and_boxes(csv_file, boxes);
         return std::make_pair(true, p.extent_);
     }
     catch (std::exception const& ex)

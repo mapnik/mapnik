@@ -134,7 +134,7 @@ struct MAPNIK_DECL csv_file_parser
     using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
     using boxes_type = std::vector<item_type>;
 
-    void parse_csv(std::istream & csv_file, boxes_type & boxes);
+    void parse_csv_and_boxes(std::istream & csv_file, boxes_type & boxes);
 
     virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const & values);
 

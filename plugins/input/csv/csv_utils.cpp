@@ -238,7 +238,7 @@ void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const 
     // no-op by default
 }
 
-void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
+void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, boxes_type & boxes)
 {
     auto file_length = detail::file_length(csv_file);
     // set back to start
