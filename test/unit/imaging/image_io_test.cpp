@@ -167,14 +167,18 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
         std::ostringstream ss;
         mapnik::save_to_stream(im, ss, format);
         CHECK(str.length() == ss.str().length());
-        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename, extension));
-        unsigned w = reader->width();
-        unsigned h = reader->height();
-        auto im2 = reader->read(0, 0, w, h);
-        CHECK(im2.size() == im.size());
-        if (extension == "png" || extension == "tiff")
+        // wrap reader in scope to ensure the file handle is
+        // released before we try to remove the file
         {
-            CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename, extension));
+            unsigned w = reader->width();
+            unsigned h = reader->height();
+            auto im2 = reader->read(0, 0, w, h);
+            CHECK(im2.size() == im.size());
+            if (extension == "png" || extension == "tiff")
+            {
+                CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
+            }
         }
         if (mapnik::util::exists(filename))
         {
