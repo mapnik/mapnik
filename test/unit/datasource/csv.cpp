@@ -189,7 +189,7 @@ TEST_CASE("csv") {
                             int ret_posix = (ret >> 8) & 0x000000ff;
                             INFO(ret);
                             INFO(ret_posix);
-                            if (path != "test/data/csv/more_headers_than_column_values.csv") // mapnik-index won't create *.index for 0 features
+                            if (!boost::iends_with(path,"more_headers_than_column_values.csv")) // mapnik-index won't create *.index for 0 features
                             {
                                 CHECK(mapnik::util::exists(path + ".index"));
                             }
@@ -878,7 +878,8 @@ TEST_CASE("csv") {
                 REQUIRE(bool(feature));
                 REQUIRE(feature->has_key("Name"));
                 std::string utf8;
-                ustring expected_string(name.c_str());
+                mapnik::transcoder tr("utf-8");
+                ustring expected_string = tr.transcode(name.c_str());
                 mapnik::value val(expected_string);
                 mapnik::to_utf8(expected_string,utf8);
                 INFO(feature->get("Name"));
