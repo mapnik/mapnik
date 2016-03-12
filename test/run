@@ -44,8 +44,8 @@ if [ -d "test/data" ]; then
         if [ -z "$JOBS" ]; then
             JOBS=1
         fi
-        if [[ -f ./test/unit/visual ]]; then
-            ./test/unit/visual -j $JOBS
+        if [[ -f ./test/visual/run ]]; then
+            ./test/visual/run -j $JOBS
             ran_a_test=true
             failures=$((failures+$?))
         else
