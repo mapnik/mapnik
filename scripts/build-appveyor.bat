@@ -30,8 +30,8 @@ ECHO ========
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
 
-::update submodule variant
-git submodule update --init deps/mapbox/variant
+::update submodules (variant + test data)
+git submodule update --init
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 
