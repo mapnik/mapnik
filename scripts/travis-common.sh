@@ -62,7 +62,7 @@ commit_message_contains () {
 }
 
 commit_message_parse () {
-    if commit_message_contains '[skip tests]'; then
+    if commit_message_contains '[skip tests]' || [[ $(uname -s) == 'Darwin' ]]; then
         config_override "CPP_TESTS = False"
     fi
     if commit_message_contains '[skip utils]'; then
