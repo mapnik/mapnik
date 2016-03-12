@@ -21,7 +21,7 @@
 #pragma GCC diagnostic pop
 
 inline void make_directory(std::string const& dir) {
-    boost::filesystem::create_directory(dir);
+    boost::filesystem::create_directories(dir);
 }
 
 TEST_CASE("image io") {
