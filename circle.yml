@@ -13,6 +13,10 @@ machine:
   post:
     - echo "there"
 
+checkout:
+  post:
+    - git submodule update --init
+
 dependencies:
   cache_directories:
     - "~/.ccache"
