@@ -1,0 +1,21 @@
+machine:
+  xcode:
+    version: 7.3
+  environment:
+    XCODE_SCHEME: "no"
+    XCODE_WORKSPACE: "no"
+    JOBS: 8
+    CCACHE_TEMPDIR: /tmp/.ccache-temp
+    CCACHE_COMPRESS: 1
+  pre:
+    - echo "here"
+  post:
+    - echo "there"
+
+dependencies:
+  cache_directories:
+    - "~/.ccache"
+
+test:
+  override:
+    - ./scripts/circleci.sh
