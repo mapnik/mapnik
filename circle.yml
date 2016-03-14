@@ -15,11 +15,16 @@ machine:
 dependencies:
   cache_directories:
     - "~/.ccache"
-  post:
+  pre:
     - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-    - sudo add-apt-repository "deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main"
+    - sudo add-apt-repository -y "deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.8 main"
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     - sudo apt-get update -y
-    - sudo apt-get install clang-3.5 -y
+  override:
+    - sudo apt-get install clang-3.8 -y
+  post:
+    - which clang-3.8
+    - which clang++-3.8
 
 
 test:
