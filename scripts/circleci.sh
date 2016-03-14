@@ -7,6 +7,6 @@ source bootstrap.sh
 ccache --version
 ccache -p || true
 ccache --show-stats || true
-./configure CC="clang-3.8" CXX="ccache clang++-3.8 -Qunused-arguments"
+./configure CC="clang-${LLVM_VERSION}" CXX="ccache clang++-${LLVM_VERSION} -Qunused-arguments"
 make
 make test
