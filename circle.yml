@@ -37,7 +37,7 @@ dependencies:
 
 database:
   pre:
-    - bootstrap.sh
+    - ./bootstrap.sh
     - ./configure CC="clang-${LLVM_VERSION}" CXX="$(pwd)/mason_packages/.link/bin/ccache clang++-${LLVM_VERSION} -Qunused-arguments"
     - make
   override:
