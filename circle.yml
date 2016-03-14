@@ -13,6 +13,13 @@ machine:
   post:
     - echo "there"
 
+# https://circleci.com/docs/manually#databases
+
+database:
+  override:
+    - psql -c 'create database template_postgis;'
+    - psql -c 'create extension postgis;' -d template_postgis
+
 checkout:
   post:
     - git submodule update --init
