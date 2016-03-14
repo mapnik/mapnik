@@ -10,4 +10,3 @@ ${CCACHE} -p || true
 ${CCACHE} --show-stats || true
 ./configure CC="clang-${LLVM_VERSION}" CXX="${CCACHE} clang++-${LLVM_VERSION} -Qunused-arguments"
 make
-make test

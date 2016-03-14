@@ -13,13 +13,6 @@ machine:
   post:
     - echo "there"
 
-# https://circleci.com/docs/manually#databases
-
-database:
-  override:
-    - psql -c 'create database template_postgis;'
-    - psql -c 'create extension postgis;' -d template_postgis
-
 checkout:
   post:
     - git submodule update --init
@@ -38,7 +31,13 @@ dependencies:
     - which clang-${LLVM_VERSION}
     - which clang++-${LLVM_VERSION}
 
+database:
+  pre:
+    - ./scripts/circleci.sh
+  override:
+    - psql -c 'create database template_postgis;'
+    - psql -c 'create extension postgis;' -d template_postgis
 
 test:
   override:
-    - ./scripts/circleci.sh
+    - make test
