@@ -28,6 +28,8 @@ artifacts:
     name: msbuild-errors.txt
   - path: mapnik-gyp\msbuild-warnings.txt
     name: msbuild-warnings.txt
+  - path: ..\..\tmp\mapnik-visual-images
+    name: mapnik-visual-images.zip
 
 build: off
 test: off
