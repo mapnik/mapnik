@@ -88,6 +88,7 @@ TEST_CASE("expressions")
     // integer
     TRY_CHECK(parse_and_dump("123") == "123");
     // unicode
+    TRY_CHECK(parse_and_dump("''") == "''");
     TRY_CHECK(parse_and_dump("'single-quoted string'") == "'single-quoted string'");
     TRY_CHECK(parse_and_dump("\"double-quoted string\"") == "'double-quoted string'");
     TRY_CHECK(parse_and_dump("'escaped \\' apostrophe'") == "'escaped \\' apostrophe'");
