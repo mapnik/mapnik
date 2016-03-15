@@ -20,7 +20,7 @@ install:
   - SET PGPASSWORD=Password12!
   - SET PATH=C:\Program Files\PostgreSQL\9.4\bin\;%PATH%
 
-build:
+build_script:
   - scripts\build-appveyor.bat
 
 after_build:
@@ -36,5 +36,6 @@ artifacts:
   - path: mapnik-visual-images.zip
     name: mapnik-visual-images.zip
 
+build: off
 test: off
 deploy: off
