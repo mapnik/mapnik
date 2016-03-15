@@ -36,6 +36,5 @@ artifacts:
   - path: mapnik-visual-images.zip
     name: mapnik-visual-images.zip
 
-build: off
 test: off
 deploy: off
