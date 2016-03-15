@@ -129,8 +129,6 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
 
-    // generic JSON support
-    json::generic_json<Iterator> json;
     // generic JSON types
     json.value = json.object | json.array | json.string_ | json.number
         ;

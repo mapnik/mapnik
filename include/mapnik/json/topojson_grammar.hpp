@@ -48,6 +48,8 @@ struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>
 {
     topojson_grammar();
 private:
+    // generic JSON support
+    json::generic_json<Iterator> json;
     // topoJSON
     qi::rule<Iterator, space_type, mapnik::topojson::topology()> topology;
     qi::rule<Iterator, space_type, std::vector<mapnik::topojson::geometry>()> objects;
