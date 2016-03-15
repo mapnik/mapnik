@@ -53,22 +53,22 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(sqlite_datasource)
 
 sqlite_datasource::sqlite_datasource(parameters const& params)
-    : datasource(params),
-      extent_(),
-      extent_initialized_(false),
-      type_(datasource::Vector),
-      table_(*params.get<std::string>("table", "")),
-      fields_(*params.get<std::string>("fields", "*")),
-      metadata_(*params.get<std::string>("metadata", "")),
-      geometry_table_(*params.get<std::string>("geometry_table", "")),
-      geometry_field_(*params.get<std::string>("geometry_field", "")),
-      index_table_(*params.get<std::string>("index_table", "")),
-      key_field_(*params.get<std::string>("key_field", "")),
-      row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
-      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
-      intersects_token_("!intersects!"),
-      desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
-      format_(mapnik::wkbAuto)
+  : datasource(params),
+    extent_(),
+    extent_initialized_(false),
+    type_(datasource::Vector),
+    table_(*params.get<std::string>("table", "")),
+    fields_(*params.get<std::string>("fields", "*")),
+    metadata_(*params.get<std::string>("metadata", "")),
+    geometry_table_(*params.get<std::string>("geometry_table", "")),
+    geometry_field_(*params.get<std::string>("geometry_field", "")),
+    index_table_(*params.get<std::string>("index_table", "")),
+    key_field_(*params.get<std::string>("key_field", "")),
+    row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
+    row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
+    intersects_token_("!intersects!"),
+    desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
+    format_(mapnik::wkbAuto)
 {
     /* TODO
        - throw if no primary key but spatial index is present?
@@ -448,7 +448,7 @@ boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_t
             if (data)
             {
 
-                mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, format_);
+                mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_twkb(data, size);
                 if (mapnik::geometry::is_empty(geom))
                 {
                     continue;
