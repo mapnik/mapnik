@@ -81,7 +81,7 @@ feature_ptr sqlite_featureset::next()
         }
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
-        mapnik::geometry::geometry<double> geom = geometry_utils::from_twkb(data, size);
+        mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(data, size, format_);
         if (mapnik::geometry::is_empty(geom))
         {
             continue;

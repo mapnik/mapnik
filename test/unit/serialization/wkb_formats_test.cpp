@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 
 #include <iostream>
@@ -7,7 +8,6 @@
 #include <mapnik/geometry_is_simple.hpp>
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/util/geometry_to_wkt.hpp>
 #include <boost/version.hpp>
 
 TEST_CASE("geometry formats") {
@@ -64,13 +64,8 @@ SECTION("wkb") {
 
         // spatialite blob
         mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
-                                                                                   sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
-                                                                                   mapnik::wkbSpatiaLite);
-        std::string wkt;
-        if (mapnik::util::to_wkt(wkt, geom))
-        {
-            std::cerr << wkt << std::endl;
-        }
+                                                                               sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
+                                                                               mapnik::wkbSpatiaLite);
         // winding order is not correct per OGC so we'll fix it
         mapnik::geometry::correct(geom);
 #if BOOST_VERSION >= 105800
@@ -81,10 +76,7 @@ SECTION("wkb") {
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_valid_blob,
                                                 sizeof(sp_valid_blob) / sizeof(sp_valid_blob[0]),
                                                 mapnik::wkbAuto);
-
-
         mapnik::geometry::correct(geom);
-
 #if BOOST_VERSION >= 105800
         REQUIRE(mapnik::geometry::is_valid(geom));
         REQUIRE(mapnik::geometry::is_simple(geom));

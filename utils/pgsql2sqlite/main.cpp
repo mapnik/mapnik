@@ -58,7 +58,7 @@ int main ( int argc, char** argv)
             ("query,q",po::value<std::string>(),"Name of the table/or query to pass to postmaster")
             ("table,t",po::value<std::string>(),"Name of the output table to create (default: table in query)")
             ("file,f",po::value<std::string>(),"Use this option to specify the name of the file to create.")
-            ("twkb", "Output geometries in TWKB format.")
+
             ;
 
         //po::positional_options_description p;
@@ -90,8 +90,6 @@ int main ( int argc, char** argv)
         boost::optional<std::string> password;
         boost::optional<std::string> connect_timeout("4");
 
-        bool output_twkb = vm.count("twkb") ? true : false;
-
         if (vm.count("host")) host = vm["host"].as<std::string>();
         if (vm.count("port")) port = vm["port"].as<std::string>();
         if (vm.count("dbname")) dbname = vm["dbname"].as<std::string>();
@@ -109,7 +107,7 @@ int main ( int argc, char** argv)
 
             std::cout << "output_table : " << output_table_name << "\n";
 
-            mapnik::pgsql2sqlite(conn, query, output_table_name, output_file, output_twkb);
+            mapnik::pgsql2sqlite(conn,query,output_table_name,output_file);
         }
         catch (mapnik::datasource_exception & ex)
         {

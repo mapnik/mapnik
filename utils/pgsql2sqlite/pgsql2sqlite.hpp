@@ -165,8 +165,7 @@ template <typename Connection>
 void pgsql2sqlite(Connection conn,
                   std::string const& query,
                   std::string const& output_table_name,
-                  std::string const& output_filename,
-                  bool output_twkb)
+                  std::string const& output_filename)
 {
     namespace sqlite = mapnik::sqlite;
     sqlite::database db(output_filename);
@@ -224,20 +223,11 @@ void pgsql2sqlite(Connection conn,
         geom_type = rs->getValue("type");
     }
 
+    // add AsBinary(<geometry_column>) modifier
     std::string select_sql_str = select_sql.str();
-    if (output_twkb)
-    {
-        // add AsTWKB(<geometry_column>, 2) modifier
-        boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","ST_AsTWKB(" + geom_col+", 2) as " + geom_col);
-    }
-    else
-    {
-        // add AsBinary(<geometry_column>) modifier
-        boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","ST_AsBinary(" + geom_col+") as " + geom_col);
-    }
+    boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","ST_AsBinary(" + geom_col+") as " + geom_col);
 
-//#ifdef MAPNIK_DEBUG
-#if 1
+#ifdef MAPNIK_DEBUG
     std::cout << select_sql_str << "\n";
 #endif
 
@@ -397,15 +387,7 @@ void pgsql2sqlite(Connection conn,
                     if (oid == geometry_oid)
                     {
                         mapnik::feature_impl feat(ctx,pkid);
-                        mapnik::geometry::geometry<double> geom;
-                        if (output_twkb)
-                        {
-                            geom = geometry_utils::from_twkb(buf, size);
-                        }
-                        else
-                        {
-                            geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
-                        }
+                        mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
                         if (!mapnik::geometry::is_empty(geom))
                         {
                             box2d<double> bbox = mapnik::geometry::envelope(geom);

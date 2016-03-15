@@ -128,11 +128,11 @@ std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream,
         {
             if (size < file_length && ss.eof())
             {
-                // we can't be sure that last line
+                // we can't be sure last line
                 // is not truncated so skip it
                 break;
             }
-            if (line.size() == 0 || (line.size() == 1 && line[0] == char(0xa))) continue; // empty lines are not interesting
+            if (line.size() == 0) continue; // empty lines are not interesting
             auto num_quotes = std::count(line.begin(), line.end(), quote);
             if (num_quotes % 2 != 0)
             {
