@@ -17,8 +17,8 @@ function mason_compile {
     make install
     # this is to adapt to when mapnik is not installed in MASON_PREFIX
     # originally (to make it easier to publish locally as a stopgap)
+    MAPNIK_PREFIX=$(mapnik-config --prefix)
     if [[ $(mapnik-config --prefix) != ${MASON_PREFIX} ]]; then
-        MAPNIK_PREFIX=$(mapnik-config --prefix)
         mkdir -p ${MASON_PREFIX}/lib
         mkdir -p ${MASON_PREFIX}/include
         mkdir -p ${MASON_PREFIX}/bin
@@ -34,7 +34,7 @@ function mason_compile {
             echo $f;
             echo $(basename $f);
             install_name_tool -id plugins/input/$(basename $f) $f;
-            install_name_tool -change ${MASON_PREFIX}"/lib/libmapnik.dylib" @loader_path/../../libmapnik.dylib $f;
+            install_name_tool -change "${MAPNIK_PREFIX}/lib/libmapnik.dylib" @loader_path/../../libmapnik.dylib $f;
         done;
     fi;
     python -c "data=open('$MASON_PREFIX/bin/mapnik-config','r').read();open('$MASON_PREFIX/bin/mapnik-config','w').write(data.replace('$HERE','.'))"
