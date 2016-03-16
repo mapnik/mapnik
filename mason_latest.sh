@@ -28,7 +28,7 @@ function mason_compile {
         cp -r ${MAPNIK_PREFIX}/bin/shapeindex ${MASON_PREFIX}/bin/
     fi
     if [[ $(uname -s) == 'Darwin' ]]; then
-        install_name_tool -id @loader_path/../lib/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";
+        install_name_tool -id @loader_path/lib/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";
         PLUGINDIR=${MASON_PREFIX}"/lib/mapnik/input/*.input";
         for f in $PLUGINDIR; do
             echo $f;
