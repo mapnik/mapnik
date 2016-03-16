@@ -131,11 +131,6 @@ mapnik_bundled_gdal_data = ''
 mapnik_bundled_proj_data = ''
 mapnik_bundled_icu_data = ''
 
-if config_env.get('MAPNIK_BUNDLED_SHARE_DIRECTORY'):
-    mapnik_bundled_gdal_data = 'lib/mapnik/share/gdal'
-    mapnik_bundled_proj_data = 'lib/mapnik/share/proj'
-    mapnik_bundled_icu_data = 'lib/mapnik/share/icu'
-
 configuration = {
     "git_revision": git_revision,
     "git_describe": git_describe,
