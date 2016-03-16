@@ -84,7 +84,7 @@ configure () {
         ./configure "$@" PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
             COVERAGE=True DEBUG=True WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     else
-        ./configure "$@" WARNING_CXXFLAGS="-Wno-unknown-warning-option"
+        ./configure "$@" PREFIX=${MASON_PREFIX} WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     fi
     # print final config values, sorted and indented
     sort -sk1,1 ./config.py | sed -e 's/^/	/'
