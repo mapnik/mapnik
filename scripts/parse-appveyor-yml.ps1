@@ -1,7 +1,8 @@
 ﻿$ErrorActionPreference = 'Stop'
-$boost_version='0'
+$pattern=$args[0]
+$version='0'
 Get-Content .\appveyor.yml |
-    foreach { 
-        if ($_ -match "BOOST_VERSION: "){ $boost_version = $_.split()[-1] }
+    foreach {
+        if ($_ -match $pattern){ $version = $_.split()[-1] }
     }
-Write-Host $boost_version
+Write-Host $version
