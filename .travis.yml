@@ -82,6 +82,10 @@ script:
 
 after_success:
  - if enabled ${MASON_PUBLISH}; then
+      export MASON_NAME=mapnik
+      export MASON_VERSION=latest
+      export MASON_LIB_FILE=lib/libmapnik-wkt.a
+      source ./.mason/mason.sh &&
      ./mason_latest.sh build &&
      ./mason_latest.sh link &&
      ./mason_latest.sh publish;

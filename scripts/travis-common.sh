@@ -83,14 +83,6 @@ configure () {
     if enabled ${COVERAGE}; then
         ./configure "$@" PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
             COVERAGE=True DEBUG=True WARNING_CXXFLAGS="-Wno-unknown-warning-option"
-    elif enabled ${MASON_PUBLISH}; then
-        export MASON_NAME=mapnik
-        export MASON_VERSION=latest
-        export MASON_LIB_FILE=lib/libmapnik-wkt.a
-        source ./.mason/mason.sh
-        ./configure "$@" PREFIX=${MASON_PREFIX} \
-            PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True \
-            RUNTIME_LINK='static' WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     else
         ./configure "$@" WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     fi

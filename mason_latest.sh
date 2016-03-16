@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 MASON_NAME=mapnik
 MASON_VERSION=latest
 MASON_LIB_FILE=lib/libmapnik-wkt.a
@@ -13,21 +15,29 @@ function mason_load_source {
 function mason_compile {
     HERE=$(pwd)
     make install
-    if [[ `uname` == 'Darwin' ]]; then
+    # this is to adapt to when mapnik is not installed in MASON_PREFIX
+    # originally (to make it easier to publish locally as a stopgap)
+    if [[ $(mapnik-config --prefix) != ${MASON_PREFIX} ]]; then
+        MAPNIK_PREFIX=$(mapnik-config --prefix)
+        mkdir -p ${MASON_PREFIX}/lib
+        mkdir -p ${MASON_PREFIX}/include
+        mkdir -p ${MASON_PREFIX}/bin
+        cp -r ${MAPNIK_PREFIX}/lib/*mapnik* ${MASON_PREFIX}/lib/
+        cp -r ${MAPNIK_PREFIX}/include/mapnik ${MASON_PREFIX}/include/
+        cp -r ${MAPNIK_PREFIX}/bin/mapnik* ${MASON_PREFIX}/bin/
+        cp -r ${MAPNIK_PREFIX}/bin/shapeindex ${MASON_PREFIX}/bin/
+    fi
+    if [[ $(uname -s) == 'Darwin' ]]; then
         install_name_tool -id @loader_path/libmapnik.dylib ${MASON_PREFIX}"/lib/libmapnik.dylib";
         PLUGINDIR=${MASON_PREFIX}"/lib/mapnik/input/*.input";
         for f in $PLUGINDIR; do
             echo $f;
-            echo `basename $f`;
-            install_name_tool -id plugins/input/`basename $f` $f;
+            echo $(basename $f);
+            install_name_tool -id plugins/input/$(basename $f) $f;
             install_name_tool -change ${MASON_PREFIX}"/lib/libmapnik.dylib" @loader_path/../../libmapnik.dylib $f;
         done;
     fi;
     python -c "data=open('$MASON_PREFIX/bin/mapnik-config','r').read();open('$MASON_PREFIX/bin/mapnik-config','w').write(data.replace('$HERE','.'))"
-    mkdir -p ${MASON_PREFIX}/share/icu
-    cp -r $GDAL_DATA ${MASON_PREFIX}/share/
-    cp -r $PROJ_LIB ${MASON_PREFIX}/share/
-    cp -r $ICU_DATA/*dat ${MASON_PREFIX}/share/icu/
     find ${MASON_PREFIX} -name "*.pyc" -exec rm {} \;
 }
 
