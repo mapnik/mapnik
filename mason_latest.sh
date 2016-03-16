@@ -34,7 +34,16 @@ function mason_compile {
             echo $f;
             echo $(basename $f);
             install_name_tool -id plugins/input/$(basename $f) $f;
-            install_name_tool -change "${MAPNIK_PREFIX}/lib/libmapnik.dylib" @loader_path/../../libmapnik.dylib $f;
+            install_name_tool -change "${MAPNIK_PREFIX}/lib/libmapnik.dylib" @loader_path/../../lib/libmapnik.dylib $f;
+        done;
+        BINDIR=${MASON_PREFIX}"/bin/*";
+        for f in $BINDIR; do
+            echo $f;
+            echo $(basename $f);
+            if [[ $(file $f) =~ 'Mach-O' ]]; then
+                install_name_tool -id bin/$(basename $f) $f;
+                install_name_tool -change "${MAPNIK_PREFIX}/lib/libmapnik.dylib" @loader_path/../lib/libmapnik.dylib $f;
+            fi
         done;
     fi;
     python -c "data=open('$MASON_PREFIX/bin/mapnik-config','r').read();open('$MASON_PREFIX/bin/mapnik-config','w').write(data.replace('$HERE','.'))"

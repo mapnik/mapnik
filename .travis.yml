@@ -83,6 +83,5 @@ script:
 after_success:
  - if enabled ${MASON_PUBLISH}; then
      ./mason_latest.sh build &&
-     ./mason_latest.sh link &&
      ./mason_latest.sh publish;
    fi
