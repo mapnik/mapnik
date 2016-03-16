@@ -81,10 +81,10 @@ config_override () {
 
 configure () {
     if enabled ${COVERAGE}; then
-        ./configure "$@" PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
+        ./configure "$@" PREFIX=${PREFIX} PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
             COVERAGE=True DEBUG=True WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     else
-        ./configure "$@" PREFIX=/tmp/mapnik WARNING_CXXFLAGS="-Wno-unknown-warning-option"
+        ./configure "$@" PREFIX=${PREFIX} WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     fi
     # print final config values, sorted and indented
     sort -sk1,1 ./config.py | sed -e 's/^/	/'

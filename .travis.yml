@@ -9,6 +9,7 @@ env:
    - CCACHE_TEMPDIR=/tmp/.ccache-temp
    - CCACHE_COMPRESS=1
    - HEAVY_JOBS="2"
+   - PREFIX=/tmp/mapnik
    - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
 addons:
@@ -45,7 +46,7 @@ matrix:
 before_install:
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
- - export PATH=$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
+ - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - export BENCH=${BENCH:-false}

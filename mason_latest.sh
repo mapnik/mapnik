@@ -18,7 +18,7 @@ function mason_compile {
     # this is to adapt to when mapnik is not installed in MASON_PREFIX
     # originally (to make it easier to publish locally as a stopgap)
     MAPNIK_PREFIX=$(mapnik-config --prefix)
-    if [[ $(mapnik-config --prefix) != ${MASON_PREFIX} ]]; then
+    if [[ ${MAPNIK_PREFIX} != ${MASON_PREFIX} ]]; then
         mkdir -p ${MASON_PREFIX}/lib
         mkdir -p ${MASON_PREFIX}/include
         mkdir -p ${MASON_PREFIX}/bin
