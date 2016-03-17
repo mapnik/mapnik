@@ -63,6 +63,11 @@ public:
         return file_ ? true : false;
     }
 
+    inline operator bool() const
+    {
+        return this->open();
+    }
+
     inline std::FILE * get() const
     {
         return file_.get();
