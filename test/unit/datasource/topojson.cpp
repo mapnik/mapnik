@@ -61,7 +61,7 @@ TEST_CASE("topology")
             for (auto const& geom : topo.geometries)
             {
                 mapnik::box2d<double> box = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
-                //std::cerr << box << std::endl;
+                CHECK(box.valid());
             }
         }
     }
