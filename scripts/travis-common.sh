@@ -102,13 +102,13 @@ coverage () {
 }
 
 trigger_downstream() {
-    body='{
-        "request": {
-          "message": "Triggered build: Mapnik core commit ${TRAVIS_COMMIT}",
-          "branch":"master"
+    body="{
+        \"request\": {
+          \"message\": \"Triggered build: Mapnik core commit ${TRAVIS_COMMIT}\",
+          \"branch\":\"master\"
         }
     }
-    '
+    "
 
     curl -s -X POST \
       -H "Content-Type: application/json" \
