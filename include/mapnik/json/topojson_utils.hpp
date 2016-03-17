@@ -50,27 +50,25 @@ struct bounding_box_visitor
     box2d<double> operator() (mapnik::topojson::multi_point const& multi_pt) const
     {
         box2d<double> bbox;
-        if (num_arcs_ > 0)
+        bool first = true;
+        double px = 0, py = 0;
+        for (auto const& pt : multi_pt.points)
         {
-            bool first = true;
-            for (auto const& pt : multi_pt.points)
+            double x = pt.x;
+            double y = pt.y;
+            if (topo_.tr)
             {
-                double x = pt.x;
-                double y = pt.y;
-                if (topo_.tr)
-                {
-                    x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                    y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y; // TODO : delta encoded ?
-                }
-                if (first)
-                {
-                    first = false;
-                    bbox.init(x,y,x,y);
-                }
-                else
-                {
-                    bbox.expand_to_include(x,y);
-                }
+                x = (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                y = (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+            }
+            if (first)
+            {
+                first = false;
+                bbox.init(x,y,x,y);
+            }
+            else
+            {
+                bbox.expand_to_include(x,y);
             }
         }
         return bbox;
