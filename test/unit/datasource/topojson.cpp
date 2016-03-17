@@ -54,14 +54,21 @@ TEST_CASE("topology")
 {
     SECTION("geometry parsing")
     {
+        mapnik::value_integer feature_id = 0;
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+        mapnik::transcoder tr("utf8");
         for (auto const& path : mapnik::util::list_directory("test/data/topojson/"))
         {
             mapnik::topojson::topology topo;
             REQUIRE(parse_topology(path, topo));
             for (auto const& geom : topo.geometries)
             {
-                mapnik::box2d<double> box = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
-                CHECK(box.valid());
+                mapnik::box2d<double> bbox = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
+                CHECK(bbox.valid());
+                mapnik::topojson::feature_generator<mapnik::context_ptr> visitor(ctx, tr, topo, feature_id++);
+                mapnik::feature_ptr feature = mapnik::util::apply_visitor(visitor, geom);
+                CHECK(feature);
+                CHECK(feature->envelope() == bbox);
             }
         }
     }
