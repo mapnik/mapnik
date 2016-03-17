@@ -12,6 +12,7 @@ env:
    - PREFIX=/tmp/mapnik
    - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
+   - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 addons:
   postgresql: "9.4"
 
@@ -24,7 +25,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
+      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" TRIGGER=true
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
@@ -82,6 +83,7 @@ script:
  - enabled ${BENCH} make bench
 
 after_success:
+ - enabled ${TRIGGER} trigger_downstream
  - if enabled ${MASON_PUBLISH}; then
      source ./.mason/mason.sh &&
      ./mason_latest.sh build &&

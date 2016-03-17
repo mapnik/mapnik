@@ -100,3 +100,21 @@ coverage () {
         --exclude fonts \
         > /dev/null
 }
+
+trigger_downstream() {
+    body='{
+        "request": {
+          "message": "Triggered build: Mapnik core commit ${TRAVIS_COMMIT}",
+          "branch":"master"
+        }
+    }
+    '
+
+    curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -H "Travis-API-Version: 3" \
+      -H "Authorization: token ${TRAVIS_TRIGGER_TOKEN}" \
+      -d "$body" \
+      https://api.travis-ci.org/repo/mapnik%2Fpython-mapnik/requests
+}
