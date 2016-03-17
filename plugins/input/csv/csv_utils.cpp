@@ -266,6 +266,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, boxes_type & 
     {
         std::size_t index = 0;
         auto headers = csv_utils::parse_line(manual_headers_, separator_, quote_);
+        headers_.reserve(headers.size());
         for (auto const& header : headers)
         {
             detail::locate_geometry_column(header, index++, locator_);
@@ -284,6 +285,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, boxes_type & 
                 else
                 {
                     std::size_t index = 0;
+                    headers_.reserve(headers.size());
                     for (auto & header : headers)
                     {
                         mapnik::util::trim(header);
