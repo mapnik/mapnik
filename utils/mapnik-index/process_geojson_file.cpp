@@ -82,7 +82,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     char const* end = start + mapped_region->get_size();
 #else
     mapnik::util::file file(filename);
-    if (!file.open())
+    if (!file)
     {
         std::clog << "Error : cannot open " << filename << std::endl;
         return std::make_pair(false, extent);
