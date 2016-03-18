@@ -93,7 +93,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
 {
     MAPNIK_LOG_DEBUG(font_engine_freetype) << "registering: " << file_name;
     mapnik::util::file file(file_name);
-    if (!file.open()) return false;
+    if (!file) return false;
 
     FT_Face face = 0;
     FT_Open_Args args;
@@ -258,7 +258,7 @@ bool freetype_engine::can_open(std::string const& face_name,
     }
     if (!found_font_file) return false;
     mapnik::util::file file(itr->second.second);
-    if (!file.open()) return false;
+    if (!file) return false;
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
@@ -332,7 +332,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     if (found_font_file)
     {
         mapnik::util::file file(itr->second.second);
-        if (file.open())
+        if (file)
         {
 #ifdef MAPNIK_THREADSAFE
             std::lock_guard<std::mutex> lock(mutex_);

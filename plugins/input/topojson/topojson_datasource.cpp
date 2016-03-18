@@ -166,7 +166,7 @@ topojson_datasource::topojson_datasource(parameters const& params)
     else
     {
         mapnik::util::file file(filename_);
-        if (!file.open())
+        if (!file)
         {
             throw mapnik::datasource_exception("TopoJSON Plugin: could not open: '" + filename_ + "'");
         }

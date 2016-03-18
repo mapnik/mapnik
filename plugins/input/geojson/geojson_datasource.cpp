@@ -151,7 +151,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         cache_features_ = *params.get<mapnik::boolean_type>("cache_features", true);
 #if !defined(MAPNIK_MEMORY_MAPPED_FILE)
         mapnik::util::file file(filename_);
-        if (!file.open())
+        if (!file)
         {
             throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
@@ -230,7 +230,7 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
                                 std::ifstream>::query_first_n(filter, index, positions, num_features_to_query_);
 
     mapnik::util::file file(filename_);
-    if (!file.open()) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
+    if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
 
     for (auto const& pos : positions)
     {
@@ -454,7 +454,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
 
         mapnik::util::file file(filename_);
 
-        if (!file.open()) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
+        if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
 
         for (auto const& pos : positions)
         {
@@ -508,7 +508,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
     else
     {
         mapnik::util::file file(filename_);
-        if (!file.open())
+        if (!file)
         {
             throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
