@@ -61,7 +61,9 @@ int run(std::string const& command, bool okay_to_fail = false)
     return worked;
 }
 
+namespace {
 std::string dbname("mapnik-tmp-postgis-test-db");
+}
 
 TEST_CASE("postgis") {
 
