@@ -124,8 +124,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
-    using vertex_converter_type = vertex_converter<
-                                                   clip_poly_tag,
+    using vertex_converter_type = vertex_converter<clip_poly_tag,
                                                    transform_tag,
                                                    affine_transform_tag,
                                                    simplify_tag,
