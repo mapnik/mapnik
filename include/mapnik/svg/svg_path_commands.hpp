@@ -29,16 +29,12 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/fusion/sequence/intrinsic/at.hpp>
 #pragma GCC diagnostic pop
 
 namespace mapnik {
 namespace svg {
 
-using namespace boost::fusion;
 
 inline double deg2rad(double deg)
 {
@@ -52,7 +48,7 @@ struct move_to
     template <typename PathType, typename T0, typename T1>
     void operator()(PathType& path, T0 v, T1 rel) const
     {
-        path.move_to(at_c<0>(v), at_c<1>(v), rel); // impl
+        path.move_to(boost::fusion::at_c<0>(v), boost::fusion::at_c<1>(v), rel); // impl
     }
 };
 
@@ -82,7 +78,7 @@ struct line_to
     template <typename PathType, typename T0, typename T1>
     void operator()(PathType& path, T0 const& v, T1 rel) const
     {
-        path.line_to(at_c<0>(v), at_c<1>(v), rel); // impl
+        path.line_to(boost::fusion::at_c<0>(v), boost::fusion::at_c<1>(v), rel); // impl
     }
 };
 
@@ -92,9 +88,9 @@ struct curve4
     template <typename PathType, typename T0, typename T1, typename T2, typename T3>
     void operator()(PathType& path, T0 const& v0, T1 const& v1, T2 const& v2, T3 rel) const
     {
-        path.curve4(at_c<0>(v0), at_c<1>(v0),
-                    at_c<0>(v1), at_c<1>(v1),
-                    at_c<0>(v2), at_c<1>(v2),
+        path.curve4(boost::fusion::at_c<0>(v0), boost::fusion::at_c<1>(v0),
+                    boost::fusion::at_c<0>(v1), boost::fusion::at_c<1>(v1),
+                    boost::fusion::at_c<0>(v2), boost::fusion::at_c<1>(v2),
                     rel); // impl
     }
 };
@@ -105,8 +101,8 @@ struct curve4_smooth
     template <typename PathType, typename T0, typename T1, typename T2>
     void operator()(PathType& path, T0 const& v0, T1 const& v1, T2 rel) const
     {
-        path.curve4(at_c<0>(v0), at_c<1>(v0),
-                    at_c<0>(v1), at_c<1>(v1),
+        path.curve4(boost::fusion::at_c<0>(v0), boost::fusion::at_c<1>(v0),
+                    boost::fusion::at_c<0>(v1), boost::fusion::at_c<1>(v1),
                     rel); // impl
     }
 };
@@ -117,8 +113,8 @@ struct curve3
     template <typename PathType, typename T0, typename T1, typename T2>
     void operator()(PathType& path, T0 const& v0, T1 const& v1, T2 rel) const
     {
-        path.curve3(at_c<0>(v0), at_c<1>(v0),
-                    at_c<0>(v1), at_c<1>(v1),
+        path.curve3(boost::fusion::at_c<0>(v0), boost::fusion::at_c<1>(v0),
+                    boost::fusion::at_c<0>(v1), boost::fusion::at_c<1>(v1),
                     rel); // impl
     }
 };
@@ -129,7 +125,7 @@ struct curve3_smooth
     template <typename PathType, typename T0, typename T1>
     void operator()(PathType& path, T0 const& v0, T1 rel) const
     {
-        path.curve3(at_c<0>(v0), at_c<1>(v0),
+        path.curve3(boost::fusion::at_c<0>(v0), boost::fusion::at_c<1>(v0),
                     rel); // impl
     }
 };
@@ -140,9 +136,9 @@ struct arc_to
     template <typename PathType, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
     void operator()(PathType& path, T0 const& rv, T1 const& angle, T2 large_arc_flag, T3 sweep_flag, T4 const& v, T5 rel) const
     {
-        path.arc_to(at_c<0>(rv), at_c<1>(rv),
+        path.arc_to(boost::fusion::at_c<0>(rv), boost::fusion::at_c<1>(rv),
                     deg2rad(angle), large_arc_flag, sweep_flag,
-                    at_c<0>(v), at_c<1>(v),
+                    boost::fusion::at_c<0>(v), boost::fusion::at_c<1>(v),
                     rel);
     }
 };
