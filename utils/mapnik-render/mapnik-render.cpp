@@ -21,7 +21,7 @@ int main (int argc,char** argv)
     namespace po = boost::program_options;
 
     bool verbose = false;
-    bool auto_open = true;
+    bool auto_open = false;
     int return_value = 0;
     std::string xml_file;
     std::string img_file;
@@ -37,7 +37,7 @@ int main (int argc,char** argv)
             ("help,h", "produce usage message")
             ("version,V","print version string")
             ("verbose,v","verbose output")
-            ("open","automatically open the file after rendering (os x only)")
+            ("open","automatically open the file after rendering")
             ("xml",po::value<std::string>(),"xml map to read")
             ("img",po::value<std::string>(),"image to render")
             ("scale-factor",po::value<double>(),"scale factor for rendering")
