@@ -487,6 +487,7 @@ box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
 }
 
 template class box2d<int>;
+template class box2d<float>;
 template class box2d<double>;
 
 }
