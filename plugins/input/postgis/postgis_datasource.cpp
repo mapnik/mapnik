@@ -89,6 +89,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1)),
       asynchronous_request_(false),
       twkb_encoding_(false),
+      twkb_direct_(*params_.get<mapnik::boolean_type>("twkb_direct", false)),
       twkb_rounding_adjustment_(*params_.get<mapnik::value_double>("twkb_rounding_adjustment", 0.0)),
       simplify_snap_ratio_(*params_.get<mapnik::value_double>("simplify_snap_ratio", 1.0/40.0)),
       // 1/20 of pixel seems to be a good compromise to avoid
@@ -242,8 +243,14 @@ postgis_datasource::postgis_datasource(parameters const& params)
             if (!geometryColumn_.empty() && srid_ <= 0)
             {
                 std::ostringstream s;
-
-                s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
+                if (twkb_direct_)
+                {
+                    s << "SELECT ST_SRID(ST_GeomFromTWKB(\"" << geometryColumn_ << "\")) AS srid FROM ";
+                }
+                else
+                {
+                    s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
+                }
                 if (!geometry_table_.empty())
                 {
                     if (!schema_.empty())
@@ -640,7 +647,14 @@ std::string postgis_datasource::populate_tokens(
         }
         else
         {
-            s << " WHERE \"" << geometryColumn_ << "\" && " << box;
+            if (twkb_direct_)
+            {
+                s << " WHERE ST_GeomFromTWKB(\"" << geometryColumn_ << "\") && " << box;
+            }
+            else
+            {
+                s << " WHERE \"" << geometryColumn_ << "\" && " << box;
+            }
         }
         populated_sql += s.str();
     }
@@ -815,38 +829,47 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         if (twkb_encoding_)
         {
-            // This will only work against PostGIS 2.2, or a back-patched version
-            // that has (a) a ST_Simplify with a "preserve collapsed" flag and
-            // (b) a ST_RemoveRepeatedPoints with a tolerance parameter and
-            // (c) a ST_AsTWKB implementation
-
-            // What number of decimals of rounding does the pixel size imply?
-            const int twkb_rounding = -1 * std::lround(log10(px_sz) + twkb_rounding_adjustment_) + 1;
-            // And what's that in map units?
-            const double twkb_tolerance = pow(10.0, -1.0 * twkb_rounding);
-
-            s << "SELECT ST_AsTWKB(";
-            s << "ST_Simplify(";
-            s << "ST_RemoveRepeatedPoints(";
-
-            if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
+            if (twkb_direct_)
             {
-                s << "ST_ClipByBox2D(";
+                s << "SELECT ";
+                s << "\"" << geometryColumn_ << "\"";
+                s <<  "AS geom";
             }
-            s << "\"" << geometryColumn_ << "\"";
-
-            // ! ST_ClipByBox2D()
-            if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
+            else
             {
-                s << "," << sql_bbox(box) << ")";
-            }
+                // This will only work against PostGIS 2.2, or a back-patched version
+                // that has (a) a ST_Simplify with a "preserve collapsed" flag and
+                // (b) a ST_RemoveRepeatedPoints with a tolerance parameter and
+                // (c) a ST_AsTWKB implementation
 
-            // ! ST_RemoveRepeatedPoints()
-            s << "," << twkb_tolerance << ")";
-            // ! ST_Simplify(), with parameter to keep collapsed geometries
-            s << "," << twkb_tolerance << ",true)";
-            // ! ST_TWKB()
-            s << "," << twkb_rounding << ") AS geom";
+                // What number of decimals of rounding does the pixel size imply?
+                const int twkb_rounding = -1 * std::lround(log10(px_sz) + twkb_rounding_adjustment_) + 1;
+                // And what's that in map units?
+                const double twkb_tolerance = pow(10.0, -1.0 * twkb_rounding);
+
+                s << "SELECT ST_AsTWKB(";
+                s << "ST_Simplify(";
+                s << "ST_RemoveRepeatedPoints(";
+
+                if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
+                {
+                    s << "ST_ClipByBox2D(";
+                }
+                s << "\"" << geometryColumn_ << "\"";
+
+                // ! ST_ClipByBox2D()
+                if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
+                {
+                    s << "," << sql_bbox(box) << ")";
+                }
+
+                // ! ST_RemoveRepeatedPoints()
+                s << "," << twkb_tolerance << ")";
+                // ! ST_Simplify(), with parameter to keep collapsed geometries
+                s << "," << twkb_tolerance << ",true)";
+                // ! ST_TWKB()
+                s << "," << twkb_rounding << ") AS geom";
+            }
         }
         else
         {
@@ -1081,8 +1104,15 @@ box2d<double> postgis_datasource::envelope() const
             }
             else
             {
-                s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent(" <<geometryColumn_<< ") as ext from ";
+                s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)";
+                if (twkb_direct_)
+                {
+                    s << " FROM (SELECT ST_Extent(ST_GeomFromTWKB(" << geometryColumn_<< ")) as ext from ";
+                }
+                else
+                {
+                    s << " FROM (SELECT ST_Extent(" << geometryColumn_<< ") as ext from ";
+                }
 
                 if (extent_from_subquery_)
                 {
