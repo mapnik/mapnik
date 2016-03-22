@@ -11,8 +11,7 @@ alter table planet_osm_polygon_twkb add column twkb bytea;
 update planet_osm_polygon_twkb set twkb = ST_AsTWKB(way, 2);
 alter table planet_osm_polygon_twkb drop column way;
 ```
-_NOTE: `update planet_osm_polygon_twkb set twkb = ST_AsTWKB(way, 2);` should be using `ST_AsTWKB(ST_Simplify(ST_RemoveRepeatedPoints(way, <tolerance>),<tolerance>, true),2)`
-`
+*NOTE: `update planet_osm_polygon_twkb set twkb = ST_AsTWKB(way, 2);` should be using `ST_AsTWKB(ST_Simplify(ST_RemoveRepeatedPoints(way, <tolerance>),<tolerance>, true),2)`*
 
 
 #### Spatial index
