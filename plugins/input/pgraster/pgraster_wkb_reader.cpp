@@ -185,6 +185,7 @@ mapnik::raster_ptr read_data_band(mapnik::box2d<double> const& bbox,
   float* data = image.data();
   double nodataval;
   nodataval = reader(); // nodata value
+  double val;
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
       val = reader();
