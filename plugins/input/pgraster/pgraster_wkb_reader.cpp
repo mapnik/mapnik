@@ -183,12 +183,10 @@ mapnik::raster_ptr read_data_band(mapnik::box2d<double> const& bbox,
 {
   mapnik::image_gray32f image(width, height);
   float* data = image.data();
-  double nodataval;
-  nodataval = reader(); // nodata value
-  double val;
+  double nodataval = reader();
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
-      val = reader();
+      double val = reader();
       int off = y * width + x;
       data[off] = val;
     }
