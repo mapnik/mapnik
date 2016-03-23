@@ -37,9 +37,9 @@ namespace mapnik { namespace json {
 
 namespace repo = boost::spirit::repository;
 
-template <typename Iterator, typename ErrorHandler>
-extract_bounding_box_grammar<Iterator, ErrorHandler>::extract_bounding_box_grammar()
-    : extract_bounding_box_grammar::base_type(start,"bounding boxes")
+template <typename Iterator, typename Boxes, typename ErrorHandler>
+extract_bounding_box_grammar<Iterator, Boxes, ErrorHandler>::extract_bounding_box_grammar()
+    : extract_bounding_box_grammar::base_type(start, "GeoJSON bounding boxes")
 {
     qi::lit_type lit;
     qi::double_type double_;

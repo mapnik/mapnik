@@ -38,7 +38,8 @@
 namespace mapnik { namespace json {
 
 using position_type = mapnik::geometry::point<double>;
-using boxes_type = std::vector<std::pair<box2d<double>, std::pair<std::size_t, std::size_t>>>;
+using box_type = box2d<double>;
+using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 
 namespace qi = boost::spirit::qi;
 
@@ -74,20 +75,20 @@ struct push_box_impl
     }
 };
 
-template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
+template <typename Iterator, typename Boxes = boxes_type, typename ErrorHandler = error_handler<Iterator> >
 struct extract_bounding_box_grammar :
-        qi::grammar<Iterator, void(boxes_type&), space_type>
+        qi::grammar<Iterator, void(Boxes&), space_type>
 {
     extract_bounding_box_grammar();
     // rules
     qi::rule<Iterator, void(boxes_type&), space_type> start;
     qi::rule<Iterator, qi::locals<Iterator>, void(boxes_type&), space_type> features;
-    qi::rule<Iterator, qi::locals<int, box2d<double>>, void(boxes_type&, Iterator const&), space_type> feature;
-    qi::rule<Iterator, qi::locals<box2d<double>>, box2d<double>(), space_type> coords;
+    qi::rule<Iterator, qi::locals<int, box_type>, void(boxes_type&, Iterator const&), space_type> feature;
+    qi::rule<Iterator, qi::locals<box_type>, box_type(), space_type> coords;
     qi::rule<Iterator, boost::optional<position_type>(), space_type> pos;
-    qi::rule<Iterator, void(box2d<double>&), space_type> ring;
-    qi::rule<Iterator, void(box2d<double>&), space_type> rings;
-    qi::rule<Iterator, void(box2d<double>&), space_type> rings_array;
+    qi::rule<Iterator, void(box_type&), space_type> ring;
+    qi::rule<Iterator, void(box_type&), space_type> rings;
+    qi::rule<Iterator, void(box_type&), space_type> rings_array;
     // generic JSON support
     json::generic_json<Iterator> json;
     // phoenix functions
