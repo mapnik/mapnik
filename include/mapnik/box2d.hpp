@@ -66,12 +66,22 @@ private:
         swap(lhs.maxy_, rhs.maxy_);
     }
 public:
+
     box2d();
     box2d(T minx,T miny,T maxx,T maxy);
     box2d(coord<T,2> const& c0, coord<T,2> const& c1);
     box2d(box2d_type const& rhs);
     box2d(box2d_type const& rhs, agg::trans_affine const& tr);
+    // move
     box2d(box2d_type&& rhs);
+    // converting ctor
+    template <typename T1>
+    explicit box2d(box2d<T1> other)
+        : minx_(static_cast<value_type>(other.minx())),
+        miny_(static_cast<value_type>(other.miny())),
+        maxx_(static_cast<value_type>(other.maxx())),
+        maxy_(static_cast<value_type>(other.maxy()))
+        {}
     box2d_type& operator=(box2d_type other);
     T minx() const;
     T miny() const;
