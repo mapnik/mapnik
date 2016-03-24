@@ -29,7 +29,7 @@
 namespace mapnik { namespace detail {
 
 template <typename T>
-std::pair<bool, box2d<double>> process_geojson_file(T & boxes, std::string const& filename, bool validate_features, bool verbose);
+std::pair<bool, typename T::value_type::first_type> process_geojson_file(T & boxes, std::string const& filename, bool validate_features, bool verbose);
 
 }}
 

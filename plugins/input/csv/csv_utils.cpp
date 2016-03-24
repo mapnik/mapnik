@@ -238,8 +238,12 @@ void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const 
     // no-op by default
 }
 
-void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, boxes_type & boxes)
+template <typename T>
+void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
 {
+    using boxes_type = T;
+    using box_type = typename boxes_type::value_type::first_type;
+
     auto file_length = detail::file_length(csv_file);
     // set back to start
     csv_file.seekg(0, std::ios::beg);
@@ -412,7 +416,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, boxes_type & 
                     else
                         extent_ = box;
                 }
-                boxes.emplace_back(box, make_pair(record_offset, record_size));
+                boxes.emplace_back(box_type(box), make_pair(record_offset, record_size));
                 add_feature(++feature_count, values);
             }
             else
@@ -495,5 +499,9 @@ mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> con
     }
     return geom;
 }
+
+template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<double>, std::pair<std::size_t, std::size_t>>> & boxes);
+
+template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<float>, std::pair<std::size_t, std::size_t>>> & boxes);
 
 } // namespace csv_utils
