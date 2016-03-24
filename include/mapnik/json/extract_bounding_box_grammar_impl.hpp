@@ -29,11 +29,47 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/repository/include/qi_iter_pos.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 // stl
 #include <iostream>
 #include <string>
 
 namespace mapnik { namespace json {
+
+struct calculate_bounding_box_impl
+{
+    using result_type = void;
+    template <typename T0, typename T1>
+    result_type operator() (T0 & bbox, T1 const& pos) const
+    {
+        if (pos)
+        {
+            typename T0::value_type x = pos->x;
+            typename T0::value_type y = pos->y;
+            if (!bbox.valid())
+            {
+                bbox.init(x, y);
+            }
+            else
+            {
+                bbox.expand_to_include(x, y);
+            }
+        }
+    }
+};
+
+struct push_box_impl
+{
+    using result_type = void;
+    template <typename T0, typename T1, typename T2, typename T3>
+    void operator() (T0 & boxes, T1 const& begin, T2 const& box, T3 const& range) const
+    {
+        if (box.valid()) boxes.emplace_back(box,
+                                            std::make_pair(std::distance(begin,
+                                                                         range.begin()),
+                                                           std::distance(range.begin(), range.end())));
+    }
+};
 
 namespace repo = boost::spirit::repository;
 
@@ -60,6 +96,12 @@ extract_bounding_box_grammar<Iterator, Boxes, ErrorHandler>::extract_bounding_bo
     boost::spirit::repository::qi::iter_pos_type iter_pos;
     using qi::fail;
     using qi::on_error;
+
+    // phoenix functions
+    boost::phoenix::function<push_box_impl> push_box;
+    boost::phoenix::function<calculate_bounding_box_impl> calculate_bounding_box;
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
 
     start = features(_r1)
         ;
