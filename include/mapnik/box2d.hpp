@@ -50,7 +50,8 @@ template <typename T> class MAPNIK_DECL box2d
                                                               boost::multipliable2<box2d<T>, T > > > >
 {
 public:
-    using box2d_type = box2d<T>;
+    using value_type = T;
+    using box2d_type = box2d<value_type>;
 private:
     T minx_;
     T miny_;
@@ -99,6 +100,7 @@ public:
     void re_center(T cx,T cy);
     void re_center(coord<T,2> const& c);
     void init(T x0,T y0,T x1,T y1);
+    void init(T x, T y);
     void clip(box2d_type const& other);
     void pad(T padding);
     bool from_string(std::string const& str);
