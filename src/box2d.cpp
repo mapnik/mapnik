@@ -299,33 +299,43 @@ void box2d<T>::re_center(coord<T,2> const& c)
 }
 
 template <typename T>
-void box2d<T>::init(T x0,T y0,T x1,T y1)
+void box2d<T>::init(T x0, T y0, T x1, T y1)
 {
-    if (x0<x1)
+    if (x0 < x1)
     {
-        minx_=x0;maxx_=x1;
+        minx_ = x0;
+        maxx_ = x1;
     }
     else
     {
-        minx_=x1;maxx_=x0;
+        minx_ = x1;
+        maxx_ = x0;
     }
-    if (y0<y1)
+    if (y0 < y1)
     {
-        miny_=y0;maxy_=y1;
+        miny_ = y0;
+        maxy_ = y1;
     }
     else
     {
-        miny_=y1;maxy_=y0;
+        miny_ = y1;
+        maxy_ = y0;
     }
+}
+
+template <typename T>
+void box2d<T>::init(T x, T y)
+{
+    init(x, y, x, y);
 }
 
 template <typename T>
 void box2d<T>::clip(box2d_type const& other)
 {
-    minx_ = std::max(minx_,other.minx());
-    miny_ = std::max(miny_,other.miny());
-    maxx_ = std::min(maxx_,other.maxx());
-    maxy_ = std::min(maxy_,other.maxy());
+    minx_ = std::max(minx_, other.minx());
+    miny_ = std::max(miny_, other.miny());
+    maxx_ = std::min(maxx_, other.maxx());
+    maxy_ = std::min(maxy_, other.maxy());
 }
 
 template <typename T>
@@ -337,7 +347,6 @@ void box2d<T>::pad(T padding)
     maxy_ += padding;
 }
 
-
 template <typename T>
 bool box2d<T>::from_string(std::string const& str)
 {
@@ -346,8 +355,7 @@ bool box2d<T>::from_string(std::string const& str)
     boost::spirit::ascii::space_type space;
     bool r = boost::spirit::qi::phrase_parse(str.begin(),
                                              str.end(),
-                                             double_ >> -lit(',') >> double_ >> -lit(',')
-                                             >> double_ >> -lit(',') >> double_,
+                                             double_ >> -lit(',') >> double_ >> -lit(',') >> double_ >> -lit(',') >> double_,
                                              space,
                                              *this);
     return r;

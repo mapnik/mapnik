@@ -29,7 +29,7 @@
 namespace mapnik { namespace detail {
 
 template <typename T>
-std::pair<bool, box2d<double>> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote);
+std::pair<bool, typename T::value_type::first_type> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote);
 
 }}
 
