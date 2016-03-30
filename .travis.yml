@@ -59,9 +59,11 @@ install:
  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export CCACHE_READONLY=1; fi
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
- - on 'osx' brew rm postgis --force
- - on 'osx' brew install postgis --force
- - on 'osx' pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres
+ - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
+ - on 'osx' rm -rf ${DATA_PATH}
+ - on 'osx' initdb ${DATA_PATH} -E utf8
+ - on 'osx' pg_ctl -w start -l postgres.log --pgdata ${DATA_PATH};
+ - on 'osx' cat postgres.log;
  - on 'osx' createuser -s postgres
  - psql -c 'create database template_postgis;' -U postgres
  - psql -c 'create extension postgis;' -d template_postgis -U postgres
