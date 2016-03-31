@@ -323,10 +323,10 @@ private:
             std::memset(node_record.get(), 0, recsize);
             std::memcpy(node_record.get(), &offset, 4);
             std::memcpy(node_record.get() + 4, &n->extent_, sizeof(bbox_type));
-            std::memcpy(node_record.get() + 36, &shape_count, 4);
+            std::memcpy(node_record.get() + 4 + sizeof(bbox_type), &shape_count, 4);
             for (int i=0; i < shape_count; ++i)
             {
-                memcpy(node_record.get() + 40 + i * sizeof(value_type), &(n->cont_[i]), sizeof(value_type));
+                memcpy(node_record.get() + 8 + sizeof(bbox_type) + i * sizeof(value_type), &(n->cont_[i]), sizeof(value_type));
             }
             int num_subnodes=0;
             for (int i = 0; i < 4; ++i)
@@ -336,7 +336,7 @@ private:
                     ++num_subnodes;
                 }
             }
-            std::memcpy(node_record.get() + 40 + shape_count * sizeof(value_type), &num_subnodes, 4);
+            std::memcpy(node_record.get() + 8 + sizeof(bbox_type) + shape_count * sizeof(value_type), &num_subnodes, 4);
             out.write(node_record.get(),recsize);
             for (int i = 0; i < 4; ++i)
             {
