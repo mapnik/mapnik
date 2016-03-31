@@ -198,12 +198,11 @@ int main (int argc, char** argv)
         if (extent.valid())
         {
             std::clog << extent << std::endl;
-            mapnik::box2d<double> extent_d(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
-            mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent_d, depth, ratio);
+            //mapnik::box2d<double> extent_d(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
+            mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
             for (auto const& item : boxes)
             {
-                auto ext_f = std::get<0>(item);
-                tree.insert(std::get<1>(item), mapnik::box2d<double>(ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy()));
+                tree.insert(std::get<1>(item), std::get<0>(item));
             }
 
             std::fstream file((filename + ".index").c_str(),

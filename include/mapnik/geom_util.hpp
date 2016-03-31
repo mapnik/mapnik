@@ -196,28 +196,32 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 }
 
 // filters
+template <typename T = double>
 struct filter_in_box
 {
-    box2d<double> box_;
-    explicit filter_in_box(box2d<double> const& box)
+    using value_type = T;
+    box2d<value_type> box_;
+    explicit filter_in_box(box2d<value_type> const& box)
         : box_(box) {}
 
-    bool pass(box2d<double> const& extent) const
+    bool pass(box2d<value_type> const& extent) const
     {
         return extent.intersects(box_);
     }
 };
 
+template <typename T = double>
 struct filter_at_point
 {
-    box2d<double> box_;
+    using value_type = T;
+    box2d<value_type> box_;
     explicit filter_at_point(coord2d const& pt, double tol=0)
         : box_(pt,pt)
     {
         box_.pad(tol);
     }
 
-    bool pass(box2d<double> const& extent) const
+    bool pass(box2d<value_type> const& extent) const
     {
         return extent.intersects(box_);
     }

@@ -537,20 +537,20 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
         if (indexed_)
         {
-            filter_in_box filter(q.get_bbox());
+            filter_in_box<double> filter(q.get_bbox());
 
-            return featureset_ptr(new ogr_index_featureset<filter_in_box>(ctx,
-                                                                          *layer,
-                                                                          filter,
-                                                                          index_name_,
-                                                                          desc_.get_encoding()));
+            return featureset_ptr(new ogr_index_featureset<filter_in_box<double> >(ctx,
+                                                                                   *layer,
+                                                                                   filter,
+                                                                                   index_name_,
+                                                                                   desc_.get_encoding()));
         }
         else
         {
             return featureset_ptr(new ogr_featureset(ctx,
-                                                      *layer,
-                                                      q.get_bbox(),
-                                                      desc_.get_encoding()));
+                                                     *layer,
+                                                     q.get_bbox(),
+                                                     desc_.get_encoding()));
         }
     }
 
@@ -578,13 +578,13 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
 
         if (indexed_)
         {
-            filter_at_point filter(pt, tol);
+            filter_at_point<double> filter(pt, tol);
 
-            return featureset_ptr(new ogr_index_featureset<filter_at_point> (ctx,
-                                                                             *layer,
-                                                                             filter,
-                                                                             index_name_,
-                                                                             desc_.get_encoding()));
+            return featureset_ptr(new ogr_index_featureset<filter_at_point<double>> (ctx,
+                                                                                     *layer,
+                                                                                     filter,
+                                                                                     index_name_,
+                                                                                     desc_.get_encoding()));
         }
         else
         {

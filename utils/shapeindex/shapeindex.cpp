@@ -171,7 +171,7 @@ int main (int argc,char** argv)
         }
         int pos = 50;
         shx.seek(pos * 2);
-        mapnik::quad_tree<mapnik::detail::node> tree(extent, depth, ratio);
+        mapnik::quad_tree<mapnik::detail::node> tree(mapnik::box2d<float>(extent), depth, ratio);
         int count = 0;
 
         if (shape_type != shape_io::shape_null)
@@ -234,7 +234,7 @@ int main (int argc,char** argv)
                             {
                                 std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                             }
-                            tree.insert(mapnik::detail::node(offset * 2, start, end),item_ext);
+                            tree.insert(mapnik::detail::node(offset * 2, start, end), mapnik::box2d<float>(item_ext));
                             ++count;
                         }
                     }
@@ -251,7 +251,7 @@ int main (int argc,char** argv)
                     {
                         std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                     }
-                    tree.insert(mapnik::detail::node(offset * 2,-1,0),item_ext);
+                    tree.insert(mapnik::detail::node(offset * 2,-1,0), mapnik::box2d<float>(item_ext));
                     ++count;
                 }
             }

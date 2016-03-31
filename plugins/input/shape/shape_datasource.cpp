@@ -236,25 +236,25 @@ featureset_ptr shape_datasource::features(query const& q) const
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features");
 #endif
 
-    filter_in_box filter(q.get_bbox());
+    filter_in_box<float> filter(mapnik::box2d<float>(q.get_bbox()));
     if (indexed_)
     {
         std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
         return featureset_ptr
-            (new shape_index_featureset<filter_in_box>(filter,
-                                                       std::move(shape_ptr),
-                                                       q.property_names(),
-                                                       desc_.get_encoding(),
-                                                       shape_name_,
-                                                       row_limit_));
+            (new shape_index_featureset<filter_in_box<float> >(filter,
+                                                               std::move(shape_ptr),
+                                                               q.property_names(),
+                                                               desc_.get_encoding(),
+                                                               shape_name_,
+                                                               row_limit_));
     }
     else
     {
-        return std::make_shared<shape_featureset<filter_in_box> >(filter,
-                                                                  shape_name_,
-                                                                  q.property_names(),
-                                                                  desc_.get_encoding(),
-                                                                  row_limit_);
+        return std::make_shared<shape_featureset<filter_in_box<float> > >(filter,
+                                                                          shape_name_,
+                                                                          q.property_names(),
+                                                                          desc_.get_encoding(),
+                                                                          row_limit_);
     }
 }
 
@@ -264,7 +264,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");
 #endif
 
-    filter_at_point filter(pt,tol);
+    filter_at_point<float> filter(pt, tol);
     // collect all attribute names
     auto const& desc = desc_.get_descriptors();
     std::set<std::string> names;
@@ -278,20 +278,20 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     {
         std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
         return featureset_ptr
-            (new shape_index_featureset<filter_at_point>(filter,
-                                                         std::move(shape_ptr),
-                                                         names,
-                                                         desc_.get_encoding(),
-                                                         shape_name_,
-                                                         row_limit_));
+            (new shape_index_featureset<filter_at_point<float> >(filter,
+                                                                 std::move(shape_ptr),
+                                                                 names,
+                                                                 desc_.get_encoding(),
+                                                                 shape_name_,
+                                                                 row_limit_));
     }
     else
     {
-        return std::make_shared<shape_featureset<filter_at_point> >(filter,
-                                                                    shape_name_,
-                                                                    names,
-                                                                    desc_.get_encoding(),
-                                                                    row_limit_);
+        return std::make_shared<shape_featureset<filter_at_point<float> > >(filter,
+                                                                            shape_name_,
+                                                                            names,
+                                                                            desc_.get_encoding(),
+                                                                            row_limit_);
     }
 }
 

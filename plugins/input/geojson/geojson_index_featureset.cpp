@@ -33,7 +33,7 @@
 #include <vector>
 #include <fstream>
 
-geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::filter_in_box const& filter)
+geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::filter_in_box<float> const& filter)
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     //
@@ -63,8 +63,9 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
     std::ifstream index(indexname.c_str(), std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: can't open index file " + indexname);
     mapnik::util::spatial_index<value_type,
-                                mapnik::filter_in_box,
-                                std::ifstream>::query(filter, index, positions_);
+                                mapnik::filter_in_box<float>,
+                                std::ifstream,
+                                mapnik::box2d<float>>::query(filter, index, positions_);
 
     std::sort(positions_.begin(), positions_.end(),
               [](value_type const& lhs, value_type const& rhs) { return lhs.first < rhs.first;});

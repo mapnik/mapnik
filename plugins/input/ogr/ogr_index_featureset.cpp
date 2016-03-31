@@ -207,5 +207,5 @@ feature_ptr ogr_index_featureset<filterT>::next()
     return feature_ptr();
 }
 
-template class ogr_index_featureset<mapnik::filter_in_box>;
-template class ogr_index_featureset<mapnik::filter_at_point>;
+template class ogr_index_featureset<mapnik::filter_in_box<double>>;
+template class ogr_index_featureset<mapnik::filter_at_point<double>>;

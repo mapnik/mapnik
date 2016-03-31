@@ -156,9 +156,10 @@ csv_datasource::csv_datasource(parameters const& params)
             using value_type = std::pair<std::size_t, std::size_t>;
             std::ifstream index(filename_ + ".index", std::ios::binary);
             if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
-            extent_ = mapnik::util::spatial_index<value_type,
-                                                  mapnik::filter_in_box,
-                                                  std::ifstream>::bounding_box(index);
+            auto extent = mapnik::util::spatial_index<value_type,
+                                                      mapnik::filter_in_box<float>,
+                                                      std::ifstream>::bounding_box(index);
+            extent_ = mapnik::box2d<double>(extent); //conversion
         }
         //in.close(); no need to call close, rely on dtor
     }
@@ -320,10 +321,10 @@ csv_datasource::get_geometry_type_impl(std::istream & stream) const
         std::ifstream index(filename_ + ".index", std::ios::binary);
         if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
 
-        mapnik::filter_in_box filter(extent_);
+        mapnik::filter_in_box<float> filter((mapnik::box2d<float>(extent_)));
         std::vector<value_type> positions;
         mapnik::util::spatial_index<value_type,
-                                    mapnik::filter_in_box,
+                                    mapnik::filter_in_box<float>,
                                     std::ifstream>::query_first_n(filter, index, positions, 5);
         int multi_type = 0;
         for (auto const& val : positions)
@@ -427,7 +428,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         }
         else if (has_disk_index_)
         {
-            mapnik::filter_in_box filter(q.get_bbox());
+            mapnik::filter_in_box<float> filter(mapnik::box2d<float>(q.get_bbox()));
             return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, quote_, headers_, ctx_);
         }
     }

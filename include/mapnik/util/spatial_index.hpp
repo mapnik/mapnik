@@ -47,7 +47,7 @@ bool check_spatial_index(InputStream& in)
     return (std::strncmp(header, "mapnik-index",12) == 0);
 }
 
-template <typename Value, typename Filter, typename InputStream, typename BBox = box2d<double> >
+template <typename Value, typename Filter, typename InputStream, typename BBox = box2d<float> >
 class spatial_index
 {
     using bbox_type = BBox;

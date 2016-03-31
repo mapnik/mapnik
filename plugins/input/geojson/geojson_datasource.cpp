@@ -222,14 +222,16 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
     using value_type = std::pair<std::size_t, std::size_t>;
     std::ifstream index(filename_ + ".index", std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
-    extent_ = mapnik::util::spatial_index<value_type,
-                                          mapnik::filter_in_box,
-                                          std::ifstream>::bounding_box(index);
-    mapnik::filter_in_box filter(extent_);
+    extent_ = mapnik::box2d<double>(mapnik::util::spatial_index<value_type,
+                                    mapnik::filter_in_box<float>,
+                                    std::ifstream,
+                                    mapnik::box2d<float>>::bounding_box(index));
+    mapnik::filter_in_box<float> filter((mapnik::box2d<float>(extent_)));
     std::vector<value_type> positions;
     mapnik::util::spatial_index<value_type,
-                                mapnik::filter_in_box,
-                                std::ifstream>::query_first_n(filter, index, positions, num_features_to_query_);
+                                mapnik::filter_in_box<float>,
+                                std::ifstream,
+                                mapnik::box2d<float>>::query_first_n(filter, index, positions, num_features_to_query_);
 
     mapnik::util::file file(filename_);
     if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
@@ -448,11 +450,12 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
         using value_type = std::pair<std::size_t, std::size_t>;
         std::ifstream index(filename_ + ".index", std::ios::binary);
         if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
-        mapnik::filter_in_box filter(extent_);
+        mapnik::filter_in_box<float> filter((mapnik::box2d<float>(extent_)));
         std::vector<value_type> positions;
         mapnik::util::spatial_index<value_type,
-                                    mapnik::filter_in_box,
-                                    std::ifstream>::query_first_n(filter, index, positions, num_features_to_query_);
+                                    mapnik::filter_in_box<float>,
+                                    std::ifstream,
+                                    mapnik::box2d<float>>::query_first_n(filter, index, positions, num_features_to_query_);
 
         mapnik::util::file file(filename_);
 
@@ -582,7 +585,7 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
         }
         else if (has_disk_index_)
         {
-            mapnik::filter_in_box filter(q.get_bbox());
+            mapnik::filter_in_box<float> filter(mapnik::box2d<float>(q.get_bbox()));
             return std::make_shared<geojson_index_featureset>(filename_, filter);
         }
 

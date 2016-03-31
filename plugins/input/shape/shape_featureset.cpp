@@ -95,7 +95,7 @@ feature_ptr shape_featureset<filterT>::next()
         {
             double x = record.read_double();
             double y = record.read_double();
-            if (!filter_.pass(mapnik::box2d<double>(x,y,x,y)))
+            if (!filter_.pass(mapnik::box2d<float>(x,y,x,y)))
                 continue;
             feature->set_geometry(mapnik::geometry::point<double>(x,y));
             break;
@@ -105,7 +105,7 @@ feature_ptr shape_featureset<filterT>::next()
         case shape_io::shape_multipointz:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            if (!filter_.pass(mapnik::box2d<float>(feature_bbox_))) continue;
             int num_points = record.read_ndr_integer();
             mapnik::geometry::multi_point<double> multi_point;
             for (int i = 0; i < num_points; ++i)
@@ -123,7 +123,7 @@ feature_ptr shape_featureset<filterT>::next()
         case shape_io::shape_polylinez:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            if (!filter_.pass(mapnik::box2d<float>(feature_bbox_))) continue;
             feature->set_geometry(shape_io::read_polyline(record));
             break;
         }
@@ -132,7 +132,7 @@ feature_ptr shape_featureset<filterT>::next()
         case shape_io::shape_polygonz:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            if (!filter_.pass(mapnik::box2d<float>(feature_bbox_))) continue;
             feature->set_geometry(shape_io::read_polygon(record));
             break;
         }
@@ -167,5 +167,5 @@ feature_ptr shape_featureset<filterT>::next()
 template <typename filterT>
 shape_featureset<filterT>::~shape_featureset() {}
 
-template class shape_featureset<mapnik::filter_in_box>;
-template class shape_featureset<mapnik::filter_at_point>;
+template class shape_featureset<mapnik::filter_in_box<float>>;
+template class shape_featureset<mapnik::filter_at_point<float>>;

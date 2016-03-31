@@ -117,7 +117,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         case shape_io::shape_multipointz:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            if (!filter_.pass(mapnik::box2d<float>(feature_bbox_))) continue;
             int num_points = record.read_ndr_integer();
             mapnik::geometry::multi_point<double> multi_point;
             for (int i = 0; i < num_points; ++i)
@@ -134,7 +134,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         case shape_io::shape_polylinez:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            if (!filter_.pass(mapnik::box2d<float>(feature_bbox_))) continue;
             if (parts.size() < 2) feature->set_geometry(shape_io::read_polyline(record));
             else feature->set_geometry(shape_io::read_polyline_parts(record, parts));
             break;
@@ -144,7 +144,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         case shape_io::shape_polygonz:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            if (!filter_.pass(mapnik::box2d<float>(feature_bbox_))) continue;
             if (parts.size() < 2) feature->set_geometry(shape_io::read_polygon(record));
             else feature->set_geometry(shape_io::read_polygon_parts(record, parts));
             break;
@@ -181,5 +181,5 @@ feature_ptr shape_index_featureset<filterT>::next()
 template <typename filterT>
 shape_index_featureset<filterT>::~shape_index_featureset() {}
 
-template class shape_index_featureset<mapnik::filter_in_box>;
-template class shape_index_featureset<mapnik::filter_at_point>;
+template class shape_index_featureset<mapnik::filter_in_box<float>>;
+template class shape_index_featureset<mapnik::filter_at_point<float>>;

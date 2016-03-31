@@ -45,7 +45,7 @@ class csv_index_featureset : public mapnik::Featureset
 public:
 
     csv_index_featureset(std::string const& filename,
-                         mapnik::filter_in_box const& filter,
+                         mapnik::filter_in_box<float> const& filter,
                          locator_type const& locator,
                          char separator,
                          char quote,

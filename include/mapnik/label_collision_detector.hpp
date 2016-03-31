@@ -67,7 +67,7 @@ private:
 // quad_tree based label collision detector
 class label_collision_detector2 : util::noncopyable
 {
-    using tree_t = quad_tree<box2d<double> >;
+    using tree_t = quad_tree<box2d<double>, box2d<double> >;
     tree_t tree_;
 public:
 
@@ -96,7 +96,7 @@ public:
 // quad_tree based label collision detector with seperate check/insert
 class label_collision_detector3 : util::noncopyable
 {
-    using tree_t = quad_tree< box2d<double> >;
+    using tree_t = quad_tree< box2d<double>, box2d<double>>;
     tree_t tree_;
 public:
 
@@ -141,7 +141,7 @@ public:
     };
 
 private:
-    using tree_t = quad_tree< label >;
+    using tree_t = quad_tree< label, box2d<double>>;
     tree_t tree_;
 
 public:
