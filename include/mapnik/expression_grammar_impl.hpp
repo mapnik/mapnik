@@ -270,7 +270,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     quoted_ustring %= omit[quote_char[_a = _1]]
         >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
         >> lit(_a);
-    unquoted_ustring %= ((alpha >> *alnum) - lit("not"));
+    unquoted_ustring %= no_skip[alpha >> *alnum] - lit("not");
     attr %= '[' >> no_skip[+~char_(']')] >> ']';
     global_attr %= '@' >> no_skip[alpha >> * (alnum | char_('-'))];
 
