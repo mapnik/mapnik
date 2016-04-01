@@ -87,6 +87,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string() , space_type> attr;
     qi::rule<Iterator, std::string() , space_type> global_attr;
     qi::rule<Iterator, std::string(), qi::locals<char> > quoted_ustring;
+    qi::rule<Iterator, std::string()> unquoted_ustring;
     qi::rule<Iterator, std::string(), space_type> ustring;
 
     qi::symbols<char const, char const> unesc_char;
