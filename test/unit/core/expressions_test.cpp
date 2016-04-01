@@ -182,4 +182,10 @@ TEST_CASE("expressions")
     // 'Québec' =~ m:^Q\S*$:
     TRY_CHECK(eval(" [name].match('^Q\\S*$') ") == true);
     TRY_CHECK(parse_and_dump(" [name].match('^Q\\S*$') ") == "[name].match('^Q\\S*$')");
+
+    // string & value concatenation
+    // this should evaluate as two strings concatenating, but currently fails
+    TRY_CHECK(eval("Hello + '!'") == eval("'Hello!'"));
+    // this should evaulate as a combination of an int value and string, but fails
+    TRY_CHECK(eval("[int]+m") == eval("'123m'"));
 }
