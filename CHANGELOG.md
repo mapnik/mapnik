@@ -8,13 +8,14 @@ For a complete change history, see the git log.
 
 ## 3.0.11
 
-Released:
+Released: April 1, 2016
 
 (Packaged from )
 
 #### Summary
 
  - Raster scaling: fixed crash and clipping negative pixel values of floating point rasters (https://github.com/mapnik/mapnik/pull/3349)
+ - Re-added support for unquoted strings in filter expressions, which was removed in [#3287](https://github.com/mapnik/mapnik/pull/3287). This removal broke styles for some users ([#3387](https://github.com/mapnik/mapnik/issues/3387)) so reintroducing it for now, but the plan will be to remove this feature since "unquoted strings in arbitrary expressions is evil".
 
 ## 3.0.10
 
