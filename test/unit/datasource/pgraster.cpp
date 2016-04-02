@@ -35,6 +35,8 @@ clang++ -o test-pgraster -g -I./test/ test/unit/run.cpp test/unit/datasource/pgr
 
 #include <boost/optional/optional_io.hpp>
 
+namespace {
+
 int run(std::string const& command, bool okay_to_fail = false)
 {
     std::string cmd;
@@ -61,11 +63,11 @@ int run(std::string const& command, bool okay_to_fail = false)
     return worked;
 }
 
-namespace {
 std::string dbname("mapnik-tmp-postgis-test-db");
-}
 
-TEST_CASE("postgis") {
+} // anonymous namespace
+
+TEST_CASE("pgraster") {
 
     SECTION("Postgis data initialization")
     {
