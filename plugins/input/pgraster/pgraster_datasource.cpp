@@ -257,7 +257,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                         if (srid_ == 0)
                         {
                             const char* srid_c = rs->getValue("srid");
-                            if (srid_c != NULL)
+                            if (srid_c != nullptr)
                             {
                                 int result = 0;
                                 const char * end = srid_c + std::strlen(srid_c);
@@ -291,13 +291,13 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     s.str("");
 
                     s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM "
-                      << populate_tokens(table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
+                      << populate_tokens(table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT nullptr LIMIT 1;";
 
                     shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
                     {
                         const char* srid_c = rs->getValue("srid");
-                        if (srid_c != NULL)
+                        if (srid_c != nullptr)
                         {
                             int result = 0;
                             const char * end = srid_c + std::strlen(srid_c);

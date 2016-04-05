@@ -105,7 +105,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
     streamRec.size = file.size();
     streamRec.descriptor.pointer = file.get();
     streamRec.read  = ft_read_cb;
-    streamRec.close = NULL;
+    streamRec.close = nullptr;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
     int num_faces = 0;
@@ -269,7 +269,7 @@ bool freetype_engine::can_open(std::string const& face_name,
     streamRec.size = file.size();
     streamRec.descriptor.pointer = file.get();
     streamRec.read  = ft_read_cb;
-    streamRec.close = NULL;
+    streamRec.close = nullptr;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
     // -1 is used to quickly check if the font file appears valid without iterating each face

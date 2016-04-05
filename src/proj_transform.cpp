@@ -124,7 +124,7 @@ unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
     geometry::point<double> * ptr = ls.data();
     double * x = reinterpret_cast<double*>(ptr);
     double * y = x + 1;
-    double * z = NULL;
+    double * z = nullptr;
     if(!forward(x, y, z, size, 2))
     {
         return size;
@@ -264,7 +264,7 @@ unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
     geometry::point<double> * ptr = ls.data();
     double * x = reinterpret_cast<double*>(ptr);
     double * y = x + 1;
-    double * z = NULL;
+    double * z = nullptr;
     if(!backward(x, y, z, size, 2))
     {
         return size;

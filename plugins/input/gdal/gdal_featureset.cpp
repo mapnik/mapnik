@@ -403,15 +403,15 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     if( red->GetBand() == 1 && green->GetBand() == 2 && blue->GetBand() == 3 )
                     {
                         int nBandsToRead = 3;
-                        if( alpha != NULL && alpha->GetBand() == 4 && !raster_has_nodata )
+                        if( alpha != nullptr && alpha->GetBand() == 4 && !raster_has_nodata )
                         {
                             nBandsToRead = 4;
-                            alpha = NULL; // to avoid reading it again afterwards
+                            alpha = nullptr; // to avoid reading it again afterwards
                         }
                         raster_io_error = dataset_.RasterIO(GF_Read, x_off, y_off, width, height,
                                                             image.bytes(),
                                                             image.width(), image.height(), GDT_Byte,
-                                                            nBandsToRead, NULL,
+                                                            nBandsToRead, nullptr,
                                                             4, 4 * image.width(), 1);
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());

@@ -66,7 +66,7 @@ read_uint16(const uint8_t** from, uint8_t littleEndian) {
 /*
 int16_t
 read_int16(const uint8_t** from, uint8_t littleEndian) {
-    assert(NULL != from);
+    assert(nullptr != from);
 
     return read_uint16(from, littleEndian);
 }

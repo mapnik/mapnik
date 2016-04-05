@@ -105,7 +105,7 @@ private:
 
 inline ScriptRun::ScriptRun()
 {
-    reset(NULL, 0, 0);
+    reset(nullptr, 0, 0);
 }
 
 inline ScriptRun::ScriptRun(const UChar chars[], int32_t length)
