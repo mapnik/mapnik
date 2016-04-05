@@ -60,6 +60,10 @@ PluginInfo::PluginInfo(std::string const& filename,
           {
                 callable_returning_string name = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
                 if (name) name_ = name();
+                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));;
+                if (init_once) {
+                    init_once();
+                }
           }
 #else
   #ifdef MAPNIK_HAS_DLCFN
@@ -68,6 +72,10 @@ PluginInfo::PluginInfo(std::string const& filename,
           {
                 callable_returning_string name = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
                 if (name) name_ = name();
+                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));;
+                if (init_once) {
+                    init_once();
+                }
           }
   #else
           throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");

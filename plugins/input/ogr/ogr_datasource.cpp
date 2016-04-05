@@ -59,6 +59,17 @@ using mapnik::datasource_exception;
 using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
+static std::once_flag once_flag;
+
+extern "C" MAPNIK_EXP void on_plugin_load()
+{
+    // initialize ogr formats
+    // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
+    std::call_once(once_flag,[](){
+        std::clog << "calling once ogr\n";
+        OGRRegisterAll();
+    });
+}
 
 ogr_datasource::ogr_datasource(parameters const& params)
     : datasource(params),
@@ -86,10 +97,6 @@ void ogr_datasource::init(mapnik::parameters const& params)
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "ogr_datasource::init");
 #endif
-
-    // initialize ogr formats
-    // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
-    OGRRegisterAll();
 
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
