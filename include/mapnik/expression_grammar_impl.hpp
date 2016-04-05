@@ -168,7 +168,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         ;
 
     expr = logical_expr [_val = _1]
-        | ustring [_val = unicode(_1)]
+        //| ustring [_val = unicode(_1)]
         ;
 
     logical_expr = not_expr [_val = _1]
@@ -255,6 +255,9 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
         | unary_function_expr [_val = _1]
         | binary_function_expr [_val = _1]
         | '(' > logical_expr [_val = _1 ] > ')'
+        //  TODO: this is a backward compatibility hack to allow unquoted strings
+        | unquoted_ustring [_val = unicode(_1)]
+        // ^ https://github.com/mapnik/mapnik/pull/3389
         ;
 
     unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
@@ -267,6 +270,7 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
     quoted_ustring %= omit[quote_char[_a = _1]]
         >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
         >> lit(_a);
+    unquoted_ustring %= no_skip[alpha >> *alnum] - lit("not");
     attr %= '[' >> no_skip[+~char_(']')] >> ']';
     global_attr %= '@' >> no_skip[alpha >> * (alnum | char_('-'))];
 
