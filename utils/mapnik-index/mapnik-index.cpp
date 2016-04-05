@@ -198,7 +198,6 @@ int main (int argc, char** argv)
         if (extent.valid())
         {
             std::clog << extent << std::endl;
-            //mapnik::box2d<double> extent_d(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
             mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
             for (auto const& item : boxes)
             {
