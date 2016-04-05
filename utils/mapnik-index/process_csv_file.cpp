@@ -46,6 +46,7 @@ namespace mapnik { namespace detail {
 template <typename T>
 std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote)
 {
+    using box_type = typename T::value_type::first_type;
     csv_utils::csv_file_parser p;
     p.manual_headers_ = manual_headers;
     p.separator_ = separator;
@@ -65,7 +66,7 @@ std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, s
     else
     {
         std::clog << "Error : cannot mmap " << filename << std::endl;
-        return std::make_pair(false, box2d<float>(p.extent_));
+        return std::make_pair(false, box_type(p.extent_));
     }
 #else
  #if defined(_WINDOWS)
@@ -76,18 +77,18 @@ std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, s
     if (!csv_file.is_open())
     {
         std::clog << "Error : cannot open " << filename << std::endl;
-        return std::make_pair(false, box2d<float>(p.extent_));
+        return std::make_pair(false, box_type(p.extent_));
     }
 #endif
     try
     {
         p.parse_csv_and_boxes(csv_file, boxes);
-        return std::make_pair(true, box2d<float>(p.extent_));
+        return std::make_pair(true, box_type(p.extent_));
     }
     catch (std::exception const& ex)
     {
         std::clog << ex.what() << std::endl;
-        return std::make_pair(false, box2d<float>(p.extent_));
+        return std::make_pair(false, box_type(p.extent_));
     }
 }
 
