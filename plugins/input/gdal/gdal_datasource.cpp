@@ -50,7 +50,6 @@ extern "C" MAPNIK_EXP void on_plugin_load()
 {
     // initialize gdal formats
     std::call_once(once_flag,[](){
-        std::clog << "calling once gdal\n";
         GDALAllRegister();
     });
 }

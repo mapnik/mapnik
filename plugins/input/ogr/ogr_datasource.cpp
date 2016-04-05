@@ -66,7 +66,6 @@ extern "C" MAPNIK_EXP void on_plugin_load()
     // initialize ogr formats
     // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
     std::call_once(once_flag,[](){
-        std::clog << "calling once ogr\n";
         OGRRegisterAll();
     });
 }
