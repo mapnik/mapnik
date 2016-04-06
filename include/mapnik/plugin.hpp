@@ -39,6 +39,7 @@ class PluginInfo : util::noncopyable
 {
 public:
     using callable_returning_string = const char* (*) ();
+    using callable_returning_void = void (*) ();
     PluginInfo (std::string const& filename,
                 std::string const& library_name);
     ~PluginInfo();

@@ -44,11 +44,14 @@ using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
+static std::once_flag once_flag;
 
-static bool GDALAllRegister_once_()
+extern "C" MAPNIK_EXP void on_plugin_load()
 {
-    static bool const quiet_unused = (GDALAllRegister(), true);
-    return quiet_unused;
+    // initialize gdal formats
+    std::call_once(once_flag,[](){
+        GDALAllRegister();
+    });
 }
 
 gdal_datasource::gdal_datasource(parameters const& params)
@@ -59,8 +62,6 @@ gdal_datasource::gdal_datasource(parameters const& params)
       nodata_tolerance_(*params.get<double>("nodata_tolerance",1e-12))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
-
-    GDALAllRegister_once_();
 
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::init");
