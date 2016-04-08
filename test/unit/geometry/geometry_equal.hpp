@@ -1,4 +1,3 @@
-
 #ifndef MAPNIK_UNIT_GEOMETRY_EQUAL
 #define MAPNIK_UNIT_GEOMETRY_EQUAL
 
@@ -85,7 +84,15 @@ auto zip_crange(Conts&... conts)
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/variant.hpp>
 
-using namespace mapnik::geometry;
+using mapnik::geometry::geometry;
+using mapnik::geometry::geometry_empty;
+using mapnik::geometry::point;
+using mapnik::geometry::line_string;
+using mapnik::geometry::polygon;
+using mapnik::geometry::multi_point;
+using mapnik::geometry::multi_line_string;
+using mapnik::geometry::multi_polygon;
+using mapnik::geometry::geometry_collection;
 
 template <typename T>
 void assert_g_equal(geometry<T> const& g1, geometry<T> const& g2);
