@@ -29,8 +29,6 @@
 #include <type_traits>
 #include <cstddef>
 
-
-
 namespace mapnik { namespace geometry {
 
 template <typename T>
@@ -45,17 +43,20 @@ struct point
     point(mapnik::coord<double, 2> const& c)
         : x(c.x), y(c.y) {}
 
-    friend inline bool operator== (point<T> const& a, point<T> const& b)
+    inline bool operator== (point<T> const& other) const
     {
-        return a.x == b.x && a.y == b.y;
+        return x == other.x && y == other.y;
     }
-    friend inline bool operator!= (point<T> const& a, point <T> const& b)
+
+    inline bool operator!= (point<T> const& other) const
     {
-        return a.x != b.x  || a.y != b.y;
+        return x != other.x || y != other.y;
     }
     value_type x;
     value_type y;
 };
+
+
 
 
 template <typename T>
