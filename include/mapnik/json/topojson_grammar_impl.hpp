@@ -33,7 +33,7 @@
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::coordinate,
     (double, x)
-    (double, y)
+     (double, y)
     )
 
 BOOST_FUSION_ADAPT_STRUCT(

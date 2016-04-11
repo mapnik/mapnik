@@ -2,7 +2,7 @@
 // mapnik
 #include <mapnik/wkb.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_geometry_adapters.hpp>
 #include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
 // bool

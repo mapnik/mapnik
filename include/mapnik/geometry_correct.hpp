@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_CORRECT_HPP
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_geometry_adapters.hpp>
 #include <mapnik/util/variant.hpp>
 
 #pragma GCC diagnostic push
