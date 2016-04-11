@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
-set -eu
-
 MASON_NAME=mapnik
 MASON_VERSION=latest
 MASON_LIB_FILE=lib/libmapnik-wkt.a
 
-. ${MASON_DIR:-~/.mason}/mason.sh
+# warning: may break when https://github.com/mapbox/mason/issues/141 lands
+# hence we are pinned for now to older mason in bootstrap.sh
+. ./.mason/mason.sh
+
+set -eu
 
 function mason_load_source {
     export MASON_BUILD_PATH=$(pwd)
