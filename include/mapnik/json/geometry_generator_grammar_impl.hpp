@@ -24,7 +24,7 @@
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/util/spirit_transform_attribute.hpp>
 #include <mapnik/geometry_types.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
+#include <mapnik/geometry/fusion_adapted.hpp>
 
 // boost
 #pragma GCC diagnostic push
