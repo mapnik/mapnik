@@ -34,7 +34,6 @@ namespace mapnik
 
 bool text_placement_info_list::next() const
 {
-    std::cerr << " state=" << state << " next()" << std::endl;
     if (state == 0)
     {
         properties = parent_->defaults;
@@ -96,7 +95,6 @@ text_placements_ptr text_placements_list::from_xml(xml_node const& node, fontset
 {
     auto list = std::make_shared<text_placements_list>();
     list->defaults.from_xml(node, fontsets, is_shield);
-    int count = 0;
     for( auto const& child : node)
     {
         if (child.is_text() || !child.is("Placement")) continue;

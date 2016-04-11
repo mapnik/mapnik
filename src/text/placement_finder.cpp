@@ -65,10 +65,8 @@ placement_finder::placement_finder(feature_impl const& feature,
 
 bool placement_finder::next_position()
 {
-    std::cerr << "next_position()" << std::endl;
     if (info_.next())
     {
-        std::cerr << "info_.next()" << std::endl;
         // parent layout, has top-level ownership of a new evaluated_format_properties_ptr (TODO is this good enough to stay in scope???)
         // but does not take ownership of the text_symbolizer_properties (info_.properties)
         text_layout_ptr layout = std::make_shared<text_layout>(font_manager_,
