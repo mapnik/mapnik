@@ -274,7 +274,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     }
                     else
                     {
-            MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no response from metadata query " << s.str();
+                        MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no response from metadata query " << s.str();
                     }
                     rs->close();
                 }
@@ -291,7 +291,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     s.str("");
 
                     s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM "
-                      << populate_tokens(table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT nullptr LIMIT 1;";
+                      << populate_tokens(table_) << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
 
                     shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
