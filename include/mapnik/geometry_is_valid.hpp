@@ -29,7 +29,7 @@
 #if BOOST_VERSION >= 105800
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry/boost_geometry_adapters.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/is_valid.hpp>
 #include <boost/geometry/algorithms/validity_failure_type.hpp>
 
@@ -102,7 +102,7 @@ struct geometry_is_valid
 struct geometry_is_valid_reason
 {
     using result_type = bool;
-
+    
     boost::geometry::validity_failure_type & failure_;
 
     geometry_is_valid_reason(boost::geometry::validity_failure_type & failure):
@@ -170,7 +170,7 @@ struct geometry_is_valid_reason
 struct geometry_is_valid_string
 {
     using result_type = bool;
-
+    
     std::string & message_;
 
     geometry_is_valid_string(std::string & message):
@@ -257,7 +257,7 @@ inline bool is_valid(T const& geom, boost::geometry::validity_failure_type & fai
 }
 
 template <typename T>
-inline bool is_valid(mapnik::geometry::geometry<T> const& geom,
+inline bool is_valid(mapnik::geometry::geometry<T> const& geom, 
                      boost::geometry::validity_failure_type & failure)
 {
     return util::apply_visitor(detail::geometry_is_valid_reason(failure), geom);
@@ -270,7 +270,7 @@ inline bool is_valid(T const& geom, std::string & message)
 }
 
 template <typename T>
-inline bool is_valid(mapnik::geometry::geometry<T> const& geom,
+inline bool is_valid(mapnik::geometry::geometry<T> const& geom, 
                      std::string & message)
 {
     return util::apply_visitor(detail::geometry_is_valid_string(message), geom);
