@@ -23,87 +23,17 @@
 #ifndef MAPNIK_GEOMETRY_HPP
 #define MAPNIK_GEOMETRY_HPP
 
+// mapnik
+#include <mapnik/geometry/point.hpp>
+#include <mapnik/geometry/line_string.hpp>
+#include <mapnik/geometry/polygon.hpp>
 #include <mapnik/util/variant.hpp>
+// stl
 #include <vector>
 #include <type_traits>
 #include <cstddef>
 
 namespace mapnik { namespace geometry {
-
-template <typename T>
-struct point
-{
-    using value_type = T;
-    point() {}
-    point(T x_, T y_)
-        : x(x_), y(y_)
-    {}
-
-    value_type x;
-    value_type y;
-};
-
-template <typename T>
-bool operator==(point<T> const& lhs, point<T> const& rhs)
-{
-    return lhs.x == rhs.x && lhs.y == rhs.y;
-}
-
-template <typename T>
-bool operator!=(point<T> const& lhs, point<T> const& rhs)
-{
-    return !(lhs == rhs);
-}
-
-template <typename T>
-struct line_string : std::vector<point<T> >
-{
-    line_string() = default;
-    explicit line_string(std::size_t size)
-        : std::vector<point<T> >(size) {}
-    inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
-    inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
-};
-
-template <typename T>
-struct linear_ring : line_string<T>
-{
-    linear_ring() = default;
-    explicit linear_ring(std::size_t size)
-        : line_string<T>(size) {}
-    linear_ring(line_string<T> && other)
-        : line_string<T>(std::move(other)) {}
-    linear_ring(line_string<T> const& other)
-        : line_string<T>(other) {}
-};
-
-template <typename T>
-using rings_container = std::vector<linear_ring<T>>;
-
-template <typename T, template <typename> class InteriorRings = rings_container>
-struct polygon
-{
-    linear_ring<T> exterior_ring;
-    using rings_container = InteriorRings<T>;
-    rings_container interior_rings;
-
-    inline void set_exterior_ring(linear_ring<T> && ring)
-    {
-        exterior_ring = std::move(ring);
-    }
-
-    inline void add_hole(linear_ring<T> && ring)
-    {
-        interior_rings.emplace_back(std::move(ring));
-    }
-
-    inline bool empty() const { return exterior_ring.empty(); }
-
-    inline std::size_t num_rings() const
-    {
-        return 1 + interior_rings.size();
-    }
-};
 
 template <typename T>
 struct multi_point : line_string<T> {};

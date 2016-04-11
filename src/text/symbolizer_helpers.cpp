@@ -351,6 +351,7 @@ bool text_symbolizer_helper::next_line_placement() const
         if (geo_itr_ == geometries_to_process_.end())
         {
             //Just processed the last geometry. Try next placement.
+            std::cerr << "Just processed the last geometry. Try next placement." << std::endl;
             if (!finder_.next_position()) return false; //No more placements
             //Start again from begin of list
             geo_itr_ = geometries_to_process_.begin();
@@ -360,10 +361,14 @@ bool text_symbolizer_helper::next_line_placement() const
         if (mapnik::util::apply_visitor(apply_line_placement_visitor(converter_, adapter_), *geo_itr_))
         {
             //Found a placement
+            std::cerr << "Found placement!" << std::endl;
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             return true;
         }
-
+        else
+        {
+            std::cerr << "ELSE?" << std::endl;
+        }
         // No placement for this geometry. Keep it in geometries_to_process_ for next try.
         ++geo_itr_;
     }
