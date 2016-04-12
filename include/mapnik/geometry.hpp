@@ -36,7 +36,14 @@
 namespace mapnik { namespace geometry {
 
 template <typename T>
-struct multi_point : line_string<T> {};
+struct multi_point : std::vector<point<T>>
+{
+    multi_point() = default;
+    explicit multi_point(std::size_t size)
+        : std::vector<point<T> >(size) {}
+    inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
+    inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
+};
 
 template <typename T>
 struct multi_line_string : std::vector<line_string<T>> {};

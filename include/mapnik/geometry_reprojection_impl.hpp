@@ -332,7 +332,11 @@ struct geom_reproj_visitor {
     template <typename T>
     bool operator() (multi_point<T> & mp) const
     {
-        return (*this) (static_cast<line_string<T> &>(mp));
+        if (proj_trans_.forward(mp) > 0)
+        {
+            return false;
+        }
+        return true;
     }
 
     template <typename T>

@@ -119,7 +119,7 @@ struct geometry_equal_visitor
     }
 
     template <typename T>
-    void operator() (line_string<T> const& ls1, line_string<T> const& ls2) const
+    void operator() (std::vector<point<T>> const& ls1, std::vector<point<T>> const& ls2) const
     {
         if (ls1.size() != ls2.size())
         {
@@ -150,10 +150,17 @@ struct geometry_equal_visitor
     }
 
     template <typename T>
+    void operator() (line_string<T> const& ls1, line_string<T> const& ls2) const
+    {
+        (*this)(static_cast<std::vector<point<T>> const&>(ls1), static_cast<std::vector<point<T>> const&>(ls2));
+    }
+
+    template <typename T>
     void operator() (multi_point<T> const& mp1, multi_point<T> const& mp2) const
     {
-        (*this)(static_cast<line_string<T> const&>(mp1), static_cast<line_string<T> const&>(mp2));
+        (*this)(static_cast<std::vector<point<T>> const&>(mp1), static_cast<std::vector<point<T>> const&>(mp2));
     }
+
 
     template <typename T>
     void operator() (multi_line_string<T> const& mls1, multi_line_string<T> const& mls2) const
