@@ -20,28 +20,19 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_LINE_STRING_HPP
-#define MAPNIK_GEOMETRY_LINE_STRING_HPP
+#ifndef MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
+#define MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
 
 // mapnik
-#include <mapnik/geometry/point.hpp>
+#include <mapnik/geometry/polygon.hpp>
 // stl
 #include <vector>
 
 namespace mapnik { namespace geometry {
 
 template <typename T, template <typename...> class Cont = std::vector>
-struct line_string : Cont<point<T> >
-{
-    using point_type = point<T>;
-    using container_type = Cont<point_type>;
-    line_string() = default;
-    explicit line_string(std::size_t size)
-        : container_type(size) {}
-    inline std::size_t num_points() const { return container_type::size(); }
-    inline void add_coord(T x, T y) { container_type::template emplace_back(x,y);}
-};
+struct multi_polygon : Cont<polygon<T>> {};
 
 }}
 
-#endif // MAPNIK_GEOMETRY_LINE_STRING_HPP
+#endif // MAPNIK_GEOMETRY_MULTI_POLYGON_HPP

@@ -27,31 +27,20 @@
 #include <mapnik/geometry/point.hpp>
 #include <mapnik/geometry/line_string.hpp>
 #include <mapnik/geometry/polygon.hpp>
+#include <mapnik/geometry/multi_point.hpp>
+#include <mapnik/geometry/multi_line_string.hpp>
+#include <mapnik/geometry/multi_polygon.hpp>
+//
 #include <mapnik/util/variant.hpp>
 // stl
 #include <vector>
+#include <deque>
 #include <type_traits>
 #include <cstddef>
 
 namespace mapnik { namespace geometry {
 
-template <typename T>
-struct multi_point : std::vector<point<T>>
-{
-    multi_point() = default;
-    explicit multi_point(std::size_t size)
-        : std::vector<point<T> >(size) {}
-    inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
-    inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
-};
-
-template <typename T>
-struct multi_line_string : std::vector<line_string<T>> {};
-
-template <typename T>
-struct multi_polygon : std::vector<polygon<T>> {};
-
-template <typename T>
+template <typename T, template <typename...> class Cont = std::vector>
 struct geometry_collection;
 
 struct geometry_empty {};
@@ -80,8 +69,8 @@ struct geometry : geometry_base<T>
 
 };
 
-template <typename T>
-struct geometry_collection : std::vector<geometry<T>> {};
+template <typename T, template <typename...> class Cont>
+struct geometry_collection : Cont<geometry<T>> {};
 
 }}
 
