@@ -26,6 +26,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
+#include <mapnik/util/is_clockwise.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
 // proj4
@@ -370,21 +371,6 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     }
 }
 
-// determine if an ordered sequence of coordinates is in clockwise order
-bool is_clockwise(const std::vector< coord<double,2> > & coords)
-{
-    int n = coords.size();
-    coord<double,2> c1, c2;
-    double a = 0.0;
-
-    for (int i=0; i<n; i++) {
-        c1 = coords[i];
-        c2 = coords[(i + 1) % n];
-        a += (c1.x * c2.y - c2.x * c1.y);
-    }
-    return a <= 0.0;
-}
-
 box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
     std::vector<coord<double,2> >::iterator it = points.begin();
     std::vector<coord<double,2> >::iterator it_end = points.end();
@@ -425,7 +411,7 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
-    if (is_source_longlat_ && !is_clockwise(coords))
+    if (is_source_longlat_ && !util::is_clockwise(coords))
     {
         // we've gone to a geographic CS, and our clockwise envelope has
         // changed into an anticlockwise one. This means we've crossed the antimeridian, and
@@ -466,7 +452,7 @@ bool proj_transform::forward(box2d<double>& env, int points) const
 
     box2d<double> result = calculate_bbox(coords);
 
-    if (is_dest_longlat_ && !is_clockwise(coords))
+    if (is_dest_longlat_ && !util::is_clockwise(coords))
     {
         // we've gone to a geographic CS, and our clockwise envelope has
         // changed into an anticlockwise one. This means we've crossed the antimeridian, and
