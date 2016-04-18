@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_CENTROID_HPP
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry/boost_geometry_adapters.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <boost/geometry/algorithms/centroid.hpp>
 #include <mapnik/geometry_is_empty.hpp>
 #include <mapnik/geometry_remove_empty.hpp>

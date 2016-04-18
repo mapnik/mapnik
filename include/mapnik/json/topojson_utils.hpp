@@ -28,7 +28,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry/boost_geometry_adapters.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_correct.hpp>
 
 namespace mapnik { namespace topojson {

@@ -10,7 +10,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry/boost_geometry_adapters.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_envelope.hpp>
 #include <mapnik/geometry_correct.hpp>
 #include <mapnik/geometry_is_empty.hpp>
