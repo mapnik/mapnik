@@ -40,9 +40,8 @@ struct trans_affine;
 
 namespace mapnik {
 
-/*!
- * A spatial envelope (i.e. bounding box) which also defines some basic operators.
- */
+// A spatial envelope (i.e. bounding box) which also defines some basic operators.
+
 template <typename T> class MAPNIK_DECL box2d
 : boost::equality_comparable<box2d<T> ,
                              boost::addable<box2d<T>,
