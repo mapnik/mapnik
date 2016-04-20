@@ -32,7 +32,7 @@ bool is_clockwise(T const& ring)
 {
     double area = 0.0;
     std::size_t num_points = ring.size();
-    assert(num_point > 2);
+    assert(num_points > 2);
     double orig_x = ring[0].x;
     double orig_y = ring[0].y;
     for (std::size_t i = 0; i < num_points; ++i)
