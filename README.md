@@ -20,7 +20,7 @@ For further information see [http://mapnik.org](http://mapnik.org) and also our 
 
 # Installation
 
-See [INSTALL.md](https://github.com/mapnik/mapnik/blob/master/INSTALL.md) for installation instructions and the [Install](https://github.com/mapnik/mapnik/wiki/Mapnik-Installation) page on the wiki for guides.
+See [INSTALL.md](INSTALL.md) for installation instructions and the [Install](https://github.com/mapnik/mapnik/wiki/Mapnik-Installation) page on the wiki for guides.
 
 # Code of Conduct
 
