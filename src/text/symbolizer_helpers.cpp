@@ -389,7 +389,7 @@ bool text_symbolizer_helper::next_point_placement() const
             return true;
         }
         //No placement for this point. Keep it in points_ for next try.
-        point_itr_++;
+        ++point_itr_;
     }
     return false;
 }
