@@ -106,7 +106,9 @@ TEST_CASE("Well-known-geometries")
             {
                 REQUIRE(wkt0 == wkt1);
                 // compare spatially (NOTE: GeometryCollection comparison also enforces strict order)
+#if BOOST_VERSION >= 105800
                 REQUIRE(spatially_equal(geom_0, geom_1));
+#endif
             }
         }
     }
