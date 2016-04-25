@@ -21,7 +21,7 @@ int main (int argc,char** argv)
     namespace po = boost::program_options;
 
     bool verbose = false;
-    bool auto_open = true;
+    bool auto_open = false;
     int return_value = 0;
     std::string xml_file;
     std::string img_file;
