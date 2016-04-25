@@ -69,15 +69,15 @@ public:
 
     static void set_severity(severity_type severity_level)
     {
-//#ifdef MAPNIK_THREADSAFE
-//        std::lock_guard<std::mutex> lock(severity_mutex_);
-//#endif
         severity_level_ = severity_level;
     }
 
     // per object security levels
     static severity_type get_object_severity(std::string const& object_name)
     {
+#ifdef MAPNIK_THREADSAFE
+        std::lock_guard<std::mutex> lock(severity_mutex_);
+#endif
         severity_map::iterator it = object_severity_level_.find(object_name);
         if (object_name.empty() || it == object_severity_level_.end())
         {
