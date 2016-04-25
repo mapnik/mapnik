@@ -16,6 +16,7 @@
 #include <vector>
 #include <fstream>
 
+#if BOOST_VERSION >= 105800
 namespace  {
 
 struct spatially_equal_visitor
@@ -79,6 +80,7 @@ bool spatially_equal(mapnik::geometry::geometry<T> const& g0, mapnik::geometry::
 }
 
 }
+#endif
 
 TEST_CASE("Well-known-geometries")
 {
