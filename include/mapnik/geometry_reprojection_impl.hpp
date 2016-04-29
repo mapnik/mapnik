@@ -30,9 +30,10 @@ namespace geometry {
 
 namespace detail {
 
-geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, unsigned int &)
+template <typename T>
+geometry_empty<T> reproject_internal(geometry_empty<T> const&, proj_transform const&, unsigned int &)
 {
-    return geometry_empty();
+    return geometry_empty<T>();
 }
 
 template <typename T>
@@ -162,7 +163,7 @@ geometry_collection<T> reproject_internal(geometry_collection<T> const & c, proj
     {
 
         geometry<T> new_g = reproject_copy(g, proj_trans, n_err);
-        if (!new_g.template is<geometry_empty>())
+        if (!new_g.template is<geometry_empty<T>>())
         {
             new_c.emplace_back(std::move(new_g));
         }
@@ -178,9 +179,9 @@ struct geom_reproj_copy_visitor
         : proj_trans_(proj_trans),
           n_err_(n_err) {}
 
-    geometry<T> operator() (geometry_empty const&) const
+    geometry<T> operator() (geometry_empty<T>) const
     {
-        return geometry_empty();
+        return geometry_empty<T>();
     }
 
     geometry<T> operator() (point<T> const& p) const
@@ -289,7 +290,8 @@ struct geom_reproj_visitor {
         return mapnik::util::apply_visitor((*this), geom);
     }
 
-    bool operator() (geometry_empty &) const { return true; }
+    template <typename T>
+    bool operator() (geometry_empty<T> &) const { return true; }
 
     template <typename T>
     bool operator() (point<T> & p) const

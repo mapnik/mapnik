@@ -82,7 +82,7 @@ public:
 
     mapnik::geometry::geometry<double> read()
     {
-        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty<double>();
         // Read the metadata bytes, populating all the
         // information about optional fields, extended (z/m) dimensions
         // expansion factors and so on

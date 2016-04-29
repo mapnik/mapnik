@@ -31,7 +31,10 @@
 namespace mapnik { namespace geometry {
 
 template <typename T, template <typename...> class Cont = std::vector>
-struct multi_line_string : Cont<line_string<T>> {};
+struct multi_line_string : Cont<line_string<T>>
+{
+    using coord_type = T;
+};
 
 }}
 

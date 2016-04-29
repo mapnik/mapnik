@@ -119,7 +119,7 @@ public:
 
     mapnik::geometry::geometry<double> read()
     {
-        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty<double>();
         int type = read_integer();
         switch (type)
         {

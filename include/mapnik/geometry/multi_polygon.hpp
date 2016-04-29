@@ -31,7 +31,10 @@
 namespace mapnik { namespace geometry {
 
 template <typename T, template <typename...> class Cont = std::vector>
-struct multi_polygon : Cont<polygon<T>> {};
+struct multi_polygon : Cont<polygon<T>>
+{
+    using coord_type = T;
+};
 
 }}
 

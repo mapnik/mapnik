@@ -69,6 +69,7 @@ public:
     using line_string_cref = std::reference_wrapper<geometry::line_string<double> const>;
     using polygon_cref = std::reference_wrapper<geometry::polygon<double> const>;
     using geometry_cref = util::variant<point_cref, line_string_cref, polygon_cref>;
+
     // Using list instead of vector, because we delete random elements and need iterators to stay valid.
     using geometry_container_type = std::list<geometry_cref>;
     base_symbolizer_helper(symbolizer_base const& sym,
@@ -109,6 +110,10 @@ protected:
     text_placement_info_ptr info_ptr_;
     evaluated_text_properties_ptr text_props_;
 };
+
+namespace geometry {
+MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
+}
 
 // Helper object that does all the TextSymbolizer placement finding
 // work except actually rendering the object.

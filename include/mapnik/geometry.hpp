@@ -43,11 +43,15 @@ namespace mapnik { namespace geometry {
 template <typename T, template <typename...> class Cont = std::vector>
 struct geometry_collection;
 
-struct geometry_empty {};
+template <typename T>
+struct geometry_empty
+{
+    using coord_type = T;
+};
 
 
 template <typename T>
-using geometry_base = mapnik::util::variant<geometry_empty,
+using geometry_base = mapnik::util::variant<geometry_empty<T>,
                                             point<T>,
                                             line_string<T>,
                                             polygon<T>,
@@ -58,8 +62,7 @@ using geometry_base = mapnik::util::variant<geometry_empty,
 template <typename T>
 struct geometry : geometry_base<T>
 {
-    using value_type = T;
-
+    using coord_type = T;
     geometry()
         : geometry_base<T>() {} // empty
 
@@ -70,7 +73,10 @@ struct geometry : geometry_base<T>
 };
 
 template <typename T, template <typename...> class Cont>
-struct geometry_collection : Cont<geometry<T>> {};
+struct geometry_collection : Cont<geometry<T>>
+{
+    using coord_type = T;
+};
 
 }}
 

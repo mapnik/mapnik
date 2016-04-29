@@ -238,7 +238,7 @@ struct geometry_to_wkb
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry::geometry_empty const&) const
+    result_type operator() (geometry::geometry_empty<double> const&) const
     {
         return result_type();
     }

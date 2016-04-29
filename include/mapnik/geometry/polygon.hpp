@@ -34,6 +34,7 @@ namespace mapnik { namespace geometry {
 template <typename T>
 struct linear_ring : line_string<T>
 {
+    using coord_type = T;
     linear_ring() = default;
     explicit linear_ring(std::size_t size)
         : line_string<T>(size) {}
@@ -49,8 +50,9 @@ using rings_container = std::vector<linear_ring<T>>;
 template <typename T, template <typename> class InteriorRings = rings_container>
 struct polygon
 {
+    using coord_type = T;
+    using rings_container = InteriorRings<coord_type>;
     linear_ring<T> exterior_ring;
-    using rings_container = InteriorRings<T>;
     rings_container interior_rings;
 
     inline void set_exterior_ring(linear_ring<T> && ring)

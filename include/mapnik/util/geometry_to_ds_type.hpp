@@ -42,7 +42,7 @@ namespace detail {
 
 struct datasource_geometry_type
 {
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_empty const&) const
+    mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_empty<double> const&) const
     {
         return mapnik::datasource_geometry_t::Unknown;
     }

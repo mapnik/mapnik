@@ -58,7 +58,7 @@ mapnik::feature_ptr csv_inline_featureset::parse_feature(std::string const& str)
     auto const* end = start + str.size();
     auto values = csv_utils::parse_line(start, end, separator_, quote_, headers_.size());
     auto geom = csv_utils::extract_geometry(values, locator_);
-    if (!geom.is<mapnik::geometry::geometry_empty>())
+    if (!geom.is<mapnik::geometry::geometry_empty<double>>())
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, ++feature_id_));
         feature->set_geometry(std::move(geom));

@@ -41,8 +41,39 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 
+namespace mapnik {
+namespace geometry {
 
-namespace mapnik { namespace detail {
+struct envelope_impl
+{
+    template <typename T>
+    box2d<double> operator() (T const& ref) const
+    {
+        return envelope<T>(ref);
+    }
+};
+
+mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom)
+{
+    return mapnik::util::apply_visitor(envelope_impl(), geom);
+}
+
+struct geometry_type_impl
+{
+    template <typename T>
+    auto operator() (T const& ref) const -> decltype(geometry_type<T>(ref))
+    {
+        return geometry_type<T>(ref);
+    }
+};
+
+mapnik::geometry::geometry_types geometry_type(mapnik::base_symbolizer_helper::geometry_cref const& geom)
+{
+    return mapnik::util::apply_visitor(geometry_type_impl(), geom);
+}
+
+} // geometry
+namespace detail {
 
 template <typename Points>
 struct apply_vertex_placement
@@ -79,7 +110,7 @@ struct split_multi_geometries
     split_multi_geometries(container_type & cont)
         : cont_(cont) { }
 
-    void operator() (geometry::geometry_empty const&) const {}
+    void operator() (geometry::geometry_empty<double> const&) const {}
     void operator() (geometry::multi_point<double> const& multi_pt) const
     {
         for ( auto const& pt : multi_pt )
@@ -459,7 +490,6 @@ void text_symbolizer_helper::init_marker() const
     marker_displacement.set(shield_dx,shield_dy);
     finder_.set_marker(std::make_shared<marker_info>(marker, trans), bbox, unlock_image, marker_displacement);
 }
-
 
 template text_symbolizer_helper::text_symbolizer_helper(
     text_symbolizer const& sym,

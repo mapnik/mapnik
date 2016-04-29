@@ -62,7 +62,7 @@ wkt_grammar<Iterator>::wkt_grammar()
 
     // <point tagged text> ::= point <point text>
     point_tagged_text = no_case[lit("POINT")]
-        >> (point_text[assign(_r1,_1)] | empty_set[assign(_r1,construct<geometry::geometry_empty>())])
+        >> (point_text[assign(_r1,_1)] | empty_set[assign(_r1,construct<geometry::geometry_empty<double>>())])
         ;
     // <point text> ::= <empty set> | <left paren> <point> <right paren>
     point_text = (lit("(") >> point >> lit(')'))

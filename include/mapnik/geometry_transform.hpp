@@ -103,9 +103,10 @@ struct geometry_transform
 
     using result_type = geometry<V>;
 
-    geometry<V> operator() (geometry_empty const& empty) const
+    template <typename T>
+    geometry<V> operator() (geometry_empty<T> const& empty) const
     {
-        return empty;
+        return geometry_empty<V>();
     }
 
     template <typename T>

@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/geometry_centroid.hpp>
@@ -7,7 +6,7 @@ TEST_CASE("geometry centroid") {
 
 SECTION("empty geometry") {
 
-    mapnik::geometry::geometry_empty geom;
+    mapnik::geometry::geometry_empty<double> geom;
     mapnik::geometry::point<double> centroid;
     REQUIRE(!mapnik::geometry::centroid(geom, centroid));
 }

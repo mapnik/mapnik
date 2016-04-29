@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/geometry.hpp>
@@ -19,7 +18,7 @@ SECTION("envelope_test - double") {
     }
     {
         // Test empty geom
-        geometry<double> geom = mapnik::geometry::geometry_empty();
+        geometry<double> geom = mapnik::geometry::geometry_empty<double>();
         mapnik::box2d<double> bbox = mapnik::geometry::envelope(geom);
         REQUIRE_FALSE( bbox.valid() );
     }

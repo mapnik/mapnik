@@ -28,13 +28,13 @@ namespace mapnik { namespace geometry {
 template <typename T>
 struct point
 {
-    using value_type = T;
+    using coord_type = T;
     point() {}
     point(T x_, T y_)
         : x(x_), y(y_)
     {}
-    value_type x;
-    value_type y;
+    coord_type x;
+    coord_type y;
 };
 
 template <typename T>

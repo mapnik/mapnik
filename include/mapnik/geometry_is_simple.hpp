@@ -36,24 +36,23 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
+template <typename T>
 struct geometry_is_simple
 {
     using result_type = bool;
 
-    template <typename T>
     result_type operator() (geometry<T> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry_empty const& ) const
+    result_type operator() (geometry_empty<T> const& ) const
     {
         // An empty geometry has no anomalous geometric points, such as self intersection or self tangency.
         // Therefore, we will return true
         return true;
     }
 
-    template <typename T>
     result_type operator() (geometry_collection<T> const& collection) const
     {
         for (auto const& geom : collection)
@@ -63,12 +62,11 @@ struct geometry_is_simple
         return true;
     }
 
-    template <typename T>
     result_type operator() (point<T> const& pt) const
     {
         return boost::geometry::is_simple(pt);
     }
-    template <typename T>
+
     result_type operator() (line_string<T> const& line) const
     {
         if (line.empty())
@@ -80,12 +78,12 @@ struct geometry_is_simple
         }
         return boost::geometry::is_simple(line);
     }
-    template <typename T>
+
     result_type operator() (polygon<T> const& poly) const
     {
         return boost::geometry::is_simple(poly);
     }
-    template <typename T>
+
     result_type operator() (multi_point<T> const& multi_pt) const
     {
         if (multi_pt.empty())
@@ -96,7 +94,7 @@ struct geometry_is_simple
         }
         return boost::geometry::is_simple(multi_pt);
     }
-    template <typename T>
+
     result_type operator() (multi_line_string<T> const& multi_line) const
     {
         if (multi_line.empty())
@@ -111,7 +109,7 @@ struct geometry_is_simple
         }
         return true;
     }
-    template <typename T>
+
     result_type operator() (multi_polygon<T> const& multi_poly) const
     {
         if (multi_poly.empty())
@@ -134,13 +132,14 @@ struct geometry_is_simple
 template <typename T>
 inline bool is_simple(T const& geom)
 {
-    return detail::geometry_is_simple() (geom);
+    using coord_type = typename T::coord_type;
+    return detail::geometry_is_simple<coord_type>() (geom);
 }
 
 template <typename T>
 inline bool is_simple(mapnik::geometry::geometry<T> const& geom)
 {
-    return util::apply_visitor(detail::geometry_is_simple(), geom);
+    return util::apply_visitor(detail::geometry_is_simple<T>(), geom);
 }
 
 }}

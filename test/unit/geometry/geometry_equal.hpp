@@ -106,7 +106,8 @@ struct geometry_equal_visitor
         REQUIRE(false);
     }
 
-    void operator() (geometry_empty const&, geometry_empty const&) const
+    template <typename T>
+    void operator() (geometry_empty<T> const&, geometry_empty<T> const&) const
     {
         REQUIRE(true);
     }
