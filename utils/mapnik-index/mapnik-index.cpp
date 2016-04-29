@@ -180,7 +180,11 @@ int main (int argc, char** argv)
         {
             std::clog << "processing '" << filename << "' as CSV\n";
             auto result = mapnik::detail::process_csv_file(boxes, filename, manual_headers, separator, quote);
-            if (!result.first) continue;
+            if (!result.first)
+            {
+                std::clog << "Error: failed to process " << filename << std::endl;
+                return EXIT_FAILURE;
+            }
             extent = result.second;
         }
         else if (mapnik::detail::is_geojson(filename))
@@ -190,7 +194,7 @@ int main (int argc, char** argv)
             if (!result.first)
             {
                 std::clog << "Error: failed to process " << filename << std::endl;
-                continue;
+                return EXIT_FAILURE;
             }
             extent = result.second;
         }
@@ -223,6 +227,11 @@ int main (int argc, char** argv)
                 file.flush();
                 file.close();
             }
+        }
+        else
+        {
+            std::clog << "Invalid extent " << extent << std::endl;
+            return EXIT_FAILURE;
         }
     }
     std::clog << "done!" << std::endl;
