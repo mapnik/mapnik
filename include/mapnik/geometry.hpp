@@ -140,7 +140,7 @@ using geometry_base = mapnik::util::variant<geometry_empty,
                                             multi_point<T>,
                                             multi_line_string<T>,
                                             multi_polygon<T>,
-                                            mapnik::util::recursive_wrapper<geometry_collection<T> > >;
+                                            geometry_collection<T> >;
 template <typename T>
 struct geometry : geometry_base<T>
 {
