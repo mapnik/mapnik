@@ -62,7 +62,7 @@ struct cairo_renderer_process_visitor_l
         mapnik::rasterizer ras;
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<image_rgba8>(ras, marker, image_tr, 1.0, image);
