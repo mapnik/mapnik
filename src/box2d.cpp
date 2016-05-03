@@ -26,7 +26,6 @@
 namespace mapnik {
 
 template class box2d<int>;
-template class box2d<std::int64_t>;
 template class box2d<float>;
 template class box2d<double>;
 
