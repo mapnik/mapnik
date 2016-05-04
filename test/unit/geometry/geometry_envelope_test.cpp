@@ -1,8 +1,7 @@
 #include "catch.hpp"
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_envelope_impl.hpp>
-//#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry_envelope.hpp>
 
 namespace {
 
