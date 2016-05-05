@@ -121,10 +121,14 @@ unicode_string<Iterator>::unicode_string()
 
     escape =
         ('x' > hex)                     [push_utf8(_r1, _1)]
-        |   ('u' > hex4)                    [push_utf8(_r1, _1)]
-        |   ('U' > hex8)                    [push_utf8(_r1, _1)]
-        |   char_("0abtnvfre\"/\\N_LP \t")  [push_esc(_r1, _1)]
-        |   eol                             // continue to next line
+        |
+        ('u' > hex4)                    [push_utf8(_r1, _1)]
+        |
+        ('U' > hex8)                    [push_utf8(_r1, _1)]
+        |
+        char_("0abtnvfre\"/\\N_LP \t")  [push_esc(_r1, _1)]
+        |
+        eol                             // continue to next line
         ;
 
     char_esc =
@@ -132,7 +136,7 @@ unicode_string<Iterator>::unicode_string()
         ;
 
     double_quoted =
-              '"'
+        '"'
         > *(char_esc(_val) | (~char_('"'))    [_val += _1])
         > '"'
         ;
@@ -141,18 +145,18 @@ unicode_string<Iterator>::unicode_string()
 template <typename Iterator>
 struct generic_json
 {
-    qi::rule<Iterator,space_type> value;
-    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
+    qi::rule<Iterator, space_type> value;
+    qi::int_parser<mapnik::value_integer, 10, 1, -1> int__;
     unicode_string<Iterator> string_;
-    qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,json_value(),space_type> number;
-    qi::rule<Iterator,space_type> object;
-    qi::rule<Iterator,space_type> array;
-    qi::rule<Iterator,space_type> pairs;
-    qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+    qi::rule<Iterator, space_type> key_value;
+    qi::rule<Iterator, json_value(), space_type> number;
+    qi::rule<Iterator, space_type> object;
+    qi::rule<Iterator, space_type> array;
+    qi::rule<Iterator, space_type> pairs;
+    qi::real_parser<double, qi::strict_real_policies<double>> strict_double;
     // conversions
-    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer> > integer_converter;
-    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double> > double_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer>> integer_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double>> double_converter;
 };
 
 }}
