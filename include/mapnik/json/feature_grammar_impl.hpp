@@ -44,6 +44,7 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     qi::_r1_type _r1;
     qi::eps_type eps;
     qi::char_type char_;
+    qi::no_skip_type no_skip;
     using qi::fail;
     using qi::on_error;
     using phoenix::new_;
@@ -101,10 +102,10 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     attribute_value %= json_.number | json_.string_ | stringify_object | stringify_array
         ;
 
-    stringify_object %= char_('{')[_a = 1 ] > *(eps(_a > 0) > (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))
+    stringify_object %= char_('{')[_a = 1 ] > no_skip[*(eps(_a > 0) > (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))]
         ;
 
-    stringify_array %= char_('[')[_a = 1 ] > *(eps(_a > 0) > (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))
+    stringify_array %= char_('[')[_a = 1 ] > no_skip[*(eps(_a > 0) > (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))]
         ;
 
     feature.name("Feature");
