@@ -53,14 +53,11 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     json_.value =  json_.object | json_.array | json_.string_ | json_.number
         ;
 
-    json_.pairs = json_.key_value % lit(',')
-        ;
-
     json_.key_value = json_.string_ > lit(':') > json_.value
         ;
 
     json_.object = lit('{')
-        > json_.pairs
+        > json_.key_value % lit(',')
         > lit('}')
         ;
 

@@ -133,13 +133,10 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     json.value = json.object | json.array | json.string_ | json.number
         ;
 
-    json.pairs = json.key_value % lit(',')
+    json.key_value = json.string_ >> lit(':') >> json.value
         ;
 
-    json.key_value = (json.string_ >> lit(':') >> json.value)
-        ;
-
-    json.object = lit('{') >> json.pairs >> lit('}')
+    json.object = lit('{') >> json.key_value % lit(',') >> lit('}')
         ;
 
     json.array = lit('[')

@@ -167,7 +167,6 @@ struct generic_json
     qi::rule<Iterator, json_value(), space_type> number;
     qi::rule<Iterator, std::unordered_map<std::string, json_value>(), space_type> object;
     qi::rule<Iterator, std::vector<json_value>(), space_type> array;
-    qi::rule<Iterator, std::unordered_map<std::string, json_value>(), space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double>> strict_double;
     // conversions
     boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer>> integer_converter;
