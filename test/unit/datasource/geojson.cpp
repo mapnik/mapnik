@@ -689,19 +689,24 @@ TEST_CASE("geojson") {
                     auto fields = ds->get_descriptor().get_descriptors();
                     std::initializer_list<std::string> names = {"NOM_FR","array","boolean","description","double","int","name","object","spaces"};
                     REQUIRE_FIELD_NAMES(fields, names);
-                    
+
                     auto fs = all_features(ds);
                     REQUIRE(bool(fs));
                     std::initializer_list<attr> attrs = {
                         attr{"name", mapnik::value_unicode_string("Test")},
                         attr{"NOM_FR", mapnik::value_unicode_string("Québec")},
-                        attr{"bool", mapnik::value_bool("true")},
+                        attr{"boolean", mapnik::value_bool("true")},
                         attr{"description", mapnik::value_unicode_string("Test: \u005C")},
                         attr{"double", mapnik::value_double(1.1)},
                         attr{"int", mapnik::value_integer(1)},
-                        attr{"object", mapnik::value_unicode_string("{\"name\":\"waka\",\"spaces\":\"value with spaces\",\"int\": 1,\"double\":1.1,\"boolean\":false,\"NOM_FR\":\"Québec\"}")},
+                        attr{"object", mapnik::value_unicode_string("{name:\"waka\",spaces:\"value with spaces\","
+                                                                    "boolean:false,int:1,another_object:{name:\"nested object\"},"
+                                                                    "double:1.1,NOM_FR:\"Québec\","
+                                                                    "array:[\"string\",\"value with spaces\",3,1.1,null,true,\"Québec\"]}")},
                         attr{"spaces", mapnik::value_unicode_string("this has spaces")},
-                        attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,\"Québec\"]")}
+                        attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,"
+                                                                   "\"Québec\",{name:\"object within an array\"},"
+                                                                   "[\"array\",\"within\",\"an\",\"array\"]]")}
                     };
                     auto feature = fs->next();
                     REQUIRE(bool(feature));
