@@ -31,6 +31,7 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/fusion/include/std_pair.hpp>
 #pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
@@ -39,7 +40,21 @@ namespace qi = boost::spirit::qi;
 namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 using space_type = standard::space_type;
-using json_value = mapnik::util::variant<value_null,value_bool, value_integer, value_double, std::string>;
+
+struct json_value;
+
+using json_value_base = mapnik::util::variant<value_null,
+                                              value_bool,
+                                              value_integer,
+                                              value_double,
+                                              std::string,
+                                              mapnik::util::recursive_wrapper<std::vector<json_value>>,
+                                              mapnik::util::recursive_wrapper<std::unordered_map<std::string, json_value> > >;
+struct json_value : json_value_base
+{
+    using json_value_base::json_value_base;
+};
+
 using uchar = std::uint32_t; // a unicode code point
 
 // unicode string grammar via boost/libs/spirit/example/qi/json/json/parser/grammar.hpp
@@ -145,14 +160,14 @@ unicode_string<Iterator>::unicode_string()
 template <typename Iterator>
 struct generic_json
 {
-    qi::rule<Iterator, space_type> value;
+    qi::rule<Iterator, json_value(), space_type> value;
     qi::int_parser<mapnik::value_integer, 10, 1, -1> int__;
     unicode_string<Iterator> string_;
-    qi::rule<Iterator, space_type> key_value;
+    qi::rule<Iterator, std::pair<std::string, json_value>(), space_type> key_value;
     qi::rule<Iterator, json_value(), space_type> number;
-    qi::rule<Iterator, space_type> object;
-    qi::rule<Iterator, space_type> array;
-    qi::rule<Iterator, space_type> pairs;
+    qi::rule<Iterator, std::unordered_map<std::string, json_value>(), space_type> object;
+    qi::rule<Iterator, std::vector<json_value>(), space_type> array;
+    qi::rule<Iterator, std::unordered_map<std::string, json_value>(), space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double>> strict_double;
     // conversions
     boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer>> integer_converter;
