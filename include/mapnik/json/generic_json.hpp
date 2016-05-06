@@ -34,6 +34,9 @@
 #include <boost/fusion/include/std_pair.hpp>
 #pragma GCC diagnostic pop
 
+#include <vector>
+#include <unordered_map>
+
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
@@ -43,13 +46,16 @@ using space_type = standard::space_type;
 
 struct json_value;
 
+using json_array = std::vector<json_value>;
+using json_object = std::unordered_map<std::string, json_value>;
+using json_object_element = std::pair<std::string, json_value>;
 using json_value_base = mapnik::util::variant<value_null,
                                               value_bool,
                                               value_integer,
                                               value_double,
                                               std::string,
-                                              mapnik::util::recursive_wrapper<std::vector<json_value>>,
-                                              mapnik::util::recursive_wrapper<std::unordered_map<std::string, json_value> > >;
+                                              mapnik::util::recursive_wrapper<json_array>,
+                                              mapnik::util::recursive_wrapper<json_object> >;
 struct json_value : json_value_base
 {
     using json_value_base::json_value_base;
@@ -163,10 +169,10 @@ struct generic_json
     qi::rule<Iterator, json_value(), space_type> value;
     qi::int_parser<mapnik::value_integer, 10, 1, -1> int__;
     unicode_string<Iterator> string_;
-    qi::rule<Iterator, std::pair<std::string, json_value>(), space_type> key_value;
+    qi::rule<Iterator, json_object_element, space_type> key_value;
     qi::rule<Iterator, json_value(), space_type> number;
-    qi::rule<Iterator, std::unordered_map<std::string, json_value>(), space_type> object;
-    qi::rule<Iterator, std::vector<json_value>(), space_type> array;
+    qi::rule<Iterator, json_object(), space_type> object;
+    qi::rule<Iterator, json_array(), space_type> array;
     qi::real_parser<double, qi::strict_real_policies<double>> strict_double;
     // conversions
     boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer>> integer_converter;

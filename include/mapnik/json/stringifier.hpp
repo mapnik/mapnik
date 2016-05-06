@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/variant.hpp>
 // stl
 #include <string>
 
