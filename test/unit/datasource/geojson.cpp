@@ -654,5 +654,65 @@ TEST_CASE("geojson") {
                 }
             }
         }
+
+        SECTION("GeoJSON properties are properly expressed")
+        {
+            mapnik::parameters params;
+            params["type"] = "geojson";
+
+            std::string filename("./test/data/json/escaped.geojson");
+            params["file"] = filename;
+
+            // cleanup in the case of a failed previous run
+            if (mapnik::util::exists(filename + ".index"))
+            {
+                mapnik::util::remove(filename + ".index");
+            }
+
+            for (auto create_index : { true, false })
+            {
+                if (create_index)
+                {
+                    CHECK(!mapnik::util::exists(filename + ".index"));
+                    int ret = create_disk_index(filename);
+                    int ret_posix = (ret >> 8) & 0x000000ff;
+                    INFO(ret);
+                    INFO(ret_posix);
+                    CHECK(mapnik::util::exists(filename + ".index"));
+                }
+
+                for (auto cache_features : {true, false})
+                {
+                    params["cache_features"] = cache_features;
+                    auto ds = mapnik::datasource_cache::instance().create(params);
+                    REQUIRE(bool(ds));
+                    auto fields = ds->get_descriptor().get_descriptors();
+                    std::initializer_list<std::string> names = {"NOM_FR","array","boolean","description","double","int","name","object","spaces"};
+                    REQUIRE_FIELD_NAMES(fields, names);
+                    
+                    auto fs = all_features(ds);
+                    REQUIRE(bool(fs));
+                    std::initializer_list<attr> attrs = {
+                        attr{"name", mapnik::value_unicode_string("Test")},
+                        attr{"NOM_FR", mapnik::value_unicode_string("Québec")},
+                        attr{"bool", mapnik::value_bool("true")},
+                        attr{"description", mapnik::value_unicode_string("Test: \u005C")},
+                        attr{"double", mapnik::value_double(1.1)},
+                        attr{"int", mapnik::value_integer(1)},
+                        attr{"object", mapnik::value_unicode_string("{\"name\":\"waka\",\"spaces\":\"value with spaces\",\"int\": 1,\"double\":1.1,\"boolean\":false,\"NOM_FR\":\"Québec\"}")},
+                        attr{"spaces", mapnik::value_unicode_string("this has spaces")},
+                        attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,\"Québec\"]")}
+                    };
+                    auto feature = fs->next();
+                    REQUIRE(bool(feature));
+                    REQUIRE_ATTRIBUTES(feature, attrs);
+                }
+                // cleanup
+                if (create_index && mapnik::util::exists(filename + ".index"))
+                {
+                    mapnik::util::remove(filename + ".index");
+                }
+            }
+        }
     }
 }
