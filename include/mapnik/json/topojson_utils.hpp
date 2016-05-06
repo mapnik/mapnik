@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/topology.hpp>
+#include <mapnik/json/attribute_value_visitor.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry_adapters.hpp>
 #include <mapnik/geometry_correct.hpp>
@@ -246,33 +247,6 @@ private:
 };
 
 namespace {
-struct attribute_value_visitor
-
-{
-public:
-    attribute_value_visitor(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    mapnik::value operator()(std::string const& val) const
-    {
-        return mapnik::value(tr_.transcode(val.c_str()));
-    }
-    mapnik::value operator()(std::vector<mapnik::json::json_value> const& arr) const
-    {
-        return mapnik::value(tr_.transcode("FAIL ARRAY"));
-    }
-    mapnik::value operator()(std::unordered_map<std::string, mapnik::json::json_value> const& obj) const
-    {
-        return mapnik::value(tr_.transcode("FAIL OBJECT"));
-    }
-    template <typename T>
-    mapnik::value operator()(T const& val) const
-    {
-        return mapnik::value(val);
-    }
-
-    mapnik::transcoder const& tr_;
-};
 
 template <typename T>
 void assign_properties(mapnik::feature_impl & feature, T const& geom, mapnik::transcoder const& tr)
@@ -281,7 +255,7 @@ void assign_properties(mapnik::feature_impl & feature, T const& geom, mapnik::tr
     {
         for (auto const& p : *geom.props)
         {
-            feature.put_new(std::get<0>(p), mapnik::util::apply_visitor(attribute_value_visitor(tr),std::get<1>(p)));
+            feature.put_new(std::get<0>(p), mapnik::util::apply_visitor(mapnik::json::attribute_value_visitor(tr),std::get<1>(p)));
         }
     }
 }

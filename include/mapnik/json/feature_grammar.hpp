@@ -24,15 +24,10 @@
 #define MAPNIK_FEATURE_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/value.hpp>
-#include <mapnik/json/generic_json.hpp>
-#include <mapnik/json/value_converters.hpp>
-#include <mapnik/util/conversions.hpp>
-
+#include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/json/attribute_value_visitor.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -45,103 +40,6 @@ namespace mapnik { namespace json {
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
-
-namespace {
-struct stringifier
-{
-    std::string operator()(std::string const& val) const
-    {
-        return "\"" + val + "\"";
-    }
-
-    std::string operator()(value_null) const
-    {
-        return "null";
-    }
-
-    std::string operator()(value_bool val) const
-    {
-        return val ? "true" : "false";
-    }
-
-    std::string operator()(value_integer val) const
-    {
-        std::string str;
-        util::to_string(str, val);
-        return str;
-    }
-
-    std::string operator()(value_double val) const
-    {
-        std::string str;
-        util::to_string(str, val);
-        return str;
-    }
-
-    std::string operator()(std::vector<mapnik::json::json_value> const& array) const
-    {
-        std::string str = "[";
-        bool first = true;
-        for (auto const& val : array)
-        {
-            if (first) first = false;
-            else str += ",";
-            str += mapnik::util::apply_visitor(*this, val);
-        }
-        str += "]";
-        return str;
-    }
-
-    std::string operator()(std::unordered_map<std::string, mapnik::json::json_value> const& object) const
-    {
-        std::string str = "{";
-        bool first = true;
-        for (auto const& kv : object)
-        {
-            if (first) first = false;
-            else str += ",";
-            str += kv.first;
-            str += ":";
-            str += mapnik::util::apply_visitor(*this, kv.second);
-        }
-        str += "}";
-        return str;
-    }
-};
-
-} // anonymous ns
-
-struct attribute_value_visitor
-{
-public:
-    attribute_value_visitor(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    mapnik::value operator()(std::string const& val) const
-    {
-        return mapnik::value(tr_.transcode(val.c_str()));
-    }
-
-    mapnik::value operator()(std::vector<mapnik::json::json_value> const& array) const
-    {
-        std::string str = stringifier()(array);
-        return mapnik::value(tr_.transcode(str.c_str()));
-    }
-
-    mapnik::value operator()(std::unordered_map<std::string, mapnik::json::json_value> const& object) const
-    {
-        std::string str = stringifier()(object);
-        return mapnik::value(tr_.transcode(str.c_str()));
-    }
-
-    template <typename T>
-    mapnik::value operator()(T const& val) const
-    {
-        return mapnik::value(val);
-    }
-
-    mapnik::transcoder const& tr_;
-};
 
 struct put_property
 {
