@@ -31,6 +31,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/value_converters.hpp>
+#include <mapnik/util/conversions.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -45,8 +46,72 @@ namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
 
-class attribute_value_visitor
+namespace {
+struct stringifier
+{
+    std::string operator()(std::string const& val) const
+    {
+        return "\"" + val + "\"";
+    }
 
+    std::string operator()(value_null) const
+    {
+        return "null";
+    }
+
+    std::string operator()(value_bool val) const
+    {
+        return val ? "true" : "false";
+    }
+
+    std::string operator()(value_integer val) const
+    {
+        std::string str;
+        util::to_string(str, val);
+        return str;
+    }
+
+    std::string operator()(value_double val) const
+    {
+        std::string str;
+        util::to_string(str, val);
+        return str;
+    }
+
+    std::string operator()(std::vector<mapnik::json::json_value> const& array) const
+    {
+        std::string str = "[";
+        bool first = true;
+        for (auto const& val : array)
+        {
+            if (first) first = false;
+            else str += ",";
+            str += mapnik::util::apply_visitor(*this, val);
+        }
+        str += "]";
+        return str;
+    }
+
+    std::string operator()(std::unordered_map<std::string, mapnik::json::json_value> const& object) const
+    {
+        std::string str = "{";
+        bool first = true;
+        for (auto const& kv : object)
+        {
+            if (first) first = false;
+            else str += ",";
+            str += kv.first;
+            str += ":";
+            str += mapnik::util::apply_visitor(*this, kv.second);
+        }
+        str += "}";
+        return str;
+    }
+};
+
+} // anonymous ns
+
+struct attribute_value_visitor
 {
 public:
     attribute_value_visitor(mapnik::transcoder const& tr)
@@ -55,6 +120,18 @@ public:
     mapnik::value operator()(std::string const& val) const
     {
         return mapnik::value(tr_.transcode(val.c_str()));
+    }
+
+    mapnik::value operator()(std::vector<mapnik::json::json_value> const& array) const
+    {
+        std::string str = stringifier()(array);
+        return mapnik::value(tr_.transcode(str.c_str()));
+    }
+
+    mapnik::value operator()(std::unordered_map<std::string, mapnik::json::json_value> const& object) const
+    {
+        std::string str = stringifier()(object);
+        return mapnik::value(tr_.transcode(str.c_str()));
     }
 
     template <typename T>
@@ -102,8 +179,6 @@ struct feature_grammar : qi::grammar<Iterator, void(FeatureType&), space_type>
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
     qi::rule<Iterator, json_value(), space_type> attribute_value;
-    qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_object;
-    qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_array;
     // functions
     phoenix::function<put_property> put_property_;
     phoenix::function<set_geometry_impl> set_geometry;

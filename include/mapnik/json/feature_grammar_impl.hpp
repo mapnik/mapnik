@@ -44,7 +44,6 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     qi::_r1_type _r1;
     qi::eps_type eps;
     qi::char_type char_;
-    qi::no_skip_type no_skip;
     using qi::fail;
     using qi::on_error;
     using phoenix::new_;
@@ -57,17 +56,19 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     json_.pairs = json_.key_value % lit(',')
         ;
 
-    json_.key_value = (json_.string_ > lit(':') > json_.value)
+    json_.key_value = json_.string_ > lit(':') > json_.value
         ;
 
     json_.object = lit('{')
-        > *json_.pairs
+        > json_.pairs
         > lit('}')
         ;
+
     json_.array = lit('[')
         > json_.value > *(lit(',') > json_.value)
         > lit(']')
         ;
+
     json_.number = json_.strict_double[_val = json_.double_converter(_1)]
         | json_.int__[_val = json_.integer_converter(_1)]
         | lit("true") [_val = true]
@@ -99,13 +100,7 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     attributes = (json_.string_ [_a = _1] > lit(':') > attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
-    attribute_value %= json_.number | json_.string_ | stringify_object | stringify_array
-        ;
-
-    stringify_object %= char_('{')[_a = 1 ] > no_skip[*(eps(_a > 0) > (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))]
-        ;
-
-    stringify_array %= char_('[')[_a = 1 ] > no_skip[*(eps(_a > 0) > (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))]
+    attribute_value %= json_.number | json_.string_ | json_.object | json_.array
         ;
 
     feature.name("Feature");
