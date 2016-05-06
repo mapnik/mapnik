@@ -257,7 +257,14 @@ public:
     {
         return mapnik::value(tr_.transcode(val.c_str()));
     }
-
+    mapnik::value operator()(std::vector<mapnik::json::json_value> const& arr) const
+    {
+        return mapnik::value(tr_.transcode("FAIL ARRAY"));
+    }
+    mapnik::value operator()(std::unordered_map<std::string, mapnik::json::json_value> const& obj) const
+    {
+        return mapnik::value(tr_.transcode("FAIL OBJECT"));
+    }
     template <typename T>
     mapnik::value operator()(T const& val) const
     {

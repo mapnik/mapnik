@@ -67,17 +67,9 @@ struct attr_value_converter
         return mapnik::Boolean;
     }
 
-    mapnik::eAttributeType operator() (std::string const& /*val*/) const
-    {
-        return mapnik::String;
-    }
-
-    mapnik::eAttributeType operator() (mapnik::value_unicode_string const& /*val*/) const
-    {
-        return mapnik::String;
-    }
-
-    mapnik::eAttributeType operator() (mapnik::value_null const& /*val*/) const
+    // string, object, array
+    template <typename T>
+    mapnik::eAttributeType operator() (T const& /*val*/) const
     {
         return mapnik::String;
     }

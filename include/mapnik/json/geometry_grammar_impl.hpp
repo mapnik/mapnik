@@ -65,7 +65,7 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
         ;
 
     json_.object = lit('{')
-        > *json_.pairs
+        > json_.pairs
         > lit('}')
         ;
     json_.array = lit('[')

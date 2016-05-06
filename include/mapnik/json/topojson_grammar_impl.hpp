@@ -139,7 +139,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     json.key_value = (json.string_ >> lit(':') >> json.value)
         ;
 
-    json.object = lit('{') >> *json.pairs >> lit('}')
+    json.object = lit('{') >> json.pairs >> lit('}')
         ;
 
     json.array = lit('[')
