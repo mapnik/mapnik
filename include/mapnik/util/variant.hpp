@@ -24,7 +24,7 @@
 #define MAPNIK_UTIL_VARIANT_HPP
 
 #include <mapnik/config.hpp>
-#include <mapbox/variant/variant.hpp>
+#include <mapbox/variant.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
