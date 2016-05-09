@@ -1,4 +1,4 @@
-language: generic
+language: cpp
 
 git:
   depth: 10
@@ -25,7 +25,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" TRIGGER=true
+      env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.5 -Qunused-arguments" _CC="clang-3.5" TRIGGER=true
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
@@ -33,7 +33,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
+      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" _CXX="ccache clang++-3.5 -Qunused-arguments" _CC="clang-3.5"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
@@ -42,9 +42,11 @@ matrix:
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=true CXX="ccache clang++ -Qunused-arguments"
+      env: JOBS=4 MASON_PUBLISH=true _CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
+ - if [[ ${_CXX:-false} != false ]]; then export CXX=${_CXX}; fi
+ - if [[ ${_CC:-false} != false ]]; then export CC=${_CC}; fi
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
