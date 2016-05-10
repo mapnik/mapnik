@@ -48,7 +48,7 @@ public:
         return mapnik::value(tr_.transcode(str.c_str()));
     }
 
-    mapnik::value operator()(std::unordered_map<std::string, mapnik::json::json_value> const& object) const
+    mapnik::value operator()(std::vector<std::pair<std::string, mapnik::json::json_value> > const& object) const
     {
         std::string str = stringifier()(object);
         return mapnik::value(tr_.transcode(str.c_str()));

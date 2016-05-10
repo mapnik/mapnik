@@ -78,7 +78,7 @@ struct stringifier
         return str;
     }
 
-    std::string operator()(std::unordered_map<std::string, mapnik::json::json_value> const& object) const
+    std::string operator()(std::vector<std::pair<std::string, mapnik::json::json_value>> const& object) const
     {
         std::string str = "{";
         bool first = true;

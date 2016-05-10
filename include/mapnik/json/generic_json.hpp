@@ -35,7 +35,6 @@
 #pragma GCC diagnostic pop
 
 #include <vector>
-#include <unordered_map>
 
 namespace mapnik { namespace json {
 
@@ -47,8 +46,8 @@ using space_type = standard::space_type;
 struct json_value;
 
 using json_array = std::vector<json_value>;
-using json_object = std::unordered_map<std::string, json_value>;
 using json_object_element = std::pair<std::string, json_value>;
+using json_object = std::vector<json_object_element>;
 using json_value_base = mapnik::util::variant<value_null,
                                               value_bool,
                                               value_integer,
@@ -169,7 +168,7 @@ struct generic_json
     qi::rule<Iterator, json_value(), space_type> value;
     qi::int_parser<mapnik::value_integer, 10, 1, -1> int__;
     unicode_string<Iterator> string_;
-    qi::rule<Iterator, json_object_element, space_type> key_value;
+    qi::rule<Iterator, json_object_element(), space_type> key_value;
     qi::rule<Iterator, json_value(), space_type> number;
     qi::rule<Iterator, json_object(), space_type> object;
     qi::rule<Iterator, json_array(), space_type> array;
