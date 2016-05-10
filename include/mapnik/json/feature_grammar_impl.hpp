@@ -94,18 +94,13 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
         > lit(':') > ((lit('{') > -attributes(_r1) > lit('}')) | lit("null"))
         ;
 
-    attributes = (json_.string_ [_a = _1] > lit(':') > attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
-        ;
-
-    attribute_value %= json_.number | json_.string_ | json_.object | json_.array
+    attributes = (json_.string_ [_a = _1] > lit(':') > json_.value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
     feature.name("Feature");
     feature_type.name("type");
     properties.name("properties");
     attributes.name("Attributes");
-    attribute_value.name("Attribute Value");
-
     on_error<fail>(feature, error_handler(_1, _2, _3, _4));
 
 }

@@ -76,7 +76,6 @@ struct feature_grammar : qi::grammar<Iterator, void(FeatureType&), space_type>
     qi::rule<Iterator, space_type> feature_type;
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator, json_value(), space_type> attribute_value;
     // functions
     phoenix::function<put_property> put_property_;
     phoenix::function<set_geometry_impl> set_geometry;
