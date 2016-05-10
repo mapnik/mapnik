@@ -699,10 +699,9 @@ TEST_CASE("geojson") {
                         attr{"description", mapnik::value_unicode_string("Test: \u005C")},
                         attr{"double", mapnik::value_double(1.1)},
                         attr{"int", mapnik::value_integer(1)},
-                        attr{"object", mapnik::value_unicode_string("{name:\"waka\",spaces:\"value with spaces\","
-                                                                    "boolean:false,int:1,another_object:{name:\"nested object\"},"
-                                                                    "double:1.1,NOM_FR:\"Québec\","
-                                                                    "array:[\"string\",\"value with spaces\",3,1.1,null,true,\"Québec\"]}")},
+                        attr{"object", mapnik::value_unicode_string("{name:\"waka\",spaces:\"value with spaces\",int:1,double:1.1,boolean:false"
+                                                                    ",NOM_FR:\"Québec\",array:[\"string\",\"value with spaces\",3,1.1,null,true"
+                                                                    ",\"Québec\"],another_object:{name:\"nested object\"}}")},
                         attr{"spaces", mapnik::value_unicode_string("this has spaces")},
                         attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,"
                                                                    "\"Québec\",{name:\"object within an array\"},"
