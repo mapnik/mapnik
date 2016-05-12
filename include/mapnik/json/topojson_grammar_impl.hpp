@@ -262,10 +262,9 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> (( lit('{') >> attributes >> lit('}')) | json.object)
         ;
 
-    attributes = (json.string_ >> lit(':') >> attribute_value) % lit(',')
+    attributes = (json.string_ >> lit(':') >> json.value) % lit(',')
         ;
 
-    attribute_value %= json.number | json.string_  ;
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;

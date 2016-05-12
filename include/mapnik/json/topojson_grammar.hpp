@@ -70,7 +70,6 @@ private:
     // properties
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties;
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> attributes;
-    qi::rule<Iterator, space_type, mapnik::json::json_value()> attribute_value;
     // id
     qi::rule<Iterator,space_type> id;
 };
