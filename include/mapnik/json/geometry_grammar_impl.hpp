@@ -62,13 +62,15 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
         ;
 
     json_.object = lit('{')
-        > json_.key_value % lit(',')
+        > -(json_.key_value % lit(','))
         > lit('}')
         ;
+
     json_.array = lit('[')
-        > json_.value > *(lit(',') > json_.value)
+        > -(json_.value % lit(','))
         > lit(']')
         ;
+
     json_.number = json_.strict_double
         | json_.int__
         | lit("true")

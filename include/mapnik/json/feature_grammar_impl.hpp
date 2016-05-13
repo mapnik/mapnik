@@ -50,19 +50,19 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     using phoenix::construct;
 
     // generic json types
-    json_.value =  json_.object | json_.array | json_.string_ | json_.number
+    json_.value = json_.object | json_.array | json_.string_ | json_.number
         ;
 
     json_.key_value = json_.string_ > lit(':') > json_.value
         ;
 
     json_.object = lit('{')
-        > json_.key_value % lit(',')
+        > -(json_.key_value % lit(','))
         > lit('}')
         ;
 
     json_.array = lit('[')
-        > json_.value > *(lit(',') > json_.value)
+        > -(json_.value % lit(','))
         > lit(']')
         ;
 
