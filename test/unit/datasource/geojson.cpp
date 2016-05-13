@@ -687,7 +687,7 @@ TEST_CASE("geojson") {
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     REQUIRE(bool(ds));
                     auto fields = ds->get_descriptor().get_descriptors();
-                    std::initializer_list<std::string> names = {"NOM_FR","array","boolean","description","double","int","name","object","spaces"};
+                    std::initializer_list<std::string> names = {"NOM_FR","array","boolean","description","double","empty_array", "empty_object","int","name","object","spaces"};
                     REQUIRE_FIELD_NAMES(fields, names);
 
                     auto fs = all_features(ds);
@@ -705,7 +705,9 @@ TEST_CASE("geojson") {
                         attr{"spaces", mapnik::value_unicode_string("this has spaces")},
                         attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,"
                                                                    "\"Québec\",{name:\"object within an array\"},"
-                                                                   "[\"array\",\"within\",\"an\",\"array\"]]")}
+                                                                   "[\"array\",\"within\",\"an\",\"array\"]]")},
+                        attr{"empty_array", mapnik::value_unicode_string("[]")},
+                        attr{"empty_object", mapnik::value_unicode_string("{}")},
                     };
                     auto feature = fs->next();
                     REQUIRE(bool(feature));
