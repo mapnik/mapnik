@@ -42,7 +42,6 @@ struct bounding_box_visitor
 
     box2d<double> operator() (mapnik::topojson::empty const&) const
     {
-        std::cerr << "EMPTY FAIL" << std::endl;
         return box2d<double>();
     }
 
