@@ -110,7 +110,6 @@ using attr = std::tuple<std::string, mapnik::value>;
 #define REQUIRE_ATTRIBUTES(feature, attrs) \
     REQUIRE(bool(feature)); \
     for (auto const &kv : attrs) { \
-        std::cerr << std::get<0>(kv) << std::endl; \
         REQUIRE(feature->has_key(std::get<0>(kv))); \
         CHECK(feature->get(std::get<0>(kv)) == std::get<1>(kv)); \
     } \
