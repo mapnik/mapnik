@@ -28,11 +28,32 @@
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 // stl
 #include <iostream>
 #include <string>
 
 namespace mapnik { namespace json {
+
+struct set_position_impl
+{
+    using result_type = void;
+    template <typename T0,typename T1>
+    result_type operator() (T0 & coords, T1 const& pos) const
+    {
+        if (pos) coords = *pos;
+    }
+};
+
+struct push_position_impl
+{
+    using result_type = void;
+    template <typename T0, typename T1>
+    result_type operator() (T0 & coords, T1 const& pos) const
+    {
+        if (pos) coords.emplace_back(*pos);
+    }
+};
 
 template <typename Iterator, typename ErrorHandler>
 positions_grammar<Iterator, ErrorHandler>::positions_grammar(ErrorHandler & error_handler)
@@ -48,6 +69,9 @@ positions_grammar<Iterator, ErrorHandler>::positions_grammar(ErrorHandler & erro
     qi::omit_type omit;
     using qi::fail;
     using qi::on_error;
+
+    boost::phoenix::function<set_position_impl> set_position;
+    boost::phoenix::function<push_position_impl> push_position;
 
     coords = rings_array[_val = _1] | rings [_val = _1] | ring[_val = _1] |  pos[set_position(_val,_1)]
         ;

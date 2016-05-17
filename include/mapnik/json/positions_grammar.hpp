@@ -32,33 +32,12 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
 
 
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-
-struct set_position_impl
-{
-    using result_type = void;
-    template <typename T0,typename T1>
-    result_type operator() (T0 & coords, T1 const& pos) const
-    {
-        if (pos) coords = *pos;
-    }
-};
-
-struct push_position_impl
-{
-    using result_type = void;
-    template <typename T0, typename T1>
-    result_type operator() (T0 & coords, T1 const& pos) const
-    {
-        if (pos) coords.emplace_back(*pos);
-    }
-};
 
 template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct positions_grammar :
@@ -70,8 +49,6 @@ struct positions_grammar :
     qi::rule<Iterator, positions(), space_type> ring;
     qi::rule<Iterator, std::vector<positions>(), space_type> rings;
     qi::rule<Iterator, std::vector<std::vector<positions> >(), space_type> rings_array;
-    boost::phoenix::function<set_position_impl> set_position;
-    boost::phoenix::function<push_position_impl> push_position;
 };
 
 }}
