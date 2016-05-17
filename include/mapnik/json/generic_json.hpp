@@ -64,7 +64,7 @@ struct json_value : json_value_base
     json_value(T && val)
         : json_value_base(std::forward<T>(val)) {}
 #else
-    // MSVC 2015  inheriting constructors is not working in this context (support is apparently planned)
+    // MSVC 2015 inheriting constructors is not working in this context (support is apparently planned)
     using json_value_base::json_value_base;
 #endif
 };
