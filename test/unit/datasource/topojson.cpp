@@ -60,7 +60,6 @@ TEST_CASE("topology")
         mapnik::transcoder tr("utf8");
         for (auto const& path : mapnik::util::list_directory("test/data/topojson/"))
         {
-            std::cerr << path << std::endl;
             mapnik::topojson::topology topo;
             REQUIRE(parse_topology(path, topo));
             for (auto const& geom : topo.geometries)
