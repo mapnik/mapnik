@@ -511,8 +511,9 @@ struct feature_generator
 
                                 if (topo_.tr)
                                 {
-                                    x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                                    y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                                    transform const& tr = *topo_.tr;
+                                    x =  (px += x) * tr.scale_x + tr.translate_x;
+                                    y =  (py += y) * tr.scale_y + tr.translate_y;
                                 }
                                 processed_coords.emplace_back(coordinate{x,y});
                             }
