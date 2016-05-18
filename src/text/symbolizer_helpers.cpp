@@ -465,7 +465,7 @@ void text_symbolizer_helper::init_marker() const
     if (marker->is<marker_null>()) return;
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-    if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
+    if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform, scale_factor_);
     double width = marker->width();
     double height = marker->height();
     double px0 = - 0.5 * width;

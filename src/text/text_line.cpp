@@ -51,7 +51,7 @@ text_line::text_line(text_line && rhs)
 
 void text_line::add_glyph(glyph_info && glyph, double scale_factor_)
 {
-    line_height_ = std::max(line_height_, glyph.line_height() + glyph.format->line_spacing);
+    line_height_ = std::max(line_height_, glyph.line_height() + glyph.format->line_spacing * scale_factor_);
     double advance = glyph.advance();
     if (glyphs_.empty())
     {

@@ -58,7 +58,7 @@ MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr,
                                     feature_impl const& feature,
                                     attributes const& vars,
                                     transform_type const& trans_expr,
-                                    double scale_factor=1.0);
+                                    double scale_factor);
 
 struct enumeration_wrapper
 {

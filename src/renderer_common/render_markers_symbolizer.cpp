@@ -159,7 +159,7 @@ struct render_marker_symbolizer_visitor
 
         if (auto image_transform = get_optional<transform_type>(sym_, keys::image_transform))
         {
-            evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+            evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         }
 
         vector_dispatch_type rasterizer_dispatch(marker_ptr,
@@ -183,7 +183,7 @@ struct render_marker_symbolizer_visitor
 
         setup_transform_scaling(image_tr, mark.width(), mark.height(), feature_, common_.vars_, sym_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         box2d<double> const& bbox = mark.bounding_box();
         mapnik::image_rgba8 const& marker = mark.get_data();
         // - clamp sizes to > 4 pixels of interactivity
