@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "catch.hpp"
+#include "ds_test_util.hpp"
 
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
@@ -72,4 +73,42 @@ TEST_CASE("topology")
             }
         }
     }
+
+    SECTION("TopoJSON properties are properly expressed")
+    {
+        std::string filename("./test/data/topojson/escaped.topojson");
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+        mapnik::transcoder tr("utf8");
+        mapnik::topojson::topology topo;
+        REQUIRE(parse_topology(filename, topo));
+        mapnik::value_integer feature_id = 0;
+        for (auto const& geom : topo.geometries)
+        {
+            mapnik::box2d<double> bbox = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
+            CHECK(bbox.valid());
+            mapnik::topojson::feature_generator<mapnik::context_ptr> visitor(ctx, tr, topo, feature_id);
+            mapnik::feature_ptr feature = mapnik::util::apply_visitor(visitor, geom);
+            CHECK(feature);
+            CHECK(feature->envelope() == bbox);
+            std::initializer_list<attr> attrs = {
+                attr{"name", mapnik::value_unicode_string("Test")},
+                attr{"NOM_FR", mapnik::value_unicode_string("Québec")},
+                attr{"boolean", mapnik::value_bool("true")},
+                attr{"description", mapnik::value_unicode_string("Test: \u005C")},
+                attr{"double", mapnik::value_double(1.1)},
+                attr{"int", mapnik::value_integer(1)},
+                attr{"object", mapnik::value_unicode_string("{name:\"waka\",spaces:\"value with spaces\",int:1,double:1.1,boolean:false"
+                                                            ",NOM_FR:\"Québec\",array:[\"string\",\"value with spaces\",3,1.1,null,true"
+                                                            ",\"Québec\"],another_object:{name:\"nested object\"}}")},
+                attr{"spaces", mapnik::value_unicode_string("this has spaces")},
+                attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,"
+                                                           "\"Québec\",{name:\"object within an array\"},"
+                                                           "[\"array\",\"within\",\"an\",\"array\"]]")},
+                attr{"empty_array", mapnik::value_unicode_string("[]")},
+                attr{"empty_object", mapnik::value_unicode_string("{}")},
+            };
+            REQUIRE_ATTRIBUTES(feature, attrs);
+        }
+    }
+
 }

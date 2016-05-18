@@ -66,7 +66,6 @@ struct attr_value_converter
     {
         return mapnik::Boolean;
     }
-
     // string, object, array
     template <typename T>
     mapnik::eAttributeType operator() (T const& /*val*/) const
@@ -101,6 +100,11 @@ struct geometry_type_visitor
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
+    template <typename T>
+    int operator() (T const& ) const
+    {
+        return 0;
+    }
 };
 
 struct collect_attributes_visitor
@@ -109,6 +113,9 @@ struct collect_attributes_visitor
     collect_attributes_visitor(mapnik::layer_descriptor & desc):
       desc_(desc) {}
 
+    // no-op
+    void operator() (mapnik::topojson::empty) {}
+    //
     template <typename GeomType>
     void operator() (GeomType const& g)
     {

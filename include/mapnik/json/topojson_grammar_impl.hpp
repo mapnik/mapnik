@@ -71,13 +71,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::linestring,
-    (mapnik::topojson::index_type, ring)
+    (std::vector<mapnik::topojson::index_type>, rings)
     (boost::optional<mapnik::topojson::properties>, props)
     )
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::multi_linestring,
-    (std::vector<mapnik::topojson::index_type>, rings)
+    (std::vector<std::vector<mapnik::topojson::index_type> >, lines)
     (boost::optional<mapnik::topojson::properties>, props)
     )
 
@@ -100,6 +100,8 @@ BOOST_FUSION_ADAPT_STRUCT(
     (boost::optional<mapnik::topojson::transform>, tr)
     (boost::optional<mapnik::topojson::bounding_box>, bbox)
    )
+
+
 
 namespace mapnik { namespace topojson {
 
@@ -128,7 +130,6 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
-
     // generic JSON types
     json.value = json.object | json.array | json.string_ | json.number
         ;
@@ -180,7 +181,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> lit('{')
         >> -((omit[json.string_]
               >> lit(':')
-              >>  (geometry_collection(_val) | geometry)) % lit(','))
+              >>  (geometry_collection(_val) | geometry[push_back(_val, _1)]) % lit(',')))
         >> lit('}')
         ;
 
@@ -195,17 +196,21 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         ;
 
     geometry_collection =  lit('{')
-               >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
-               >> -(lit(',') >> omit[bbox])
-               >> lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
-               >> lit(']')
-               >> lit('}')
+        >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
+        >> -(lit(',') >> omit[bbox])
+        >> lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
+        >> lit(']')
+        >> lit('}')
         ;
+
     point = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"Point\"")
         >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate)
-            ^ (lit(',') >> properties) /*^ (lit(',') >> omit[id])*/)
+            ^
+            (lit(',') >> properties)
+            ^
+            (lit(',') >> omit[json.key_value]))
         >> lit('}')
         ;
 
@@ -214,23 +219,30 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"coordinates\"") >> lit(':')
              >> lit('[') >> -(coordinate % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
+            ^
+            (lit(',') >> properties) ^ (lit(',') >> omit[json.key_value]))
         >> lit('}')
         ;
 
     linestring = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"LineString\"")
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[') >> int_ >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
+        >> (lit(',') >> (lit("\"arcs\"") >> lit(':') >> ring)
+            ^
+            (lit(',') >> properties))
+        //^
+        //  (lit(',') >> omit[json.key_value]))
         >> lit('}')
         ;
 
     multi_linestring = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiLineString\"")
         >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[')
-             >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
+        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
+             >> lit('[') >> -(ring % lit(',')) >> lit(']'))
+            ^
+            (lit(',') >> properties)
+            ^
+            (lit(',') >> omit[json.key_value]))
         >> lit('}')
         ;
 
@@ -239,7 +251,8 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> -(lit(',') >> omit[bbox])
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
              >> lit('[') >> -(ring % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
+            ^ (lit(',') >> properties))
+            //^ (lit(',') >> omit[json.key_value]))
         >> lit('}')
         ;
 
@@ -249,11 +262,8 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
              >> lit('[')
              >> -((lit('[') >> -(ring % lit(',')) >> lit(']')) % lit(','))
-             >> lit(']')) ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
+             >> lit(']')) ^ (lit(',') >> properties) ^ (lit(',') >> omit[json.key_value]))
         >> lit('}')
-        ;
-
-    id = lit("\"id\"") >> lit(':') >> omit[json.value]
         ;
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
@@ -261,12 +271,8 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
 
     properties = lit("\"properties\"")
         >> lit(':')
-        >> (( lit('{') >> attributes >> lit('}')) | json.object)
+        >> lit('{') >> (json.string_ >> lit(':') >> json.value) % lit(',') >> lit('}')
         ;
-
-    attributes = (json.string_ >> lit(':') >> json.value) % lit(',')
-        ;
-
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;

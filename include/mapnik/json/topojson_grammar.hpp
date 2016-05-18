@@ -69,9 +69,6 @@ private:
     qi::rule<Iterator, space_type, std::vector<index_type>()> ring;
     // properties
     qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties;
-    qi::rule<Iterator, space_type, mapnik::topojson::properties()> attributes;
-    // id
-    qi::rule<Iterator,space_type> id;
 };
 
 }}
