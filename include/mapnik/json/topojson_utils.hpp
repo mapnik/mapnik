@@ -437,7 +437,7 @@ struct feature_generator
                             }
                             processed_coords.emplace_back(coordinate{x,y});
                         }
-
+                        linear_ring.reserve(linear_ring.size() + processed_coords.size());
                         if (reverse)
                         {
                             for (auto const& c : processed_coords | boost::adaptors::reversed)
@@ -519,7 +519,7 @@ struct feature_generator
                             }
 
                             using namespace boost::adaptors;
-
+                            linear_ring.reserve(linear_ring.size() + processed_coords.size());
                             if (reverse)
                             {
                                 for (auto const& c : (processed_coords | reversed))
