@@ -704,11 +704,7 @@ def FindBoost(context, prefixes, thread_flag):
     BOOST_INCLUDE_DIR = None
     BOOST_APPEND = None
     env['BOOST_APPEND'] = str()
-
-    if env['THREADING'] == 'multi':
-        search_lib = 'libboost_thread'
-    else:
-        search_lib = 'libboost_filesystem'
+    search_lib = 'libboost_filesystem'
 
     # note: must call normpath to strip trailing slash otherwise dirname
     # does not remove 'lib' and 'include'
@@ -1410,15 +1406,6 @@ if not preconfigured:
             ['regex', 'boost/regex.hpp', True],
             ['program_options', 'boost/program_options.hpp', False]
         ]
-
-        if env['THREADING'] == 'multi':
-            BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-            # on solaris the configure checks for boost_thread
-            # require the -pthreads flag to be able to check for
-            # threading support, so we add as a global library instead
-            # of attaching to cxxflags after configure
-            if env['PLATFORM'] == 'SunOS':
-                env.Append(CXXFLAGS = '-pthreads')
 
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
         if env['PRIORITIZE_LINKING']:
