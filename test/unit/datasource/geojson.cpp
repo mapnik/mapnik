@@ -693,21 +693,21 @@ TEST_CASE("geojson") {
                     auto fs = all_features(ds);
                     REQUIRE(bool(fs));
                     std::initializer_list<attr> attrs = {
-                        attr{"name", mapnik::value_unicode_string("Test")},
-                        attr{"NOM_FR", mapnik::value_unicode_string("Québec")},
-                        attr{"boolean", mapnik::value_bool("true")},
-                        attr{"description", mapnik::value_unicode_string("Test: \u005C")},
+                        attr{"name", mapnik::value_unicode_string(u8"Test")},
+                        attr{"NOM_FR", mapnik::value_unicode_string(u8"Québec")},
+                        attr{"boolean", mapnik::value_bool(u8"true")},
+                        attr{"description", mapnik::value_unicode_string(u8"Test: \u005C")},
                         attr{"double", mapnik::value_double(1.1)},
                         attr{"int", mapnik::value_integer(1)},
-                        attr{"object", mapnik::value_unicode_string("{name:\"waka\",spaces:\"value with spaces\",int:1,double:1.1,boolean:false"
-                                                                    ",NOM_FR:\"Québec\",array:[\"string\",\"value with spaces\",3,1.1,null,true"
-                                                                    ",\"Québec\"],another_object:{name:\"nested object\"}}")},
-                        attr{"spaces", mapnik::value_unicode_string("this has spaces")},
-                        attr{"array", mapnik::value_unicode_string("[\"string\",\"value with spaces\",3,1.1,null,true,"
-                                                                   "\"Québec\",{name:\"object within an array\"},"
-                                                                   "[\"array\",\"within\",\"an\",\"array\"]]")},
-                        attr{"empty_array", mapnik::value_unicode_string("[]")},
-                        attr{"empty_object", mapnik::value_unicode_string("{}")},
+                        attr{"object", mapnik::value_unicode_string(u8"{name:\"waka\",spaces:\"value with spaces\",int:1,double:1.1,boolean:false"
+                                                                    u8",NOM_FR:\"Québec\",array:[\"string\",\"value with spaces\",3,1.1,null,true"
+                                                                    u8",\"Québec\"],another_object:{name:\"nested object\"}}")},
+                        attr{"spaces", mapnik::value_unicode_string(u8"this has spaces")},
+                        attr{"array", mapnik::value_unicode_string(u8"[\"string\",\"value with spaces\",3,1.1,null,true,"
+                                                                   u8"\"Québec\",{name:\"object within an array\"},"
+                                                                   u8"[\"array\",\"within\",\"an\",\"array\"]]")},
+                        attr{"empty_array", mapnik::value_unicode_string(u8"[]")},
+                        attr{"empty_object", mapnik::value_unicode_string(u8"{}")},
                     };
                     auto feature = fs->next();
                     REQUIRE(bool(feature));
