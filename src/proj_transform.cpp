@@ -200,20 +200,21 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
 #ifdef MAPNIK_USE_PROJ4
     if (is_dest_longlat_)
     {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= DEG_TO_RAD;
-            y[i*offset] *= DEG_TO_RAD;
+        for (int i = 0; i < point_count; ++i)
+        {
+            x[i * offset] *= DEG_TO_RAD;
+            y[i * offset] *= DEG_TO_RAD;
         }
     }
 
-    if (pj_transform( dest_.proj_, source_.proj_, point_count,
-                      offset, x,y,z) != 0)
+    if (pj_transform(dest_.proj_, source_.proj_, point_count,
+                     offset, x, y, z) != 0)
     {
         return false;
     }
 
-    for(int j=0; j<point_count; j++) {
+    for (int j = 0; j < point_count; ++j)
+    {
         if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
         {
             return false;
@@ -222,10 +223,10 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
 
     if (is_source_longlat_)
     {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= RAD_TO_DEG;
-            y[i*offset] *= RAD_TO_DEG;
+        for (int i = 0; i < point_count; ++i)
+        {
+            x[i * offset] *= RAD_TO_DEG;
+            y[i * offset] *= RAD_TO_DEG;
         }
     }
 #endif
@@ -266,7 +267,7 @@ unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
     double * x = reinterpret_cast<double*>(ptr);
     double * y = x + 1;
     double * z = nullptr;
-    if(!backward(x, y, z, size, 2))
+    if (!backward(x, y, z, size, 2))
     {
         return size;
     }
@@ -333,10 +334,7 @@ bool proj_transform::backward (box2d<double> & box) const
     double miny = std::min(lly, lry);
     double maxx = std::max(urx, lrx);
     double maxy = std::max(ury, uly);
-    box.init(minx,
-             miny,
-             maxx,
-             maxy);
+    box.init(minx, miny, maxx, maxy);
     return true;
 }
 
