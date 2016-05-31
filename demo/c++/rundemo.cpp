@@ -230,7 +230,7 @@ int main ( int, char** )
             parameters p;
             p["type"]="shape";
             p["file"]="demo/data/boundaries";
-            p["encoding"]="latin1";
+            p["encoding"]="utf8";
 
             layer lyr("Provinces");
             lyr.set_datasource(datasource_cache::instance().create(p));
@@ -295,7 +295,7 @@ int main ( int, char** )
             parameters p;
             p["type"]="shape";
             p["file"]="demo/data/popplaces";
-            p["encoding"] = "latin1";
+            p["encoding"] = "utf8";
             layer lyr("Populated Places");
             lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));
