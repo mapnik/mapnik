@@ -37,6 +37,7 @@ void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, a
 {
     double width = 0.0;
     double height = 0.0;
+    double half_stroke_width = 0.0;
     if (has_key(sym,keys::width) && has_key(sym,keys::height))
     {
         width = get<double>(sym, keys::width, feature, vars, 0.0);
@@ -50,6 +51,10 @@ void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, a
     {
         width = height = get<double>(sym, keys::height, feature, vars, 0.0);
     }
+    if (has_key(sym,keys::stroke_width))
+    {
+        half_stroke_width = get<double>(sym, keys::stroke_width, feature, vars, 0.0) / 2.0;
+    }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
     styled_svg.push_attr();
     styled_svg.begin_path();
@@ -59,6 +64,10 @@ void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, a
     styled_svg.pop_attr();
     double lox,loy,hix,hiy;
     styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
+    lox -= half_stroke_width;
+    loy -= half_stroke_width;
+    hix += half_stroke_width;
+    hiy += half_stroke_width;
     styled_svg.set_dimensions(width,height);
     marker_ellipse.set_dimensions(width,height);
     marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
