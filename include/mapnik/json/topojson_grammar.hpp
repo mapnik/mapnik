@@ -197,7 +197,7 @@ private:
     qi::rule<Iterator, space_type, std::vector<std::vector<index_type>>()> rings;
     qi::rule<Iterator, space_type, arcs_type()> rings_array;
     // properties
-    qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties;
+    qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties_;
     qi::symbols<char, int> geometry_type_dispatch;
 };
 

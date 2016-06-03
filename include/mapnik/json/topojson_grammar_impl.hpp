@@ -171,7 +171,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
            |
            (lit("\"arcs\"") > lit(':') > rings_array[_c = _1])
            |
-           properties[_d = _1]
+           properties_[_d = _1]
            |
            json.key_value) % lit(',')
         > lit('}')[_val = create_geometry(_a, _b, _c, _d)]
@@ -198,7 +198,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         ring
         ;
 
-    properties = lit("\"properties\"")
+    properties_ = lit("\"properties\"")
         >> lit(':')
         >> lit('{') >> (json.string_ >> lit(':') >> json.value) % lit(',') >> lit('}')
         ;
@@ -221,6 +221,7 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     json.value.name("value");
     coordinate_.name("coordinate");
     geometry.name("geometry");
+    properties_.name("properties");
     geometry_collection.name("geometry_collection");
     // error handler
     on_error<fail>(topology, error_handler(_1, _2, _3, _4));
