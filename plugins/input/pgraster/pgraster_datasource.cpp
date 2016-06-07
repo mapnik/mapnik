@@ -878,9 +878,10 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         std::string table_with_bbox;
         std::string col = geometryColumn_;
 
-        if ( use_overviews_ ) {
-          std::string sch = schema_;
-          std::string tab = mapnik::sql_utils::unquote_double(raster_table_);
+        if ( use_overviews_ && !overviews_.empty()) {
+          std::string sch = overviews_[0].schema;
+          std::string tab = overviews_[0].table;
+          col = overviews_[0].column;
           const double scale = std::min(px_gw, px_gh);
           std::vector<pgraster_overview>::const_reverse_iterator i;
           for (i=overviews_.rbegin(); i!=overviews_.rend(); ++i) {
