@@ -551,6 +551,32 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         MAPNIK_LOG_WARN(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of alpha band";
                     }
                 }
+                else if( dataset_.GetRasterCount() > 0 && dataset_.GetRasterBand(1) )
+                {
+                    // Check if we have a non-alpha mask band (for example a TIFF internal mask)
+                    int flags = dataset_.GetRasterBand(1)->GetMaskFlags();
+                    GDALRasterBand* mask = 0;
+                    if (flags == GMF_PER_DATASET)
+                    {
+                        mask = dataset_.GetRasterBand(1)->GetMaskBand();
+                    }
+                    if (mask)
+                    {
+                        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: found and processing mask band...";
+                        if (!raster_has_nodata)
+                        {
+                            raster_io_error = mask->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 3,
+                                                              image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                            if (raster_io_error == CE_Failure) {
+                                throw datasource_exception(CPLGetLastErrorMsg());
+                            }
+                        }
+                        else
+                        {
+                            MAPNIK_LOG_WARN(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of mask band";
+                        }
+                    }
+                }
                 mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, image, filter_factor);
                 // set nodata value to be used in raster colorizer
                 if (nodata_value_) raster->set_nodata(*nodata_value_);
