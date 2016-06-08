@@ -37,7 +37,7 @@
 
 namespace {
 
-int run(std::string const& command, bool okay_to_fail = false)
+bool run(std::string const& command, bool okay_to_fail = false)
 {
     std::string cmd;
     if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
@@ -75,8 +75,6 @@ bool ping_postmaster()
 }
 
 }
-
-
 
 TEST_CASE("postgis") {
 
