@@ -28,9 +28,6 @@ dependencies:
     - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   override:
     - sudo apt-get update -y
-  post:
-    - which clang-${LLVM_VERSION}
-    - which clang++-${LLVM_VERSION}
 
 database:
   pre:
