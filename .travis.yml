@@ -25,19 +25,19 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.5 -Qunused-arguments" _CC="clang-3.5" TRIGGER=true
+      env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8" TRIGGER=true
       addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5' ]
+	apt:
+	  sources: [ 'ubuntu-toolchain-r-test']
+	  packages: [ 'libstdc++6']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" _CXX="ccache clang++-3.5 -Qunused-arguments" _CC="clang-3.5"
+      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.8" _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8"
       addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5', 'llvm-3.5-dev' ]
+	apt:
+	  sources: [ 'ubuntu-toolchain-r-test']
+	  packages: [ 'libstdc++6','libstdc++-5-dev' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
@@ -58,6 +58,9 @@ before_install:
  - git_submodule_update --init --depth=10
 
 install:
+ - ./.mason/mason install clang 3.8.0
+ - export PATH=$(./.mason/mason prefix clang 3.8.0)/bin:${PATH}
+ - which clang++
  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export CCACHE_READONLY=1; fi
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
