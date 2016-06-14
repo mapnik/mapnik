@@ -27,17 +27,17 @@ matrix:
       compiler: ": clang"
       env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8" TRIGGER=true
       addons:
-	apt:
-	  sources: [ 'ubuntu-toolchain-r-test']
-	  packages: [ 'libstdc++6']
+      apt:
+        sources: [ 'ubuntu-toolchain-r-test']
+        packages: [ 'libstdc++6']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
       env: JOBS=8 COVERAGE=true LLVM_VERSION="3.8" _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8"
       addons:
-	apt:
-	  sources: [ 'ubuntu-toolchain-r-test']
-	  packages: [ 'libstdc++6','libstdc++-5-dev' ]
+      apt:
+        sources: [ 'ubuntu-toolchain-r-test']
+        packages: [ 'libstdc++6','libstdc++-5-dev' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
