@@ -58,10 +58,6 @@ before_install:
  - git_submodule_update --init --depth=10
 
 install:
- - ./.mason/mason install clang 3.8.0
- - export PATH=$(./.mason/mason prefix clang 3.8.0)/bin:${PATH}
- - which clang++
- - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export CCACHE_READONLY=1; fi
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
  - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
@@ -76,6 +72,9 @@ install:
 
 before_script:
  - source bootstrap.sh
+ - mason install clang 3.8.0
+ - export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
+ - which clang++
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
