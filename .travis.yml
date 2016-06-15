@@ -82,7 +82,7 @@ before_script:
 
 script:
  - export SCONSFLAGS='--debug=time'
- - configure BENCHMARK=${BENCH}
+ - configure BENCHMARK=${BENCH} || cat config.log
  - make
  - make test
  - enabled ${COVERAGE} coverage
