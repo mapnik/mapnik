@@ -72,9 +72,13 @@ install:
 
 before_script:
  - source bootstrap.sh
- - mason install clang 3.8.0
- - export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
- - which clang++
+ - |
+   if [[ $(uname -s) == 'Linux' ]]; then
+     mason install clang 3.8.0
+     export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
+     which clang++
+     export LLVM_COV="$(mason prefix clang 3.8.0)/bin/llvm-cov"
+   fi
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
@@ -86,7 +90,7 @@ script:
  - cat config.log
  - make
  - make test
- - enabled ${COVERAGE} export LLVM_COV="$(mason prefix clang 3.8.0)/bin/llvm-cov" && coverage
+ - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
 
 after_success:
