@@ -1355,7 +1355,7 @@ if not preconfigured:
 
     # test for C++11 support, which is required
     if not env['HOST'] and not conf.supports_cxx11():
-        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler to at least g++ 4.7 (ideally 4.8)")
+        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler")
         Exit(1)
 
     if not env['HOST']:
