@@ -376,7 +376,6 @@ struct agg_render_marker_visitor
         using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-        using svg_attribute_type = agg::pod_bvector<mapnik::svg::path_attributes>;
 
         ras_ptr_->reset();
         if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
@@ -403,14 +402,12 @@ struct agg_render_marker_visitor
         mtx *= agg::trans_affine_scaling(common_.scale_factor_);
         // render the marker at the center of the marker box
         mtx.translate(pos_.x, pos_.y);
-        using namespace mapnik::svg;
-        vertex_stl_adapter<svg_path_storage> stl_storage(marker.get_data()->source());
+        svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(marker.get_data()->source());
         svg_path_adapter svg_path(stl_storage);
-        svg_renderer_agg<svg_path_adapter,
-                         svg_attribute_type,
-                         renderer_type,
-                         pixfmt_comp_type> svg_renderer(svg_path,
-                                                        marker.get_data()->attributes());
+        svg::renderer_agg<svg_path_adapter,
+                          svg_attribute_type,
+                          renderer_type,
+                          pixfmt_comp_type> svg_renderer(svg_path, marker.get_data()->attributes());
 
         // https://github.com/mapnik/mapnik/issues/1316
         // https://github.com/mapnik/mapnik/issues/1866

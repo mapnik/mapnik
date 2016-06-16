@@ -29,7 +29,7 @@
 #include <mapnik/geometry_centroid.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/marker.hpp> // for svg_storage_type
+#include <mapnik/marker.hpp> // svg_attribute_type, svg_storage_type
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/box2d.hpp>
@@ -49,8 +49,6 @@
 namespace mapnik {
 
 struct clip_poly_tag;
-
-using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
 
 template <typename Detector>
 struct vector_markers_dispatch : util::noncopyable

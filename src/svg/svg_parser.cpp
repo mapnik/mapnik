@@ -1046,8 +1046,7 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
 }
 
-svg_parser::svg_parser(svg_converter<svg_path_adapter,
-                       agg::pod_bvector<mapnik::svg::path_attributes> > & path)
+svg_parser::svg_parser(svg_converter_type & path)
     : path_(path),
       is_defs_(false) {}
 

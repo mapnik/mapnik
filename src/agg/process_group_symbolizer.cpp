@@ -75,11 +75,10 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-        using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
-        using svg_renderer_type = svg::svg_renderer_agg<svg_path_adapter,
-                                                        svg_attribute_type,
-                                                        renderer_type,
-                                                        pixfmt_comp_type>;
+        using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                    svg_attribute_type,
+                                                    renderer_type,
+                                                    pixfmt_comp_type>;
         ras_ptr_->reset();
         buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);

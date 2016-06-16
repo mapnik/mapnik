@@ -172,14 +172,12 @@ struct grid_render_marker_visitor
         mtx *= agg::trans_affine_scaling(common_.scale_factor_);
         // render the marker at the center of the marker box
         mtx.translate(pos_.x, pos_.y);
-        using namespace mapnik::svg;
-        vertex_stl_adapter<svg_path_storage> stl_storage(marker.get_data()->source());
+        svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(marker.get_data()->source());
         svg_path_adapter svg_path(stl_storage);
-        svg_renderer_agg<svg_path_adapter,
-            agg::pod_bvector<path_attributes>,
-            renderer_type,
-            pixfmt_type> svg_renderer(svg_path,
-                                                marker.get_data()->attributes());
+        svg::renderer_agg<svg_path_adapter,
+                          svg_attribute_type,
+                          renderer_type,
+                          pixfmt_type> svg_renderer(svg_path, marker.get_data()->attributes());
 
         svg_renderer.render_id(*ras_ptr_, sl, renb, feature_.id(), mtx, opacity_, bbox);
     }
