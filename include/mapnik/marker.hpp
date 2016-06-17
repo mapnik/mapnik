@@ -27,12 +27,8 @@
 #include <mapnik/image.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/util/variant.hpp>
-
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore_agg.hpp>
-#include "agg_array.h"
-#pragma GCC diagnostic pop
 
 // stl
 #include <deque>
@@ -42,10 +38,8 @@ namespace mapnik
 {
 
 struct image_any;
-namespace svg { struct path_attributes; }
 
 using svg::svg_path_adapter;
-
 using svg_attribute_type = std::deque<svg::path_attributes>;
 using svg_storage_type = svg::svg_storage<svg::svg_path_storage, svg_attribute_type>;
 using svg_path_ptr = std::shared_ptr<svg_storage_type>;
