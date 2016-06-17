@@ -27,11 +27,6 @@
 #include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/operators.hpp>
-#pragma GCC diagnostic pop
-
 // agg
 // forward declare so that apps using mapnik do not need agg headers
 namespace agg {
@@ -43,10 +38,6 @@ namespace mapnik {
 // A spatial envelope (i.e. bounding box) which also defines some basic operators.
 
 template <typename T> class MAPNIK_DECL box2d
-: boost::equality_comparable<box2d<T> ,
-                             boost::addable<box2d<T>,
-                                            boost::dividable2<box2d<T>, T,
-                                                              boost::multipliable2<box2d<T>, T > > > >
 {
 public:
     using value_type = T;
@@ -106,6 +97,7 @@ public:
     bool intersects(box2d_type const& other) const;
     box2d_type intersect(box2d_type const& other) const;
     bool operator==(box2d_type const& other) const;
+    bool operator!=(box2d_type const& other) const;
     void re_center(T cx,T cy);
     void re_center(geometry::point<T> const& c);
     void init(T x0,T y0,T x1,T y1);
@@ -119,10 +111,11 @@ public:
 
     // define some operators
     box2d_type& operator+=(box2d_type const& other);
+    box2d_type  operator*(T) const;
     box2d_type& operator*=(T);
     box2d_type& operator/=(T);
     T operator[](int index) const;
-    box2d_type operator +(T other) const; //enlarge box by given amount
+    box2d_type  operator +(T other) const; //enlarge box by given amount
     box2d_type& operator +=(T other); //enlarge box by given amount
 
     // compute the bounding box of this one transformed

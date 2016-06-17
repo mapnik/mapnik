@@ -120,6 +120,12 @@ bool box2d<T>::operator==(box2d<T> const& other) const
 }
 
 template <typename T>
+bool box2d<T>::operator!=(box2d<T> const& other) const
+{
+    return !(*this == other);
+}
+
+template <typename T>
 T box2d<T>::minx() const
 {
     return minx_;
@@ -429,6 +435,13 @@ box2d<T>& box2d<T>::operator*=(T t)
     miny_ = c.y - sy;
     maxy_ = c.y + sy;
     return *this;
+}
+
+template <typename T>
+box2d<T> box2d<T>::operator*(T t) const
+{
+    box2d<T> temp(*this);
+    return temp *=t;
 }
 
 template <typename T>
