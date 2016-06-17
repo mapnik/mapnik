@@ -52,9 +52,9 @@ void render_pattern<image_rgba8>(rasterizer & ras,
     using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
     agg::scanline_u8 sl;
 
-    mapnik::box2d<double> const& bbox = marker.bounding_box() * tr;
-    mapnik::coord<double,2> c = bbox.center();
-    agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+    auto const& bbox = marker.bounding_box() * tr;
+    auto c = bbox.center();
+    agg::trans_affine mtx = agg::trans_affine_translation(-c.x, -c.y);
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 

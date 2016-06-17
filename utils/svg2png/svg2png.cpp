@@ -86,10 +86,10 @@ struct main_marker_visitor
         pixfmt pixf(buf);
         renderer_base renb(pixf);
 
-        mapnik::box2d<double> const& bbox = marker.get_data()->bounding_box();
-        mapnik::coord<double,2> c = bbox.center();
+        auto const& bbox = marker.get_data()->bounding_box();
+        auto c = bbox.center();
         // center the svg marker on '0,0'
-        agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+        agg::trans_affine mtx = agg::trans_affine_translation(-c.x, -c.y);
         // render the marker at the center of the marker box
         mtx.translate(0.5 * im.width(), 0.5 * im.height());
 

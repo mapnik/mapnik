@@ -41,6 +41,7 @@
 #include <mapnik/text/font_library.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/geometry.hpp>
 
 // stl
 #include <stdexcept>
@@ -499,7 +500,7 @@ void Map::set_base_path(std::string const& base)
 
 void Map::zoom(double factor)
 {
-    coord2d center = current_extent_.center();
+    auto center = current_extent_.center();
     double w = factor * current_extent_.width();
     double h = factor * current_extent_.height();
     current_extent_ = box2d<double>(center.x - 0.5 * w,

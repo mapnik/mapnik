@@ -289,7 +289,7 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
 
 mapnik::featureset_ptr topojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    mapnik::box2d<double> query_bbox(pt, pt);
+    mapnik::box2d<double> query_bbox(pt.x, pt.y, pt.x, pt.y);
     query_bbox.pad(tol);
     mapnik::query q(query_bbox);
     for (auto const& attr_info : desc_.get_descriptors())

@@ -594,7 +594,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
         }
         else
         {
-            mapnik::box2d<double> bbox(pt, pt);
+            mapnik::box2d<double> bbox(pt.x, pt.y, pt.x, pt.y);
             bbox.pad(tol);
             return featureset_ptr(new ogr_featureset (ctx,
                                                       *layer,

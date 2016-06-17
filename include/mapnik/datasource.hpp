@@ -33,7 +33,7 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
 #include <mapnik/datasource_geometry_type.hpp>
-
+#include <mapnik/coord.hpp>
 // stl
 #include <map>
 #include <string>

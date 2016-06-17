@@ -25,7 +25,6 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/util/is_clockwise.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
@@ -335,7 +334,7 @@ bool proj_transform::backward (box2d<double> & box) const
 }
 
 // Returns points in clockwise order. This allows us to do anti-meridian checks.
-void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env, int points)
+void envelope_points(std::vector<geometry::point<double>> & coords, box2d<double>& env, int points)
 {
     double width = env.width();
     double height = env.height();
@@ -353,21 +352,22 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     double ystep = height / steps;
 
     coords.resize(points);
-    for (int i=0; i<steps; i++) {
+    for (int i = 0; i < steps; ++i)
+    {
         // top: left>right
-        coords[i] = coord<double, 2>(env.minx() + i * xstep, env.maxy());
+        coords[i] = geometry::point<double>(env.minx() + i * xstep, env.maxy());
         // right: top>bottom
-        coords[i + steps] = coord<double, 2>(env.maxx(), env.maxy() - i * ystep);
+        coords[i + steps] = geometry::point<double>(env.maxx(), env.maxy() - i * ystep);
         // bottom: right>left
-        coords[i + steps * 2] = coord<double, 2>(env.maxx() - i * xstep, env.miny());
+        coords[i + steps * 2] = geometry::point<double>(env.maxx() - i * xstep, env.miny());
         // left: bottom>top
-        coords[i + steps * 3] = coord<double, 2>(env.minx(), env.miny() + i * ystep);
+        coords[i + steps * 3] = geometry::point<double>(env.minx(), env.miny() + i * ystep);
     }
 }
 
-box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
-    std::vector<coord<double,2> >::iterator it = points.begin();
-    std::vector<coord<double,2> >::iterator it_end = points.end();
+box2d<double> calculate_bbox(std::vector<geometry::point<double> > & points) {
+    std::vector<geometry::point<double> >::iterator it = points.begin();
+    std::vector<geometry::point<double> >::iterator it_end = points.end();
 
     box2d<double> env(*it, *(++it));
     for (; it!=it_end; ++it) {
@@ -393,15 +393,13 @@ bool proj_transform::backward(box2d<double>& env, int points) const
         return backward(env);
     }
 
-    std::vector<coord<double,2> > coords;
+    std::vector<geometry::point<double>> coords;
     envelope_points(coords, env, points);  // this is always clockwise
 
-    double z;
-    for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
-        z = 0;
-        if (!backward(it->x, it->y, z)) {
-            return false;
-        }
+    for (auto & pt : coords)
+    {
+        double z = 0;
+        if (!backward(pt.x, pt.y, z)) return false;
     }
 
     box2d<double> result = calculate_bbox(coords);
@@ -432,15 +430,13 @@ bool proj_transform::forward(box2d<double>& env, int points) const
         return forward(env);
     }
 
-    std::vector<coord<double,2> > coords;
+    std::vector<geometry::point<double>> coords;
     envelope_points(coords, env, points);  // this is always clockwise
 
-    double z;
-    for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
-        z = 0;
-        if (!forward(it->x, it->y, z)) {
-            return false;
-        }
+    for (auto & pt : coords)
+    {
+        double z = 0;
+        if (!forward(pt.x, pt.y, z)) return false;
     }
 
     box2d<double> result = calculate_bbox(coords);

@@ -187,7 +187,7 @@ struct render_marker_symbolizer_visitor
         box2d<double> const& bbox = mark.bounding_box();
         mapnik::image_rgba8 const& marker = mark.get_data();
         // - clamp sizes to > 4 pixels of interactivity
-        coord2d center = bbox.center();
+        auto center = bbox.center();
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine marker_trans = recenter * image_tr;
         raster_dispatch_type rasterizer_dispatch(marker,

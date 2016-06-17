@@ -228,8 +228,8 @@ struct cairo_render_marker_visitor
             agg::trans_affine marker_tr = tr_;
             if (recenter_)
             {
-                coord<double,2> c = bbox.center();
-                marker_tr = agg::trans_affine_translation(-c.x,-c.y);
+                auto c = bbox.center();
+                marker_tr = agg::trans_affine_translation(-c.x, -c.y);
                 marker_tr *= tr_;
             }
             marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);

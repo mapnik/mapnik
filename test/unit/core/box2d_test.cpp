@@ -1,25 +1,9 @@
-
 #include "catch.hpp"
 
-#include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 #include "agg_trans_affine.h"
 
 TEST_CASE("box2d") {
-SECTION("coord init") {
-  auto c = mapnik::coord2d(100, 100);
-
-  REQUIRE(c.x == 100);
-  REQUIRE(c.y == 100);
-}
-
-SECTION("coord multiplication") {
-  auto c = mapnik::coord2d(100, 100);
-  c *= 2;
-
-  REQUIRE(c.x == 200);
-  REQUIRE(c.y == 200);
-}
 
 SECTION("envelope init") {
   auto e = mapnik::box2d<double>(100, 100, 200, 200);
@@ -171,9 +155,9 @@ SECTION("mapnik::box2d intersects")
     mapnik::box2d<double> b2(100.001,100,200,200);
     CHECK(!b0.intersects(b2));
     CHECK(!b2.intersects(b0));
-    // coord
-    CHECK(b0.intersects(mapnik::coord<double,2>(100,100)));
-    CHECK(!b0.intersects(mapnik::coord<double,2>(100.001,100)));
+    // geometry::point<T>
+    CHECK(b0.intersects(mapnik::geometry::point<double>(100,100)));
+    CHECK(!b0.intersects(mapnik::geometry::point<double>(100.001,100)));
 }
 
 SECTION("mapnik::box2d intersect")
@@ -192,7 +176,7 @@ SECTION("mapnik::box2d re_center")
     mapnik::box2d<double> b(0, 0, 100, 100);
     b.re_center(0, 0);
     CHECK(b == mapnik::box2d<double>(-50, -50, 50, 50));
-    b.re_center(mapnik::coord2d(50,50));
+    b.re_center(mapnik::geometry::point<double>(50,50));
     CHECK(b == mapnik::box2d<double>(0, 0, 100, 100));
 }
 

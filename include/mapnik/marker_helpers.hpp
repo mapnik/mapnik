@@ -93,7 +93,7 @@ struct vector_markers_dispatch : util::noncopyable
 protected:
     static agg::trans_affine recenter(svg_path_ptr const& src)
     {
-        coord2d center = src->bounding_box().center();
+        auto center = src->bounding_box().center();
         return agg::trans_affine_translation(-center.x, -center.y);
     }
 

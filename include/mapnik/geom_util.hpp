@@ -212,7 +212,7 @@ struct filter_at_point
 {
     box2d<double> box_;
     explicit filter_at_point(coord2d const& pt, double tol=0)
-        : box_(pt,pt)
+        : box_(pt.x,pt.y, pt.x, pt.y)
     {
         box_.pad(tol);
     }

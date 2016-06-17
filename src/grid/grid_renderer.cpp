@@ -163,8 +163,8 @@ struct grid_render_marker_visitor
 
         ras_ptr_->reset();
 
-        box2d<double> const& bbox = marker.get_data()->bounding_box();
-        coord<double,2> c = bbox.center();
+        auto const& bbox = marker.get_data()->bounding_box();
+        auto c = bbox.center();
         // center the svg marker on '0,0'
         agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
         // apply symbol transformation to get to map space

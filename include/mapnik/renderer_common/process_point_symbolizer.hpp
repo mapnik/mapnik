@@ -56,8 +56,8 @@ void render_point_symbolizer(point_symbolizer const &sym,
         value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym, feature, common.vars_);
         point_placement_enum placement= get<point_placement_enum, keys::point_placement_type>(sym, feature, common.vars_);
 
-        box2d<double> const& bbox = mark->bounding_box();
-        coord2d center = bbox.center();
+        auto const& bbox = mark->bounding_box();
+        auto center = bbox.center();
 
         agg::trans_affine tr;
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);

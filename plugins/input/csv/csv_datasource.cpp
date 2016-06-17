@@ -436,7 +436,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    mapnik::box2d<double> query_bbox(pt, pt);
+    mapnik::box2d<double> query_bbox(pt.x, pt.y, pt.x, pt.y);
     query_bbox.pad(tol);
     mapnik::query q(query_bbox);
     std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
