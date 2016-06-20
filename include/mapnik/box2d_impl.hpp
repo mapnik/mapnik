@@ -32,10 +32,10 @@
 #include <mapnik/config.hpp>
 
 #pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/include/adapt_adt.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_adapt_adt_attributes.hpp>
-#include <mapnik/warning_ignore.hpp>
 #pragma GCC diagnostic pop
 
 // agg
