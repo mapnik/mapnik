@@ -39,7 +39,6 @@
 #pragma GCC diagnostic pop
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 
 #include <cstdint>
