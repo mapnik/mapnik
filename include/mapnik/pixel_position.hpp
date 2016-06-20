@@ -24,21 +24,20 @@
 
 // stl
 #include <cmath>
+#include <mapnik/geometry.hpp>
 
 namespace mapnik
 {
 
 struct rotation;
-struct pixel_position
+struct pixel_position : geometry::point<double>
 {
-    double x;
-    double y;
-    pixel_position(double x_, double y_)
-     : x(x_),
-       y(y_) {}
+    pixel_position(double x, double y)
+        : geometry::point<double>(x, y) {}
+
     pixel_position()
-     : x(0),
-       y(0) {}
+        : geometry::point<double>(0,0) {}
+
     pixel_position operator+ (pixel_position const& other) const
     {
         return pixel_position(x + other.x, y + other.y);
