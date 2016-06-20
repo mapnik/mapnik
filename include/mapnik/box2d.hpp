@@ -29,6 +29,7 @@
 // stl
 #include <limits>
 #include <string>
+#include <algorithm>
 #include <stdexcept>
 // agg
 // forward declare so that apps using mapnik do not need agg headers
