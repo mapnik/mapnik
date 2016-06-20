@@ -24,7 +24,7 @@
 
 // stl
 #include <cmath>
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry/point.hpp>
 
 namespace mapnik
 {
