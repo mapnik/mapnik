@@ -23,6 +23,7 @@
 
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
 #pragma GCC diagnostic ignored "-Wpragmas" // gcc
+#pragma GCC diagnostic ignored "-W#pragma-messages"
 #pragma GCC diagnostic ignored "-Wunsequenced"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

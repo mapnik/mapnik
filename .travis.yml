@@ -1,4 +1,4 @@
-language: c
+language: cpp
 
 git:
   depth: 10
@@ -25,26 +25,28 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" TRIGGER=true
+      env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8" TRIGGER=true
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5' ]
+          sources: [ 'ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++6', 'libstdc++-5-dev']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true LLVM_VERSION="3.5" CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5"
+      env: JOBS=8 COVERAGE=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8"
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5', 'llvm-3.5-dev' ]
+          sources: [ 'ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++6','libstdc++-5-dev' ]
     - os: osx
-      compiler: clang
+      compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=true
+      env: JOBS=4 MASON_PUBLISH=true _CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
+ - if [[ ${_CXX:-false} != false ]]; then export CXX=${_CXX}; fi
+ - if [[ ${_CC:-false} != false ]]; then export CC=${_CC}; fi
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
@@ -56,7 +58,6 @@ before_install:
  - git_submodule_update --init --depth=10
 
 install:
- - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export CCACHE_READONLY=1; fi
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
  - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
@@ -71,6 +72,13 @@ install:
 
 before_script:
  - source bootstrap.sh
+ - |
+   if [[ $(uname -s) == 'Linux' ]]; then
+     mason install clang 3.8.0
+     export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
+     which clang++
+     export LLVM_COV="$(mason prefix clang 3.8.0)/bin/llvm-cov"
+   fi
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
@@ -79,6 +87,7 @@ before_script:
 script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
+ - cat config.log
  - make
  - make test
  - enabled ${COVERAGE} coverage

@@ -61,7 +61,7 @@ void render_point_symbolizer(point_symbolizer const &sym,
 
         agg::trans_affine tr;
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-        if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
+        if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform, common.scale_factor_);
 
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;

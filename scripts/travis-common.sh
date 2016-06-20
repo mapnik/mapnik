@@ -62,7 +62,7 @@ commit_message_contains () {
 }
 
 commit_message_parse () {
-    if commit_message_contains '[skip tests]' || [[ $(uname -s) == 'Darwin' ]]; then
+    if commit_message_contains '[skip tests]'; then
         config_override "CPP_TESTS = False"
     fi
     if commit_message_contains '[skip utils]'; then
@@ -92,8 +92,7 @@ configure () {
 
 coverage () {
     ./mason_packages/.link/bin/cpp-coveralls \
-        --gcov /usr/bin/llvm-cov-${LLVM_VERSION} \
-        --build-root . --gcov-options '\-lp' \
+        --gcov ${LLVM_COV} \
         --exclude mason_packages \
         --exclude .sconf_temp --exclude benchmark --exclude deps \
         --exclude scons --exclude test --exclude demo --exclude docs \

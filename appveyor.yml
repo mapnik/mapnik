@@ -1,6 +1,6 @@
 environment:
   msvs_toolset: 14
-  BOOST_VERSION: 59
+  BOOST_VERSION: 60
   FASTBUILD: 1
   matrix:
     - platform: x64

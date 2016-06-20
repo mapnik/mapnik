@@ -47,7 +47,6 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     qi::_a_type _a;
     qi::_b_type _b;
     qi::eps_type eps;
-    qi::omit_type omit;
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
@@ -58,26 +57,26 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     json_.value =  json_.object | json_.array | json_.string_ | json_.number
         ;
 
-    json_.pairs = json_.key_value % lit(',')
-        ;
-
-    json_.key_value = (json_.string_ > lit(':') > json_.value)
+    json_.key_value = json_.string_ > lit(':') > json_.value
         ;
 
     json_.object = lit('{')
-        > *json_.pairs
+        > -(json_.key_value % lit(','))
         > lit('}')
         ;
+
     json_.array = lit('[')
-        > json_.value > *(lit(',') > json_.value)
+        > -(json_.value % lit(','))
         > lit(']')
         ;
+
     json_.number = json_.strict_double
         | json_.int__
         | lit("true")
         | lit ("false")
         | lit("null")
         ;
+
     geometry = lit('{')[_a = 0]
         > (((lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
             |
@@ -85,7 +84,7 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
             |
             (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))
             |
-            omit[json_.key_value]) % lit(',')) [create_geometry(_val,_a,_b)]
+            json_.key_value) % lit(',')) [create_geometry(_val,_a,_b)]
         > lit('}')
         ;
 

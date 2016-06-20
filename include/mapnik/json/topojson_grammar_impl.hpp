@@ -58,48 +58,14 @@ BOOST_FUSION_ADAPT_STRUCT(
     )
 
 BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::topojson::point,
-    (mapnik::topojson::coordinate, coord)
-    (boost::optional<mapnik::topojson::properties>, props)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::topojson::multi_point,
-    (std::vector<mapnik::topojson::coordinate>, points)
-    (boost::optional<mapnik::topojson::properties>, props)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::topojson::linestring,
-    (mapnik::topojson::index_type, ring)
-    (boost::optional<mapnik::topojson::properties>, props)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::topojson::multi_linestring,
-    (std::vector<mapnik::topojson::index_type>, rings)
-    (boost::optional<mapnik::topojson::properties>, props)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::topojson::polygon,
-    (std::vector<std::vector<mapnik::topojson::index_type> >, rings)
-    (boost::optional<mapnik::topojson::properties>, props)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::topojson::multi_polygon,
-    (std::vector<std::vector<std::vector<mapnik::topojson::index_type> > >, polygons)
-    (boost::optional<mapnik::topojson::properties>, props)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::topology,
     (std::vector<mapnik::topojson::geometry>, geometries)
     (std::vector<mapnik::topojson::arc>, arcs)
     (boost::optional<mapnik::topojson::transform>, tr)
     (boost::optional<mapnik::topojson::bounding_box>, bbox)
    )
+
+
 
 namespace mapnik { namespace topojson {
 
@@ -121,30 +87,43 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     qi::_3_type _3;
     qi::_4_type _4;
     qi::_r1_type _r1;
+    qi::_a_type _a;
+    qi::_b_type _b;
+    qi::_c_type _c;
+    qi::_d_type _d;
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
     using phoenix::construct;
 
+    geometry_type_dispatch.add
+        ("\"Point\"",1)
+        ("\"LineString\"",2)
+        ("\"Polygon\"",3)
+        ("\"MultiPoint\"",4)
+        ("\"MultiLineString\"",5)
+        ("\"MultiPolygon\"",6)
+        ("\"GeometryCollection\"",7)
+        ;
+
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
-
+    boost::phoenix::function<create_geometry_impl> const create_geometry;
     // generic JSON types
     json.value = json.object | json.array | json.string_ | json.number
         ;
 
-    json.pairs = json.key_value % lit(',')
+    json.key_value = json.string_ > lit(':') > json.value
         ;
 
-    json.key_value = (json.string_ >> lit(':') >> json.value)
-        ;
-
-    json.object = lit('{') >> *json.pairs >> lit('}')
+    json.object = lit('{')
+        > -(json.key_value % lit(','))
+        > lit('}')
         ;
 
     json.array = lit('[')
-        >> json.value >> *(lit(',') >> json.value)
-        >> lit(']')
+        > -(json.value % lit(','))
+        > lit(']')
         ;
 
     json.number = json.strict_double[_val = json.double_converter(_1)]
@@ -181,101 +160,58 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
         >> lit('{')
         >> -((omit[json.string_]
               >> lit(':')
-              >>  (geometry_collection(_val) | geometry)) % lit(','))
+              >>  (geometry_collection(_val) | geometry[push_back(_val, _1)]) % lit(',')))
         >> lit('}')
         ;
 
-    geometry =
-        point |
-        linestring |
-        polygon |
-        multi_point |
-        multi_linestring |
-        multi_polygon |
-        omit[json.object]
+    geometry = lit('{')[_a = 0]
+        > ((lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
+           |
+           (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1])
+           |
+           (lit("\"arcs\"") > lit(':') > rings_array[_c = _1])
+           |
+           properties_[_d = _1]
+           |
+           json.key_value) % lit(',')
+        > lit('}')[_val = create_geometry(_a, _b, _c, _d)]
         ;
+
 
     geometry_collection =  lit('{')
-               >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
-               >> -(lit(',') >> omit[bbox])
-               >> lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
-               >> lit(']')
-               >> lit('}')
-        ;
-    point = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"Point\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate)
-            ^ (lit(',') >> properties) /*^ (lit(',') >> omit[id])*/)
+        >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
+        >> lit(',') >> lit("\"geometries\"") >> lit(':')
+        >> lit('[')
+        >> -(geometry[push_back(_r1, _1)] % lit(','))
+        >> lit(']')
         >> lit('}')
-        ;
-
-    multi_point = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"MultiPoint\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':')
-             >> lit('[') >> -(coordinate % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    linestring = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"LineString\"")
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[') >> int_ >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    multi_linestring = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"MultiLineString\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[')
-             >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    polygon = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"Polygon\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
-             >> lit('[') >> -(ring % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    multi_polygon = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"MultiPolygon\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
-             >> lit('[')
-             >> -((lit('[') >> -(ring % lit(',')) >> lit(']')) % lit(','))
-             >> lit(']')) ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    id = lit("\"id\"") >> lit(':') >> omit[json.value]
         ;
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
         ;
+    rings = lit('[') >> -(ring % lit(',')) >> lit(']')
+        ;
+    rings_array = lit('[') >> -(rings % lit(',')) >> lit(']')
+        |
+        rings
+        |
+        ring
+        ;
 
-    properties = lit("\"properties\"")
+    properties_ = lit("\"properties\"")
         >> lit(':')
-        >> (( lit('{') >> attributes >> lit('}')) | json.object)
+        >> lit('{') >> (json.string_ >> lit(':') >> json.value) % lit(',') >> lit('}')
         ;
-
-    attributes = (json.string_ >> lit(':') >> attribute_value) % lit(',')
-        ;
-
-    attribute_value %= json.number | json.string_  ;
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;
 
-    arc = lit('[') >> -(coordinate % lit(',')) >> lit(']') ;
+    arc = lit('[') >> -(coordinate_ % lit(',')) >> lit(']') ;
 
-    coordinate = lit('[') >> double_ >> lit(',') >> double_ >> lit(']');
+    coordinate_ = lit('[') > double_ > lit(',') > double_ > lit(']');
+
+    coordinates = (lit('[') >> coordinate_ % lit(',') > lit(']'))
+        | coordinate_;
 
     topology.name("topology");
     transform.name("transform");
@@ -283,13 +219,9 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     arc.name("arc");
     arcs.name("arcs");
     json.value.name("value");
-    coordinate.name("coordinate");
-
-    point.name("point");
-    multi_point.name("multi_point");
-    linestring.name("linestring");
-    polygon.name("polygon");
-    multi_polygon.name("multi_polygon");
+    coordinate_.name("coordinate");
+    geometry.name("geometry");
+    properties_.name("properties");
     geometry_collection.name("geometry_collection");
     // error handler
     on_error<fail>(topology, error_handler(_1, _2, _3, _4));

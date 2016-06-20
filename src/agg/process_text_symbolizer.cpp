@@ -63,7 +63,7 @@ void agg_renderer<T0,T1>::process(text_symbolizer const& sym,
     if (halo_transform)
     {
         agg::trans_affine halo_affine_transform;
-        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform);
+        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform, common_.scale_factor_);
         ren.set_halo_transform(halo_affine_transform);
     }
 

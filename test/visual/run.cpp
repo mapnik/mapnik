@@ -48,30 +48,48 @@ namespace po = boost::program_options;
 
 runner::renderer_container create_renderers(po::variables_map const & args,
                                             boost::filesystem::path const & output_dir,
-                                            bool append_all = false)
+                                            bool force_append = false)
 {
     boost::filesystem::path reference_dir(args["images-dir"].as<std::string>());
     bool overwrite = args.count("overwrite");
     runner::renderer_container renderers;
 
-    if (append_all || args.count(agg_renderer::name))
+    if (force_append || args.count(agg_renderer::name))
     {
         renderers.emplace_back(renderer<agg_renderer>(output_dir, reference_dir, overwrite));
     }
 #if defined(HAVE_CAIRO)
-    if (append_all || args.count(cairo_renderer::name))
+    if (force_append || args.count(cairo_renderer::name))
     {
         renderers.emplace_back(renderer<cairo_renderer>(output_dir, reference_dir, overwrite));
     }
+#ifdef CAIRO_HAS_SVG_SURFACE
+    if (args.count(cairo_svg_renderer::name))
+    {
+        renderers.emplace_back(renderer<cairo_svg_renderer>(output_dir, reference_dir, overwrite));
+    }
+#endif
+#ifdef CAIRO_HAS_PS_SURFACE
+    if (args.count(cairo_ps_renderer::name))
+    {
+        renderers.emplace_back(renderer<cairo_ps_renderer>(output_dir, reference_dir, overwrite));
+    }
+#endif
+#ifdef CAIRO_HAS_PDF_SURFACE
+    if (args.count(cairo_pdf_renderer::name))
+    {
+        renderers.emplace_back(renderer<cairo_pdf_renderer>(output_dir, reference_dir, overwrite));
+    }
+#endif
 #endif
 #if defined(SVG_RENDERER)
-    if (append_all || args.count(svg_renderer::name))
+    if (force_append || args.count(svg_renderer::name))
     {
         renderers.emplace_back(renderer<svg_renderer>(output_dir, reference_dir, overwrite));
     }
 #endif
 #if defined(GRID_RENDERER)
-    if (append_all || args.count(grid_renderer::name))
+    if (force_append || args.count(grid_renderer::name))
     {
         renderers.emplace_back(renderer<grid_renderer>(output_dir, reference_dir, overwrite));
     }
@@ -112,6 +130,15 @@ int main(int argc, char** argv)
         (agg_renderer::name, "render with AGG renderer")
 #if defined(HAVE_CAIRO)
         (cairo_renderer::name, "render with Cairo renderer")
+#ifdef CAIRO_HAS_SVG_SURFACE
+        (cairo_svg_renderer::name, "render with Cairo SVG renderer")
+#endif
+#ifdef CAIRO_HAS_PS_SURFACE
+        (cairo_ps_renderer::name, "render with Cairo PS renderer")
+#endif
+#ifdef CAIRO_HAS_PDF_SURFACE
+        (cairo_pdf_renderer::name, "render with Cairo PDF renderer")
+#endif
 #endif
 #if defined(SVG_RENDERER)
         (svg_renderer::name, "render with SVG renderer")
@@ -183,7 +210,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception & e)
     {
-        std::cerr << "Error runnig tests: " << e.what() << std::endl;
+        std::cerr << "Error running tests: " << e.what() << std::endl;
         return 1;
     }
 

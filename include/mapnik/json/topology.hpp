@@ -62,13 +62,13 @@ struct multi_point
 
 struct linestring
 {
-    index_type ring ;
+    std::vector<index_type> rings ;
     boost::optional<properties> props;
 };
 
 struct multi_linestring
 {
-    std::vector<index_type> rings;
+    std::vector<std::vector<index_type> > lines;
     boost::optional<properties> props;
 };
 
@@ -84,7 +84,10 @@ struct multi_polygon
     boost::optional<properties> props;
 };
 
-using geometry =  util::variant<point,
+struct empty {};
+
+using geometry =  util::variant<empty,
+                                point,
                                 linestring,
                                 polygon,
                                 multi_point,

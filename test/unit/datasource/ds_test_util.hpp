@@ -106,13 +106,18 @@ inline std::size_t count_features(mapnik::featureset_ptr features) {
 }
 
 using attr = std::tuple<std::string, mapnik::value>;
+
+#define REQUIRE_ATTRIBUTES(feature, attrs) \
+    REQUIRE(bool(feature)); \
+    for (auto const &kv : attrs) { \
+        REQUIRE(feature->has_key(std::get<0>(kv))); \
+        CHECK(feature->get(std::get<0>(kv)) == std::get<1>(kv)); \
+    } \
+
+
 inline void require_attributes(mapnik::feature_ptr feature,
                         std::initializer_list<attr> const &attrs) {
-    REQUIRE(bool(feature));
-    for (auto const &kv : attrs) {
-        REQUIRE(feature->has_key(std::get<0>(kv)));
-        CHECK(feature->get(std::get<0>(kv)) == std::get<1>(kv));
-    }
+    REQUIRE_ATTRIBUTES(feature, attrs);
 }
 
 namespace detail {

@@ -49,7 +49,6 @@ struct geometry_empty
     using coord_type = T;
 };
 
-
 template <typename T>
 using geometry_base = mapnik::util::variant<geometry_empty<T>,
                                             point<T>,
@@ -58,11 +57,12 @@ using geometry_base = mapnik::util::variant<geometry_empty<T>,
                                             multi_point<T>,
                                             multi_line_string<T>,
                                             multi_polygon<T>,
-                                            mapnik::util::recursive_wrapper<geometry_collection<T> > >;
+                                            geometry_collection<T> >;
 template <typename T>
 struct geometry : geometry_base<T>
 {
     using coord_type = T;
+
     geometry()
         : geometry_base<T>() {} // empty
 
@@ -71,6 +71,7 @@ struct geometry : geometry_base<T>
         : geometry_base<T>(std::forward<G>(geom)) {}
 
 };
+
 
 template <typename T, template <typename...> class Cont>
 struct geometry_collection : Cont<geometry<T>>

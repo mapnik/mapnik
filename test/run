@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -o pipefail
+set -eu
+
 failures=0
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
@@ -18,9 +21,8 @@ if [ -d "test/data" ]; then
 
     run_substep "Running C++ Unit tests..."
     if [[ -f ./test/unit/run ]]; then
-        ./test/unit/run
-        failures=$((failures+$?))
         ran_a_test=true
+        ./test/unit/run || failures=$((failures+$?))
     else
         run_warn "Skipping unit tests since they were not built"
     fi
@@ -31,8 +33,7 @@ if [ -d "test/data" ]; then
         for FILE in test/standalone/*-bin; do
           found_test=true
           ran_a_test=true
-          ${FILE};
-          failures=$((failures+$?))
+          ${FILE} || failures=$((failures+$?))
         done
     fi
     if [[ $found_test == false ]]; then
@@ -45,9 +46,8 @@ if [ -d "test/data" ]; then
             JOBS=1
         fi
         if [[ -f ./test/visual/run ]]; then
-            ./test/visual/run -j $JOBS
             ran_a_test=true
-            failures=$((failures+$?))
+            ./test/visual/run -j $JOBS || failures=$((failures+$?))
         else
             run_warn "Skipping visual tests since they were not built"
         fi
