@@ -79,7 +79,7 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
          << (geometry_collection | empty[_1 = _a]))
         |
         (&uint_(geometry::geometry_types::Unknown)[_1 = _a]
-         << lit("POINT EMPTY")) // special case for geometry_empty as mapnik::geometry::point<double> can't be empty
+         << lit("POINT EMPTY")) // special case for geometry_empty<double> as mapnik::geometry::point<double> can't be empty
         ;
 
     point = lit("POINT(") << point_coord << lit(")")

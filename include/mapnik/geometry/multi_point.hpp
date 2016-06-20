@@ -20,14 +20,29 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_GEOMETRY_MULTI_POINT_HPP
+#define MAPNIK_GEOMETRY_MULTI_POINT_HPP
+
 // mapnik
-#include <mapnik/box2d_impl.hpp>
+#include <mapnik/geometry/point.hpp>
+// stl
+#include <vector>
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
 
-template class box2d<int>;
-template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+template <typename T, template <typename...> class Cont = std::vector>
+struct multi_point : Cont<point<T>>
+{
+    using coord_type = T;
+    using point_type = point<coord_type>;
+    using container_type = Cont<point_type>;
+    multi_point() = default;
+    explicit multi_point(std::size_t size)
+        : container_type(size) {}
+    inline std::size_t num_points() const { return container_type::size(); }
+    inline void add_coord(T x, T y) { container_type::template emplace_back(x, y);}
+};
 
-}
+}}
+
+#endif // MAPNIK_GEOMETRY_MULTI_POINT_HPP

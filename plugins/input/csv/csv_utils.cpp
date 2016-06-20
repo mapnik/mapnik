@@ -406,7 +406,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
             }
 
             auto geom = extract_geometry(values, locator_);
-            if (!geom.is<mapnik::geometry::geometry_empty>())
+            if (!geom.is<mapnik::geometry::geometry_empty<double>>())
             {
                 auto box = mapnik::geometry::envelope(geom);
                 if (!extent_initialized_)

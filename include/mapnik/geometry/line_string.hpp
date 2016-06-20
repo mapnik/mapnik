@@ -20,14 +20,29 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_GEOMETRY_LINE_STRING_HPP
+#define MAPNIK_GEOMETRY_LINE_STRING_HPP
+
 // mapnik
-#include <mapnik/box2d_impl.hpp>
+#include <mapnik/geometry/point.hpp>
+// stl
+#include <vector>
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
 
-template class box2d<int>;
-template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+template <typename T, template <typename...> class Cont = std::vector>
+struct line_string : Cont<point<T> >
+{
+    using coord_type = T;
+    using point_type = point<coord_type>;
+    using container_type = Cont<point_type>;
+    line_string() = default;
+    explicit line_string(std::size_t size)
+        : container_type(size) {}
+    inline std::size_t num_points() const { return container_type::size(); }
+    inline void add_coord(coord_type x, coord_type y) { container_type::template emplace_back(x,y);}
+};
 
-}
+}}
+
+#endif // MAPNIK_GEOMETRY_LINE_STRING_HPP

@@ -21,7 +21,7 @@ void envelope_test()
     }
     {
         // Test empty geom
-        geometry<coord_type> geom = mapnik::geometry::geometry_empty();
+        geometry<coord_type> geom = mapnik::geometry::geometry_empty<coord_type>();
         mapnik::box2d<coord_type> bbox = mapnik::geometry::envelope(geom);
         REQUIRE_FALSE( bbox.valid() );
     }

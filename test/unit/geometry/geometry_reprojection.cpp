@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 #include "geometry_equal.hpp"
 
@@ -16,10 +15,10 @@ SECTION("test_projection_4326_3857 - Empty Geometry Object") {
     mapnik::projection dest("+init=epsg:3857");
     mapnik::proj_transform proj_trans(source, dest);
     {
-        geometry_empty geom;
+        geometry_empty<double> geom;
         unsigned int err = 0;
         // Test Standard Transform
-        geometry_empty new_geom = reproject_copy(geom, proj_trans, err);
+        geometry_empty<double> new_geom = reproject_copy(geom, proj_trans, err);
         REQUIRE(err == 0);
         // Transform providing projections not transfrom
         new_geom = reproject_copy(geom, source, dest, err);
@@ -42,20 +41,20 @@ SECTION("test_projection_4326_3857 - Empty Geometry in Geometry Variant") {
     mapnik::projection dest("+init=epsg:3857");
     mapnik::proj_transform proj_trans(source, dest);
     {
-        geometry<double> geom = geometry_empty();
+        geometry<double> geom = geometry_empty<double>();
         unsigned int err = 0;
         // Test Standard Transform
         geometry<double> new_geom = reproject_copy(geom, proj_trans, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
         // Transform providing projections not transfrom
         new_geom = reproject_copy(geom, source, dest, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
         // Transform providing projections in reverse
         new_geom = reproject_copy(geom, dest, source, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
         // Transform in place
         REQUIRE(reproject(new_geom, proj_trans));
         // Transform in place providing projections
@@ -269,7 +268,7 @@ SECTION("test_projection_4326_3857 - Line_String Geometry Variant Object") {
         // Reprojecting empty line string will return a geometry_empty
         geometry<double> new_geom = reproject_copy(geom0, proj_trans1, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
     }
     {
         // Test Standard Transform
@@ -443,7 +442,7 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Variant Object") {
         // Reprojecting empty poly will return a geometry_empty
         geometry<double> new_geom = reproject_copy(geom0, proj_trans1, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
     }
     {
         // Test Standard Transform
@@ -583,7 +582,7 @@ SECTION("test_projection_4326_3857 - Multi_Point Geometry Variant Object") {
         // Reprojecting empty multi point will return a geometry_empty
         geometry<double> new_geom = reproject_copy(geom0, proj_trans1, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
     }
     {
         // Test Standard Transform
@@ -739,7 +738,7 @@ SECTION("test_projection_4326_3857 - Multi_Line_String Geometry Variant Object")
         // Reprojecting empty line string will return a geometry_empty
         geometry<double> new_geom = reproject_copy(geom0, proj_trans1, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
     }
     {
         // Test Standard Transform
@@ -921,7 +920,7 @@ SECTION("test_projection_4326_3857 - Multi_Polygon Geometry Variant Object") {
         // Reprojecting empty poly will return a geometry_empty
         geometry<double> new_geom = reproject_copy(geom0, proj_trans1, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
     }
     {
         // Test Standard Transform
@@ -1103,7 +1102,7 @@ SECTION("test_projection_4326_3857 - Geometry Collection Variant Object") {
         // Reprojecting empty poly will return a geometry_empty
         geometry<double> new_geom = reproject_copy(geom0, proj_trans1, err);
         REQUIRE(err == 0);
-        REQUIRE(new_geom.is<geometry_empty>());
+        REQUIRE(new_geom.is<geometry_empty<double>>());
     }
     {
         // Test Standard Transform

@@ -238,7 +238,7 @@ struct geometry_to_wkb
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry::geometry_empty const&) const
+    result_type operator() (geometry::geometry_empty<double> const&) const
     {
         return result_type();
     }
@@ -288,7 +288,7 @@ wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte
     wkb_buffer_ptr multi_wkb = std::make_unique<wkb_buffer>(multi_size);
     wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(geometry::detail::geometry_type()(multi_geom)) , 4, byte_order);
+    write(ss, static_cast<int>(geometry::detail::geometry_type<double>()(multi_geom)) , 4, byte_order);
     write(ss, multi_geom.size(), 4 ,byte_order);
 
     for ( wkb_buffer_ptr const& wkb : wkb_cont)

@@ -49,7 +49,7 @@ struct hit_test_visitor
        y_(y),
        tol_(tol) {}
 
-    bool operator() (geometry::geometry_empty const& ) const
+    bool operator() (geometry::geometry_empty<double> const& ) const
     {
         return false;
     }

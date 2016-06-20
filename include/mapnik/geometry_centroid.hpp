@@ -41,13 +41,13 @@ struct geometry_centroid
     geometry_centroid(point<T> & pt)
         : pt_(pt) {}
 
-    template <typename T1>
-    result_type operator() (T1 const& geom) const
+    template <typename U>
+    result_type operator() (U const& geom) const
     {
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry_empty const&) const
+    result_type operator() (geometry_empty<T> const&) const
     {
         return false;
     }

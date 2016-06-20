@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/geometry_is_empty.hpp>
@@ -7,7 +6,7 @@ TEST_CASE("geometry is_empty") {
 
 SECTION("empty geometry") {
 
-    mapnik::geometry::geometry_empty geom;
+    mapnik::geometry::geometry_empty<double> geom;
     REQUIRE(mapnik::geometry::is_empty(geom));
 }
 
@@ -19,7 +18,7 @@ SECTION("geometry collection") {
     }
     {
         mapnik::geometry::geometry_collection<double> geom;
-        mapnik::geometry::geometry_empty geom1;
+        mapnik::geometry::geometry_empty<double> geom1;
         geom.emplace_back(std::move(geom1));
         REQUIRE(!mapnik::geometry::is_empty(geom));
     }

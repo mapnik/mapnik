@@ -20,14 +20,35 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/box2d_impl.hpp>
+#ifndef MAPNIK_GEOMETRY_POINT_HPP
+#define MAPNIK_GEOMETRY_POINT_HPP
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
 
-template class box2d<int>;
-template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+template <typename T>
+struct point
+{
+    using coord_type = T;
+    point() {}
+    point(T x_, T y_)
+        : x(x_), y(y_)
+    {}
+    coord_type x;
+    coord_type y;
+};
 
+template <typename T>
+bool operator==(point<T> const& lhs, point<T> const& rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y;
 }
+
+template <typename T>
+bool operator!=(point<T> const& lhs, point<T> const& rhs)
+{
+    return lhs.x != rhs.x || lhs.y != rhs.y;
+}
+
+}}
+
+#endif // MAPNIK_GEOMETRY_POINT_HPP

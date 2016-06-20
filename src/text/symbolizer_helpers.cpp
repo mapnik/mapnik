@@ -110,7 +110,7 @@ struct split_multi_geometries
     split_multi_geometries(container_type & cont)
         : cont_(cont) { }
 
-    void operator() (geometry::geometry_empty const&) const {}
+    void operator() (geometry::geometry_empty<double> const&) const {}
     void operator() (geometry::multi_point<double> const& multi_pt) const
     {
         for ( auto const& pt : multi_pt )
