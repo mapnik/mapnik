@@ -26,7 +26,8 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
-
+// stl
+#include <limits>
 // agg
 // forward declare so that apps using mapnik do not need agg headers
 namespace agg {
