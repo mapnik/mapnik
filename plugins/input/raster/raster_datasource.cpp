@@ -37,7 +37,7 @@
 using mapnik::layer_descriptor;
 using mapnik::featureset_ptr;
 using mapnik::query;
-using mapnik::coord2d;
+using mapnik::geometry::point;
 using mapnik::datasource_exception;
 using mapnik::datasource;
 using mapnik::parameters;
@@ -220,7 +220,7 @@ featureset_ptr raster_datasource::features(query const& q) const
     }
 }
 
-featureset_ptr raster_datasource::features_at_point(coord2d const&, double tol) const
+featureset_ptr raster_datasource::features_at_point(mapnik::geometry::point<double> const&, double tol) const
 {
     MAPNIK_LOG_WARN(raster) << "raster_datasource: feature_at_point not supported";
 

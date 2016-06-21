@@ -41,7 +41,7 @@ public:
     virtual ~memory_datasource();
     virtual datasource::datasource_t type() const;
     virtual featureset_ptr features(query const& q) const;
-    virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
+    virtual featureset_ptr features_at_point(geometry::point<double> const& pt, double tol = 0) const;
     virtual box2d<double> envelope() const;
     virtual boost::optional<datasource_geometry_t> get_geometry_type() const;
     virtual layer_descriptor get_descriptor() const;

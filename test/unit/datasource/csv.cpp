@@ -284,7 +284,7 @@ TEST_CASE("csv") {
 
                 auto fs = all_features(ds);
                 auto pt = ds->envelope().center();
-                auto fs2 = ds->features_at_point(mapnik::coord<double, 2>(pt.x, pt.y), 10000);
+                auto fs2 = ds->features_at_point(pt, 10000);
                 REQUIRE(fs != nullptr);
                 auto feature = fs->next();
                 auto feature2 = fs2->next();

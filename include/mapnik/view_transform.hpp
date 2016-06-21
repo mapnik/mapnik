@@ -24,7 +24,6 @@
 #define MAPNIK_VIEW_TRANSFORM_HPP
 
 // mapnik
-#include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/proj_transform.hpp>
 
@@ -109,13 +108,13 @@ public:
         *y = extent_.maxy() - (*y + (offset_y_ - offset_)) / sy_;
     }
 
-    inline coord2d& forward(coord2d& c) const
+    inline geometry::point<double>& forward(geometry::point<double>& c) const
     {
         forward(&c.x, &c.y);
         return c;
     }
 
-    inline coord2d& backward(coord2d& c) const
+    inline geometry::point<double>& backward(geometry::point<double>& c) const
     {
         backward(&c.x, &c.y);
         return c;

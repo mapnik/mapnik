@@ -591,7 +591,7 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     return mapnik::featureset_ptr();
 }
 
-mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
+mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::geometry::point<double> const& pt, double tol) const
 {
     mapnik::box2d<double> query_bbox(pt.x, pt.y, pt.x, pt.y);
     query_bbox.pad(tol);

@@ -33,7 +33,7 @@
 class GDALDataset;
 class GDALRasterBand;
 
-using gdal_query = mapnik::util::variant<mapnik::query, mapnik::coord2d>;
+using gdal_query = mapnik::util::variant<mapnik::query, mapnik::geometry::point<double>>;
 
 class gdal_featureset : public mapnik::Featureset
 {
@@ -47,7 +47,7 @@ class gdal_featureset : public mapnik::Featureset
             return featureset_.get_feature(q);
         }
 
-        mapnik::feature_ptr operator() (mapnik::coord2d const& p) const
+        mapnik::feature_ptr operator() (mapnik::geometry::point<double> const& p) const
         {
             return featureset_.get_feature_at_point(p);
         }
@@ -72,7 +72,7 @@ public:
 
 private:
     mapnik::feature_ptr get_feature(mapnik::query const& q);
-    mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
+    mapnik::feature_ptr get_feature_at_point(mapnik::geometry::point<double> const& p);
     GDALDataset & dataset_;
     mapnik::context_ptr ctx_;
     int band_;

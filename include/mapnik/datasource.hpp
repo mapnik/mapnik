@@ -33,7 +33,6 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
 #include <mapnik/datasource_geometry_type.hpp>
-#include <mapnik/coord.hpp>
 // stl
 #include <map>
 #include <string>
@@ -112,7 +111,7 @@ public:
     }
     virtual boost::optional<datasource_geometry_t> get_geometry_type() const = 0;
     virtual featureset_ptr features(query const& q) const = 0;
-    virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
+    virtual featureset_ptr features_at_point(geometry::point<double> const& pt, double tol = 0) const = 0;
     virtual box2d<double> envelope() const = 0;
     virtual layer_descriptor get_descriptor() const = 0;
     virtual ~datasource() {}

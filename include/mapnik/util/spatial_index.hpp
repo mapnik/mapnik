@@ -24,7 +24,6 @@
 #define MAPNIK_UTIL_SPATIAL_INDEX_HPP
 
 //mapnik
-#include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/geom_util.hpp>

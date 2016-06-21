@@ -95,7 +95,7 @@ void memory_datasource::push(feature_ptr feature)
             throw std::runtime_error("Can not add a raster feature to a memory datasource that contains vectors");
         }
     }
-    else 
+    else
     {
         if (!type_set_)
         {
@@ -121,7 +121,7 @@ featureset_ptr memory_datasource::features(const query& q) const
 }
 
 
-featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double tol) const
+featureset_ptr memory_datasource::features_at_point(geometry::point<double> const& pt, double tol) const
 {
     box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
     box.pad(tol);

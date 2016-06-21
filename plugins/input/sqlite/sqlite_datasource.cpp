@@ -41,7 +41,7 @@
 #include <boost/tokenizer.hpp>
 
 using mapnik::box2d;
-using mapnik::coord2d;
+using mapnik::geometry::point;
 using mapnik::query;
 using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
@@ -554,7 +554,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
     return featureset_ptr();
 }
 
-featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double tol) const
+featureset_ptr sqlite_datasource::features_at_point(mapnik::geometry::point<double> const& pt, double tol) const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::features_at_point");

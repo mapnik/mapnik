@@ -207,7 +207,7 @@ TEST_CASE("postgis") {
             auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
 
-            auto featureset = ds->features_at_point(mapnik::coord2d(1, 1));
+            auto featureset = ds->features_at_point(mapnik::geometry::point<double>(1, 1));
             mapnik::feature_ptr feature;
             while ((bool(feature = featureset->next()))) {
                 REQUIRE(feature->get(2).to_string() == feature->get("col_text").to_string());

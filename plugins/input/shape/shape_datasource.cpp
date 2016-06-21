@@ -258,7 +258,7 @@ featureset_ptr shape_datasource::features(query const& q) const
     }
 }
 
-featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol) const
+featureset_ptr shape_datasource::features_at_point(point<double> const& pt, double tol) const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");

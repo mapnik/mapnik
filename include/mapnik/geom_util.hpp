@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry_types.hpp>
 // stl
@@ -211,7 +210,7 @@ struct filter_in_box
 struct filter_at_point
 {
     box2d<double> box_;
-    explicit filter_at_point(coord2d const& pt, double tol=0)
+    explicit filter_at_point(geometry::point<double> const& pt, double tol=0)
         : box_(pt.x,pt.y, pt.x, pt.y)
     {
         box_.pad(tol);

@@ -285,7 +285,7 @@ TEST_CASE("geojson") {
                     }
                     auto features = ds->features(query);
                     auto pt = ds->envelope().center();
-                    auto features2 = ds->features_at_point(mapnik::coord<double, 2>(pt.x, pt.y), 0);
+                    auto features2 = ds->features_at_point(pt, 0);
                     REQUIRE(features != nullptr);
                     REQUIRE(features2 != nullptr);
                     auto feature = features->next();
@@ -343,7 +343,7 @@ TEST_CASE("geojson") {
                     }
                     auto features = ds->features(query);
                     auto pt = ds->envelope().center();
-                    auto features2 = ds->features_at_point(mapnik::coord<double, 2>(pt.x, pt.y), 10);
+                    auto features2 = ds->features_at_point(pt, 10);
                     auto bounding_box = ds->envelope();
                     mapnik::box2d<double> bbox;
                     mapnik::value_integer count = 0;

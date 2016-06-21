@@ -2,7 +2,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/offset_converter.hpp>
 

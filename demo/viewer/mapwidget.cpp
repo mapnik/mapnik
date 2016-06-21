@@ -45,7 +45,7 @@ using mapnik::image_rgba8;
 using mapnik::Map;
 using mapnik::layer;
 using mapnik::box2d;
-using mapnik::coord2d;
+using mapnik::geometry::point;
 using mapnik::feature_ptr;
 using mapnik::view_transform;
 using mapnik::projection;
@@ -465,7 +465,7 @@ void MapWidget::zoomToLevel(int level)
       mapnik::box2d<double> ext = map_->get_current_extent();
       double width = static_cast<double>(map_->width());
       double height= static_cast<double>(map_->height());
-      mapnik::coord2d pt = ext.center();
+      mapnik::geometry::point<double> pt = ext.center();
 
       double res = scale_denom * 0.00028;
 

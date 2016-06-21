@@ -33,7 +33,6 @@
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
@@ -60,7 +59,7 @@ using mapnik::featureset_ptr;
 using mapnik::feature_ptr;
 using mapnik::query;
 using mapnik::parameters;
-using mapnik::coord2d;
+using mapnik::geometry::point;
 
 typedef std::shared_ptr< ConnectionManager::PoolType> CnxPool_ptr;
 
@@ -83,7 +82,7 @@ public:
     processor_context_ptr get_context(feature_style_context_map &) const;
     featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const;
     featureset_ptr features(query const& q) const;
-    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
+    featureset_ptr features_at_point(mapnik::geometry::point<double> const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;

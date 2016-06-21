@@ -38,7 +38,7 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(gdal_datasource)
 
 using mapnik::box2d;
-using mapnik::coord2d;
+using mapnik::geometry::point;
 using mapnik::query;
 using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
@@ -238,7 +238,7 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               nodata_tolerance_);
 }
 
-featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
+featureset_ptr gdal_datasource::features_at_point(mapnik::geometry::point<double> const& pt, double tol) const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features_at_point");

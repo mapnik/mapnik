@@ -730,7 +730,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
                 throw std::runtime_error(s.str());
             }
             double tol = (map_ex.maxx() - map_ex.minx()) / static_cast<double>(width_) * 3;
-            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y), tol);
+            featureset_ptr fs = ds->features_at_point(mapnik::geometry::point<double>(x,y), tol);
             MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
             if (fs)
             {

@@ -630,7 +630,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 }
 
 
-feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
+feature_ptr gdal_featureset::get_feature_at_point(mapnik::geometry::point<double> const& pt)
 {
     CPLErr raster_io_error = CE_None;
 

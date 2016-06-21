@@ -29,7 +29,6 @@
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/value_types.hpp>
@@ -53,7 +52,7 @@ public:
     datasource::datasource_t type() const;
     static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
+    mapnik::featureset_ptr features_at_point(mapnik::geometry::point<double> const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
