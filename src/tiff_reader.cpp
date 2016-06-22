@@ -213,8 +213,7 @@ tiff_reader<T>::tiff_reader(std::string const& filename)
       is_tiled_(false)
 {
     source_.open(filename, std::ios_base::in | std::ios_base::binary);
-    if (!source_.is_open()) throw image_reader_exception("TIFF reader: cannot open file "+ filename);
-    if (!stream_)  throw image_reader_exception("TIFF reader: cannot open file "+ filename);
+    if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ filename);
     init();
 }
 
