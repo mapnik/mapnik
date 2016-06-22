@@ -24,7 +24,6 @@
 #define MAPNIK_UTIL_CHAR_ARRAY_BUFFER_HPP
 
 #include <streambuf>
-#include <iostream>
 
 namespace mapnik { namespace util {
 
@@ -57,7 +56,6 @@ private:
 
     int_type pbackfail(int_type ch)
     {
-        std::cerr << "pbackfail" << std::endl;
         if (current_ == begin_ || (ch != traits_type::eof() && ch != current_[-1]))
         {
             return traits_type::eof();
