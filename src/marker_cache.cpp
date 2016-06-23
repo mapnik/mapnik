@@ -39,9 +39,11 @@
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

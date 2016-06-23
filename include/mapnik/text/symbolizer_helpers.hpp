@@ -158,6 +158,10 @@ protected:
     void init_marker() const;
 };
 
-} //namespace
+namespace geometry {
+MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
+}
+
+} //namespace mapnik
 
 #endif // SYMBOLIZER_HELPERS_HPP

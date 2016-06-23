@@ -29,8 +29,11 @@
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/util/variant.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include <agg_trans_affine.h>
+#pragma GCC diagnostic pop
 
 // stl
 #include <cmath>

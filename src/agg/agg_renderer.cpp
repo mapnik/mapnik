@@ -43,7 +43,9 @@
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_any.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
@@ -53,9 +55,12 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_rgba.h"
+#pragma GCC diagnostic pop
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <cmath>

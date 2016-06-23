@@ -33,9 +33,6 @@ extern "C"
 #include <webp/decode.h>
 }
 
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
 #pragma GCC diagnostic pop
 
 // stl

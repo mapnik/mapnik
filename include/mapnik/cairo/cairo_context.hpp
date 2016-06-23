@@ -38,18 +38,20 @@
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <cairo.h>
+#pragma GCC diagnostic pop
+
 // stl
 #include <memory>
-
-// cairo
-#include <cairo.h>
-
-// stl
 #include <map>
 #include <stdexcept>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

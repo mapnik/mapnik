@@ -163,7 +163,7 @@ int main (int argc, char** argv)
     std::clog << "max tree depth:" << depth << std::endl;
     std::clog << "split ratio:" << ratio << std::endl;
 
-    using box_type = mapnik::box2d<double>;
+    using box_type = mapnik::box2d<float>;
     using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
 
     for (auto const& filename : files_to_process)
@@ -175,12 +175,16 @@ int main (int argc, char** argv)
         }
 
         std::vector<item_type> boxes;
-        mapnik::box2d<double> extent;
+        box_type extent;
         if (mapnik::detail::is_csv(filename))
         {
             std::clog << "processing '" << filename << "' as CSV\n";
             auto result = mapnik::detail::process_csv_file(boxes, filename, manual_headers, separator, quote);
-            if (!result.first) continue;
+            if (!result.first)
+            {
+                std::clog << "Error: failed to process " << filename << std::endl;
+                return EXIT_FAILURE;
+            }
             extent = result.second;
         }
         else if (mapnik::detail::is_geojson(filename))
@@ -190,7 +194,7 @@ int main (int argc, char** argv)
             if (!result.first)
             {
                 std::clog << "Error: failed to process " << filename << std::endl;
-                continue;
+                return EXIT_FAILURE;
             }
             extent = result.second;
         }
@@ -198,10 +202,12 @@ int main (int argc, char** argv)
         if (extent.valid())
         {
             std::clog << extent << std::endl;
-            mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent, depth, ratio);
+            mapnik::box2d<double> extent_d(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
+            mapnik::quad_tree<std::pair<std::size_t, std::size_t>> tree(extent_d, depth, ratio);
             for (auto const& item : boxes)
             {
-                tree.insert(std::get<1>(item), std::get<0>(item));
+                auto ext_f = std::get<0>(item);
+                tree.insert(std::get<1>(item), mapnik::box2d<double>(ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy()));
             }
 
             std::fstream file((filename + ".index").c_str(),
@@ -221,6 +227,11 @@ int main (int argc, char** argv)
                 file.flush();
                 file.close();
             }
+        }
+        else
+        {
+            std::clog << "Invalid extent " << extent << std::endl;
+            return EXIT_FAILURE;
         }
     }
     std::clog << "done!" << std::endl;

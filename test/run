@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -o pipefail
+set -eu
+
 failures=0
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
@@ -9,36 +12,55 @@ source ./localize.sh
 function run_step    { >&2 echo -e "\033[1m\033[34m* $1\033[0m"; }
 function run_substep { >&2 echo -e "\033[1m\033[36m* $1\033[0m"; }
 function run_success { >&2 echo -e "\033[1m\033[32m* $1\033[0m"; }
+function run_warn    { >&2 echo -e "\033[1m\033[31m* $1\033[0m"; }
 
 run_step "Starting Mapnik tests"
 
+ran_a_test=false
 if [ -d "test/data" ]; then
 
     run_substep "Running C++ Unit tests..."
-    ./test/unit/run
-    failures=$((failures+$?))
+    if [[ -f ./test/unit/run ]]; then
+        ran_a_test=true
+        ./test/unit/run || failures=$((failures+$?))
+    else
+        run_warn "Skipping unit tests since they were not built"
+    fi
 
     run_substep "Running standalone C++ tests..."
+    found_test=false
     if [ -n "$(find test/standalone/ -maxdepth 1 -name '*-bin' -print -quit)" ]; then
         for FILE in test/standalone/*-bin; do
-            ${FILE};
-          failures=$((failures+$?))
+          found_test=true
+          ran_a_test=true
+          ${FILE} || failures=$((failures+$?))
         done
+    fi
+    if [[ $found_test == false ]]; then
+        run_warn "Skipping standalone tests since they were not built"
     fi
 
     if [ -d "test/data-visual/styles" ]; then
         run_substep "Running visual tests..."
-        if [ -z "$JOBS" ]; then
+        if [ -z "${JOBS:-}" ]; then
             JOBS=1
         fi
-        ./test/visual/run -j $JOBS
-        failures=$((failures+$?))
+        if [[ -f ./test/visual/run ]]; then
+            ran_a_test=true
+            ./test/visual/run -j $JOBS || failures=$((failures+$?))
+        else
+            run_warn "Skipping visual tests since they were not built"
+        fi
     else
         echo "Notice: Skipping visual tests, the visual tests data are not present under the standard directory \"test/data-visual\"."
     fi
 
 else
     echo "Notice: Skipping all tests, the test data are not present under the standard directory \"test/data\"."
+fi
+
+if [[ $ran_a_test == false ]]; then
+    run_warn "**** WARNING: no tests were run ****"
 fi
 
 exit $failures

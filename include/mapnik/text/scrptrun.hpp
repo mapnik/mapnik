@@ -17,9 +17,12 @@
 #ifndef __SCRPTRUN_H
 #define __SCRPTRUN_H
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/utypes.h>
 #include <unicode/uobject.h>
 #include <unicode/uscript.h>
+#pragma GCC diagnostic pop
 
 struct ScriptRecord
 {
@@ -102,7 +105,7 @@ private:
 
 inline ScriptRun::ScriptRun()
 {
-    reset(NULL, 0, 0);
+    reset(nullptr, 0, 0);
 }
 
 inline ScriptRun::ScriptRun(const UChar chars[], int32_t length)

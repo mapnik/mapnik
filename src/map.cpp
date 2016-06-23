@@ -307,7 +307,7 @@ bool Map::load_fonts()
             continue;
         }
         mapnik::util::file file(file_path);
-        if (file.open())
+        if (file)
         {
             auto item = font_memory_cache_.emplace(file_path, std::make_pair(file.data(),file.size()));
             if (item.second) result = true;

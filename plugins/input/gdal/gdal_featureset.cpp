@@ -44,6 +44,41 @@ using mapnik::view_transform;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
+#ifdef MAPNIK_LOG
+namespace {
+
+void get_overview_meta(GDALRasterBand* band)
+{
+    int band_overviews = band->GetOverviewCount();
+    if (band_overviews > 0)
+    {
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: " << band_overviews << " overviews found!";
+
+        for (int b = 0; b < band_overviews; b++)
+        {
+            GDALRasterBand * overview = band->GetOverview(b);
+            MAPNIK_LOG_DEBUG(gdal) << "Overview= " << b
+              << " Width=" << overview->GetXSize()
+              << " Height=" << overview->GetYSize();
+        }
+    }
+    else
+    {
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: No overviews found!";
+    }
+
+    int bsx,bsy;
+    double scale;
+    band->GetBlockSize(&bsx, &bsy);
+    scale = band->GetScale();
+
+    MAPNIK_LOG_DEBUG(gdal) << "Block=" << bsx << "x" << bsy
+        << " Scale=" << scale
+        << " Type=" << GDALGetDataTypeName(band->GetRasterDataType())
+        << "Color=" << GDALGetColorInterpretationName(band->GetColorInterpretation());
+}
+} // anonymous ns
+#endif
 gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
                                  gdal_query q,
@@ -403,15 +438,15 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     if( red->GetBand() == 1 && green->GetBand() == 2 && blue->GetBand() == 3 )
                     {
                         int nBandsToRead = 3;
-                        if( alpha != NULL && alpha->GetBand() == 4 && !raster_has_nodata )
+                        if( alpha != nullptr && alpha->GetBand() == 4 && !raster_has_nodata )
                         {
                             nBandsToRead = 4;
-                            alpha = NULL; // to avoid reading it again afterwards
+                            alpha = nullptr; // to avoid reading it again afterwards
                         }
                         raster_io_error = dataset_.RasterIO(GF_Read, x_off, y_off, width, height,
                                                             image.bytes(),
                                                             image.width(), image.height(), GDT_Byte,
-                                                            nBandsToRead, NULL,
+                                                            nBandsToRead, nullptr,
                                                             4, 4 * image.width(), 1);
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());
@@ -551,6 +586,32 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                         MAPNIK_LOG_WARN(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of alpha band";
                     }
                 }
+                else if( dataset_.GetRasterCount() > 0 && dataset_.GetRasterBand(1) )
+                {
+                    // Check if we have a non-alpha mask band (for example a TIFF internal mask)
+                    int flags = dataset_.GetRasterBand(1)->GetMaskFlags();
+                    GDALRasterBand* mask = 0;
+                    if (flags == GMF_PER_DATASET)
+                    {
+                        mask = dataset_.GetRasterBand(1)->GetMaskBand();
+                    }
+                    if (mask)
+                    {
+                        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: found and processing mask band...";
+                        if (!raster_has_nodata)
+                        {
+                            raster_io_error = mask->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 3,
+                                                              image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                            if (raster_io_error == CE_Failure) {
+                                throw datasource_exception(CPLGetLastErrorMsg());
+                            }
+                        }
+                        else
+                        {
+                            MAPNIK_LOG_WARN(gdal) << "warning: nodata value (" << raster_nodata << ") used to set transparency instead of mask band";
+                        }
+                    }
+                }
                 mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, image, filter_factor);
                 // set nodata value to be used in raster colorizer
                 if (nodata_value_) raster->set_nodata(*nodata_value_);
@@ -620,36 +681,3 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
     }
     return feature_ptr();
 }
-
-#ifdef MAPNIK_LOG
-void gdal_featureset::get_overview_meta(GDALRasterBand* band)
-{
-    int band_overviews = band->GetOverviewCount();
-    if (band_overviews > 0)
-    {
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: " << band_overviews << " overviews found!";
-
-        for (int b = 0; b < band_overviews; b++)
-        {
-            GDALRasterBand * overview = band->GetOverview(b);
-            MAPNIK_LOG_DEBUG(gdal) << "Overview= " << b
-              << " Width=" << overview->GetXSize()
-              << " Height=" << overview->GetYSize();
-        }
-    }
-    else
-    {
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: No overviews found!";
-    }
-
-    int bsx,bsy;
-    double scale;
-    band->GetBlockSize(&bsx, &bsy);
-    scale = band->GetScale();
-
-    MAPNIK_LOG_DEBUG(gdal) << "Block=" << bsx << "x" << bsy
-        << " Scale=" << scale
-        << " Type=" << GDALGetDataTypeName(band->GetRasterDataType())
-        << "Color=" << GDALGetColorInterpretationName(band->GetColorInterpretation());
-}
-#endif

@@ -38,7 +38,8 @@ using mapnik_lib_t = struct _mapnik_lib_t;
 class PluginInfo : util::noncopyable
 {
 public:
-    using name_func = const char* (*) ();
+    using callable_returning_string = const char* (*) ();
+    using callable_returning_void = void (*) ();
     PluginInfo (std::string const& filename,
                 std::string const& library_name);
     ~PluginInfo();

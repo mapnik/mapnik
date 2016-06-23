@@ -41,7 +41,7 @@ struct weighted_vertex : private util::noncopyable
         vertex2d const& A = prev->coord;
         vertex2d const& B = next->coord;
         vertex2d const& C = coord;
-        return std::abs((double)((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
+        return std::abs(static_cast<double>((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
     }
 
     struct ascending_sort

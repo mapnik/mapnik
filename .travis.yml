@@ -1,4 +1,4 @@
-language: c
+language: cpp
 
 git:
   depth: 10
@@ -9,16 +9,12 @@ env:
    - CCACHE_TEMPDIR=/tmp/.ccache-temp
    - CCACHE_COMPRESS=1
    - HEAVY_JOBS="2"
+   - PREFIX=/tmp/mapnik
    - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
    - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
+   - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 addons:
   postgresql: "9.4"
-  apt:
-    sources:
-     - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.6
-    packages:
-     - clang-3.6
 
 cache:
   directories:
@@ -28,22 +24,32 @@ matrix:
   include:
     - os: linux
       sudo: false
-      compiler: clang
-      env: JOBS=8 CXX="ccache clang++-3.6 -Qunused-arguments" CC="clang-3.6" MASON_PUBLISH=False BENCH=False
+      compiler: ": clang"
+      env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8" TRIGGER=true
       addons:
-	apt:
-	  sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6' ]
-	  packages: [ 'clang-3.6', 'libstdc++-4.9-dev', 'libstdc++6' ]
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++6', 'libstdc++-5-dev']
+    - os: linux
+      sudo: false
+      compiler: ": clang-coverage"
+      env: JOBS=8 COVERAGE=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8"
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++6','libstdc++-5-dev' ]
     - os: osx
-      compiler: clang
+      compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=False
+      env: JOBS=4 MASON_PUBLISH=true _CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
+ - if [[ ${_CXX:-false} != false ]]; then export CXX=${_CXX}; fi
+ - if [[ ${_CC:-false} != false ]]; then export CC=${_CC}; fi
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
- - export PATH=$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
+ - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - export BENCH=${BENCH:-false}
@@ -52,12 +58,13 @@ before_install:
  - git_submodule_update --init --depth=10
 
 install:
- - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then export CCACHE_READONLY=1; fi
  - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
  - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
- - on 'osx' brew rm postgis --force
- - on 'osx' brew install postgis --force
- - on 'osx' pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres
+ - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
+ - on 'osx' rm -rf ${DATA_PATH}
+ - on 'osx' initdb ${DATA_PATH} -E utf8
+ - on 'osx' pg_ctl -w start -l postgres.log --pgdata ${DATA_PATH};
+ - on 'osx' cat postgres.log;
  - on 'osx' createuser -s postgres
  - psql -c 'create database template_postgis;' -U postgres
  - psql -c 'create extension postgis;' -d template_postgis -U postgres
@@ -65,6 +72,13 @@ install:
 
 before_script:
  - source bootstrap.sh
+ - |
+   if [[ $(uname -s) == 'Linux' ]]; then
+     mason install clang 3.8.0
+     export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
+     which clang++
+     export LLVM_COV="$(mason prefix clang 3.8.0)/bin/llvm-cov"
+   fi
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
@@ -73,14 +87,16 @@ before_script:
 script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
+ - cat config.log
  - make
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
 
 after_success:
+ - enabled ${TRIGGER} trigger_downstream
  - if enabled ${MASON_PUBLISH}; then
+     source ./.mason/mason.sh &&
      ./mason_latest.sh build &&
-     ./mason_latest.sh link &&
      ./mason_latest.sh publish;
    fi

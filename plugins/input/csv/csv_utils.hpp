@@ -55,16 +55,6 @@ struct geometry_column_locator
     std::size_t index2;
 };
 
-namespace detail {
-
-std::size_t file_length(std::istream & stream);
-
-std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length);
-
-void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator);
-bool valid(geometry_column_locator const& locator, std::size_t max_size);
-
-} // namespace detail
 
 mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator);
 
@@ -140,11 +130,8 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
 
 struct csv_file_parser
 {
-    using box_type = mapnik::box2d<double>;
-    using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
-    using boxes_type = std::vector<item_type>;
-
-    void parse_csv(std::istream & csv_file, boxes_type & boxes);
+    template <typename T>
+    void parse_csv_and_boxes(std::istream & csv_file, T & boxes);
 
     virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const & values);
 

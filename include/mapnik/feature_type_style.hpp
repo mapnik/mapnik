@@ -29,8 +29,10 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_compositing.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <vector>

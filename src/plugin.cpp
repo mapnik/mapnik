@@ -58,16 +58,24 @@ PluginInfo::PluginInfo(std::string const& filename,
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
           if (module_ && module_->dl)
           {
-                name_func name = reinterpret_cast<name_func>(dlsym(module_->dl, library_name.c_str()));
+                callable_returning_string name = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
                 if (name) name_ = name();
+                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
+                if (init_once) {
+                    init_once();
+                }
           }
 #else
   #ifdef MAPNIK_HAS_DLCFN
           if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
           if (module_ && module_->dl)
           {
-                name_func name = reinterpret_cast<name_func>(dlsym(module_->dl, library_name.c_str()));
+                callable_returning_string name = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
                 if (name) name_ = name();
+                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
+                if (init_once) {
+                    init_once();
+                }
           }
   #else
           throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
@@ -108,7 +116,7 @@ void * PluginInfo::get_symbol(std::string const& sym_name) const
 #ifdef MAPNIK_SUPPORTS_DLOPEN
     return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
 #else
-    return NULL;
+    return nullptr;
 #endif
 }
 

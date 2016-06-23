@@ -27,8 +27,10 @@
 // std
 #include <stdexcept>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/ucnv.h>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

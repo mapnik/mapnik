@@ -23,10 +23,15 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/debug.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 extern "C"
 {
 #include FT_GLYPH_H
 }
+
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -36,7 +41,7 @@ font_face::font_face(FT_Face face)
 
 bool font_face::set_character_sizes(double size)
 {
-    return (FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0) == 0);
+    return (FT_Set_Char_Size(face_,0,static_cast<FT_F26Dot6>(size * (1<<6)),0,0) == 0);
 }
 
 bool font_face::set_unscaled_character_sizes()
@@ -108,7 +113,7 @@ void font_face_set::set_unscaled_character_sizes()
 
 void stroker::init(double radius)
 {
-    FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
+    FT_Stroker_Set(s_, static_cast<FT_Fixed>(radius * (1<<6)),
                    FT_STROKER_LINECAP_ROUND,
                    FT_STROKER_LINEJOIN_ROUND,
                    0);

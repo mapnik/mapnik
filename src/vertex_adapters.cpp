@@ -34,7 +34,7 @@ point_vertex_adapter<T>::point_vertex_adapter(point<T> const& pt)
       first_(true) {}
 
 template <typename T>
-unsigned point_vertex_adapter<T>::vertex(value_type * x, value_type * y) const
+unsigned point_vertex_adapter<T>::vertex(coord_type * x, coord_type * y) const
 {
     if (first_)
     {
@@ -67,7 +67,7 @@ line_string_vertex_adapter<T>::line_string_vertex_adapter(line_string<T> const& 
 {}
 
 template <typename T>
-unsigned line_string_vertex_adapter<T>::vertex(value_type * x, value_type * y) const
+unsigned line_string_vertex_adapter<T>::vertex(coord_type * x, coord_type * y) const
 {
     if (current_index_ != end_index_)
     {
@@ -117,7 +117,7 @@ void polygon_vertex_adapter<T>::rewind(unsigned) const
     start_loop_ = true;
 }
 template <typename T>
-unsigned polygon_vertex_adapter<T>::vertex(value_type * x, value_type * y) const
+unsigned polygon_vertex_adapter<T>::vertex(coord_type * x, coord_type * y) const
 {
     if (rings_itr_ == rings_end_)
     {
@@ -177,7 +177,7 @@ void ring_vertex_adapter<T>::rewind(unsigned) const
 }
 
 template <typename T>
-unsigned ring_vertex_adapter<T>::vertex(value_type * x, value_type * y) const
+unsigned ring_vertex_adapter<T>::vertex(coord_type * x, coord_type * y) const
 {
     if (current_index_ < end_index_)
     {

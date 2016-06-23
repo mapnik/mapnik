@@ -24,14 +24,10 @@
 #define MAPNIK_FEATURE_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/value.hpp>
-#include <mapnik/json/generic_json.hpp>
-#include <mapnik/json/value_converters.hpp>
-
+#include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/json/attribute_value_visitor.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -44,27 +40,6 @@ namespace mapnik { namespace json {
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace fusion = boost::fusion;
-
-class attribute_value_visitor
-
-{
-public:
-    attribute_value_visitor(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    mapnik::value operator()(std::string const& val) const
-    {
-        return mapnik::value(tr_.transcode(val.c_str()));
-    }
-
-    template <typename T>
-    mapnik::value operator()(T const& val) const
-    {
-        return mapnik::value(val);
-    }
-
-    mapnik::transcoder const& tr_;
-};
 
 struct put_property
 {
@@ -101,9 +76,6 @@ struct feature_grammar : qi::grammar<Iterator, void(FeatureType&), space_type>
     qi::rule<Iterator, space_type> feature_type;
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator, json_value(), space_type> attribute_value;
-    qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_object;
-    qi::rule<Iterator, qi::locals<std::int32_t>, std::string(), space_type> stringify_array;
     // functions
     phoenix::function<put_property> put_property_;
     phoenix::function<set_geometry_impl> set_geometry;

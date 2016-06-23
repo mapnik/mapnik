@@ -28,7 +28,10 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/noncopyable.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 #include <agg_trans_affine.h>
 
 // freetype2
@@ -38,6 +41,8 @@ extern "C"
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 }
+
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

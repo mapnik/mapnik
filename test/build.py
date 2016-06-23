@@ -9,6 +9,8 @@ test_env = env.Clone()
 if not env['CPP_TESTS']:
     for cpp_test_bin in glob.glob('./*/*-bin'):
         os.unlink(cpp_test_bin)
+    if os.path.exists('./unit/run'): os.unlink('./unit/run')
+    if os.path.exists('./visual/run'): os.unlink('./visual/run')
 else:
     test_env['LIBS'] = [env['MAPNIK_NAME']]
     test_env.AppendUnique(LIBS='mapnik-wkt')

@@ -151,7 +151,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         cache_features_ = *params.get<mapnik::boolean_type>("cache_features", true);
 #if !defined(MAPNIK_MEMORY_MAPPED_FILE)
         mapnik::util::file file(filename_);
-        if (!file.open())
+        if (!file)
         {
             throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }
@@ -192,12 +192,14 @@ geojson_datasource::geojson_datasource(parameters const& params)
 }
 
 namespace {
+using box_type = box2d<double>;
+using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using base_iterator_type = char const*;
 const mapnik::transcoder geojson_datasource_static_tr("utf8");
 const mapnik::json::feature_collection_grammar<base_iterator_type,mapnik::feature_impl> geojson_datasource_static_fc_grammar(geojson_datasource_static_tr);
 const mapnik::json::feature_grammar_callback<base_iterator_type,mapnik::feature_impl> geojson_datasource_static_feature_callback_grammar(geojson_datasource_static_tr);
 const mapnik::json::feature_grammar<base_iterator_type, mapnik::feature_impl> geojson_datasource_static_feature_grammar(geojson_datasource_static_tr);
-const mapnik::json::extract_bounding_box_grammar<base_iterator_type> geojson_datasource_static_bbox_grammar;
+const mapnik::json::extract_bounding_box_grammar<base_iterator_type, boxes_type> geojson_datasource_static_bbox_grammar;
 }
 
 void geojson_datasource::initialise_descriptor(mapnik::feature_ptr const& feature)
@@ -230,7 +232,7 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
                                 std::ifstream>::query_first_n(filter, index, positions, num_features_to_query_);
 
     mapnik::util::file file(filename_);
-    if (!file.open()) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
+    if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
 
     for (auto const& pos : positions)
     {
@@ -257,7 +259,7 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
 template <typename Iterator>
 void geojson_datasource::initialise_index(Iterator start, Iterator end)
 {
-    mapnik::json::boxes_type boxes;
+    boxes_type boxes;
     boost::spirit::standard::space_type space;
     Iterator itr = start;
     if (!boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_bbox_grammar)(boost::phoenix::ref(boxes)) , space))
@@ -454,7 +456,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
 
         mapnik::util::file file(filename_);
 
-        if (!file.open()) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
+        if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
 
         for (auto const& pos : positions)
         {
@@ -508,7 +510,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
     else
     {
         mapnik::util::file file(filename_);
-        if (!file.open())
+        if (!file)
         {
             throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
         }

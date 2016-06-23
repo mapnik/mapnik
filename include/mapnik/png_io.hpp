@@ -29,16 +29,18 @@
 #include <mapnik/hextree.hpp>
 #include <mapnik/image.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
-
-// boost
-
 
 extern "C"
 {
 #include <png.h>
 }
+
+#pragma GCC diagnostic pop
 
 #define MAX_OCTREE_LEVELS 4
 
@@ -99,10 +101,10 @@ void save_as_png(T1 & file,
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
-        png_destroy_write_struct(&png_ptr,(png_infopp)0);
+        png_destroy_write_struct(&png_ptr,static_cast<png_infopp>(0));
         return;
     }
-    jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+    jmp_buf* jmp_context = static_cast<jmp_buf*>(png_get_error_ptr(png_ptr));
     if (jmp_context)
     {
         png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -120,7 +122,7 @@ void save_as_png(T1 & file,
     const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
-        row_pointers[i] = (png_bytep)image.get_row(i);
+        row_pointers[i] = const_cast<png_bytep>(reinterpret_cast<const unsigned char *>(image.get_row(i)));
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
     png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
@@ -161,7 +163,7 @@ void reduce_8(T const& in,
                     break;
                 }
             }
-            if (idx>=0 && idx<(int)alpha.size())
+            if (idx>=0 && idx < static_cast<int>(alpha.size()))
             {
                 alpha[idx]+=U2ALPHA(val);
                 alphaCount[idx]++;
@@ -212,7 +214,7 @@ void reduce_4(T const& in,
                     break;
                 }
             }
-            if (idx>=0 && idx<(int)alpha.size())
+            if (idx>=0 && idx < static_cast<int>(alpha.size()))
             {
                 alpha[idx]+=U2ALPHA(val);
                 alphaCount[idx]++;
@@ -273,10 +275,10 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
-        png_destroy_write_struct(&png_ptr,(png_infopp)0);
+        png_destroy_write_struct(&png_ptr,static_cast<png_infopp>(0));
         return;
     }
-    jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+    jmp_buf* jmp_context = static_cast<jmp_buf*>(png_get_error_ptr(png_ptr));
     if (jmp_context)
     {
         png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -310,14 +312,14 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
         }
         if (alphaSize>0)
         {
-            png_set_tRNS(png_ptr, info_ptr, (png_bytep)&trans[0], alphaSize, 0);
+            png_set_tRNS(png_ptr, info_ptr, static_cast<png_bytep>(&trans[0]), alphaSize, 0);
         }
     }
 
     png_write_info(png_ptr, info_ptr);
     for (unsigned i=0;i<height;i++)
     {
-        png_write_row(png_ptr,(png_bytep)image.get_row(i));
+        png_write_row(png_ptr,const_cast<png_bytep>(image.get_row(i)));
     }
 
     png_write_end(png_ptr, info_ptr);
@@ -352,7 +354,7 @@ void save_as_png8_oct(T1 & file,
         {
             for (unsigned x = 0; x < width; ++x)
             {
-                unsigned val = U2ALPHA((unsigned)image.get_row(y)[x]);
+                unsigned val = U2ALPHA(static_cast<unsigned>(image.get_row(y)[x]));
                 alphaHist[val]++;
                 meanAlpha += val;
                 if (val>0 && val<255)

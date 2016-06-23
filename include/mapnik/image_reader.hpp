@@ -29,8 +29,12 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/factory.hpp>
 #include <mapnik/box2d.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
 // stl
 #include <stdexcept>
 #include <string>

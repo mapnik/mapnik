@@ -96,7 +96,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     value_double opacity = get<value_double, keys::opacity>(sym, feature, common_.vars_);
     agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
     auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-    if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform);
+    if (image_transform) evaluate_transform(image_tr, feature, common_.vars_, *image_transform, common_.scale_factor_);
 
     cairo_save_restore guard(context_);
     context_.set_operator(comp_op);
@@ -124,8 +124,7 @@ void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
-    using vertex_converter_type = vertex_converter<
-                                                   clip_poly_tag,
+    using vertex_converter_type = vertex_converter<clip_poly_tag,
                                                    transform_tag,
                                                    affine_transform_tag,
                                                    simplify_tag,

@@ -33,7 +33,8 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/image_compositing.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -41,6 +42,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace detail {
 

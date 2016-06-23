@@ -65,7 +65,7 @@ datasource_cache::~datasource_cache()
 datasource_ptr datasource_cache::create(parameters const& params)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
-    if ( ! type)
+    if (!type)
     {
         throw config_error(std::string("Could not create datasource. Required ") +
                            "parameter 'type' is missing");

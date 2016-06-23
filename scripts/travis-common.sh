@@ -81,18 +81,10 @@ config_override () {
 
 configure () {
     if enabled ${COVERAGE}; then
-        ./configure "$@" PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
-            COVERAGE=True DEBUG=True
-    elif enabled ${MASON_PUBLISH}; then
-        export MASON_NAME=mapnik
-        export MASON_VERSION=latest
-        export MASON_LIB_FILE=lib/libmapnik-wkt.a
-        source ./.mason/mason.sh
-        ./configure "$@" PREFIX=${MASON_PREFIX} \
-            PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True \
-            RUNTIME_LINK='static'
+        ./configure "$@" PREFIX=${PREFIX} PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
+            COVERAGE=True DEBUG=True WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     else
-        ./configure "$@"
+        ./configure "$@" PREFIX=${PREFIX} WARNING_CXXFLAGS="-Wno-unknown-warning-option"
     fi
     # print final config values, sorted and indented
     sort -sk1,1 ./config.py | sed -e 's/^/	/'
@@ -100,11 +92,28 @@ configure () {
 
 coverage () {
     ./mason_packages/.link/bin/cpp-coveralls \
-        --gcov /usr/bin/llvm-cov-${LLVM_VERSION} \
-        --build-root . --gcov-options '\-lp' \
+        --gcov ${LLVM_COV} \
         --exclude mason_packages \
         --exclude .sconf_temp --exclude benchmark --exclude deps \
         --exclude scons --exclude test --exclude demo --exclude docs \
         --exclude fonts \
         > /dev/null
+}
+
+trigger_downstream() {
+    body="{
+        \"request\": {
+          \"message\": \"Triggered build: Mapnik core commit ${TRAVIS_COMMIT}\",
+          \"branch\":\"master\"
+        }
+    }
+    "
+
+    curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json" \
+      -H "Travis-API-Version: 3" \
+      -H "Authorization: token ${TRAVIS_TRIGGER_TOKEN}" \
+      -d "$body" \
+      https://api.travis-ci.org/repo/mapnik%2Fpython-mapnik/requests
 }

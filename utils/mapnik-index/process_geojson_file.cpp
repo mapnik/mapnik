@@ -38,33 +38,38 @@
 #include <mapnik/json/feature_collection_grammar_impl.hpp>
 
 namespace {
+
+template <typename T>
 struct feature_validate_callback
 {
-    feature_validate_callback(mapnik::box2d<double> const& box)
+    feature_validate_callback(mapnik::box2d<T> const& box)
         : box_(box) {}
 
     void operator() (mapnik::feature_ptr const& f) const
     {
-        if (box_ != f->envelope())
+        if (box_ != box_)
         {
             throw std::runtime_error("Bounding boxes mismatch validation feature");
         }
     }
-    mapnik::box2d<double> const& box_;
+    mapnik::box2d<T> const& box_;
 };
 
+using box_type = mapnik::box2d<float>;
+using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using base_iterator_type = char const*;
-const mapnik::json::extract_bounding_box_grammar<base_iterator_type> geojson_datasource_static_bbox_grammar;
+const mapnik::json::extract_bounding_box_grammar<base_iterator_type, boxes_type> geojson_datasource_static_bbox_grammar;
 const mapnik::transcoder tr("utf8");
-const mapnik::json::feature_grammar_callback<base_iterator_type, mapnik::feature_impl, feature_validate_callback> fc_grammar(tr);
+const mapnik::json::feature_grammar_callback<base_iterator_type, mapnik::feature_impl, feature_validate_callback<float>> fc_grammar(tr);
 }
 
 namespace mapnik { namespace detail {
 
 template <typename T>
-std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const& filename, bool validate_features, bool verbose)
+std::pair<bool,typename T::value_type::first_type> process_geojson_file(T & boxes, std::string const& filename, bool validate_features, bool verbose)
 {
-    mapnik::box2d<double> extent;
+    using box_type = typename T::value_type::first_type;
+    box_type extent;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     mapnik::mapped_region_ptr mapped_region;
     boost::optional<mapnik::mapped_region_ptr> memory =
@@ -82,7 +87,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     char const* end = start + mapped_region->get_size();
 #else
     mapnik::util::file file(filename);
-    if (!file.open())
+    if (!file)
     {
         std::clog << "Error : cannot open " << filename << std::endl;
         return std::make_pair(false, extent);
@@ -121,7 +126,7 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
             {
                 base_iterator_type feat_itr = start + item.second.first;
                 base_iterator_type feat_end = feat_itr + item.second.second;
-                feature_validate_callback callback(item.first);
+                feature_validate_callback<float> callback(item.first);
                 bool result = boost::spirit::qi::phrase_parse(feat_itr, feat_end, (fc_grammar)
                                                               (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
                                                               space);
@@ -136,9 +141,6 @@ std::pair<bool,box2d<double>> process_geojson_file(T & boxes, std::string const&
     return std::make_pair(true, extent);
 }
 
-using box_type = mapnik::box2d<double>;
-using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
-using boxes_type = std::vector<item_type>;
-template std::pair<bool,box2d<double>> process_geojson_file(boxes_type&, std::string const&, bool, bool);
+template std::pair<bool,box_type> process_geojson_file(boxes_type&, std::string const&, bool, bool);
 
 }}

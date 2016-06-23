@@ -1,5 +1,5 @@
-#ifndef __MAPNIK_BENCH_FRAMEWORK_HPP__
-#define __MAPNIK_BENCH_FRAMEWORK_HPP__
+#ifndef MAPNIK_BENCH_FRAMEWORK_HPP
+#define MAPNIK_BENCH_FRAMEWORK_HPP
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -52,7 +52,6 @@ public:
     }
     virtual bool validate() const = 0;
     virtual bool operator()() const = 0;
-    virtual ~test_case() {}
 };
 
 // gathers --long-option values in 'params';
@@ -288,4 +287,4 @@ protected:
 
 }
 
-#endif // __MAPNIK_BENCH_FRAMEWORK_HPP__
+#endif // MAPNIK_BENCH_FRAMEWORK_HPP

@@ -25,14 +25,14 @@
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_scaling_traits.hpp>
 
-// boost
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/bimap.hpp>
 #pragma GCC diagnostic pop
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_pixfmt_gray.h"
@@ -47,6 +47,7 @@
 #include "agg_span_interpolator_linear.h"
 #include "agg_trans_affine.h"
 #include "agg_image_filters.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

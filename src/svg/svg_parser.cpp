@@ -30,10 +30,14 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -150,7 +154,7 @@ double parse_svg_value(T & error_messages, const char* str, bool & percent)
         ("pc", DPI/6.0)
         ("mm", DPI/25.4)
         ("cm", DPI/2.54)
-        ("in", (double)DPI)
+        ("in", static_cast<double>(DPI))
         ;
     const char* cur = str; // phrase_parse modifies the first iterator
     const char* end = str + std::strlen(str);

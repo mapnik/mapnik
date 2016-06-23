@@ -98,7 +98,7 @@ Additional optional dependencies:
  * PostgreSQL (for PostGIS plugin support)
     - libpq - PostreSQL libraries
     - pg_config - PostgreSQL installation capabilities
- * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
+ * libgdal - GDAL/OGR input (For gdal and ogr plugin support) (>= GDAL 2.0.2 for thread safety - https://github.com/mapnik/mapnik/issues/3339)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
 
 Instructions for installing many of these dependencies on

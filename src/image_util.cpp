@@ -38,13 +38,14 @@
 #include <mapnik/safe_cast.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
-
 #endif
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

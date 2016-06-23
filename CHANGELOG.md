@@ -10,12 +10,16 @@ For a complete change history, see the git log.
 
 Released:
 
-(Packaged from )
+(Packaged from 8d9dc27)
 
 #### Summary
 
  - Raster scaling: fixed crash and clipping negative pixel values of floating point rasters (https://github.com/mapnik/mapnik/pull/3349)
-
+ - Restored support for unquoted strings in expressions (https://github.com/mapnik/mapnik/pull/3390)
+ - [TWKB](https://github.com/TWKB/) support via https://github.com/mapnik/mapnik/pull/3356 (#3355)
+ - Visual test runner can render SVG, PDF and Postscript with Cairo renderer (https://github.com/mapnik/mapnik/pull/3418)
+ - Scale factor is now applied also to `text-line-spacing` and transforms (https://github.com/mapnik/mapnik/pull/3416)
+ 
 ## 3.0.10
 
 Released: February 25, 2016

@@ -27,8 +27,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
 
-//boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/operators.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <sstream>

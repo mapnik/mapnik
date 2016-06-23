@@ -37,7 +37,10 @@
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
-// agg
+
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
@@ -50,6 +53,7 @@
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -88,7 +92,7 @@ struct agg_renderer_process_visitor_l
         value_double opacity = get<value_double, keys::opacity>(sym_, feature_, common_.vars_);
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
         image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);

@@ -26,7 +26,10 @@
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/text/text_properties.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace formatting {
 

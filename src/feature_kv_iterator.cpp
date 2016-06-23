@@ -22,7 +22,11 @@
 
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/feature.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

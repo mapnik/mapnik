@@ -37,8 +37,10 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/renderer_common/render_group_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

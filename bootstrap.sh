@@ -10,14 +10,16 @@ todo
 - shrink icu data
 '
 
+MASON_VERSION="b709931"
+
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
-        git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
+        git clone https://github.com/mapbox/mason.git ./.mason
+        (cd ./.mason && git checkout ${MASON_VERSION})
     else
         echo "Updating to latest mason"
-        (cd ./.mason && git pull)
+        (cd ./.mason && git fetch && git checkout ${MASON_VERSION})
     fi
-    export MASON_DIR=$(pwd)/.mason
     export PATH=$(pwd)/.mason:$PATH
     export CXX=${CXX:-clang++}
     export CC=${CC:-clang}
@@ -28,8 +30,8 @@ function install() {
     if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/${2} ]]; then
         mason install $1 $2
         mason link $1 $2
-        if [[ $3 ]]; then
-            LA_FILE=$(${MASON_DIR:-~/.mason}/mason prefix $1 $2)/lib/$3.la
+        if [[ ${3:-false} != false ]]; then
+            LA_FILE=$(mason prefix $1 $2)/lib/$3.la
             if [[ -f ${LA_FILE} ]]; then
                perl -i -p -e 's:\Q$ENV{HOME}/build/mapbox/mason\E:$ENV{PWD}:g' ${LA_FILE}
             else
@@ -60,8 +62,11 @@ function install_mason_deps() {
     wait
     install webp 0.4.2 libwebp &
     install gdal 1.11.2 libgdal &
-    install boost 1.59.0 &
-    install boost_liball 1.59.0 &
+    install boost 1.61.0 &
+    install boost_libsystem 1.61.0 &
+    install boost_libfilesystem 1.61.0 &
+    install boost_libprogram_options 1.61.0 &
+    install boost_libregex 1.61.0 &
     install freetype 2.6 libfreetype &
     install harfbuzz 0.9.41 libharfbuzz &
     wait

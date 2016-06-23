@@ -36,15 +36,13 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_statement.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 #pragma GCC diagnostic pop
 
+#include <tuple>
 
 // adapted to conform to the concepts
 // required by Karma to be recognized as a container of

@@ -40,8 +40,157 @@
 #include <cstdio>
 #include <algorithm>
 
-namespace csv_utils
+namespace csv_utils {
+namespace detail {
+
+std::size_t file_length(std::istream & stream)
 {
+    stream.seekg(0, std::ios::end);
+    return stream.tellg();
+}
+
+std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream, std::size_t file_length)
+{
+    // autodetect newlines/quotes/separators
+    char newline = '\n'; // default
+    bool has_newline = false;
+    bool has_single_quote = false;
+    char quote = '"'; // default
+    char separator = ','; // default
+    // local counters
+    int num_commas = 0;
+    int num_tabs = 0;
+    int num_pipes = 0;
+    int num_semicolons = 0;
+
+    static std::size_t const max_size = 4000;
+    std::size_t size = std::min(file_length, max_size);
+    std::vector<char> buffer;
+    buffer.resize(size);
+    stream.read(buffer.data(), size);
+    for (auto c : buffer)
+    {
+        switch (c)
+        {
+        case '\r':
+            newline = '\r';
+            has_newline = true;
+            break;
+        case '\n':
+            has_newline = true;
+            break;
+        case '\'':
+            if (!has_single_quote)
+            {
+                quote = c;
+                has_single_quote = true;
+            }
+            break;
+        case ',':
+            if (!has_newline) ++num_commas;
+            break;
+        case '\t':
+            if (!has_newline) ++num_tabs;
+            break;
+        case '|':
+            if (!has_newline) ++num_pipes;
+            break;
+        case ';':
+           if (!has_newline) ++num_semicolons;
+            break;
+        }
+    }
+    // detect separator
+    if (num_tabs > 0 && num_tabs > num_commas)
+    {
+        separator = '\t';
+        MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
+    }
+    else // pipes/semicolons
+    {
+        if (num_pipes > num_commas)
+        {
+            separator = '|';
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
+        }
+        else  if (num_semicolons > num_commas)
+        {
+            separator = ';';
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
+        }
+    }
+
+    if (has_newline && has_single_quote)
+    {
+        std::istringstream ss(std::string(buffer.begin(), buffer.end()));
+        std::size_t num_columns = 0;
+        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote); )
+        {
+            if (size < file_length && ss.eof())
+            {
+                // we can't be sure that last line
+                // is not truncated so skip it
+                break;
+            }
+            if (line.size() == 0 || (line.size() == 1 && line[0] == char(0xa))) continue; // empty lines are not interesting
+            auto num_quotes = std::count(line.begin(), line.end(), quote);
+            if (num_quotes % 2 != 0)
+            {
+                quote = '"';
+                break;
+            }
+            auto columns = csv_utils::parse_line(line, separator, quote);
+            if (num_columns > 0 && num_columns != columns.size())
+            {
+                quote = '"';
+                break;
+            }
+            num_columns = columns.size();
+        }
+    }
+    return std::make_tuple(newline, has_newline, separator, quote);
+}
+
+void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator)
+{
+    std::string lower_val(header);
+    std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
+    if (lower_val == "wkt" || (lower_val.find("geom") != std::string::npos))
+    {
+        locator.type = geometry_column_locator::WKT;
+        locator.index = index;
+    }
+    else if (lower_val == "geojson")
+    {
+        locator.type = geometry_column_locator::GEOJSON;
+        locator.index = index;
+    }
+    else if (lower_val == "x" || lower_val == "lon"
+             || lower_val == "lng" || lower_val == "long"
+             || (lower_val.find("longitude") != std::string::npos))
+    {
+        locator.index = index;
+        locator.type = geometry_column_locator::LON_LAT;
+    }
+
+    else if (lower_val == "y"
+             || lower_val == "lat"
+             || (lower_val.find("latitude") != std::string::npos))
+    {
+        locator.index2 = index;
+        locator.type = geometry_column_locator::LON_LAT;
+    }
+}
+
+bool valid(geometry_column_locator const& locator, std::size_t max_size)
+{
+    if (locator.type == geometry_column_locator::UNKNOWN) return false;
+    if (locator.index >= max_size) return false;
+    if (locator.type == geometry_column_locator::LON_LAT && locator.index2 >= max_size) return false;
+    return true;
+}
+
+} // namespace detail
 
 static const mapnik::csv_line_grammar<char const*> line_g;
 static const mapnik::csv_white_space_skipper skipper{};
@@ -89,8 +238,12 @@ void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const 
     // no-op by default
 }
 
-void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
+template <typename T>
+void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
 {
+    using boxes_type = T;
+    using box_type = typename boxes_type::value_type::first_type;
+
     auto file_length = detail::file_length(csv_file);
     // set back to start
     csv_file.seekg(0, std::ios::beg);
@@ -98,7 +251,7 @@ void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
     bool has_newline;
     char detected_quote;
     char detected_separator;
-    std::tie(newline, has_newline, detected_separator, detected_quote) = detail::autodect_csv_flavour(csv_file, file_length);
+    std::tie(newline, has_newline, detected_separator, detected_quote) = detail::autodetect_csv_flavour(csv_file, file_length);
     if (quote_ == 0) quote_ = detected_quote;
     if (separator_ == 0) separator_ = detected_separator;
 
@@ -117,6 +270,7 @@ void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
     {
         std::size_t index = 0;
         auto headers = csv_utils::parse_line(manual_headers_, separator_, quote_);
+        headers_.reserve(headers.size());
         for (auto const& header : headers)
         {
             detail::locate_geometry_column(header, index++, locator_);
@@ -135,6 +289,7 @@ void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
                 else
                 {
                     std::size_t index = 0;
+                    headers_.reserve(headers.size());
                     for (auto & header : headers)
                     {
                         mapnik::util::trim(header);
@@ -261,7 +416,7 @@ void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
                     else
                         extent_ = box;
                 }
-                boxes.emplace_back(box, make_pair(record_offset, record_size));
+                boxes.emplace_back(box_type(box), make_pair(record_offset, record_size));
                 add_feature(++feature_count, values);
             }
             else
@@ -301,156 +456,6 @@ void csv_file_parser::parse_csv(std::istream & csv_file, boxes_type & boxes)
     }
 }
 
-namespace detail {
-
-std::size_t file_length(std::istream & stream)
-{
-    stream.seekg(0, std::ios::end);
-    return stream.tellg();
-}
-
-std::tuple<char, bool, char, char> autodect_csv_flavour(std::istream & stream, std::size_t file_length)
-{
-    // autodetect newlines/quotes/separators
-    char newline = '\n'; // default
-    bool has_newline = false;
-    bool has_single_quote = false;
-    char quote = '"'; // default
-    char separator = ','; // default
-    // local counters
-    int num_commas = 0;
-    int num_tabs = 0;
-    int num_pipes = 0;
-    int num_semicolons = 0;
-
-    static std::size_t const max_size = 4000;
-    std::size_t size = std::min(file_length, max_size);
-    std::vector<char> buffer;
-    buffer.resize(size);
-    stream.read(buffer.data(), size);
-    for (auto c : buffer)
-    {
-        switch (c)
-        {
-        case '\r':
-            newline = '\r';
-            has_newline = true;
-            break;
-        case '\n':
-            has_newline = true;
-            break;
-        case '\'':
-            if (!has_single_quote)
-            {
-                quote = c;
-                has_single_quote = true;
-            }
-            break;
-        case ',':
-            if (!has_newline) ++num_commas;
-            break;
-        case '\t':
-            if (!has_newline) ++num_tabs;
-            break;
-        case '|':
-            if (!has_newline) ++num_pipes;
-            break;
-        case ';':
-           if (!has_newline) ++num_semicolons;
-            break;
-        }
-    }
-    // detect separator
-    if (num_tabs > 0 && num_tabs > num_commas)
-    {
-        separator = '\t';
-        MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
-    }
-    else // pipes/semicolons
-    {
-        if (num_pipes > num_commas)
-        {
-            separator = '|';
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
-        }
-        else  if (num_semicolons > num_commas)
-        {
-            separator = ';';
-            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
-        }
-    }
-
-    if (has_newline && has_single_quote)
-    {
-        std::istringstream ss(std::string(buffer.begin(), buffer.end()));
-        std::size_t num_columns = 0;
-        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote); )
-        {
-            if (size < file_length && ss.eof())
-            {
-                // we can't be sure last line
-                // is not truncated so skip it
-                break;
-            }
-            if (line.size() == 0) continue; // empty lines are not interesting
-            auto num_quotes = std::count(line.begin(), line.end(), quote);
-            if (num_quotes % 2 != 0)
-            {
-                quote = '"';
-                break;
-            }
-            auto columns = csv_utils::parse_line(line, separator, quote);
-            if (num_columns > 0 && num_columns != columns.size())
-            {
-                quote = '"';
-                break;
-            }
-            num_columns = columns.size();
-        }
-    }
-    return std::make_tuple(newline, has_newline, separator, quote);
-}
-
-void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator)
-{
-    std::string lower_val(header);
-    std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
-    if (lower_val == "wkt" || (lower_val.find("geom") != std::string::npos))
-    {
-        locator.type = geometry_column_locator::WKT;
-        locator.index = index;
-    }
-    else if (lower_val == "geojson")
-    {
-        locator.type = geometry_column_locator::GEOJSON;
-        locator.index = index;
-    }
-    else if (lower_val == "x" || lower_val == "lon"
-             || lower_val == "lng" || lower_val == "long"
-             || (lower_val.find("longitude") != std::string::npos))
-    {
-        locator.index = index;
-        locator.type = geometry_column_locator::LON_LAT;
-    }
-
-    else if (lower_val == "y"
-             || lower_val == "lat"
-             || (lower_val.find("latitude") != std::string::npos))
-    {
-        locator.index2 = index;
-        locator.type = geometry_column_locator::LON_LAT;
-    }
-}
-
-bool valid(geometry_column_locator const& locator, std::size_t max_size)
-{
-    if (locator.type == geometry_column_locator::UNKNOWN) return false;
-    if (locator.index >= max_size) return false;
-    if (locator.type == geometry_column_locator::LON_LAT && locator.index2 >= max_size) return false;
-    return true;
-}
-
-} // namespace detail
 
 mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
 {
@@ -494,5 +499,9 @@ mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> con
     }
     return geom;
 }
+
+template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<double>, std::pair<std::size_t, std::size_t>>> & boxes);
+
+template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<float>, std::pair<std::size_t, std::size_t>>> & boxes);
 
 } // namespace csv_utils

@@ -23,6 +23,8 @@
 #ifndef MAPNIK_UTIL_IS_CLOCKWISE_HPP
 #define MAPNIK_UTIL_IS_CLOCKWISE_HPP
 
+#include <cassert>
+
 namespace mapnik { namespace util {
 
 template <typename T>
@@ -30,11 +32,18 @@ bool is_clockwise(T const& ring)
 {
     double area = 0.0;
     std::size_t num_points = ring.size();
+    assert(num_points > 2);
+    double orig_x = ring[0].x;
+    double orig_y = ring[0].y;
     for (std::size_t i = 0; i < num_points; ++i)
     {
         auto const& p0 = ring[i];
         auto const& p1 = ring[(i + 1) % num_points];
-        area += p0.x * p1.y - p0.y * p1.x;
+        double x0 = p0.x - orig_x;
+        double y0 = p0.y - orig_y;
+        double x1 = p1.x - orig_x;
+        double y1 = p1.y - orig_y;
+        area += x0 * y1 - x1 * y0;
     }
     return (area < 0.0) ? true : false;
 }

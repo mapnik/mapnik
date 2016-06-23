@@ -34,7 +34,8 @@
 #include <boost/gil/gil_all.hpp>
 #pragma GCC diagnostic pop
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_color_rgba.h"
@@ -42,6 +43,8 @@
 #include "agg_scanline_u.h"
 #include "agg_blur.h"
 #include "agg_gradient_lut.h"
+#pragma GCC diagnostic pop
+
 // stl
 #include <cmath>
 

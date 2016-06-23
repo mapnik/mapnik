@@ -29,8 +29,10 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/util/variant.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_array.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <memory>

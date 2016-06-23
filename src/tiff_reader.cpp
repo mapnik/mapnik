@@ -23,21 +23,15 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
-
+#include <mapnik/util/char_array_buffer.hpp>
 extern "C"
 {
 #include <tiffio.h>
 }
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-#pragma GCC diagnostic pop
-
 // stl
 #include <memory>
+#include <fstream>
 
 namespace mapnik { namespace impl {
 
@@ -106,7 +100,7 @@ class tiff_reader : public image_reader
 {
     using tiff_ptr = std::shared_ptr<TIFF>;
     using source_type = T;
-    using input_stream = boost::iostreams::stream<source_type>;
+    using input_stream = std::istream;
 
     struct tiff_closer
     {
@@ -145,7 +139,7 @@ public:
         stripped,
         tiled
     };
-    explicit tiff_reader(std::string const& file_name);
+    explicit tiff_reader(std::string const& filename);
     tiff_reader(char const* data, std::size_t size);
     virtual ~tiff_reader();
     unsigned width() const final;
@@ -183,14 +177,14 @@ private:
 namespace
 {
 
-image_reader* create_tiff_reader(std::string const& file)
+image_reader* create_tiff_reader(std::string const& filename)
 {
-    return new tiff_reader<boost::iostreams::file_source>(file);
+    return new tiff_reader<std::filebuf>(filename);
 }
 
 image_reader* create_tiff_reader2(char const * data, std::size_t size)
 {
-    return new tiff_reader<boost::iostreams::array_source>(data, size);
+    return new tiff_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
 const bool registered = register_image_reader("tiff",create_tiff_reader);
@@ -199,9 +193,9 @@ const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
 }
 
 template <typename T>
-tiff_reader<T>::tiff_reader(std::string const& file_name)
-    : source_(file_name, std::ios_base::in | std::ios_base::binary),
-      stream_(source_),
+tiff_reader<T>::tiff_reader(std::string const& filename)
+    : source_(),
+      stream_(&source_),
       tif_(nullptr),
       read_method_(generic),
       rows_per_strip_(0),
@@ -218,14 +212,15 @@ tiff_reader<T>::tiff_reader(std::string const& file_name)
       has_alpha_(false),
       is_tiled_(false)
 {
-    if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ file_name);
+    source_.open(filename, std::ios_base::in | std::ios_base::binary);
+    if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ filename);
     init();
 }
 
 template <typename T>
 tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
     : source_(data, size),
-      stream_(source_),
+      stream_(&source_),
       tif_(nullptr),
       read_method_(generic),
       rows_per_strip_(0),
@@ -243,8 +238,6 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
       is_tiled_(false)
 {
     if (!stream_) throw image_reader_exception("TIFF reader: cannot open image stream ");
-    stream_.rdbuf()->pubsetbuf(0, 0);
-    stream_.seekg(0, std::ios::beg);
     init();
 }
 

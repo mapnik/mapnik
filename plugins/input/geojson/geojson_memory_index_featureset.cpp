@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/geometry_is_empty.hpp>

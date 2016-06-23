@@ -58,9 +58,14 @@ public:
         }
      }
 
-    inline bool open() const
+    inline bool is_open() const
     {
         return file_ ? true : false;
+    }
+
+    explicit operator bool() const
+    {
+        return this->is_open();
     }
 
     inline std::FILE * get() const

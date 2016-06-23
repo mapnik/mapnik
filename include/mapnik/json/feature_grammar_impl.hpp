@@ -50,23 +50,22 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     using phoenix::construct;
 
     // generic json types
-    json_.value =  json_.object | json_.array | json_.string_ | json_.number
+    json_.value = json_.object | json_.array | json_.string_ | json_.number
         ;
 
-    json_.pairs = json_.key_value % lit(',')
-        ;
-
-    json_.key_value = (json_.string_ > lit(':') > json_.value)
+    json_.key_value = json_.string_ > lit(':') > json_.value
         ;
 
     json_.object = lit('{')
-        > *json_.pairs
+        > -(json_.key_value % lit(','))
         > lit('}')
         ;
+
     json_.array = lit('[')
-        > json_.value > *(lit(',') > json_.value)
+        > -(json_.value % lit(','))
         > lit(']')
         ;
+
     json_.number = json_.strict_double[_val = json_.double_converter(_1)]
         | json_.int__[_val = json_.integer_converter(_1)]
         | lit("true") [_val = true]
@@ -95,24 +94,13 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
         > lit(':') > ((lit('{') > -attributes(_r1) > lit('}')) | lit("null"))
         ;
 
-    attributes = (json_.string_ [_a = _1] > lit(':') > attribute_value [put_property_(_r1,_a,_1)]) % lit(',')
-        ;
-
-    attribute_value %= json_.number | json_.string_ | stringify_object | stringify_array
-        ;
-
-    stringify_object %= char_('{')[_a = 1 ] > *(eps(_a > 0) > (char_('{')[_a +=1] | char_('}')[_a -=1] | char_))
-        ;
-
-    stringify_array %= char_('[')[_a = 1 ] > *(eps(_a > 0) > (char_('[')[_a +=1] | char_(']')[_a -=1] | char_))
+    attributes = (json_.string_ [_a = _1] > lit(':') > json_.value [put_property_(_r1,_a,_1)]) % lit(',')
         ;
 
     feature.name("Feature");
     feature_type.name("type");
     properties.name("properties");
     attributes.name("Attributes");
-    attribute_value.name("Attribute Value");
-
     on_error<fail>(feature, error_handler(_1, _2, _3, _4));
 
 }

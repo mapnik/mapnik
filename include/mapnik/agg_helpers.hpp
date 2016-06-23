@@ -26,8 +26,10 @@
 // mapnik
 #include <mapnik/symbolizer_enumerations.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_gamma_functions.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

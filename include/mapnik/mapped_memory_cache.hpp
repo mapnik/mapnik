@@ -31,7 +31,12 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
 
 namespace boost { namespace interprocess { class mapped_region; } }
 

@@ -761,6 +761,13 @@ struct to_expression_string_impl
 
     std::string operator()(value_unicode_string const& val) const
     {
+        // toUTF8(sink) doesn't Flush() the sink if the source string
+        // is empty -- we must return a pair of quotes in that case
+        //  https://github.com/mapnik/mapnik/issues/3362
+        if (val.isEmpty())
+        {
+            return std::string(2, quote_);
+        }
         EscapingByteSink sink(quote_);
         val.toUTF8(sink);
         return sink.dest_;

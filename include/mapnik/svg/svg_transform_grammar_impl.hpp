@@ -24,8 +24,6 @@
 //    from implementation files. It therefore doesn't have an include guard.
 // mapnik
 #include <mapnik/svg/svg_transform_grammar.hpp>
-// agg
-#include <agg_trans_affine.h>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -33,6 +31,11 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
+#pragma GCC diagnostic pop
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
+#include <agg_trans_affine.h>
 #pragma GCC diagnostic pop
 
 namespace mapnik { namespace svg {

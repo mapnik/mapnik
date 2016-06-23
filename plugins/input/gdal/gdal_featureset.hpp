@@ -73,11 +73,6 @@ public:
 private:
     mapnik::feature_ptr get_feature(mapnik::query const& q);
     mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
-
-#ifdef MAPNIK_LOG
-    void get_overview_meta(GDALRasterBand * band);
-#endif
-
     GDALDataset & dataset_;
     mapnik::context_ptr ctx_;
     int band_;

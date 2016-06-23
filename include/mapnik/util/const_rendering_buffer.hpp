@@ -25,7 +25,10 @@
 
 #include <mapnik/safe_cast.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
+#pragma GCC diagnostic pop
 
 #include <cstdint>
 

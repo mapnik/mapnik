@@ -40,11 +40,13 @@
 #include <deque>
 #include <memory>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
 #include "agg_conv_stroke.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

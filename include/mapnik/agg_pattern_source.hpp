@@ -27,8 +27,10 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

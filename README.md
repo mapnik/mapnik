@@ -9,6 +9,7 @@ _/      _/    _/_/_/  _/_/_/    _/    _/  _/  _/    _/
 ```
 
 [![Build Status Linux](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
+[![CircleCI](https://circleci.com/gh/mapnik/mapnik.svg?style=svg)](https://circleci.com/gh/mapnik/mapnik)
 [![Build Status Windows](https://ci.appveyor.com/api/projects/status/hc9l7okdjtucfqqn?branch=master&svg=true)](https://ci.appveyor.com/project/Mapbox/mapnik)
 [![Coverage Status](https://coveralls.io/repos/mapnik/mapnik/badge.svg?branch=master&service=github)](https://coveralls.io/github/mapnik/mapnik?branch=master)
 
@@ -20,7 +21,7 @@ For further information see [http://mapnik.org](http://mapnik.org) and also our 
 
 # Installation
 
-See [INSTALL.md](https://github.com/mapnik/mapnik/blob/master/INSTALL.md) for installation instructions and the [Install](https://github.com/mapnik/mapnik/wiki/Mapnik-Installation) page on the wiki for guides.
+See [INSTALL.md](INSTALL.md) for installation instructions and the [Install](https://github.com/mapnik/mapnik/wiki/Mapnik-Installation) page on the wiki for guides.
 
 # Code of Conduct
 
@@ -28,4 +29,4 @@ Please note that this project is released with a [Contributor Code of Conduct](h
 
 # License
 
-Mapnik software is free and is released under the LGPL ([GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html_)). Please see [COPYING](https://github.com/mapnik/mapnik/blob/master/COPYING) for more information.
+Mapnik software is free and is released under the LGPL ([GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html)). Please see [COPYING](https://github.com/mapnik/mapnik/blob/master/COPYING) for more information.

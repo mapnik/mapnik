@@ -35,8 +35,10 @@
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/boolean.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace formatting {
 
