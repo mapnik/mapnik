@@ -42,7 +42,7 @@ if [ -d "test/data" ]; then
 
     if [ -d "test/data-visual/styles" ]; then
         run_substep "Running visual tests..."
-        if [ -z "$JOBS" ]; then
+        if [ -z "${JOBS:-}" ]; then
             JOBS=1
         fi
         if [[ -f ./test/visual/run ]]; then
