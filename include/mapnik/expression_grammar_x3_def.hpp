@@ -302,12 +302,10 @@ namespace mapnik { namespace grammar {
     auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"') >> no_skip[*(unesc_char | ("\\x" > hex) | (char_ - '"'))] > '"';
     auto const quoted_string = x3::rule<class quoted_string, std::string> {} = single_quoted_string | double_quoted_string;
 
-    auto const ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum];
+    auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum] - lit("not");
 
     // start
     auto const expression_def = logical_expression [do_assign]
-        |
-        ustring[do_unicode]
         ;
 
     auto const logical_expression_def = not_expression[do_assign] >
@@ -399,6 +397,9 @@ namespace mapnik { namespace grammar {
         binary_func_expression[do_assign]
         |
         ('(' > logical_expression[do_assign] > ')')
+        |
+        unquoted_ustring[do_unicode]
+        // ^ https://github.com/mapnik/mapnik/pull/3389
         ;
 
     BOOST_SPIRIT_DEFINE (
