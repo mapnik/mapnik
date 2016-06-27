@@ -219,8 +219,8 @@ struct geometry_is_valid_string
 template <typename T>
 inline bool is_valid(T const& geom)
 {
-    using coord_type = typename T::coord_type;
-    return detail::geometry_is_valid<coord_type>() (geom);
+    using coordinate_type = typename T::coordinate_type;
+    return detail::geometry_is_valid<coordinate_type>() (geom);
 }
 
 template <typename T>
@@ -232,8 +232,8 @@ inline bool is_valid(mapnik::geometry::geometry<T> const& geom)
 template <typename T>
 inline bool is_valid(T const& geom, boost::geometry::validity_failure_type & failure)
 {
-    using coord_type = typename T::coord_type;
-    return detail::geometry_is_valid_reason<coord_type>(failure) (geom);
+    using coordinate_type = typename T::coordinate_type;
+    return detail::geometry_is_valid_reason<coordinate_type>(failure) (geom);
 }
 
 template <typename T>
@@ -246,8 +246,8 @@ inline bool is_valid(mapnik::geometry::geometry<T> const& geom,
 template <typename T>
 inline bool is_valid(T const& geom, std::string & message)
 {
-    using coord_type = typename T::coord_type;
-    return detail::geometry_is_valid_string<coord_type>(message) (geom);
+    using coordinate_type = typename T::coordinate_type;
+    return detail::geometry_is_valid_string<coordinate_type>(message) (geom);
 }
 
 template <typename T>

@@ -31,8 +31,8 @@ namespace detail {
 template <typename T>
 struct geometry_envelope
 {
-    using coord_type = T;
-    using bbox_type = box2d<coord_type>;
+    using coordinate_type = T;
+    using bbox_type = box2d<coordinate_type>;
     bbox_type & bbox;
 
     explicit geometry_envelope(bbox_type & bbox_)
@@ -139,11 +139,11 @@ struct geometry_envelope
 } // end ns detail
 
 template <typename T>
-auto envelope(T const& geom) -> box2d<typename T::coord_type>
+auto envelope(T const& geom) -> box2d<typename T::coordinate_type>
 {
-    using coord_type = typename T::coord_type;
-    box2d<coord_type> bbox;
-    detail::geometry_envelope<coord_type> op(bbox);
+    using coordinate_type = typename T::coordinate_type;
+    box2d<coordinate_type> bbox;
+    detail::geometry_envelope<coordinate_type> op(bbox);
     op(geom);
     return bbox;
 }

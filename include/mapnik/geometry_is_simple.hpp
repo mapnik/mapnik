@@ -132,8 +132,8 @@ struct geometry_is_simple
 template <typename T>
 inline bool is_simple(T const& geom)
 {
-    using coord_type = typename T::coord_type;
-    return detail::geometry_is_simple<coord_type>() (geom);
+    using coordinate_type = typename T::coordinate_type;
+    return detail::geometry_is_simple<coordinate_type>() (geom);
 }
 
 template <typename T>

@@ -82,8 +82,8 @@ struct geometry_type
 template <typename T>
 static inline mapnik::geometry::geometry_types geometry_type(T const& geom)
 {
-    using coord_type = typename T::coord_type;
-    return detail::geometry_type<coord_type>()(geom);
+    using coordinate_type = typename T::coordinate_type;
+    return detail::geometry_type<coordinate_type>()(geom);
 }
 
 }}

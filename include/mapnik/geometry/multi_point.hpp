@@ -33,8 +33,8 @@ namespace mapnik { namespace geometry {
 template <typename T, template <typename...> class Cont = std::vector>
 struct multi_point : Cont<point<T>>
 {
-    using coord_type = T;
-    using point_type = point<coord_type>;
+    using coordinate_type = T;
+    using point_type = point<coordinate_type>;
     using container_type = Cont<point_type>;
     multi_point() = default;
     explicit multi_point(std::size_t size)

@@ -46,7 +46,7 @@ struct geometry_collection;
 template <typename T>
 struct geometry_empty
 {
-    using coord_type = T;
+    using coordinate_type = T;
 };
 
 template <typename T>
@@ -61,7 +61,7 @@ using geometry_base = mapnik::util::variant<geometry_empty<T>,
 template <typename T>
 struct geometry : geometry_base<T>
 {
-    using coord_type = T;
+    using coordinate_type = T;
 
     geometry()
         : geometry_base<T>() {} // empty
@@ -76,7 +76,7 @@ struct geometry : geometry_base<T>
 template <typename T, template <typename...> class Cont>
 struct geometry_collection : Cont<geometry<T>>
 {
-    using coord_type = T;
+    using coordinate_type = T;
 };
 
 }}

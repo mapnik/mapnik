@@ -23,31 +23,12 @@
 #ifndef MAPNIK_GEOMETRY_POINT_HPP
 #define MAPNIK_GEOMETRY_POINT_HPP
 
+#include <mapbox/geometry/point.hpp>
+
 namespace mapnik { namespace geometry {
 
 template <typename T>
-struct point
-{
-    using coord_type = T;
-    point() {}
-    point(T x_, T y_)
-        : x(x_), y(y_)
-    {}
-    coord_type x;
-    coord_type y;
-};
-
-template <typename T>
-bool operator==(point<T> const& lhs, point<T> const& rhs)
-{
-    return lhs.x == rhs.x && lhs.y == rhs.y;
-}
-
-template <typename T>
-bool operator!=(point<T> const& lhs, point<T> const& rhs)
-{
-    return lhs.x != rhs.x || lhs.y != rhs.y;
-}
+using point = mapbox::geometry::point<T>;
 
 }}
 

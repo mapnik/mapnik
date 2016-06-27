@@ -33,14 +33,14 @@ namespace mapnik { namespace geometry {
 template <typename T, template <typename...> class Cont = std::vector>
 struct line_string : Cont<point<T> >
 {
-    using coord_type = T;
-    using point_type = point<coord_type>;
+    using coordinate_type = T;
+    using point_type = point<coordinate_type>;
     using container_type = Cont<point_type>;
     line_string() = default;
     explicit line_string(std::size_t size)
         : container_type(size) {}
     inline std::size_t num_points() const { return container_type::size(); }
-    inline void add_coord(coord_type x, coord_type y) { container_type::template emplace_back(x,y);}
+    inline void add_coord(coordinate_type x, coordinate_type y) { container_type::template emplace_back(x,y);}
 };
 
 }}

@@ -149,8 +149,8 @@ struct geometry_to_path
 template <typename T>
 void to_path(T const& geom, path_type & p)
 {
-    using coord_type = typename T::coord_type;
-    detail::geometry_to_path<coord_type> func(p);
+    using coordinate_type = typename T::coordinate_type;
+    detail::geometry_to_path<coordinate_type> func(p);
     func(geom);
 }
 

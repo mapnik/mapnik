@@ -161,15 +161,15 @@ private:
 template <typename G>
 inline bool is_empty(G const& geom)
 {
-    using coord_type = typename G::coord_type;
-    return detail::geometry_is_empty<coord_type>()(geom);
+    using coordinate_type = typename G::coordinate_type;
+    return detail::geometry_is_empty<coordinate_type>()(geom);
 }
 
 template <typename G>
 inline bool has_empty(G const& geom)
 {
-    using coord_type = typename G::coord_type;
-    return detail::geometry_has_empty<coord_type>()(geom);
+    using coordinate_type = typename G::coordinate_type;
+    return detail::geometry_has_empty<coordinate_type>()(geom);
 }
 
 }}

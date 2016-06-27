@@ -26,14 +26,12 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/geometry/point.hpp>
 // stl
 #include <vector>
 
 namespace mapnik {
 
-namespace geometry {
-template <typename T> struct point;
-}
 class projection;
 template <typename T> class box2d;
 
