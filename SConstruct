@@ -1598,6 +1598,7 @@ if not preconfigured:
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
     env.Prepend(CPPPATH = '#deps/mapbox/variant/include')
+    env.Prepend(CPPPATH = '#deps/mapbox/geometry/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
