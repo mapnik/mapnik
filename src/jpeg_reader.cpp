@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/image_reader.hpp>
+#include <mapnik/util/char_array_buffer.hpp>
 #include <mapnik/color.hpp>
 
 // jpeg
@@ -30,16 +31,10 @@ extern "C"
 #include <jpeglib.h>
 }
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-#pragma GCC diagnostic pop
-
 // std
 #include <cstdio>
 #include <memory>
+#include <fstream>
 
 namespace mapnik
 {
@@ -49,7 +44,7 @@ class jpeg_reader : public image_reader
 {
 public:
     using source_type = T;
-    using input_stream = boost::iostreams::stream<source_type>;
+    using input_stream = std::iostream;
     const static unsigned BUF_SIZE = 4096;
 private:
     struct jpeg_stream_wrapper
@@ -77,7 +72,7 @@ private:
     unsigned width_;
     unsigned height_;
 public:
-    explicit jpeg_reader(std::string const& file_name);
+    explicit jpeg_reader(std::string const& filename);
     explicit jpeg_reader(char const* data, size_t size);
     ~jpeg_reader();
     unsigned width() const final;
@@ -99,14 +94,14 @@ private:
 
 namespace
 {
-image_reader* create_jpeg_reader(std::string const& file)
+image_reader* create_jpeg_reader(std::string const& filename)
 {
-    return new jpeg_reader<boost::iostreams::file_source>(file);
+    return new jpeg_reader<std::filebuf>(filename);
 }
 
 image_reader* create_jpeg_reader2(char const* data, size_t size)
 {
-    return new jpeg_reader<boost::iostreams::array_source>(data, size);
+    return new jpeg_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
 const bool registered  = register_image_reader("jpeg",create_jpeg_reader);
@@ -115,20 +110,21 @@ const bool registered2 = register_image_reader("jpeg",create_jpeg_reader2);
 
 // ctors
 template <typename T>
-jpeg_reader<T>::jpeg_reader(std::string const& file_name)
-    : source_(file_name,std::ios_base::in | std::ios_base::binary),
-      stream_(source_),
+jpeg_reader<T>::jpeg_reader(std::string const& filename)
+    : source_(),
+      stream_(&source_),
       width_(0),
       height_(0)
 {
-    if (!stream_) throw image_reader_exception("cannot open image file "+ file_name);
+    source_.open(filename, std::ios_base::in | std::ios_base::binary);
+    if (!stream_) throw image_reader_exception("cannot open image file "+ filename);
     init();
 }
 
 template <typename T>
 jpeg_reader<T>::jpeg_reader(char const* data, size_t size)
     : source_(data, size),
-      stream_(source_),
+      stream_(&source_),
       width_(0),
       height_(0)
 {

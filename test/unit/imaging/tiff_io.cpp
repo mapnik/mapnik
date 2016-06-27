@@ -1,4 +1,3 @@
-
 // disabled on windows due to https://github.com/mapnik/mapnik/issues/2838
 // TODO - get to the bottom of why including `tiff_reader.cpp` breaks windows
 // or re-write image_readers to allow `#include tiff_reader.hpp`
@@ -12,7 +11,7 @@
 #include "../../../src/tiff_reader.cpp"
 
 #define TIFF_ASSERT(filename) \
-    mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename); \
+    mapnik::tiff_reader<std::filebuf> tiff_reader(filename);    \
     REQUIRE( tiff_reader.width() == 256 ); \
     REQUIRE( tiff_reader.height() == 256 ); \
     REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG ); \
@@ -20,7 +19,7 @@
     REQUIRE( reader->width() == 256 ); \
     REQUIRE( reader->height() == 256 ); \
     mapnik::util::file file(filename); \
-    mapnik::tiff_reader<boost::iostreams::array_source> tiff_reader2(file.data().get(),file.size()); \
+    mapnik::tiff_reader<mapnik::util::char_array_buffer> tiff_reader2(file.data().get(),file.size()); \
     REQUIRE( tiff_reader2.width() == 256 ); \
     REQUIRE( tiff_reader2.height() == 256 ); \
     std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(file.data().get(),file.size())); \
@@ -57,11 +56,13 @@
     REQUIRE( subimage.width() == 1 ); \
     REQUIRE( subimage.height() == 1 ); \
 
-TEST_CASE("tiff io") {
+TEST_CASE("tiff io")
+{
 
-SECTION("scan rgb8 striped") {
+SECTION("scan rgb8 striped")
+{
     std::string filename("./test/data/tiff/scan_512x512_rgb8_striped.tif");
-    mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename);
+    mapnik::tiff_reader<std::filebuf> tiff_reader(filename);
     REQUIRE( tiff_reader.width() == 512 );
     REQUIRE( tiff_reader.height() == 512 );
     REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG );
@@ -76,7 +77,7 @@ SECTION("scan rgb8 striped") {
     REQUIRE( reader->width() == 512 );
     REQUIRE( reader->height() == 512 );
     mapnik::util::file file(filename);
-    mapnik::tiff_reader<boost::iostreams::array_source> tiff_reader2(file.data().get(),file.size());
+    mapnik::tiff_reader<mapnik::util::char_array_buffer> tiff_reader2(file.data().get(),file.size());
     REQUIRE( tiff_reader2.width() == 512 );
     REQUIRE( tiff_reader2.height() == 512 );
     std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(file.data().get(),file.size()));
@@ -91,7 +92,7 @@ SECTION("scan rgb8 striped") {
 
 SECTION("scan rgb8 tiled") {
     std::string filename("./test/data/tiff/scan_512x512_rgb8_tiled.tif");
-    mapnik::tiff_reader<boost::iostreams::file_source> tiff_reader(filename);
+    mapnik::tiff_reader<std::filebuf> tiff_reader(filename);
     REQUIRE( tiff_reader.width() == 512 );
     REQUIRE( tiff_reader.height() == 512 );
     REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG );
@@ -106,7 +107,7 @@ SECTION("scan rgb8 tiled") {
     REQUIRE( reader->width() == 512 );
     REQUIRE( reader->height() == 512 );
     mapnik::util::file file(filename);
-    mapnik::tiff_reader<boost::iostreams::array_source> tiff_reader2(file.data().get(),file.size());
+    mapnik::tiff_reader<mapnik::util::char_array_buffer> tiff_reader2(file.data().get(),file.size());
     REQUIRE( tiff_reader2.width() == 512 );
     REQUIRE( tiff_reader2.height() == 512 );
     std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(file.data().get(),file.size()));
