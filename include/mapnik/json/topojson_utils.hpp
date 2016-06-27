@@ -313,7 +313,7 @@ struct feature_generator
                 x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                 y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
             }
-            multi_point.add_coord(x, y);
+            multi_point.emplace_back(x, y);
         }
         feature->set_geometry(std::move(multi_point));
         assign_properties(*feature, multi_pt, tr_);
@@ -344,7 +344,7 @@ struct feature_generator
                             x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                             y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                         }
-                        line_string.add_coord(x,y);
+                        line_string.emplace_back(x,y);
                     }
                 }
             }
@@ -383,7 +383,7 @@ struct feature_generator
                                 x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                                 y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                             }
-                            line_string.add_coord(x, y);
+                            line_string.emplace_back(x, y);
                         }
 
                     }
@@ -524,14 +524,14 @@ struct feature_generator
                             {
                                 for (auto const& c : (processed_coords | reversed))
                                 {
-                                    linear_ring.add_coord(c.x, c.y);
+                                    linear_ring.emplace_back(c.x, c.y);
                                 }
                             }
                             else
                             {
                                 for (auto const& c : processed_coords)
                                 {
-                                    linear_ring.add_coord(c.x, c.y);
+                                    linear_ring.emplace_back(c.x, c.y);
                                 }
                             }
                         }

@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/vertex_adapters.hpp>
@@ -8,10 +7,10 @@ TEST_CASE("vertex_adapters") {
 
 SECTION("polygon") {
     mapnik::geometry::polygon<double> g;
-    g.exterior_ring.add_coord(1,1);
-    g.exterior_ring.add_coord(2,2);
-    g.exterior_ring.add_coord(100,100);
-    g.exterior_ring.add_coord(1,1);
+    g.exterior_ring.emplace_back(1,1);
+    g.exterior_ring.emplace_back(2,2);
+    g.exterior_ring.emplace_back(100,100);
+    g.exterior_ring.emplace_back(1,1);
 
     mapnik::geometry::polygon_vertex_adapter<double> va(g);
     double x,y;
@@ -47,26 +46,26 @@ SECTION("polygon") {
 
 SECTION("polygon with hole") {
     mapnik::geometry::polygon<double> g;
-    g.exterior_ring.add_coord(0,0);
-    g.exterior_ring.add_coord(-10,0);
-    g.exterior_ring.add_coord(-10,10);
-    g.exterior_ring.add_coord(0,10);
-    g.exterior_ring.add_coord(0,0);
+    g.exterior_ring.emplace_back(0,0);
+    g.exterior_ring.emplace_back(-10,0);
+    g.exterior_ring.emplace_back(-10,10);
+    g.exterior_ring.emplace_back(0,10);
+    g.exterior_ring.emplace_back(0,0);
     std::vector<mapnik::geometry::linear_ring<double> > interior_rings;
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(-7,7);
-    hole.add_coord(-7,3);
-    hole.add_coord(-3,3);
-    hole.add_coord(-3,7);
-    hole.add_coord(-7,7);
+    hole.emplace_back(-7,7);
+    hole.emplace_back(-7,3);
+    hole.emplace_back(-3,3);
+    hole.emplace_back(-3,7);
+    hole.emplace_back(-7,7);
     g.add_hole(std::move(hole));
 
     mapnik::geometry::linear_ring<double> hole_in_hole;
-    hole_in_hole.add_coord(-6,4);
-    hole_in_hole.add_coord(-6,6);
-    hole_in_hole.add_coord(-4,6);
-    hole_in_hole.add_coord(-4,4);
-    hole_in_hole.add_coord(-6,4);
+    hole_in_hole.emplace_back(-6,4);
+    hole_in_hole.emplace_back(-6,6);
+    hole_in_hole.emplace_back(-4,6);
+    hole_in_hole.emplace_back(-4,4);
+    hole_in_hole.emplace_back(-6,4);
     g.add_hole(std::move(hole_in_hole));
 
     mapnik::geometry::polygon_vertex_adapter<double> va(g);

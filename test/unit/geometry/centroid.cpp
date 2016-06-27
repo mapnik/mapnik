@@ -30,9 +30,9 @@ SECTION("point") {
 SECTION("linestring") {
 
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0, 0);
-    line.add_coord(25, 25);
-    line.add_coord(50, 50);
+    line.emplace_back(0, 0);
+    line.emplace_back(25, 25);
+    line.emplace_back(50, 50);
     mapnik::geometry::point<double> centroid;
     REQUIRE(mapnik::geometry::centroid(line, centroid));
     REQUIRE(centroid.x == 25);
@@ -50,11 +50,11 @@ SECTION("polygon") {
 
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0, 0);
-    ring.add_coord(1, 0);
-    ring.add_coord(1, 1);
-    ring.add_coord(0, 1);
-    ring.add_coord(0, 0);
+    ring.emplace_back(0, 0);
+    ring.emplace_back(1, 0);
+    ring.emplace_back(1, 1);
+    ring.emplace_back(0, 1);
+    ring.emplace_back(0, 0);
     poly.set_exterior_ring(std::move(ring));
 
     mapnik::geometry::point<double> centroid;
@@ -83,9 +83,9 @@ SECTION("empty polygon") {
 SECTION("multi-point") {
 
     mapnik::geometry::multi_point<double> geom;
-    geom.add_coord(0, 0);
-    geom.add_coord(25, 25);
-    geom.add_coord(50, 50);
+    geom.emplace_back(0, 0);
+    geom.emplace_back(25, 25);
+    geom.emplace_back(50, 50);
     mapnik::geometry::point<double> centroid;
     REQUIRE(mapnik::geometry::centroid(geom, centroid));
     REQUIRE(centroid.x == 25);
@@ -104,16 +104,16 @@ SECTION("multi-linestring") {
     mapnik::geometry::multi_line_string<double> geom;
     {
         mapnik::geometry::line_string<double> line;
-        line.add_coord(0, 0);
-        line.add_coord(0, 25);
-        line.add_coord(0, 50);
+        line.emplace_back(0, 0);
+        line.emplace_back(0, 25);
+        line.emplace_back(0, 50);
         geom.emplace_back(std::move(line));
     }
     {
         mapnik::geometry::line_string<double> line;
-        line.add_coord(0, 0);
-        line.add_coord(25, 0);
-        line.add_coord(50, 0);
+        line.emplace_back(0, 0);
+        line.emplace_back(25, 0);
+        line.emplace_back(50, 0);
         geom.emplace_back(std::move(line));
     }
     mapnik::geometry::point<double> centroid;
@@ -126,9 +126,9 @@ SECTION("multi-linestring: one component empty") {
 
     mapnik::geometry::multi_line_string<double> geom;
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0, 0);
-    line.add_coord(0, 25);
-    line.add_coord(0, 50);
+    line.emplace_back(0, 0);
+    line.emplace_back(0, 25);
+    line.emplace_back(0, 50);
     geom.emplace_back(std::move(line));
     geom.emplace_back();
     mapnik::geometry::point<double> centroid;
@@ -150,22 +150,22 @@ SECTION("multi-polygon") {
     {
         mapnik::geometry::polygon<double> poly;
         mapnik::geometry::linear_ring<double> ring;
-        ring.add_coord(0, 0);
-        ring.add_coord(1, 0);
-        ring.add_coord(1, 1);
-        ring.add_coord(0, 1);
-        ring.add_coord(0, 0);
+        ring.emplace_back(0, 0);
+        ring.emplace_back(1, 0);
+        ring.emplace_back(1, 1);
+        ring.emplace_back(0, 1);
+        ring.emplace_back(0, 0);
         poly.set_exterior_ring(std::move(ring));
         geom.emplace_back(std::move(poly));
     }
     {
         mapnik::geometry::polygon<double> poly;
         mapnik::geometry::linear_ring<double> ring;
-        ring.add_coord(1, 1);
-        ring.add_coord(2, 1);
-        ring.add_coord(2, 2);
-        ring.add_coord(1, 2);
-        ring.add_coord(1, 1);
+        ring.emplace_back(1, 1);
+        ring.emplace_back(2, 1);
+        ring.emplace_back(2, 2);
+        ring.emplace_back(1, 2);
+        ring.emplace_back(1, 1);
         poly.set_exterior_ring(std::move(ring));
         geom.emplace_back(std::move(poly));
     }
@@ -181,11 +181,11 @@ SECTION("multi-polygon: one component empty") {
     mapnik::geometry::multi_polygon<double> geom;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0, 0);
-    ring.add_coord(1, 0);
-    ring.add_coord(1, 1);
-    ring.add_coord(0, 1);
-    ring.add_coord(0, 0);
+    ring.emplace_back(0, 0);
+    ring.emplace_back(1, 0);
+    ring.emplace_back(1, 1);
+    ring.emplace_back(0, 1);
+    ring.emplace_back(0, 0);
     poly.set_exterior_ring(std::move(ring));
     geom.emplace_back(std::move(poly));
     geom.emplace_back();

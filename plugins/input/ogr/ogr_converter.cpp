@@ -98,7 +98,7 @@ mapnik::geometry::line_string<double> ogr_converter::convert_linestring(OGRLineS
     geom.reserve(num_points);
     for (int i = 0; i < num_points; ++i)
     {
-       geom.add_coord(ogr_geom->getX(i), ogr_geom->getY(i));
+       geom.emplace_back(ogr_geom->getX(i), ogr_geom->getY(i));
     }
     return geom;
 }

@@ -24,25 +24,12 @@
 #define MAPNIK_GEOMETRY_LINE_STRING_HPP
 
 // mapnik
-#include <mapnik/geometry/point.hpp>
-// stl
-#include <vector>
+#include <mapbox/geometry/line_string.hpp>
 
 namespace mapnik { namespace geometry {
 
-template <typename T, template <typename...> class Cont = std::vector>
-struct line_string : Cont<point<T> >
-{
-    using coordinate_type = T;
-    using point_type = point<coordinate_type>;
-    using container_type = Cont<point_type>;
-    line_string() = default;
-    explicit line_string(std::size_t size)
-        : container_type(size) {}
-    inline std::size_t num_points() const { return container_type::size(); }
-    inline void add_coord(coordinate_type x, coordinate_type y) { container_type::template emplace_back(x,y);}
-};
-
+template <typename T>
+using line_string = mapbox::geometry::line_string<T>;
 }}
 
 #endif // MAPNIK_GEOMETRY_LINE_STRING_HPP

@@ -123,10 +123,10 @@ public:
 
             if (cmd == mapnik::SEG_CLOSE)
             {
-                ring.add_coord(x0, y0);
+                ring.emplace_back(x0, y0);
                 break;
             }
-            ring.add_coord(x,y);
+            ring.emplace_back(x,y);
         }
         poly2.set_exterior_ring(std::move(ring));
         // interior rings
@@ -139,12 +139,12 @@ public:
             }
             else if (cmd == mapnik::SEG_CLOSE)
             {
-                ring.add_coord(x0,y0);
+                ring.emplace_back(x0,y0);
                 poly2.add_hole(std::move(ring));
                 ring.clear();
                 continue;
             }
-            ring.add_coord(x,y);
+            ring.emplace_back(x,y);
         }
 
         std::string expect = expected_+".png";
@@ -243,11 +243,11 @@ public:
         mapnik::geometry::correct(poly);
 
         mapnik::geometry::linear_ring<double> bbox;
-        bbox.add_coord(extent_.minx(), extent_.miny());
-        bbox.add_coord(extent_.minx(), extent_.maxy());
-        bbox.add_coord(extent_.maxx(), extent_.maxy());
-        bbox.add_coord(extent_.maxx(), extent_.miny());
-        bbox.add_coord(extent_.minx(), extent_.miny());
+        bbox.emplace_back(extent_.minx(), extent_.miny());
+        bbox.emplace_back(extent_.minx(), extent_.maxy());
+        bbox.emplace_back(extent_.maxx(), extent_.maxy());
+        bbox.emplace_back(extent_.maxx(), extent_.miny());
+        bbox.emplace_back(extent_.minx(), extent_.miny());
 
         std::deque<mapnik::geometry::polygon<double> > result;
         boost::geometry::intersection(bbox, poly, result);
@@ -291,11 +291,11 @@ public:
         mapnik::geometry::correct(poly);
 
         mapnik::geometry::linear_ring<double> bbox;
-        bbox.add_coord(extent_.minx(), extent_.miny());
-        bbox.add_coord(extent_.minx(), extent_.maxy());
-        bbox.add_coord(extent_.maxx(), extent_.maxy());
-        bbox.add_coord(extent_.maxx(), extent_.miny());
-        bbox.add_coord(extent_.minx(), extent_.miny());
+        bbox.emplace_back(extent_.minx(), extent_.miny());
+        bbox.emplace_back(extent_.minx(), extent_.maxy());
+        bbox.emplace_back(extent_.maxx(), extent_.maxy());
+        bbox.emplace_back(extent_.maxx(), extent_.miny());
+        bbox.emplace_back(extent_.minx(), extent_.miny());
 
         bool valid = true;
         for (unsigned i=0;i<iterations_;++i)

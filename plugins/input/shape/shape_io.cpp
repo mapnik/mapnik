@@ -114,7 +114,7 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
         {
             double x = record.read_double();
             double y = record.read_double();
-            line.add_coord(x, y);
+            line.emplace_back(x, y);
         }
         geom = std::move(line);
     }
@@ -144,7 +144,7 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                line.add_coord(x, y);
+                line.emplace_back(x, y);
             }
             multi_line.push_back(std::move(line));
         }

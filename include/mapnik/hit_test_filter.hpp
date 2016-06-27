@@ -68,7 +68,7 @@ struct hit_test_visitor
     }
     bool operator() (geometry::line_string<double> const& geom) const
     {
-        std::size_t num_points = geom.num_points();
+        std::size_t num_points = geom.size();
         if (num_points > 1)
         {
             for (std::size_t i = 1; i < num_points; ++i)
@@ -92,7 +92,7 @@ struct hit_test_visitor
     bool operator() (geometry::polygon<double> const& geom) const
     {
         auto const& exterior = geom.exterior_ring;
-        std::size_t num_points = exterior.num_points();
+        std::size_t num_points = exterior.size();
         if (num_points < 4) return false;
         bool inside = false;
         for (std::size_t i = 1; i < num_points; ++i)

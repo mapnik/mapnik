@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/geometry_remove_empty.hpp>
@@ -19,9 +18,9 @@ SECTION("multi-linestring") {
     using geom_type = mapnik::geometry::multi_line_string<double>;
     geom_type geom;
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0, 0);
-    line.add_coord(0, 25);
-    line.add_coord(0, 50);
+    line.emplace_back(0, 0);
+    line.emplace_back(0, 25);
+    line.emplace_back(0, 50);
     geom.emplace_back(std::move(line));
     geom.emplace_back();
 
@@ -37,11 +36,11 @@ SECTION("multi-polygon") {
     geom_type geom;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0, 0);
-    ring.add_coord(1, 0);
-    ring.add_coord(1, 1);
-    ring.add_coord(0, 1);
-    ring.add_coord(0, 0);
+    ring.emplace_back(0, 0);
+    ring.emplace_back(1, 0);
+    ring.emplace_back(1, 1);
+    ring.emplace_back(0, 1);
+    ring.emplace_back(0, 0);
     poly.set_exterior_ring(std::move(ring));
     geom.emplace_back(std::move(poly));
     geom.emplace_back();

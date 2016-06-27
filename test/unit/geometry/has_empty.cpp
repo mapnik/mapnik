@@ -34,7 +34,7 @@ SECTION("geometry collection") {
         mapnik::geometry::geometry_collection<double> geom;
         mapnik::geometry::multi_line_string<double> mls;
         mapnik::geometry::line_string<double> line;
-        line.add_coord(0, 0);
+        line.emplace_back(0, 0);
         mls.emplace_back(std::move(line));
         geom.emplace_back(std::move(mls));
         REQUIRE(!mapnik::geometry::has_empty(geom));
@@ -55,9 +55,9 @@ SECTION("linestring") {
     }
     {
         mapnik::geometry::line_string<double> line;
-        line.add_coord(0, 0);
-        line.add_coord(25, 25);
-        line.add_coord(50, 50);
+        line.emplace_back(0, 0);
+        line.emplace_back(25, 25);
+        line.emplace_back(50, 50);
         REQUIRE(!mapnik::geometry::has_empty(line));
     }
 }
@@ -77,11 +77,11 @@ SECTION("polygon") {
     {
         mapnik::geometry::polygon<double> poly;
         mapnik::geometry::linear_ring<double> ring;
-        ring.add_coord(0, 0);
-        ring.add_coord(1, 0);
-        ring.add_coord(1, 1);
-        ring.add_coord(0, 1);
-        ring.add_coord(0, 0);
+        ring.emplace_back(0, 0);
+        ring.emplace_back(1, 0);
+        ring.emplace_back(1, 1);
+        ring.emplace_back(0, 1);
+        ring.emplace_back(0, 0);
         poly.set_exterior_ring(std::move(ring));
         REQUIRE(!mapnik::geometry::has_empty(poly));
     }
@@ -95,9 +95,9 @@ SECTION("multi-point") {
     }
     {
         mapnik::geometry::multi_point<double> geom;
-        geom.add_coord(0, 0);
-        geom.add_coord(25, 25);
-        geom.add_coord(50, 50);
+        geom.emplace_back(0, 0);
+        geom.emplace_back(25, 25);
+        geom.emplace_back(50, 50);
         REQUIRE(!mapnik::geometry::has_empty(geom));
     }
 }
@@ -117,7 +117,7 @@ SECTION("multi-linestring") {
     {
         mapnik::geometry::multi_line_string<double> geom;
         mapnik::geometry::line_string<double> line;
-        line.add_coord(0, 0);
+        line.emplace_back(0, 0);
         geom.emplace_back(std::move(line));
         REQUIRE(!mapnik::geometry::has_empty(geom));
     }
@@ -141,7 +141,7 @@ SECTION("multi-polygon") {
         mapnik::geometry::multi_polygon<double> geom;
         mapnik::geometry::polygon<double> poly;
         mapnik::geometry::linear_ring<double> ring;
-        ring.add_coord(0, 0);
+        ring.emplace_back(0, 0);
         poly.set_exterior_ring(std::move(ring));
         geom.emplace_back(std::move(poly));
         REQUIRE(!mapnik::geometry::has_empty(geom));
