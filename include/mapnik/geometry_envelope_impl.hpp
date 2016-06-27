@@ -57,58 +57,22 @@ struct geometry_envelope
 
     void operator() (mapnik::geometry::line_string<T> const& line) const
     {
-        bool first = true;
-        for (auto const& pt : line)
-        {
-            if (first && !bbox.valid())
-            {
-                bbox.init(pt.x, pt.y, pt.x, pt.y);
-                first = false;
-            }
-            else
-            {
-                bbox.expand_to_include(pt.x, pt.y);
-            }
-        }
+        _envelope_impl(line, bbox);
     }
 
     void operator() (mapnik::geometry::linear_ring<T> const& ring) const
     {
-        (*this)(static_cast<mapnik::geometry::line_string<T> const&>(ring));
+        _envelope_impl(ring, bbox);
     }
 
     void operator() (mapnik::geometry::polygon<T> const& poly) const
     {
-        bool first = true;
-        for (auto const& pt : poly.exterior_ring)
-        {
-            if (first && !bbox.valid())
-            {
-                bbox.init(pt.x, pt.y, pt.x, pt.y);
-                first = false;
-            }
-            else
-            {
-                bbox.expand_to_include(pt.x, pt.y);
-            }
-        }
+        _envelope_impl(poly.exterior_ring, bbox);
     }
 
     void operator() (mapnik::geometry::multi_point<T> const& multi_point) const
     {
-        bool first = true;
-        for (auto const& pt : multi_point)
-        {
-            if (first && !bbox.valid())
-            {
-                bbox.init(pt.x, pt.y, pt.x, pt.y);
-                first = false;
-            }
-            else
-            {
-                bbox.expand_to_include(pt.x, pt.y);
-            }
-        }
+        _envelope_impl(multi_point, bbox);
     }
 
     void operator() (mapnik::geometry::multi_line_string<T> const& multi_line) const
@@ -132,6 +96,25 @@ struct geometry_envelope
         for (auto const& geom : collection)
         {
             (*this)(geom);
+        }
+    }
+
+private:
+    template <typename Points>
+    void _envelope_impl(Points const& points, bbox_type & b) const
+    {
+        bool first = true;
+        for (auto const& pt : points)
+        {
+            if (first && !b.valid())
+            {
+                b.init(pt.x, pt.y, pt.x, pt.y);
+                first = false;
+            }
+            else
+            {
+                b.expand_to_include(pt.x, pt.y);
+            }
         }
     }
 };

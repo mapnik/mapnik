@@ -23,8 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_POLYGON_HPP
 #define MAPNIK_GEOMETRY_POLYGON_HPP
 
-// mapnik
-#include <mapnik/geometry/line_string.hpp>
+// geometry
+#include <mapbox/geometry/polygon.hpp>
 
 // stl
 #include <vector>
@@ -32,17 +32,7 @@
 namespace mapnik { namespace geometry {
 
 template <typename T>
-struct linear_ring : line_string<T>
-{
-    using coordinate_type = T;
-    linear_ring() = default;
-    explicit linear_ring(std::size_t size)
-        : line_string<T>(size) {}
-    linear_ring(line_string<T> && other)
-        : line_string<T>(std::move(other)) {}
-    linear_ring(line_string<T> const& other)
-        : line_string<T>(other) {}
-};
+using linear_ring = mapbox::geometry::linear_ring<T>;
 
 template <typename T>
 using rings_container = std::vector<linear_ring<T>>;
