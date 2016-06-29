@@ -60,23 +60,14 @@ struct move_part
     }
 };
 
-struct set_exterior
-{
-    using result_type = void;
-    template <typename Polygon, typename Ring>
-    void operator() (Polygon & poly, Ring && ring) const
-    {
-        poly.set_exterior_ring(std::move(ring));
-    }
-};
 
-struct add_hole
+struct set_ring
 {
     using result_type = void;
     template <typename Polygon, typename Ring>
     void operator() (Polygon & poly, Ring && ring) const
     {
-        poly.add_hole(std::move(ring));
+        poly.push_back(std::move(ring));
     }
 };
 
@@ -109,8 +100,7 @@ struct wkt_grammar : qi::grammar<Iterator, void(mapnik::geometry::geometry<doubl
     qi::rule<Iterator,ascii::space_type> empty_set;
     boost::phoenix::function<detail::assign> assign;
     boost::phoenix::function<detail::move_part> move_part;
-    boost::phoenix::function<detail::set_exterior> set_exterior;
-    boost::phoenix::function<detail::add_hole> add_hole;
+    boost::phoenix::function<detail::set_ring> set_ring;
 };
 
 }}

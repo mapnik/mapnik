@@ -41,13 +41,13 @@ SECTION("multi-polygon") {
     ring.emplace_back(1, 1);
     ring.emplace_back(0, 1);
     ring.emplace_back(0, 0);
-    poly.set_exterior_ring(std::move(ring));
+    poly.push_back(std::move(ring));
     geom.emplace_back(std::move(poly));
     geom.emplace_back();
-
+    //geom.back().emplace_back(); //add an empty exterior ring
     REQUIRE(geom.size() == 2);
     geom_type geom2 = mapnik::geometry::remove_empty(geom);
     REQUIRE(geom2.size() == 1);
-    REQUIRE(geom2[0].exterior_ring.size() == 5);
+    REQUIRE(geom2.front().front().size() == 5);
 }
 }

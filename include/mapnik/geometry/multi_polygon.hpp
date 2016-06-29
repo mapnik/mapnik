@@ -23,18 +23,13 @@
 #ifndef MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
 #define MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
 
-// mapnik
-#include <mapnik/geometry/polygon.hpp>
-// stl
-#include <vector>
+// geometry
+#include <mapbox/geometry/multi_polygon.hpp>
 
 namespace mapnik { namespace geometry {
 
-template <typename T, template <typename...> class Cont = std::vector>
-struct multi_polygon : Cont<polygon<T>>
-{
-    using coordinate_type = T;
-};
+template <typename T>
+using multi_polygon = mapbox::geometry::multi_polygon<T>;
 
 }}
 

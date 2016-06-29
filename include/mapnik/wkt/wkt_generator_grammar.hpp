@@ -115,8 +115,8 @@ struct wkt_generator_grammar :
     karma::rule<OutputIterator, geometry::line_string<coordinate_type> const&()> linestring_coord;
     karma::rule<OutputIterator, geometry::geometry<coordinate_type> const&()> polygon;
     karma::rule<OutputIterator, geometry::polygon<coordinate_type> const&()> polygon_coord;
-    karma::rule<OutputIterator, geometry::linear_ring<coordinate_type> const&()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<coordinate_type> > const&()> interior_ring_coord;
+    karma::rule<OutputIterator, geometry::linear_ring<coordinate_type> const&()> ring;
+    //karma::rule<OutputIterator, std::vector<geometry::linear_ring<coordinate_type> > const&()> interior_ring_coord;
     karma::rule<OutputIterator, geometry::geometry<coordinate_type> const& ()> multi_point;
     karma::rule<OutputIterator, geometry::multi_point<coordinate_type> const& ()> multi_point_coord;
     karma::rule<OutputIterator, geometry::geometry<coordinate_type> const& ()> multi_linestring;

@@ -67,7 +67,7 @@ struct geometry_envelope
 
     void operator() (mapnik::geometry::polygon<T> const& poly) const
     {
-        _envelope_impl(poly.exterior_ring, bbox);
+        if (!poly.empty()) _envelope_impl(poly[0], bbox);
     }
 
     void operator() (mapnik::geometry::multi_point<T> const& multi_point) const

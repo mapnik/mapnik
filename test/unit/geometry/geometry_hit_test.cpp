@@ -50,7 +50,7 @@ SECTION("hit_test_filter - double") {
         ring.emplace_back(-10,10);
         ring.emplace_back(0,10);
         ring.emplace_back(0,0);
-        poly.set_exterior_ring(std::move(ring));
+        poly.push_back(std::move(ring));
         geometry<double> geom(poly);
         REQUIRE( mapnik::hit_test(geom,-5,5,0) );
 
@@ -82,14 +82,14 @@ SECTION("hit_test_filter - double") {
         ring.emplace_back(-10,10);
         ring.emplace_back(0,10);
         ring.emplace_back(0,0);
-        poly.set_exterior_ring(std::move(ring));
+        poly.push_back(std::move(ring));
         linear_ring<double> hole;
         hole.emplace_back(-7,7);
         hole.emplace_back(-7,3);
         hole.emplace_back(-3,3);
         hole.emplace_back(-3,7);
         hole.emplace_back(-7,7);
-        poly.add_hole(std::move(hole));
+        poly.push_back(std::move(hole));
         geometry<double> geom(poly);
         REQUIRE( !mapnik::hit_test(geom,-5,5,0) );
         // add another hole inside the first hole
@@ -100,7 +100,7 @@ SECTION("hit_test_filter - double") {
         fill.emplace_back(-4,6);
         fill.emplace_back(-4,4);
         fill.emplace_back(-6,4);
-        poly.add_hole(std::move(fill));
+        poly.push_back(std::move(fill));
         REQUIRE( mapnik::hit_test(geometry<double>(poly),-5,5,0) );
     }
 }

@@ -67,31 +67,14 @@ struct geometry_to_path
     // polygon
     void operator() (polygon<T> const& poly) const
     {
-        // exterior
-        bool first = true;
-        for (auto const& pt : poly.exterior_ring)
+        // rings: exterior *interior
+        for (auto const& ring : poly)
         {
-            if (first)
-            {
-                p_.move_to(pt.x, pt.y);
-                first=false;
-            }
-            else
-            {
-                p_.line_to(pt.x, pt.y);
-            }
-        }
-        if (!first)
-        {
-            p_.close_path();
-        }
-        // interior
-        for (auto const& ring : poly.interior_rings)
-        {
-            first = true;
+            bool first = true;
             for (auto const& pt : ring)
             {
-                if (first) {
+                if (first)
+                {
                     p_.move_to(pt.x, pt.y);
                     first=false;
                 }

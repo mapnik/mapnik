@@ -55,7 +55,7 @@ SECTION("polygon") {
     ring.emplace_back(1, 1);
     ring.emplace_back(0, 1);
     ring.emplace_back(0, 0);
-    poly.set_exterior_ring(std::move(ring));
+    poly.push_back(std::move(ring));
 
     mapnik::geometry::point<double> centroid;
     REQUIRE(mapnik::geometry::centroid(poly, centroid));
@@ -67,7 +67,7 @@ SECTION("polygon with empty exterior ring") {
 
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    poly.set_exterior_ring(std::move(ring));
+    poly.push_back(std::move(ring));
 
     mapnik::geometry::point<double> centroid;
     REQUIRE(!mapnik::geometry::centroid(poly, centroid));
@@ -76,6 +76,7 @@ SECTION("polygon with empty exterior ring") {
 SECTION("empty polygon") {
 
     mapnik::geometry::polygon<double> poly;
+    poly.emplace_back();
     mapnik::geometry::point<double> centroid;
     REQUIRE(!mapnik::geometry::centroid(poly, centroid));
 }
@@ -155,7 +156,7 @@ SECTION("multi-polygon") {
         ring.emplace_back(1, 1);
         ring.emplace_back(0, 1);
         ring.emplace_back(0, 0);
-        poly.set_exterior_ring(std::move(ring));
+        poly.push_back(std::move(ring));
         geom.emplace_back(std::move(poly));
     }
     {
@@ -166,7 +167,7 @@ SECTION("multi-polygon") {
         ring.emplace_back(2, 2);
         ring.emplace_back(1, 2);
         ring.emplace_back(1, 1);
-        poly.set_exterior_ring(std::move(ring));
+        poly.push_back(std::move(ring));
         geom.emplace_back(std::move(poly));
     }
 
@@ -186,10 +187,10 @@ SECTION("multi-polygon: one component empty") {
     ring.emplace_back(1, 1);
     ring.emplace_back(0, 1);
     ring.emplace_back(0, 0);
-    poly.set_exterior_ring(std::move(ring));
+    poly.push_back(std::move(ring));
     geom.emplace_back(std::move(poly));
     geom.emplace_back();
-
+    geom.back().emplace_back();
     mapnik::geometry::point<double> centroid;
     REQUIRE(mapnik::geometry::centroid(geom, centroid));
     REQUIRE(centroid.x == 0.5);

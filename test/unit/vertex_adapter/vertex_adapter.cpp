@@ -7,10 +7,11 @@ TEST_CASE("vertex_adapters") {
 
 SECTION("polygon") {
     mapnik::geometry::polygon<double> g;
-    g.exterior_ring.emplace_back(1,1);
-    g.exterior_ring.emplace_back(2,2);
-    g.exterior_ring.emplace_back(100,100);
-    g.exterior_ring.emplace_back(1,1);
+    g.emplace_back();
+    g.back().emplace_back(1,1);
+    g.back().emplace_back(2,2);
+    g.back().emplace_back(100,100);
+    g.back().emplace_back(1,1);
 
     mapnik::geometry::polygon_vertex_adapter<double> va(g);
     double x,y;
@@ -46,11 +47,12 @@ SECTION("polygon") {
 
 SECTION("polygon with hole") {
     mapnik::geometry::polygon<double> g;
-    g.exterior_ring.emplace_back(0,0);
-    g.exterior_ring.emplace_back(-10,0);
-    g.exterior_ring.emplace_back(-10,10);
-    g.exterior_ring.emplace_back(0,10);
-    g.exterior_ring.emplace_back(0,0);
+    g.emplace_back();
+    g.back().emplace_back(0,0);
+    g.back().emplace_back(-10,0);
+    g.back().emplace_back(-10,10);
+    g.back().emplace_back(0,10);
+    g.back().emplace_back(0,0);
     std::vector<mapnik::geometry::linear_ring<double> > interior_rings;
     mapnik::geometry::linear_ring<double> hole;
     hole.emplace_back(-7,7);
@@ -58,7 +60,7 @@ SECTION("polygon with hole") {
     hole.emplace_back(-3,3);
     hole.emplace_back(-3,7);
     hole.emplace_back(-7,7);
-    g.add_hole(std::move(hole));
+    g.push_back(std::move(hole));
 
     mapnik::geometry::linear_ring<double> hole_in_hole;
     hole_in_hole.emplace_back(-6,4);
@@ -66,7 +68,7 @@ SECTION("polygon with hole") {
     hole_in_hole.emplace_back(-4,6);
     hole_in_hole.emplace_back(-4,4);
     hole_in_hole.emplace_back(-6,4);
-    g.add_hole(std::move(hole_in_hole));
+    g.push_back(std::move(hole_in_hole));
 
     mapnik::geometry::polygon_vertex_adapter<double> va(g);
     double x,y;
@@ -99,7 +101,7 @@ SECTION("polygon with hole") {
     REQUIRE( y == 0 );
 
     // exterior ring via ring_vertex_adapter
-    mapnik::geometry::ring_vertex_adapter<double> va2(g.exterior_ring);
+    mapnik::geometry::ring_vertex_adapter<double> va2(g.front());
     cmd = va2.vertex(&x,&y);
     REQUIRE( cmd == mapnik::SEG_MOVETO );
     REQUIRE( x == 0 );

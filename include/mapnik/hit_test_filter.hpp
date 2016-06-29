@@ -89,41 +89,48 @@ struct hit_test_visitor
         }
         return false;
     }
-    bool operator() (geometry::polygon<double> const& geom) const
+    bool operator() (geometry::polygon<double> const& poly) const
     {
-        auto const& exterior = geom.exterior_ring;
-        std::size_t num_points = exterior.size();
-        if (num_points < 4) return false;
-        bool inside = false;
-        for (std::size_t i = 1; i < num_points; ++i)
-        {
-            auto const& pt0 = exterior[i-1];
-            auto const& pt1 = exterior[i];
+        //auto const& exterior = geom.exterior_ring;
+        //std::size_t num_points = exterior.size();
+        //if (num_points < 4) return false;
+
+        //for (std::size_t i = 1; i < num_points; ++i)
+        //{
+        //   auto const& pt0 = exterior[i-1];
+        //   auto const& pt1 = exterior[i];
             // todo - account for tolerance
-            if (pip(pt0.x,pt0.y,pt1.x,pt1.y,x_,y_))
-            {
-                inside = !inside;
-            }
-        }
-        if (!inside) return false;
-        for (auto const& ring :  geom.interior_rings)
+        //   if (pip(pt0.x,pt0.y,pt1.x,pt1.y,x_,y_))
+        //   {
+        //       inside = !inside;
+        //   }
+        //}
+        //if (!inside) return false;
+
+        //// FIXME !!!
+        bool inside = false;
+        bool exterior = true;
+        for (auto const& ring :  poly)
         {
-            std::size_t num_interior_points = ring.size();
-            if (num_interior_points < 4)
+            std::size_t num_points = ring.size();
+            if (num_points < 4)
             {
-                continue;
+                if (exterior) return false;
+                else continue;
             }
-            for (std::size_t j = 1; j < num_interior_points; ++j)
+
+            for (std::size_t j = 1; j < num_points; ++j)
             {
-                auto const& pt0 = ring[j-1];
+                auto const& pt0 = ring[j - 1];
                 auto const& pt1 = ring[j];
-                if (pip(pt0.x,pt0.y,pt1.x,pt1.y,x_,y_))
+                if (pip(pt0.x, pt0.y, pt1.x, pt1.y, x_, y_))
                 {
                     // TODO - account for tolerance
-                    inside=!inside;
+                    inside = !inside;
                 }
             }
         }
+        ////////////////////////////
         return inside;
     }
     bool operator() (geometry::multi_polygon<double> const& geom) const

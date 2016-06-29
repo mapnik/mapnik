@@ -102,18 +102,18 @@ template <typename T>
 polygon_vertex_adapter<T>::polygon_vertex_adapter(polygon<T> const& poly)
     : poly_(poly),
       rings_itr_(0),
-      rings_end_(poly_.interior_rings.size() + 1),
+      rings_end_(poly_.size()),
       current_index_(0),
-      end_index_((rings_itr_ < rings_end_) ? poly_.exterior_ring.size() : 0),
+      end_index_(poly_.empty() ? 0 : poly_[0].size()),
       start_loop_(true) {}
 
 template <typename T>
 void polygon_vertex_adapter<T>::rewind(unsigned) const
 {
     rings_itr_ = 0;
-    rings_end_ = poly_.interior_rings.size() + 1;
+    rings_end_ = poly_.size();
     current_index_ = 0;
-    end_index_ = (rings_itr_ < rings_end_) ? poly_.exterior_ring.size() : 0;
+    end_index_ = poly_.empty() ? 0 : poly_[0].size();
     start_loop_ = true;
 }
 template <typename T>
@@ -125,8 +125,7 @@ unsigned polygon_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type 
     }
     if (current_index_ < end_index_)
     {
-        point<T> const& coord = (rings_itr_ == 0) ?
-            poly_.exterior_ring[current_index_++] : poly_.interior_rings[rings_itr_- 1][current_index_++];
+        point<T> const& coord = poly_[rings_itr_][current_index_++];
         *x = coord.x;
         *y = coord.y;
         if (start_loop_)
@@ -145,8 +144,8 @@ unsigned polygon_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type 
     else if (++rings_itr_ != rings_end_)
     {
         current_index_ = 0;
-        end_index_ = poly_.interior_rings[rings_itr_ - 1].size();
-        point<T> const& coord = poly_.interior_rings[rings_itr_ - 1][current_index_++];
+        end_index_ = poly_[rings_itr_].size();
+        point<T> const& coord = poly_[rings_itr_][current_index_++];
         *x = coord.x;
         *y = coord.y;
         return mapnik::SEG_MOVETO;

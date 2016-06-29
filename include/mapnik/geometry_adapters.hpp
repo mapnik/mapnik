@@ -37,7 +37,7 @@
 // and once we do that the compile time is == to just including boost/geometry.hpp
 #include <boost/geometry.hpp>
 #pragma GCC diagnostic pop
-
+#include <boost/range/iterator_range_core.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
@@ -82,7 +82,9 @@ template <typename CoordinateType>
 inline typename mapnik::geometry::line_string<CoordinateType>::const_iterator
 range_end(mapnik::geometry::line_string<CoordinateType> const& line) {return line.end();}
 
-namespace geometry { namespace traits {
+namespace geometry {
+
+namespace traits {
 
 // register mapnik::box2d<double>
 template<> struct tag<mapnik::box2d<double> > { using type = box_tag; };
@@ -175,13 +177,13 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container const&;
+    using type = boost::iterator_range<typename mapbox::geometry::polygon<CoordinateType>::const_iterator>;
 };
 
 template <typename CoordinateType>
 struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container&;
+    using type = boost::iterator_range<typename mapbox::geometry::polygon<CoordinateType>::iterator>;
 };
 
 // exterior
@@ -190,27 +192,33 @@ struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
 {
     static mapnik::geometry::linear_ring<CoordinateType> & get(mapnik::geometry::polygon<CoordinateType> & p)
     {
-        return p.exterior_ring;
+        if (p.empty()) p.emplace_back();
+        return p.at(0);
     }
 
     static mapnik::geometry::linear_ring<CoordinateType> const& get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return p.exterior_ring;
+        return p.at(0);
     }
 };
 
 template <typename CoordinateType>
 struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 {
-    using holes_type = typename mapnik::geometry::polygon<CoordinateType>::rings_container;
-    static holes_type&  get(mapnik::geometry::polygon<CoordinateType> & p)
+    using ring_iterator = typename mapbox::geometry::polygon<CoordinateType>::iterator;
+    using const_ring_iterator = typename mapbox::geometry::polygon<CoordinateType>::const_iterator;
+    using holes_type = boost::iterator_range<ring_iterator>;
+    using const_holes_type = boost::iterator_range<const_ring_iterator>;
+    static holes_type get(mapnik::geometry::polygon<CoordinateType> & p)
+    //        -> decltype(boost::make_iterator_range(p.begin() + 1, p.end()))
     {
-        return p.interior_rings;
+        return boost::make_iterator_range(p.begin() + 1, p.end());
     }
 
-    static holes_type const& get(mapnik::geometry::polygon<CoordinateType> const& p)
+    static const_holes_type get(mapnik::geometry::polygon<CoordinateType> const& p)
+    //  -> decltype(boost::make_iterator_range(p.begin() + 1, p.end())) const
     {
-        return p.interior_rings;
+        return boost::make_iterator_range(p.begin() + 1, p.end());
     }
 };
 

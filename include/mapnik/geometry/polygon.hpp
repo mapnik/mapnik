@@ -27,13 +27,18 @@
 #include <mapbox/geometry/polygon.hpp>
 
 // stl
-#include <vector>
+//#include <vector>
 
 namespace mapnik { namespace geometry {
 
 template <typename T>
 using linear_ring = mapbox::geometry::linear_ring<T>;
 
+template <typename T>
+using polygon = mapbox::geometry::polygon<T>;
+
+
+/*
 template <typename T>
 using rings_container = std::vector<linear_ring<T>>;
 
@@ -62,6 +67,7 @@ struct polygon
         return 1 + interior_rings.size();
     }
 };
+*/
 
 }}
 

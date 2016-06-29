@@ -406,8 +406,7 @@ struct feature_generator
         {
             std::vector<mapnik::topojson::coordinate> processed_coords;
             mapnik::geometry::polygon<double> polygon;
-            if (poly.rings.size() > 1) polygon.interior_rings.reserve(poly.rings.size() - 1);
-            bool first = true;
+            polygon.reserve(poly.rings.size());
             bool hit = false;
             for (auto const& ring : poly.rings)
             {
@@ -454,15 +453,7 @@ struct feature_generator
                         }
                     }
                 }
-                if (first)
-                {
-                    first = false;
-                    polygon.set_exterior_ring(std::move(linear_ring));
-                }
-                else
-                {
-                    polygon.add_hole(std::move(linear_ring));
-                }
+                polygon.push_back(std::move(linear_ring));
             }
             if (hit)
             {
@@ -485,9 +476,8 @@ struct feature_generator
             bool hit = false;
             for (auto const& poly : multi_poly.polygons)
             {
-                bool first = true;
                 mapnik::geometry::polygon<double> polygon;
-                if (poly.size() > 1) polygon.interior_rings.reserve(poly.size() - 1);
+                polygon.reserve(poly.size());
 
                 for (auto const& ring : poly)
                 {
@@ -536,15 +526,7 @@ struct feature_generator
                             }
                         }
                     }
-                    if (first)
-                    {
-                        first = false;
-                        polygon.set_exterior_ring(std::move(linear_ring));
-                    }
-                    else
-                    {
-                        polygon.add_hole(std::move(linear_ring));
-                    }
+                    polygon.push_back(std::move(linear_ring));
                 }
                 multi_polygon.push_back(std::move(polygon));
             }

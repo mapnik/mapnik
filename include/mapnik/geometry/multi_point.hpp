@@ -23,25 +23,13 @@
 #ifndef MAPNIK_GEOMETRY_MULTI_POINT_HPP
 #define MAPNIK_GEOMETRY_MULTI_POINT_HPP
 
-// mapnik
-#include <mapnik/geometry/point.hpp>
-// stl
-#include <vector>
+// geometry
+#include <mapbox/geometry/multi_point.hpp>
 
 namespace mapnik { namespace geometry {
 
-template <typename T, template <typename...> class Cont = std::vector>
-struct multi_point : Cont<point<T>>
-{
-    using coordinate_type = T;
-    using point_type = point<coordinate_type>;
-    using container_type = Cont<point_type>;
-    multi_point() = default;
-    explicit multi_point(std::size_t size)
-        : container_type(size) {}
-    inline std::size_t num_points() const { return container_type::size(); }
-    inline void add_coord(T x, T y) { container_type::template emplace_back(x, y);}
-};
+template <typename T>
+using multi_point = mapbox::geometry::multi_point<T>;
 
 }}
 

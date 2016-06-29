@@ -47,6 +47,11 @@ struct geometry_is_empty
         return geom.empty();
     }
 
+    bool operator() (mapnik::geometry::linear_ring<T> const& geom) const
+    {
+        return geom.empty();
+    }
+
     bool operator() (mapnik::geometry::polygon<T> const& geom) const
     {
         return geom.empty();
@@ -103,6 +108,11 @@ struct geometry_has_empty
         return false;
     }
 
+    bool operator() (mapnik::geometry::linear_ring<T> const&) const
+    {
+        return false;
+    }
+
     bool operator() (mapnik::geometry::polygon<T> const&) const
     {
         return false;
@@ -145,7 +155,7 @@ private:
     template <typename U>
     bool test_multigeometry(U const & geom) const
     {
-        for (auto const & item : geom)
+        for (auto const& item : geom)
         {
             if (item.empty())
             {
