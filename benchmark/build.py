@@ -35,7 +35,7 @@ benchmarks = [
     #"test_to_double.cpp",
     #"test_to_int.cpp",
     #"test_utf_encoding.cpp"
-    #"test_polygon_clipping.cpp",
+    "test_polygon_clipping.cpp",
     #"test_polygon_clipping_rendering.cpp",
     "test_proj_transform1.cpp",
     "test_expression_parse.cpp",
