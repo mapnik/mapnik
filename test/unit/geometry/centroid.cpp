@@ -177,25 +177,25 @@ SECTION("multi-polygon") {
     REQUIRE(centroid.y == 1);
 }
 
-//SECTION("multi-polygon: one component empty") {
-//
-//    mapnik::geometry::multi_polygon<double> geom;
-//    mapnik::geometry::polygon<double> poly;
-//    mapnik::geometry::linear_ring<double> ring;
-//    ring.emplace_back(0, 0);
-//    ring.emplace_back(1, 0);
-//    ring.emplace_back(1, 1);
-//    ring.emplace_back(0, 1);
-//    ring.emplace_back(0, 0);
-//    poly.push_back(std::move(ring));
-//    geom.emplace_back(std::move(poly));
-//    geom.emplace_back();
-//    geom.back().emplace_back();
-//    mapnik::geometry::point<double> centroid;
-//    REQUIRE(mapnik::geometry::centroid(geom, centroid));
-//    REQUIRE(centroid.x == 0.5);
-//    REQUIRE(centroid.y == 0.5);
-//}
+SECTION("multi-polygon: one component empty") {
+
+   mapnik::geometry::multi_polygon<double> geom;
+   mapnik::geometry::polygon<double> poly;
+   mapnik::geometry::linear_ring<double> ring;
+   ring.emplace_back(0, 0);
+   ring.emplace_back(1, 0);
+   ring.emplace_back(1, 1);
+   ring.emplace_back(0, 1);
+   ring.emplace_back(0, 0);
+   poly.push_back(std::move(ring));
+   geom.emplace_back(std::move(poly));
+   geom.emplace_back();
+   geom.back().emplace_back();
+   mapnik::geometry::point<double> centroid;
+   REQUIRE(mapnik::geometry::centroid(geom, centroid));
+   REQUIRE(centroid.x == 0.5);
+   REQUIRE(centroid.y == 0.5);
+}
 
 SECTION("empty multi-polygon") {
 
