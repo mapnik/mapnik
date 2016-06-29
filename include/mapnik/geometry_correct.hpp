@@ -60,13 +60,13 @@ struct geometry_correct
     template <typename T>
     result_type operator() (polygon<T> & poly) const
     {
-        boost::geometry::correct(poly);
+        if (!poly.empty()) boost::geometry::correct(poly);
     }
 
     template <typename T>
     result_type operator() (multi_polygon<T> & multi_poly) const
     {
-        boost::geometry::correct(multi_poly);
+        if (!multi_poly.empty()) boost::geometry::correct(multi_poly);
     }
 
     template <typename T>
