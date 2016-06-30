@@ -193,7 +193,6 @@ struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
     static mapnik::geometry::linear_ring<CoordinateType> & get(mapnik::geometry::polygon<CoordinateType> & p)
     {
         if (p.empty()) {
-            abort();
             throw std::runtime_error("ring must be initialized 1");
         }
         return p[0];
@@ -202,7 +201,6 @@ struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
     static mapnik::geometry::linear_ring<CoordinateType> const& get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
         if (p.empty()) {
-            abort();
             throw std::runtime_error("ring must be initialized 2");
         }
         return p[0];
