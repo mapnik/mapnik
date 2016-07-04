@@ -177,7 +177,7 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = boost::iterator_range<typename mapbox::geometry::polygon<CoordinateType>::const_iterator>;
+    using type = boost::iterator_range<typename mapbox::geometry::polygon<CoordinateType>::const_iterator> const;
 };
 
 template <typename CoordinateType>
@@ -190,13 +190,15 @@ struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
 {
-    static mapnik::geometry::linear_ring<CoordinateType> & get(mapnik::geometry::polygon<CoordinateType> & p)
+    using ring_const_type   = typename ring_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using ring_mutable_type = typename ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    static ring_mutable_type get(mapnik::geometry::polygon<CoordinateType> & p)
     {
         if (p.empty()) throw std::runtime_error("ring must be initialized 1");
         return p[0];
     }
 
-    static mapnik::geometry::linear_ring<CoordinateType> const& get(mapnik::geometry::polygon<CoordinateType> const& p)
+    static ring_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
         if (p.empty()) throw std::runtime_error("ring must be initialized 2");
         return p[0];
@@ -206,18 +208,19 @@ struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 {
-    using const_ring_iterator = typename mapbox::geometry::polygon<CoordinateType>::const_iterator;
-    using interior_type = mapnik::detail::polygon_interior<CoordinateType>;
-    using const_interior_type = boost::iterator_range<const_ring_iterator>;
-    static interior_type get(mapnik::geometry::polygon<CoordinateType> & p)
+    using interior_const_type = typename interior_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using interior_mutable_type = typename interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+
+    static interior_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
+    {
+        return boost::make_iterator_range(p.begin() + 1, p.end());
+    }
+
+    static interior_mutable_type get(mapnik::geometry::polygon<CoordinateType>& p)
     {
         return mapnik::detail::polygon_interior<CoordinateType>(p);
     }
 
-    static const_interior_type get(mapnik::geometry::polygon<CoordinateType> const& p)
-    {
-        return boost::make_iterator_range(p.begin() + 1, p.end());
-    }
 };
 
 }}}
