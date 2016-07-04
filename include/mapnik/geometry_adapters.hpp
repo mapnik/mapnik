@@ -183,7 +183,6 @@ struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    //using type = boost::iterator_range<typename mapbox::geometry::polygon<CoordinateType>::iterator>;
     using type = mapnik::detail::polygon_interior<CoordinateType>;
 };
 
