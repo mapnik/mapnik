@@ -130,14 +130,12 @@ SECTION("multi-polygon") {
         REQUIRE(!mapnik::geometry::has_empty(geom));
     }
     {
-        /*** FIXME
         mapnik::geometry::multi_polygon<double> geom;
         mapnik::geometry::polygon<double> poly;
         mapnik::geometry::linear_ring<double> ring;
         poly.push_back(std::move(ring));
         geom.emplace_back(std::move(poly));
         REQUIRE(mapnik::geometry::has_empty(geom));
-        ***/
     }
     {
         mapnik::geometry::multi_polygon<double> geom;
