@@ -123,14 +123,25 @@ struct geometry_has_empty
         return false;
     }
 
-    bool operator() (mapnik::geometry::multi_line_string<T> const& geom) const
+    bool operator() (mapnik::geometry::multi_line_string<T> const& multi_line) const
     {
-        return test_multigeometry(geom);
+        for (auto const& line : multi_line)
+        {
+            if (line.empty()) return true;
+        }
+        return false;
     }
 
-    bool operator() (mapnik::geometry::multi_polygon<T> const& geom) const
+    bool operator() (mapnik::geometry::multi_polygon<T> const& multi_poly) const
     {
-        return test_multigeometry(geom);
+        for (auto const& poly : multi_poly)
+        {
+            if (poly.empty() || poly.front().empty()) // no-rings OR exterioir is empty
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     bool operator() (mapnik::geometry::geometry_collection<T> const& geom) const
@@ -149,20 +160,6 @@ struct geometry_has_empty
     bool operator() (U const&) const
     {
         return true;
-    }
-
-private:
-    template <typename U>
-    bool test_multigeometry(U const & geom) const
-    {
-        for (auto const& item : geom)
-        {
-            if (item.empty())
-            {
-                return true;
-            }
-        }
-        return false;
     }
 };
 
