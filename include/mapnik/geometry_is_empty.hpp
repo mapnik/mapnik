@@ -54,7 +54,7 @@ struct geometry_is_empty
 
     bool operator() (mapnik::geometry::polygon<T> const& geom) const
     {
-        return geom.empty();
+        return geom.empty() || geom.front().empty();
     }
 
     bool operator() (mapnik::geometry::multi_point<T> const& geom) const
