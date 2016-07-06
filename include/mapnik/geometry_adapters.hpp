@@ -41,7 +41,6 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/polygon_interior.hpp>
 #include <cstdint>
 
 // register point
@@ -177,13 +176,13 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = boost::iterator_range<typename mapbox::geometry::polygon<CoordinateType>::const_iterator> const;
+    using type = typename mapnik::geometry::polygon<CoordinateType>::interior_rings const&;
 };
 
 template <typename CoordinateType>
 struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = mapnik::detail::polygon_interior<CoordinateType>;
+    using type = typename mapnik::geometry::polygon<CoordinateType>::interior_rings& ;
 };
 
 // exterior
@@ -213,14 +212,13 @@ struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 
     static interior_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return boost::make_iterator_range(p.begin() + 1, p.end());
+        return p.interior();
     }
 
     static interior_mutable_type get(mapnik::geometry::polygon<CoordinateType>& p)
     {
-        return mapnik::detail::polygon_interior<CoordinateType>(p);
+        return p.interior();
     }
-
 };
 
 }}}

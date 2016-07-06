@@ -24,12 +24,19 @@
 #define MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
 
 // geometry
-#include <mapbox/geometry/multi_polygon.hpp>
+#include <mapnik/geometry/polygon.hpp>
 
 namespace mapnik { namespace geometry {
 
-template <typename T>
-using multi_polygon = mapbox::geometry::multi_polygon<T>;
+template <typename T, template <typename...> class Cont = std::vector>
+struct multi_polygon : Cont<polygon<T>>
+{
+    using coordinate_type = T;
+    using polygon_type = polygon<T>;
+    using container_type = Cont<polygon_type>;
+    using container_type::container_type;
+};
+
 
 }}
 
