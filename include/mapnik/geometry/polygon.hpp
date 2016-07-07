@@ -88,6 +88,10 @@ struct polygon : mapbox::geometry::polygon<T>
         //this->resize(1); // explicit exterior ring ?
     }
 
+    polygon(polygon && other)
+        : base_type(std::move(other)),
+          interior_(*this) {}
+
     polygon(polygon const& other)
         : base_type(other),
           interior_(*this) {}
