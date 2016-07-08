@@ -145,7 +145,24 @@ public:
 
     bool isOK() const
     {
-        return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
+        if (closed_ || (PQstatus(conn_) != CONNECTION_OK))
+        {
+            return false;
+        }
+        std::string pingcmd("SELECT 1");
+        PGresult *res = PQexec(conn_, pingcmd.c_str());
+        if (!res)
+        {
+            return false;
+        }
+        ExecStatusType status = PQresultStatus(res);
+        PQclear(res);
+        res = NULL;
+        if (status != PGRES_TUPLES_OK)
+        {
+            return false;
+        }
+        return true;
     }
 
     void close()
