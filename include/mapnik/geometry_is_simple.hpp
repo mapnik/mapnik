@@ -81,7 +81,7 @@ struct geometry_is_simple
 
     result_type operator() (polygon<T> const& poly) const
     {
-        return boost::geometry::is_simple(poly);
+        return poly.empty() ? true : boost::geometry::is_simple(poly);
     }
 
     result_type operator() (multi_point<T> const& multi_pt) const
