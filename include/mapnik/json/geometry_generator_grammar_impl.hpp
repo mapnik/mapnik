@@ -98,7 +98,7 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
         ;
     linestring_coord = point_coord % lit(',')
         ;
-    linearring_coord = linestring.alias();
+    linearring_coord = point_coord % lit(',')
         ;
     polygon_coord = (lit('[') << linearring_coord << lit(']')) % lit(',')
         ;
