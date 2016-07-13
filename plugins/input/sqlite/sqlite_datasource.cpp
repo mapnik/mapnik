@@ -551,7 +551,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
                                                      using_subquery_);
     }
 
-    return featureset_ptr();
+    return mapnik::make_empty_featureset();
 }
 
 featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -631,5 +631,5 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
                                                      using_subquery_);
     }
 
-    return featureset_ptr();
+    return mapnik::make_empty_featureset();
 }
