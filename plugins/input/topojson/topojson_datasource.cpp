@@ -284,7 +284,7 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
         }
     }
     // otherwise return an empty featureset pointer
-    return mapnik::featureset_ptr();
+    return mapnik::make_empty_featureset();
 }
 
 mapnik::featureset_ptr topojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const

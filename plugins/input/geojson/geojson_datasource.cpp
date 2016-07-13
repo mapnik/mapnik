@@ -587,8 +587,8 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
         }
 
     }
-    // otherwise return an empty featureset pointer
-    return mapnik::featureset_ptr();
+    // otherwise return an empty featureset
+    return mapnik::make_empty_featureset();
 }
 
 mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
