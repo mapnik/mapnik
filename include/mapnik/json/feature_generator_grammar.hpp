@@ -40,26 +40,26 @@ struct is_container<mapnik::feature_impl const> : mpl::false_ {} ;
 template <>
 struct container_iterator<mapnik::feature_impl const>
 {
-    using type = mapnik::feature_kv_iterator2;
+    using type = mapnik::feature_kv_iterator;
 };
 
 template <>
 struct begin_container<mapnik::feature_impl const>
 {
-    static mapnik::feature_kv_iterator2
+    static mapnik::feature_kv_iterator
     call (mapnik::feature_impl const& f)
     {
-        return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.begin(),f.end());
+        return f.begin();
     }
 };
 
 template <>
 struct end_container<mapnik::feature_impl const>
 {
-    static mapnik::feature_kv_iterator2
+    static mapnik::feature_kv_iterator
     call (mapnik::feature_impl const& f)
     {
-        return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.end(),f.end());
+        return f.end();
     }
 };
 
