@@ -39,20 +39,16 @@ feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
 void feature_kv_iterator::increment()
 {
     ++itr_;
-    for ( ;itr_ != f_.ctx_->end(); ++itr_)
-    {
-        if (f_.has_key(itr_->first)) break;
-    }
 }
 
 void feature_kv_iterator::decrement()
 {
-    // no-op //--itr_;
+    // dummy //--itr_;
 }
 
 void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator>::type )
 {
-    // no-op
+    // dummy
 }
 
 bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
