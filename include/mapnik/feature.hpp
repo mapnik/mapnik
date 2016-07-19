@@ -154,7 +154,7 @@ public:
 
     inline bool has_key(context_type::key_type const& key) const
     {
-        return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
+        return (ctx_->mapping_.count(key) == 1);
     }
 
     inline value_type const& get(context_type::key_type const& key) const
