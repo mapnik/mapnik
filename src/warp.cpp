@@ -166,7 +166,7 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
 
 namespace detail {
 
-struct warp_image_visitor
+struct warp_image_visitor : public util::static_visitor<void>
 {
     warp_image_visitor (raster & target_raster, proj_transform const& prj_trans, box2d<double> const& source_ext,
                         double offset_x, double offset_y, unsigned mesh_size,
