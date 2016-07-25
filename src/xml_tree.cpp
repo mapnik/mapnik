@@ -69,6 +69,7 @@ DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
 DEFINE_NAME_TRAIT( int, "int")
+DEFINE_NAME_TRAIT( bool, "bool")
 DEFINE_NAME_TRAIT( boolean_type, "boolean_type")
 #ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
@@ -411,6 +412,7 @@ std::string xml_node::line_to_string() const
 #define compile_get_value(T) template T xml_node::get_value<T>() const
 
 compile_get_opt_attr(boolean_type);
+compile_get_opt_attr(mapnik::value_bool);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(int);
 compile_get_opt_attr(unsigned);

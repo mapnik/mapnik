@@ -51,6 +51,10 @@ struct value_holder : value_holder_base
     value_holder()
         : value_holder_base() {}
 
+    // C-string -> std::string
+    value_holder(char const* str)
+        : value_holder(std::string(str)) {}
+
     // perfect forwarding
     template <typename T>
     value_holder(T && obj)
