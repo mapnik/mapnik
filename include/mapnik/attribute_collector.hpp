@@ -51,7 +51,7 @@
 namespace mapnik {
 
 template <typename Container>
-struct expression_attributes
+struct expression_attributes : public util::static_visitor<void>
 {
     explicit expression_attributes(Container& names)
         : names_(names) {}

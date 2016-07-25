@@ -29,7 +29,7 @@
 namespace mapnik { namespace geometry { namespace detail {
 
 //template <typename Transformer>
-struct geometry_to_path
+struct geometry_to_path : public util::static_visitor<void>
 {
     geometry_to_path(path_type & p)
         : p_(p) {}

@@ -24,7 +24,15 @@
 #define MAPNIK_UTIL_VARIANT_HPP
 
 #include <mapnik/config.hpp>
-#include <mapbox/variant.hpp>
+
+#define USE_BOOST
+
+#ifdef USE_BOOST
+    #include <boost/variant.hpp>
+    #define VARIANT_INLINE inline
+#else
+    #include <mapbox/variant.hpp>
+#endif
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -33,9 +41,67 @@
 
 namespace mapnik { namespace util {
 
+#ifdef USE_BOOST
+
+template <typename T>
+using recursive_wrapper = typename boost::recursive_wrapper<T>;
+
+template<typename... Types>
+using variant = boost::variant<Types...>;
+
+template <typename T>
+using static_visitor = boost::static_visitor<T>;
+
+// unary visitor interface
+// const
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V const& v) -> decltype(boost::apply_visitor(std::forward<F>(f),v))
+{
+    return boost::apply_visitor(std::forward<F>(f),v);
+}
+// non-const
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V & v) -> decltype(boost::apply_visitor(std::forward<F>(f),v))
+{
+    return boost::apply_visitor(std::forward<F>(f),v);
+}
+
+// binary visitor interface
+// const
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V const& v0, V const& v1) -> decltype(boost::apply_visitor(std::forward<F>(f), v0, v1))
+{
+    return boost::apply_visitor(std::forward<F>(f), v0, v1);
+}
+
+// non-const
+template <typename F, typename V>
+auto VARIANT_INLINE static apply_visitor(F && f, V & v0, V & v1) -> decltype(boost::apply_visitor(std::forward<F>(f), v0, v1))
+{
+    return boost::apply_visitor(std::forward<F>(f), v0, v1);
+}
+
+// getter interface
+
+template <typename ResultType, typename T>
+auto get(T & var)->decltype(boost::get<ResultType>(var))
+{
+    return boost::get<ResultType>(var);
+}
+
+template <typename ResultType, typename T>
+auto get(T const& var)->decltype(boost::get<ResultType>(var))
+{
+    return boost::get<ResultType>(var);
+}
+
+#else
+
 template <typename T>
 using recursive_wrapper = typename mapbox::util::recursive_wrapper<T>;
 
+template <typename T>
+using static_visitor = mapbox::util::static_visitor<T>;
 
 template<typename... Types>
 class variant : public mapbox::util::variant<Types...>
@@ -79,16 +145,21 @@ auto VARIANT_INLINE static apply_visitor(F && f, V & v0, V & v1) -> decltype(V::
 
 // getter interface
 template <typename ResultType, typename T>
-ResultType & get(T & var)
+auto get(T& var)->decltype(var.template get<ResultType>())
 {
     return var.template get<ResultType>();
 }
 
 template <typename ResultType, typename T>
-ResultType const& get(T const& var)
+auto get(T const& var)->decltype(var.template get<ResultType>())
 {
     return var.template get<ResultType>();
 }
+
+#endif
+
+
+
 
 }}
 

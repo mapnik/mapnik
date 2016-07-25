@@ -914,7 +914,7 @@ void apply_filter(Src & src, invert const& /*op*/)
 }
 
 template <typename Src>
-struct filter_visitor
+struct filter_visitor : public util::static_visitor<void>
 {
     filter_visitor(Src & src)
     : src_(src) {}
@@ -928,7 +928,7 @@ struct filter_visitor
     Src & src_;
 };
 
-struct filter_radius_visitor
+struct filter_radius_visitor : public util::static_visitor<void>
 {
     int & radius_;
     filter_radius_visitor(int & radius)

@@ -29,7 +29,7 @@
 
 namespace mapnik { namespace geometry { namespace detail {
 
-struct geometry_type
+struct geometry_type : public util::static_visitor<mapnik::geometry::geometry_types>
 {
     template <typename T>
     mapnik::geometry::geometry_types operator () (T const& geom) const

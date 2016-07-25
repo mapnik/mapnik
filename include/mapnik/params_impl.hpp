@@ -175,7 +175,7 @@ boost::optional<T> param_cast(value_bool const& source)
 } // end namespace detail
 
 template <typename T>
-struct value_extractor_visitor
+struct value_extractor_visitor : public util::static_visitor<void>
 {
 
     value_extractor_visitor(boost::optional<T> & var)

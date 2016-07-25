@@ -191,7 +191,7 @@ inline void clear(transform_node& val)
 
 namespace  {
 
-struct is_null_transform_node
+struct is_null_transform_node : public util::static_visitor<bool>
 {
     bool operator() (value const& val) const
     {

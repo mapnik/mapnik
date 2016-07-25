@@ -98,7 +98,7 @@ enum class property_types : std::uint8_t
 };
 
 template <typename T>
-struct evaluate_path_wrapper
+struct evaluate_path_wrapper : public util::static_visitor<T>
 {
     using result_type = T;
     template <typename T1, typename T2>
@@ -110,7 +110,7 @@ struct evaluate_path_wrapper
 };
 
 template <>
-struct evaluate_path_wrapper<std::string>
+struct evaluate_path_wrapper<std::string> : public util::static_visitor<std::string>
 {
     template <typename T1, typename T2>
     std::string operator() (T1 const& expr, T2 const& feature) const
@@ -339,7 +339,7 @@ struct evaluate_expression_wrapper<mapnik::font_feature_settings>
 };
 
 template <typename T>
-struct extract_value
+struct extract_value : public util::static_visitor<T>
 {
     using result_type = T;
 

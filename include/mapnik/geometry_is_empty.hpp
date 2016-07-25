@@ -29,7 +29,7 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
-struct geometry_is_empty
+struct geometry_is_empty : public util::static_visitor<bool>
 {
     bool operator() (mapnik::geometry::geometry<double> const& geom) const
     {

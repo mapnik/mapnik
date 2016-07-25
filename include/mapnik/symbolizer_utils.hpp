@@ -129,7 +129,7 @@ struct symbolizer_traits<dot_symbolizer>
 // symbolizer name impl
 namespace detail {
 
-struct symbolizer_name_impl
+struct symbolizer_name_impl : public util::static_visitor<std::string>
 {
 public:
     template <typename Symbolizer>

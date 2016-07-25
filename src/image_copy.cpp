@@ -33,7 +33,7 @@ namespace detail
 {
 
 template <typename T0>
-struct visitor_image_copy
+struct visitor_image_copy : public util::static_visitor<T0>
 {
     using dst_type = typename T0::pixel_type;
 
@@ -63,7 +63,7 @@ struct visitor_image_copy
 };
 
 template <typename T0>
-struct visitor_image_copy_so
+struct visitor_image_copy_so : public util::static_visitor<T0>
 {
     using dst_type = typename T0::pixel_type;
 

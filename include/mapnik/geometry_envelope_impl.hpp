@@ -29,7 +29,7 @@ namespace mapnik { namespace geometry {
 namespace detail {
 
 template <typename T>
-struct geometry_envelope
+struct geometry_envelope : public util::static_visitor<void>
 {
     using coord_type = T;
     using bbox_type = box2d<coord_type>;

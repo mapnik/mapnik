@@ -33,7 +33,7 @@
 
 namespace mapnik {
 
-struct property_value_hash_visitor
+struct property_value_hash_visitor : public util::static_visitor<std::size_t>
 {
     std::size_t operator() (color const& val) const
     {

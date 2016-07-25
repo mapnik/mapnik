@@ -123,7 +123,7 @@ inline std::size_t hash_value(value const& val)
 using value = value_adl_barrier::value;
 
 namespace detail {
-struct is_null_visitor
+struct is_null_visitor: public util::static_visitor<bool>
 {
     bool operator()(value const& val) const
     {

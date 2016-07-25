@@ -52,7 +52,7 @@ struct transform_processor
     using transform_type = agg::trans_affine;
 
     template <typename Container>
-    struct attribute_collector
+    struct attribute_collector : public util::static_visitor<void>
     {
         expression_attributes<Container> collect_;
 
@@ -103,7 +103,7 @@ struct transform_processor
         }
     };
 
-    struct node_evaluator
+    struct node_evaluator : public util::static_visitor<void>
     {
         node_evaluator(transform_type& tr,
                        feature_type const& feat,

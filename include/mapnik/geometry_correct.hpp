@@ -38,7 +38,7 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
-struct geometry_correct
+struct geometry_correct : public util::static_visitor<void>
 {
     using result_type = void;
 

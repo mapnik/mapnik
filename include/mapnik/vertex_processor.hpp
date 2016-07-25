@@ -28,7 +28,7 @@
 namespace mapnik { namespace geometry {
 
 template <typename T>
-struct vertex_processor
+struct vertex_processor : public util::static_visitor<void>
 {
     using processor_type = T;
     vertex_processor(processor_type& proc)

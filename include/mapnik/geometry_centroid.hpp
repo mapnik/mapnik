@@ -34,7 +34,7 @@ namespace mapnik { namespace geometry {
 namespace detail {
 
 template <typename T>
-struct geometry_centroid
+struct geometry_centroid : public util::static_visitor<bool>
 {
     using result_type = bool;
 

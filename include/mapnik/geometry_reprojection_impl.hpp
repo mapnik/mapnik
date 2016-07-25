@@ -171,7 +171,7 @@ geometry_collection<T> reproject_internal(geometry_collection<T> const & c, proj
 }
 
 template <typename T>
-struct geom_reproj_copy_visitor
+struct geom_reproj_copy_visitor : public util::static_visitor<geometry<T>>
 {
 
     geom_reproj_copy_visitor(proj_transform const & proj_trans, unsigned int & n_err)
@@ -278,7 +278,8 @@ T reproject_copy(T const& geom, projection const& source, projection const& dest
 
 namespace detail {
 
-struct geom_reproj_visitor {
+struct geom_reproj_visitor : public util::static_visitor<bool>
+{
 
     geom_reproj_visitor(proj_transform const & proj_trans)
         : proj_trans_(proj_trans) {}

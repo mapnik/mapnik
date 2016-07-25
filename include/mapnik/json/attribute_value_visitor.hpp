@@ -31,7 +31,7 @@
 
 namespace mapnik { namespace json {
 
-struct attribute_value_visitor
+struct attribute_value_visitor : public util::static_visitor<mapnik::value>
 {
 public:
     attribute_value_visitor(mapnik::transcoder const& tr)

@@ -37,7 +37,7 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
-struct geometry_is_valid
+struct geometry_is_valid : public util::static_visitor<bool>
 {
     using result_type = bool;
 

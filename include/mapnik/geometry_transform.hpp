@@ -96,7 +96,7 @@ inline multi_polygon<V> transform_geometry(multi_polygon<T> const& geom, Transfo
 }
 
 template <typename Transformer, typename V>
-struct geometry_transform
+struct geometry_transform : public util::static_visitor<geometry<V>>
 {
     geometry_transform(Transformer const& transformer)
         : transformer_(transformer) {}

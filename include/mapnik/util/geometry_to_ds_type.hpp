@@ -40,7 +40,7 @@ namespace mapnik { namespace util {
 
 namespace detail {
 
-struct datasource_geometry_type
+struct datasource_geometry_type: public util::static_visitor<mapnik::datasource_geometry_t>
 {
     mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_empty const&) const
     {

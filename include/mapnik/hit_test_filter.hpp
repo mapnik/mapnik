@@ -42,7 +42,7 @@ inline bool pip(double x0,
     return ((((y1 <= y) && (y < y0)) || ((y0 <= y) && (y < y1))) && (x < (x0 - x1) * (y - y1) / (y0 - y1) + x1));
 }
 
-struct hit_test_visitor
+struct hit_test_visitor : public util::static_visitor<bool>
 {
     hit_test_visitor(double x, double y, double tol)
      : x_(x),

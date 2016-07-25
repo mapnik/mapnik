@@ -225,9 +225,8 @@ wkb_buffer_ptr multi_point_wkb( geometry::multi_point<double> const& multi_pt, w
 template <typename MultiGeometry>
     wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte_order);
 
-struct geometry_to_wkb
+struct geometry_to_wkb: public util::static_visitor<wkb_buffer_ptr>
 {
-
     using result_type = wkb_buffer_ptr;
 
     geometry_to_wkb(wkbByteOrder byte_order)

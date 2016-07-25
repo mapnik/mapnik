@@ -177,7 +177,7 @@ MAPNIK_DECL void composite(image_gray32f & dst, image_gray32f const& src, compos
 
 namespace detail {
 
-struct composite_visitor
+struct composite_visitor : public util::static_visitor<void>
 {
     composite_visitor(image_any const& src,
                       composite_mode_e mode,

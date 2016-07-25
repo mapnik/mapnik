@@ -302,7 +302,7 @@ inline std::ostream& operator<< (std::ostream& os, colorize_alpha const& filter)
 
 
 template <typename Out>
-struct to_string_visitor
+struct to_string_visitor : public util::static_visitor<void>
 {
     to_string_visitor(Out & out)
     : out_(out) {}

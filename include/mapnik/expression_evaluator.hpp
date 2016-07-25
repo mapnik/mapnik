@@ -35,7 +35,7 @@ namespace mapnik
 {
 
 template <typename T0, typename T1, typename T2>
-struct evaluate
+struct evaluate : public util::static_visitor<T1>
 {
     using feature_type = T0;
     using value_type = T1;

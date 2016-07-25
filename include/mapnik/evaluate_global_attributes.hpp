@@ -39,7 +39,7 @@ namespace mapnik {
 namespace {
 
 template <typename T, typename Attributes>
-struct evaluate_expression
+struct evaluate_expression : public util::static_visitor<T>
 {
     using value_type = T;
 
@@ -133,7 +133,7 @@ struct evaluate_expression
 };
 
 template <typename T>
-struct evaluate_expression<T, boost::none_t>
+struct evaluate_expression<T, boost::none_t> : public util::static_visitor<T>
 {
     using value_type = T;
 
