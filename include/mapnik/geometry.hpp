@@ -145,13 +145,13 @@ template <typename T>
 struct geometry : geometry_base<T>
 {
     using coord_type = T;
+    // FIXMED
+
+    geometry(geometry_empty const&)
+        : geometry_base<T>() {} // empty
 
     geometry()
         : geometry_base<T>() {} // empty
-
-    template <typename G>
-    geometry(G && geom)
-        : geometry_base<T>(std::forward<G>(geom)) {}
 
 };
 
