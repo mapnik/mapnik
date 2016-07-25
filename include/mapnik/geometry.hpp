@@ -148,11 +148,7 @@ struct geometry : geometry_base<T>
 
     geometry()
         : geometry_base<T>() {} // empty
-
-    template <typename G>
-    geometry(G && geom)
-        : geometry_base<T>(std::forward<G>(geom)) {}
-
+    using geometry_base<T>::geometry_base;
 };
 
 template <typename T>
