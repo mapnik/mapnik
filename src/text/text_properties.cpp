@@ -103,9 +103,9 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
     set_property_from_xml<value_double>(expressions.label_position_tolerance, "label-position-tolerance", node);
     set_property_from_xml<value_double>(expressions.minimum_padding, "minimum-padding", node);
     set_property_from_xml<value_double>(expressions.minimum_path_length, "minimum-path-length", node);
-    set_property_from_xml<boolean_type>(expressions.avoid_edges, "avoid-edges", node);
-    set_property_from_xml<boolean_type>(expressions.allow_overlap, "allow-overlap", node);
-    set_property_from_xml<boolean_type>(expressions.largest_bbox_only, "largest-bbox-only", node);
+    set_property_from_xml<value_bool>(expressions.avoid_edges, "avoid-edges", node);
+    set_property_from_xml<value_bool>(expressions.allow_overlap, "allow-overlap", node);
+    set_property_from_xml<value_bool>(expressions.largest_bbox_only, "largest-bbox-only", node);
     set_property_from_xml<value_double>(expressions.max_char_angle_delta, "max-char-angle-delta", node);
     set_property_from_xml<text_upright_e>(expressions.upright, "upright", node);
 }
@@ -215,9 +215,9 @@ void text_layout_properties::from_xml(xml_node const &node, fontset_map const& f
     set_property_from_xml<double>(text_ratio, "text-ratio", node);
     set_property_from_xml<double>(wrap_width, "wrap-width", node);
     set_property_from_xml<std::string>(wrap_char, "wrap-character", node);
-    set_property_from_xml<boolean_type>(wrap_before, "wrap-before", node);
-    set_property_from_xml<boolean_type>(repeat_wrap_char, "repeat-wrap-character", node);
-    set_property_from_xml<boolean_type>(rotate_displacement, "rotate-displacement", node);
+    set_property_from_xml<value_bool>(wrap_before, "wrap-before", node);
+    set_property_from_xml<value_bool>(repeat_wrap_char, "repeat-wrap-character", node);
+    set_property_from_xml<value_bool>(rotate_displacement, "rotate-displacement", node);
     set_property_from_xml<double>(orientation, "orientation", node);
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);

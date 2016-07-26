@@ -479,7 +479,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
         // Finally, add unique metadata to layer descriptor
         mapnik::parameters & extra_params = desc_.get_extra_parameters();
         // explicitly make copies of values due to https://github.com/mapnik/mapnik/issues/2651
-        extra_params["srid"] = srid_;
+        extra_params["srid"] = mapnik::value_integer(srid_);
         if (!key_field_.empty())
         {
             extra_params["key_field"] = key_field_;

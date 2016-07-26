@@ -39,7 +39,7 @@ extern "C"
 {
 #include <png.h>
 }
-
+#include <set>
 #pragma GCC diagnostic pop
 
 #define MAX_OCTREE_LEVELS 4
@@ -515,19 +515,19 @@ void save_as_png8_oct(T1 & file,
     }
 
     //transparency values per palette index
-    std::vector<unsigned> alphaTable;
-    //alphaTable.resize(palette.size());//allow semitransparency also in almost opaque range
+    std::vector<unsigned> alpha_table;
+    //alpha_table.resize(palette.size());//allow semitransparency also in almost opaque range
     if (opts.trans_mode != 0)
     {
-        alphaTable.resize(palette.size() - cols[TRANSPARENCY_LEVELS-1]);
+        alpha_table.resize(palette.size() - cols[TRANSPARENCY_LEVELS-1]);
     }
 
     if (palette.size() > 16 )
     {
         // >16 && <=256 colors -> write 8-bit color depth
         image_gray8 reduced_image(width,height);
-        reduce_8(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
-        save_as_png(file,palette,reduced_image,width,height,8,alphaTable,opts);
+        reduce_8(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alpha_table);
+        save_as_png(file,palette,reduced_image,width,height,8,alpha_table,opts);
     }
     else if (palette.size() == 1)
     {
@@ -535,13 +535,13 @@ void save_as_png8_oct(T1 & file,
         unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
         image_gray8 reduced_image(image_width,image_height);
-        reduce_1(image,reduced_image,trees, limits, alphaTable);
+        reduce_1(image,reduced_image,trees, limits, alpha_table);
         if (meanAlpha<255 && cols[0]==0)
         {
-            alphaTable.resize(1);
-            alphaTable[0] = meanAlpha;
+            alpha_table.resize(1);
+            alpha_table[0] = meanAlpha;
         }
-        save_as_png(file,palette,reduced_image,width,height,1,alphaTable,opts);
+        save_as_png(file,palette,reduced_image,width,height,1,alpha_table,opts);
     }
     else
     {
@@ -549,8 +549,8 @@ void save_as_png8_oct(T1 & file,
         unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
         image_gray8 reduced_image(image_width,image_height);
-        reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
-        save_as_png(file,palette,reduced_image,width,height,4,alphaTable,opts);
+        reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alpha_table);
+        save_as_png(file,palette,reduced_image,width,height,4,alpha_table,opts);
     }
 }
 
@@ -560,7 +560,7 @@ void save_as_png8(T1 & file,
                   T2 const& image,
                   T3 const & tree,
                   std::vector<mapnik::rgb> const& palette,
-                  std::vector<unsigned> const& alphaTable,
+                  std::vector<unsigned> const& alpha_table,
                   png_options const& opts)
 {
     unsigned width = image.width();
@@ -579,7 +579,7 @@ void save_as_png8(T1 & file,
                 row_out[x] = tree.quantize(row[x]);
             }
         }
-        save_as_png(file, palette, reduced_image, width, height, 8, alphaTable, opts);
+        save_as_png(file, palette, reduced_image, width, height, 8, alpha_table, opts);
     }
     else if (palette.size() == 1)
     {
@@ -588,7 +588,7 @@ void save_as_png8(T1 & file,
         unsigned image_height = height;
         image_gray8 reduced_image(image_width, image_height);
         reduced_image.set(0);
-        save_as_png(file, palette, reduced_image, width, height, 1, alphaTable, opts);
+        save_as_png(file, palette, reduced_image, width, height, 1, alpha_table, opts);
     }
     else
     {
@@ -612,7 +612,7 @@ void save_as_png8(T1 & file,
                 row_out[x>>1] |= index;
             }
         }
-        save_as_png(file, palette, reduced_image, width, height, 4, alphaTable, opts);
+        save_as_png(file, palette, reduced_image, width, height, 4, alpha_table, opts);
     }
 }
 
@@ -623,6 +623,7 @@ void save_as_png8_hex(T1 & file,
 {
     unsigned width = image.width();
     unsigned height = image.height();
+
     if (width + height > 3) // at least 3 pixels (hextree implementation requirement)
     {
         // structure for color quantization
@@ -647,20 +648,44 @@ void save_as_png8_hex(T1 & file,
         }
 
         //transparency values per palette index
-        std::vector<mapnik::rgba> pal;
-        tree.create_palette(pal);
+        std::vector<mapnik::rgba> rgba_palette;
+        tree.create_palette(rgba_palette);
+        auto size = rgba_palette.size();
         std::vector<mapnik::rgb> palette;
-        std::vector<unsigned> alphaTable;
-        for (unsigned i=0; i<pal.size(); ++i)
+        std::vector<unsigned> alpha_table;
+        palette.reserve(size);
+        alpha_table.reserve(size);
+        for (auto const& c : rgba_palette)
         {
-            palette.push_back(rgb(pal[i].r, pal[i].g, pal[i].b));
-            alphaTable.push_back(pal[i].a);
+            palette.emplace_back(c.r, c.g, c.b);
+            alpha_table.push_back(c.a);
         }
-        save_as_png8<T1, T2, hextree<mapnik::rgba> >(file, image, tree, palette, alphaTable, opts);
+        save_as_png8<T1, T2, hextree<mapnik::rgba> >(file, image, tree, palette, alpha_table, opts);
     }
     else
     {
-        throw std::runtime_error("Can't quantize images with less than 3 pixels");
+
+        std::set<mapnik::rgba> colors;
+        for (unsigned y = 0; y < height; ++y)
+        {
+            typename T2::pixel_type const * row = image.get_row(y);
+
+            for (unsigned x = 0; x < width; ++x)
+            {
+                unsigned val = row[x];
+                colors.emplace(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val));
+            }
+        }
+        std::string str;
+        for (auto c : colors)
+        {
+            str.push_back(c.r);
+            str.push_back(c.g);
+            str.push_back(c.b);
+            str.push_back(c.a);
+        }
+        rgba_palette pal(str, rgba_palette::PALETTE_RGBA);
+        save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alpha_table(), opts);
     }
 }
 
@@ -670,7 +695,7 @@ void save_as_png8_pal(T1 & file,
                       rgba_palette const& pal,
                       png_options const& opts)
 {
-    save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alphaTable(), opts);
+    save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alpha_table(), opts);
 }
 
 }
