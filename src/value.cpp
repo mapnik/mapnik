@@ -673,7 +673,7 @@ struct convert<std::string>
 
     std::string operator()(value_null const&) const
     {
-        return std::string();
+        return std::string("");
     }
 };
 
@@ -708,7 +708,7 @@ struct to_unicode_impl
 
     value_unicode_string operator()(value_null const&) const
     {
-        return value_unicode_string();
+        return value_unicode_string("");
     }
 };
 

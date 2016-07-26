@@ -110,7 +110,7 @@ extract_bounding_box_grammar<Iterator, Boxes, ErrorHandler>::extract_bounding_bo
                                                >> *((json.key_value - lit("\"features\"")) >> lit(','))
                                                >> lit("\"features\"")
                                                >> lit(':'))
-                                          >> lit('[') >> (feature(_r1,_a) % lit(',')) >> lit(']')
+                                          >> lit('[') >> -(feature(_r1,_a) % lit(',')) >> lit(']')
         ;
 
     feature = raw[lit('{')[_a = 1]

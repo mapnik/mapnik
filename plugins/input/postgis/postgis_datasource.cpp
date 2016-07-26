@@ -479,7 +479,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
         // Finally, add unique metadata to layer descriptor
         mapnik::parameters & extra_params = desc_.get_extra_parameters();
         // explicitly make copies of values due to https://github.com/mapnik/mapnik/issues/2651
-        extra_params["srid"] = srid_;
+        extra_params["srid"] = mapnik::value_integer(srid_);
         if (!key_field_.empty())
         {
             extra_params["key_field"] = key_field_;
@@ -942,7 +942,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
     }
 
-    return featureset_ptr();
+    return mapnik::make_empty_featureset();
 }
 
 
@@ -955,7 +955,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return featureset_ptr();
+        if (!conn) return mapnik::make_empty_featureset();
 
         if (conn->isOK())
         {
@@ -1030,7 +1030,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
         }
     }
 
-    return featureset_ptr();
+    return mapnik::make_empty_featureset();
 }
 
 box2d<double> postgis_datasource::envelope() const
