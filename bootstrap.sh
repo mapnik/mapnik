@@ -10,7 +10,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="better-linking"
+MASON_VERSION="b709931"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -29,6 +29,7 @@ function install() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
     if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/${2} ]]; then
         mason install $1 $2
+        mason link $1 $2
         if [[ ${3:-false} != false ]]; then
             LA_FILE=$(mason prefix $1 $2)/lib/$3.la
             if [[ -f ${LA_FILE} ]]; then
@@ -38,7 +39,6 @@ function install() {
             fi
         fi
     fi
-    mason link $1 $2
 }
 
 ICU_VERSION="55.1"
