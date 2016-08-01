@@ -108,6 +108,9 @@ TEST_CASE("expressions")
     TRY_CHECK(eval(" rad_to_deg * atan(1.0) ").to_double() == approx(45.0));
     // exp
     TRY_CHECK(eval(" exp(0.0) ") == 1.0);
+    // log
+    TRY_CHECK(eval(" log(1.0) ") == 0.0);
+    TRY_CHECK(eval(" log(exp(1.0)) ") == 1.0);
     // abs
     TRY_CHECK(eval(" abs(cos(-pi)) ") == 1.0);
     // length (string)
