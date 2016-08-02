@@ -41,8 +41,8 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
-#include <mapnik/image_util.hpp>
 #include <mapnik/image_any.hpp>
+#include <mapnik/make_unique.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -72,7 +72,8 @@ template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       buffers_(),
-      internal_buffers_(),
+      internal_buffers_(m.width(), m.height()),
+      inflated_buffer_(),
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
@@ -85,7 +86,8 @@ template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, attributes const& vars, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       buffers_(),
-      internal_buffers_(),
+      internal_buffers_(req.width(), req.height()),
+      inflated_buffer_(),
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
@@ -99,7 +101,8 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1>
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       buffers_(),
-      internal_buffers_(),
+      internal_buffers_(m.width(), m.height()),
+      inflated_buffer_(),
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
@@ -225,8 +228,7 @@ void agg_renderer<T0,T1>::start_layer_processing(layer const& lay, box2d<double>
 
     if (lay.comp_op() || lay.get_opacity() < 1.0)
     {
-        internal_buffers_.emplace(common_.width_, common_.height_);
-        buffers_.emplace(internal_buffers_.top());
+        buffers_.emplace(internal_buffers_.push());
         set_premultiplied_alpha(buffers_.top().get(), true);
     }
     else
@@ -279,15 +281,24 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             unsigned target_width = common_.width_ + (offset * 2);
             unsigned target_height = common_.height_ + (offset * 2);
             ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
-            internal_buffers_.emplace(target_width, target_height);
+            if (!inflated_buffer_ ||
+                (inflated_buffer_->width() < target_width ||
+                 inflated_buffer_->height() < target_height))
+            {
+                inflated_buffer_ = std::make_unique<buffer_type>(target_width, target_height);
+            }
+            else
+            {
+                mapnik::fill(*inflated_buffer_, 0); // fill with transparent colour
+            }
+            buffers_.emplace(*inflated_buffer_);
         }
         else
         {
-            internal_buffers_.emplace(common_.width_, common_.height_);
+            buffers_.emplace(internal_buffers_.push());
             common_.t_.set_offset(0);
             ras_ptr->clip_box(0,0,common_.width_,common_.height_);
         }
-        buffers_.emplace(internal_buffers_.top());
         set_premultiplied_alpha(buffers_.top().get(), true);
     }
     else
@@ -331,7 +342,10 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
                       -common_.t_.offset(),
                       -common_.t_.offset());
         }
-        internal_buffers_.pop();
+        if (&current_buffer == &internal_buffers_.top())
+        {
+            internal_buffers_.pop();
+        }
     }
     if (st.direct_image_filters().size() > 0)
     {
