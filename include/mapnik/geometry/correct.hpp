@@ -20,58 +20,72 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_REMOVE_EMPTY_HPP
-#define MAPNIK_GEOMETRY_REMOVE_EMPTY_HPP
+#ifndef MAPNIK_GEOMETRY_CORRECT_HPP
+#define MAPNIK_GEOMETRY_CORRECT_HPP
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
+#include <mapnik/util/variant.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/geometry/algorithms/correct.hpp>
+#pragma GCC diagnostic pop
+
+#include <type_traits>
 
 namespace mapnik { namespace geometry {
 
 namespace detail {
 
-struct geometry_remove_empty
+struct geometry_correct
 {
-    mapnik::geometry::multi_line_string<double> operator() (mapnik::geometry::multi_line_string<double> const & geom) const
-    {
-        return remove_empty(geom);
-    }
+    using result_type = void;
 
-    mapnik::geometry::multi_polygon<double> operator() (mapnik::geometry::multi_polygon<double> const & geom) const
+    template <typename T>
+    result_type operator() (geometry<T> & geom) const
     {
-        return remove_empty(geom);
+        mapnik::util::apply_visitor(*this, geom);
     }
 
     template <typename T>
-    T operator() (T const & geom) const
+    result_type operator() (geometry_collection<T> & collection) const
     {
-        return geom;
-    }
-
-private:
-    template <typename T>
-    T remove_empty(T const & geom) const
-    {
-        T new_geom;
-        for (auto const & g : geom)
+        for (auto & geom : collection)
         {
-            if (!g.empty())
-            {
-                new_geom.emplace_back(g);
-            }
+            (*this)(geom);
         }
-        return new_geom;
     }
+
+    template <typename T>
+    result_type operator() (polygon<T> & poly) const
+    {
+        boost::geometry::correct(poly);
+    }
+
+    template <typename T>
+    result_type operator() (multi_polygon<T> & multi_poly) const
+    {
+        boost::geometry::correct(multi_poly);
+    }
+
+    template <typename T>
+    result_type operator() (T &) const
+    {
+        //no-op
+    }
+
 };
 
 }
 
 template <typename GeomType>
-inline GeomType remove_empty(GeomType const& geom)
+inline void correct(GeomType & geom)
 {
-    return detail::geometry_remove_empty()(geom);
+    static_assert(!std::is_const<GeomType>::value,"mapnik::geometry::correct on const& is invalid");
+    detail::geometry_correct()(geom);
 }
 
 }}
 
-#endif // MAPNIK_GEOMETRY_REMOVE_EMPTY_HPP
+#endif // MAPNIK_GEOMETRY_CORRECT_HPP

@@ -27,7 +27,7 @@
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/spatial_index.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 // stl
 #include <string>
 #include <vector>

@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/conversions.hpp>

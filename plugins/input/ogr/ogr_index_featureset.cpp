@@ -30,7 +30,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 // boost
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)

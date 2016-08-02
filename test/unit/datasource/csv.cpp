@@ -28,8 +28,8 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_types.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>

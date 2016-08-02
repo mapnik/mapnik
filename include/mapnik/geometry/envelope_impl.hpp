@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/box2d.hpp>
 

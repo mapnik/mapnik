@@ -29,7 +29,7 @@
 #if BOOST_VERSION >= 105600
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
 #include <boost/geometry/algorithms/is_simple.hpp>
 
 namespace mapnik { namespace geometry {

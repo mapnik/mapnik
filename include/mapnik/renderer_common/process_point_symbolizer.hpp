@@ -29,9 +29,9 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/geometry_centroid.hpp>
-#include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/centroid.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/geom_util.hpp>
 

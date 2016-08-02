@@ -1,8 +1,7 @@
-
 #include "catch.hpp"
 
 #include <mapnik/vertex_adapters.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 TEST_CASE("vertex_adapters") {
 

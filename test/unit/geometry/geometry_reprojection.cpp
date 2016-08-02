@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 #include "geometry_equal.hpp"
 
@@ -6,7 +5,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/geometry_reprojection.hpp>
+#include <mapnik/geometry/reprojection.hpp>
 
 TEST_CASE("geometry reprojection") {
 

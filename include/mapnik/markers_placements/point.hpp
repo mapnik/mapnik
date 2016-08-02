@@ -24,7 +24,7 @@
 #define MAPNIK_MARKERS_PLACEMENTS_POINT_HPP
 
 #include <mapnik/geom_util.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/markers_placements/basic.hpp>
 
 namespace mapnik {

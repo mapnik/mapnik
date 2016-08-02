@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 #include "geometry_equal.hpp"
 
@@ -6,8 +5,8 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/view_transform.hpp>
-#include <mapnik/geometry_transform.hpp>
-#include <mapnik/geometry_strategy.hpp>
+#include <mapnik/geometry/transform.hpp>
+#include <mapnik/geometry/strategy.hpp>
 #include <mapnik/proj_strategy.hpp>
 #include <mapnik/view_strategy.hpp>
 

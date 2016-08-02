@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/geometry_reprojection.hpp>
-#include <mapnik/geometry_reprojection_impl.hpp>
+#include <mapnik/geometry/reprojection.hpp>
+#include <mapnik/geometry/reprojection_impl.hpp>
 
 namespace mapnik {
 

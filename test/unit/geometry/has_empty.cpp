@@ -1,7 +1,6 @@
-
 #include "catch.hpp"
 
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 
 TEST_CASE("geometry has_empty") {
 
