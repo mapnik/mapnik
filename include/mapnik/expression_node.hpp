@@ -24,7 +24,7 @@
 #define MAPNIK_EXPRESSION_NODE_HPP
 
 // mapnik
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/unicode.hpp>

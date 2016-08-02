@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/util/variant.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 // stl
 #include <functional>
 
@@ -35,7 +35,9 @@
 
 #pragma GCC diagnostic pop
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+
+namespace detail {
 
 inline void hash_combine(std::size_t & seed, std::size_t val)
 {
@@ -70,7 +72,7 @@ struct value_hasher
 } // namespace  detail
 
 template <typename T>
-std::size_t mapnik_hash_value(T const& val)
+std::size_t value_hash(T const& val)
 {
     std::size_t seed = 0;
     detail::hash_combine(seed, util::apply_visitor(detail::value_hasher(), val));

@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/symbolizer_keys.hpp>

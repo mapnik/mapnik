@@ -27,7 +27,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/function_call.hpp>
 
 #pragma GCC diagnostic push
