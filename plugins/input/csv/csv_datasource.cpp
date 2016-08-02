@@ -38,7 +38,7 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/fs.hpp>

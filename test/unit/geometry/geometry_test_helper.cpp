@@ -1,6 +1,6 @@
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_envelope.hpp>
-#include <mapnik/geometry_envelope_impl.hpp>
+#include <mapnik/geometry/envelope.hpp>
+#include <mapnik/geometry/envelope_impl.hpp>
 
 
 namespace mapnik { namespace geometry {

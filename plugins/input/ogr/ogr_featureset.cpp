@@ -31,7 +31,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 // ogr
 #include "ogr_featureset.hpp"

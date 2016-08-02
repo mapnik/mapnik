@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_TRANSFORM_HPP
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
 #include <boost/geometry/algorithms/transform.hpp>
 
 namespace mapnik { namespace geometry { namespace detail {

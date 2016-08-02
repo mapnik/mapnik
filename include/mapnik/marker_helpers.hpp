@@ -25,8 +25,8 @@
 
 #include <mapnik/feature.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_centroid.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/centroid.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/marker.hpp> // for svg_storage_type

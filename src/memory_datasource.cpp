@@ -27,7 +27,7 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/boolean.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 // stl
 #include <algorithm>
@@ -95,7 +95,7 @@ void memory_datasource::push(feature_ptr feature)
             throw std::runtime_error("Can not add a raster feature to a memory datasource that contains vectors");
         }
     }
-    else 
+    else
     {
         if (!type_set_)
         {

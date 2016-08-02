@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/wkt/wkt_grammar.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
+#include <mapnik/geometry/fusion_adapted.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

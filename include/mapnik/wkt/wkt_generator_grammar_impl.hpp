@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
 #include <mapnik/util/spirit_transform_attribute.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
+#include <mapnik/geometry/fusion_adapted.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

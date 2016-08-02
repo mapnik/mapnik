@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 // boost
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

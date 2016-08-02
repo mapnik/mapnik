@@ -24,7 +24,7 @@
 #include "../../plugins/input/csv/csv_getline.hpp"
 #include "../../plugins/input/csv/csv_utils.hpp"
 #include <mapnik/datasource.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)

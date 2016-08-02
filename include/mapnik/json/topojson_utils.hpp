@@ -29,8 +29,8 @@
 #include <mapnik/json/topology.hpp>
 #include <mapnik/json/attribute_value_visitor.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_adapters.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 namespace mapnik { namespace topojson {
 

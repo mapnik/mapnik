@@ -1,7 +1,6 @@
-
 #include "catch.hpp"
 
-#include <mapnik/geometry_centroid.hpp>
+#include <mapnik/geometry/centroid.hpp>
 
 TEST_CASE("geometry centroid") {
 

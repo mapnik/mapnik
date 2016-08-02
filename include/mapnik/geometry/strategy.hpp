@@ -23,20 +23,20 @@
 #ifndef MAPNIK_GEOMETRY_STRATEGY_HPP
 #define MAPNIK_GEOMETRY_STRATEGY_HPP
 
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/util/rounding_cast.hpp>
 
-namespace mapnik { 
+namespace mapnik {
 namespace geometry {
 
 namespace helper
 {
     template <std::size_t... Ts>
     struct index {};
- 
+
     template <std::size_t N, std::size_t... Ts>
     struct gen_seq : gen_seq<N - 1, N - 1, Ts...> {};
- 
+
     template <std::size_t... Ts>
     struct gen_seq<0, Ts...> : index<Ts...> {};
 }
@@ -70,7 +70,7 @@ struct strategy_group
 
     template <typename P1, typename P2, typename T, typename ...Args>
     inline P2 execute(P1 const& p, bool & status, T const& strat, Args const& ... args) const
-    { 
+    {
         return execute<P1,P2>(strat.template execute<P1,P1>(p, status), status, args...);
     }
 
@@ -79,7 +79,7 @@ struct strategy_group
     {
         return strat.template execute<P1,P2>(p, status);
     }
-    
+
 private:
     std::tuple<Strategies const& ...> ops_;
 
@@ -87,7 +87,7 @@ private:
 
 
 // The difference between this strategy group and the previous is that the conversion from P1 to P2 happens
-// in the first strategy rather then the last strategy. 
+// in the first strategy rather then the last strategy.
 template <typename... Strategies>
 struct strategy_group_first
 {
@@ -116,13 +116,13 @@ struct strategy_group_first
 
     template <typename P1, typename P2, typename T, typename ...Args>
     inline P2 execute_first(P1 const& p, bool & status, T const& strat, Args const& ... args) const
-    { 
+    {
         return execute<P2>(strat.template execute<P1,P2>(p, status), status, args...);
     }
 
     template <typename P2, typename T, typename ...Args>
     inline P2 execute(P2 const& p, bool & status, T const& strat, Args const& ... args) const
-    { 
+    {
         return execute<P2>(strat.template execute<P2,P2>(p, status), status, args...);
     }
 
@@ -131,13 +131,13 @@ struct strategy_group_first
     {
         return strat.template execute<P2,P2>(p, status);
     }
-    
+
     template <typename P2>
     inline P2 execute(P2 const& p, bool & status) const
     {
         return p;
     }
-    
+
 private:
     std::tuple<Strategies const& ...> ops_;
 
@@ -151,7 +151,7 @@ struct scale_strategy
     template <typename P1, typename P2>
     inline bool apply(P1 const & p1, P2 & p2) const
     {
-        
+
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
         double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
@@ -159,7 +159,7 @@ struct scale_strategy
         boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
-    
+
     template <typename P1, typename P2>
     inline P2 execute(P1 const& p1, bool & status) const
     {
@@ -181,7 +181,7 @@ struct scale_rounding_strategy
     template <typename P1, typename P2>
     inline bool apply(P1 const & p1, P2 & p2) const
     {
-        
+
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = (boost::geometry::get<0>(p1) * scale_) + offset_;
         double y = (boost::geometry::get<1>(p1) * scale_) + offset_;
@@ -189,7 +189,7 @@ struct scale_rounding_strategy
         boost::geometry::set<1>(p2, static_cast<p2_type>(std::round(y)));
         return true;
     }
-    
+
     template <typename P1, typename P2>
     inline P2 execute(P1 const& p1, bool & status) const
     {
