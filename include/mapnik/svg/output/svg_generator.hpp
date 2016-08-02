@@ -30,7 +30,7 @@
 #include <mapnik/svg/geometry_svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 
 namespace mapnik { namespace svg {

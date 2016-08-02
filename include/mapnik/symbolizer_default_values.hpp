@@ -29,7 +29,7 @@
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <type_traits>
 
 

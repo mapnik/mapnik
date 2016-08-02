@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/expression_node.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 

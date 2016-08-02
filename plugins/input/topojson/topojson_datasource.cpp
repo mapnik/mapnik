@@ -31,7 +31,7 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/json/topojson_grammar.hpp>

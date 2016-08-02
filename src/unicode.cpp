@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 // std
 #include <stdexcept>

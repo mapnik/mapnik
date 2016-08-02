@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/util/conversions.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 #include <cstring>
 #include <algorithm>

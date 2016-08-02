@@ -25,7 +25,7 @@
 //mapnik
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/placements/base.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/pixel_position.hpp>
 
 namespace mapnik {
