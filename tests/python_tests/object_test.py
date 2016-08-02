@@ -378,9 +378,9 @@ def test_map_init_from_string():
       </Layer>
     </Map>'''
 
-    m = mapnik.Map(600, 300)
-    eq_(m.base, '')
-    try:
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
+        m = mapnik.Map(600, 300)
+        eq_(m.base, '')
         mapnik.load_map_from_string(m, map_string)
         eq_(m.base, './')
         mapnik.load_map_from_string(m, map_string, False, "") # this "" will have no effect
@@ -395,10 +395,6 @@ def test_map_init_from_string():
         m.base = 'foo'
         mapnik.load_map_from_string(m, map_string, True, ".")
         eq_(m.base, '.')
-    except RuntimeError, e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(e)
 
 # Color initialization
 @raises(Exception) # Boost.Python.ArgumentError

@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from utilities import execution_path, run_all, datasources_available
 import tempfile
 
 import os, sys, glob, mapnik
-from xml.etree import ElementTree
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -13,19 +12,10 @@ def setup():
     os.chdir(execution_path('.'))
 
 def compare_map(xmlfile):
-    have_inputs = True
     missing_plugins = set()
-    e = ElementTree.parse(xmlfile)
-    data_source_type_params = e.findall(".//Layer/Datasource/Parameter[@name=\"type\"]")
-    if data_source_type_params is not None and len(data_source_type_params) > 0:
-        for p in data_source_type_params:
-            dstype = p.text
-            if dstype not in mapnik.DatasourceCache.plugin_names():
-                have_inputs = False
-                missing_plugins.add(dstype)
-
+    have_inputs = datasources_available(xmlfile, missing_plugins)
     if not have_inputs:
-        print 'Notice: skipping map comparison for %s due to missing input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
+        print 'Notice: skipping map comparison for %s due to unavailable input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
         return False
 
     m = mapnik.Map(256, 256)
@@ -40,10 +30,10 @@ def compare_map(xmlfile):
     mapnik.save_map(m, test_map)
     new_map = mapnik.Map(256, 256)
     mapnik.load_map(new_map, test_map, False, absolute_base)
-    open(test_map2,'w').write(mapnik.save_map_to_string(new_map))
-    diff = ' diff %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
+    open(test_map2, 'w').write(mapnik.save_map_to_string(new_map))
+    diff = ' diff %s %s' % (os.path.abspath(test_map), os.path.abspath(test_map2))
     try:
-        eq_(open(test_map).read(),open(test_map2).read())
+        eq_(open(test_map).read(), open(test_map2).read())
     except AssertionError, e:
         raise AssertionError('serialized map "%s" not the same after being reloaded, \ncompare with command:\n\n$%s' % (xmlfile, diff))
 
