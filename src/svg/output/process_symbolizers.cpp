@@ -33,7 +33,7 @@
 #include <mapnik/symbolizer_dispatch.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/geometry/transform.hpp>
-#include <mapnik/geometry_to_path.hpp>
+#include <mapnik/geometry/to_path.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/safe_cast.hpp>
 // boost
