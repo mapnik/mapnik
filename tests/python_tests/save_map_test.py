@@ -23,7 +23,7 @@ def compare_map(xmlfile):
     missing_plugins = set()
     have_inputs = datasources_available(xmlfile, missing_plugins)
     if not have_inputs:
-        print 'Notice: skipping saved map comparison for %s due to missing input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
+        print 'Notice: skipping saved map comparison for %s due to unavailable input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
         return False
 
     m = mapnik.Map(256, 256)

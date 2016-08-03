@@ -28,46 +28,43 @@ def test_adding_datasource_to_layer():
 
 </Map>
 '''
-    if 'shape' not in mapnik.DatasourceCache.plugin_names():
-        print "skipping test_adding_datasource_to_layer because \"shape\" plugin is not available"
-        return
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
+        m = mapnik.Map(256, 256)
 
-    m = mapnik.Map(256, 256)
+        mapnik.load_map_from_string(m, map_string)
 
-    mapnik.load_map_from_string(m, map_string)
+        # validate it loaded fine
+        eq_(m.layers[0].styles[0], 'world_borders_style')
+        eq_(m.layers[0].styles[1], 'point_style')
+        eq_(len(m.layers), 1)
 
-    # validate it loaded fine
-    eq_(m.layers[0].styles[0], 'world_borders_style')
-    eq_(m.layers[0].styles[1], 'point_style')
-    eq_(len(m.layers), 1)
+        # also assign a variable reference to that layer
+        # below we will test that this variable references
+        # the same object that is attached to the map
+        lyr = m.layers[0]
 
-    # also assign a variable reference to that layer
-    # below we will test that this variable references
-    # the same object that is attached to the map
-    lyr = m.layers[0]
+        # ensure that there was no datasource for the layer...
+        eq_(m.layers[0].datasource, None)
+        eq_(lyr.datasource, None)
 
-    # ensure that there was no datasource for the layer...
-    eq_(m.layers[0].datasource, None)
-    eq_(lyr.datasource, None)
+        # also note that since the srs was black it defaulted to wgs84
+        eq_(m.layers[0].srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        eq_(lyr.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
 
-    # also note that since the srs was black it defaulted to wgs84
-    eq_(m.layers[0].srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-    eq_(lyr.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        # now add a datasource one...
+        ds = mapnik.Shapefile(file='../data/shp/world_merc.shp')
+        m.layers[0].datasource = ds
 
-    # now add a datasource one...
-    ds = mapnik.Shapefile(file='../data/shp/world_merc.shp')
-    m.layers[0].datasource = ds
+        # now ensure it is attached
+        eq_(m.layers[0].datasource.describe()['name'], "shape")
+        eq_(lyr.datasource.describe()['name'], "shape")
 
-    # now ensure it is attached
-    eq_(m.layers[0].datasource.describe()['name'], "shape")
-    eq_(lyr.datasource.describe()['name'], "shape")
+        # and since we have now added a shapefile in spherical mercator, adjust the projection
+        lyr.srs = '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
 
-    # and since we have now added a shapefile in spherical mercator, adjust the projection
-    lyr.srs = '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
-
-    # test that assignment
-    eq_(m.layers[0].srs, '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
-    eq_(lyr.srs, '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
+        # test that assignment
+        eq_(m.layers[0].srs, '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
+        eq_(lyr.srs, '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
 
 if __name__ == "__main__":
     setup()

@@ -48,7 +48,7 @@ def test_good_files():
         if have_inputs:
             good_files.append(xmlfile)
         else:
-            print 'Notice: skipping load_map_test for %s due to missing input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
+            print 'Notice: skipping load_map_test for %s due to unavailable input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
 
     failures = [];
     strict = False
