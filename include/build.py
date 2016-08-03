@@ -38,7 +38,9 @@ subdirs = [
     'text',
     'text/placements',
     'text/formatting',
-    'markers_placements'
+    'markers_placements',
+    'geometry',
+    'value'
     ]
 
 if env['SVG_RENDERER']:
