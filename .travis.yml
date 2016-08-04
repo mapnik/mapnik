@@ -63,7 +63,7 @@ before_script:
  - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
 
 script:
- - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=${DEBUG} DEMO=True BENCHMARK=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
+ - ./configure CXX=$CXX CC=$CC XMLPARSER=$XMLPARSER DEBUG=$DEBUG ENABLE_LOG=$DEBUG PGSQL2SQLITE=True SVG2PNG=True BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
  - make
  - make test-local
  - source localize.sh && make grind
