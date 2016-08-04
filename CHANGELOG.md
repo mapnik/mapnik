@@ -8,7 +8,7 @@ For a complete change history, see the git log.
 
 ## 3.0.12
 
-Released:?????
+Released: xx-xx-xx
 
 (Packaged from xxxxxx)
 
@@ -39,7 +39,7 @@ Released:?????
 
 ## 3.0.11
 
-Released:
+Released: April 1, 2016
 
 (Packaged from 8d9dc27)
 
