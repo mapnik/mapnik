@@ -4,6 +4,7 @@
 #include <mapnik/util/conversions.hpp>
 
 // boost
+#include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
