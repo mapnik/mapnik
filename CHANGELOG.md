@@ -35,7 +35,7 @@ Released: xx-xx-xx
 - Ensure input plugins return `empty_featureset` rather than `nullptr` (feature_ptr())
 - Added support for quantising small (less than 3 pixel) images (ref #3466)
 - Added support for natural logarithm function in expressions (ref #3475)
-
+- Improved logic for derwrmining if certain compiler features are available e.g `inheriting constructors` (MSVC)
 
 ## 3.0.11
 
