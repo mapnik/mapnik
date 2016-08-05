@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from utilities import execution_path, run_all, datasources_available
 import tempfile
 
 import os, sys, glob, mapnik
@@ -19,16 +19,16 @@ def setup():
 def teardown():
     mapnik.logger.set_severity(default_logging_severity)
 
-def compare_map(xml):
+def compare_map(xmlfile):
+    missing_plugins = set()
+    have_inputs = datasources_available(xmlfile, missing_plugins)
+    if not have_inputs:
+        print 'Notice: skipping saved map comparison for %s due to unavailable input plugins: %s' % (os.path.basename(xmlfile), list(missing_plugins))
+        return False
+
     m = mapnik.Map(256, 256)
-    absolute_base = os.path.abspath(os.path.dirname(xml))
-    try:
-        mapnik.load_map(m, xml, True, absolute_base)
-    except RuntimeError, e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(str(e))
-        return
+    absolute_base = os.path.abspath(os.path.dirname(xmlfile))
+    mapnik.load_map(m, xmlfile, True, absolute_base)
     (handle, test_map) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map1-')
     os.close(handle)
     (handle, test_map2) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map2-')
@@ -38,12 +38,12 @@ def compare_map(xml):
     mapnik.save_map(m, test_map)
     new_map = mapnik.Map(256, 256)
     mapnik.load_map(new_map, test_map, True, absolute_base)
-    open(test_map2,'w').write(mapnik.save_map_to_string(new_map))
+    open(test_map2, 'w').write(mapnik.save_map_to_string(new_map))
     diff = ' diff %s %s' % (os.path.abspath(test_map),os.path.abspath(test_map2))
     try:
-        eq_(open(test_map).read(),open(test_map2).read())
+        eq_(open(test_map).read(), open(test_map2).read())
     except AssertionError, e:
-        raise AssertionError('serialized map "%s" not the same after being reloaded, \ncompare with command:\n\n$%s' % (xml,diff))
+        raise AssertionError('serialized map "%s" not the same after being reloaded, \ncompare with command:\n\n$%s' % (xmlfile, diff))
 
     if os.path.exists(test_map):
         os.remove(test_map)
@@ -53,8 +53,6 @@ def compare_map(xml):
 
 def test_compare_map():
     good_maps = glob.glob("../data/good_maps/*.xml")
-    # remove one map that round trips CDATA differently, but this is okay
-    good_maps.remove('../data/good_maps/empty_parameter2.xml')
     for m in good_maps:
         compare_map(m)
 

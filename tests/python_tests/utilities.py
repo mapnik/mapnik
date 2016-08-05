@@ -6,6 +6,7 @@ from nose.tools import assert_almost_equal
 
 import os, sys, inspect, traceback
 import mapnik
+from xml.etree import ElementTree
 
 def execution_path(filename):
     return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
@@ -55,7 +56,7 @@ def get_unique_colors(im):
         for y in range(im.height()):
             pixel = im.get_pixel(x,y)
             if pixel not in pixels:
-                 pixels.append(pixel)
+                pixels.append(pixel)
     pixels = sorted(pixels)
     return map(pixel2rgba,pixels)
 
@@ -94,3 +95,33 @@ def assert_box2d_almost_equal(a, b, msg=None):
     assert_almost_equal(a.maxx, b.maxx, msg=msg)
     assert_almost_equal(a.miny, b.miny, msg=msg)
     assert_almost_equal(a.maxy, b.maxy, msg=msg)
+
+def datasources_available(map_file, missing_datasources=None):
+    '''
+    datasources_available
+
+    Determine whether the map file contains only available data source types.
+
+    @param map_file: path of XML map file
+    @type map_file: string
+
+    @param missing_datasources: collection of data source type names. if there
+                                are unavailable data sources, and a collection
+                                reference is provided, it will be populated with
+                                the names of the unavailable data sources
+    @type missing_datasources: collection reference
+
+    @return: True if all referenced data source types are available,
+             otherwise False
+    '''
+    have_inputs = True
+    map_xml = ElementTree.parse(map_file)
+    data_source_type_params = map_xml.findall(".//Datasource/Parameter[@name=\"type\"]")
+    if data_source_type_params is not None and len(data_source_type_params) > 0:
+        for p in data_source_type_params:
+            dstype = p.text
+            if dstype not in mapnik.DatasourceCache.plugin_names():
+                have_inputs = False
+                if missing_datasources is not None:
+                    missing_datasources.add(dstype)
+    return have_inputs

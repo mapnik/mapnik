@@ -28,15 +28,15 @@ def test_adding_datasource_to_layer():
 
 </Map>
 '''
-    m = mapnik.Map(256, 256)
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
+        m = mapnik.Map(256, 256)
 
-    try:
         mapnik.load_map_from_string(m, map_string)
 
         # validate it loaded fine
-        eq_(m.layers[0].styles[0],'world_borders_style')
-        eq_(m.layers[0].styles[1],'point_style')
-        eq_(len(m.layers),1)
+        eq_(m.layers[0].styles[0], 'world_borders_style')
+        eq_(m.layers[0].styles[1], 'point_style')
+        eq_(len(m.layers), 1)
 
         # also assign a variable reference to that layer
         # below we will test that this variable references
@@ -44,31 +44,27 @@ def test_adding_datasource_to_layer():
         lyr = m.layers[0]
 
         # ensure that there was no datasource for the layer...
-        eq_(m.layers[0].datasource,None)
-        eq_(lyr.datasource,None)
+        eq_(m.layers[0].datasource, None)
+        eq_(lyr.datasource, None)
 
         # also note that since the srs was black it defaulted to wgs84
-        eq_(m.layers[0].srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        eq_(lyr.srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        eq_(m.layers[0].srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        eq_(lyr.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
 
         # now add a datasource one...
         ds = mapnik.Shapefile(file='../data/shp/world_merc.shp')
         m.layers[0].datasource = ds
 
         # now ensure it is attached
-        eq_(m.layers[0].datasource.describe()['name'],"shape")
-        eq_(lyr.datasource.describe()['name'],"shape")
+        eq_(m.layers[0].datasource.describe()['name'], "shape")
+        eq_(lyr.datasource.describe()['name'], "shape")
 
         # and since we have now added a shapefile in spherical mercator, adjust the projection
         lyr.srs = '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
 
         # test that assignment
-        eq_(m.layers[0].srs,'+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
-        eq_(lyr.srs,'+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
-    except RuntimeError, e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(e)
+        eq_(m.layers[0].srs, '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
+        eq_(lyr.srs, '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs')
 
 if __name__ == "__main__":
     setup()

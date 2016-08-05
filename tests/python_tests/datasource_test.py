@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all
+from utilities import execution_path, run_all, datasources_available
 import os, mapnik
 
 def setup():
@@ -126,9 +126,10 @@ def test_hit_grid():
         """ encode a list of strings with run-length compression """
         return ["%d:%s" % (len(list(group)), name) for name, group in groupby(l)]
 
-    m = mapnik.Map(256,256);
-    try:
-        mapnik.load_map(m,'../data/good_maps/agg_poly_gamma_map.xml');
+    xmlfile = '../data/good_maps/agg_poly_gamma_map.xml'
+    if datasources_available(xmlfile):
+        m = mapnik.Map(256,256);
+        mapnik.load_map(m, xmlfile);
         m.zoom_all()
         join_field = 'NAME'
         fg = [] # feature grid
@@ -144,10 +145,6 @@ def test_hit_grid():
         hit_list = '|'.join(rle_encode(fg))
         eq_(hit_list[:16],'730:|2:Greenland')
         eq_(hit_list[-12:],'1:Chile|812:')
-    except RuntimeError, e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(str(e))
 
 
 if __name__ == '__main__':
