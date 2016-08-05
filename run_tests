@@ -6,14 +6,14 @@ echo "*** Running visual tests..."
 python tests/visual_tests/test.py -q
 failures=$((failures+$?))
 
+echo
 echo "*** Running C++ tests..."
 for FILE in tests/cpp_tests/*-bin; do 
-  ${FILE} -q -d .;
+  ${FILE} -d .
   failures=$((failures+$?))
 done
 
 echo
-
 echo "*** Running python tests..."
 python tests/run_tests.py -q
 failures=$((failures+$?))
