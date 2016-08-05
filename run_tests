@@ -8,7 +8,7 @@ failures=$((failures+$?))
 
 echo "*** Running C++ tests..."
 for FILE in tests/cpp_tests/*-bin; do 
-	${FILE} -q -d .;
+  ${FILE} -q -d .;
   failures=$((failures+$?))
 done
 

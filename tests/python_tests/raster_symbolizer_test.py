@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_all, contains_word, get_unique_colors
+from utilities import execution_path, run_all, contains_word, get_unique_colors,\
+    datasources_available
 
 import os, mapnik
 
@@ -89,27 +90,22 @@ def test_dataraster_query_point():
         assert len(features) == 0
 
 def test_load_save_map():
-    map = mapnik.Map(256,256)
+    m = mapnik.Map(256,256)
     in_map = "../data/good_maps/raster_symbolizer.xml"
-    try:
-        mapnik.load_map(map, in_map)
-
-        out_map = mapnik.save_map_to_string(map)
+    if datasources_available(in_map):
+        mapnik.load_map(m, in_map)
+        out_map = mapnik.save_map_to_string(m)
         assert 'RasterSymbolizer' in out_map
         assert 'RasterColorizer' in out_map
         assert 'stop' in out_map
-    except RuntimeError, e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(str(e))
 
 def test_raster_with_alpha_blends_correctly_with_background():
     WIDTH = 500
     HEIGHT = 500
 
-    map = mapnik.Map(WIDTH, HEIGHT)
+    m = mapnik.Map(WIDTH, HEIGHT)
     WHITE = mapnik.Color(255, 255, 255)
-    map.background = WHITE
+    m.background = WHITE
 
     style = mapnik.Style()
     rule = mapnik.Rule()
@@ -119,20 +115,20 @@ def test_raster_with_alpha_blends_correctly_with_background():
     rule.symbols.append(symbolizer)
     style.rules.append(rule)
 
-    map.append_style('raster_style', style)
+    m.append_style('raster_style', style)
 
     map_layer = mapnik.Layer('test_layer')
     filepath = '../data/raster/white-alpha.png'
     if 'gdal' in mapnik.DatasourceCache.plugin_names():
         map_layer.datasource = mapnik.Gdal(file=filepath)
         map_layer.styles.append('raster_style')
-        map.layers.append(map_layer)
+        m.layers.append(map_layer)
 
-        map.zoom_all()
+        m.zoom_all()
 
         mim = mapnik.Image(WIDTH, HEIGHT)
 
-        mapnik.render(map, mim)
+        mapnik.render(m, mim)
         imdata = mim.tostring()
         # All white is expected
         eq_(get_unique_colors(mim),['rgba(254,254,254,255)'])
