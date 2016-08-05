@@ -1,3 +1,4 @@
+sudo: required
 language: cpp
 
 compiler:
@@ -10,25 +11,49 @@ env:
    - XMLPARSER="libxml2" DEBUG=True
    - XMLPARSER="ptree" DEBUG=True
 
+addons:
+  apt:
+    sources:
+      - boost-latest
+    packages:
+      - libboost-filesystem1.54-dev
+      - libboost-program-options1.54-dev
+      - libboost-python1.54-dev
+      - libboost-regex1.54-dev
+      - libboost-system1.54-dev
+      - libboost-thread1.54-dev
+      - libcairo2-dev
+      - libfreetype6-dev
+      - libicu-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libproj-dev
+      - libspatialite-dev
+      - libsqlite3-dev
+      - libtiff4-dev
+      - libwebp-dev
+      - libxml2-dev
+      - postgis
+      - python-cairo-dev
+      - python-nose
+      - valgrind
+  postgresql: 9.4
+
 # travis + ubuntugis with gdal and postggis leads to many potential dead-end conflicts
-# the below is thanks to https://github.com/CartoDB/Windshaft/blob/d82fe08b32fc7907bbe907ab290f8a082215ae26/.travis.yml#L1
 before_install:
-  - export PGUSER=postgres
-  - sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
-  - sudo apt-get -qq purge postgis* postgresql*
-  - sudo apt-add-repository -y ppa:cartodb/postgresql-9.3
-  - sudo apt-add-repository -y ppa:cartodb/gis
-  - sudo rm -Rf /var/lib/postgresql /etc/postgresql
-  - sudo apt-get update -qq
-  - sudo apt-get install -q libharfbuzz-dev postgresql-9.3-postgis-2.1 postgresql-contrib-9.3 gdal-bin libgdal-dev
-  - echo -e "local\tall\tall\ttrust\nhost\tall\tall\t127.0.0.1/32\ttrust\nhost\tall\tall\t::1/128\ttrust" |sudo tee /etc/postgresql/9.3/main/pg_hba.conf
-  - sudo service postgresql restart
+ - grep '^deb ' /etc/apt/sources.list.d/*.list
+ - apt-cache showpkg postgresql-9.4-postgis-2.1
+ - apt-cache showpkg postgresql-9.4-postgis-2.2
+ - apt-cache policy postgis
+ - apt-cache policy libgdal1
+ - apt-cache policy libgdal1-dev
+ - apt-cache policy libgdal-dev
+ - sudo apt-get install --force-yes {libgdal1,libgdal1-dev,libgdal-dev}='1.9.0-*'
+ - sudo service postgresql restart
 
 install:
- - sudo apt-get install -y libboost-python1.48-dev libboost-thread1.48-dev libboost-filesystem1.48-dev libboost-regex1.48-dev libboost-program-options1.48-dev
- - sudo apt-get install -y make valgrind python-nose libicu-dev libproj-dev libcairo-dev python-cairo-dev libcairo-dev python-cairo-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libsqlite3-dev
- # multi-face ttc font: https://github.com/mapnik/mapnik/issues/2274
- - sudo apt-get install ttf-wqy-microhei
+ - gdal-config --version || true
+ - gdal-config --ogr-enabled || true
 
 before_script:
  - psql -U postgres -c 'create database template_postgis'
@@ -38,7 +63,7 @@ before_script:
  - if [[ "${DEBUG}" == True ]]; then export JOBS=$((JOBS/2)); fi;
 
 script:
- - ./configure CXX=${CXX} CC=${CC} XML_PARSER=$XML_PARSER DEBUG=${DEBUG} DEMO=True BENCHMARK=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
+ - ./configure CXX=$CXX CC=$CC XMLPARSER=$XMLPARSER DEBUG=$DEBUG ENABLE_LOG=$DEBUG PGSQL2SQLITE=True SVG2PNG=True BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True
  - make
  - make test-local
  - source localize.sh && make grind
