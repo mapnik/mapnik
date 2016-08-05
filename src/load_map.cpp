@@ -755,7 +755,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 }
                 catch (...)
                 {
-                    throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
+                    throw config_error("Unknown exception occurred attempting to create datasoure for layer '" + lyr.name() + "'");
                 }
             }
         }
