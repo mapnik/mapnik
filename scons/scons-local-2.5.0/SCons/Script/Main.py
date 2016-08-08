@@ -564,7 +564,7 @@ def find_deepest_user_frame(tb):
 
 def _scons_user_error(e):
     """Handle user errors. Print out a message and a description of the
-    error, along with the line number and routine where it occured.
+    error, along with the line number and routine where it occurred.
     The file and line number will be the deepest stack frame that is
     not part of SCons itself.
     """
@@ -579,7 +579,7 @@ def _scons_user_error(e):
 
 def _scons_user_warning(e):
     """Handle user warnings. Print out a message and a description of
-    the warning, along with the line number and routine where it occured.
+    the warning, along with the line number and routine where it occurred.
     The file and line number will be the deepest stack frame that is
     not part of SCons itself.
     """
