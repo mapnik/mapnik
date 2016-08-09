@@ -182,7 +182,8 @@ TEST_CASE("expressions")
     auto val0 = eval(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')");
     auto val1 = eval(u8"'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
     TRY_CHECK(val0 == val1);
-    TRY_CHECK(val0.to_string() == val1.to_string());
+    TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
+    TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode (UTF-16)
 
     // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
     TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode(u8"Q u é b e c"));
