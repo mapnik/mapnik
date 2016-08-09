@@ -11,15 +11,6 @@ todo
 - shrink icu data
 '
 
-# allow sourcing of script without
-# causing the terminal to bail on error
-function finish {
-  set +eu
-  set +o pipefail
-}
-
-trap finish EXIT
-
 MASON_VERSION="7ed8931"
 
 function setup_mason() {
@@ -155,3 +146,8 @@ function main() {
 }
 
 main
+
+# allow sourcing of script without
+# causing the terminal to bail on error
+set +eu
+set +o pipefail
