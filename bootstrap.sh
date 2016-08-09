@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-#set -eu
+set -eu
+set -o pipefail
 
 : '
 
@@ -10,7 +11,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="b709931"
+MASON_VERSION="7ed8931"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -33,7 +34,7 @@ function install() {
         if [[ ${3:-false} != false ]]; then
             LA_FILE=$(mason prefix $1 $2)/lib/$3.la
             if [[ -f ${LA_FILE} ]]; then
-               perl -i -p -e 's:\Q$ENV{HOME}/build/mapbox/mason\E:$ENV{PWD}:g' ${LA_FILE}
+                perl -i -p -e 's:\Q$ENV{HOME}/build/mapbox/mason\E:$ENV{PWD}:g' ${LA_FILE}
             else
                 echo "$LA_FILE not found"
             fi
@@ -44,6 +45,7 @@ function install() {
 ICU_VERSION="55.1"
 
 function install_mason_deps() {
+    FAIL=0
     install ccache 3.2.4 &
     install jpeg_turbo 1.4.0 libjpeg &
     install libpng 1.6.20 libpng &
@@ -51,7 +53,6 @@ function install_mason_deps() {
     install libpq 9.4.1 &
     install sqlite 3.8.8.3 libsqlite3 &
     install expat 2.1.0 libexpat &
-    wait
     install icu ${ICU_VERSION} &
     install proj 4.8.0 libproj &
     install pixman 0.32.6 libpixman-1 &
@@ -59,17 +60,22 @@ function install_mason_deps() {
     install protobuf 2.6.1 &
     # technically protobuf is not a mapnik core dep, but installing
     # here by default helps make mapnik-vector-tile builds easier
-    wait
     install webp 0.4.2 libwebp &
     install gdal 1.11.2 libgdal &
     install boost 1.61.0 &
     install boost_libsystem 1.61.0 &
     install boost_libfilesystem 1.61.0 &
     install boost_libprogram_options 1.61.0 &
-    install boost_libregex 1.61.0 &
+    install boost_libregex_icu 1.61.0 &
     install freetype 2.6 libfreetype &
     install harfbuzz 0.9.41 libharfbuzz &
-    wait
+    for job in $(jobs -p)
+    do
+        wait $job || let "FAIL+=1"
+    done
+    if [[ "$FAIL" != "0" ]]; then
+        exit ${FAIL}
+    fi
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
@@ -140,3 +146,8 @@ function main() {
 }
 
 main
+
+# allow sourcing of script without
+# causing the terminal to bail on error
+set +eu
+set +o pipefail
