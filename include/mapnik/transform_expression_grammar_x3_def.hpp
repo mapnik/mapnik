@@ -66,6 +66,32 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node,
                           (mapnik::expr_node, angle_))
 
 
+// Following specializations are required to avoid trasferring mapnik::skewX/Y nodes as underlying expressions
+//
+// template <typename Source, typename Dest>
+// inline void
+// move_to_plain(Source&& src, Dest& dest, mpl::true_) // src is a single-element tuple
+// {
+//     dest = std::move(fusion::front(src));
+// }
+// which will fail to compile with latest (more strict) `mapbox::variant` (boost_1_61)
+
+namespace boost { namespace spirit { namespace x3 { namespace traits {
+template <>
+inline void move_to<mapnik::skewX_node, mapnik::detail::transform_node>(mapnik::skewX_node && src, mapnik::detail::transform_node& dst)
+{
+    dst = std::move(src);
+}
+
+template <>
+inline void move_to<mapnik::skewY_node, mapnik::detail::transform_node>(mapnik::skewY_node && src, mapnik::detail::transform_node& dst)
+{
+    dst = std::move(src);
+}
+
+}}}}
+
+
 namespace mapnik { namespace grammar {
 
     namespace x3 = boost::spirit::x3;
