@@ -50,6 +50,17 @@ struct exp_impl
 
 };
 
+// log
+struct log_impl
+{
+    //using type = T;
+    value_type operator() (value_type const& val) const
+    {
+        return std::log(val.to_double());
+    }
+
+};
+
 // sin
 struct sin_impl
 {

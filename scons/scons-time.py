@@ -9,7 +9,7 @@
 #
 
 #
-# Copyright (c) 2001 - 2015 The SCons Foundation
+# Copyright (c) 2001 - 2016 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -32,7 +32,7 @@
 from __future__ import division
 from __future__ import nested_scopes
 
-__revision__ = "src/script/scons-time.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+__revision__ = "src/script/scons-time.py rel_2.5.0:3543:937e55cd78f7 2016/04/09 11:29:54 bdbaddog"
 
 import getopt
 import glob
@@ -43,53 +43,10 @@ import sys
 import tempfile
 import time
 
-try:
-    sorted
-except NameError:
-    # Pre-2.4 Python has no sorted() function.
-    #
-    # The pre-2.4 Python list.sort() method does not support
-    # list.sort(key=) nor list.sort(reverse=) keyword arguments, so
-    # we must implement the functionality of those keyword arguments
-    # by hand instead of passing them to list.sort().
-    def sorted(iterable, cmp=None, key=None, reverse=False):
-        if key is not None:
-            result = [(key(x), x) for x in iterable]
-        else:
-            result = iterable[:]
-        if cmp is None:
-            # Pre-2.3 Python does not support list.sort(None).
-            result.sort()
-        else:
-            result.sort(cmp)
-        if key is not None:
-            result = [t1 for t0,t1 in result]
-        if reverse:
-            result.reverse()
-        return result
-
-if os.environ.get('SCONS_HORRIBLE_REGRESSION_TEST_HACK') is not None:
-    # We can't apply the 'callable' fixer until the floor is 2.6, but the
-    # '-3' option to Python 2.6 and 2.7 generates almost ten thousand
-    # warnings.  This hack allows us to run regression tests with the '-3'
-    # option by replacing the callable() built-in function with a hack
-    # that performs the same function but doesn't generate the warning.
-    # Note that this hack is ONLY intended to be used for regression
-    # testing, and should NEVER be used for real runs.
-    from types import ClassType
-    def callable(obj):
-        if hasattr(obj, '__call__'): return True
-        if isinstance(obj, (ClassType, type)): return True
-        return False
-
 def make_temp_file(**kw):
     try:
         result = tempfile.mktemp(**kw)
-        try:
-            result = os.path.realpath(result)
-        except AttributeError:
-            # Python 2.1 has no os.path.realpath() method.
-            pass
+        result = os.path.realpath(result)
     except TypeError:
         try:
             save_template = tempfile.template

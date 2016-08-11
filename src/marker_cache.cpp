@@ -267,7 +267,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
                 else
                 {
-                    MAPNIK_LOG_ERROR(marker_cache) << "could not intialize reader for: '" << uri << "'";
+                    MAPNIK_LOG_ERROR(marker_cache) << "could not initialize reader for: '" << uri << "'";
                     return std::make_shared<mapnik::marker const>(mapnik::marker_null());
                 }
             }

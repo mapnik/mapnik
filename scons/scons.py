@@ -2,7 +2,7 @@
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001 - 2015 The SCons Foundation
+# Copyright (c) 2001 - 2016 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,15 +23,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "src/script/scons.py rel_2.4.1:3453:73fefd3ea0b0 2015/11/09 03:25:05 bdbaddog"
+__revision__ = "src/script/scons.py rel_2.5.0:3544:95d356f188a3 2016/04/09 14:38:50 bdbaddog"
 
-__version__ = "2.4.1"
+__version__ = "2.5.0"
 
-__build__ = "rel_2.4.1:3453:73fefd3ea0b0"
+__build__ = "rel_2.5.0:3544:95d356f188a3[MODIFIED]"
 
 __buildsys__ = "ubuntu1404-32bit"
 
-__date__ = "2015/11/09 03:25:05"
+__date__ = "2016/04/09 14:38:50"
 
 __developer__ = "bdbaddog"
 
@@ -188,8 +188,8 @@ sys.path = libs + sys.path
 if __name__ == "__main__":
     try:
         import SCons.Script
-    except:
-        print("Import failed. Unable to find SCons files in:")
+    except ImportError:
+        print("SCons import failed. Unable to find engine files in:")
         for path in libs:
             print("  %s" % path)
         raise

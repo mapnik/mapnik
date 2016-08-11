@@ -1,4 +1,3 @@
-
 #include "catch_ext.hpp"
 
 #include <mapnik/expression.hpp>
@@ -108,6 +107,9 @@ TEST_CASE("expressions")
     TRY_CHECK(eval(" rad_to_deg * atan(1.0) ").to_double() == approx(45.0));
     // exp
     TRY_CHECK(eval(" exp(0.0) ") == 1.0);
+    // log
+    TRY_CHECK(eval(" log(1.0) ") == 0.0);
+    TRY_CHECK(eval(" log(exp(1.0)) ") == 1.0);
     // abs
     TRY_CHECK(eval(" abs(cos(-pi)) ") == 1.0);
     // length (string)
@@ -173,6 +175,19 @@ TEST_CASE("expressions")
     // regex
     // replace
     TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));
+
+    // https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+    //'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C' - black chess figures
+    // replace black knights with white knights
+    auto val0 = eval(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')");
+    auto val1 = eval(u8"'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
+    TRY_CHECK(val0 == val1);
+    TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
+    TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode (UTF-16)
+
+    // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
+    TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode(u8"Q u é b e c"));
+    TRY_CHECK(eval("'Москва'.replace('(?<!^)(\\B|b)(?!$)',' ')") == tr.transcode(u8"М о с к в а"));
     // 'foo' =~ s:(\w)\1:$1x:r
     TRY_CHECK(eval(" 'foo'.replace('(\\w)\\1', '$1x') ") == tr.transcode("fox"));
     TRY_CHECK(parse_and_dump(" 'foo'.replace('(\\w)\\1', '$1x') ") == "'foo'.replace('(\\w)\\1','$1x')");
@@ -184,8 +199,8 @@ TEST_CASE("expressions")
     TRY_CHECK(parse_and_dump(" [name].match('^Q\\S*$') ") == "[name].match('^Q\\S*$')");
 
     // string & value concatenation
-    // this should evaluate as two strings concatenating, but currently fails
+    // this should evaluate as two strings concatenating
     TRY_CHECK(eval("Hello + '!'") == eval("'Hello!'"));
-    // this should evaulate as a combination of an int value and string, but fails
+    // this should evaulate as a combination of an int value and string
     TRY_CHECK(eval("[int]+m") == eval("'123m'"));
 }
