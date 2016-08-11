@@ -33,7 +33,6 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
-#pragma GCC diagnostic pop
 
 // stl
 #include <algorithm>
