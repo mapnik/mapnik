@@ -47,7 +47,6 @@ struct exp_impl
     {
         return std::exp(val.to_double());
     }
-
 };
 
 // log
@@ -58,7 +57,6 @@ struct log_impl
     {
         return std::log(val.to_double());
     }
-
 };
 
 // sin

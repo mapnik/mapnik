@@ -227,6 +227,7 @@ namespace mapnik { namespace grammar {
                 ("tan",  tan_impl())
                 ("atan", atan_impl())
                 ("exp",  exp_impl())
+                ("log",  log_impl())
                 ("abs",  abs_impl())
                 ("length",length_impl())
                 ;
