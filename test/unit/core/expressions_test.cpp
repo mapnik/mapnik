@@ -180,14 +180,14 @@ TEST_CASE("expressions")
     //'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C' - black chess figures
     // replace black knights with white knights
     auto val0 = eval(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')");
-    auto val1 = eval(u8"'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
+    auto val1 = eval("'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
     TRY_CHECK(val0 == val1);
     TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
     TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode (UTF-16)
 
     // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
-    TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode(u8"Q u é b e c"));
-    TRY_CHECK(eval("'Москва'.replace('(?<!^)(\\B|b)(?!$)',' ')") == tr.transcode(u8"М о с к в а"));
+    TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode("Q u é b e c"));
+    TRY_CHECK(eval("'Москва'.replace('(?<!^)(\\B|b)(?!$)',' ')") == tr.transcode("М о с к в а"));
     // 'foo' =~ s:(\w)\1:$1x:r
     TRY_CHECK(eval(" 'foo'.replace('(\\w)\\1', '$1x') ") == tr.transcode("fox"));
     TRY_CHECK(parse_and_dump(" 'foo'.replace('(\\w)\\1', '$1x') ") == "'foo'.replace('(\\w)\\1','$1x')");
