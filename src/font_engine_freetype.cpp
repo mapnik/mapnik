@@ -34,11 +34,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
 
-// stl
-#include <algorithm>
-#include <stdexcept>
-#include <memory>
-
 // freetype2
 extern "C"
 {
@@ -52,7 +47,6 @@ extern "C"
 // stl
 #include <algorithm>
 #include <stdexcept>
-
 
 namespace mapnik
 {
