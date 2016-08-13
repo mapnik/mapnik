@@ -11,7 +11,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="7ed8931"
+MASON_VERSION="new-pkgs"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -19,7 +19,7 @@ function setup_mason() {
         (cd ./.mason && git checkout ${MASON_VERSION})
     else
         echo "Updating to latest mason"
-        (cd ./.mason && git fetch && git checkout ${MASON_VERSION})
+        (cd ./.mason && git fetch && git checkout ${MASON_VERSION} && git pull)
     fi
     export PATH=$(pwd)/.mason:$PATH
     export CXX=${CXX:-clang++}
@@ -47,21 +47,21 @@ ICU_VERSION="55.1"
 function install_mason_deps() {
     FAIL=0
     install ccache 3.2.4 &
-    install jpeg_turbo 1.4.0 libjpeg &
-    install libpng 1.6.20 libpng &
-    install libtiff 4.0.4beta libtiff &
-    install libpq 9.4.1 &
-    install sqlite 3.8.8.3 libsqlite3 &
-    install expat 2.1.0 libexpat &
+    install jpeg_turbo 1.5.0 libjpeg &
+    install libpng 1.6.24 libpng &
+    install libtiff 4.0.6 libtiff &
+    install libpq 9.5.2 &
+    install sqlite 3.14.1 libsqlite3 &
+    install expat 2.2.0 libexpat &
     install icu ${ICU_VERSION} &
-    install proj 4.8.0 libproj &
-    install pixman 0.32.6 libpixman-1 &
-    install cairo 1.14.2 libcairo &
+    install proj 4.9.2 libproj &
+    install pixman 0.34.0 libpixman-1 &
+    install cairo 1.14.6 libcairo &
     install protobuf 2.6.1 &
     # technically protobuf is not a mapnik core dep, but installing
     # here by default helps make mapnik-vector-tile builds easier
-    install webp 0.5.0 libwebp &
-    install gdal 1.11.2 libgdal &
+    install webp 0.5.1 libwebp &
+    install gdal 2.1.1 libgdal &
     install boost 1.61.0 &
     install boost_libsystem 1.61.0 &
     install boost_libfilesystem 1.61.0 &
@@ -71,8 +71,8 @@ function install_mason_deps() {
     # here by default helps make python-mapnik builds easier
     install boost_libthread 1.61.0 &
     install boost_libpython 1.61.0 &
-    install freetype 2.6 libfreetype &
-    install harfbuzz 0.9.41 libharfbuzz &
+    install freetype 2.6.5 libfreetype &
+    install harfbuzz 1.3.0 libharfbuzz &
     for job in $(jobs -p)
     do
         wait $job || let "FAIL+=1"
