@@ -59,7 +59,7 @@ inline featureset_ptr make_invalid_featureset()
 
 inline bool is_valid(featureset_ptr const& ptr)
 {
-    return (dynamic_cast<invalid_featureset*>(ptr.get()) == nullptr) ? false : true;
+    return (dynamic_cast<invalid_featureset*>(ptr.get()) == nullptr) ? true : false;
 }
 
 }

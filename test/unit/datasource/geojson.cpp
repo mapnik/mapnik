@@ -107,7 +107,7 @@ TEST_CASE("geojson") {
                 auto ds = mapnik::datasource_cache::instance().create(params);
                 CHECK(ds != nullptr);
                 auto fs = all_features(ds);
-                REQUIRE(mapnik::is_valid(fs));
+                REQUIRE(!mapnik::is_valid(fs));
                 while (auto f = fs->next())
                 {
                     CHECK(false); // shouldn't get here
