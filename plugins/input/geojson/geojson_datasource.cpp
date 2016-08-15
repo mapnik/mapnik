@@ -233,7 +233,6 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
 
     mapnik::util::file file(filename_);
     if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + "'");
-
     for (auto const& pos : positions)
     {
         std::fseek(file.get(), pos.first, SEEK_SET);
@@ -243,7 +242,7 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
         auto const* start = record.data();
         auto const*  end = start + record.size();
         mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1));
         using namespace boost::spirit;
         standard::space_type space;
         if (!boost::spirit::qi::phrase_parse(start, end,
@@ -254,6 +253,7 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
         }
         initialise_descriptor(feature);
     }
+    desc_.order_by_name();
 }
 
 template <typename Iterator>
@@ -339,6 +339,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             }
         }
     }
+    desc_.order_by_name();
 }
 
 template <typename Iterator>
