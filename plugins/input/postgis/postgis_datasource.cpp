@@ -942,7 +942,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
     }
 
-    return mapnik::make_empty_featureset();
+    return mapnik::make_invalid_featureset();
 }
 
 
@@ -955,7 +955,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return mapnik::make_empty_featureset();
+        if (!conn) return mapnik::make_invalid_featureset();
 
         if (conn->isOK())
         {
@@ -1030,7 +1030,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
         }
     }
 
-    return mapnik::make_empty_featureset();
+    return mapnik::make_invalid_featureset();
 }
 
 box2d<double> postgis_datasource::envelope() const
