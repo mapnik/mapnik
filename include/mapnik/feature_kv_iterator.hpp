@@ -46,12 +46,11 @@ class feature_impl;
 
 class MAPNIK_DECL feature_kv_iterator :
         public boost::iterator_facade<feature_kv_iterator,
-                                      std::tuple<std::string , value> const,
+                                      std::tuple<std::string, value> const,
                                       boost::forward_traversal_tag>
 {
 public:
     using value_type = std::tuple<std::string,value>;
-
     feature_kv_iterator (feature_impl const& f, bool begin = false);
 private:
     friend class boost::iterator_core_access;
