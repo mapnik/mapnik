@@ -115,6 +115,26 @@ TEST_CASE("geojson") {
             }
         }
 
+        SECTION("GeoJSON attribute descriptors are alphabetically ordered")
+        {
+            for (auto cache_features : {true, false})
+            {
+                mapnik::parameters params;
+                params["type"] = "geojson";
+                params["file"] = "./test/data/json/properties.json";
+                params["cache_features"] = cache_features;
+                auto ds = mapnik::datasource_cache::instance().create(params);
+                CHECK(ds != nullptr);
+                std::vector<std::string> expected_names = {"a", "b", "c", "d", "e"};
+                auto fields = ds->get_descriptor().get_descriptors();
+                std::size_t index = 0;
+                for (auto const& field : fields)
+                {
+                    REQUIRE(field.get_name() == expected_names[index++]);
+                }
+            }
+        }
+
         SECTION("GeoJSON invalid Point")
         {
             for (auto cache_features : {true, false})
