@@ -111,7 +111,6 @@ mapnik::color parse_color(T & error_messages, const char* str)
     }
     catch (mapnik::config_error const& ex)
     {
-
         error_messages.emplace_back(ex.what());
     }
     return c;
