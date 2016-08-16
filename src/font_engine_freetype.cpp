@@ -27,18 +27,12 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
-#include <mapnik/util/singleton.hpp>
 #include <mapnik/make_unique.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
-#pragma GCC diagnostic pop
-
-// stl
-#include <algorithm>
-#include <stdexcept>
 
 // freetype2
 extern "C"
@@ -48,6 +42,11 @@ extern "C"
 #include FT_STROKER_H
 #include FT_MODULE_H
 }
+#pragma GCC diagnostic pop
+
+// stl
+#include <algorithm>
+#include <stdexcept>
 
 
 namespace mapnik
@@ -76,7 +75,7 @@ unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *
     if (count <= 0) return 0;
     FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
     std::fseek (file , offset , SEEK_SET);
-    return std::fread ((char*)buffer, 1, count, file);
+    return std::fread(reinterpret_cast<unsigned char*>(buffer), 1, count, file);
 }
 
 bool freetype_engine::register_font(std::string const& file_name)
@@ -94,7 +93,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
 {
     MAPNIK_LOG_DEBUG(font_engine_freetype) << "registering: " << file_name;
     mapnik::util::file file(file_name);
-    if (!file.open()) return false;
+    if (!file) return false;
 
     FT_Face face = 0;
     FT_Open_Args args;
@@ -106,7 +105,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
     streamRec.size = file.size();
     streamRec.descriptor.pointer = file.get();
     streamRec.read  = ft_read_cb;
-    streamRec.close = NULL;
+    streamRec.close = nullptr;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
     int num_faces = 0;
@@ -259,7 +258,7 @@ bool freetype_engine::can_open(std::string const& face_name,
     }
     if (!found_font_file) return false;
     mapnik::util::file file(itr->second.second);
-    if (!file.open()) return false;
+    if (!file) return false;
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
@@ -270,7 +269,7 @@ bool freetype_engine::can_open(std::string const& face_name,
     streamRec.size = file.size();
     streamRec.descriptor.pointer = file.get();
     streamRec.read  = ft_read_cb;
-    streamRec.close = NULL;
+    streamRec.close = nullptr;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
     // -1 is used to quickly check if the font file appears valid without iterating each face
@@ -333,7 +332,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
     if (found_font_file)
     {
         mapnik::util::file file(itr->second.second);
-        if (file.open())
+        if (file)
         {
 #ifdef MAPNIK_THREADSAFE
             std::lock_guard<std::mutex> lock(mutex_);
@@ -361,7 +360,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
 face_manager::face_manager(font_library & library,
                            freetype_engine::font_file_mapping_type const& font_file_mapping,
                            freetype_engine::font_memory_cache_type const& font_cache)
-    : face_ptr_cache_(),
+    : face_cache_(new face_cache()),
       library_(library),
       font_file_mapping_(font_file_mapping),
       font_memory_cache_(font_cache)
@@ -376,8 +375,8 @@ face_manager::face_manager(font_library & library,
 
 face_ptr face_manager::get_face(std::string const& name)
 {
-    auto itr = face_ptr_cache_.find(name);
-    if (itr != face_ptr_cache_.end())
+    auto itr = face_cache_->find(name);
+    if (itr != face_cache_->end())
     {
         return itr->second;
     }
@@ -391,7 +390,7 @@ face_ptr face_manager::get_face(std::string const& name)
                                                      freetype_engine::get_cache());
         if (face)
         {
-            face_ptr_cache_.emplace(name,face);
+            face_cache_->emplace(name, face);
         }
         return face;
     }

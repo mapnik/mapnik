@@ -47,7 +47,6 @@
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/variant_io.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
@@ -105,7 +104,7 @@ void serialize_raster_colorizer(ptree & sym_node,
     raster_colorizer dfl;
     if (colorizer->get_default_mode() != dfl.get_default_mode() || explicit_defaults)
     {
-        set_attr(col_node, "default-mode", colorizer->get_default_mode());
+        set_attr(col_node, "default-mode", colorizer->get_default_mode().as_string());
     }
     if (colorizer->get_default_color() != dfl.get_default_color() || explicit_defaults)
     {
@@ -404,7 +403,7 @@ void serialize_style( ptree & map_node, std::string const& name, feature_type_st
     filter_mode_e filter_mode = style.get_filter_mode();
     if (filter_mode != dfl.get_filter_mode() || explicit_defaults)
     {
-        set_attr(style_node, "filter-mode", filter_mode);
+        set_attr(style_node, "filter-mode", filter_mode.as_string());
     }
 
     double opacity = style.get_opacity();

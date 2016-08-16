@@ -27,8 +27,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/operators.hpp>
+#pragma GCC diagnostic pop
 
 // agg
 // forward declare so that apps using mapnik do not need agg headers
@@ -38,9 +40,8 @@ struct trans_affine;
 
 namespace mapnik {
 
-/*!
- * A spatial envelope (i.e. bounding box) which also defines some basic operators.
- */
+// A spatial envelope (i.e. bounding box) which also defines some basic operators.
+
 template <typename T> class MAPNIK_DECL box2d
 : boost::equality_comparable<box2d<T> ,
                              boost::addable<box2d<T>,
@@ -48,7 +49,8 @@ template <typename T> class MAPNIK_DECL box2d
                                                               boost::multipliable2<box2d<T>, T > > > >
 {
 public:
-    using box2d_type = box2d<T>;
+    using value_type = T;
+    using box2d_type = box2d<value_type>;
 private:
     T minx_;
     T miny_;
@@ -63,12 +65,22 @@ private:
         swap(lhs.maxy_, rhs.maxy_);
     }
 public:
+
     box2d();
     box2d(T minx,T miny,T maxx,T maxy);
     box2d(coord<T,2> const& c0, coord<T,2> const& c1);
     box2d(box2d_type const& rhs);
     box2d(box2d_type const& rhs, agg::trans_affine const& tr);
+    // move
     box2d(box2d_type&& rhs);
+    // converting ctor
+    template <typename T1>
+    explicit box2d(box2d<T1> other)
+        : minx_(static_cast<value_type>(other.minx())),
+        miny_(static_cast<value_type>(other.miny())),
+        maxx_(static_cast<value_type>(other.maxx())),
+        maxy_(static_cast<value_type>(other.maxy()))
+        {}
     box2d_type& operator=(box2d_type other);
     T minx() const;
     T miny() const;
@@ -97,6 +109,7 @@ public:
     void re_center(T cx,T cy);
     void re_center(coord<T,2> const& c);
     void init(T x0,T y0,T x1,T y1);
+    void init(T x, T y);
     void clip(box2d_type const& other);
     void pad(T padding);
     bool from_string(std::string const& str);

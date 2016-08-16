@@ -58,7 +58,7 @@ MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr,
                                     feature_impl const& feature,
                                     attributes const& vars,
                                     transform_type const& trans_expr,
-                                    double scale_factor=1.0);
+                                    double scale_factor);
 
 struct enumeration_wrapper
 {
@@ -98,24 +98,24 @@ using value_base_type = util::variant<value_bool,
 
 struct strict_value : value_base_type
 {
-    // default ctor
-    strict_value()
-        : value_base_type() {}
-    // copy ctor
+    strict_value() = default;
+
     strict_value(const char* val)
-        : value_base_type(val) {}
+        : value_base_type(std::string(val)) {}
 
     template <typename T>
     strict_value(T const& obj)
         : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
     {}
-    // move ctor
-    template <typename T>
-    strict_value(T && obj) noexcept
-        : value_base_type(std::move(obj)) {}
 
+    template <typename T>
+    strict_value(T && obj)
+        noexcept(std::is_nothrow_constructible<value_base_type, T && >::value)
+        : value_base_type(std::forward<T>(obj))
+    {}
 };
-}
+
+} // namespace detail
 
 struct MAPNIK_DECL symbolizer_base
 {

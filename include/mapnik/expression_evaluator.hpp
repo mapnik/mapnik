@@ -45,27 +45,27 @@ struct evaluate
         : feature_(f),
           vars_(v) {}
 
-    value_integer operator() (value_integer val) const
+    value_type operator() (value_integer val) const
     {
         return val;
     }
 
-    value_double operator() (value_double val) const
+    value_type operator() (value_double val) const
     {
         return val;
     }
 
-    value_bool operator() (value_bool val) const
+    value_type operator() (value_bool val) const
     {
         return val;
     }
 
-    value_null operator() (value_null val) const
+    value_type operator() (value_null val) const
     {
         return val;
     }
 
-    value_unicode_string const& operator() (value_unicode_string const& str) const
+    value_type operator() (value_unicode_string const& str) const
     {
         return str;
     }
@@ -90,16 +90,16 @@ struct evaluate
         return geom.value<value_type,feature_type>(feature_);
     }
 
-    value_type operator() (binary_node<tags::logical_and> const & x) const
+    value_type operator() (binary_node<tags::logical_and> const& x) const
     {
         return (util::apply_visitor(*this, x.left).to_bool())
             && (util::apply_visitor(*this, x.right).to_bool());
     }
 
-    value_type operator() (binary_node<tags::logical_or> const & x) const
+    value_type operator() (binary_node<tags::logical_or> const& x) const
     {
-        return (util::apply_visitor(*this,x.left).to_bool())
-            || (util::apply_visitor(*this,x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool())
+            || (util::apply_visitor(*this, x.right).to_bool());
     }
 
     template <typename Tag>

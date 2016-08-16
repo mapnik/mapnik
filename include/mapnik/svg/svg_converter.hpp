@@ -29,7 +29,8 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -37,6 +38,7 @@
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
 #include "agg_bounding_rect.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <stdexcept>
@@ -224,7 +226,15 @@ public:
         attr.stroke_color.opacity(a * s.opacity());
         attr.stroke_flag = true;
     }
-
+    void dash_array(dash_array && dash)
+    {
+        path_attributes& attr = cur_attr();
+        attr.dash = std::move(dash);
+    }
+    void dash_offset(double offset)
+    {
+        cur_attr().dash_offset = offset;
+    }
     void even_odd(bool flag)
     {
         cur_attr().even_odd_flag = flag;

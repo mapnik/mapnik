@@ -27,8 +27,11 @@
 #include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>
@@ -48,9 +51,14 @@ struct value_holder : value_holder_base
     value_holder()
         : value_holder_base() {}
 
+    // C-string -> std::string
+    value_holder(char const* str)
+        : value_holder(std::string(str)) {}
+
     // perfect forwarding
     template <typename T>
-    value_holder(T && obj) noexcept
+    value_holder(T && obj)
+        noexcept(std::is_nothrow_constructible<value_holder_base, T && >::value)
         : value_holder_base(std::forward<T>(obj))
     {}
 };

@@ -37,7 +37,7 @@ struct visitor_image_copy
 {
     using dst_type = typename T0::pixel_type;
 
-    T0 operator() (image_null const&)
+    T0 operator() (image_null const&) const
     {
         throw std::runtime_error("Can not cast a null image");
     }
@@ -48,7 +48,7 @@ struct visitor_image_copy
     }
 
     template <typename T1>
-    T0 operator() (T1 const& src)
+    T0 operator() (T1 const& src) const
     {
         T0 dst(safe_cast<int>(src.width()), safe_cast<int>(src.height()), false);
         for (std::size_t y = 0; y < dst.height(); ++y)
@@ -75,7 +75,7 @@ struct visitor_image_copy_so
         throw std::runtime_error("Can not cast a null image");
     }
 
-    T0 operator() (T0 const& src)
+    T0 operator() (T0 const& src) const
     {
         if (offset_ == src.get_offset() && scaling_ == src.get_scaling())
         {
@@ -91,7 +91,7 @@ struct visitor_image_copy_so
     }
 
     template <typename T1>
-    T0 operator() (T1 const& src)
+    T0 operator() (T1 const& src) const
     {
         double src_offset = src.get_offset();
         double src_scaling = src.get_scaling();

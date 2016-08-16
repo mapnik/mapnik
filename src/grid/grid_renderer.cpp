@@ -47,11 +47,15 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/pixel_position.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/math/special_functions/round.hpp>
+#pragma GCC diagnostic pop
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

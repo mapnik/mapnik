@@ -25,50 +25,19 @@
 
 // mapnik
 #include <mapnik/util/variant.hpp>
+#include <mapnik/json/positions.hpp>
 #include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
 #pragma GCC diagnostic pop
 
-// stl
-#include <tuple>
 
 namespace mapnik { namespace json {
 
-struct empty {};
-
-using position = mapnik::geometry::point<double>;
-using positions = std::vector<position>;
-using coordinates = util::variant<empty, position, positions, std::vector<positions>, std::vector<std::vector<positions> > > ;
-
 namespace qi = boost::spirit::qi;
-
-struct set_position_impl
-{
-    using result_type = void;
-    template <typename T0,typename T1>
-    result_type operator() (T0 & coords, T1 const& pos) const
-    {
-        if (pos) coords = *pos;
-    }
-};
-
-struct push_position_impl
-{
-    using result_type = void;
-    template <typename T0,typename T1>
-    result_type operator() (T0 & coords, T1 const& pos) const
-    {
-        if (pos) coords.push_back(*pos);
-    }
-};
 
 template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct positions_grammar :
@@ -80,8 +49,6 @@ struct positions_grammar :
     qi::rule<Iterator, positions(), space_type> ring;
     qi::rule<Iterator, std::vector<positions>(), space_type> rings;
     qi::rule<Iterator, std::vector<std::vector<positions> >(), space_type> rings_array;
-    boost::phoenix::function<set_position_impl> set_position;
-    boost::phoenix::function<push_position_impl> push_position;
 };
 
 }}

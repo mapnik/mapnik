@@ -23,11 +23,13 @@
 #define MAPNIK_FACE_HPP
 
 //mapnik
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// freetype2
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 extern "C"
 {
 #include <ft2build.h>
@@ -35,8 +37,9 @@ extern "C"
 #include FT_STROKER_H
 }
 
+#pragma GCC diagnostic pop
+
 //stl
-#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>

@@ -5,12 +5,13 @@ SET EL=0
 ECHO =========== %~f0 ===========
 
 ECHO NUMBER_OF_PROCESSORS^: %NUMBER_OF_PROCESSORS%
-ECHO RAM [MB]^:
-powershell "get-ciminstance -class 'cim_physicalmemory' | %% { $_.Capacity/1024/1024}"
+powershell Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted -Force
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+powershell .\scripts\appveyor-system-info.ps1
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ::only build on AppVeyor, if explicitly stated
-ECHO APPVEYOR_REPO_COMMIT_MESSAGE^: %APPVEYOR_REPO_COMMIT_MESSAGE%
+ECHO APPVEYOR_REPO_COMMIT_MESSAGE^: "%APPVEYOR_REPO_COMMIT_MESSAGE%"
 ::SET BUILD_ON_APPVEYOR=0
 ::for /F "tokens=1 usebackq" %%i in (`powershell .\scripts\parse-commit-message.ps1 '[build appveyor]'`) DO SET BUILD_ON_APPVEYOR=%%i
 ::IF %BUILD_ON_APPVEYOR% EQU 0 ECHO not building, commit with [build appveyor] && GOTO DONE
@@ -21,32 +22,27 @@ ECHO msvs_toolset^: %msvs_toolset%
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
+SET ICU_VERSION=56.1
+ECHO ICU_VERSION^: %ICU_VERSION%
 IF DEFINED APPVEYOR (ECHO on AppVeyor) ELSE (ECHO NOT on AppVeyor)
 ECHO ========
 
 SET PATH=C:\Python27;%PATH%
 SET PATH=C:\Program Files\7-Zip;%PATH%
 
-:: *nix style find command comes with git:
-ECHO checking for unix style 'find'
-find %USERPROFILE% -name "*.blabla"
-IF %ERRORLEVEL% EQU 0 GOTO NIX_FIND_FOUND
-
-IF DEFINED GIT_INSTALL_ROOT SET TEMP_GIT_DIR=%GIT_INSTALL_ROOT%&& GOTO TEST_FIND_AGAIN
-IF EXIST "C:\Program Files (x86)\Git" SET TEMP_GIT_DIR=C:\Program Files (x86)\Git&& GOTO TEST_FIND_AGAIN
-IF EXIST "C:\Program Files\Git" SET TEMP_GIT_DIR=C:\Program Files\Git&& GOTO TEST_FIND_AGAIN
-
-:TEST_FIND_AGAIN
-SET PATH=%TEMP_GIT_DIR%\bin;%PATH%
-SET PATH=%TEMP_GIT_DIR%\usr\bin;%PATH%
-ECHO %PATH%
-::check again
-find %USERPROFILE% -name "*.blabla"
-IF %ERRORLEVEL% NEQ 0 (ECHO unix style find not found && GOTO ERROR)
+::update submodules (variant + test data)
+git submodule update --init
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 
-:NIX_FIND_FOUND
-ECHO find was found
+::python bindings, including test data
+IF NOT EXIST bindings\python git clone --recursive https://github.com/mapnik/python-mapnik.git bindings/python
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+CD bindings\python & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git fetch & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+git pull & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+CD ..\.. & IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 ::cloning mapnik-gyp
 if EXIST mapnik-gyp ECHO mapnik-gyp already cloned && GOTO MAPNIK_GYP_ALREADY_HERE

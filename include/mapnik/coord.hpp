@@ -23,8 +23,10 @@
 #ifndef MAPNIK_COORD_HPP
 #define MAPNIK_COORD_HPP
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/operators.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 template <typename T,int dim>

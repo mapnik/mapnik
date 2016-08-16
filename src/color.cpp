@@ -25,21 +25,10 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/config_error.hpp>
 
-// agg
-#include "agg_color_rgba.h"
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_statement.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
-
-// stl
-#include <sstream>
 
 namespace mapnik {
 
@@ -52,22 +41,23 @@ color::color(std::string const& str, bool premultiplied)
 std::string color::to_string() const
 {
     namespace karma = boost::spirit::karma;
-    boost::spirit::karma::_1_type _1;
     boost::spirit::karma::eps_type eps;
     boost::spirit::karma::double_type double_;
-    boost::spirit::karma::string_type kstring;
-    boost::spirit::karma::uint_generator<uint8_t,10> color_generator;
+    boost::spirit::karma::uint_generator<uint8_t,10> color_;
     std::string str;
     std::back_insert_iterator<std::string> sink(str);
-    karma::generate(sink,
+    karma::generate(sink, eps(alpha() < 255)
                     // begin grammar
-                    kstring[ boost::phoenix::if_(alpha()==255) [_1="rgb("].else_[_1="rgba("]]
-                    << color_generator[_1 = red()] << ','
-                    << color_generator[_1 = green()] << ','
-                    << color_generator[_1 = blue()]
-                    << kstring[ boost::phoenix::if_(alpha()==255) [_1 = ')'].else_[_1 =',']]
-                    << eps(alpha()<255) << double_ [_1 = alpha()/255.0]
-                    << ')'
+                    << "rgba("
+                    << color_(red()) << ','
+                    << color_(green()) << ','
+                    << color_(blue()) << ','
+                    << double_(alpha()/255.0) << ')'
+                    |
+                    "rgb("
+                    << color_(red()) << ','
+                    << color_(green()) << ','
+                    << color_(blue()) << ')'
                     // end grammar
         );
     return str;
@@ -76,7 +66,6 @@ std::string color::to_string() const
 std::string color::to_hex_string() const
 {
     namespace karma = boost::spirit::karma;
-    boost::spirit::karma::_1_type _1;
     boost::spirit::karma::hex_type hex;
     boost::spirit::karma::eps_type eps;
     boost::spirit::karma::right_align_type right_align;
@@ -85,23 +74,34 @@ std::string color::to_hex_string() const
     karma::generate(sink,
                     // begin grammar
                     '#'
-                    << right_align(2,'0')[hex[_1 = red()]]
-                    << right_align(2,'0')[hex[_1 = green()]]
-                    << right_align(2,'0')[hex[_1 = blue()]]
-                    << eps(alpha() < 255) <<  right_align(2,'0')[hex [_1 = alpha()]]
+                    << right_align(2,'0')[hex(red())]
+                    << right_align(2,'0')[hex(green())]
+                    << right_align(2,'0')[hex(blue())]
+                    << eps(alpha() < 255) << right_align(2,'0')[hex(alpha())]
                     // end grammar
         );
     return str;
 }
 
+namespace  {
+
+static std::uint8_t multiply(std::uint8_t c, std::uint8_t a)
+{
+    std::uint32_t t = c * a + 128;
+    return std::uint8_t(((t >> 8) + t) >> 8);
+}
+
+}
+
 bool color::premultiply()
 {
     if (premultiplied_) return false;
-    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
-    pre_c.premultiply();
-    red_ = pre_c.r;
-    green_ = pre_c.g;
-    blue_ = pre_c.b;
+    if (alpha_ != 255)
+    {
+        red_ = multiply(red_, alpha_);
+        green_ = multiply(green_, alpha_);
+        blue_ = multiply(blue_, alpha_);
+    }
     premultiplied_ = true;
     return true;
 }
@@ -109,13 +109,23 @@ bool color::premultiply()
 bool color::demultiply()
 {
     if (!premultiplied_) return false;
-    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
-    pre_c.demultiply();
-    red_ = pre_c.r;
-    green_ = pre_c.g;
-    blue_ = pre_c.b;
+    if (alpha_ < 255)
+    {
+        if (alpha_ == 0)
+        {
+            red_ = green_ = blue_ = 0;
+        }
+        else
+        {
+            std::uint32_t r = (std::uint32_t(red_) * 255) / alpha_;
+            std::uint32_t g = (std::uint32_t(green_) * 255) / alpha_;
+            std::uint32_t b = (std::uint32_t(blue_) * 255) / alpha_;
+            red_ = (r > 255) ? 255 : r;
+            green_ = (g > 255) ? 255 : g;
+            blue_ = (b > 255) ? 255 : b;
+        }
+    }
     premultiplied_ = false;
     return true;
 }
-
 }

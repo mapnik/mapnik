@@ -21,32 +21,29 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg/svg_path_attributes.hpp>
+
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_path_grammar.hpp>
-#include <mapnik/svg/svg_converter.hpp>
-
-// agg
-#include "agg_path_storage.h"
-
+#include <mapnik/svg/svg_path_grammar_impl.hpp>
 // stl
-#include <string>
 #include <cstring>
+#include <string>
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-    template <typename PathType>
-    bool parse_path(const char* wkt, PathType & p)
-    {
-        using namespace boost::spirit;
-        using iterator_type = const char*;
-        using skip_type = ascii::space_type;
-        svg_path_grammar<iterator_type,skip_type,PathType> g(p);
-        iterator_type first = wkt;
-        iterator_type last =  wkt + std::strlen(wkt);
-        return qi::phrase_parse(first, last, g, skip_type());
-    }
+template <typename PathType>
+bool parse_path(const char* wkt, PathType& p)
+{
+    using namespace boost::spirit;
+    using iterator_type = const char*;
+    using skip_type = ascii::space_type;
+    static const svg_path_grammar<iterator_type, PathType, skip_type> g;
+    iterator_type first = wkt;
+    iterator_type last = wkt + std::strlen(wkt);
+    bool status = qi::phrase_parse(first, last, (g)(boost::phoenix::ref(p)), skip_type());
+    return (status && (first == last));
+}
+template bool MAPNIK_DECL parse_path<svg_converter_type>(const char*, svg_converter_type&);
 
-    template bool parse_path<svg_converter_type>(const char*, svg_converter_type&);
-
-    }}
+} // namespace svg
+} // namespace mapnik

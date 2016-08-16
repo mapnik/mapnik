@@ -39,7 +39,9 @@
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/pattern_alignment.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -52,6 +54,7 @@
 #include "agg_span_pattern_rgba.h"
 #include "agg_image_accessors.h"
 #include "agg_conv_clip_polygon.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -75,13 +78,13 @@ struct agg_renderer_process_visitor_p
         feature_(feature),
         prj_trans_(prj_trans) {}
 
-    void operator() (marker_null const&) {}
+    void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const& marker)
+    void operator() (marker_svg const& marker) const
     {
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform);
+        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
@@ -180,7 +183,7 @@ struct agg_renderer_process_visitor_p
         agg::render_scanlines(*ras_ptr_, sl, rp);
     }
 
-    void operator() (marker_rgba8 const& marker)
+    void operator() (marker_rgba8 const& marker) const
     {
         using color = agg::rgba8;
         using order = agg::order_rgba;

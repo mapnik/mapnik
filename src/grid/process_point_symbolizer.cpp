@@ -30,15 +30,16 @@
 #include <mapnik/grid/grid.hpp>
 
 #include <mapnik/geom_util.hpp>
-#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

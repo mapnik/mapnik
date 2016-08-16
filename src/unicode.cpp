@@ -27,8 +27,10 @@
 // std
 #include <stdexcept>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/ucnv.h>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -60,4 +62,12 @@ transcoder::~transcoder()
 {
     if (conv_) ucnv_close(conv_);
 }
+
+
+void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
+{
+    target.clear(); // mimic previous target.assign(...) semantics
+    input.toUTF8String(target); // this appends to target
+}
+
 }

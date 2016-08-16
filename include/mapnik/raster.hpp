@@ -28,8 +28,11 @@
 #include <mapnik/image_any.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
- // boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

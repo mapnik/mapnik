@@ -103,13 +103,13 @@ public:
         switch (format_)
         {
         case wkbSpatiaLite:
-            byteOrder_ = (wkbByteOrder) wkb_[1];
+            byteOrder_ = static_cast<wkbByteOrder>(wkb_[1]);
             pos_ = 39;
             break;
 
         case wkbGeneric:
         default:
-            byteOrder_ = (wkbByteOrder) wkb_[0];
+            byteOrder_ = static_cast<wkbByteOrder>(wkb_[0]);
             pos_ = 1;
             break;
         }
@@ -124,8 +124,12 @@ public:
         switch (type)
         {
         case wkbPoint:
-            geom = read_point();
+        {
+            auto pt = read_point();
+            if (!std::isnan(pt.x) && !std::isnan(pt.y))
+                geom = std::move(pt);
             break;
+        }
         case wkbLineString:
             geom = read_linestring();
             break;
@@ -146,11 +150,19 @@ public:
             break;
         case wkbPointZ:
         case wkbPointM:
-            geom = read_point<true>();
+        {
+            auto pt = read_point<true>();
+            if (!std::isnan(pt.x) && !std::isnan(pt.y))
+                geom = std::move(pt);
             break;
+        }
         case wkbPointZM:
-            geom = read_point<true,true>();
+        {
+            auto pt = read_point<true,true>();
+            if (!std::isnan(pt.x) && !std::isnan(pt.y))
+                geom = std::move(pt);
             break;
+        }
         case wkbLineStringZ:
         case wkbLineStringM:
             geom = read_linestring<true>();

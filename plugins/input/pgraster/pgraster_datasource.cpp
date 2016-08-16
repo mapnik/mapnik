@@ -257,7 +257,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                         if (srid_ == 0)
                         {
                             const char* srid_c = rs->getValue("srid");
-                            if (srid_c != NULL)
+                            if (srid_c != nullptr)
                             {
                                 int result = 0;
                                 const char * end = srid_c + std::strlen(srid_c);
@@ -274,7 +274,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     }
                     else
                     {
-            MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no response from metadata query " << s.str();
+                        MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no response from metadata query " << s.str();
                     }
                     rs->close();
                 }
@@ -297,7 +297,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     if (rs->next())
                     {
                         const char* srid_c = rs->getValue("srid");
-                        if (srid_c != NULL)
+                        if (srid_c != nullptr)
                         {
                             int result = 0;
                             const char * end = srid_c + std::strlen(srid_c);
@@ -878,9 +878,10 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         std::string table_with_bbox;
         std::string col = geometryColumn_;
 
-        if ( use_overviews_ ) {
-          std::string sch = schema_;
-          std::string tab = mapnik::sql_utils::unquote_double(raster_table_);
+        if ( use_overviews_ && !overviews_.empty()) {
+          std::string sch = overviews_[0].schema;
+          std::string tab = overviews_[0].table;
+          col = overviews_[0].column;
           const double scale = std::min(px_gw, px_gh);
           std::vector<pgraster_overview>::const_reverse_iterator i;
           for (i=overviews_.rbegin(); i!=overviews_.rend(); ++i) {
@@ -997,7 +998,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
     }
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }
 
 
@@ -1010,7 +1011,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return featureset_ptr();
+        if (!conn) return mapnik::make_invalid_featureset();
 
         if (conn->isOK())
         {
@@ -1081,7 +1082,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
         }
     }
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }
 
 box2d<double> pgraster_datasource::envelope() const

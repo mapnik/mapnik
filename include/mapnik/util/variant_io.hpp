@@ -65,7 +65,7 @@ VARIANT_INLINE std::basic_ostream<charT, traits>&
 operator<< (std::basic_ostream<charT, traits>& out, variant<Types...> const& rhs)
 {
     detail::printer<std::basic_ostream<charT, traits>> visitor(out);
-    apply_visitor(visitor, rhs);
+    mapnik::util::apply_visitor(visitor, rhs);
     return out;
 }
 

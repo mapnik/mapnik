@@ -38,18 +38,20 @@
 #include <mapnik/symbolizer_base.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <cairo.h>
+#pragma GCC diagnostic pop
+
 // stl
 #include <memory>
-
-// cairo
-#include <cairo.h>
-
-// stl
 #include <map>
 #include <stdexcept>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -306,6 +308,7 @@ public:
     void stroke();
     void fill();
     void paint();
+    void paint(double opacity);
     void set_pattern(cairo_pattern const& pattern);
     void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_rgba8 const& data, double opacity = 1.0);
@@ -324,6 +327,9 @@ public:
                   composite_mode_e comp_op = src_over,
                   composite_mode_e halo_comp_op = src_over,
                   double scale_factor = 1.0);
+
+    void push_group();
+    void pop_group();
 
     template <typename T>
     void add_path(T& path, unsigned start_index = 0)

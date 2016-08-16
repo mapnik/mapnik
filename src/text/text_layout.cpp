@@ -29,8 +29,11 @@
 #include <mapnik/text/harfbuzz_shaper.hpp>
 #include <mapnik/make_unique.hpp>
 
-// ICU
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/brkiter.h>
+#pragma GCC diagnostic pop
+
 #include <algorithm>
 
 namespace mapnik

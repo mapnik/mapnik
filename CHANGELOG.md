@@ -6,6 +6,83 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.12
+
+Released: xx-xx-xx
+
+(Packaged from xxxxxx)
+
+#### Summary
+
+- Ensured gdal.input is registered once (refs #3093 #3339 #3340)
+- Fixed `mapnik::util::is_clockwise` implementation to use coordinates relative to the origin and avoid numeric precision issues
+- `mapnik-index` is updated to fail on first error in input (csv)
+- Added `guard` to `get_object_severity` method (ref #3322)
+- Improved `hash` calculation for `mapnik::value` (ref #3406)
+- AGG - made cover `unsigned` to avoid left shift of negative values (ref #3406)
+- Fixed using `scale_factor` in `evaluate_transform(..)`
+- Fixed line spacing logic by applying `scale factor`
+- ~~Fixed `stringify_object/stringify_array` implementations by disabling white space skipping (ref #3419)~~
+- Added geojson unit test for property types/values
+- JSON - added support for object and array type in `json_value` and update `stringifier`
+- GDAL.input - fallback to using `overviews` if present (8e8482803bb435726534c3b686a56037b7d3e8ad)
+- TopoJSON.input - improved and simplified grammer/parser implementation (https://github.com/mapnik/mapnik/pull/3429)
+- GDAL.input - Added support for non-alpha mask band
+- TopoJSON.input - fixed order of ellements limitation (ref #3434)
+- Fixed stroke-width size not included in markers ellipse bounding box (ref #3445)
+- Implemented `char_array_buffer` and removed `boost::iostreams` dependency (2e8c0d36c2237f2815d8004c1b96bad909056eb9)
+- JSON.input - `extract_bounding_box_grammar` - make features optional (ref #3463)
+- Ensure input plugins return `empty_featureset` rather than `nullptr` (feature_ptr())
+- Added support for quantising small (less than 3 pixel) images (ref #3466)
+- Added support for natural logarithm function in expressions (ref #3475)
+- Improved logic determining if certain compiler features are available e.g `inheriting constructors` (MSVC)
+- GeoJSON - corrected quoting in `stringgifird` objects (ref #3491)
+
+## 3.0.11
+
+Released: April 1, 2016
+
+(Packaged from 8d9dc27)
+
+#### Summary
+
+ - Raster scaling: fixed crash and clipping negative pixel values of floating point rasters (https://github.com/mapnik/mapnik/pull/3349)
+ - Restored support for unquoted strings in expressions (https://github.com/mapnik/mapnik/pull/3390)
+ - [TWKB](https://github.com/TWKB/) support via https://github.com/mapnik/mapnik/pull/3356 (#3355)
+ - Visual test runner can render SVG, PDF and Postscript with Cairo renderer (https://github.com/mapnik/mapnik/pull/3418)
+ - Scale factor is now applied also to `text-line-spacing` and transforms (https://github.com/mapnik/mapnik/pull/3416)
+
+## 3.0.10
+
+Released: February 25, 2016
+
+(Packaged from 5c0d496)
+
+#### Summary
+
+ - The `shapeindex` command now has a `--index-parts` option. When used the index will be bigger
+   but will allow the Shapefile datasource to only parse polygon parts within the query bounds.
+ - WARNING: index files generated with this newer Mapnik are invalid for older versions of Mapnik.
+ - Any `.index` files accompanying a `.shp` must now be regenerated otherwise
+   it will be skipped. To avoid this problem you can delete the existing `.index` files, or ideally run `shapeindex` to recreate the `.index`. (https://github.com/mapnik/mapnik/pull/3300)
+   The trigger for this change was an optimization that required a new binary format for the shapefile indexes (https://github.com/mapnik/mapnik/pull/3217).
+ - Shapeindex - another fix for skipping `null` shapes (#3288)
+ - Fixed support for filter expressions starting with `not` (https://github.com/mapnik/mapnik/issues/3017)
+ - Ensure `mapped_memory_cache` acts as singleton across shared objects (#3306)
+ - Removed miniz support in PNG encoder (#3281)
+ - Added `-fvisibility=hidden -fvisibility-inlines-hidden` to default compiler flags
+ - Fixed parsing of SVG `PathElement` (https://github.com/mapnik/mapnik/issues/3225)
+ - JSON parsing now supports arbitrary (nested) attributes in `geometry`
+ - Support for rendering `dash-array` in SVGs
+ - SVG parser is now stricter (fails is all input is not parsable) (#3251)
+ - SVG parser now correctly handles optional separator `(,)` between multiple command parts
+ - Optimized parsing of `png` format string
+ - The `memory_datasource` now dynamically reports correct datasource type (vector or raster)
+ - Upgraded `mapbox::variant v1.1.0`
+ - Compare: https://github.com/mapnik/mapnik/compare/v3.0.9...v3.0.10
+
+
+
 ## 3.0.9
 
 Released: November 26, 2015
@@ -18,12 +95,12 @@ Released: November 26, 2015
  - Fixed mapnik.util.variant issue when compiling with gcc-5.x and SSO enabled by default (https://github.com/mapnik/mapnik/issues/3103) (via @nkovacs)
  - Fixed issue with complex scripts where some character sequences weren't rendered correctly (https://github.com/mapnik/mapnik/issues/3050) (via @jkroll20)
  - Revived postgis.input tests
- - JSON: geometry grammar has been refactored and optimized to have expectation points
+ - JSON: geometry grammar has been re-factored and optimized to have expectation points
  - Filled missing specializations for value_bool in `mapnik::value` comparison operators
  - `mapnik.Image` - fixed copy semantics implementation for internal buffer
  - JSON parsing: unified error_handler across all grammars
  - Improved unit test coverage
- - Raster scaling: fixed nodata handling, acurracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
+ - Raster scaling: fixed nodata handling, accuracy when working with small floats and clipping floats by \[0; 255\] (https://github.com/mapnik/mapnik/pull/3147)
  - Added [`code of conduct`](http://contributor-covenant.org)
  - GeoJSON plug-in is updated to skip feature with empty geometries
  - GeoJSON plug-in : ensure original order of features is preserved (fixed) (https://github.com/mapnik/mapnik/issues/3182)
@@ -41,9 +118,9 @@ Released: October 23, 2015
 
  - Renamed `SHAPE_MEMORY_MAPPED_FILE` define to `MAPNIK_MEMORY_MAPPED_FILE`. Pass `./configure MEMORY_MAPPED_FILE=True|False` to request
    support for memory mapped files across Mapnik plugins (currently shape, csv, and geojson).
- - Unified `mapnik-index` utility supporing GeoJSON and CSV formats
+ - Unified `mapnik-index` utility supporting GeoJSON and CSV formats
  - Increased unit test coverage for GeoJSON and CSV plugins
- - shape.input - refactor to support *.shx and improve handling various bogus shapefiles
+ - shape.input - re-factor to support *.shx and improve handling various bogus shapefiles
  - geojson.input - make JSON parser stricter + support single Feature/Geometry as well as FeatureCollection
  - maintain 'FT_LOAD_NO_HINTING' + support >= harfbuzz 1.0.5
  - geojson.input - implement on-disk-index support
@@ -109,7 +186,7 @@ Released: August 26, 2015
 
 #### Summary
 
-- CSV.input: plug-in has been refactored to minimise memory usage and to improve handling of larger input.
+- CSV.input: plug-in has been re-factored to minimise memory usage and to improve handling of larger input.
   (NOTE: [large_csv](https://github.com/mapnik/mapnik/tree/large_csv) branch adds experimental trunsduction parser with deferred string initialisation)
 - CSV.input: added internal spatial index (boost::geometry::index::tree) for fast `bounding box` queries (https://github.com/mapnik/mapnik/pull/3010)
 - Fixed deadlock in recursive datasource registration via @zerebubuth (https://github.com/mapnik/mapnik/pull/3038)
@@ -499,8 +576,8 @@ Summary: The 2.2.0 release is primarily a performance and stability release. The
 
 - Enabled default input plugin directory and fonts path to be set inherited from environment settings in
   python bindings to make it easier to run tests locally (#1594). New environment settings are:
-	- MAPNIK_INPUT_PLUGINS_DIRECTORY
-	- MAPNIK_FONT_DIRECTORY
+    - MAPNIK_INPUT_PLUGINS_DIRECTORY
+    - MAPNIK_FONT_DIRECTORY
 
 - Added support for controlling rendering behavior of markers on multi-geometries `marker-multi-policy` (#1555,#1573)
 
@@ -892,7 +969,7 @@ Released January, 19 2010
 
 - Gdal Plugin: Added support for Gdal overviews, enabling fast loading of > 1GB rasters (#54)
 
-	* Use the gdaladdo utility to add overviews to existing GDAL datasets
+    * Use the gdaladdo utility to add overviews to existing GDAL datasets
 
 - PostGIS: Added an optional `geometry_table` parameter. The `geometry_table` used by Mapnik to look up
   metadata in the geometry_columns and calculate extents (when the `geometry_field` and `srid` parameters
@@ -917,23 +994,23 @@ Released January, 19 2010
   complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
   query to be used by indexes. (#415)
 
-	* Pass the bbox token inside a subquery like: !bbox!
+    * Pass the bbox token inside a subquery like: !bbox!
 
-	* Valid Usages include:
+    * Valid Usages include:
 
-		<Parameter name="table">
-		  (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
-		</Parameter>
+        <Parameter name="table">
+          (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
+        </Parameter>
 
-		<Parameter name="table">
-		  (Select * from table where geom &amp;&amp; !bbox!) as map
-		</Parameter>
+        <Parameter name="table">
+          (Select * from table where geom &amp;&amp; !bbox!) as map
+        </Parameter>
 
 - PostGIS Plugin: Added `scale_denominator` substitution ability in sql query string (#415/#465)
 
-	* Pass the scale_denominator token inside a subquery like: !scale_denominator!
+    * Pass the scale_denominator token inside a subquery like: !scale_denominator!
 
-	* e.g. (Select * from table where field_value > !scale_denominator!) as map
+    * e.g. (Select * from table where field_value > !scale_denominator!) as map
 
 - PostGIS Plugin: Added support for quoted table names (r1454) (#393)
 
@@ -965,14 +1042,14 @@ Released January, 19 2010
 - TextSymbolizer: Large set of new attributes: `text_transform`, `line_spacing`, `character_spacing`,
   `wrap_character`, `wrap_before`, `horizontal_alignment`, `justify_alignment`, and `opacity`.
 
-	* More details at changesets: r1254 and r1341
+    * More details at changesets: r1254 and r1341
 
 - SheildSymbolizer: Added special new attributes: `unlock_image`, `VERTEX` placement, `no_text` and many
   attributes previously only supported in the TextSymbolizer: `allow_overlap`, `vertical_alignment`,
   `horizontal_alignment`, `justify_alignment`, `wrap_width`, `wrap_character`, `wrap_before`, `text_transform`,
   `line_spacing`, `character_spacing`, and `opacity`.
 
-	* More details at changeset r1341
+    * More details at changeset r1341
 
 - XML: Added support for using CDATA with libxml2 parser (r1364)
 
@@ -1200,7 +1277,7 @@ Released April 1, 2009
 
 - Plugins: Use memory mapped files for reading shape file (r628)
 
-- Core: Use streams to write images (i/o refactor) (r628) (#15)
+- Core: Use streams to write images (i/o re-factor) (r628) (#15)
 
 # Mapnik 0.5.1
 

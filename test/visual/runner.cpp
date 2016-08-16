@@ -57,13 +57,13 @@ public:
     }
 
     template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
-    void operator()(T const & renderer)
+    void operator()(T const& renderer) const
     {
         test(renderer);
     }
 
     template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
-    void operator()(T const & renderer)
+    void operator()(T const & renderer) const
     {
         if (tiles_.width == 1 && tiles_.height == 1)
         {
@@ -73,7 +73,7 @@ public:
 
 private:
     template <typename T>
-    void test(T const & renderer)
+    void test(T const & renderer) const
     {
         map_size size { map_.width(), map_.height() };
         std::chrono::high_resolution_clock::time_point start(std::chrono::high_resolution_clock::now());
@@ -96,7 +96,7 @@ private:
     }
 
     template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
-    typename T::image_type render(T const & renderer)
+    typename T::image_type render(T const& renderer) const
     {
         if (tiles_.width == 1 && tiles_.height == 1)
         {
@@ -109,7 +109,7 @@ private:
     }
 
     template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
-    typename T::image_type render(T const & renderer)
+    typename T::image_type render(T const & renderer) const
     {
         return renderer.render(map_, scale_factor_);
     }
@@ -150,7 +150,8 @@ result_list runner::test_all(report_type & report) const
 
 result_list runner::test(std::vector<std::string> const & style_names, report_type & report) const
 {
-    std::vector<runner::path_type> files(style_names.size());
+    std::vector<runner::path_type> files;
+    files.reserve(style_names.size());
     std::transform(style_names.begin(), style_names.end(), std::back_inserter(files),
         [&](runner::path_type const & name)
         {
@@ -363,4 +364,3 @@ void runner::parse_map_sizes(std::string const & str, std::vector<map_size> & si
 }
 
 }
-

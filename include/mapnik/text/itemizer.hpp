@@ -34,10 +34,12 @@
 #include <list>
 #include <vector>
 
-// ICU
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
 #include <unicode/uscript.h>
 #include <unicode/ubidi.h>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

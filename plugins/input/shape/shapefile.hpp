@@ -105,6 +105,11 @@ struct shape_record
         pos += n;
     }
 
+    void set_pos(unsigned pos_)
+    {
+        pos = pos_;
+    }
+
     int read_ndr_integer()
     {
         std::int32_t val;

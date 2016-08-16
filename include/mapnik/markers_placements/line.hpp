@@ -35,29 +35,23 @@ template <typename Locator, typename Detector>
 class markers_line_placement : public markers_point_placement<Locator, Detector>
 {
 public:
-    markers_line_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
-        : markers_point_placement<Locator, Detector>(locator, detector, params),
+    using point_placement = markers_point_placement<Locator, Detector>;
+    using point_placement::point_placement;
+
+    markers_line_placement(Locator & locator, Detector & detector,
+                           markers_placement_params const& params)
+        : point_placement(locator, detector, params),
             first_point_(true),
             spacing_(0.0),
             marker_width_((params.size * params.tr).width()),
             path_(locator)
     {
         spacing_ = params.spacing < 1 ? 100 : params.spacing;
-        rewind();
     }
-
-    markers_line_placement(markers_line_placement && rhs)
-        : markers_point_placement<Locator, Detector>(std::move(rhs)),
-          first_point_(std::move(rhs.first_point_)),
-          spacing_(std::move(rhs.spacing_)),
-          marker_width_(std::move(rhs.marker_width_)),
-          path_(std::move(rhs.path_))
-    {}
 
     void rewind()
     {
-        this->locator_.rewind(0);
-        this->done_ = false;
+        point_placement::rewind();
         first_point_ = true;
     }
 
@@ -70,7 +64,7 @@ public:
 
         if (this->locator_.type() == geometry::geometry_types::Point)
         {
-            return markers_point_placement<Locator, Detector>::get_point(x, y, angle, ignore_placement);
+            return point_placement::get_point(x, y, angle, ignore_placement);
         }
 
         double move = spacing_;
@@ -102,15 +96,9 @@ public:
                     {
                         continue;
                     }
-                    box2d<double> box = this->perform_transform(angle, x, y);
-                    if ((this->params_.avoid_edges && !this->detector_.extent().contains(box))
-                        || (!this->params_.allow_overlap && !this->detector_.has_placement(box)))
+                    if (!this->push_to_detector(x, y, angle, ignore_placement))
                     {
                         continue;
-                    }
-                    if (!ignore_placement)
-                    {
-                        this->detector_.insert(box);
                     }
                     return true;
                 }

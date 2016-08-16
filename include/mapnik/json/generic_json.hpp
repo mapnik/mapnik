@@ -31,7 +31,10 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/fusion/include/std_pair.hpp>
 #pragma GCC diagnostic pop
+
+#include <vector>
 
 namespace mapnik { namespace json {
 
@@ -39,7 +42,36 @@ namespace qi = boost::spirit::qi;
 namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 using space_type = standard::space_type;
-using json_value = mapnik::util::variant<value_null,value_bool, value_integer, value_double, std::string>;
+
+struct json_value;
+
+using json_array = std::vector<json_value>;
+using json_object_element = std::pair<std::string, json_value>;
+using json_object = std::vector<json_object_element>;
+using json_value_base = mapnik::util::variant<value_null,
+                                              value_bool,
+                                              value_integer,
+                                              value_double,
+                                              std::string,
+                                              mapnik::util::recursive_wrapper<json_array>,
+                                              mapnik::util::recursive_wrapper<json_object> >;
+struct json_value : json_value_base
+{
+#if __cpp_inheriting_constructors >= 200802
+
+    using json_value_base::json_value_base;
+
+#else
+
+    json_value() = default;
+
+    template <typename T>
+    json_value(T && val)
+        : json_value_base(std::forward<T>(val)) {}
+
+#endif
+};
+
 using uchar = std::uint32_t; // a unicode code point
 
 // unicode string grammar via boost/libs/spirit/example/qi/json/json/parser/grammar.hpp
@@ -121,10 +153,14 @@ unicode_string<Iterator>::unicode_string()
 
     escape =
         ('x' > hex)                     [push_utf8(_r1, _1)]
-        |   ('u' > hex4)                    [push_utf8(_r1, _1)]
-        |   ('U' > hex8)                    [push_utf8(_r1, _1)]
-        |   char_("0abtnvfre\"/\\N_LP \t")  [push_esc(_r1, _1)]
-        |   eol                             // continue to next line
+        |
+        ('u' > hex4)                    [push_utf8(_r1, _1)]
+        |
+        ('U' > hex8)                    [push_utf8(_r1, _1)]
+        |
+        char_("0abtnvfre\"/\\N_LP \t")  [push_esc(_r1, _1)]
+        |
+        eol                             // continue to next line
         ;
 
     char_esc =
@@ -132,7 +168,7 @@ unicode_string<Iterator>::unicode_string()
         ;
 
     double_quoted =
-              '"'
+        '"'
         > *(char_esc(_val) | (~char_('"'))    [_val += _1])
         > '"'
         ;
@@ -141,18 +177,17 @@ unicode_string<Iterator>::unicode_string()
 template <typename Iterator>
 struct generic_json
 {
-    qi::rule<Iterator,space_type> value;
-    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
+    qi::rule<Iterator, json_value(), space_type> value;
+    qi::int_parser<mapnik::value_integer, 10, 1, -1> int__;
     unicode_string<Iterator> string_;
-    qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,json_value(),space_type> number;
-    qi::rule<Iterator,space_type> object;
-    qi::rule<Iterator,space_type> array;
-    qi::rule<Iterator,space_type> pairs;
-    qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+    qi::rule<Iterator, json_object_element(), space_type> key_value;
+    qi::rule<Iterator, json_value(), space_type> number;
+    qi::rule<Iterator, json_object(), space_type> object;
+    qi::rule<Iterator, json_array(), space_type> array;
+    qi::real_parser<double, qi::strict_real_policies<double>> strict_double;
     // conversions
-    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer> > integer_converter;
-    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double> > double_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_integer>> integer_converter;
+    boost::phoenix::function<mapnik::detail::value_converter<mapnik::value_double>> double_converter;
 };
 
 }}

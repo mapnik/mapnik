@@ -22,9 +22,9 @@
 
 
 #pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wno-unknown-pragmas" // clang
-#pragma GCC diagnostic ignored "-Wno-pragmas" // gcc
-#pragma GCC diagnostic ignored "-Wno-unsequenced"
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
+#pragma GCC diagnostic ignored "-W#pragma-messages"
+#pragma GCC diagnostic ignored "-Wunsequenced"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wredeclared-class-member"
@@ -34,3 +34,24 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
+#pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wdocumentation"
+#pragma GCC diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wdeprecated"
+#pragma GCC diagnostic ignored "-Wpadded"
+#pragma GCC diagnostic ignored "-Wc++98-compat"
+#pragma GCC diagnostic ignored "-Wreserved-id-macro"
+#pragma GCC diagnostic ignored "-Wweak-vtables"
+#pragma GCC diagnostic ignored "-Wextra-semi"
+#pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#pragma GCC diagnostic ignored "-Wheader-hygiene"
+#pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
+#pragma GCC diagnostic ignored "-Wcovered-switch-default"
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+

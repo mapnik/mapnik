@@ -27,19 +27,20 @@
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
-#include <mapnik/miniz_png.hpp>
 #include <mapnik/image.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 
 // zlib
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
-
-// boost
-
 
 extern "C"
 {
 #include <png.h>
 }
+#include <set>
+#pragma GCC diagnostic pop
 
 #define MAX_OCTREE_LEVELS 4
 
@@ -53,7 +54,6 @@ struct png_options {
     double gamma;
     bool paletted;
     bool use_hextree;
-    bool use_miniz;
     png_options() :
         colors(256),
         compression(Z_DEFAULT_COMPRESSION),
@@ -61,8 +61,7 @@ struct png_options {
         trans_mode(-1),
         gamma(-1),
         paletted(true),
-        use_hextree(true),
-        use_miniz(false) {}
+        use_hextree(true) {}
 };
 
 template <typename T>
@@ -85,23 +84,6 @@ void save_as_png(T1 & file,
                 png_options const& opts)
 
 {
-    if (opts.use_miniz)
-    {
-        MiniZ::PNGWriter writer(opts.compression,opts.strategy);
-        if (opts.trans_mode == 0)
-        {
-            writer.writeIHDR(image.width(), image.height(), 24);
-            writer.writeIDATStripAlpha(image);
-        }
-        else
-        {
-            writer.writeIHDR(image.width(), image.height(), 32);
-            writer.writeIDAT(image);
-        }
-        writer.writeIEND();
-        writer.toStream(file);
-        return;
-    }
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -119,10 +101,10 @@ void save_as_png(T1 & file,
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
-        png_destroy_write_struct(&png_ptr,(png_infopp)0);
+        png_destroy_write_struct(&png_ptr,static_cast<png_infopp>(0));
         return;
     }
-    jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+    jmp_buf* jmp_context = static_cast<jmp_buf*>(png_get_error_ptr(png_ptr));
     if (jmp_context)
     {
         png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -140,7 +122,7 @@ void save_as_png(T1 & file,
     const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
-        row_pointers[i] = (png_bytep)image.get_row(i);
+        row_pointers[i] = const_cast<png_bytep>(reinterpret_cast<const unsigned char *>(image.get_row(i)));
     }
     png_set_rows(png_ptr, info_ptr, row_pointers.get());
     png_write_png(png_ptr, info_ptr, (opts.trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, nullptr);
@@ -181,7 +163,7 @@ void reduce_8(T const& in,
                     break;
                 }
             }
-            if (idx>=0 && idx<(int)alpha.size())
+            if (idx>=0 && idx < static_cast<int>(alpha.size()))
             {
                 alpha[idx]+=U2ALPHA(val);
                 alphaCount[idx]++;
@@ -232,7 +214,7 @@ void reduce_4(T const& in,
                     break;
                 }
             }
-            if (idx>=0 && idx<(int)alpha.size())
+            if (idx>=0 && idx < static_cast<int>(alpha.size()))
             {
                 alpha[idx]+=U2ALPHA(val);
                 alphaCount[idx]++;
@@ -273,19 +255,6 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
                  std::vector<unsigned> const&alpha,
                  png_options const& opts)
 {
-    if (opts.use_miniz)
-    {
-        MiniZ::PNGWriter writer(opts.compression,opts.strategy);
-        // image.width()/height() does not reflect the actual image dimensions; it
-        // refers to the quantized scanlines.
-        writer.writeIHDR(width, height, color_depth);
-        writer.writePLTE(palette);
-        writer.writetRNS(alpha);
-        writer.writeIDAT(image);
-        writer.writeIEND();
-        writer.toStream(file);
-        return;
-    }
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -306,10 +275,10 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
-        png_destroy_write_struct(&png_ptr,(png_infopp)0);
+        png_destroy_write_struct(&png_ptr,static_cast<png_infopp>(0));
         return;
     }
-    jmp_buf* jmp_context = (jmp_buf*) png_get_error_ptr(png_ptr);
+    jmp_buf* jmp_context = static_cast<jmp_buf*>(png_get_error_ptr(png_ptr));
     if (jmp_context)
     {
         png_destroy_write_struct(&png_ptr, &info_ptr);
@@ -343,14 +312,14 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
         }
         if (alphaSize>0)
         {
-            png_set_tRNS(png_ptr, info_ptr, (png_bytep)&trans[0], alphaSize, 0);
+            png_set_tRNS(png_ptr, info_ptr, static_cast<png_bytep>(&trans[0]), alphaSize, 0);
         }
     }
 
     png_write_info(png_ptr, info_ptr);
     for (unsigned i=0;i<height;i++)
     {
-        png_write_row(png_ptr,(png_bytep)image.get_row(i));
+        png_write_row(png_ptr,const_cast<png_bytep>(image.get_row(i)));
     }
 
     png_write_end(png_ptr, info_ptr);
@@ -385,7 +354,7 @@ void save_as_png8_oct(T1 & file,
         {
             for (unsigned x = 0; x < width; ++x)
             {
-                unsigned val = U2ALPHA((unsigned)image.get_row(y)[x]);
+                unsigned val = U2ALPHA(static_cast<unsigned>(image.get_row(y)[x]));
                 alphaHist[val]++;
                 meanAlpha += val;
                 if (val>0 && val<255)
@@ -546,19 +515,19 @@ void save_as_png8_oct(T1 & file,
     }
 
     //transparency values per palette index
-    std::vector<unsigned> alphaTable;
-    //alphaTable.resize(palette.size());//allow semitransparency also in almost opaque range
+    std::vector<unsigned> alpha_table;
+    //alpha_table.resize(palette.size());//allow semitransparency also in almost opaque range
     if (opts.trans_mode != 0)
     {
-        alphaTable.resize(palette.size() - cols[TRANSPARENCY_LEVELS-1]);
+        alpha_table.resize(palette.size() - cols[TRANSPARENCY_LEVELS-1]);
     }
 
     if (palette.size() > 16 )
     {
         // >16 && <=256 colors -> write 8-bit color depth
         image_gray8 reduced_image(width,height);
-        reduce_8(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
-        save_as_png(file,palette,reduced_image,width,height,8,alphaTable,opts);
+        reduce_8(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alpha_table);
+        save_as_png(file,palette,reduced_image,width,height,8,alpha_table,opts);
     }
     else if (palette.size() == 1)
     {
@@ -566,13 +535,13 @@ void save_as_png8_oct(T1 & file,
         unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
         image_gray8 reduced_image(image_width,image_height);
-        reduce_1(image,reduced_image,trees, limits, alphaTable);
+        reduce_1(image,reduced_image,trees, limits, alpha_table);
         if (meanAlpha<255 && cols[0]==0)
         {
-            alphaTable.resize(1);
-            alphaTable[0] = meanAlpha;
+            alpha_table.resize(1);
+            alpha_table[0] = meanAlpha;
         }
-        save_as_png(file,palette,reduced_image,width,height,1,alphaTable,opts);
+        save_as_png(file,palette,reduced_image,width,height,1,alpha_table,opts);
     }
     else
     {
@@ -580,8 +549,8 @@ void save_as_png8_oct(T1 & file,
         unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
         image_gray8 reduced_image(image_width,image_height);
-        reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
-        save_as_png(file,palette,reduced_image,width,height,4,alphaTable,opts);
+        reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alpha_table);
+        save_as_png(file,palette,reduced_image,width,height,4,alpha_table,opts);
     }
 }
 
@@ -591,7 +560,7 @@ void save_as_png8(T1 & file,
                   T2 const& image,
                   T3 const & tree,
                   std::vector<mapnik::rgb> const& palette,
-                  std::vector<unsigned> const& alphaTable,
+                  std::vector<unsigned> const& alpha_table,
                   png_options const& opts)
 {
     unsigned width = image.width();
@@ -610,7 +579,7 @@ void save_as_png8(T1 & file,
                 row_out[x] = tree.quantize(row[x]);
             }
         }
-        save_as_png(file, palette, reduced_image, width, height, 8, alphaTable, opts);
+        save_as_png(file, palette, reduced_image, width, height, 8, alpha_table, opts);
     }
     else if (palette.size() == 1)
     {
@@ -619,7 +588,7 @@ void save_as_png8(T1 & file,
         unsigned image_height = height;
         image_gray8 reduced_image(image_width, image_height);
         reduced_image.set(0);
-        save_as_png(file, palette, reduced_image, width, height, 1, alphaTable, opts);
+        save_as_png(file, palette, reduced_image, width, height, 1, alpha_table, opts);
     }
     else
     {
@@ -643,7 +612,7 @@ void save_as_png8(T1 & file,
                 row_out[x>>1] |= index;
             }
         }
-        save_as_png(file, palette, reduced_image, width, height, 4, alphaTable, opts);
+        save_as_png(file, palette, reduced_image, width, height, 4, alpha_table, opts);
     }
 }
 
@@ -654,6 +623,7 @@ void save_as_png8_hex(T1 & file,
 {
     unsigned width = image.width();
     unsigned height = image.height();
+
     if (width + height > 3) // at least 3 pixels (hextree implementation requirement)
     {
         // structure for color quantization
@@ -678,20 +648,44 @@ void save_as_png8_hex(T1 & file,
         }
 
         //transparency values per palette index
-        std::vector<mapnik::rgba> pal;
-        tree.create_palette(pal);
+        std::vector<mapnik::rgba> rgba_palette;
+        tree.create_palette(rgba_palette);
+        auto size = rgba_palette.size();
         std::vector<mapnik::rgb> palette;
-        std::vector<unsigned> alphaTable;
-        for (unsigned i=0; i<pal.size(); ++i)
+        std::vector<unsigned> alpha_table;
+        palette.reserve(size);
+        alpha_table.reserve(size);
+        for (auto const& c : rgba_palette)
         {
-            palette.push_back(rgb(pal[i].r, pal[i].g, pal[i].b));
-            alphaTable.push_back(pal[i].a);
+            palette.emplace_back(c.r, c.g, c.b);
+            alpha_table.push_back(c.a);
         }
-        save_as_png8<T1, T2, hextree<mapnik::rgba> >(file, image, tree, palette, alphaTable, opts);
+        save_as_png8<T1, T2, hextree<mapnik::rgba> >(file, image, tree, palette, alpha_table, opts);
     }
     else
     {
-        throw std::runtime_error("Can't quantize images with less than 3 pixels");
+
+        std::set<mapnik::rgba> colors;
+        for (unsigned y = 0; y < height; ++y)
+        {
+            typename T2::pixel_type const * row = image.get_row(y);
+
+            for (unsigned x = 0; x < width; ++x)
+            {
+                unsigned val = row[x];
+                colors.emplace(U2RED(val), U2GREEN(val), U2BLUE(val), U2ALPHA(val));
+            }
+        }
+        std::string str;
+        for (auto c : colors)
+        {
+            str.push_back(c.r);
+            str.push_back(c.g);
+            str.push_back(c.b);
+            str.push_back(c.a);
+        }
+        rgba_palette pal(str, rgba_palette::PALETTE_RGBA);
+        save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alpha_table(), opts);
     }
 }
 
@@ -701,7 +695,7 @@ void save_as_png8_pal(T1 & file,
                       rgba_palette const& pal,
                       png_options const& opts)
 {
-    save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alphaTable(), opts);
+    save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alpha_table(), opts);
 }
 
 }

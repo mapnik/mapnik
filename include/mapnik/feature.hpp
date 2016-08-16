@@ -90,7 +90,7 @@ private:
 using context_type = context<std::map<std::string,std::size_t> >;
 using context_ptr = std::shared_ptr<context_type>;
 
-static const value default_feature_value;
+static const value default_feature_value{};
 
 class MAPNIK_DECL feature_impl : private util::noncopyable
 {
@@ -101,15 +101,15 @@ public:
     using cont_type = std::vector<value_type>;
     using iterator = feature_kv_iterator;
 
-    feature_impl(context_ptr const& ctx, mapnik::value_integer id)
-        : id_(id),
+    feature_impl(context_ptr const& ctx, mapnik::value_integer _id)
+        : id_(_id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
         geom_(geometry::geometry_empty()),
         raster_() {}
 
     inline mapnik::value_integer id() const { return id_;}
-    inline void set_id(mapnik::value_integer id) { id_ = id;}
+    inline void set_id(mapnik::value_integer _id) { id_ = _id;}
     template <typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {
@@ -154,7 +154,7 @@ public:
 
     inline bool has_key(context_type::key_type const& key) const
     {
-        return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
+        return (ctx_->mapping_.count(key) == 1);
     }
 
     inline value_type const& get(context_type::key_type const& key) const

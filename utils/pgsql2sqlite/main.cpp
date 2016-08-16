@@ -26,10 +26,13 @@
 #include <mapnik/wkb.hpp>
 #include "connection_manager.hpp"
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
-#include <memory>
 #include <boost/program_options.hpp>
+#pragma GCC diagnostic pop
+
+#include <memory>
 
 //stl
 #include <iostream>

@@ -29,10 +29,15 @@
 #include <mapnik/svg/svg_parser_exception.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
+#include <mapnik/util/dasharray_parser.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -123,7 +128,7 @@ template <typename T>
 double parse_double(T & error_messages, const char* str)
 {
     using namespace boost::spirit::qi;
-    qi::double_type double_;
+    double_type double_;
     double val = 0.0;
     if (!parse(str, str + std::strlen(str),double_,val))
     {
@@ -132,24 +137,40 @@ double parse_double(T & error_messages, const char* str)
     return val;
 }
 
-
-// parse a double that might end with a %
-// if it does then set the ref bool true and divide the result by 100
-
-template <typename T>
-double parse_double_optional_percent(T & error_messages, const char* str, bool &percent)
+// https://www.w3.org/TR/SVG/coords.html#Units
+template <typename T, int DPI = 90>
+double parse_svg_value(T & error_messages, const char* str, bool & percent)
 {
-    using namespace boost::spirit::qi;
+    using skip_type = boost::spirit::ascii::space_type;
     using boost::phoenix::ref;
-    qi::_1_type _1;
     qi::double_type double_;
-    qi::char_type char_;
-
+    qi::lit_type lit;
+    qi::_1_type _1;
     double val = 0.0;
-    if (!parse(str, str + std::strlen(str),double_[ref(val)=_1, ref(percent) = false]
-               >> -char_('%')[ref(val) /= 100.0, ref(percent) = true]))
+    qi::symbols<char, double> units;
+    units.add
+        ("px", 1.0)
+        ("pt", DPI/72.0)
+        ("pc", DPI/6.0)
+        ("mm", DPI/25.4)
+        ("cm", DPI/2.54)
+        ("in", static_cast<double>(DPI))
+        ;
+    const char* cur = str; // phrase_parse modifies the first iterator
+    const char* end = str + std::strlen(str);
+    if (!qi::phrase_parse(cur, end,
+                      double_[ref(val) = _1][ref(percent) = false]
+                      > - (units[ ref(val) *= _1]
+                           |
+                           lit('%')[ref(val) *= 0.01][ref(percent) = true]),
+                      skip_type()))
     {
-        error_messages.emplace_back("Failed to parse double (optional %) from " + std::string(str));
+        error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) + "'");
+    }
+    else if (cur != end)
+    {
+        error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) +
+                                    "', trailing garbage: '" + cur + "'");
     }
     return val;
 }
@@ -159,9 +180,9 @@ bool parse_double_list(T & error_messages, const char* str, double* list)
 {
     using namespace boost::spirit::qi;
     using boost::phoenix::ref;
-    qi::_1_type _1;
-    qi::double_type double_;
-    qi::lit_type lit;
+    _1_type _1;
+    double_type double_;
+    lit_type lit;
     using skip_type = boost::spirit::ascii::space_type;
 
     if (!phrase_parse(str, str + std::strlen(str),
@@ -411,7 +432,8 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
     }
     else if (std::strcmp(name, "stroke-width") == 0)
     {
-        parser.path_.stroke_width(parse_double(parser.error_messages_, value));
+        bool percent;
+        parser.path_.stroke_width(parse_svg_value(parser.error_messages_, value, percent));
     }
     else if (std::strcmp(name, "stroke-opacity") == 0)
     {
@@ -439,7 +461,19 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
     {
         parser.path_.miter_limit(parse_double(parser.error_messages_,value));
     }
-
+    else if (std::strcmp(name,"stroke-dasharray") == 0)
+    {
+        dash_array dash;
+        if (util::parse_dasharray(value, dash))
+        {
+            parser.path_.dash_array(std::move(dash));
+        }
+    }
+    else if (std::strcmp(name,"stroke-dashoffset") == 0)
+    {
+        double offset = parse_double(parser.error_messages_, value);
+        parser.path_.dash_offset(offset);
+    }
     else if(std::strcmp(name,  "opacity") == 0)
     {
         double opacity = parse_double(parser.error_messages_, value);
@@ -454,7 +488,6 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         parser.path_.display(false);
     }
 }
-
 
 void parse_attr(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
@@ -493,12 +526,12 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     auto const* width_attr = node->first_attribute("width");
     if (width_attr)
     {
-        width = parse_double_optional_percent(parser.error_messages_, width_attr->value(), has_percent_width);
+        width = parse_svg_value(parser.error_messages_, width_attr->value(), has_percent_width);
     }
     auto const* height_attr = node->first_attribute("height");
     if (height_attr)
     {
-        height = parse_double_optional_percent(parser.error_messages_, height_attr->value(), has_percent_height);
+        height = parse_svg_value(parser.error_messages_, height_attr->value(), has_percent_height);
     }
     auto const* viewbox_attr = node->first_attribute("viewBox");
     if (viewbox_attr)
@@ -589,18 +622,18 @@ void parse_line(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double y1 = 0.0;
     double x2 = 0.0;
     double y2 = 0.0;
-
+    bool percent;
     auto const* x1_attr = node->first_attribute("x1");
-    if (x1_attr) x1 = parse_double(parser.error_messages_, x1_attr->value());
+    if (x1_attr) x1 = parse_svg_value(parser.error_messages_, x1_attr->value(), percent);
 
     auto const* y1_attr = node->first_attribute("y1");
-    if (y1_attr) y1 = parse_double(parser.error_messages_, y1_attr->value());
+    if (y1_attr) y1 = parse_svg_value(parser.error_messages_, y1_attr->value(), percent);
 
     auto const* x2_attr = node->first_attribute("x2");
-    if (x2_attr) x2 = parse_double(parser.error_messages_, x2_attr->value());
+    if (x2_attr) x2 = parse_svg_value(parser.error_messages_, x2_attr->value(), percent);
 
     auto const* y2_attr = node->first_attribute("y2");
-    if (y2_attr) y2 = parse_double(parser.error_messages_, y2_attr->value());
+    if (y2_attr) y2 = parse_svg_value(parser.error_messages_, y2_attr->value(), percent);
 
     parser.path_.begin_path();
     parser.path_.move_to(x1, y1);
@@ -613,23 +646,23 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double cx = 0.0;
     double cy = 0.0;
     double r = 0.0;
-
+    bool percent;
     auto * attr = node->first_attribute("cx");
     if (attr != nullptr)
     {
-        cx = parse_double(parser.error_messages_, attr->value());
+        cx = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("cy");
     if (attr != nullptr)
     {
-        cy = parse_double(parser.error_messages_, attr->value());
+        cy = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("r");
     if (attr != nullptr)
     {
-        r = parse_double(parser.error_messages_, attr->value());
+        r = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     parser.path_.begin_path();
@@ -654,29 +687,29 @@ void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
     double cy = 0.0;
     double rx = 0.0;
     double ry = 0.0;
-
+    bool percent;
     auto * attr = node->first_attribute("cx");
     if (attr != nullptr)
     {
-        cx = parse_double(parser.error_messages_, attr->value());
+        cx = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("cy");
     if (attr)
     {
-        cy = parse_double(parser.error_messages_, attr->value());
+        cy = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("rx");
     if (attr != nullptr)
     {
-        rx = parse_double(parser.error_messages_, attr->value());
+        rx = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("ry");
     if (attr != nullptr)
     {
-        ry = parse_double(parser.error_messages_, attr->value());
+        ry = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     if (rx != 0.0 && ry != 0.0)
@@ -709,35 +742,35 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double h = 0.0;
     double rx = 0.0;
     double ry = 0.0;
-
+    bool percent;
     auto * attr = node->first_attribute("x");
     if (attr != nullptr)
     {
-        x = parse_double(parser.error_messages_, attr->value());
+        x = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("y");
     if (attr != nullptr)
     {
-        y = parse_double(parser.error_messages_, attr->value());
+        y = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     attr = node->first_attribute("width");
     if (attr != nullptr)
     {
-        w = parse_double(parser.error_messages_, attr->value());
+        w = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
     attr = node->first_attribute("height");
     if (attr)
     {
-        h = parse_double(parser.error_messages_, attr->value());
+        h = parse_svg_value(parser.error_messages_, attr->value(), percent);
     }
 
     bool rounded = true;
     attr = node->first_attribute("rx");
     if (attr != nullptr)
     {
-        rx = parse_double(parser.error_messages_, attr->value());
+        rx = parse_svg_value(parser.error_messages_, attr->value(), percent);
         if ( rx > 0.5 * w ) rx = 0.5 * w;
     }
     else rounded = false;
@@ -745,7 +778,7 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
     attr = node->first_attribute("ry");
     if (attr != nullptr)
     {
-        ry = parse_double(parser.error_messages_, attr->value());
+        ry = parse_svg_value(parser.error_messages_, attr->value(), percent);
         if ( ry > 0.5 * h ) ry = 0.5 * h;
         if (!rounded)
         {
@@ -924,19 +957,19 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     auto * attr = node->first_attribute("cx");
     if (attr != nullptr)
     {
-        cx = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        cx = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("cy");
     if (attr != nullptr)
     {
-        cy = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        cy = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("fx");
     if (attr != nullptr)
     {
-        fx = parse_double_optional_percent(parser.error_messages_,attr->value(), has_percent);
+        fx = parse_svg_value(parser.error_messages_,attr->value(), has_percent);
     }
     else
         fx = cx;
@@ -944,7 +977,7 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     attr = node->first_attribute("fy");
     if (attr != nullptr)
     {
-        fy = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        fy = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
     else
         fy = cy;
@@ -952,7 +985,7 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     attr = node->first_attribute("r");
     if (attr != nullptr)
     {
-        r = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        r = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
     // this logic for detecting %'s will not support mixed coordinates.
     if (has_percent && parser.temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)
@@ -981,25 +1014,25 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     auto * attr = node->first_attribute("x1");
     if (attr != nullptr)
     {
-        x1 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        x1 = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("x2");
     if (attr != nullptr)
     {
-        x2 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        x2 = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("y1");
     if (attr != nullptr)
     {
-        y1 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        y1 = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("y2");
     if (attr != nullptr)
     {
-        y2 = parse_double_optional_percent(parser.error_messages_, attr->value(), has_percent);
+        y2 = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
     // this logic for detecting %'s will not support mixed coordinates.
     if (has_percent && parser.temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)

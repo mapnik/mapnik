@@ -100,10 +100,8 @@ private:
     static font_memory_cache_type global_memory_fonts_;
 };
 
-class MAPNIK_DECL face_manager : private util::noncopyable
+class MAPNIK_DECL face_manager
 {
-    using face_ptr_cache_type = std::map<std::string, face_ptr>;
-
 public:
     face_manager(font_library & library,
                  freetype_engine::font_file_mapping_type const& font_file_mapping,
@@ -112,9 +110,13 @@ public:
     face_set_ptr get_face_set(std::string const& name);
     face_set_ptr get_face_set(font_set const& fset);
     face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset);
-    inline stroker_ptr get_stroker() { return stroker_; }
+    stroker_ptr get_stroker() const { return stroker_; }
+
 private:
-    face_ptr_cache_type face_ptr_cache_;
+    using face_cache = std::map<std::string, face_ptr>;
+    using face_cache_ptr = std::shared_ptr<face_cache>;
+
+    face_cache_ptr face_cache_;
     font_library & library_;
     freetype_engine::font_file_mapping_type const& font_file_mapping_;
     freetype_engine::font_memory_cache_type const& font_memory_cache_;

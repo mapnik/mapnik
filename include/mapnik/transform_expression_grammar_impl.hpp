@@ -45,7 +45,6 @@ transform_expression_grammar<Iterator>::transform_expression_grammar()
     qi::_3_type _3;
     qi::_6_type _6;
     qi::_val_type _val;
-    qi::char_type char_;
     qi::double_type double_;
     qi::lit_type lit;
     qi::no_case_type no_case;
@@ -57,8 +56,7 @@ transform_expression_grammar<Iterator>::transform_expression_grammar()
     // the order provided.  The individual transform definitions are
     // separated by whitespace and/or a comma.
 
-    qi::no_skip_type no_skip;
-    start = transform_ % no_skip[char_(", ")] ;
+    start = transform_ % *lit(',') ;
 
     transform_ = matrix | translate | scale | rotate | skewX | skewY ;
 

@@ -39,6 +39,41 @@
 namespace mapnik
 {
 
+namespace {
+box2d<double> get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
+{
+    /*
+
+      (0/ymax)           (width/ymax)
+      ***************
+      *             *
+      (0/0)*             *
+      *             *
+      ***************
+      (0/ymin)          (width/ymin)
+      Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
+    */
+    double width = layout.cluster_width(glyph.char_index);
+    if (glyph.advance() <= 0) width = -width;
+    pixel_position tmp, tmp2;
+    tmp.set(0, glyph.ymax());
+    tmp = tmp.rotate(rot);
+    tmp2.set(width, glyph.ymax());
+    tmp2 = tmp2.rotate(rot);
+    box2d<double> bbox(tmp.x,  -tmp.y,
+                       tmp2.x, -tmp2.y);
+    tmp.set(width, glyph.ymin());
+    tmp = tmp.rotate(rot);
+    bbox.expand_to_include(tmp.x, -tmp.y);
+    tmp.set(0, glyph.ymin());
+    tmp = tmp.rotate(rot);
+    bbox.expand_to_include(tmp.x, -tmp.y);
+    pixel_position pos2 = pos + pixel_position(0, glyph.offset.y).rotate(rot);
+    bbox.move(pos2.x , -pos2.y);
+    return bbox;
+}
+} // anonymous namespace
+
 placement_finder::placement_finder(feature_impl const& feature,
                                    attributes const& attr,
                                    DetectorType &detector,
@@ -430,39 +465,6 @@ bool placement_finder::add_marker(glyph_positions_ptr & glyphs, pixel_position c
     bboxes.push_back(std::move(bbox));
     glyphs->set_marker(marker_, real_pos);
     return true;
-}
-
-box2d<double> placement_finder::get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
-{
-    /*
-
-      (0/ymax)           (width/ymax)
-      ***************
-      *             *
-      (0/0)*             *
-      *             *
-      ***************
-      (0/ymin)          (width/ymin)
-      Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
-    */
-    double width = layout.cluster_width(glyph.char_index);
-    if (glyph.advance() <= 0) width = -width;
-    pixel_position tmp, tmp2;
-    tmp.set(0, glyph.ymax());
-    tmp = tmp.rotate(rot);
-    tmp2.set(width, glyph.ymax());
-    tmp2 = tmp2.rotate(rot);
-    box2d<double> bbox(tmp.x,  -tmp.y,
-                       tmp2.x, -tmp2.y);
-    tmp.set(width, glyph.ymin());
-    tmp = tmp.rotate(rot);
-    bbox.expand_to_include(tmp.x, -tmp.y);
-    tmp.set(0, glyph.ymin());
-    tmp = tmp.rotate(rot);
-    bbox.expand_to_include(tmp.x, -tmp.y);
-    pixel_position pos2 = pos + pixel_position(0, glyph.offset.y).rotate(rot);
-    bbox.move(pos2.x , -pos2.y);
-    return bbox;
 }
 
 }// ns mapnik

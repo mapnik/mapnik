@@ -307,7 +307,7 @@ bool Map::load_fonts()
             continue;
         }
         mapnik::util::file file(file_path);
-        if (file.open())
+        if (file)
         {
             auto item = font_memory_cache_.emplace(file_path, std::make_pair(file.data(),file.size()));
             if (item.second) result = true;
@@ -695,7 +695,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
 {
     if (!current_extent_.valid())
     {
-        throw std::runtime_error("query_point: map extent is not intialized, you need to set a valid extent before querying");
+        throw std::runtime_error("query_point: map extent is not initialized, you need to set a valid extent before querying");
     }
     if (!current_extent_.intersects(x,y))
     {
@@ -746,7 +746,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         else s << " (map has no layers)";
         throw std::out_of_range(s.str());
     }
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }
 
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const

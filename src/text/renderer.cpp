@@ -60,7 +60,9 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
     FT_Vector pen;
     FT_Error  error;
 
+    glyphs_.clear();
     glyphs_.reserve(positions.size());
+
     for (auto const& glyph_pos : positions)
     {
         glyph_info const& glyph = glyph_pos.glyph;
@@ -121,7 +123,6 @@ agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap,
 template <typename T>
 void agg_text_renderer<T>::render(glyph_positions const& pos)
 {
-    glyphs_.clear();
     prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;
@@ -232,7 +233,6 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
 template <typename T>
 void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer feature_id)
 {
-    glyphs_.clear();
     prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;

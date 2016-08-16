@@ -24,7 +24,11 @@
 #define MAPNIK_GRID_RASTERIZER_HPP
 
 #include <mapnik/util/noncopyable.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

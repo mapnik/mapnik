@@ -23,7 +23,7 @@
 #ifndef MAPNIK_IMAGE_VIEW_NULL_HPP
 #define MAPNIK_IMAGE_VIEW_NULL_HPP
 
-#include <mapnik/image.hpp>
+#include <mapnik/image_view.hpp>
 
 //stl
 #include <stdexcept>

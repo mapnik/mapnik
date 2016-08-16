@@ -73,7 +73,8 @@ memory_datasource::memory_datasource(parameters const& params)
       desc_(memory_datasource::name(),
             *params.get<std::string>("encoding","utf-8")),
       type_(datasource::Vector),
-      bbox_check_(*params.get<boolean_type>("bbox_check", true)) {}
+      bbox_check_(*params.get<boolean_type>("bbox_check", true)),
+      type_set_(false) {}
 
 memory_datasource::~memory_datasource() {}
 
@@ -81,6 +82,30 @@ void memory_datasource::push(feature_ptr feature)
 {
     // TODO - collect attribute descriptors?
     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+    if (feature->get_raster())
+    {
+        // if a feature has a raster_ptr set it must be of raster type.
+        if (!type_set_)
+        {
+            type_ = datasource::Raster;
+            type_set_ = true;
+        }
+        else if (type_ == datasource::Vector)
+        {
+            throw std::runtime_error("Can not add a raster feature to a memory datasource that contains vectors");
+        }
+    }
+    else 
+    {
+        if (!type_set_)
+        {
+            type_set_ = true;
+        }
+        else if (type_ == datasource::Raster)
+        {
+            throw std::runtime_error("Can not add a vector feature to a memory datasource that contains rasters");
+        }
+    }
     features_.push_back(feature);
     dirty_extent_ = true;
 }
@@ -107,6 +132,7 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double to
 void memory_datasource::set_envelope(box2d<double> const& box)
 {
     extent_ = box;
+    dirty_extent_ = false;
 }
 
 box2d<double> memory_datasource::envelope() const

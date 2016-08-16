@@ -149,7 +149,7 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
 
 inline unsigned interpolate(unsigned start, unsigned end, float fraction)
 {
-    return static_cast<unsigned>(fraction * ((float)end - (float)start) + start);
+    return static_cast<unsigned>(fraction * (static_cast<float>(end) - static_cast<float>(start)) + static_cast<float>(start));
 }
 
 unsigned raster_colorizer::get_color(float value) const

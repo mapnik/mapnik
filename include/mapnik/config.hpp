@@ -53,6 +53,17 @@
 #define PROJ_ENVELOPE_POINTS 20
 
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
+
+#ifndef BOOST_MPL_LIMIT_VECTOR_SIZE
+ #define BOOST_MPL_LIMIT_VECTOR_SIZE 30
+#else
+ #warning "WARNING: BOOST_MPL_LIMIT_VECTOR_SIZE is already defined. Ensure config.hpp is included before any Boost headers"
+#endif
+
+#ifndef BOOST_MPL_LIMIT_LIST_SIZE
+ #define BOOST_MPL_LIMIT_LIST_SIZE 30
+#else
+ #warning "WARNING: BOOST_MPL_LIMIT_LIST_SIZE is already defined. Ensure config.hpp is included before any Boost headers"
+#endif
 
 #endif // MAPNIK_CONFIG_HPP

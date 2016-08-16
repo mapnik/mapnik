@@ -28,8 +28,10 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/geometry.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <cmath>
@@ -63,7 +65,8 @@ boost::optional<bool> is_known_geographic(std::string const& srs);
 
 static inline bool lonlat2merc(double * x, double * y , int point_count)
 {
-    for(int i=0; i<point_count; i++) {
+    for(int i=0; i<point_count; ++i)
+    {
         if (x[i] > 180) x[i] = 180;
         else if (x[i] < -180) x[i] = -180;
         if (y[i] > MAX_LATITUDE) y[i] = MAX_LATITUDE;

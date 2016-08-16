@@ -25,7 +25,9 @@ from copy import copy
 
 Import ('env')
 
-program_env = env.Clone()
+Import ('plugin_base')
+
+program_env = plugin_base.Clone()
 
 source = Split(
     """

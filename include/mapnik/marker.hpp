@@ -29,8 +29,10 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/util/variant.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_array.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <memory>
@@ -41,8 +43,10 @@ namespace mapnik
 struct image_any;
 namespace svg { struct path_attributes; }
 
-using attr_storage = agg::pod_bvector<mapnik::svg::path_attributes>;
-using svg_storage_type = mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage>;
+using svg::svg_path_adapter;
+
+using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
+using svg_storage_type = svg::svg_storage<svg::svg_path_storage, svg_attribute_type>;
 using svg_path_ptr = std::shared_ptr<svg_storage_type>;
 using image_ptr = std::shared_ptr<image_any>;
 
@@ -56,23 +60,17 @@ public:
         bitmap_data_.set(0xff000000);
     }
 
-    marker_rgba8(image_rgba8 const & data)
+    explicit marker_rgba8(image_rgba8 const& data)
         : bitmap_data_(data) {}
 
-    marker_rgba8(image_rgba8 && data)
+    explicit marker_rgba8(image_rgba8 && data) noexcept
         : bitmap_data_(std::move(data)) {}
-
-    marker_rgba8(marker_rgba8 const& rhs)
-        : bitmap_data_(rhs.bitmap_data_) {}
-
-    marker_rgba8(marker_rgba8 && rhs) noexcept
-        : bitmap_data_(std::move(rhs.bitmap_data_)) {}
 
     box2d<double> bounding_box() const
     {
-        std::size_t width = bitmap_data_.width();
-        std::size_t height = bitmap_data_.height();
-        return box2d<double>(static_cast<double>(0), static_cast<double>(0), static_cast<double>(width), static_cast<double>(height));
+        std::size_t _width = bitmap_data_.width();
+        std::size_t _height = bitmap_data_.height();
+        return box2d<double>(static_cast<double>(0), static_cast<double>(0), static_cast<double>(_width), static_cast<double>(_height));
     }
 
     inline double width() const
@@ -97,18 +95,12 @@ private:
 struct marker_svg
 {
 public:
-    marker_svg() { }
+    marker_svg() = default;
 
-    marker_svg(mapnik::svg_path_ptr data)
+    explicit marker_svg(mapnik::svg_path_ptr data) noexcept
         : vector_data_(data) {}
 
-    marker_svg(marker_svg const& rhs)
-        : vector_data_(rhs.vector_data_) {}
-
-    marker_svg(marker_svg && rhs) noexcept
-        : vector_data_(rhs.vector_data_) {}
-
-    box2d<double> bounding_box() const
+    inline box2d<double> bounding_box() const
     {
         return vector_data_->bounding_box();
     }
@@ -122,11 +114,15 @@ public:
         return vector_data_->bounding_box().height();
     }
 
-    mapnik::svg_path_ptr get_data() const
+    inline mapnik::svg_path_ptr get_data() const
     {
         return vector_data_;
     }
 
+    inline std::tuple<double,double> dimensions() const
+    {
+        return std::make_tuple(vector_data_->width(), vector_data_->height());
+    }
 private:
     mapnik::svg_path_ptr vector_data_;
 
@@ -134,9 +130,8 @@ private:
 
 struct marker_null
 {
-    marker_null() = default;
 public:
-    box2d<double> bounding_box() const
+    inline box2d<double> bounding_box() const
     {
         return box2d<double>();
     }
@@ -189,8 +184,9 @@ struct marker : marker_base
     marker() = default;
 
     template <typename T>
-    marker(T && data) noexcept
-        : marker_base(std::move(data)) {}
+    marker(T && _data)
+        noexcept(std::is_nothrow_constructible<marker_base, T && >::value)
+        : marker_base(std::forward<T>(_data)) {}
 
     double width() const
     {

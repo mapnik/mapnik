@@ -24,14 +24,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
-#include <mapnik/json/positions_grammar_impl.hpp>
-
+#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
-#include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <iostream>                     // for clog, endl, etc
-#include <string>                       // for string
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace json {
 
@@ -57,12 +53,38 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
 
     start = geometry.alias() | lit("null");
 
+    // generic json types
+    json_.value =  json_.object | json_.array | json_.string_ | json_.number
+        ;
+
+    json_.key_value = json_.string_ > lit(':') > json_.value
+        ;
+
+    json_.object = lit('{')
+        > -(json_.key_value % lit(','))
+        > lit('}')
+        ;
+
+    json_.array = lit('[')
+        > -(json_.value % lit(','))
+        > lit(']')
+        ;
+
+    json_.number = json_.strict_double
+        | json_.int__
+        | lit("true")
+        | lit ("false")
+        | lit("null")
+        ;
+
     geometry = lit('{')[_a = 0]
-        > (-lit(',') >> (lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
-           ^
-           (-lit(',') >> (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1]))
-           ^
-           (-lit(',') >> (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))))[create_geometry(_val,_a,_b)]
+        > (((lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
+            |
+            (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1])
+            |
+            (lit("\"geometries\"") > lit(':') > lit('[') > geometry_collection[_val = _1] > lit(']'))
+            |
+            json_.key_value) % lit(',')) [create_geometry(_val,_a,_b)]
         > lit('}')
         ;
 

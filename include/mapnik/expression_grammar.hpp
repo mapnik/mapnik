@@ -25,124 +25,17 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
-#include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
-#include <mapnik/function_call.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_locals.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/adapted/struct.hpp>
 #pragma GCC diagnostic pop
-
-BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
-                          (mapnik::unary_function_impl, fun)
-                          (mapnik::unary_function_call::argument_type, arg))
-
-BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
-                          (mapnik::binary_function_impl, fun)
-                          (mapnik::binary_function_call::argument_type, arg1)
-                          (mapnik::binary_function_call::argument_type, arg2))
 
 namespace mapnik
 {
 namespace qi = boost::spirit::qi;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
-
-struct unicode_impl
-{
-    template <typename T>
-    struct result
-    {
-        using type = mapnik::value_unicode_string;
-    };
-
-    explicit unicode_impl(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    mapnik::value_unicode_string operator()(std::string const& str) const
-    {
-        return tr_.transcode(str.c_str());
-    }
-
-    mapnik::transcoder const& tr_;
-};
-
-struct regex_match_impl
-{
-    template <typename T>
-    struct result
-    {
-        using type = expr_node;
-    };
-
-    explicit regex_match_impl(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    template <typename T0,typename T1>
-    expr_node operator() (T0 & node, T1 const& pattern) const;
-
-    mapnik::transcoder const& tr_;
-};
-
-struct regex_replace_impl
-{
-
-    template <typename T>
-    struct result
-    {
-        using type = expr_node;
-    };
-
-    explicit regex_replace_impl(mapnik::transcoder const& tr)
-        : tr_(tr) {}
-
-    template <typename T0,typename T1,typename T2>
-    expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const;
-
-    mapnik::transcoder const& tr_;
-};
-
-struct geometry_types : qi::symbols<char, mapnik::value_integer>
-{
-    geometry_types()
-    {
-        add
-            ("point", 1)
-            ("linestring", 2)
-            ("polygon",3)
-            ("collection",4)
-            ;
-    }
-};
-
-struct boolean_constants :  qi::symbols<char,mapnik::value_bool>
-{
-    boolean_constants()
-    {
-        add
-            ("true", true)
-            ("false", false)
-            ;
-    }
-};
-
-struct floating_point_constants :  qi::symbols<char,mapnik::value_double>
-{
-    floating_point_constants()
-    {
-        add
-            ("pi", 3.1415926535897932384626433832795)
-            ("deg_to_rad",0.017453292519943295769236907684886)
-            ("rad_to_deg",57.295779513082320876798154814105)
-            ;
-    }
-};
-
 
 template <typename T>
 struct integer_parser
@@ -176,9 +69,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
     typename integer_parser<mapnik::value_integer>::type int__;
     mapnik::transcoder tr_;
-    boost::phoenix::function<unicode_impl> unicode_;
-    boost::phoenix::function<regex_match_impl> regex_match_;
-    boost::phoenix::function<regex_replace_impl> regex_replace_;
+
     rule_type expr;
     rule_type equality_expr;
     rule_type cond_expr;
@@ -196,13 +87,12 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string() , space_type> attr;
     qi::rule<Iterator, std::string() , space_type> global_attr;
     qi::rule<Iterator, std::string(), qi::locals<char> > quoted_ustring;
+    qi::rule<Iterator, std::string()> unquoted_ustring;
     qi::rule<Iterator, std::string(), space_type> ustring;
 
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
-    geometry_types geom_type;
-    boolean_constants bool_const;
-    floating_point_constants float_const;
+    qi::symbols<char, expr_node> constant;
     unary_function_types unary_func_type;
     binary_function_types binary_func_type;
 

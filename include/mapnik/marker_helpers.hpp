@@ -35,9 +35,13 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
+#include <mapnik/renderer_common/render_markers_symbolizer.hpp>
+#include <mapnik/vertex_converters.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <memory>
@@ -52,60 +56,53 @@ template <typename Detector>
 struct vector_markers_dispatch : util::noncopyable
 {
     vector_markers_dispatch(svg_path_ptr const& src,
+                            svg_path_adapter & path,
+                            svg_attribute_type const& attrs,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector & detector,
                             double scale_factor,
                             feature_impl const& feature,
-                            attributes const& vars)
-        : src_(src),
-          marker_trans_(marker_trans),
-          sym_(sym),
-          detector_(detector),
-          feature_(feature),
-          vars_(vars),
-          scale_factor_(scale_factor)
+                            attributes const& vars,
+                            bool snap_to_pixels,
+                            markers_renderer_context & renderer_context)
+        : params_(src->bounding_box(), recenter(src) * marker_trans,
+                  sym, feature, vars, scale_factor, snap_to_pixels)
+        , renderer_context_(renderer_context)
+        , src_(src)
+        , path_(path)
+        , attrs_(attrs)
+        , detector_(detector)
     {}
-
-    virtual ~vector_markers_dispatch() {}
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum, keys::markers_placement_type>(sym_, feature_, vars_);
-        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
-        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
-        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
-        value_double opacity = get<value_double,keys::opacity>(sym_, feature_, vars_);
-        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
-        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
-        coord2d center = src_->bounding_box().center();
-        agg::trans_affine_translation recenter(-center.x, -center.y);
-        agg::trans_affine tr = recenter * marker_trans_;
-        direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
-        markers_placement_params params { src_->bounding_box(), tr, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
         markers_placement_finder<T, Detector> placement_finder(
-            placement_method, path, detector_, params);
+            params_.placement_method, path, detector_, params_.placement_params);
         double x, y, angle = .0;
-        while (placement_finder.get_point(x, y, angle, ignore_placement))
+        while (placement_finder.get_point(x, y, angle, params_.ignore_placement))
         {
-            agg::trans_affine matrix = tr;
+            agg::trans_affine matrix = params_.placement_params.tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            render_marker(matrix, opacity);
+            renderer_context_.render_marker(src_, path_, attrs_, params_, matrix);
         }
     }
 
-    virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
-
 protected:
+    static agg::trans_affine recenter(svg_path_ptr const& src)
+    {
+        coord2d center = src->bounding_box().center();
+        return agg::trans_affine_translation(-center.x, -center.y);
+    }
+
+    markers_dispatch_params params_;
+    markers_renderer_context & renderer_context_;
     svg_path_ptr const& src_;
-    agg::trans_affine const& marker_trans_;
-    symbolizer_base const& sym_;
+    svg_path_adapter & path_;
+    svg_attribute_type const& attrs_;
     Detector & detector_;
-    feature_impl const& feature_;
-    attributes const& vars_;
-    double scale_factor_;
 };
 
 template <typename Detector>
@@ -117,53 +114,35 @@ struct raster_markers_dispatch : util::noncopyable
                             Detector & detector,
                             double scale_factor,
                             feature_impl const& feature,
-                            attributes const& vars)
-    : src_(src),
-        marker_trans_(marker_trans),
-        sym_(sym),
-        detector_(detector),
-        feature_(feature),
-        vars_(vars),
-        scale_factor_(scale_factor)
+                            attributes const& vars,
+                            markers_renderer_context & renderer_context)
+        : params_(box2d<double>(0, 0, src.width(), src.height()),
+                  marker_trans, sym, feature, vars, scale_factor)
+        , renderer_context_(renderer_context)
+        , src_(src)
+        , detector_(detector)
     {}
-
-    virtual ~raster_markers_dispatch() {}
 
     template <typename T>
     void add_path(T & path)
     {
-        marker_placement_enum placement_method = get<marker_placement_enum, keys::markers_placement_type>(sym_, feature_, vars_);
-        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym_, feature_, vars_);
-        value_bool avoid_edges = get<value_bool, keys::avoid_edges>(sym_, feature_, vars_);
-        value_double opacity = get<value_double, keys::opacity>(sym_, feature_, vars_);
-        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym_, feature_, vars_);
-        value_double spacing = get<value_double, keys::spacing>(sym_, feature_, vars_);
-        value_double max_error = get<value_double, keys::max_error>(sym_, feature_, vars_);
-        box2d<double> bbox(0,0, src_.width(),src_.height());
-        direction_enum direction = get<direction_enum, keys::direction>(sym_, feature_, vars_);
-        markers_placement_params params { bbox, marker_trans_, spacing * scale_factor_, max_error, allow_overlap, avoid_edges, direction };
         markers_placement_finder<T, Detector> placement_finder(
-            placement_method, path, detector_, params);
+            params_.placement_method, path, detector_, params_.placement_params);
         double x, y, angle = .0;
-        while (placement_finder.get_point(x, y, angle, ignore_placement))
+        while (placement_finder.get_point(x, y, angle, params_.ignore_placement))
         {
-            agg::trans_affine matrix = marker_trans_;
+            agg::trans_affine matrix = params_.placement_params.tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            render_marker(matrix, opacity);
+            renderer_context_.render_marker(src_, params_, matrix);
         }
     }
 
-    virtual void render_marker(agg::trans_affine const& marker_tr, double opacity) = 0;
-
 protected:
+    markers_dispatch_params params_;
+    markers_renderer_context & renderer_context_;
     image_rgba8 const& src_;
-    agg::trans_affine const& marker_trans_;
-    symbolizer_base const& sym_;
     Detector & detector_;
-    feature_impl const& feature_;
-    attributes const& vars_;
-    double scale_factor_;
 };
 
 void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars,
@@ -182,85 +161,29 @@ void setup_transform_scaling(agg::trans_affine & tr,
                              attributes const& vars,
                              symbolizer_base const& sym);
 
+using vertex_converter_type = vertex_converter<clip_line_tag,
+                                               clip_poly_tag,
+                                               transform_tag,
+                                               affine_transform_tag,
+                                               simplify_tag,
+                                               smooth_tag,
+                                               offset_transform_tag>;
+
 // Apply markers to a feature with multiple geometries
-template <typename Converter, typename Processor>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars, Converter & converter, Processor & proc, symbolizer_base const& sym)
-{
-    using vertex_converter_type = Converter;
-    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type,Processor>;
-    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+template <typename Processor>
+void apply_markers_multi(feature_impl const& feature, attributes const& vars,
+                         vertex_converter_type & converter, Processor & proc, symbolizer_base const& sym);
 
-    auto const& geom = feature.get_geometry();
-    geometry::geometry_types type = geometry::geometry_type(geom);
 
-    if (type == geometry::geometry_types::Point
-        || type == geometry::geometry_types::LineString
-        || type == geometry::geometry_types::Polygon)
-    {
-        apply_vertex_converter_type apply(converter, proc);
-        mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
-    }
-    else
-    {
+using vector_dispatch_type = vector_markers_dispatch<mapnik::label_collision_detector4>;
+using raster_dispatch_type = raster_markers_dispatch<mapnik::label_collision_detector4>;
 
-        marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
-        marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
+extern template void apply_markers_multi<vector_dispatch_type>(feature_impl const& feature, attributes const& vars,
+                         vertex_converter_type & converter, vector_dispatch_type & proc, symbolizer_base const& sym);
 
-        if (placement == MARKER_POINT_PLACEMENT &&
-            multi_policy == MARKER_WHOLE_MULTI)
-        {
-            geometry::point<double> pt;
-            // test if centroid is contained by bounding box
-            if (geometry::centroid(geom, pt) && converter.disp_.args_.bbox.contains(pt.x, pt.y))
-            {
-                // unset any clipping since we're now dealing with a point
-                converter.template unset<clip_poly_tag>();
-                geometry::point_vertex_adapter<double> va(pt);
-                converter.apply(va, proc);
-            }
-        }
-        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
-                 multi_policy == MARKER_LARGEST_MULTI)
-        {
-            // Only apply to path with largest envelope area
-            // TODO: consider using true area for polygon types
-            if (type == geometry::geometry_types::MultiPolygon)
-            {
-                geometry::multi_polygon<double> const& multi_poly = mapnik::util::get<geometry::multi_polygon<double> >(geom);
-                double maxarea = 0;
-                geometry::polygon<double> const* largest = 0;
-                for (geometry::polygon<double> const& poly : multi_poly)
-                {
-                    box2d<double> bbox = geometry::envelope(poly);
-                    double area = bbox.width() * bbox.height();
-                    if (area > maxarea)
-                    {
-                        maxarea = area;
-                        largest = &poly;
-                    }
-                }
-                if (largest)
-                {
-                    geometry::polygon_vertex_adapter<double> va(*largest);
-                    converter.apply(va, proc);
-                }
-            }
-            else
-            {
-                MAPNIK_LOG_WARN(marker_symbolizer) << "TODO: if you get here -> open an issue";
-            }
-        }
-        else
-        {
-            if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
-            {
-                MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
-            }
-            apply_vertex_converter_type apply(converter, proc);
-            mapnik::util::apply_visitor(vertex_processor_type(apply), geom);
-        }
-    }
-}
+extern template void apply_markers_multi<raster_dispatch_type>(feature_impl const& feature, attributes const& vars,
+                         vertex_converter_type & converter, raster_dispatch_type & proc, symbolizer_base const& sym);
+
 
 }
 

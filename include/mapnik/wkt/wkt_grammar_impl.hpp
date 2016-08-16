@@ -20,14 +20,18 @@
  *
  *****************************************************************************/
 
-#include <mapnik/config.hpp>
 #include <mapnik/wkt/wkt_grammar.hpp>
+#include <mapnik/geometry_fusion_adapted.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/phoenix/object/construct.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace wkt {
 

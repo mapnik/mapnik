@@ -43,6 +43,7 @@ using rgba_hash_table = std::unordered_map<unsigned int, unsigned char>;
 
 // stl
 #include <vector>
+#include <tuple>
 
 #define U2RED(x) ((x)&0xff)
 #define U2GREEN(x) (((x)>>8)&0xff)
@@ -53,7 +54,8 @@ namespace mapnik {
 
 struct rgba;
 
-struct MAPNIK_DECL rgb {
+struct MAPNIK_DECL rgb
+{
     std::uint8_t r;
     std::uint8_t g;
     std::uint8_t b;
@@ -92,7 +94,7 @@ struct MAPNIK_DECL rgba
           b(U2BLUE(c)),
           a(U2ALPHA(c)) {}
 
-    inline bool operator==(const rgba& y) const
+    inline bool operator==(rgba const& y) const
     {
         return r == y.r && g == y.g && b == y.b && a == y.a;
     }
@@ -103,18 +105,27 @@ struct MAPNIK_DECL rgba
         bool operator() (const rgba& x, const rgba& y) const;
     };
 
+    inline bool operator<(rgba const& y) const
+    {
+        return std::tie(r, g, b, a) < std::tie(y.r, y.g, y.b, y.a);
+    }
+
 };
 
 
-class MAPNIK_DECL rgba_palette : private util::noncopyable {
+class MAPNIK_DECL rgba_palette : private util::noncopyable
+{
 public:
     enum palette_type { PALETTE_RGBA = 0, PALETTE_RGB = 1, PALETTE_ACT = 2 };
 
     explicit rgba_palette(std::string const& pal, palette_type type = PALETTE_RGBA);
     rgba_palette();
 
-    const std::vector<rgb>& palette() const;
-    const std::vector<unsigned>& alphaTable() const;
+    inline std::vector<rgb> const& palette() const { return rgb_pal_;}
+    inline std::vector<unsigned> const& alpha_table() const { return alpha_pal_;}
+
+    inline std::vector<rgb>& palette() { return rgb_pal_;}
+    inline std::vector<unsigned>& alpha_table() { return alpha_pal_;}
 
     unsigned char quantize(unsigned c) const;
 

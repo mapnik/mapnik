@@ -41,8 +41,8 @@ public:
     illegal_enum_value():
         what_() {}
 
-    illegal_enum_value( std::string const& what ) :
-        what_( what )
+    illegal_enum_value( std::string const& _what ) :
+        what_( _what )
     {
     }
     virtual ~illegal_enum_value() throw() {}
@@ -59,9 +59,9 @@ protected:
 
 /** Slim wrapper for enumerations. It creates a new type from a native enum and
  * a char pointer array. It almost exactly behaves like a native enumeration
- * type. It supports string conversion through stream operators. This is usefull
+ * type. It supports string conversion through stream operators. This is useful
  * for debugging, serialization/deserialization and also helps with implementing
- * language bindings. The two convinient macros DEFINE_ENUM() and IMPLEMENT_ENUM()
+ * language bindings. The two convenient macros DEFINE_ENUM() and IMPLEMENT_ENUM()
  * are provided to help with instanciation.
  *
  * @par Limitations:
@@ -203,55 +203,10 @@ public:
                                  str + "' for enum " + our_name_);
     }
 
-    /** Parses the input stream @p is for a word consisting of characters and
-     * digits (<i>a-z, A-Z, 0-9</i>) and underscores (<i>_</i>).
-     * The failbit of the stream is set if the word is not a valid identifier.
-     */
-    std::istream & parse(std::istream & is)
-    {
-        std::string word;
-        char c;
-
-        while ( is.peek() != std::char_traits< char >::eof())
-        {
-            is >> c;
-            if ( isspace(c) && word.empty() )
-            {
-                continue;
-            }
-            if ( isalnum(c) || (c == '_') || c == '-' )
-            {
-                word += c;
-            }
-            else
-            {
-                is.unget();
-                break;
-            }
-        }
-
-        try
-        {
-            from_string( word );
-        }
-        catch (illegal_enum_value const&)
-        {
-            is.setstate(std::ios::failbit);
-        }
-
-        return is;
-    }
-
     /** Returns the current value as a string identifier. */
     std::string as_string() const
     {
         return our_strings_[value_];
-    }
-
-    /** Prints the string identifier to the output stream @p os. */
-    std::ostream & print(std::ostream & os = std::cerr) const
-    {
-        return os << our_strings_[value_];
     }
 
     /** Static helper function to iterate over valid identifiers. */
@@ -284,22 +239,6 @@ public:
         return true;
     }
 
-    static std::string const& get_full_qualified_name()
-    {
-        return our_name_;
-    }
-
-    static std::string get_name()
-    {
-        std::string::size_type idx = our_name_.find_last_of(":");
-        if ( idx == std::string::npos )
-        {
-            return our_name_;
-        } else {
-            return our_name_.substr( idx + 1 );
-        }
-    }
-
 private:
     ENUM value_;
     static const char ** our_strings_ ;
@@ -314,19 +253,7 @@ template <class ENUM, int THE_MAX>
 std::ostream &
 operator<<(std::ostream & os, const mapnik::enumeration<ENUM, THE_MAX> & e)
 {
-    e.print( os );
-    return os;
-}
-
-/** istream operator for enumeration
- * @relates mapnik::enumeration
- */
-template <class ENUM, int THE_MAX>
-std::istream &
-operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
-{
-    e.parse( is );
-    return is;
+    return os << e.as_string();
 }
 
 } // end of namespace

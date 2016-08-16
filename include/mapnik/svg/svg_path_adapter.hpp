@@ -28,10 +28,12 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/safe_cast.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_math.h"
 #include "agg_array.h"
 #include "agg_bezier_arc.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <cmath>
@@ -49,7 +51,7 @@ public:
     using self_type = path_adapter<VertexContainer>;
 
     //--------------------------------------------------------------------
-    path_adapter(VertexContainer & vertices) : vertices_(vertices), iterator_(0) {}
+    path_adapter(VertexContainer & _vertices) : vertices_(_vertices), iterator_(0) {}
     //void remove_all() { vertices_.remove_all(); iterator_ = 0; }
     //void free_all()   { vertices_.free_all();   iterator_ = 0; }
 

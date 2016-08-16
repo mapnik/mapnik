@@ -28,8 +28,13 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/datasource_geometry_type.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#include <boost/fusion/include/at.hpp>
+#include <boost/fusion/include/vector.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace util {
 

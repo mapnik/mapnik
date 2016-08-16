@@ -24,13 +24,18 @@
 #define MAPNIK_JSON_ERROR_HANDLER_HPP
 
 #include <mapnik/config.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/qi.hpp>
-#include <boost/spirit/home/support/info.hpp>
+#include <boost/spirit/home/qi/nonterminal/error_handler.hpp>
+namespace boost { namespace spirit { struct info; } }
 #pragma GCC diagnostic pop
+
 // mapnik
+#ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
+#endif
+
 // stl
 #include <cassert>
 #include <string>

@@ -27,8 +27,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
 
-//boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/operators.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <sstream>
@@ -55,19 +57,19 @@ public:
         premultiplied_(false)
         {}
 
-    color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 0xff, bool premultiplied = false)
-      : red_(red),
-        green_(green),
-        blue_(blue),
-        alpha_(alpha),
+    color(std::uint8_t _red, std::uint8_t _green, std::uint8_t _blue, std::uint8_t _alpha = 0xff, bool premultiplied = false)
+      : red_(_red),
+        green_(_green),
+        blue_(_blue),
+        alpha_(_alpha),
         premultiplied_(premultiplied)
         {}
 
-    color(std::uint32_t rgba, bool premultiplied = false)
-      : red_(rgba & 0xff),
-        green_((rgba >> 8) & 0xff),
-        blue_((rgba >> 16) & 0xff),
-        alpha_((rgba >> 24) & 0xff),
+    color(std::uint32_t _rgba, bool premultiplied = false)
+      : red_(_rgba & 0xff),
+        green_((_rgba >> 8) & 0xff),
+        blue_((_rgba >> 16) & 0xff),
+        alpha_((_rgba >> 24) & 0xff),
         premultiplied_(premultiplied) {}
 
     // copy ctor
@@ -128,23 +130,23 @@ public:
         return alpha_;
     }
 
-    inline void set_red(std::uint8_t red)
+    inline void set_red(std::uint8_t _red)
     {
-        red_ = red;
+        red_ = _red;
     }
 
-    inline void set_green(std::uint8_t green)
+    inline void set_green(std::uint8_t _green)
     {
-        green_ = green;
+        green_ = _green;
     }
 
-    inline void set_blue(std::uint8_t blue)
+    inline void set_blue(std::uint8_t _blue)
     {
-        blue_ = blue;
+        blue_ = _blue;
     }
-    inline void set_alpha(std::uint8_t alpha)
+    inline void set_alpha(std::uint8_t _alpha)
     {
-        alpha_ = alpha;
+        alpha_ = _alpha;
     }
     inline bool get_premultiplied() const
     {
@@ -173,8 +175,7 @@ template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
 operator << ( std::basic_ostream<charT, traits> & s, mapnik::color const& c )
 {
-    std::string hex_string( c.to_string() );
-    s << hex_string;
+    s << c.to_string();
     return s;
 }
 

@@ -24,53 +24,44 @@
 #define MAPNIK_GEOMETRY_HPP
 
 #include <mapnik/util/variant.hpp>
-#include <mapnik/coord.hpp>
 #include <vector>
 #include <type_traits>
 #include <cstddef>
-
-
 
 namespace mapnik { namespace geometry {
 
 template <typename T>
 struct point
 {
-    using value_type = T;
+    using coord_type = T;
     point() {}
     point(T x_, T y_)
         : x(x_), y(y_)
     {}
-    // temp - remove when geometry is templated on value_type
-    point(mapnik::coord<double, 2> const& c)
-        : x(c.x), y(c.y) {}
 
-    point(point const& other) = default;
-    point(point && other) noexcept = default;
-    point & operator=(point const& other) = default;
-    friend inline bool operator== (point<T> const& a, point<T> const& b)
-    {
-        return a.x == b.x && a.y == b.y;
-    }
-    friend inline bool operator!= (point<T> const& a, point <T> const& b)
-    {
-        return a.x != b.x  || a.y != b.y;
-    }
-    value_type x;
-    value_type y;
+    coord_type x;
+    coord_type y;
 };
 
+template <typename T>
+bool operator==(point<T> const& lhs, point<T> const& rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+template <typename T>
+bool operator!=(point<T> const& lhs, point<T> const& rhs)
+{
+    return !(lhs == rhs);
+}
 
 template <typename T>
 struct line_string : std::vector<point<T> >
 {
+    using coord_type = T;
     line_string() = default;
-    line_string (std::size_t size)
+    explicit line_string(std::size_t size)
         : std::vector<point<T> >(size) {}
-    line_string (line_string && other) = default ;
-    line_string& operator=(line_string &&) = default;
-    line_string (line_string const& ) = default;
-    line_string& operator=(line_string const&) = default;
     inline std::size_t num_points() const { return std::vector<point<T>>::size(); }
     inline void add_coord(T x, T y) { std::vector<point<T>>::template emplace_back(x,y);}
 };
@@ -78,18 +69,14 @@ struct line_string : std::vector<point<T> >
 template <typename T>
 struct linear_ring : line_string<T>
 {
+    using coord_type = T;
     linear_ring() = default;
-    linear_ring(std::size_t size)
+    explicit linear_ring(std::size_t size)
         : line_string<T>(size) {}
-    linear_ring (linear_ring && other) = default ;
-    linear_ring& operator=(linear_ring &&) = default;
     linear_ring(line_string<T> && other)
-        : line_string<T>(other) {}
-    linear_ring (linear_ring const& ) = default;
+        : line_string<T>(std::move(other)) {}
     linear_ring(line_string<T> const& other)
         : line_string<T>(other) {}
-    linear_ring& operator=(linear_ring const&) = default;
-
 };
 
 template <typename T>
@@ -98,11 +85,11 @@ using rings_container = std::vector<linear_ring<T>>;
 template <typename T, template <typename> class InteriorRings = rings_container>
 struct polygon
 {
-    linear_ring<T> exterior_ring;
+    using coord_type = T;
     using rings_container = InteriorRings<T>;
+    linear_ring<T> exterior_ring;
     rings_container interior_rings;
 
-    polygon() = default;
     inline void set_exterior_ring(linear_ring<T> && ring)
     {
         exterior_ring = std::move(ring);
@@ -122,13 +109,22 @@ struct polygon
 };
 
 template <typename T>
-struct multi_point : line_string<T> {};
+struct multi_point : line_string<T>
+{
+    using coord_type = T;
+};
 
 template <typename T>
-struct multi_line_string : std::vector<line_string<T>> {};
+struct multi_line_string : std::vector<line_string<T>>
+{
+    using coord_type = T;
+};
 
 template <typename T>
-struct multi_polygon : std::vector<polygon<T>> {};
+struct multi_polygon : std::vector<polygon<T>>
+{
+    using coord_type = T;
+};
 
 template <typename T>
 struct geometry_collection;
@@ -144,23 +140,32 @@ using geometry_base = mapnik::util::variant<geometry_empty,
                                             multi_point<T>,
                                             multi_line_string<T>,
                                             multi_polygon<T>,
-                                            mapnik::util::recursive_wrapper<geometry_collection<T> > >;
+                                            geometry_collection<T> >;
 template <typename T>
 struct geometry : geometry_base<T>
 {
-    using value_type = T;
+    using coord_type = T;
 
-    geometry()
-        : geometry_base<T>() {} // empty
+#if __cpp_inheriting_constructors >= 200802
+
+    using geometry_base<T>::geometry_base;
+
+#else
+
+    geometry() = default;
 
     template <typename G>
     geometry(G && geom)
         : geometry_base<T>(std::forward<G>(geom)) {}
 
+#endif
 };
 
 template <typename T>
-struct geometry_collection : std::vector<geometry<T>> {};
+struct geometry_collection : std::vector<geometry<T>>
+{
+    using coord_type = T;
+};
 
 }}
 

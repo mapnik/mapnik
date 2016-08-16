@@ -294,7 +294,9 @@ opts.AddVariables(
     EnumVariable('OPTIMIZATION','Set compiler optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
+    BoolVariable('COVERAGE', 'Compile a libmapnik and plugins with --coverage', 'False'),
     BoolVariable('DEBUG_UNDEFINED', 'Compile a version of Mapnik using clang/llvm undefined behavior asserts', 'False'),
+    BoolVariable('DEBUG_SANITIZE', 'Compile a version of Mapnik using clang/llvm address sanitation', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
 
@@ -303,6 +305,7 @@ opts.AddVariables(
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     BoolVariable('NO_ATEXIT', 'Will prevent Singletons from being deleted atexit of main thread', 'False'),
+    BoolVariable('NO_DLCLOSE', 'Will prevent plugins from being unloaded', 'False'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
     BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
@@ -317,7 +320,6 @@ opts.AddVariables(
     ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths (create multiple excludes separated by :)', ''),
     ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
     ('MAPNIK_NAME', 'Name of library', 'mapnik'),
-    BoolVariable('MAPNIK_BUNDLED_SHARE_DIRECTORY', 'For portable packaging: instruct mapnik-config to report relative paths to bundled GDAL_DATA, PROJ_LIB, and ICU_DATA','False'),
 
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -703,11 +705,7 @@ def FindBoost(context, prefixes, thread_flag):
     BOOST_INCLUDE_DIR = None
     BOOST_APPEND = None
     env['BOOST_APPEND'] = str()
-
-    if env['THREADING'] == 'multi':
-        search_lib = 'libboost_thread'
-    else:
-        search_lib = 'libboost_filesystem'
+    search_lib = 'libboost_filesystem'
 
     # note: must call normpath to strip trailing slash otherwise dirname
     # does not remove 'lib' and 'include'
@@ -1139,6 +1137,9 @@ if not preconfigured:
     else:
         mode = 'release mode'
 
+    if env['COVERAGE']:
+        mode += ' (with coverage)'
+
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
@@ -1355,7 +1356,7 @@ if not preconfigured:
 
     # test for C++11 support, which is required
     if not env['HOST'] and not conf.supports_cxx11():
-        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler to at least g++ 4.7 (ideally 4.8)")
+        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler")
         Exit(1)
 
     if not env['HOST']:
@@ -1407,15 +1408,6 @@ if not preconfigured:
             ['program_options', 'boost/program_options.hpp', False]
         ]
 
-        if env['THREADING'] == 'multi':
-            BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-            # on solaris the configure checks for boost_thread
-            # require the -pthreads flag to be able to check for
-            # threading support, so we add as a global library instead
-            # of attaching to cxxflags after configure
-            if env['PLATFORM'] == 'SunOS':
-                env.Append(CXXFLAGS = '-pthreads')
-
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
         if env['PRIORITIZE_LINKING']:
             conf.prioritize_paths(silent=True)
@@ -1447,12 +1439,13 @@ if not preconfigured:
         # just turn it off like this, but seems the only available work-
         # around. See https://svn.boost.org/trac/boost/ticket/6779 for more
         # details.
-        boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_')]
-        if not conf.CheckBoostScopedEnum():
-            if boost_version < [1, 51]:
-                env.Append(CXXFLAGS = '-DBOOST_NO_SCOPED_ENUMS')
-            elif boost_version < [1, 57]:
-                env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
+        if not env['HOST']:
+            boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_')]
+            if not conf.CheckBoostScopedEnum():
+                if boost_version < [1, 51]:
+                    env.Append(CXXFLAGS = '-DBOOST_NO_SCOPED_ENUMS')
+                elif boost_version < [1, 57]:
+                    env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
 
     if not env['HOST'] and env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
@@ -1605,6 +1598,7 @@ if not preconfigured:
     # prepend to make sure we link locally
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
+    env.Prepend(CPPPATH = '#deps/mapbox/variant/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
@@ -1630,7 +1624,7 @@ if not preconfigured:
                 env["CAIRO_ALL_LIBS"] = ['cairo']
                 if env['RUNTIME_LINK'] == 'static':
                     env["CAIRO_ALL_LIBS"].extend(
-                        ['pixman-1','expat']
+                        ['pixman-1']
                     )
                 # todo - run actual checkLib?
                 env['HAS_CAIRO'] = True
@@ -1727,6 +1721,9 @@ if not preconfigured:
         if env['NO_ATEXIT']:
             env.Append(CPPDEFINES = '-DMAPNIK_NO_ATEXIT')
 
+        if env['NO_DLCLOSE'] or env['COVERAGE']:
+            env.Append(CPPDEFINES = '-DMAPNIK_NO_DLCLOSE')
+
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
             pthread = ''
@@ -1786,19 +1783,23 @@ if not preconfigured:
 
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion viable
-        common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
+        # -Wfloat-equal -Wold-style-cast -Wexit-time-destructors -Wglobal-constructors -Wreserved-id-macro -Wheader-hygiene -Wmissing-noreturn
+        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unsequenced '
+            common_cxx_flags += ' -Wno-unsequenced -Wtautological-compare -Wheader-hygiene '
 
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:
-            # TODO - add back -fvisibility-inlines-hidden
-            # https://github.com/mapnik/mapnik/issues/1863
             env.Append(CXXFLAGS = common_cxx_flags + '-O%s' % (env['OPTIMIZATION']))
         if env['DEBUG_UNDEFINED']:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
+
+        if env['DEBUG_SANITIZE']:
+            env.Append(CXXFLAGS = ['-fsanitize=address'])
+            env.Append(LINKFLAGS = ['-fsanitize=address'])
+
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
         if env['PRIORITIZE_LINKING']:
@@ -1887,6 +1888,10 @@ if not HELP_REQUESTED:
     Export('env')
 
     plugin_base = env.Clone()
+
+    if env['COVERAGE']:
+        plugin_base.Append(LINKFLAGS='--coverage')
+        plugin_base.Append(CXXFLAGS='--coverage')
 
     Export('plugin_base')
 

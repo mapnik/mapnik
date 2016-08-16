@@ -21,6 +21,51 @@
  *****************************************************************************/
 
 #include <mapnik/json/topojson_grammar.hpp>
+#include <mapnik/json/generic_json.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::coordinate,
+    (double, x)
+    (double, y)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::arc,
+    (std::list<mapnik::topojson::coordinate>, coordinates)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::transform,
+    (double, scale_x)
+    (double, scale_y)
+    (double, translate_x)
+    (double, translate_y)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::bounding_box,
+    (double, minx)
+    (double, miny)
+    (double, maxx)
+    (double, maxy)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::topojson::topology,
+    (std::vector<mapnik::topojson::geometry>, geometries)
+    (std::vector<mapnik::topojson::arc>, arcs)
+    (boost::optional<mapnik::topojson::transform>, tr)
+    (boost::optional<mapnik::topojson::bounding_box>, bbox)
+   )
+
+
 
 namespace mapnik { namespace topojson {
 
@@ -42,30 +87,47 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     qi::_3_type _3;
     qi::_4_type _4;
     qi::_r1_type _r1;
+    qi::_a_type _a;
+    qi::_b_type _b;
+    qi::_c_type _c;
+    qi::_d_type _d;
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
     using phoenix::construct;
-    // generic json types
-    json_.value = json_.object | json_.array | json_.string_ | json_.number
+
+    geometry_type_dispatch.add
+        ("\"Point\"",1)
+        ("\"LineString\"",2)
+        ("\"Polygon\"",3)
+        ("\"MultiPoint\"",4)
+        ("\"MultiLineString\"",5)
+        ("\"MultiPolygon\"",6)
+        ("\"GeometryCollection\"",7)
         ;
 
-    json_.pairs = json_.key_value % lit(',')
+    // error handler
+    boost::phoenix::function<ErrorHandler> const error_handler;
+    boost::phoenix::function<create_geometry_impl> const create_geometry;
+    // generic JSON types
+    json.value = json.object | json.array | json.string_ | json.number
         ;
 
-    json_.key_value = (json_.string_ >> lit(':') >> json_.value)
+    json.key_value = json.string_ > lit(':') > json.value
         ;
 
-    json_.object = lit('{') >> *json_.pairs >> lit('}')
+    json.object = lit('{')
+        > -(json.key_value % lit(','))
+        > lit('}')
         ;
 
-    json_.array = lit('[')
-        >> json_.value >> *(lit(',') >> json_.value)
-        >> lit(']')
+    json.array = lit('[')
+        > -(json.value % lit(','))
+        > lit(']')
         ;
 
-    json_.number = json_.strict_double[_val = json_.double_converter(_1)]
-        | json_.int__[_val = json_.integer_converter(_1)]
+    json.number = json.strict_double[_val = json.double_converter(_1)]
+        | json.int__[_val = json.integer_converter(_1)]
         | lit("true")[_val = true]
         | lit("false")[_val = false]
         | lit("null")[_val = construct<value_null>()]
@@ -96,117 +158,70 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     objects = lit("\"objects\"")
         >> lit(':')
         >> lit('{')
-        >> -((omit[json_.string_]
+        >> -((omit[json.string_]
               >> lit(':')
-              >>  (geometry_collection(_val) | geometry)) % lit(','))
+              >>  (geometry_collection(_val) | geometry[push_back(_val, _1)]) % lit(',')))
         >> lit('}')
         ;
 
-    geometry =
-        point |
-        linestring |
-        polygon |
-        multi_point |
-        multi_linestring |
-        multi_polygon |
-        omit[json_.object]
+    geometry = lit('{')[_a = 0]
+        > ((lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
+           |
+           (lit("\"coordinates\"") > lit(':') > coordinates[_b = _1])
+           |
+           (lit("\"arcs\"") > lit(':') > rings_array[_c = _1])
+           |
+           properties_[_d = _1]
+           |
+           json.key_value) % lit(',')
+        > lit('}')[_val = create_geometry(_a, _b, _c, _d)]
         ;
+
 
     geometry_collection =  lit('{')
-               >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
-               >> -(lit(',') >> omit[bbox])
-               >> lit(',') >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry[push_back(_r1, _1)] % lit(','))
-               >> lit(']')
-               >> lit('}')
-        ;
-    point = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"Point\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate)
-            ^ (lit(',') >> properties) /*^ (lit(',') >> omit[id])*/)
+        >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"")
+        >> lit(',') >> lit("\"geometries\"") >> lit(':')
+        >> lit('[')
+        >> -(geometry[push_back(_r1, _1)] % lit(','))
+        >> lit(']')
         >> lit('}')
-        ;
-
-    multi_point = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"MultiPoint\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':')
-             >> lit('[') >> -(coordinate % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    linestring = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"LineString\"")
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[') >> int_ >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    multi_linestring = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"MultiLineString\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[')
-             >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    polygon = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"Polygon\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
-             >> lit('[') >> -(ring % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    multi_polygon = lit('{')
-        >> lit("\"type\"") >> lit(':') >> lit("\"MultiPolygon\"")
-        >> -(lit(',') >> omit[bbox])
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
-             >> lit('[')
-             >> -((lit('[') >> -(ring % lit(',')) >> lit(']')) % lit(','))
-             >> lit(']')) ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
-        >> lit('}')
-        ;
-
-    id = lit("\"id\"") >> lit(':') >> omit[json_.value]
         ;
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
         ;
+    rings = lit('[') >> -(ring % lit(',')) >> lit(']')
+        ;
+    rings_array = lit('[') >> -(rings % lit(',')) >> lit(']')
+        |
+        rings
+        |
+        ring
+        ;
 
-    properties = lit("\"properties\"")
+    properties_ = lit("\"properties\"")
         >> lit(':')
-        >> (( lit('{') >> attributes >> lit('}')) | json_.object)
+        >> lit('{') >> (json.string_ >> lit(':') >> json.value) % lit(',') >> lit('}')
         ;
-
-    attributes = (json_.string_ >> lit(':') >> attribute_value) % lit(',')
-        ;
-
-    attribute_value %= json_.number | json_.string_  ;
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;
 
-    arc = lit('[') >> -(coordinate % lit(',')) >> lit(']') ;
+    arc = lit('[') >> -(coordinate_ % lit(',')) >> lit(']') ;
 
-    coordinate = lit('[') >> double_ >> lit(',') >> double_ >> lit(']');
+    coordinate_ = lit('[') > double_ > lit(',') > double_ > lit(']');
+
+    coordinates = (lit('[') >> coordinate_ % lit(',') > lit(']'))
+        | coordinate_;
 
     topology.name("topology");
     transform.name("transform");
     objects.name("objects");
     arc.name("arc");
     arcs.name("arcs");
-    json_.value.name("value");
-    coordinate.name("coordinate");
-
-    point.name("point");
-    multi_point.name("multi_point");
-    linestring.name("linestring");
-    polygon.name("polygon");
-    multi_polygon.name("multi_polygon");
+    json.value.name("value");
+    coordinate_.name("coordinate");
+    geometry.name("geometry");
+    properties_.name("properties");
     geometry_collection.name("geometry_collection");
     // error handler
     on_error<fail>(topology, error_handler(_1, _2, _3, _4));

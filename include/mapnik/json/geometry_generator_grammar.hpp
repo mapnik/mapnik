@@ -27,12 +27,12 @@
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
 #include <boost/spirit/home/karma/domain.hpp>
 #pragma GCC diagnostic pop

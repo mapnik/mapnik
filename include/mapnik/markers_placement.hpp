@@ -29,7 +29,6 @@
 #include <mapnik/markers_placements/vertext_first.hpp>
 #include <mapnik/markers_placements/vertext_last.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
-#include <mapnik/util/variant.hpp>
 
 namespace mapnik
 {
@@ -38,70 +37,99 @@ template <typename Locator, typename Detector>
 class markers_placement_finder : util::noncopyable
 {
 public:
-    using markers_placement = util::variant<markers_point_placement<Locator, Detector>,
-                                            markers_line_placement<Locator, Detector>,
-                                            markers_interior_placement<Locator, Detector>,
-                                            markers_vertex_first_placement<Locator, Detector>,
-                                            markers_vertex_last_placement<Locator, Detector>>;
-
-    class get_point_visitor
-    {
-    public:
-        get_point_visitor(double &x, double &y, double &angle, bool ignore_placement)
-            : x_(x), y_(y), angle_(angle), ignore_placement_(ignore_placement)
-        {
-        }
-
-        template <typename T>
-        bool operator()(T &placement) const
-        {
-            return placement.get_point(x_, y_, angle_, ignore_placement_);
-        }
-
-    private:
-        double &x_, &y_, &angle_;
-        bool ignore_placement_;
-    };
-
     markers_placement_finder(marker_placement_e placement_type,
                              Locator &locator,
                              Detector &detector,
                              markers_placement_params const& params)
-        : placement_(create(placement_type, locator, detector, params))
+        : placement_type_(placement_type)
     {
+        switch (placement_type)
+        {
+        default:
+        case MARKER_POINT_PLACEMENT:
+            construct(&point_, locator, detector, params);
+            break;
+        case MARKER_INTERIOR_PLACEMENT:
+            construct(&interior_, locator, detector, params);
+            break;
+        case MARKER_LINE_PLACEMENT:
+            construct(&line_, locator, detector, params);
+            break;
+        case MARKER_VERTEX_FIRST_PLACEMENT:
+            construct(&vertex_first_, locator, detector, params);
+            break;
+        case MARKER_VERTEX_LAST_PLACEMENT:
+            construct(&vertex_last_, locator, detector, params);
+            break;
+        }
+    }
+
+    ~markers_placement_finder()
+    {
+        switch (placement_type_)
+        {
+        default:
+        case MARKER_POINT_PLACEMENT:
+            destroy(&point_);
+            break;
+        case MARKER_INTERIOR_PLACEMENT:
+            destroy(&interior_);
+            break;
+        case MARKER_LINE_PLACEMENT:
+            destroy(&line_);
+            break;
+        case MARKER_VERTEX_FIRST_PLACEMENT:
+            destroy(&vertex_first_);
+            break;
+        case MARKER_VERTEX_LAST_PLACEMENT:
+            destroy(&vertex_last_);
+            break;
+        }
     }
 
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
-        return util::apply_visitor(get_point_visitor(x, y, angle, ignore_placement), placement_);
-    }
-
-private:
-    // Factory function for particular placement implementations.
-    static markers_placement create(marker_placement_e placement_type,
-                                    Locator &locator,
-                                    Detector &detector,
-                                    markers_placement_params const& params)
-    {
-        switch (placement_type)
+        switch (placement_type_)
         {
+        default:
         case MARKER_POINT_PLACEMENT:
-            return markers_point_placement<Locator, Detector>(locator,detector,params);
+            return point_.get_point(x, y, angle, ignore_placement);
         case MARKER_INTERIOR_PLACEMENT:
-            return markers_interior_placement<Locator, Detector>(locator,detector,params);
+            return interior_.get_point(x, y, angle, ignore_placement);
         case MARKER_LINE_PLACEMENT:
-            return markers_line_placement<Locator, Detector>(locator,detector,params);
+            return line_.get_point(x, y, angle, ignore_placement);
         case MARKER_VERTEX_FIRST_PLACEMENT:
-            return markers_vertex_first_placement<Locator, Detector>(locator,detector,params);
+            return vertex_first_.get_point(x, y, angle, ignore_placement);
         case MARKER_VERTEX_LAST_PLACEMENT:
-            return markers_vertex_last_placement<Locator, Detector>(locator,detector,params);
-        default: // point
-            return markers_point_placement<Locator, Detector>(locator,detector,params);
+            return vertex_last_.get_point(x, y, angle, ignore_placement);
         }
     }
 
-    markers_placement placement_;
+private:
+    marker_placement_e const placement_type_;
+
+    union
+    {
+        markers_point_placement<Locator, Detector> point_;
+        markers_line_placement<Locator, Detector> line_;
+        markers_interior_placement<Locator, Detector> interior_;
+        markers_vertex_first_placement<Locator, Detector> vertex_first_;
+        markers_vertex_last_placement<Locator, Detector> vertex_last_;
+    };
+
+    template <typename T>
+    static T* construct(T* what, Locator & locator, Detector & detector,
+                        markers_placement_params const& params)
+    {
+        return new(what) T(locator, detector, params);
+    }
+
+    template <typename T>
+    static void destroy(T* what)
+    {
+        what->~T();
+    }
 };
 
 }

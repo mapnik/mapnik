@@ -1,3 +1,4 @@
+
 #include "catch.hpp"
 
 #include <mapnik/geometry.hpp>
@@ -43,6 +44,8 @@ SECTION("point -- geometry object") {
     CHECK( failure == boost::geometry::no_failure );
 }
 
+#if BOOST_VERSION < 106000
+
 SECTION("point unitialized") {
     mapnik::geometry::point<double> pt2;
     CHECK( mapnik::geometry::is_valid(pt2) );
@@ -53,6 +56,37 @@ SECTION("point unitialized") {
     CHECK( mapnik::geometry::is_valid(pt2, failure2) );
     CHECK( failure2 == boost::geometry::no_failure );
 }
+#endif
+
+#if BOOST_VERSION >= 106000
+
+SECTION("point NaN") {
+    mapnik::geometry::point<double> pt(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN());
+    CHECK( std::isnan(pt.x) );
+    CHECK( std::isnan(pt.y) );
+    CHECK( !mapnik::geometry::is_valid(pt) );
+    std::string message;
+    CHECK( !mapnik::geometry::is_valid(pt, message) );
+    CHECK( message == "Geometry has point(s) with invalid coordinate(s)");
+    boost::geometry::validity_failure_type failure;
+    CHECK( !mapnik::geometry::is_valid(pt, failure) );
+    CHECK( failure == boost::geometry::failure_invalid_coordinate );
+}
+
+SECTION("point Infinity") {
+    mapnik::geometry::point<double> pt(std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
+    CHECK( std::isinf(pt.x) );
+    CHECK( std::isinf(pt.y) );
+    CHECK( !mapnik::geometry::is_valid(pt) );
+    std::string message;
+    CHECK( !mapnik::geometry::is_valid(pt, message) );
+    CHECK( message == "Geometry has point(s) with invalid coordinate(s)");
+    boost::geometry::validity_failure_type failure;
+    CHECK( !mapnik::geometry::is_valid(pt, failure) );
+    CHECK( failure == boost::geometry::failure_invalid_coordinate );
+}
+
+#else // BOOST_VERSION >= 1.60
 
 // This is funky that boost geometry is_valid does not check for NAN when dealing with a point
 // this test is here in case the logic ever changes
@@ -86,9 +120,11 @@ SECTION("point Infinity") {
     CHECK( failure == boost::geometry::no_failure );
 }
 
+#endif // BOOST_VERSION >= 1.60
+
 SECTION("multi point") {
     mapnik::geometry::multi_point<double> mpt;
-    mpt.add_coord(0,0);    
+    mpt.add_coord(0,0);
     mpt.add_coord(1,1);
     CHECK( mapnik::geometry::is_valid(mpt) );
     std::string message;
@@ -113,7 +149,7 @@ SECTION("multi point empty") {
 
 SECTION("line_string") {
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0,0);    
+    line.add_coord(0,0);
     line.add_coord(1,1);
     CHECK( mapnik::geometry::is_valid(line) );
     std::string message;
@@ -127,7 +163,7 @@ SECTION("line_string") {
 // This shouldn't fail -- test added in case logic ever changes
 SECTION("line_string repeated points") {
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0,0);    
+    line.add_coord(0,0);
     line.add_coord(1,1);
     line.add_coord(1,1);
     line.add_coord(2,2);
@@ -153,10 +189,10 @@ SECTION("line_string empty") {
 
 SECTION("multi_line_string") {
     mapnik::geometry::line_string<double> line1;
-    line1.add_coord(0,0);    
+    line1.add_coord(0,0);
     line1.add_coord(1,1);
     mapnik::geometry::line_string<double> line2;
-    line2.add_coord(0,1);    
+    line2.add_coord(0,1);
     line2.add_coord(1,2);
     mapnik::geometry::multi_line_string<double> lines;
     lines.emplace_back(line1);
@@ -184,7 +220,7 @@ SECTION("multi_line_string empty") {
 SECTION("polygon") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(1,0);
     ring.add_coord(1,1);
     ring.add_coord(0,1);
@@ -202,7 +238,7 @@ SECTION("polygon") {
 SECTION("polygon invalid winding order") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(0,1);
     ring.add_coord(1,1);
     ring.add_coord(1,0);
@@ -221,7 +257,7 @@ SECTION("polygon invalid winding order") {
 SECTION("polygon 2 repeated points") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(1,0);
     ring.add_coord(1,1);
     ring.add_coord(1,1);
@@ -240,7 +276,7 @@ SECTION("polygon 2 repeated points") {
 SECTION("polygon 3 repeated points") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(1,0);
     ring.add_coord(1,1);
     ring.add_coord(1,1);
@@ -271,7 +307,7 @@ SECTION("polygon that is empty") {
 SECTION("polygon with spike") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(1,0);
     ring.add_coord(1,1);
     ring.add_coord(2,2);
@@ -291,14 +327,14 @@ SECTION("polygon with spike") {
 SECTION("polygon with hole") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(3,0);
     ring.add_coord(3,3);
     ring.add_coord(0,3);
     ring.add_coord(0,0);
     poly.set_exterior_ring(std::move(ring));
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(1,1);    
+    hole.add_coord(1,1);
     hole.add_coord(1,2);
     hole.add_coord(2,2);
     hole.add_coord(2,1);
@@ -316,7 +352,7 @@ SECTION("polygon with hole") {
 SECTION("polygon with empty hole") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(3,0);
     ring.add_coord(3,3);
     ring.add_coord(0,3);
@@ -337,14 +373,14 @@ SECTION("polygon with empty hole") {
 SECTION("polygon with hole with invalid winding order") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(3,0);
     ring.add_coord(3,3);
     ring.add_coord(0,3);
     ring.add_coord(0,0);
     poly.set_exterior_ring(std::move(ring));
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(1,1);    
+    hole.add_coord(1,1);
     hole.add_coord(2,1);
     hole.add_coord(2,2);
     hole.add_coord(1,2);
@@ -363,7 +399,7 @@ SECTION("multi polygon") {
     mapnik::geometry::multi_polygon<double> mp;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(1,0);
     ring.add_coord(1,1);
     ring.add_coord(0,1);
@@ -371,7 +407,7 @@ SECTION("multi polygon") {
     poly.set_exterior_ring(std::move(ring));
     mapnik::geometry::polygon<double> poly2;
     mapnik::geometry::linear_ring<double> ring2;
-    ring2.add_coord(0,0);    
+    ring2.add_coord(0,0);
     ring2.add_coord(-1,0);
     ring2.add_coord(-1,-1);
     ring2.add_coord(0,-1);
@@ -392,14 +428,14 @@ SECTION("multi polygon with hole") {
     mapnik::geometry::multi_polygon<double> mp;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
+    ring.add_coord(0,0);
     ring.add_coord(3,0);
     ring.add_coord(3,3);
     ring.add_coord(0,3);
     ring.add_coord(0,0);
     poly.set_exterior_ring(std::move(ring));
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(1,1);    
+    hole.add_coord(1,1);
     hole.add_coord(1,2);
     hole.add_coord(2,2);
     hole.add_coord(2,1);
@@ -407,14 +443,14 @@ SECTION("multi polygon with hole") {
     poly.add_hole(std::move(hole));
     mapnik::geometry::polygon<double> poly2;
     mapnik::geometry::linear_ring<double> ring2;
-    ring2.add_coord(0,0);    
+    ring2.add_coord(0,0);
     ring2.add_coord(-3,0);
     ring2.add_coord(-3,-3);
     ring2.add_coord(0,-3);
     ring2.add_coord(0,0);
     poly2.set_exterior_ring(std::move(ring2));
     mapnik::geometry::linear_ring<double> hole2;
-    hole2.add_coord(-1,-1);    
+    hole2.add_coord(-1,-1);
     hole2.add_coord(-1,-2);
     hole2.add_coord(-2,-2);
     hole2.add_coord(-2,-1);

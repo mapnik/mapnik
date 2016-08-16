@@ -63,7 +63,7 @@ CONFIG_MAPNIK_LIBNAME='%(mapnik_libname)s'
 CONFIG_MAPNIK_LIBPATH="%(mapnik_libpath)s"
 CONFIG_DEP_LIBS='%(dep_libs)s'
 CONFIG_MAPNIK_LDFLAGS="%(ldflags)s"
-CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg"
+CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg -I${CONFIG_PREFIX}/include/mapnik"
 CONFIG_DEP_INCLUDES="%(dep_includes)s"
 CONFIG_CXXFLAGS="%(cxxflags)s"
 CONFIG_CXX='%(cxx)s'
@@ -130,11 +130,6 @@ lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 mapnik_bundled_gdal_data = ''
 mapnik_bundled_proj_data = ''
 mapnik_bundled_icu_data = ''
-
-if config_env.get('MAPNIK_BUNDLED_SHARE_DIRECTORY'):
-    mapnik_bundled_gdal_data = 'lib/mapnik/share/gdal'
-    mapnik_bundled_proj_data = 'lib/mapnik/share/proj'
-    mapnik_bundled_icu_data = 'lib/mapnik/share/icu'
 
 configuration = {
     "git_revision": git_revision,

@@ -22,7 +22,6 @@
 // mapnik
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_filter_grammar.hpp>
-#include <mapnik/image_filter_grammar_impl.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

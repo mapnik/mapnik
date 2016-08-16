@@ -41,8 +41,39 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 
+namespace mapnik {
+namespace geometry {
 
-namespace mapnik { namespace detail {
+struct envelope_impl
+{
+    template <typename T>
+    box2d<double> operator() (T const& ref) const
+    {
+        return envelope<T>(ref);
+    }
+};
+
+mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom)
+{
+    return mapnik::util::apply_visitor(envelope_impl(), geom);
+}
+
+struct geometry_type_impl
+{
+    template <typename T>
+    auto operator() (T const& ref) const -> decltype(geometry_type<T>(ref))
+    {
+        return geometry_type<T>(ref);
+    }
+};
+
+mapnik::geometry::geometry_types geometry_type(mapnik::base_symbolizer_helper::geometry_cref const& geom)
+{
+    return mapnik::util::apply_visitor(geometry_type_impl(), geom);
+}
+
+} // geometry
+namespace detail {
 
 template <typename Points>
 struct apply_vertex_placement
@@ -389,7 +420,7 @@ bool text_symbolizer_helper::next_point_placement() const
             return true;
         }
         //No placement for this point. Keep it in points_ for next try.
-        point_itr_++;
+        ++point_itr_;
     }
     return false;
 }
@@ -434,7 +465,7 @@ void text_symbolizer_helper::init_marker() const
     if (marker->is<marker_null>()) return;
     agg::trans_affine trans;
     auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-    if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform);
+    if (image_transform) evaluate_transform(trans, feature_, vars_, *image_transform, scale_factor_);
     double width = marker->width();
     double height = marker->height();
     double px0 = - 0.5 * width;
@@ -459,7 +490,6 @@ void text_symbolizer_helper::init_marker() const
     marker_displacement.set(shield_dx,shield_dy);
     finder_.set_marker(std::make_shared<marker_info>(marker, trans), bbox, unlock_image, marker_displacement);
 }
-
 
 template text_symbolizer_helper::text_symbolizer_helper(
     text_symbolizer const& sym,

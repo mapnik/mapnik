@@ -41,7 +41,7 @@ struct weighted_vertex : private util::noncopyable
         vertex2d const& A = prev->coord;
         vertex2d const& B = next->coord;
         vertex2d const& C = coord;
-        return std::abs((double)((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
+        return std::abs(static_cast<double>((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
     }
 
     struct ascending_sort
@@ -76,16 +76,16 @@ struct sleeve
 
     bool inside(vertex2d const& q)
     {
-        bool inside=false;
+        bool _inside=false;
 
         for (unsigned i=0;i<4;++i)
         {
             if ((((v[i+1].y <= q.y) && (q.y < v[i].y)) ||
                  ((v[i].y <= q.y) && (q.y < v[i+1].y))) &&
                 (q.x < (v[i].x - v[i+1].x) * (q.y - v[i+1].y)/ (v[i].y - v[i+1].y) + v[i+1].x))
-                inside=!inside;
+                _inside=!_inside;
         }
-        return inside;
+        return _inside;
     }
 };
 
@@ -592,11 +592,11 @@ private:
         }
 
         // Slurp the points back out that haven't been marked as discarded
-        for (vertex2d const& vertex : vertices)
+        for (vertex2d const& v : vertices)
         {
-            if (vertex.cmd != SEG_END)
+            if (v.cmd != SEG_END)
             {
-                vertices_.emplace_back(vertex);
+                vertices_.emplace_back(v);
             }
         }
 

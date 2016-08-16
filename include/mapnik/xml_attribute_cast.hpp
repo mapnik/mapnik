@@ -55,7 +55,7 @@ struct do_xml_attribute_cast
 {
     static inline boost::optional<T> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& /*source*/)
     {
-        std::string err_msg("No conversion from std::string to");
+        std::string err_msg("No conversion from std::string to ");
         err_msg += std::string(typeid(T).name());
         throw std::runtime_error(err_msg);
     }
@@ -71,6 +71,19 @@ struct do_xml_attribute_cast<mapnik::boolean_type>
         if (mapnik::util::string2bool(source, result))
             return boost::optional<mapnik::boolean_type>(result);
         return boost::optional<mapnik::boolean_type>();
+    }
+};
+
+// specialization for mapnik::value_bool
+template <>
+struct do_xml_attribute_cast<mapnik::value_bool>
+{
+    static inline boost::optional<mapnik::value_bool> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    {
+        bool result;
+        if (mapnik::util::string2bool(source, result))
+            return boost::optional<mapnik::value_bool>(result);
+        return boost::optional<mapnik::value_bool>();
     }
 };
 

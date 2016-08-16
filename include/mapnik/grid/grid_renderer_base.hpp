@@ -24,11 +24,11 @@
 #define MAPNIK_GRID_RENDERER_BASE_HPP
 
 #pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include "agg_renderer_base.h"
+#include <mapnik/warning_ignore_agg.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
-#pragma GCC diagnostic pop
 #include <mapnik/grid/grid_pixfmt.hpp>
+#include "agg_renderer_base.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

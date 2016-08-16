@@ -24,9 +24,12 @@
 #define MAPNIK_IMAGE_SCALING_TRAITS_HPP
 
 // mapnik
-#include <mapnik/span_image_filter.h>
+#include <mapnik/image.hpp>
+#include <mapnik/image_scaling.hpp>
+#include <mapnik/span_image_filter.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_pixfmt_gray.h"
@@ -34,6 +37,7 @@
 #include "agg_span_image_filter_gray.h"
 #include "agg_span_image_filter_rgba.h"
 #include "agg_span_interpolator_linear.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik  { namespace detail {
 

@@ -55,6 +55,7 @@ private:
     mapnik::layer_descriptor desc_;
     datasource::datasource_t type_;
     bool bbox_check_;
+    bool type_set_;
     mutable box2d<double> extent_;
     mutable bool dirty_extent_ = true;
 };

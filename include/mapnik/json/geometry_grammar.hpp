@@ -30,9 +30,11 @@
 #include <mapnik/json/positions_grammar.hpp>
 #include <mapnik/json/geometry_util.hpp>
 
-// spirit::qi
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 
@@ -49,6 +51,8 @@ struct geometry_grammar :
     qi::symbols<char, int> geometry_type_dispatch;
     positions_grammar<Iterator> coordinates;
     boost::phoenix::function<create_geometry_impl> create_geometry;
+    // generic JSON
+    generic_json<Iterator> json_;
     // error handler
     ErrorHandler error_handler;
 };

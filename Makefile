@@ -7,6 +7,10 @@ ifeq ($(JOBS),)
 	JOBS:=1
 endif
 
+ifeq ($(HEAVY_JOBS),)
+	HEAVY_JOBS:=1
+endif
+
 all: mapnik
 
 install:
@@ -20,7 +24,8 @@ release:
 	git clone --depth 1 --branch v$${MAPNIK_VERSION} git@github.com:mapnik/mapnik.git $${TARBALL_NAME} && \
 	cd $${TARBALL_NAME} && \
 	git checkout "tags/v$${MAPNIK_VERSION}" && \
-	git submodule update --depth 1 --init && \
+	git submodule update --depth 100 --init && \
+	rm -rf deps/mapbox/variant/.git && \
 	rm -rf test/data/.git && \
 	rm -rf test/data/.gitignore && \
 	rm -rf test/data-visual/.git && \
@@ -37,22 +42,28 @@ python:
 	python bindings/python/test/visual.py -q
 
 src/json/libmapnik-json.a:
-	# we first build memory intensive files with -j1
-	$(PYTHON) scons/scons.py -j1 \
+	# we first build memory intensive files with -j$(HEAVY_JOBS)
+	$(PYTHON) scons/scons.py -j$(HEAVY_JOBS) \
 		--config=cache --implicit-cache --max-drift=1 \
-		src/renderer_common/process_group_symbolizer.os \
+		src/renderer_common/render_group_symbolizer.os \
+		src/renderer_common/render_markers_symbolizer.os \
+		src/renderer_common/render_thunk_extractor.os \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
 		src/css_color_grammar.os \
 		src/expression_grammar.os \
 		src/transform_expression_grammar.os \
-		src/image_filter_types.os \
-		src/agg/process_markers_symbolizer.os \
-		src/agg/process_group_symbolizer.os \
-		src/grid/process_markers_symbolizer.os \
-		src/grid/process_group_symbolizer.os \
-		src/cairo/process_markers_symbolizer.os \
-		src/cairo/process_group_symbolizer.os \
+		src/image_filter_grammar.os \
+		src/marker_helpers.os \
+		src/svg/svg_transform_parser.os \
+		src/agg/process_line_symbolizer.os \
+		plugins/input/geojson/geojson_datasource.os \
+		utils/mapnik-index/process_geojson_file.o \
+		src/svg/svg_path_parser.os \
+		src/svg/svg_parser.os \
+		src/svg/svg_points_parser.os \
+		src/svg/svg_transform_parser.os \
+
 
 mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
@@ -70,6 +81,8 @@ clean:
 	@find ./src/ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./src/ -name "*.a" -exec rm {} \;
+	@find ./ -name "*.gcda" -exec rm {} \;
+	@find ./ -name "*.gcno" -exec rm {} \;
 
 distclean:
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi

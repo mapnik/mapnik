@@ -20,80 +20,60 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CVS_GRAMMAR_HPP
-#define MAPNIK_CVS_GRAMMAR_HPP
+#ifndef MAPNIK_CSV_GRAMMAR_HPP
+#define MAPNIK_CSV_GRAMMAR_HPP
 
-//#define BOOST_SPIRIT_DEBUG
-
+#include <mapnik/csv/csv_types.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
 
 namespace mapnik {
 
 namespace qi = boost::spirit::qi;
-using csv_value  = std::string;
-using csv_line = std::vector<csv_value>;
-using csv_data = std::vector<csv_line>;
 
-template <typename Iterator>
-struct csv_white_space_skipper : qi::grammar<Iterator>
+struct csv_white_space_skipper : qi::primitive_parser<csv_white_space_skipper>
 {
-    csv_white_space_skipper()
-        : csv_white_space_skipper::base_type(skip)
+    template <typename Context, typename Iterator>
+    struct attribute
     {
-        using namespace qi;
-        qi::lit_type lit;
-        skip = +lit(' ')
-            ;
+        typedef qi::unused_type type;
+    };
+
+    template <typename Iterator, typename Context
+      , typename Skipper, typename Attribute>
+    bool parse(Iterator& first, Iterator const& last
+      , Context& /*context*/, Skipper const& skipper
+      , Attribute& /*attr*/) const
+    {
+        qi::skip_over(first, last, skipper);
+        if (first != last && *first == ' ')
+        {
+            while (++first != last && *first == ' ')
+                ;
+            return true;
+        }
+        return false;
     }
-    qi::rule<Iterator> skip;
+
+    template <typename Context>
+    qi::info what(Context& /*context*/) const
+    {
+        return qi::info("csv_white_space_skipper");
+    }
 };
 
-template <typename Iterator, typename Skipper = csv_white_space_skipper<Iterator> >
+
+template <typename Iterator, typename Skipper = csv_white_space_skipper>
 struct csv_line_grammar : qi::grammar<Iterator, csv_line(char, char), Skipper>
 {
-    csv_line_grammar()
-        : csv_line_grammar::base_type(line)
-    {
-        using namespace qi;
-        qi::_a_type _a;
-        qi::_r1_type _r1;
-        qi::_r2_type _r2;
-        qi::lit_type lit;
-        qi::_1_type _1;
-        qi::char_type char_;
-        qi::omit_type omit;
-        unesc_char.add
-            ("\\a", '\a')
-            ("\\b", '\b')
-            ("\\f", '\f')
-            ("\\n", '\n')
-            ("\\r", '\r')
-            ("\\t", '\t')
-            ("\\v", '\v')
-            ("\\\\",'\\')
-            ("\\\'", '\'')
-            ("\\\"", '\"')
-            ("\"\"", '\"') // double quote
-            ;
-        line = -omit[char_("\n\r")] >> column(_r1, _r2) % lit(_r1)
-            ;
-        column = quoted(_r2) | *(char_ - (lit(_r1)))
-            ;
-        quoted = omit[char_(_r1)[_a = _1]] > text(_a) > -lit(_a) // support unmatched quotes or not (??)
-            ;
-        text = *(unesc_char | (char_ - lit(_r1)))
-            ;
-        BOOST_SPIRIT_DEBUG_NODES((line)(column)(quoted));
-    }
+    csv_line_grammar();
 private:
     qi::rule<Iterator, csv_line(char, char),  Skipper> line;
     qi::rule<Iterator, csv_value(char, char)> column; // no-skip
     qi::rule<Iterator, csv_value(char)> text; // no-skip
-    qi::rule<Iterator, qi::locals<char>, csv_value(char)> quoted; //no-skip
+    qi::rule<Iterator, csv_value(char)> quoted; // no-skip
     qi::symbols<char const, char const> unesc_char;
 };
 
 }
 
-#endif // MAPNIK_CVS_GRAMMAR_HPP
+#endif // MAPNIK_CSV_GRAMMAR_HPP

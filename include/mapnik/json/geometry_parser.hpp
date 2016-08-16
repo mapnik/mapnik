@@ -24,25 +24,13 @@
 #define MAPNIK_JSON_GEOMETRY_PARSER_HPP
 
 // mapnik
+#include <mapnik/geometry.hpp>
 
-
-#include <mapnik/json/geometry_grammar.hpp>
-
-// boost
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
+#include <string>
 
 namespace mapnik { namespace json {
 
-inline bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom)
-{
-    using namespace boost::spirit;
-    static const geometry_grammar<char const*> g;
-    standard::space_type space;
-    char const* start = json.c_str();
-    char const* end = start + json.length();
-    return qi::phrase_parse(start, end, g, space, geom);
-}
+bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom);
 
 }}
 

@@ -59,7 +59,7 @@ struct placement_finder_adapter
 
 };
 
-using vertex_converter_type = vertex_converter<clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
+using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 
 class base_symbolizer_helper
 {
@@ -158,6 +158,10 @@ protected:
     void init_marker() const;
 };
 
-} //namespace
+namespace geometry {
+MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
+}
+
+} //namespace mapnik
 
 #endif // SYMBOLIZER_HELPERS_HPP

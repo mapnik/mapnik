@@ -51,8 +51,10 @@
 #include <map>
 #include <tuple>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -317,12 +319,8 @@ struct evaluate_expression_wrapper<mapnik::dash_array>
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
         if (val.is_null()) return dash_array();
         dash_array dash;
-        std::vector<double> buf;
         std::string str = val.to_string();
-        if (util::parse_dasharray(str,buf))
-        {
-            util::add_dashes(buf,dash);
-        }
+        util::parse_dasharray(str,dash);
         return dash;
     }
 };

@@ -26,7 +26,8 @@
 // mapnik
 #include <mapnik/feature.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
 #include "agg_image_filters.h"
@@ -34,7 +35,7 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_gray.h"
-
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 

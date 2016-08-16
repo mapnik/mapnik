@@ -26,8 +26,11 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/path.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <tuple>

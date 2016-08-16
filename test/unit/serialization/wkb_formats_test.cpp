@@ -2,11 +2,9 @@
 
 #include <iostream>
 #include <mapnik/wkb.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/geometry_is_valid.hpp>
 #include <mapnik/geometry_is_simple.hpp>
 #include <mapnik/geometry_correct.hpp>
-#include <mapnik/feature_factory.hpp>
 #include <boost/version.hpp>
 
 TEST_CASE("geometry formats") {
@@ -54,9 +52,6 @@ SECTION("wkb") {
 
     unsigned char sq_invalid_blob[] = {
         0x23, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x40, 0x23 };
-
-    mapnik::context_ptr ctx(new mapnik::context_type);
-    mapnik::feature_ptr feature = mapnik::feature_factory::create(ctx, 1);
 
     // test of parsing wkb geometries
     try {

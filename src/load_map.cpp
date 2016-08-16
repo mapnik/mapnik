@@ -59,18 +59,22 @@
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/boolean.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <algorithm>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 using boost::tokenizer;
 
@@ -196,7 +200,7 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
             {
                 map.set_background(*bgcolor);
             }
-            
+
             optional<std::string> image_filename = map_node.get_opt_attr<std::string>("background-image");
             if (image_filename)
             {
@@ -751,7 +755,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 }
                 catch (...)
                 {
-                    throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
+                    throw config_error("Unknown exception occurred attempting to create datasoure for layer '" + lyr.name() + "'");
                 }
             }
         }
@@ -887,7 +891,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& nod
 {
     set_symbolizer_property<symbolizer_base,double>(sym, keys::simplify_tolerance, node);
     set_symbolizer_property<symbolizer_base,double>(sym, keys::smooth, node);
-    set_symbolizer_property<symbolizer_base,boolean_type>(sym, keys::clip, node);
+    set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::clip, node);
     set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, node);
     set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::geometry_transform, node);
     set_symbolizer_property<symbolizer_base,simplify_algorithm_e>(sym, keys::simplify_algorithm, node);
@@ -903,8 +907,8 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
         point_symbolizer sym;
         parse_symbolizer_base(sym, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
-        set_symbolizer_property<symbolizer_base,boolean_type>(sym, keys::allow_overlap, node);
-        set_symbolizer_property<symbolizer_base,boolean_type>(sym, keys::ignore_placement, node);
+        set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::allow_overlap, node);
+        set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::ignore_placement, node);
         set_symbolizer_property<symbolizer_base,point_placement_enum>(sym, keys::point_placement_type, node);
         set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::image_transform, node);
         if (file && !file->empty())
@@ -1007,9 +1011,9 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::width, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::height, node);
-        set_symbolizer_property<symbolizer_base,boolean_type>(sym, keys::allow_overlap, node);
-        set_symbolizer_property<symbolizer_base,boolean_type>(sym, keys::avoid_edges, node);
-        set_symbolizer_property<symbolizer_base,boolean_type>(sym, keys::ignore_placement, node);
+        set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::allow_overlap, node);
+        set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::avoid_edges, node);
+        set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::ignore_placement, node);
         set_symbolizer_property<symbolizer_base,color>(sym, keys::fill, node);
         set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::image_transform, node);
         set_symbolizer_property<symbolizer_base,marker_placement_enum>(sym, keys::markers_placement_type, node);
@@ -1168,7 +1172,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base,double>(sym, keys::shield_dx, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::shield_dy, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
-        set_symbolizer_property<symbolizer_base,mapnik::boolean_type>(sym, keys::unlock_image, node);
+        set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::unlock_image, node);
 
         std::string file = node.get_attr<std::string>("file");
         if (file.empty())
@@ -1339,7 +1343,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
 
         // premultiplied status of image
         optional<mapnik::boolean_type> premultiplied = node.get_opt_attr<mapnik::boolean_type>("premultiplied");
-        if (premultiplied) put(raster_sym, keys::premultiplied, *premultiplied);
+        if (premultiplied) put(raster_sym, keys::premultiplied, bool(*premultiplied));
 
         bool found_colorizer = false;
         for ( auto const& css : node)

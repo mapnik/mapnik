@@ -74,7 +74,7 @@ void glyph_positions::set_marker(marker_info_ptr mark, pixel_position const& mar
     marker_pos_ = marker_pos;
 }
 
-marker_info_ptr glyph_positions::get_marker() const
+marker_info_ptr const& glyph_positions::get_marker() const
 {
     return marker_info_;
 }

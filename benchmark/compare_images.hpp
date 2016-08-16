@@ -1,11 +1,10 @@
-#ifndef __MAPNIK_COMPARE_IMAGES_HPP__
-#define __MAPNIK_COMPARE_IMAGES_HPP__
+#ifndef MAPNIK_COMPARE_IMAGES_HPP
+#define MAPNIK_COMPARE_IMAGES_HPP
 
 #include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 
-using namespace mapnik;
 
 namespace benchmark {
 
@@ -23,15 +22,15 @@ namespace benchmark {
             throw mapnik::image_reader_exception("Failed to load: " + src_fn);
         }
 
-        const image_any desc_any = reader1->read(0,0,reader1->width(), reader1->height());
-        const image_any src_any = reader2->read(0,0,reader2->width(), reader2->height());
+        const mapnik::image_any desc_any = reader1->read(0,0,reader1->width(), reader1->height());
+        const mapnik::image_any src_any = reader2->read(0,0,reader2->width(), reader2->height());
 
-        image_rgba8 const& dest = util::get<image_rgba8>(desc_any);
-        image_rgba8 const& src = util::get<image_rgba8>(src_any);
+        mapnik::image_rgba8 const& dest = mapnik::util::get<mapnik::image_rgba8>(desc_any);
+        mapnik::image_rgba8 const& src = mapnik::util::get<mapnik::image_rgba8>(src_any);
 
         return compare(dest, src, 0, true) == 0;
     }
 
 }
 
-#endif // __MAPNIK_COMPARE_IMAGES_HPP__
+#endif // MAPNIK_COMPARE_IMAGES_HPP

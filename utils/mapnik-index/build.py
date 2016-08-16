@@ -24,18 +24,19 @@ import glob
 from copy import copy
 
 Import ('env')
+Import ('plugin_base')
 
-program_env = env.Clone()
+program_env = plugin_base.Clone()
 
 source = Split(
     """
     mapnik-index.cpp
     process_csv_file.cpp
     process_geojson_file.cpp
+    ../../plugins/input/csv/csv_utils.cpp
     """
     )
 
-#headers = ['#plugins/input/shape'] + env['CPPPATH']
 headers = env['CPPPATH']
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']

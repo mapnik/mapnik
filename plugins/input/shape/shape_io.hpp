@@ -23,16 +23,16 @@
 #ifndef SHAPE_IO_HPP
 #define SHAPE_IO_HPP
 
+// stl
+#include <memory>
+#include <ios>
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
-
+#include <mapnik/util/spatial_index.hpp>
 // boost
 #include <boost/optional.hpp>
-
-// stl
-#include <memory>
-
+//
 #include "dbfile.hpp"
 #include "shapefile.hpp"
 
@@ -72,7 +72,13 @@ public:
 
     inline bool has_index() const
     {
-        return (index_ && index_->is_open());
+        if (index_ && index_->is_open())
+        {
+            bool status = mapnik::util::check_spatial_index(index_->file());
+            index_->seek(0);// rewind
+            return status;
+        }
+        return false;
     }
 
     inline int id() const { return id_;}
@@ -80,6 +86,8 @@ public:
     static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
     static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
     static mapnik::geometry::geometry<double> read_polygon(shape_file::record_type & record);
+    static mapnik::geometry::geometry<double> read_polyline_parts(shape_file::record_type & record,std::vector<std::pair<int,int>> const& parts);
+    static mapnik::geometry::geometry<double> read_polygon_parts(shape_file::record_type & record, std::vector<std::pair<int,int>> const& parts);
 
     shapeType type_;
     shape_file shp_;

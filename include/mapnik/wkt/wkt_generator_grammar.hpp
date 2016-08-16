@@ -27,7 +27,6 @@
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -105,7 +104,7 @@ template <typename OutputIterator, typename Geometry>
 struct wkt_generator_grammar :
     karma::grammar<OutputIterator, Geometry const& ()>
 {
-    using coord_type = typename Geometry::value_type;
+    using coord_type = typename Geometry::coord_type;
     wkt_generator_grammar();
     // rules
     karma::rule<OutputIterator, Geometry const&()> geometry;

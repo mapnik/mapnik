@@ -34,8 +34,10 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <map>

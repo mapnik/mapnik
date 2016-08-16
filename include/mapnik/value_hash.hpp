@@ -26,20 +26,20 @@
 // mapnik
 #include <mapnik/util/variant.hpp>
 #include <mapnik/value_types.hpp>
-
 // stl
 #include <functional>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
+
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace detail {
 
-template <class T>
-inline void hash_combine(std::size_t & seed, T const& v)
+inline void hash_combine(std::size_t & seed, std::size_t val)
 {
-    std::hash<T> hasher;
-    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+    seed ^= val + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 struct value_hasher
@@ -52,6 +52,11 @@ struct value_hasher
     std::size_t operator() (value_unicode_string const& val) const
     {
         return static_cast<std::size_t>(val.hashCode());
+    }
+
+    std::size_t operator()(value_integer val) const
+    {
+        return static_cast<std::size_t>(val);
     }
 
     template <class T>
@@ -67,8 +72,9 @@ struct value_hasher
 template <typename T>
 std::size_t mapnik_hash_value(T const& val)
 {
-    std::size_t seed = util::apply_visitor(detail::value_hasher(), val);
-    detail::hash_combine(seed, val.get_type_index());
+    std::size_t seed = 0;
+    detail::hash_combine(seed, util::apply_visitor(detail::value_hasher(), val));
+    detail::hash_combine(seed, val.which());
     return seed;
 }
 

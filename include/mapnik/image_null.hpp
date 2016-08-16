@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/image.hpp>
 #include <mapnik/pixel_types.hpp>
 
 //stl
@@ -47,9 +48,6 @@ public:
           bool /*initialize*/ = true,
           bool /*premultiplied*/ = false,
           bool /*painted*/ = false) {}
-    image(image<null_t> const&) {}
-    image(image<null_t> &&) noexcept {}
-    image<null_t>& operator=(image<null_t>) { return *this; }
     bool operator==(image<null_t> const&) const { return true; }
     bool operator<(image<null_t> const&) const { return false; }
 

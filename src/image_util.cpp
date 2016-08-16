@@ -38,13 +38,14 @@
 #include <mapnik/safe_cast.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
-
 #endif
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>
@@ -111,7 +112,7 @@ MAPNIK_DECL void save_to_stream(T const& image,
     {
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-        if (t == "png" || boost::algorithm::starts_with(t, "png"))
+        if (boost::algorithm::starts_with(t, "png"))
         {
             png_saver_pal visitor(stream, t, palette);
             mapnik::util::apply_visitor(visitor, image);
@@ -141,7 +142,7 @@ MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
     {
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-        if (t == "png" || boost::algorithm::starts_with(t, "png"))
+        if (boost::algorithm::starts_with(t, "png"))
         {
             png_saver_pal visitor(stream, t, palette);
             visitor(image);
@@ -172,7 +173,7 @@ MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
     {
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-        if (t == "png" || boost::algorithm::starts_with(t, "png"))
+        if (boost::algorithm::starts_with(t, "png"))
         {
             png_saver_pal visitor(stream, t, palette);
             visitor(image);
@@ -200,7 +201,7 @@ MAPNIK_DECL void save_to_stream(T const& image,
     {
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-        if (t == "png" || boost::algorithm::starts_with(t, "png"))
+        if (boost::algorithm::starts_with(t, "png"))
         {
             png_saver visitor(stream, t);
             util::apply_visitor(visitor, image);
@@ -236,7 +237,7 @@ MAPNIK_DECL void save_to_stream<image_rgba8>(image_rgba8 const& image,
     {
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-        if (t == "png" || boost::algorithm::starts_with(t, "png"))
+        if (boost::algorithm::starts_with(t, "png"))
         {
             png_saver visitor(stream, t);
             visitor(image);
@@ -276,7 +277,7 @@ MAPNIK_DECL void save_to_stream<image_view_rgba8>(image_view_rgba8 const& image,
     {
         std::string t = type;
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
-        if (t == "png" || boost::algorithm::starts_with(t, "png"))
+        if (boost::algorithm::starts_with(t, "png"))
         {
             png_saver visitor(stream, t);
             visitor(image);
@@ -2087,7 +2088,7 @@ struct visitor_view_to_stream
         : os_(os) {}
 
     template <typename T>
-    void operator() (T const& view)
+    void operator() (T const& view) const
     {
         for (std::size_t i=0;i<view.height();i++)
         {

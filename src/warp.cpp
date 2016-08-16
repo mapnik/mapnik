@@ -31,7 +31,8 @@
 #include <mapnik/raster.hpp>
 #include <mapnik/proj_transform.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_image_filters.h"
 #include "agg_trans_bilinear.h"
 #include "agg_span_interpolator_linear.h"
@@ -45,6 +46,7 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_renderer_scanline.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -181,10 +183,10 @@ struct warp_image_visitor
           nodata_value_(nodata_value)
     {}
 
-    void operator() (image_null const&) {}
+    void operator() (image_null const&) const {}
 
     template <typename T>
-    void operator() (T const& source)
+    void operator() (T const& source) const
     {
         using image_type = T;
         //source and target image data types must match

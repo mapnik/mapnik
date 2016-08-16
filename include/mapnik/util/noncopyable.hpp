@@ -28,6 +28,15 @@ namespace mapnik { namespace util {
 namespace non_copyable_
 {
 
+class movable
+{
+protected:
+    constexpr movable() = default;
+    ~movable() = default;
+    movable( movable && ) = default;
+    movable& operator=(movable && ) = default;
+};
+
 class noncopyable
 {
 protected:
@@ -36,8 +45,10 @@ protected:
     noncopyable( noncopyable const& ) = delete;
     noncopyable& operator=(noncopyable const& ) = delete;
 };
+
 }
 
+using movable = non_copyable_::movable;
 using noncopyable = non_copyable_::noncopyable;
 
 }}

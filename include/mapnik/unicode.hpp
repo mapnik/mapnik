@@ -45,6 +45,10 @@ public:
 private:
     UConverter * conv_;
 };
+
+// convinience method
+void MAPNIK_DECL to_utf8(mapnik::value_unicode_string const& input, std::string & target);
+
 }
 
 #endif // MAPNIK_UNICODE_HPP

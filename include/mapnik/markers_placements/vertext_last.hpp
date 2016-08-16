@@ -31,13 +31,8 @@ template <typename Locator, typename Detector>
 class markers_vertex_last_placement : public markers_point_placement<Locator, Detector>
 {
 public:
-    markers_vertex_last_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
-        : markers_point_placement<Locator, Detector>(locator, detector, params)
-    {}
-
-    markers_vertex_last_placement(markers_vertex_last_placement && rhs)
-        : markers_point_placement<Locator, Detector>(std::move(rhs))
-    {}
+    using point_placement = markers_point_placement<Locator, Detector>;
+    using point_placement::point_placement;
 
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
@@ -80,19 +75,9 @@ public:
             }
         }
 
-        box2d<double> box = this->perform_transform(angle, x, y);
-        if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+        if (!this->push_to_detector(x, y, angle, ignore_placement))
         {
             return false;
-        }
-        if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
-        {
-            return false;
-        }
-
-        if (!ignore_placement)
-        {
-            this->detector_.insert(box);
         }
 
         this->done_ = true;
