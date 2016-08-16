@@ -96,6 +96,45 @@ TEST_CASE("geojson") {
             }
         }
 
+        SECTION("GeoJSON an empty FeatureCollection")
+        {
+            for (auto cache_features : {true, false})
+            {
+                mapnik::parameters params;
+                params["type"] = "geojson";
+                params["file"] = "./test/data/json/empty_featurecollection.json";
+                params["cache_features"] = cache_features;
+                auto ds = mapnik::datasource_cache::instance().create(params);
+                CHECK(ds != nullptr);
+                auto fs = all_features(ds);
+                REQUIRE(!mapnik::is_valid(fs));
+                while (auto f = fs->next())
+                {
+                    CHECK(false); // shouldn't get here
+                }
+            }
+        }
+
+        SECTION("GeoJSON attribute descriptors are alphabetically ordered")
+        {
+            for (auto cache_features : {true, false})
+            {
+                mapnik::parameters params;
+                params["type"] = "geojson";
+                params["file"] = "./test/data/json/properties.json";
+                params["cache_features"] = cache_features;
+                auto ds = mapnik::datasource_cache::instance().create(params);
+                CHECK(ds != nullptr);
+                std::vector<std::string> expected_names = {"a", "b", "c", "d", "e"};
+                auto fields = ds->get_descriptor().get_descriptors();
+                std::size_t index = 0;
+                for (auto const& field : fields)
+                {
+                    REQUIRE(field.get_name() == expected_names[index++]);
+                }
+            }
+        }
+
         SECTION("GeoJSON invalid Point")
         {
             for (auto cache_features : {true, false})
@@ -285,8 +324,6 @@ TEST_CASE("geojson") {
                     }
                     auto features = ds->features(query);
                     auto features2 = ds->features_at_point(ds->envelope().center(),0);
-                    REQUIRE(features != nullptr);
-                    REQUIRE(features2 != nullptr);
                     auto feature = features->next();
                     auto feature2 = features2->next();
                     REQUIRE(feature != nullptr);
@@ -404,7 +441,6 @@ TEST_CASE("geojson") {
                         query.add_property_name(field.get_name());
                     }
                     auto features = ds->features(query);
-                    REQUIRE(features != nullptr);
                     auto feature = features->next();
                     REQUIRE(feature != nullptr);
                     REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
@@ -693,7 +729,6 @@ TEST_CASE("geojson") {
                     REQUIRE_FIELD_NAMES(fields, names);
 
                     auto fs = all_features(ds);
-                    REQUIRE(bool(fs));
                     std::initializer_list<attr> attrs = {
                         attr{"name", tr.transcode("Test")},
                         attr{"NOM_FR", tr.transcode("Québec")},

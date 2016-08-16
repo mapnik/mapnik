@@ -746,7 +746,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         else s << " (map has no layers)";
         throw std::out_of_range(s.str());
     }
-    return mapnik::make_empty_featureset();
+    return mapnik::make_invalid_featureset();
 }
 
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const

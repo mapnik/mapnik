@@ -30,7 +30,6 @@ function install() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
     if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/${2} ]]; then
         mason install $1 $2
-        mason link $1 $2
         if [[ ${3:-false} != false ]]; then
             LA_FILE=$(mason prefix $1 $2)/lib/$3.la
             if [[ -f ${LA_FILE} ]]; then
@@ -40,6 +39,7 @@ function install() {
             fi
         fi
     fi
+    mason link $1 $2
 }
 
 ICU_VERSION="55.1"
@@ -60,7 +60,7 @@ function install_mason_deps() {
     install protobuf 2.6.1 &
     # technically protobuf is not a mapnik core dep, but installing
     # here by default helps make mapnik-vector-tile builds easier
-    install webp 0.4.2 libwebp &
+    install webp 0.5.0 libwebp &
     install gdal 1.11.2 libgdal &
     install boost 1.61.0 &
     install boost_libsystem 1.61.0 &

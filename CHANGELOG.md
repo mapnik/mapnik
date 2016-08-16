@@ -36,6 +36,7 @@ Released: xx-xx-xx
 - Added support for quantising small (less than 3 pixel) images (ref #3466)
 - Added support for natural logarithm function in expressions (ref #3475)
 - Improved logic determining if certain compiler features are available e.g `inheriting constructors` (MSVC)
+- GeoJSON - corrected quoting in `stringgifird` objects (ref #3491)
 
 ## 3.0.11
 
