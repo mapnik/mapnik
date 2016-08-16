@@ -55,7 +55,7 @@ int main ( int, char** )
     try {
         std::cout << " running demo ... \n";
         datasource_cache::instance().register_datasources("plugins/input/");
-        freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.35/ttf/DejaVuSans.ttf");
+        freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.37/ttf/DejaVuSans.ttf");
 
         Map m(800,600);
         m.set_background(parse_color("white"));
