@@ -51,11 +51,11 @@ template <typename T> class MAPNIK_DECL box2d
 public:
     using value_type = T;
     using box2d_type = box2d<value_type>;
-private:
     T minx_;
     T miny_;
     T maxx_;
     T maxy_;
+private:
     friend inline void swap(box2d_type & lhs, box2d_type & rhs)
     {
         using std::swap;
