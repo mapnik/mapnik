@@ -51,10 +51,16 @@ BOOST_FUSION_ADAPT_TPL_STRUCT(
 namespace mapnik {
 
 namespace detail {
-auto minx = [](auto& ctx) { _val(ctx) = _attr(ctx); };
-auto miny = [](auto& ctx) { _val(ctx) = _attr(ctx); };
-auto maxx = [](auto& ctx) { _val(ctx) = _attr(ctx); };
-auto maxy = [](auto& ctx) { _val(ctx) = _attr(ctx); };
+
+template <typename T>
+struct assign
+{
+    template <typename Context>
+    void operator() (Context & ctx) const
+    {
+        _val(ctx) = safe_cast<T>(_attr(ctx));
+    }
+};
 }
 
 template <typename T>
@@ -361,10 +367,10 @@ bool box2d<T>::from_string(std::string const& str)
     boost::spirit::x3::ascii::space_type space;
     bool r = boost::spirit::x3::phrase_parse(str.begin(),
                                              str.end(),
-                                             double_[detail::minx] >> -lit(',') >>
-                                             double_[detail::miny] >> -lit(',') >>
-                                             double_[detail::maxx] >> -lit(',') >>
-                                             double_[detail::maxy],
+                                             double_[detail::assign<T>()] >> -lit(',') >>
+                                             double_[detail::assign<T>()] >> -lit(',') >>
+                                             double_[detail::assign<T>()] >> -lit(',') >>
+                                             double_[detail::assign<T>()],
                                              space,
                                              *this);
     return r;
