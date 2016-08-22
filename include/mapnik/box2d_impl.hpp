@@ -48,9 +48,7 @@ BOOST_FUSION_ADAPT_TPL_STRUCT(
     (T, maxx_),
     (T, maxy_))
 
-namespace mapnik {
-
-namespace detail {
+namespace mapnik { namespace detail { namespace {
 
 template <typename T>
 struct assign
@@ -61,7 +59,8 @@ struct assign
         _val(ctx) = safe_cast<T>(_attr(ctx));
     }
 };
-}
+} // anonymous
+} // detail
 
 template <typename T>
 box2d<T>::box2d()
