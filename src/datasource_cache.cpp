@@ -117,7 +117,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #endif
         create_ds create_datasource = reinterpret_cast<create_ds>(itr->second->get_symbol("create"));
 
-    if (! create_datasource)
+    if (!create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  itr->second->get_error());

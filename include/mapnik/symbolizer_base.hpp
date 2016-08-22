@@ -101,7 +101,7 @@ struct strict_value : value_base_type
     strict_value() = default;
 
     strict_value(const char* val)
-        : value_base_type(val) {}
+        : value_base_type(std::string(val)) {}
 
     template <typename T>
     strict_value(T const& obj)

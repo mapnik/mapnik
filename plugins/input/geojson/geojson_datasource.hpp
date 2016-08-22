@@ -104,7 +104,7 @@ private:
     std::unique_ptr<spatial_index_type> tree_;
     bool cache_features_ = true;
     bool has_disk_index_ = false;
-    const std::size_t num_features_to_query_ = 5;
+    const std::size_t num_features_to_query_;
 };
 
 

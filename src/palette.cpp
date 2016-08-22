@@ -65,16 +65,6 @@ rgba_palette::rgba_palette()
 #endif
 }
 
-const std::vector<rgb>& rgba_palette::palette() const
-{
-    return rgb_pal_;
-}
-
-const std::vector<unsigned>& rgba_palette::alphaTable() const
-{
-    return alpha_pal_;
-}
-
 bool rgba_palette::valid() const
 {
     return colors_ > 0;

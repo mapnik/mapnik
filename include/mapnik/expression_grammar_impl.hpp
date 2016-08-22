@@ -102,6 +102,7 @@ unary_function_types::unary_function_types()
         ("tan",  tan_impl())
         ("atan", atan_impl())
         ("exp",  exp_impl())
+        ("log",  log_impl())
         ("abs",  abs_impl())
         ("length",length_impl())
         ;

@@ -29,7 +29,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++6', 'libstdc++-5-dev']
+          packages: [ 'libstdc++-5-dev', 'xutils']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
@@ -37,7 +37,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++6','libstdc++-5-dev' ]
+          packages: ['libstdc++-5-dev', 'xutils' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
@@ -45,6 +45,12 @@ matrix:
       env: JOBS=4 MASON_PUBLISH=true _CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
+ # workaround travis rvm bug
+ # http://superuser.com/questions/1044130/why-am-i-having-how-can-i-fix-this-error-shell-session-update-command-not-f
+ - |
+   if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+     rvm get head || true
+   fi
  - if [[ ${_CXX:-false} != false ]]; then export CXX=${_CXX}; fi
  - if [[ ${_CC:-false} != false ]]; then export CC=${_CC}; fi
  - source scripts/travis-common.sh
