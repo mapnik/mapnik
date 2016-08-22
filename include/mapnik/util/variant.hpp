@@ -28,7 +28,7 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp> // spirit support
+#include <boost/mpl/vector.hpp> // spirit support
 #pragma GCC diagnostic pop
 
 namespace mapnik { namespace util {
@@ -36,13 +36,14 @@ namespace mapnik { namespace util {
 template <typename T>
 using recursive_wrapper = typename mapbox::util::recursive_wrapper<T>;
 
+
 template<typename... Types>
 class variant : public mapbox::util::variant<Types...>
 {
 public:
     // tell spirit that this is an adapted variant
     struct adapted_variant_tag;
-    using types = std::tuple<Types...>;
+    using types = boost::mpl::vector<Types...>;
     // inherit ctor's
     using mapbox::util::variant<Types...>::variant;
 };
