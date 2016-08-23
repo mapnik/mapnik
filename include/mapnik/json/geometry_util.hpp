@@ -84,10 +84,7 @@ struct create_polygon
     {
         mapnik::geometry::polygon<double> poly;
         std::size_t num_rings = rings.size();
-        if (num_rings > 1)
-        {
-            poly.interior_rings.reserve(num_rings - 1);
-        }
+        poly.reserve(num_rings);
 
         for ( std::size_t i = 0; i < num_rings; ++i)
         {
@@ -98,8 +95,7 @@ struct create_polygon
             {
                 ring.emplace_back(std::move(pt));
             }
-            if (i == 0) poly.set_exterior_ring(std::move(ring));
-            else poly.add_hole(std::move(ring));
+            poly.push_back(std::move(ring));
         }
         geom_ = std::move(poly);
         mapnik::geometry::correct(geom_);
@@ -179,9 +175,7 @@ struct create_multipolygon
         {
             mapnik::geometry::polygon<double> poly;
             std::size_t num_rings = rings.size();
-            if ( num_rings > 1)
-                poly.interior_rings.reserve(num_rings - 1);
-
+            poly.reserve(num_rings);
             for ( std::size_t i = 0; i < num_rings; ++i)
             {
                 std::size_t size = rings[i].size();
@@ -191,8 +185,8 @@ struct create_multipolygon
                 {
                     ring.emplace_back(std::move(pt));
                 }
-                if (i == 0) poly.set_exterior_ring(std::move(ring));
-                else poly.add_hole(std::move(ring));
+
+                poly.push_back(std::move(ring));
             }
             multi_poly.emplace_back(std::move(poly));
         }

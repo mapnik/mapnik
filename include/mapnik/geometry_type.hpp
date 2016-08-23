@@ -29,56 +29,49 @@
 
 namespace mapnik { namespace geometry { namespace detail {
 
+template <typename T>
 struct geometry_type
 {
-    template <typename T>
-    mapnik::geometry::geometry_types operator () (T const& geom) const
+    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry<T> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    mapnik::geometry::geometry_types operator() (geometry_empty const& ) const
+    mapnik::geometry::geometry_types operator() (geometry_empty<T> const& ) const
     {
         return mapnik::geometry::geometry_types::Unknown;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::point<T> const&) const
     {
         return mapnik::geometry::geometry_types::Point;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::line_string<T> const&) const
     {
         return mapnik::geometry::geometry_types::LineString;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::polygon<T> const&) const
     {
         return mapnik::geometry::geometry_types::Polygon;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_point<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPoint;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_line_string<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiLineString;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_polygon<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPolygon;
     }
 
-    template <typename T>
     mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry_collection<T> const&) const
     {
         return mapnik::geometry::geometry_types::GeometryCollection;
@@ -89,7 +82,8 @@ struct geometry_type
 template <typename T>
 static inline mapnik::geometry::geometry_types geometry_type(T const& geom)
 {
-    return detail::geometry_type()(geom);
+    using coordinate_type = typename T::coordinate_type;
+    return detail::geometry_type<coordinate_type>()(geom);
 }
 
 }}

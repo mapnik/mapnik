@@ -41,13 +41,13 @@ struct geometry_centroid
     geometry_centroid(point<T> & pt)
         : pt_(pt) {}
 
-    template <typename T1>
-    result_type operator() (T1 const& geom) const
+    template <typename U>
+    result_type operator() (U const& geom) const
     {
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry_empty const&) const
+    result_type operator() (geometry_empty<T> const&) const
     {
         return false;
     }
@@ -105,17 +105,29 @@ private:
     }
 
     template <typename Geom>
-    result_type centroid_multi(Geom const & geom) const
+    result_type centroid_multi(Geom const & multi_geom) const
     {
 // https://github.com/mapnik/mapnik/issues/3169
 #if BOOST_VERSION <= 105900
-        if (mapnik::geometry::has_empty(geom))
+        if (mapnik::geometry::has_empty(multi_geom))
         {
-            Geom stripped = mapnik::geometry::remove_empty(geom);
-            return centroid_simple(stripped);
+            mapnik::geometry::multi_point<T> multi_pt;
+            multi_pt.reserve(multi_geom.size());
+            for (auto const& geom : multi_geom)
+            {
+                try
+                {
+                    point<T> c;
+                    boost::geometry::centroid(geom, c);
+                    multi_pt.push_back(std::move(c));
+
+                }
+                catch (boost::geometry::centroid_exception const & e) {}
+            }
+            return centroid_simple(multi_pt);
         }
 #endif
-        return centroid_simple(geom);
+        return centroid_simple(multi_geom);
     }
 };
 

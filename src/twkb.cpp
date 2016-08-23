@@ -82,7 +82,7 @@ public:
 
     mapnik::geometry::geometry<double> read()
     {
-        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty<double>();
         // Read the metadata bytes, populating all the
         // information about optional fields, extended (z/m) dimensions
         // expansion factors and so on
@@ -328,11 +328,7 @@ private:
     {
         unsigned int num_rings = read_unsigned_integer();
         mapnik::geometry::polygon<double> poly;
-        if (num_rings > 1)
-        {
-            poly.interior_rings.reserve(num_rings - 1);
-        }
-
+        poly.reserve(num_rings);
         for (unsigned int i = 0; i < num_rings; ++i)
         {
             mapnik::geometry::linear_ring<double> ring;
@@ -342,8 +338,7 @@ private:
                 ring.reserve(num_points);
                 read_coords<mapnik::geometry::linear_ring<double>>(ring, num_points);
             }
-            if ( i == 0) poly.set_exterior_ring(std::move(ring));
-            else poly.add_hole(std::move(ring));
+            poly.push_back(std::move(ring));
         }
         return poly;
     }

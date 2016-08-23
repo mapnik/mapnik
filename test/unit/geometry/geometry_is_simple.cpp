@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <boost/version.hpp>
@@ -11,7 +10,7 @@ TEST_CASE("geometry is_simple") {
 #if BOOST_VERSION >= 105800
 
 SECTION("point") {
-    mapnik::geometry::geometry_empty empty;
+    mapnik::geometry::geometry_empty<double> empty;
     CHECK( mapnik::geometry::is_simple(empty) );
 }
 
@@ -53,8 +52,8 @@ SECTION("point Infinity") {
 
 SECTION("multi point") {
     mapnik::geometry::multi_point<double> mpt;
-    mpt.add_coord(0,0);    
-    mpt.add_coord(1,1);
+    mpt.emplace_back(0,0);
+    mpt.emplace_back(1,1);
     CHECK( mapnik::geometry::is_simple(mpt) );
 }
 
@@ -65,18 +64,18 @@ SECTION("multi point empty") {
 
 SECTION("line_string") {
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0,0);    
-    line.add_coord(1,1);
+    line.emplace_back(0,0);
+    line.emplace_back(1,1);
     CHECK( mapnik::geometry::is_simple(line) );
 }
 
 // This fails while is_valid will not fail!
 SECTION("line_string repeated points") {
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0,0);    
-    line.add_coord(1,1);
-    line.add_coord(1,1);
-    line.add_coord(2,2);
+    line.emplace_back(0,0);
+    line.emplace_back(1,1);
+    line.emplace_back(1,1);
+    line.emplace_back(2,2);
     CHECK( !mapnik::geometry::is_simple(line) );
 }
 
@@ -87,11 +86,11 @@ SECTION("line_string empty") {
 
 SECTION("multi_line_string") {
     mapnik::geometry::line_string<double> line1;
-    line1.add_coord(0,0);    
-    line1.add_coord(1,1);
+    line1.emplace_back(0,0);
+    line1.emplace_back(1,1);
     mapnik::geometry::line_string<double> line2;
-    line2.add_coord(0,1);    
-    line2.add_coord(1,2);
+    line2.emplace_back(0,1);
+    line2.emplace_back(1,2);
     mapnik::geometry::multi_line_string<double> lines;
     lines.emplace_back(line1);
     lines.emplace_back(line2);
@@ -113,24 +112,24 @@ SECTION("multi_line_string empty") {
 SECTION("polygon") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
 SECTION("polygon invalid winding order") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(0,1);
-    ring.add_coord(1,1);
-    ring.add_coord(1,0);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(0,1);
+    ring.emplace_back(1,1);
+    ring.emplace_back(1,0);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
@@ -139,13 +138,13 @@ SECTION("polygon invalid winding order") {
 SECTION("polygon 2 repeated points") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     CHECK( !mapnik::geometry::is_simple(poly) );
 }
 // repeated points are not considered invalid in a polygon
@@ -153,14 +152,14 @@ SECTION("polygon 2 repeated points") {
 SECTION("polygon 3 repeated points") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(1,1);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(1,1);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     CHECK( !mapnik::geometry::is_simple(poly) );
 }
 
@@ -168,27 +167,28 @@ SECTION("polygon 3 repeated points") {
 
 SECTION("polygon that is empty") {
     mapnik::geometry::polygon<double> poly;
+    poly.emplace_back();
     CHECK( !mapnik::geometry::is_simple(poly) );
 }
 
 SECTION("polygon that has empty exterior ring") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    poly.set_exterior_ring(std::move(ring));
+    poly.push_back(std::move(ring));
     CHECK( !mapnik::geometry::is_simple(poly) );
 }
 
 SECTION("polygon that has empty interior ring") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     mapnik::geometry::linear_ring<double> ring2;
-    poly.add_hole(std::move(ring2));
+    poly.push_back(std::move(ring2));
     CHECK( !mapnik::geometry::is_simple(poly) );
 }
 
@@ -202,21 +202,21 @@ SECTION("polygon that is empty") {
 SECTION("polygon that has empty exterior ring") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    poly.set_exterior_ring(std::move(ring));
+    poly.push_back(std::move(ring));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
 SECTION("polygon that has empty interior ring") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     mapnik::geometry::linear_ring<double> ring2;
-    poly.add_hole(std::move(ring2));
+    poly.push_back(std::move(ring2));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
@@ -226,33 +226,33 @@ SECTION("polygon that has empty interior ring") {
 SECTION("polygon with spike") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(2,2);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(2,2);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
 SECTION("polygon with hole") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(3,0);
-    ring.add_coord(3,3);
-    ring.add_coord(0,3);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(3,0);
+    ring.emplace_back(3,3);
+    ring.emplace_back(0,3);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(1,1);    
-    hole.add_coord(1,2);
-    hole.add_coord(2,2);
-    hole.add_coord(2,1);
-    hole.add_coord(1,1);
-    poly.add_hole(std::move(hole));
+    hole.emplace_back(1,1);
+    hole.emplace_back(1,2);
+    hole.emplace_back(2,2);
+    hole.emplace_back(2,1);
+    hole.emplace_back(1,1);
+    poly.push_back(std::move(hole));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
@@ -260,19 +260,19 @@ SECTION("polygon with hole") {
 SECTION("polygon with hole with invalid winding order") {
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(3,0);
-    ring.add_coord(3,3);
-    ring.add_coord(0,3);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(3,0);
+    ring.emplace_back(3,3);
+    ring.emplace_back(0,3);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(1,1);    
-    hole.add_coord(2,1);
-    hole.add_coord(2,2);
-    hole.add_coord(1,2);
-    hole.add_coord(1,1);
-    poly.add_hole(std::move(hole));
+    hole.emplace_back(1,1);
+    hole.emplace_back(2,1);
+    hole.emplace_back(2,2);
+    hole.emplace_back(1,2);
+    hole.emplace_back(1,1);
+    poly.push_back(std::move(hole));
     CHECK( mapnik::geometry::is_simple(poly) );
 }
 
@@ -280,20 +280,20 @@ SECTION("multi polygon") {
     mapnik::geometry::multi_polygon<double> mp;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(1,0);
-    ring.add_coord(1,1);
-    ring.add_coord(0,1);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(1,0);
+    ring.emplace_back(1,1);
+    ring.emplace_back(0,1);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     mapnik::geometry::polygon<double> poly2;
     mapnik::geometry::linear_ring<double> ring2;
-    ring2.add_coord(0,0);    
-    ring2.add_coord(-1,0);
-    ring2.add_coord(-1,-1);
-    ring2.add_coord(0,-1);
-    ring2.add_coord(0,0);
-    poly2.set_exterior_ring(std::move(ring2));
+    ring2.emplace_back(0,0);
+    ring2.emplace_back(-1,0);
+    ring2.emplace_back(-1,-1);
+    ring2.emplace_back(0,-1);
+    ring2.emplace_back(0,0);
+    poly2.push_back(std::move(ring2));
     mp.emplace_back(poly);
     mp.emplace_back(poly2);
     CHECK( mapnik::geometry::is_simple(mp) );
@@ -303,34 +303,34 @@ SECTION("multi polygon with hole") {
     mapnik::geometry::multi_polygon<double> mp;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0,0);    
-    ring.add_coord(3,0);
-    ring.add_coord(3,3);
-    ring.add_coord(0,3);
-    ring.add_coord(0,0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0,0);
+    ring.emplace_back(3,0);
+    ring.emplace_back(3,3);
+    ring.emplace_back(0,3);
+    ring.emplace_back(0,0);
+    poly.push_back(std::move(ring));
     mapnik::geometry::linear_ring<double> hole;
-    hole.add_coord(1,1);
-    hole.add_coord(1,2);
-    hole.add_coord(2,2);
-    hole.add_coord(2,1);
-    hole.add_coord(1,1);
-    poly.add_hole(std::move(hole));
+    hole.emplace_back(1,1);
+    hole.emplace_back(1,2);
+    hole.emplace_back(2,2);
+    hole.emplace_back(2,1);
+    hole.emplace_back(1,1);
+    poly.push_back(std::move(hole));
     mapnik::geometry::polygon<double> poly2;
     mapnik::geometry::linear_ring<double> ring2;
-    ring2.add_coord(0,0);    
-    ring2.add_coord(-3,0);
-    ring2.add_coord(-3,-3);
-    ring2.add_coord(0,-3);
-    ring2.add_coord(0,0);
-    poly2.set_exterior_ring(std::move(ring2));
+    ring2.emplace_back(0,0);
+    ring2.emplace_back(-3,0);
+    ring2.emplace_back(-3,-3);
+    ring2.emplace_back(0,-3);
+    ring2.emplace_back(0,0);
+    poly2.push_back(std::move(ring2));
     mapnik::geometry::linear_ring<double> hole2;
-    hole2.add_coord(-1,-1);    
-    hole2.add_coord(-1,-2);
-    hole2.add_coord(-2,-2);
-    hole2.add_coord(-2,-1);
-    hole2.add_coord(-1,-1);
-    poly2.add_hole(std::move(hole2));
+    hole2.emplace_back(-1,-1);
+    hole2.emplace_back(-1,-2);
+    hole2.emplace_back(-2,-2);
+    hole2.emplace_back(-2,-1);
+    hole2.emplace_back(-1,-1);
+    poly2.push_back(std::move(hole2));
     mp.emplace_back(poly);
     mp.emplace_back(poly2);
     CHECK( mapnik::geometry::is_simple(mp) );

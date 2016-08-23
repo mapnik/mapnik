@@ -191,10 +191,9 @@ TEST_CASE("geojson") {
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Polygon);
                 auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geometry);
-                REQUIRE(poly.num_rings() == 2);
-                REQUIRE(poly.exterior_ring.size() == 5);
-                REQUIRE(poly.interior_rings.size() == 1);
-                REQUIRE(poly.interior_rings[0].size() == 5);
+                REQUIRE(poly.size() == 2);
+                REQUIRE(poly[0].size() == 5);
+                REQUIRE(poly[1].size() == 5);
                 REQUIRE(mapnik::geometry::envelope(poly) == mapnik::box2d<double>(100,0,101,1));
 
             }
@@ -248,8 +247,8 @@ TEST_CASE("geojson") {
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPolygon);
                 auto const& multi_poly = mapnik::util::get<mapnik::geometry::multi_polygon<double> >(geometry);
                 REQUIRE(multi_poly.size() == 2);
-                REQUIRE(multi_poly[0].num_rings() == 1);
-                REQUIRE(multi_poly[1].num_rings() == 2);
+                REQUIRE(multi_poly[0].size() == 1);
+                REQUIRE(multi_poly[1].size() == 2);
                 REQUIRE(mapnik::geometry::envelope(multi_poly) == mapnik::box2d<double>(100,0,103,3));
 
             }

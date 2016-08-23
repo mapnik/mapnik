@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 #include "geometry_equal.hpp"
 
@@ -12,7 +11,6 @@
 #include <mapnik/view_strategy.hpp>
 
 TEST_CASE("geometry strategy tests") {
-
 SECTION("proj and view strategy") {
     using namespace mapnik::geometry;
     mapnik::box2d<double> e(-20037508.342789,-20037508.342789,20037508.342789,20037508.342789);
@@ -184,5 +182,4 @@ SECTION("scaling strategies - double to int64") {
         assert_g_equal(r, o);
     }
 } // END SECTION
-
 } // END TEST CASE

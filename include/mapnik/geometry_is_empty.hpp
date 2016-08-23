@@ -29,103 +29,114 @@ namespace mapnik { namespace geometry {
 
 namespace detail {
 
+template <typename T>
 struct geometry_is_empty
 {
-    bool operator() (mapnik::geometry::geometry<double> const& geom) const
+    bool operator() (mapnik::geometry::geometry<T> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    bool operator() (mapnik::geometry::point<double> const&) const
+    bool operator() (mapnik::geometry::point<T> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::line_string<double> const& geom) const
+    bool operator() (mapnik::geometry::line_string<T> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::polygon<double> const& geom) const
+    bool operator() (mapnik::geometry::linear_ring<T> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::multi_point<double> const& geom) const
+    bool operator() (mapnik::geometry::polygon<T> const& geom) const
+    {
+        return geom.empty() || geom.front().empty();
+    }
+
+    bool operator() (mapnik::geometry::multi_point<T> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::multi_line_string<double> const& geom) const
+    bool operator() (mapnik::geometry::multi_line_string<T> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::multi_polygon<double> const& geom) const
+    bool operator() (mapnik::geometry::multi_polygon<T> const& geom) const
     {
         return geom.empty();
     }
 
-    bool operator() (mapnik::geometry::geometry_collection<double> const& geom) const
+    bool operator() (mapnik::geometry::geometry_collection<T> const& geom) const
     {
         return geom.empty();
     }
 
-    template <typename T>
-    bool operator() (T const&) const
+    template <typename U>
+    bool operator() (U const&) const
     {
         return true;
     }
 
 };
 
+template <typename T>
 struct geometry_has_empty
 {
-    bool operator() (mapnik::geometry::geometry<double> const& geom) const
+    bool operator() (mapnik::geometry::geometry<T> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    bool operator() (mapnik::geometry::geometry_empty const&) const
+    bool operator() (mapnik::geometry::geometry_empty<T> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::point<double> const&) const
+    bool operator() (mapnik::geometry::point<T> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::line_string<double> const&) const
+    bool operator() (mapnik::geometry::line_string<T> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::polygon<double> const&) const
+    bool operator() (mapnik::geometry::linear_ring<T> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::multi_point<double> const&) const
+    bool operator() (mapnik::geometry::polygon<T> const&) const
     {
         return false;
     }
 
-    bool operator() (mapnik::geometry::multi_line_string<double> const& geom) const
+    bool operator() (mapnik::geometry::multi_point<T> const&) const
     {
-        return test_multigeometry(geom);
+        return false;
     }
 
-    bool operator() (mapnik::geometry::multi_polygon<double> const& geom) const
+    bool operator() (mapnik::geometry::multi_line_string<T> const& multi_line) const
     {
-        return test_multigeometry(geom);
-    }
-
-    bool operator() (mapnik::geometry::geometry_collection<double> const& geom) const
-    {
-        for (auto const & item : geom)
+        for (auto const& line : multi_line)
         {
-            if (geometry_is_empty()(item) || (*this)(item))
+            if (line.empty()) return true;
+        }
+        return false;
+    }
+
+    bool operator() (mapnik::geometry::multi_polygon<T> const& multi_poly) const
+    {
+        for (auto const& poly : multi_poly)
+        {
+            if (poly.empty() || poly.front().empty()) // no-rings OR exterioir is empty
             {
                 return true;
             }
@@ -133,39 +144,39 @@ struct geometry_has_empty
         return false;
     }
 
-    template <typename T>
-    bool operator() (T const&) const
+    bool operator() (mapnik::geometry::geometry_collection<T> const& geom) const
+    {
+        for (auto const & item : geom)
+        {
+            if (geometry_is_empty<T>()(item) || (*this)(item))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template <typename U>
+    bool operator() (U const&) const
     {
         return true;
-    }
-
-private:
-    template <typename T>
-    bool test_multigeometry(T const & geom) const
-    {
-        for (auto const & item : geom)
-        {
-            if (item.empty())
-            {
-                return true;
-            }
-        }
-        return false;
     }
 };
 
 }
 
-template <typename GeomType>
-inline bool is_empty(GeomType const& geom)
+template <typename G>
+inline bool is_empty(G const& geom)
 {
-    return detail::geometry_is_empty()(geom);
+    using coordinate_type = typename G::coordinate_type;
+    return detail::geometry_is_empty<coordinate_type>()(geom);
 }
 
-template <typename GeomType>
-inline bool has_empty(GeomType const& geom)
+template <typename G>
+inline bool has_empty(G const& geom)
 {
-    return detail::geometry_has_empty()(geom);
+    using coordinate_type = typename G::coordinate_type;
+    return detail::geometry_has_empty<coordinate_type>()(geom);
 }
 
 }}

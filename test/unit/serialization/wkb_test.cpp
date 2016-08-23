@@ -23,7 +23,7 @@ struct spatially_equal_visitor
 {
     using result_type = bool;
 
-    result_type operator() (mapnik::geometry::geometry_empty, mapnik::geometry::geometry_empty) const
+    result_type operator() (mapnik::geometry::geometry_empty<double>, mapnik::geometry::geometry_empty<double>) const
     {
         return true;
     }

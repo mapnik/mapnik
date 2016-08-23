@@ -37,11 +37,10 @@
 // and once we do that the compile time is == to just including boost/geometry.hpp
 #include <boost/geometry.hpp>
 #pragma GCC diagnostic pop
-
+#include <boost/range/iterator_range_core.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/box2d.hpp>
-
 #include <cstdint>
 
 // register point
@@ -82,7 +81,9 @@ template <typename CoordinateType>
 inline typename mapnik::geometry::line_string<CoordinateType>::const_iterator
 range_end(mapnik::geometry::line_string<CoordinateType> const& line) {return line.end();}
 
-namespace geometry { namespace traits {
+namespace geometry {
+
+namespace traits {
 
 // register mapnik::box2d<double>
 template<> struct tag<mapnik::box2d<double> > { using type = box_tag; };
@@ -175,42 +176,48 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container const&;
+    using type = typename mapnik::geometry::polygon<CoordinateType>::interior_rings const&;
 };
 
 template <typename CoordinateType>
 struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container&;
+    using type = typename mapnik::geometry::polygon<CoordinateType>::interior_rings& ;
 };
 
 // exterior
 template <typename CoordinateType>
 struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
 {
-    static mapnik::geometry::linear_ring<CoordinateType> & get(mapnik::geometry::polygon<CoordinateType> & p)
+    using ring_const_type   = typename ring_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using ring_mutable_type = typename ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    static ring_mutable_type get(mapnik::geometry::polygon<CoordinateType> & p)
     {
-        return p.exterior_ring;
+        if (p.empty()) throw std::runtime_error("ring must be initialized 1");
+        return p[0];
     }
 
-    static mapnik::geometry::linear_ring<CoordinateType> const& get(mapnik::geometry::polygon<CoordinateType> const& p)
+    static ring_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return p.exterior_ring;
+        if (p.empty()) throw std::runtime_error("ring must be initialized 2");
+        return p[0];
     }
 };
 
 template <typename CoordinateType>
 struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 {
-    using holes_type = typename mapnik::geometry::polygon<CoordinateType>::rings_container;
-    static holes_type&  get(mapnik::geometry::polygon<CoordinateType> & p)
+    using interior_const_type = typename interior_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using interior_mutable_type = typename interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+
+    static interior_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return p.interior_rings;
+        return p.interior();
     }
 
-    static holes_type const& get(mapnik::geometry::polygon<CoordinateType> const& p)
+    static interior_mutable_type get(mapnik::geometry::polygon<CoordinateType>& p)
     {
-        return p.interior_rings;
+        return p.interior();
     }
 };
 

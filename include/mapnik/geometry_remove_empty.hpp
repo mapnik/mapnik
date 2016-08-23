@@ -32,25 +32,25 @@ namespace detail {
 
 struct geometry_remove_empty
 {
-    mapnik::geometry::multi_line_string<double> operator() (mapnik::geometry::multi_line_string<double> const & geom) const
+    mapnik::geometry::multi_line_string<double> operator() (mapnik::geometry::multi_line_string<double> const& geom) const
     {
         return remove_empty(geom);
     }
 
-    mapnik::geometry::multi_polygon<double> operator() (mapnik::geometry::multi_polygon<double> const & geom) const
+    mapnik::geometry::multi_polygon<double> operator() (mapnik::geometry::multi_polygon<double> const& geom) const
     {
         return remove_empty(geom);
     }
 
     template <typename T>
-    T operator() (T const & geom) const
+    T operator() (T const& geom) const
     {
         return geom;
     }
 
 private:
     template <typename T>
-    T remove_empty(T const & geom) const
+    T remove_empty(T const& geom) const
     {
         T new_geom;
         for (auto const & g : geom)

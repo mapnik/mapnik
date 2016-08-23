@@ -20,8 +20,7 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/geometry_reprojection.hpp>
+// mapnik <mapnik/geometry_reprojection.hpp>
 #include <mapnik/geometry.hpp>
 
 namespace mapnik {
@@ -30,9 +29,10 @@ namespace geometry {
 
 namespace detail {
 
-geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, unsigned int &)
+template <typename T>
+geometry_empty<T> reproject_internal(geometry_empty<T> const&, proj_transform const&, unsigned int &)
 {
-    return geometry_empty();
+    return geometry_empty<T>();
 }
 
 template <typename T>
@@ -62,31 +62,22 @@ template <typename T>
 polygon<T> reproject_internal(polygon<T> const& poly, proj_transform const& proj_trans, unsigned int & n_err)
 {
     polygon<T> new_poly;
-    linear_ring<T> new_ext(poly.exterior_ring);
-    unsigned int err = proj_trans.forward(new_ext);
-    // If the exterior ring doesn't transform don't bother with the holes.
-    if (err > 0 || new_ext.empty())
+    new_poly.reserve(poly.size());
+    bool exterior = true;
+    for (auto const& lr : poly)
     {
-        n_err += err;
-    }
-    else
-    {
-        new_poly.set_exterior_ring(std::move(new_ext));
-        new_poly.interior_rings.reserve(poly.interior_rings.size());
-
-        for (auto const& lr : poly.interior_rings)
+        linear_ring<T> new_lr(lr);
+        unsigned int err = proj_trans.forward(new_lr);
+        if (err > 0 || new_lr.empty())
         {
-            linear_ring<T> new_lr(lr);
-            err = proj_trans.forward(new_lr);
-            if (err > 0 || new_lr.empty())
-            {
-                n_err += err;
-                // If there is an error in interior ring drop
-                // it from polygon.
-                continue;
-            }
-            new_poly.add_hole(std::move(new_lr));
+            n_err += err;
+            // If there is an error in interior ring drop
+            // it from polygon.
+            if (!exterior) continue;
         }
+        if (exterior) exterior = false;
+        new_poly.push_back(std::move(new_lr));
+
     }
     return new_poly;
 }
@@ -145,7 +136,7 @@ multi_polygon<T> reproject_internal(multi_polygon<T> const & mpoly, proj_transfo
     for (auto const& poly : mpoly)
     {
         polygon<T> new_poly = reproject_internal(poly, proj_trans, n_err);
-        if (!new_poly.exterior_ring.empty())
+        if (new_poly.size() > 0 && !new_poly[0].empty())
         {
             new_mpoly.emplace_back(std::move(new_poly));
         }
@@ -162,7 +153,7 @@ geometry_collection<T> reproject_internal(geometry_collection<T> const & c, proj
     {
 
         geometry<T> new_g = reproject_copy(g, proj_trans, n_err);
-        if (!new_g.template is<geometry_empty>())
+        if (!new_g.template is<geometry_empty<T>>())
         {
             new_c.emplace_back(std::move(new_g));
         }
@@ -178,9 +169,9 @@ struct geom_reproj_copy_visitor
         : proj_trans_(proj_trans),
           n_err_(n_err) {}
 
-    geometry<T> operator() (geometry_empty const&) const
+    geometry<T> operator() (geometry_empty<T>) const
     {
-        return geometry_empty();
+        return geometry_empty<T>();
     }
 
     geometry<T> operator() (point<T> const& p) const
@@ -207,7 +198,7 @@ struct geom_reproj_copy_visitor
     {
         geometry<T> geom; // default empty
         polygon<T> new_poly = reproject_internal(poly, proj_trans_, n_err_);
-        if (new_poly.exterior_ring.empty()) return geom;
+        if (new_poly.size() == 0 || new_poly[0].size() == 0) return geom;
         geom = std::move(new_poly);
         return geom;
     }
@@ -289,7 +280,8 @@ struct geom_reproj_visitor {
         return mapnik::util::apply_visitor((*this), geom);
     }
 
-    bool operator() (geometry_empty &) const { return true; }
+    template <typename T>
+    bool operator() (geometry_empty<T> &) const { return true; }
 
     template <typename T>
     bool operator() (point<T> & p) const
@@ -314,12 +306,7 @@ struct geom_reproj_visitor {
     template <typename T>
     bool operator() (polygon<T> & poly) const
     {
-        if (proj_trans_.forward(poly.exterior_ring) > 0)
-        {
-            return false;
-        }
-
-        for (auto & lr : poly.interior_rings)
+        for (auto & lr : poly)
         {
             if (proj_trans_.forward(lr) > 0)
             {
@@ -332,7 +319,11 @@ struct geom_reproj_visitor {
     template <typename T>
     bool operator() (multi_point<T> & mp) const
     {
-        return (*this) (static_cast<line_string<T> &>(mp));
+        if (proj_trans_.forward(mp) > 0)
+        {
+            return false;
+        }
+        return true;
     }
 
     template <typename T>

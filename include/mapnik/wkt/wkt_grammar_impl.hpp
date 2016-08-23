@@ -62,7 +62,7 @@ wkt_grammar<Iterator>::wkt_grammar()
 
     // <point tagged text> ::= point <point text>
     point_tagged_text = no_case[lit("POINT")]
-        >> (point_text[assign(_r1,_1)] | empty_set[assign(_r1,construct<geometry::geometry_empty>())])
+        >> (point_text[assign(_r1,_1)] | empty_set[assign(_r1,construct<geometry::geometry_empty<double>>())])
         ;
     // <point text> ::= <empty set> | <left paren> <point> <right paren>
     point_text = (lit("(") >> point >> lit(')'))
@@ -86,12 +86,14 @@ wkt_grammar<Iterator>::wkt_grammar()
 
     // <polygon text> ::= <empty set> | <left paren> <linestring text> {<comma> <linestring text>}* <right paren>
     polygon_text =
-        (lit('(') >> linearring_text[set_exterior(_val,_1)] >> *(lit(',') >> linearring_text[add_hole(_val,_1)]) >> lit(')'))
+        lit('(') >> linearring_text[set_ring(_val,_1)] % lit(',') >> lit(')')
         |
         empty_set
         ;
 
-    linearring_text = ring_points | empty_set
+    linearring_text = ring_points
+        |
+        empty_set
         ;
     //<multipoint tagged text> ::= multipoint <multipoint text>
     multipoint_tagged_text = no_case[lit("MULTIPOINT")]
