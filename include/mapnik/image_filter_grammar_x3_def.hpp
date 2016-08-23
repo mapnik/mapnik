@@ -33,6 +33,7 @@
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp> // spirit support
 #pragma GCC diagnostic pop
 
 

@@ -26,11 +26,6 @@
 #include <mapnik/config.hpp>
 #include <mapbox/variant.hpp>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp> // spirit support
-#pragma GCC diagnostic pop
-
 namespace mapnik { namespace util {
 
 template <typename T>
