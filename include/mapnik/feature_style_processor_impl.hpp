@@ -342,10 +342,12 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     bool early_return = false;
 
     // first, try intersection of map extent forward projected into layer srs
-    if (prj_trans.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
+    // and keep buffered_query_ext unchanged if intersects() return false
+    box2d<double> buffered_query_ext2(buffered_query_ext);
+    if (prj_trans.forward(buffered_query_ext2, PROJ_ENVELOPE_POINTS) && buffered_query_ext2.intersects(layer_ext))
     {
         fw_success = true;
-        layer_ext.clip(buffered_query_ext);
+        layer_ext.clip(buffered_query_ext2);
     }
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
@@ -409,9 +411,11 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     layer_ext2 = lay.envelope();
     if (fw_success)
     {
-        if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))
+        // keep query_ext unchanged to get res for mapnik::query later
+        box2d<double> query_ext2(query_ext);
+        if (prj_trans.forward(query_ext2, PROJ_ENVELOPE_POINTS))
         {
-            layer_ext2.clip(query_ext);
+            layer_ext2.clip(query_ext2);
         }
     }
     else
@@ -529,7 +533,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
         }
         return;
     }
-    
+
     p.start_layer_processing(mat.lay_, mat.layer_ext2_);
 
     layer const& lay = mat.lay_;
