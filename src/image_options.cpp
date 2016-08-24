@@ -59,7 +59,6 @@ image_options_map parse_image_options(std::string const& str)
      auto const end = str.end();
      using boost::spirit::x3::space;
      using mapnik::grammar::image_options;
-     //mapnik::detail::image_options_grammar<std::string::const_iterator> g;
      image_options_map options;
      bool success = boost::spirit::x3::phrase_parse(begin, end, image_options, space, options);
      if (!success)
