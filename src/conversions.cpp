@@ -33,7 +33,6 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
-//#include <boost/spirit/include/qi.hpp>
 #ifdef MAPNIK_KARMA_TO_STRING
 #include <boost/spirit/include/karma.hpp>
 #endif
