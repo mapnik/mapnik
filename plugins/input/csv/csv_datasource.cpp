@@ -431,7 +431,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
             return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, quote_, headers_, ctx_);
         }
     }
-    return mapnik::make_empty_featureset();
+    return mapnik::make_invalid_featureset();
 }
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const

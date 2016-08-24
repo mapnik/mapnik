@@ -998,7 +998,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
     }
 
-    return mapnik::make_empty_featureset();
+    return mapnik::make_invalid_featureset();
 }
 
 
@@ -1011,7 +1011,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return mapnik::make_empty_featureset();
+        if (!conn) return mapnik::make_invalid_featureset();
 
         if (conn->isOK())
         {
@@ -1082,7 +1082,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
         }
     }
 
-    return mapnik::make_empty_featureset();
+    return mapnik::make_invalid_featureset();
 }
 
 box2d<double> pgraster_datasource::envelope() const
