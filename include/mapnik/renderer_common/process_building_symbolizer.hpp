@@ -41,6 +41,7 @@ void make_building(geometry::polygon<double> const& poly, double height, F1 cons
     const std::unique_ptr<path_type> frame(new path_type(path_type::types::LineString));
     const std::unique_ptr<path_type> roof(new path_type(path_type::types::Polygon));
     std::deque<segment_t> face_segments;
+    double ring_begin_x, ring_begin_y;
     double x0 = 0;
     double y0 = 0;
     double x,y;
@@ -52,15 +53,21 @@ void make_building(geometry::polygon<double> const& poly, double height, F1 cons
         if (cm == SEG_MOVETO)
         {
             frame->move_to(x,y);
+            ring_begin_x = x;
+            ring_begin_y = y;
         }
         else if (cm == SEG_LINETO)
         {
             frame->line_to(x,y);
-            face_segments.push_back(segment_t(x0,y0,x,y));
+            face_segments.emplace_back(x0,y0,x,y);
         }
         else if (cm == SEG_CLOSE)
         {
             frame->close_path();
+            if (!face_segments.empty())
+            {
+                face_segments.emplace_back(x0, y0, ring_begin_x, ring_begin_y);
+            }
         }
         x0 = x;
         y0 = y;
