@@ -54,7 +54,7 @@ void font_feature_settings::from_string(std::string const& features)
     if (std::all_of(features.begin(), features.end(), isspace)) return;
 
     namespace x3 = boost::spirit::x3;
-    auto appender = [&](auto& ctx)
+    auto appender = [&](auto const& ctx)
         {
             this->append(_attr(ctx));
         };
