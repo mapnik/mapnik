@@ -6,9 +6,41 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.12
+
+Released: xx-xx-xx
+
+(Packaged from xxxxxx)
+
+#### Summary
+
+- Ensured gdal.input is registered once (refs #3093 #3339 #3340)
+- Fixed `mapnik::util::is_clockwise` implementation to use coordinates relative to the origin and avoid numeric precision issues
+- `mapnik-index` is updated to fail on first error in input (csv)
+- Added `guard` to `get_object_severity` method (ref #3322)
+- Improved `hash` calculation for `mapnik::value` (ref #3406)
+- AGG - made cover `unsigned` to avoid left shift of negative values (ref #3406)
+- Fixed using `scale_factor` in `evaluate_transform(..)`
+- Fixed line spacing logic by applying `scale factor`
+- ~~Fixed `stringify_object/stringify_array` implementations by disabling white space skipping (ref #3419)~~
+- Added geojson unit test for property types/values
+- JSON - added support for object and array type in `json_value` and update `stringifier`
+- GDAL.input - fallback to using `overviews` if present (8e8482803bb435726534c3b686a56037b7d3e8ad)
+- TopoJSON.input - improved and simplified grammer/parser implementation (https://github.com/mapnik/mapnik/pull/3429)
+- GDAL.input - Added support for non-alpha mask band
+- TopoJSON.input - fixed order of ellements limitation (ref #3434)
+- Fixed stroke-width size not included in markers ellipse bounding box (ref #3445)
+- Implemented `char_array_buffer` and removed `boost::iostreams` dependency (2e8c0d36c2237f2815d8004c1b96bad909056eb9)
+- JSON.input - `extract_bounding_box_grammar` - make features optional (ref #3463)
+- Ensure input plugins return `empty_featureset` rather than `nullptr` (feature_ptr())
+- Added support for quantising small (less than 3 pixel) images (ref #3466)
+- Added support for natural logarithm function in expressions (ref #3475)
+- Improved logic determining if certain compiler features are available e.g `inheriting constructors` (MSVC)
+- GeoJSON - corrected quoting in `stringgifird` objects (ref #3491)
+
 ## 3.0.11
 
-Released:
+Released: April 1, 2016
 
 (Packaged from 8d9dc27)
 
@@ -19,7 +51,7 @@ Released:
  - [TWKB](https://github.com/TWKB/) support via https://github.com/mapnik/mapnik/pull/3356 (#3355)
  - Visual test runner can render SVG, PDF and Postscript with Cairo renderer (https://github.com/mapnik/mapnik/pull/3418)
  - Scale factor is now applied also to `text-line-spacing` and transforms (https://github.com/mapnik/mapnik/pull/3416)
- 
+
 ## 3.0.10
 
 Released: February 25, 2016
@@ -544,8 +576,8 @@ Summary: The 2.2.0 release is primarily a performance and stability release. The
 
 - Enabled default input plugin directory and fonts path to be set inherited from environment settings in
   python bindings to make it easier to run tests locally (#1594). New environment settings are:
-	- MAPNIK_INPUT_PLUGINS_DIRECTORY
-	- MAPNIK_FONT_DIRECTORY
+    - MAPNIK_INPUT_PLUGINS_DIRECTORY
+    - MAPNIK_FONT_DIRECTORY
 
 - Added support for controlling rendering behavior of markers on multi-geometries `marker-multi-policy` (#1555,#1573)
 
@@ -937,7 +969,7 @@ Released January, 19 2010
 
 - Gdal Plugin: Added support for Gdal overviews, enabling fast loading of > 1GB rasters (#54)
 
-	* Use the gdaladdo utility to add overviews to existing GDAL datasets
+    * Use the gdaladdo utility to add overviews to existing GDAL datasets
 
 - PostGIS: Added an optional `geometry_table` parameter. The `geometry_table` used by Mapnik to look up
   metadata in the geometry_columns and calculate extents (when the `geometry_field` and `srid` parameters
@@ -962,23 +994,23 @@ Released January, 19 2010
   complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
   query to be used by indexes. (#415)
 
-	* Pass the bbox token inside a subquery like: !bbox!
+    * Pass the bbox token inside a subquery like: !bbox!
 
-	* Valid Usages include:
+    * Valid Usages include:
 
-		<Parameter name="table">
-		  (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
-		</Parameter>
+        <Parameter name="table">
+          (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
+        </Parameter>
 
-		<Parameter name="table">
-		  (Select * from table where geom &amp;&amp; !bbox!) as map
-		</Parameter>
+        <Parameter name="table">
+          (Select * from table where geom &amp;&amp; !bbox!) as map
+        </Parameter>
 
 - PostGIS Plugin: Added `scale_denominator` substitution ability in sql query string (#415/#465)
 
-	* Pass the scale_denominator token inside a subquery like: !scale_denominator!
+    * Pass the scale_denominator token inside a subquery like: !scale_denominator!
 
-	* e.g. (Select * from table where field_value > !scale_denominator!) as map
+    * e.g. (Select * from table where field_value > !scale_denominator!) as map
 
 - PostGIS Plugin: Added support for quoted table names (r1454) (#393)
 
@@ -1010,14 +1042,14 @@ Released January, 19 2010
 - TextSymbolizer: Large set of new attributes: `text_transform`, `line_spacing`, `character_spacing`,
   `wrap_character`, `wrap_before`, `horizontal_alignment`, `justify_alignment`, and `opacity`.
 
-	* More details at changesets: r1254 and r1341
+    * More details at changesets: r1254 and r1341
 
 - SheildSymbolizer: Added special new attributes: `unlock_image`, `VERTEX` placement, `no_text` and many
   attributes previously only supported in the TextSymbolizer: `allow_overlap`, `vertical_alignment`,
   `horizontal_alignment`, `justify_alignment`, `wrap_width`, `wrap_character`, `wrap_before`, `text_transform`,
   `line_spacing`, `character_spacing`, and `opacity`.
 
-	* More details at changeset r1341
+    * More details at changeset r1341
 
 - XML: Added support for using CDATA with libxml2 parser (r1364)
 

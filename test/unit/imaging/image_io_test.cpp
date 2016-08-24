@@ -1,7 +1,5 @@
-
 #include "catch.hpp"
 
-#include <iostream>
 #include <cstring>
 #include <mapnik/color.hpp>
 #include <mapnik/image.hpp>
@@ -22,6 +20,31 @@
 
 inline void make_directory(std::string const& dir) {
     boost::filesystem::create_directories(dir);
+}
+
+namespace {
+template <typename T>
+void check_tiny_png_image_quantising(T const& im)
+{
+    std::ostringstream ss(std::ios::binary);
+    mapnik::save_to_stream(im, ss, "png8");
+    ss.flush();
+    std::string str = ss.str();
+    std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(str.data(), str.size()));
+    auto w = reader->width();
+    auto h = reader->height();
+    CHECK(w > 0);
+    CHECK(h > 0);
+    auto im2 = mapnik::util::get<mapnik::image_rgba8>(reader->read(0, 0, w, h));
+    for (std::size_t i = 0; i < w; ++i)
+    {
+        for (std::size_t j = 0; j < h; ++j)
+        {
+            REQUIRE(im2(i,j) == im(i,j));
+        }
+    }
+}
+
 }
 
 TEST_CASE("image io") {
@@ -186,4 +209,28 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
         }
     }
 }
+
+SECTION("Quantising small (less than 3 pixel images preserve original colours")
+{
+#if defined(HAVE_PNG)
+    { // 1x1
+        mapnik::image_rgba8 im(1,1); // 1 pixel
+        im(0,0) = mapnik::color("green").rgba();
+        check_tiny_png_image_quantising(im);
+    }
+    { // 1x2
+        mapnik::image_rgba8 im(1,2); // 2 pixels
+        mapnik::fill(im, mapnik::color("red").rgba());
+        im(0,0) = mapnik::color("green").rgba();
+        check_tiny_png_image_quantising(im);
+    }
+    { // 2x1
+        mapnik::image_rgba8 im(2,1); // 2 pixels
+        mapnik::fill(im, mapnik::color("red").rgba());
+        im(0,0) = mapnik::color("green").rgba();
+        check_tiny_png_image_quantising(im);
+    }
+#endif
+} // END SECTION
+
 } // END TEST_CASE

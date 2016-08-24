@@ -94,11 +94,20 @@ public:
     {
         return extra_params_;
     }
+
     bool has_name(std::string const& name) const
     {
         auto result = std::find_if(std::begin(descriptors_), std::end(descriptors_),
                                 [&name](attribute_descriptor const& desc) { return name == desc.get_name();});
         return result != std::end(descriptors_);
+    }
+    void order_by_name()
+    {
+        std::sort(std::begin(descriptors_), std::end(descriptors_),
+                  [](attribute_descriptor const& d0, attribute_descriptor const& d1)
+                  {
+                      return d0.get_name() < d1.get_name();
+                  });
     }
 private:
     std::string name_;

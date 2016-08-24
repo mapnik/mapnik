@@ -86,7 +86,7 @@ struct stringifier
         {
             if (first) first = false;
             else str += ",";
-            str += kv.first;
+            str +=  "\"" + kv.first + "\"";
             str += ":";
             str += mapnik::util::apply_visitor(*this, kv.second);
         }
