@@ -30,14 +30,9 @@
 #include <boost/spirit/home/x3.hpp>
 #pragma GCC diagnostic pop
 
-namespace mapnik
-{
+namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-
-namespace grammar
-{
-
 struct transcoder_tag;
 struct expression_class; // top-most ID
 using expression_grammar_type = x3::rule<expression_class, mapnik::expr_node>;
