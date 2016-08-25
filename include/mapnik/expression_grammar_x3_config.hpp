@@ -27,11 +27,6 @@
 #include <mapnik/unicode.hpp>
 #include <string>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
-
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;

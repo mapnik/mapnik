@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,43 +20,25 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/path_expression_grammar.hpp>
-#include <mapnik/attribute.hpp>
+#ifndef MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
+#define MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
 
+// mapnik
+#include <mapnik/path_expression.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/home/x3.hpp>
 #pragma GCC diagnostic pop
 
-namespace mapnik
-{
+namespace mapnik { namespace grammar {
 
-template <typename Iterator>
-path_expression_grammar<Iterator>::path_expression_grammar()
-    : path_expression_grammar::base_type(expr)
-{
-    standard_wide::char_type char_;
-    qi::_1_type _1;
-    qi::_val_type _val;
-    qi::lit_type lit;
-    qi::lexeme_type lexeme;
-    using phoenix::push_back;
-    using boost::phoenix::construct;
+namespace x3 = boost::spirit::x3;
+struct path_expression_class; // top-most ID
+using path_expression_grammar_type = x3::rule<path_expression_class, path_expression>;
 
-    expr =
-        * (
-            str [ push_back(_val, _1)]
-            |
-            ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
-            )
-        ;
+BOOST_SPIRIT_DECLARE(path_expression_grammar_type);
 
-    attr %= +(char_ - ']');
-    str  %= lexeme[+(char_ -'[')];
-}
+}}
 
-}
+#endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
