@@ -62,6 +62,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       schema_(""),
       geometry_table_(*params.get<std::string>("geometry_table", "")),
       geometry_field_(*params.get<std::string>("geometry_field", "")),
+      geometry_display_expression_(*params.get<std::string>("geometry_display_expression", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
       row_limit_(*params.get<int>("row_limit", 0)),
@@ -535,10 +536,10 @@ std::string postgis_datasource::populate_tokens(std::string const& sql) const
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+std::string
+postgis_datasource::substitute_tokens(std::string const& sql, double scale_denom, std::string const& box, double pixel_width, double pixel_height, bool &hasbbox) const
 {
     std::string populated_sql = sql;
-    std::string box = sql_bbox(env);
 
     if (boost::algorithm::icontains(populated_sql, scale_denom_token_))
     {
@@ -561,12 +562,23 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
         boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
     }
 
-    if (boost::algorithm::icontains(populated_sql, bbox_token_))
+    hasbbox = boost::algorithm::icontains(populated_sql, bbox_token_);
+    if (hasbbox)
     {
         boost::algorithm::replace_all(populated_sql, bbox_token_, box);
-        return populated_sql;
     }
-    else
+    return populated_sql;
+}
+
+std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+{
+    std::string populated_sql = sql;
+    std::string box = sql_bbox(env);
+    bool hasbbox;
+
+    populated_sql = substitute_tokens(sql, scale_denom, box, pixel_width, pixel_height, hasbbox);
+
+    if ( ! hasbbox )
     {
         std::ostringstream s;
 
@@ -583,8 +595,10 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
             s << " WHERE \"" << geometryColumn_ << "\" && " << box;
         }
 
-        return populated_sql + s.str();
+        populated_sql += s.str();
     }
+
+    return populated_sql;
 }
 
 
@@ -729,6 +743,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             throw mapnik::datasource_exception(s_error.str());
         }
 
+
         std::ostringstream s;
 
         const double px_gw = 1.0 / boost::get<0>(q.resolution());
@@ -740,7 +755,18 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
           s << "ST_Simplify(";
         }
 
-        s << "\"" << geometryColumn_ << "\"";
+        std::string geometryDisplayExpression;
+        if ( geometry_display_expression_.empty() ) {
+          geometryDisplayExpression = "\"" + geometryColumn_ + "\"";
+        } else {
+          bool hasbbox;
+          geometryDisplayExpression = substitute_tokens(
+            geometry_display_expression_,
+            scale_denom, sql_bbox(box), px_gw, px_gh, hasbbox);
+        	MAPNIK_LOG_WARN(postgis) << "postgis_datasource: expr: " << geometryDisplayExpression;
+        }
+
+        s << geometryDisplayExpression;
 
         if (simplify_geometries_) {
           // 1/20 of pixel seems to be a good compromise to avoid
