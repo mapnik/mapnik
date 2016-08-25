@@ -38,9 +38,10 @@ namespace detail {
 template <typename F1, typename F2, typename F3>
 void make_building(geometry::polygon<double> const& poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
 {
-    const std::unique_ptr<path_type> frame(new path_type(path_type::types::LineString));
-    const std::unique_ptr<path_type> roof(new path_type(path_type::types::Polygon));
+    path_type frame(path_type::types::LineString);
+    path_type roof(path_type::types::Polygon);
     std::deque<segment_t> face_segments;
+    double ring_begin_x, ring_begin_y;
     double x0 = 0;
     double y0 = 0;
     double x,y;
@@ -51,16 +52,22 @@ void make_building(geometry::polygon<double> const& poly, double height, F1 cons
     {
         if (cm == SEG_MOVETO)
         {
-            frame->move_to(x,y);
+            frame.move_to(x,y);
+            ring_begin_x = x;
+            ring_begin_y = y;
         }
         else if (cm == SEG_LINETO)
         {
-            frame->line_to(x,y);
-            face_segments.push_back(segment_t(x0,y0,x,y));
+            frame.line_to(x,y);
+            face_segments.emplace_back(x0,y0,x,y);
         }
         else if (cm == SEG_CLOSE)
         {
-            frame->close_path();
+            frame.close_path();
+            if (!face_segments.empty())
+            {
+                face_segments.emplace_back(x0, y0, ring_begin_x, ring_begin_y);
+            }
         }
         x0 = x;
         y0 = y;
@@ -69,16 +76,16 @@ void make_building(geometry::polygon<double> const& poly, double height, F1 cons
     std::sort(face_segments.begin(),face_segments.end(), y_order);
     for (auto const& seg : face_segments)
     {
-        const std::unique_ptr<path_type> faces(new path_type(path_type::types::Polygon));
-        faces->move_to(std::get<0>(seg),std::get<1>(seg));
-        faces->line_to(std::get<2>(seg),std::get<3>(seg));
-        faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
-        faces->line_to(std::get<0>(seg),std::get<1>(seg) + height);
+        path_type faces(path_type::types::Polygon);
+        faces.move_to(std::get<0>(seg),std::get<1>(seg));
+        faces.line_to(std::get<2>(seg),std::get<3>(seg));
+        faces.line_to(std::get<2>(seg),std::get<3>(seg) + height);
+        faces.line_to(std::get<0>(seg),std::get<1>(seg) + height);
 
-        face_func(*faces);
+        face_func(faces);
         //
-        frame->move_to(std::get<0>(seg),std::get<1>(seg));
-        frame->line_to(std::get<0>(seg),std::get<1>(seg)+height);
+        frame.move_to(std::get<0>(seg),std::get<1>(seg));
+        frame.line_to(std::get<0>(seg),std::get<1>(seg)+height);
     }
 
     va.rewind(0);
@@ -87,23 +94,23 @@ void make_building(geometry::polygon<double> const& poly, double height, F1 cons
     {
         if (cm == SEG_MOVETO)
         {
-            frame->move_to(x,y+height);
-            roof->move_to(x,y+height);
+            frame.move_to(x,y+height);
+            roof.move_to(x,y+height);
         }
         else if (cm == SEG_LINETO)
         {
-            frame->line_to(x,y+height);
-            roof->line_to(x,y+height);
+            frame.line_to(x,y+height);
+            roof.line_to(x,y+height);
         }
         else if (cm == SEG_CLOSE)
         {
-            frame->close_path();
-            roof->close_path();
+            frame.close_path();
+            roof.close_path();
         }
     }
 
-    frame_func(*frame);
-    roof_func(*roof);
+    frame_func(frame);
+    roof_func(roof);
 }
 
 } // ns detail
