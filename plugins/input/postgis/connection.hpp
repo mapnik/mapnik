@@ -34,6 +34,7 @@
 // std
 #include <sstream>
 #include <iostream>
+#include <sys/select.h>
 
 extern "C" {
 #include "libpq-fe.h"
@@ -47,7 +48,8 @@ public:
     Connection(std::string const& connection_str,boost::optional<std::string> const& password)
         : cursorId(0),
           closed_(false),
-          pending_(false)
+          pending_(false),
+          statement_timeout_(0) // in milliseconds
     {
         std::string connect_with_pass = connection_str;
         if (password && !password->empty())
@@ -91,6 +93,13 @@ public:
         }
     }
 
+    int statement_timeout(int statement_timeout)
+    {
+      int old_timeout = statement_timeout_;
+      statement_timeout_ = statement_timeout;
+      return old_timeout;
+    }
+
     bool execute(std::string const& sql)
     {
 #ifdef MAPNIK_STATS
@@ -115,17 +124,47 @@ public:
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute_query ") + sql);
 #endif
+
         PGresult* result = 0;
-        if ( executeAsyncQuery(sql, type) ) {
-          // fetch multiple times until NULL is returned,
-          // to handle multi-statement queries
-          while ( PGresult *tmp = getResult() ) {
-            if ( result ) PQclear(result);
-            result = tmp;
-          }
+        int success;
+        if (type == 1)
+        {
+            success = PQsendQueryParams(conn_, sql.c_str(), 0, 0, 0, 0, 0, 1);
+        }
+        else
+        {
+            success = PQsendQuery(conn_, sql.c_str());
         }
 
-        if (! result || (PQresultStatus(result) != PGRES_TUPLES_OK))
+        if ( ! success ) {
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
+            err_msg += "\nin executeQuery Full sql was: '";
+            err_msg += sql;
+            err_msg += "'\n";
+            throw mapnik::datasource_exception(err_msg);
+        }
+
+        bool ok = false;
+        while ( true ) {
+          PGresult *tmp;
+          try {
+            tmp = getResult();
+          } catch (mapnik::datasource_exception& ex) {
+            ok = false;
+            std::string err_msg = ex.what();
+            err_msg += "\nFull sql was: '";
+            err_msg += sql;
+            err_msg += "'\n";
+            if ( result ) PQclear(result);
+            throw mapnik::datasource_exception(err_msg);
+          }
+          if ( ! tmp ) break;
+          ok = (PQresultStatus(tmp) == PGRES_TUPLES_OK);
+          if ( result ) PQclear(result);
+          result = tmp;
+        }
+        if (!ok) 
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
@@ -182,7 +221,63 @@ public:
 
     PGresult* getResult()
     {
-        PGresult *result = PQgetResult(conn_);
+        PGresult *result = NULL;
+
+        if ( ! statement_timeout_ ) return PQgetResult(conn_);
+
+        int sock = PQsocket(conn_);
+        if ( sock < 0 ) {
+            std::stringstream ss;
+            ss << "Postgis Plugin: PQsocket() returned " << sock
+               << "\nin getResult.\n";
+            throw mapnik::datasource_exception(ss.str());
+        }
+
+        mapnik::timer timeout;
+
+        bool ok = false;
+        fd_set input_mask;
+        struct timeval toutval, *tmout = NULL;
+        while ( true ) {
+          do {
+
+            ok = PQconsumeInput(conn_);
+            if ( ! ok ) break;
+
+            if ( PQisBusy(conn_) ) {
+              FD_ZERO(&input_mask);
+              FD_SET(sock, &input_mask);
+
+              if ( statement_timeout_ ) {
+                int msleft = statement_timeout_ - timeout.wall_clock_elapsed();
+                toutval.tv_sec = 0;
+                toutval.tv_usec = msleft*1000; // microseconds
+                tmout = &toutval;
+              }
+
+              int ret = select(sock + 1, &input_mask, NULL, NULL, tmout);
+              if ( ret < 1 )
+              {
+                std::stringstream ss;
+                ss << "Postgis Plugin: ";
+                if ( ret == 0 ) {
+                  ss << "timeout (" <<statement_timeout_ << " ms)";
+                } else {
+                  ss << "select: " << strerror(errno);
+                }
+                close();
+                throw mapnik::datasource_exception(ss.str());
+              }
+            }
+          } while ( PQisBusy(conn_) );
+
+          if ( ! ok ) break;
+          PGresult *tmp = PQgetResult(conn_);
+          if ( ! tmp ) break;
+          ok = (PQresultStatus(tmp) == PGRES_TUPLES_OK);
+          if ( result ) PQclear(result);
+          result = tmp;
+        }
         return result;
     }
 
@@ -257,6 +352,7 @@ private:
     int cursorId;
     bool closed_;
     bool pending_;
+    int statement_timeout_; // statement timeout in seconds
 
     void clearAsyncResult(PGresult *result)
     {
