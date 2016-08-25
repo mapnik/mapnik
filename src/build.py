@@ -161,7 +161,8 @@ source = Split(
     generate_image_filters.cpp
     image_filter_grammar_x3.cpp
     color.cpp
-    conversions.cpp
+    conversions_numeric.cpp
+    conversions_string.cpp
     image_copy.cpp
     image_compositing.cpp
     image_scaling.cpp
