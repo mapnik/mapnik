@@ -35,7 +35,7 @@ namespace mapnik { namespace grammar {
 namespace x3 = boost::spirit::x3;
 struct transcoder_tag;
 struct expression_class; // top-most ID
-using expression_grammar_type = x3::rule<expression_class, mapnik::expr_node>;
+using expression_grammar_type = x3::rule<expression_class, expr_node>;
 
 BOOST_SPIRIT_DECLARE(expression_grammar_type);
 
