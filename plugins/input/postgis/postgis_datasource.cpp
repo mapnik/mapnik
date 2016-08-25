@@ -62,13 +62,27 @@ postgis_datasource::postgis_datasource(parameters const& params)
       schema_(""),
       geometry_table_(*params.get<std::string>("geometry_table", "")),
       geometry_field_(*params.get<std::string>("geometry_field", "")),
+      geometry_display_expression_(*params.get<std::string>("geometry_display_expression", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
       row_limit_(*params.get<int>("row_limit", 0)),
       type_(datasource::Vector),
       srid_(*params.get<int>("srid", 0)),
       extent_initialized_(false),
-      simplify_geometries_(false),
+      grid_geometries_(*params_.get<mapnik::boolean>("grid_geometries", false)),
+      grid_geometries_max_resolution_(*params.get<mapnik::value_double>("grid_geometries_max_resolution", FMAX)),
+      simplify_geometries_(*params_.get<mapnik::boolean>("simplify_geometries", false)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
+      simplify_geometries_max_resolution_(*params.get<mapnik::value_double>("simplify_geometries_max_resolution", FMAX)),
+      simplify_geometries_factor_(*params.get<mapnik::value_double>("simplify_geometries_factor", 1.0/20)),
+      clip_geometries_(*params_.get<mapnik::boolean>("clip_geometries", false)),
+      clip_geometries_min_resolution_(*params.get<mapnik::value_double>("clip_geometries_min_resolution", 0)),
+      // 1/20 of pixel seems to be a good compromise to avoid
+      // drop of collapsed polygons.
+      // See https://github.com/mapnik/mapnik/issues/1639
+      clip_geometries_factor_(*params.get<mapnik::value_double>("clip_geometries_factor", 1.0/20)),
       desc_(*params.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
@@ -121,8 +135,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
     boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
     boost::optional<mapnik::boolean> estimate_extent = params.get<mapnik::boolean>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
-    boost::optional<mapnik::boolean> simplify_opt = params.get<mapnik::boolean>("simplify_geometries", false);
-    simplify_geometries_ = simplify_opt && *simplify_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -535,10 +547,10 @@ std::string postgis_datasource::populate_tokens(std::string const& sql) const
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+std::string
+postgis_datasource::substitute_tokens(std::string const& sql, double scale_denom, std::string const& box, double pixel_width, double pixel_height, bool &hasbbox) const
 {
     std::string populated_sql = sql;
-    std::string box = sql_bbox(env);
 
     if (boost::algorithm::icontains(populated_sql, scale_denom_token_))
     {
@@ -561,12 +573,23 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
         boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
     }
 
-    if (boost::algorithm::icontains(populated_sql, bbox_token_))
+    hasbbox = boost::algorithm::icontains(populated_sql, bbox_token_);
+    if (hasbbox)
     {
         boost::algorithm::replace_all(populated_sql, bbox_token_, box);
-        return populated_sql;
     }
-    else
+    return populated_sql;
+}
+
+std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+{
+    std::string populated_sql = sql;
+    std::string box = sql_bbox(env);
+    bool hasbbox;
+
+    populated_sql = substitute_tokens(sql, scale_denom, box, pixel_width, pixel_height, hasbbox);
+
+    if ( ! hasbbox )
     {
         std::ostringstream s;
 
@@ -583,8 +606,10 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
             s << " WHERE \"" << geometryColumn_ << "\" && " << box;
         }
 
-        return populated_sql + s.str();
+        populated_sql += s.str();
     }
+
+    return populated_sql;
 }
 
 
@@ -729,24 +754,65 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             throw mapnik::datasource_exception(s_error.str());
         }
 
-        std::ostringstream s;
+        const double px_hres = boost::get<0>(q.resolution());
+        const double px_vres = boost::get<1>(q.resolution());
+        const double px_min_res = std::min(px_hres, px_vres);
+        MAPNIK_LOG_WARN(postgis) << "postgis_datasource: px_min_res=" << px_min_res;
+        const double px_gw = 1.0 / px_hres;
+        const double px_gh = 1.0 / px_vres;
+        const double px_min_size = std::min(px_gw, px_gh);
+        MAPNIK_LOG_WARN(postgis) << "postgis_datasource: px_min_size=" << px_min_size;
 
-        const double px_gw = 1.0 / boost::get<0>(q.resolution());
-        const double px_gh = 1.0 / boost::get<1>(q.resolution());
+        std::string geometryDisplayExpression;
+        if ( geometry_display_expression_.empty() ) {
+          geometryDisplayExpression = "\"" + geometryColumn_ + "\"";
+        } else {
+          bool hasbbox;
+          geometryDisplayExpression = substitute_tokens(
+            geometry_display_expression_,
+            scale_denom, sql_bbox(box), px_gw, px_gh, hasbbox);
+        	MAPNIK_LOG_WARN(postgis) << "postgis_datasource: expr: " << geometryDisplayExpression;
+        }
+
+        bool do_clip = clip_geometries_ &&
+                        px_min_res > clip_geometries_min_resolution_;
+        bool do_grid = grid_geometries_ &&
+                        px_min_res < grid_geometries_max_resolution_;
+        bool do_simp = simplify_geometries_ &&
+                        px_min_res < simplify_geometries_max_resolution_;
+
+        std::ostringstream s;
 
         s << "SELECT ST_AsBinary(";
 
-        if (simplify_geometries_) {
+        if (do_simp) {
           s << "ST_Simplify(";
         }
 
-        s << "\"" << geometryColumn_ << "\"";
+        if (do_grid) {
+          s << "ST_SnapToGrid(";
+        }
 
-        if (simplify_geometries_) {
-          // 1/20 of pixel seems to be a good compromise to avoid
-          // drop of collapsed polygons.
-          // See https://github.com/mapnik/mapnik/issues/1639
-          const double tolerance = std::min(px_gw, px_gh) / 20.0;
+        if (do_clip) {
+          // We clip before ST_Simplify as ST_Simplify might
+          // output invalid polygons which would be a damage
+          // for ST_Intersection
+          s << "ST_ClipByBox2d(";
+        }
+
+        s << geometryDisplayExpression;
+
+        if (do_clip) {
+          s << ", " << sql_bbox(box) << ")";
+        }
+
+        if (do_grid) {
+          const double tolerance = px_min_size * clip_geometries_factor_;
+          s << ", " << tolerance << ")";
+        }
+
+        if (do_simp) {
+          const double tolerance = px_min_size * simplify_geometries_factor_;
           s << ", " << tolerance << ")";
         }
 
