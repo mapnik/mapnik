@@ -36,7 +36,11 @@ Released: xx-xx-xx
 - Added support for quantising small (less than 3 pixel) images (ref #3466)
 - Added support for natural logarithm function in expressions (ref #3475)
 - Improved logic determining if certain compiler features are available e.g `inheriting constructors` (MSVC)
-- GeoJSON - corrected quoting in `stringgifird` objects (ref #3491)
+- GeoJSON - corrected quoting in `stringify` objects (ref #3491)
+- GeoJSON - ensured consistent ordering of attribute descriptors (ref #3494)
+- GeoJSON - exposed `num_features_to_query` as datasource paramer (ref #3495)
+- Replaced `boost::mpl::vector<Types...>` with `std::tuple<Types...>` (ref #3503)
+- BuildingSymbolizer - fixed closing segment of polygon in building symbolizer (ref #3505)
 
 ## 3.0.11
 
