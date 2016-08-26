@@ -20,40 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
-#define MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
+#ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
+#define MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP
 
-// mapnik
-#include <mapnik/path_expression.hpp>
+#include <mapnik/expression_node.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/home/x3.hpp>
 #pragma GCC diagnostic pop
 
-// stl
-#include <string>
-#include <vector>
+namespace mapnik { namespace grammar {
+
+namespace x3 = boost::spirit::x3;
+struct transcoder_tag;
+struct expression_class; // top-most ID
+using expression_grammar_type = x3::rule<expression_class, expr_node>;
+
+BOOST_SPIRIT_DECLARE(expression_grammar_type);
+
+}}
+
 
 namespace mapnik
 {
-
-using namespace boost;
-namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-namespace standard_wide =  boost::spirit::standard_wide;
-
-using standard_wide::space_type;
-
-template <typename Iterator>
-struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_component>(), space_type>
-{
-    path_expression_grammar();
-    qi::rule<Iterator, std::vector<path_component>() , space_type> expr;
-    qi::rule<Iterator, std::string() , space_type> attr;
-    qi::rule<Iterator, std::string() > str;
-};
-
+grammar::expression_grammar_type expression_grammar();
 }
 
-#endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
+
+#endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP

@@ -124,9 +124,9 @@ public:
         return pixmap_.painted();
     }
 
-    void painted(bool painted)
+    void painted(bool _painted)
     {
-        pixmap_.painted(painted);
+        pixmap_.painted(_painted);
     }
 
     inline eAttributeCollectionPolicy attribute_collection_policy() const

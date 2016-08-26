@@ -29,6 +29,8 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/geometry/correct.hpp>
 
+#include <memory>
+
 namespace mapnik
 {
 

@@ -20,43 +20,24 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/path_expression_grammar.hpp>
-#include <mapnik/attribute.hpp>
+#ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP
+#define MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP
 
+#include <mapnik/expression_grammar_x3.hpp>
+#include <mapnik/unicode.hpp>
+#include <string>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#pragma GCC diagnostic pop
+namespace mapnik { namespace grammar {
 
-namespace mapnik
-{
+namespace x3 = boost::spirit::x3;
+using iterator_type = std::string::const_iterator;
+using phrase_context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
-template <typename Iterator>
-path_expression_grammar<Iterator>::path_expression_grammar()
-    : path_expression_grammar::base_type(expr)
-{
-    standard_wide::char_type char_;
-    qi::_1_type _1;
-    qi::_val_type _val;
-    qi::lit_type lit;
-    qi::lexeme_type lexeme;
-    using phoenix::push_back;
-    using boost::phoenix::construct;
+// define combined context
+using context_type = x3::with_context<transcoder_tag,
+                                      std::reference_wrapper<mapnik::transcoder const> const,
+                                      phrase_context_type>::type;
 
-    expr =
-        * (
-            str [ push_back(_val, _1)]
-            |
-            ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
-            )
-        ;
+}}
 
-    attr %= +(char_ - ']');
-    str  %= lexeme[+(char_ -'[')];
-}
-
-}
+#endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_CONFIG_HPP

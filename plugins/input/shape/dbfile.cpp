@@ -30,7 +30,7 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/home/x3.hpp>
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
@@ -187,9 +187,9 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 double val = 0.0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                ascii::space_type space;
-                static qi::double_type double_;
-                if (qi::phrase_parse(itr,end,double_,space,val))
+                x3::ascii::space_type space;
+                static x3::double_type double_;
+                if (x3::phrase_parse(itr,end,double_,space,val))
                 {
                     f.put(name,val);
                 }
@@ -199,9 +199,9 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
                 mapnik::value_integer val = 0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                ascii::space_type space;
-                static qi::int_parser<mapnik::value_integer,10,1,-1> numeric_parser;
-                if (qi::phrase_parse(itr, end, numeric_parser, space, val))
+                x3::ascii::space_type space;
+                static x3::int_parser<mapnik::value_integer,10,1,-1> numeric_parser;
+                if (x3::phrase_parse(itr, end, numeric_parser, space, val))
                 {
                     f.put(name,val);
                 }

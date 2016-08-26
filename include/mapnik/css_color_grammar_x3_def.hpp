@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,84 +20,49 @@
  *
  *****************************************************************************/
 
-// NOTE: This is an implementation header file and is only meant to be included
-//    from implementation files. It therefore doesn't have an include guard.
-// mapnik
-#include <mapnik/css_color_grammar.hpp>
-// boost
+// REF: http://www.w3.org/TR/css3-color/
+
+#ifndef MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
+#define MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
+
+#include <mapnik/css_color_grammar_x3.hpp>
+#include <mapnik/util/hsl.hpp>
+#include <mapnik/safe_cast.hpp>
+
 #pragma GCC diagnostic push
-#include <boost/fusion/include/adapt_adt.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/struct.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #pragma GCC diagnostic pop
 
-
-BOOST_FUSION_ADAPT_ADT(
+BOOST_FUSION_ADAPT_STRUCT (
     mapnik::color,
-    (unsigned, unsigned, obj.red(), obj.set_red(mapnik::safe_cast<uint8_t>(val)))
-    (unsigned, unsigned, obj.green(), obj.set_green(mapnik::safe_cast<uint8_t>(val)))
-    (unsigned, unsigned, obj.blue(), obj.set_blue(mapnik::safe_cast<uint8_t>(val)))
-    (unsigned, unsigned, obj.alpha(), obj.set_alpha(mapnik::safe_cast<uint8_t>(val)))
+    (std::uint8_t, red_)
+    (std::uint8_t, green_)
+    (std::uint8_t, blue_)
+    (std::uint8_t, alpha_)
     )
 
-namespace mapnik
+namespace mapnik {
+
+namespace x3 = boost::spirit::x3;
+
+namespace css_color_grammar {
+
+using x3::lit;
+using x3::uint_parser;
+using x3::hex;
+using x3::symbols;
+using x3::omit;
+using x3::attr;
+using x3::double_;
+using x3::no_case;
+using x3::no_skip;
+
+struct named_colors_ : x3::symbols<color>
 {
-namespace phoenix = boost::phoenix;
-
-struct percent_conv_impl
-{
-    using result_type = unsigned;
-    unsigned operator() (double val) const
-    {
-        return safe_cast<uint8_t>(std::lround((255.0 * val)/100.0));
-    }
-};
-
-struct alpha_conv_impl
-{
-    using result_type = unsigned;
-    unsigned operator() (double val) const
-    {
-        return safe_cast<uint8_t>(std::lround((255.0 * val)));
-    }
-};
-
-struct hsl_conv_impl
-{
-    using result_type = void;
-    template <typename T0,typename T1, typename T2, typename T3>
-    void operator() (T0 & c, T1 h, T2 s, T3 l) const
-    {
-        double m1,m2;
-        // normalize values
-        h /= 360.0;
-        s /= 100.0;
-        l /= 100.0;
-
-        if (l <= 0.5)
-        {
-            m2 = l * (s + 1.0);
-        }
-        else
-        {
-            m2 = l + s - l*s;
-        }
-        m1 = l * 2 - m2;
-
-        double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
-        double g = hue_to_rgb(m1, m2, h);
-        double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
-
-        c.set_red(safe_cast<uint8_t>(std::lround(255.0 * r)));
-        c.set_green(safe_cast<uint8_t>(std::lround(255.0 * g)));
-        c.set_blue(safe_cast<uint8_t>(std::lround(255.0 * b)));
-    }
-};
-
-struct named_colors : qi::symbols<char,color>
-{
-    named_colors()
+    named_colors_()
     {
         add
             ("aliceblue", color(240, 248, 255))
@@ -249,77 +214,241 @@ struct named_colors : qi::symbols<char,color>
             ("transparent", color(0, 0, 0, 0))
             ;
     }
+} named_colors;
+
+x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
+x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
+x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
+
+// starting rule
+css_color_grammar_type const css_color("css_color");
+// rules
+x3::rule<class hex2_color, color> const hex2_color("hex2_color");
+x3::rule<class hex1_color, color> const hex1_color("hex1_color");
+x3::rule<class rgb_color,  color> const rgb_color("rgb_color");
+x3::rule<class rgba_color, color> const rgba_color("rgba_color");
+x3::rule<class rgb_color_percent, color> const rgb_color_percent("rgb_color_percent");
+x3::rule<class rgba_color_percent, color> const rgba_color_percent("rgba_color_percent");
+
+struct clip_opacity
+{
+    static double call(double val)
+    {
+        if (val > 1.0) return 1.0;
+        if (val < 0.0) return 0.0;
+        return val;
+    }
 };
 
-template <typename Iterator>
-css_color_grammar<Iterator>::css_color_grammar()
-    : css_color_grammar::base_type(css_color)
-
+struct percent_converter
 {
-    qi::lit_type lit;
-    qi::_val_type _val;
-    qi::double_type double_;
-    qi::_1_type _1;
-    qi::_a_type _a;
-    qi::_b_type _b;
-    qi::_c_type _c;
-    qi::lexeme_type lexeme;
-    ascii::no_case_type no_case;
-    using phoenix::at_c;
-    // symbols
-    named_colors named;
-    // functions
-    phoenix::function<percent_conv_impl> percent_converter;
-    phoenix::function<alpha_conv_impl>   alpha_converter;
-    phoenix::function<hsl_conv_impl>  hsl_converter;
+    static std::uint8_t call(double val)
+    {
+        return safe_cast<std::uint8_t>(std::lround((255.0 * val)/100.0));
+    }
+};
 
-    css_color %= rgba_color
-        | rgba_percent_color
-        | hsl_percent_color
-        | hex_color
-        | hex_color_small
-        | no_case[named];
+auto dec_red = [](auto& ctx)
+{
+    _val(ctx).red_ = _attr(ctx);
+};
 
-    hex_color = lexeme[ lit('#')
-        >> hex2 [ at_c<0>(_val) = _1 ]
-        >> hex2 [ at_c<1>(_val) = _1 ]
-        >> hex2 [ at_c<2>(_val) = _1 ]
-        >>-hex2 [ at_c<3>(_val) = _1 ] ]
-        ;
+auto dec_green = [](auto& ctx)
+{
+    _val(ctx).green_ = _attr(ctx);
+};
 
-    hex_color_small = lexeme[ lit('#')
-        >> hex1 [ at_c<0>(_val) = _1 | _1 << 4 ]
-        >> hex1 [ at_c<1>(_val) = _1 | _1 << 4 ]
-        >> hex1 [ at_c<2>(_val) = _1 | _1 << 4 ]
-        >>-hex1 [ at_c<3>(_val) = _1 | _1 << 4 ] ]
-        ;
+auto dec_blue = [](auto& ctx)
+{
+    _val(ctx).blue_ = _attr(ctx);
+};
 
-    rgba_color = lit("rgb") >> -lit('a')
-                            >> lit('(')
-                            >> dec3 [at_c<0>(_val) = _1] >> ','
-                            >> dec3 [at_c<1>(_val) = _1] >> ','
-                            >> dec3 [at_c<2>(_val) = _1]
-                            >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
-                            >> lit(')')
-        ;
+auto opacity = [](auto& ctx)
+{
+    _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
+};
 
-    rgba_percent_color = lit("rgb") >> -lit('a')
-                                    >> lit('(')
-                                    >> double_ [at_c<0>(_val) = percent_converter(_1)] >> '%' >> ','
-                                    >> double_ [at_c<1>(_val) = percent_converter(_1)] >> '%' >> ','
-                                    >> double_ [at_c<2>(_val) = percent_converter(_1)] >> '%'
-                                    >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
-                                    >> lit(')')
-        ;
+auto percent_red = [] (auto & ctx)
+{
+    _val(ctx).red_ = percent_converter::call(_attr(ctx));
+};
 
-    hsl_percent_color = lit("hsl") >> -lit('a')
-                                   >> lit('(')
-                                   >> double_ [ _a = _1] >> ','        // hue 0..360
-                                   >> double_ [ _b = _1] >> '%' >> ',' // saturation 0..100%
-                                   >> double_ [ _c = _1] >> '%'        // lightness  0..100%
-                                   >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)]) // opacity 0...1
-                                   >> lit (')') [ hsl_converter(_val,_a,_b,_c)]
-        ;
+auto percent_green = [] (auto & ctx)
+{
+    _val(ctx).green_ = percent_converter::call(_attr(ctx));
+};
+
+auto percent_blue = [] (auto & ctx)
+{
+    _val(ctx).blue_ = percent_converter::call(_attr(ctx));
+};
+
+auto hex1_red = [](auto& ctx)
+{
+    _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex1_green = [](auto& ctx)
+{
+    _val(ctx).green_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex1_blue = [](auto& ctx)
+{
+    _val(ctx).blue_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex1_opacity = [](auto& ctx)
+{
+    _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex2_red = [](auto& ctx)
+{
+    _val(ctx).red_ = _attr(ctx);
+};
+
+auto hex2_green = [](auto& ctx)
+{
+    _val(ctx).green_ = _attr(ctx);
+};
+
+auto hex2_blue = [](auto& ctx)
+{
+    _val(ctx).blue_ = _attr(ctx);
+};
+
+auto hex2_opacity = [](auto& ctx)
+{
+    _val(ctx).alpha_ = _attr(ctx);
+};
+
+auto hsl_to_rgba = [] (auto& ctx)
+{
+    double h = std::get<0>(_attr(ctx));
+    double s = std::get<1>(_attr(ctx));
+    double l = std::get<2>(_attr(ctx));
+    double m1;
+    double m2;
+    // normalise values
+    h /= 360.0;
+    s /= 100.0;
+    l /= 100.0;
+    if (l <= 0.5)
+    {
+        m2 = l * (s + 1.0);
+    }
+    else
+    {
+        m2 = l + s - l*s;
+    }
+    m1 = l * 2 - m2;
+
+    double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
+    double g = hue_to_rgb(m1, m2, h);
+    double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
+    uint8_t alpha = uint8_t((255.0 * clip_opacity::call(std::get<3>(_attr(ctx)))) + 0.5);
+    _val(ctx) = color(safe_cast<uint8_t>(std::lround(255.0 * r)),
+                      safe_cast<uint8_t>(std::lround(255.0 * g)),
+                      safe_cast<uint8_t>(std::lround(255.0 * b)),
+                      alpha);
+};
+
+auto const hex2_color_def = no_skip[lit('#')
+                                    >> hex2[hex2_red]
+                                    >> hex2[hex2_green]
+                                    >> hex2[hex2_blue]
+                                    >> (hex2[hex2_opacity] | attr(255)[hex2_opacity])];
+
+auto const hex1_color_def = no_skip[lit('#')
+                                    >> hex1[hex1_red]
+                                    >> hex1[hex1_green]
+                                    >> hex1[hex1_blue]
+                                    >> (hex1[hex1_opacity] | attr(15)[hex1_opacity])];
+
+auto const rgb_color_def = lit("rgb")
+    >> lit('(') >> dec3[dec_red]
+    >> lit(',') >> dec3[dec_green]
+    >> lit(',') >> dec3[dec_blue]
+    >> attr(255) >> lit(')');
+
+auto const rgb_color_percent_def = lit("rgb")
+    >> lit('(') >> dec3[percent_red] >> lit('%')
+    >> lit(',') >> dec3[percent_green] >> lit('%')
+    >> lit(',') >> dec3[percent_blue] >> lit('%')
+    >> attr(255) >> lit(')');
+
+auto const rgba_color_def = lit("rgba")
+    >> lit('(') >> dec3[dec_red]
+    >> lit(',') >> dec3[dec_green]
+    >> lit(',') >> dec3[dec_blue]
+    >> lit(',') >> double_[opacity] >> lit(')');
+
+auto const rgba_color_percent_def = lit("rgba")
+    >> lit('(') >> dec3[percent_red] >> lit('%')
+    >> lit(',') >> dec3[percent_green] >> lit('%')
+    >> lit(',') >> dec3[percent_blue] >> lit('%')
+    >> lit(',') >> double_[opacity] >> lit(')');
+
+auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint8_t,std::uint8_t,std::uint8_t, double >> {} =
+    lit("hsl")
+    >> lit('(') >> dec3
+    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> dec3 >> lit('%')
+    >> attr(1.0) >> lit(')')
+    ;
+
+auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint8_t,std::uint8_t,std::uint8_t, double >> {} =
+    lit("hsla")
+    >> lit('(') >> dec3
+    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> double_ >> lit(')')
+    ;
+
+auto const hsl_color = x3::rule<class hsl_color, color> {} = hsl_values[hsl_to_rgba];
+auto const hsla_color = x3::rule<class hsla_color, color> {} = hsla_values[hsl_to_rgba];
+
+auto const css_color_def =
+    no_case[named_colors]
+    |
+    hex2_color
+    |
+    hex1_color
+    |
+    rgb_color
+    |
+    rgba_color
+    |
+    rgb_color_percent
+    |
+    rgba_color_percent
+    |
+    hsl_color
+    |
+    hsla_color
+    ;
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+BOOST_SPIRIT_DEFINE(
+    css_color,
+    hex2_color,
+    hex1_color,
+    rgb_color,
+    rgba_color,
+    rgb_color_percent,
+    rgba_color_percent
+    );
+#pragma GCC diagnostic pop
+
+} // ns
+
+css_color_grammar::css_color_grammar_type color_grammar()
+{
+    return css_color_grammar::css_color;
 }
 
-}
+} //ns mapnik
+
+#endif //MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP

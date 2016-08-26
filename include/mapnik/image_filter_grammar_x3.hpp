@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,23 +20,37 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_MAKE_UNIQUE_HPP
-#define MAPNIK_MAKE_UNIQUE_HPP
+#ifndef MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP
+#define MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP
 
-// http://stackoverflow.com/questions/14131454/visual-studio-2012-cplusplus-and-c-11
-#if defined(_MSC_VER) && _MSC_VER < 1800 || !defined(_MSC_VER) && __cplusplus <= 201103L
+//#include <mapnik/image_filter.hpp>
+#include <mapnik/image_filter_types.hpp>
 
-#include <memory>
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
 
-namespace std {
+namespace mapnik
+{
 
-// C++14 backfill from http://herbsutter.com/gotw/_102/
-template<typename T, typename ...Args>
-inline std::unique_ptr<T> make_unique(Args&& ...args) {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+namespace x3 = boost::spirit::x3;
+
+namespace image_filter
+{
+
+struct image_filter_class;
+using image_filter_grammar_type = x3::rule<image_filter_class, std::vector<filter::filter_type> >;
+
+BOOST_SPIRIT_DECLARE(image_filter_grammar_type);
+
+
+}}
+
+namespace mapnik {
+
+image_filter::image_filter_grammar_type image_filter_grammar();
+
 }
 
-}
-#endif
-
-#endif // MAPNIK_MAKE_UNIQUE_HPP
+#endif // MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,36 @@
  *
  *****************************************************************************/
 
-#include <mapnik/transform_expression_grammar_impl.hpp>
-#include <string>
+#ifndef MAPNIK_CSS_COLOR_GRAMMAR_X3_HPP
+#define MAPNIK_CSS_COLOR_GRAMMAR_X3_HPP
 
-template struct mapnik::transform_expression_grammar<std::string::const_iterator>;
+#include <mapnik/color.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
+
+namespace mapnik
+{
+
+namespace x3 = boost::spirit::x3;
+
+namespace css_color_grammar
+{
+
+struct css_color_class;
+using css_color_grammar_type = x3::rule<css_color_class, mapnik::color>;
+
+BOOST_SPIRIT_DECLARE(css_color_grammar_type);
+
+}}
+
+
+namespace mapnik
+{
+css_color_grammar::css_color_grammar_type color_grammar();
+}
+
+
+#endif // MAPNIK_CSS_COLOR_GRAMMAR_X3_HPP

@@ -48,7 +48,6 @@ extern "C"
 #include <algorithm>
 #include <stdexcept>
 
-
 namespace mapnik
 {
 

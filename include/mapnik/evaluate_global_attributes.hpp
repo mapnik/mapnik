@@ -43,8 +43,8 @@ struct evaluate_expression
 {
     using value_type = T;
 
-    explicit evaluate_expression(Attributes const& attributes)
-        : attributes_(attributes) {}
+    explicit evaluate_expression(Attributes const& _attributes)
+        : attributes_(_attributes) {}
 
     value_type operator() (attribute const&) const
     {

@@ -40,12 +40,12 @@ public:
     using resolution_type = std::tuple<double,double>;
 
     query(box2d<double> const& bbox,
-          resolution_type const& resolution,
-          double scale_denominator,
+          resolution_type const& _resolution,
+          double _scale_denominator,
           box2d<double> const& unbuffered_bbox)
         : bbox_(bbox),
-          resolution_(resolution),
-          scale_denominator_(scale_denominator),
+          resolution_(_resolution),
+          scale_denominator_(_scale_denominator),
           filter_factor_(1.0),
           unbuffered_bbox_(unbuffered_bbox),
           names_(),
@@ -53,11 +53,11 @@ public:
     {}
 
     query(box2d<double> const& bbox,
-          resolution_type const& resolution,
-          double scale_denominator = 1.0)
+          resolution_type const& _resolution,
+          double _scale_denominator = 1.0)
         : bbox_(bbox),
-          resolution_(resolution),
-          scale_denominator_(scale_denominator),
+          resolution_(_resolution),
+          scale_denominator_(_scale_denominator),
           filter_factor_(1.0),
           unbuffered_bbox_(bbox),
           names_(),
