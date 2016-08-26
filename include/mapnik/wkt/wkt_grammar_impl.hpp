@@ -46,7 +46,6 @@ wkt_grammar<Iterator>::wkt_grammar()
     qi::_1_type _1;
     qi::_a_type _a;
     using boost::phoenix::construct;
-    //using boost::phoenix::at_c;
     geometry_tagged_text = point_tagged_text(_r1)
         | linestring_tagged_text(_r1)
         | polygon_tagged_text(_r1)
