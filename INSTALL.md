@@ -71,7 +71,7 @@ Build system dependencies are:
 Mapnik Core depends on:
 
  * Boost
-    - >= 1.47 is required and >= 1.56 recommended
+    - >= 1.56 is required
     - These libraries are used:
       - filesystem
       - system
