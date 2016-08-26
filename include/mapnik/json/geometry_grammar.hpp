@@ -36,6 +36,8 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
 
+#include <memory>
+
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;

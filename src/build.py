@@ -152,15 +152,17 @@ else: # unix, non-macos
 
 source = Split(
     """
-    expression_grammar.cpp
+    expression_grammar_x3.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp
     params.cpp
-    image_filter_types.cpp
-    image_filter_grammar.cpp
+    parse_image_filters.cpp
+    generate_image_filters.cpp
+    image_filter_grammar_x3.cpp
     color.cpp
-    conversions.cpp
+    conversions_numeric.cpp
+    conversions_string.cpp
     image_copy.cpp
     image_compositing.cpp
     image_scaling.cpp
@@ -174,6 +176,7 @@ source = Split(
     expression_string.cpp
     expression.cpp
     transform_expression.cpp
+    transform_expression_grammar_x3.cpp
     feature_kv_iterator.cpp
     feature_style_processor.cpp
     feature_type_style.cpp
@@ -200,7 +203,6 @@ source = Split(
     load_map.cpp
     palette.cpp
     marker_helpers.cpp
-    transform_expression_grammar.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
@@ -224,7 +226,7 @@ source = Split(
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
     warp.cpp
-    css_color_grammar.cpp
+    css_color_grammar_x3.cpp
     vertex_cache.cpp
     vertex_adapters.cpp
     text/font_library.cpp

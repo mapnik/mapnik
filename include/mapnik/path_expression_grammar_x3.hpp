@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,25 @@
  *
  *****************************************************************************/
 
-// NOTE: we define this here in a cpp because def is needed twice:
-// once by src/color_factory.cpp and once by include/mapnik/image_filter_grammar.hpp
-// otherwise it would make sense to simply do `#include <mapnik/css_color_grammar_impl.hpp>`
-// in a single file
-#include <mapnik/color.hpp>
-#include <mapnik/css_color_grammar_impl.hpp>
-#include <string>
+#ifndef MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
+#define MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
 
-template struct mapnik::css_color_grammar<std::string::const_iterator>;
+// mapnik
+#include <mapnik/path_expression.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
+
+namespace mapnik { namespace grammar {
+
+namespace x3 = boost::spirit::x3;
+struct path_expression_class; // top-most ID
+using path_expression_grammar_type = x3::rule<path_expression_class, path_expression>;
+
+BOOST_SPIRIT_DECLARE(path_expression_grammar_type);
+
+}}
+
+#endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP

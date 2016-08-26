@@ -20,23 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_MAKE_UNIQUE_HPP
-#define MAPNIK_MAKE_UNIQUE_HPP
+#ifndef MAPNIK_TRANSFORM_GRAMMAR_X3_HPP
+#define MAPNIK_TRANSFORM_GRAMMAR_X3_HPP
 
-// http://stackoverflow.com/questions/14131454/visual-studio-2012-cplusplus-and-c-11
-#if defined(_MSC_VER) && _MSC_VER < 1800 || !defined(_MSC_VER) && __cplusplus <= 201103L
+#include <mapnik/transform_expression.hpp>
 
-#include <memory>
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
 
-namespace std {
+namespace mapnik {
 
-// C++14 backfill from http://herbsutter.com/gotw/_102/
-template<typename T, typename ...Args>
-inline std::unique_ptr<T> make_unique(Args&& ...args) {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+namespace x3 = boost::spirit::x3;
+
+namespace grammar {
+
+struct transform_expression_class; // top-most ID
+using transform_expression_grammar_type = x3::rule<transform_expression_class, mapnik::transform_list>;
+
+BOOST_SPIRIT_DECLARE(transform_expression_grammar_type);
+
+}}  // ns
+
+namespace mapnik
+{
+grammar::transform_expression_grammar_type transform_expression_grammar();
 }
 
-}
 #endif
-
-#endif // MAPNIK_MAKE_UNIQUE_HPP

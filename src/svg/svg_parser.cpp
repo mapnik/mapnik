@@ -41,9 +41,8 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
@@ -54,6 +53,24 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
+
+namespace mapnik { namespace svg {
+struct viewbox
+{
+    double x0;
+    double y0;
+    double x1;
+    double y1;
+};
+}}
+
+BOOST_FUSION_ADAPT_STRUCT (
+    mapnik::svg::viewbox,
+    (double, x0)
+    (double, y0)
+    (double, x1)
+    (double, y1)
+    )
 
 namespace mapnik { namespace svg {
 
@@ -77,29 +94,29 @@ void parse_attr(svg_parser & parser,rapidxml::xml_node<char> const* node);
 void parse_attr(svg_parser & parser,char const * name, char const* value);
 
 
+namespace grammar {
+
+namespace x3 = boost::spirit::x3;
+
 using color_lookup_type = std::vector<std::pair<double, agg::rgba8> >;
-namespace qi = boost::spirit::qi;
 using pairs_type = std::vector<std::pair<std::string, std::string> >;
 
-template <typename Iterator,typename SkipType>
-struct key_value_sequence_ordered
-    : qi::grammar<Iterator, pairs_type(), SkipType>
-{
-    key_value_sequence_ordered()
-        : key_value_sequence_ordered::base_type(query)
-    {
-        qi::lit_type lit;
-        qi::char_type char_;
-        query =  pair >> *( lit(';') >> pair);
-        pair  =  key >> -(':' >> value);
-        key   =  char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-");
-        value = +(char_ - lit(';'));
-    }
+x3::rule<class key_value_sequence_ordered, pairs_type> const key_value_sequence_ordered("key_value_sequence_ordered");
+x3::rule<class key_value, std::pair<std::string, std::string> > key_value("key_value");
+x3::rule<class key, std::string> key("key");
+x3::rule<class value_, std::string> value("value");
 
-    qi::rule<Iterator, pairs_type(), SkipType> query;
-    qi::rule<Iterator, std::pair<std::string, std::string>(), SkipType> pair;
-    qi::rule<Iterator, std::string(), SkipType> key, value;
-};
+auto const key_def = x3::char_("a-zA-Z_") > *x3::char_("a-zA-Z_0-9-");
+auto const value_def = +(x3::char_ - ';');
+auto const key_value_def = key > -(':' > value);
+auto const key_value_sequence_ordered_def = key_value % ';';
+
+BOOST_SPIRIT_DEFINE(key);
+BOOST_SPIRIT_DEFINE(value);
+BOOST_SPIRIT_DEFINE(key_value);
+BOOST_SPIRIT_DEFINE(key_value_sequence_ordered);
+
+}
 
 template <typename T>
 mapnik::color parse_color(T & error_messages, const char* str)
@@ -126,10 +143,9 @@ agg::rgba8 parse_color_agg(T & error_messages, const char* str)
 template <typename T>
 double parse_double(T & error_messages, const char* str)
 {
-    using namespace boost::spirit::qi;
-    double_type double_;
+    using namespace boost::spirit::x3;
     double val = 0.0;
-    if (!parse(str, str + std::strlen(str),double_,val))
+    if (!parse(str, str + std::strlen(str), double_, val))
     {
         error_messages.emplace_back("Failed to parse double: \"" + std::string(str) + "\"");
     }
@@ -138,15 +154,11 @@ double parse_double(T & error_messages, const char* str)
 
 // https://www.w3.org/TR/SVG/coords.html#Units
 template <typename T, int DPI = 90>
-double parse_svg_value(T & error_messages, const char* str, bool & percent)
+double parse_svg_value(T & error_messages, const char* str, bool & is_percent)
 {
-    using skip_type = boost::spirit::ascii::space_type;
-    using boost::phoenix::ref;
-    qi::double_type double_;
-    qi::lit_type lit;
-    qi::_1_type _1;
+    namespace x3 = boost::spirit::x3;
     double val = 0.0;
-    qi::symbols<char, double> units;
+    x3::symbols<double> units;
     units.add
         ("px", 1.0)
         ("pt", DPI/72.0)
@@ -157,12 +169,17 @@ double parse_svg_value(T & error_messages, const char* str, bool & percent)
         ;
     const char* cur = str; // phrase_parse modifies the first iterator
     const char* end = str + std::strlen(str);
-    if (!qi::phrase_parse(cur, end,
-                      double_[ref(val) = _1][ref(percent) = false]
-                      > - (units[ ref(val) *= _1]
-                           |
-                           lit('%')[ref(val) *= 0.01][ref(percent) = true]),
-                      skip_type()))
+
+    auto apply_value =   [&](auto const& ctx) { val = _attr(ctx); is_percent = false; };
+    auto apply_units =   [&](auto const& ctx) { val *= _attr(ctx); };
+    auto apply_percent = [&](auto const& ctx) { val *= 0.01; is_percent = true; };
+
+    if (!x3::phrase_parse(cur, end,
+                          x3::double_[apply_value]
+                          > - (units[apply_units]
+                               |
+                               x3::lit('%')[apply_percent]),
+                          x3::space))
     {
         error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) + "'");
     }
@@ -174,46 +191,35 @@ double parse_svg_value(T & error_messages, const char* str, bool & percent)
     return val;
 }
 
-template <typename T>
-bool parse_double_list(T & error_messages, const char* str, double* list)
+template <typename T, typename V>
+bool parse_viewbox(T & error_messages, const char* str, V & viewbox)
 {
-    using namespace boost::spirit::qi;
-    using boost::phoenix::ref;
-    _1_type _1;
-    double_type double_;
-    lit_type lit;
-    using skip_type = boost::spirit::ascii::space_type;
-
-    if (!phrase_parse(str, str + std::strlen(str),
-                      double_[ref(list[0])=_1] >> -lit(',') >>
-                      double_[ref(list[1])=_1] >> -lit(',') >>
-                      double_[ref(list[2])=_1] >> -lit(',') >>
-                      double_[ref(list[3])=_1], skip_type()))
+    namespace x3 = boost::spirit::x3;
+    if ( !x3::phrase_parse(str, str + std::strlen(str),
+                           x3::double_ > -x3::lit(',') >
+                           x3::double_ > -x3::lit(',') >
+                           x3::double_ > -x3::lit(',') >
+                           x3::double_, x3::space, viewbox))
     {
-        error_messages.emplace_back("failed to parse list of doubles from " + std::string(str));
+        error_messages.emplace_back("failed to parse SVG viewbox from " + std::string(str));
         return false;
     }
     return true;
 }
 
-bool parse_style (char const* str, pairs_type & v)
+bool parse_style (char const* str, grammar::pairs_type & v)
 {
-    using namespace boost::spirit::qi;
-    using skip_type = boost::spirit::ascii::space_type;
-    key_value_sequence_ordered<const char*, skip_type> kv_parser;
-    return phrase_parse(str, str + std::strlen(str), kv_parser, skip_type(), v);
+    namespace x3 = boost::spirit::x3;
+    return x3::phrase_parse(str, str + std::strlen(str), grammar::key_value_sequence_ordered , x3::space, v);
 }
 
 bool parse_id_from_url (char const* str, std::string & id)
 {
-    using namespace boost::spirit::qi;
-    using skip_type = boost::spirit::ascii::space_type;
-    qi::_1_type _1;
-    qi::char_type char_;
-    qi::lit_type lit;
-    return phrase_parse(str, str + std::strlen(str),
-                        lit("url") > "(" > "#" > *(char_ - lit(')'))[boost::phoenix::ref(id) += _1] > ")",
-                        skip_type());
+    namespace x3 = boost::spirit::x3;
+    auto extract_id = [&](auto const& ctx) { id += _attr(ctx); };
+    return x3::phrase_parse(str, str + std::strlen(str),
+                            x3::lit("url") > '(' > '#' > *(x3::char_ - ')')[extract_id] > ')',
+                            x3::space);
 }
 
 bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
@@ -517,7 +523,7 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double width = 0;
     double height = 0;
     double aspect_ratio = 1;
-    double viewbox[4] = {0,0,0,0};
+    viewbox vbox = {0,0,0,0};
     bool has_viewbox = false;
     bool has_percent_height = true;
     bool has_percent_width = true;
@@ -535,23 +541,23 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     auto const* viewbox_attr = node->first_attribute("viewBox");
     if (viewbox_attr)
     {
-        has_viewbox = parse_double_list(parser.error_messages_, viewbox_attr->value(), viewbox);
+        has_viewbox = parse_viewbox(parser.error_messages_, viewbox_attr->value(), vbox);
     }
 
     if (has_percent_width && !has_percent_height && has_viewbox)
     {
-        aspect_ratio = viewbox[2] / viewbox[3];
+        aspect_ratio = vbox.x1 / vbox.y1;
         width = aspect_ratio * height;
     }
     else if (!has_percent_width && has_percent_height && has_viewbox)
     {
-        aspect_ratio = viewbox[2] / viewbox[3];
+        aspect_ratio = vbox.x1 / vbox.y1;
         height = height / aspect_ratio;
     }
     else if (has_percent_width && has_percent_height && has_viewbox)
     {
-        width = viewbox[2];
-        height = viewbox[3];
+        width = vbox.x1;
+        height = vbox.y1;
     }
 
     parser.path_.set_dimensions(width, height);

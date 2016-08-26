@@ -28,7 +28,7 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wredeclared-class-member"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef" 
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wc++11-narrowing"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -54,4 +54,3 @@
 #pragma GCC diagnostic ignored "-Wmissing-noreturn"
 #pragma GCC diagnostic ignored "-Wcovered-switch-default"
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-

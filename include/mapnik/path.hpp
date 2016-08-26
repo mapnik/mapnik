@@ -70,9 +70,9 @@ public:
         return static_cast<bool>(type_ >> geometry_bits);
     }
 
-    void set_type(types type)
+    void set_type(types _type)
     {
-        type_ = type;
+        type_ = _type;
     }
 
     container_type const& data() const

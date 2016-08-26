@@ -52,7 +52,7 @@ public:
 
     hit_grid_view(unsigned x, unsigned y,
                   unsigned width, unsigned height,
-                  T const& data,
+                  T const& _data,
                   std::string const& key,
                   std::string const& id_name,
                   std::set<std::string> const& names,
@@ -63,7 +63,7 @@ public:
           y_(y),
           width_(width),
           height_(height),
-          data_(data),
+          data_(_data),
           key_(key),
           id_name_(id_name),
           names_(names),

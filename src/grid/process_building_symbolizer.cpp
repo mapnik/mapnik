@@ -38,6 +38,7 @@
 
 // stl
 #include <deque>
+#include <memory>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
