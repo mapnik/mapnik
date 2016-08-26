@@ -47,7 +47,8 @@ public:
     postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                        context_ptr const& ctx,
                        std::string const& encoding,
-                       bool key_field = false);
+                       bool key_field = false,
+                       bool twkb_encoding = false);
     feature_ptr next();
     ~postgis_featureset();
 
@@ -58,6 +59,7 @@ private:
     unsigned totalGeomSize_;
     mapnik::value_integer feature_id_;
     bool key_field_;
+    bool twkb_encoding_;
 };
 
 #endif // POSTGIS_FEATURESET_HPP

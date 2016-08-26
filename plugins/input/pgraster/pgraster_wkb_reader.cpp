@@ -65,12 +65,12 @@ read_uint16(const boost::uint8_t** from, boost::uint8_t littleEndian) {
     return ret;
 }
 
-int16_t
-read_int16(const uint8_t** from, uint8_t littleEndian) {
-    assert(NULL != from);
-
-    return read_uint16(from, littleEndian);
-}
+// int16_t
+// read_int16(const uint8_t** from, uint8_t littleEndian) {
+//     assert(NULL != from);
+//
+//     return read_uint16(from, littleEndian);
+// }
 
 double
 read_float64(const boost::uint8_t** from, boost::uint8_t littleEndian) {
@@ -185,16 +185,17 @@ void read_data_band(mapnik::raster_ptr raster,
 {
   mapnik::image_data_32 & image = raster->data_;
 
-  // Start with plain white (ABGR or RGBA depending on endiannes)
-  // TODO: set to transparent instead?
-  image.set(0xffffffff);
-
   raster->premultiplied_alpha_ = true;
 
   float* data = (float*)image.getBytes();
-  double val;
-  val = reader(); // nodata value, need to read anyway
-  if ( hasnodata ) raster->set_nodata(val);
+  double nodataval;
+  double val = reader(); // read nodata value, whether we use it or not (here, we don't)
+  
+  if ( hasnodata ) {
+    nodataval = val;
+    raster->set_nodata(nodataval);
+  }
+
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
       val = reader();
@@ -218,7 +219,7 @@ pgraster_wkb_reader::read_indexed(mapnik::raster_ptr raster)
   int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
   int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
 
-  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: band type:"
+  MAPNIK_LOG_DEBUG(pgraster) << __func__ << ": band type:"
         << pixtype << " offline:" << offline
         << " hasnodata:" << hasnodata;
 
@@ -278,26 +279,44 @@ void read_grayscale_band(mapnik::raster_ptr raster,
 {
   mapnik::image_data_32 & image = raster->data_;
 
-  // Start with plain white (ABGR or RGBA depending on endiannes)
-  // TODO: set to transparent instead?
-  image.set(0xffffffff);
-
   raster->premultiplied_alpha_ = true;
 
+  // Start with black and transparent full on
+  image.set(0x00000000);
+
   int val;
+  int nodataval;
   uint8_t * data = image.getBytes();
   int ps = 4; // sizeof(image_data::pixel_type)
   int off;
   val = reader(); // nodata value, need to read anyway
-  if ( hasnodata ) raster->set_nodata(val);
+  if ( hasnodata ) {
+      raster->set_nodata(val); // this doesn't actually *do* anything, just sets a value on the raster object
+      nodataval = val;
+  }
+
+  MAPNIK_LOG_DEBUG(pgraster) << __func__ << ": hasnodata:"
+        << hasnodata << " nodataval:" << val;
+
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
       val = reader();
+      // Apply harse type clipping rules ala GDAL
+      if ( val < 0 ) val = 0;
+      if ( val > 255 ) val = 255;
+      // Calculate pixel offset
       off = y * width * ps + x * ps;
-      // Pixel space is RGBA
+      // Pixel space is RGBA, fill all w/ same value for Grey
       data[off+0] = val;
       data[off+1] = val;
       data[off+2] = val;
+      // Set the alpha channel for transparent nodata values
+      // Nodata handling is *manual* at the driver level
+      if ( hasnodata && val == nodataval ) {
+          data[off+3] = 0x00;
+      } else {
+          data[off+3] = 0xFF;
+      }
     }
   }
 }
@@ -311,7 +330,7 @@ pgraster_wkb_reader::read_grayscale(mapnik::raster_ptr raster)
   int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
   int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
 
-  MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: band type:"
+  MAPNIK_LOG_DEBUG(pgraster) << __func__ << ": band type:"
         << pixtype << " offline:" << offline
         << " hasnodata:" << hasnodata;
 
@@ -359,10 +378,9 @@ pgraster_wkb_reader::read_rgba(mapnik::raster_ptr raster)
 {
   mapnik::image_data_32 & image = raster->data_;
 
-  // Start with plain white (ABGR or RGBA depending on endiannes)
-  image.set(0xffffffff);
-  //raster->set_nodata(0xffffffff);
-
+  // Start with white and transparent full on
+  image.set(0xffffff00);
+ 
   raster->premultiplied_alpha_ = true;
 
   uint8_t nodataval;
@@ -373,7 +391,7 @@ pgraster_wkb_reader::read_rgba(mapnik::raster_ptr raster)
     int offline = BANDTYPE_IS_OFFDB(type) ? 1 : 0;
     int hasnodata = BANDTYPE_HAS_NODATA(type) ? 1 : 0;
 
-    MAPNIK_LOG_DEBUG(pgraster) << "pgraster_wkb_reader: band " << bn
+    MAPNIK_LOG_DEBUG(pgraster) << __func__ << ": band " << bn
           << " type:" << pixtype << " offline:" << offline
           << " hasnodata:" << hasnodata;
 
@@ -390,10 +408,16 @@ pgraster_wkb_reader::read_rgba(mapnik::raster_ptr raster)
     }
 
     uint8_t tmp = read_uint8(&ptr_);
-    if ( ! bn ) nodataval = tmp;
-    else if ( tmp != nodataval ) {
-      MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band " << bn
-            << " nodataval " << tmp << " != band 0 nodataval " << nodataval;
+    if ( hasnodata ) {
+        // Use the NODATA value from the Red band as our global NODATA value
+        if ( bn == 0 ) {
+            nodataval = tmp;
+        }
+        // Warn if the bands have inconsistent NODATA values
+        else if ( tmp != nodataval ) {
+          MAPNIK_LOG_WARN(pgraster) << "pgraster_wkb_reader: band " << bn
+                << " nodataval " << tmp << " != band 0 nodataval " << nodataval;
+        }
     }
 
     int ps = 4; // sizeof(image_data::pixel_type)
@@ -406,6 +430,12 @@ pgraster_wkb_reader::read_rgba(mapnik::raster_ptr raster)
         int off = y * width_ * ps + x * ps;
         // Pixel space is RGBA
         image_data[off+bn] = val;
+        // For a 3-band image, with a NODATA value, use the nodata value
+        // from the Red band (aping the GDAL driver) to set the alpha-channel
+        // to transparent in NODATA areas
+        if ( hasnodata && bn == 0 && numBands_ == 3 ) {
+            image_data[off+3] = ( val == nodataval ? 0x00 : 0xFF );
+        }
       }
     }
   }
