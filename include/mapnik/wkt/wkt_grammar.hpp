@@ -28,7 +28,6 @@
 #include <mapnik/geometry.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/assert.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #pragma GCC diagnostic pop
