@@ -56,7 +56,7 @@ public:
     void operator()() const
     {
         mapnik::Map m(width_,height_);
-        mapnik::load_map(m,xml_);
+        mapnik::load_map(m,xml_,true);
         m.zoom_to_box(extent_);
         for (unsigned i=0;i<iterations_;++i)
         {
@@ -79,11 +79,6 @@ int main(int argc, char** argv)
         {
             std::clog << "please provide a name for this test\n";
             return -1;
-        }
-        bool success = mapnik::freetype_engine::register_fonts("./fonts", true);
-        if (!success) {
-           std::clog << "warning, did not register any new fonts!\n";
-           return -1;
         }
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         {

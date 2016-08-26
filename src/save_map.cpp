@@ -832,6 +832,12 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         set_attr( map_node, "background-color", * c );
     }
 
+    optional<std::string> const& font_directory = map.font_directory();
+    if ( font_directory )
+    {
+        set_attr( map_node, "font-directory", *font_directory );
+    }
+
     optional<std::string> const& image_filename = map.background_image();
     if ( image_filename )
     {

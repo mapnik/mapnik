@@ -10,17 +10,28 @@ public:
      : test_case(params) {}
     bool validate() const
     {
-        return true;
+        mapnik::freetype_engine engine;
+        unsigned long count = 0;
+        std::map<std::string, std::string> memory_font_cache;
+        mapnik::freetype_engine::font_file_mapping_type font_file_mapping = mapnik::freetype_engine::get_mapping();
+        BOOST_FOREACH ( std::string const& name , mapnik::freetype_engine::face_names())
+        {
+            mapnik::face_ptr f = engine.create_face(name,font_file_mapping,memory_font_cache);
+            if (f) ++count;
+        }
+        return (count == 22);
     }
     void operator()() const
     {
         mapnik::freetype_engine engine;
         unsigned long count = 0;
+        std::map<std::string, std::string> memory_font_cache;
+        mapnik::freetype_engine::font_file_mapping_type font_file_mapping = mapnik::freetype_engine::get_mapping();
         for (unsigned i=0;i<iterations_;++i)
         {
             BOOST_FOREACH ( std::string const& name , mapnik::freetype_engine::face_names())
             {
-                mapnik::face_ptr f = engine.create_face(name);
+                mapnik::face_ptr f = engine.create_face(name,font_file_mapping,memory_font_cache);
                 if (f) ++count;
             }
         }
@@ -38,6 +49,6 @@ int main(int argc, char** argv)
     } 
     std::size_t face_count = mapnik::freetype_engine::face_names().size();
     test test_runner(params);
-    return run(test_runner,(boost::format("font_engine: creating %ld faces") % (face_count * 1000 * 10)).str());
+    return run(test_runner,(boost::format("font_engine: creating %ld faces") % (face_count)).str());
 }
 

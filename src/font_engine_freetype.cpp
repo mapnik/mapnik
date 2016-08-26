@@ -139,6 +139,12 @@ struct ft_face_guard {
 
 bool freetype_engine::register_font(std::string const& file_name)
 {
+    return register_font(file_name,name2file_);
+}
+
+bool freetype_engine::register_font(std::string const& file_name,
+                                    font_file_mapping_type & font_mapping)
+{
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
@@ -196,7 +202,7 @@ bool freetype_engine::register_font(std::string const& file_name)
             // skip fonts with leading . in the name
             if (!boost::algorithm::starts_with(name,"."))
             {
-                name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+                font_mapping.insert(std::make_pair(name, std::make_pair(i,file_name)));
                 success = true;
             }
         }
@@ -218,13 +224,18 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
+    return register_fonts(dir,name2file_,recurse);
+}
+
+bool freetype_engine::register_fonts(std::string const& dir, font_file_mapping_type & font_mapping, bool recurse)
+{
     if (!mapnik::util::exists(dir))
     {
         return false;
     }
     if (!mapnik::util::is_directory(dir))
     {
-        return mapnik::freetype_engine::register_font(dir);
+        return mapnik::freetype_engine::register_font(dir,font_mapping);
     }
     bool success = false;
     try
@@ -250,7 +261,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 #endif
             if (boost::filesystem::is_directory(*itr) && recurse)
             {
-                if (register_fonts(file_name, true))
+                if (register_fonts(file_name, font_mapping, true))
                 {
                     success = true;
                 }
@@ -266,7 +277,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
                     mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))
                 {
-                    if (mapnik::freetype_engine::register_font(file_name))
+                    if (register_font(file_name,font_mapping))
                     {
                         success = true;
                     }
@@ -285,7 +296,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 std::vector<std::string> freetype_engine::face_names ()
 {
     std::vector<std::string> names;
-    std::map<std::string,std::pair<int,std::string> >::const_iterator itr;
+    font_file_mapping_type::const_iterator itr;
     for (itr = name2file_.begin();itr!=name2file_.end();++itr)
     {
         names.push_back(itr->first);
@@ -293,23 +304,37 @@ std::vector<std::string> freetype_engine::face_names ()
     return names;
 }
 
-std::map<std::string,std::pair<int,std::string> > const& freetype_engine::get_mapping()
+freetype_engine::font_file_mapping_type const& freetype_engine::get_mapping()
 {
     return name2file_;
 }
 
 
-face_ptr freetype_engine::create_face(std::string const& family_name)
+face_ptr freetype_engine::create_face(std::string const& family_name,
+                                      freetype_engine::font_file_mapping_type const& font_mapping,
+                                      std::map<std::string, std::string> & memory_fonts)
 {
-    std::map<std::string, std::pair<int,std::string> >::const_iterator itr;
-    itr = name2file_.find(family_name);
-    if (itr != name2file_.end())
+    bool found_font_file = false;
+    font_file_mapping_type::const_iterator itr = font_mapping.find(family_name);
+    if (itr != font_mapping.end())
+    {
+        found_font_file = true;
+    }
+    else
+    {
+        itr = name2file_.find(family_name);
+        if (itr != name2file_.end())
+        {
+            found_font_file = true;
+        }
+    }
+    if (found_font_file)
     {
         FT_Face face;
 
-        std::map<std::string,std::string>::const_iterator mem_font_itr = memory_fonts_.find(itr->second.second);
+        std::map<std::string,std::string>::const_iterator mem_font_itr = memory_fonts.find(itr->second.second);
 
-        if (mem_font_itr != memory_fonts_.end()) // memory font
+        if (mem_font_itr != memory_fonts.end()) // memory font
         {
             FT_Error error = FT_New_Memory_Face(library_,
                                                 reinterpret_cast<FT_Byte const*>(mem_font_itr->second.c_str()),
@@ -339,7 +364,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 buffer.resize(file_size);
                 std::fread(&buffer[0], file_size, 1, file);
                 std::pair<std::map<std::string,std::string>::iterator,bool> result =
-                    memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
+                    memory_fonts.insert(std::make_pair(itr->second.second, buffer));
                 FT_Error error = FT_New_Memory_Face (library_,
                                                      reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
                                                      static_cast<FT_Long>(buffer.size()),
@@ -350,7 +375,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 else
                 {
                     // we can't load font, erase it.
-                    memory_fonts_.erase(result.first);
+                    memory_fonts.erase(result.first);
                 }
             }
         }
@@ -816,8 +841,7 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
 #ifdef MAPNIK_THREADSAFE
 boost::mutex freetype_engine::mutex_;
 #endif
-std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-std::map<std::string,std::string> freetype_engine::memory_fonts_;
+freetype_engine::font_file_mapping_type freetype_engine::name2file_;
 
 template text_renderer<image_32>::text_renderer(image_32&,
                                                 face_manager<freetype_engine>&,

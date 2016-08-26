@@ -117,6 +117,7 @@ typedef boost::shared_ptr<stroker> stroker_ptr;
 class MAPNIK_DECL freetype_engine
 {
 public:
+    typedef std::map<std::string,std::pair<int,std::string> > font_file_mapping_type;
     static bool is_font_file(std::string const& file_name);
 
     /*! \brief register a font file
@@ -125,15 +126,26 @@ public:
      */
     static bool register_font(std::string const& file_name);
 
+    /*! \brief register a font file using a local mapping
+     *  @param file_name path to a font file.
+     *  @param font_mapping a std::map holding association between a family name and a font file.
+     *  @return bool - true if at least one face was successfully registered in the file.
+     */
+    static bool register_font(std::string const& file_name,
+                                    font_file_mapping_type & font_mapping);
+
     /*! \brief register a font file
      *  @param dir - path to a directory containing fonts or subdirectories.
      *  @param recurse - default false, whether to search for fonts in sub directories.
      *  @return bool - true if at least one face was successfully registered.
      */
     static bool register_fonts(std::string const& dir, bool recurse = false);
+    static bool register_fonts(std::string const& dir, font_file_mapping_type & font_mapping, bool recurse = false);
     static std::vector<std::string> face_names();
-    static std::map<std::string,std::pair<int,std::string> > const& get_mapping();
-    face_ptr create_face(std::string const& family_name);
+    static font_file_mapping_type const& get_mapping();
+    face_ptr create_face(std::string const& family_name,
+                         font_file_mapping_type const& font_mapping,
+                         std::map<std::string, std::string> & memory_fonts);
     stroker_ptr create_stroker();
     virtual ~freetype_engine();
     freetype_engine();
@@ -142,8 +154,7 @@ private:
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
-    static std::map<std::string,std::pair<int,std::string> > name2file_;
-    static std::map<std::string, std::string> memory_fonts_;
+    static font_file_mapping_type name2file_;
 };
 
 template <typename T>
@@ -153,8 +164,11 @@ class MAPNIK_DECL face_manager : private mapnik::noncopyable
     typedef std::map<std::string,face_ptr> face_ptr_cache_type;
 
 public:
-    face_manager(T & engine)
+    face_manager(T & engine,
+                 freetype_engine::font_file_mapping_type const& font_mapping)
         : engine_(engine),
+        memory_fonts_(),
+        font_file_mapping_(font_mapping),
         stroker_(engine_.create_stroker()),
         face_ptr_cache_()  {}
 
@@ -168,7 +182,7 @@ public:
         }
         else
         {
-            face_ptr face = engine_.create_face(name);
+            face_ptr face = engine_.create_face(name,font_file_mapping_,memory_fonts_);
             if (face)
             {
                 face_ptr_cache_.insert(make_pair(name,face));
@@ -229,6 +243,8 @@ public:
 
 private:
     font_engine_type & engine_;
+    std::map<std::string, std::string> memory_fonts_;
+    freetype_engine::font_file_mapping_type const& font_file_mapping_;
     stroker_ptr stroker_;
     face_ptr_cache_type face_ptr_cache_;
 };

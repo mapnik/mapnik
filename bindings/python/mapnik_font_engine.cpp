@@ -25,6 +25,17 @@
 
 #include <mapnik/font_engine_freetype.hpp>
 
+namespace {
+   bool register_font(std::string const& path)
+   {
+       return mapnik::freetype_engine::register_font(path);
+   }
+   bool register_fonts(std::string const& path, bool recurse)
+   {
+       return mapnik::freetype_engine::register_fonts(path,recurse);
+   }
+}
+
 void export_font_engine()
 {
     using mapnik::freetype_engine;
@@ -39,8 +50,8 @@ void export_font_engine()
 
     class_<freetype_engine,bases<singleton<freetype_engine,CreateStatic> >,
         boost::noncopyable>("FontEngine",no_init)
-        .def("register_font",&freetype_engine::register_font)
-        .def("register_fonts",&freetype_engine::register_fonts)
+        .def("register_font",&register_font)
+        .def("register_fonts",&register_fonts)
         .def("face_names",&freetype_engine::face_names)
         .staticmethod("register_font")
         .staticmethod("register_fonts")
