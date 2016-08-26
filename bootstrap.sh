@@ -39,6 +39,8 @@ function install() {
             fi
         fi
     fi
+    # the rm here is to workaround https://github.com/mapbox/mason/issues/230
+    rm -f ./mason_packages/.link/mason.ini
     mason link $1 $2
 }
 
