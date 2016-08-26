@@ -26,10 +26,6 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/phoenix/object/construct.hpp>
 #pragma GCC diagnostic pop
 
@@ -50,7 +46,7 @@ wkt_grammar<Iterator>::wkt_grammar()
     qi::_1_type _1;
     qi::_a_type _a;
     using boost::phoenix::construct;
-    using boost::phoenix::at_c;
+    //using boost::phoenix::at_c;
     geometry_tagged_text = point_tagged_text(_r1)
         | linestring_tagged_text(_r1)
         | polygon_tagged_text(_r1)
