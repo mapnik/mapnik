@@ -61,4 +61,3 @@ generic_json<Iterator>::generic_json()
 
 using iterator_type = char const*;
 template struct mapnik::json::generic_json<iterator_type>;
-template struct mapnik::json::generic_json<std::string::const_iterator>;
