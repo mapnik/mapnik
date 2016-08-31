@@ -129,7 +129,7 @@ struct push_esc
     }
 };
 
-template< typename Iterator >
+template< typename Iterator>
 unicode_string<Iterator>::unicode_string()
     : unicode_string::base_type(double_quoted)
 {
@@ -175,8 +175,9 @@ unicode_string<Iterator>::unicode_string()
 }
 
 template <typename Iterator>
-struct generic_json
+struct generic_json : qi::grammar<Iterator, json_value(), space_type>
 {
+    generic_json();
     qi::rule<Iterator, json_value(), space_type> value;
     qi::int_parser<mapnik::value_integer, 10, 1, -1> int__;
     unicode_string<Iterator> string_;

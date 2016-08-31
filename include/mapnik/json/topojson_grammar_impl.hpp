@@ -94,7 +94,6 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     using qi::fail;
     using qi::on_error;
     using phoenix::push_back;
-    using phoenix::construct;
 
     geometry_type_dispatch.add
         ("\"Point\"",1)
@@ -109,29 +108,6 @@ topojson_grammar<Iterator, ErrorHandler>::topojson_grammar()
     // error handler
     boost::phoenix::function<ErrorHandler> const error_handler;
     boost::phoenix::function<create_geometry_impl> const create_geometry;
-    // generic JSON types
-    json.value = json.object | json.array | json.string_ | json.number
-        ;
-
-    json.key_value = json.string_ > lit(':') > json.value
-        ;
-
-    json.object = lit('{')
-        > -(json.key_value % lit(','))
-        > lit('}')
-        ;
-
-    json.array = lit('[')
-        > -(json.value % lit(','))
-        > lit(']')
-        ;
-
-    json.number = json.strict_double[_val = json.double_converter(_1)]
-        | json.int__[_val = json.integer_converter(_1)]
-        | lit("true")[_val = true]
-        | lit("false")[_val = false]
-        | lit("null")[_val = construct<value_null>()]
-        ;
 
     // topo json
     topology = lit('{') >> lit("\"type\"") >> lit(':') >> lit("\"Topology\"")
