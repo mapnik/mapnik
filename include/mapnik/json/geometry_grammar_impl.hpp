@@ -52,31 +52,6 @@ geometry_grammar<Iterator, ErrorHandler>::geometry_grammar()
     using phoenix::push_back;
 
     start = geometry.alias() | lit("null");
-
-    // generic json types
-    json_.value =  json_.object | json_.array | json_.string_ | json_.number
-        ;
-
-    json_.key_value = json_.string_ > lit(':') > json_.value
-        ;
-
-    json_.object = lit('{')
-        > -(json_.key_value % lit(','))
-        > lit('}')
-        ;
-
-    json_.array = lit('[')
-        > -(json_.value % lit(','))
-        > lit(']')
-        ;
-
-    json_.number = json_.strict_double
-        | json_.int__
-        | lit("true")
-        | lit ("false")
-        | lit("null")
-        ;
-
     geometry = lit('{')[_a = 0]
         > (((lit("\"type\"") > lit(':') > geometry_type_dispatch[_a = _1])
             |

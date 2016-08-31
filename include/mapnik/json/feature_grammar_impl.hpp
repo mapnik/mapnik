@@ -35,7 +35,6 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     qi::lit_type lit;
     qi::long_long_type long_long;
     qi::double_type double_;
-    qi::_val_type _val;
     qi::_1_type _1;
     qi::_2_type _2;
     qi::_3_type _3;
@@ -48,30 +47,6 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     using qi::on_error;
     using phoenix::new_;
     using phoenix::construct;
-
-    // generic json types
-    json_.value = json_.object | json_.array | json_.string_ | json_.number
-        ;
-
-    json_.key_value = json_.string_ > lit(':') > json_.value
-        ;
-
-    json_.object = lit('{')
-        > -(json_.key_value % lit(','))
-        > lit('}')
-        ;
-
-    json_.array = lit('[')
-        > -(json_.value % lit(','))
-        > lit(']')
-        ;
-
-    json_.number = json_.strict_double[_val = json_.double_converter(_1)]
-        | json_.int__[_val = json_.integer_converter(_1)]
-        | lit("true") [_val = true]
-        | lit ("false") [_val = false]
-        | lit("null")[_val = construct<value_null>()]
-        ;
 
     // geojson types
     feature_type = lit("\"type\"") > lit(':') > lit("\"Feature\"")
