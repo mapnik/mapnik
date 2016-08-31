@@ -31,7 +31,7 @@
 
 namespace {
 
-using iterator_type = std::string::const_iterator;
+using iterator_type = char const*;
 const mapnik::topojson::topojson_grammar<iterator_type> grammar;
 
 bool parse_topology(std::string const& filename, mapnik::topojson::topology & topo)
@@ -42,8 +42,8 @@ bool parse_topology(std::string const& filename, mapnik::topojson::topology & to
     std::fread(&buffer[0], buffer.size(), 1, file.get());
     if (!file) return false;
     boost::spirit::standard::space_type space;
-    iterator_type itr = buffer.begin();
-    iterator_type end = buffer.end();
+    iterator_type itr = buffer.c_str();
+    iterator_type end = itr + buffer.length();
     bool result = boost::spirit::qi::phrase_parse(itr, end, grammar, space, topo);
     return (result && (itr == end));
 }

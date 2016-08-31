@@ -24,5 +24,5 @@
 #include <mapnik/json/topojson_grammar_impl.hpp>
 #include <string>
 
-using iterator_type = std::string::const_iterator;
+using iterator_type = char const*;
 template struct mapnik::topojson::topojson_grammar<iterator_type> ;

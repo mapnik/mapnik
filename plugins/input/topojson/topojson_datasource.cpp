@@ -160,7 +160,7 @@ topojson_datasource::topojson_datasource(parameters const& params)
     }
     if (!inline_string_.empty())
     {
-        parse_topojson(inline_string_);
+        parse_topojson(inline_string_.c_str());
     }
     else
     {
@@ -172,20 +172,22 @@ topojson_datasource::topojson_datasource(parameters const& params)
         std::string file_buffer;
         file_buffer.resize(file.size());
         std::fread(&file_buffer[0], file.size(), 1, file.get());
-        parse_topojson(file_buffer);
+        parse_topojson(file_buffer.c_str());
     }
 }
 
 namespace {
-using base_iterator_type = std::string::const_iterator;
-const mapnik::topojson::topojson_grammar<base_iterator_type> g;
+using iterator_type = const char*;
+const mapnik::topojson::topojson_grammar<iterator_type> g;
 }
 
 template <typename T>
 void topojson_datasource::parse_topojson(T const& buffer)
 {
     boost::spirit::standard::space_type space;
-    bool result = boost::spirit::qi::phrase_parse(buffer.begin(), buffer.end(), g, space, topo_);
+    auto itr = buffer;
+    auto end = buffer + std::strlen(buffer);
+    bool result = boost::spirit::qi::phrase_parse(itr, end, g, space, topo_);
     if (!result)
     {
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
