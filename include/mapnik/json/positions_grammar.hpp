@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/positions.hpp>
-#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/geometry.hpp>
 #pragma GCC diagnostic push
@@ -38,6 +37,8 @@
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
+namespace standard = boost::spirit::standard;
+using space_type = standard::space_type;
 
 template <typename Iterator, typename ErrorHandler = error_handler<Iterator> >
 struct positions_grammar :

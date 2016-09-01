@@ -20,9 +20,44 @@
  *
  *****************************************************************************/
 
-#include <mapnik/feature.hpp>
-#include <mapnik/json/topojson_grammar_impl.hpp>
-#include <string>
+#include <mapnik/json/generic_json.hpp>
+
+namespace mapnik { namespace json {
+
+template <typename Iterator>
+generic_json<Iterator>::generic_json()
+    : generic_json::base_type(value)
+{
+    qi::lit_type lit;
+    qi::_val_type _val;
+    qi::_1_type _1;
+    using phoenix::construct;
+    // generic json types
+    value = object | array | string_ | number
+        ;
+
+    key_value = string_ > lit(':') > value
+        ;
+
+    object = lit('{')
+        > -(key_value % lit(','))
+        > lit('}')
+        ;
+
+    array = lit('[')
+        > -(value % lit(','))
+        > lit(']')
+        ;
+
+    number = strict_double[_val = double_converter(_1)]
+        | int__[_val = integer_converter(_1)]
+        | lit("true") [_val = true]
+        | lit ("false") [_val = false]
+        | lit("null")[_val = construct<value_null>()]
+        ;
+}
+
+}}
 
 using iterator_type = char const*;
-template struct mapnik::topojson::topojson_grammar<iterator_type> ;
+template struct mapnik::json::generic_json<iterator_type>;
