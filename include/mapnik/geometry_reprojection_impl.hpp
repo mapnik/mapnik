@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-// mapnik <mapnik/geometry_reprojection.hpp>
+#include <mapnik/geometry_reprojection.hpp>
 #include <mapnik/geometry.hpp>
 
 namespace mapnik {
