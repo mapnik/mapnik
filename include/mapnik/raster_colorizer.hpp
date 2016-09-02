@@ -93,7 +93,7 @@ public:
 
     //! \brief Set the stop value
     //! \param[in] value The stop value
-    inline void set_value(float value) { value_ = value; }
+    inline void set_value(float v) { value_ = v; }
 
     //! \brief Get the stop value
     //! \return The stop value
@@ -205,7 +205,7 @@ public:
     //!
     //! \param[in] value Input value
     //! \return color associated with the value
-    unsigned get_color(float value) const;
+    unsigned get_color(float v) const;
 
 
     //! \brief Set the epsilon value for exact mode

@@ -1,4 +1,4 @@
-language: cpp
+language: generic
 
 git:
   depth: 10
@@ -25,24 +25,24 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8" TRIGGER=true
+      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8" TRIGGER=true
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-5-dev', 'xutils']
+          packages: [ 'libstdc++-5-dev', 'xutils-dev']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true _CXX="ccache clang++-3.8 -Qunused-arguments" _CC="clang-3.8"
+      env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: ['libstdc++-5-dev', 'xutils' ]
+          packages: ['libstdc++-5-dev', 'xutils-dev' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=true _CXX="ccache clang++ -Qunused-arguments"
+      env: JOBS=4 MASON_PUBLISH=true CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
  # workaround travis rvm bug
@@ -51,8 +51,6 @@ before_install:
    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
      rvm get head || true
    fi
- - if [[ ${_CXX:-false} != false ]]; then export CXX=${_CXX}; fi
- - if [[ ${_CC:-false} != false ]]; then export CC=${_CC}; fi
  - source scripts/travis-common.sh
  - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
@@ -94,7 +92,7 @@ script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
  - cat config.log
- - make
+ - scripts/travis-command-wrapper.py -s "date;ps aux | grep ${CXX}" -i 60 make
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
