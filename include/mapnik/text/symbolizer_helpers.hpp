@@ -111,10 +111,6 @@ protected:
     evaluated_text_properties_ptr text_props_;
 };
 
-namespace geometry {
-MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
-}
-
 // Helper object that does all the TextSymbolizer placement finding
 // work except actually rendering the object.
 
@@ -162,10 +158,6 @@ protected:
     //ShieldSymbolizer only
     void init_marker() const;
 };
-
-namespace geometry {
-MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
-}
 
 } //namespace mapnik
 
