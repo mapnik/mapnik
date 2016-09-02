@@ -98,7 +98,7 @@ private:
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;
     std::string filename_;
-    std::string inline_string_;
+    bool from_inline_string_;
     mapnik::box2d<double> extent_;
     std::vector<mapnik::feature_ptr> features_;
     std::unique_ptr<spatial_index_type> tree_;
