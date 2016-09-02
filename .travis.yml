@@ -92,7 +92,7 @@ script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
  - cat config.log
- - scripts/travis-command-wrapper.py make
+ - scripts/travis-command-wrapper.py -s "date;ps aux | grep ${CXX}" -i 60 make
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
