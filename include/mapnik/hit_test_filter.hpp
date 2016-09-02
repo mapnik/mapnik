@@ -91,31 +91,16 @@ struct hit_test_visitor
     }
     bool operator() (geometry::polygon<double> const& poly) const
     {
-        //auto const& exterior = geom.exterior_ring;
-        //std::size_t num_points = exterior.size();
-        //if (num_points < 4) return false;
-
-        //for (std::size_t i = 1; i < num_points; ++i)
-        //{
-        //   auto const& pt0 = exterior[i-1];
-        //   auto const& pt1 = exterior[i];
-            // todo - account for tolerance
-        //   if (pip(pt0.x,pt0.y,pt1.x,pt1.y,x_,y_))
-        //   {
-        //       inside = !inside;
-        //   }
-        //}
-        //if (!inside) return false;
-
-        //// FIXME !!!
         bool inside = false;
-        bool exterior = true;
+        std::size_t ring_count = 0;
         for (auto const& ring :  poly)
         {
+            ++ring_count;
+            bool is_exterior = (ring_count == 1);
             std::size_t num_points = ring.size();
             if (num_points < 4)
             {
-                if (exterior) return false;
+                if (is_exterior) return false;
                 else continue;
             }
 
@@ -129,8 +114,8 @@ struct hit_test_visitor
                     inside = !inside;
                 }
             }
+            if (is_exterior && !inside) return false;
         }
-        ////////////////////////////
         return inside;
     }
     bool operator() (geometry::multi_polygon<double> const& geom) const
