@@ -136,7 +136,7 @@ struct geometry_has_empty
     {
         for (auto const& poly : multi_poly)
         {
-            if (poly.empty() || poly.front().empty()) // no-rings OR exterioir is empty
+            if (poly.empty() || poly.front().empty()) // no-rings OR exterior is empty
             {
                 return true;
             }
