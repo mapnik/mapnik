@@ -49,6 +49,7 @@ ICU_VERSION="55.1"
 function install_mason_deps() {
     FAIL=0
     install ccache 3.3.0 &
+    install zlib system &
     install jpeg_turbo 1.5.0 libjpeg &
     install libpng 1.6.24 libpng &
     install libtiff 4.0.6 libtiff &
