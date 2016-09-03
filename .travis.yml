@@ -97,7 +97,7 @@ script:
  # ccache results and therefore should be faster
  # (and might work) for the next build
  - DURATION=2100
- - scripts/travis-command-wrapper.py -s "date;ps aux | grep clang" -i 60 --deadline=$(( $(date +%s) + ${DURATION} )) make
+ - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
