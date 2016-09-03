@@ -92,11 +92,11 @@ script:
  - export SCONSFLAGS='--debug=time'
  - configure BENCHMARK=${BENCH}
  - cat config.log
- # we limit the `make` to 25 min
+ # we limit the `make` to 35 min
  # to ensure that slow builds still upload their
  # ccache results and therefore should be faster
  # (and might work) for the next build
- - DURATION=1500
+ - DURATION=2100
  - scripts/travis-command-wrapper.py -s "date;ps aux | grep clang" -i 60 --deadline=$(( $(date +%s) + ${DURATION} )) make
  - make test
  - enabled ${COVERAGE} coverage
