@@ -10,11 +10,6 @@ SET APPVEYOR=true
 SET LOCAL_BUILD_DONT_SKIP_TESTS=true
 SET FASTBUILD=1
 
-FOR /F "tokens=1 usebackq" %%i in (`powershell .\scripts\parse-appveyor-yml.ps1`) DO SET BOOST_VERSION=%%i
-ECHO BOOST_VERSION found in appveyor.yml^: %BOOST_VERSION%
-IF "%BOOST_VERSION%"=="0" ECHO BOOST_VERSION not valid && SET ERRORLEVEL=1 && GOTO ERROR
-
-
 :: OVERRIDE PARAMETERS >>>>>>>>
 :NEXT-ARG
 
