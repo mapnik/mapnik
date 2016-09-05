@@ -41,6 +41,8 @@ Released: xx-xx-xx
 - GeoJSON - exposed `num_features_to_query` as datasource paramer (ref #3495)
 - Replaced `boost::mpl::vector<Types...>` with `std::tuple<Types...>` (ref #3503)
 - BuildingSymbolizer - fixed closing segment of polygon in building symbolizer (ref #3505)
+- Update dependencies versions
+- Fixed warnings when compiling with g++5
 
 ## 3.0.11
 
