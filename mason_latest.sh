@@ -53,11 +53,11 @@ function mason_compile {
 }
 
 function mason_cflags {
-    ""
+    :
 }
 
 function mason_ldflags {
-    ""
+    :
 }
 
 function mason_clean {

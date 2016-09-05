@@ -80,7 +80,15 @@ def write_config(configuration,template,config_file):
         os.chmod(config_file,0755)
     except: pass
 
-cxxflags = ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
+
+cxxflags_raw = config_env['LIBMAPNIK_CXXFLAGS'];
+# strip clang specific flags to avoid breaking gcc
+# while it is not recommended to mix compilers, this nevertheless
+# makes it easier to compile apps with gcc and mapnik-config against mapnik built with clang
+to_remove = ['-Wno-unsequenced','-Wno-unknown-warning-option','-Wtautological-compare','-Wheader-hygiene']
+cxxflags_cleaned = [item for item in config_env['LIBMAPNIK_CXXFLAGS'] if item not in to_remove];
+
+cxxflags = ' '.join(cxxflags_cleaned)
 
 defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 

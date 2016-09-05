@@ -149,7 +149,8 @@ namespace std
 {
 
 #pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wmismatched-tags"
 
 template <>
 struct hash<mapnik::value>
