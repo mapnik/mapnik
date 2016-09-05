@@ -64,7 +64,9 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
 
 ECHO looking for boost and icu versions in SDK ...
-FOR /F "tokens=1,2 usebackq" %%i in (`powershell .\scripts\get-boost-icu-version-from-sdk.ps1`) DO SET %%i=%%j
+FOR /F "tokens=1,2 usebackq" %%i in (`powershell %APPVEYOR_BUILD_FOLDER%\scripts\get-boost-icu-version-from-sdk.ps1`) DO SET %%i=%%j
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
 ECHO BOOST_VERSION found in SDK^: %BOOST_VERSION%
 ECHO ICU_VERSION found in SDK^: %ICU_VERSION%
 ECHO ICU_VERSION2 found in SDK^: %ICU_VERSION2%
