@@ -113,18 +113,14 @@ geojson_datasource::geojson_datasource(parameters const& params)
     desc_(geojson_datasource::name(),
           *params.get<std::string>("encoding","utf-8")),
     filename_(),
-    inline_string_(),
+    from_inline_string_(false),
     extent_(),
     features_(),
     tree_(nullptr),
     num_features_to_query_(*params.get<mapnik::value_integer>("num_features_to_query",5))
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
-    if (inline_string)
-    {
-        inline_string_ = *inline_string;
-    }
-    else
+    if (!inline_string)
     {
         boost::optional<std::string> file = params.get<std::string>("file");
         if (!file) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
@@ -137,10 +133,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
         has_disk_index_ = mapnik::util::exists(filename_ + ".index");
     }
 
-    if (!inline_string_.empty())
+    if (inline_string)
     {
-        char const* start = inline_string_.c_str();
-        char const* end = start + inline_string_.size();
+        from_inline_string_ = true;
+        char const* start = inline_string->c_str();
+        char const* end = start + inline_string->size();
         parse_geojson(start, end);
     }
     else if (has_disk_index_)
@@ -162,14 +159,6 @@ geojson_datasource::geojson_datasource(parameters const& params)
         std::fread(&file_buffer[0], file.size(), 1, file.get());
         char const* start = file_buffer.c_str();
         char const* end = start + file_buffer.length();
-        if (cache_features_)
-        {
-            parse_geojson(start, end);
-        }
-        else
-        {
-            initialise_index(start, end);
-        }
 #else
         boost::optional<mapnik::mapped_region_ptr> mapped_region =
             mapnik::mapped_memory_cache::instance().find(filename_, false);
@@ -180,6 +169,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
         char const* start = reinterpret_cast<char const*>((*mapped_region)->get_address());
         char const* end = start + (*mapped_region)->get_size();
+#endif
         if (cache_features_)
         {
             parse_geojson(start, end);
@@ -188,7 +178,6 @@ geojson_datasource::geojson_datasource(parameters const& params)
         {
             initialise_index(start, end);
         }
-#endif
     }
 }
 
@@ -276,7 +265,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
                                                  space);
         if (!result || itr != end)
         {
-            if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file from in-memory string");
+            if (from_inline_string_) throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file from in-memory string");
             else throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file '" + filename_ + "'");
         }
 
@@ -368,7 +357,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
                                                      space);
             if (!result || itr != end)
             {
-                if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
+                if (from_inline_string_) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
                 else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
             }
         }
@@ -382,7 +371,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
                                                       space);
         if (!result || itr != end)
         {
-            if (!inline_string_.empty()) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
+            if (from_inline_string_) throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file from in-memory string");
             else throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + filename_ + "'");
         }
     }

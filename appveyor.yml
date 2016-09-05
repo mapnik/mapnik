@@ -1,6 +1,6 @@
 environment:
   msvs_toolset: 14
-  BOOST_VERSION: 60
+  BOOST_VERSION: 61
   FASTBUILD: 1
   matrix:
     - platform: x64
@@ -24,7 +24,7 @@ build_script:
   - scripts\build-appveyor.bat
 
 after_build:
-  - 7z a mapnik-visual-images.zip C:\tmp\mapnik-visual-images
+  - 7z a visual-test-results.zip C:\tmp\mapnik-visual-images\visual-test-results
 
 artifacts:
   - path: mapnik-gyp\msbuild-summary.txt
@@ -33,8 +33,8 @@ artifacts:
     name: msbuild-errors.txt
   - path: mapnik-gyp\msbuild-warnings.txt
     name: msbuild-warnings.txt
-  - path: mapnik-visual-images.zip
-    name: mapnik-visual-images.zip
+  - path: visual-test-results.zip
+    name: visual-test-results.zip
 
 test: off
 deploy: off
