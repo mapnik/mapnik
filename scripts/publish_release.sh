@@ -6,6 +6,13 @@ set -o pipefail
 # for normal release leave empty
 # for release candidate, add "-rcN"
 export MAPNIK_VERSION=$(git describe)
+if [[ $(git tag -l) =~ $MAPNIK_VERSION ]]; then echo yes;
+    echo "Success: found $MAPNIK_VERSION (result of git describe) in tags, continuing"
+else
+    echo "error: $MAPNIK_VERSION (result of git describe) not in "git tag -l" output, aborting"
+    echo "You must create a valid annotated tag first, before running this ./scripts/publish_release.sh"
+    exit 1
+fi
 export TARBALL_NAME="mapnik-${MAPNIK_VERSION}"
 cd /tmp/
 rm -rf ${TARBALL_NAME}
