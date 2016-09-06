@@ -17,24 +17,7 @@ install:
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 release:
-	export MAPNIK_VERSION=$(shell ./utils/mapnik-config/mapnik-config --version) && \
-	export TARBALL_NAME="mapnik-v$${MAPNIK_VERSION}" && \
-	cd /tmp/ && \
-	rm -rf $${TARBALL_NAME} && \
-	git clone --depth 1 --branch v$${MAPNIK_VERSION} git@github.com:mapnik/mapnik.git $${TARBALL_NAME} && \
-	cd $${TARBALL_NAME} && \
-	git checkout "tags/v$${MAPNIK_VERSION}" && \
-	git submodule update --depth 100 --init && \
-	rm -rf deps/mapbox/variant/.git && \
-	rm -rf test/data/.git && \
-	rm -rf test/data/.gitignore && \
-	rm -rf test/data-visual/.git && \
-	rm -rf test/data-visual/.gitignore && \
-	rm -rf .git && \
-	rm -rf .gitignore && \
-	cd ../ && \
-	tar cjf $${TARBALL_NAME}.tar.bz2 $${TARBALL_NAME}/ && \
-	aws s3 cp --acl public-read $${TARBALL_NAME}.tar.bz2 s3://mapnik/dist/v$${MAPNIK_VERSION}/
+	./scripts/publish_release.sh
 
 python:
 	if [ ! -d ./bindings/python ]; then git clone git@github.com:mapnik/python-mapnik.git --recursive ./bindings/python; else (cd bindings/python && git pull && git submodule update --init); fi;
@@ -95,10 +78,13 @@ rebuild:
 uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
-test/data:
-	git submodule update --init
+test/data-visual:
+	./scripts/ensure_test_data.sh
 
-test: ./test/data
+test/data:
+	./scripts/ensure_test_data.sh
+
+test: ./test/data test/data-visual
 	@./test/run
 
 check: test
