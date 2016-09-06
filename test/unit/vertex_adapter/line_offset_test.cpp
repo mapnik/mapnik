@@ -1,5 +1,6 @@
 
 #include "catch.hpp"
+#include "fake_path.hpp"
 
 // mapnik
 #include <mapnik/vertex_cache.hpp>
@@ -7,53 +8,6 @@
 
 // stl
 #include <iostream>
-#include <vector>
-#include <tuple>
-
-struct fake_path
-{
-    using coord_type = std::tuple<double, double, unsigned>;
-    using cont_type = std::vector<coord_type>;
-    cont_type vertices_;
-    cont_type::iterator itr_;
-
-    fake_path(std::initializer_list<double> l)
-        : fake_path(l.begin(), l.size()) {
-    }
-
-    fake_path(std::vector<double> const &v)
-        : fake_path(v.begin(), v.size()) {
-    }
-
-    template <typename Itr>
-    fake_path(Itr itr, size_t sz) {
-        size_t num_coords = sz >> 1;
-        vertices_.reserve(num_coords);
-
-        for (size_t i = 0; i < num_coords; ++i) {
-            double x = *itr++;
-            double y = *itr++;
-            unsigned cmd = (i == 0) ? agg::path_cmd_move_to : agg::path_cmd_line_to;
-            vertices_.push_back(std::make_tuple(x, y, cmd));
-        }
-        itr_ = vertices_.begin();
-    }
-
-    unsigned vertex(double *x, double *y) {
-        if (itr_ == vertices_.end()) {
-            return agg::path_cmd_stop;
-        }
-        *x = std::get<0>(*itr_);
-        *y = std::get<1>(*itr_);
-        unsigned cmd = std::get<2>(*itr_);
-        ++itr_;
-        return cmd;
-    }
-
-    void rewind(unsigned) {
-        itr_ = vertices_.begin();
-    }
-};
 
 double dist(mapnik::pixel_position const &a,
             mapnik::pixel_position const &b)
