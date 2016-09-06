@@ -22,7 +22,6 @@ ECHO msvs_toolset^: %msvs_toolset%
 SET BUILD_TYPE=%configuration%
 SET BUILDPLATFORM=%platform%
 SET TOOLS_VERSION=%msvs_toolset%.0
-SET ICU_VERSION=56.1
 ECHO ICU_VERSION^: %ICU_VERSION%
 IF DEFINED APPVEYOR (ECHO on AppVeyor) ELSE (ECHO NOT on AppVeyor)
 ECHO ========
@@ -62,6 +61,16 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 ECHO extracting binary deps
 IF EXIST mapnik-sdk (ECHO already extracted) ELSE (7z -y x deps.7z | %windir%\system32\FIND "ing archive")
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+
+ECHO looking for boost and icu versions in SDK ...
+FOR /F "tokens=1,2 usebackq" %%i in (`powershell %APPVEYOR_BUILD_FOLDER%\scripts\get-boost-icu-version-from-sdk.ps1`) DO SET %%i=%%j
+IF %ERRORLEVEL% NEQ 0 GOTO ERROR
+
+ECHO BOOST_VERSION found in SDK^: %BOOST_VERSION%
+ECHO ICU_VERSION found in SDK^: %ICU_VERSION%
+ECHO ICU_VERSION2 found in SDK^: %ICU_VERSION2%
+
 
 CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
