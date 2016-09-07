@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.12
 
-Released: xx-xx-xx
+Released: September 7, 2016
 
-(Packaged from xxxxxx)
+(Packaged from dcf3857)
 
 #### Summary
 
