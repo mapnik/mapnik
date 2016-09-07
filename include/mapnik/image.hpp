@@ -76,7 +76,6 @@ public:
 private:
     detail::image_dimensions<65535> dimensions_;
     detail::buffer buffer_;
-    pixel_type *pData_;
     double offset_;
     double scaling_;
     bool premultiplied_alpha_;
