@@ -74,7 +74,7 @@ function install_mason_deps() {
     # here by default helps make python-mapnik builds easier
     install boost_libthread 1.61.0 &
     install boost_libpython 1.61.0 &
-    install freetype 2.6.5 libfreetype &
+    install freetype 2.6.1 libfreetype &
     install harfbuzz 1.3.0 libharfbuzz &
     for job in $(jobs -p)
     do
