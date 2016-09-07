@@ -36,6 +36,7 @@
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/extend_converter.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -65,6 +66,7 @@ struct stroke_tag {};
 struct dash_tag {};
 struct affine_transform_tag {};
 struct offset_transform_tag {};
+struct extend_tag {};
 
 namespace  detail {
 
@@ -251,6 +253,23 @@ struct converter_traits<T,mapnik::offset_transform_tag>
         auto const& vars = args.vars;
         double offset = get<value_double, keys::offset>(sym, feat, vars);
         geom.set_offset(offset * args.scale_factor);
+    }
+};
+
+template <typename T>
+struct converter_traits<T, mapnik::extend_tag>
+{
+    using geometry_type = T;
+    using conv_type = extend_converter<geometry_type>;
+
+    template <typename Args>
+    static void setup(geometry_type & geom, Args const& args)
+    {
+        auto const& sym = args.sym;
+        auto const& feat = args.feature;
+        auto const& vars = args.vars;
+        double extend = get<value_double, keys::extend>(sym, feat, vars);
+        geom.set_extend(extend * args.scale_factor);
     }
 };
 
