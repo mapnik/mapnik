@@ -49,9 +49,7 @@ namespace util {
 using namespace boost::spirit;
 
 auto INTEGER = qi::int_type();
-#ifdef BIGINT
 auto LONGLONG = qi::long_long_type();
-#endif
 auto FLOAT = qi::float_type();
 auto DOUBLE = qi::double_type();
 
@@ -98,7 +96,6 @@ bool string2int(std::string const& value, int & result)
     return r && (str_beg == str_end);
 }
 
-#ifdef BIGINT
 bool string2int(const char * iter, const char * end, mapnik::value_integer & result)
 {
     ascii::space_type space;
@@ -114,7 +111,6 @@ bool string2int(std::string const& value, mapnik::value_integer & result)
     bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,space,result);
     return r && (str_beg == str_end);
 }
-#endif
 
 bool string2double(std::string const& value, double & result)
 {
@@ -175,14 +171,12 @@ bool to_string(std::string & str, int value)
   return karma::generate(sink, value);
 }
 
-#ifdef BIGINT
 bool to_string(std::string & str, mapnik::value_integer value)
 {
   namespace karma = boost::spirit::karma;
   std::back_insert_iterator<std::string> sink(str);
   return karma::generate(sink, value);
 }
-#endif
 
 bool to_string(std::string & str, unsigned value)
 {
@@ -216,7 +210,6 @@ bool to_string(std::string & s, int val)
     return true;
 }
 
-#ifdef BIGINT
 bool to_string(std::string & s, mapnik::value_integer val)
 {
     s.resize(s.capacity());
@@ -232,7 +225,6 @@ bool to_string(std::string & s, mapnik::value_integer val)
     }
     return true;
 }
-#endif
 
 bool to_string(std::string & s, unsigned val)
 {

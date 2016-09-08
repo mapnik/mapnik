@@ -406,7 +406,6 @@ opts.AddVariables(
     BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
     BoolVariable('MAPNIK_RENDER', 'Compile and install a utility to render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
-    BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
     )
 
 # variables to pickle after successful configure step
@@ -471,7 +470,6 @@ pickle_store = [# Scons internal variables
         'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER',
-        'BIGINT',
         'HOST'
         ]
 
@@ -1378,9 +1376,6 @@ if not preconfigured:
                         env['SKIPPED_DEPS'].append('harfbuzz-min-version')
                     if not conf.harfbuzz_with_freetype_support():
                         env['MISSING_DEPS'].append('harfbuzz-with-freetype-support')
-
-    if env['BIGINT']:
-        env.Append(CPPDEFINES = '-DBIGINT')
 
     if env['THREADING'] == 'multi':
         thread_flag = thread_suffix

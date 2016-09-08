@@ -45,10 +45,8 @@ MAPNIK_DECL bool string2bool(const char * iter, const char * end, bool & result)
 MAPNIK_DECL bool string2int(std::string const& value, int & result);
 MAPNIK_DECL bool string2int(const char * iter, const char * end, int & result);
 
-#ifdef BIGINT
 MAPNIK_DECL bool string2int(std::string const& value, mapnik::value_integer & result);
 MAPNIK_DECL bool string2int(const char * iter, const char * end, mapnik::value_integer & result);
-#endif
 
 MAPNIK_DECL bool string2double(std::string const& value, double & result);
 MAPNIK_DECL bool string2double(const char * iter, const char * end, double & result);
@@ -57,9 +55,7 @@ MAPNIK_DECL bool string2float(std::string const& value, float & result);
 MAPNIK_DECL bool string2float(const char * iter, const char * end, float & result);
 
 MAPNIK_DECL bool to_string(std::string & str, int value);
-#ifdef BIGINT
 MAPNIK_DECL bool to_string(std::string & str, mapnik::value_integer value);
-#endif
 MAPNIK_DECL bool to_string(std::string & str, unsigned value);
 MAPNIK_DECL bool to_string(std::string & str, bool value);
 MAPNIK_DECL bool to_string(std::string & str, double value);

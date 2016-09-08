@@ -100,8 +100,7 @@ struct do_xml_attribute_cast<int>
     }
 };
 
-#ifdef BIGINT
-// specialization for long long
+// specialization for mapnik::value_integer
 template <>
 struct do_xml_attribute_cast<mapnik::value_integer>
 {
@@ -113,8 +112,6 @@ struct do_xml_attribute_cast<mapnik::value_integer>
         return boost::optional<mapnik::value_integer>();
     }
 };
-
-#endif
 
 // specialization for unsigned
 

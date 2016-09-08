@@ -71,9 +71,7 @@ DEFINE_NAME_TRAIT( unsigned, "unsigned")
 DEFINE_NAME_TRAIT( int, "int")
 DEFINE_NAME_TRAIT( bool, "bool")
 DEFINE_NAME_TRAIT( boolean_type, "boolean_type")
-#ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
-#endif
 DEFINE_NAME_TRAIT( std::string, "string" )
 DEFINE_NAME_TRAIT( color, "color" )
 DEFINE_NAME_TRAIT( expression_ptr, "expression_ptr" )
@@ -416,9 +414,7 @@ compile_get_opt_attr(mapnik::value_bool);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(int);
 compile_get_opt_attr(unsigned);
-#ifdef BIGINT
 compile_get_opt_attr(mapnik::value_integer);
-#endif
 compile_get_opt_attr(float);
 compile_get_opt_attr(double);
 compile_get_opt_attr(color);

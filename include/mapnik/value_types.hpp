@@ -44,16 +44,8 @@ namespace U_ICU_NAMESPACE {
 
 namespace mapnik  {
 
-#ifdef BIGINT
-//using value_integer = boost::long_long_type;
-//using value_integer = long long;
 using value_integer = std::int64_t;
 using value_integer_pixel = gray64s_t;
-#else
-//using value_integer = int;
-using value_integer = std::int32_t;
-using value_integer_pixel = gray32s_t;
-#endif
 
 using value_double = double;
 using value_unicode_string = U_NAMESPACE_QUALIFIER UnicodeString;
