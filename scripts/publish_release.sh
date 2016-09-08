@@ -66,7 +66,8 @@ rm -f deps/mapbox/variant/Jamroot
 function check_and_tag() {
     REPO_DIR=$1
     REPO_NAME=$2
-    if [[ $(curl --fail -I https://github.com/mapnik/${REPO_NAME}/archive/${MAPNIK_VERSION}.tar.gz) ]]; then
+    cmd="curl --fail -I https://github.com/mapnik/${REPO_NAME}/releases/tag/${MAPNIK_VERSION}"
+    if [[ $(${cmd}) ]]; then
         step "test data already tagged, no need to initialize submodule"
     else
         step "tagging test data"
@@ -91,13 +92,14 @@ step "removing .git and .gitignore"
 rm -rf .git
 rm -rf .gitignore
 export TARBALL_COMPRESSED=${TARBALL_NAME}.tar.bz2
+echo ${MAPNIK_VERSION} > RELEASE_VERSION.md
 step "creating tarball of ${TARBALL_COMPRESSED}"
 cd ../
 tar cjf ${TARBALL_COMPRESSED} ${TARBALL_NAME}/
 step "uploading to github"
 # https://developer.github.com/v3/repos/releases/#create-a-release
 IS_PRERELEASE=false
-if [[ ${MAPNIK_VERSION} =~ 'rc' ]]; then
+if [[ ${MAPNIK_VERSION} =~ 'rc' ]] || [[ ${MAPNIK_VERSION} =~ 'alpha' ]]; then
   IS_PRERELEASE=true
 fi
 IS_DRAFT=true
@@ -114,6 +116,8 @@ https://api.github.com/repos/mapnik/mapnik/releases?access_token=${GITHUB_TOKEN_
 cat create_response.json
 # parse out upload url and form it up to post tarball
 UPLOAD_URL=$(python -c "import json;print json.load(open('create_response.json'))['upload_url'].replace('{?name,label}','?name=${TARBALL_COMPRESSED}')")
+HTML_URL=$(python -c "import json;print json.load(open('create_response.json'))['html_url']")
+
 step "upload url: $UPLOAD_URL"
 
 # upload source tarball
@@ -124,7 +128,8 @@ curl ${UPLOAD_URL} \
 --data-binary @${TARBALL_COMPRESSED}
 
 echo
-step "Success: view your new draft release as https://github.com/mapnik/mapnik/releases"
+step "Success: view your new draft release at ${HTML_URL}"
+open ${HTML_URL}
 echo
 
 #step "uploading $(realpath ${TARBALL_COMPRESSED}) to s3://mapnik/dist/${MAPNIK_VERSION}/"
