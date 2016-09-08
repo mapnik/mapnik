@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.12
 
-Released: September 7, 2016
+Released: September 8, 2016
 
-(Packaged from dcf3857)
+(Packaged from 1d22d86)
 
 #### Summary
 
@@ -43,6 +43,8 @@ Released: September 7, 2016
 - BuildingSymbolizer - fixed closing segment of polygon in building symbolizer (ref #3505)
 - Update dependencies versions
 - Fixed warnings when compiling with g++5
+- Fixed image swap (ref #3513)
+- Stop bundling testdata in source tarball (ref #3335)
 
 ## 3.0.11
 
