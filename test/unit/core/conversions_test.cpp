@@ -249,7 +249,6 @@ SECTION("to string") {
         REQUIRE( out == "4294967295" );
         out.clear();
 
-#ifdef BIGINT
         // long long
         to_string(out,mapnik::value_integer(-0));
         REQUIRE( out == "0" );
@@ -262,13 +261,7 @@ SECTION("to string") {
         to_string(out,mapnik::value_integer(9223372036854775807));
         REQUIRE( out == "9223372036854775807" );
         out.clear();
-#else
-  #ifdef _MSC_VER
-    #pragma NOTE("BIGINT not defined so skipping large number conversion tests")
-  #else
-    #warning BIGINT not defined so skipping large number conversion tests
-  #endif
-#endif
+
         // bool
         to_string(out, true);
         REQUIRE( out == "true" );
