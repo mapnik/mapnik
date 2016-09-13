@@ -20,18 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_WKT_FACTORY_HPP
-#define MAPNIK_WKT_FACTORY_HPP
+#include <mapnik/wkt/wkt_grammar_x3_def.hpp>
 
-// mapnik
-#include <mapnik/geometry.hpp>
-// stl
-#include <string>
+namespace mapnik { namespace grammar {
 
-namespace mapnik {
+namespace x3 = boost::spirit::x3;
+using iterator_type = std::string::const_iterator;
+using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
+BOOST_SPIRIT_INSTANTIATE(wkt_grammar_type, iterator_type, context_type);
 
-bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> & geom);
-
-}
-
-#endif // MAPNIK_WKT_FACTORY_HPP
+}}
