@@ -20,18 +20,28 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_WKT_FACTORY_HPP
-#define MAPNIK_WKT_FACTORY_HPP
-
 // mapnik
-#include <mapnik/geometry.hpp>
-// stl
-#include <string>
+#include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/wkt/wkt_grammar_x3.hpp>
 
 namespace mapnik {
 
-bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> & geom);
-
+bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> & geom)
+{
+    using namespace boost::spirit;
+    x3::ascii::space_type space;
+    std::string::const_iterator itr = wkt.begin();
+    std::string::const_iterator end =  wkt.end();
+    bool result;
+    try
+    {
+        result  = x3::phrase_parse(itr, end, wkt_grammar(), space, geom);
+    }
+    catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+    {
+        return false;
+    }
+    return result && itr==end;
 }
 
-#endif // MAPNIK_WKT_FACTORY_HPP
+}
