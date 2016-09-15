@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,20 +27,11 @@
 #include <mapnik/value.hpp>
 
 #include <mapnik/path_expression_grammar_x3.hpp>
-#include <mapnik/path_expression_grammar_x3_def.hpp>
 
 // stl
 #include <stdexcept>
 
-namespace mapnik { namespace grammar {
-
-namespace x3 = boost::spirit::x3;
-using iterator_type = std::string::const_iterator;
-using context_type = x3::phrase_parse_context<x3::standard_wide::space_type>::type;
-
-BOOST_SPIRIT_INSTANTIATE(path_expression_grammar_type, iterator_type, context_type);
-
-}
+namespace mapnik {
 
 path_expression_ptr parse_path(std::string const& str)
 {
