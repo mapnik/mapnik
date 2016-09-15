@@ -20,29 +20,13 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
-#define MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
-
-// mapnik
-#include <mapnik/path_expression.hpp>
-
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+#include <mapnik/path_expression_grammar_x3_def.hpp>
 
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-struct path_expression_class; // top-most ID
-using path_expression_grammar_type = x3::rule<path_expression_class, path_expression>;
+using iterator_type = std::string::const_iterator;
+using context_type = x3::phrase_parse_context<x3::standard_wide::space_type>::type;
+BOOST_SPIRIT_INSTANTIATE(path_expression_grammar_type, iterator_type, context_type);
 
-BOOST_SPIRIT_DECLARE(path_expression_grammar_type);
-
-}
-
-grammar::path_expression_grammar_type const& path_expression_grammar();
-
-}
-
-#endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
+}}

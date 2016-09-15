@@ -185,6 +185,7 @@ source = Split(
     font_set.cpp
     function_call.cpp
     gradient.cpp
+    path_expression_grammar_x3.cpp
     parse_path.cpp
     image_reader.cpp
     cairo_io.cpp

@@ -53,7 +53,7 @@ BOOST_SPIRIT_DEFINE(
 
 namespace mapnik {
 
-grammar::path_expression_grammar_type path_expression_grammar()
+grammar::path_expression_grammar_type const& path_expression_grammar()
 {
     return grammar::path_expression;
 }
