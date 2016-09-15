@@ -251,7 +251,7 @@ BOOST_SPIRIT_DEFINE(
 
 } // image_filter
 
-image_filter::image_filter_grammar_type image_filter_grammar()
+image_filter::image_filter_grammar_type const& image_filter_grammar()
 {
     return image_filter::start;
 }

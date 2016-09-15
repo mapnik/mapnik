@@ -49,7 +49,7 @@ BOOST_SPIRIT_DECLARE(image_filter_grammar_type);
 
 namespace mapnik {
 
-image_filter::image_filter_grammar_type image_filter_grammar();
+image_filter::image_filter_grammar_type const& image_filter_grammar();
 
 }
 

@@ -424,7 +424,7 @@ namespace mapnik { namespace grammar {
 
 namespace mapnik
 {
-grammar::expression_grammar_type expression_grammar()
+grammar::expression_grammar_type const& expression_grammar()
 {
     return grammar::expression;
 }

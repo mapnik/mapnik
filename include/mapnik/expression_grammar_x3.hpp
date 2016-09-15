@@ -44,7 +44,7 @@ BOOST_SPIRIT_DECLARE(expression_grammar_type);
 
 namespace mapnik
 {
-grammar::expression_grammar_type expression_grammar();
+grammar::expression_grammar_type const& expression_grammar();
 }
 
 

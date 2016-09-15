@@ -48,7 +48,7 @@ BOOST_SPIRIT_DECLARE(css_color_grammar_type);
 
 namespace mapnik
 {
-css_color_grammar::css_color_grammar_type color_grammar();
+css_color_grammar::css_color_grammar_type const& color_grammar();
 }
 
 

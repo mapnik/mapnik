@@ -121,7 +121,7 @@ BOOST_SPIRIT_DEFINE(
 
 namespace mapnik
 {
-grammar::wkt_grammar_type wkt_grammar()
+grammar::wkt_grammar_type const& wkt_grammar()
 {
     return grammar::wkt;
 }
