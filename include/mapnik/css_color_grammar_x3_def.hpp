@@ -444,7 +444,7 @@ BOOST_SPIRIT_DEFINE(
 
 } // ns
 
-css_color_grammar::css_color_grammar_type color_grammar()
+css_color_grammar::css_color_grammar_type const& color_grammar()
 {
     return css_color_grammar::css_color;
 }

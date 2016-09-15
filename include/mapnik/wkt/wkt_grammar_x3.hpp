@@ -42,7 +42,7 @@ BOOST_SPIRIT_DECLARE(wkt_grammar_type);
 
 namespace mapnik
 {
-grammar::wkt_grammar_type wkt_grammar();
+grammar::wkt_grammar_type const& wkt_grammar();
 }
 
 
