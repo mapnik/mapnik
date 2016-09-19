@@ -83,7 +83,6 @@ struct compute_compatible_component_variant<mapnik::geometry::geometry<double>, 
     :  detail::has_type<Expected, mapnik::geometry::geometry<double>::types>
 {
     using compatible_type = Expected;
-    enum { value = true };
     static bool is_compatible(int index)
     {
         return (index == detail::index<compatible_type, mapnik::geometry::geometry<double>::types>::value);
