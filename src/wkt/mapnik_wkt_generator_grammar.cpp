@@ -21,8 +21,72 @@
  *****************************************************************************/
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 #include <string>
+
+namespace boost { using mapbox::util::get; }
+
+#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
+
+namespace boost { namespace spirit { namespace traits
+{
+template <>
+struct not_is_variant<mapnik::geometry::geometry<double>, karma::domain>
+    : mpl::false_
+{};
+
+template <>
+struct variant_which< mapnik::geometry::geometry<double> >
+{
+    static int call(mapnik::geometry::geometry<double> const& v)
+    {
+        return v.which();
+    }
+};
+
+namespace detail {
+
+template <typename T, typename Tuple>
+struct has_type;
+
+template <typename T>
+struct has_type<T, std::tuple<>> : std::false_type {};
+
+template <typename T, typename U, typename... Types>
+struct has_type<T, std::tuple<U, Types...>> : has_type<T, std::tuple<Types...>> {};
+
+template <typename T, typename... Types>
+struct has_type<T, std::tuple<T, Types...>> : std::true_type {};
+
+template <typename T, typename Tuple>
+struct index;
+
+template <typename T, typename... Types>
+struct index<T, std::tuple<T, Types...>>
+{
+    static const std::size_t value = 0;
+};
+
+template <typename T, typename U, typename... Types>
+struct index<T, std::tuple<U, Types...>>
+{
+    static const std::size_t value = 1 + index<T, std::tuple<Types...>>::value;
+};
+
+}
+
+template <typename Expected>
+struct compute_compatible_component_variant<mapnik::geometry::geometry<double>, Expected>
+    :  detail::has_type<Expected, mapnik::geometry::geometry<double>::types>
+{
+    using compatible_type = Expected;
+    static bool is_compatible(int index)
+    {
+        return (index == detail::index<compatible_type, mapnik::geometry::geometry<double>::types>::value);
+    }
+};
+
+}}}
+
 
 namespace mapnik { namespace wkt {
 
