@@ -31,7 +31,6 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
 #include <boost/spirit/home/karma/domain.hpp>
 #pragma GCC diagnostic pop
@@ -39,7 +38,6 @@
 namespace mapnik { namespace wkt {
 
 namespace karma = boost::spirit::karma;
-namespace phoenix = boost::phoenix;
 
 namespace detail {
 
