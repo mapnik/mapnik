@@ -39,9 +39,23 @@ struct not_is_variant<mapnik::geometry::geometry<double>, karma::domain>
 {};
 
 template <>
+struct not_is_variant<mapnik::geometry::geometry<std::int64_t>, karma::domain>
+    : mpl::false_
+{};
+
+template <>
 struct variant_which< mapnik::geometry::geometry<double> >
 {
     static int call(mapnik::geometry::geometry<double> const& v)
+    {
+        return v.which();
+    }
+};
+
+template <>
+struct variant_which< mapnik::geometry::geometry<std::int64_t> >
+{
+    static int call(mapnik::geometry::geometry<std::int64_t> const& v)
     {
         return v.which();
     }
@@ -86,6 +100,17 @@ struct compute_compatible_component_variant<mapnik::geometry::geometry<double>, 
     static bool is_compatible(int index)
     {
         return (index == detail::index<compatible_type, mapnik::geometry::geometry<double>::types>::value);
+    }
+};
+
+template <typename Expected>
+struct compute_compatible_component_variant<mapnik::geometry::geometry<std::int64_t>, Expected>
+    :  detail::has_type<Expected, mapnik::geometry::geometry<std::int64_t>::types>
+{
+    using compatible_type = Expected;
+    static bool is_compatible(int index)
+    {
+        return (index == detail::index<compatible_type, mapnik::geometry::geometry<std::int64_t>::types>::value);
     }
 };
 
