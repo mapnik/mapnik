@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-
 #include <mapnik/geometry.hpp>
 
 #pragma GCC diagnostic push
@@ -94,7 +93,6 @@ struct wkt_generator_grammar :
     wkt_generator_grammar();
     // rules
     karma::rule<OutputIterator, Geometry()> geometry;
-    karma::rule<OutputIterator, geometry::geometry_empty()> empty;
     karma::rule<OutputIterator, geometry::point<coord_type>()> point;
     karma::rule<OutputIterator, geometry::point<coord_type>()> point_coord;
     karma::rule<OutputIterator, geometry::line_string<coord_type>()> linestring;
