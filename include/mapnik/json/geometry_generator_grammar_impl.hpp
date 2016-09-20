@@ -22,60 +22,33 @@
 
 // mapnik
 #include <mapnik/json/geometry_generator_grammar.hpp>
-#include <mapnik/util/spirit_transform_attribute.hpp>
-#include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
 
-// boost
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/fusion/include/at.hpp>
-#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
-namespace phoenix = boost::phoenix;
 
 template <typename OutputIterator, typename Geometry>
 geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar()
     : geometry_generator_grammar::base_type(geometry)
 {
-    boost::spirit::karma::_val_type _val;
-    boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::_a_type _a;
     boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::uint_type uint_;
-    boost::spirit::karma::eps_type eps;
 
-    geometry = geometry_dispatch.alias()
-        ;
-
-    geometry_dispatch = eps[_a = geometry_type(_val)] <<
-        (&uint_(geometry::geometry_types::Point)[_1 = _a]
-         << (point | lit("null")))
+    geometry =
+        point
         |
-        (&uint_(geometry::geometry_types::LineString)[_1 = _a]
-         << (linestring | lit("null")))
+        linestring
         |
-        (&uint_(geometry::geometry_types::Polygon)[_1 = _a]
-         << (polygon | lit("null")))
+        polygon
         |
-        (&uint_(geometry::geometry_types::MultiPoint)[_1 = _a]
-         << (multi_point | lit("null")))
+        multi_point
         |
-        (&uint_(geometry::geometry_types::MultiLineString)[_1 = _a]
-         << (multi_linestring | lit("null")))
+        multi_linestring
         |
-        (&uint_(geometry::geometry_types::MultiPolygon)[_1 = _a]
-         << (multi_polygon | lit("null")))
+        multi_polygon
         |
-        (&uint_(geometry::geometry_types::GeometryCollection)[_1 = _a]
-         << (geometry_collection | lit("null")))
+        geometry_collection
         |
         lit("null")
         ;

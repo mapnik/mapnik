@@ -40,7 +40,7 @@ feature_generator_grammar<OutputIterator, FeatureType>::feature_generator_gramma
 
     feature = lit("{\"type\":\"Feature\",\"id\":")
         << uint_[_1 = id_(_val)]
-        << lit(",\"geometry\":") << geometry
+        << lit(",\"geometry\":") << geometry[_1 = geom_(_val)]
         << lit(",\"properties\":") << properties
         << lit('}')
         ;
