@@ -11,7 +11,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="new-pkgs"
+MASON_VERSION="llvm-3.9.0-newpkgs"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
