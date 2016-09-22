@@ -76,13 +76,10 @@ install:
 
 before_script:
  - source bootstrap.sh
- - |
-   if [[ $(uname -s) == 'Linux' ]]; then
-     mason install clang 3.8.0
-     export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
-     which clang++
-     export LLVM_COV="$(mason prefix clang 3.8.0)/bin/llvm-cov"
-   fi
+ - mason install clang++ 3.8.1
+ - export PATH=$(mason prefix clang++ 3.8.1)/bin:${PATH}
+ - which clang++
+ - export LLVM_COV="$(mason prefix clang++ 3.8.1)/bin/llvm-cov"
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
