@@ -41,6 +41,7 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     qi::_4_type _4;
     qi::_a_type _a;
     qi::_r1_type _r1;
+    qi::_r2_type _r2;
     qi::eps_type eps;
     qi::char_type char_;
     using qi::fail;
@@ -55,14 +56,17 @@ feature_grammar<Iterator,FeatureType,ErrorHandler>::feature_grammar(mapnik::tran
     start = feature(_r1);
 
     feature = eps[_a = false] > lit('{') >
-        (feature_type[_a = true]
-         |
-         (lit("\"geometry\"") > lit(':') > geometry_grammar_[set_geometry(_r1, _1)])
-         |
-         properties(_r1)
-         |
-         json_.key_value) % lit(',')
+        feature_part(_r1, _a) % lit(',')
         > eps(_a) > lit('}')
+        ;
+
+    feature_part = feature_type[_r2 = true]
+        |
+        (lit("\"geometry\"") > lit(':') > geometry_grammar_[set_geometry(_r1, _1)])
+        |
+        properties(_r1)
+        |
+        json_.key_value
         ;
 
     properties = lit("\"properties\"")
