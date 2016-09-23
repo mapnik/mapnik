@@ -108,16 +108,16 @@ struct attr_value_converter
 };
 
 geojson_datasource::geojson_datasource(parameters const& params)
-  : datasource(params),
-    type_(datasource::Vector),
-    desc_(geojson_datasource::name(),
-          *params.get<std::string>("encoding","utf-8")),
-    filename_(),
-    from_inline_string_(false),
-    extent_(),
-    features_(),
-    tree_(nullptr),
-    num_features_to_query_(*params.get<mapnik::value_integer>("num_features_to_query",5))
+    : datasource(params),
+      type_(datasource::Vector),
+      desc_(geojson_datasource::name(),
+            *params.get<std::string>("encoding","utf-8")),
+      filename_(),
+      from_inline_string_(false),
+      extent_(),
+      features_(),
+      tree_(nullptr),
+      num_features_to_query_(std::max(mapnik::value_integer(1), *params.get<mapnik::value_integer>("num_features_to_query", 5)))
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (!inline_string)
@@ -261,8 +261,8 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
         std::size_t start_id = 1;
         mapnik::json::default_feature_callback callback(features_);
         bool result = boost::spirit::qi::phrase_parse(itr, end, (geojson_datasource_static_feature_callback_grammar)
-                                                 (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
-                                                 space);
+                                                      (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
+                                                      space);
         if (!result || itr != end)
         {
             if (from_inline_string_) throw mapnik::datasource_exception("geojson_datasource: Failed to parse GeoJSON file from in-memory string");
@@ -481,8 +481,8 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
     }
     else if (cache_features_)
     {
-        unsigned num_features = features_.size();
-        for (unsigned i = 0; i < num_features && i < num_features_to_query_; ++i)
+        std::size_t num_features = features_.size();
+        for (std::size_t i = 0; i < num_features && i < num_features_to_query_; ++i)
         {
             result = mapnik::util::to_ds_type(features_[i]->get_geometry());
             if (result)
