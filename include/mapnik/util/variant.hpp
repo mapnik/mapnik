@@ -32,15 +32,7 @@ template <typename T>
 using recursive_wrapper = typename mapbox::util::recursive_wrapper<T>;
 
 template<typename... Types>
-class variant : public mapbox::util::variant<Types...>
-{
-public:
-    // tell spirit that this is an adapted variant
-    struct adapted_variant_tag;
-    using types = std::tuple<Types...>;
-    // inherit ctor's
-    using mapbox::util::variant<Types...>::variant;
-};
+using variant = typename  mapbox::util::variant<Types...>;
 
 // unary visitor interface
 // const
