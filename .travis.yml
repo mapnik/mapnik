@@ -20,11 +20,6 @@ cache:
   directories:
   - $HOME/.ccache
 
-     - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.5
-    packages:
-     - clang-3.5
-
 matrix:
   include:
     - os: linux
@@ -33,8 +28,8 @@ matrix:
       env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8" TRIGGER=true
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
-          packages: [ 'clang-3.5']
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+          packages: [ 'clang-3.5' ]
           # libstdc++-4.9-dev,libstdc++6 4.9.3-13ubuntu2
           # libstdc++-5-dev,libstdc++6 5.4.0-6ubuntu1~16.04.2
     - os: linux
@@ -43,8 +38,8 @@ matrix:
       env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8"
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
-          packages: [ 'clang-3.5']
+          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
+          packages: [ 'clang-3.5' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
