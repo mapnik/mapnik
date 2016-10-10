@@ -30,14 +30,15 @@ on () {
 
 git_submodule_update () {
     git submodule update "$@" && return
-    # failed, search pull requests for matching commits
+    # failed, search branch and pull request heads for matching commit
     git submodule foreach \
         '
         test "$sha1" = "`git rev-parse HEAD`" ||
-        git ls-remote origin "refs/pull/*/head" |
+        git ls-remote origin "refs/heads/*" "refs/pull/*/head" |
         while read hash ref; do
             if test "$hash" = "$sha1"; then
-                git config --add remote.origin.fetch "+$ref:$ref";
+                git config --add remote.origin.fetch "+$ref:$ref"
+                break
             fi
         done
         '
