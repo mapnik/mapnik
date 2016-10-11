@@ -266,6 +266,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     box2d<double> layer_ext = lay.envelope();
+    const box2d<double> buffered_query_ext_map_srs = buffered_query_ext;
     bool fw_success = false;
     bool early_return = false;
 
@@ -281,9 +282,9 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         early_return = true;
     }
     // next try intersection of layer extent back projected into map srs
-    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
+    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext_map_srs.intersects(layer_ext))
     {
-        layer_ext.clip(buffered_query_ext);
+        layer_ext.clip(buffered_query_ext_map_srs);
         // forward project layer extent back into native projection
         if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
