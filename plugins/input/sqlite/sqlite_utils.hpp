@@ -35,8 +35,8 @@
 #include <mapnik/params.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/geometry_is_empty.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

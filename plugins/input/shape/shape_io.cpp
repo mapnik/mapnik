@@ -27,7 +27,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/util/is_clockwise.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 using mapnik::datasource_exception;
 const std::string shape_io::SHP = ".shp";

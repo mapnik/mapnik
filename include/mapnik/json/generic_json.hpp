@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GENERIC_JSON_HPP
 #define MAPNIK_GENERIC_JSON_HPP
 
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/value_converters.hpp>
 

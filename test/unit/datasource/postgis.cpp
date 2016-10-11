@@ -25,7 +25,7 @@
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/util/fs.hpp>
 
 /*

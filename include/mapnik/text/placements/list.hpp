@@ -50,8 +50,8 @@ private:
 class text_placement_info_list : public text_placement_info
 {
 public:
-    text_placement_info_list(text_placements_list const* parent, double scale_factor) :
-        text_placement_info(parent, scale_factor),
+    text_placement_info_list(text_placements_list const* parent, double _scale_factor) :
+        text_placement_info(parent, _scale_factor),
         state(0), parent_(parent) {}
     bool next() const;
 private:

@@ -29,7 +29,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 namespace mapnik
 {

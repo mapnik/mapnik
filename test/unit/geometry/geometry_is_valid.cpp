@@ -1,8 +1,7 @@
-
 #include "catch.hpp"
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_is_valid.hpp>
+#include <mapnik/geometry/is_valid.hpp>
 
 TEST_CASE("geometry is_valid") {
 

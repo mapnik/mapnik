@@ -28,10 +28,10 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_is_empty.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 // ogr
 #include "sqlite_featureset.hpp"

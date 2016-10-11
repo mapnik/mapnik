@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/quad_tree.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

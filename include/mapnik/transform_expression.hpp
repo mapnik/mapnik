@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/util/variant.hpp>
@@ -55,6 +55,8 @@ struct matrix_node
     expr_node e_;
     expr_node f_;
 
+    matrix_node() = default;
+
     template <typename T>
     explicit matrix_node(T const& m)
         : a_(m.sx), b_(m.shy), c_(m.shx), d_(m.sy), e_(m.tx), f_(m.ty) {}
@@ -69,6 +71,8 @@ struct translate_node
     expr_node tx_;
     expr_node ty_;
 
+    translate_node() = default;
+
     translate_node(expr_node const& tx,
                    boost::optional<expr_node> const& ty)
         : tx_(tx)
@@ -79,6 +83,8 @@ struct scale_node
 {
     expr_node sx_;
     expr_node sy_;
+
+    scale_node() = default;
 
     scale_node(expr_node const& sx,
                boost::optional<expr_node> const& sy)
@@ -93,6 +99,8 @@ struct rotate_node
     expr_node angle_;
     expr_node cx_;
     expr_node cy_;
+
+    rotate_node() = default;
 
     explicit rotate_node(expr_node const& angle)
         : angle_(angle) {}
@@ -123,16 +131,16 @@ struct rotate_node
 struct skewX_node
 {
     expr_node angle_;
-
-    explicit skewX_node(expr_node const& angle)
+    skewX_node() = default;
+    skewX_node(expr_node const& angle)
         : angle_(angle) {}
 };
 
 struct skewY_node
 {
     expr_node angle_;
-
-    explicit skewY_node(expr_node const& angle)
+    skewY_node() = default;
+    skewY_node(expr_node const& angle)
         : angle_(angle) {}
 };
 
@@ -225,9 +233,9 @@ bool is_null_node (T const& node)
 
 } // namespace detail
 
-using transform_node = detail::transform_node             ;
-using transform_list = std::vector<transform_node>        ;
-using transform_list_ptr = std::shared_ptr<transform_list>  ;
+using transform_node = detail::transform_node;
+using transform_list = std::vector<transform_node>;
+using transform_list_ptr = std::shared_ptr<transform_list>;
 
 MAPNIK_DECL std::string to_expression_string(transform_node const& node);
 MAPNIK_DECL std::string to_expression_string(transform_list const& list);

@@ -93,11 +93,11 @@ void font_face_set::add(face_ptr face)
     faces_.push_back(face);
 }
 
-void font_face_set::set_character_sizes(double size)
+void font_face_set::set_character_sizes(double _size)
 {
     for (face_ptr const& face : faces_)
     {
-        face->set_character_sizes(size);
+        face->set_character_sizes(_size);
     }
 }
 

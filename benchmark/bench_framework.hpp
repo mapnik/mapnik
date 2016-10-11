@@ -4,7 +4,7 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/params.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/safe_cast.hpp>
 #include "../test/cleanup.hpp"
 

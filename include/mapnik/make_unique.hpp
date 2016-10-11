@@ -23,10 +23,10 @@
 #ifndef MAPNIK_MAKE_UNIQUE_HPP
 #define MAPNIK_MAKE_UNIQUE_HPP
 
-#include <memory>
-
 // http://stackoverflow.com/questions/14131454/visual-studio-2012-cplusplus-and-c-11
 #if defined(_MSC_VER) && _MSC_VER < 1800 || !defined(_MSC_VER) && __cplusplus <= 201103L
+
+#include <memory>
 
 namespace std {
 

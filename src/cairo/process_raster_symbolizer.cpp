@@ -32,6 +32,8 @@
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 
+#include <memory>
+
 namespace mapnik
 {
 

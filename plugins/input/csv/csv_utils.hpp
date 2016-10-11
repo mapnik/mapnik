@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/csv/csv_types.hpp>

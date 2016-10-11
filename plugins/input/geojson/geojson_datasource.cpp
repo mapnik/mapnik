@@ -40,7 +40,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -49,7 +49,7 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/make_unique.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/json/extract_bounding_box_grammar_impl.hpp>
 #include <mapnik/util/fs.hpp>

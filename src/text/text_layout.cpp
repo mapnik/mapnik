@@ -35,6 +35,7 @@
 #pragma GCC diagnostic pop
 
 #include <algorithm>
+#include <memory>
 
 namespace mapnik
 {

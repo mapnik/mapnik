@@ -23,7 +23,7 @@
 #define MAPNIK_TEXT_LAYOUT_HPP
 
 //mapnik
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/attribute.hpp>

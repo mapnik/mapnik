@@ -27,7 +27,7 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/boolean.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 // stl
 #include <algorithm>
@@ -68,12 +68,12 @@ const char * memory_datasource::name()
     return "memory";
 }
 
-memory_datasource::memory_datasource(parameters const& params)
-    : datasource(params),
+memory_datasource::memory_datasource(parameters const& _params)
+    : datasource(_params),
       desc_(memory_datasource::name(),
-            *params.get<std::string>("encoding","utf-8")),
+            *params_.get<std::string>("encoding","utf-8")),
       type_(datasource::Vector),
-      bbox_check_(*params.get<boolean_type>("bbox_check", true)),
+      bbox_check_(*params_.get<boolean_type>("bbox_check", true)),
       type_set_(false) {}
 
 memory_datasource::~memory_datasource() {}
@@ -95,7 +95,7 @@ void memory_datasource::push(feature_ptr feature)
             throw std::runtime_error("Can not add a raster feature to a memory datasource that contains vectors");
         }
     }
-    else 
+    else
     {
         if (!type_set_)
         {

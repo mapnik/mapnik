@@ -51,11 +51,11 @@ static const double EARTH_DIAMETER = EARTH_RADIUS * 2.0;
 static const double EARTH_CIRCUMFERENCE = EARTH_DIAMETER * M_PI;
 static const double MAXEXTENT = EARTH_CIRCUMFERENCE / 2.0;
 static const double M_PI_by2 = M_PI / 2;
-static const double D2R = M_PI / 180;
-static const double R2D = 180 / M_PI;
-static const double M_PIby360 = M_PI / 360;
-static const double MAXEXTENTby180 = MAXEXTENT / 180;
-static const double MAX_LATITUDE = R2D * (2 * std::atan(std::exp(180 * D2R)) - M_PI_by2);
+static const double D2R = M_PI / 180.0;
+static const double R2D = 180.0 / M_PI;
+static const double M_PIby360 = M_PI / 360.0;
+static const double MAXEXTENTby180 = MAXEXTENT / 180.0;
+static const double MAX_LATITUDE = R2D * (2 * std::atan(std::exp(180.0 * D2R)) - M_PI_by2);
 static const std::string MAPNIK_LONGLAT_PROJ = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 static const std::string MAPNIK_GMERC_PROJ = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over";
 
@@ -63,24 +63,23 @@ boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs);
 
 boost::optional<bool> is_known_geographic(std::string const& srs);
 
-static inline bool lonlat2merc(double * x, double * y , int point_count)
+static inline bool lonlat2merc(double * x, double * y, std::size_t point_count)
 {
-    for(int i=0; i<point_count; ++i)
+    for (std::size_t i = 0; i < point_count; ++i)
     {
         if (x[i] > 180) x[i] = 180;
         else if (x[i] < -180) x[i] = -180;
         if (y[i] > MAX_LATITUDE) y[i] = MAX_LATITUDE;
         else if (y[i] < -MAX_LATITUDE) y[i] = -MAX_LATITUDE;
         x[i] = x[i] * MAXEXTENTby180;
-        y[i] = std::log(std::tan((90 + y[i]) * M_PIby360)) * R2D;
-        y[i] = y[i] * MAXEXTENTby180;
+        y[i] = std::log(std::tan((90.0 + y[i]) * M_PIby360)) * R2D * MAXEXTENTby180;
     }
     return true;
 }
 
-static inline bool merc2lonlat(double * x, double * y , int point_count)
+static inline bool merc2lonlat(double * x, double * y, std::size_t point_count)
 {
-    for(int i=0; i<point_count; i++)
+    for(std::size_t i = 0; i < point_count; ++i)
     {
         if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
         else if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;

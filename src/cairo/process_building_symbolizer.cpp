@@ -34,6 +34,7 @@
 
 // stl
 #include <cmath>
+#include <memory>
 
 namespace mapnik
 {

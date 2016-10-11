@@ -25,11 +25,11 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 //
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/util/noncopyable.hpp>

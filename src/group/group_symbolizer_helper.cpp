@@ -28,7 +28,7 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/vertex_cache.hpp>

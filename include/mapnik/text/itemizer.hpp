@@ -25,7 +25,7 @@
 
 //mapnik
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/config.hpp>
 

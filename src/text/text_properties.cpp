@@ -39,6 +39,8 @@
 #include <boost/property_tree/ptree.hpp>
 #pragma GCC diagnostic pop
 
+#include <memory>
+
 namespace mapnik
 {
 using boost::optional;
