@@ -25,7 +25,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8" TRIGGER=true
+      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" TRIGGER=true
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
@@ -33,7 +33,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8"
+      env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
@@ -76,10 +76,10 @@ install:
 
 before_script:
  - source bootstrap.sh
- - mason install clang++ 3.8.1
- - export PATH=$(mason prefix clang++ 3.8.1)/bin:${PATH}
+ - mason install clang++ 3.9.0
+ - export PATH=$(mason prefix clang++ 3.9.0)/bin:${PATH}
  - which clang++
- - export LLVM_COV="$(mason prefix clang++ 3.8.1)/bin/llvm-cov"
+ - export LLVM_COV="$(mason prefix clang++ 3.9.0)/bin/llvm-cov"
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
@@ -95,6 +95,7 @@ script:
  # (and might work) for the next build
  - DURATION=2400
  - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
+ - nm src/libmapnik.* | grep "GLIBCXX_3.4.2[0-9]" | c++filt
  - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
