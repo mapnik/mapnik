@@ -28,7 +28,6 @@
 #include <mapnik/debug.hpp>
 
 // stl
-#include <bitset>
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
