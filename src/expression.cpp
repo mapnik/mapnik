@@ -26,7 +26,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
-#include <mapnik/expression_grammar_x3_config.hpp>
 
 namespace mapnik
 {
