@@ -64,7 +64,6 @@ namespace mapnik { namespace grammar {
     using x3::alpha;
     using x3::alnum;
     using x3::hex;
-    struct transcoder_tag;
 
     auto do_assign = [] (auto & ctx)
     {
