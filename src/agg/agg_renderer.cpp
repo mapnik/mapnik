@@ -257,6 +257,7 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             {
                 util::apply_visitor(visitor, filter_tag);
             }
+            radius *= common_.scale_factor_;
             if (radius > common_.t_.offset())
             {
                 common_.t_.set_offset(radius);
