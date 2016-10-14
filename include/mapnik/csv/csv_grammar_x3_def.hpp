@@ -53,9 +53,11 @@ struct unesc_char_ : x3::symbols<char>
     }
 } unesc_char;
 
-struct separator_ : x3::parser<separator_>
+template <typename T>
+struct literal : x3::parser<literal<T>>
 {
     using attribute_type = x3::unused_type;
+    using context_tag = T;
     static bool const has_attribute = false;
 
     template <typename Iterator, typename Context, typename Attribute>
@@ -63,33 +65,17 @@ struct separator_ : x3::parser<separator_>
                Context const& context, x3::unused_type, Attribute& ) const
     {
         x3::skip_over(first, last, context);
-        if (first != last && *first == x3::get<separator_tag>(context))
+        if (first != last && *first == x3::get<context_tag>(context))
         {
             ++first;
             return true;
         }
         return false;
     }
-} separator;
+};
 
-struct quote_ : x3::parser<quote_>
-{
-    using attribute_type = x3::unused_type;
-    static bool const has_attribute = false;
-
-    template <typename Iterator, typename Context, typename Attribute>
-    bool parse(Iterator& first, Iterator const& last,
-               Context const& context, x3::unused_type, Attribute& ) const
-    {
-        x3::skip_over(first, last, context);
-        if (first != last && *first == x3::get<quote_tag>(context))
-        {
-            ++first;
-            return true;
-        }
-        return false;
-    }
-} quote;
+auto static const separator = literal<separator_tag>{};
+auto static const quote = literal<quote_tag>{};
 
 // starting rule
 csv_line_grammar_type const line("csv-line");
