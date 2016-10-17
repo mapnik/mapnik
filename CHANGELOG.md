@@ -459,7 +459,7 @@ Released June 3rd, 2013
 
 Summary: The 2.2.0 release is primarily a performance and stability release. The code line represents development in the master branch since the release of 2.1.0 in Aug 2012 and therefore includes nearly a year of bug-fixes and optimizations. Nearly 500 new tests have been added bring the total coverage to 925. Shapefile and PostGIS datasources have benefited from numerous stability fixes, 64 bit integer support has been added to support OSM data in the grid renderer and in attribute filtering, and many fixes have landed for higher quality output when using a custom `scale_factor` during rendering. Critical code paths have been optimized include raster rendering, xml map loading, string to number conversion, vector reprojection when using `epsg:4326` and `epsg:3857`, `hextree` encoding, halo rendering, and rendering when using a custom `gamma`. Mapnik 2.2 also compiles faster than previous releases in the 2.x series and drops several unneeded and hard to install dependencies making builds on OS X and Windows easier than any previous release.
 
-- Removed 3 depedencies without loosing any functionality: `ltdl`, `cairomm` and `libsigc++` (#1804,#806,#1681)
+- Removed 3 dependencies without loosing any functionality: `ltdl`, `cairomm` and `libsigc++` (#1804,#806,#1681)
 
 - Added 64 bit integer support in expressions, feature ids, and the grid_renderer (#1661,#1662,#1662)
 
