@@ -390,7 +390,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& fi
 }
 
 template <typename Src, typename Filter>
-void apply_filter(Src & src, Filter const& filter)
+void apply_filter(Src & src, Filter const& filter, double /*scale_factor*/)
 {
     demultiply_alpha(src);
     double_buffer<Src> tb(src);
@@ -398,12 +398,12 @@ void apply_filter(Src & src, Filter const& filter)
 }
 
 template <typename Src>
-void apply_filter(Src & src, agg_stack_blur const& op)
+void apply_filter(Src & src, agg_stack_blur const& op, double scale_factor)
 {
     premultiply_alpha(src);
     agg::rendering_buffer buf(src.bytes(),src.width(),src.height(), src.row_size());
     agg::pixfmt_rgba32_pre pixf(buf);
-    agg::stack_blur_rgba32(pixf,op.rx,op.ry);
+    agg::stack_blur_rgba32(pixf, op.rx * scale_factor, op.ry * scale_factor);
 }
 
 inline double channel_delta(double source, double match)
@@ -420,7 +420,7 @@ inline uint8_t apply_alpha_shift(double source, double match, double alpha)
 }
 
 template <typename Src>
-void apply_filter(Src & src, color_to_alpha const& op)
+void apply_filter(Src & src, color_to_alpha const& op, double /*scale_factor*/)
 {
     using namespace boost::gil;
     bool premultiplied = src.get_premultiplied();
@@ -481,7 +481,7 @@ void apply_filter(Src & src, color_to_alpha const& op)
 }
 
 template <typename Src>
-void apply_filter(Src & src, colorize_alpha const& op)
+void apply_filter(Src & src, colorize_alpha const& op, double /*scale_factor*/)
 {
     using namespace boost::gil;
     std::ptrdiff_t size = op.size();
@@ -590,7 +590,7 @@ void apply_filter(Src & src, colorize_alpha const& op)
 }
 
 template <typename Src>
-void apply_filter(Src & src, scale_hsla const& transform)
+void apply_filter(Src & src, scale_hsla const& transform, double /*scale_factor*/)
 {
     using namespace boost::gil;
     bool tinting = !transform.is_identity();
@@ -802,25 +802,25 @@ void apply_color_blind_filter(Src & src, ColorBlindFilter const& op)
 }
 
 template <typename Src>
-void apply_filter(Src & src, color_blind_protanope const& op)
+void apply_filter(Src & src, color_blind_protanope const& op, double /*scale_factor*/)
 {
     apply_color_blind_filter(src, op);
 }
 
 template <typename Src>
-void apply_filter(Src & src, color_blind_deuteranope const& op)
+void apply_filter(Src & src, color_blind_deuteranope const& op, double /*scale_factor*/)
 {
     apply_color_blind_filter(src, op);
 }
 
 template <typename Src>
-void apply_filter(Src & src, color_blind_tritanope const& op)
+void apply_filter(Src & src, color_blind_tritanope const& op, double /*scale_factor*/)
 {
     apply_color_blind_filter(src, op);
 }
 
 template <typename Src>
-void apply_filter(Src & src, gray const& /*op*/)
+void apply_filter(Src & src, gray const& /*op*/, double /*scale_factor*/)
 {
     premultiply_alpha(src);
     using namespace boost::gil;
@@ -871,7 +871,7 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
 }
 
 template <typename Src>
-void apply_filter(Src & src, x_gradient const& /*op*/)
+void apply_filter(Src & src, x_gradient const& /*op*/, double /*scale_factor*/)
 {
     premultiply_alpha(src);
     double_buffer<Src> tb(src);
@@ -879,7 +879,7 @@ void apply_filter(Src & src, x_gradient const& /*op*/)
 }
 
 template <typename Src>
-void apply_filter(Src & src, y_gradient const& /*op*/)
+void apply_filter(Src & src, y_gradient const& /*op*/, double /*scale_factor*/)
 {
     premultiply_alpha(src);
     double_buffer<Src> tb(src);
@@ -888,7 +888,7 @@ void apply_filter(Src & src, y_gradient const& /*op*/)
 }
 
 template <typename Src>
-void apply_filter(Src & src, invert const& /*op*/)
+void apply_filter(Src & src, invert const& /*op*/, double /*scale_factor*/)
 {
     premultiply_alpha(src);
     using namespace boost::gil;
@@ -916,16 +916,18 @@ void apply_filter(Src & src, invert const& /*op*/)
 template <typename Src>
 struct filter_visitor
 {
-    filter_visitor(Src & src)
-    : src_(src) {}
+    filter_visitor(Src & src, double scale_factor)
+    : src_(src),
+      scale_factor_(scale_factor) {}
 
     template <typename T>
     void operator () (T const& filter) const
     {
-        apply_filter(src_, filter);
+        apply_filter(src_, filter, scale_factor_);
     }
 
     Src & src_;
+    double scale_factor_;
 };
 
 struct filter_radius_visitor
@@ -944,14 +946,14 @@ struct filter_radius_visitor
 };
 
 template<typename Src>
-void filter_image(Src & src, std::string const& filter)
+void filter_image(Src & src, std::string const& filter, double scale_factor=1)
 {
     std::vector<filter_type> filter_vector;
     if(!parse_image_filters(filter, filter_vector))
     {
         throw std::runtime_error("Failed to parse filter argument in filter_image: '" + filter + "'");
     }
-    filter_visitor<Src> visitor(src);
+    filter_visitor<Src> visitor(src, scale_factor);
     for (filter_type const& filter_tag : filter_vector)
     {
         util::apply_visitor(visitor, filter_tag);
@@ -959,7 +961,7 @@ void filter_image(Src & src, std::string const& filter)
 }
 
 template<typename Src>
-Src filter_image(Src const& src, std::string const& filter)
+Src filter_image(Src const& src, std::string const& filter, double scale_factor=1)
 {
     std::vector<filter_type> filter_vector;
     if(!parse_image_filters(filter, filter_vector))
@@ -967,7 +969,7 @@ Src filter_image(Src const& src, std::string const& filter)
         throw std::runtime_error("Failed to parse filter argument in filter_image: '" + filter + "'");
     }
     Src new_src(src);
-    filter_visitor<Src> visitor(new_src);
+    filter_visitor<Src> visitor(new_src, scale_factor);
     for (filter_type const& filter_tag : filter_vector)
     {
         util::apply_visitor(visitor, filter_tag);
