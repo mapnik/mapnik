@@ -23,8 +23,6 @@
 #ifndef MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP
 
-#define BIGINT // int64_t support
-
 #include <mapnik/json/geojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
