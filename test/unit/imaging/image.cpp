@@ -363,4 +363,30 @@ SECTION("Image copy/move")
     }
 }
 
+SECTION("image::swap")
+{
+    auto blue = mapnik::color(50, 50, 250).rgba();
+    auto orange = mapnik::color(250, 150, 0).rgba();
+
+    mapnik::image_rgba8 im;
+    mapnik::image_rgba8 im2(16, 16);
+    mapnik::image_rgba8 im3(16, 16);
+
+    im2.set(blue);
+    im3.set(orange);
+
+    // swap two non-empty images
+    CHECK_NOTHROW(im2.swap(im3));
+    CHECK(im2(0, 0) == orange);
+    CHECK(im3(0, 0) == blue);
+
+    // swap empty <-> non-empty
+    CHECK_NOTHROW(im.swap(im3));
+    CHECK(im3.data() == nullptr);
+    CHECKED_IF(im.data() != nullptr)
+    {
+        CHECK(im(0, 0) == blue);
+    }
+}
+
 } // END TEST CASE

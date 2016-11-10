@@ -24,10 +24,8 @@
 #define MAPNIK_JSON_POSITIONS_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/util/variant.hpp>
 #include <mapnik/json/positions.hpp>
 #include <mapnik/json/error_handler.hpp>
-#include <mapnik/geometry.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>

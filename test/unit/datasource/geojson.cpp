@@ -115,6 +115,58 @@ TEST_CASE("geojson") {
             }
         }
 
+        SECTION("GeoJSON num_features_to_query")
+        {
+            std::string filename = "./test/data/json/featurecollection-multipleprops.geojson";
+            for (mapnik::value_integer num_features_to_query : { mapnik::value_integer(-1),
+                        mapnik::value_integer(0),
+                        mapnik::value_integer(1),
+                        mapnik::value_integer(2),
+                        mapnik::value_integer(3),
+                        std::numeric_limits<mapnik::value_integer>::max()})
+            {
+                for (auto create_index : { true, false })
+                {
+                    if (create_index)
+                    {
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(mapnik::util::exists(filename + ".index"));
+                    }
+
+                    for (auto cache_features : {true, false})
+                    {
+                        mapnik::parameters params;
+                        params["type"] = "geojson";
+                        params["file"] = filename;
+                        params["cache_features"] = cache_features;
+                        params["num_features_to_query"] = num_features_to_query;
+                        auto ds = mapnik::datasource_cache::instance().create(params);
+                        CHECK(ds != nullptr);
+                        auto fields = ds->get_descriptor().get_descriptors();
+                        if (!create_index && cache_features)
+                        {
+                            // when there's no index and caching is enabled descriptor is always fully initialised
+                            REQUIRE(fields.size() == 2);
+                        }
+                        else
+                        {
+                            // at least 1 feature should be queried
+                            REQUIRE(fields.size() == std::min(std::max(mapnik::value_integer(1), num_features_to_query),
+                                                              mapnik::value_integer(2)));
+                        }
+                    }
+                    // cleanup
+                    if (create_index && mapnik::util::exists(filename + ".index"))
+                    {
+                        mapnik::util::remove(filename + ".index");
+                    }
+                }
+            }
+        }
+
         SECTION("GeoJSON attribute descriptors are alphabetically ordered")
         {
             for (auto cache_features : {true, false})

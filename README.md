@@ -9,7 +9,6 @@ _/      _/    _/_/_/  _/_/_/    _/    _/  _/  _/    _/
 ```
 
 [![Build Status Linux](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
-[![CircleCI](https://circleci.com/gh/mapnik/mapnik.svg?style=svg)](https://circleci.com/gh/mapnik/mapnik)
 [![Build Status Windows](https://ci.appveyor.com/api/projects/status/hc9l7okdjtucfqqn?branch=master&svg=true)](https://ci.appveyor.com/project/Mapbox/mapnik)
 [![Coverage Status](https://coveralls.io/repos/mapnik/mapnik/badge.svg?branch=master&service=github)](https://coveralls.io/github/mapnik/mapnik?branch=master)
 

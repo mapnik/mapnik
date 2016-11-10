@@ -19,6 +19,9 @@ install:
 release:
 	./scripts/publish_release.sh
 
+test-release:
+	./scripts/test_release.sh
+
 python:
 	if [ ! -d ./bindings/python ]; then git clone git@github.com:mapnik/python-mapnik.git --recursive ./bindings/python; else (cd bindings/python && git pull && git submodule update --init); fi;
 	make

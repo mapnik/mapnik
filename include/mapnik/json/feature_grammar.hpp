@@ -72,7 +72,8 @@ struct feature_grammar : qi::grammar<Iterator, void(FeatureType&), space_type>
     generic_json<Iterator> json_;
     // geoJSON
     qi::rule<Iterator, void(FeatureType&),space_type> start;
-    qi::rule<Iterator, qi::locals<bool>, void(FeatureType&),space_type> feature;
+    qi::rule<Iterator, qi::locals<bool>, void(FeatureType&), space_type> feature;
+    qi::rule<Iterator, void(FeatureType&, bool&), space_type> feature_part;
     qi::rule<Iterator, space_type> feature_type;
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;

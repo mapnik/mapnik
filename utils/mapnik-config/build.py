@@ -159,7 +159,7 @@ configuration = {
     "mapnik_bundled_icu_data":mapnik_bundled_icu_data,
 }
 
-## if we are statically linking depedencies
+## if we are statically linking dependencies
 ## then they do not need to be reported in ldflags
 #if env['RUNTIME_LINK'] == 'static':
 #    configuration['ldflags'] = ''
