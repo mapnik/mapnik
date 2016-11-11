@@ -59,7 +59,7 @@ struct feature_validate_callback
 
 using box_type = mapnik::box2d<float>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
-//using base_iterator_type = char const*;
+using base_iterator_type = char const*;
 //const mapnik::json::extract_bounding_box_grammar<base_iterator_type, boxes_type> geojson_datasource_static_bbox_grammar;
 //const mapnik::transcoder tr("utf8");
 //const mapnik::json::feature_grammar_callback<base_iterator_type, mapnik::feature_impl, feature_validate_callback<float>> fc_grammar(tr);
@@ -130,8 +130,6 @@ auto on_feature_callback = [] (auto const& ctx)
 
 namespace {
 auto const& geojson_value = geojson_grammar();
-//auto const& key_value_ = key_value_grammar();
-//auto const& json_string = mapnik::json::unicode_string_grammar();
 }
 
 // extract bounding box from GeoJSON Feature
@@ -174,7 +172,7 @@ auto extract_bounding_box = [](auto const& ctx)
 auto const coordinates_rule = x3::rule<struct coordinates_rule_tag, mapnik::box2d<float> > {}
     = lit("\"coordinates\"") >> lit(':') >> positions_rule[extract_bounding_box];
 
-auto const bounding_box = x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<char const*>,mapnik::box2d<float>>> {}
+auto const bounding_box = x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>,mapnik::box2d<float>>> {}
     = raw[lit('{')[open_bracket] >> *(eps[check_brackets] >>
                                   (lit("\"FeatureCollection\"") > eps(false)
                                    |
@@ -260,8 +258,8 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     {
         mapped_region = *memory;
     }
-    char const* start = reinterpret_cast<char const*>(mapped_region->get_address());
-    char const* end = start + mapped_region->get_size();
+    base_iterator_type start = reinterpret_cast<base_iterator_type>(mapped_region->get_address());
+    base_iterator_type end = start + mapped_region->get_size();
 #else
     mapnik::util::file file(filename);
     if (!file)
@@ -272,14 +270,14 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     std::string file_buffer;
     file_buffer.resize(file.size());
     std::fread(&file_buffer[0], file.size(), 1, file.get());
-    char const* start = file_buffer.c_str();
-    char const* end = start + file_buffer.length();
+    base_iterator_type start = file_buffer.c_str();
+    base_iterator_type end = start + file_buffer.length();
 #endif
     using namespace boost::spirit;
     using space_type = mapnik::json::grammar::space_type;
     auto const* itr = start;
 
-    extract_positions<char const*, boxes_type> callback(itr, boxes);
+    extract_positions<base_iterator_type, boxes_type> callback(itr, boxes);
     mapnik::json::grammar::keys_map keys;
     std::size_t bracket_counter = 0;
     auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
@@ -297,7 +295,7 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
             return std::make_pair(false, extent);
         }
     }
-    catch (x3::expectation_failure<char const*> const& ex)
+    catch (x3::expectation_failure<base_iterator_type> const& ex)
     {
         std::clog << ex.what() << std::endl;
         std::clog << "Expected: " << ex.which();
@@ -318,25 +316,6 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
         {
             if (!extent.valid()) extent = item.first;
             else extent.expand_to_include(item.first);
-
-            if (validate_features)
-            {
-                std::clog << "FIXME" << std::endl;
-                return std::make_pair(false, extent);
-#if 0
-                base_iterator_type feat_itr = start + item.second.first;
-                base_iterator_type feat_end = feat_itr + item.second.second;
-                feature_validate_callback<float> callback(item.first);
-                bool result = boost::spirit::::phrase_parse(feat_itr, feat_end, (fc_grammar)
-                                                              (boost::phoenix::ref(ctx), boost::phoenix::ref(start_id), boost::phoenix::ref(callback)),
-                                                              space);
-                if (!result || feat_itr != feat_end)
-                {
-                    if (verbose) std::clog << std::string(start + item.second.first, feat_end ) << std::endl;
-                    return std::make_pair(false, extent);
-                }
-#endif
-            }
         }
     }
     return std::make_pair(true, extent);
