@@ -90,7 +90,11 @@ int main (int argc, char** argv)
         po::positional_options_description p;
         p.add("files",-1);
         po::variables_map vm;
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+        po::store(po::command_line_parser(argc, argv)
+                  .options(desc)
+                  .style(po::command_line_style::unix_style | po::command_line_style::allow_long_disguise)
+                  .positional(p)
+                  .run(), vm);
         po::notify(vm);
 
         if (vm.count("version"))
