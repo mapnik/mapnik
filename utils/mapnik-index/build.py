@@ -33,6 +33,7 @@ source = Split(
     mapnik-index.cpp
     process_csv_file.cpp
     process_geojson_file.cpp
+    process_geojson_file_x3.cpp
     ../../plugins/input/csv/csv_utils.os
     """
     )

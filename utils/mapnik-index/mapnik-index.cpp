@@ -30,6 +30,7 @@
 
 #include "process_csv_file.hpp"
 #include "process_geojson_file.hpp"
+#include "process_geojson_file_x3.hpp"
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -62,6 +63,7 @@ int main (int argc, char** argv)
     namespace po = boost::program_options;
     bool verbose = false;
     bool validate_features = false;
+    bool use_x3 = false;
     unsigned int depth = DEFAULT_DEPTH;
     double ratio = DEFAULT_RATIO;
     std::vector<std::string> files;
@@ -82,6 +84,7 @@ int main (int argc, char** argv)
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
             ("files",po::value<std::vector<std::string> >(),"Files to index: file1 file2 ...fileN")
             ("validate-features", "Validate GeoJSON features")
+            ("x3","Use boost::spirit::x3 based parser for GeoJSON")
             ;
 
         po::positional_options_description p;
@@ -107,6 +110,10 @@ int main (int argc, char** argv)
         if (vm.count("validate-features"))
         {
             validate_features = true;
+        }
+        if (vm.count("x3"))
+        {
+            use_x3 = true;
         }
         if (vm.count("depth"))
         {
@@ -190,7 +197,15 @@ int main (int argc, char** argv)
         else if (mapnik::detail::is_geojson(filename))
         {
             std::clog << "processing '" << filename << "' as GeoJSON\n";
-            auto result = mapnik::detail::process_geojson_file(boxes, filename, validate_features, verbose);
+            std::pair<bool,mapnik::box2d<float>> result;
+            if (use_x3)
+            {
+                result = mapnik::detail::process_geojson_file_x3(boxes, filename, validate_features, verbose);
+            }
+            else
+            {
+                result = mapnik::detail::process_geojson_file(boxes, filename, validate_features, verbose);
+            }
             if (!result.first)
             {
                 std::clog << "Error: failed to process " << filename << std::endl;
