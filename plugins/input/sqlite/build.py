@@ -34,7 +34,10 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-libraries = [ 'sqlite3' ]
+if env['SPATIALITE']:
+    libraries = [ 'spatialite', 'sqlite3', 'xml2', 'proj', 'geos_c', 'geos' ]
+else:
+    libraries = [ 'sqlite3' ]
 
 linkflags = []
 if env['SQLITE_LINKFLAGS']:
