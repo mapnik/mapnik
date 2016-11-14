@@ -32,6 +32,8 @@ namespace mapnik { namespace util {
 
 bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<double> const& geom);
 
+bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<std::int64_t> const& geom);
+
 }}
 
 
