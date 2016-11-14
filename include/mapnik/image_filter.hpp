@@ -916,7 +916,7 @@ void apply_filter(Src & src, invert const& /*op*/, double /*scale_factor*/)
 template <typename Src>
 struct filter_visitor
 {
-    filter_visitor(Src & src, double scale_factor)
+    filter_visitor(Src & src, double scale_factor=1.0)
     : src_(src),
       scale_factor_(scale_factor) {}
 
