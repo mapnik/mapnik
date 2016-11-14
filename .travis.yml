@@ -10,8 +10,8 @@ env:
    - CCACHE_COMPRESS=1
    - HEAVY_JOBS="2"
    - PREFIX=/tmp/mapnik
-   - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
-   - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
+   - secure: "D5CLP5lbyFru788iZO8RqDenY/YsHPREvr34zCEi93xMqOTxPmME/zyuEZSyjP5ZLyf8g/fxOuPYSDbOQ1QLwNDBWxB0JomWOahyimHKrMCrMcGHCjl//2W2mE+p9VwF5VLGgfy7CskGkS49Mye37FDK0ejwuq6MDI45DsH4Fkk="
+   - secure: "ZPHyAVL3ID5g3KEmwcnzG9z2tAQwSx526Qd3Y6tsZ3Yj+aSagVBiZQjZGKWgNX74lymtmYKnb2Md46apWLeImt6tjB3MWTu7WwWoZRnqUligz/8Nmg4Lgo7EOCkQcjN/gpA1i+cM5b+ZKDTZYOaHO6/+DAaunQzA7/p99hw/XYg="
    - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 addons:
   postgresql: "9.4"
