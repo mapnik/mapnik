@@ -23,8 +23,11 @@
 #ifndef MAPNIK_PARSE_HEX_HPP
 #define MAPNIK_PARSE_HEX_HPP
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_char_.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace util {
 

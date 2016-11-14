@@ -189,6 +189,8 @@ public:
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
 #pragma GCC diagnostic ignored "-Wundefined-var-template"
             if (str_copy == our_strings_[i])
 #pragma GCC diagnostic pop
@@ -202,6 +204,8 @@ public:
             }
         }
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
 #pragma GCC diagnostic ignored "-Wundefined-var-template"
         throw illegal_enum_value(std::string("Illegal enumeration value '") +
                                  str + "' for enum " + our_name_);
@@ -212,6 +216,8 @@ public:
     std::string as_string() const
     {
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
 #pragma GCC diagnostic ignored "-Wundefined-var-template"
         return our_strings_[value_];
 #pragma GCC diagnostic pop

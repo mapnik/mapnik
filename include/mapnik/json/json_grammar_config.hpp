@@ -23,7 +23,11 @@
 #ifndef MAPNIK_JSON_GRAMMAR_CONFIG_HPP
 #define MAPNIK_JSON_GRAMMAR_CONFIG_HPP
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
+
 #include <unordered_map>
 
 namespace mapnik { namespace json {
