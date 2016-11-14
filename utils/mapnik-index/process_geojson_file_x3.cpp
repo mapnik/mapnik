@@ -41,28 +41,21 @@
 
 namespace {
 
-template <typename T>
-struct feature_validate_callback
+template <typename Keys>
+bool validate_geojson_feature(mapnik::json::geojson_value const& value, Keys const& keys)
 {
-    feature_validate_callback(mapnik::box2d<T> const& box)
-        : box_(box) {}
-
-    void operator() (mapnik::feature_ptr const& f) const
+    if (!value.is<mapnik::json::geojson_object>())
     {
-        if (box_ != box_)
-        {
-            throw std::runtime_error("Bounding boxes mismatch validation feature");
-        }
+        std::clog << "Expecting an GeoJSON object" << std::endl;
+        return false;
     }
-    mapnik::box2d<T> const& box_;
+    mapnik::json::geojson_object const& feature = mapnik::util::get<mapnik::json::geojson_object>(value);
+    return true;
 };
 
 using box_type = mapnik::box2d<float>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using base_iterator_type = char const*;
-//const mapnik::json::extract_bounding_box_grammar<base_iterator_type, boxes_type> geojson_datasource_static_bbox_grammar;
-//const mapnik::transcoder tr("utf8");
-//const mapnik::json::feature_grammar_callback<base_iterator_type, mapnik::feature_impl, feature_validate_callback<float>> fc_grammar(tr);
 }
 
 namespace mapnik { namespace json {
@@ -182,14 +175,14 @@ auto const bounding_box = x3::rule<struct bounding_box_rule_tag, std::tuple<boos
                                    |
                                    coordinates_rule[assign_bbox]
                                    |
-                                   omit[json_string]
+                                   omit[geojson_string]
                                    |
                                    omit[char_]))][assign_range];
 
 
 auto const feature = bounding_box[on_feature_callback];
 
-auto const key_value_ = omit[json_string] > lit(':') > omit[geojson_value] ;
+auto const key_value_ = omit[geojson_string] > lit(':') > omit[geojson_value] ;
 
 auto const features = lit("\"features\"")
     > lit(':') > lit('[') > -(omit[feature] % lit(',')) > lit(']');
@@ -205,13 +198,13 @@ auto const feature_collection = x3::rule<struct feature_collection_tag> {}
 namespace {
 struct collect_features
 {
-    collect_features(std::vector<mapnik::json::json_value> & values)
+    collect_features(std::vector<mapnik::json::geojson_value> & values)
         : values_(values) {}
-    void operator() (mapnik::json::json_value && val) const
+    void operator() (mapnik::json::geojson_value && val) const
     {
         values_.push_back(std::move(val));
     }
-    std::vector<mapnik::json::json_value> & values_;
+    std::vector<mapnik::json::geojson_value> & values_;
 };
 
 template <typename Iterator, typename Boxes>
@@ -230,7 +223,6 @@ struct extract_positions
         auto size = std::distance(r.begin(), r.end());
         boxes_.emplace_back(std::make_pair(bbox,std::make_pair(offset, size)));
         //boxes_.emplace_back(std::make_tuple(bbox,offset, size));
-        //std::clog << offset << ":" << size << " " << bbox << std::endl;
     }
     Iterator start_;
     Boxes & boxes_;
@@ -308,14 +300,43 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
         return std::make_pair(false, extent);
     }
 
-    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-    //std::size_t start_id = 1;
+    auto feature_grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys))
+        [ mapnik::json::grammar::geojson_value ];
     for (auto const& item : boxes)
     {
         if (item.first.valid())
         {
             if (!extent.valid()) extent = item.first;
             else extent.expand_to_include(item.first);
+
+            if (validate_features)
+            {
+                base_iterator_type feat_itr = start + item.second.first;
+                base_iterator_type feat_end = feat_itr + item.second.second;
+                mapnik::json::geojson_value feature_value;
+                try
+                {
+                    bool result = x3::phrase_parse(feat_itr, feat_end, feature_grammar, space_type(), feature_value);
+                    if (!result || feat_itr != feat_end)
+                    {
+                        if (verbose) std::clog << std::string(start + item.second.first, feat_end ) << std::endl;
+                        return std::make_pair(false, extent);
+                    }
+                }
+                catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+                {
+                    if (verbose) std::clog << ex.what() << std::endl;
+                    return std::make_pair(false, extent);
+                }
+                catch (...)
+                {
+                    return std::make_pair(false, extent);
+                }
+                if (!validate_geojson_feature(feature_value, keys))
+                {
+                    return std::make_pair(false, extent);
+                }
+            }
         }
     }
     return std::make_pair(true, extent);

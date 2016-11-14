@@ -91,24 +91,24 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 geojson_grammar_type const value("JSON Value");
 key_value_type const key_value("JSON key/value");
 // rules
-x3::rule<class json_object_tag, json_object> object("JSON Object");
-x3::rule<class json_array_tag, json_array> array("JSON Array");
-x3::rule<class json_number_tag, json_value> number("JSON Number");
-//x3::rule<class key_value_tag, json_object_element> key_value("JSON key/value");
+x3::rule<class json_object_tag, geojson_object> object("JSON Object");
+x3::rule<class json_array_tag, geojson_array> array("JSON Array");
+x3::rule<class json_number_tag, geojson_value> number("JSON Number");
+//x3::rule<class key_value_tag, geojson_object_element> key_value("JSON key/value");
 // GeoJSON
-x3::rule<class geojson_coordinates_tag, json_object_element> coordinates("GeoJSON Coordinates");
-x3::rule<class geojson_geometry_type_tag, json_object_element> geometry_type("GeoJSON Geometry Type");
-x3::rule<class geojson_key_value_type_tag, json_object_element> geojson_key_value("GeoJSON Key/Value Type");
-auto const json_double = x3::real_parser<value_double, x3::strict_real_policies<value_double>>();
-auto const json_integer = x3::int_parser<value_integer, 10, 1, -1>();
+x3::rule<class geojson_coordinates_tag, geojson_object_element> coordinates("GeoJSON Coordinates");
+x3::rule<class geojson_geometry_type_tag, geojson_object_element> geometry_type("GeoJSON Geometry Type");
+x3::rule<class geojson_key_value_type_tag, geojson_object_element> geojson_key_value("GeoJSON Key/Value Type");
+auto const geojson_double = x3::real_parser<value_double, x3::strict_real_policies<value_double>>();
+auto const geojson_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
 // import unicode string rule
-namespace { auto const& json_string = mapnik::json::unicode_string_grammar(); }
+namespace { auto const& geojson_string = mapnik::json::unicode_string_grammar(); }
 // import positions rule
 namespace { auto const& positions_rule = mapnik::json::positions_grammar(); }
 
 // GeoJSON types
-auto const value_def =  object | array | json_string | number
+auto const value_def =  object | array | geojson_string | number
     ;
 
 auto const coordinates_def = string("\"coordinates\"")[assign_key] > lit(':') > (positions_rule[assign_value] | value[assign_value])
@@ -117,7 +117,7 @@ auto const coordinates_def = string("\"coordinates\"")[assign_key] > lit(':') > 
 auto const geometry_type_def = string("\"type\"")[assign_key] > lit(':') > (geometry_type_sym[assign_value] | value[assign_value])
     ;
 
-auto const key_value_def = json_string[assign_key] > lit(':') > value[assign_value]
+auto const key_value_def = geojson_string[assign_key] > lit(':') > value[assign_value]
     ;
 
 auto const geojson_key_value_def =
@@ -138,8 +138,8 @@ auto const array_def = lit('[')
     > lit(']')
     ;
 
-auto const number_def = json_double[assign]
-    | json_integer[assign]
+auto const number_def = geojson_double[assign]
+    | geojson_integer[assign]
     | lit("true") [make_true]
     | lit ("false") [make_false]
     | lit("null")[make_null]

@@ -38,40 +38,40 @@
 namespace mapnik { namespace json {
 
 namespace x3 = boost::spirit::x3;
-struct json_value;
-using json_array = std::vector<json_value>;
-using json_object_element = std::pair<int, json_value>;
-using json_object = std::vector<json_object_element>;
-using json_value_base = mapnik::util::variant<value_null,
+struct geojson_value;
+using geojson_array = std::vector<geojson_value>;
+using geojson_object_element = std::pair<int, geojson_value>;
+using geojson_object = std::vector<geojson_object_element>;
+using geojson_value_base = mapnik::util::variant<value_null,
                                               value_bool,
                                               value_integer,
                                               value_double,
                                               std::string,
                                               mapnik::geometry::geometry_types,
                                               positions,
-                                              json_array,
-                                              json_object>;
-struct json_value : json_value_base
+                                              geojson_array,
+                                              geojson_object>;
+struct geojson_value : geojson_value_base
 {
 #if __cpp_inheriting_constructors >= 200802
 
-    using json_value_base::json_value_base;
+    using geojson_value_base::geojson_value_base;
 
 #else
 
-    json_value() = default;
+    geojson_value() = default;
 
     template <typename T>
-    json_value(T && val)
-        : json_value_base(std::forward<T>(val)) {}
+    geojson_value(T && val)
+        : geojson_value_base(std::forward<T>(val)) {}
 
 #endif
 };
 
 namespace grammar {
 
-using geojson_grammar_type = x3::rule<class geojson_tag, json_value>;
-using key_value_type = x3::rule<class key_value_tag, json_object_element>;
+using geojson_grammar_type = x3::rule<class geojson_tag, geojson_value>;
+using key_value_type = x3::rule<class key_value_tag, geojson_object_element>;
 BOOST_SPIRIT_DECLARE(geojson_grammar_type);
 BOOST_SPIRIT_DECLARE(key_value_type);
 }
