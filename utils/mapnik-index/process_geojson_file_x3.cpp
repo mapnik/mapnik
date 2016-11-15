@@ -39,24 +39,32 @@
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/positions_grammar_x3_def.hpp>
 
+namespace mapnik { namespace json {
+
+constexpr char const* wkn_to_string(well_known_names val)
+{
+    switch(val)
+    {
+    case type: return "type";
+    case geometry: return "geometry";
+    case coordinates: return "coordinates";
+    case properties: return "properties";
+    default: return "unknown";
+    }
+}
+
+}}
+
 namespace {
 
-enum well_known_names
-{
-    type = 0,
-    geometry = 1,
-    coordinates = 2,
-    properties = 3
-};
+constexpr mapnik::json::well_known_names feature_properties[] = {
+    mapnik::json::well_known_names::type,
+    mapnik::json::well_known_names::geometry,
+    mapnik::json::well_known_names::properties}; // sorted
 
-constexpr int feature_properties[] = {
-    well_known_names::type,
-    well_known_names::geometry,
-    well_known_names::properties}; // sorted
-
-constexpr int geometry_properties[] = {
-    well_known_names::type,
-    well_known_names::coordinates}; // sorted
+constexpr mapnik::json::well_known_names geometry_properties[] = {
+    mapnik::json::well_known_names::type,
+    mapnik::json::well_known_names::coordinates}; // sorted
 
 template <typename Keys>
 std::string join(Keys const& keys)
@@ -66,7 +74,7 @@ std::string join(Keys const& keys)
     for (auto const& key : keys)
     {
         if (!first) result += ",";
-        result += "\"" + std::to_string(key) + "\"";
+        result += "\"" + std::string(mapnik::json::wkn_to_string(key)) + "\"";
         first = false;
     }
     return result;
@@ -110,7 +118,7 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
     for (auto & elem : feature)
     {
         auto const key = std::get<0>(elem);
-        if (key == well_known_names::geometry)
+        if (key == mapnik::json::well_known_names::geometry)
         {
             auto & geom_value = std::get<1>(elem);
             if (!geom_value.is<mapnik::json::geojson_object>())
@@ -135,7 +143,7 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
             for (auto & elem2 : geometry)
             {
                 auto const key2 = std::get<0>(elem2);
-                if (key2 == well_known_names::type)
+                if (key2 == mapnik::json::well_known_names::type)
                 {
                     auto const& geom_type_value = std::get<1>(elem2);
                     if (!geom_type_value.is<mapnik::geometry::geometry_types>())
@@ -150,7 +158,7 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                         return false;
                     }
                 }
-                else if (key2 == well_known_names::coordinates)
+                else if (key2 == mapnik::json::well_known_names::coordinates)
                 {
                     auto const& coordinates_value = std::get<1>(elem2);
                     if (!coordinates_value.is<mapnik::json::positions>())
