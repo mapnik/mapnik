@@ -428,14 +428,7 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     auto const* itr = start;
 
     extract_positions<base_iterator_type, boxes_type> callback(itr, boxes);
-    mapnik::json::grammar::keys_map keys =
-        {
-            {"type", mapnik::json::well_known_names::type},
-            {"geometry", mapnik::json::well_known_names::geometry},
-            {"coordinates", mapnik::json::well_known_names::coordinates},
-            {"properties", mapnik::json::well_known_names::properties}
-        };
-
+    auto keys = mapnik::json::get_keys();
     std::size_t bracket_counter = 0;
     auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
         [x3::with<mapnik::json::keys_tag>(std::ref(keys))

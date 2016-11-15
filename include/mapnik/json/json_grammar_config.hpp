@@ -37,7 +37,8 @@ enum well_known_names
     type = 1,
     geometry,
     coordinates,
-    properties
+    properties,
+    id
 };
 
 constexpr char const* wkn_to_string(well_known_names val)
@@ -48,15 +49,28 @@ constexpr char const* wkn_to_string(well_known_names val)
     case geometry: return "geometry";
     case coordinates: return "coordinates";
     case properties: return "properties";
+    case id: return "id";
     default: return "unknown";
     }
 }
 
 struct keys_tag;
 
-namespace grammar {
-
 using keys_map = std::unordered_map<std::string, int>;
+
+inline keys_map get_keys()
+{
+    keys_map keys =  {
+        {"type", well_known_names::type},
+        {"geometry", well_known_names::geometry},
+        {"coordinates", well_known_names::coordinates},
+        {"properties", well_known_names::properties},
+        {"id", well_known_names::id}
+    };
+    return keys;
+}
+
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 using space_type = x3::standard::space_type;
