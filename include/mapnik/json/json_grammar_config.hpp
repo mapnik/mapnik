@@ -34,10 +34,10 @@ namespace mapnik { namespace json {
 
 enum well_known_names
 {
-    type = 0,
-    geometry = 1,
-    coordinates = 2,
-    properties = 3
+    type = 1,
+    geometry,
+    coordinates,
+    properties
 };
 
 constexpr char const* wkn_to_string(well_known_names val)
