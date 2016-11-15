@@ -32,6 +32,14 @@
 
 namespace mapnik { namespace json {
 
+enum well_known_names
+{
+    type = 0,
+    geometry = 1,
+    coordinates = 2,
+    properties = 3
+};
+
 struct keys_tag;
 
 namespace grammar {
