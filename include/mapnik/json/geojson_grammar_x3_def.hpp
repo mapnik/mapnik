@@ -67,7 +67,7 @@ auto assign_value = [](auto const& ctx)
 
 using x3::lit;
 using x3::string;
-using x3::omit;
+using x3::lexeme;
 
 struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 {
@@ -111,10 +111,12 @@ namespace { auto const& positions_rule = mapnik::json::positions_grammar(); }
 auto const value_def =  object | array | geojson_string | number
     ;
 
-auto const coordinates_def = string("\"coordinates\"")[assign_key] > lit(':') > (positions_rule[assign_value] | value[assign_value])
+auto const coordinates_def = lexeme[lit('"') >> (string("coordinates") > lit('"'))][assign_key]
+    > lit(':') > (positions_rule[assign_value] | value[assign_value])
     ;
 
-auto const geometry_type_def = string("\"type\"")[assign_key] > lit(':') > (geometry_type_sym[assign_value] | value[assign_value])
+auto const geometry_type_def = lexeme[lit('"') >> (string("type") > lit('"'))][assign_key]
+    > lit(':') > (geometry_type_sym[assign_value] | value[assign_value])
     ;
 
 auto const key_value_def = geojson_string[assign_key] > lit(':') > value[assign_value]
