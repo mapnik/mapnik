@@ -40,6 +40,18 @@ enum well_known_names
     properties = 3
 };
 
+constexpr char const* wkn_to_string(well_known_names val)
+{
+    switch(val)
+    {
+    case type: return "type";
+    case geometry: return "geometry";
+    case coordinates: return "coordinates";
+    case properties: return "properties";
+    default: return "unknown";
+    }
+}
+
 struct keys_tag;
 
 namespace grammar {

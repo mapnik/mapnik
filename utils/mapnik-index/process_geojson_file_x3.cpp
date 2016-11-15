@@ -39,22 +39,6 @@
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/positions_grammar_x3_def.hpp>
 
-namespace mapnik { namespace json {
-
-constexpr char const* wkn_to_string(well_known_names val)
-{
-    switch(val)
-    {
-    case type: return "type";
-    case geometry: return "geometry";
-    case coordinates: return "coordinates";
-    case properties: return "properties";
-    default: return "unknown";
-    }
-}
-
-}}
-
 namespace {
 
 constexpr mapnik::json::well_known_names feature_properties[] = {
