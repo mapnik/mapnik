@@ -56,8 +56,8 @@ auto assign_key = [](auto const& ctx)
 {
     std::string const& name = _attr(ctx);
     keys_map & keys = x3::get<keys_tag>(ctx);
-    auto result = keys.insert(std::make_pair(name, keys.size()));
-    std::get<0>(_val(ctx)) = result.first->second;
+    auto result = keys.insert(keys_map::value_type(name, keys.size() + 1));
+    std::get<0>(_val(ctx)) = result.first->right;
 };
 
 auto assign_value = [](auto const& ctx)
