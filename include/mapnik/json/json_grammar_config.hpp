@@ -26,47 +26,53 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
+#include <boost/bimap.hpp>
+#include <boost/bimap/set_of.hpp>
+#include <boost/bimap/unordered_set_of.hpp>
+#include <boost/assign/list_of.hpp>
 #pragma GCC diagnostic pop
-
-#include <unordered_map>
 
 namespace mapnik { namespace json {
 
 enum well_known_names
 {
-    type = 1,
+    id = 1,
+    type,
+    features,
     geometry,
     coordinates,
-    properties,
-    id
+    properties
 };
 
 constexpr char const* wkn_to_string(well_known_names val)
 {
     switch(val)
     {
+    case id: return "id";
     case type: return "type";
+    case features: return "features";
     case geometry: return "geometry";
     case coordinates: return "coordinates";
     case properties: return "properties";
-    case id: return "id";
     default: return "unknown";
     }
 }
 
 struct keys_tag;
 
-using keys_map = std::unordered_map<std::string, int>;
+using keys_map = boost::bimap<boost::bimaps::unordered_set_of<std::string>,
+                              boost::bimaps::set_of<int>>;
 
 inline keys_map get_keys()
 {
-    keys_map keys =  {
-        {"type", well_known_names::type},
-        {"geometry", well_known_names::geometry},
-        {"coordinates", well_known_names::coordinates},
-        {"properties", well_known_names::properties},
-        {"id", well_known_names::id}
-    };
+    keys_map keys = boost::assign::list_of<keys_map::relation>
+        ("type", well_known_names::type)
+        ("features", well_known_names::features)
+        ("geometry", well_known_names::geometry)
+        ("coordinates", well_known_names::coordinates)
+        ("properties", well_known_names::properties)
+        ("id", well_known_names::id)
+        ;
     return keys;
 }
 
