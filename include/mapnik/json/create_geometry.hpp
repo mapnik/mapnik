@@ -29,6 +29,7 @@
 
 namespace mapnik { namespace json {
 
+namespace {
 // geometries
 template <typename Geometry>
 struct create_point
@@ -205,38 +206,35 @@ struct create_multipolygon
 
     Geometry & geom_;
 };
+} // anonymous ns
 
-struct create_geometry_impl
+template <typename Geometry>
+void create_geometry (Geometry & geom, int type, mapnik::json::positions const& coords)
 {
-    using result_type = void;
-    template <typename Geometry>
-    void operator() (Geometry & geom, int type, mapnik::json::positions const& coords) const
+    switch (type)
     {
-        switch (type)
-        {
-        case 1 ://Point
-            util::apply_visitor(create_point<Geometry>(geom), coords);
-            break;
-        case 2 ://LineString
-           util::apply_visitor(create_linestring<Geometry>(geom), coords);
-           break;
-        case 3 ://Polygon
-            util::apply_visitor(create_polygon<Geometry>(geom), coords);
-            break;
-        case 4 ://MultiPoint
-            util::apply_visitor(create_multipoint<Geometry>(geom), coords);
-            break;
-        case 5 ://MultiLineString
-            util::apply_visitor(create_multilinestring<Geometry>(geom), coords);
-            break;
-        case 6 ://MultiPolygon
-            util::apply_visitor(create_multipolygon<Geometry>(geom), coords);
-            break;
-        default:
-            break;
-        }
+    case 1 ://Point
+        util::apply_visitor(create_point<Geometry>(geom), coords);
+        break;
+    case 2 ://LineString
+        util::apply_visitor(create_linestring<Geometry>(geom), coords);
+        break;
+    case 3 ://Polygon
+        util::apply_visitor(create_polygon<Geometry>(geom), coords);
+        break;
+    case 4 ://MultiPoint
+        util::apply_visitor(create_multipoint<Geometry>(geom), coords);
+        break;
+    case 5 ://MultiLineString
+        util::apply_visitor(create_multilinestring<Geometry>(geom), coords);
+        break;
+    case 6 ://MultiPolygon
+        util::apply_visitor(create_multipolygon<Geometry>(geom), coords);
+        break;
+    default:
+        break;
     }
-};
+}
 
 }}
 
