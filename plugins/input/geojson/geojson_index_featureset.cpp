@@ -24,10 +24,14 @@
 #include "geojson_index_featureset.hpp"
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/json/unicode_string_grammar_x3_def.hpp>
+#include <mapnik/json/positions_grammar_x3_def.hpp>
+#include <mapnik/json/geojson_grammar_x3_def.hpp>
+#include <mapnik/json/json_grammar_config.hpp>
+#include <mapnik/json/create_feature.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -90,14 +94,32 @@ mapnik::feature_ptr geojson_index_featureset::next()
         auto const*  end = start + record.size();
 #endif
         static const mapnik::transcoder tr("utf8");
-        static const mapnik::json::feature_grammar<char const*, mapnik::feature_impl> grammar(tr);
-        using namespace boost::spirit;
-        standard::space_type space;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
-        if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space) || start != end)
+        using namespace boost::spirit;
+        using space_type = mapnik::json::grammar::space_type;
+        using mapnik::json::grammar::iterator_type;
+
+        mapnik::json::geojson_value value;
+        auto keys = mapnik::json::get_keys();
+        auto grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys))
+            [ mapnik::json::geojson_grammar() ];
+        try
         {
-            throw std::runtime_error("Failed to parse GeoJSON feature");
+            bool result = x3::phrase_parse(start, end, grammar, space_type(), value);
+            if (!result) return mapnik::feature_ptr();
+            mapnik::json::create_feature(*feature, value, keys, tr);
         }
+        catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+        {
+            std::cerr << ex.what() << std::endl;
+            return mapnik::feature_ptr();
+        }
+        catch (std::runtime_error const& ex)
+        {
+            std::cerr << "Exception caught:" << ex.what() << std::endl;
+            return mapnik::feature_ptr();
+        }
+
         // skip empty geometries
         if (mapnik::geometry::is_empty(feature->get_geometry()))
             continue;
