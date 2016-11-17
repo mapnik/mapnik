@@ -28,19 +28,19 @@
 #include <exception>
 #include <string>
 
-namespace mapnik { namespace value {
+namespace mapnik {
 
-class error : public std::exception
+class value_error : public std::exception
 {
 public:
-    error() :
+    value_error() :
         what_() {}
 
-    error( std::string const& what ) :
+    value_error( std::string const& what ) :
         what_( what )
     {}
 
-    virtual ~error() throw() {}
+    virtual ~value_error() throw() {}
 
     virtual const char * what() const throw()
     {
@@ -56,6 +56,6 @@ protected:
     mutable std::string what_;
 };
 
-}}
+}
 
 #endif // MAPNIK_VALUE_ERROR_HPP
