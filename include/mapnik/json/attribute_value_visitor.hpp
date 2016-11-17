@@ -27,7 +27,6 @@
 #include <mapnik/value.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/stringifier.hpp>
-#include <mapnik/json/value_converters.hpp>
 
 namespace mapnik { namespace json {
 
