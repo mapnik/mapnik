@@ -77,6 +77,13 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
 
 geojson_index_featureset::~geojson_index_featureset() {}
 
+namespace {
+using namespace boost::spirit;
+//static const mapnik::json::keys_map keys = mapnik::json::get_keys();
+static const mapnik::json::grammar::geojson_grammar_type geojson_g = mapnik::json::geojson_grammar();
+
+}
+
 mapnik::feature_ptr geojson_index_featureset::next()
 {
     while( itr_ != positions_.end())
@@ -98,16 +105,14 @@ mapnik::feature_ptr geojson_index_featureset::next()
         using namespace boost::spirit;
         using space_type = mapnik::json::grammar::space_type;
         using mapnik::json::grammar::iterator_type;
-
         mapnik::json::geojson_value value;
-        auto keys = mapnik::json::get_keys();
-        auto grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys))
-            [ mapnik::json::geojson_grammar() ];
+        auto const grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys_))
+            [ geojson_g ];
         try
         {
             bool result = x3::phrase_parse(start, end, grammar, space_type(), value);
             if (!result) return mapnik::feature_ptr();
-            mapnik::json::create_feature(*feature, value, keys, tr);
+            mapnik::json::create_feature(*feature, value, keys_, tr);
         }
         catch (x3::expectation_failure<std::string::const_iterator> const& ex)
         {
