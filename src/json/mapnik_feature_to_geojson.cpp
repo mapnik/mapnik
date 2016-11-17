@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,16 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_JSON_FEATURE_GENERATOR_HPP
-#define MAPNIK_JSON_FEATURE_GENERATOR_HPP
-
 // mapnik
-#include <mapnik/feature.hpp>
+#include <mapnik/util/feature_to_geojson.hpp>
 #include <mapnik/json/feature_generator_grammar.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik { namespace util {
 
-inline bool to_geojson(std::string & json, mapnik::feature_impl const& feature)
+bool to_geojson(std::string & json, mapnik::feature_impl const& feature)
 {
     using sink_type = std::back_insert_iterator<std::string>;
     static const mapnik::json::feature_generator_grammar<sink_type, mapnik::feature_impl> grammar;
@@ -41,5 +38,3 @@ inline bool to_geojson(std::string & json, mapnik::feature_impl const& feature)
 }
 
 }}
-
-#endif // MAPNIK_JSON_FEATURE_GENERATOR_HPP
