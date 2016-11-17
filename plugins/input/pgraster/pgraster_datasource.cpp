@@ -627,10 +627,10 @@ std::string pgraster_datasource::sql_bbox(box2d<double> const& env) const
         b << "ST_SetSRID(";
     }
 
-    b << "'BOX3D(";
+    b << "'BOX(";
     b << std::setprecision(16);
     b << env.minx() << " " << env.miny() << ",";
-    b << env.maxx() << " " << env.maxy() << ")'::box3d";
+    b << env.maxx() << " " << env.maxy() << ")'::box2d";
 
     if (srid_ > 0)
     {
