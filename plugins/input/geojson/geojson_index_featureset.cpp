@@ -108,23 +108,10 @@ mapnik::feature_ptr geojson_index_featureset::next()
         mapnik::json::geojson_value value;
         auto const grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys_))
             [ geojson_g ];
-        try
-        {
-            bool result = x3::phrase_parse(start, end, grammar, space_type(), value);
-            if (!result) return mapnik::feature_ptr();
-            mapnik::json::create_feature(*feature, value, keys_, tr);
-        }
-        catch (x3::expectation_failure<std::string::const_iterator> const& ex)
-        {
-            std::cerr << ex.what() << std::endl;
-            return mapnik::feature_ptr();
-        }
-        catch (std::runtime_error const& ex)
-        {
-            std::cerr << "Exception caught:" << ex.what() << std::endl;
-            return mapnik::feature_ptr();
-        }
 
+        bool result = x3::phrase_parse(start, end, grammar, space_type(), value);
+        if (!result) throw std::runtime_error("Failed to parse GeoJSON feature");
+        mapnik::json::create_feature(*feature, value, keys_, tr);
         // skip empty geometries
         if (mapnik::geometry::is_empty(feature->get_geometry()))
             continue;
