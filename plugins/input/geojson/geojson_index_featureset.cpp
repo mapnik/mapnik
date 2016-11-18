@@ -29,13 +29,99 @@
 #include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/positions_grammar_x3_def.hpp>
-#include <mapnik/json/geojson_grammar_x3_def.hpp>
+#include <mapnik/json/generic_json_grammar_x3_def.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
-#include <mapnik/json/create_feature.hpp>
+#include <mapnik/json/create_geometry.hpp>
 // stl
 #include <string>
 #include <vector>
 #include <fstream>
+
+
+namespace mapnik { namespace json { namespace {
+
+namespace x3 = boost::spirit::x3;
+using x3::lit;
+using x3::omit;
+using x3::char_;
+
+struct feature_tag;
+// generic json rule
+auto const& value = generic_json_grammar();
+// import unicode string rule
+auto const& geojson_string = unicode_string_grammar();
+// import positions rule
+auto const& positions_rule = positions_grammar();
+// geometry types symbols
+struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
+{
+    geometry_type_()
+    {
+        add
+            ("\"Point\"", mapnik::geometry::geometry_types::Point)
+            ("\"LineString\"", mapnik::geometry::geometry_types::LineString)
+            ("\"Polygon\"", mapnik::geometry::geometry_types::Polygon)
+            ("\"MultiPoint\"", mapnik::geometry::geometry_types::MultiPoint)
+            ("\"MultiLineString\"", mapnik::geometry::geometry_types::MultiLineString )
+            ("\"MultiPolygon\"",mapnik::geometry::geometry_types::MultiPolygon)
+            ("\"GeometryCollection\"",mapnik::geometry::geometry_types::GeometryCollection)
+            ;
+    }
+} geometry_type_symbols;
+
+auto const assign_geometry_type = [] (auto const& ctx)
+{
+    std::get<0>(_val(ctx)) = _attr(ctx);
+};
+
+auto const assign_geometry = [] (auto const& ctx)
+{
+    mapnik::feature_impl & feature = x3::get<feature_tag>(ctx);
+    mapnik::geometry::geometry<double> geom;
+    auto const type = std::get<0>(_attr(ctx));
+    auto const& coordinates = std::get<1>(_attr(ctx));
+    mapnik::json::create_geometry(geom, type, coordinates);
+    feature.set_geometry(std::move(geom));
+};
+
+auto const assign_positions = [] (auto const& ctx)
+{
+    std::get<1>(_val(ctx)) = std::move(_attr(ctx));
+};
+
+auto const feature_type = lit("\"type\"") > lit(':') > lit("\"Feature\"");
+auto const geometry_type = x3::rule<struct geometry_type_tag, mapnik::geometry::geometry_types> {} =
+    lit("\"type\"") > lit(':') > geometry_type_symbols;
+
+auto const coordinates = x3::rule<struct coordinates_tag, positions> {} =
+    lit("\"coordinates\"") > lit(':') > positions_rule
+    ;
+
+auto const geometry = x3::rule<struct geomerty_tag, std::tuple<mapnik::geometry::geometry_types, positions>> {} =
+    (geometry_type[assign_geometry_type]
+     |
+     coordinates[assign_positions]
+     |
+     (omit[geojson_string] > lit(':') > omit[value])) % lit(',')
+    ;
+
+
+auto const feature_part = x3::rule<struct feature_part_rule_tag> {} =
+    feature_type
+    |
+    (lit("\"geometry\"") > lit(':') > lit('{') > geometry[assign_geometry] > lit('}'))
+    |
+    (lit("\"properties\"") > lit(':') > omit[value])
+    |
+    omit[geojson_string] > lit(':') > omit[value]
+    ;
+
+auto const feature = x3::rule<struct feature_rule_tag> {} =
+    lit('{') > feature_part % lit(',') > lit('}')
+    ;
+
+}}}
+
 
 geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::filter_in_box const& filter)
     :
@@ -77,13 +163,6 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
 
 geojson_index_featureset::~geojson_index_featureset() {}
 
-namespace {
-using namespace boost::spirit;
-//static const mapnik::json::keys_map keys = mapnik::json::get_keys();
-static const mapnik::json::grammar::geojson_grammar_type geojson_g = mapnik::json::geojson_grammar();
-
-}
-
 mapnik::feature_ptr geojson_index_featureset::next()
 {
     while( itr_ != positions_.end())
@@ -105,13 +184,14 @@ mapnik::feature_ptr geojson_index_featureset::next()
         using namespace boost::spirit;
         using space_type = mapnik::json::grammar::space_type;
         using mapnik::json::grammar::iterator_type;
-        mapnik::json::geojson_value value;
-        auto const grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys_))
-            [ geojson_g ];
+        //mapnik::json::geojson_value value;
+        //auto const grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys_))
+        //    [ mapnik::json::geojson_grammar() ];
+        auto grammar = x3::with<mapnik::json::feature_tag>(std::ref(*feature))
+            [ mapnik::json::feature ];
+        bool result = x3::phrase_parse(start, end, grammar, space_type());
 
-        bool result = x3::phrase_parse(start, end, grammar, space_type(), value);
         if (!result) throw std::runtime_error("Failed to parse GeoJSON feature");
-        mapnik::json::create_feature(*feature, value, keys_, tr);
         // skip empty geometries
         if (mapnik::geometry::is_empty(feature->get_geometry()))
             continue;

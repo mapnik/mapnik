@@ -32,45 +32,12 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
-#include <boost/bimap.hpp>
-#include <boost/bimap/set_of.hpp>
-#include <boost/bimap/unordered_set_of.hpp>
-#include <boost/assign/list_of.hpp>
 #pragma GCC diagnostic pop
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 
 #include <deque>
 #include <cstdio>
-
-namespace {
-
-using keys_map = boost::bimap<boost::bimaps::unordered_set_of<std::string>,
-                              boost::bimaps::set_of<int>>;
-
-enum well_known_names
-{
-    id = 1,
-    type,
-    features,
-    geometry,
-    coordinates,
-    properties
-};
-
-inline keys_map get_keys()
-{
-    keys_map keys = boost::assign::list_of<keys_map::relation>
-        ("type", well_known_names::type)
-        ("features", well_known_names::features)
-        ("geometry", well_known_names::geometry)
-        ("coordinates", well_known_names::coordinates)
-        ("properties", well_known_names::properties)
-        ("id", well_known_names::id)
-        ;
-    return keys;
-}
-}
 
 class geojson_index_featureset : public mapnik::Featureset
 {
@@ -92,7 +59,6 @@ private:
     mapnik::context_ptr ctx_;
     std::vector<value_type> positions_;
     std::vector<value_type>::iterator itr_;
-    keys_map keys_ = get_keys();
 };
 
 #endif // GEOJSON_INDEX_FEATURESE_HPP
