@@ -36,6 +36,9 @@ namespace mapnik { namespace json {
 
 struct stringifier
 {
+    stringifier(keys_map const& keys)
+        : keys_(keys) {}
+
     std::string operator()(std::string const& val) const
     {
         return "\"" + val + "\"";
@@ -79,14 +82,14 @@ struct stringifier
         return str;
     }
 
-    std::string operator()(mapnik::json::geojson_object const& object, keys_map const& keys) const
+    std::string operator()(mapnik::json::geojson_object const& object) const
     {
         std::string str = "{";
         bool first = true;
         for (auto const& kv : object)
         {
-            auto itr = keys.right.find(std::get<0>(kv));
-            if (itr != keys.right.end())
+            auto itr = keys_.right.find(std::get<0>(kv));
+            if (itr != keys_.right.end())
             {
                 if (first) first = false;
                 else str += ",";
@@ -103,6 +106,8 @@ struct stringifier
     {
         return "";
     }
+
+    keys_map const& keys_;
 };
 
 struct attribute_value_visitor
@@ -119,13 +124,13 @@ public:
 
     mapnik::value operator()(mapnik::json::geojson_array const& array) const
     {
-        std::string str = stringifier()(array);
+        std::string str = stringifier(keys_)(array);
         return mapnik::value(tr_.transcode(str.c_str()));
     }
 
     mapnik::value operator()(mapnik::json::geojson_object const& object) const
     {
-        std::string str = stringifier()(object, keys_);
+        std::string str = stringifier(keys_)(object);
         return mapnik::value(tr_.transcode(str.c_str()));
     }
 
