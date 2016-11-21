@@ -94,7 +94,7 @@ mapnik::feature_ptr geojson_index_featureset::next()
         static const mapnik::transcoder tr("utf8");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
         using mapnik::json::grammar::iterator_type;
-        mapnik::json::parse_feature(start, end, *feature, tr); // throw in failure
+        mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure
         // skip empty geometries
         if (mapnik::geometry::is_empty(feature->get_geometry()))
             continue;

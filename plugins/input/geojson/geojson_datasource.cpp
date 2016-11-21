@@ -55,6 +55,7 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>
+#include <mapnik/json/parse_feature.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
@@ -233,11 +234,12 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
         auto const* start = record.data();
         auto const*  end = start + record.size();
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1));
-        using namespace boost::spirit;
-        standard::space_type space;
-        if (!boost::spirit::qi::phrase_parse(start, end,
-                                             (geojson_datasource_static_feature_grammar)(boost::phoenix::ref(*feature)), space)
-            || start != end)
+
+        try
+        {
+            mapnik::json::parse_feature(start, end, *feature, geojson_datasource_static_tr);
+        }
+        catch (...)
         {
             throw std::runtime_error("Failed to parse geojson feature");
         }
