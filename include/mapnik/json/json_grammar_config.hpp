@@ -80,7 +80,7 @@ namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 using space_type = x3::standard::space_type;
-using iterator_type = std::string::const_iterator;
+using iterator_type = char const*;
 using context_type = x3::with_context<keys_tag,
                                       std::reference_wrapper<keys_map> const,
                                       x3::phrase_parse_context<space_type>::type>::type;
