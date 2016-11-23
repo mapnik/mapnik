@@ -23,6 +23,8 @@
 #ifndef MAPNIK_JSON_GRAMMAR_CONFIG_HPP
 #define MAPNIK_JSON_GRAMMAR_CONFIG_HPP
 
+#include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -59,6 +61,8 @@ constexpr char const* wkn_to_string(well_known_names val)
 }
 
 struct keys_tag;
+struct transcoder_tag;
+struct feature_tag;
 
 using keys_map = boost::bimap<boost::bimaps::unordered_set_of<std::string>,
                               boost::bimaps::set_of<int>>;
@@ -84,6 +88,15 @@ using iterator_type = char const*;
 using context_type = x3::with_context<keys_tag,
                                       std::reference_wrapper<keys_map> const,
                                       x3::phrase_parse_context<space_type>::type>::type;
+
+using geometry_context_type = x3::with_context<feature_tag,
+                                               std::reference_wrapper<mapnik::feature_impl> const,
+                                               context_type>::type;
+
+using feature_context_type = x3::with_context<transcoder_tag,
+                                              std::reference_wrapper<mapnik::transcoder> const,
+                                              geometry_context_type>::type;
+
 }}}
 
 #endif // MAPNIK_JSON_GRAMMAR_CONFIG_HPP

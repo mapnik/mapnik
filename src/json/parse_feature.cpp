@@ -21,10 +21,10 @@
  *****************************************************************************/
 
 #include <mapnik/json/parse_feature.hpp>
+#include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/generic_json_grammar_x3_def.hpp>
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/positions_grammar_x3_def.hpp>
-#include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/create_geometry.hpp>
 #include <mapnik/util/conversions.hpp>
 
@@ -133,9 +133,6 @@ using x3::lit;
 using x3::omit;
 using x3::char_;
 
-struct transcoder_tag;
-struct feature_tag;
-//
 auto const& value = mapnik::json::generic_json_grammar();
 // import unicode string rule
 auto const& geojson_string = unicode_string_grammar();
@@ -230,7 +227,7 @@ auto const feature_part = x3::rule<struct feature_part_rule_tag> {} =
     omit[geojson_string] > lit(':') > omit[value]
     ;
 
-auto const feature = x3::rule<struct feature_rule_tag> {} =
+auto const feature_rule = x3::rule<struct feature_rule_tag> {} =
     lit('{') > feature_part % lit(',') > lit('}')
     ;
 
@@ -244,7 +241,7 @@ void parse_feature(Iterator start, Iterator end, feature_impl& feature, mapnik::
     using space_type = mapnik::json::grammar::space_type;
     auto grammar = x3::with<mapnik::json::transcoder_tag>(std::ref(tr))
         [x3::with<mapnik::json::feature_tag>(std::ref(feature))
-         [ mapnik::json::feature ]];
+         [ mapnik::json::feature_rule ]];
     if (!x3::phrase_parse(start, end, grammar, space_type()))
     {
         throw std::runtime_error("Can't parser GeoJSON Feature");

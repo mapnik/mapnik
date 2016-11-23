@@ -19,10 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
+#if 0
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
 BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, iterator_type, context_type);
 }}}
+
+#endif

@@ -20,11 +20,16 @@
  *
  *****************************************************************************/
 
-#if 0
-#include <mapnik/json/positions_grammar_x3_def.hpp>
-#include <mapnik/json/json_grammar_config.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
-BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, context_type);
-}}}
-#endif
+#ifndef MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_X3_HPP
+#define MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_X3_HPP
+
+namespace mapnik { namespace json {
+
+template <typename Iterator, typename Boxes>
+void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes);
+
+}}
+
+
+#endif // MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_X3_HPP

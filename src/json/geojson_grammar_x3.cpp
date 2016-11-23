@@ -20,10 +20,12 @@
  *
  *****************************************************************************/
 
+#if 0
 #include <mapnik/json/geojson_grammar_x3_def.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
+
 namespace mapnik { namespace json { namespace grammar {
-
 BOOST_SPIRIT_INSTANTIATE(geojson_grammar_type, iterator_type, context_type);
-
 }}}
+
+#endif
