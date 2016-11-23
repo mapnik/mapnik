@@ -38,7 +38,6 @@
 #include <mapnik/json/geojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
-
 #include <mapnik/json/extract_bounding_boxes_x3.hpp>
 
 namespace {
@@ -213,7 +212,7 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
     return true;
 };
 
-using box_type = mapnik::box2d<double>;
+using box_type = mapnik::box2d<float>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using base_iterator_type = char const*;
 
@@ -276,21 +275,20 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     }
 
     using namespace boost::spirit;
-    using space_type = mapnik::json::grammar::space_type;
 
-    auto keys = mapnik::json::get_keys();
-    auto feature_grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys))
-        [ geojson_value ];
+    //using space_type = mapnik::json::grammar::space_type;
+    //auto keys = mapnik::json::get_keys();
+    //auto feature_grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys))
+    //    [ geojson_value ];
     for (auto const& item : boxes)
     {
         if (item.first.valid())
         {
             if (!extent.valid()) extent = item.first;
             else extent.expand_to_include(item.first);
-
+#if 0
             if (validate_features)
             {
-#if 0
                 base_iterator_type feat_itr = start + item.second.first;
                 base_iterator_type feat_end = feat_itr + item.second.second;
                 mapnik::json::geojson_value feature_value;
@@ -316,8 +314,8 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
                 {
                     return std::make_pair(false, extent);
                 }
-#endif
             }
+#endif
         }
     }
     return std::make_pair(true, extent);

@@ -91,9 +91,11 @@ auto on_feature_callback = [] (auto const& ctx)
     x3::get<feature_callback_tag>(ctx)(_attr(ctx));
 };
 
-namespace {
-auto const& geojson_value = geojson_grammar();
-}
+namespace { auto const& geojson_value = geojson_grammar();}
+// import unicode string rule
+//namespace { auto const& geojson_string = unicode_string_grammar(); }
+// import positions rule
+//namespace { auto const& positions_rule = positions_grammar(); }
 
 // extract bounding box from GeoJSON Feature
 
@@ -126,16 +128,16 @@ auto assign_bbox = [](auto const& ctx)
 
 auto extract_bounding_box = [](auto const& ctx)
 {
-    mapnik::box2d<double> bbox;
-    calculate_bounding_box<mapnik::box2d<double>> visitor(bbox);
+    mapnik::box2d<float> bbox;
+    calculate_bounding_box<mapnik::box2d<float>> visitor(bbox);
     mapnik::util::apply_visitor(visitor, _attr(ctx));
     _val(ctx) = std::move(bbox);
 };
 
-auto const coordinates_rule = x3::rule<struct coordinates_rule_tag, mapnik::box2d<double> > {}
+auto const coordinates_rule = x3::rule<struct coordinates_rule_tag, mapnik::box2d<float> > {}
     = lit("\"coordinates\"") >> lit(':') >> positions_rule[extract_bounding_box];
 
-auto const bounding_box = x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>,mapnik::box2d<double>>> {}
+auto const bounding_box = x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>,mapnik::box2d<float>>> {}
     = raw[lit('{')[open_bracket] >> *(eps[check_brackets] >>
                                   (lit("\"FeatureCollection\"") > eps(false)
                                    |
@@ -188,7 +190,7 @@ struct extract_positions
     void operator() (T const& val) const
     {
         auto const& r = std::get<0>(val);
-        mapnik::box2d<double> const& bbox = std::get<1>(val);
+        mapnik::box2d<float> const& bbox = std::get<1>(val);
         auto offset = std::distance(start_, r.begin());
         auto size = std::distance(r.begin(), r.end());
         boxes_.emplace_back(std::make_pair(bbox,std::make_pair(offset, size)));
@@ -224,7 +226,7 @@ void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
 
 }
 
-using box_type = mapnik::box2d<double>;
+using box_type = mapnik::box2d<float>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using base_iterator_type = char const*;
 template void extract_bounding_boxes<base_iterator_type, boxes_type>(base_iterator_type, base_iterator_type, boxes_type&);

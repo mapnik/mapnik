@@ -91,7 +91,7 @@ using context_type = x3::with_context<keys_tag,
 
 using geometry_context_type = x3::with_context<feature_tag,
                                                std::reference_wrapper<mapnik::feature_impl> const,
-                                               context_type>::type;
+                                               x3::phrase_parse_context<space_type>::type>::type;
 
 using feature_context_type = x3::with_context<transcoder_tag,
                                               std::reference_wrapper<mapnik::transcoder> const,

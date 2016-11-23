@@ -24,7 +24,7 @@
 #define MAPNIK_UTILS_PROCESS_GEOJSON_FILE_X3_HPP
 
 #include <utility>
-#include <mapnik/box2d.hpp>
+#include <string>
 
 namespace mapnik { namespace detail {
 

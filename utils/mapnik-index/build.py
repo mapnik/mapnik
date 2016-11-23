@@ -34,6 +34,7 @@ source = Split(
     process_csv_file.cpp
     process_geojson_file.cpp
     process_geojson_file_x3.cpp
+    extract_bounding_boxes_x3.cpp
     ../../plugins/input/csv/csv_utils.os
     """
     )
