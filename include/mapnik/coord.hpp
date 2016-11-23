@@ -181,6 +181,7 @@ private:
 };
 
 using coord2d = coord<double,2>;
+using coord2f = coord<float,2>;
 using coord2i = coord<int,2>;
 
 }
