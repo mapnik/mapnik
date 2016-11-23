@@ -44,6 +44,7 @@ else:
       %(PLUGIN_NAME)s_featureset.cpp
       %(PLUGIN_NAME)s_index_featureset.cpp
       %(PLUGIN_NAME)s_memory_index_featureset.cpp
+      ../../../utils/mapnik-index/extract_bounding_boxes_x3.cpp
 
       """ % locals()
     )
