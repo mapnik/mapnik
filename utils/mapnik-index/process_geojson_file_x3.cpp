@@ -276,17 +276,16 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
 
     using namespace boost::spirit;
 
-    //using space_type = mapnik::json::grammar::space_type;
-    //auto keys = mapnik::json::get_keys();
-    //auto feature_grammar = x3::with<mapnik::json::keys_tag>(std::ref(keys))
-    //    [ geojson_value ];
+    using space_type = mapnik::json::grammar::space_type;
+    auto keys = mapnik::json::get_keys();
+    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
+        [ geojson_value ];
     for (auto const& item : boxes)
     {
         if (item.first.valid())
         {
             if (!extent.valid()) extent = item.first;
             else extent.expand_to_include(item.first);
-#if 0
             if (validate_features)
             {
                 base_iterator_type feat_itr = start + item.second.first;
@@ -315,7 +314,6 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
                     return std::make_pair(false, extent);
                 }
             }
-#endif
         }
     }
     return std::make_pair(true, extent);
