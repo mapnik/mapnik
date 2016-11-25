@@ -186,7 +186,7 @@ void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
     std::size_t bracket_counter = 0;
     auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
         [x3::with<mapnik::json::grammar::feature_callback_tag>(std::ref(callback))
-         [x3::with<mapnik::json::keys_tag>(std::ref(keys))
+         [x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
           [mapnik::json::grammar::feature_collection]
              ]];
 
