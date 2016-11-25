@@ -60,9 +60,6 @@ constexpr char const* wkn_to_string(well_known_names val)
     }
 }
 
-struct keys_tag;
-struct transcoder_tag;
-struct feature_tag;
 
 using keys_map = boost::bimap<boost::bimaps::unordered_set_of<std::string>,
                               boost::bimaps::set_of<int>>;
@@ -82,20 +79,41 @@ inline keys_map get_keys()
 
 namespace grammar {
 
+struct keys_tag;
+struct transcoder_tag;
+struct feature_tag;
+
 namespace x3 = boost::spirit::x3;
 using space_type = x3::standard::space_type;
 using iterator_type = char const*;
+
+using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 using context_type = x3::with_context<keys_tag,
                                       std::reference_wrapper<keys_map> const,
-                                      x3::phrase_parse_context<space_type>::type>::type;
+                                      phrase_parse_context_type>::type;
 
 using geometry_context_type = x3::with_context<feature_tag,
                                                std::reference_wrapper<mapnik::feature_impl> const,
-                                               x3::phrase_parse_context<space_type>::type>::type;
+                                               phrase_parse_context_type>::type;
 
 using feature_context_type = x3::with_context<transcoder_tag,
                                               std::reference_wrapper<mapnik::transcoder> const,
                                               geometry_context_type>::type;
+
+// our spirit x3 grammars needs this one with changed order of feature_impl and transcoder (??)
+using feature_context_const_type = x3::with_context<feature_tag,
+                                                    std::reference_wrapper<mapnik::feature_impl> const,
+                                                    x3::with_context<transcoder_tag,
+                                                                     std::reference_wrapper<mapnik::transcoder const> const,
+                                                                     phrase_parse_context_type>::type>::type;
+
+// helper macro
+#define BOOST_SPIRIT_INSTANTIATE_UNUSED(rule_type, Iterator, Context)   \
+    template bool parse_rule<Iterator, Context, boost::spirit::x3::unused_type const>( \
+        rule_type rule_                                                 \
+        , Iterator& first, Iterator const& last                         \
+        , Context const& context, boost::spirit::x3::unused_type const& ); \
+    /***/
 
 }}}
 
