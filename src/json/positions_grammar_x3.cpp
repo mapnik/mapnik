@@ -24,7 +24,11 @@
 #include <mapnik/json/positions_grammar_x3_def.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
+
+BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, phrase_parse_context_type);
 BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, context_type);
-//BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, geometry_context_type);
-//BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, feature_context_type);
+BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, geometry_context_type);
+BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, feature_context_type);
+BOOST_SPIRIT_INSTANTIATE(positions_grammar_type, iterator_type, feature_context_const_type);
+
 }}}

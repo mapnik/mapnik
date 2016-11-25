@@ -25,6 +25,5 @@
 
 namespace mapnik { namespace json { namespace grammar {
 BOOST_SPIRIT_INSTANTIATE(geojson_grammar_type, iterator_type, context_type);
-//BOOST_SPIRIT_INSTANTIATE(geojson_grammar_type, iterator_type, geometry_context_type);
-//BOOST_SPIRIT_INSTANTIATE(geojson_grammar_type, iterator_type, feature_context_type);
+BOOST_SPIRIT_INSTANTIATE(key_value_type, iterator_type, context_type);
 }}}
