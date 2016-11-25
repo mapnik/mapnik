@@ -23,6 +23,7 @@
 #ifndef MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP
 
+
 #include <mapnik/json/geojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
@@ -91,14 +92,14 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 geojson_grammar_type const value("JSON Value");
 key_value_type const key_value("JSON key/value");
 // rules
-x3::rule<class json_object_tag, geojson_object> object("JSON Object");
-x3::rule<class json_array_tag, geojson_array> array("JSON Array");
-x3::rule<class json_number_tag, geojson_value> number("JSON Number");
+x3::rule<class json_object_tag, geojson_object> const object("JSON Object");
+x3::rule<class json_array_tag, geojson_array> const array("JSON Array");
+x3::rule<class json_number_tag, geojson_value> const number("JSON Number");
 //x3::rule<class key_value_tag, geojson_object_element> key_value("JSON key/value");
 // GeoJSON
-x3::rule<class geojson_coordinates_tag, geojson_object_element> coordinates("GeoJSON Coordinates");
-x3::rule<class geojson_geometry_type_tag, geojson_object_element> geometry_type("GeoJSON Geometry Type");
-x3::rule<class geojson_key_value_type_tag, geojson_object_element> geojson_key_value("GeoJSON Key/Value Type");
+x3::rule<class geojson_coordinates_tag, geojson_object_element> const coordinates("GeoJSON Coordinates");
+x3::rule<class geojson_geometry_type_tag, geojson_object_element> const geometry_type("GeoJSON Geometry Type");
+x3::rule<class geojson_key_value_type_tag, geojson_object_element> const geojson_key_value("GeoJSON Key/Value Type");
 auto const geojson_double = x3::real_parser<value_double, x3::strict_real_policies<value_double>>();
 auto const geojson_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
