@@ -83,8 +83,8 @@ using x3::hex;
 using x3::eol;
 using x3::no_skip;
 
-x3::uint_parser<uchar, 16, 4, 4> const hex4;
-x3::uint_parser<uchar, 16, 8, 8> const hex8;
+x3::uint_parser<uchar, 16, 4, 4> const hex4 {};
+x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
 // start rule
 unicode_string_grammar_type const unicode_string("Unicode String");
