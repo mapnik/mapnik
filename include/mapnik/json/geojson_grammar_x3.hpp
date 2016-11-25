@@ -72,8 +72,7 @@ namespace grammar {
 
 using geojson_grammar_type = x3::rule<class geojson_tag, geojson_value>;
 using key_value_type = x3::rule<class key_value_tag, geojson_object_element>;
-BOOST_SPIRIT_DECLARE(geojson_grammar_type);
-BOOST_SPIRIT_DECLARE(key_value_type);
+BOOST_SPIRIT_DECLARE(geojson_grammar_type, key_value_type);
 }
 
 grammar::geojson_grammar_type const& geojson_grammar();
