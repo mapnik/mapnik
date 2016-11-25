@@ -23,9 +23,10 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/json/extract_bounding_boxes_x3.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
-#include <mapnik/json/geojson_grammar_x3_def.hpp>
-#include <mapnik/json/unicode_string_grammar_x3_def.hpp>
-#include <mapnik/json/positions_grammar_x3_def.hpp>
+#include <mapnik/json/extract_bounding_boxes_x3_config.hpp>
+#include <mapnik/json/geojson_grammar_x3.hpp>
+#include <mapnik/json/unicode_string_grammar_x3.hpp>
+#include <mapnik/json/positions_grammar_x3.hpp>
 
 namespace mapnik { namespace json {
 
@@ -93,9 +94,9 @@ auto on_feature_callback = [] (auto const& ctx)
 
 namespace { auto const& geojson_value = geojson_grammar();}
 // import unicode string rule
-//namespace { auto const& geojson_string = unicode_string_grammar(); }
+namespace { auto const& geojson_string = unicode_string_grammar(); }
 // import positions rule
-//namespace { auto const& positions_rule = positions_grammar(); }
+namespace { auto const& positions_rule = positions_grammar(); }
 
 // extract bounding box from GeoJSON Feature
 
@@ -134,11 +135,13 @@ auto extract_bounding_box = [](auto const& ctx)
     _val(ctx) = std::move(bbox);
 };
 
-auto const coordinates_rule = x3::rule<struct coordinates_rule_tag, mapnik::box2d<float> > {}
-    = lit("\"coordinates\"") >> lit(':') >> positions_rule[extract_bounding_box];
+x3::rule<struct coordinates_rule_tag, mapnik::box2d<float> > const coordinates_rule = "Coordinates";
+x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>,mapnik::box2d<float>>> const bounding_box = "Bounding Box";
+x3::rule<struct feature_collection_tag> const feature_collection = "Feature Collection";
 
-auto const bounding_box = x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>,mapnik::box2d<float>>> {}
-    = raw[lit('{')[open_bracket] >> *(eps[check_brackets] >>
+auto const coordinates_rule_def = lit("\"coordinates\"") >> lit(':') >> positions_rule[extract_bounding_box];
+
+auto const bounding_box_def = raw[lit('{')[open_bracket] >> *(eps[check_brackets] >>
                                   (lit("\"FeatureCollection\"") > eps(false)
                                    |
                                    lit('{')[open_bracket]
@@ -161,45 +164,13 @@ auto const features = lit("\"features\"")
 
 auto const type = lit("\"type\"") > lit(':') > lit("\"FeatureCollection\"");
 
-auto const feature_collection = x3::rule<struct feature_collection_tag> {}
-    = lit('{') > (( type | features | key_value_) % lit(',')) > lit('}');
+auto const feature_collection_def = lit('{') > (( type | features | key_value_) % lit(',')) > lit('}');
 
-
-}
-
-namespace {
-struct collect_features
-{
-    collect_features(std::vector<mapnik::json::geojson_value> & values)
-        : values_(values) {}
-    void operator() (mapnik::json::geojson_value && val) const
-    {
-        values_.push_back(std::move(val));
-    }
-    std::vector<mapnik::json::geojson_value> & values_;
-};
-
-template <typename Iterator, typename Boxes>
-struct extract_positions
-{
-    extract_positions(Iterator start, Boxes & boxes)
-        : start_(start),
-          boxes_(boxes) {}
-
-    template <typename T>
-    void operator() (T const& val) const
-    {
-        auto const& r = std::get<0>(val);
-        mapnik::box2d<float> const& bbox = std::get<1>(val);
-        auto offset = std::distance(start_, r.begin());
-        auto size = std::distance(r.begin(), r.end());
-        boxes_.emplace_back(std::make_pair(bbox,std::make_pair(offset, size)));
-        //boxes_.emplace_back(std::make_tuple(bbox,offset, size));
-    }
-    Iterator start_;
-    Boxes & boxes_;
-};
-
+BOOST_SPIRIT_DEFINE (
+    coordinates_rule,
+    bounding_box,
+    feature_collection
+    );
 }
 
 template <typename Iterator, typename Boxes>
@@ -214,8 +185,8 @@ void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
     auto keys = mapnik::json::get_keys();
     std::size_t bracket_counter = 0;
     auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
-        [x3::with<mapnik::json::keys_tag>(std::ref(keys))
-         [x3::with<mapnik::json::grammar::feature_callback_tag>(std::ref(callback))
+        [x3::with<mapnik::json::grammar::feature_callback_tag>(std::ref(callback))
+         [x3::with<mapnik::json::keys_tag>(std::ref(keys))
           [mapnik::json::grammar::feature_collection]
              ]];
 
@@ -225,9 +196,7 @@ void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
     }
 
 }
-
-using box_type = mapnik::box2d<float>;
-using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using base_iterator_type = char const*;
 template void extract_bounding_boxes<base_iterator_type, boxes_type>(base_iterator_type, base_iterator_type, boxes_type&);
+
 }}
