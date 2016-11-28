@@ -27,7 +27,7 @@
 namespace mapnik { namespace json {
 
 template <typename Iterator, typename Boxes>
-void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes);
+void extract_bounding_boxes(Iterator & start, Iterator const& end, Boxes & boxes);
 
 }}
 

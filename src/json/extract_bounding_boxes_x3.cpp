@@ -175,7 +175,7 @@ BOOST_SPIRIT_DEFINE (
 }
 
 template <typename Iterator, typename Boxes>
-void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
+void extract_bounding_boxes(Iterator& start, Iterator const& end, Boxes & boxes)
 {
     using namespace boost::spirit;
     using space_type = mapnik::json::grammar::space_type;
@@ -198,6 +198,6 @@ void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
 
 }
 using base_iterator_type = char const*;
-template void extract_bounding_boxes<base_iterator_type, boxes_type>(base_iterator_type, base_iterator_type, boxes_type&);
-template void extract_bounding_boxes<base_iterator_type, boxes_type_f>(base_iterator_type, base_iterator_type, boxes_type_f&);
+template void extract_bounding_boxes<base_iterator_type, boxes_type>(base_iterator_type&, base_iterator_type const&, boxes_type&);
+template void extract_bounding_boxes<base_iterator_type, boxes_type_f>(base_iterator_type&, base_iterator_type const& , boxes_type_f&);
 }}
