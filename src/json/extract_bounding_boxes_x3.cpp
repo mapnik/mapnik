@@ -129,14 +129,15 @@ auto assign_bbox = [](auto const& ctx)
 
 auto extract_bounding_box = [](auto const& ctx)
 {
-    mapnik::box2d<float> bbox;
-    calculate_bounding_box<mapnik::box2d<float>> visitor(bbox);
+    using box_type = typename std::decay<decltype(_val(ctx))>::type;
+    box_type bbox;
+    calculate_bounding_box<box_type> visitor(bbox);
     mapnik::util::apply_visitor(visitor, _attr(ctx));
     _val(ctx) = std::move(bbox);
 };
 
-x3::rule<struct coordinates_rule_tag, mapnik::box2d<float> > const coordinates_rule = "Coordinates";
-x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>,mapnik::box2d<float>>> const bounding_box = "Bounding Box";
+x3::rule<struct coordinates_rule_tag, mapnik::box2d<double> > const coordinates_rule = "Coordinates";
+x3::rule<struct bounding_box_rule_tag, std::tuple<boost::iterator_range<base_iterator_type>, mapnik::box2d<double>>> const bounding_box = "Bounding Box";
 x3::rule<struct feature_collection_tag> const feature_collection = "Feature Collection";
 
 auto const coordinates_rule_def = lit("\"coordinates\"") >> lit(':') >> positions_rule[extract_bounding_box];
@@ -198,5 +199,5 @@ void extract_bounding_boxes(Iterator start, Iterator end, Boxes & boxes)
 }
 using base_iterator_type = char const*;
 template void extract_bounding_boxes<base_iterator_type, boxes_type>(base_iterator_type, base_iterator_type, boxes_type&);
-
+template void extract_bounding_boxes<base_iterator_type, boxes_type_f>(base_iterator_type, base_iterator_type, boxes_type_f&);
 }}

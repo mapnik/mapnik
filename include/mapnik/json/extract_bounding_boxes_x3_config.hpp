@@ -42,6 +42,9 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename Boxes>
 struct extract_positions
 {
+    using boxes_type = Boxes;
+    using box_type = typename boxes_type::value_type::first_type;
+
     extract_positions(Iterator start, Boxes & boxes)
         : start_(start),
           boxes_(boxes) {}
@@ -50,19 +53,24 @@ struct extract_positions
     void operator() (T const& val) const
     {
         auto const& r = std::get<0>(val);
-        mapnik::box2d<float> const& bbox = std::get<1>(val);
+        auto const& b = std::get<1>(val);
         auto offset = std::distance(start_, r.begin());
         auto size = std::distance(r.begin(), r.end());
-        boxes_.emplace_back(std::make_pair(bbox,std::make_pair(offset, size)));
+        boxes_.emplace_back(std::make_pair(box_type(b.minx(), b.miny(), b.maxx(), b.maxy()), std::make_pair(offset, size)));
         //boxes_.emplace_back(std::make_tuple(bbox,offset, size));
     }
     Iterator start_;
     Boxes & boxes_;
 };
 
-using box_type = mapnik::box2d<float>;
+using box_type = mapnik::box2d<double>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
 using callback_type = extract_positions<grammar::iterator_type, boxes_type>;
+
+using box_type_f = mapnik::box2d<float>;
+using boxes_type_f = std::vector<std::pair<box_type_f, std::pair<std::size_t, std::size_t>>>;
+using callback_type_f = extract_positions<grammar::iterator_type, boxes_type_f>;
+
 
 namespace grammar {
 
@@ -89,6 +97,17 @@ using extract_bounding_boxes_reverse_context_type =
                                       x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
                                                        phrase_parse_context_type>::type>::type>::type;
 
+
+using extract_bounding_boxes_context_type_f =
+    x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
+                     x3::with_context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
+                                      context_type>::type>::type;
+
+using extract_bounding_boxes_reverse_context_type_f =
+    x3::with_context<keys_tag, std::reference_wrapper<keys_map> const,
+                     x3::with_context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
+                                      x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
+                                                       phrase_parse_context_type>::type>::type>::type;
 
 }}}
 
