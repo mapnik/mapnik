@@ -270,7 +270,7 @@ auto const feature_part_def = feature_type
     |
     (lit("\"geometry\"") > lit(':') > lit('{') > geometry_tuple[assign_geometry] > lit('}'))
     |
-    (lit("\"properties\"") > lit(':') > lit('{') > properties > lit('}'))
+    (lit("\"properties\"") > lit(':') > lit('{') > -properties > lit('}'))
     |
     omit[geojson_string] > lit(':') > omit[value]
     ;
