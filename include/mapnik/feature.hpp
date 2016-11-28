@@ -208,6 +208,11 @@ public:
         return geom_;
     }
 
+    inline geometry::geometry<double> & get_geometry()
+    {
+        return geom_;
+    }
+
     inline box2d<double> envelope() const
     {
         return mapnik::geometry::envelope(geom_);
