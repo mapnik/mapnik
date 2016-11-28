@@ -177,14 +177,40 @@ auto const assign_geometry_type = [] (auto const& ctx)
     std::get<0>(_val(ctx)) = _attr(ctx);
 };
 
+auto const create_collection = [] (auto const& ctx)
+{
+    mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
+    feature.set_geometry(mapnik::geometry::geometry_collection<double>());
+};
+
 auto const assign_geometry = [] (auto const& ctx)
 {
     mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
+    // first check if we're not dealing with GeometryCollection
+    if (feature.get_geometry().is<mapnik::geometry::geometry_empty>())
+    {
+        mapnik::geometry::geometry<double> geom;
+        auto const type = std::get<0>(_attr(ctx));
+        auto const& coordinates = std::get<1>(_attr(ctx));
+        mapnik::json::create_geometry(geom, type, coordinates);
+        feature.set_geometry(std::move(geom));
+    }
+};
+
+auto const push_geometry = [] (auto const& ctx)
+{
     mapnik::geometry::geometry<double> geom;
     auto const type = std::get<0>(_attr(ctx));
     auto const& coordinates = std::get<1>(_attr(ctx));
     mapnik::json::create_geometry(geom, type, coordinates);
-    feature.set_geometry(std::move(geom));
+    mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
+    geometry::geometry<double> & collection = feature.get_geometry();
+
+    if (collection.is<mapnik::geometry::geometry_collection<double>>())
+    {
+        auto & col = collection.get<mapnik::geometry::geometry_collection<double>>();
+        col.push_back(std::move(geom));
+    }
 };
 
 auto const assign_positions = [] (auto const& ctx)
@@ -213,7 +239,7 @@ x3::rule<struct geometry_tag, std::tuple<mapnik::geometry::geometry_types, mapni
 x3::rule<struct property_tag, std::tuple<std::string, json_value>> const property = "Property";
 x3::rule<struct properties_tag> const properties = "Properties";
 x3::rule<struct feature_part_rule_tag> const feature_part = "Feature part";
-
+x3::rule<struct geometry_collection> const geometry_collection = "GeometryCollection";
 
 auto const feature_type_def = lit("\"type\"") > lit(':') > lit("\"Feature\"");
 
@@ -221,9 +247,17 @@ auto const geometry_type_def = lit("\"type\"") > lit(':') > geometry_type_symbol
 
 auto const coordinates_def = lit("\"coordinates\"") > lit(':') > positions_rule;
 
+auto const geometry_collection_def = lit("\"geometries\"")[create_collection] > lit(':')
+    > lit('[')
+    > ((lit('{') > geometry_tuple[push_geometry] > lit('}')) % lit(','))
+    > lit(']');
+
+
 auto const geometry_tuple_def = (geometry_type[assign_geometry_type]
                                  |
                                  coordinates[assign_positions]
+                                 |
+                                 geometry_collection
                                  |
                                  (omit[geojson_string] > lit(':') > omit[value])) % lit(',');
 
@@ -258,7 +292,8 @@ BOOST_SPIRIT_DEFINE(
     properties,
     feature_part,
     feature_rule,
-    geometry_rule
+    geometry_rule,
+    geometry_collection
     );
 #pragma GCC diagnostic pop
 
