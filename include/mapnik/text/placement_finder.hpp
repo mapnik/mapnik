@@ -67,8 +67,6 @@ private:
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
     // Moves dx pixels but makes sure not to fall of the end.
     void path_move_dx(vertex_cache & pp, double dx);
-    // Normalize angle in range [-pi, +pi].
-    static double normalize_angle(double angle);
     // Adjusts user defined spacing to place an integer number of labels.
     double get_spacing(double path_length, double layout_width) const;
     // Checks for collision.
