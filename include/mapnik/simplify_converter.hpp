@@ -120,11 +120,11 @@ public:
         return algorithm_;
     }
 
-    void set_simplify_algorithm(simplify_algorithm_e value)
+    void set_simplify_algorithm(simplify_algorithm_e val)
     {
-        if (algorithm_ != value)
+        if (algorithm_ != val)
         {
-            algorithm_ = value;
+            algorithm_ = val;
             reset();
         }
     }
@@ -134,11 +134,11 @@ public:
         return tolerance_;
     }
 
-    void set_simplify_tolerance(double value)
+    void set_simplify_tolerance(double val)
     {
-        if (tolerance_ != value)
+        if (tolerance_ != val)
         {
-            tolerance_ = value;
+            tolerance_ = val;
             reset();
         }
     }
