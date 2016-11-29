@@ -268,7 +268,7 @@ auto const properties_def = property[assign_property] % lit(',');
 
 auto const feature_part_def = feature_type
     |
-    (lit("\"geometry\"") > lit(':') > lit('{') > geometry_tuple[assign_geometry] > lit('}'))
+    (lit("\"geometry\"") > lit(':') > (lit('{') > geometry_tuple[assign_geometry] > lit('}')) | lit("null"))
     |
     (lit("\"properties\"") > lit(':') > lit('{') > -properties > lit('}'))
     |
@@ -278,7 +278,7 @@ auto const feature_part_def = feature_type
 
 auto const feature_rule_def = lit('{') > feature_part % lit(',') > lit('}');
 
-auto const geometry_rule_def =  lit('{') > geometry_tuple[assign_geometry] > lit('}');
+auto const geometry_rule_def =  (lit('{') > geometry_tuple[assign_geometry] > lit('}')) | lit("null");
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
