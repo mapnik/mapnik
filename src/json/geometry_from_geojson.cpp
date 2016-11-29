@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,18 +20,30 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_JSON_FEATURE_PARSER_HPP
-#define MAPNIK_JSON_FEATURE_PARSER_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
-// stl
-#include <string>
+#include <mapnik/json/geometry_parser.hpp>
+#include <mapnik/json/parse_feature.hpp>
+#include <mapnik/feature_factory.hpp>
 
 namespace mapnik { namespace json {
 
-bool from_geojson(std::string const& json, mapnik::feature_impl & feature);
+bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom)
+{
+    try
+    {
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp geometry holder
+        const char* start = json.c_str();
+        const char* end = start + json.length();
+        mapnik::json::parse_geometry(start, end, *feature);
+        geom = std::move(feature->get_geometry());
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
 
 }}
-
-#endif // MAPNIK_JSON_FEATURE_PARSER_HPP
