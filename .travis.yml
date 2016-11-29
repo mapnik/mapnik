@@ -25,8 +25,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      sudo: required
-      dist: trusty
+      sudo: false
       env: JOBS=4 CXX="ccache g++-6" CC="gcc-6"
       addons:
         apt:
