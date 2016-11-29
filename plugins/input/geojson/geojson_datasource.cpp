@@ -49,7 +49,6 @@
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
-#include <mapnik/json/feature_collection_grammar.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>

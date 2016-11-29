@@ -25,11 +25,10 @@
 
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/json/parse_feature.hpp>
-//#include <mapnik/json/json_grammar_config.hpp>
+
 // stl
 #include <string>
 #include <vector>
@@ -67,7 +66,6 @@ mapnik::feature_ptr geojson_memory_index_featureset::next()
         chr_iterator_type start = json.data();
         chr_iterator_type end = start + json.size();
         static const mapnik::transcoder tr("utf8");
-        static const mapnik::json::feature_grammar<chr_iterator_type,mapnik::feature_impl> grammar(tr);
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
         mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure
         // skip empty geometries
