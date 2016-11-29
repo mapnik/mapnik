@@ -23,7 +23,7 @@
 #ifndef MAPNIK_JSON_PROPERTIES_GENERATOR_GRAMMAR_HPP
 #define MAPNIK_JSON_PROPERTIES_GENERATOR_GRAMMAR_HPP
 
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
 
 #pragma GCC diagnostic push

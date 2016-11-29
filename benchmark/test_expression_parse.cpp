@@ -1,8 +1,8 @@
 #include "bench_framework.hpp"
 #include <mapnik/unicode.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
-#include <mapnik/expression_grammar.hpp>
 
 class test : public benchmark::test_case
 {

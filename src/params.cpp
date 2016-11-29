@@ -24,7 +24,7 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/params_impl.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 namespace mapnik {
 

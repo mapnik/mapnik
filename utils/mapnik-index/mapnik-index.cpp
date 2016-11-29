@@ -29,7 +29,7 @@
 #include <mapnik/quad_tree.hpp>
 
 #include "process_csv_file.hpp"
-#include "process_geojson_file.hpp"
+#include "process_geojson_file_x3.hpp"
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -87,7 +87,11 @@ int main (int argc, char** argv)
         po::positional_options_description p;
         p.add("files",-1);
         po::variables_map vm;
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+        po::store(po::command_line_parser(argc, argv)
+                  .options(desc)
+                  .style(po::command_line_style::unix_style | po::command_line_style::allow_long_disguise)
+                  .positional(p)
+                  .run(), vm);
         po::notify(vm);
 
         if (vm.count("version"))
@@ -190,7 +194,8 @@ int main (int argc, char** argv)
         else if (mapnik::detail::is_geojson(filename))
         {
             std::clog << "processing '" << filename << "' as GeoJSON\n";
-            auto result = mapnik::detail::process_geojson_file(boxes, filename, validate_features, verbose);
+            std::pair<bool,mapnik::box2d<float>> result;
+            result = mapnik::detail::process_geojson_file_x3(boxes, filename, validate_features, verbose);
             if (!result.first)
             {
                 std::clog << "Error: failed to process " << filename << std::endl;

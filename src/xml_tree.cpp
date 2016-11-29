@@ -38,6 +38,7 @@
 
 // stl
 #include <type_traits>
+#include <memory>
 
 namespace mapnik
 {

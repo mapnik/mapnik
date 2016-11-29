@@ -23,7 +23,7 @@
 #ifndef MAPNIK_GENERIC_JSON_HPP
 #define MAPNIK_GENERIC_JSON_HPP
 
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/value_converters.hpp>
 
@@ -53,8 +53,8 @@ using json_value_base = mapnik::util::variant<value_null,
                                               value_integer,
                                               value_double,
                                               std::string,
-                                              mapnik::util::recursive_wrapper<json_array>,
-                                              mapnik::util::recursive_wrapper<json_object> >;
+                                              json_array,
+                                              json_object>;
 struct json_value : json_value_base
 {
 #if __cpp_inheriting_constructors >= 200802

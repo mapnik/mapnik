@@ -33,24 +33,35 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/fusion/include/adapt_adt.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_adapt_adt_attributes.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/spirit/home/x3.hpp>
 #pragma GCC diagnostic pop
 
 // agg
 #include "agg_trans_affine.h"
 
-BOOST_FUSION_ADAPT_TPL_ADT(
+BOOST_FUSION_ADAPT_TPL_STRUCT(
     (T),
     (mapnik::box2d)(T),
-    (T, T, obj.minx(), obj.set_minx(mapnik::safe_cast<T>(val)))
-    (T, T, obj.miny(), obj.set_miny(mapnik::safe_cast<T>(val)))
-    (T, T, obj.maxx(), obj.set_maxx(mapnik::safe_cast<T>(val)))
-    (T, T, obj.maxy(), obj.set_maxy(mapnik::safe_cast<T>(val))))
+    (T, minx_),
+    (T, miny_),
+    (T, maxx_),
+    (T, maxy_))
 
-namespace mapnik
+namespace mapnik { namespace detail { namespace {
+
+template <typename T>
+struct assign
 {
+    template <typename Context>
+    void operator() (Context & ctx) const
+    {
+        _val(ctx) = safe_cast<T>(_attr(ctx));
+    }
+};
+} // anonymous
+} // detail
+
 template <typename T>
 box2d<T>::box2d()
     :minx_( std::numeric_limits<T>::max()),
@@ -61,13 +72,13 @@ box2d<T>::box2d()
 template <typename T>
 box2d<T>::box2d(T minx,T miny,T maxx,T maxy)
 {
-    init(minx,miny,maxx,maxy);
+    init(minx, miny, maxx, maxy);
 }
 
 template <typename T>
 box2d<T>::box2d(coord<T,2> const& c0, coord<T,2> const& c1)
 {
-    init(c0.x,c0.y,c1.x,c1.y);
+    init(c0.x, c0.y, c1.x, c1.y);
 }
 
 template <typename T>
@@ -350,12 +361,15 @@ void box2d<T>::pad(T padding)
 template <typename T>
 bool box2d<T>::from_string(std::string const& str)
 {
-    boost::spirit::qi::lit_type lit;
-    boost::spirit::qi::double_type double_;
-    boost::spirit::ascii::space_type space;
-    bool r = boost::spirit::qi::phrase_parse(str.begin(),
+    using boost::spirit::x3::lit;
+    boost::spirit::x3::double_type double_;
+    boost::spirit::x3::ascii::space_type space;
+    bool r = boost::spirit::x3::phrase_parse(str.begin(),
                                              str.end(),
-                                             double_ >> -lit(',') >> double_ >> -lit(',') >> double_ >> -lit(',') >> double_,
+                                             double_[detail::assign<T>()] >> -lit(',') >>
+                                             double_[detail::assign<T>()] >> -lit(',') >>
+                                             double_[detail::assign<T>()] >> -lit(',') >>
+                                             double_[detail::assign<T>()],
                                              space,
                                              *this);
     return r;

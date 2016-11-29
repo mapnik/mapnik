@@ -27,7 +27,7 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/tolerance_iterator.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
 
 namespace mapnik {
 

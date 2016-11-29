@@ -41,7 +41,7 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
+DEFAULT_CXX11_CXXFLAGS = " -std=c++14"
 DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
@@ -1786,8 +1786,7 @@ if not preconfigured:
         common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unsequenced -Wtautological-compare -Wheader-hygiene '
-
+            common_cxx_flags += ' -Wno-unsequenced  -Wtautological-compare -Wheader-hygiene -Wc++14-extensions '
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:

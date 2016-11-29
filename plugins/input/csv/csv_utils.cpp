@@ -23,14 +23,14 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/datasource.hpp>
 // csv grammar
-#include <mapnik/csv/csv_grammar_impl.hpp>
+#include <mapnik/csv/csv_grammar_x3_def.hpp>
 //
 #include "csv_getline.hpp"
 #include "csv_utils.hpp"
@@ -192,14 +192,17 @@ bool valid(geometry_column_locator const& locator, std::size_t max_size)
 
 } // namespace detail
 
-static const mapnik::csv_line_grammar<char const*> line_g;
-static const mapnik::csv_white_space_skipper skipper{};
-
 mapnik::csv_line parse_line(char const* start, char const* end, char separator, char quote, std::size_t num_columns)
 {
+    namespace x3 = boost::spirit::x3;
+    auto parser = x3::with<mapnik::grammar::quote_tag>(quote)
+        [ x3::with<mapnik::grammar::separator_tag>(separator)
+          [ mapnik::csv_line_grammar()]
+            ];
+
     mapnik::csv_line values;
     if (num_columns > 0) values.reserve(num_columns);
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(separator, quote), skipper, values))
+    if (!x3::phrase_parse(start, end, parser, mapnik::csv_white_space, values))
     {
         throw mapnik::datasource_exception("Failed to parse CSV line:\n" + std::string(start, end));
     }

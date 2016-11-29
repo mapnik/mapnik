@@ -2,9 +2,9 @@
 
 #include <iostream>
 #include <mapnik/wkb.hpp>
-#include <mapnik/geometry_is_valid.hpp>
-#include <mapnik/geometry_is_simple.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/is_valid.hpp>
+#include <mapnik/geometry/is_simple.hpp>
+#include <mapnik/geometry/correct.hpp>
 #include <boost/version.hpp>
 
 TEST_CASE("geometry formats") {

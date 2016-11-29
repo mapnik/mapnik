@@ -131,9 +131,9 @@ public:
         return painted_;
     }
 
-    void painted(bool painted)
+    void painted(bool _painted)
     {
-        painted_ = painted;
+        painted_ = _painted;
     }
 
     inline eAttributeCollectionPolicy attribute_collection_policy() const

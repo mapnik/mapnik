@@ -88,7 +88,6 @@ template struct MAPNIK_DECL image_dimensions<65535>;
 
 } // end ns detail
 
-template class MAPNIK_DECL image<null_t>;
 template class MAPNIK_DECL image<rgba8_t>;
 template class MAPNIK_DECL image<gray8_t>;
 template class MAPNIK_DECL image<gray8s_t>;

@@ -34,7 +34,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

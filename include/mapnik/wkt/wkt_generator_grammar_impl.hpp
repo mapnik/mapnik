@@ -22,13 +22,7 @@
 
 // mapnik
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
-#include <mapnik/util/spirit_transform_attribute.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
-
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#pragma GCC diagnostic pop
+#include <mapnik/geometry/fusion_adapted.hpp>
 
 namespace mapnik { namespace wkt {
 
@@ -36,53 +30,26 @@ template <typename OutputIterator, typename Geometry>
 wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
     : wkt_generator_grammar::base_type(geometry)
 {
-    boost::spirit::karma::_val_type _val;
-    boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::_a_type _a;
     boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::uint_type uint_;
-    boost::spirit::karma::eps_type eps;
-
-    empty.add
-        (geometry::geometry_types::Point, "POINT EMPTY")
-        (geometry::geometry_types::LineString, "LINESTRING EMPTY")
-        (geometry::geometry_types::Polygon, "POLYGON EMPTY")
-        (geometry::geometry_types::MultiPoint, "MULTIPOINT EMPTY")
-        (geometry::geometry_types::MultiLineString, "MULTILINESTRING EMPTY")
-        (geometry::geometry_types::MultiPolygon, "MULTIPOLYGON EMPTY")
-        (geometry::geometry_types::GeometryCollection, "GEOMETRYCOLLECTION EMPTY")
+    geometry =
+        point
+        |
+        linestring
+        |
+        polygon
+        |
+        multi_point
+        |
+        multi_linestring
+        |
+        multi_polygon
+        |
+        geometry_collection
+        |
+        lit("POINT EMPTY") // special case for geometry_empty
         ;
 
-    geometry = geometry_dispatch.alias()
-        ;
-
-    geometry_dispatch = eps[_a = geometry_type(_val)] <<
-        (&uint_(geometry::geometry_types::Point)[_1 = _a]
-         << point)
-        |
-        (&uint_(geometry::geometry_types::LineString)[_1 = _a]
-         << (linestring | empty[_1 = _a]))
-        |
-        (&uint_(geometry::geometry_types::Polygon)[_1 = _a]
-         << (polygon | empty[_1 = _a]))
-        |
-        (&uint_(geometry::geometry_types::MultiPoint)[_1 = _a]
-         << ( multi_point | empty[_1 = _a]))
-        |
-        (&uint_(geometry::geometry_types::MultiLineString)[_1 = _a]
-         << (multi_linestring | empty[_1 = _a]))
-        |
-        (&uint_(geometry::geometry_types::MultiPolygon)[_1 = _a]
-         << (multi_polygon | empty[_1 = _a]))
-        |
-        (&uint_(geometry::geometry_types::GeometryCollection)[_1 = _a]
-         << (geometry_collection | empty[_1 = _a]))
-        |
-        (&uint_(geometry::geometry_types::Unknown)[_1 = _a]
-         << lit("POINT EMPTY")) // special case for geometry_empty as mapnik::geometry::point<double> can't be empty
-        ;
-
-    point = lit("POINT(") << point_coord << lit(")")
+    point = lit("POINT(") << coordinate << lit(' ') << coordinate << lit(")")
         ;
     linestring = lit("LINESTRING(") << linestring_coord << lit(")")
         ;
@@ -112,7 +79,7 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
         ;
     multi_polygon_coord = (lit('(') << polygon_coord << lit(')')) % lit(',')
         ;
-    geometries =  geometry % lit(',')
+    geometries = geometry % lit(',')
         ;
 
 }

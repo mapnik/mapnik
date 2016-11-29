@@ -20,13 +20,12 @@
  *
  *****************************************************************************/
 
-
 #include <iostream>
 #include <vector>
 #include <string>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 #include "shape_index_featureset.hpp"

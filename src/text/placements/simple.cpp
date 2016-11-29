@@ -32,9 +32,7 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/home/x3.hpp>
 #include <boost/property_tree/ptree.hpp>
 #pragma GCC diagnostic pop
 
@@ -43,12 +41,9 @@
 namespace mapnik
 {
 
-namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-using phoenix::push_back;
-using phoenix::ref;
+namespace x3 = boost::spirit::x3;
 
-struct direction_name : qi::symbols<char, directions_e>
+struct direction_name : x3::symbols<directions_e>
 {
     direction_name()
     {
@@ -64,8 +59,7 @@ struct direction_name : qi::symbols<char, directions_e>
             ("X" , EXACT_POSITION)
             ;
     }
-
-};
+} names;
 
 // Position string: [POS][SIZE]
 // [POS] is any combination of
@@ -82,21 +76,15 @@ bool parse_positions(std::string const& evaluated_positions,
                      std::vector<directions_e> & direction,
                      std::vector<int> & text_sizes)
 {
-    direction_name names;
-    boost::spirit::ascii::space_type space;
-    qi::_1_type _1;
-    qi::float_type float_;
-    std::string::const_iterator first = evaluated_positions.begin();
-    std::string::const_iterator last = evaluated_positions.end();
-    bool r = qi::phrase_parse(first, last,
-                     (names[push_back(phoenix::ref(direction), _1)] % ',')
-                     >> *(',' >> float_[push_back(phoenix::ref(text_sizes), _1)]),
-                     space);
-    if (first != last)
-    {
-        return false;
-    }
-    return r;
+    auto push_back_direction = [&](auto const& ctx) { direction.push_back(_attr(ctx));};
+    auto push_back_size = [&](auto const& ctx) { text_sizes.push_back(_attr(ctx));};
+    auto const first = evaluated_positions.begin();
+    auto const last = evaluated_positions.end();
+    bool r = x3::phrase_parse(first, last,
+                              (names[push_back_direction] % ',')
+                              >> *(',' >> x3::float_[push_back_size]),
+                              x3::space);
+    return (r && first != last);
 }
 
 

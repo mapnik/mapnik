@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
-#include <mapnik/value_hash.hpp>
+#include <mapnik/value/types.hpp>
+#include <mapnik/value/hash.hpp>
 #include <mapnik/util/variant.hpp>
 
 
@@ -115,7 +115,7 @@ operator << (std::basic_ostream<charT,traits>& out,
 // hash function
 inline std::size_t hash_value(value const& val)
 {
-    return mapnik_hash_value(val);
+    return mapnik::value_hash(val);
 }
 
 } // namespace value_adl_barrier
@@ -157,7 +157,7 @@ struct hash<mapnik::value>
 {
     size_t operator()(mapnik::value const& val) const
     {
-        return mapnik::mapnik_hash_value(val);
+        return mapnik::value_hash(val);
     }
 };
 

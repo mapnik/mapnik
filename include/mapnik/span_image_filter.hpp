@@ -176,9 +176,9 @@ public:
 
     span_image_resample_rgba_affine(source_type & src,
                                     interpolator_type & inter,
-                                    agg::image_filter_lut const & filter,
+                                    agg::image_filter_lut const & _filter,
                                     boost::optional<value_type> const & nodata_value) :
-        agg::span_image_resample_rgba_affine<Source>(src, inter, filter)
+        agg::span_image_resample_rgba_affine<Source>(src, inter, _filter)
     { }
 };
 
