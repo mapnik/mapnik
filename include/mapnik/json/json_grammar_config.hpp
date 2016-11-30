@@ -92,13 +92,11 @@ using context_type = x3::with_context<keys_tag,
                                       std::reference_wrapper<keys_map> const,
                                       phrase_parse_context_type>::type;
 
-using geometry_context_type = x3::with_context<feature_tag,
-                                               std::reference_wrapper<mapnik::feature_impl> const,
-                                               phrase_parse_context_type>::type;
-
 using feature_context_type = x3::with_context<transcoder_tag,
                                               std::reference_wrapper<mapnik::transcoder> const,
-                                              geometry_context_type>::type;
+                                              x3::with_context<feature_tag,
+                                                               std::reference_wrapper<mapnik::feature_impl> const,
+                                                               phrase_parse_context_type>::type>::type;
 
 // our spirit x3 grammars needs this one with changed order of feature_impl and transcoder (??)
 using feature_context_const_type = x3::with_context<feature_tag,

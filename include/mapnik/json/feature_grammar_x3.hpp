@@ -23,6 +23,8 @@
 #ifndef MAPNIK_JSON_FEATURE_GRAMMAR_X3_HPP
 #define MAPNIK_JSON_FEATURE_GRAMMAR_X3_HPP
 
+#include <mapnik/geometry.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -32,7 +34,7 @@ namespace mapnik { namespace json { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 using feature_grammar_type = x3::rule<class feature_rule_tag>;
-using geometry_grammar_type = x3::rule<class geometry_rule_tag>;
+using geometry_grammar_type = x3::rule<struct geomerty_rule_tag, mapnik::geometry::geometry<double> >;
 
 BOOST_SPIRIT_DECLARE(feature_grammar_type);
 BOOST_SPIRIT_DECLARE(geometry_grammar_type);

@@ -35,6 +35,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
 
+
 namespace mapnik { namespace json {
 
 struct stringifier
@@ -177,24 +178,26 @@ auto const assign_geometry_type = [] (auto const& ctx)
     std::get<0>(_val(ctx)) = _attr(ctx);
 };
 
-auto const create_collection = [] (auto const& ctx)
+auto const create_geometry = [] (auto const& ctx)
 {
-    mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
-    feature.set_geometry(mapnik::geometry::geometry_collection<double>());
+    mapnik::geometry::geometry<double> geom;
+    auto const type = std::get<0>(_attr(ctx));
+    if (type == mapnik::geometry::geometry_types::GeometryCollection)
+    {
+        _val(ctx) = std::move(std::get<2>(_attr(ctx)));
+    }
+    else
+    {
+        auto const& coordinates = std::get<1>(_attr(ctx));
+        mapnik::json::create_geometry(geom, type, coordinates);
+        _val(ctx) = std::move(geom);
+    }
 };
 
 auto const assign_geometry = [] (auto const& ctx)
 {
     mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
-    // first check if we're not dealing with GeometryCollection
-    if (feature.get_geometry().is<mapnik::geometry::geometry_empty>())
-    {
-        mapnik::geometry::geometry<double> geom;
-        auto const type = std::get<0>(_attr(ctx));
-        auto const& coordinates = std::get<1>(_attr(ctx));
-        mapnik::json::create_geometry(geom, type, coordinates);
-        feature.set_geometry(std::move(geom));
-    }
+    feature.set_geometry(std::move(_attr(ctx)));
 };
 
 auto const push_geometry = [] (auto const& ctx)
@@ -203,19 +206,17 @@ auto const push_geometry = [] (auto const& ctx)
     auto const type = std::get<0>(_attr(ctx));
     auto const& coordinates = std::get<1>(_attr(ctx));
     mapnik::json::create_geometry(geom, type, coordinates);
-    mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
-    geometry::geometry<double> & collection = feature.get_geometry();
-
-    if (collection.is<mapnik::geometry::geometry_collection<double>>())
-    {
-        auto & col = collection.get<mapnik::geometry::geometry_collection<double>>();
-        col.push_back(std::move(geom));
-    }
+    _val(ctx).push_back(std::move(geom));
 };
 
 auto const assign_positions = [] (auto const& ctx)
 {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
+};
+
+auto const assign_collection = [] (auto const& ctx)
+{
+    std::get<2>(_val(ctx)) = std::move(_attr(ctx));
 };
 
 auto assign_property = [](auto const& ctx)
@@ -229,17 +230,18 @@ auto assign_property = [](auto const& ctx)
 
 
 //exported rules
-feature_grammar_type const feature_rule = "Feature";
-geometry_grammar_type const geometry_rule = "Geometry";
+feature_grammar_type const feature_rule = "Feature Rule";
+geometry_grammar_type const geometry_rule = "Feature Rule";
+
 // rules
 x3::rule<struct feature_type_tag> const feature_type = "Feature Type";
 x3::rule<struct geometry_type_tag, mapnik::geometry::geometry_types> const geometry_type = "Geometry Type";
 x3::rule<struct coordinates_tag, mapnik::json::positions> const coordinates = "Coordinates";
-x3::rule<struct geometry_tag, std::tuple<mapnik::geometry::geometry_types, mapnik::json::positions>> const geometry_tuple = "Geometry";
-x3::rule<struct property_tag, std::tuple<std::string, json_value>> const property = "Property";
+x3::rule<struct geomerty_tag, std::tuple<mapnik::geometry::geometry_types, mapnik::json::positions, mapnik::geometry::geometry_collection<double>>> const geometry_tuple = "Geometry";
+x3::rule<struct property, std::tuple<std::string, json_value>> const property = "Property";
 x3::rule<struct properties_tag> const properties = "Properties";
 x3::rule<struct feature_part_rule_tag> const feature_part = "Feature part";
-x3::rule<struct geometry_collection> const geometry_collection = "GeometryCollection";
+x3::rule<struct geometry_collection, mapnik::geometry::geometry_collection<double>> const geometry_collection = "GeometryCollection";
 
 auto const feature_type_def = lit("\"type\"") > lit(':') > lit("\"Feature\"");
 
@@ -247,17 +249,16 @@ auto const geometry_type_def = lit("\"type\"") > lit(':') > geometry_type_symbol
 
 auto const coordinates_def = lit("\"coordinates\"") > lit(':') > positions_rule;
 
-auto const geometry_collection_def = lit("\"geometries\"")[create_collection] > lit(':')
+auto const geometry_collection_def = lit("\"geometries\"") > lit(':')
     > lit('[')
     > ((lit('{') > geometry_tuple[push_geometry] > lit('}')) % lit(','))
     > lit(']');
-
 
 auto const geometry_tuple_def = (geometry_type[assign_geometry_type]
                                  |
                                  coordinates[assign_positions]
                                  |
-                                 geometry_collection
+                                 geometry_collection[assign_collection]
                                  |
                                  (omit[geojson_string] > lit(':') > omit[value])) % lit(',');
 
@@ -268,7 +269,7 @@ auto const properties_def = property[assign_property] % lit(',');
 
 auto const feature_part_def = feature_type
     |
-    (lit("\"geometry\"") > lit(':') > (lit('{') > geometry_tuple[assign_geometry] > lit('}')) | lit("null"))
+    (lit("\"geometry\"") > lit(':') >  geometry_rule[assign_geometry])
     |
     (lit("\"properties\"") > lit(':') > lit('{') > -properties > lit('}'))
     |
@@ -278,7 +279,8 @@ auto const feature_part_def = feature_type
 
 auto const feature_rule_def = lit('{') > feature_part % lit(',') > lit('}');
 
-auto const geometry_rule_def =  (lit('{') > geometry_tuple[assign_geometry] > lit('}')) | lit("null");
+
+auto const geometry_rule_def =  (lit('{') > geometry_tuple[create_geometry] > lit('}')) | lit("null");
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -298,7 +300,6 @@ BOOST_SPIRIT_DEFINE(
 #pragma GCC diagnostic pop
 
 }}}
-
 
 namespace mapnik { namespace json {
 
