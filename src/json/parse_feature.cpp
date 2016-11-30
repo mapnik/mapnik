@@ -23,10 +23,6 @@
 #include <mapnik/json/parse_feature.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/feature_grammar_x3.hpp>
-#include <mapnik/json/create_geometry.hpp>
-#include <mapnik/util/conversions.hpp>
-#include <mapnik/value.hpp>
-#include <mapnik/geometry/geometry_types.hpp>
 
 namespace mapnik { namespace json {
 
