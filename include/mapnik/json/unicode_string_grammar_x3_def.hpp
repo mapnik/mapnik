@@ -95,11 +95,11 @@ x3::rule<class escaped_tag, std::string> const escaped("Escaped Characted");
 auto unicode_string_def = double_quoted
     ;
 auto const escaped_def = lit('\\') >
-    (lit('x') > hex[push_utf8]
+    ((lit('x') > hex[push_utf8])
      |
-     lit('u') > hex4[push_utf8]
+     (lit('u') > hex4[push_utf8])
      |
-     lit('U') > hex8[push_utf8]
+     (lit('U') > hex8[push_utf8])
      |
      char_("0abtnvfre\"/\\N_LP \t")[push_esc]
      |
