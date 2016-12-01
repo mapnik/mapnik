@@ -95,6 +95,7 @@ function make_config() {
     echo "
 CXX = '$CXX'
 CC = '$CC'
+CUSTOM_CXXFLAGS = '-D_GLIBCXX_USE_CXX11_ABI=0'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
