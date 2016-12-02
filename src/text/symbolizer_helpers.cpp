@@ -189,12 +189,6 @@ base_symbolizer_helper::base_symbolizer_helper(
 
 struct largest_bbox_first
 {
-    bool operator() (geometry::geometry<double> const* g0, geometry::geometry<double> const* g1) const
-    {
-        box2d<double> b0 = geometry::envelope(*g0);
-        box2d<double> b1 = geometry::envelope(*g1);
-        return b0.width() * b0.height() > b1.width() * b1.height();
-    }
     bool operator() (base_symbolizer_helper::geometry_cref const& g0,
                      base_symbolizer_helper::geometry_cref const& g1) const
     {
