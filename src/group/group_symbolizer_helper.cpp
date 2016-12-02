@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/group/group_symbolizer_helper.hpp>
 #include <mapnik/label_collision_detector.hpp>
-//#include <mapnik/geom_util.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/debug.hpp>

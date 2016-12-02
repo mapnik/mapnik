@@ -23,7 +23,6 @@
 #ifndef MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP
 #define MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP
 
-//#include <mapnik/image_filter.hpp>
 #include <mapnik/image_filter_types.hpp>
 
 #pragma GCC diagnostic push
