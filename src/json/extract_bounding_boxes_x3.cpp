@@ -181,9 +181,8 @@ void extract_bounding_boxes(Iterator& start, Iterator const& end, Boxes & boxes)
     using namespace boost::spirit;
     using space_type = mapnik::json::grammar::space_type;
     using iterator_type = Iterator;
-    using boxes_type = Boxes;
 
-    extract_positions<iterator_type, boxes_type> callback(start, boxes);
+    extract_positions<iterator_type, Boxes> callback(start, boxes);
     auto keys = mapnik::json::get_keys();
     std::size_t bracket_counter = 0;
     auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))

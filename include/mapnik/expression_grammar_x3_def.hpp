@@ -316,7 +316,7 @@ namespace mapnik { namespace grammar {
 
     auto const not_expression_def = conditional_expression[do_assign]
         |
-        (lit("not") | lit('!')) > conditional_expression[do_not]
+        ((lit("not") | lit('!')) > conditional_expression[do_not])
         ;
 
     auto const conditional_expression_def = equality_expression[do_assign]
@@ -350,11 +350,11 @@ namespace mapnik { namespace grammar {
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
     auto const multiplicative_expression_def = unary_expression [do_assign]
-        > *( '*' > unary_expression [do_mult]
+        > *( ('*' > unary_expression [do_mult])
              |
-             '/' > unary_expression [do_div]
+             ('/' > unary_expression [do_div])
              |
-             '%' > unary_expression [do_mod]
+             ('%' > unary_expression [do_mod])
              |
              regex_match_expression[do_regex_match]
              |
@@ -367,9 +367,9 @@ namespace mapnik { namespace grammar {
     auto const unary_expression_def =
         primary_expression[do_assign]
         |
-        '+' > primary_expression[do_assign]
+        ('+' > primary_expression[do_assign])
         |
-        '-' > primary_expression[do_negate]
+        ('-' > primary_expression[do_negate])
         ;
 
     auto const primary_expression_def =
