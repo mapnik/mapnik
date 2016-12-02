@@ -393,6 +393,11 @@ std::string box2d<T>::to_string() const
     return s.str();
 }
 
+template <typename T>
+T  box2d<T>::area() const
+{
+    return width() * height();
+}
 
 template <typename T>
 box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
