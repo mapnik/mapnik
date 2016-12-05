@@ -88,123 +88,17 @@ struct agg_renderer_process_visitor_p
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(*ras_ptr_, marker, image_tr, 1.0, image);
-
-        agg::rendering_buffer buf(current_buffer_->bytes(), current_buffer_->width(),
-                                  current_buffer_->height(), current_buffer_->row_size());
-        ras_ptr_->reset();
-        value_double gamma = get<value_double, keys::gamma>(sym_, feature_, common_.vars_);
-        gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym_, feature_, common_.vars_);
-        if (gamma != gamma_ || gamma_method != gamma_method_)
-        {
-            set_gamma_method(ras_ptr_, gamma, gamma_method);
-            gamma_method_ = gamma_method;
-            gamma_ = gamma;
-        }
-
-        value_bool clip = get<value_bool, keys::clip>(sym_, feature_, common_.vars_);
-        value_double opacity = get<double, keys::opacity>(sym_, feature_, common_.vars_);
-        value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
-        value_double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
-
-        box2d<double> clip_box = clipping_extent(common_);
-
-        using color = agg::rgba8;
-        using order = agg::order_rgba;
-        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
-        using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
-
-        using wrap_x_type = agg::wrap_mode_repeat;
-        using wrap_y_type = agg::wrap_mode_repeat;
-        using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
-                                                         wrap_x_type,
-                                                         wrap_y_type>;
-
-        using span_gen_type = agg::span_pattern_rgba<img_source_type>;
-        using ren_base = agg::renderer_base<pixfmt_type>;
-
-        using renderer_type = agg::renderer_scanline_aa_alpha<ren_base,
-                                                              agg::span_allocator<agg::rgba8>,
-                                                              span_gen_type>;
-
-        pixfmt_type pixf(buf);
-        pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
-        ren_base renb(pixf);
-
-        unsigned w = image.width();
-        unsigned h = image.height();
-        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(),w,h,w*4);
-        agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
-        img_source_type img_src(pixf_pattern);
-
-        pattern_alignment_enum alignment = get<pattern_alignment_enum, keys::alignment>(sym_, feature_, common_.vars_);
-        unsigned offset_x=0;
-        unsigned offset_y=0;
-
-        if (alignment == LOCAL_ALIGNMENT)
-        {
-            double x0 = 0;
-            double y0 = 0;
-            using apply_local_alignment = detail::apply_local_alignment;
-            apply_local_alignment apply(common_.t_,prj_trans_, clip_box, x0, y0);
-            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
-            offset_x = unsigned(current_buffer_->width() - x0);
-            offset_y = unsigned(current_buffer_->height() - y0);
-        }
-
-        span_gen_type sg(img_src, offset_x, offset_y);
-
-        agg::span_allocator<agg::rgba8> sa;
-        renderer_type rp(renb,sa, sg, unsigned(opacity * 255));
-
-        agg::trans_affine tr;
-        auto transform = get_optional<transform_type>(sym_, keys::geometry_transform);
-        if (transform) evaluate_transform(tr, feature_, common_.vars_, *transform, common_.scale_factor_);
-        using vertex_converter_type = vertex_converter<clip_poly_tag,
-                                                       transform_tag,
-                                                       affine_transform_tag,
-                                                       simplify_tag,
-                                                       smooth_tag>;
-
-        vertex_converter_type converter(clip_box,sym_,common_.t_,prj_trans_,tr,feature_,common_.vars_,common_.scale_factor_);
-
-
-        if (prj_trans_.equal() && clip) converter.set<clip_poly_tag>();
-        converter.set<transform_tag>(); //always transform
-        converter.set<affine_transform_tag>(); // optional affine transform
-        if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-        if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
-        using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
-        using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-        apply_vertex_converter_type apply(converter, *ras_ptr_);
-        mapnik::util::apply_visitor(vertex_processor_type(apply),feature_.get_geometry());
-        agg::scanline_u8 sl;
-        ras_ptr_->filling_rule(agg::fill_even_odd);
-        agg::render_scanlines(*ras_ptr_, sl, rp);
+        render(image);
     }
 
     void operator() (marker_rgba8 const& marker) const
     {
-        using color = agg::rgba8;
-        using order = agg::order_rgba;
-        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
-        using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+        render(marker.get_data());
+    }
 
-        using wrap_x_type = agg::wrap_mode_repeat;
-        using wrap_y_type = agg::wrap_mode_repeat;
-        using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
-                                                         wrap_x_type,
-                                                         wrap_y_type>;
-
-        using span_gen_type = agg::span_pattern_rgba<img_source_type>;
-        using ren_base = agg::renderer_base<pixfmt_type>;
-
-        using renderer_type = agg::renderer_scanline_aa_alpha<ren_base,
-                                                              agg::span_allocator<agg::rgba8>,
-                                                              span_gen_type>;
-        mapnik::image_rgba8 const& image = marker.get_data();
-
-
+private:
+    void render(mapnik::image_rgba8 const& image) const
+    {
         agg::rendering_buffer buf(current_buffer_->bytes(), current_buffer_->width(),
                                   current_buffer_->height(), current_buffer_->row_size());
         ras_ptr_->reset();
@@ -224,6 +118,23 @@ struct agg_renderer_process_visitor_p
 
         box2d<double> clip_box = clipping_extent(common_);
 
+        using color = agg::rgba8;
+        using order = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+        using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
+
+        using wrap_x_type = agg::wrap_mode_repeat;
+        using wrap_y_type = agg::wrap_mode_repeat;
+        using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
+                                                         wrap_x_type,
+                                                         wrap_y_type>;
+
+        using span_gen_type = agg::span_pattern_rgba<img_source_type>;
+        using ren_base = agg::renderer_base<pixfmt_type>;
+
+        using renderer_type = agg::renderer_scanline_aa_alpha<ren_base,
+                                                              agg::span_allocator<agg::rgba8>,
+                                                              span_gen_type>;
 
         pixfmt_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
@@ -282,7 +193,6 @@ struct agg_renderer_process_visitor_p
         agg::render_scanlines(*ras_ptr_, sl, rp);
     }
 
-private:
     renderer_common & common_;
     buffer_type * current_buffer_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
