@@ -99,7 +99,8 @@ pretty_dep_names = {
     'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
-    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
+    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
+    'spatialite':'Spatialite extension for SQLite (-DHAS_SPATIALITE=1)'
     }
 
 # Core plugin build configuration
@@ -379,6 +380,9 @@ opts.AddVariables(
     PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    BoolVariable('SPATIALITE', 'Attempt to build with Spatialite support', 'True'),
+    PathVariable('SPATIALITE_INCLUDES', 'Search path for Spatialite include files', '/usr/include/', PathVariable.PathAccept),
+    PathVariable('SPATIALITE_LIBS', 'Search path for Spatialite library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
 
@@ -1214,7 +1218,7 @@ if not preconfigured:
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
         DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
-        DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
+        DEFAULT_CXX11_LINKFLAGS += ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
     env.Append(CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
@@ -1348,6 +1352,15 @@ if not preconfigured:
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['tiff'])
+
+    if env['SPATIALITE']:
+        OPTIONAL_LIBSHEADERS.append(['spatialite', ['sqlite3.h', 'spatialite.h'], False, 'C', '-DHAS_SPATIALITE'])
+        inc_path = env['%s_INCLUDES' % 'SPATIALITE']
+        lib_path = env['%s_LIBS' % 'SPATIALITE']
+        env.AppendUnique(CPPPATH = fix_path(inc_path))
+        env.AppendUnique(LIBPATH = fix_path(lib_path))
+    else:
+        env['SKIPPED_DEPS'].extend(['spatalite'])
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:

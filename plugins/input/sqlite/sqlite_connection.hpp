@@ -40,6 +40,10 @@
 // sqlite
 extern "C" {
 #include <sqlite3.h>
+
+#ifdef HAS_SPATIALITE
+#include <spatialite.h>
+#endif
 }
 
 #include "sqlite_resultset.hpp"
@@ -78,6 +82,10 @@ public:
             throw mapnik::datasource_exception (s.str());
         }
 
+#ifdef HAS_SPATIALITE
+        conn_ = spatialite_alloc_connection();
+        spatialite_init_ex(db_, conn_, 0);
+#endif
         sqlite3_busy_timeout(db_,5000);
     }
 
@@ -97,6 +105,11 @@ public:
 
             throw mapnik::datasource_exception (s.str());
         }
+
+#ifdef HAS_SPATIALITE
+        conn_ = spatialite_alloc_connection();
+        spatialite_init_ex(db_, conn_, 0);
+#endif
     }
 
     virtual ~sqlite_connection ()
@@ -104,6 +117,9 @@ public:
         if (db_)
         {
             sqlite3_close (db_);
+#ifdef HAS_SPATIALITE
+            spatialite_cleanup_ex(conn_);
+#endif
         }
     }
 
@@ -177,6 +193,9 @@ private:
 
     sqlite3* db_;
     std::string file_;
+#ifdef HAS_SPATIALITE
+    void* conn_;
+#endif
 };
 
 #endif // MAPNIK_SQLITE_CONNECTION_HPP

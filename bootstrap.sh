@@ -55,6 +55,9 @@ function install_mason_deps() {
     install libtiff 4.0.6 libtiff &
     install libpq 9.5.2 &
     install sqlite 3.14.1 libsqlite3 &
+    # these could somehow be checked via env['SPATIALITE'] check
+    install geos 3.5.0 libgeos &
+    install spatialite 4.3.0a libspatialite &
     install expat 2.2.0 libexpat &
     install icu ${ICU_VERSION} &
     install proj 4.9.2 libproj &
@@ -127,6 +130,8 @@ CAIRO_INCLUDES = '${MASON_LINKED_REL}/include'
 CAIRO_LIBS = '${MASON_LINKED_REL}/lib'
 SQLITE_INCLUDES = '${MASON_LINKED_REL}/include'
 SQLITE_LIBS = '${MASON_LINKED_REL}/lib'
+SPATIALITE_INCLUDES = '${MASON_LINKED_REL}/include'
+SPATIALITE_LIBS = '${MASON_LINKED_REL}/lib'
 BENCHMARK = True
 CPP_TESTS = True
 PGSQL2SQLITE = True
