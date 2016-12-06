@@ -46,7 +46,7 @@
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/util/variant.hpp>
-#include <mapbox/variant_io.hpp>
+#include <mapnik/util/variant_io.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
@@ -488,7 +488,8 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
 
 void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
 {
-    if (params.size()) {
+    if (params.size())
+    {
         ptree & params_node = map_node.push_back(
             ptree::value_type("Parameters", ptree()))->second;
 
