@@ -54,10 +54,13 @@ struct extract_positions
     {
         auto const& r = std::get<0>(val);
         auto const& b = std::get<1>(val);
-        auto offset = std::distance(start_, r.begin());
-        auto size = std::distance(r.begin(), r.end());
-        boxes_.emplace_back(std::make_pair(box_type(b.minx(), b.miny(), b.maxx(), b.maxy()), std::make_pair(offset, size)));
-        //boxes_.emplace_back(std::make_tuple(bbox,offset, size));
+        if (b.valid())
+        {
+            auto offset = std::distance(start_, r.begin());
+            auto size = std::distance(r.begin(), r.end());
+            boxes_.emplace_back(std::make_pair(box_type(b.minx(), b.miny(), b.maxx(), b.maxy()), std::make_pair(offset, size)));
+            //boxes_.emplace_back(std::make_tuple(bbox,offset, size));
+        }
     }
     Iterator start_;
     Boxes & boxes_;
