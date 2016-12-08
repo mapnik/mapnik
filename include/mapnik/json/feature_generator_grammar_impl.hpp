@@ -22,11 +22,6 @@
 
 #include <mapnik/json/feature_generator_grammar.hpp>
 
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/fusion/include/at.hpp>
-
 namespace mapnik { namespace json {
 
 template <typename OutputIterator, typename FeatureType>
