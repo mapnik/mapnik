@@ -32,7 +32,6 @@ namespace filter {
 
 bool parse_image_filters(std::string const& str, std::vector<filter_type> & image_filters)
 {
-    using namespace boost::spirit::x3::ascii;
     auto const& grammar = mapnik::image_filter_grammar();
     auto itr = str.begin();
     auto end = str.end();
