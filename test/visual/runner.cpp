@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,11 @@
 #include <future>
 #include <atomic>
 
+
 #include <mapnik/load_map.hpp>
 
 #include "runner.hpp"
+#include "parse_map_sizes.hpp"
 
 namespace visual_tests
 {
@@ -348,19 +350,7 @@ result_list runner::test_one(runner::path_type const& style_path,
             }
         }
     }
-
     return results;
-}
-
-void runner::parse_map_sizes(std::string const & str, std::vector<map_size> & sizes) const
-{
-    boost::spirit::ascii::space_type space;
-    std::string::const_iterator iter = str.begin();
-    std::string::const_iterator end = str.end();
-    if (!boost::spirit::qi::phrase_parse(iter, end, map_sizes_parser_, space, sizes))
-    {
-        throw std::runtime_error("Failed to parse list of sizes: '" + str + "'");
-    }
 }
 
 }

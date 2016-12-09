@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,40 +20,17 @@
  *
  *****************************************************************************/
 
-#ifndef MAP_SIZES_GRAMMAR_HPP
-#define MAP_SIZES_GRAMMAR_HPP
+#ifndef VISUAL_TESTS_PARSE_MAP_SIZES_HPP
+#define VISUAL_TESTS_PARSE_MAP_SIZES_HPP
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#pragma GCC diagnostic pop
+#include "config.hpp"
+#include <vector>
+#include <string>
 
-namespace visual_tests
-{
+namespace visual_tests {
 
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
-
-template <typename Iterator>
-struct map_sizes_grammar : qi::grammar<Iterator, std::vector<map_size>(), ascii::space_type>
-{
-    map_sizes_grammar() : map_sizes_grammar::base_type(start)
-    {
-        using namespace boost::spirit::qi;
-        using namespace boost::phoenix;
-
-        int_type int_;
-        _1_type _1;
-        _2_type _2;
-        _val_type _val;
-
-        start = (int_ >> ',' >> int_)[push_back(_val, construct<map_size>(_1, _2))] % ';';
-    }
-
-    qi::rule<Iterator, std::vector<map_size>(), ascii::space_type> start;
-};
+void parse_map_sizes(std::string const & str, std::vector<map_size> & sizes);
 
 }
 
-#endif
+#endif //VISUAL_TESTS_PARSE_MAP_SIZES_HPP
