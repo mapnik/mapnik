@@ -39,11 +39,6 @@ namespace mapnik {
 
 namespace detail {
 
-inline void hash_combine(std::size_t & seed, std::size_t val)
-{
-    seed ^= val + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-
 struct value_hasher
 {
     std::size_t operator() (value_null val) const
