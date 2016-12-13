@@ -173,7 +173,9 @@ struct create_geometry_impl
 };
 
 using coordinates_type = util::variant<coordinate,std::vector<coordinate>>;
-using arcs_type = util::variant<std::vector<index_type>, std::vector<std::vector<index_type>>, std::vector<std::vector<std::vector<index_type>>>>;
+using arcs_type = util::variant<std::vector<index_type>,
+                                std::vector<std::vector<index_type>>,
+                                std::vector<std::vector<std::vector<index_type>>>>;
 template <typename Iterator, typename ErrorHandler = json::error_handler<Iterator> >
 struct topojson_grammar : qi::grammar<Iterator, space_type, topology()>
 
