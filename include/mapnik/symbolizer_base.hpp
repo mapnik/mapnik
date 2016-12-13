@@ -100,18 +100,13 @@ struct strict_value : value_base_type
 {
     strict_value() = default;
 
-    strict_value(const char* val)
+    strict_value(const char* val) noexcept(false)
         : value_base_type(std::string(val)) {}
 
-    template <typename T>
-    strict_value(T const& obj)
-        : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
-    {}
-
-    template <typename T>
+    template <typename T, typename U = detail::mapnik_value_type_t<T>>
     strict_value(T && obj)
-        noexcept(std::is_nothrow_constructible<value_base_type, T && >::value)
-        : value_base_type(std::forward<T>(obj))
+        noexcept(std::is_nothrow_constructible<value_base_type, U>::value)
+        : value_base_type(U(std::forward<T>(obj)))
     {}
 };
 
