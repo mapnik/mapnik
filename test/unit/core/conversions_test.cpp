@@ -285,13 +285,13 @@ SECTION("to string") {
 
         // mapnik::value hash() and operator== works for all T in value<Types...>
         mapnik::transcoder tr("utf8");
-        using values_container = std::unordered_map<mapnik::value, unsigned>;
+        using values_container = std::unordered_map<mapnik::value, mapnik::value>;
         values_container vc;
-        mapnik::value keys[5] = {true, 1, 3.14159f, tr.transcode("Мапник"), mapnik::value_null()} ;
+        mapnik::value keys[5] = {true, 123456789, 3.14159f, tr.transcode("Мапник"), mapnik::value_null()} ;
         for (auto const& k : keys)
         {
-            vc.insert({k, 123456789});
-            REQUIRE( vc[k] == 123456789 );
+            vc.insert({k, k});
+            REQUIRE( vc[k] == k );
         }
 
         // mapnik::value << to ostream
