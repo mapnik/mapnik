@@ -54,11 +54,6 @@ struct value_hasher
         return static_cast<std::size_t>(val.hashCode());
     }
 
-    std::size_t operator()(value_integer val) const
-    {
-        return static_cast<std::size_t>(val);
-    }
-
     template <class T>
     std::size_t operator()(T const& val) const
     {
@@ -72,10 +67,7 @@ struct value_hasher
 template <typename T>
 std::size_t mapnik_hash_value(T const& val)
 {
-    std::size_t seed = 0;
-    detail::hash_combine(seed, util::apply_visitor(detail::value_hasher(), val));
-    detail::hash_combine(seed, val.which());
-    return seed;
+    return util::apply_visitor(detail::value_hasher(), val);
 }
 
 } // namespace mapnik
