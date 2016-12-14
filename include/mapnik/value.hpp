@@ -47,30 +47,20 @@ class MAPNIK_DECL value : public value_base
 public:
     value() = default;
 
-    // conversion from type T is done via a temporary of type U, which
-    // is determined by mapnik_value_type;
-    // enable_if< decay<T> != value > is necessary to avoid ill-formed
-    // recursion in noexcept specifier; and it also prevents using this
-    // constructor where implicitly-declared copy/move should be used
-    // (e.g. value(value&))
-    template <typename T,
-              typename U = typename std::enable_if<
-                                !detail::is_same_decay<T, value>::value,
-                                detail::mapnik_value_type_decay<T>
-                            >::type::type>
+    // Conversion from type T is done via a temporary value or reference
+    // of type U, which is determined by mapnik_value_type_t.
+    //
+    // CAVEAT: We don't check `noexcept(conversion from T to U)`.
+    //         But since the type U is either value_bool, value_integer,
+    //         value_double or T &&, this conversion SHOULD NEVER throw.
+    template <typename T, typename U = detail::mapnik_value_type_t<T>>
     value(T && val)
-        noexcept(noexcept(U(std::forward<T>(val))) &&
-                 std::is_nothrow_constructible<value_base, U && >::value)
+        noexcept(std::is_nothrow_constructible<value_base, U>::value)
         : value_base(U(std::forward<T>(val))) {}
 
-    template <typename T,
-              typename U = typename std::enable_if<
-                                !detail::is_same_decay<T, value>::value,
-                                detail::mapnik_value_type_decay<T>
-                            >::type::type>
+    template <typename T, typename U = detail::mapnik_value_type_t<T>>
     value& operator=(T && val)
-        noexcept(noexcept(U(std::forward<T>(val))) &&
-                 std::is_nothrow_assignable<value_base, U && >::value)
+        noexcept(std::is_nothrow_assignable<value_base, U>::value)
     {
         value_base::operator=(U(std::forward<T>(val)));
         return *this;
