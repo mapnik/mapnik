@@ -46,6 +46,21 @@ enum well_known_names
     properties
 };
 
+#ifdef _WINDOWS
+char const* wkn_to_string(well_known_names val)
+{
+    switch(val)
+    {
+    case id: return "id";
+    case type: return "type";
+    case features: return "features";
+    case geometry: return "geometry";
+    case coordinates: return "coordinates";
+    case properties: return "properties";
+    default: return "unknown";
+    }
+}
+#else
 constexpr char const* wkn_to_string(well_known_names val)
 {
     switch(val)
@@ -59,6 +74,7 @@ constexpr char const* wkn_to_string(well_known_names val)
     default: return "unknown";
     }
 }
+#endif
 
 
 using keys_map = boost::bimap<boost::bimaps::unordered_set_of<std::string>,
