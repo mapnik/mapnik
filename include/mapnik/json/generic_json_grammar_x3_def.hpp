@@ -26,6 +26,7 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <mapnik/json/generic_json_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
+#include <mapnik/util/windows_c2995.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
 

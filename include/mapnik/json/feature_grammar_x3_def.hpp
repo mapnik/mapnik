@@ -32,6 +32,7 @@
 
 #include <mapnik/json/create_geometry.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/windows_c2995.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
 

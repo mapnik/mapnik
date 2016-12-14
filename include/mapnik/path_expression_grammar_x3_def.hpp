@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/path_expression_grammar_x3.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/util/windows_c2995.hpp>
 
 namespace mapnik { namespace grammar {
 

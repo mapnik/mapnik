@@ -26,6 +26,7 @@
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/transform_expression_grammar_x3.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
+#include <mapnik/util/windows_c2995.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

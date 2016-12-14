@@ -23,10 +23,10 @@
 #ifndef MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP
 
-
 #include <mapnik/image_filter_grammar_x3.hpp>
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/css_color_grammar_x3.hpp>
+#include <mapnik/util/windows_c2995.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
