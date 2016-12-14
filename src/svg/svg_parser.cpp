@@ -30,8 +30,7 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
-#include <mapnik/json/json_grammar_config.hpp>
-#include <mapnik/util/windows_c2995.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"

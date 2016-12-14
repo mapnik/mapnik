@@ -27,7 +27,6 @@
 #include <mapnik/json/geojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
-#include <mapnik/util/windows_c2995.hpp>
 
 namespace mapnik { namespace json {
 

@@ -24,7 +24,6 @@
 #define MAPNIK_JSON_UNICODE_STRING_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
-#include <mapnik/util/windows_c2995.hpp>
 #include <iostream>
 
 namespace mapnik { namespace json { namespace grammar {

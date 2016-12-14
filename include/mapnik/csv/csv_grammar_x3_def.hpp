@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-#include <mapnik/util/windows_c2995.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <mapnik/csv/csv_grammar_x3.hpp>

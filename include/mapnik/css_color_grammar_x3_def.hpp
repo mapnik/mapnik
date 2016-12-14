@@ -28,7 +28,7 @@
 #include <mapnik/css_color_grammar_x3.hpp>
 #include <mapnik/util/hsl.hpp>
 #include <mapnik/safe_cast.hpp>
-#include <mapnik/util/windows_c2995.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>

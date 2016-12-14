@@ -25,7 +25,7 @@
 
 #include <mapnik/wkt/wkt_grammar_x3.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
-#include <mapnik/util/windows_c2995.hpp>
+
 #ifdef __GNUC__
 // instantiate `is_substitute` for reference T and reference Attribute
 // fixes gcc6 compilation issue

@@ -25,7 +25,6 @@
 
 #include <mapnik/json/positions_grammar_x3.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
-#include <mapnik/util/windows_c2995.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
 

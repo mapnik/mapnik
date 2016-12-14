@@ -23,7 +23,6 @@
 #ifndef MAPNIK_EXPRESSIONS_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_EXPRESSIONS_GRAMMAR_X3_DEF_HPP
 
-#include <mapnik/util/windows_c2995.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
