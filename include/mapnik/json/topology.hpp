@@ -23,7 +23,7 @@
 #ifndef MAPNIK_TOPOLOGY_HPP
 #define MAPNIK_TOPOLOGY_HPP
 
-#include <mapnik/json/generic_json.hpp>
+#include <mapnik/json/json_value.hpp>
 #include <mapnik/util/variant.hpp>
 
 #pragma GCC diagnostic push

@@ -26,7 +26,7 @@
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/value_converters.hpp>
-
+#include <mapnik/json/json_value.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -42,35 +42,6 @@ namespace qi = boost::spirit::qi;
 namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 using space_type = standard::space_type;
-
-struct json_value;
-
-using json_array = std::vector<json_value>;
-using json_object_element = std::pair<std::string, json_value>;
-using json_object = std::vector<json_object_element>;
-using json_value_base = mapnik::util::variant<value_null,
-                                              value_bool,
-                                              value_integer,
-                                              value_double,
-                                              std::string,
-                                              json_array,
-                                              json_object>;
-struct json_value : json_value_base
-{
-#if __cpp_inheriting_constructors >= 200802
-
-    using json_value_base::json_value_base;
-
-#else
-
-    json_value() = default;
-
-    template <typename T>
-    json_value(T && val)
-        : json_value_base(std::forward<T>(val)) {}
-
-#endif
-};
 
 using uchar = std::uint32_t; // a unicode code point
 

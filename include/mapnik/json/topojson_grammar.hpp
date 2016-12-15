@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/json/error_handler.hpp>
 #include <mapnik/json/topology.hpp>
+#include <mapnik/json/generic_json.hpp>
 #include <mapnik/json/value_converters.hpp>
 
 #pragma GCC diagnostic push
