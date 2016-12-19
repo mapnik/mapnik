@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,44 +20,29 @@
  *
  *****************************************************************************/
 
-#include <mapnik/json/generic_json.hpp>
+#ifndef MAPNIK_TOPOJSON_GRAMMAR_X3_HPP
+#define MAPNIK_TOPOJSON_GRAMMAR_X3_HPP
 
-namespace mapnik { namespace json {
+// mapnik
+#include <mapnik/json/topology.hpp>
 
-template <typename Iterator>
-generic_json<Iterator>::generic_json()
-    : generic_json::base_type(value)
-{
-    qi::lit_type lit;
-    qi::_val_type _val;
-    qi::_1_type _1;
-    using phoenix::construct;
-    // generic json types
-    value = object | array | string_ | number
-        ;
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
 
-    key_value = string_ > lit(':') > value
-        ;
+namespace mapnik { namespace json { namespace grammar {
 
-    object = lit('{')
-        > -(key_value % lit(','))
-        > lit('}')
-        ;
+namespace x3 = boost::spirit::x3;
 
-    array = lit('[')
-        > -(value % lit(','))
-        > lit(']')
-        ;
+using topojson_grammar_type = x3::rule<class topojson_rule_tag, topojson::topology>;
 
-    number = strict_double[_val = double_converter(_1)]
-        | int__[_val = integer_converter(_1)]
-        | lit("true") [_val = true]
-        | lit ("false") [_val = false]
-        | lit("null")[_val = construct<value_null>()]
-        ;
+BOOST_SPIRIT_DECLARE(topojson_grammar_type);
+
 }
+
+grammar::topojson_grammar_type const& topojson_grammar();
 
 }}
 
-using iterator_type = char const*;
-template struct mapnik::json::generic_json<iterator_type>;
+#endif //MAPNIK_TOPOJSON_GRAMMAR_X3_HPP

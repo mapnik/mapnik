@@ -26,13 +26,10 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/json/topology.hpp>
-#include <mapnik/json/topojson_grammar.hpp>
+#include <mapnik/json/topojson_grammar_x3.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 
 namespace {
-
-using iterator_type = char const*;
-const mapnik::topojson::topojson_grammar<iterator_type> grammar;
 
 bool parse_topology(std::string const& filename, mapnik::topojson::topology & topo)
 {
@@ -41,11 +38,22 @@ bool parse_topology(std::string const& filename, mapnik::topojson::topology & to
     buffer.resize(file.size());
     std::fread(&buffer[0], buffer.size(), 1, file.get());
     if (!file) return false;
-    boost::spirit::standard::space_type space;
-    iterator_type itr = buffer.c_str();
-    iterator_type end = itr + buffer.length();
-    bool result = boost::spirit::qi::phrase_parse(itr, end, grammar, space, topo);
-    return (result && (itr == end));
+    using space_type = boost::spirit::x3::standard::space_type;
+    char const* itr = buffer.c_str();
+    char const* end = itr + buffer.length();
+    try
+    {
+        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::topojson_grammar(), space_type() , topo);
+    }
+    catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
+    {
+        std::cerr << "failed to parse TopoJSON..." << std::endl;
+        std::cerr << ex.what() << std::endl;
+        std::cerr << "Expected: " << ex.which();
+        std::cerr << " Got: \"" << std::string(ex.where(), ex.where() + 200) << "...\"" << std::endl;
+        return false;
+    }
+    return (itr == end);
 }
 
 }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,9 +20,11 @@
  *
  *****************************************************************************/
 
-#include <mapnik/feature.hpp>
-#include <mapnik/json/topojson_grammar_impl.hpp>
-#include <string>
+#include <mapnik/json/json_grammar_config.hpp>
+#include <mapnik/json/topojson_grammar_x3_def.hpp>
 
-using iterator_type = char const*;
-template struct mapnik::topojson::topojson_grammar<iterator_type> ;
+namespace mapnik { namespace json { namespace grammar {
+
+BOOST_SPIRIT_INSTANTIATE(topojson_grammar_type, iterator_type, phrase_parse_context_type);
+
+}}}

@@ -23,6 +23,11 @@
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/extract_bounding_boxes_x3_config.hpp>
+#include <mapnik/json/json_value.hpp>
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json { namespace grammar {
 
@@ -44,3 +49,5 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extr
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
 
 }}}
+
+template bool mapnik::json::grammar::parse_rule<char const*, boost::spirit::x3::context<boost::spirit::x3::skipper_tag, boost::spirit::x3::char_class<boost::spirit::char_encoding::standard, boost::spirit::x3::space_tag> const, boost::spirit::x3::unused_type>, boost::fusion::iterator_range<boost::fusion::std_tuple_iterator<std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, mapnik::json::json_value>, 0>, boost::fusion::std_tuple_iterator<std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, mapnik::json::json_value>, 1> > >(boost::spirit::x3::rule<mapnik::json::grammar::unicode_string_tag, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, false>, char const*&, char const* const&, boost::spirit::x3::context<boost::spirit::x3::skipper_tag, boost::spirit::x3::char_class<boost::spirit::char_encoding::standard, boost::spirit::x3::space_tag> const, boost::spirit::x3::unused_type> const&, boost::fusion::iterator_range<boost::fusion::std_tuple_iterator<std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, mapnik::json::json_value>, 0>, boost::fusion::std_tuple_iterator<std::__1::tuple<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, mapnik::json::json_value>, 1> >&);

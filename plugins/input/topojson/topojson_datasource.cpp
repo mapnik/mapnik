@@ -34,7 +34,7 @@
 #include <mapnik/value/types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
-#include <mapnik/json/topojson_grammar.hpp>
+#include <mapnik/json/topojson_grammar_x3.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
@@ -176,20 +176,22 @@ topojson_datasource::topojson_datasource(parameters const& params)
     }
 }
 
-namespace {
-using iterator_type = const char*;
-const mapnik::topojson::topojson_grammar<iterator_type> g;
-}
-
 template <typename T>
 void topojson_datasource::parse_topojson(T const& buffer)
 {
-    boost::spirit::standard::space_type space;
     auto itr = buffer;
     auto end = buffer + std::strlen(buffer);
-    bool result = boost::spirit::qi::phrase_parse(itr, end, g, space, topo_);
-    if (!result)
+    using space_type = boost::spirit::x3::standard::space_type;
+    try
     {
+        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::topojson_grammar(), space_type(), topo_);
+    }
+    catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
+    {
+        std::clog << "failed to parse TopoJSON..." << std::endl;
+        std::clog << ex.what() << std::endl;
+        std::clog << "Expected: " << ex.which();
+        std::clog << " Got: \"" << std::string(ex.where(), ex.where() + 200) << "...\"" << std::endl;
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
