@@ -48,7 +48,9 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extr
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
 
-template bool mapnik::json::grammar::parse_rule<iterator_type, phrase_parse_context_type,
-                                                boost::fusion::iterator_range<boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 0>, boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 1>>> (unicode_string_grammar_type, iterator_type&, iterator_type const&,  phrase_parse_context_type const&, boost::fusion::iterator_range<boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 0>, boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 1> >&);
+using attribute_type = boost::fusion::iterator_range<boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 0>, boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 1>>;
+
+template bool mapnik::json::grammar::parse_rule<iterator_type, phrase_parse_context_type, attribute_type> (
+    unicode_string_grammar_type, iterator_type&, iterator_type const&,  phrase_parse_context_type const&, attribute_type &);
 
 }}}
