@@ -23,11 +23,6 @@
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/extract_bounding_boxes_x3_config.hpp>
-#include <mapnik/json/json_value.hpp>
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
-#pragma GCC diagnostic pop
 
 namespace mapnik { namespace json { namespace grammar {
 
@@ -47,10 +42,5 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extr
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
-
-using attribute_type = boost::fusion::iterator_range<boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 0>, boost::fusion::std_tuple_iterator<std::tuple<std::string, mapnik::json::json_value>, 1>>;
-
-template bool mapnik::json::grammar::parse_rule<iterator_type, phrase_parse_context_type, attribute_type> (
-    unicode_string_grammar_type, iterator_type&, iterator_type const&,  phrase_parse_context_type const&, attribute_type &);
 
 }}}

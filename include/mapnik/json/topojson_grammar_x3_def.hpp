@@ -255,13 +255,23 @@ auto assign_properties = [] (auto const& ctx)
     std::get<3>(_val(ctx)) = std::move(_attr(ctx));
 };
 
+auto assign_prop_name = [] (auto const& ctx)
+{
+    std::get<0>(_val(ctx)) = std::move(_attr(ctx));
+};
+
+auto assign_prop_value = [] (auto const& ctx)
+{
+    std::get<1>(_val(ctx)) = std::move(_attr(ctx));
+};
+
 namespace x3 = boost::spirit::x3;
 
 using x3::lit;
 using x3::double_;
 using x3::int_;
 using x3::omit;
-
+using x3::char_;
 namespace
 {
 // import unicode string rule
@@ -296,6 +306,7 @@ topojson_grammar_type const topology = "Topology";
 x3::rule<class transform_tag, mapnik::topojson::transform> transform = "Transform";
 x3::rule<class bbox_tag, mapnik::topojson::bounding_box> bbox = "Bounding Box";
 x3::rule<class objects_tag, std::vector<mapnik::topojson::geometry>> objects= "Objects";
+x3::rule<class property_tag, mapnik::topojson::property> property = "Property";
 x3::rule<class properties_tag, mapnik::topojson::properties> properties = "Properties";
 x3::rule<class geometry_tag, mapnik::topojson::geometry> geometry = "Geometry";
 x3::rule<class geometry_collection_tag, std::vector<mapnik::topojson::geometry>> geometry_collection = "Geometry Collection";
@@ -346,7 +357,7 @@ auto const  bbox_def = lit("\"bbox\"") > lit(':')
 
 auto const objects_def = lit("\"objects\"") > lit(':')
     > lit('{')
-    > ((omit[json_string] > lit(':') > ((geometry_collection[push_collection] | geometry[push_geometry]))) % lit(','))
+    > ((omit[*~char_(':')] > lit(':') > ((geometry_collection[push_collection] | geometry[push_geometry]))) % lit(','))
     > lit('}')
     ;
 
@@ -359,7 +370,7 @@ auto const geometry_tuple_def =
      |
      properties[assign_properties]
      |
-     omit[json_string >> lit(':') >> json_value]) % lit(',')
+     omit[json_string] > lit(':') > omit[json_value]) % lit(',')
     ;
 
 auto const geometry_def = lit("{") > geometry_tuple[create_geometry] > lit("}");
@@ -384,9 +395,12 @@ auto const rings_array_def = (lit('[') >> (rings % lit(',')) >> lit(']'))
     ring
     ;
 
+auto const property_def = json_string[assign_prop_name] > lit(':') > json_value[assign_prop_value]
+    ;
+
 auto const properties_def = lit("\"properties\"")
     > lit(':')
-    > lit('{') > (json_string > lit(':') > json_value) % lit(',') > lit('}')
+    > lit('{') > (property % lit(',')) > lit('}')
     ;
 
 auto const arcs_def = lit("\"arcs\"") >> lit(':') >> lit('[') >> -( arc % lit(',')) >> lit(']') ;
@@ -408,6 +422,7 @@ BOOST_SPIRIT_DEFINE(
     ring,
     rings,
     rings_array,
+    property,
     properties,
     arcs,
     arc,
