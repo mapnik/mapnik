@@ -303,25 +303,25 @@ struct geometry_type_ : x3::symbols<int>
 // start rule
 topojson_grammar_type const topology = "Topology";
 // rules
-x3::rule<class transform_tag, mapnik::topojson::transform> transform = "Transform";
-x3::rule<class bbox_tag, mapnik::topojson::bounding_box> bbox = "Bounding Box";
-x3::rule<class objects_tag, std::vector<mapnik::topojson::geometry>> objects= "Objects";
-x3::rule<class property_tag, mapnik::topojson::property> property = "Property";
-x3::rule<class properties_tag, mapnik::topojson::properties> properties = "Properties";
-x3::rule<class geometry_tag, mapnik::topojson::geometry> geometry = "Geometry";
-x3::rule<class geometry_collection_tag, std::vector<mapnik::topojson::geometry>> geometry_collection = "Geometry Collection";
+x3::rule<class transform_tag, mapnik::topojson::transform> const transform = "Transform";
+x3::rule<class bbox_tag, mapnik::topojson::bounding_box> const bbox = "Bounding Box";
+x3::rule<class objects_tag, std::vector<mapnik::topojson::geometry>> const objects= "Objects";
+x3::rule<class property_tag, mapnik::topojson::property> const property = "Property";
+x3::rule<class properties_tag, mapnik::topojson::properties> const properties = "Properties";
+x3::rule<class geometry_tag, mapnik::topojson::geometry> const geometry = "Geometry";
+x3::rule<class geometry_collection_tag, std::vector<mapnik::topojson::geometry>> const geometry_collection = "Geometry Collection";
 x3::rule<class geometry_tuple_tag,
          std::tuple<int,
                     coordinates_type,
                     arcs_type,
-                    mapnik::topojson::properties>> geometry_tuple = "Geometry Tuple";
-x3::rule<class coordinate_tag, mapnik::topojson::coordinate> coordinate = "Coordinate";
-x3::rule<class coordinates_tag, coordinates_type> coordinates = "Coordinates";
-x3::rule<class arc_tag, mapnik::topojson::arc> arc = "Arc";
-x3::rule<class arcs_tag, std::vector<mapnik::topojson::arc>> arcs = "Arcs";
-x3::rule<class ring_type, std::vector<index_type>> ring = "Ring";
-x3::rule<class rings_type, std::vector<std::vector<index_type>>> rings = "Rings";
-x3::rule<class rings_array_type, arcs_type> rings_array = "Rings Array";
+                    mapnik::topojson::properties>> const geometry_tuple = "Geometry Tuple";
+x3::rule<class coordinate_tag, mapnik::topojson::coordinate> const coordinate = "Coordinate";
+x3::rule<class coordinates_tag, coordinates_type> const coordinates = "Coordinates";
+x3::rule<class arc_tag, mapnik::topojson::arc> const arc = "Arc";
+x3::rule<class arcs_tag, std::vector<mapnik::topojson::arc>> const arcs = "Arcs";
+x3::rule<class ring_type, std::vector<index_type>> const ring = "Ring";
+x3::rule<class rings_type, std::vector<std::vector<index_type>>> const rings = "Rings";
+x3::rule<class rings_array_type, arcs_type> const rings_array = "Rings Array";
 
 // defs
 auto const topology_def = lit('{') >
