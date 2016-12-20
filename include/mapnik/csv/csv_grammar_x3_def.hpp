@@ -20,11 +20,15 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_CSV_GRAMMAR_X3_DEF_HPP
+#define MAPNIK_CSV_GRAMMAR_X3_DEF_HPP
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <mapnik/csv/csv_grammar_x3.hpp>
 #pragma GCC diagnostic pop
-#include <iostream>
+
+
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
@@ -111,3 +115,6 @@ grammar::csv_line_grammar_type const& csv_line_grammar()
 }
 
 } // namespace mapnik
+
+
+#endif // MAPNIK_CSV_GRAMMAR_X3_DEF_HPP

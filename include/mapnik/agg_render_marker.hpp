@@ -20,6 +20,9 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_AGG_RENDER_MARKER_HPP
+#define MAPNIK_AGG_RENDER_MARKER_HPP
+
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
@@ -148,3 +151,5 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
 }
 
 }
+
+#endif // MAPNIK_AGG_RENDER_MARKER_HPP

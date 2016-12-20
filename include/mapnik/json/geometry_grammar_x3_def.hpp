@@ -20,6 +20,9 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_JSON_GEOMETRY_GRAMMAR_X3_DEF_HPP
+#define MAPNIK_JSON_GEOMETRY_GRAMMAR_X3_DEF_HPP
+
 // mapnik
 #include <mapnik/json/geometry_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
@@ -153,3 +156,6 @@ grammar::geometry_grammar_type const& geometry_grammar()
     return grammar::geometry;
 }
 }}
+
+
+#endif // MAPNIK_JSON_GEOMETRY_GRAMMAR_X3_DEF_HPP

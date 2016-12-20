@@ -20,7 +20,12 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_STRINGIFY_MACRO_HPP
+#define MAPNIK_STRINGIFY_MACRO_HPP
+
 #ifndef MAPNIK_STRINGIFY
 #define MAPNIK_STRINGIFY(n) MAPNIK_STRINGIFY_HELPER(n)
 #define MAPNIK_STRINGIFY_HELPER(n) #n
 #endif
+
+#endif // MAPNIK_STRINGIFY_MACRO_HPP

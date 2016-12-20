@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_OUTPUT_ATTRIBUTES
-#define MAPNIK_SVG_OUTPUT_ATTRIBUTES
+#ifndef MAPNIK_SVG_OUTPUT_ATTRIBUTES_HPP
+#define MAPNIK_SVG_OUTPUT_ATTRIBUTES_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
@@ -199,4 +199,4 @@ namespace mapnik { namespace svg {
     };
     }}
 
-#endif // MAPNIK_SVG_OUTPUT_ATTRIBUTES
+#endif // MAPNIK_SVG_OUTPUT_ATTRIBUTES_HPP

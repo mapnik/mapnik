@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_XML_NODE_H
-#define MAPNIK_XML_NODE_H
+#ifndef MAPNIK_XML_NODE_HPP
+#define MAPNIK_XML_NODE_HPP
 
 //mapnik
 #include <mapnik/config.hpp> // for MAPNIK_DECL
@@ -150,4 +150,4 @@ private:
 
 } //ns mapnik
 
-#endif // MAPNIK_XML_NODE_H
+#endif // MAPNIK_XML_NODE_HPP

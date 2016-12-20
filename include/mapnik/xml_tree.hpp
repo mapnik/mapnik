@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_XML_TREE_H
-#define MAPNIK_XML_TREE_H
+#ifndef MAPNIK_XML_TREE_HPP
+#define MAPNIK_XML_TREE_HPP
 
 // mapnik
 #include <mapnik/xml_node.hpp>
@@ -50,4 +50,4 @@ public:
 
 } //ns mapnik
 
-#endif // MAPNIK_XML_TREE_H
+#endif // MAPNIK_XML_TREE_HPP
