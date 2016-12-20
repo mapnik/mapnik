@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef OGR_INDEX_HH
-#define OGR_INDEX_HH
+#ifndef OGR_INDEX_HPP
+#define OGR_INDEX_HPP
 
 // stl
 #include <fstream>
@@ -102,4 +102,4 @@ void ogr_index<filterT, IStream>::read_envelope(IStream& file, box2d<double>& en
     file.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
 }
 
-#endif // OGR_INDEX_HH
+#endif // OGR_INDEX_HPP
