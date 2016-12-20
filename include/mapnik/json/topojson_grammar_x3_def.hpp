@@ -226,12 +226,15 @@ auto push_geometry = [] (auto const& ctx)
 auto push_collection = [] (auto const& ctx)
 {
     auto & dest = _val(ctx);
-    auto const& src = _attr(ctx);
+    auto & src = _attr(ctx);
     if (dest.empty()) dest = std::move(src);
     else
+    {
+        dest.reserve(dest.size() + src.size());
         dest.insert(std::end(dest),
                     std::make_move_iterator(std::begin(src)),
                     std::make_move_iterator(std::end(src)));
+    }
 };
 
 
