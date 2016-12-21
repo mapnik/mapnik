@@ -25,19 +25,27 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8" TRIGGER=true
+      env: JOBS=4 CXX="ccache g++-6" CC="gcc-6"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-5-dev', 'xutils-dev']
+          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev']
+    - os: linux
+      sudo: false
+      compiler: ": clang"
+      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" TRIGGER=true
+      addons:
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++-4.9-dev', 'xutils-dev']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
-      env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.8 -Qunused-arguments" CC="clang-3.8"
+      env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9"
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: ['libstdc++-5-dev', 'xutils-dev' ]
+          packages: ['libstdc++-4.9-dev', 'xutils-dev' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
@@ -78,10 +86,12 @@ before_script:
  - source bootstrap.sh
  - |
    if [[ $(uname -s) == 'Linux' ]]; then
-     mason install clang 3.8.0
-     export PATH=$(mason prefix clang 3.8.0)/bin:${PATH}
-     which clang++
-     export LLVM_COV="$(mason prefix clang 3.8.0)/bin/llvm-cov"
+     mason install clang++ 3.9.0
+     export PATH=$(mason prefix clang++ 3.9.0)/bin:${PATH}
+     mason install llvm-cov 3.9.0
+     export PATH=$(mason prefix llvm-cov 3.9.0)/bin:${PATH}
+     which llvm-cov
+     export LLVM_COV="$(mason prefix llvm-cov 3.9.0)/bin/llvm-cov"
    fi
  - ccache --version
  - ccache -p || true
@@ -98,7 +108,10 @@ script:
  # (and might work) for the next build
  - DURATION=2400
  - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
- - make test
+ - RESULT=0
+ - make test || RESULT=$?
+ # we allow visual failures with g++ for now: https://github.com/mapnik/mapnik/issues/3567
+ - if [[ ${RESULT} != 0 ]] && [[ ${CXX} =~ 'clang++' ]]; then false; fi;
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
 

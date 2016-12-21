@@ -24,7 +24,7 @@
 #define MAPNIK_UTIL_VARIANT_IO_HPP
 
 
-namespace mapnik { namespace util {
+namespace mapbox { namespace util {
 
 namespace detail {
 

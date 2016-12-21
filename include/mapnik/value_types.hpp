@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/cxx11_support.hpp>
 #include <mapnik/pixel_types.hpp>
 
 
@@ -34,7 +35,6 @@
 #pragma GCC diagnostic pop
 
 // stl
-#include <type_traits>
 #include <iosfwd>
 #include <cstddef>
 
@@ -152,90 +152,23 @@ inline std::istream& operator>> ( std::istream & s, value_null & )
 
 
 namespace detail {
-// to mapnik::value_type conversions traits
-template <typename T>
-struct is_value_bool
-{
-    constexpr static bool value = std::is_same<T, bool>::value;
-};
 
-template <typename T>
-struct is_value_integer
-{
-    constexpr static bool value = std::is_integral<T>::value && !std::is_same<T, bool>::value;
-};
+// Helper metafunction for mapnik::value construction and assignment.
+// Returns:
+//  value_bool      if T is bool
+//  value_integer   if T is an integral type (except bool)
+//  value_double    if T is a floating-point type
+//  T &&            otherwise
 
-template <typename T>
-struct is_value_double
-{
-    constexpr static bool value = std::is_floating_point<T>::value;
-};
-
-template <typename T>
-struct is_value_unicode_string
-{
-    constexpr static bool value = std::is_same<T, typename mapnik::value_unicode_string>::value;
-};
-
-template <typename T>
-struct is_value_string
-{
-    constexpr static bool value = std::is_same<T, typename std::string>::value;
-};
-
-template <typename T>
-struct is_value_null
-{
-    constexpr static bool value = std::is_same<T, typename mapnik::value_null>::value;
-};
-
-template <typename T, class Enable = void>
-struct mapnik_value_type
-{
-    using type = T;
-};
-
-// value_null
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_null<T>::value>::type>
-{
-    using type = mapnik::value_null;
-};
-
-// value_bool
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_bool<T>::value>::type>
-{
-    using type = mapnik::value_bool;
-};
-
-// value_integer
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_integer<T>::value>::type>
-{
-    using type = mapnik::value_integer;
-};
-
-// value_double
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_double<T>::value>::type>
-{
-    using type = mapnik::value_double;
-};
-
-// value_unicode_string
-template <typename T>
-struct mapnik_value_type<T, typename std::enable_if<detail::is_value_unicode_string<T>::value>::type>
-{
-    using type = mapnik::value_unicode_string const&;
-};
-
-template <typename T>
-using mapnik_value_type_decay = mapnik_value_type<typename std::decay<T>::type>;
-
-template <typename T, typename U>
-using is_same_decay = std::is_same<typename std::decay<T>::type,
-                                   typename std::decay<U>::type>;
+template <typename T, typename dT = decay_t<T>>
+using mapnik_value_type_t =
+    conditional_t<
+        std::is_same<dT, bool>::value, value_bool,
+        conditional_t<
+            std::is_integral<dT>::value, value_integer,
+            conditional_t<
+                std::is_floating_point<dT>::value, value_double,
+                T && >>>;
 
 } // namespace detail
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,51 +20,24 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_VALUE_HASH_HPP
-#define MAPNIK_VALUE_HASH_HPP
+#ifndef MAPNIK_CXX11_SUPPORT_HPP
+#define MAPNIK_CXX11_SUPPORT_HPP
 
-// mapnik
-#include <mapnik/util/variant.hpp>
-#include <mapnik/value_types.hpp>
-// stl
-#include <functional>
+#include <type_traits>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <unicode/unistr.h>
+namespace mapnik {
+namespace detail {
 
-#pragma GCC diagnostic pop
-
-namespace mapnik { namespace detail {
-
-struct value_hasher
-{
-    std::size_t operator() (value_null val) const
-    {
-        return hash_value(val);
-    }
-
-    std::size_t operator() (value_unicode_string const& val) const
-    {
-        return static_cast<std::size_t>(val.hashCode());
-    }
-
-    template <class T>
-    std::size_t operator()(T const& val) const
-    {
-        std::hash<T> hasher;
-        return hasher(val);
-    }
-};
-
-} // namespace  detail
+template <bool B, typename T, typename F>
+using conditional_t = typename std::conditional<B, T, F>::type;
 
 template <typename T>
-std::size_t mapnik_hash_value(T const& val)
-{
-    return util::apply_visitor(detail::value_hasher(), val);
-}
+using decay_t = typename std::decay<T>::type;
 
+template <bool B, typename T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+} // namespace detail
 } // namespace mapnik
 
-#endif // MAPNIK_VALUE_HASH_HPP
+#endif // MAPNIK_CXX11_SUPPORT_HPP

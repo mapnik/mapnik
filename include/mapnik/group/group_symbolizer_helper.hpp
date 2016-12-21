@@ -68,16 +68,6 @@ public:
         box_elements_.push_back(box_element(box, repeat_key));
     }
 
-    inline void clear_box_elements()
-    {
-        box_elements_.clear();
-    }
-
-    inline text_symbolizer_properties const& get_properties() const
-    {
-        return info_ptr_->properties;
-    }
-
     pixel_position_list const& get();
 
     // Iterate over the given path, placing line-following labels or point labels with respect to label_spacing.
