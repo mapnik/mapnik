@@ -462,7 +462,7 @@ T get(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return T();
+    return T{};
 }
 
 
@@ -487,7 +487,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return boost::optional<T>();
+    return boost::optional<T>{};
 }
 
 }
