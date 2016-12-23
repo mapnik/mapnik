@@ -22,24 +22,37 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/svg/svg_transform_grammar_impl.hpp>
+#include <mapnik/svg/svg_transform_grammar_x3_def.hpp>
 // stl
 #include <string>
 #include <cstring>
 
-namespace mapnik {
-namespace svg {
+namespace mapnik { namespace svg {
 
-template <typename TransformType>
-bool parse_svg_transform(const char* wkt, TransformType& tr)
+template <typename Transform>
+bool parse_svg_transform(const char* wkt, Transform& tr)
 {
     using namespace boost::spirit;
-    using iterator_type = const char*;
-    using skip_type = ascii::space_type;
-    static const svg_transform_grammar<iterator_type, TransformType, skip_type> g;
+    using iterator_type = char const*;
     iterator_type first = wkt;
     iterator_type last = wkt + std::strlen(wkt);
-    return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(tr)), skip_type());
+    using space_type = mapnik::svg::grammar::space_type;
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(std::ref(tr))
+          [mapnik::svg::svg_transform_grammar()];
+
+    try
+    {
+        if (!x3::phrase_parse(first, last, grammar, space_type())
+            || first != last)
+        {
+            throw std::runtime_error("Failed to parse svg-transform");
+        }
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
 }
 
 template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);

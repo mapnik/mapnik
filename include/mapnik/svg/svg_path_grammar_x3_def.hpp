@@ -102,10 +102,6 @@ auto const curve3_smooth = [] (auto const& ctx)
                                             x3::get<relative_tag>(ctx));
 };
 
-inline double deg2rad(double deg)
-{
-    return (M_PI * deg) / 180.0;
-}
 
 auto const arc_to = [] (auto & ctx)
 {
@@ -136,10 +132,11 @@ auto const absolute = [] (auto const& ctx)
     x3::get<relative_tag>(ctx).get() = false;
 };
 
+// exported rules
 svg_path_grammar_type const svg_path = "SVG Path";
-
 svg_points_grammar_type const svg_points = "SVG_Points";
 
+// rules
 auto const coord = x3::rule<class coord_tag, coord_type>{} = double_ > -lit(',') > double_;
 
 auto const svg_points_def = coord[move_to] // move_to

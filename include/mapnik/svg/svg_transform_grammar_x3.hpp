@@ -20,32 +20,24 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_GRAMMAR_CONFIG_X3_HPP
-#define MAPNIK_SVG_GRAMMAR_CONFIG_X3_HPP
+#ifndef MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP
+#define MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP
 
-#include <mapnik/svg/svg_path_parser.hpp>
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+// mapnik
+#include <mapnik/svg/svg_grammar_config_x3.hpp>
 
 namespace mapnik { namespace svg { namespace grammar {
 
-class relative_tag;
-class svg_path_tag;
-class svg_transform_tag;
+using namespace boost::spirit::x3;
 
-namespace x3 = boost::spirit::x3;
-using space_type = x3::standard::space_type;
-using iterator_type = char const*;
+using svg_transform_grammar_type = x3::rule<class svg_transform_rule_tag>;
 
-using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
-using svg_parse_context_type = x3::with_context<relative_tag, std::reference_wrapper<bool> const,
-                                                x3::with_context<svg_path_tag,std::reference_wrapper<svg_converter_type> const,
-                                                                 phrase_parse_context_type>::type>::type;
+BOOST_SPIRIT_DECLARE(svg_transform_grammar_type);
 
-inline double deg2rad(double deg) {return (M_PI * deg) / 180.0;}
+}
 
-}}}
+grammar::svg_transform_grammar_type const& svg_transform_grammar();
 
-#endif // MAPNIK_SVG_GRAMMAR_CONFIG_X3_HPP
+}}
+
+#endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP

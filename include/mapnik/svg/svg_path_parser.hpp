@@ -39,12 +39,12 @@ template <typename PathType>
 bool parse_points(const char* wkt, PathType& p);
 
 template <typename TransformType>
-bool MAPNIK_DECL parse_svg_transform(const char* wkt, TransformType& tr);
+bool parse_svg_transform(const char* wkt, TransformType& tr);
 
 //
 extern template bool MAPNIK_DECL parse_path<svg_converter_type>(const char*, svg_converter_type&);
 extern template bool MAPNIK_DECL parse_points<svg_converter_type>(const char*, svg_converter_type&);
-extern template bool MAPNIK_DECL parse_svg_transform<svg_converter_type>(const char*, svg_converter_type&);
+extern template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
 }
 }
 
