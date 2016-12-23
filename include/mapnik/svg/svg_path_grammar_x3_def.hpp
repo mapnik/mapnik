@@ -23,6 +23,7 @@
 #ifndef MAPNIK_SVG_PATH_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_SVG_PATH_GRAMMAR_X3_DEF_HPP
 
+// mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/svg/svg_path_grammar_x3.hpp>
@@ -137,11 +138,15 @@ auto const absolute = [] (auto const& ctx)
 
 svg_path_grammar_type const svg_path = "SVG Path";
 
+svg_points_grammar_type const svg_points = "SVG_Points";
+
 auto const coord = x3::rule<class coord_tag, coord_type>{} = double_ > -lit(',') > double_;
 
+auto const svg_points_def = coord[move_to] // move_to
+    > *(-lit(',') >> coord[line_to]);      // *line_to
+
 auto const M = x3::rule<class M_tag> {} = (lit('M')[absolute] | lit('m')[relative])
-    > coord[move_to]                     // move_to
-    > *(-lit(',') >> coord[line_to]);    // *line_to
+    > svg_points ;
 
 auto const H = x3::rule<class H_tag> {} = (lit('H')[absolute] | lit('h')[relative])
     > (double_[ hline_to] % -lit(',')) ; // +hline_to
@@ -179,7 +184,8 @@ auto const svg_path_def = +cmd;
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
-    svg_path
+    svg_path,
+    svg_points
     );
 #pragma GCC diagnostic pop
 
@@ -188,6 +194,11 @@ BOOST_SPIRIT_DEFINE(
 grammar::svg_path_grammar_type const& svg_path_grammar()
 {
     return grammar::svg_path;
+}
+
+grammar::svg_points_grammar_type const& svg_points_grammar()
+{
+    return grammar::svg_points;
 }
 
 }}

@@ -23,7 +23,7 @@
 // mapnik
 
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_path_grammar_x3_def.hpp>
+#include <mapnik/svg/svg_path_grammar_x3.hpp>
 // stl
 #include <cstring>
 #include <string>
@@ -36,18 +36,17 @@ bool parse_path(const char* wkt, PathType& p)
 {
     using namespace boost::spirit;
     using iterator_type = char const*;
-    using skip_type = x3::ascii::space_type;
-    skip_type space;
     iterator_type first = wkt;
     iterator_type last = wkt + std::strlen(wkt);
     bool relative = false;
+    using space_type = mapnik::svg::grammar::space_type;
     auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(std::ref(p))
         [ x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))
           [mapnik::svg::svg_path_grammar()]];
 
     try
     {
-        if (!x3::phrase_parse(first, last, grammar, space)
+        if (!x3::phrase_parse(first, last, grammar, space_type())
             || first != last)
         {
             throw std::runtime_error("Failed to parse svg-path");

@@ -226,6 +226,7 @@ source = Split(
     svg/svg_path_parser.cpp
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
+    svg/svg_path_grammar_x3.cpp
     warp.cpp
     css_color_grammar_x3.cpp
     vertex_cache.cpp

@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_points_grammar_impl.hpp>
+#include <mapnik/svg/svg_path_grammar_x3.hpp>
 // stl
 #include <string>
 #include <cstring>
@@ -34,12 +34,29 @@ template <typename PathType>
 bool parse_points(const char* wkt, PathType& p)
 {
     using namespace boost::spirit;
-    using iterator_type = const char*;
-    using skip_type = ascii::space_type;
-    static const svg_points_grammar<iterator_type, PathType, skip_type> g;
+    using iterator_type = char const*;
+    using space_type = mapnik::svg::grammar::space_type;
     iterator_type first = wkt;
     iterator_type last = wkt + std::strlen(wkt);
-    return qi::phrase_parse(first, last, (g)(boost::phoenix::ref(p)), skip_type());
+    bool relative = false;
+
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(std::ref(p))
+        [ x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))
+          [mapnik::svg::svg_points_grammar()]];
+
+    try
+    {
+        if (!x3::phrase_parse(first, last, grammar, space_type())
+            || first != last)
+        {
+            throw std::runtime_error("Failed to parse svg-path");
+        }
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
 }
 
 template bool parse_points<svg_converter_type>(const char*, svg_converter_type&);

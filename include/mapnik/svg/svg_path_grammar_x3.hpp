@@ -23,25 +23,23 @@
 #ifndef MAPNIK_SVG_PATH_GRAMMAR_X3_HPP
 #define MAPNIK_SVG_PATH_GRAMMAR_X3_HPP
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+#include <mapnik/svg/svg_grammar_config_x3.hpp>
 
 namespace mapnik { namespace svg { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
-class relative_tag;
-class svg_path_tag;
-
 using svg_path_grammar_type = x3::rule<class svg_path_rule_tag>;
+using svg_points_grammar_type = x3::rule<class svg_points_rule_tag>;
 
-BOOST_SPIRIT_DECLARE(svg_path_grammar_type);
+BOOST_SPIRIT_DECLARE(svg_path_grammar_type,
+                     svg_points_grammar_type);
 
 }
 
 grammar::svg_path_grammar_type const& svg_path_grammar();
+
+grammar::svg_points_grammar_type const& svg_points_grammar();
 
 }}
 

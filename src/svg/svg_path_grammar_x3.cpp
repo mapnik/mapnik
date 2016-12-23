@@ -20,28 +20,18 @@
  *
  *****************************************************************************/
 
-#ifndef SVG_POINTS_GRAMMAR_HPP
-#define SVG_POINTS_GRAMMAR_HPP
+#include <mapnik/svg/svg_path_grammar_x3_def.hpp>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
-#pragma GCC diagnostic pop
+namespace mapnik { namespace svg { namespace grammar {
 
-namespace mapnik { namespace svg {
+#define BOOST_SPIRIT_INSTANTIATE_UNUSED(rule_type, Iterator, Context)   \
+    template bool parse_rule<Iterator, Context, boost::spirit::x3::unused_type const>( \
+        rule_type rule_                                                 \
+        , Iterator& first, Iterator const& last                         \
+        , Context const& context, boost::spirit::x3::unused_type const& ); \
+    /***/
 
-using namespace boost::spirit;
-using namespace boost::phoenix;
+BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_path_grammar_type, iterator_type, svg_parse_context_type);
+BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_points_grammar_type, iterator_type, svg_parse_context_type);
 
-template <typename Iterator, typename PathType, typename SkipType>
-struct svg_points_grammar : qi::grammar<Iterator, void(PathType&), SkipType>
-{
-    // ctor
-    svg_points_grammar();
-    // rules
-    qi::rule<Iterator, void(PathType&), SkipType> start;
-    qi::rule<Iterator, boost::fusion::vector2<double, double>(), SkipType> coord;
-};
-}}
-
-#endif // SVG_POINTS_GRAMMAR_HPP
+}}}
