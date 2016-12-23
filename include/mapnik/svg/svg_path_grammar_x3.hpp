@@ -35,13 +35,13 @@ namespace x3 = boost::spirit::x3;
 class relative_tag;
 class svg_path_tag;
 
-using svg_path_grammar_type = x3::rule<class svg_rule_tag>;
+using svg_path_grammar_type = x3::rule<class svg_path_rule_tag>;
 
 BOOST_SPIRIT_DECLARE(svg_path_grammar_type);
 
 }
 
-grammar::svg_path_grammar_type svg_path_grammar();
+grammar::svg_path_grammar_type const& svg_path_grammar();
 
 }}
 

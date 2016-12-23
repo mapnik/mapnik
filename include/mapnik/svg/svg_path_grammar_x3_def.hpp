@@ -185,7 +185,7 @@ BOOST_SPIRIT_DEFINE(
 
 }
 
-grammar::svg_path_grammar_type svg_path_grammar()
+grammar::svg_path_grammar_type const& svg_path_grammar()
 {
     return grammar::svg_path;
 }
