@@ -256,10 +256,10 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     base_iterator_type start = file_buffer.c_str();
     base_iterator_type end = start + file_buffer.length();
 #endif
-
+    base_iterator_type itr = start; // make a copy to preserve `start` iterator state
     try
     {
-        mapnik::json::extract_bounding_boxes(start, end, boxes);
+        mapnik::json::extract_bounding_boxes(itr, end, boxes);
     }
     catch (boost::spirit::x3::expectation_failure<base_iterator_type> const& ex)
     {
@@ -275,7 +275,6 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     }
 
     using namespace boost::spirit;
-
     using space_type = mapnik::json::grammar::space_type;
     auto keys = mapnik::json::get_keys();
     auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
@@ -296,7 +295,7 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
                     bool result = x3::phrase_parse(feat_itr, feat_end, feature_grammar, space_type(), feature_value);
                     if (!result || feat_itr != feat_end)
                     {
-                        if (verbose) std::clog << std::string(start + item.second.first, feat_end ) << std::endl;
+                        if (verbose) std::clog << "Failed to parse: offset=" << item.second.first << " size=" << item.second.second << std::endl;
                         return std::make_pair(false, extent);
                     }
                 }
@@ -307,10 +306,12 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
                 }
                 catch (...)
                 {
+                    if (verbose) std::clog << "Failed to parse: offset=" << item.second.first << " size=" << item.second.second << std::endl;
                     return std::make_pair(false, extent);
                 }
                 if (!validate_geojson_feature(feature_value, keys, verbose))
                 {
+                    if (verbose) std::clog << "Failed to validate: [" << std::string(start + item.second.first, feat_end ) << "]" << std::endl;
                     return std::make_pair(false, extent);
                 }
             }
