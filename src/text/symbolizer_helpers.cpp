@@ -187,23 +187,26 @@ base_symbolizer_helper::base_symbolizer_helper(
     initialize_points();
 }
 
-struct largest_bbox_first
+template <typename It>
+static It largest_bbox(It begin, It end)
 {
-    bool operator() (geometry::geometry<double> const* g0, geometry::geometry<double> const* g1) const
+    if (begin == end)
     {
-        box2d<double> b0 = geometry::envelope(*g0);
-        box2d<double> b1 = geometry::envelope(*g1);
-        return b0.width() * b0.height() > b1.width() * b1.height();
+        return end;
     }
-    bool operator() (base_symbolizer_helper::geometry_cref const& g0,
-                     base_symbolizer_helper::geometry_cref const& g1) const
+    It largest_geom = begin;
+    double largest_bbox = geometry::envelope(*largest_geom).area();
+    for (++begin; begin != end; ++begin)
     {
-        // TODO - this has got to be expensive! Can we cache bbox's if there are repeated calls to same geom?
-        box2d<double> b0 = geometry::envelope(g0);
-        box2d<double> b1 = geometry::envelope(g1);
-        return b0.width() * b0.height() > b1.width() * b1.height();
+        double bbox = geometry::envelope(*begin).area();
+        if (bbox > largest_bbox)
+        {
+            largest_bbox = bbox;
+            largest_geom = begin;
+        }
     }
-};
+    return largest_geom;
+}
 
 void base_symbolizer_helper::initialize_geometries() const
 {
@@ -216,10 +219,16 @@ void base_symbolizer_helper::initialize_geometries() const
             type == geometry::geometry_types::MultiPolygon)
         {
             bool largest_box_only = text_props_->largest_bbox_only;
-            if (largest_box_only)
+            if (largest_box_only && geometries_to_process_.size() > 1)
             {
-                geometries_to_process_.sort(largest_bbox_first());
+                auto largest_geom = largest_bbox(
+                    geometries_to_process_.begin(),
+                    geometries_to_process_.end());
                 geo_itr_ = geometries_to_process_.begin();
+                if (geo_itr_ != largest_geom)
+                {
+                    std::swap(*geo_itr_, *largest_geom);
+                }
                 geometries_to_process_.erase(++geo_itr_, geometries_to_process_.end());
             }
         }
