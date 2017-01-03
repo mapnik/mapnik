@@ -107,8 +107,7 @@ struct text_render_thunk : util::movable
 using render_thunk = util::variant<vector_marker_render_thunk,
                                    raster_marker_render_thunk,
                                    text_render_thunk>;
-using render_thunk_ptr = std::unique_ptr<render_thunk>;
-using render_thunk_list = std::list<render_thunk_ptr>;
+using render_thunk_list = std::list<render_thunk>;
 
 } // namespace mapnik
 
