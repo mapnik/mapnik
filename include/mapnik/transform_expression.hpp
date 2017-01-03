@@ -38,8 +38,6 @@
 #include <boost/fusion/include/vector.hpp>
 #pragma GCC diagnostic pop
 
-//
-#include <boost/utility/value_init.hpp>
 // stl
 #include <vector>
 #include <memory>
@@ -170,10 +168,6 @@ struct transform_node
     transform_variant base_;
 
     transform_node()
-        : base_() {}
-
-    template <typename T>
-    transform_node(boost::value_initialized<T> const&)
         : base_() {}
 
     template <typename T>
