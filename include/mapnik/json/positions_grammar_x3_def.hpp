@@ -44,7 +44,7 @@ x3::rule<class rings_array_class, rings_array> const rings_array("RingsArray");
 
 auto const positions_def = rings_array | rings | ring | point ;
 auto const point_def = lit('[') > double_ > lit(',') > double_ > omit[*(lit(',') > double_)] > lit(']');
-auto const ring_def = lit('[') >> (point % lit(',') > lit(']'));
+auto const ring_def = lit('[') >> -(point % lit(',')) >> lit(']');
 auto const rings_def = lit('[') >> (ring % lit(',') > lit(']'));
 auto const rings_array_def = lit('[') >> (rings % lit(',') > lit(']'));
 
