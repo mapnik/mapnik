@@ -26,9 +26,9 @@
 #include <mapnik/wkt/wkt_grammar_x3.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && BOOST_VERSION < 106300
 // instantiate `is_substitute` for reference T and reference Attribute
-// fixes gcc6 compilation issue
+// fixes gcc6 compilation issue with boost 1_61 and boost_1_62
 namespace boost { namespace spirit { namespace x3 { namespace traits {
 template <typename T, typename Attribute, typename Enable>
 struct is_substitute<T&, Attribute&, Enable>
