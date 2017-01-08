@@ -57,6 +57,7 @@ struct direction_name : x3::symbols<directions_e>
             ("NW", NORTHWEST)
             ("SW", SOUTHWEST)
             ("X" , EXACT_POSITION)
+            ("C" , CENTER)
             ;
     }
 } names;

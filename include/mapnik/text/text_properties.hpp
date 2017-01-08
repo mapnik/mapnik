@@ -96,7 +96,8 @@ enum directions_e : std::uint8_t
     SOUTHEAST,
     NORTHWEST,
     SOUTHWEST,
-    EXACT_POSITION
+    EXACT_POSITION,
+    CENTER
 };
 
 using fontset_map = std::map<std::string, font_set>;
