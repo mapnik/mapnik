@@ -62,7 +62,7 @@ pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
     switch (dir)
     {
     case EXACT_POSITION:
-        return pixel_position(dx,dy);
+        return pixel_position(0,0);
         break;
     case NORTH:
         return pixel_position(0,-std::abs(dy));
