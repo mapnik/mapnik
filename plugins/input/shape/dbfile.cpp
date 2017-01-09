@@ -167,7 +167,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
             else
             {
                 // NOTE: null logical fields use '?'
-                f.put(name,false);x
+                f.put(name,false);
             }
             break;
         }
