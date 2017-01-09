@@ -40,9 +40,9 @@ public:
         what_( what )
     {}
 
-    virtual ~value_error() throw() {}
+    virtual ~value_error() {}
 
-    virtual const char * what() const throw()
+    virtual const char * what() const noexcept
     {
         return what_.c_str();
     }

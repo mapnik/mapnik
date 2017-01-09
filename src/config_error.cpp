@@ -37,7 +37,7 @@ config_error::config_error(std::string const& what,
 {
 }
 
-char const* config_error::what() const throw()
+char const* config_error::what() const noexcept
 {
     msg_ = what_;
     if (!node_name_.empty())

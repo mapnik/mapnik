@@ -44,7 +44,7 @@ raster_info::raster_info(const raster_info& rhs)
 {
 }
 
-void raster_info::swap(raster_info& other) //throw()
+void raster_info::swap(raster_info& other)
 {
     std::swap(file_,other.file_);
     std::swap(format_,other.format_);
