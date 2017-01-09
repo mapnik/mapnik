@@ -96,7 +96,7 @@ public:
     void get_control_points(double &x1, double &y1, double &x2, double &y2) const;
 
 private:
-    void swap(gradient& other) throw();
+    void swap(gradient& other) noexcept;
 };
 }
 

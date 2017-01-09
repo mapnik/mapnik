@@ -56,9 +56,9 @@ public:
     image_writer_exception(std::string const& message)
         : message_(message) {}
 
-    ~image_writer_exception() throw() {}
+    ~image_writer_exception(){}
 
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return message_.c_str();
     }

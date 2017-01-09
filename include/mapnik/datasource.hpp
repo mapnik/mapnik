@@ -46,14 +46,11 @@ class MAPNIK_DECL datasource_exception : public std::exception
 public:
     datasource_exception(std::string const& message)
       : message_(message)
-    {
-    }
+    {}
 
-    ~datasource_exception() throw()
-    {
-    }
+    ~datasource_exception() {}
 
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return message_.c_str();
     }

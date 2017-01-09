@@ -38,9 +38,9 @@ public:
     svg_parser_exception(std::string const& message)
       : message_(message) {}
 
-    ~svg_parser_exception() throw() {}
+    ~svg_parser_exception() {}
 
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return message_.c_str();
     }

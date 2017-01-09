@@ -41,10 +41,8 @@ public:
     config_error(std::string const& what,
                  unsigned line_number,
                  std::string const& filename);
-    virtual ~config_error() throw() {}
-
-    virtual const char * what() const throw();
-
+    virtual ~config_error() {}
+    virtual const char * what() const noexcept;
     void append_context(std::string const& ctx) const;
     void append_context(std::string const& ctx, xml_node const& node) const;
     void append_context(xml_node const& node) const;
