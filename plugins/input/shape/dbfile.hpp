@@ -77,7 +77,7 @@ public:
     field_descriptor const& descriptor(int col) const;
     void move_to(int index);
     std::string string_value(int col) const;
-    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const throw();
+    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const;
 private:
     void read_header();
     int read_short();
