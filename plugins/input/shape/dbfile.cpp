@@ -137,7 +137,7 @@ const field_descriptor& dbf_file::descriptor(int col) const
 }
 
 
-void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const throw()
+void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const
 {
     using namespace boost::spirit;
 
@@ -167,7 +167,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
             else
             {
                 // NOTE: null logical fields use '?'
-                f.put(name,false);
+                f.put(name,false);x
             }
             break;
         }
