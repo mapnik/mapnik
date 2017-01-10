@@ -151,7 +151,6 @@ auto const transform_node_rule_def = matrix | translate  | scale | rotate | skew
 // number or attribute
 auto const atom = x3::rule<class atom_tag, expr_node> {} = double_[create_expr_node]
     ;
-// FIXME - ^ add feature attribute support e.g attr [ _val = construct<mapnik::attribute>(_1) ];
 
 auto const sep_atom = x3::rule<class sep_atom_tag, expr_node> {} = -lit(',') >> double_[create_expr_node]
     ;
