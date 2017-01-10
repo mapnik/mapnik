@@ -33,30 +33,6 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #pragma GCC diagnostic pop
 
-// adapt transform nodes
-// martrix
-BOOST_FUSION_ADAPT_STRUCT(mapnik::matrix_node,
-                          (mapnik::expr_node, a_)
-                          (mapnik::expr_node, b_)
-                          (mapnik::expr_node, c_)
-                          (mapnik::expr_node, d_)
-                          (mapnik::expr_node, e_)
-                          (mapnik::expr_node, f_))
-// translate
-BOOST_FUSION_ADAPT_STRUCT(mapnik::translate_node,
-                          (mapnik::expr_node, tx_)
-                          (mapnik::expr_node, ty_))
-
-// scale
-BOOST_FUSION_ADAPT_STRUCT(mapnik::scale_node,
-                          (mapnik::expr_node, sx_)
-                          (mapnik::expr_node, sy_))
-
-// rotate
-BOOST_FUSION_ADAPT_STRUCT(mapnik::rotate_node,
-                          (mapnik::expr_node, angle_)
-                          (mapnik::expr_node, cx_)
-                          (mapnik::expr_node, cy_))
 // skewX
 BOOST_FUSION_ADAPT_STRUCT(mapnik::skewX_node,
                           (mapnik::expr_node, angle_))
@@ -94,82 +70,146 @@ inline void move_to<mapnik::skewY_node, mapnik::detail::transform_node>(mapnik::
 
 namespace mapnik { namespace grammar {
 
-    namespace x3 = boost::spirit::x3;
-    namespace ascii = boost::spirit::x3::ascii;
+namespace x3 = boost::spirit::x3;
+namespace ascii = boost::spirit::x3::ascii;
 
-    // [http://www.w3.org/TR/SVG/coords.html#TransformAttribute]
+// [http://www.w3.org/TR/SVG/coords.html#TransformAttribute]
 
-    // The value of the ‘transform’ attribute is a <transform-list>, which
-    // is defined as a list of transform definitions, which are applied in
-    // the order provided.  The individual transform definitions are
-    // separated by whitespace and/or a comma.
+// The value of the ‘transform’ attribute is a <transform-list>, which
+// is defined as a list of transform definitions, which are applied in
+// the order provided.  The individual transform definitions are
+// separated by whitespace and/or a comma.
 
-    using x3::double_;
-    using x3::no_skip;
-    using x3::no_case;
-    using x3::lit;
+using x3::double_;
+using x3::no_skip;
+using x3::no_case;
+using x3::lit;
 
-    // starting rule
-    transform_expression_grammar_type const transform("transform");
-    // rules
-    x3::rule<class transform_list_class, mapnik::transform_list> transform_list_rule("transform list");
-    x3::rule<class transform_node_class, mapnik::transform_node> transform_node_rule("transform node");
-    x3::rule<class matrix_node_class, mapnik::matrix_node> matrix("matrix node");
-    x3::rule<class translate_node_class, mapnik::translate_node> translate("translate node");
-    x3::rule<class scale_node_class, mapnik::scale_node> scale("scale node");
-    x3::rule<class rotate_node_class, mapnik::rotate_node> rotate("rotate node");
-    x3::rule<class skewX_node_class, mapnik::skewX_node> skewX("skew X node");
-    x3::rule<class skewY_node_class, mapnik::skewY_node> skewY("skew Y node");
+auto const create_expr_node = [](auto const& ctx)
+{
+    _val(ctx) = _attr(ctx);
+};
 
-    // Import the expression rule
-    namespace { auto const& expr = expression_grammar(); }
+auto const construct_matrix = [] (auto const& ctx)
+{
+    auto const& attr = _attr(ctx);
+    auto const& a = boost::fusion::at<boost::mpl::int_<0>>(attr);
+    auto const& b = boost::fusion::at<boost::mpl::int_<1>>(attr);
+    auto const& c = boost::fusion::at<boost::mpl::int_<2>>(attr);
+    auto const& d = boost::fusion::at<boost::mpl::int_<3>>(attr);
+    auto const& e = boost::fusion::at<boost::mpl::int_<4>>(attr);
+    auto const& f = boost::fusion::at<boost::mpl::int_<5>>(attr);
+    _val(ctx) = mapnik::matrix_node(a, b, c, d, e, f);
+};
 
-    // start
-    auto const transform_def = transform_list_rule;
+auto const construct_translate = [](auto const& ctx)
+{
+    auto const& attr = _attr(ctx);
+    auto const& dx = boost::fusion::at<boost::mpl::int_<0>>(attr);
+    auto const& dy = boost::fusion::at<boost::mpl::int_<1>>(attr); //optional
+    _val(ctx) = mapnik::translate_node(dx, dy);
+};
 
-    auto const transform_list_rule_def = transform_node_rule % *lit(',');
+auto const construct_scale = [](auto const& ctx)
+{
+    auto const& attr = _attr(ctx);
+    auto const& sx = boost::fusion::at<boost::mpl::int_<0>>(attr);
+    auto const& sy = boost::fusion::at<boost::mpl::int_<1>>(attr); //optional
+    _val(ctx) = mapnik::scale_node(sx, sy);
+};
 
-    auto const transform_node_rule_def = matrix | translate  | scale | rotate | skewX | skewY ;
+auto const construct_rotate = [](auto const& ctx)
+{
+    auto const& attr = _attr(ctx);
+    auto const& a = boost::fusion::at<boost::mpl::int_<0>>(attr);
+    auto const& sx = boost::fusion::at<boost::mpl::int_<1>>(attr); //optional
+    auto const& sy = boost::fusion::at<boost::mpl::int_<2>>(attr); //optional
+    _val(ctx) = mapnik::rotate_node(a, sx, sy);
+};
 
-    // matrix(<a> <b> <c> <d> <e> <f>)
-    auto const matrix_def = no_case[lit("matrix")]
-        > '(' > expr > ',' >  expr > ',' > expr > ',' > expr > ',' > expr > ',' > expr > ')'
-        ;
+// starting rule
+transform_expression_grammar_type const transform("transform");
+// rules
+x3::rule<class transform_list_class, mapnik::transform_list> transform_list_rule("transform list");
+x3::rule<class transform_node_class, mapnik::transform_node> transform_node_rule("transform node");
+x3::rule<class matrix_node_class, mapnik::matrix_node> matrix("matrix node");
+x3::rule<class translate_node_class, mapnik::translate_node> translate("translate node");
+x3::rule<class scale_node_class, mapnik::scale_node> scale("scale node");
+x3::rule<class rotate_node_class, mapnik::rotate_node> rotate("rotate node");
+x3::rule<class skewX_node_class, mapnik::skewX_node> skewX("skew X node");
+x3::rule<class skewY_node_class, mapnik::skewY_node> skewY("skew Y node");
+x3::rule<class expr_tag, mapnik::expr_node> expr("Expression");
+x3::rule<class sep_expr_tag, mapnik::expr_node> sep_expr("Separated Expression");
 
-    // translate(<tx> [<ty>])
-    auto const translate_def = no_case[lit("translate")]
-        > '(' > expr > -(',' > expr )  > ')'
-        ;
+// start
+auto const transform_def = transform_list_rule;
 
-    // scale(<sx> [<sy>])
-    auto const scale_def = no_case[lit("scale")]
-        > '(' > expr >  -(',' > expr )  > ')'
-        ;
+auto const transform_list_rule_def = transform_node_rule % *lit(',');
 
-    // rotate(<rotate-angle> [<cx> <cy>])
-    auto const rotate_def = no_case[lit("rotate")]
-        > '(' > expr > -(',' > expr > ',' > expr) > ')'
-        ;
+auto const transform_node_rule_def = matrix | translate  | scale | rotate | skewX | skewY ;
 
-    // skewX(<skew-angle>)
-    auto const skewX_def = no_case[lit("skewX")]
-        > '(' > expr > ')';
+// number or attribute
+auto const atom = x3::rule<class atom_tag, expr_node> {} = double_[create_expr_node]
+    ;
+// FIXME - ^ add feature attribute support e.g attr [ _val = construct<mapnik::attribute>(_1) ];
 
-    // skewY(<skew-angle>)
-    auto const skewY_def = no_case[lit("skewY")]
-        > '(' >  expr  > ')';
+auto const sep_atom = x3::rule<class sep_atom_tag, expr_node> {} = -lit(',') >> double_[create_expr_node]
+    ;
 
+auto const expr_def = expression_grammar();
+// Individual arguments in lists containing one or more compound
+// expressions are separated by a comma.
+auto const sep_expr_def = lit(',') > expr
+    ;
 
-    BOOST_SPIRIT_DEFINE (
-        transform,
-        transform_list_rule,
-        transform_node_rule,
-        matrix,
-        translate,
-        scale,
-        rotate,
-        skewX,
-        skewY);
+// matrix(<a> <b> <c> <d> <e> <f>)
+auto const matrix_def = no_case[lit("matrix")] > '('
+    > ((atom >> sep_atom >> sep_atom >> sep_atom >> sep_atom >> sep_atom >> lit(')'))[construct_matrix]
+       |
+       (expr > sep_expr > sep_expr > sep_expr > sep_expr > sep_expr > lit(')'))[construct_matrix])
+    ;
+
+// translate(<tx> [<ty>])
+auto const translate_def = no_case[lit("translate")] > lit('(')
+    > (( atom >> -sep_atom  >> lit(')'))[construct_translate]
+       |
+       ( expr > -sep_expr > lit(')'))[construct_translate]
+        );
+
+// scale(<sx> [<sy>])
+auto const scale_def = no_case[lit("scale")] > lit('(')
+    > (( atom >> -sep_atom  >> lit(')'))[construct_scale]
+       |
+       ( expr > -sep_expr > lit(')'))[construct_scale]
+        );
+
+// rotate(<rotate-angle> [<cx> <cy>])
+auto const rotate_def = no_case[lit("rotate")] > lit('(')
+    > ((atom >> -sep_atom >> -sep_atom >>  lit(')'))[construct_rotate]
+       |
+       (expr > -sep_expr > -sep_expr > lit(')'))[construct_rotate]
+        );
+
+// skewX(<skew-angle>)
+auto const skewX_def = no_case[lit("skewX")]
+    > '(' > expr > ')';
+
+// skewY(<skew-angle>)
+auto const skewY_def = no_case[lit("skewY")]
+    > '(' >  expr  > ')';
+
+BOOST_SPIRIT_DEFINE (
+    expr,
+    sep_expr,
+    transform,
+    transform_list_rule,
+    transform_node_rule,
+    matrix,
+    translate,
+    scale,
+    rotate,
+    skewX,
+    skewY);
 
 }} // ns
 
