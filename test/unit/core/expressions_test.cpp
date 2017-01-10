@@ -125,9 +125,9 @@ TEST_CASE("expressions")
 
     // geometry types
     TRY_CHECK(eval(" [mapnik::geometry_type] = point ") == true);
-    TRY_CHECK(eval(" [mapnik::geometry_type] <> linestring ") == true);
-    TRY_CHECK(eval(" [mapnik::geometry_type] != polygon ") == true);
-    TRY_CHECK(eval(" [mapnik::geometry_type] neq collection ") == true);
+    TRY_CHECK(eval(" [ mapnik::geometry_type] <> linestring ") == true);
+    TRY_CHECK(eval(" [mapnik::geometry_type ] != polygon ") == true);
+    TRY_CHECK(eval(" [ mapnik::geometry_type ] neq collection ") == true);
     TRY_CHECK(eval(" [mapnik::geometry_type] eq collection ") == false);
 
     //unary expression
