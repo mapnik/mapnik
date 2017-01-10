@@ -77,17 +77,20 @@ namespace mapnik { namespace grammar {
 
     auto do_attribute = [] (auto const& ctx)
     {
-        _val(ctx) = std::move(attribute(_attr(ctx)));
+        auto & attr = _attr(ctx);
+        if (attr == "mapnik::geometry_type")
+        {
+            _val(ctx) = std::move(geometry_type_attribute());
+        }
+        else
+        {
+            _val(ctx) = std::move(attribute(attr));
+        }
     };
 
     auto do_global_attribute = [] (auto const& ctx)
     {
         _val(ctx) = std::move(global_attribute(_attr(ctx)));
-    };
-
-    auto do_geometry_type_attribute = [] (auto const& ctx)
-    {
-        _val(ctx) = std::move(geometry_type_attribute());
     };
 
     auto do_add = [] (auto const& ctx)
@@ -386,8 +389,6 @@ namespace mapnik { namespace grammar {
         float_const[do_assign]
         |
         quoted_string[do_unicode]
-        |
-        lit("[mapnik::geometry_type]")[do_geometry_type_attribute]
         |
         feature_attr[do_attribute]
         |
