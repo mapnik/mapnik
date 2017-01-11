@@ -20,6 +20,9 @@ TEST_CASE("transform-expressions")
     CHECK(test_transform_expressions("matrix( 1,2,3,4,5, 6)", "matrix(1, 2, 3, 4, 5, 6)"));
     CHECK(test_transform_expressions("matrix(1 2 3 4 5  6)", "matrix(1, 2, 3, 4, 5, 6)"));
     CHECK(test_transform_expressions("matrix(1,2,3,4,5,4*2-1)", "matrix(1, 2, 3, 4, 5, (4*2-1))"));
+    CHECK(test_transform_expressions("matrix(1,2,3,4,5,[value])", "matrix(1, 2, 3, 4, 5, [value])"));
+    CHECK(test_transform_expressions("matrix(1,2,@value,4,5,6)", "matrix(1, 2, @value, 4, 5, 6)"));
+    CHECK(test_transform_expressions("matrix(1,2,3,4,5,@value)", "matrix(1, 2, 3, 4, 5, @value)"));
 
     // translate
     CHECK(test_transform_expressions("translate(100)", "translate(100)"));
@@ -53,5 +56,5 @@ TEST_CASE("transform-expressions")
 
     // compound
     CHECK(test_transform_expressions("translate([tx]) rotate([a])", "translate([tx]) rotate([a])"));
-    CHECK(test_transform_expressions("rotate(30+[a]) scale(2*[sx],[sy])", "rotate((30+[a])) scale(2*[sx], [sy])"));
+    CHECK(test_transform_expressions("rotate(30+@value) scale(2*[sx],[sy])", "rotate((30+@value)) scale(2*[sx], [sy])"));
 }
