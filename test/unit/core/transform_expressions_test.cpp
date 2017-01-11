@@ -56,5 +56,5 @@ TEST_CASE("transform-expressions")
 
     // compound
     CHECK(test_transform_expressions("translate([tx]) rotate([a])", "translate([tx]) rotate([a])"));
-    CHECK(test_transform_expressions("rotate(30+@value) scale(2*[sx],[sy])", "rotate((30+@value)) scale(2*[sx], [sy])"));
+    CHECK(test_transform_expressions("rotate(30+@global_value) scale(2*[sx],[sy])", "rotate((30+@global_value)) scale(2*[sx], [sy])"));
 }
