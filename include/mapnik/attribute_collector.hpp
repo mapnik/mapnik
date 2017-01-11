@@ -24,7 +24,7 @@
 #define MAPNIK_ATTRIBUTE_COLLECTOR_HPP
 
 // mapnik
-#include <mapnik/transform_processor.hpp>
+#include <mapnik/transform/transform_processor.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer.hpp>

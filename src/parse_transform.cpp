@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#include <mapnik/parse_transform.hpp>
-#include <mapnik/transform_expression_grammar_x3.hpp>
+#include <mapnik/transform/parse_transform.hpp>
+#include <mapnik/transform/transform_expression_grammar_x3.hpp>
 #include <mapnik/expression_grammar_x3_config.hpp> // transcoder_tag
 #include <mapnik/config_error.hpp>
 // stl

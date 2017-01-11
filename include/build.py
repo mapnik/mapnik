@@ -38,6 +38,7 @@ subdirs = [
     'text',
     'text/placements',
     'text/formatting',
+    'transform',
     'markers_placements',
     'geometry',
     'value'

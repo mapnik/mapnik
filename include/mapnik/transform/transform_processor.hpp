@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/transform/transform_expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/util/variant.hpp>
 

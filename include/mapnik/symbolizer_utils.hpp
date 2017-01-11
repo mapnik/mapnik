@@ -30,13 +30,13 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/transform_processor.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
-#include <mapnik/parse_transform.hpp>
+#include <mapnik/transform/transform_processor.hpp>
+#include <mapnik/transform/parse_transform.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/variant.hpp>
 

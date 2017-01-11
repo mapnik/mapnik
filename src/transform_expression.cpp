@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/expression_string.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/transform/transform_expression.hpp>
 
 // stl
 #include <sstream>

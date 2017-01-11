@@ -39,7 +39,7 @@
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/parse_transform.hpp>
+#include <mapnik/transform/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/text/placements/registry.hpp>
@@ -55,7 +55,7 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/group/group_rule.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/transform/transform_expression.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/boolean.hpp>
 

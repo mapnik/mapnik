@@ -23,7 +23,7 @@
 #ifndef MAPNIK_TRANSFORM_GRAMMAR_X3_HPP
 #define MAPNIK_TRANSFORM_GRAMMAR_X3_HPP
 
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/transform/transform_expression.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

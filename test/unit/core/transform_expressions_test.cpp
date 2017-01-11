@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
-#include <mapnik/parse_transform.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/transform/parse_transform.hpp>
+#include <mapnik/transform/transform_expression.hpp>
 
 namespace {
 

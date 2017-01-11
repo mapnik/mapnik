@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/transform_expression_grammar_x3_def.hpp>
+#include <mapnik/transform/transform_expression_grammar_x3_def.hpp>
 #include <mapnik/expression_grammar_x3_config.hpp>
 
 namespace mapnik { namespace grammar {

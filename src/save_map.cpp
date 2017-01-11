@@ -41,7 +41,7 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer_utils.hpp>
-#include <mapnik/transform_processor.hpp>
+#include <mapnik/transform/transform_processor.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
