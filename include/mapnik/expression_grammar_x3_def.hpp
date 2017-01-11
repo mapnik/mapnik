@@ -348,7 +348,7 @@ namespace mapnik { namespace grammar {
              ('-' > multiplicative_expression[do_subt]));
 
     auto const feature_attr = lexeme['[' > +~char_(']') > ']'];
-    auto const global_attr = x3::rule<class global_attr, std::string> {} = lexeme[lit('@') > alpha > *alnum];
+    auto const global_attr = x3::rule<class global_attr, std::string> {} = lexeme[lit('@') > char_("a-zA-Z_") > *char_("a-zA-Z0-9_")];
 
     auto const regex_match_expression_def = lit(".match") > '(' > quoted_string > ')';
     auto const regex_replace_expression_def = lit(".replace") > '(' > quoted_string > ',' > quoted_string > ')';
