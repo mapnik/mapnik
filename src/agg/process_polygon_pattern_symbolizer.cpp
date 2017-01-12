@@ -118,9 +118,9 @@ private:
 
         box2d<double> clip_box = clipping_extent(common_);
 
-        using color = agg::rgba8;
+        using col = agg::rgba8;
         using order = agg::order_rgba;
-        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<col, order>;
         using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
 
         using wrap_x_type = agg::wrap_mode_repeat;

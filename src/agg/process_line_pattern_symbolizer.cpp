@@ -96,9 +96,9 @@ struct agg_renderer_process_visitor_l
 private:
     void render(mapnik::image_rgba8 const& marker, double width, double height) const
     {
-        using color = agg::rgba8;
+        using col = agg::rgba8;
         using order = agg::order_rgba;
-        using blender_type = agg::comp_op_adaptor_rgba_pre<color, order>;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<col, order>;
         using pattern_filter_type = agg::pattern_filter_bilinear_rgba8;
         using pattern_type = agg::line_image_pattern<pattern_filter_type>;
         using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
