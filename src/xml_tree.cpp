@@ -346,16 +346,16 @@ boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
 template <typename T>
 T xml_node::get_attr(std::string const& name, T const& default_opt_value) const
 {
-    boost::optional<T> value = get_opt_attr<T>(name);
-    if (value) return *value;
+    boost::optional<T> val = get_opt_attr<T>(name);
+    if (val) return *val;
     return default_opt_value;
 }
 
 template <typename T>
 T xml_node::get_attr(std::string const& name) const
 {
-    boost::optional<T> value = get_opt_attr<T>(name);
-    if (value) return *value;
+    boost::optional<T> val = get_opt_attr<T>(name);
+    if (val) return *val;
     throw attribute_not_found(name_, name);
 }
 

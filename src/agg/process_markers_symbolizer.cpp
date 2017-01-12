@@ -56,7 +56,6 @@ struct agg_markers_renderer_context : markers_renderer_context
 {
     using renderer_base = typename SvgRenderer::renderer_base;
     using vertex_source_type = typename SvgRenderer::vertex_source_type;
-    using attribute_source_type = typename SvgRenderer::attribute_source_type;
     using pixfmt_type = typename renderer_base::pixfmt_type;
 
     agg_markers_renderer_context(symbolizer_base const& sym,
@@ -117,7 +116,6 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-    using svg_attribute_type = agg::pod_bvector<path_attributes>;
     using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
                                                svg_attribute_type,
                                                renderer_type,
