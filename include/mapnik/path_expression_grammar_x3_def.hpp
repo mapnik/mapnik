@@ -41,7 +41,7 @@ x3::rule<class str_expression, std::string> const str_expression("string");
 
 auto const attr_expression_def = +(char_ - ']');
 auto const str_expression_def = lexeme[+(char_ -'[')];
-auto const path_expression_def = *(str_expression[create_string] | '[' > attr_expression[create_attribute] > ']');
+auto const path_expression_def = *(str_expression[create_string] | ('[' > attr_expression[create_attribute] > ']'));
 
 BOOST_SPIRIT_DEFINE(
     path_expression,
