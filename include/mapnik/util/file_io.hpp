@@ -83,11 +83,8 @@ public:
         if (!size_) return nullptr;
         std::fseek(file_.get(), 0, SEEK_SET);
         data_type buffer(new char[size_]);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wunused-result"
-        std::fread(buffer.get(), size_, 1, file_.get());
-#pragma GCC diagnostic pop
+        auto count = std::fread(buffer.get(), size_, 1, file_.get());
+        if (count != 1) return nullptr;
         return buffer;
     }
 private:
