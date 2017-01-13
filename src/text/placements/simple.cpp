@@ -91,8 +91,8 @@ bool parse_positions(std::string const& evaluated_positions,
 
 text_placement_info_simple::text_placement_info_simple(text_placements_simple const* parent,
                            std::string const& evaluated_positions,
-                           double scale_factor)
-: text_placement_info(parent, scale_factor),
+                           double scale_factor_)
+: text_placement_info(parent, scale_factor_),
   state(0),
   position_state(0),
   direction_(parent->direction_),
@@ -136,10 +136,10 @@ bool text_placement_info_simple::next_position_only() const
     return true;
 }
 
-text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const
+text_placement_info_ptr text_placements_simple::get_placement_info(double scale_factor_, feature_impl const& feature, attributes const& vars) const
 {
     std::string evaluated_positions = util::apply_visitor(extract_value<std::string>(feature,vars), positions_);
-    return std::make_shared<text_placement_info_simple>(this, evaluated_positions, scale_factor);
+    return std::make_shared<text_placement_info_simple>(this, evaluated_positions, scale_factor_);
 }
 
 text_placements_simple::text_placements_simple(symbolizer_base::value_type const& positions)

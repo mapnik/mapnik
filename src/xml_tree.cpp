@@ -230,9 +230,9 @@ xml_node & xml_node::add_child(const char * name, unsigned line, bool is_text)
     return children_.back();
 }
 
-void xml_node::add_attribute(const char * name, const char * value)
+void xml_node::add_attribute(const char * name, const char * value_)
 {
-    auto result = attributes_.emplace(name,xml_attribute(value));
+    auto result = attributes_.emplace(name,xml_attribute(value_));
     if (!result.second)
     {
         MAPNIK_LOG_ERROR(xml_tree) << "ignoring duplicate attribute '" << name << "'";

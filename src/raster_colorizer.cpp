@@ -48,10 +48,10 @@ static const char *colorizer_mode_strings[] = {
 IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings )
 
 
-colorizer_stop::colorizer_stop(float value, colorizer_mode mode,
+colorizer_stop::colorizer_stop(float val, colorizer_mode mode,
                                color const& _color,
                                std::string const& label)
-: value_(value)
+: value_(val)
     , mode_(mode)
     , color_(_color)
     , label_(label)
@@ -135,14 +135,14 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
     int len = out.width() * out.height();
     for (int i=0; i<len; ++i)
     {
-        pixel_type value = in_data[i];
-        if (nodata && (std::fabs(value - *nodata) < epsilon_))
+        pixel_type val = in_data[i];
+        if (nodata && (std::fabs(val - *nodata) < epsilon_))
         {
             out_data[i] = 0; // rgba(0,0,0,0)
         }
         else
         {
-            out_data[i] = get_color(value);
+            out_data[i] = get_color(val);
         }
     }
 }
@@ -152,7 +152,7 @@ inline unsigned interpolate(unsigned start, unsigned end, float fraction)
     return static_cast<unsigned>(fraction * (static_cast<float>(end) - static_cast<float>(start)) + static_cast<float>(start));
 }
 
-unsigned raster_colorizer::get_color(float value) const
+unsigned raster_colorizer::get_color(float val) const
 {
     int stopCount = stops_.size();
 
@@ -162,13 +162,13 @@ unsigned raster_colorizer::get_color(float value) const
         return default_color_.rgba();
     }
 
-    //1 - Find the stop that the value is in
+    //1 - Find the stop that the val is in
     int stopIdx = -1;
     bool foundStopIdx = false;
 
     for(int i=0; i<stopCount; ++i)
     {
-        if(value < stops_[i].get_value())
+        if (val < stops_[i].get_value())
         {
             stopIdx = i-1;
             foundStopIdx = true;
@@ -215,7 +215,7 @@ unsigned raster_colorizer::get_color(float value) const
     {
         stopColor = default_color_;
         nextStopColor = stops_[nextStopIdx].get_color();
-        stopValue = value;
+        stopValue = val;
         nextStopValue = stops_[nextStopIdx].get_value();
     }
     else
@@ -237,7 +237,7 @@ unsigned raster_colorizer::get_color(float value) const
         }
         else
         {
-            float fraction = (value - stopValue) / (nextStopValue - stopValue);
+            float fraction = (val - stopValue) / (nextStopValue - stopValue);
 
             unsigned r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
             unsigned g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
@@ -258,7 +258,7 @@ unsigned raster_colorizer::get_color(float value) const
     case COLORIZER_EXACT:
     default:
         //approximately equal (within epsilon)
-        if(std::fabs(value - stopValue) < epsilon_)
+        if (std::fabs(val - stopValue) < epsilon_)
         {
             outputColor = stopColor;
         }
@@ -271,7 +271,7 @@ unsigned raster_colorizer::get_color(float value) const
 
 
     /*
-      MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << value;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << val;
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopIdx: " << stopIdx;
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopIdx: " << nextStopIdx;
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopValue: " << stopValue;

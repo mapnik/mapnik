@@ -1483,32 +1483,32 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                 colorizer_mode mode = n.get_attr<colorizer_mode>("mode", COLORIZER_INHERIT);
 
                 // value is required, and it must be bigger than the previous
-                optional<float> value = n.get_opt_attr<float>("value");
+                optional<float> val = n.get_opt_attr<float>("value");
 
-                if(!value)
+                if (!val)
                 {
                     throw config_error("stop tag missing value");
                 }
 
-                if(value < maximumValue)
+                if (val < maximumValue)
                 {
                     throw config_error("stop tag values must be in ascending order");
                 }
-                maximumValue = *value;
+                maximumValue = *val;
 
                 optional<std::string> label = n.get_opt_attr<std::string>("label");
 
                 //append the stop
-                colorizer_stop tmpStop;
-                tmpStop.set_color(*stopcolor);
-                tmpStop.set_mode(mode);
-                tmpStop.set_value(*value);
+                colorizer_stop stop;
+                stop.set_color(*stopcolor);
+                stop.set_mode(mode);
+                stop.set_value(*val);
                 if (label)
                 {
-                    tmpStop.set_label(*label);
+                    stop.set_label(*label);
                 }
 
-                rc->add_stop(tmpStop);
+                rc->add_stop(stop);
             }
         }
     }
