@@ -252,9 +252,9 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     }
     std::string file_buffer;
     file_buffer.resize(file.size());
-    std::fread(&file_buffer[0], file.size(), 1, file.get());
+    auto count = std::fread(&file_buffer[0], file.size(), 1, file.get());
     base_iterator_type start = file_buffer.c_str();
-    base_iterator_type end = start + file_buffer.length();
+    base_iterator_type end = (count == 1) ? start + file_buffer.length() : start;
 #endif
     base_iterator_type itr = start; // make a copy to preserve `start` iterator state
     try

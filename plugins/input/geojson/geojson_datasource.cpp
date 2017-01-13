@@ -155,9 +155,9 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
         std::string file_buffer;
         file_buffer.resize(file.size());
-        std::fread(&file_buffer[0], file.size(), 1, file.get());
+        auto count = std::fread(&file_buffer[0], file.size(), 1, file.get());
         char const* start = file_buffer.c_str();
-        char const* end = start + file_buffer.length();
+        char const* end = (count == 1) ? start + file_buffer.length() : start;
 #else
         boost::optional<mapnik::mapped_region_ptr> mapped_region =
             mapnik::mapped_memory_cache::instance().find(filename_, false);
@@ -226,9 +226,9 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
         std::fseek(file.get(), pos.first, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        std::fread(record.data(), pos.second, 1, file.get());
+        auto count = std::fread(record.data(), pos.second, 1, file.get());
         auto const* start = record.data();
-        auto const*  end = start + record.size();
+        auto const*  end = (count == 1) ? start + record.size() : start;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1));
         try
         {
@@ -471,9 +471,9 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             std::fseek(file.get(), pos.first, SEEK_SET);
             std::vector<char> record;
             record.resize(pos.second);
-            std::fread(record.data(), pos.second, 1, file.get());
+            auto count = std::fread(record.data(), pos.second, 1, file.get());
             auto const* start = record.data();
-            auto const*  end = start + record.size();
+            auto const*  end = (count == 1) ? start + record.size() : start;
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp feature
             try
             {
@@ -533,11 +533,10 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             std::fseek(file.get(), file_offset, SEEK_SET);
             std::vector<char> json;
             json.resize(size);
-            std::fread(json.data(), size, 1, file.get());
-
+            auto count_objects = std::fread(json.data(), size, 1, file.get());
             using chr_iterator_type = char const*;
             chr_iterator_type start2 = json.data();
-            chr_iterator_type end2 = start2 + json.size();
+            chr_iterator_type end2 = (count_objects == 1) ? start2 + json.size() : start2;
 
             mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp feature
             try

@@ -171,8 +171,8 @@ topojson_datasource::topojson_datasource(parameters const& params)
         }
         std::string file_buffer;
         file_buffer.resize(file.size());
-        std::fread(&file_buffer[0], file.size(), 1, file.get());
-        parse_topojson(file_buffer.c_str());
+        auto count = std::fread(&file_buffer[0], file.size(), 1, file.get());
+        if (count == 1) parse_topojson(file_buffer.c_str());
     }
 }
 

@@ -61,10 +61,10 @@ mapnik::feature_ptr geojson_memory_index_featureset::next()
         std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> json;
         json.resize(size);
-        std::fread(json.data(), size, 1, file_.get());
+        auto count = std::fread(json.data(), size, 1, file_.get());
         using chr_iterator_type = char const*;
         chr_iterator_type start = json.data();
-        chr_iterator_type end = start + json.size();
+        chr_iterator_type end = (count == 1) ? start + json.size() : start;
         static const mapnik::transcoder tr("utf8");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
         mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure

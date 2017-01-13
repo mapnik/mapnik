@@ -87,9 +87,9 @@ mapnik::feature_ptr geojson_index_featureset::next()
         std::fseek(file_.get(), pos.first, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        std::fread(record.data(), pos.second, 1, file_.get());
+        auto count = std::fread(record.data(), pos.second, 1, file_.get());
         auto const* start = record.data();
-        auto const*  end = start + record.size();
+        auto const*  end = (count == 1) ? start + record.size() : start;
 #endif
         static const mapnik::transcoder tr("utf8");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
