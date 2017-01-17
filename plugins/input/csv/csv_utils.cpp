@@ -285,7 +285,10 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
             {
                 auto headers = csv_utils::parse_line(csv_line, separator_, quote_);
                 // skip blank lines
-                if (headers.size() > 0 && headers[0].empty()) ++line_number;
+                if (headers.size() == 1 && headers[0].empty())
+                {
+                    ++line_number;
+                }
                 else
                 {
                     std::size_t index = 0;
@@ -300,7 +303,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
                                 std::ostringstream s;
                                 s << "CSV Plugin: expected a column header at line ";
                                 s << line_number << ", column " << index;
-                                s << " - ensure this row contains valid header fields: '";
+                                s << " - expected fields: '";
                                 s << csv_line;
                                 throw mapnik::datasource_exception(s.str());
                             }
@@ -338,7 +341,6 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
         std::string str("CSV Plugin: could not detect column(s) with the name(s) of wkt, geojson, x/y, or ");
         str += "latitude/longitude in:\n";
         str += csv_line;
-        str += "\n - this is required for reading geometry data";
         throw mapnik::datasource_exception(str);
     }
 
