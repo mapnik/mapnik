@@ -154,6 +154,19 @@ void handle_png_options(std::string const& type,
                 throw image_writer_exception("invalid compression strategy parameter: " + *val);
             }
         }
+        else if (key == "f")
+        {
+            // filters = PNG_NO_FILTERS;
+            // filters = PNG_ALL_FILTERS;
+            // filters = PNG_FAST_FILTERS;
+            // filters = PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP | PNG_FILTER_AVG | PNG_FILTER_PAETH;
+
+            if (!val) throw image_writer_exception("invalid filters parameter: <uninitialised>");
+            if (*val == "no") opts.filters = PNG_NO_FILTERS;
+            else if (*val == "all") opts.filters = PNG_ALL_FILTERS;
+            else if (*val == "fast") opts.filters = PNG_FAST_FILTERS;
+            else opts.filters = parse_png_filters(*val); // none | sub | up | avg | paeth
+        }
         else
         {
             throw image_writer_exception("unhandled png option: " + key);

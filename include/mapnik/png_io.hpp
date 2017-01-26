@@ -48,14 +48,17 @@ namespace mapnik {
 
 struct png_options {
     int colors;
+    int filters;
     int compression;
     int strategy;
     int trans_mode;
     double gamma;
     bool paletted;
     bool use_hextree;
+
     png_options() :
         colors(256),
+        filters(PNG_FILTER_NONE),
         compression(Z_DEFAULT_COMPRESSION),
         strategy(Z_DEFAULT_STRATEGY),
         trans_mode(-1),
@@ -97,7 +100,7 @@ void save_as_png(T1 & file,
     mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
     png_set_asm_flags(png_ptr, flags | mask);
 #endif
-    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, PNG_FILTER_NONE);
+    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, opts.filters);
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
@@ -271,7 +274,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
     png_set_asm_flags(png_ptr, flags | mask);
 #endif
-    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, PNG_FILTER_NONE);
+    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, opts.filters);
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {

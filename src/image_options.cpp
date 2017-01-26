@@ -42,7 +42,7 @@ x3::rule<class key, std::string> const key("key");
 x3::rule<class value, std::string> const value("value");
 
 auto const key_def = char_("a-zA-Z_") > *char_("a-zA-Z_0-9\\.\\-");
-auto const value_def = +char_("a-zA-Z_0-9\\.\\-");
+auto const value_def = +char_("a-zA-Z_0-9\\.\\-|");
 auto const key_value_def = key > -('=' > value);
 auto const image_options_def = key_value % lit(':');
 
@@ -55,17 +55,64 @@ BOOST_SPIRIT_DEFINE(image_options);
 
 image_options_map parse_image_options(std::string const& str)
 {
-     auto const begin = str.begin();
+     auto begin = str.begin();
      auto const end = str.end();
      using boost::spirit::x3::space;
      using mapnik::grammar::image_options;
      image_options_map options;
-     bool success = boost::spirit::x3::phrase_parse(begin, end, image_options, space, options);
-     if (!success)
+     try
      {
-         throw std::runtime_error("Can't parse image options: " + str);
+         bool success = boost::spirit::x3::phrase_parse(begin, end, image_options, space, options);
+         if (!success || begin != end)
+         {
+             throw std::runtime_error("Can't parse image options: " + str);
+         }
+     }
+     catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
+     {
+         throw std::runtime_error("Can't parse image options: " + str + " " + ex.what());
      }
      return options;   // RVO
 }
+
+#if defined(HAVE_PNG)
+extern "C"
+{
+#include <png.h>
+}
+
+int parse_png_filters(std::string const& str)
+{
+    auto begin = str.begin();
+    auto const end = str.end();
+    using boost::spirit::x3::space;
+    using boost::spirit::x3::symbols;
+    symbols<int> filter;
+    filter.add
+        ("none", PNG_FILTER_NONE)
+        ("sub", PNG_FILTER_SUB)
+        ("up", PNG_FILTER_UP)
+        ("avg", PNG_FILTER_AVG)
+        ("paeth", PNG_FILTER_PAETH)
+        ;
+
+    std::vector<int> opts;
+    try
+    {
+        bool success = boost::spirit::x3::phrase_parse(begin, end, filter % "|" , space , opts);
+        if (!success || begin != end)
+        {
+            throw std::runtime_error("Can't parse PNG filters: " + str);
+        }
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
+    {
+        throw std::runtime_error("Can't parse PNG filters: " + str + " " + ex.what());
+    }
+    int filters = 0;
+    std::for_each(opts.begin(), opts.end(), [&filters] (int f) { filters |= f;});
+    return filters;
+}
+#endif
 
 } // ns mapnik
