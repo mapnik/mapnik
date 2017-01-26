@@ -24,7 +24,7 @@
 #define MAPNIK_SVG_STORAGE_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik {

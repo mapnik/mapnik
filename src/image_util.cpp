@@ -32,7 +32,7 @@
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/safe_cast.hpp>

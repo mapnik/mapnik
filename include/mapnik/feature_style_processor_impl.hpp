@@ -33,7 +33,7 @@
 #include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/rule_cache.hpp>

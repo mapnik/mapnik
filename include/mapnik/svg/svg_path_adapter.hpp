@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push

@@ -24,7 +24,7 @@
 #define MAPNIK_GEOMETRY_ENVELOPE_HPP
 
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik {
 namespace geometry {

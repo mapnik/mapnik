@@ -24,7 +24,7 @@
 #define MAPNIK_MEMORY_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/envelope.hpp>
 #include <mapnik/featureset.hpp>

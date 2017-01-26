@@ -25,7 +25,7 @@
 //mapnik
 #include <mapnik/value/types.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/text/text_properties.hpp>

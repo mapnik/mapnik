@@ -166,10 +166,10 @@ source = Split(
     image_copy.cpp
     image_compositing.cpp
     image_scaling.cpp
-    box2d.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
+    geometry/box2d.cpp
     geometry/reprojection.cpp
     geometry/envelope.cpp
     expression_node.cpp

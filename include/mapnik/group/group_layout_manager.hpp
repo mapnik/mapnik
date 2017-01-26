@@ -24,7 +24,7 @@
 #define MAPNIK_GROUP_LAYOUT_MANAGER_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/group/group_layout.hpp>
 

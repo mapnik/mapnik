@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik {
 

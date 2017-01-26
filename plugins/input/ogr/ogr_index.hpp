@@ -28,7 +28,7 @@
 #include <vector>
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/query.hpp>
 
 using mapnik::box2d;

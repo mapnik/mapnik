@@ -29,7 +29,7 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/util/const_rendering_buffer.hpp>
 

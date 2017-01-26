@@ -24,7 +24,7 @@
 #define MAPNIK_CSV_UTILS_DATASOURCE_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/conversions.hpp>

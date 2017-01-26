@@ -31,7 +31,7 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 

@@ -24,7 +24,7 @@
 #define MAPNIK_QUERY_HPP
 
 //mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/attribute.hpp>
 
 // stl

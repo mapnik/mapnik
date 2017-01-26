@@ -30,7 +30,7 @@
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/rule.hpp>              // for rule, symbolizers
-#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/geometry/box2d.hpp>     // for box2d
 #include <mapnik/color.hpp>     // for color
 #include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e

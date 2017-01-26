@@ -27,7 +27,7 @@
 #include <memory>
 #include <ios>
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/spatial_index.hpp>
 // boost

@@ -24,7 +24,7 @@
 #define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/featureset.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor_context.hpp>

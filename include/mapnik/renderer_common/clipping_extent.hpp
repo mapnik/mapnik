@@ -24,7 +24,7 @@
 #define MAPNIK_CLIPPING_EXTENT_HPP
 
 
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik {
 

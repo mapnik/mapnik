@@ -24,7 +24,7 @@
 #define MAPNIK_GRID_VIEW_HPP
 
 #include <mapnik/image.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>

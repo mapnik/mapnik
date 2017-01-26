@@ -28,7 +28,7 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/util/noncopyable.hpp>       // for noncopyable
 #include <mapnik/rule.hpp>              // for rule, symbolizers
-#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/geometry/box2d.hpp>     // for box2d
 #include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>

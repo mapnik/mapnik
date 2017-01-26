@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/well_known_srs.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 // stl
 #include <vector>

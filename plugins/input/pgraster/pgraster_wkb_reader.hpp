@@ -29,7 +29,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp> // for raster_ptr
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 enum pgraster_color_interp {
   // Automatic color interpretation:

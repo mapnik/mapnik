@@ -22,7 +22,7 @@
 
 #include <mapnik/geometry/envelope.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik { namespace geometry {
 

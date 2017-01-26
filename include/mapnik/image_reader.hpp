@@ -28,7 +28,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/factory.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

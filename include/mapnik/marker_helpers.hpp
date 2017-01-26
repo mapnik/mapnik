@@ -32,7 +32,7 @@
 #include <mapnik/marker.hpp> // for svg_storage_type
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/attribute.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>

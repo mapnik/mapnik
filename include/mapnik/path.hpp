@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik { namespace detail {

@@ -24,7 +24,7 @@
 #define MAPNIK_GEOM_UTIL_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry/geometry_types.hpp>

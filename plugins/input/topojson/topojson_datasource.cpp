@@ -32,7 +32,7 @@
 // mapnik
 #include <mapnik/unicode.hpp>
 #include <mapnik/value/types.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/json/topojson_grammar_x3.hpp>
 #include <mapnik/json/topojson_utils.hpp>

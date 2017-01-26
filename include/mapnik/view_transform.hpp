@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/coord.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/proj_transform.hpp>
 
 namespace mapnik

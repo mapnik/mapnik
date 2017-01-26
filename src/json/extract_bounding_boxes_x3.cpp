@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/json/extract_bounding_boxes_x3.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/extract_bounding_boxes_x3_config.hpp>

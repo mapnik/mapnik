@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/box2d_impl.hpp>
+#include <mapnik/geometry/box2d_impl.hpp>
 
 namespace mapnik {
 

@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/image.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/grid/grid_view.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>

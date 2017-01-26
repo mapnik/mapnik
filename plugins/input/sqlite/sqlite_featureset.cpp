@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>

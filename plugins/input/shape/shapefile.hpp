@@ -32,7 +32,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push

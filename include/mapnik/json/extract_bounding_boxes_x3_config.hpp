@@ -24,7 +24,7 @@
 #define MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_CONFIG_HPP
 
 #include <mapnik/json/json_grammar_config.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

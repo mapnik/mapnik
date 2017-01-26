@@ -21,7 +21,7 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/renderer_common/render_pattern.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>

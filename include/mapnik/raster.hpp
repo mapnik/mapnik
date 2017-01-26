@@ -24,7 +24,7 @@
 #define MAPNIK_RASTER_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/image_any.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>

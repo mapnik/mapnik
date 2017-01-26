@@ -24,7 +24,7 @@
 #define MAPNIK_UTILS_PROCESS_CSV_FILE_HPP
 
 #include <utility>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik { namespace detail {
 

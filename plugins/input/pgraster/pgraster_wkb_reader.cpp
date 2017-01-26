@@ -35,7 +35,7 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/box2d.hpp> // for box2d
+#include <mapnik/geometry/box2d.hpp> // for box2d
 #include <functional>
 
 #include <cstdint>

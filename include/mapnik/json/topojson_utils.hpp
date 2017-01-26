@@ -24,7 +24,7 @@
 #define MAPNIK_TOPOJSON_UTILS_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/json/attribute_value_visitor.hpp>

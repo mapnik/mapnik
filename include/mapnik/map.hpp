@@ -28,7 +28,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
