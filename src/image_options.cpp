@@ -28,6 +28,13 @@
 #include <boost/fusion/include/std_pair.hpp>
 #pragma GCC diagnostic pop
 
+#if defined(HAVE_PNG)
+extern "C"
+{
+#include <png.h>
+}
+#endif // HAVE_PNG
+
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
@@ -76,10 +83,6 @@ image_options_map parse_image_options(std::string const& str)
 }
 
 #if defined(HAVE_PNG)
-extern "C"
-{
-#include <png.h>
-}
 
 int parse_png_filters(std::string const& str)
 {
@@ -113,6 +116,7 @@ int parse_png_filters(std::string const& str)
     std::for_each(opts.begin(), opts.end(), [&filters] (int f) { filters |= f;});
     return filters;
 }
-#endif
+
+#endif // HAVE_PNG
 
 } // ns mapnik
