@@ -86,12 +86,12 @@ before_script:
  - source bootstrap.sh
  - |
    if [[ $(uname -s) == 'Linux' ]]; then
-     mason install clang++ 3.9.0
-     export PATH=$(mason prefix clang++ 3.9.0)/bin:${PATH}
-     mason install llvm-cov 3.9.0
-     export PATH=$(mason prefix llvm-cov 3.9.0)/bin:${PATH}
+     mason install clang++ 3.9.1
+     export PATH=$(mason prefix clang++ 3.9.1)/bin:${PATH}
+     mason install llvm-cov 3.9.1
+     export PATH=$(mason prefix llvm-cov 3.9.1)/bin:${PATH}
      which llvm-cov
-     export LLVM_COV="$(mason prefix llvm-cov 3.9.0)/bin/llvm-cov"
+     export LLVM_COV="$(mason prefix llvm-cov 3.9.1)/bin/llvm-cov"
    fi
  - ccache --version
  - ccache -p || true
