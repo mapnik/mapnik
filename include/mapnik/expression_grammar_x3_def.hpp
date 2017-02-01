@@ -120,8 +120,8 @@ namespace mapnik { namespace grammar {
 
     auto do_unicode = [] (auto const& ctx)
     {
-        auto & tr = x3::get<transcoder_tag>(ctx).get();
-        _val(ctx) = std::move(tr.transcode(_attr(ctx).c_str()));
+        auto const& transcode = x3::get<transcoder_tag>(ctx);
+        _val(ctx) = transcode(_attr(ctx));
     };
 
     auto do_null = [] (auto const& ctx)
