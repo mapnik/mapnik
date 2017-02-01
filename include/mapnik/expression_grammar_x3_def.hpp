@@ -49,9 +49,8 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::binary_function_call,
 namespace mapnik { namespace grammar {
 
     namespace x3 = boost::spirit::x3;
-    namespace ascii = boost::spirit::x3::ascii;
-    using ascii::char_;
-    using ascii::string;
+
+    using x3::ascii::char_;
     using x3::lit;
     using x3::double_;
     using x3::int_;

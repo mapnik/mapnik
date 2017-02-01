@@ -71,7 +71,6 @@ inline void move_to<mapnik::skewY_node, mapnik::detail::transform_node>(mapnik::
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
 
 // [http://www.w3.org/TR/SVG/coords.html#TransformAttribute]
 
