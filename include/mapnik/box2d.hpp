@@ -116,6 +116,7 @@ public:
     bool valid() const;
     void move(T x, T y);
     std::string to_string() const;
+    T area() const;
 
     // define some operators
     box2d_type& operator+=(box2d_type const& other);
