@@ -38,11 +38,10 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/regex.hpp>
 #pragma GCC diagnostic pop
 
 // stl
+#include <cfloat> // FLT_MAX
 #include <memory>
 #include <string>
 #include <algorithm>
@@ -52,12 +51,13 @@
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
-const double postgis_datasource::FMAX = std::numeric_limits<float>::max();
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using std::shared_ptr;
 using mapnik::attribute_descriptor;
+using mapnik::sql_utils::identifier;
+using mapnik::sql_utils::literal;
 
 postgis_datasource::postgis_datasource(parameters const& params)
     : datasource(params),
@@ -79,10 +79,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
              params.get<std::string>("user"),
              params.get<std::string>("password"),
              params.get<std::string>("connect_timeout", "4")),
-      bbox_token_("!bbox!"),
-      scale_denom_token_("!scale_denominator!"),
-      pixel_width_token_("!pixel_width!"),
-      pixel_height_token_("!pixel_height!"),
       pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10)),
       persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
       extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
@@ -99,8 +95,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       simplify_prefilter_(*params_.get<mapnik::value_double>("simplify_prefilter", 0.0)),
       simplify_dp_preserve_(false),
       simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0)),
-      // TODO - use for known tokens too: "(@\\w+|!\\w+!)"
-      pattern_(boost::regex("(@\\w+)",boost::regex::normal | boost::regbase::icase)),
+      re_tokens_("!(@?\\w+)!"), // matches  !mapnik_var!  or  !@user_var!
       // params below are for testing purposes only and may be removed at any time
       intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
       intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
@@ -551,43 +546,9 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 
 std::string postgis_datasource::populate_tokens(std::string const& sql) const
 {
-    std::string populated_sql = sql;
-
-    if (boost::algorithm::icontains(sql, bbox_token_))
-    {
-        box2d<double> max_env(-1.0 * FMAX, -1.0 * FMAX, FMAX, FMAX);
-        const std::string max_box = sql_bbox(max_env);
-        boost::algorithm::replace_all(populated_sql, bbox_token_, max_box);
-    }
-
-    if (boost::algorithm::icontains(sql, scale_denom_token_))
-    {
-        std::ostringstream ss;
-        ss << FMAX;
-        boost::algorithm::replace_all(populated_sql, scale_denom_token_, ss.str());
-    }
-
-    if (boost::algorithm::icontains(sql, pixel_width_token_))
-    {
-        boost::algorithm::replace_all(populated_sql, pixel_width_token_, "0");
-    }
-
-    if (boost::algorithm::icontains(sql, pixel_height_token_))
-    {
-        boost::algorithm::replace_all(populated_sql, pixel_height_token_, "0");
-    }
-
-    std::string copy2 = populated_sql;
-    std::list<std::string> l;
-    boost::regex_split(std::back_inserter(l), copy2, pattern_);
-    if (!l.empty())
-    {
-        for (auto const & token: l)
-        {
-            boost::algorithm::replace_all(populated_sql, token, "null");
-        }
-    }
-    return populated_sql;
+    return populate_tokens(sql, FLT_MAX,
+                           box2d<double>(-FLT_MAX, -FLT_MAX, FLT_MAX, FLT_MAX),
+                           0, 0, mapnik::attributes{}, false);
 }
 
 std::string postgis_datasource::populate_tokens(
@@ -596,43 +557,66 @@ std::string postgis_datasource::populate_tokens(
                                 box2d<double> const& env,
                                 double pixel_width,
                                 double pixel_height,
-                                mapnik::attributes const& vars) const
+                                mapnik::attributes const& vars,
+                                bool intersect) const
 {
-    std::string populated_sql = sql;
-    std::string box = sql_bbox(env);
+    std::ostringstream populated_sql;
+    std::cmatch m;
+    char const* start = sql.data();
+    char const* end = start + sql.size();
 
-    if (boost::algorithm::icontains(populated_sql, scale_denom_token_))
+    while (std::regex_search(start, end, m, re_tokens_))
     {
-        std::ostringstream ss;
-        ss << scale_denom;
-        boost::algorithm::replace_all(populated_sql, scale_denom_token_, ss.str());
+        populated_sql.write(start, m[0].first - start);
+        start = m[0].second;
+
+        auto m1 = boost::make_iterator_range(m[1].first, m[1].second);
+        if (m1.front() == '@')
+        {
+            std::string var_name(m1.begin() + 1, m1.end());
+            auto itr = vars.find(var_name);
+            if (itr != vars.end())
+            {
+                auto var_value = itr->second.to_string();
+                populated_sql << literal(var_value);
+            }
+            else
+            {
+                populated_sql << "NULL"; // undefined @variable
+            }
+        }
+        else if (boost::algorithm::equals(m1, "bbox"))
+        {
+            populated_sql << sql_bbox(env);
+            intersect = false;
+        }
+        else if (boost::algorithm::equals(m1, "pixel_height"))
+        {
+            populated_sql << pixel_height;
+        }
+        else if (boost::algorithm::equals(m1, "pixel_width"))
+        {
+            populated_sql << pixel_width;
+        }
+        else if (boost::algorithm::equals(m1, "scale_denominator"))
+        {
+            populated_sql << scale_denom;
+        }
+        else
+        {
+            populated_sql << "NULL"; // unrecognized !token!
+        }
     }
 
-    if (boost::algorithm::icontains(sql, pixel_width_token_))
-    {
-        std::ostringstream ss;
-        ss << pixel_width;
-        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
-    }
+    populated_sql.write(start, end - start);
 
-    if (boost::algorithm::icontains(sql, pixel_height_token_))
+    if (intersect)
     {
-        std::ostringstream ss;
-        ss << pixel_height;
-        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
-    }
-
-    if (boost::algorithm::icontains(populated_sql, bbox_token_))
-    {
-        boost::algorithm::replace_all(populated_sql, bbox_token_, box);
-    }
-    else
-    {
-        std::ostringstream s;
-
         if (intersect_min_scale_ > 0 && (scale_denom <= intersect_min_scale_))
         {
-            s << " WHERE ST_Intersects(\"" << geometryColumn_ << "\"," << box << ")";
+            populated_sql << " WHERE ST_Intersects("
+                          << identifier(geometryColumn_) << ", "
+                          << sql_bbox(env) << ")";
         }
         else if (intersect_max_scale_ > 0 && (scale_denom >= intersect_max_scale_))
         {
@@ -640,29 +624,13 @@ std::string postgis_datasource::populate_tokens(
         }
         else
         {
-            s << " WHERE \"" << geometryColumn_ << "\" && " << box;
-        }
-        populated_sql += s.str();
-    }
-    std::string copy2 = populated_sql;
-    std::list<std::string> l;
-    boost::regex_split(std::back_inserter(l), copy2, pattern_);
-    if (!l.empty())
-    {
-        for (auto const & token: l)
-        {
-            auto itr = vars.find(token.substr(1,std::string::npos));
-            if (itr != vars.end())
-            {
-                boost::algorithm::replace_all(populated_sql, token, itr->second.to_string());
-            }
-            else
-            {
-                boost::algorithm::replace_all(populated_sql, token, "null");
-            }
+            populated_sql << " WHERE "
+                          << identifier(geometryColumn_) << " && "
+                          << sql_bbox(env);
         }
     }
-    return populated_sql;
+
+    return populated_sql.str();
 }
 
 
@@ -1015,7 +983,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             box2d<double> box(pt.x - tol, pt.y - tol, pt.x + tol, pt.y + tol);
-            std::string table_with_bbox = populate_tokens(table_, FMAX, box, 0, 0, mapnik::attributes());
+            std::string table_with_bbox = populate_tokens(table_, FLT_MAX, box, 0, 0,
+                                                          mapnik::attributes{});
 
             s << " FROM " << table_with_bbox;
 

@@ -37,10 +37,10 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/regex.hpp>
 
 // stl
 #include <memory>
+#include <regex>
 #include <vector>
 #include <string>
 
@@ -84,12 +84,12 @@ private:
                                 box2d<double> const& env,
                                 double pixel_width,
                                 double pixel_height,
-                                mapnik::attributes const& vars) const;
+                                mapnik::attributes const& vars,
+                                bool intersect = true) const;
     std::string populate_tokens(std::string const& sql) const;
     std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
-    static const double FMAX;
 
     const std::string uri_;
     const std::string username_;
@@ -109,10 +109,6 @@ private:
     bool simplify_geometries_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
-    const std::string bbox_token_;
-    const std::string scale_denom_token_;
-    const std::string pixel_width_token_;
-    const std::string pixel_height_token_;
     int pool_max_size_;
     bool persist_connection_;
     bool extent_from_subquery_;
@@ -126,7 +122,7 @@ private:
     mapnik::value_double simplify_prefilter_;
     bool simplify_dp_preserve_;
     mapnik::value_double simplify_clip_resolution_;
-    boost::regex pattern_;
+    std::regex re_tokens_;
     int intersect_min_scale_;
     int intersect_max_scale_;
     bool key_field_as_attribute_;
