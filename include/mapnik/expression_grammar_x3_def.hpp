@@ -177,17 +177,21 @@ namespace mapnik { namespace grammar {
 // regex
     auto do_regex_match = [] (auto const& ctx)
     {
-        auto const& tr = x3::get<transcoder_tag>(ctx).get();
-        _val(ctx) = std::move(mapnik::regex_match_node(tr, std::move(_val(ctx)) , std::move(_attr(ctx))));
+        auto const& transcode = x3::get<transcoder_tag>(ctx);
+        auto const& pattern = _attr(ctx);
+        _val(ctx) = mapnik::regex_match_node(std::move(_val(ctx)),
+                                             transcode(pattern));
     };
 
     auto do_regex_replace = [] (auto const& ctx)
     {
-        auto const& tr = x3::get<transcoder_tag>(ctx).get();
+        auto const& transcode = x3::get<transcoder_tag>(ctx);
         auto const& pair = _attr(ctx);
         auto const& pattern = std::get<0>(pair);
         auto const& format = std::get<1>(pair);
-        _val(ctx) = mapnik::regex_replace_node(tr, _val(ctx) , pattern, format);
+        _val(ctx) = mapnik::regex_replace_node(std::move(_val(ctx)),
+                                               transcode(pattern),
+                                               transcode(format));
     };
 
 // mapnik::value_integer
