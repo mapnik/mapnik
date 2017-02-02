@@ -39,6 +39,41 @@
 
 namespace mapnik { namespace sql_utils {
 
+    struct quoted_string
+    {
+        std::string const* operator-> () const { return &str; }
+        std::string const& str;
+        char const quot;
+    };
+
+    inline quoted_string identifier(std::string const& str)
+    {
+        return { str, '"' };
+    }
+
+    inline quoted_string literal(std::string const& str)
+    {
+        return { str, '\'' };
+    }
+
+    inline std::ostream& operator << (std::ostream& os, quoted_string qs)
+    {
+        std::size_t pos = 0, next;
+
+        os.put(qs.quot);
+        while ((next = qs->find(qs.quot, pos)) != std::string::npos)
+        {
+            os.write(qs->data() + pos, next - pos + 1);
+            os.put(qs.quot);
+            pos = next + 1;
+        }
+        if ((next = qs->size()) > pos)
+        {
+            os.write(qs->data() + pos, next - pos);
+        }
+        return os.put(qs.quot);
+    }
+
     inline std::string unquote_double(std::string const& sql)
     {
         std::string table_name = sql;
