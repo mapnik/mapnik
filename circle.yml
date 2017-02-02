@@ -28,8 +28,8 @@ dependencies:
 database:
   pre:
     - ./bootstrap.sh
-    - ./.mason/mason install clang ${LLVM_VERSION}
-    - ./.mason/mason link clang ${LLVM_VERSION}
+    - ./.mason/mason install clang++ ${LLVM_VERSION}
+    - ./.mason/mason link clang++ ${LLVM_VERSION}
     - ./configure CC="$(pwd)/mason_packages/.link/bin/clang" CXX="$(pwd)/mason_packages/.link/bin/ccache $(pwd)/mason_packages/.link/bin/clang++ -Qunused-arguments"
     - make
   override:
