@@ -270,6 +270,21 @@ TEST_CASE("postgis") {
             REQUIRE(ext.maxy() == 4);
         }
 
+        SECTION("Postgis doesn't interpret @domain in email address as @variable")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "(SELECT gid, geom, 'fake@mail.ru' as email"
+                              " FROM public.test LIMIT 1) AS data";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            auto featureset = all_features(ds);
+            auto feature = featureset->next();
+            CHECKED_IF(feature != nullptr)
+            {
+                CHECK(feature->get("email").to_string() == "fake@mail.ru");
+            }
+        }
+
         SECTION("Postgis query extent: full dataset")
         {
             //include schema to increase coverage
