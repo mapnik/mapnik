@@ -41,7 +41,7 @@ struct set_position_impl
     template <typename T0,typename T1>
     result_type operator() (T0 & coords, T1 const& pos) const
     {
-        if (pos) coords = *pos;
+        coords = pos;
     }
 };
 
@@ -51,7 +51,7 @@ struct push_position_impl
     template <typename T0, typename T1>
     result_type operator() (T0 & coords, T1 const& pos) const
     {
-        if (pos) coords.emplace_back(*pos);
+        coords.emplace_back(pos);
     }
 };
 
@@ -75,13 +75,13 @@ positions_grammar<Iterator, ErrorHandler>::positions_grammar(ErrorHandler & erro
 
     coords = rings_array[_val = _1] | rings [_val = _1] | ring[_val = _1] |  pos[set_position(_val,_1)]
         ;
-    pos = lit('[') > -(double_ > lit(',') > double_) > omit[*(lit(',') > double_)] > lit(']')
+    pos = lit('[') > double_ > lit(',') > double_ > omit[*(lit(',') > double_)] > lit(']')
         ;
-    ring = lit('[') >> pos[push_position(_val,_1)] % lit(',') > lit(']')
+    ring = lit('[') >> -(pos[push_position(_val,_1)] % lit(',')) >> lit(']')
         ;
-    rings = lit('[') >> ring % lit(',') > lit(']')
+    rings = lit('[') >> (ring % lit(',') > lit(']'))
         ;
-    rings_array = lit('[') >> rings % lit(',') > lit(']')
+    rings_array = lit('[') >> (rings % lit(',') > lit(']'))
         ;
     coords.name("Coordinates");
     pos.name("Position");
