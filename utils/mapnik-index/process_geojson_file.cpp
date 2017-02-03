@@ -137,6 +137,11 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file(T & boxe
                 }
             }
         }
+        else if (validate_features)
+        {
+            if (verbose) std::clog << "Invalid bbox encountered " << item.first << std::endl;
+            return std::make_pair(false, extent);
+        }
     }
     return std::make_pair(true, extent);
 }
