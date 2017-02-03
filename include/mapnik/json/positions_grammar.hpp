@@ -44,7 +44,7 @@ struct positions_grammar :
 {
     positions_grammar(ErrorHandler & error_handler);
     qi::rule<Iterator, coordinates(),space_type> coords;
-    qi::rule<Iterator, boost::optional<position>(), space_type> pos;
+    qi::rule<Iterator, position(), space_type> pos;
     qi::rule<Iterator, positions(), space_type> ring;
     qi::rule<Iterator, std::vector<positions>(), space_type> rings;
     qi::rule<Iterator, std::vector<std::vector<positions> >(), space_type> rings_array;

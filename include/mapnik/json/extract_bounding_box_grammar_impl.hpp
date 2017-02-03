@@ -42,18 +42,15 @@ struct calculate_bounding_box_impl
     template <typename T0, typename T1>
     result_type operator() (T0 & bbox, T1 const& pos) const
     {
-        if (pos)
+        typename T0::value_type x = pos.x;
+        typename T0::value_type y = pos.y;
+        if (!bbox.valid())
         {
-            typename T0::value_type x = pos->x;
-            typename T0::value_type y = pos->y;
-            if (!bbox.valid())
-            {
-                bbox.init(x, y);
-            }
-            else
-            {
-                bbox.expand_to_include(x, y);
-            }
+            bbox.init(x, y);
+        }
+        else
+        {
+            bbox.expand_to_include(x, y);
         }
     }
 };
@@ -132,16 +129,16 @@ extract_bounding_box_grammar<Iterator, Boxes, ErrorHandler>::extract_bounding_bo
         >> lit(':') >> (rings_array(_a) | rings (_a) | ring(_a) | pos[calculate_bounding_box(_a,_1)])[_val = _a]
         ;
 
-    pos = lit('[') > -(double_ > lit(',') > double_) > omit[*(lit(',') > double_)] > lit(']')
+    pos = lit('[') > double_ > lit(',') > double_ > omit[*(lit(',') > double_)] > lit(']')
         ;
 
-    ring = lit('[') >> pos[calculate_bounding_box(_r1,_1)] % lit(',') > lit(']')
+    ring = lit('[') >> -(pos[calculate_bounding_box(_r1,_1)] % lit(',')) >> lit(']')
         ;
 
-    rings = lit('[') >> ring(_r1)  % lit(',') > lit(']')
+    rings = lit('[') >> (ring(_r1)  % lit(',') > lit(']'))
         ;
 
-    rings_array = lit('[') >> rings(_r1) % lit(',') > lit(']')
+    rings_array = lit('[') >> (rings(_r1) % lit(',') > lit(']'))
         ;
 
     coords.name("Coordinates");

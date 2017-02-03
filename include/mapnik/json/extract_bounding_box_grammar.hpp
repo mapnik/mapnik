@@ -51,7 +51,7 @@ struct extract_bounding_box_grammar :
     qi::rule<Iterator, qi::locals<Iterator>, void(boxes_type&), space_type> features;
     qi::rule<Iterator, qi::locals<int, box_type>, void(boxes_type&, Iterator const&), space_type> feature;
     qi::rule<Iterator, qi::locals<box_type>, box_type(), space_type> coords;
-    qi::rule<Iterator, boost::optional<position_type>(), space_type> pos;
+    qi::rule<Iterator, position_type(), space_type> pos;
     qi::rule<Iterator, void(box_type&), space_type> ring;
     qi::rule<Iterator, void(box_type&), space_type> rings;
     qi::rule<Iterator, void(box_type&), space_type> rings_array;
