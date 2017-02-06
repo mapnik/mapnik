@@ -8,7 +8,7 @@ For a complete change history, see the git log.
 
 ## 3.0.13
 
-Released: January xx, 2017
+Released: February xx, 2017
 
 (Packaged from xxxxxxx)
 
@@ -26,7 +26,8 @@ Released: January xx, 2017
 - Changed `render_thunk_list` to `std::list<render_thunk>` (PR #3585)
 - Upgraded to variant `v1.1.5`
 - CSV.input - fixed `blank` line test (8a3a380b3b5c64681f2478b4f0d06f6a907f5eed)
-
+- GeoJSON - handle empty elements in position grammar (ref #3609)
+- mapnik-index - return failure on invalid bounding box (ref #3611)
 
 ## 3.0.12
 
