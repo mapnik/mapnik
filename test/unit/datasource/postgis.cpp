@@ -185,6 +185,24 @@ TEST_CASE("postgis") {
             CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
         }
 
+        SECTION("Postgis properly escapes names with single quotes")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "\"test'single'quotes\"";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+        }
+
+        SECTION("Postgis properly escapes names with double quotes")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "\"test\"\"double\"\"quotes\"";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+        }
+
         SECTION("Postgis query field names")
         {
             mapnik::parameters params(base_params);
