@@ -46,15 +46,6 @@ git_submodule_update () {
     git submodule update "$@"
 }
 
-# install and call pip
-pip () {
-    if ! which pip >/dev/null; then
-        easy_install --user pip && \
-        export PATH="$HOME/Library/Python/2.7/bin:$PATH"
-    fi
-    command pip "$@"
-}
-
 # commit_message_contains TEXT
 #   - returns 0 (true) if TEXT is found in commit message
 #   - case-insensitive, plain-text search, not regex
@@ -92,13 +83,7 @@ configure () {
 }
 
 coverage () {
-    ./mason_packages/.link/bin/cpp-coveralls \
-        --gcov ${LLVM_COV} \
-        --exclude mason_packages \
-        --exclude .sconf_temp --exclude benchmark --exclude deps \
-        --exclude scons --exclude test --exclude demo --exclude docs \
-        --exclude fonts \
-        > /dev/null
+    ./codecov -x "llvm-cov gcov" -Z
 }
 
 trigger_downstream() {

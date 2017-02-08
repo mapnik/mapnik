@@ -80,7 +80,7 @@ install:
  - on 'osx' createuser -s postgres
  - psql -c 'create database template_postgis;' -U postgres
  - psql -c 'create extension postgis;' -d template_postgis -U postgres
- - enabled ${COVERAGE} pip install --user cpp-coveralls
+ - enabled ${COVERAGE} curl -S -f https://codecov.io/bash -o codecov && chmod +x codecov
 
 before_script:
  - source bootstrap.sh
