@@ -33,8 +33,8 @@
 #pragma GCC diagnostic pop
 
 // stl
-#include <sstream>
-#include <vector>
+#include <iosfwd>
+#include <regex>
 #include <string>
 
 namespace mapnik { namespace sql_utils {
@@ -123,6 +123,69 @@ namespace mapnik { namespace sql_utils {
     inline void quote_attr(std::ostringstream & s, std::string const& field)
     {
         s << ",\"" << field << "\"";
+    }
+
+    const std::regex re_from{
+        "\\bFROM\\b"
+        , std::regex::icase
+    };
+
+    const std::regex re_table_name{
+        "\\s*(\\w+|(\"[^\"]*\")+)"      // $1 = schema
+        "(\\.(\\w+|(\"[^\"]*\")+))?"    // $4 = table
+        "\\s*"
+    };
+
+    inline bool table_from_sql(std::string const& sql,
+                               std::string & schema,
+                               std::string & table)
+    {
+        std::smatch m;
+        auto start = sql.begin();
+        auto end = sql.end();
+        auto flags = std::regex_constants::match_default;
+        auto found = std::regex_match(start, end, m, re_table_name);
+        auto extract_matched_parts = [&]()
+        {
+            if (m[4].matched)
+            {
+                table.assign(m[4].first, m[4].second);
+                schema.assign(m[1].first, m[1].second);
+            }
+            else
+            {
+                table.assign(m[1].first, m[1].second);
+                schema.clear();
+            }
+        };
+
+        if (found)
+        {
+            // input is not subquery, just "[schema.]table"
+            extract_matched_parts();
+        }
+        else
+        {
+            // search "FROM [schema.]table" in subquery
+            while (std::regex_search(start, end, m, re_from, flags))
+            {
+                start = m[0].second;
+                if (std::regex_search(start, end, m, re_table_name,
+                                      std::regex_constants::match_continuous))
+                {
+                    extract_matched_parts();
+                    found = true;
+                    start = m[0].second;
+                }
+                flags = std::regex_constants::match_prev_avail;
+            }
+        }
+        if (found)
+        {
+            sql_utils::unquote('"', schema);
+            sql_utils::unquote('"', table);
+        }
+        return found;
     }
 
     inline std::string table_from_sql(std::string const& sql)
