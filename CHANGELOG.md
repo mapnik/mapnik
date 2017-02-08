@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.13
 
-Released: February xx, 2017
+Released: February 8, 2017
 
-(Packaged from xxxxxxx)
+(Packaged from 2a153c0)
 
 #### Summary
 
