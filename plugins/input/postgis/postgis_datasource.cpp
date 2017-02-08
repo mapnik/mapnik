@@ -62,7 +62,6 @@ using mapnik::sql_utils::literal;
 postgis_datasource::postgis_datasource(parameters const& params)
     : datasource(params),
       table_(*params.get<std::string>("table", "")),
-      schema_(""),
       geometry_table_(*params.get<std::string>("geometry_table", "")),
       geometry_field_(*params.get<std::string>("geometry_field", "")),
       key_field_(*params.get<std::string>("key_field", "")),
@@ -154,21 +153,13 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
             desc_.set_encoding(conn->client_encoding());
 
-            if (geometry_table_.empty())
-            {
-                geometry_table_ = mapnik::sql_utils::table_from_sql(table_);
-            }
+            mapnik::sql_utils::table_from_sql(
+                    geometry_table_.empty() ? table_ : geometry_table_,
+                    parsed_schema_, parsed_table_);
 
-            std::string::size_type idx = geometry_table_.find_last_of('.');
-            if (idx != std::string::npos)
-            {
-                schema_ = geometry_table_.substr(0, idx);
-                geometry_table_ = geometry_table_.substr(idx + 1);
-            }
-
-            // NOTE: geometry_table_ how should ideally be a table name, but
+            // NOTE: parsed_table_ now should ideally be a table name, but
             // there are known edge cases where this will break down and
-            // geometry_table_ may even be empty: https://github.com/mapnik/mapnik/issues/2718
+            // it may even be empty: https://github.com/mapnik/mapnik/issues/2718
 
             // If we do not know both the geometry_field and the srid
             // then first attempt to fetch the geometry name from a geometry_columns entry.
@@ -176,8 +167,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
             // from the simplistic table parsing in table_from_sql() or if
             // the table parameter references a table, view, or subselect not
             // registered in the geometry columns.
-            geometryColumn_ = geometry_field_;
-            if (!geometry_table_.empty() && (geometryColumn_.empty() || srid_ == 0))
+            geometryColumn_ = mapnik::sql_utils::unquote_copy('"', geometry_field_);
+            if (!parsed_table_.empty() && (geometryColumn_.empty() || srid_ == 0))
             {
 #ifdef MAPNIK_STATS
                 mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column)");
@@ -186,21 +177,15 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
                 try
                 {
-                    s << "SELECT f_geometry_column, srid FROM "
-                      << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
-                      << mapnik::sql_utils::unquote_double(geometry_table_)
-                      << "'";
-                    if (! schema_.empty())
+                    s << "SELECT f_geometry_column, srid FROM " << GEOMETRY_COLUMNS
+                      << " WHERE f_table_name=" << literal(parsed_table_);
+                    if (!parsed_schema_.empty())
                     {
-                        s << " AND f_table_schema='"
-                          << mapnik::sql_utils::unquote_double(schema_)
-                          << "'";
+                        s << " AND f_table_schema=" << literal(parsed_schema_);
                     }
-                    if (! geometry_field_.empty())
+                    if (!geometryColumn_.empty())
                     {
-                        s << " AND f_geometry_column='"
-                          << mapnik::sql_utils::unquote_double(geometry_field_)
-                          << "'";
+                        s << " AND f_geometry_column=" << literal(geometryColumn_);
                     }
                     shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
@@ -232,26 +217,24 @@ postgis_datasource::postgis_datasource(parameters const& params)
             }
 
             // If we still do not know the srid then we can try to fetch
-            // it from the 'geometry_table_' parameter, which should work even if it is
+            // it from the 'parsed_table_' parameter, which should work even if it is
             // a subselect as long as we know the geometry_field to query
             if (!geometryColumn_.empty() && srid_ <= 0)
             {
                 std::ostringstream s;
 
-                s << "SELECT ST_SRID(\"" << geometryColumn_ << "\") AS srid FROM ";
-                if (!geometry_table_.empty())
+                s << "SELECT ST_SRID(" << identifier(geometryColumn_)
+                  << ") AS srid FROM ";
+                if (!parsed_table_.empty())
                 {
-                    if (!schema_.empty())
-                    {
-                        s << schema_ << '.';
-                    }
-                    s << geometry_table_;
+                    append_geometry_table(s);
                 }
                 else
                 {
                     s << populate_tokens(table_);
                 }
-                s << " WHERE \"" << geometryColumn_ << "\" IS NOT NULL LIMIT 1;";
+                s << " WHERE " << identifier(geometryColumn_)
+                  << " IS NOT NULL LIMIT 1";
 
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
@@ -283,18 +266,16 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     "WHERE a.attnum > 0 AND a.attrelid = c.oid "
                     "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
                     "AND c.oid = i.indrelid AND i.indisprimary = 't' "
-                    "AND t.typname !~ '^geom' AND c.relname ="
-                  << " '" << mapnik::sql_utils::unquote_double(geometry_table_) << "' "
+                    "AND t.typname !~ '^geom' AND c.relname = "
+                  << literal(parsed_table_) << " "
                     //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
                   << "AND (i.indkey[0]=a.attnum OR i.indkey[1]=a.attnum OR i.indkey[2]=a.attnum "
                     "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
                     "OR i.indkey[6]=a.attnum OR i.indkey[7]=a.attnum OR i.indkey[8]=a.attnum "
                     "OR i.indkey[9]=a.attnum) ";
-                if (! schema_.empty())
+                if (!parsed_schema_.empty())
                 {
-                    s << "AND n.nspname='"
-                      << mapnik::sql_utils::unquote_double(schema_)
-                      << "' ";
+                    s << "AND n.nspname=" << literal(parsed_schema_) << ' ';
                 }
                 s << "ORDER BY a.attnum";
 
@@ -313,7 +294,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                                 key_field_ = std::string(key_field_string);
 
                                 MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: auto-detected key field of '"
-                                                          << key_field_ << "' on table '" << geometry_table_ << "'";
+                                                          << key_field_ << "' on table '" << parsed_table_ << "'";
                             }
                         }
                         else
@@ -324,7 +305,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                             err << "PostGIS Plugin: Error: '"
                                 << rs_key->getValue(0)
                                 << "' on table '"
-                                << geometry_table_
+                                << parsed_table_
                                 << "' is not a valid integer primary key field\n";
                             throw mapnik::datasource_exception(err.str());
                         }
@@ -344,9 +325,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
             // but still not known at this point, then throw
             if (*autodetect_key_field && key_field_.empty())
             {
-                throw mapnik::datasource_exception(std::string("PostGIS Plugin: Error: primary key required")
-                                                   + " but could not be detected for table '" +
-                                                   geometry_table_ + "', please supply 'key_field' option to specify field to use for primary key");
+                throw mapnik::datasource_exception(
+                        "PostGIS Plugin: Error: primary key required"
+                        " but could not be detected for table '"
+                        + parsed_table_ + "', please supply 'key_field'"
+                        " option to specify field to use for primary key");
             }
 
             if (srid_ == 0)
@@ -633,6 +616,25 @@ std::string postgis_datasource::populate_tokens(
     return populated_sql.str();
 }
 
+void postgis_datasource::append_geometry_table(std::ostream & os) const
+{
+    if (!geometry_table_.empty())
+    {
+        os << geometry_table_; // assume datasource parameter is valid SQL
+    }
+    else if (!parsed_schema_.empty())
+    {
+        os << identifier(parsed_schema_) << '.' << identifier(parsed_table_);
+    }
+    else if (!parsed_table_.empty())
+    {
+        os << identifier(parsed_table_);
+    }
+    else
+    {
+        os << table_; // assume datasource parameter is valid SQL
+    }
+}
 
 std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
 {
@@ -757,20 +759,11 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         {
             std::ostringstream s_error;
             s_error << "PostGIS: geometry name lookup failed for table '";
-
-            if (! schema_.empty())
-            {
-                s_error << schema_ << ".";
-            }
-            s_error << geometry_table_
-                    << "'. Please manually provide the 'geometry_field' parameter or add an entry "
+            append_geometry_table(s_error);
+            s_error << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                     << "in the geometry_columns for '";
-
-            if (! schema_.empty())
-            {
-                s_error << schema_ << ".";
-            }
-            s_error << geometry_table_ << "'.";
+            append_geometry_table(s_error);
+            s_error << "'.";
 
             throw mapnik::datasource_exception(s_error.str());
         }
@@ -801,7 +794,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             {
                 s << "ST_ClipByBox2D(";
             }
-            s << "\"" << geometryColumn_ << "\"";
+            s << identifier(geometryColumn_);
 
             // ! ST_ClipByBox2D()
             if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
@@ -833,7 +826,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             }
 
             // Geometry column!
-            s << "\"" << geometryColumn_ << "\"";
+            s << identifier(geometryColumn_);
 
             // ! ST_SnapToGrid()
             if (simplify_geometries_ && simplify_snap_ratio_ > 0.0)
@@ -871,7 +864,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         if (! key_field_.empty())
         {
-            mapnik::sql_utils::quote_attr(s, key_field_);
+            s << ',' << identifier(key_field_);
             if (key_field_as_attribute_)
             {
                 ctx->push(key_field_);
@@ -881,7 +874,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             {
                 if (*pos != key_field_)
                 {
-                    mapnik::sql_utils::quote_attr(s, *pos);
+                    s << ',' << identifier(*pos);
                     ctx->push(*pos);
                 }
             }
@@ -890,7 +883,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         {
             for (; pos != end; ++pos)
             {
-                mapnik::sql_utils::quote_attr(s, *pos);
+                s << ',' << identifier(*pos);
                 ctx->push(*pos);
             }
         }
@@ -931,33 +924,25 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: geometry name lookup failed for table '";
-
-                if (! schema_.empty())
-                {
-                    s_error << schema_ << ".";
-                }
-                s_error << geometry_table_
-                        << "'. Please manually provide the 'geometry_field' parameter or add an entry "
+                append_geometry_table(s_error);
+                s_error << "'. Please manually provide the 'geometry_field' parameter or add an entry "
                         << "in the geometry_columns for '";
-
-                if (! schema_.empty())
-                {
-                    s_error << schema_ << ".";
-                }
-                s_error << geometry_table_ << "'.";
+                append_geometry_table(s_error);
+                s_error << "'.";
 
                 throw mapnik::datasource_exception(s_error.str());
             }
 
             std::ostringstream s;
-            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT ST_AsBinary(" << identifier(geometryColumn_)
+              << ") AS geom";
 
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             auto const& desc = desc_.get_descriptors();
 
             if (!key_field_.empty())
             {
-                mapnik::sql_utils::quote_attr(s, key_field_);
+                s << ',' << identifier(key_field_);
                 if (key_field_as_attribute_)
                 {
                     ctx->push(key_field_);
@@ -967,7 +952,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
                     std::string const& name = attr_info.get_name();
                     if (name != key_field_)
                     {
-                        mapnik::sql_utils::quote_attr(s, name);
+                        s << ',' << identifier(name);
                         ctx->push(name);
                     }
                 }
@@ -977,7 +962,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
                 for (auto const& attr_info : desc)
                 {
                     std::string const& name = attr_info.get_name();
-                    mapnik::sql_utils::quote_attr(s, name);
+                    s << ',' << identifier(name);
                     ctx->push(name);
                 }
             }
@@ -1022,12 +1007,8 @@ box2d<double> postgis_datasource::envelope() const
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: unable to query the layer extent of table '";
-
-                if (! schema_.empty())
-                {
-                    s_error << schema_ << ".";
-                }
-                s_error << geometry_table_ << "' because we cannot determine the geometry field name."
+                append_geometry_table(s_error);
+                s_error << "' because we cannot determine the geometry field name."
                         << "\nPlease provide either an 'extent' parameter to skip this query, "
                         << "a 'geometry_field' and/or 'geometry_table' parameter, or add a "
                         << "record to the 'geometry_columns' for your table.";
@@ -1038,20 +1019,21 @@ box2d<double> postgis_datasource::envelope() const
             if (estimate_extent_)
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Estimated_Extent('";
+                  << " FROM (SELECT ST_Estimated_Extent(";
 
-                if (! schema_.empty())
+                if (!parsed_schema_.empty())
                 {
-                    s << mapnik::sql_utils::unquote_double(schema_) << "','";
+                    s << literal(parsed_schema_) << ',';
                 }
 
-                s << mapnik::sql_utils::unquote_double(geometry_table_) << "','"
-                  << mapnik::sql_utils::unquote_double(geometryColumn_) << "') as ext) as tmp";
+                s << literal(parsed_table_) << ','
+                  << literal(geometryColumn_) << ") as ext) as tmp";
             }
             else
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent(" <<geometryColumn_<< ") as ext from ";
+                  << " FROM (SELECT ST_Extent("
+                  << identifier(geometryColumn_) << ") as ext from ";
 
                 if (extent_from_subquery_)
                 {
@@ -1061,14 +1043,10 @@ box2d<double> postgis_datasource::envelope() const
                 }
                 else
                 {
-                    if (! schema_.empty())
-                    {
-                        s << schema_ << ".";
-                    }
-
                     // but if the subquery does not limit records then querying the
                     // actual table will be faster as indexes can be used
-                    s << geometry_table_ << ") as tmp";
+                    append_geometry_table(s);
+                    s << ") as tmp";
                 }
             }
 
@@ -1111,21 +1089,15 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
             std::string g_type;
             try
             {
-                s << "SELECT lower(type) as type FROM "
-                  << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
-                  << mapnik::sql_utils::unquote_double(geometry_table_)
-                  << "'";
-                if (! schema_.empty())
+                s << "SELECT lower(type) as type FROM " << GEOMETRY_COLUMNS
+                  << " WHERE f_table_name=" << literal(parsed_table_);
+                if (!parsed_schema_.empty())
                 {
-                    s << " AND f_table_schema='"
-                      << mapnik::sql_utils::unquote_double(schema_)
-                      << "'";
+                    s << " AND f_table_schema=" << literal(parsed_schema_);
                 }
-                if (! geometry_field_.empty())
+                if (!geometryColumn_.empty())
                 {
-                    s << " AND f_geometry_column='"
-                      << mapnik::sql_utils::unquote_double(geometry_field_)
-                      << "'";
+                    s << " AND f_geometry_column=" << literal(geometryColumn_);
                 }
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
@@ -1164,8 +1136,8 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
 
                 std::string prev_type("");
 
-                s << "SELECT ST_GeometryType(\""
-                  << geometryColumn_ << "\") AS geom"
+                s << "SELECT ST_GeometryType("
+                  << identifier(geometryColumn_) << ") AS geom"
                   << " FROM " << populate_tokens(table_);
 
                 if (row_limit_ > 0 && row_limit_ < 5)

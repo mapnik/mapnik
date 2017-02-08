@@ -87,6 +87,7 @@ private:
                                 mapnik::attributes const& vars,
                                 bool intersect = true) const;
     std::string populate_tokens(std::string const& sql) const;
+    void append_geometry_table(std::ostream & os) const;
     std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
@@ -95,9 +96,10 @@ private:
     const std::string username_;
     const std::string password_;
     const std::string table_;
-    std::string schema_;
-    std::string geometry_table_;
+    const std::string geometry_table_;
     const std::string geometry_field_;
+    std::string parsed_schema_;
+    std::string parsed_table_;
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;
