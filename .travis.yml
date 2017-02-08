@@ -60,8 +60,7 @@ before_install:
      rvm get head || true
    fi
  - source scripts/travis-common.sh
- - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
- - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PYTHONUSERBASE}/bin:${PATH}
+ - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - export BENCH=${BENCH:-false}
@@ -70,8 +69,6 @@ before_install:
  - git_submodule_update --init --depth=10
 
 install:
- - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
- - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
  - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
  - on 'osx' rm -rf ${DATA_PATH}
  - on 'osx' initdb ${DATA_PATH} -E utf8
@@ -80,7 +77,8 @@ install:
  - on 'osx' createuser -s postgres
  - psql -c 'create database template_postgis;' -U postgres
  - psql -c 'create extension postgis;' -d template_postgis -U postgres
- - enabled ${COVERAGE} curl -S -f https://codecov.io/bash -o codecov && chmod +x codecov
+ - enabled ${COVERAGE} curl -S -f https://codecov.io/bash -o codecov
+ - enabled ${COVERAGE} chmod +x codecov
 
 before_script:
  - source bootstrap.sh
