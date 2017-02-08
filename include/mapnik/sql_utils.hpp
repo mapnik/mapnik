@@ -74,6 +74,36 @@ namespace mapnik { namespace sql_utils {
         return os.put(qs.quot);
     }
 
+    // Does nothing if `str` doesn't start with `quot`.
+    // Otherwise erases the opening quote, collapses inner quote pairs,
+    // and erases everything from the closing quote to the end of the
+    // string. The closing quote is the first non-paired quote after the
+    // opening one. For a well-formed quoted string, it is also the last
+    // character, so nothing gets lost.
+    inline void unquote(char quot, std::string & str)
+    {
+        if (!str.empty() && str.front() == quot)
+        {
+            std::size_t di = 0;
+            for (std::size_t si = 1; si < str.size(); ++si)
+            {
+                char c = str[si];
+                if (c == quot && (++si >= str.size() || str[si] != quot))
+                    break;
+                str[di++] = c;
+            }
+            str.erase(di);
+        }
+    }
+
+    inline std::string unquote_copy(char quot, std::string const& str)
+    {
+        std::string tmp(str);
+        sql_utils::unquote(quot, tmp);
+        return tmp;
+    }
+
+    [[deprecated("flawed")]]
     inline std::string unquote_double(std::string const& sql)
     {
         std::string table_name = sql;
@@ -81,6 +111,7 @@ namespace mapnik { namespace sql_utils {
         return table_name;
     }
 
+    [[deprecated("flawed")]]
     inline std::string unquote(std::string const& sql)
     {
         std::string table_name = sql;
@@ -88,6 +119,7 @@ namespace mapnik { namespace sql_utils {
         return table_name;
     }
 
+    [[deprecated("flawed")]]
     inline void quote_attr(std::ostringstream & s, std::string const& field)
     {
         s << ",\"" << field << "\"";
