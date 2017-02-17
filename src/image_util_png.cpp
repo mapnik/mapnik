@@ -25,7 +25,10 @@ extern "C"
 {
 #include <png.h>
 }
+#ifndef PNG_FAST_FILTERS // libpng < 1.6
+#define PNG_FAST_FILTERS ( PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP )
 #endif
+#endif // HAVE_PNG
 
 // mapnik
 #if defined(HAVE_PNG)
