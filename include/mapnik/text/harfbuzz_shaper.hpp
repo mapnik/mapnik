@@ -149,38 +149,22 @@ static void shape_text(text_line & line,
                 }
 
                 // if we have a valid codepoint, save rendering info.
-                if (glyphs[i].codepoint)
-                {
-                    auto itr = glyphinfos.find(cluster);
-                    if (itr == glyphinfos.end())
-                    {
-                        std::vector<glyph_face_info> v = {{ face, glyphs[i], positions[i] }};
-                        bool result = false;
-                        std::tie(itr, result) = glyphinfos.insert(std::make_pair(cluster, v));
 
-                    }
-                    if (itr->second.front().glyph.codepoint == 0)
-                    {
-                        itr->second.front() = { face, glyphs[i], positions[i] };
-                    }
-                    else if (in_cluster)
-                    {
-                        itr->second.push_back({ face, glyphs[i], positions[i] });
-                    }
-                }
-                else
+                auto itr = glyphinfos.find(cluster);
+                if (itr == glyphinfos.end())
                 {
-                    auto itr = glyphinfos.find(cluster);
-                    if (itr == glyphinfos.end())
-                    {
-                        std::vector<glyph_face_info> v = {{ face, glyphs[i], positions[i] }};
-                        bool result = false;
-                        std::tie(itr, result) = glyphinfos.insert(std::make_pair(cluster, v));
-                    }
-                    if (itr != glyphinfos.end() && itr->second.front().glyph.codepoint == 0)
-                    {
-                        itr->second.front() = { face, glyphs[i], positions[i] };
-                    }
+                    std::vector<glyph_face_info> v = {{ face, glyphs[i], positions[i] }};
+                    bool result = false;
+                    std::tie(itr, result) = glyphinfos.insert(std::make_pair(cluster, v));
+
+                }
+                if (itr->second.front().glyph.codepoint == 0)
+                {
+                    itr->second.front() = { face, glyphs[i], positions[i] };
+                }
+                else if (in_cluster)
+                {
+                    itr->second.push_back({ face, glyphs[i], positions[i] });
                 }
             }
 
