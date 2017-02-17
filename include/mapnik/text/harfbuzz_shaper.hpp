@@ -104,8 +104,9 @@ static void shape_text(text_line & line,
         // this table is filled with information for rendering each glyph, so that
         // several font faces can be used in a single text_item
         std::size_t pos = 0;
-        std::map<unsigned, std::vector<glyph_face_info>> glyphinfos;
+        std::vector<std::vector<glyph_face_info>> glyphinfos;
 
+        glyphinfos.resize(text.length());
         for (auto const& face : *face_set)
         {
             ++pos;
@@ -147,35 +148,28 @@ static void shape_text(text_line & line,
                 {
                     in_cluster = true;
                 }
-
-                // if we have a valid codepoint, save rendering info.
-
-                auto itr = glyphinfos.find(cluster);
-                bool status = true;
-                if (itr == glyphinfos.end())
+                if (glyphinfos.size() > cluster)
                 {
-                    std::vector<glyph_face_info> v = {{ face, glyphs[i], positions[i] }};
-                    std::tie(itr,  status) = glyphinfos.insert(std::make_pair(cluster, v));
-
-                }
-                if (status)
-                {
-                    if (itr->second.front().glyph.codepoint == 0)
+                    auto & c = glyphinfos[cluster];
+                    if (c.empty())
                     {
-                        itr->second.front() = { face, glyphs[i], positions[i] };
+                        c.push_back({face, glyphs[i], positions[i]});
+                    }
+                    if (c.front().glyph.codepoint == 0)
+                    {
+                        c.front() = { face, glyphs[i], positions[i] };
                     }
                     else if (in_cluster)
                     {
-                        itr->second.push_back({ face, glyphs[i], positions[i] });
+                        c.push_back({ face, glyphs[i], positions[i] });
                     }
                 }
             }
-
             bool all_set = true;
-            for (auto c : clusters)
+            for (auto c_id : clusters)
             {
-                auto itr = glyphinfos.find(c);
-                if (itr == glyphinfos.end() || itr->second.empty() || (itr->second.front().glyph.codepoint == 0))
+                auto const& c = glyphinfos[c_id];
+                if (c.empty() || c.front().glyph.codepoint == 0)
                 {
                     all_set = false;
                     break;
@@ -187,34 +181,31 @@ static void shape_text(text_line & line,
                 continue;
             }
             double max_glyph_height = 0;
-            for (auto const& c : clusters)
+            for (auto const& c_id : clusters)
             {
-                auto itr = glyphinfos.find(c);
-                if (itr != glyphinfos.end())
+                auto const& c = glyphinfos[c_id];
+                for (auto const& info : c)
                 {
-                    for (auto const& info : itr->second)
+                    face_ptr theface = face;
+                    auto & gpos = info.position;
+                    auto & glyph = info.glyph;
+                    if (info.glyph.codepoint != 0)
                     {
-                        face_ptr theface = face;
-                        auto & gpos = info.position;
-                        auto & glyph = info.glyph;
-                        if (info.glyph.codepoint != 0)
-                        {
-                            theface = info.face;
-                        }
-                        unsigned char_index = glyph.cluster;
-                        glyph_info g(glyph.codepoint,char_index,text_item.format_);
-                        if (theface->glyph_dimensions(g))
-                        {
-                            g.face = theface;
-                            g.scale_multiplier = size / theface->get_face()->units_per_EM;
-                            //Overwrite default advance with better value provided by HarfBuzz
-                            g.unscaled_advance = gpos.x_advance;
-                            g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
-                            double tmp_height = g.height();
-                            if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
-                            width_map[char_index] += g.advance();
-                            line.add_glyph(std::move(g), scale_factor);
-                        }
+                        theface = info.face;
+                    }
+                    unsigned char_index = glyph.cluster;
+                    glyph_info g(glyph.codepoint,char_index,text_item.format_);
+                    if (theface->glyph_dimensions(g))
+                    {
+                        g.face = theface;
+                        g.scale_multiplier = size / theface->get_face()->units_per_EM;
+                        //Overwrite default advance with better value provided by HarfBuzz
+                        g.unscaled_advance = gpos.x_advance;
+                        g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
+                        double tmp_height = g.height();
+                        if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
+                        width_map[char_index] += g.advance();
+                        line.add_glyph(std::move(g), scale_factor);
                     }
                 }
             }
