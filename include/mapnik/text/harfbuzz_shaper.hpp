@@ -85,7 +85,6 @@ static void shape_text(text_line & line,
     mapnik::value_unicode_string const& text = itemizer.text();
     for (auto const& text_item : list)
     {
-        auto item_length = static_cast<int>(text_item.end - text_item.start);
         face_set_ptr face_set = font_manager.get_face_set(text_item.format_->face_name, text_item.format_->fontset);
         double size = text_item.format_->text_size * scale_factor;
         face_set->set_unscaled_character_sizes();
@@ -101,22 +100,24 @@ static void shape_text(text_line & line,
             hb_glyph_info_t glyph;
             hb_glyph_position_t position;
         };
+
         // this table is filled with information for rendering each glyph, so that
         // several font faces can be used in a single text_item
-        std::vector<glyph_face_info> glyphinfos;
-        int valid_glyphs = 0;
         std::size_t pos = 0;
+        std::map<unsigned, std::vector<glyph_face_info>> glyphinfos;
+
         for (auto const& face : *face_set)
         {
             ++pos;
             hb_buffer_clear_contents(buffer.get());
-            hb_buffer_add_utf16(buffer.get(), uchar_to_utf16(text.getBuffer()), text.length(), text_item.start, item_length);
+            hb_buffer_add_utf16(buffer.get(), uchar_to_utf16(text.getBuffer()), text.length(), text_item.start, static_cast<int>(text_item.end - text_item.start));
             hb_buffer_set_direction(buffer.get(), (text_item.dir == UBIDI_RTL) ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
             hb_buffer_set_script(buffer.get(), _icu_script_to_script(text_item.script));
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
             // https://github.com/mapnik/test-data-visual/pull/25
+
 #if (HB_VERSION_MAJOR > 0 && HB_VERSION_ATLEAST(1, 0, 5))
-            hb_ft_font_set_load_flags(font, FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
+            hb_ft_font_set_load_flags(font,FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
 #endif
             hb_shape(font, buffer.get(), ff_settings.get_features(), ff_count);
             hb_font_destroy(font);
@@ -125,51 +126,113 @@ static void shape_text(text_line & line,
             hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer.get(), &num_glyphs);
             hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer.get(), &num_glyphs);
 
-            // if the number of rendered glyphs has increased, we need to resize the table
-            if (num_glyphs > glyphinfos.size())
-            {
-                glyphinfos.resize(num_glyphs);
-            }
-            // Check if all glyphs are valid.
+            unsigned cluster = 0;
+            bool in_cluster = false;
+            std::vector<unsigned> clusters;
+
             for (unsigned i = 0; i < num_glyphs; ++i)
             {
+                if (i == 0)
+                {
+                    cluster = glyphs[0].cluster;
+                    clusters.push_back(cluster);
+                }
+                if (cluster != glyphs[i].cluster)
+                {
+                    cluster = glyphs[i].cluster;
+                    clusters.push_back(cluster);
+                    in_cluster = false;
+                }
+                else if (i != 0)
+                {
+                    in_cluster = true;
+                }
+
                 // if we have a valid codepoint, save rendering info.
                 if (glyphs[i].codepoint)
                 {
-                    if (!glyphinfos[i].glyph.codepoint)
+                    auto itr = glyphinfos.find(cluster);
+                    if (itr == glyphinfos.end())
                     {
-                        ++valid_glyphs;
-                        glyphinfos[i] = { face, glyphs[i], positions[i] };
+                        std::vector<glyph_face_info> v = {{ face, glyphs[i], positions[i] }};
+                        bool result = false;
+                        std::tie(itr, result) = glyphinfos.insert(std::make_pair(cluster, v));
+
+                    }
+                    if (itr->second.front().glyph.codepoint == 0)
+                    {
+                        itr->second.front() = { face, glyphs[i], positions[i] };
+                    }
+                    else if (in_cluster)
+                    {
+                        itr->second.push_back({ face, glyphs[i], positions[i] });
+                    }
+                }
+                else
+                {
+                    auto itr = glyphinfos.find(cluster);
+                    if (itr == glyphinfos.end())
+                    {
+                        std::vector<glyph_face_info> v = {{ face, glyphs[i], positions[i] }};
+                        bool result = false;
+                        std::tie(itr, result) = glyphinfos.insert(std::make_pair(cluster, v));
+                    }
+                    if (itr != glyphinfos.end() && itr->second.front().glyph.codepoint == 0)
+                    {
+                        itr->second.front() = { face, glyphs[i], positions[i] };
                     }
                 }
             }
-            if (valid_glyphs < item_length && (pos < num_faces))
+
+            bool all_set = true;
+            for (auto c : clusters)
+            {
+                auto itr = glyphinfos.find(c);
+                if (itr == glyphinfos.end())
+                {
+                    all_set = false;
+                    break;
+                }
+                if (!itr->second.empty() && itr->second.front().glyph.codepoint == 0)
+                {
+                    all_set = false;
+                    break;
+                }
+            }
+            if (!all_set && (pos < num_faces))
             {
                 //Try next font in fontset
                 continue;
             }
             double max_glyph_height = 0;
-            for (auto const& info : glyphinfos)
+            for (auto const& c : clusters)
             {
-                if (info.glyph.codepoint)
+                auto itr = glyphinfos.find(c);
+                if (itr != glyphinfos.end())
                 {
-                    auto const& gpos = info.position;
-                    auto const& glyph = info.glyph;
-                    auto const& theface = info.face;
-
-                    unsigned char_index = glyph.cluster;
-                    glyph_info g(glyph.codepoint, char_index, text_item.format_);
-                    if (theface->glyph_dimensions(g))
+                    for (auto const& info : itr->second)
                     {
-                        g.face = theface;
-                        g.scale_multiplier = size / theface->get_face()->units_per_EM;
-                        //Overwrite default advance with better value provided by HarfBuzz
-                        g.unscaled_advance = gpos.x_advance;
-                        g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
-                        double tmp_height = g.height();
-                        if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
-                        width_map[char_index] += g.advance();
-                        line.add_glyph(std::move(g), scale_factor);
+                        face_ptr theface = face;
+                        auto & gpos = info.position;
+                        auto & glyph = info.glyph;
+                        if (info.glyph.codepoint != 0)
+                        {
+                            theface = info.face;
+                        }
+                        unsigned char_index = glyph.cluster;
+                        glyph_info g(glyph.codepoint,char_index,text_item.format_);
+                        if (theface->glyph_dimensions(g))
+                        {
+                            g.face = theface;
+                            g.scale_multiplier = size / theface->get_face()->units_per_EM;
+                            //Overwrite default advance with better value provided by HarfBuzz
+                            g.unscaled_advance = gpos.x_advance;
+                            g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
+                            double tmp_height = g.height();
+                            if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
+                            width_map[char_index] += g.advance();
+                            line.add_glyph(std::move(g), scale_factor);
+                        }
                     }
                 }
             }
