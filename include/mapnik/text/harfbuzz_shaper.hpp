@@ -172,7 +172,7 @@ static void shape_text(text_line & line,
             for (auto c : clusters)
             {
                 auto itr = glyphinfos.find(c);
-                if (itr == glyphinfos.end() || (!itr->second.empty() && itr->second.front().glyph.codepoint == 0))
+                if (itr == glyphinfos.end() || itr->second.empty() || (itr->second.front().glyph.codepoint == 0))
                 {
                     all_set = false;
                     break;
