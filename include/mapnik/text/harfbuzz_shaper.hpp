@@ -148,21 +148,22 @@ static void shape_text(text_line & line,
                 {
                     in_cluster = true;
                 }
-                if (glyphinfos.size() > cluster)
+                if (glyphinfos.size() <= cluster)
                 {
-                    auto & c = glyphinfos[cluster];
-                    if (c.empty())
-                    {
-                        c.push_back({face, glyphs[i], positions[i]});
-                    }
-                    if (c.front().glyph.codepoint == 0)
-                    {
-                        c.front() = { face, glyphs[i], positions[i] };
-                    }
-                    else if (in_cluster)
-                    {
-                        c.push_back({ face, glyphs[i], positions[i] });
-                    }
+                    glyphinfos.resize(cluster + 1);
+                }
+                auto & c = glyphinfos[cluster];
+                if (c.empty())
+                {
+                    c.push_back({face, glyphs[i], positions[i]});
+                }
+                if (c.front().glyph.codepoint == 0)
+                {
+                    c.front() = { face, glyphs[i], positions[i] };
+                }
+                else if (in_cluster)
+                {
+                    c.push_back({ face, glyphs[i], positions[i] });
                 }
             }
             bool all_set = true;
