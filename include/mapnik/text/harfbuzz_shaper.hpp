@@ -157,7 +157,7 @@ static void shape_text(text_line & line,
                 {
                     c.push_back({face, glyphs[i], positions[i]});
                 }
-                if (c.front().glyph.codepoint == 0)
+                else if (c.front().glyph.codepoint == 0)
                 {
                     c.front() = { face, glyphs[i], positions[i] };
                 }
