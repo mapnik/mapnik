@@ -6,8 +6,8 @@
 
 TEST_CASE("shaping")
 {
-    mapnik::freetype_engine::register_fonts("test/data/fonts/Noto");
     mapnik::freetype_engine::register_font("test/data/fonts/NotoSans-Regular.ttc");
+    mapnik::freetype_engine::register_fonts("test/data/fonts/Noto");
     mapnik::font_set fontset("fontset");
     for (auto const& name : mapnik::freetype_engine::face_names())
     {
@@ -27,13 +27,13 @@ TEST_CASE("shaping")
     props->text_size = 64;
 
     std::vector<std::tuple<unsigned, unsigned>> expected =
-        {{0, 0}, {0, 3}, {0, 4}, {0, 7}, {3, 8}, {11, 9}, {0, 10}, {0, 11}, {0, 12}, {12, 13}};
+        {{0, 0}, {0, 3}, {0, 4}, {0, 7}, {3, 8}, {11, 9}, {68, 10}, {69, 11}, {70, 12}, {12, 13}};
     // with default NotoSans-Regular.ttc and NotoNaskhArabic-Regular.ttf ^^^
 
     //std::vector<std::tuple<unsigned, unsigned>> expected =
-    //    {{977,0},{1094,3}{1038,4},{1168,4},{9,7},{3,8},{9,9},{20827,10},{11294,11},{42895,12},{10,13}};
-    // expected results if NotoSansCJKjp-Regular.otf and "NotoSansTibetan-Regular.ttf available and registered^^
-    auto ustr = tr.transcode("སྤུ་ཧྲེང (普兰镇)");
+    //  {{977,0}, {1094,3}, {1038,4}, {1168,4}, {9,7}, {3,8}, {11,9}, {68,10}, {69,11}, {70,12}, {12,13}};
+    // expected results if "NotoSansTibetan-Regular.ttf is registered^^
+    auto ustr = tr.transcode("སྤུ་ཧྲེང (abc)");
     auto length = ustr.length();
     itemizer.add_text(ustr, props);
 
@@ -49,7 +49,6 @@ TEST_CASE("shaping")
         {
             unsigned glyph_index, char_index;
             std::tie(glyph_index, char_index) = expected[index++];
-            //std::cerr << g.glyph_index << ":" << g.char_index << std::endl;
             REQUIRE(glyph_index == g.glyph_index);
             REQUIRE(char_index == g.char_index);
         }
