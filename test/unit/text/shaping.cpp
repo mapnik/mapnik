@@ -7,7 +7,7 @@
 namespace {
 
 void test_shaping( mapnik::font_set const& fontset, mapnik::face_manager& fm,
-                  std::vector<std::tuple<unsigned, unsigned>> const& expected, char const* str)
+                   std::vector<std::tuple<unsigned, unsigned>> const& expected, char const* str, bool debug = false)
 {
     mapnik::transcoder tr("utf8");
     std::map<unsigned,double> width_map;
@@ -30,11 +30,19 @@ void test_shaping( mapnik::font_set const& fontset, mapnik::face_manager& fm,
     std::size_t index = 0;
     for (auto const& g : line)
     {
-        unsigned glyph_index, char_index;
-        CHECK(index < expected.size());
-        std::tie(glyph_index, char_index) = expected[index++];
-        REQUIRE(glyph_index == g.glyph_index);
-        REQUIRE(char_index == g.char_index);
+        if (debug)
+        {
+            if (index++ > 0) std::cerr << ",";
+            std::cerr << "{" << g.glyph_index << ", " << g.char_index << "}";
+        }
+        else
+        {
+            unsigned glyph_index, char_index;
+            CHECK(index < expected.size());
+            std::tie(glyph_index, char_index) = expected[index++];
+            REQUIRE(glyph_index == g.glyph_index);
+            REQUIRE(char_index == g.char_index);
+        }
     }
 }
 }
@@ -75,5 +83,12 @@ TEST_CASE("shaping")
             {{68, 0}, {69, 1}, {70, 2}, {3, 3}, {11, 4}, {0, 5}, {0, 6}, {0, 7}, {12, 8}};
         test_shaping(fontset, fm, expected, "abc (普兰镇)");
     }
+
+    {
+        std::vector<std::tuple<unsigned, unsigned>> expected =
+            {{68, 0}, {69, 1}, {70, 2}, {3, 3}, {11, 4}, {68, 5}, {69, 6}, {70, 7}, {12, 8}};
+        test_shaping(fontset, fm, expected, "abc (abc)");
+    }
+
 
 }
