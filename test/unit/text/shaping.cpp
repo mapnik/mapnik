@@ -70,4 +70,10 @@ TEST_CASE("shaping")
         test_shaping(fontset, fm, expected, "སྤུ་ཧྲེང (普兰镇)");
     }
 
+    {
+        std::vector<std::tuple<unsigned, unsigned>> expected =
+            {{68, 0}, {69, 1}, {70, 2}, {3, 3}, {11, 4}, {0, 5}, {0, 6}, {0, 7}, {12, 8}};
+        test_shaping(fontset, fm, expected, "abc (普兰镇)");
+    }
+
 }
