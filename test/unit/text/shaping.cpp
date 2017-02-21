@@ -69,19 +69,19 @@ TEST_CASE("shaping")
         //std::vector<std::tuple<unsigned, unsigned>> expected =
         //  {{977,0}, {1094,3}, {1038,4}, {1168,4}, {9,7}, {3,8}, {11,9}, {68,10}, {69,11}, {70,12}, {12,13}};
         // expected results if "NotoSansTibetan-Regular.ttf is registered^^
-        test_shaping(fontset, fm, expected, "སྤུ་ཧྲེང (abc)");
+        test_shaping(fontset, fm, expected, u8"སྤུ་ཧྲེང (abc)");
     }
 
     {
         std::vector<std::tuple<unsigned, unsigned>> expected =
             {{0, 0}, {0, 3}, {0, 4}, {0, 7}, {3, 8}, {11, 9}, {0, 10}, {0, 11}, {0, 12}, {12, 13}};
-        test_shaping(fontset, fm, expected, "སྤུ་ཧྲེང (普兰镇)");
+        test_shaping(fontset, fm, expected, u8"སྤུ་ཧྲེང (普兰镇)");
     }
 
     {
         std::vector<std::tuple<unsigned, unsigned>> expected =
             {{68, 0}, {69, 1}, {70, 2}, {3, 3}, {11, 4}, {0, 5}, {0, 6}, {0, 7}, {12, 8}};
-        test_shaping(fontset, fm, expected, "abc (普兰镇)");
+        test_shaping(fontset, fm, expected, u8"abc (普兰镇)");
     }
 
     {
