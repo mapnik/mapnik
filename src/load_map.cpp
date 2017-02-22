@@ -1155,10 +1155,14 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         if (placement_type)
         {
             placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_, true);
-        } else {
-            placements = std::make_shared<text_placements_dummy>();
+            if (!placements)
+                return;
         }
-        placements->defaults.from_xml(node, fontsets_, true);
+        else
+        {
+            placements = std::make_shared<text_placements_dummy>();
+            placements->defaults.from_xml(node, fontsets_, true);
+        }
         if (strict_ &&
             !placements->defaults.format_defaults.fontset)
         {
