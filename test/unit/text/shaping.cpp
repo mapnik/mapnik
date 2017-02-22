@@ -33,7 +33,9 @@ void test_shaping( mapnik::font_set const& fontset, mapnik::face_manager& fm,
         if (debug)
         {
             if (index++ > 0) std::cerr << ",";
-            std::cerr << "{" << g.glyph_index << ", " << g.char_index << "}";
+            std::cerr << "{" << g.glyph_index << ", " << g.char_index
+                //<< ", " << g.face->family_name() << ":" << g.face->style_name()
+                      <<  "}";
         }
         else
         {
@@ -88,6 +90,13 @@ TEST_CASE("shaping")
         std::vector<std::tuple<unsigned, unsigned>> expected =
             {{68, 0}, {69, 1}, {70, 2}, {3, 3}, {11, 4}, {68, 5}, {69, 6}, {70, 7}, {12, 8}};
         test_shaping(fontset, fm, expected, "abc (abc)");
+    }
+
+    {
+        //    "ⵃⴰⵢ ⵚⵉⵏⴰⵄⵉ الحي الصناعي"
+        std::vector<std::tuple<unsigned, unsigned>> expected =
+            {{0, 0},{0, 1},{0, 2},{3, 3},{0, 4},{0, 5},{0, 6},{0, 7},{0, 8},{0, 9},{3, 10},{509, 22},{481, 21},{438, 20},{503, 19},{470, 18},{496, 17},{43, 16},{3, 15},{509, 14},{454, 13},{496, 12},{43, 11}};
+        test_shaping(fontset, fm, expected, "ⵃⴰⵢ ⵚⵉⵏⴰⵄⵉ الحي الصناعي");
     }
 
 
