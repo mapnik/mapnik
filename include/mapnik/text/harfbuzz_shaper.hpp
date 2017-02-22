@@ -188,8 +188,8 @@ static void shape_text(text_line & line,
                 for (auto const& info : c)
                 {
                     face_ptr theface = face;
-                    auto & gpos = info.position;
-                    auto & glyph = info.glyph;
+                    auto const& gpos = info.position;
+                    auto const& glyph = info.glyph;
                     if (info.glyph.codepoint != 0)
                     {
                         theface = info.face;
