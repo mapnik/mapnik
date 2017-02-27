@@ -24,7 +24,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
-
+#include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
 
@@ -96,7 +96,7 @@ int main (int argc, char** argv)
 
         if (vm.count("version"))
         {
-            std::clog << "version 1.0.0" << std::endl;
+            std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
             return 1;
         }
         if (vm.count("help"))
