@@ -199,11 +199,16 @@ static void shape_text(text_line & line,
                     if (theface->glyph_dimensions(g))
                     {
                         g.face = theface;
-                        g.scale_multiplier = size / theface->get_face()->units_per_EM;
+                        g.scale_multiplier = theface->get_face()->units_per_EM > 0 ?
+                            (size / theface->get_face()->units_per_EM) : (size / 2048.0) ;
                         //Overwrite default advance with better value provided by HarfBuzz
                         g.unscaled_advance = gpos.x_advance;
                         g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
                         double tmp_height = g.height();
+                        if (theface->is_color())
+                        {
+                            tmp_height = size;
+                        }
                         if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
                         width_map[char_index] += g.advance();
                         line.add_glyph(std::move(g), scale_factor);
