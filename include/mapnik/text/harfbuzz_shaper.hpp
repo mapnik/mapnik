@@ -187,25 +187,21 @@ static void shape_text(text_line & line,
                 auto const& c = glyphinfos[c_id];
                 for (auto const& info : c)
                 {
-                    face_ptr theface = face;
                     auto const& gpos = info.position;
                     auto const& glyph = info.glyph;
-                    if (info.glyph.codepoint != 0)
-                    {
-                        theface = info.face;
-                    }
                     unsigned char_index = glyph.cluster;
                     glyph_info g(glyph.codepoint,char_index,text_item.format_);
-                    if (theface->glyph_dimensions(g))
+                    if (info.glyph.codepoint != 0) g.face = info.face;
+                    else g.face = face;
+                    if (g.face->glyph_dimensions(g))
                     {
-                        g.face = theface;
-                        g.scale_multiplier = theface->get_face()->units_per_EM > 0 ?
-                            (size / theface->get_face()->units_per_EM) : (size / 2048.0) ;
+                        g.scale_multiplier = g.face->get_face()->units_per_EM > 0 ?
+                            (size / g.face->get_face()->units_per_EM) : (size / 2048.0) ;
                         //Overwrite default advance with better value provided by HarfBuzz
                         g.unscaled_advance = gpos.x_advance;
                         g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
                         double tmp_height = g.height();
-                        if (theface->is_color())
+                        if (g.face->is_color())
                         {
                             tmp_height = size;
                         }
