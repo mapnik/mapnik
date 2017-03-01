@@ -48,6 +48,8 @@ void push_utf8_impl(std::string & str, uchar code_point)
 }
 }
 
+auto push_char = [](auto const& ctx) { _val(ctx).push_back(_attr(ctx));};
+
 auto push_utf8 = [](auto const& ctx) { detail::push_utf8_impl(_val(ctx), _attr(ctx));};
 
 auto push_esc = [] (auto const& ctx)
@@ -79,10 +81,10 @@ auto push_esc = [] (auto const& ctx)
 
 using x3::lit;
 using x3::char_;
-using x3::hex;
 using x3::eol;
 using x3::no_skip;
 
+x3::uint_parser<char,  16, 2, 2> const hex2 {};
 x3::uint_parser<uchar, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
@@ -95,7 +97,7 @@ x3::rule<class escaped_tag, std::string> const escaped("Escaped Characted");
 auto unicode_string_def = double_quoted
     ;
 auto const escaped_def = lit('\\') >
-    ((lit('x') > hex[push_utf8])
+    ((lit('x') > hex2[push_char])
      |
      (lit('u') > hex4[push_utf8])
      |
