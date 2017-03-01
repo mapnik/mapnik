@@ -85,7 +85,7 @@ using x3::eol;
 using x3::no_skip;
 
 x3::uint_parser<char,  16, 2, 2> const hex2 {};
-x3::uint_parser<uchar, 16, 4, 5> const hex4 {};
+x3::uint_parser<uchar, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
 // start rule
