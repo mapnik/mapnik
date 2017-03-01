@@ -24,8 +24,9 @@
 #define MAPNIK_JSON_UNICODE_STRING_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
-#include <iostream>
-
+// boost
+#include <boost/regex/pending/unicode_iterator.hpp>
+//
 namespace mapnik { namespace json { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
@@ -51,6 +52,25 @@ void push_utf8_impl(std::string & str, uchar code_point)
 auto push_char = [](auto const& ctx) { _val(ctx).push_back(_attr(ctx));};
 
 auto push_utf8 = [](auto const& ctx) { detail::push_utf8_impl(_val(ctx), _attr(ctx));};
+
+auto push_utf16 = [](auto const& ctx)
+{
+    using iterator_type = std::vector<std::uint16_t>::const_iterator;
+    auto const& utf16 = _attr(ctx);
+    try
+    {
+        boost::u16_to_u32_iterator<iterator_type> itr(utf16.begin());
+        boost::u16_to_u32_iterator<iterator_type> end(utf16.end());
+        for (; itr != end; ++itr)
+        {
+            detail::push_utf8_impl(_val(ctx), *itr);
+        }
+    }
+    catch( ... )
+    {
+        // caught
+    }
+};
 
 auto push_esc = [] (auto const& ctx)
 {
@@ -85,7 +105,7 @@ using x3::eol;
 using x3::no_skip;
 
 x3::uint_parser<char,  16, 2, 2> const hex2 {};
-x3::uint_parser<uchar, 16, 4, 4> const hex4 {};
+x3::uint_parser<std::uint16_t, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
 // start rule
@@ -93,13 +113,17 @@ unicode_string_grammar_type const unicode_string("Unicode String");
 // rules
 x3::rule<class double_quoted_tag, std::string> const double_quoted("Double-quoted string");
 x3::rule<class escaped_tag, std::string> const escaped("Escaped Characted");
+x3::rule<class utf16_string_tag, std::vector<std::uint16_t>> const utf16_string("UTF16 encoded string");
 
 auto unicode_string_def = double_quoted
     ;
+
+auto utf16_string_def = lit('u') > hex4 > *(lit("\\u") > hex4);
+
 auto const escaped_def = lit('\\') >
     ((lit('x') > hex2[push_char])
      |
-     (lit('u') > hex4[push_utf8])
+     utf16_string[push_utf16]
      |
      (lit('U') > hex8[push_utf8])
      |
@@ -116,7 +140,8 @@ auto const double_quoted_def = lit('"') > no_skip[*(escaped[append] | (~char_('"
 BOOST_SPIRIT_DEFINE(
     unicode_string,
     double_quoted,
-    escaped
+    escaped,
+    utf16_string
     );
 
 #pragma GCC diagnostic pop
