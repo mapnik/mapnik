@@ -63,7 +63,7 @@ namespace mapnik { namespace grammar {
     using x3::no_case;
     using x3::alpha;
     using x3::alnum;
-    using x3::hex;
+    x3::uint_parser<char, 16, 2, 2> const hex2 {};
 
     auto do_assign = [] (auto const& ctx)
     {
@@ -302,8 +302,8 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
     // strings
-    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'') >> no_skip[*(unesc_char | ("\\x" > hex) | (char_ - '\''))] > '\'';
-    auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"') >> no_skip[*(unesc_char | ("\\x" > hex) | (char_ - '"'))] > '"';
+    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'') >> no_skip[*(unesc_char | ("\\x" > hex2) | (char_ - '\''))] > '\'';
+    auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"') >> no_skip[*(unesc_char | ("\\x" > hex2) | (char_ - '"'))] > '"';
     auto const quoted_string = x3::rule<class quoted_string, std::string> {} = single_quoted_string | double_quoted_string;
 
     auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum] - lit("not");
