@@ -67,7 +67,7 @@ namespace mapnik { namespace grammar {
     x3::uint_parser<char, 16, 2, 2> const hex2 {};
 
     namespace {
-    auto const& escaped = json::grammar::escaped;
+    auto const& escaped_unicode = json::grammar::escaped_unicode;
     }
 
     auto append = [](auto const& ctx)
@@ -315,12 +315,14 @@ namespace mapnik { namespace grammar {
     auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'')
         >> no_skip[*(unesc_char[append]
                      |
+                     //(lit('\\') > escaped_unicode[append]) // FIXME (!)
+                     //|
                      (~char_('\''))[append])] > lit('\'');
 
     auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"')
         >> no_skip[*(unesc_char[append]
                      |
-                     escaped[append]
+                     (lit('\\') > escaped_unicode[append])
                      |
                      (~char_('"'))[append])] > lit('"');
 
