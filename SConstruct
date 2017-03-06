@@ -1129,6 +1129,7 @@ if not preconfigured:
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
 
+
     conf = Configure(env, custom_tests = conf_tests)
 
     if env['DEBUG']:
@@ -1141,6 +1142,9 @@ if not preconfigured:
 
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
+
+    cxx_version = call("%s --version" % env["CXX"] ,silent=True)
+    color_print(5, "CXX %s" % cxx_version)
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
