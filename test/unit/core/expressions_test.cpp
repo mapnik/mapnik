@@ -183,7 +183,16 @@ TEST_CASE("expressions")
     auto val1 = eval("'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
     TRY_CHECK(val0 == val1);
     TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
-    TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode (UTF-16)
+    TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode
+    // \u+NNNN \U+NNNNNNNN \xNN\xNN
+    auto val3 = eval(u8"'\u262f\xF0\x9F\x8D\xB7'");
+    auto val4 = eval(u8"'\U0000262f\U0001F377'");
+    // UTF16 surrogate pairs work also ;)
+    // \ud83d\udd7a\ud83c\udffc => \U0001F57A\U0001F3FC works also
+    // TODO: find a way to enter UTF16 pairs
+    TRY_CHECK(val3 == val4);
+    TRY_CHECK(val3.to_string() == val4.to_string()); // UTF-8
+    TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicode
 
     // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
     TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode("Q u é b e c"));
