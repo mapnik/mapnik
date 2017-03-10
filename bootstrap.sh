@@ -74,7 +74,7 @@ function install_mason_deps() {
     install boost_libthread 1.63.0
     install boost_libpython 1.63.0
     install freetype 2.7.1 libfreetype
-    install harfbuzz 1.4.2-ft libharfbuzz
+    install harfbuzz 1.4.4-ft libharfbuzz
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
