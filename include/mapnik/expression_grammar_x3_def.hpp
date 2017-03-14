@@ -24,6 +24,7 @@
 #define MAPNIK_EXPRESSIONS_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/expression_grammar_x3.hpp>
+#include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/unicode.hpp>
@@ -64,6 +65,15 @@ namespace mapnik { namespace grammar {
     using x3::alpha;
     using x3::alnum;
     x3::uint_parser<char, 16, 2, 2> const hex2 {};
+
+    namespace {
+    auto const& escaped_unicode = json::grammar::escaped_unicode;
+    }
+
+    auto append = [](auto const& ctx)
+    {
+        _val(ctx) += _attr(ctx);
+    };
 
     auto do_assign = [] (auto const& ctx)
     {
@@ -302,8 +312,20 @@ namespace mapnik { namespace grammar {
     x3::rule<class regex_replace_expression, std::pair<std::string,std::string> > const regex_replace_expression("regex replace expression");
 
     // strings
-    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'') >> no_skip[*(unesc_char | ("\\x" > hex2) | (char_ - '\''))] > '\'';
-    auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"') >> no_skip[*(unesc_char | ("\\x" > hex2) | (char_ - '"'))] > '"';
+    auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'')
+        >> no_skip[*(unesc_char[append]
+                     |
+                     //(lit('\\') > escaped_unicode[append]) // FIXME (!)
+                     //|
+                     (~char_('\''))[append])] > lit('\'');
+
+    auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"')
+        >> no_skip[*(unesc_char[append]
+                     |
+                     (lit('\\') > escaped_unicode[append])
+                     |
+                     (~char_('"'))[append])] > lit('"');
+
     auto const quoted_string = x3::rule<class quoted_string, std::string> {} = single_quoted_string | double_quoted_string;
 
     auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum] - lit("not");

@@ -57,7 +57,7 @@ SECTION("registration") {
         mapnik::load_map_string(m3,"<Map font-directory=\"test/data/fonts/Noto/\"></Map>");
         REQUIRE( m3.get_font_memory_cache().size() == 0 );
         REQUIRE( m3.load_fonts() );
-        REQUIRE( m3.get_font_memory_cache().size() == 1 );
+        REQUIRE( m3.get_font_memory_cache().size() == 2 );
 
         std::vector<std::string> face_names;
         std::string foo("foo");

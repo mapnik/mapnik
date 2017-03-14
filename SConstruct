@@ -1787,7 +1787,7 @@ if not preconfigured:
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion viable
         # -Wfloat-equal -Wold-style-cast -Wexit-time-destructors -Wglobal-constructors -Wreserved-id-macro -Wheader-hygiene -Wmissing-noreturn
-        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
+        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
             common_cxx_flags += ' -Wno-unsequenced  -Wtautological-compare -Wheader-hygiene -Wc++14-extensions '
@@ -1799,7 +1799,7 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
         if env['DEBUG_SANITIZE']:
-            env.Append(CXXFLAGS = ['-fsanitize=address'])
+            env.Append(CXXFLAGS = ['-fsanitize=address','-fno-omit-frame-pointer'])
             env.Append(LINKFLAGS = ['-fsanitize=address'])
 
 
