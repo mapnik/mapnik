@@ -31,10 +31,14 @@
 // fixes gcc6 compilation issue
 namespace boost { namespace spirit { namespace x3 { namespace traits {
 
-using ring_type = mapnik::geometry::linear_ring<double>;
-template <>
-struct is_substitute<ring_type const&, ring_type const& , void>
-    : is_substitute<ring_type, ring_type, void>  {};
+template <typename T, typename Attribute, typename Enable>
+struct is_substitute<T&, Attribute&, Enable>
+  : is_substitute<T, Attribute, Enable> {};
+
+//using ring_type = mapnik::geometry::linear_ring<double>;
+//template <>
+//struct is_substitute<ring_type const&, ring_type const& , void>
+//    : is_substitute<ring_type, ring_type, void>  {};
 
 }}}}
 #endif
