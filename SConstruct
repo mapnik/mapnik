@@ -1799,7 +1799,7 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
         if env['DEBUG_SANITIZE']:
-            env.Append(CXXFLAGS = ['-fsanitize=address'])
+            env.Append(CXXFLAGS = ['-fsanitize=address','-fno-omit-frame-pointer'])
             env.Append(LINKFLAGS = ['-fsanitize=address'])
 
 
