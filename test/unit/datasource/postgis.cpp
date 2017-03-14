@@ -26,6 +26,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/util/fs.hpp>
 
 /*
@@ -185,6 +186,24 @@ TEST_CASE("postgis") {
             CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
         }
 
+        SECTION("Postgis properly escapes names with single quotes")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "\"test'single'quotes\"";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+        }
+
+        SECTION("Postgis properly escapes names with double quotes")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "\"test\"\"double\"\"quotes\"";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+        }
+
         SECTION("Postgis query field names")
         {
             mapnik::parameters params(base_params);
@@ -268,6 +287,55 @@ TEST_CASE("postgis") {
             REQUIRE(ext.miny() == -2);
             REQUIRE(ext.maxx() == 5);
             REQUIRE(ext.maxy() == 4);
+        }
+
+        SECTION("Postgis doesn't interpret @domain in email address as @variable")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "(SELECT gid, geom, 'fake@mail.ru' as email"
+                              " FROM public.test LIMIT 1) AS data";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            auto featureset = all_features(ds);
+            auto feature = featureset->next();
+            CHECKED_IF(feature != nullptr)
+            {
+                CHECK(feature->get("email").to_string() == "fake@mail.ru");
+            }
+        }
+
+        SECTION("Postgis interpolates !@uservar! tokens in query")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "(SELECT * FROM public.test"
+                              " WHERE GeometryType(geom) = !@wantedGeomType!"
+                              " LIMIT 1) AS data";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+
+            mapnik::transcoder tr("utf8");
+            mapnik::query qry(ds->envelope());
+            qry.set_variables({{"wantedGeomType", tr.transcode("POINT")}});
+            CHECK(qry.variables().count("wantedGeomType") == 1);
+
+            auto featureset = ds->features(qry);
+            auto feature = featureset->next();
+            CHECKED_IF(feature != nullptr)
+            {
+                auto const& geom = feature->get_geometry();
+                CHECK(mapnik::geometry::geometry_type(geom) == mapnik::geometry::Point);
+            }
+
+            qry.set_variables({{"wantedGeomType", tr.transcode("POLYGON")}});
+            CHECK(qry.variables().count("wantedGeomType") == 1);
+
+            featureset = ds->features(qry);
+            feature = featureset->next();
+            CHECKED_IF(feature != nullptr)
+            {
+                auto const& geom = feature->get_geometry();
+                CHECK(mapnik::geometry::geometry_type(geom) == mapnik::geometry::Polygon);
+            }
         }
 
         SECTION("Postgis query extent: full dataset")
