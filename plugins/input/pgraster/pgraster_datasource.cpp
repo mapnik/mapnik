@@ -186,7 +186,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 raster_table_ = raster_table_.substr(idx + 1);
             }
 
-            // If we do not know either the geometry_field or the srid or we
+            // If we do not know either the raster_field or the srid or we
             // want to use overviews but do not know about schema, or
             // no extent was specified, then attempt to fetch the missing
             // information from a raster_columns entry.
@@ -194,7 +194,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
             // This will return no records if we are querying a bogus table returned
             // from the simplistic table parsing in table_from_sql() or if
             // the table parameter references a table, view, or subselect not
-            // registered in the geometry columns.
+            // registered in the raster_columns.
             //
             geometryColumn_ = mapnik::sql_utils::unquote_double(raster_field_);
             if (!raster_table_.empty() && (
@@ -285,7 +285,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
 
                 // If we still do not know the srid then we can try to fetch
                 // it from the 'table_' parameter, which should work even if it is
-                // a subselect as long as we know the geometry_field to query
+                // a subselect as long as we know the raster_field to query
                 if (! geometryColumn_.empty() && srid_ <= 0)
                 {
                     s.str("");
@@ -463,7 +463,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Table " << table_ << " is using SRID=" << srid_;
             }
 
-            // At this point the geometry_field may still not be known
+            // At this point the raster_field may still not be known
             // but we'll catch that where more useful...
             MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Using SRID=" << srid_;
             MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: Using geometry_column=" << geometryColumn_;
@@ -857,7 +857,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
                 s_error << schema_ << ".";
             }
             s_error << raster_table_
-                    << "'. Please manually provide the 'geometry_field' parameter or add an entry "
+                    << "'. Please manually provide the 'raster_field' parameter or add an entry "
                     << "in the geometry_columns for '";
 
             if (! schema_.empty())
@@ -1025,7 +1025,7 @@ featureset_ptr pgraster_datasource::features_at_point(coord2d const& pt, double 
                     s_error << schema_ << ".";
                 }
                 s_error << raster_table_
-                        << "'. Please manually provide the 'geometry_field' parameter or add an entry "
+                        << "'. Please manually provide the 'raster_field' parameter or add an entry "
                         << "in the geometry_columns for '";
 
                 if (! schema_.empty())
