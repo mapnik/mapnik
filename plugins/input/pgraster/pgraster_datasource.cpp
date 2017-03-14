@@ -923,7 +923,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         if (band_) s << "ST_Band(";
 
-        if (prescale_rasters_) s << "ST_Resize(";
+        if (prescale_rasters_) s << "ST_Resample(";
 
         if (clip_rasters_) s << "ST_Clip(";
 
@@ -937,11 +937,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         }
 
         if (prescale_rasters_) {
-          const double scale = std::min(px_gw, px_gh);
-          s << ", least(abs(ST_ScaleX(\"" << col
-            << "\"))::float8/" << scale
-            << ", 1.0), least(abs(ST_ScaleY(\"" << col
-            << "\"))::float8/" << scale << ", 1.0))";
+          s << "," << px_gw << " * sign(ST_ScaleX(\"" << col << "\")),"
+            << px_gh << " * sign(ST_ScaleY(\"" << col << "\")), 0, 0)";
           // TODO: if band_ is given, we'll interpret as indexed so
           //       the rescaling must NOT ruin it (use algorithm mode!)
         }
