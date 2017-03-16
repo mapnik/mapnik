@@ -10,8 +10,6 @@ env:
    - CCACHE_COMPRESS=1
    - HEAVY_JOBS="2"
    - PREFIX=/tmp/mapnik
-   - secure: "D5CLP5lbyFru788iZO8RqDenY/YsHPREvr34zCEi93xMqOTxPmME/zyuEZSyjP5ZLyf8g/fxOuPYSDbOQ1QLwNDBWxB0JomWOahyimHKrMCrMcGHCjl//2W2mE+p9VwF5VLGgfy7CskGkS49Mye37FDK0ejwuq6MDI45DsH4Fkk="
-   - secure: "ZPHyAVL3ID5g3KEmwcnzG9z2tAQwSx526Qd3Y6tsZ3Yj+aSagVBiZQjZGKWgNX74lymtmYKnb2Md46apWLeImt6tjB3MWTu7WwWoZRnqUligz/8Nmg4Lgo7EOCkQcjN/gpA1i+cM5b+ZKDTZYOaHO6/+DAaunQzA7/p99hw/XYg="
    - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 addons:
   postgresql: "9.4"
@@ -33,7 +31,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 MASON_PUBLISH=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" TRIGGER=true
+      env: JOBS=8 CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" TRIGGER=true
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
@@ -50,7 +48,7 @@ matrix:
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 MASON_PUBLISH=true CXX="ccache clang++ -Qunused-arguments"
+      env: JOBS=4 CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
  # workaround travis rvm bug
@@ -115,8 +113,3 @@ script:
 
 after_success:
  - enabled ${TRIGGER} trigger_downstream
- - if enabled ${MASON_PUBLISH}; then
-     source ./.mason/mason.sh &&
-     ./mason_latest.sh build &&
-     ./mason_latest.sh publish;
-   fi
