@@ -119,7 +119,8 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
         gamma_method_ = GAMMA_POWER;
         gamma_ = 1.0;
     }
-    agg::rendering_buffer buf(current_buffer_->bytes(),current_buffer_->width(),current_buffer_->height(),current_buffer_->row_size());
+    buffer_type & current_buffer = buffers_.top().get();
+    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
     using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>;
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;

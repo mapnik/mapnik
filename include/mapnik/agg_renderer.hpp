@@ -35,8 +35,10 @@
 #include <mapnik/request.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/renderer_common.hpp>
+#include <mapnik/image_util.hpp>
 // stl
 #include <memory>
+#include <stack>
 
 // fwd declaration to avoid dependence on agg headers
 namespace agg { struct trans_affine; }
@@ -57,6 +59,53 @@ namespace mapnik {
 }
 
 namespace mapnik {
+
+template <typename T>
+class buffer_stack
+{
+public:
+    buffer_stack(std::size_t width, std::size_t height)
+        : width_(width),
+          height_(height),
+          buffers_(),
+          position_(buffers_.begin())
+    {
+    }
+
+    T & push()
+    {
+        if (position_ == buffers_.begin())
+        {
+            buffers_.emplace_front(width_, height_);
+            position_ = buffers_.begin();
+        }
+        else
+        {
+            position_--;
+            mapnik::fill(*position_, 0); // fill with transparent colour
+        }
+        return *position_;
+    }
+
+    void pop()
+    {
+        if (position_ != buffers_.end())
+        {
+            position_++;
+        }
+    }
+
+    T & top() const
+    {
+        return *position_;
+    }
+
+private:
+    const std::size_t width_;
+    const std::size_t height_;
+    std::deque<T> buffers_;
+    typename std::deque<T>::iterator position_;
+};
 
 template <typename T0, typename T1=label_collision_detector4>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0> >,
@@ -160,15 +209,14 @@ protected:
     void draw_geo_extent(box2d<double> const& extent,mapnik::color const& color);
 
 private:
-    buffer_type & pixmap_;
-    std::shared_ptr<buffer_type> internal_buffer_;
-    mutable buffer_type * current_buffer_;
-    mutable bool style_level_compositing_;
+    std::stack<std::reference_wrapper<buffer_type>> buffers_;
+    buffer_stack<buffer_type> internal_buffers_;
+    std::unique_ptr<buffer_type> inflated_buffer_;
     const std::unique_ptr<rasterizer> ras_ptr;
     gamma_method_enum gamma_method_;
     double gamma_;
     renderer_common common_;
-    void setup(Map const& m);
+    void setup(Map const & m, buffer_type & pixmap);
 };
 
 extern template class MAPNIK_DECL agg_renderer<image<rgba8_t>>;
