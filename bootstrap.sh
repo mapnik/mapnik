@@ -11,7 +11,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="v0.8.0"
+MASON_VERSION="3c6df04"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -44,16 +44,16 @@ function install() {
     mason link $1 $2
 }
 
-ICU_VERSION="55.1"
+ICU_VERSION="57.1"
 
 function install_mason_deps() {
-    install ccache 3.3.0
+    install ccache 3.3.1
     install zlib 1.2.8
     install jpeg_turbo 1.5.1 libjpeg
     install libpng 1.6.28 libpng
     install libtiff 4.0.7 libtiff
-    install libpq 9.6.1
-    install sqlite 3.16.2 libsqlite3
+    install libpq 9.6.2
+    install sqlite 3.17.0 libsqlite3
     install expat 2.2.0 libexpat
     install icu ${ICU_VERSION}
     install proj 4.9.3 libproj
@@ -68,7 +68,7 @@ function install_mason_deps() {
     install boost_libsystem 1.63.0
     install boost_libfilesystem 1.63.0
     install boost_libprogram_options 1.63.0
-    install boost_libregex_icu 1.63.0
+    install boost_libregex_icu57 1.63.0
     # technically boost thread and python are not a core dep, but installing
     # here by default helps make python-mapnik builds easier
     install boost_libthread 1.63.0
