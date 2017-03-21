@@ -50,39 +50,54 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
         |
         geometry_collection
         |
-        lit("null")
+        lit("null") // geometry_empty
         ;
 
     point = lit("{\"type\":\"Point\",\"coordinates\":") << point_coord << lit("}")
         ;
-    linestring = lit("{\"type\":\"LineString\",\"coordinates\":[") << linestring_coord << lit("]}")
+
+    linestring = lit("{\"type\":\"LineString\",\"coordinates\":") << linestring_coord << lit("}")
         ;
-    polygon = lit("{\"type\":\"Polygon\",\"coordinates\":[") << polygon_coord << lit("]}")
+
+    polygon = lit("{\"type\":\"Polygon\",\"coordinates\":") << polygon_coord << lit("}")
         ;
+
     multi_point = lit("{\"type\":\"MultiPoint\",\"coordinates\":[") << multi_point_coord << lit("]}")
         ;
+
     multi_linestring = lit("{\"type\":\"MultiLineString\",\"coordinates\":[") << multi_linestring_coord << lit("]}")
         ;
+
     multi_polygon = lit("{\"type\":\"MultiPolygon\",\"coordinates\":[") << multi_polygon_coord << lit("]}")
         ;
+
     geometry_collection = lit("{\"type\":\"GeometryCollection\",\"geometries\":[") << geometries  << lit("]}")
         ;
+
     point_coord = lit('[') << coordinate << lit(',') << coordinate  << lit(']')
         ;
-    linestring_coord = point_coord % lit(',')
+
+    linestring_coord = lit('[') << -(point_coord % lit(',')) << lit(']')
         ;
-    polygon_coord = lit('[') << exterior_ring_coord << lit(']') << interior_ring_coord
+
+    polygon_coord = lit('[') << exterior_ring_coord << interior_ring_coord << lit(']')
         ;
+
     exterior_ring_coord = linestring_coord.alias()
         ;
-    interior_ring_coord =  *(lit(",[") << exterior_ring_coord << lit(']'))
+
+    interior_ring_coord =  *(lit(",") << exterior_ring_coord)
         ;
+
     multi_point_coord = linestring_coord.alias()
         ;
-    multi_linestring_coord = (lit('[') << linestring_coord << lit(']')) % lit(',')
+
+    multi_linestring_coord = lit('[') << linestring_coord  % lit(',') << lit(']')
         ;
-    multi_polygon_coord = (lit('[') << polygon_coord << lit(']')) % lit(',')
+
+    multi_polygon_coord = lit('[') << polygon_coord  % lit(',') << lit("]")
         ;
+
     geometries =  geometry % lit(',')
         ;
 }
