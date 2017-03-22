@@ -37,7 +37,15 @@ bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & 
     standard::space_type space;
     char const* start = json.c_str();
     char const* end = start + json.length();
-    return qi::phrase_parse(start, end, g, space, geom);
+    try
+    {
+        if (!qi::phrase_parse(start, end, g, space, geom))
+        {
+            throw std::runtime_error("Can't parser GeoJSON Geometry");
+        }
+    }
+    catch (...) { return false; }
+    return true;
 }
 
 }}
