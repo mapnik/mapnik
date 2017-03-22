@@ -62,13 +62,13 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
     polygon = lit("{\"type\":\"Polygon\",\"coordinates\":") << polygon_coord << lit("}")
         ;
 
-    multi_point = lit("{\"type\":\"MultiPoint\",\"coordinates\":[") << multi_point_coord << lit("]}")
+    multi_point = lit("{\"type\":\"MultiPoint\",\"coordinates\":") << multi_point_coord << lit("}")
         ;
 
-    multi_linestring = lit("{\"type\":\"MultiLineString\",\"coordinates\":[") << multi_linestring_coord << lit("]}")
+    multi_linestring = lit("{\"type\":\"MultiLineString\",\"coordinates\":") << multi_linestring_coord << lit("}")
         ;
 
-    multi_polygon = lit("{\"type\":\"MultiPolygon\",\"coordinates\":[") << multi_polygon_coord << lit("]}")
+    multi_polygon = lit("{\"type\":\"MultiPolygon\",\"coordinates\":") << multi_polygon_coord << lit("}")
         ;
 
     geometry_collection = lit("{\"type\":\"GeometryCollection\",\"geometries\":[") << geometries  << lit("]}")
