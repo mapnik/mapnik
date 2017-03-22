@@ -121,17 +121,33 @@ TEST_CASE("geojson") {
             auto valid_empty_geometries =
                 {
                     "null", // Point can't be empty
-                    "{ \"type\": \"LineString\", \"coordinates\": [] }}",
-                    "{ \"type\": \"Polygon\", \"coordinates\": [ [ ] ] } }",
-                    "{ \"type\": \"MultiPoint\", \"coordinates\": [ ] }}",
-                    "{ \"type\": \"MultiLineString\", \"coordinates\": [ [] ] }}",
-                    "{ \"type\": \"MultiPolygon\", \"coordinates\": [[ []] ] }}"
+                    "{ \"type\": \"LineString\", \"coordinates\": [] }",
+                    "{ \"type\": \"Polygon\", \"coordinates\": [ [ ] ] } ",
+                    "{ \"type\": \"MultiPoint\", \"coordinates\": [ ] }",
+                    "{ \"type\": \"MultiLineString\", \"coordinates\": [ [] ] }",
+                    "{ \"type\": \"MultiPolygon\", \"coordinates\": [[ []] ] }"
                 };
 
             for (auto const& json  : valid_empty_geometries)
             {
                 mapnik::geometry::geometry<double> geom;
                 CHECK(mapnik::json::from_geojson(json, geom));
+            }
+
+            auto invalid_empty_geometries =
+                {
+                    "{ \"type\": \"Point\", \"coordinates\": [] }",
+                    "{ \"type\": \"LineString\", \"coordinates\": [[]] }"
+                    "{ \"type\": \"Polygon\", \"coordinates\": [[[]]] }",
+                    "{ \"type\": \"MultiPoint\", \"coordinates\": [[]] }",
+                    "{ \"type\": \"MultiLineString\", \"coordinates\": [[[]]] }",
+                    "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[[]]]] }"
+                };
+
+            for (auto const& json  : invalid_empty_geometries)
+            {
+                mapnik::geometry::geometry<double> geom;
+                CHECK(!mapnik::json::from_geojson(json, geom));
             }
         }
 
