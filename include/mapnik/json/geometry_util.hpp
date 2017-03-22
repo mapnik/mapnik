@@ -43,7 +43,10 @@ struct create_point
     }
 
     template <typename T>
-    void operator()(T const&) const {} // no-op - shouldn't get here
+    void operator()(T const&) const
+    {
+        throw std::runtime_error("Failed to parse geojson geometry");
+    }
     Geometry & geom_;
 };
 
@@ -55,21 +58,21 @@ struct create_linestring
 
     void operator() (positions const& ring) const
     {
+        mapnik::geometry::line_string<double> line;
         std::size_t size = ring.size();
-        if (size > 1)
+        line.reserve(size);
+        for (auto && pt : ring)
         {
-            mapnik::geometry::line_string<double> line;
-            line.reserve(size);
-            for (auto && pt : ring)
-            {
-                line.emplace_back(std::move(pt));
-            }
-            geom_ = std::move(line);
+            line.emplace_back(std::move(pt));
         }
+        geom_ = std::move(line);
     }
 
     template <typename T>
-    void operator()(T const&) const {}  // no-op - shouldn't get here
+    void operator()(T const&) const
+    {
+        throw std::runtime_error("Failed to parse geojson geometry");
+    }
 
     Geometry & geom_;
 };
@@ -106,7 +109,10 @@ struct create_polygon
     }
 
     template <typename T>
-    void operator()(T const&) const {}  // no-op - shouldn't get here
+    void operator()(T const&) const
+    {
+        throw std::runtime_error("Failed to parse geojson geometry");
+    }
 
     Geometry & geom_;
 };
@@ -130,7 +136,10 @@ struct create_multipoint
     }
 
     template <typename T>
-    void operator()(T const&) const {}  // no-op - shouldn't get here
+    void operator()(T const&) const
+    {
+        throw std::runtime_error("Failed to parse geojson geometry");
+    }
 
     Geometry & geom_;
 };
@@ -160,7 +169,10 @@ struct create_multilinestring
     }
 
     template <typename T>
-    void operator()(T const&) const {}  // no-op - shouldn't get here
+    void operator()(T const&) const
+    {
+        throw std::runtime_error("Failed to parse geojson geometry");
+    }
 
     Geometry & geom_;
 };
@@ -201,7 +213,10 @@ struct create_multipolygon
     }
 
     template <typename T>
-    void operator()(T const&) const {}  // no-op - shouldn't get here
+    void operator()(T const&) const
+    {
+        throw std::runtime_error("Failed to parse geojson geometry");
+    }
 
     Geometry & geom_;
 };

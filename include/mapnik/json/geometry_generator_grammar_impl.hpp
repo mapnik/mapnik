@@ -56,26 +56,24 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
         ;
 
     geometry_dispatch = eps[_a = geometry_type(_val)] <<
-        (&uint_(geometry::geometry_types::Point)[_1 = _a]
-         << (point | lit("null")))
+        (&uint_(geometry::geometry_types::Point)[_1 = _a] << point)
         |
         (&uint_(geometry::geometry_types::LineString)[_1 = _a]
-         << (linestring | lit("null")))
+         << (linestring | "{\"type\":\"LineString\",\"coordinates\":[]}"))
         |
         (&uint_(geometry::geometry_types::Polygon)[_1 = _a]
-         << (polygon | lit("null")))
+         << (polygon | "{\"type\":\"Polygon\",\"coordinates\":[[]]}"))
         |
         (&uint_(geometry::geometry_types::MultiPoint)[_1 = _a]
-         << (multi_point | lit("null")))
+         << (multi_point | "{\"type\":\"MultiPoint\",\"coordinates\":[]}"))
         |
         (&uint_(geometry::geometry_types::MultiLineString)[_1 = _a]
-         << (multi_linestring | lit("null")))
+         << (multi_linestring | "{\"type\":\"MultiLineString\",\"coordinates\":[[]]}"))
         |
         (&uint_(geometry::geometry_types::MultiPolygon)[_1 = _a]
-         << (multi_polygon | lit("null")))
+         << (multi_polygon | "{\"type\":\"MultiPolygon\",\"coordinates\":[[[]]]}"))
         |
-        (&uint_(geometry::geometry_types::GeometryCollection)[_1 = _a]
-         << (geometry_collection | lit("null")))
+        (&uint_(geometry::geometry_types::GeometryCollection)[_1 = _a] << geometry_collection)
         |
         lit("null")
         ;
@@ -96,7 +94,7 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
         ;
     point_coord = lit('[') << coordinate << lit(',') << coordinate  << lit(']')
         ;
-    linestring_coord = point_coord % lit(',')
+    linestring_coord = (point_coord % lit(','))
         ;
     polygon_coord = lit('[') << exterior_ring_coord << lit(']') << interior_ring_coord
         ;
