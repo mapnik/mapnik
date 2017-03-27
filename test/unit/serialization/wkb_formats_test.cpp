@@ -2,9 +2,9 @@
 
 #include <iostream>
 #include <mapnik/wkb.hpp>
-#include <mapnik/geometry_is_valid.hpp>
-#include <mapnik/geometry_is_simple.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/is_valid.hpp>
+#include <mapnik/geometry/is_simple.hpp>
+#include <mapnik/geometry/correct.hpp>
 #include <boost/version.hpp>
 
 TEST_CASE("geometry formats") {
@@ -79,7 +79,7 @@ SECTION("wkb") {
         geom = mapnik::geometry_utils::from_wkb((const char*)sp_invalid_blob,
                                                 sizeof(sp_invalid_blob) / sizeof(sp_invalid_blob[0]),
                                                 mapnik::wkbAuto);
-        REQUIRE(geom.is<mapnik::geometry::geometry_empty<double>>()); // returns geometry_empty
+        REQUIRE(geom.is<mapnik::geometry::geometry_empty>()); // returns geometry_empty
 
         // sqlite generic wkb blob
 
@@ -103,7 +103,7 @@ SECTION("wkb") {
         geom = mapnik::geometry_utils::from_wkb((const char*)sq_invalid_blob,
                                                 sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
                                                 mapnik::wkbGeneric);
-        REQUIRE(geom.is<mapnik::geometry::geometry_empty<double>>()); // returns geometry_empty
+        REQUIRE(geom.is<mapnik::geometry::geometry_empty>()); // returns geometry_empty
 
     }
     catch (std::exception const& ex)

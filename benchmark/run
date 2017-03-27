@@ -24,7 +24,7 @@ run test_getline 30 10000000
 #run test_polygon_clipping 10 1000
 #run test_polygon_clipping_rendering 10 100
 run test_proj_transform1 10 100
-run test_expression_parse 10 1000
+run test_expression_parse 10 10000
 run test_face_ptr_creation 10 1000
 run test_font_registration 10 100
 run test_offset_converter 10 1000

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,14 +48,17 @@ namespace mapnik {
 
 struct png_options {
     int colors;
+    int filters;
     int compression;
     int strategy;
     int trans_mode;
     double gamma;
     bool paletted;
     bool use_hextree;
+
     png_options() :
         colors(256),
+        filters(PNG_FILTER_NONE),
         compression(Z_DEFAULT_COMPRESSION),
         strategy(Z_DEFAULT_STRATEGY),
         trans_mode(-1),
@@ -97,7 +100,7 @@ void save_as_png(T1 & file,
     mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
     png_set_asm_flags(png_ptr, flags | mask);
 #endif
-    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, PNG_FILTER_NONE);
+    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, opts.filters);
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
@@ -120,7 +123,7 @@ void save_as_png(T1 & file,
                  (opts.trans_mode == 0) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
     const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
-    for (unsigned int i = 0; i < image.height(); i++)
+    for (unsigned int i = 0; i < image.height(); ++i)
     {
         row_pointers[i] = const_cast<png_bytep>(reinterpret_cast<const unsigned char *>(image.get_row(i)));
     }
@@ -141,7 +144,7 @@ void reduce_8(T const& in,
     unsigned height = in.height();
 
     std::vector<unsigned> alphaCount(alpha.size());
-    for(unsigned i=0; i<alpha.size(); i++)
+    for(unsigned i=0; i<alpha.size(); ++i)
     {
         alpha[i] = 0;
         alphaCount[i] = 0;
@@ -155,7 +158,7 @@ void reduce_8(T const& in,
             unsigned val = row[x];
             std::uint8_t index = 0;
             int idx = -1;
-            for(int j=levels-1; j>0; j--)
+            for(int j=levels-1; j>0; --j)
             {
                 if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0)
                 {
@@ -166,12 +169,12 @@ void reduce_8(T const& in,
             if (idx>=0 && idx < static_cast<int>(alpha.size()))
             {
                 alpha[idx]+=U2ALPHA(val);
-                alphaCount[idx]++;
+                ++alphaCount[idx];
             }
             row_out[x] = index;
         }
     }
-    for(unsigned i=0; i<alpha.size(); i++)
+    for(unsigned i=0; i<alpha.size(); ++i)
     {
         if (alphaCount[i]!=0)
         {
@@ -192,7 +195,7 @@ void reduce_4(T const& in,
     unsigned height = in.height();
 
     std::vector<unsigned> alphaCount(alpha.size());
-    for(unsigned i=0; i<alpha.size(); i++)
+    for(unsigned i=0; i<alpha.size(); ++i)
     {
         alpha[i] = 0;
         alphaCount[i] = 0;
@@ -206,7 +209,7 @@ void reduce_4(T const& in,
             unsigned val = row[x];
             std::uint8_t index = 0;
             int idx=-1;
-            for(int j=levels-1; j>0; j--)
+            for(int j=levels-1; j>0; --j)
             {
                 if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0)
                 {
@@ -217,7 +220,7 @@ void reduce_4(T const& in,
             if (idx>=0 && idx < static_cast<int>(alpha.size()))
             {
                 alpha[idx]+=U2ALPHA(val);
-                alphaCount[idx]++;
+                ++alphaCount[idx];
             }
             if (x%2 == 0)
             {
@@ -226,7 +229,7 @@ void reduce_4(T const& in,
             row_out[x>>1] |= index;
         }
     }
-    for(unsigned i=0; i<alpha.size(); i++)
+    for(unsigned i=0; i<alpha.size(); ++i)
     {
         if (alphaCount[i]!=0)
         {
@@ -252,7 +255,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
                  unsigned width,
                  unsigned height,
                  unsigned color_depth,
-                 std::vector<unsigned> const&alpha,
+                 std::vector<unsigned> const& alpha,
                  png_options const& opts)
 {
     png_voidp error_ptr=0;
@@ -271,7 +274,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     mask = png_get_asm_flagmask(PNG_SELECT_READ | PNG_SELECT_WRITE);
     png_set_asm_flags(png_ptr, flags | mask);
 #endif
-    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, PNG_FILTER_NONE);
+    png_set_filter(png_ptr, PNG_FILTER_TYPE_BASE, opts.filters);
     png_infop info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr)
     {
@@ -302,7 +305,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     {
         std::vector<png_byte> trans(alpha.size());
         unsigned alphaSize=0;//truncate to nonopaque values
-        for(unsigned i=0; i < alpha.size(); i++)
+        for(unsigned i=0; i < alpha.size(); ++i)
         {
             trans[i]=alpha[i];
             if (alpha[i]<255)
@@ -317,7 +320,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     }
 
     png_write_info(png_ptr, info_ptr);
-    for (unsigned i=0;i<height;i++)
+    for (unsigned i=0;i<height; ++i)
     {
         png_write_row(png_ptr,const_cast<png_bytep>(image.get_row(i)));
     }
@@ -346,7 +349,7 @@ void save_as_png8_oct(T1 & file,
     }
     else
     {
-        for(int i=0; i<256; i++)
+        for(int i=0; i<256; ++i)
         {
             alphaHist[i] = 0;
         }
@@ -355,11 +358,11 @@ void save_as_png8_oct(T1 & file,
             for (unsigned x = 0; x < width; ++x)
             {
                 unsigned val = U2ALPHA(static_cast<unsigned>(image.get_row(y)[x]));
-                alphaHist[val]++;
+                ++alphaHist[val];
                 meanAlpha += val;
                 if (val>0 && val<255)
                 {
-                    semiCount++;
+                    ++semiCount;
                 }
             }
         }
@@ -371,17 +374,17 @@ void save_as_png8_oct(T1 & file,
     limits[0] = 0;
     limits[1] = (opts.trans_mode!=0 && alphaHist[0]>0)?1:0;
     limits[TRANSPARENCY_LEVELS] = 256;
-    for(unsigned j=2; j<TRANSPARENCY_LEVELS; j++)
+    for(unsigned j=2; j<TRANSPARENCY_LEVELS; ++j)
     {
         limits[j] = limits[1];
     }
     if (opts.trans_mode != 0)
     {
         unsigned alphaHistSum = 0;
-        for(unsigned i=1; i<256; i++)
+        for(unsigned i=1; i<256; ++i)
         {
             alphaHistSum += alphaHist[i];
-            for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
+            for(unsigned j=1; j<TRANSPARENCY_LEVELS; ++j)
             {
                 if (alphaHistSum<semiCount*(j)/4)
                 {
@@ -409,7 +412,7 @@ void save_as_png8_oct(T1 & file,
     // count colors
     if (opts.trans_mode == 0)
     {
-        for (unsigned j=0; j<TRANSPARENCY_LEVELS; j++)
+        for (unsigned j=0; j<TRANSPARENCY_LEVELS; ++j)
         {
             cols[j] = 0;
         }
@@ -417,10 +420,10 @@ void save_as_png8_oct(T1 & file,
     }
     else
     {
-        for (unsigned j=0; j<TRANSPARENCY_LEVELS; j++)
+        for (unsigned j=0; j<TRANSPARENCY_LEVELS; ++j)
         {
             cols[j] = 0;
-            for (unsigned i=limits[j]; i<limits[j+1]; i++)
+            for (unsigned i=limits[j]; i<limits[j+1]; ++i)
             {
                 cols[j] += alphaHist[i];
             }
@@ -438,7 +441,7 @@ void save_as_png8_oct(T1 & file,
     {
         // give chance less populated but not empty cols to have at least few colors(12)
         unsigned minCols = (12+1)*divCoef/(opts.colors-cols[0]);
-        for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
+        for(unsigned j=1; j<TRANSPARENCY_LEVELS; ++j)
         {
             if (cols[j]>12 && cols[j]<minCols)
             {
@@ -448,7 +451,7 @@ void save_as_png8_oct(T1 & file,
         }
     }
     unsigned usedColors = cols[0];
-    for(unsigned j=1; j<TRANSPARENCY_LEVELS-1; j++)
+    for(unsigned j=1; j<TRANSPARENCY_LEVELS-1; ++j)
     {
         cols[j] = cols[j]*(opts.colors-cols[0])/divCoef;
         usedColors += cols[j];
@@ -466,7 +469,7 @@ void save_as_png8_oct(T1 & file,
 
     // octree table for separate alpha range with 1-based index (0 is fully transparent: no color)
     octree<rgb> trees[MAX_OCTREE_LEVELS];
-    for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
+    for(unsigned j=1; j<TRANSPARENCY_LEVELS; ++j)
     {
         trees[j].setMaxColors(cols[j]);
     }
@@ -477,7 +480,7 @@ void save_as_png8_oct(T1 & file,
         {
             unsigned val = row[x];
             // insert to proper tree based on alpha range
-            for(unsigned j=TRANSPARENCY_LEVELS-1; j>0; j--)
+            for(unsigned j=TRANSPARENCY_LEVELS-1; j>0; --j)
             {
                 if (cols[j]>0 && U2ALPHA(val)>=limits[j])
                 {
@@ -495,7 +498,7 @@ void save_as_png8_oct(T1 & file,
         palette.push_back(rgb(0,0,0));
     }
 
-    for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
+    for(unsigned j=1; j<TRANSPARENCY_LEVELS; ++j)
     {
         if (cols[j]>0)
         {

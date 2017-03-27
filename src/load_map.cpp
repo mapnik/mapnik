@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/parse_transform.hpp>
+#include <mapnik/transform/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/text/placements/registry.hpp>
@@ -55,7 +55,7 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/group/group_rule.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/transform/transform_expression.hpp>
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/boolean.hpp>
 
@@ -104,7 +104,10 @@ public:
 private:
     void parse_map_include(Map & map, xml_node const& node);
     void parse_style(Map & map, xml_node const& node);
-    void parse_layer(Map & map, xml_node const& node);
+
+    template <typename Parent>
+    void parse_layer(Parent & parent, xml_node const& node);
+
     void parse_symbolizer_base(symbolizer_base &sym, xml_node const& node);
     void parse_fontset(Map & map, xml_node const & node);
     bool parse_font(font_set & fset, xml_node const& f);
@@ -133,7 +136,7 @@ private:
     void find_unused_nodes_recursive(xml_node const& node, std::string & error_text);
     std::string ensure_relative_to_xml(boost::optional<std::string> const& opt_path);
     void ensure_exists(std::string const& file_path);
-    void check_styles(Map const & map) const throw (config_error);
+    void check_styles(Map const & map);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
                                               std::string const& name);
 
@@ -559,7 +562,8 @@ bool map_parser::parse_font(font_set & fset, xml_node const& f)
     return false;
 }
 
-void map_parser::parse_layer(Map & map, xml_node const& node)
+template <typename Parent>
+void map_parser::parse_layer(Parent & parent, xml_node const& node)
 {
     std::string name;
     try
@@ -575,7 +579,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         name = node.get_attr("name", std::string("Unnamed"));
 
         // If no projection is given inherit from map
-        std::string srs = node.get_attr("srs", map.srs());
+        std::string srs = node.get_attr("srs", parent.srs());
         try
         {
             // create throwaway projection object here to ensure it is valid
@@ -679,6 +683,24 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             }
         }
 
+        // compositing
+        optional<std::string> comp_op_name = node.get_opt_attr<std::string>("comp-op");
+        if (comp_op_name)
+        {
+            optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+            if (comp_op)
+            {
+                lyr.set_comp_op(*comp_op);
+            }
+            else
+            {
+                throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
+            }
+        }
+
+        optional<double> opacity = node.get_opt_attr<double>("opacity");
+        if (opacity) lyr.set_opacity(*opacity);
+
         for (auto const& child: node)
         {
 
@@ -758,8 +780,12 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                     throw config_error("Unknown exception occurred attempting to create datasoure for layer '" + lyr.name() + "'");
                 }
             }
+            else if (child.is("Layer"))
+            {
+                parse_layer(lyr, child);
+            }
         }
-        map.add_layer(std::move(lyr));
+        parent.add_layer(std::move(lyr));
     }
     catch (config_error const& ex)
     {
@@ -895,6 +921,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const& nod
     set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::comp_op, node);
     set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::geometry_transform, node);
     set_symbolizer_property<symbolizer_base,simplify_algorithm_e>(sym, keys::simplify_algorithm, node);
+    set_symbolizer_property<symbolizer_base,double>(sym, keys::extend, node);
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & node)
@@ -1155,10 +1182,14 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         if (placement_type)
         {
             placements = placements::registry::instance().from_xml(*placement_type, node, fontsets_, true);
-        } else {
-            placements = std::make_shared<text_placements_dummy>();
+            if (!placements)
+                return;
         }
-        placements->defaults.from_xml(node, fontsets_, true);
+        else
+        {
+            placements = std::make_shared<text_placements_dummy>();
+            placements->defaults.from_xml(node, fontsets_, true);
+        }
         if (strict_ &&
             !placements->defaults.format_defaults.fontset)
         {
@@ -1483,32 +1514,32 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                 colorizer_mode mode = n.get_attr<colorizer_mode>("mode", COLORIZER_INHERIT);
 
                 // value is required, and it must be bigger than the previous
-                optional<float> value = n.get_opt_attr<float>("value");
+                optional<float> val = n.get_opt_attr<float>("value");
 
-                if(!value)
+                if (!val)
                 {
                     throw config_error("stop tag missing value");
                 }
 
-                if(value < maximumValue)
+                if (val < maximumValue)
                 {
                     throw config_error("stop tag values must be in ascending order");
                 }
-                maximumValue = *value;
+                maximumValue = *val;
 
                 optional<std::string> label = n.get_opt_attr<std::string>("label");
 
                 //append the stop
-                colorizer_stop tmpStop;
-                tmpStop.set_color(*stopcolor);
-                tmpStop.set_mode(mode);
-                tmpStop.set_value(*value);
+                colorizer_stop stop;
+                stop.set_color(*stopcolor);
+                stop.set_mode(mode);
+                stop.set_value(*val);
                 if (label)
                 {
-                    tmpStop.set_label(*label);
+                    stop.set_label(*label);
                 }
 
-                rc->add_stop(tmpStop);
+                rc->add_stop(stop);
             }
         }
     }
@@ -1691,7 +1722,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
     }
 }
 
-void map_parser::check_styles(Map const & map) const throw (config_error)
+void map_parser::check_styles(Map const & map)
 {
     for (auto const & layer : map.layers())
     {

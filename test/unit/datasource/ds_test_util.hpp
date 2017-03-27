@@ -29,8 +29,8 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_types.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 namespace {
 
@@ -131,7 +131,7 @@ struct feature_count
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    std::size_t operator()(mapnik::geometry::geometry_empty<T> const &) const
+    std::size_t operator()(mapnik::geometry::geometry_empty const &) const
     {
         return 0;
     }

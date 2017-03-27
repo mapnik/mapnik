@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 // stl
 #include <sstream>
@@ -229,7 +229,7 @@ struct geometry_to_wkb
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry::geometry_empty<double> const&) const
+    result_type operator() (geometry::geometry_empty const&) const
     {
         return result_type();
     }

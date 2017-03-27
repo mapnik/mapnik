@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik { namespace detail {
@@ -70,9 +70,9 @@ public:
         return static_cast<bool>(type_ >> geometry_bits);
     }
 
-    void set_type(types type)
+    void set_type(types _type)
     {
-        type_ = type;
+        type_ = _type;
     }
 
     container_type const& data() const

@@ -24,7 +24,7 @@
 #define MAPNIK_JSON_STRINGIFIER_HPP
 
 // mapnik
-#include <mapnik/json/generic_json.hpp>
+#include <mapnik/json/json_value.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/variant.hpp>
 // stl

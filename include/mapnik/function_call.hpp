@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,7 +47,6 @@ struct exp_impl
     {
         return std::exp(val.to_double());
     }
-
 };
 
 // log
@@ -58,7 +57,6 @@ struct log_impl
     {
         return std::log(val.to_double());
     }
-
 };
 
 // sin
@@ -102,7 +100,7 @@ struct abs_impl
 {
     value_type operator() (value_type const& val) const
     {
-        return std::fabs(val.to_double());
+        return std::abs(val.to_double());
     }
 };
 

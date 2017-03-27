@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,14 +43,10 @@ namespace mapnik { namespace geometry {
 template <typename T, template <typename...> class Cont = std::vector>
 struct geometry_collection;
 
-template <typename T>
-struct geometry_empty
-{
-    using coordinate_type = T;
-};
+struct geometry_empty {};
 
 template <typename T>
-using geometry_base = mapnik::util::variant<geometry_empty<T>,
+using geometry_base = mapnik::util::variant<geometry_empty,
                                             point<T>,
                                             line_string<T>,
                                             polygon<T>,

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,6 +38,7 @@
 
 // stl
 #include <type_traits>
+#include <memory>
 
 namespace mapnik
 {
@@ -133,13 +134,13 @@ node_not_found::node_not_found(std::string const& node_name)
     : node_name_(node_name),
       msg_() {}
 
-const char* node_not_found::what() const throw()
+const char* node_not_found::what() const noexcept
 {
     msg_ = std::string("Node "+node_name_+ "not found");
     return msg_.c_str();
 }
 
-node_not_found::~node_not_found() throw() {}
+node_not_found::~node_not_found() {}
 
 
 attribute_not_found::attribute_not_found(std::string const& node_name,
@@ -148,25 +149,25 @@ attribute_not_found::attribute_not_found(std::string const& node_name,
       attribute_name_(attribute_name),
       msg_() {}
 
-const char* attribute_not_found::what() const throw()
+const char* attribute_not_found::what() const noexcept
 {
     msg_ = std::string("Attribute '" + attribute_name_ +"' not found in node '"+node_name_+ "'");
     return msg_.c_str();
 }
 
-attribute_not_found::~attribute_not_found() throw() {}
+attribute_not_found::~attribute_not_found() {}
 
 more_than_one_child::more_than_one_child(std::string const& node_name)
     : node_name_(node_name),
       msg_() {}
 
-const char* more_than_one_child::what() const throw()
+const char* more_than_one_child::what() const noexcept
 {
     msg_ = std::string("More than one child node in node '" + node_name_ +"'");
     return msg_.c_str();
 }
 
-more_than_one_child::~more_than_one_child() throw() {}
+more_than_one_child::~more_than_one_child() {}
 
 xml_node::xml_node(xml_tree &tree, std::string && name, unsigned line, bool is_text)
     : tree_(tree),
@@ -229,9 +230,9 @@ xml_node & xml_node::add_child(const char * name, unsigned line, bool is_text)
     return children_.back();
 }
 
-void xml_node::add_attribute(const char * name, const char * value)
+void xml_node::add_attribute(const char * name, const char * value_)
 {
-    auto result = attributes_.emplace(name,xml_attribute(value));
+    auto result = attributes_.emplace(name,xml_attribute(value_));
     if (!result.second)
     {
         MAPNIK_LOG_ERROR(xml_tree) << "ignoring duplicate attribute '" << name << "'";
@@ -345,16 +346,16 @@ boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
 template <typename T>
 T xml_node::get_attr(std::string const& name, T const& default_opt_value) const
 {
-    boost::optional<T> value = get_opt_attr<T>(name);
-    if (value) return *value;
+    boost::optional<T> val = get_opt_attr<T>(name);
+    if (val) return *val;
     return default_opt_value;
 }
 
 template <typename T>
 T xml_node::get_attr(std::string const& name) const
 {
-    boost::optional<T> value = get_opt_attr<T>(name);
-    if (value) return *value;
+    boost::optional<T> val = get_opt_attr<T>(name);
+    if (val) return *val;
     throw attribute_not_found(name_, name);
 }
 

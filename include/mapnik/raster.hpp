@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define MAPNIK_RASTER_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/image_any.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
@@ -52,9 +52,9 @@ public:
           data_(std::move(data)),
           filter_factor_(filter_factor) {}
 
-    void set_nodata(double nodata)
+    void set_nodata(double _nodata)
     {
-        nodata_ = nodata;
+        nodata_ = _nodata;
     }
 
     boost::optional<double> const& nodata() const

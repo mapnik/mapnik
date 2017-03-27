@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -74,7 +74,6 @@ struct thunk_renderer : render_thunk_list_dispatch
         using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
 
         using namespace mapnik::svg;
-        using svg_attribute_type = agg::pod_bvector<path_attributes>;
         using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
                                                    svg_attribute_type,
                                                    renderer_type,

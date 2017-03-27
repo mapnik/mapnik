@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,6 +35,7 @@
 #pragma GCC diagnostic pop
 
 #include <algorithm>
+#include <memory>
 
 namespace mapnik
 {
@@ -62,31 +63,24 @@ pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
     {
     case EXACT_POSITION:
         return pixel_position(dx,dy);
-        break;
     case NORTH:
         return pixel_position(0,-std::abs(dy));
-        break;
     case EAST:
         return pixel_position(std::abs(dx),0);
-        break;
     case SOUTH:
         return pixel_position(0,std::abs(dy));
-        break;
     case WEST:
         return pixel_position(-std::abs(dx),0);
-        break;
     case NORTHEAST:
         return pixel_position(std::abs(dx),-std::abs(dy));
-        break;
     case SOUTHEAST:
         return pixel_position(std::abs(dx),std::abs(dy));
-        break;
     case NORTHWEST:
         return pixel_position(-std::abs(dx),-std::abs(dy));
-        break;
     case SOUTHWEST:
         return pixel_position(-std::abs(dx),std::abs(dy));
-        break;
+    case CENTER:
+        return pixel_position(0, 0);
     default:
         return pixel_position(dx,dy);
     }

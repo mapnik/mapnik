@@ -25,7 +25,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 #include <mapnik/symbolizer.hpp>
 
@@ -128,12 +128,12 @@ struct render_marker_symbolizer_visitor
 
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
 
-        boost::optional<svg_path_ptr> const& stock_vector_marker = mark.get_data();
-        svg_path_ptr marker_ptr = *stock_vector_marker;
+        svg_path_ptr stock_vector_marker = mark.get_data();
+        svg_path_ptr marker_ptr = stock_vector_marker;
         bool is_ellipse = false;
 
         svg_attribute_type s_attributes;
-        auto const& r_attributes = get_marker_attributes(*stock_vector_marker, s_attributes);
+        auto const& r_attributes = get_marker_attributes(stock_vector_marker, s_attributes);
 
         // special case for simple ellipse markers
         // to allow for full control over rx/ry dimensions

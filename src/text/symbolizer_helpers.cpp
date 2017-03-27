@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,14 +29,14 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_centroid.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/centroid.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/text/placement_finder_impl.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
@@ -110,7 +110,7 @@ struct split_multi_geometries
     split_multi_geometries(container_type & cont)
         : cont_(cont) { }
 
-    void operator() (geometry::geometry_empty<double> const&) const {}
+    void operator() (geometry::geometry_empty const&) const {}
     void operator() (geometry::multi_point<double> const& multi_pt) const
     {
         for ( auto const& pt : multi_pt )
@@ -187,23 +187,26 @@ base_symbolizer_helper::base_symbolizer_helper(
     initialize_points();
 }
 
-struct largest_bbox_first
+template <typename It>
+static It largest_bbox(It begin, It end)
 {
-    bool operator() (geometry::geometry<double> const* g0, geometry::geometry<double> const* g1) const
+    if (begin == end)
     {
-        box2d<double> b0 = geometry::envelope(*g0);
-        box2d<double> b1 = geometry::envelope(*g1);
-        return b0.width() * b0.height() > b1.width() * b1.height();
+        return end;
     }
-    bool operator() (base_symbolizer_helper::geometry_cref const& g0,
-                     base_symbolizer_helper::geometry_cref const& g1) const
+    It largest_geom = begin;
+    double largest_bbox = geometry::envelope(*largest_geom).area();
+    for (++begin; begin != end; ++begin)
     {
-        // TODO - this has got to be expensive! Can we cache bbox's if there are repeated calls to same geom?
-        box2d<double> b0 = geometry::envelope(g0);
-        box2d<double> b1 = geometry::envelope(g1);
-        return b0.width() * b0.height() > b1.width() * b1.height();
+        double bbox = geometry::envelope(*begin).area();
+        if (bbox > largest_bbox)
+        {
+            largest_bbox = bbox;
+            largest_geom = begin;
+        }
     }
-};
+    return largest_geom;
+}
 
 void base_symbolizer_helper::initialize_geometries() const
 {
@@ -216,10 +219,16 @@ void base_symbolizer_helper::initialize_geometries() const
             type == geometry::geometry_types::MultiPolygon)
         {
             bool largest_box_only = text_props_->largest_bbox_only;
-            if (largest_box_only)
+            if (largest_box_only && geometries_to_process_.size() > 1)
             {
-                geometries_to_process_.sort(largest_bbox_first());
+                auto largest_geom = largest_bbox(
+                    geometries_to_process_.begin(),
+                    geometries_to_process_.end());
                 geo_itr_ = geometries_to_process_.begin();
+                if (geo_itr_ != largest_geom)
+                {
+                    std::swap(*geo_itr_, *largest_geom);
+                }
                 geometries_to_process_.erase(++geo_itr_, geometries_to_process_.end());
             }
         }
@@ -318,10 +327,12 @@ text_symbolizer_helper::text_symbolizer_helper(
     value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
     value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
     value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
+    value_double extend = mapnik::get<value_double, keys::extend>(sym_, feature_, vars_);
 
     if (clip) converter_.template set<clip_line_tag>();
     converter_.template set<transform_tag>(); //always transform
     converter_.template set<affine_transform_tag>();
+    if (extend > 0.0) converter_.template set<extend_tag>();
     if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter_.template set<smooth_tag>(); // optional smooth converter
 
@@ -443,12 +454,15 @@ text_symbolizer_helper::text_symbolizer_helper(
     value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
     value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
     value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
+    value_double extend = mapnik::get<value_double, keys::extend>(sym_, feature_, vars_);
 
     if (clip) converter_.template set<clip_line_tag>();
     converter_.template set<transform_tag>(); //always transform
     converter_.template set<affine_transform_tag>();
+    if (extend > 0.0) converter_.template set<extend_tag>();
     if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0) converter_.template set<smooth_tag>(); // optional smooth converter
+
     if (geometries_to_process_.size())
     {
         init_marker();

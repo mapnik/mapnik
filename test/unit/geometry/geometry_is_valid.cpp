@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_is_valid.hpp>
+#include <mapnik/geometry/is_valid.hpp>
 
 TEST_CASE("geometry is_valid") {
 
@@ -10,7 +10,7 @@ TEST_CASE("geometry is_valid") {
 
 
 SECTION("empty geometry") {
-    mapnik::geometry::geometry_empty<double> empty;
+    mapnik::geometry::geometry_empty empty;
     CHECK( mapnik::geometry::is_valid(empty) );
     std::string message;
     CHECK( mapnik::geometry::is_valid(empty, message) );

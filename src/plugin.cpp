@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,8 +58,8 @@ PluginInfo::PluginInfo(std::string const& filename,
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
           if (module_ && module_->dl)
           {
-                callable_returning_string name = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-                if (name) name_ = name();
+              callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
+                if (name_call) name_ = name_call();
                 callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
                 if (init_once) {
                     init_once();
@@ -70,8 +70,8 @@ PluginInfo::PluginInfo(std::string const& filename,
           if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
           if (module_ && module_->dl)
           {
-                callable_returning_string name = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-                if (name) name_ = name();
+                callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
+                if (name_call) name_ = name_call();
                 callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
                 if (init_once) {
                     init_once();

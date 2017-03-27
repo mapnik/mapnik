@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include <mapnik/geometry_remove_empty.hpp>
+#include <mapnik/geometry/remove_empty.hpp>
 
 TEST_CASE("geometry remove_empty") {
 

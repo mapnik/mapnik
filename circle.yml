@@ -7,11 +7,7 @@ machine:
     JOBS: 8
     CCACHE_TEMPDIR: /tmp/.ccache-temp
     CCACHE_COMPRESS: 1
-    LLVM_VERSION: 3.8
-  pre:
-    - echo "here"
-  post:
-    - echo "there"
+    LLVM_VERSION: 3.9.1
 
 checkout:
   post:
@@ -32,9 +28,9 @@ dependencies:
 database:
   pre:
     - ./bootstrap.sh
-    - ./.mason/mason install clang ${LLVM_VERSION}.0
-    - ./.mason/mason link clang ${LLVM_VERSION}.0
-    - ./configure CC="$(pwd)/mason_packages/.link/bin/clang-${LLVM_VERSION}" CXX="$(pwd)/mason_packages/.link/bin/ccache $(pwd)/mason_packages/.link/bin/clang++-${LLVM_VERSION} -Qunused-arguments"
+    - ./.mason/mason install clang++ ${LLVM_VERSION}
+    - ./.mason/mason link clang++ ${LLVM_VERSION}
+    - ./configure CC="$(pwd)/mason_packages/.link/bin/clang" CXX="$(pwd)/mason_packages/.link/bin/ccache $(pwd)/mason_packages/.link/bin/clang++ -Qunused-arguments"
     - make
   override:
     - psql -c 'create database template_postgis;'

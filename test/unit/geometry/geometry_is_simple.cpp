@@ -2,7 +2,7 @@
 
 #include <boost/version.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_is_simple.hpp>
+#include <mapnik/geometry/is_simple.hpp>
 
 TEST_CASE("geometry is_simple") {
 
@@ -10,7 +10,7 @@ TEST_CASE("geometry is_simple") {
 #if BOOST_VERSION >= 105800
 
 SECTION("point") {
-    mapnik::geometry::geometry_empty<double> empty;
+    mapnik::geometry::geometry_empty empty;
     CHECK( mapnik::geometry::is_simple(empty) );
 }
 
@@ -280,6 +280,7 @@ SECTION("multi polygon") {
     mapnik::geometry::multi_polygon<double> mp;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
+
     ring.emplace_back(0,0);
     ring.emplace_back(1,0);
     ring.emplace_back(1,1);

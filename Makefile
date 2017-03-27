@@ -1,4 +1,3 @@
-
 OS := $(shell uname -s)
 
 PYTHON = python
@@ -36,15 +35,14 @@ src/json/libmapnik-json.a:
 		src/renderer_common/render_thunk_extractor.os \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
-		src/css_color_grammar.os \
-		src/expression_grammar.os \
-		src/transform_expression_grammar.os \
-		src/image_filter_grammar.os \
+		src/css_color_grammar_x3.os \
+		src/expression_grammar_x3.os \
+		src/transform_expression_grammar_x3.os \
+		src/image_filter_grammar_x3.os \
 		src/marker_helpers.os \
 		src/svg/svg_transform_parser.os \
 		src/agg/process_line_symbolizer.os \
 		plugins/input/geojson/geojson_datasource.os \
-		utils/mapnik-index/process_geojson_file.o \
 		src/svg/svg_path_parser.os \
 		src/svg/svg_parser.os \
 		src/svg/svg_points_parser.os \

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,9 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
+
+#include <memory>
 
 namespace mapnik
 {
@@ -119,7 +121,7 @@ public:
 
     mapnik::geometry::geometry<double> read()
     {
-        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty<double>();
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
         int type = read_integer();
         switch (type)
         {

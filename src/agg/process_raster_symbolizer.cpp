@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/raster.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/renderer_common/process_raster_symbolizer.hpp>
 
@@ -55,7 +55,7 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
         sym, feature, prj_trans, common_,
         [&](image_rgba8 const & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
-            composite(*current_buffer_, target,
+            composite(buffers_.top().get(), target,
                       comp_op, opacity, start_x, start_y);
         }
     );

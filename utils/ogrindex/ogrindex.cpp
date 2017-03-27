@@ -29,7 +29,7 @@
 #include <boost/program_options.hpp>
 
 #include <mapnik/datasource.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/feature_layer_desc.hpp>

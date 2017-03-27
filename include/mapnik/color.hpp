@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,16 +38,15 @@
 
 namespace mapnik {
 
-class MAPNIK_DECL color
-    : boost::equality_comparable<color>
+class MAPNIK_DECL color : boost::equality_comparable<color>
 {
-private:
+public:
     std::uint8_t red_;
     std::uint8_t green_;
     std::uint8_t blue_;
     std::uint8_t alpha_;
     bool premultiplied_;
-public:
+
     // default ctor
     color()
       : red_(0xff),

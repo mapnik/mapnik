@@ -22,7 +22,7 @@
 
 #include <mapnik/text/scrptrun.hpp>
 
-#define ARRAY_SIZE(array) (sizeof array  / sizeof array[0])
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 const char ScriptRun::fgClassID=0;
 
@@ -124,7 +124,7 @@ UBool ScriptRun::next()
     if (scriptEnd >= charLimit) {
         return false;
     }
-    
+
     scriptCode = USCRIPT_COMMON;
 
     for (scriptStart = scriptEnd; scriptEnd < charLimit; scriptEnd += 1) {
@@ -178,7 +178,6 @@ UBool ScriptRun::next()
         if (sameScript(scriptCode, sc)) {
             if (scriptCode <= USCRIPT_INHERITED && sc > USCRIPT_INHERITED) {
                 scriptCode = sc;
-
                 // now that we have a final script code, fix any open
                 // characters we pushed before we knew the script code.
                 while (startSP < parenSP) {
@@ -205,4 +204,3 @@ UBool ScriptRun::next()
 
     return true;
 }
-

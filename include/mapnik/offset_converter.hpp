@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -77,18 +77,18 @@ struct offset_converter
         return threshold_;
     }
 
-    void set_offset(double value)
+    void set_offset(double val)
     {
-        if (offset_ != value)
+        if (offset_ != val)
         {
-            offset_ = value;
+            offset_ = val;
             reset();
         }
     }
 
-    void set_threshold(double value)
+    void set_threshold(double val)
     {
-        threshold_ = value;
+        threshold_ = val;
         // no need to reset(), since threshold doesn't affect
         // offset vertices' computation, it only controls how
         // far will we be looking for self-intersections
@@ -269,7 +269,7 @@ private:
         if (position < -1e-6) return -1;
         return 0;
     }
-    
+
     void displace2(vertex2d & v1, vertex2d const& v0, vertex2d const& v2, double a, double b) const
     {
         double sa = offset_ * std::sin(a);
@@ -284,14 +284,14 @@ private:
         double abs_hcasa = std::abs(hcasa);
         double abs_hsa = std::abs(hsa);
         double abs_hca = std::abs(hca);
-                
-        vertex2d v_tmp(vertex2d::no_init);    
+
+        vertex2d v_tmp(vertex2d::no_init);
         v_tmp.x = v1.x - sa - hca;
         v_tmp.y = v1.y + ca - hsa;
         v_tmp.cmd = v1.cmd;
-        
+
         int same = point_line_position(v0, v2, v_tmp)*point_line_position(v0, v2, v1);
-        
+
         if (same >= 0 && std::abs(h) < 10)
         {
             v1.x = v_tmp.x;
@@ -314,14 +314,14 @@ private:
             v1.y = v1.y + ca - hsa;
         }
         else
-        {      
+        {
             if (abs_hsaca*abs_hsaca + abs_hcasa*abs_hcasa > abs_offset*abs_offset)
             {
                 double d = (abs_hsaca*abs_hsaca + abs_hcasa*abs_hcasa);
                 d = d < 1e-6 ? 1. : d;
                 double scale = (abs_offset*abs_offset)/d;
                 v1.x = v1.x + hcasa*scale;
-                v1.y = v1.y + hsaca*scale;                
+                v1.y = v1.y + hsaca*scale;
             }
             else
             {
@@ -330,8 +330,7 @@ private:
             }
         }
     }
-    
-    
+
     status init_vertices()
     {
         if (status_ != initial) // already initialized
@@ -482,8 +481,9 @@ private:
         }
         start_v2.x = v2.x;
         start_v2.y = v2.y;
+
         vertex2d tmp_prev(vertex2d::no_init);
-        
+
         while (i < points.size())
         {
             v1 = v2;
@@ -576,7 +576,7 @@ private:
             tmp_prev.cmd = v1.cmd;
             tmp_prev.x = v1.x;
             tmp_prev.y = v1.y;
-            
+
             if (v1.cmd == SEG_MOVETO)
             {
                 if (bulge_steps == 0)

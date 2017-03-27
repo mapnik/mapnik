@@ -24,13 +24,13 @@
 #define MAPNIK_TOPOJSON_UTILS_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/topology.hpp>
 #include <mapnik/json/attribute_value_visitor.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_adapters.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 namespace mapnik { namespace topojson {
 

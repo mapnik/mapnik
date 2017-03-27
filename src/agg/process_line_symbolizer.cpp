@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -112,7 +112,8 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    agg::rendering_buffer buf(current_buffer_->bytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->row_size());
+    buffer_type & current_buffer = buffers_.top().get();
+    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
 
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;
@@ -139,7 +140,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {
-        double padding = static_cast<double>(common_.query_extent_.width()/pixmap_.width());
+        double padding = static_cast<double>(common_.query_extent_.width() / common_.width_);
         double half_stroke = 0.5 * width;
         if (half_stroke > 1)
         {

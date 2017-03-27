@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -96,7 +96,7 @@ public:
     void get_control_points(double &x1, double &y1, double &x2, double &y2) const;
 
 private:
-    void swap(gradient& other) throw();
+    void swap(gradient& other) noexcept;
 };
 }
 

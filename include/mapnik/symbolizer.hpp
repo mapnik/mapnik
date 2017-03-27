@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -462,7 +462,7 @@ T get(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return T();
+    return T{};
 }
 
 
@@ -487,7 +487,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return boost::optional<T>();
+    return boost::optional<T>{};
 }
 
 }

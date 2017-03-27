@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,14 +23,14 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/datasource.hpp>
 // csv grammar
-#include <mapnik/csv/csv_grammar_impl.hpp>
+#include <mapnik/csv/csv_grammar_x3_def.hpp>
 //
 #include "csv_getline.hpp"
 #include "csv_utils.hpp"
@@ -192,14 +192,17 @@ bool valid(geometry_column_locator const& locator, std::size_t max_size)
 
 } // namespace detail
 
-static const mapnik::csv_line_grammar<char const*> line_g;
-static const mapnik::csv_white_space_skipper skipper{};
-
 mapnik::csv_line parse_line(char const* start, char const* end, char separator, char quote, std::size_t num_columns)
 {
+    namespace x3 = boost::spirit::x3;
+    auto parser = x3::with<mapnik::grammar::quote_tag>(quote)
+        [ x3::with<mapnik::grammar::separator_tag>(separator)
+          [ mapnik::csv_line_grammar()]
+            ];
+
     mapnik::csv_line values;
     if (num_columns > 0) values.reserve(num_columns);
-    if (!boost::spirit::qi::phrase_parse(start, end, (line_g)(separator, quote), skipper, values))
+    if (!x3::phrase_parse(start, end, parser, mapnik::csv_white_space, values))
     {
         throw mapnik::datasource_exception("Failed to parse CSV line:\n" + std::string(start, end));
     }
@@ -285,7 +288,10 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
             {
                 auto headers = csv_utils::parse_line(csv_line, separator_, quote_);
                 // skip blank lines
-                if (headers.size() > 0 && headers[0].empty()) ++line_number;
+                if (headers.size() == 1 && headers[0].empty())
+                {
+                    ++line_number;
+                }
                 else
                 {
                     std::size_t index = 0;
@@ -300,7 +306,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
                                 std::ostringstream s;
                                 s << "CSV Plugin: expected a column header at line ";
                                 s << line_number << ", column " << index;
-                                s << " - ensure this row contains valid header fields: '";
+                                s << " - expected fields: '";
                                 s << csv_line;
                                 throw mapnik::datasource_exception(s.str());
                             }
@@ -338,7 +344,6 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
         std::string str("CSV Plugin: could not detect column(s) with the name(s) of wkt, geojson, x/y, or ");
         str += "latitude/longitude in:\n";
         str += csv_line;
-        str += "\n - this is required for reading geometry data";
         throw mapnik::datasource_exception(str);
     }
 
@@ -406,7 +411,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
             }
 
             auto geom = extract_geometry(values, locator_);
-            if (!geom.is<mapnik::geometry::geometry_empty<double>>())
+            if (!geom.is<mapnik::geometry::geometry_empty>())
             {
                 auto box = mapnik::geometry::envelope(geom);
                 if (!extent_initialized_)

@@ -26,7 +26,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 #include <cmath>
 
 namespace mapnik { namespace detail {
@@ -82,7 +82,7 @@ public:
 
     mapnik::geometry::geometry<double> read()
     {
-        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty<double>();
+        mapnik::geometry::geometry<double> geom = mapnik::geometry::geometry_empty();
         // Read the metadata bytes, populating all the
         // information about optional fields, extended (z/m) dimensions
         // expansion factors and so on

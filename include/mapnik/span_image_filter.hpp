@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -176,9 +176,9 @@ public:
 
     span_image_resample_rgba_affine(source_type & src,
                                     interpolator_type & inter,
-                                    agg::image_filter_lut const & filter,
+                                    agg::image_filter_lut const & _filter,
                                     boost::optional<value_type> const & nodata_value) :
-        agg::span_image_resample_rgba_affine<Source>(src, inter, filter)
+        agg::span_image_resample_rgba_affine<Source>(src, inter, _filter)
     { }
 };
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -72,10 +72,13 @@ public:
 
     bool glyph_dimensions(glyph_info &glyph) const;
 
+    inline bool is_color() const { return color_font_;}
+
     ~font_face();
 
 private:
     FT_Face face_;
+    bool color_font_ = false;
 };
 using face_ptr = std::shared_ptr<font_face>;
 

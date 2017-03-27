@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
 // stl
 #include <string>
 
@@ -40,12 +39,12 @@ template <typename PathType>
 bool parse_points(const char* wkt, PathType& p);
 
 template <typename TransformType>
-bool MAPNIK_DECL parse_svg_transform(const char* wkt, TransformType& tr);
+bool parse_svg_transform(const char* wkt, TransformType& tr);
 
 //
 extern template bool MAPNIK_DECL parse_path<svg_converter_type>(const char*, svg_converter_type&);
 extern template bool MAPNIK_DECL parse_points<svg_converter_type>(const char*, svg_converter_type&);
-extern template bool MAPNIK_DECL parse_svg_transform<svg_converter_type>(const char*, svg_converter_type&);
+extern template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
 }
 }
 

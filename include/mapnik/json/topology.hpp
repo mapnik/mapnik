@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 #ifndef MAPNIK_TOPOLOGY_HPP
 #define MAPNIK_TOPOLOGY_HPP
 
-#include <mapnik/json/generic_json.hpp>
+#include <mapnik/json/json_value.hpp>
 #include <mapnik/util/variant.hpp>
 
 #pragma GCC diagnostic push

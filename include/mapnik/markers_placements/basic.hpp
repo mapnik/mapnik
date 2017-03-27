@@ -24,7 +24,7 @@
 #define MAPNIK_MARKERS_PLACEMENTS_BASIC_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/util/math.hpp>
 #include <mapnik/util/noncopyable.hpp>

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,9 +29,9 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/geometry_centroid.hpp>
-#include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/centroid.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/geom_util.hpp>
 

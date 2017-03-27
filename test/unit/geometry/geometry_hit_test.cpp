@@ -2,7 +2,7 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/hit_test_filter.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 TEST_CASE("geometry ops") {
 

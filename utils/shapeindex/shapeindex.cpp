@@ -20,13 +20,13 @@
  *
  *****************************************************************************/
 
-
 #include <iostream>
 #include <vector>
 #include <string>
+#include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 #include "shape_index_featureset.hpp"
@@ -71,7 +71,7 @@ int main (int argc,char** argv)
 
         if (vm.count("version"))
         {
-            std::clog << "version 0.3.0" <<std::endl;
+            std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
             return EXIT_FAILURE;
         }
 

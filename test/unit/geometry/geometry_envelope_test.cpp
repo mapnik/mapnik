@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 namespace {
 
@@ -21,7 +21,7 @@ void envelope_test()
     }
     {
         // Test empty geom
-        geometry<coord_type> geom = mapnik::geometry::geometry_empty<coord_type>();
+        geometry<coord_type> geom = mapnik::geometry::geometry_empty();
         mapnik::box2d<coord_type> bbox = mapnik::geometry::envelope(geom);
         REQUIRE_FALSE( bbox.valid() );
     }

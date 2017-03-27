@@ -23,19 +23,21 @@
 #ifndef MAPNIK_PARSE_HEX_HPP
 #define MAPNIK_PARSE_HEX_HPP
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_char_.hpp>
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/home/x3.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace util {
 
 template <typename Out>
 bool parse_hex(std::string const& input, Out & output)
 {
-    boost::spirit::qi::lit_type lit;
+    using boost::spirit::x3::lit;
     auto itr = input.begin();
     auto end = input.end();
-    using hex2 = boost::spirit::qi::uint_parser< unsigned, 16, 2, 2 >;
-    return boost::spirit::qi::parse(itr, end, -(lit("\\x") | lit("0x")) > *hex2(), output);
+    using hex2 = boost::spirit::x3::uint_parser< unsigned, 16, 2, 2 >;
+    return boost::spirit::x3::parse(itr, end, -(lit("\\x") | lit("0x")) > *hex2(), output);
 }
 
 }}

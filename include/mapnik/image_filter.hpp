@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -681,7 +681,7 @@ void apply_filter(Src & src, scale_hsla const& transform, double /*scale_factor*
 }
 
 template <typename Src, typename ColorBlindFilter>
-void color_blind_filter(Src & src, ColorBlindFilter const& op)
+void apply_color_blind_filter(Src & src, ColorBlindFilter const& op)
 {
     using namespace boost::gil;
     rgba8_view_t src_view = rgba8_view(src);
@@ -804,19 +804,19 @@ void color_blind_filter(Src & src, ColorBlindFilter const& op)
 template <typename Src>
 void apply_filter(Src & src, color_blind_protanope const& op, double /*scale_factor*/)
 {
-    color_blind_filter(src, op);
+    apply_color_blind_filter(src, op);
 }
 
 template <typename Src>
 void apply_filter(Src & src, color_blind_deuteranope const& op, double /*scale_factor*/)
 {
-    color_blind_filter(src, op);
+    apply_color_blind_filter(src, op);
 }
 
 template <typename Src>
 void apply_filter(Src & src, color_blind_tritanope const& op, double /*scale_factor*/)
 {
-    color_blind_filter(src, op);
+    apply_color_blind_filter(src, op);
 }
 
 template <typename Src>
@@ -916,7 +916,7 @@ void apply_filter(Src & src, invert const& /*op*/, double /*scale_factor*/)
 template <typename Src>
 struct filter_visitor
 {
-    filter_visitor(Src & src, double scale_factor)
+    filter_visitor(Src & src, double scale_factor=1.0)
     : src_(src),
       scale_factor_(scale_factor) {}
 

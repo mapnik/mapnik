@@ -10,10 +10,10 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
-#include <mapnik/geometry_envelope.hpp>
-#include <mapnik/geometry_correct.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
+#include <mapnik/geometry/envelope.hpp>
+#include <mapnik/geometry/correct.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/color.hpp>
 // boost geometry

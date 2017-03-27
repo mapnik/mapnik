@@ -41,8 +41,8 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
-DEFAULT_CXX11_LINKFLAGS = ""
+DEFAULT_CXX14_CXXFLAGS = " -std=c++14"
+DEFAULT_CXX14_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
     ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
@@ -61,7 +61,7 @@ SCONS_CONFIGURE_CACHE = 'config.cache'
 SCONF_TEMP_DIR = '.sconf_temp'
 # auto-search directories for boost libs/headers
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
-BOOST_MIN_VERSION = '1.47'
+BOOST_MIN_VERSION = '1.61'
 #CAIRO_MIN_VERSION = '1.8.0'
 
 HARFBUZZ_MIN_VERSION = (0, 9, 34)
@@ -1037,12 +1037,12 @@ int main()
         return True
     return False
 
-def supports_cxx11(context,silent=False):
+def supports_cxx14(context,silent=False):
     ret = context.TryRun("""
 
 int main()
 {
-#if __cplusplus >= 201103
+#if __cplusplus >= 201402L
     return 0;
 #else
     return -1;
@@ -1051,7 +1051,7 @@ int main()
 
 """, '.cpp')
     if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++11 flag... ' % context.env.get('CXX','CXX'))
+        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
     if silent:
         context.did_show_result=1
     context.Result(ret[0])
@@ -1080,7 +1080,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
-               'supports_cxx11'        : supports_cxx11,
+               'supports_cxx14'        : supports_cxx14,
                'CheckBoostScopedEnum'  : CheckBoostScopedEnum,
                }
 
@@ -1129,6 +1129,7 @@ if not preconfigured:
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
 
+
     conf = Configure(env, custom_tests = conf_tests)
 
     if env['DEBUG']:
@@ -1141,6 +1142,9 @@ if not preconfigured:
 
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
+
+    cxx_version = call("%s --version" % env["CXX"] ,silent=True)
+    color_print(5, "CXX %s" % cxx_version)
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
@@ -1213,13 +1217,13 @@ if not preconfigured:
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
-        DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
-        DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
+        DEFAULT_CXX14_CXXFLAGS += ' -stdlib=libc++'
+        DEFAULT_CXX14_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
-    env.Append(CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
+    env.Append(CXXFLAGS = DEFAULT_CXX14_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
-    env.Append(LINKFLAGS = DEFAULT_CXX11_LINKFLAGS)
+    env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
@@ -1353,9 +1357,9 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
 
-    # test for C++11 support, which is required
-    if not env['HOST'] and not conf.supports_cxx11():
-        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler")
+    # test for C++14 support, which is required
+    if not env['HOST'] and not conf.supports_cxx14():
+        color_print(1,"C++ compiler does not support C++14 standard (-std=c++14), which is required. Please upgrade your compiler")
         Exit(1)
 
     if not env['HOST']:
@@ -1784,11 +1788,10 @@ if not preconfigured:
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion viable
         # -Wfloat-equal -Wold-style-cast -Wexit-time-destructors -Wglobal-constructors -Wreserved-id-macro -Wheader-hygiene -Wmissing-noreturn
-        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
+        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unsequenced -Wtautological-compare -Wheader-hygiene '
-
+            common_cxx_flags += ' -Wno-unsequenced  -Wtautological-compare -Wheader-hygiene -Wc++14-extensions '
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:
@@ -1797,7 +1800,7 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
         if env['DEBUG_SANITIZE']:
-            env.Append(CXXFLAGS = ['-fsanitize=address'])
+            env.Append(CXXFLAGS = ['-fsanitize=address','-fno-omit-frame-pointer'])
             env.Append(LINKFLAGS = ['-fsanitize=address'])
 
 

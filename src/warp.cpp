@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_scaling_traits.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/proj_transform.hpp>

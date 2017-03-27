@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,10 +24,12 @@
 #include "geojson_index_featureset.hpp"
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/spatial_index.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/util/conversions.hpp>
+#include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/json/parse_feature.hpp>
+#include <mapnik/json/json_grammar_config.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -85,19 +87,14 @@ mapnik::feature_ptr geojson_index_featureset::next()
         std::fseek(file_.get(), pos.first, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        std::fread(record.data(), pos.second, 1, file_.get());
+        auto count = std::fread(record.data(), pos.second, 1, file_.get());
         auto const* start = record.data();
-        auto const*  end = start + record.size();
+        auto const*  end = (count == 1) ? start + record.size() : start;
 #endif
         static const mapnik::transcoder tr("utf8");
-        static const mapnik::json::feature_grammar<char const*, mapnik::feature_impl> grammar(tr);
-        using namespace boost::spirit;
-        standard::space_type space;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
-        if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space) || start != end)
-        {
-            throw std::runtime_error("Failed to parse GeoJSON feature");
-        }
+        using mapnik::json::grammar::iterator_type;
+        mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure
         // skip empty geometries
         if (mapnik::geometry::is_empty(feature->get_geometry()))
             continue;

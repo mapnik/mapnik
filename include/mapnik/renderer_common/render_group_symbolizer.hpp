@@ -42,9 +42,9 @@ struct render_thunk_list_dispatch
     {
         offset_ = offset;
 
-        for (render_thunk_ptr const& thunk : thunks)
+        for (render_thunk const& thunk : thunks)
         {
-            util::apply_visitor(std::ref(*this), *thunk);
+            util::apply_visitor(std::ref(*this), thunk);
         }
     }
 

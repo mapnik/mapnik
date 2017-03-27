@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,16 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_AGG_RENDER_MARKER_HPP
+#define MAPNIK_AGG_RENDER_MARKER_HPP
+
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/util/const_rendering_buffer.hpp>
 
@@ -148,3 +151,5 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
 }
 
 }
+
+#endif // MAPNIK_AGG_RENDER_MARKER_HPP

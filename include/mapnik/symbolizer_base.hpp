@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/symbolizer_keys.hpp>
@@ -100,18 +100,13 @@ struct strict_value : value_base_type
 {
     strict_value() = default;
 
-    strict_value(const char* val)
+    strict_value(const char* val) noexcept(false)
         : value_base_type(std::string(val)) {}
 
-    template <typename T>
-    strict_value(T const& obj)
-        : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
-    {}
-
-    template <typename T>
+    template <typename T, typename U = detail::mapnik_value_type_t<T>>
     strict_value(T && obj)
-        noexcept(std::is_nothrow_constructible<value_base_type, T && >::value)
-        : value_base_type(std::forward<T>(obj))
+        noexcept(std::is_nothrow_constructible<value_base_type, U>::value)
+        : value_base_type(U(std::forward<T>(obj)))
     {}
 };
 

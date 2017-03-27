@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,9 +38,9 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_adapters.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/make_unique.hpp>
 #include <mapnik/util/spatial_index.hpp>

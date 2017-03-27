@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2016 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -181,6 +181,7 @@ private:
 };
 
 using coord2d = coord<double,2>;
+using coord2f = coord<float,2>;
 using coord2i = coord<int,2>;
 
 }
