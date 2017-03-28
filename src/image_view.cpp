@@ -29,7 +29,6 @@
 namespace mapnik
 {
 
-template class MAPNIK_DECL image_view<image_null>;
 template class MAPNIK_DECL image_view<image_rgba8>;
 template class MAPNIK_DECL image_view<image_gray8>;
 template class MAPNIK_DECL image_view<image_gray8s>;
