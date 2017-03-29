@@ -41,6 +41,7 @@
 #include <mapnik/geometry/box2d.hpp>
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<std::int64_t>, std::int64_t, boost::geometry::cs::cartesian, x, y)
 BOOST_GEOMETRY_REGISTER_LINESTRING_TEMPLATED(mapnik::geometry::line_string)
 BOOST_GEOMETRY_REGISTER_RING_TEMPLATED(mapnik::geometry::linear_ring)
 // needed by box2d<T>
@@ -227,6 +228,25 @@ struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
     }
 };
 
+template <typename CoordinateType>
+struct resize<mapnik::interior_rings<CoordinateType>>
+{
+    static inline void apply(mapnik::interior_rings<CoordinateType> interiors, std::size_t new_size)
+    {
+        interiors.resize(new_size);
+    }
+};
+
+template <typename CoordinateType>
+struct clear<mapnik::interior_rings<CoordinateType>>
+{
+    static inline void apply(mapnik::interior_rings<CoordinateType> interiors)
+    {
+        interiors.clear();
+    }
+};
+
 }}}
+
 
 #endif //MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
