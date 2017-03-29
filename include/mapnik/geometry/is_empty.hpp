@@ -48,7 +48,7 @@ struct geometry_is_empty
 
     bool operator() (mapnik::geometry::polygon<double> const& geom) const
     {
-        return geom.empty();
+        return geom.empty() || geom.front().empty();
     }
 
     bool operator() (mapnik::geometry::multi_point<double> const& geom) const
@@ -78,94 +78,13 @@ struct geometry_is_empty
     }
 
 };
-
-struct geometry_has_empty
-{
-    bool operator() (mapnik::geometry::geometry<double> const& geom) const
-    {
-        return mapnik::util::apply_visitor(*this, geom);
-    }
-
-    bool operator() (mapnik::geometry::geometry_empty const&) const
-    {
-        return false;
-    }
-
-    bool operator() (mapnik::geometry::point<double> const&) const
-    {
-        return false;
-    }
-
-    bool operator() (mapnik::geometry::line_string<double> const&) const
-    {
-        return false;
-    }
-
-    bool operator() (mapnik::geometry::polygon<double> const&) const
-    {
-        return false;
-    }
-
-    bool operator() (mapnik::geometry::multi_point<double> const&) const
-    {
-        return false;
-    }
-
-    bool operator() (mapnik::geometry::multi_line_string<double> const& geom) const
-    {
-        return test_multigeometry(geom);
-    }
-
-    bool operator() (mapnik::geometry::multi_polygon<double> const& geom) const
-    {
-        return test_multigeometry(geom);
-    }
-
-    bool operator() (mapnik::geometry::geometry_collection<double> const& geom) const
-    {
-        for (auto const & item : geom)
-        {
-            if (geometry_is_empty()(item) || (*this)(item))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    template <typename T>
-    bool operator() (T const&) const
-    {
-        return true;
-    }
-
-private:
-    template <typename T>
-    bool test_multigeometry(T const & geom) const
-    {
-        for (auto const & item : geom)
-        {
-            if (item.empty())
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-};
-
 }
 
+// returns true if the geometry is the empty set
 template <typename GeomType>
 inline bool is_empty(GeomType const& geom)
 {
     return detail::geometry_is_empty()(geom);
-}
-
-template <typename GeomType>
-inline bool has_empty(GeomType const& geom)
-{
-    return detail::geometry_has_empty()(geom);
 }
 
 }}
