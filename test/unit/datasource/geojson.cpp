@@ -139,7 +139,7 @@ TEST_CASE("geojson") {
                 CHECK(mapnik::util::to_geojson(json_out, geom));
                 json.erase(std::remove_if(
                                std::begin(json), std::end(json),
-                               [l = std::locale{}](char ch) { return std::isspace(ch, l); }
+                               [](char ch) { return std::isspace(ch, std::locale{}); }
                                ), std::end(json));
                 REQUIRE(json == json_out);
             }
