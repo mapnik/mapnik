@@ -121,48 +121,53 @@ inline void require_attributes(mapnik::feature_ptr feature,
 }
 
 namespace detail {
-struct feature_count {
-    template <typename T>
-    std::size_t operator()(T const &geom) const {
+
+template <typename T>
+struct feature_count
+{
+    template <typename U>
+    std::size_t operator()(U const &geom) const
+    {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    std::size_t operator()(mapnik::geometry::geometry_empty const &) const {
+    std::size_t operator()(mapnik::geometry::geometry_empty const &) const
+    {
         return 0;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::point<T> const &) const {
+    std::size_t operator()(mapnik::geometry::point<T> const &) const
+    {
         return 1;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::line_string<T> const &) const {
+    std::size_t operator()(mapnik::geometry::line_string<T> const &) const
+    {
         return 1;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::polygon<T> const &) const {
+    std::size_t operator()(mapnik::geometry::polygon<T> const &) const
+    {
         return 1;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::multi_point<T> const &mp) const {
+    std::size_t operator()(mapnik::geometry::multi_point<T> const &mp) const
+    {
         return mp.size();
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::multi_line_string<T> const &mls) const {
+    std::size_t operator()(mapnik::geometry::multi_line_string<T> const &mls) const
+    {
         return mls.size();
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::multi_polygon<T> const &mp) const {
+    std::size_t operator()(mapnik::geometry::multi_polygon<T> const &mp) const
+    {
         return mp.size();
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::geometry_collection<T> const &col) const {
+    std::size_t operator()(mapnik::geometry::geometry_collection<T> const &col) const
+    {
         std::size_t sum = 0;
         for (auto const &geom : col) {
             sum += operator()(geom);
@@ -174,7 +179,7 @@ struct feature_count {
 
 template <typename T>
 inline std::size_t feature_count(mapnik::geometry::geometry<T> const &g) {
-    return detail::feature_count()(g);
+    return detail::feature_count<T>()(g);
 }
 
 inline void require_geometry(mapnik::feature_ptr feature,

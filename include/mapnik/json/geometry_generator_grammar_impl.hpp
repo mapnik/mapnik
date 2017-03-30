@@ -24,7 +24,6 @@
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
 
-
 namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
@@ -80,16 +79,13 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
     linestring_coord = lit('[') << -(point_coord % lit(',')) << lit(']')
         ;
 
-    polygon_coord = lit('[') << exterior_ring_coord << interior_ring_coord << lit(']')
+    linear_ring_coord = lit('[') << -(point_coord % lit(',')) << lit(']')//linestring_coord.alias()
         ;
 
-    exterior_ring_coord = linestring_coord.alias()
+    polygon_coord = lit('[') << linear_ring_coord % lit(',') << lit(']')
         ;
 
-    interior_ring_coord =  *(lit(",") << exterior_ring_coord)
-        ;
-
-    multi_point_coord = linestring_coord.alias()
+    multi_point_coord = lit('[') << -(point_coord % lit(',')) << lit(']');//linestring_coord.alias()
         ;
 
     multi_linestring_coord = lit('[') << linestring_coord  % lit(',') << lit(']')
@@ -98,7 +94,7 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
     multi_polygon_coord = lit('[') << polygon_coord  % lit(',') << lit("]")
         ;
 
-    geometries =  geometry % lit(',')
+    geometries = geometry % lit(',')
         ;
 }
 

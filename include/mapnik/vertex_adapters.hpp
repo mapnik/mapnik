@@ -32,10 +32,9 @@ namespace mapnik { namespace geometry {
 template <typename T>
 struct point_vertex_adapter
 {
-    using coord_type = typename point<T>::coord_type;
-
+    using coordinate_type = T;
     point_vertex_adapter(point<T> const& pt);
-    unsigned vertex(coord_type * x, coord_type * y) const;
+    unsigned vertex(coordinate_type * x, coordinate_type * y) const;
     void rewind(unsigned) const;
     geometry_types type () const;
     point<T> const& pt_;
@@ -45,23 +44,23 @@ struct point_vertex_adapter
 template <typename T>
 struct line_string_vertex_adapter
 {
-    using coord_type = typename point<T>::coord_type;
+    using coordinate_type = T;
     line_string_vertex_adapter(line_string<T> const& line);
-    unsigned vertex(coord_type * x, coord_type * y) const;
+    unsigned vertex(coordinate_type * x, coordinate_type * y) const;
     void rewind(unsigned) const;
     geometry_types type () const;
     line_string<T> const& line_;
     mutable std::size_t current_index_;
-   const std::size_t end_index_;
+    const std::size_t end_index_;
 };
 
 template <typename T>
 struct polygon_vertex_adapter
 {
-    using coord_type = typename point<T>::coord_type;
+    using coordinate_type = T;
     polygon_vertex_adapter(polygon<T> const& poly);
     void rewind(unsigned) const;
-    unsigned vertex(coord_type * x, coord_type * y) const;
+    unsigned vertex(coordinate_type * x, coordinate_type * y) const;
     geometry_types type () const;
 private:
     polygon<T> const& poly_;
@@ -75,10 +74,10 @@ private:
 template <typename T>
 struct ring_vertex_adapter
 {
-    using coord_type = typename point<T>::coord_type;
+    using coordinate_type = T;
     ring_vertex_adapter(linear_ring<T> const& ring);
     void rewind(unsigned) const;
-    unsigned vertex(coord_type * x, coord_type * y) const;
+    unsigned vertex(coordinate_type * x, coordinate_type * y) const;
     geometry_types type () const;
 private:
     linear_ring<T> const& ring_;

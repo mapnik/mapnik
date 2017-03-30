@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2016 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,9 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_ADAPTERS_HPP
-#define MAPNIK_GEOMETRY_ADAPTERS_HPP
+
+#ifndef MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
+#define MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
 
 #include <mapnik/config.hpp>
 
@@ -29,64 +30,79 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #undef B0
-#include <boost/geometry/geometries/register/linestring.hpp>
+#include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/ring.hpp>
-// NOTE: ideally we would not include all of boost/geometry here to save on compile time
-// however we need to pull in <boost/geometry/multi/multi.hpp> for things to work
-// and once we do that the compile time is == to just including boost/geometry.hpp
-#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/register/linestring.hpp>
 #pragma GCC diagnostic pop
-
+// mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/geometry/box2d.hpp>
 
-#include <cstdint>
-
-// register point
-BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
-BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<float>, float, boost::geometry::cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
 BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<std::int64_t>, std::int64_t, boost::geometry::cs::cartesian, x, y)
-// ring
+BOOST_GEOMETRY_REGISTER_LINESTRING_TEMPLATED(mapnik::geometry::line_string)
 BOOST_GEOMETRY_REGISTER_RING_TEMPLATED(mapnik::geometry::linear_ring)
 // needed by box2d<T>
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, boost::geometry::cs::cartesian, x, y)
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2f, float,  boost::geometry::cs::cartesian, x, y)
 
-namespace boost {
+namespace mapnik {
 
 template <typename CoordinateType>
-struct range_iterator<mapnik::geometry::line_string<CoordinateType> >
+struct interior_rings
 {
-    using type = typename mapnik::geometry::line_string<CoordinateType>::iterator;
+    using polygon_type = mapnik::geometry::polygon<CoordinateType>;
+    using iterator = typename polygon_type::iterator;
+    using const_iterator = typename polygon_type::const_iterator;
+    using value_type = typename polygon_type::value_type;
+
+    interior_rings(polygon_type & poly)
+        : poly_(poly) {}
+
+    iterator begin()
+    {
+        auto itr = poly_.begin();
+        std::advance(itr, 1);
+        return itr;
+    }
+
+    iterator end() { return poly_.end();}
+    const_iterator begin() const
+    {
+        auto itr = poly_.begin();
+        std::advance(itr, 1);
+        return itr;
+    }
+
+    const_iterator end() const { return poly_.end();}
+
+    void clear()
+    {
+        poly_.resize(1);
+    }
+
+    void resize(std::size_t size)
+    {
+        poly_.resize(size + 1);
+    }
+
+    std::size_t size() const
+    {
+        return poly_.empty() ? 0 : poly_.size() - 1;
+    }
+
+    void push_back(value_type const& val) { poly_.push_back(val); }
+    value_type& back() { return poly_.back(); }
+    value_type const& back()  const { return poly_.back(); }
+    polygon_type & poly_;
 };
 
-template <typename CoordinateType>
-struct range_const_iterator<mapnik::geometry::line_string<CoordinateType> >
-{
-    using type = typename mapnik::geometry::line_string<CoordinateType>::const_iterator;
-};
+} // ns mapnik
 
-template <typename CoordinateType>
-inline typename mapnik::geometry::line_string<CoordinateType>::iterator
-range_begin(mapnik::geometry::line_string<CoordinateType> & line) {return line.begin();}
+namespace boost { namespace geometry { namespace traits {
 
-template <typename CoordinateType>
-inline typename mapnik::geometry::line_string<CoordinateType>::iterator
-range_end(mapnik::geometry::line_string<CoordinateType> & line) {return line.end();}
-
-template <typename CoordinateType>
-inline typename mapnik::geometry::line_string<CoordinateType>::const_iterator
-range_begin(mapnik::geometry::line_string<CoordinateType> const& line) {return line.begin();}
-
-template <typename CoordinateType>
-inline typename mapnik::geometry::line_string<CoordinateType>::const_iterator
-range_end(mapnik::geometry::line_string<CoordinateType> const& line) {return line.end();}
-
-namespace geometry { namespace traits {
-
-// register mapnik::box2d<double>
 template<> struct tag<mapnik::box2d<double> > { using type = box_tag; };
 template<> struct point_type<mapnik::box2d<double> > { using type = mapnik::coord2d; };
 
@@ -122,50 +138,6 @@ struct indexed_access<mapnik::box2d<double>, max_corner, 1>
     static inline void set(mapnik::box2d<double> &b , ct const& value) { b.set_maxy(value); }
 };
 
-// box2d<float>
-template<> struct tag<mapnik::box2d<float> > { using type = box_tag; };
-template<> struct point_type<mapnik::box2d<float> > { using type = mapnik::coord2f; };
-
-template <>
-struct indexed_access<mapnik::box2d<float>, min_corner, 0>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.minx();}
-    static inline void set(mapnik::box2d<float> &b, ct const& value) { b.set_minx(value); }
-};
-
-template <>
-struct indexed_access<mapnik::box2d<float>, min_corner, 1>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.miny();}
-    static inline void set(mapnik::box2d<float> &b, ct const& value) { b.set_miny(value); }
-};
-
-template <>
-struct indexed_access<mapnik::box2d<float>, max_corner, 0>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.maxx();}
-    static inline void set(mapnik::box2d<float> &b, ct const& value) { b.set_maxx(value); }
-};
-
-template <>
-struct indexed_access<mapnik::box2d<float>, max_corner, 1>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.maxy();}
-    static inline void set(mapnik::box2d<float> &b , ct const& value) { b.set_maxy(value); }
-};
-
-// mapnik::geometry::line_string
-template<typename CoordinateType>
-struct tag<mapnik::geometry::line_string<CoordinateType> >
-{
-    using type = linestring_tag;
-};
-
-// mapnik::geometry::polygon
 template<typename CoordinateType>
 struct tag<mapnik::geometry::polygon<CoordinateType> >
 {
@@ -213,46 +185,69 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 template <typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container const&;
+    using type = typename mapnik::interior_rings<CoordinateType> const;
 };
 
 template <typename CoordinateType>
 struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 {
-    using type = typename mapnik::geometry::polygon<CoordinateType>::rings_container&;
+    using type = typename mapnik::interior_rings<CoordinateType> ;
 };
 
-// exterior
 template <typename CoordinateType>
 struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
 {
-    static mapnik::geometry::linear_ring<CoordinateType> & get(mapnik::geometry::polygon<CoordinateType> & p)
+    using ring_const_type   = typename ring_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using ring_mutable_type = typename ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    static ring_mutable_type get(mapnik::geometry::polygon<CoordinateType> & p)
     {
-        return p.exterior_ring;
+        if (p.empty()) p.resize(1);
+        return p[0];
     }
 
-    static mapnik::geometry::linear_ring<CoordinateType> const& get(mapnik::geometry::polygon<CoordinateType> const& p)
+    static ring_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return p.exterior_ring;
+        if (p.empty()) throw std::runtime_error("Exterior ring must be initialized!");
+        return p[0];
     }
 };
 
 template <typename CoordinateType>
 struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 {
-    using holes_type = typename mapnik::geometry::polygon<CoordinateType>::rings_container;
-    static holes_type&  get(mapnik::geometry::polygon<CoordinateType> & p)
+    using interior_const_type = typename interior_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using interior_mutable_type = typename interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+
+    static interior_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return p.interior_rings;
+        return mapnik::interior_rings<CoordinateType>(const_cast<mapnik::geometry::polygon<CoordinateType>&>(p));
     }
 
-    static holes_type const& get(mapnik::geometry::polygon<CoordinateType> const& p)
+    static interior_mutable_type get(mapnik::geometry::polygon<CoordinateType>& p)
     {
-        return p.interior_rings;
+        return mapnik::interior_rings<CoordinateType>(p);
+    }
+};
+
+template <typename CoordinateType>
+struct resize<mapnik::interior_rings<CoordinateType>>
+{
+    static inline void apply(mapnik::interior_rings<CoordinateType> interiors, std::size_t new_size)
+    {
+        interiors.resize(new_size);
+    }
+};
+
+template <typename CoordinateType>
+struct clear<mapnik::interior_rings<CoordinateType>>
+{
+    static inline void apply(mapnik::interior_rings<CoordinateType> interiors)
+    {
+        interiors.clear();
     }
 };
 
 }}}
 
 
-#endif //MAPNIK_GEOMETRY_ADAPTERS_HPP
+#endif //MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP

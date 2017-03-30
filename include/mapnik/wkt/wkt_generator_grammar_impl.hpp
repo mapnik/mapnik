@@ -73,19 +73,16 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
     point_coord = coordinate << lit(' ') << coordinate
         ;
 
-    linestring_coord = lit("(") << point_coord % lit(',') << lit(")")
+    linestring_coord = lit('(') << point_coord % lit(',') << lit(')')
         ;
 
-    polygon_coord = lit("(") << exterior_ring_coord << interior_ring_coord << lit(")")
+    linear_ring_coord = lit('(') << point_coord % lit(',') << lit(')');//linestring_coord.alias()
         ;
 
-    exterior_ring_coord = linestring_coord.alias()
+    polygon_coord = linear_ring_coord % lit(',')
         ;
 
-    interior_ring_coord =  *(lit(",") << exterior_ring_coord)
-        ;
-
-    multi_point_coord = linestring_coord.alias()
+    multi_point_coord = lit('(') << point_coord % lit(',') << lit(')');//linestring_coord.alias()
         ;
 
     multi_linestring_coord = lit("(") << linestring_coord % lit(',') << lit(")")

@@ -145,7 +145,7 @@ struct svg_path_generator :
 {
 
     using path_type = Path;
-    using coord_type = typename boost::remove_pointer<typename path_type::value_type>::type;
+    using coordinate_type = typename boost::remove_pointer<typename path_type::value_type>::type;
 
     svg_path_generator();
     // rules
@@ -153,7 +153,7 @@ struct svg_path_generator :
     karma::rule<OutputIterator, path_type const& ()> point;
     karma::rule<OutputIterator, path_type const& ()> linestring;
     karma::rule<OutputIterator, path_type const& ()> polygon;
-    karma::rule<OutputIterator, coord_type ()> svg_point;
+    karma::rule<OutputIterator, coordinate_type ()> svg_point;
     karma::rule<OutputIterator, path_type const& ()> svg_path;
 
     // phoenix functions

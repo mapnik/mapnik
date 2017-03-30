@@ -44,8 +44,8 @@ public:
         PolygonExterior = Polygon,
         PolygonInterior = Polygon | ( 1 << geometry_bits)
     };
-    using coord_type = T;
-    using container_type = Container<coord_type>;
+    using coordinate_type = T;
+    using container_type = Container<coordinate_type>;
     using value_type = typename container_type::value_type;
     using size_type = typename container_type::size_type;
     container_type cont_;
@@ -84,17 +84,17 @@ public:
     {
         return cont_.size();
     }
-    void push_vertex(coord_type x, coord_type y, CommandType c)
+    void push_vertex(coordinate_type x, coordinate_type y, CommandType c)
     {
         cont_.push_back(x,y,c);
     }
 
-    void line_to(coord_type x,coord_type y)
+    void line_to(coordinate_type x,coordinate_type y)
     {
         push_vertex(x,y,SEG_LINETO);
     }
 
-    void move_to(coord_type x,coord_type y)
+    void move_to(coordinate_type x,coordinate_type y)
     {
         push_vertex(x,y,SEG_MOVETO);
     }

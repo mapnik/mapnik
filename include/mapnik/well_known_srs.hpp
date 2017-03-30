@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp> // for M_PI on windows
 #include <mapnik/enumeration.hpp>
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry/point.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -35,6 +35,7 @@
 
 // stl
 #include <cmath>
+#include <vector>
 
 namespace mapnik {
 
@@ -92,9 +93,9 @@ static inline bool merc2lonlat(double * x, double * y, std::size_t point_count)
     return true;
 }
 
-static inline bool lonlat2merc(geometry::line_string<double> & ls)
+static inline bool lonlat2merc(std::vector<geometry::point<double>> & ls)
 {
-    for(auto & p : ls)
+    for (auto& p : ls)
     {
         if (p.x > 180) p.x = 180;
         else if (p.x < -180) p.x = -180;
@@ -107,7 +108,7 @@ static inline bool lonlat2merc(geometry::line_string<double> & ls)
     return true;
 }
 
-static inline bool merc2lonlat(geometry::line_string<double> & ls)
+static inline bool merc2lonlat(std::vector<geometry::point<double>> & ls)
 {
     for (auto & p : ls)
     {

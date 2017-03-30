@@ -180,22 +180,30 @@ struct render_ring_visitor
         }
     }
 
-    void operator()(mapnik::geometry::polygon<double> const& geom) const
+    void operator()(mapnik::geometry::polygon<double> const& poly) const
     {
         agg::rgba8 red(255,0,0,255);
         agg::rgba8 green(0,255,255,255);
         agg::rgba8 black(0,0,0,255);
-        renderer_.draw_ring(geom.exterior_ring,red);
-        if (mapnik::util::is_clockwise(geom.exterior_ring))
+        bool exterior = true;
+        for (auto const& ring : poly)
         {
-            renderer_.draw_outline(geom.exterior_ring,black);
-        }
-        for (auto const& ring : geom.interior_rings)
-        {
-            renderer_.draw_ring(ring,green);
-            if (!mapnik::util::is_clockwise(ring))
+            if (exterior)
             {
-                renderer_.draw_outline(ring,black);
+                exterior = false;
+                renderer_.draw_ring(ring, red);
+                if (mapnik::util::is_clockwise(ring))
+                {
+                    renderer_.draw_outline(ring,black);
+                }
+            }
+            else
+            {
+                renderer_.draw_ring(ring,green);
+                if (!mapnik::util::is_clockwise(ring))
+                {
+                    renderer_.draw_outline(ring,black);
+                }
             }
         }
     }

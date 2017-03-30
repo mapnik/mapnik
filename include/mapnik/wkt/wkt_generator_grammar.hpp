@@ -89,28 +89,27 @@ template <typename OutputIterator, typename Geometry>
 struct wkt_generator_grammar :
     karma::grammar<OutputIterator, Geometry()>
 {
-    using coord_type = typename Geometry::coord_type;
+    using coordinate_type = typename Geometry::coordinate_type;
     wkt_generator_grammar();
     // rules
     karma::rule<OutputIterator, Geometry()> geometry;
-    karma::rule<OutputIterator, geometry::point<coord_type>()> point;
-    karma::rule<OutputIterator, geometry::point<coord_type>()> point_coord;
-    karma::rule<OutputIterator, geometry::line_string<coord_type>()> linestring;
-    karma::rule<OutputIterator, geometry::line_string<coord_type>()> linestring_coord;
-    karma::rule<OutputIterator, geometry::polygon<coord_type>()> polygon;
-    karma::rule<OutputIterator, geometry::polygon<coord_type>()> polygon_coord;
-    karma::rule<OutputIterator, geometry::linear_ring<coord_type>()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<coord_type> >()> interior_ring_coord;
-    karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point;
-    karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point_coord;
-    karma::rule<OutputIterator, geometry::multi_line_string<coord_type>()> multi_linestring;
-    karma::rule<OutputIterator, geometry::multi_line_string<coord_type>()> multi_linestring_coord;
-    karma::rule<OutputIterator, geometry::multi_polygon<coord_type>()> multi_polygon;
-    karma::rule<OutputIterator, geometry::multi_polygon<coord_type>()> multi_polygon_coord;
-    karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometry_collection;
-    karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometries;
+    karma::rule<OutputIterator, geometry::point<coordinate_type>()> point;
+    karma::rule<OutputIterator, geometry::point<coordinate_type>()> point_coord;
+    karma::rule<OutputIterator, geometry::line_string<coordinate_type>()> linestring;
+    karma::rule<OutputIterator, geometry::line_string<coordinate_type>()> linestring_coord;
+    karma::rule<OutputIterator, geometry::polygon<coordinate_type>()> polygon;
+    karma::rule<OutputIterator, geometry::polygon<coordinate_type>()> polygon_coord;
+    karma::rule<OutputIterator, geometry::linear_ring<coordinate_type>()> linear_ring_coord;
+    karma::rule<OutputIterator, geometry::multi_point<coordinate_type>()> multi_point;
+    karma::rule<OutputIterator, geometry::multi_point<coordinate_type>()> multi_point_coord;
+    karma::rule<OutputIterator, geometry::multi_line_string<coordinate_type>()> multi_linestring;
+    karma::rule<OutputIterator, geometry::multi_line_string<coordinate_type>()> multi_linestring_coord;
+    karma::rule<OutputIterator, geometry::multi_polygon<coordinate_type>()> multi_polygon;
+    karma::rule<OutputIterator, geometry::multi_polygon<coordinate_type>()> multi_polygon_coord;
+    karma::rule<OutputIterator, geometry::geometry_collection<coordinate_type>()> geometry_collection;
+    karma::rule<OutputIterator, geometry::geometry_collection<coordinate_type>()> geometries;
     //
-    typename detail::coordinate_generator<coord_type>::generator coordinate;
+    typename detail::coordinate_generator<coordinate_type>::generator coordinate;
 };
 
 }}

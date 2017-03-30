@@ -75,7 +75,7 @@ template <typename OutputIterator, typename Geometry>
 struct geometry_generator_grammar :
         karma::grammar<OutputIterator, Geometry()>
 {
-    using coord_type = typename Geometry::coord_type;
+    using coord_type = typename Geometry::coordinate_type;
     geometry_generator_grammar();
     karma::rule<OutputIterator, Geometry()> geometry;
     karma::rule<OutputIterator, geometry::point<coord_type>()> point;
@@ -84,8 +84,7 @@ struct geometry_generator_grammar :
     karma::rule<OutputIterator, geometry::line_string<coord_type>()> linestring_coord;
     karma::rule<OutputIterator, geometry::polygon<coord_type>()> polygon;
     karma::rule<OutputIterator, geometry::polygon<coord_type>()> polygon_coord;
-    karma::rule<OutputIterator, geometry::linear_ring<coord_type>()> exterior_ring_coord;
-    karma::rule<OutputIterator, std::vector<geometry::linear_ring<coord_type> >()> interior_ring_coord;
+    karma::rule<OutputIterator, geometry::linear_ring<coord_type>()> linear_ring_coord;
     karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point;
     karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point_coord;
     karma::rule<OutputIterator, geometry::multi_line_string<coord_type>()> multi_linestring;
@@ -96,7 +95,6 @@ struct geometry_generator_grammar :
     karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometries;
     //
     karma::real_generator<coord_type, detail::json_coordinate_policy<coord_type> > coordinate;
-
 };
 
 }}

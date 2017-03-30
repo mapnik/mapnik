@@ -10,3 +10,7 @@
 	path = deps/mapbox/variant
 	url = https://github.com/mapbox/variant.git
         branch = master
+[submodule "deps/mapbox/geometry"]
+	path = deps/mapbox/geometry
+	url = https://github.com/mapbox/geometry.hpp.git
+        branch = master

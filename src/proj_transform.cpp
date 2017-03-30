@@ -103,7 +103,7 @@ bool proj_transform::forward (geometry::point<double> & p) const
     return forward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
+unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls) const
 {
     std::size_t size = ls.size();
     if (size == 0) return 0;
@@ -244,7 +244,7 @@ bool proj_transform::backward (geometry::point<double> & p) const
     return backward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
+unsigned int proj_transform::backward (std::vector<geometry::point<double>> & ls) const
 {
     std::size_t size = ls.size();
     if (size == 0) return 0;

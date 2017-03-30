@@ -20,14 +20,20 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/geometry/box2d_impl.hpp>
+#ifndef MAPNIK_GEOMETRY_POLYGON_HPP
+#define MAPNIK_GEOMETRY_POLYGON_HPP
 
-namespace mapnik {
+// geometry
+#include <mapbox/geometry/polygon.hpp>
 
-template class box2d<int>;
-//template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+namespace mapnik { namespace geometry {
 
-}
+template <typename T>
+using linear_ring = mapbox::geometry::linear_ring<T>;
+
+template <typename T>
+using polygon = mapbox::geometry::polygon<T>;
+
+}}
+
+#endif // MAPNIK_GEOMETRY_POLYGON_HPP

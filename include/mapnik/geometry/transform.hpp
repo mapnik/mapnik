@@ -105,7 +105,7 @@ struct geometry_transform
 
     geometry<V> operator() (geometry_empty const& empty) const
     {
-        return empty;
+        return geometry_empty();
     }
 
     template <typename T>

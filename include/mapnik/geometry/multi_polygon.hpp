@@ -20,14 +20,24 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/geometry/box2d_impl.hpp>
+#ifndef MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
+#define MAPNIK_GEOMETRY_MULTI_POLYGON_HPP
 
-namespace mapnik {
+// geometry
+#include <mapnik/geometry/polygon.hpp>
 
-template class box2d<int>;
-//template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+namespace mapnik { namespace geometry {
 
-}
+template <typename T, template <typename...> class Cont = std::vector>
+struct multi_polygon : Cont<polygon<T>>
+{
+    using coordinate_type = T;
+    using polygon_type = polygon<T>;
+    using container_type = Cont<polygon_type>;
+    using container_type::container_type;
+};
+
+
+}}
+
+#endif // MAPNIK_GEOMETRY_MULTI_POLYGON_HPP

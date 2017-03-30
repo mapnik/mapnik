@@ -35,13 +35,8 @@
 #include <boost/numeric/conversion/cast.hpp>
 #pragma GCC diagnostic pop
 
-
 namespace mapnik {
 
-namespace geometry {
-template <typename T> struct point;
-template <typename T> struct line_string;
-}
 class projection;
 template <typename T> class box2d;
 

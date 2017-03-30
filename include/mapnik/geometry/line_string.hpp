@@ -20,14 +20,16 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_GEOMETRY_LINE_STRING_HPP
+#define MAPNIK_GEOMETRY_LINE_STRING_HPP
+
 // mapnik
-#include <mapnik/geometry/box2d_impl.hpp>
+#include <mapbox/geometry/line_string.hpp>
 
-namespace mapnik {
+namespace mapnik { namespace geometry {
 
-template class box2d<int>;
-//template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+template <typename T>
+using line_string = mapbox::geometry::line_string<T>;
+}}
 
-}
+#endif // MAPNIK_GEOMETRY_LINE_STRING_HPP

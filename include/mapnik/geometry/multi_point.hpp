@@ -20,14 +20,17 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/geometry/box2d_impl.hpp>
+#ifndef MAPNIK_GEOMETRY_MULTI_POINT_HPP
+#define MAPNIK_GEOMETRY_MULTI_POINT_HPP
 
-namespace mapnik {
+// geometry
+#include <mapbox/geometry/multi_point.hpp>
 
-template class box2d<int>;
-//template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+namespace mapnik { namespace geometry {
 
-}
+template <typename T>
+using multi_point = mapbox::geometry::multi_point<T>;
+
+}}
+
+#endif // MAPNIK_GEOMETRY_MULTI_POINT_HPP

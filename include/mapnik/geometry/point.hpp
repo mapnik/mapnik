@@ -20,14 +20,16 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/geometry/box2d_impl.hpp>
+#ifndef MAPNIK_GEOMETRY_POINT_HPP
+#define MAPNIK_GEOMETRY_POINT_HPP
 
-namespace mapnik {
+#include <mapbox/geometry/point.hpp>
 
-template class box2d<int>;
-//template class box2d<std::int64_t>;
-template class box2d<float>;
-template class box2d<double>;
+namespace mapnik { namespace geometry {
 
-}
+template <typename T>
+using point = mapbox::geometry::point<T>;
+
+}}
+
+#endif // MAPNIK_GEOMETRY_POINT_HPP

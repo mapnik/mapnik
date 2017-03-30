@@ -27,9 +27,9 @@ void envelope_test()
     }
     {
         line_string<coord_type> line;
-        line.add_coord(0,0);
-        line.add_coord(1,1);
-        line.add_coord(2,2);
+        line.emplace_back(0,0);
+        line.emplace_back(1,1);
+        line.emplace_back(2,2);
         geometry<coord_type> geom(line);
         mapnik::box2d<coord_type> bbox = mapnik::geometry::envelope(geom);
         REQUIRE( bbox.minx() == 0 );
@@ -39,13 +39,13 @@ void envelope_test()
     }
     {
         line_string<coord_type> line;
-        line.add_coord(0,0);
-        line.add_coord(1,1);
-        line.add_coord(2,2);
+        line.emplace_back(0,0);
+        line.emplace_back(1,1);
+        line.emplace_back(2,2);
         line_string<coord_type> line2;
-        line2.add_coord(0,0);
-        line2.add_coord(-1,-1);
-        line2.add_coord(-2,-2);
+        line2.emplace_back(0,0);
+        line2.emplace_back(-1,-1);
+        line2.emplace_back(-2,-2);
         multi_line_string<coord_type> multi_line;
         multi_line.emplace_back(std::move(line));
         multi_line.emplace_back(std::move(line2));
@@ -59,12 +59,12 @@ void envelope_test()
     {
         polygon<coord_type> poly;
         linear_ring<coord_type> ring;
-        ring.add_coord(0,0);
-        ring.add_coord(-10,0);
-        ring.add_coord(-10,10);
-        ring.add_coord(0,10);
-        ring.add_coord(0,0);
-        poly.set_exterior_ring(std::move(ring));
+        ring.emplace_back(0,0);
+        ring.emplace_back(-10,0);
+        ring.emplace_back(-10,10);
+        ring.emplace_back(0,10);
+        ring.emplace_back(0,0);
+        poly.push_back(std::move(ring));
         geometry<coord_type> geom(poly);
         mapnik::box2d<coord_type> bbox = mapnik::geometry::envelope(geom);
         REQUIRE( bbox.minx() == -10 );
@@ -102,19 +102,19 @@ void envelope_test()
         // polygon with hole
         polygon<coord_type> poly;
         linear_ring<coord_type> ring;
-        ring.add_coord(0,0);
-        ring.add_coord(-10,0);
-        ring.add_coord(-10,10);
-        ring.add_coord(0,10);
-        ring.add_coord(0,0);
-        poly.set_exterior_ring(std::move(ring));
+        ring.emplace_back(0,0);
+        ring.emplace_back(-10,0);
+        ring.emplace_back(-10,10);
+        ring.emplace_back(0,10);
+        ring.emplace_back(0,0);
+        poly.push_back(std::move(ring));
         linear_ring<coord_type> hole;
-        hole.add_coord(-7,7);
-        hole.add_coord(-7,3);
-        hole.add_coord(-3,3);
-        hole.add_coord(-3,7);
-        hole.add_coord(-7,7);
-        poly.add_hole(std::move(hole));
+        hole.emplace_back(-7,7);
+        hole.emplace_back(-7,3);
+        hole.emplace_back(-3,3);
+        hole.emplace_back(-3,7);
+        hole.emplace_back(-7,7);
+        poly.push_back(std::move(hole));
         geometry<coord_type> geom(poly);
         mapnik::box2d<coord_type> bbox = mapnik::geometry::envelope(poly);
         REQUIRE( bbox.minx() == -10 );
@@ -124,12 +124,12 @@ void envelope_test()
         // add another hole inside the first hole
         // which should be considered a hit
         linear_ring<coord_type> fill;
-        fill.add_coord(-6,4);
-        fill.add_coord(-6,6);
-        fill.add_coord(-4,6);
-        fill.add_coord(-4,4);
-        fill.add_coord(-6,4);
-        poly.add_hole(std::move(fill));
+        fill.emplace_back(-6,4);
+        fill.emplace_back(-6,6);
+        fill.emplace_back(-4,6);
+        fill.emplace_back(-4,4);
+        fill.emplace_back(-6,4);
+        poly.push_back(std::move(fill));
         bbox = mapnik::geometry::envelope(poly);
         REQUIRE( bbox.minx() == -10 );
         REQUIRE( bbox.miny() == 0 );

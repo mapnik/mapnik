@@ -28,13 +28,12 @@
 
 namespace mapnik { namespace geometry { namespace detail {
 
-//template <typename Transformer>
+template <typename T>
 struct geometry_to_path
 {
     geometry_to_path(path_type & p)
         : p_(p) {}
 
-    template <typename T>
     void operator() (geometry<T> const& geom) const
     {
         mapnik::util::apply_visitor(*this, geom);
@@ -45,7 +44,6 @@ struct geometry_to_path
         // no-op
     }
     // point
-    template <typename T>
     void operator() (point<T> const& pt) const
     {
         //point pt_new;
@@ -54,7 +52,6 @@ struct geometry_to_path
     }
 
     // line_string
-    template <typename T>
     void operator() (line_string<T> const& line) const
     {
         bool first = true;
@@ -68,34 +65,16 @@ struct geometry_to_path
     }
 
     // polygon
-    template <typename T>
     void operator() (polygon<T> const& poly) const
     {
-        // exterior
-        bool first = true;
-        for (auto const& pt : poly.exterior_ring)
+        // rings: exterior *interior
+        for (auto const& ring : poly)
         {
-            if (first)
-            {
-                p_.move_to(pt.x, pt.y);
-                first=false;
-            }
-            else
-            {
-                p_.line_to(pt.x, pt.y);
-            }
-        }
-        if (!first)
-        {
-            p_.close_path();
-        }
-        // interior
-        for (auto const& ring : poly.interior_rings)
-        {
-            first = true;
+            bool first = true;
             for (auto const& pt : ring)
             {
-                if (first) {
+                if (first)
+                {
                     p_.move_to(pt.x, pt.y);
                     first=false;
                 }
@@ -112,7 +91,6 @@ struct geometry_to_path
     }
 
     // multi point
-    template <typename T>
     void operator() (multi_point<T> const& multi_pt) const
     {
         for (auto const& pt : multi_pt)
@@ -121,7 +99,6 @@ struct geometry_to_path
         }
     }
     // multi_line_string
-    template <typename T>
     void operator() (multi_line_string<T> const& multi_line) const
     {
         for (auto const& line : multi_line)
@@ -131,7 +108,6 @@ struct geometry_to_path
     }
 
     // multi_polygon
-    template <typename T>
     void operator() (multi_polygon<T> const& multi_poly) const
     {
         for (auto const& poly : multi_poly)
@@ -139,8 +115,7 @@ struct geometry_to_path
             (*this)(poly);
         }
     }
-
-    template <typename T>
+    // geometry_collection
     void operator() (geometry_collection<T> const& collection) const
     {
         for (auto const& geom :  collection)
@@ -157,7 +132,8 @@ struct geometry_to_path
 template <typename T>
 void to_path(T const& geom, path_type & p)
 {
-    detail::geometry_to_path func(p);
+    using coordinate_type = typename T::coordinate_type;
+    detail::geometry_to_path<coordinate_type> func(p);
     func(geom);
 }
 

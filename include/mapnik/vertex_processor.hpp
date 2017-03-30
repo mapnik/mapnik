@@ -39,6 +39,7 @@ struct vertex_processor
     {
         util::apply_visitor(*this, geom);
     }
+
     void operator() (geometry_empty const&) const
     {
         // no-op

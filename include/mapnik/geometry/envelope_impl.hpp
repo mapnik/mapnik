@@ -31,11 +31,11 @@ namespace detail {
 template <typename T>
 struct geometry_envelope
 {
-    using coord_type = T;
-    using bbox_type = box2d<coord_type>;
+    using coordinate_type = T;
+    using bbox_type = box2d<coordinate_type>;
     bbox_type & bbox;
 
-    geometry_envelope(bbox_type & bbox_)
+    explicit geometry_envelope(bbox_type & bbox_)
         : bbox(bbox_) {}
 
     template <typename U>
@@ -57,58 +57,22 @@ struct geometry_envelope
 
     void operator() (mapnik::geometry::line_string<T> const& line) const
     {
-        bool first = true;
-        for (auto const& pt : line)
-        {
-            if (first && !bbox.valid())
-            {
-                bbox.init(pt.x, pt.y, pt.x, pt.y);
-                first = false;
-            }
-            else
-            {
-                bbox.expand_to_include(pt.x, pt.y);
-            }
-        }
+        _envelope_impl(line, bbox);
     }
 
     void operator() (mapnik::geometry::linear_ring<T> const& ring) const
     {
-        (*this)(static_cast<mapnik::geometry::line_string<T> const&>(ring));
+        _envelope_impl(ring, bbox);
     }
 
     void operator() (mapnik::geometry::polygon<T> const& poly) const
     {
-        bool first = true;
-        for (auto const& pt : poly.exterior_ring)
-        {
-            if (first && !bbox.valid())
-            {
-                bbox.init(pt.x, pt.y, pt.x, pt.y);
-                first = false;
-            }
-            else
-            {
-                bbox.expand_to_include(pt.x, pt.y);
-            }
-        }
+        if (!poly.empty()) _envelope_impl(poly[0], bbox);
     }
 
     void operator() (mapnik::geometry::multi_point<T> const& multi_point) const
     {
-        bool first = true;
-        for (auto const& pt : multi_point)
-        {
-            if (first && !bbox.valid())
-            {
-                bbox.init(pt.x, pt.y, pt.x, pt.y);
-                first = false;
-            }
-            else
-            {
-                bbox.expand_to_include(pt.x, pt.y);
-            }
-        }
+        _envelope_impl(multi_point, bbox);
     }
 
     void operator() (mapnik::geometry::multi_line_string<T> const& multi_line) const
@@ -134,16 +98,35 @@ struct geometry_envelope
             (*this)(geom);
         }
     }
+
+private:
+    template <typename Points>
+    void _envelope_impl(Points const& points, bbox_type & b) const
+    {
+        bool first = true;
+        for (auto const& pt : points)
+        {
+            if (first && !b.valid())
+            {
+                b.init(pt.x, pt.y, pt.x, pt.y);
+                first = false;
+            }
+            else
+            {
+                b.expand_to_include(pt.x, pt.y);
+            }
+        }
+    }
 };
 
 } // end ns detail
 
 template <typename T>
-auto envelope(T const& geom) -> box2d<typename T::coord_type>
+auto envelope(T const& geom) -> box2d<typename T::coordinate_type>
 {
-    using coord_type = typename T::coord_type;
-    box2d<coord_type> bbox;
-    detail::geometry_envelope<coord_type> op(bbox);
+    using coordinate_type = typename T::coordinate_type;
+    box2d<coordinate_type> bbox;
+    detail::geometry_envelope<coordinate_type> op(bbox);
     op(geom);
     return bbox;
 }
