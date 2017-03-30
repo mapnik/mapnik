@@ -138,53 +138,6 @@ struct indexed_access<mapnik::box2d<double>, max_corner, 1>
     static inline void set(mapnik::box2d<double> &b , ct const& value) { b.set_maxy(value); }
 };
 
-<<<<<<< HEAD:include/mapnik/geometry/boost_adapters.hpp
-=======
-// box2d<float>
-template<> struct tag<mapnik::box2d<float> > { using type = box_tag; };
-template<> struct point_type<mapnik::box2d<float> > { using type = mapnik::coord2f; };
-
-template <>
-struct indexed_access<mapnik::box2d<float>, min_corner, 0>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.minx();}
-    static inline void set(mapnik::box2d<float> &b, ct const& value) { b.set_minx(value); }
-};
-
-template <>
-struct indexed_access<mapnik::box2d<float>, min_corner, 1>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.miny();}
-    static inline void set(mapnik::box2d<float> &b, ct const& value) { b.set_miny(value); }
-};
-
-template <>
-struct indexed_access<mapnik::box2d<float>, max_corner, 0>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.maxx();}
-    static inline void set(mapnik::box2d<float> &b, ct const& value) { b.set_maxx(value); }
-};
-
-template <>
-struct indexed_access<mapnik::box2d<float>, max_corner, 1>
-{
-    using ct = coordinate_type<mapnik::coord2f>::type;
-    static inline ct get(mapnik::box2d<float> const& b) { return b.maxy();}
-    static inline void set(mapnik::box2d<float> &b , ct const& value) { b.set_maxy(value); }
-};
-
-// mapnik::geometry::line_string
-template<typename CoordinateType>
-struct tag<mapnik::geometry::line_string<CoordinateType> >
-{
-    using type = linestring_tag;
-};
-
-// mapnik::geometry::polygon
->>>>>>> master:include/mapnik/geometry/boost_adapters.hpp
 template<typename CoordinateType>
 struct tag<mapnik::geometry::polygon<CoordinateType> >
 {
