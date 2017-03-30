@@ -247,6 +247,17 @@ struct clear<mapnik::interior_rings<CoordinateType>>
     }
 };
 
+template <typename CoordinateType>
+struct push_back<mapnik::interior_rings<CoordinateType>>
+{
+    template <typename Ring>
+    static inline void apply(mapnik::interior_rings<CoordinateType> interiors, Ring const& ring)
+    {
+        interiors.push_back(ring);
+    }
+};
+
+
 }}}
 
 
