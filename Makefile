@@ -1,7 +1,5 @@
 OS := $(shell uname -s)
 
-PYTHON = python
-
 ifeq ($(JOBS),)
 	JOBS:=1
 endif
@@ -20,11 +18,6 @@ release:
 
 test-release:
 	./scripts/test_release.sh
-
-python:
-	if [ ! -d ./bindings/python ]; then git clone git@github.com:mapnik/python-mapnik.git --recursive ./bindings/python; else (cd bindings/python && git pull && git submodule update --init); fi;
-	make
-	python bindings/python/test/visual.py -q
 
 src/json/libmapnik-json.a:
 	# we first build memory intensive files with -j$(HEAVY_JOBS)
@@ -95,13 +88,6 @@ bench:
 
 demo:
 	cd demo/c++; ./rundemo `mapnik-config --prefix`
-
-pep8:
-	# https://gist.github.com/1903033
-	# gsed on osx
-	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$$//'
-	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$$/{$$d;N;ba' -e '}'
-	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs ged -i '/./,/^$$/!d'
 
 # note: pass --gen-suppressions=yes to create new suppression entries
 grind:

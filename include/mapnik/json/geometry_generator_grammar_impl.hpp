@@ -24,7 +24,6 @@
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
 
-
 namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;

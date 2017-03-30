@@ -80,7 +80,6 @@ x3::rule<class geometries, mapnik::geometry::geometry_collection<double> > const
 
 auto const point_text_def = '(' > double_ > double_ > ')';
 auto const positions_def = lit('(') > (double_ > double_) % lit(',') > lit(')');
-//auto const polygon_rings_def = '(' > positions[set_exterior] > *(lit(',') > positions[add_hole]) > ')';
 auto const polygon_rings_def = '(' > positions[add_ring] % lit(',') > ')';
 auto const points_def = (lit('(') >> ((point_text_def % ',') > lit(')'))) | positions_def ;
 auto const lines_def = lit('(') > (positions_def % lit(',')) > lit(')');

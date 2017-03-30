@@ -20,14 +20,11 @@
  *
  *****************************************************************************/
 
-// mapnik <mapnik/geometry_reprojection.hpp>
+// mapnik
+#include <mapnik/geometry/reprojection.hpp>
 #include <mapnik/geometry.hpp>
 
-namespace mapnik {
-
-namespace geometry {
-
-namespace detail {
+namespace mapnik { namespace geometry { namespace detail {
 
 //template <typename T>
 geometry_empty reproject_internal(geometry_empty const&, proj_transform const&, unsigned int &)
@@ -388,5 +385,4 @@ bool reproject(T & geom, projection const& source, projection const& dest)
 }
 
 } // end geometry ns
-
 } // end mapnik ns

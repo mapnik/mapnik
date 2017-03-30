@@ -14,4 +14,3 @@
 	path = deps/mapbox/geometry
 	url = https://github.com/mapbox/geometry.hpp.git
         branch = master
-
