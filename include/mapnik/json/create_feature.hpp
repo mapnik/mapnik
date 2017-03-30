@@ -183,7 +183,7 @@ void create_feature(feature_impl & feature,
             auto const& geometry = mapnik::util::get<mapnik::json::geojson_object>(geom_value);
             mapnik::geometry::geometry_types geom_type;
             mapnik::json::positions const* coordinates = nullptr;
-            for (auto & elem2 : geometry)
+            for (auto const& elem2 : geometry)
             {
                 auto const key2 = std::get<0>(elem2);
                 if (key2 == mapnik::json::well_known_names::type)
