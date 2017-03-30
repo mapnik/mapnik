@@ -89,12 +89,12 @@ struct create_polygon
         mapnik::geometry::polygon<double> poly;
         std::size_t num_rings = rngs.size();
         poly.reserve(num_rings);
-        for ( std::size_t i = 0; i < num_rings; ++i)
+        for (auto const& r : rngs)
         {
-            std::size_t size = rngs[i].size();
+            std::size_t size = r.size();
             mapnik::geometry::linear_ring<double> ring;
             ring.reserve(size);
-            for ( auto && pt : rngs[i])
+            for ( auto && pt : r)
             {
                 ring.emplace_back(std::move(pt));
             }
