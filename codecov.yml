@@ -1,0 +1,10 @@
+ignore:
+  - "mason_packages"
+  - "benchmark"
+  - "deps"
+  - ".sconf_temp"
+  - "scons"
+  - "test"
+  - "demo"
+  - "docs"
+  - "fonts"
