@@ -51,6 +51,36 @@ BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2f, float,  boost::geometry::cs::c
 namespace mapnik {
 
 template <typename CoordinateType>
+struct const_interior_rings
+{
+    using polygon_type = mapnik::geometry::polygon<CoordinateType> const;
+    using const_iterator = typename polygon_type::const_iterator;
+    using iterator = const_iterator; // needed by boost::range_iterator
+    using value_type = typename polygon_type::value_type;
+
+    const_interior_rings(polygon_type const& poly)
+        : poly_(poly) {}
+
+    const_iterator begin() const
+    {
+        auto itr = poly_.cbegin();
+        std::advance(itr, 1);
+        return itr;
+    }
+
+    const_iterator end() const { return poly_.cend();}
+
+    std::size_t size() const
+    {
+        return poly_.empty() ? 0 : poly_.size() - 1;
+    }
+
+    value_type const& back()  const { return poly_.back(); }
+    polygon_type const& poly_;
+};
+
+
+template <typename CoordinateType>
 struct interior_rings
 {
     using polygon_type = mapnik::geometry::polygon<CoordinateType>;
@@ -71,12 +101,12 @@ struct interior_rings
     iterator end() { return poly_.end();}
     const_iterator begin() const
     {
-        auto itr = poly_.begin();
+        auto itr = poly_.cbegin();
         std::advance(itr, 1);
         return itr;
     }
 
-    const_iterator end() const { return poly_.end();}
+    const_iterator end() const { return poly_.cend();}
 
     void clear()
     {
@@ -183,9 +213,9 @@ struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
 
 // interior
 template <typename CoordinateType>
-struct interior_const_type<mapnik::geometry::polygon<CoordinateType> >
+struct interior_const_type<mapnik::geometry::polygon<CoordinateType>>
 {
-    using type = typename mapnik::interior_rings<CoordinateType> const;
+    using type = typename mapnik::const_interior_rings<CoordinateType> const;
 };
 
 template <typename CoordinateType>
@@ -220,7 +250,7 @@ struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
 
     static interior_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        return mapnik::interior_rings<CoordinateType>(const_cast<mapnik::geometry::polygon<CoordinateType>&>(p));
+        return mapnik::const_interior_rings<CoordinateType>(p);
     }
 
     static interior_mutable_type get(mapnik::geometry::polygon<CoordinateType>& p)
@@ -257,8 +287,6 @@ struct push_back<mapnik::interior_rings<CoordinateType>>
     }
 };
 
-
 }}}
-
 
 #endif //MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
