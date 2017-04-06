@@ -22,7 +22,7 @@ Released: February 8, 2017
 - postgis.input - use 2D box for pgraster bounding box (PR #3551)
 - Fixed GroupSymbolizer PairLayout with 3+ items (#3526)
 - Simplified `hash` implementation (204d30e58d3553278ab6bcda2d4122b0f13f6392)
-- Simplified `mapnik::valu`e conversion rules (#3570)
+- Simplified `mapnik::value` conversion rules (#3570)
 - Changed `render_thunk_list` to `std::list<render_thunk>` (PR #3585)
 - Upgraded to variant `v1.1.5`
 - CSV.input - fixed `blank` line test (8a3a380b3b5c64681f2478b4f0d06f6a907f5eed)
