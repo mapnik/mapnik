@@ -133,39 +133,45 @@ struct interior_rings
 
 namespace boost { namespace geometry { namespace traits {
 
-template<> struct tag<mapnik::box2d<double> > { using type = box_tag; };
+template <typename CoordinateType>
+struct tag<mapnik::box2d<CoordinateType> >
+{
+    using type = box_tag;
+};
+
 template<> struct point_type<mapnik::box2d<double> > { using type = mapnik::coord2d; };
+template<> struct point_type<mapnik::box2d<float> > { using type = mapnik::coord2f; };
 
-template <>
-struct indexed_access<mapnik::box2d<double>, min_corner, 0>
+template <typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, min_corner, 0>
 {
-    using ct = coordinate_type<mapnik::coord2d>::type;
-    static inline ct get(mapnik::box2d<double> const& b) { return b.minx();}
-    static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_minx(value); }
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.minx();}
+    static inline void set(mapnik::box2d<CoordinateType> &b, ct const& value) { b.set_minx(value); }
 };
 
-template <>
-struct indexed_access<mapnik::box2d<double>, min_corner, 1>
+template <typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, min_corner, 1>
 {
-    using ct = coordinate_type<mapnik::coord2d>::type;
-    static inline ct get(mapnik::box2d<double> const& b) { return b.miny();}
-    static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_miny(value); }
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.miny();}
+    static inline void set(mapnik::box2d<CoordinateType> &b, ct const& value) { b.set_miny(value); }
 };
 
-template <>
-struct indexed_access<mapnik::box2d<double>, max_corner, 0>
+template <typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, max_corner, 0>
 {
-    using ct = coordinate_type<mapnik::coord2d>::type;
-    static inline ct get(mapnik::box2d<double> const& b) { return b.maxx();}
-    static inline void set(mapnik::box2d<double> &b, ct const& value) { b.set_maxx(value); }
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.maxx();}
+    static inline void set(mapnik::box2d<CoordinateType> &b, ct const& value) { b.set_maxx(value); }
 };
 
-template <>
-struct indexed_access<mapnik::box2d<double>, max_corner, 1>
+template <typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, max_corner, 1>
 {
-    using ct = coordinate_type<mapnik::coord2d>::type;
-    static inline ct get(mapnik::box2d<double> const& b) { return b.maxy();}
-    static inline void set(mapnik::box2d<double> &b , ct const& value) { b.set_maxy(value); }
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.maxy();}
+    static inline void set(mapnik::box2d<CoordinateType> &b , ct const& value) { b.set_maxy(value); }
 };
 
 template<typename CoordinateType>
