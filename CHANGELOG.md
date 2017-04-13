@@ -15,7 +15,7 @@ Released: February 8, 2017
 #### Summary
 
 - Unbundle `unifont` font from distribution
-- GeoJSON: imporoved parsing grammar avoiding temp synthesised attribute (#3507)
+- GeoJSON: improved parsing grammar avoiding temp synthesized attribute (#3507)
 - GeoJSON: expose `num_features_to_query` datasource parameter + unit test (#3515)
 - Fixed intersecting extents in different projections (PR #3525 )
 - Fixed `blur` implementation by taking into account `scale_factor`
