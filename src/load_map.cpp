@@ -1013,13 +1013,12 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             // back compatibility with Mapnik 2.0.0
             if (!marker_type->empty() && filename.empty())
             {
-                if (*marker_type == "ellipse")
+                if (*marker_type == "ellipse"   ||
+                    *marker_type == "arrow"     ||
+                    *marker_type == "arrowhead" ||
+                    *marker_type == "triangle")
                 {
-                    filename = marker_cache::instance().known_svg_prefix_ + "ellipse";
-                }
-                else if (*marker_type == "arrow")
-                {
-                    filename = marker_cache::instance().known_svg_prefix_ + "arrow";
+                    filename = marker_cache::instance().known_svg_prefix_ + *marker_type;
                 }
             }
         }

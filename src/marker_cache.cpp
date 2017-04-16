@@ -62,6 +62,17 @@ marker_cache::marker_cache()
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
                "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
+    insert_svg("arrowhead",
+               "<?xml version='1.0' standalone='no'?>"
+               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+               "<path fill='#0000FF' stroke='black' stroke-width='.5' d='M 10,0 0,5 3,0 0,-5 Z'/>"
+               "</svg>");
+    insert_svg("triangle",
+               "<?xml version='1.0' standalone='no'?>"
+               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+               "<path fill='#0000FF' stroke='black' stroke-width='.5' d='M 10,0 0,5 0,-5 Z'/>"
+               "</svg>");
+
     marker_cache_.emplace("image://square",std::make_shared<mapnik::marker const>(mapnik::marker_rgba8()));
 }
 
