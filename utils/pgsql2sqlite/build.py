@@ -54,9 +54,6 @@ else:
 # Link Library to Dependencies
 libraries = copy(program_env['LIBS'])
 
-if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
-    libraries.append('dl')
-
 if env['HAS_CAIRO']:
     program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
     program_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
@@ -74,6 +71,9 @@ if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
 
 if env['SQLITE_LINKFLAGS']:
     program_env.Append(LINKFLAGS=env['SQLITE_LINKFLAGS'])
+
+if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+    libraries.append('dl')
 
 pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
