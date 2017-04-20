@@ -35,7 +35,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-4.9-dev', 'xutils-dev']
+          packages: [ 'libstdc++-4.8-dev', 'xutils-dev']
     - os: linux
       sudo: false
       compiler: ": clang-coverage"
@@ -43,7 +43,7 @@ matrix:
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: ['libstdc++-4.9-dev', 'xutils-dev' ]
+          packages: ['libstdc++-4.8-dev', 'xutils-dev' ]
     - os: osx
       compiler: ": clang-osx"
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
