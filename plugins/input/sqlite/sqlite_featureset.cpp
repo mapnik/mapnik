@@ -49,6 +49,7 @@ sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                                      std::string const& encoding,
                                      mapnik::box2d<double> const& bbox,
                                      mapnik::wkbFormat format,
+                                     bool twkb_encoding,
                                      bool spatial_index,
                                      bool using_subquery)
     : rs_(rs),
@@ -56,6 +57,7 @@ sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
       tr_(new transcoder(encoding)),
       bbox_(bbox),
       format_(format),
+      twkb_encoding_(twkb_encoding),
       spatial_index_(spatial_index),
       using_subquery_(using_subquery)
 {}
@@ -81,7 +83,9 @@ feature_ptr sqlite_featureset::next()
         }
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
-        mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(data, size, format_);
+        mapnik::geometry::geometry<double> geom;
+        if (twkb_encoding_) geom = geometry_utils::from_twkb(data, size);
+        else geom = geometry_utils::from_wkb(data, size, format_);
         if (mapnik::geometry::is_empty(geom))
         {
             continue;

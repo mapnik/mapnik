@@ -82,6 +82,7 @@ private:
     const std::string intersects_token_;
     mapnik::layer_descriptor desc_;
     mapnik::wkbFormat format_;
+    bool twkb_encoding_;
     bool use_spatial_index_;
     bool has_spatial_index_;
     bool using_subquery_;

@@ -68,7 +68,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       intersects_token_("!intersects!"),
       desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
-      format_(mapnik::wkbAuto)
+      format_(mapnik::wkbAuto),
+      twkb_encoding_(false)
 {
     /* TODO
        - throw if no primary key but spatial index is present?
@@ -112,6 +113,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         else if (*wkb == "generic")
         {
             format_ = mapnik::wkbGeneric;
+        }
+        else if (*wkb == "twkb")
+        {
+            format_ = mapnik::wkbGeneric;
+            twkb_encoding_ = true;
         }
         else
         {
@@ -448,7 +454,10 @@ boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_t
             if (data)
             {
 
-                mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, format_);
+                mapnik::geometry::geometry<double> geom;
+
+                if (twkb_encoding_) geom = mapnik::geometry_utils::from_twkb(data, size);
+                else geom = mapnik::geometry_utils::from_wkb(data, size, format_);
                 if (mapnik::geometry::is_empty(geom))
                 {
                     continue;
@@ -547,6 +556,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
                                                      desc_.get_encoding(),
                                                      e,
                                                      format_,
+                                                     twkb_encoding_,
                                                      has_spatial_index_,
                                                      using_subquery_);
     }
@@ -627,6 +637,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
                                                      desc_.get_encoding(),
                                                      e,
                                                      format_,
+                                                     twkb_encoding_,
                                                      has_spatial_index_,
                                                      using_subquery_);
     }
