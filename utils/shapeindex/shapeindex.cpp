@@ -187,7 +187,10 @@ int main (int argc,char** argv)
                 int shp_content_length = shp.read_xdr_integer();
                 if (shx_content_length != shp_content_length)
                 {
-                    std::clog << "Content length mismatch for record number " << record_number << std::endl;
+                    if (verbose)
+                    {
+                        std::clog << "Content length mismatch for record number " << record_number << std::endl;
+                    }
                     continue;
                 }
                 shape_type = shp.read_ndr_integer();
