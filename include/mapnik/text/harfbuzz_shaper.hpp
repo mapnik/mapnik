@@ -79,7 +79,7 @@ static hb_language_t script_to_language(hb_script_t script)
     case HB_SCRIPT_GUJARATI: return hb_language_from_string("gu", -1); break;
     case HB_SCRIPT_GURMUKHI: return hb_language_from_string("pa", -1); break;
     case HB_SCRIPT_HANGUL: return hb_language_from_string("ko", -1); break;
-    case HB_SCRIPT_HAN: return hb_language_from_string("zh-Hans", -1); break;
+    case HB_SCRIPT_HAN: return hb_language_from_string("zh-hans", -1); break;
     case HB_SCRIPT_HEBREW: return hb_language_from_string("he", -1); break;
     case HB_SCRIPT_HIRAGANA: return hb_language_from_string("ja", -1); break;
     case HB_SCRIPT_KANNADA: return hb_language_from_string("kn", -1); break;
@@ -183,6 +183,10 @@ static void shape_text(text_line & line,
             hb_font_t *font(hb_ft_font_create(face->get_face(), nullptr));
             auto script = detail::_icu_script_to_script(text_item.script);
             auto language = detail::script_to_language(script);
+            MAPNIK_LOG_DEBUG(harfbuzz_shaper) << "RUN:[" << text_item.start << "," << text_item.end << "]"
+                                              << " LANGUAGE:" << hb_language_to_string(language)
+                                              << " SCRIPT:" << script << "(" << text_item.script << ") " << uscript_getShortName(text_item.script)
+                                              << " FONT:" << face->family_name();
             if (language != HB_LANGUAGE_INVALID)
             {
                 hb_buffer_set_language(buffer.get(), language); // set most common language for the run based script
