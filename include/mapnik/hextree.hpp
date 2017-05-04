@@ -246,7 +246,9 @@ public:
         }
         if (colors_ == 1)
         {
-            return pal_remap_[has_holes_?1:0];
+            if (pal_remap_.size() > 1)
+                return pal_remap_[has_holes_?1:0];
+            else return 0;
         }
 
         rgba_hash_table::iterator it = color_hashmap_.find(val);
@@ -358,7 +360,7 @@ private:
 
     void print_tree(node *r, int d=0, int id=0) const
     {
-        for (int i=0; i<d; i++)
+        for (int i=0; i<d; ++i)
         {
             printf("\t");
         }
