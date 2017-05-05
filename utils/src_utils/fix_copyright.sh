@@ -7,7 +7,7 @@ then
 fi
 
 YEAR=$1
-DIRECTORIES=( "include/mapnik" "src" "plugins/input" "demo/c++" "demo/viewer" )
+DIRECTORIES=( "include/mapnik" "src" "plugins/input" "demo/c++" "demo/viewer" "utils" "test" )
 
 SED="sed -i -e"
 COMMAND="s: \* Copyright (C) 20[0-9][0-9].*: \* Copyright (C) $YEAR Artem Pavlenko:g"
