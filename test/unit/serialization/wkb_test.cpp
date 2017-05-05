@@ -16,6 +16,7 @@
 #include <vector>
 #include <fstream>
 
+
 #if BOOST_VERSION >= 105800
 namespace  {
 
@@ -84,7 +85,7 @@ bool spatially_equal(mapnik::geometry::geometry<T> const& g0, mapnik::geometry::
 
 TEST_CASE("Well-known-geometries")
 {
-    SECTION("wkb")
+    SECTION("wkb+wkt")
     {
         std::string filename("test/unit/data/well-known-geometries.test");
         std::ifstream is(filename.c_str(),std::ios_base::in | std::ios_base::binary);
@@ -101,12 +102,16 @@ TEST_CASE("Well-known-geometries")
             mapnik::geometry::geometry<double> geom_0 = mapnik::geometry_utils::from_wkb(wkb.data(), wkb.size(), mapnik::wkbAuto);
             mapnik::geometry::geometry<double> geom_1 = mapnik::geometry_utils::from_twkb(twkb.data(), twkb.size());
             // compare WKTs as doubles
-            std::string wkt0, wkt1;
+            std::string wkt, wkt0, wkt1;
+            wkt = columns[0];
+            //wkt.erase(std::remove(wkt.begin(), wkt.end(), ' '), wkt.end());
+            // ^ we can't use this approach because spaces are part of format e.g POINT(100 200)
             REQUIRE(mapnik::util::to_wkt(wkt0, geom_0));
             REQUIRE(mapnik::util::to_wkt(wkt1, geom_1));
             if (!mapnik::geometry::is_empty(geom_0) && !mapnik::geometry::is_empty(geom_1))
             {
                 REQUIRE(wkt0 == wkt1);
+                REQUIRE(wkt0 == wkt); // WKT round-trip
                 // compare spatially (NOTE: GeometryCollection comparison also enforces strict order)
 #if BOOST_VERSION >= 105800
                 REQUIRE(spatially_equal(geom_0, geom_1));
