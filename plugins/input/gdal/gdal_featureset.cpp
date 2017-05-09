@@ -187,16 +187,6 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     int width = end_x - x_off;
     int height = end_y - y_off;
 
-    // don't process almost invisible data
-    if (box.width() < 0.5)
-    {
-        width = 0;
-    }
-    if (box.height() < 0.5)
-    {
-        height = 0;
-    }
-
     //calculate actual box2d of returned raster
     box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
     intersect = t.backward(feature_raster_extent);
