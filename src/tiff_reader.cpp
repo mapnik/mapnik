@@ -257,10 +257,10 @@ void tiff_reader<T>::init()
     TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photometric_);
     TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &bands_);
 
-    MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_;
-    MAPNIK_LOG_DEBUG(tiff_reader) << "sample format: " << sample_format_;
-    MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_;
-    MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_ ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "sample format: " << sample_format_ ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_ ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_ ;
 
     TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
     TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
@@ -274,8 +274,8 @@ void tiff_reader<T>::init()
     {
         orientation = 1;
     }
-    MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation;
-
+    MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "planar-config: " << planar_config_ ;
     is_tiled_ = TIFFIsTiled(tif);
 
     if (is_tiled_)
@@ -311,9 +311,9 @@ void tiff_reader<T>::init()
         if (TIFFGetField(tif, 33550, &count, &pixelscale) == 1 && count == 3
             && TIFFGetField(tif, 33922 , &count,  &tilepoint) == 1 && count == 6)
         {
-            MAPNIK_LOG_DEBUG(tiff_reader) << "PixelScale:" << pixelscale[0] << "," << pixelscale[1] << "," <<  pixelscale[2];
-            MAPNIK_LOG_DEBUG(tiff_reader) << "TilePoint:" << tilepoint[0] << "," << tilepoint[1] << "," << tilepoint[2];
-            MAPNIK_LOG_DEBUG(tiff_reader) << "          " << tilepoint[3] << "," << tilepoint[4] << "," << tilepoint[5];
+            MAPNIK_LOG_DEBUG(tiff_reader) << "PixelScale:" << pixelscale[0] << "," << pixelscale[1] << "," <<  pixelscale[2] ;
+            MAPNIK_LOG_DEBUG(tiff_reader) << "TilePoint:" << tilepoint[0] << "," << tilepoint[1] << "," << tilepoint[2] ;
+            MAPNIK_LOG_DEBUG(tiff_reader) << "          " << tilepoint[3] << "," << tilepoint[4] << "," << tilepoint[5] ;
 
             // assuming upper-left
             double lox = tilepoint[3];
@@ -321,7 +321,7 @@ void tiff_reader<T>::init()
             double hix = lox + pixelscale[0] * width_;
             double hiy = loy - pixelscale[1] * height_;
             bbox_.reset(box2d<double>(lox, loy, hix, hiy));
-            MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_;
+            MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_ ;
         }
 
     }
@@ -391,7 +391,7 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
     using pixel_type = typename image_type::pixel_type;
     if (read_method_ == tiled)
     {
-        image_type data(width,height);
+        image_type data(width, height);
         read_tiled<image_type>(x0, y0, data);
         return image_any(std::move(data));
     }
@@ -407,14 +407,52 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
             std::size_t start_x = x0;
             std::size_t end_x = std::min(x0 + width, width_);
             std::size_t element_size = sizeof(pixel_type);
+            MAPNIK_LOG_DEBUG(tiff_reader) << "SCANLINE SIZE=" << TIFFScanlineSize(tif);
             std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
-            const std::unique_ptr<pixel_type[]> scanline(new pixel_type[size_to_allocate]);
-            for  (std::size_t y = start_y; y < end_y; ++y)
+            std::unique_ptr<pixel_type[]> const scanline(new pixel_type[size_to_allocate]);
+            if (planar_config_ == PLANARCONFIG_CONTIG)
             {
-                if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                for  (std::size_t y = start_y; y < end_y; ++y)
                 {
-                    pixel_type * row = data.get_row(y - y0);
-                    std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                    // we have to read all scanlines sequentially from start_y
+                    // to be able to use scanline interface with compressed blocks.
+                    if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                    {
+                        pixel_type * row = data.get_row(y - y0);
+                        if (bands_ == 1)
+                        {
+                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                        }
+                        else if (size_to_allocate == bands_ * width_)
+                        {
+                            // bands_ > 1 => packed bands in grayscale image e.g an extra alpha channel.
+                            // Just pick first one for now.
+                            pixel_type * buf = scanline.get() + start_x * bands_;
+                            std::size_t x_index = 0;
+                            for (std::size_t j = 0; j < end_x * bands_; ++j)
+                            {
+                                if (x_index >= width) break;
+                                if (j % bands_ == 0)
+                                {
+                                    row[x_index++] = buf[j];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if (planar_config_ == PLANARCONFIG_SEPARATE)
+            {
+                for (std::size_t s = 0 ; s < bands_ ; ++s)
+                {
+                    for  (std::size_t y = start_y; y < end_y; ++y)
+                    {
+                        if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                        {
+                            pixel_type * row = data.get_row(y - y0);
+                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                        }
+                    }
                 }
             }
             return image_any(std::move(data));
@@ -639,28 +677,27 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
     }
 }
 
-
 template <typename T>
-void tiff_reader<T>::read_stripped(std::size_t x0,std::size_t y0,image_rgba8& image)
+void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, image_rgba8& image)
 {
     TIFF* tif = open(stream_);
     if (tif)
     {
-        image_rgba8 strip(width_,rows_per_strip_,false);
-        std::size_t width=image.width();
-        std::size_t height=image.height();
+        image_rgba8 strip(width_, rows_per_strip_, false);
+        std::size_t width = image.width();
+        std::size_t height = image.height();
 
-        std::size_t start_y=(y0/rows_per_strip_)*rows_per_strip_;
-        std::size_t end_y=std::min(y0+height, height_);
-        std::size_t tx0,tx1,ty0,ty1;
+        std::size_t start_y = (y0 / rows_per_strip_) * rows_per_strip_;
+        std::size_t end_y = std::min(y0 + height, height_);
+        std::size_t tx0, tx1, ty0, ty1;
 
-        tx0=x0;
-        tx1=std::min(width+x0,width_);
+        tx0 = x0;
+        tx1 = std::min(width + x0, width_);
         std::size_t row = 0;
-        for (std::size_t y=start_y; y < end_y; y+=rows_per_strip_)
+        for (std::size_t y = start_y; y < end_y; y += rows_per_strip_)
         {
-            ty0 = std::max(y0,y)-y;
-            ty1 = std::min(end_y,y+rows_per_strip_)-y;
+            ty0 = std::max(y0, y) - y;
+            ty1 = std::min(end_y, y + rows_per_strip_) - y;
 
             if (!TIFFReadRGBAStrip(tif,y,strip.data()))
             {
@@ -670,7 +707,7 @@ void tiff_reader<T>::read_stripped(std::size_t x0,std::size_t y0,image_rgba8& im
             // This is in reverse because the TIFFReadRGBAStrip reads inverted
             for (std::size_t ty = ty1; ty > ty0; --ty)
             {
-                image.set_row(row,tx0-x0,tx1-x0,&strip.data()[(ty-1)*width_+tx0]);
+                image.set_row(row, tx0 - x0, tx1 - x0, &strip.data()[(ty - 1) * width_ + tx0]);
                 ++row;
             }
         }
