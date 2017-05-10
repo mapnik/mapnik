@@ -133,6 +133,7 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
 
     // create a scaling matrix
     agg::trans_affine img_mtx;
+    img_mtx *= agg::trans_affine_translation(x_off_f, y_off_f);
     img_mtx /= agg::trans_affine_scaling(image_ratio_x, image_ratio_y);
 
     // create a linear interpolator for our scaling matrix
@@ -141,11 +142,10 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     double scaled_width = target.width();
     double scaled_height = target.height();
     ras.reset();
-    ras.move_to_d(x_off_f,                y_off_f);
-    ras.line_to_d(x_off_f + scaled_width, y_off_f);
-    ras.line_to_d(x_off_f + scaled_width, y_off_f + scaled_height);
-    ras.line_to_d(x_off_f,                y_off_f + scaled_height);
-
+    ras.move_to_d(0.0, 0.0);
+    ras.line_to_d(scaled_width, 0.0);
+    ras.line_to_d(scaled_width, scaled_height);
+    ras.line_to_d(0.0, scaled_height);
     if (scaling_method == SCALING_NEAR)
     {
         using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_filter;
