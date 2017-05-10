@@ -216,7 +216,8 @@ void render_raster_symbolizer(raster_symbolizer const& sym,
     {
         box2d<double> target_ext = box2d<double>(source->ext_);
         box2d<double> target_query_ext = box2d<double>(source->query_ext_);
-        if (!prj_trans.equal()) {
+        if (!prj_trans.equal())
+        {
             prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
             prj_trans.backward(target_query_ext, PROJ_ENVELOPE_POINTS);
         }
