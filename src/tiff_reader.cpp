@@ -486,7 +486,8 @@ struct tiff_reader_traits
     using pixel_type = typename image_type::pixel_type;
     static bool read_tile(TIFF * tif, std::size_t x, std::size_t y, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
-        return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, tile_width * tile_height * sizeof(pixel_type)) != -1);
+        std::uint32_t tile_size = TIFFTileSize(tif);
+        return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x, y, 0, 0), buf, tile_size) != -1);
     }
 };
 
@@ -643,7 +644,9 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
     TIFF* tif = open(stream_);
     if (tif)
     {
-        std::unique_ptr<pixel_type[]> buf(new pixel_type[tile_width_*tile_height_]);
+        std::uint32_t tile_size = TIFFTileSize(tif);
+        assert(tile_size == bands_ * tile_width_ * tile_height_);
+        std::unique_ptr<pixel_type[]> tile(new pixel_type[tile_size]);
         std::size_t width = image.width();
         std::size_t height = image.height();
         std::size_t start_y = (y0 / tile_height_) * tile_height_;
@@ -660,17 +663,25 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
 
             for (std::size_t x = start_x; x < end_x; x += tile_width_)
             {
-                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_, tile_height_))
+                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, tile.get(), tile_width_, tile_height_))
                 {
                     MAPNIK_LOG_DEBUG(tiff_reader) <<  "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
                     break;
                 }
+                if (bands_ > 1)
+                {
+                    std::uint32_t size = tile_width_ * tile_height_;
+                    for (std::uint32_t n = 0; n < size; ++n)
+                    {
+                        tile[n] = tile[n * bands_];
+                    }
+                }
                 std::size_t tx0 = std::max(x0, x);
                 std::size_t tx1 = std::min(width + x0, x + tile_width_);
-                std::size_t row = y + ty0 - y0;
-                for (std::size_t ty = ty0; ty < ty1; ++ty, ++row)
+                std::size_t row_index = y + ty0 - y0;
+                for (std::size_t ty = ty0; ty < ty1; ++ty, ++row_index)
                 {
-                    image.set_row(row, tx0 - x0, tx1 - x0, &buf[ty * tile_width_ + tx0 - x]);
+                    image.set_row(row_index, tx0 - x0, tx1 - x0, &tile[ty * tile_width_ + tx0 - x]);
                 }
             }
         }
