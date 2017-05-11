@@ -68,7 +68,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
 #endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (! file) throw datasource_exception("missing <file> parameter");
+    if (!file) throw datasource_exception("missing <file> parameter");
 
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
