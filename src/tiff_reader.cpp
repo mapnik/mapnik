@@ -271,7 +271,6 @@ void tiff_reader<T>::init()
 
     TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar_config_);
     TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression_ );
-    TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_);
 
     std::uint16_t orientation;
     if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &orientation) == 0)
@@ -289,7 +288,7 @@ void tiff_reader<T>::init()
         MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is tiled";
         read_method_ = tiled;
     }
-    else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+    else if (TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_) != 0)
     {
         MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is stripped";
         read_method_ = stripped;
@@ -684,7 +683,7 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
         std::size_t end_x = ((x0 + width) / tile_width_ + 1) * tile_width_;
         end_y = std::min(end_y, height_);
         end_x = std::min(end_x, width_);
-
+        bool pick_first_band = (bands_ > 1) && (tile_size / (width * height * sizeof(pixel_type)) == bands_);
         for (std::size_t y = start_y; y < end_y; y += tile_height_)
         {
             std::size_t ty0 = std::max(y0, y) - y;
@@ -697,7 +696,7 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
                     MAPNIK_LOG_DEBUG(tiff_reader) <<  "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
                     break;
                 }
-                if (bands_ > 1)
+                if (pick_first_band)
                 {
                     std::uint32_t size = tile_width_ * tile_height_;
                     for (std::uint32_t n = 0; n < size; ++n)
@@ -722,7 +721,6 @@ template <typename ImageData>
 void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & image)
 {
     using pixel_type = typename detail::tiff_reader_traits<ImageData>::pixel_type;
-
     TIFF* tif = open(stream_);
     if (tif)
     {
@@ -738,6 +736,7 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
         tx0 = x0;
         tx1 = std::min(width + x0, width_);
         std::size_t row = 0;
+        bool pick_first_band = (bands_ > 1) && (strip_size / (width_ * rows_per_strip_ * sizeof(pixel_type)) == bands_);
         for (std::size_t y = start_y; y < end_y; y += rows_per_strip_)
         {
             ty0 = std::max(y0, y) - y;
@@ -748,7 +747,7 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
                 MAPNIK_LOG_DEBUG(tiff_reader) << "TIFFRead(Encoded|RGBA)Strip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
             }
-            if (bands_ > 1) // pick first band by default
+            if (pick_first_band)
             {
                 std::uint32_t size = width_ * rows_per_strip_;
                 for (std::uint32_t n = 0; n < size; ++n)
