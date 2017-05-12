@@ -6,6 +6,13 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.x
+
+#### Summary
+
+- Fixed problems with high levels of overzooming in the GDAL and raster plugin where data would be slightly offset
+- High levels of overzooming on raster data no longer results in the return of a transparent image.
+
 ## 3.0.13
 
 Released: February 8, 2017
