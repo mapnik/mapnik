@@ -96,6 +96,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                     int end_y = static_cast<int>(std::ceil(ext.maxy()));
 
                     // clip to available data
+                    if (x_off >= image_width) x_off = image_width - 1;
+                    if (y_off >= image_width) y_off = image_width - 1;
                     if (x_off < 0) x_off = 0;
                     if (y_off < 0) y_off = 0;
                     if (end_x > image_width)  end_x = image_width;
@@ -103,12 +105,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                     int width = end_x - x_off;
                     int height = end_y - y_off;
-                    if (width < 1) {
-                        width = 1;
-                    }
-                    if (height < 1) {
-                        height = 1;
-                    }
+                    if (width < 1) width = 1;
+                    if (height < 1) height = 1;
 
                     // calculate actual box2d of returned raster
                     box2d<double> feature_raster_extent(rem.minx() + x_off,
