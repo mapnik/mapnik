@@ -399,12 +399,12 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
         return image_any(std::move(data));
     }
     // TODO: temp disable and default to `scanline` method for stripped images.
-    //else if (read_method_ == stripped)
-    //{
-    //    image_type data(width, height);
-    //    read_stripped<image_type>(x0, y0, data);
-    //   return image_any(std::move(data));
-    //}
+    else if (read_method_ == stripped)
+    {
+        image_type data(width, height);
+        read_stripped<image_type>(x0, y0, data);
+        return image_any(std::move(data));
+    }
     else
     {
         TIFF* tif = open(stream_);
@@ -501,10 +501,9 @@ struct tiff_reader_traits
         return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x, y, 0, 0), buf, tile_size) != -1);
     }
 
-    static bool read_strip(TIFF * tif, std::size_t y, pixel_type * buf)
+    static bool read_strip(TIFF * tif, std::size_t y, std::size_t rows_per_strip, std::size_t strip_width, pixel_type * buf)
     {
-        std::uint32_t strip_size = TIFFStripSize(tif);
-        return (TIFFReadEncodedStrip(tif, y, buf, strip_size) != -1);
+        return (TIFFReadEncodedStrip(tif, y/rows_per_strip, buf, -1) != -1);
     }
 };
 
@@ -527,10 +526,15 @@ struct tiff_reader_traits<image_rgba8>
         return false;
     }
 
-    static bool read_strip(TIFF * tif, std::size_t y, pixel_type * buf)
+    static bool read_strip(TIFF * tif, std::size_t y, std::size_t rows_per_strip, std::size_t strip_width, pixel_type * buf)
     {
         if (TIFFReadRGBAStrip(tif, y, buf) != -1)
         {
+            std::uint32_t strip_size = TIFFStripSize(tif);
+            for (std::size_t y = 0; y < rows_per_strip/2; ++y)
+            {
+                std::swap_ranges(buf + y * strip_width, buf + (y + 1) * strip_width, buf + (rows_per_strip - y - 1) * strip_width);
+            }
             return true;
         }
         return false;
@@ -698,7 +702,7 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
                 }
                 if (pick_first_band)
                 {
-                    std::uint32_t size = tile_width_ * tile_height_;
+                    std::uint32_t size = tile_width_ * tile_height_ * sizeof(pixel_type);
                     for (std::uint32_t n = 0; n < size; ++n)
                     {
                         tile[n] = tile[n * bands_];
@@ -737,29 +741,28 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
         tx1 = std::min(width + x0, width_);
         std::size_t row = 0;
         bool pick_first_band = (bands_ > 1) && (strip_size / (width_ * rows_per_strip_ * sizeof(pixel_type)) == bands_);
+
         for (std::size_t y = start_y; y < end_y; y += rows_per_strip_)
         {
             ty0 = std::max(y0, y) - y;
             ty1 = std::min(end_y, y + rows_per_strip_) - y;
 
-            if (!detail::tiff_reader_traits<ImageData>::read_strip(tif, y, strip.get()))
+            if (!detail::tiff_reader_traits<ImageData>::read_strip(tif, y, rows_per_strip_, width_, strip.get()))
             {
                 MAPNIK_LOG_DEBUG(tiff_reader) << "TIFFRead(Encoded|RGBA)Strip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
             }
             if (pick_first_band)
             {
-                std::uint32_t size = width_ * rows_per_strip_;
+                std::uint32_t size = width_ * rows_per_strip_ * sizeof(pixel_type);
                 for (std::uint32_t n = 0; n < size; ++n)
                 {
                     strip[n] = strip[bands_ * n];
                 }
             }
-            // This is in reverse because the TIFFRead(RGBA|Encoded)Strip reads inverted
-            for (std::size_t ty = ty1; ty > ty0; --ty)
-                //for (std::size_t ty = ty0; ty < ty1; ++ty)
+            for (std::size_t ty = ty0; ty < ty1; ++ty)
             {
-                image.set_row(row++, tx0 - x0, tx1 - x0, &strip[(ty - 1) * width_ + tx0]);
+                image.set_row(row++, tx0 - x0, tx1 - x0, &strip[ty * width_ + tx0]);
             }
         }
     }
