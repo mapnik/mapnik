@@ -117,10 +117,6 @@ Image generate_test_image()
 template <typename Image1, typename Image2>
 bool identical(Image1 const& im1, Image2 const& im2)
 {
-    std::cerr << "gotcha! Image1 w/h" << im1.width()  << ":" << im1.height()
-              << " Image2 w/h" << im2.width()  << ":" << im2.height()
-              << std::endl;
-
     if ((im1.width() != im2.width()) || (im1.height() != im2.height()))
         return false;
 
@@ -128,84 +124,57 @@ bool identical(Image1 const& im1, Image2 const& im2)
     {
         for (std::size_t j = 0; j < im1.height(); ++j)
         {
-            if (im1(i,j) != im2(i,j))
-            {
-                std::cerr << "FAIL at (" << i << "," << j << ") " << int(im1(i,j)) << "<>" << int(im2(i,j)) << std::endl;
-                //mapnik::save_to_file(im1, "/tmp/image-fail-1.tif");
-                //mapnik::save_to_file(im2, "/tmp/image-fail-2.tif", "tiff");
-                return false;
-            }
+            if (im1(i,j) != im2(i,j)) return false;
         }
     }
     return true;
 }
+
+template <typename Image>
+void test_tiff_reader(std::string const& pattern)
+{
+    // generate expected image (rgba8 or gray8)
+    auto im = generate_test_image<Image>();
+
+    for (auto const& path : mapnik::util::list_directory("test/data/tiff/"))
+    {
+        if (boost::iends_with(path,".tif")
+            && boost::istarts_with(mapnik::util::basename(path), pattern))
+        {
+            mapnik::tiff_reader<std::filebuf> tiff_reader(path);
+            auto width = tiff_reader.width();
+            auto height = tiff_reader.height();
+            {
+                // whole image
+                auto tiff = tiff_reader.read(0, 0, width, height);
+                CHECK(tiff.is<Image>());
+                auto im2 = tiff.get<Image>();
+                REQUIRE(identical(im, im2));
+            }
+            {
+                // portion
+                auto tiff = tiff_reader.read(11, 13, width - 11, height - 13);
+                CHECK(tiff.is<Image>());
+                auto im2 = tiff.get<Image>();
+                auto view = mapnik::image_view_rgba8(11, 13, width, height, im);
+                REQUIRE(identical(view, im2));
+            }
+        }
+    }
+}
+
 }
 
 TEST_CASE("tiff io")
 {
-    SECTION("tiff-reader rgb(a)8")
+    SECTION("tiff-reader rgb8+rgba8")
     {
-        // generate expected rgba8 image
-        auto im = generate_test_image<mapnik::image_rgba8>();
-
-        for (auto const& path : mapnik::util::list_directory("test/data/tiff/"))
-        {
-            if (boost::iends_with(path,".tif")
-                && boost::istarts_with(mapnik::util::basename(path), "tiff_rgb"))
-            {
-                mapnik::tiff_reader<std::filebuf> tiff_reader(path);
-                auto width = tiff_reader.width();
-                auto height = tiff_reader.height();
-                {
-                    // read whole image
-                    auto tiff = tiff_reader.read(0, 0, width, height);
-                    CHECK(tiff.is<mapnik::image_rgba8>());
-                    auto im2 = tiff.get<mapnik::image_rgba8>();
-                    REQUIRE(identical(im, im2));
-                }
-                {
-                    // read a portion
-                    auto tiff = tiff_reader.read(11, 13, width - 11, height - 13);
-                    CHECK(tiff.is<mapnik::image_rgba8>());
-                    auto im2 = tiff.get<mapnik::image_rgba8>();
-                    auto view = mapnik::image_view_rgba8(11, 13, width, height, im);
-                    REQUIRE(identical(view, im2));
-                }
-            }
-        }
+        test_tiff_reader<mapnik::image_rgba8>("tiff_rgb");
     }
 
     SECTION("tiff-reader gray8")
     {
-        // generate expected gray8 image
-        auto im = generate_test_image<mapnik::image_gray8>();
-
-        for (auto const& path : mapnik::util::list_directory("test/data/tiff/"))
-        {
-            if (boost::iends_with(path,".tif")
-                && boost::istarts_with(mapnik::util::basename(path), "tiff_gray"))
-            {
-                std::cerr << path << std::endl;
-                mapnik::tiff_reader<std::filebuf> tiff_reader(path);
-                auto width = tiff_reader.width();
-                auto height = tiff_reader.height();
-                {
-                    // read whole image
-                    auto tiff = tiff_reader.read(0, 0, width, height);
-                    CHECK(tiff.is<mapnik::image_gray8>());
-                    auto im2 = tiff.get<mapnik::image_gray8>();
-                    REQUIRE(identical(im, im2));
-                }
-                {
-                    // read a portion
-                    auto tiff = tiff_reader.read(11, 13, width - 11, height - 13);
-                    CHECK(tiff.is<mapnik::image_gray8>());
-                    auto im2 = tiff.get<mapnik::image_gray8>();
-                    auto view = mapnik::image_view_gray8(11, 13, width, height, im);
-                    REQUIRE(identical(view, im2));
-                }
-            }
-        }
+        test_tiff_reader<mapnik::image_rgba8>("tiff_gray");
     }
 
     SECTION("scan rgb8 striped")
