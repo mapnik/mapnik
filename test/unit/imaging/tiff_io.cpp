@@ -156,7 +156,7 @@ void test_tiff_reader(std::string const& pattern)
                 auto tiff = tiff_reader.read(11, 13, width - 11, height - 13);
                 CHECK(tiff.is<Image>());
                 auto im2 = tiff.get<Image>();
-                auto view = mapnik::image_view_rgba8(11, 13, width, height, im);
+                auto view = mapnik::image_view<Image>(11, 13, width, height, im);
                 REQUIRE(identical(view, im2));
             }
         }
@@ -174,7 +174,7 @@ TEST_CASE("tiff io")
 
     SECTION("tiff-reader gray8")
     {
-        test_tiff_reader<mapnik::image_rgba8>("tiff_gray");
+        test_tiff_reader<mapnik::image_gray8>("tiff_gray");
     }
 
     SECTION("scan rgb8 striped")
