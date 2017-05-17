@@ -530,7 +530,6 @@ struct tiff_reader_traits<image_rgba8>
     {
         if (TIFFReadRGBAStrip(tif, y, buf) != -1)
         {
-            std::uint32_t strip_size = TIFFStripSize(tif);
             for (std::size_t y = 0; y < rows_per_strip/2; ++y)
             {
                 std::swap_ranges(buf + y * strip_width, buf + (y + 1) * strip_width, buf + (rows_per_strip - y - 1) * strip_width);
@@ -687,7 +686,7 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
         std::size_t end_x = ((x0 + width) / tile_width_ + 1) * tile_width_;
         end_y = std::min(end_y, height_);
         end_x = std::min(end_x, width_);
-        bool pick_first_band = (bands_ > 1) && (tile_size / (width * height * sizeof(pixel_type)) == bands_);
+        bool pick_first_band = (bands_ > 1) && (tile_size / (tile_width_ * tile_height_ * sizeof(pixel_type)) == bands_);
         for (std::size_t y = start_y; y < end_y; y += tile_height_)
         {
             std::size_t ty0 = std::max(y0, y) - y;
@@ -741,7 +740,6 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
         tx1 = std::min(width + x0, width_);
         std::size_t row = 0;
         bool pick_first_band = (bands_ > 1) && (strip_size / (width_ * rows_per_strip_ * sizeof(pixel_type)) == bands_);
-
         for (std::size_t y = start_y; y < end_y; y += rows_per_strip_)
         {
             ty0 = std::max(y0, y) - y;
