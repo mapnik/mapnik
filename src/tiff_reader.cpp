@@ -672,7 +672,6 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
     if (tif)
     {
         std::uint32_t tile_size = TIFFTileSize(tif);
-        assert(tile_size == bands_ * tile_width_ * tile_height_);
         std::unique_ptr<pixel_type[]> tile(new pixel_type[tile_size]);
         std::size_t width = image.width();
         std::size_t height = image.height();
