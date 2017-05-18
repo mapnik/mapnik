@@ -497,6 +497,7 @@ struct tiff_reader_traits
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
 
+    constexpr static bool reverse = false;
     static bool read_tile(TIFF * tif, std::size_t x, std::size_t y, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
         std::uint32_t tile_size = TIFFTileSize(tif);
@@ -513,8 +514,9 @@ struct tiff_reader_traits
 template <>
 struct tiff_reader_traits<image_rgba8>
 {
+    using image_type = image_rgba8;
     using pixel_type = std::uint32_t;
-
+    constexpr static bool reverse = true;
     static bool read_tile(TIFF * tif, std::size_t x0, std::size_t y0, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
         if (TIFFReadRGBATile(tif, x0, y0, buf) != -1)
@@ -530,16 +532,7 @@ struct tiff_reader_traits<image_rgba8>
 
     static bool read_strip(TIFF * tif, std::size_t y, std::size_t rows_per_strip, std::size_t strip_width, pixel_type * buf)
     {
-        if (TIFFReadRGBAStrip(tif, y, buf) != -1)
-        {
-            /*
-            for (std::size_t y = 0; y < rows_per_strip/2; ++y)
-            {
-                std::swap_ranges(buf + y * strip_width, buf + (y + 1) * strip_width, buf + (rows_per_strip - y - 1) * strip_width);
-            }*/
-            return true;
-        }
-        return false;
+        return (TIFFReadRGBAStrip(tif, y, buf) != 0);
     }
 };
 
@@ -809,9 +802,22 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
                     strip[n] = strip[bands_ * n];
                 }
             }
-            for (std::size_t ty = ty0; ty < ty1; ++ty)
+
+            if (detail::tiff_reader_traits<ImageData>::reverse)
             {
-                image.set_row(row++, tx0 - x0, tx1 - x0, &strip[ty * width_ + tx0]);
+                std::size_t num_rows = std::min(end_y - y, static_cast<std::size_t>(rows_per_strip_));
+                for (std::size_t ty = ty0; ty < ty1; ++ty)
+                {
+                    // This is in reverse because the TIFFReadRGBAStrip reads are inverted
+                    image.set_row(row++, tx0 - x0, tx1 - x0, &strip[(num_rows - ty - 1) * width_ + tx0]);
+                }
+            }
+            else
+            {
+                for (std::size_t ty = ty0; ty < ty1; ++ty)
+                {
+                    image.set_row(row++, tx0 - x0, tx1 - x0, &strip[ty * width_ + tx0]);
+                }
             }
         }
     }
