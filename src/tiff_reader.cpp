@@ -517,15 +517,7 @@ struct tiff_reader_traits<image_rgba8>
     constexpr static bool reverse = true;
     static bool read_tile(TIFF * tif, std::size_t x0, std::size_t y0, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
-        if (TIFFReadRGBATile(tif, x0, y0, buf) != -1)
-        {
-            for (std::size_t y = 0; y < tile_height/2; ++y)
-            {
-                std::swap_ranges(buf + y * tile_width, buf + (y + 1) * tile_width, buf + (tile_height - y - 1) * tile_width);
-            }
-            return true;
-        }
-        return false;
+        return (TIFFReadRGBATile(tif, x0, y0, buf) != 0);
     }
 
     static bool read_strip(TIFF * tif, std::size_t y, std::size_t rows_per_strip, std::size_t strip_width, pixel_type * buf)
@@ -703,9 +695,21 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
                 std::size_t tx0 = std::max(x0, x);
                 std::size_t tx1 = std::min(width + x0, x + tile_width_);
                 std::size_t row_index = y + ty0 - y0;
-                for (std::size_t ty = ty0; ty < ty1; ++ty, ++row_index)
+
+                if (detail::tiff_reader_traits<ImageData>::reverse)
                 {
-                    image.set_row(row_index, tx0 - x0, tx1 - x0, &tile[ty * tile_width_ + tx0 - x]);
+                    for (std::size_t ty = ty0; ty < ty1; ++ty, ++row_index)
+                    {
+                        // This is in reverse because the TIFFReadRGBATile reads are inverted
+                        image.set_row(row_index, tx0 - x0, tx1 - x0, &tile[(tile_height_ - ty - 1) * tile_width_ + tx0 - x]);
+                    }
+                }
+                else
+                {
+                    for (std::size_t ty = ty0; ty < ty1; ++ty, ++row_index)
+                    {
+                        image.set_row(row_index, tx0 - x0, tx1 - x0, &tile[ty * tile_width_ + tx0 - x]);
+                    }
                 }
             }
         }
