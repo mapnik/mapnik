@@ -62,7 +62,7 @@ raster_datasource::raster_datasource(parameters const& params)
         filename_ = *file;
 
     multi_tiles_ = *params.get<mapnik::boolean_type>("multi", false);
-    tile_size_ = *params.get<mapnik::value_integer>("tile_size", 256);
+    tile_size_ = *params.get<mapnik::value_integer>("tile_size", 1024);
     tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
     boost::optional<std::string> format_from_filename = mapnik::type_from_filename(*file);

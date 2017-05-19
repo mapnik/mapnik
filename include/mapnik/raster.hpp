@@ -40,15 +40,27 @@ class raster : private util::noncopyable
 {
 public:
     box2d<double> ext_;
+    box2d<double> query_ext_;
     image_any data_;
     double filter_factor_;
     boost::optional<double> nodata_;
+    
+    template <typename ImageData>
+    raster(box2d<double> const& ext,
+           box2d<double> const& query_ext,
+           ImageData && data,
+           double filter_factor)
+        : ext_(ext),
+          query_ext_(query_ext),
+          data_(std::move(data)),
+          filter_factor_(filter_factor) {}
 
     template <typename ImageData>
     raster(box2d<double> const& ext,
            ImageData && data,
            double filter_factor)
         : ext_(ext),
+          query_ext_(ext),
           data_(std::move(data)),
           filter_factor_(filter_factor) {}
 
@@ -71,7 +83,6 @@ public:
     {
         filter_factor_ = factor;
     }
-
 };
 }
 
