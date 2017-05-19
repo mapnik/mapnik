@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -162,8 +162,12 @@ private:
     tiff_reader(const tiff_reader&);
     tiff_reader& operator=(const tiff_reader&);
     void init();
-    void read_generic(std::size_t x,std::size_t y,image_rgba8& image);
-    void read_stripped(std::size_t x,std::size_t y,image_rgba8& image);
+
+    template <typename ImageData>
+    void read_generic(std::size_t x,std::size_t y, ImageData & image);
+
+    template <typename ImageData>
+    void read_stripped(std::size_t x,std::size_t y, ImageData & image);
 
     template <typename ImageData>
     void read_tiled(std::size_t x,std::size_t y, ImageData & image);
@@ -257,25 +261,24 @@ void tiff_reader<T>::init()
     TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photometric_);
     TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &bands_);
 
-    MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_;
-    MAPNIK_LOG_DEBUG(tiff_reader) << "sample format: " << sample_format_;
-    MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_;
-    MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bits per sample: " << bps_ ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "sample format: " << sample_format_ ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "photometric: " << photometric_ ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "bands: " << bands_ ;
 
     TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width_);
     TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height_);
 
     TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &planar_config_);
     TIFFGetField(tif, TIFFTAG_COMPRESSION, &compression_ );
-    TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_);
 
     std::uint16_t orientation;
     if (TIFFGetField(tif, TIFFTAG_ORIENTATION, &orientation) == 0)
     {
         orientation = 1;
     }
-    MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation;
-
+    MAPNIK_LOG_DEBUG(tiff_reader) << "orientation: " << orientation ;
+    MAPNIK_LOG_DEBUG(tiff_reader) << "planar-config: " << planar_config_ ;
     is_tiled_ = TIFFIsTiled(tif);
 
     if (is_tiled_)
@@ -285,7 +288,7 @@ void tiff_reader<T>::init()
         MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is tiled";
         read_method_ = tiled;
     }
-    else if (TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rows_per_strip_)!=0)
+    else if (TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rows_per_strip_) != 0)
     {
         MAPNIK_LOG_DEBUG(tiff_reader) << "tiff is stripped";
         read_method_ = stripped;
@@ -311,9 +314,9 @@ void tiff_reader<T>::init()
         if (TIFFGetField(tif, 33550, &count, &pixelscale) == 1 && count == 3
             && TIFFGetField(tif, 33922 , &count,  &tilepoint) == 1 && count == 6)
         {
-            MAPNIK_LOG_DEBUG(tiff_reader) << "PixelScale:" << pixelscale[0] << "," << pixelscale[1] << "," <<  pixelscale[2];
-            MAPNIK_LOG_DEBUG(tiff_reader) << "TilePoint:" << tilepoint[0] << "," << tilepoint[1] << "," << tilepoint[2];
-            MAPNIK_LOG_DEBUG(tiff_reader) << "          " << tilepoint[3] << "," << tilepoint[4] << "," << tilepoint[5];
+            MAPNIK_LOG_DEBUG(tiff_reader) << "PixelScale:" << pixelscale[0] << "," << pixelscale[1] << "," <<  pixelscale[2] ;
+            MAPNIK_LOG_DEBUG(tiff_reader) << "TilePoint:" << tilepoint[0] << "," << tilepoint[1] << "," << tilepoint[2] ;
+            MAPNIK_LOG_DEBUG(tiff_reader) << "          " << tilepoint[3] << "," << tilepoint[4] << "," << tilepoint[5] ;
 
             // assuming upper-left
             double lox = tilepoint[3];
@@ -321,7 +324,7 @@ void tiff_reader<T>::init()
             double hix = lox + pixelscale[0] * width_;
             double hiy = loy - pixelscale[1] * height_;
             bbox_.reset(box2d<double>(lox, loy, hix, hiy));
-            MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_;
+            MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_ ;
         }
 
     }
@@ -391,8 +394,15 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
     using pixel_type = typename image_type::pixel_type;
     if (read_method_ == tiled)
     {
-        image_type data(width,height);
+        image_type data(width, height);
         read_tiled<image_type>(x0, y0, data);
+        return image_any(std::move(data));
+    }
+    // TODO: temp disable and default to `scanline` method for stripped images.
+    else if (read_method_ == stripped)
+    {
+        image_type data(width, height);
+        read_stripped<image_type>(x0, y0, data);
         return image_any(std::move(data));
     }
     else
@@ -407,14 +417,52 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
             std::size_t start_x = x0;
             std::size_t end_x = std::min(x0 + width, width_);
             std::size_t element_size = sizeof(pixel_type);
+            MAPNIK_LOG_DEBUG(tiff_reader) << "SCANLINE SIZE=" << TIFFScanlineSize(tif);
             std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1)/element_size;
-            const std::unique_ptr<pixel_type[]> scanline(new pixel_type[size_to_allocate]);
-            for  (std::size_t y = start_y; y < end_y; ++y)
+            std::unique_ptr<pixel_type[]> const scanline(new pixel_type[size_to_allocate]);
+            if (planar_config_ == PLANARCONFIG_CONTIG)
             {
-                if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                for  (std::size_t y = start_y; y < end_y; ++y)
                 {
-                    pixel_type * row = data.get_row(y - y0);
-                    std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                    // we have to read all scanlines sequentially from start_y
+                    // to be able to use scanline interface with compressed blocks.
+                    if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                    {
+                        pixel_type * row = data.get_row(y - y0);
+                        if (bands_ == 1)
+                        {
+                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                        }
+                        else if (size_to_allocate == bands_ * width_)
+                        {
+                            // bands_ > 1 => packed bands in grayscale image e.g an extra alpha channel.
+                            // Just pick first one for now.
+                            pixel_type * buf = scanline.get() + start_x * bands_;
+                            std::size_t x_index = 0;
+                            for (std::size_t j = 0; j < end_x * bands_; ++j)
+                            {
+                                if (x_index >= width) break;
+                                if (j % bands_ == 0)
+                                {
+                                    row[x_index++] = buf[j];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if (planar_config_ == PLANARCONFIG_SEPARATE)
+            {
+                for (std::size_t s = 0 ; s < bands_ ; ++s)
+                {
+                    for  (std::size_t y = start_y; y < end_y; ++y)
+                    {
+                        if (-1 != TIFFReadScanline(tif, scanline.get(), y) && (y >= y0))
+                        {
+                            pixel_type * row = data.get_row(y - y0);
+                            std::transform(scanline.get() + start_x, scanline.get() + end_x, row, [](pixel_type const& p) { return p;});
+                        }
+                    }
                 }
             }
             return image_any(std::move(data));
@@ -446,9 +494,17 @@ struct tiff_reader_traits
 {
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
+
+    constexpr static bool reverse = false;
     static bool read_tile(TIFF * tif, std::size_t x, std::size_t y, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
-        return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x,y,0,0), buf, tile_width * tile_height * sizeof(pixel_type)) != -1);
+        std::uint32_t tile_size = TIFFTileSize(tif);
+        return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x, y, 0, 0), buf, tile_size) != -1);
+    }
+
+    static bool read_strip(TIFF * tif, std::size_t y, std::size_t rows_per_strip, std::size_t strip_width, pixel_type * buf)
+    {
+        return (TIFFReadEncodedStrip(tif, y/rows_per_strip, buf, -1) != -1);
     }
 };
 
@@ -456,18 +512,17 @@ struct tiff_reader_traits
 template <>
 struct tiff_reader_traits<image_rgba8>
 {
+    using image_type = image_rgba8;
     using pixel_type = std::uint32_t;
+    constexpr static bool reverse = true;
     static bool read_tile(TIFF * tif, std::size_t x0, std::size_t y0, pixel_type* buf, std::size_t tile_width, std::size_t tile_height)
     {
-        if (TIFFReadRGBATile(tif, x0, y0, buf) != -1)
-        {
-            for (std::size_t y = 0; y < tile_height/2; ++y)
-            {
-                std::swap_ranges(buf + y * tile_width, buf + (y + 1) * tile_width, buf + (tile_height - y - 1) * tile_width);
-            }
-            return true;
-        }
-        return false;
+        return (TIFFReadRGBATile(tif, x0, y0, buf) != 0);
+    }
+
+    static bool read_strip(TIFF * tif, std::size_t y, std::size_t rows_per_strip, std::size_t strip_width, pixel_type * buf)
+    {
+        return (TIFFReadRGBAStrip(tif, y, buf) != 0);
     }
 };
 
@@ -591,7 +646,8 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(std::size_t, std::size_t, image_rgba8&)
+template <typename ImageData>
+void tiff_reader<T>::read_generic(std::size_t, std::size_t, ImageData &)
 {
     throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
 }
@@ -605,7 +661,8 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
     TIFF* tif = open(stream_);
     if (tif)
     {
-        std::unique_ptr<pixel_type[]> buf(new pixel_type[tile_width_*tile_height_]);
+        std::uint32_t tile_size = TIFFTileSize(tif);
+        std::unique_ptr<pixel_type[]> tile(new pixel_type[tile_size]);
         std::size_t width = image.width();
         std::size_t height = image.height();
         std::size_t start_y = (y0 / tile_height_) * tile_height_;
@@ -614,7 +671,7 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
         std::size_t end_x = ((x0 + width) / tile_width_ + 1) * tile_width_;
         end_y = std::min(end_y, height_);
         end_x = std::min(end_x, width_);
-
+        bool pick_first_band = (bands_ > 1) && (tile_size / (tile_width_ * tile_height_ * sizeof(pixel_type)) == bands_);
         for (std::size_t y = start_y; y < end_y; y += tile_height_)
         {
             std::size_t ty0 = std::max(y0, y) - y;
@@ -622,56 +679,98 @@ void tiff_reader<T>::read_tiled(std::size_t x0,std::size_t y0, ImageData & image
 
             for (std::size_t x = start_x; x < end_x; x += tile_width_)
             {
-                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, buf.get(), tile_width_, tile_height_))
+                if (!detail::tiff_reader_traits<ImageData>::read_tile(tif, x, y, tile.get(), tile_width_, tile_height_))
                 {
                     MAPNIK_LOG_DEBUG(tiff_reader) <<  "read_tile(...) failed at " << x << "/" << y << " for " << width_ << "/" << height_ << "\n";
                     break;
                 }
+                if (pick_first_band)
+                {
+                    std::uint32_t size = tile_width_ * tile_height_ * sizeof(pixel_type);
+                    for (std::uint32_t n = 0; n < size; ++n)
+                    {
+                        tile[n] = tile[n * bands_];
+                    }
+                }
                 std::size_t tx0 = std::max(x0, x);
                 std::size_t tx1 = std::min(width + x0, x + tile_width_);
-                std::size_t row = y + ty0 - y0;
-                for (std::size_t ty = ty0; ty < ty1; ++ty, ++row)
+                std::size_t row_index = y + ty0 - y0;
+
+                if (detail::tiff_reader_traits<ImageData>::reverse)
                 {
-                    image.set_row(row, tx0 - x0, tx1 - x0, &buf[ty * tile_width_ + tx0 - x]);
+                    for (std::size_t ty = ty0; ty < ty1; ++ty, ++row_index)
+                    {
+                        // This is in reverse because the TIFFReadRGBATile reads are inverted
+                        image.set_row(row_index, tx0 - x0, tx1 - x0, &tile[(tile_height_ - ty - 1) * tile_width_ + tx0 - x]);
+                    }
+                }
+                else
+                {
+                    for (std::size_t ty = ty0; ty < ty1; ++ty, ++row_index)
+                    {
+                        image.set_row(row_index, tx0 - x0, tx1 - x0, &tile[ty * tile_width_ + tx0 - x]);
+                    }
                 }
             }
         }
     }
 }
 
-
 template <typename T>
-void tiff_reader<T>::read_stripped(std::size_t x0,std::size_t y0,image_rgba8& image)
+template <typename ImageData>
+void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & image)
 {
+    using pixel_type = typename detail::tiff_reader_traits<ImageData>::pixel_type;
     TIFF* tif = open(stream_);
     if (tif)
     {
-        image_rgba8 strip(width_,rows_per_strip_,false);
-        std::size_t width=image.width();
-        std::size_t height=image.height();
+        std::uint32_t strip_size = TIFFStripSize(tif);
+        std::unique_ptr<pixel_type[]> strip(new pixel_type[strip_size]);
+        std::size_t width = image.width();
+        std::size_t height = image.height();
 
-        std::size_t start_y=(y0/rows_per_strip_)*rows_per_strip_;
-        std::size_t end_y=std::min(y0+height, height_);
-        std::size_t tx0,tx1,ty0,ty1;
+        std::size_t start_y = (y0 / rows_per_strip_) * rows_per_strip_;
+        std::size_t end_y = std::min(y0 + height, height_);
+        std::size_t tx0, tx1, ty0, ty1;
 
-        tx0=x0;
-        tx1=std::min(width+x0,width_);
+        tx0 = x0;
+        tx1 = std::min(width + x0, width_);
         std::size_t row = 0;
-        for (std::size_t y=start_y; y < end_y; y+=rows_per_strip_)
+        bool pick_first_band = (bands_ > 1) && (strip_size / (width_ * rows_per_strip_ * sizeof(pixel_type)) == bands_);
+        for (std::size_t y = start_y; y < end_y; y += rows_per_strip_)
         {
-            ty0 = std::max(y0,y)-y;
-            ty1 = std::min(end_y,y+rows_per_strip_)-y;
+            ty0 = std::max(y0, y) - y;
+            ty1 = std::min(end_y, y + rows_per_strip_) - y;
 
-            if (!TIFFReadRGBAStrip(tif,y,strip.data()))
+            if (!detail::tiff_reader_traits<ImageData>::read_strip(tif, y, rows_per_strip_, width_, strip.get()))
             {
-                MAPNIK_LOG_DEBUG(tiff_reader) << "TIFFReadRGBAStrip failed at " << y << " for " << width_ << "/" << height_ << "\n";
+                MAPNIK_LOG_DEBUG(tiff_reader) << "TIFFRead(Encoded|RGBA)Strip failed at " << y << " for " << width_ << "/" << height_ << "\n";
                 break;
             }
-            // This is in reverse because the TIFFReadRGBAStrip reads inverted
-            for (std::size_t ty = ty1; ty > ty0; --ty)
+            if (pick_first_band)
             {
-                image.set_row(row,tx0-x0,tx1-x0,&strip.data()[(ty-1)*width_+tx0]);
-                ++row;
+                std::uint32_t size = width_ * rows_per_strip_ * sizeof(pixel_type);
+                for (std::uint32_t n = 0; n < size; ++n)
+                {
+                    strip[n] = strip[bands_ * n];
+                }
+            }
+
+            if (detail::tiff_reader_traits<ImageData>::reverse)
+            {
+                std::size_t num_rows = std::min(end_y - y, static_cast<std::size_t>(rows_per_strip_));
+                for (std::size_t ty = ty0; ty < ty1; ++ty)
+                {
+                    // This is in reverse because the TIFFReadRGBAStrip reads are inverted
+                    image.set_row(row++, tx0 - x0, tx1 - x0, &strip[(num_rows - ty - 1) * width_ + tx0]);
+                }
+            }
+            else
+            {
+                for (std::size_t ty = ty0; ty < ty1; ++ty)
+                {
+                    image.set_row(row++, tx0 - x0, tx1 - x0, &strip[ty * width_ + tx0]);
+                }
             }
         }
     }
