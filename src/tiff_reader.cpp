@@ -303,7 +303,7 @@ void tiff_reader<T>::init()
         if (extrasamples > 0 &&
             sampleinfo[0] == EXTRASAMPLE_UNSPECIFIED)
         {
-            throw std::runtime_error("Unspecified provided for extra samples to tiff reader.");
+            throw image_reader_exception("Unspecified provided for extra samples to tiff reader.");
         }
     }
     // Try extracting bounding box from geoTIFF tags
@@ -558,7 +558,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -576,7 +576,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -598,7 +598,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -620,7 +620,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -649,7 +649,7 @@ template <typename T>
 template <typename ImageData>
 void tiff_reader<T>::read_generic(std::size_t, std::size_t, ImageData &)
 {
-    throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
+    throw image_reader_exception("tiff_reader: TODO - tiff is not stripped or tiled");
 }
 
 template <typename T>
