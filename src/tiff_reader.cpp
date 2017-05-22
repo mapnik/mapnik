@@ -113,11 +113,13 @@ struct tiff_io_traits
     using input_stream_type = std::istream;
 };
 
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
 template <>
 struct tiff_io_traits<boost::interprocess::ibufferstream>
 {
     using input_stream_type = boost::interprocess::ibufferstream;
 };
+#endif
 }
 
 template <typename T>
@@ -208,8 +210,11 @@ namespace
 
 image_reader* create_tiff_reader(std::string const& filename)
 {
-    //return new tiff_reader<std::filebuf>(filename);
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     return new tiff_reader<boost::interprocess::ibufferstream>(filename);
+#else
+    return new tiff_reader<std::filebuf>(filename);
+#endif
 }
 
 image_reader* create_tiff_reader2(char const * data, std::size_t size)
@@ -224,23 +229,29 @@ const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
 
 template <typename T>
 tiff_reader<T>::tiff_reader(std::string const& filename)
-    : source_(),
-      stream_(),//&source_),
-      tif_(nullptr),
-      read_method_(generic),
-      rows_per_strip_(0),
-      tile_width_(0),
-      tile_height_(0),
-      width_(0),
-      height_(0),
-      bps_(0),
-      sample_format_(SAMPLEFORMAT_UINT),
-      photometric_(0),
-      bands_(1),
-      planar_config_(PLANARCONFIG_CONTIG),
-      compression_(COMPRESSION_NONE),
-      has_alpha_(false),
-      is_tiled_(false)
+    :
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    stream_(),
+#else
+    source_(),
+    stream_(&source_),
+#endif
+
+    tif_(nullptr),
+    read_method_(generic),
+    rows_per_strip_(0),
+    tile_width_(0),
+    tile_height_(0),
+    width_(0),
+    height_(0),
+    bps_(0),
+    sample_format_(SAMPLEFORMAT_UINT),
+    photometric_(0),
+    bands_(1),
+    planar_config_(PLANARCONFIG_CONTIG),
+    compression_(COMPRESSION_NONE),
+    has_alpha_(false),
+    is_tiled_(false)
 {
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
