@@ -11,7 +11,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="3c6df04"
+MASON_VERSION="v0.10.0"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -84,10 +84,14 @@ export CPLUS_INCLUDE_PATH="${MASON_LINKED_ABS}/include"
 export LIBRARY_PATH="${MASON_LINKED_ABS}/lib"
 
 function make_config() {
+    CUSTOM_CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+    if [[ $(uname -s) == 'Darwin' ]]; then
+        CUSTOM_CXXFLAGS="${CUSTOM_CXXFLAGS} -mmacosx-version-min=10.8"
+    fi
     echo "
 CXX = '$CXX'
 CC = '$CC'
-CUSTOM_CXXFLAGS = '-D_GLIBCXX_USE_CXX11_ABI=0'
+CUSTOM_CXXFLAGS = '${CUSTOM_CXXFLAGS}'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
