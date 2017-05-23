@@ -42,7 +42,7 @@ extern "C"
 #include <memory>
 #include <fstream>
 
-namespace mapnik { namespace impl {
+namespace mapnik { namespace detail {
 
 static toff_t tiff_seek_proc(thandle_t handle, toff_t off, int whence)
 {
@@ -101,11 +101,6 @@ static int tiff_map_proc(thandle_t, tdata_t* , toff_t*)
 {
     return 0;
 }
-
-}
-
-namespace detail {
-
 
 template <typename T>
 struct tiff_io_traits
@@ -836,13 +831,13 @@ TIFF* tiff_reader<T>::open(std::istream & input)
     {
         tif_ = tiff_ptr(TIFFClientOpen("tiff_input_stream", "rcm",
                                        reinterpret_cast<thandle_t>(&input),
-                                       impl::tiff_read_proc,
-                                       impl::tiff_write_proc,
-                                       impl::tiff_seek_proc,
-                                       impl::tiff_close_proc,
-                                       impl::tiff_size_proc,
-                                       impl::tiff_map_proc,
-                                       impl::tiff_unmap_proc), tiff_closer());
+                                       detail::tiff_read_proc,
+                                       detail::tiff_write_proc,
+                                       detail::tiff_seek_proc,
+                                       detail::tiff_close_proc,
+                                       detail::tiff_size_proc,
+                                       detail::tiff_map_proc,
+                                       detail::tiff_unmap_proc), tiff_closer());
     }
     return tif_.get();
 }
