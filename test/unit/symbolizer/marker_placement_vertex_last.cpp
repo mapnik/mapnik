@@ -3,7 +3,7 @@
 
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/markers_placements/vertext_last.hpp>
+#include <mapnik/markers_placements/vertex_last.hpp>
 
 using namespace mapnik;
 
