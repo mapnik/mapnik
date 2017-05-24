@@ -41,42 +41,67 @@ public:
             return false;
         }
 
-        double x0, y0;
-        unsigned command0 = this->locator_.vertex(&x0, &y0);
+        geometry::point<double> p0;
+        geometry::point<double> p1;
+        geometry::point<double> p_next;
+        geometry::point<double> move_to;
+        unsigned cmd0 = SEG_END;
+        unsigned cmd1 = SEG_END;
+        unsigned cmd_next = SEG_END;
 
-        if (agg::is_stop(command0))
+        while ((cmd_next = this->locator_.vertex(&p_next.x, &p_next.y)) != SEG_END)
+        {
+            switch (cmd_next)
+            {
+                case SEG_MOVETO:
+                    move_to = p_next;
+                    p0 = p_next;
+                    cmd0 = cmd_next;
+                    break;
+                case SEG_LINETO:
+                    p1 = p0;
+                    cmd1 = cmd0;
+                    p0 = p_next;
+                    cmd0 = cmd_next;
+                    break;
+                case SEG_CLOSE:
+                    p1 = p0;
+                    cmd1 = cmd0;
+                    p0 = move_to;
+                    cmd0 = cmd_next;
+                    break;
+            }
+        }
+
+        // Empty geometry
+        if (cmd0 == SEG_END)
         {
             this->done_ = true;
             return false;
         }
 
-        double next_x, next_y;
-        double x1 = x0, y1 = y0;
-        unsigned command1 = command0;
+        // Last point
+        x = p0.x;
+        y = p0.y;
 
-        while (!agg::is_stop(command0 = this->locator_.vertex(&next_x, &next_y)))
+        // Line or polygon
+        if (cmd0 == SEG_LINETO || cmd0 == SEG_CLOSE)
         {
-            command1 = command0;
-            x1 = x0;
-            y1 = y0;
-            x0 = next_x;
-            y0 = next_y;
-        }
-
-        x = x0;
-        y = y0;
-
-        if (agg::is_line_to(command1))
-        {
-            angle = std::atan2(y0 - y1, x0 - x1);
+            angle = std::atan2(p0.y - p1.y, p0.x - p1.x);
             if (!this->set_direction(angle))
             {
+                this->done_ = true;
                 return false;
             }
+        }
+        else
+        {
+            angle = 0.0;
         }
 
         if (!this->push_to_detector(x, y, angle, ignore_placement))
         {
+            this->done_ = true;
             return false;
         }
 
