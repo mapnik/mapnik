@@ -40,13 +40,14 @@ namespace  mapnik { namespace svg {
     {
         using error_message_container = std::vector<std::string> ;
     public:
-        explicit svg_parser(svg_converter_type & path);
+        explicit svg_parser(svg_converter_type & path, bool strict = false);
         ~svg_parser();
         error_message_container const& error_messages() const;
         bool parse(std::string const& filename);
         bool parse_from_string(std::string const& svg);
         svg_converter_type & path_;
         bool is_defs_;
+        bool strict_;
         std::map<std::string, gradient> gradient_map_;
         std::pair<std::string, gradient> temporary_gradient_;
         error_message_container error_messages_;

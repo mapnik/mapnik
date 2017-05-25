@@ -141,7 +141,7 @@ struct visitor_create_marker
 } // end detail ns
 
 std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
-                                                         bool update_cache)
+                                                         bool update_cache, bool strict)
 {
     if (uri.empty())
     {
@@ -174,15 +174,15 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
             svg_path_adapter svg_path(stl_storage);
             svg_converter_type svg(svg_path, marker_path->attributes());
-            svg_parser p(svg);
+            svg_parser p(svg, strict);
 
-            if (!p.parse_from_string(known_svg_string))
+            if (!p.parse_from_string(known_svg_string) && !strict)
             {
                 for (auto const& msg : p.error_messages())
                 {
                     MAPNIK_LOG_ERROR(marker_cache) <<  "SVG PARSING ERROR:\"" << msg << "\"";
                 }
-                return std::make_shared<mapnik::marker const>(mapnik::marker_null());
+                //return std::make_shared<mapnik::marker const>(mapnik::marker_null());
             }
             //svg.arrange_orientations();
             double lox,loy,hix,hiy;
@@ -214,16 +214,16 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
-                svg_parser p(svg);
+                svg_parser p(svg, strict);
 
 
-                if (!p.parse(uri))
+                if (!p.parse(uri) && !strict)
                 {
                     for (auto const& msg : p.error_messages())
                     {
                         MAPNIK_LOG_ERROR(marker_cache) <<  "SVG PARSING ERROR:\"" << msg << "\"";
                     }
-                    return std::make_shared<mapnik::marker const>(mapnik::marker_null());
+                    //return std::make_shared<mapnik::marker const>(mapnik::marker_null());
                 }
                 //svg.arrange_orientations();
                 double lox,loy,hix,hiy;
