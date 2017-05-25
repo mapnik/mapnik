@@ -270,7 +270,7 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             else
             {
                 parser.path_.push_attr();
-                //parse_attr(parser, node);
+                parse_attr(parser, node);
                 if (parser.path_.display())
                 {
                     if (std::strcmp(name, "path") == 0)
