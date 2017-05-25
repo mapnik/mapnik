@@ -92,7 +92,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse(svg_name));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG::parse_from_string syntax error")
@@ -109,7 +109,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG::parse_from_string syntax error")
@@ -122,7 +122,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse(svg_name));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG parser color <fail>")
@@ -142,7 +142,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG - cope with erroneous geometries")
@@ -172,7 +172,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG parser double % <fail>")
@@ -190,7 +190,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG parser display=none")
@@ -612,7 +612,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse(svg_name));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG missing <gradient> id")
@@ -630,7 +630,7 @@ TEST_CASE("SVG parser") {
 
         test_parser p;
         REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->error_messages()) == join(expected_errors));
+        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
     }
 
     SECTION("SVG missing <gradient> inheritance")
