@@ -115,6 +115,15 @@ BOOST_SPIRIT_DEFINE(key, value, key_value, key_value_sequence_ordered);
 
 }}
 
+namespace {
+template <typename T>
+void on_error(T & error_messages, std::string const& msg, bool strict)
+{
+    if (strict) throw std::runtime_error(msg);
+    else error_messages.emplace_back(msg);
+}
+}
+
 template <typename T>
 mapnik::color parse_color(T & error_messages, const char* str)
 {
@@ -125,7 +134,7 @@ mapnik::color parse_color(T & error_messages, const char* str)
     }
     catch (mapnik::config_error const& ex)
     {
-        error_messages.emplace_back(ex.what());
+        on_error(error_messages, ex.what(), false);
     }
     return c;
 }
@@ -144,7 +153,7 @@ double parse_double(T & error_messages, const char* str)
     double val = 0.0;
     if (!parse(str, str + std::strlen(str), double_, val))
     {
-        error_messages.emplace_back("Failed to parse double: \"" + std::string(str) + "\"");
+        on_error(error_messages,"Failed to parse double: \"" + std::string(str) + "\"", false);
     }
     return val;
 }
@@ -178,12 +187,12 @@ double parse_svg_value(T & error_messages, const char* str, bool & is_percent)
                                x3::lit('%')[apply_percent]),
                           x3::space))
     {
-        error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) + "'");
+        on_error(error_messages,"Failed to parse SVG value: '" + std::string(str) + "'", false);
     }
     else if (cur != end)
     {
-        error_messages.emplace_back("Failed to parse SVG value: '" + std::string(str) +
-                                    "', trailing garbage: '" + cur + "'");
+        on_error(error_messages,"Failed to parse SVG value: '" + std::string(str) +
+                 "', trailing garbage: '" + cur + "'", false);
     }
     return val;
 }
@@ -198,7 +207,7 @@ bool parse_viewbox(T & error_messages, const char* str, V & viewbox)
                            x3::double_ > -x3::lit(',') >
                            x3::double_, x3::space, viewbox))
     {
-        error_messages.emplace_back("failed to parse SVG viewbox from " + std::string(str));
+        on_error(error_messages,"failed to parse SVG viewbox from " + std::string(str), false);
         return false;
     }
     return true;
@@ -261,7 +270,7 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             else
             {
                 parser.path_.push_attr();
-                parse_attr(parser, node);
+                //parse_attr(parser, node);
                 if (parser.path_.display())
                 {
                     if (std::strcmp(name, "path") == 0)
@@ -299,6 +308,7 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     else
                     {
                         //std::cerr << "unprocessed node  <--[" << node->name() << "]\n";
+                        on_error(parser.error_messages_, std::string("Unsupported element:\"") + node->name(), parser.strict_);
                     }
                 }
                 parser.path_.pop_attr();
@@ -387,7 +397,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             {
                 std::stringstream ss;
                 ss << "Failed to find gradient fill: " << id;
-                parser.error_messages_.push_back(ss.str());
+                on_error(parser.error_messages_, ss.str(), parser.strict_);
             }
         }
         else
@@ -424,7 +434,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             {
                 std::stringstream ss;
                 ss << "Failed to find gradient stroke: " << id;
-                parser.error_messages_.push_back(ss.str());
+                on_error(parser.error_messages_, ss.str(), parser.strict_);
             }
         }
         else
@@ -488,6 +498,10 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
     else if (std::strcmp(name,  "display") == 0  && std::strcmp(value,  "none") == 0)
     {
         parser.path_.display(false);
+    }
+    else
+    {
+        on_error(parser.error_messages_, std::string("Unsupported attribute:\"") + name, parser.strict_);
     }
 }
 
@@ -576,12 +590,12 @@ void parse_path(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 if (id_attr == nullptr) id_attr = node->first_attribute("id");
                 if (id_attr)
                 {
-                    parser.error_messages_.push_back(std::string("unable to parse invalid svg <path> with id '")
-                                                     + id_attr->value() + "'");
+                    on_error(parser.error_messages_, std::string("unable to parse invalid svg <path> with id '")
+                             + id_attr->value() + "'", parser.strict_);
                 }
                 else
                 {
-                    parser.error_messages_.push_back(std::string("unable to parse invalid svg <path>"));
+                    on_error(parser.error_messages_, std::string("unable to parse invalid svg <path>"), parser.strict_);
                 }
             }
             parser.path_.end_path();
@@ -597,7 +611,7 @@ void parse_polygon(svg_parser & parser, rapidxml::xml_node<char> const* node)
         parser.path_.begin_path();
         if (!mapnik::svg::parse_points(attr->value(), parser.path_))
         {
-            parser.error_messages_.push_back(std::string("Failed to parse <polygon> 'points'"));
+            on_error(parser.error_messages_, std::string("Failed to parse <polygon> 'points'"), parser.strict_);
         }
         parser.path_.close_subpath();
         parser.path_.end_path();
@@ -612,7 +626,7 @@ void parse_polyline(svg_parser & parser, rapidxml::xml_node<char> const* node)
         parser.path_.begin_path();
         if (!mapnik::svg::parse_points(attr->value(), parser.path_))
         {
-            parser.error_messages_.push_back(std::string("Failed to parse <polyline> 'points'"));
+            on_error(parser.error_messages_, std::string("Failed to parse <polyline> 'points'"), parser.strict_);
         }
         parser.path_.end_path();
     }
@@ -917,7 +931,7 @@ bool parse_common_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
             {
                 std::stringstream ss;
                 ss << "Failed to find linked gradient " << linkid;
-                parser.error_messages_.push_back(ss.str());
+                on_error(parser.error_messages_, ss.str(), parser.strict_);
                 return false;
             }
         }
@@ -981,8 +995,7 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     {
         fy = parse_svg_value(parser.error_messages_, attr->value(), has_percent);
     }
-    else
-        fy = cy;
+    else fy = cy;
 
     attr = node->first_attribute("r");
     if (attr != nullptr)
@@ -1049,9 +1062,10 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
 }
 
 svg_parser::svg_parser(svg_converter<svg_path_adapter,
-                       agg::pod_bvector<mapnik::svg::path_attributes> > & path)
+                       agg::pod_bvector<mapnik::svg::path_attributes> > & path, bool strict)
     : path_(path),
-      is_defs_(false) {}
+      is_defs_(false),
+      strict_(strict) {}
 
 svg_parser::~svg_parser() {}
 

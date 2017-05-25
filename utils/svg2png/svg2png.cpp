@@ -144,6 +144,7 @@ int main (int argc,char** argv)
 
     bool verbose = false;
     bool auto_open = false;
+    bool strict = false;
     int status = 0;
     std::vector<std::string> svg_files;
     mapnik::logger::instance().set_severity(mapnik::logger::error);
@@ -156,18 +157,19 @@ int main (int argc,char** argv)
             ("version,V","print version string")
             ("verbose,v","verbose output")
             ("open","automatically open the file after rendering (os x only)")
+            ("strict","enables strict SVG parsing")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
 
         po::positional_options_description p;
-        p.add("svg",-1);
+        p.add("svg", -1);
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
 
         if (vm.count("version"))
         {
-            std::clog <<"version " << MAPNIK_VERSION_STRING << std::endl;
+            std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
             return 1;
         }
 
@@ -185,6 +187,11 @@ int main (int argc,char** argv)
         if (vm.count("open"))
         {
             auto_open = true;
+        }
+
+        if (vm.count("strict"))
+        {
+            strict = true;
         }
 
         if (vm.count("svg"))
@@ -211,8 +218,7 @@ int main (int argc,char** argv)
             {
                 std::clog << "found: " << svg_name << "\n";
             }
-
-            std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+            std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false, strict);
             main_marker_visitor visitor(svg_name, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
