@@ -73,7 +73,6 @@ public:
     bool strict_;
     std::map<std::string, gradient> gradient_map_;
     std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> unresolved_gradient_map_;
-    std::pair<std::string, gradient> temporary_gradient_;
     error_handler err_handler_;
 
 };
