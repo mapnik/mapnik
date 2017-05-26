@@ -30,7 +30,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/util/noncopyable.hpp>
-
+#include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 // stl
 #include <map>
 
@@ -72,6 +72,7 @@ public:
     bool is_defs_;
     bool strict_;
     std::map<std::string, gradient> gradient_map_;
+    std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> unresolved_gradient_map_;
     std::pair<std::string, gradient> temporary_gradient_;
     error_handler err_handler_;
 

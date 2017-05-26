@@ -45,7 +45,6 @@
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #pragma GCC diagnostic pop
 
 #include <string>
@@ -243,10 +242,10 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             parse_radial_gradient(parser, node);
         }
-        else if (std::strcmp(name, "stop") == 0)
-        {
-            parse_gradient_stop(parser, node);
-        }
+        //else if (std::strcmp(name, "stop") == 0)
+        //{
+        //    parse_gradient_stop(parser, node);
+        //}
 
         if (!parser.is_defs_) // FIXME
         {
@@ -355,10 +354,10 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parser.is_defs_ = false;
         }
     }
-    else if (std::strcmp(name, "linearGradient") == 0 || std::strcmp(name, "radialGradient") == 0)
-    {
-        parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
-    }
+    //else if (std::strcmp(name, "linearGradient") == 0 || std::strcmp(name, "radialGradient") == 0)
+    //{
+    //    parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
+    //}
 }
 
 void parse_attr(svg_parser & parser, char const* name, char const* value )
@@ -382,6 +381,32 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             if (parser.gradient_map_.count(id) > 0)
             {
                 parser.path_.add_fill_gradient(parser.gradient_map_[id]);
+            }
+            else if (parser.unresolved_gradient_map_.count(id) > 0)
+            {
+                // try parsing again
+                auto const* gradient_node = parser.unresolved_gradient_map_[id];
+                traverse_tree(parser, gradient_node);
+
+                //if (std::strcmp(gradient_node->name(), "linearGradient"))
+                //{
+                //    parse_linear_gradient(parser, gradient_node);
+                //}
+                //else if (std::strcmp(gradient_node->name(), "radialGradient"))
+                //{
+                //    parse_radial_gradient(parser, gradient_node);
+                //}
+
+                if (parser.gradient_map_.count(id) > 0)
+                {
+                    parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
+                }
+                else
+                {
+                    std::stringstream ss;
+                    ss << "Failed to find gradient fill: " << id;
+                    parser.err_handler().on_error(ss.str());
+                }
             }
             else
             {
@@ -419,6 +444,31 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             if (parser.gradient_map_.count(id) > 0)
             {
                 parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
+            }
+            else if (parser.unresolved_gradient_map_.count(id) > 0)
+            {
+                // try parsing again
+                auto const* gradient_node = parser.unresolved_gradient_map_[id];
+                traverse_tree(parser, gradient_node);
+                //if (std::strcmp(gradient_node->name(), "linearGradient"))
+                //{
+                //    parse_linear_gradient(parser, gradient_node);
+                //}
+                //else if (std::strcmp(gradient_node->name(), "radialGradient"))
+                //{
+                //    parse_radial_gradient(parser, gradient_node);
+                //}
+
+                if (parser.gradient_map_.count(id) > 0)
+                {
+                    parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
+                }
+                else
+                {
+                    std::stringstream ss;
+                    ss << "Failed to find gradient stroke: " << id;
+                    parser.err_handler().on_error(ss.str());
+                }
             }
             else
             {
@@ -919,9 +969,9 @@ bool parse_common_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
             }
             else
             {
-                std::stringstream ss;
-                ss << "Failed to find linked gradient " << linkid;
-                parser.err_handler().on_error(ss.str());
+                // save node for later
+                std::cerr << "Unresolved Gradient: " << parser.temporary_gradient_.first << std::endl;
+                parser.unresolved_gradient_map_.emplace(parser.temporary_gradient_.first, node);
                 return false;
             }
         }
@@ -952,7 +1002,7 @@ bool parse_common_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
 
 void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    parse_common_gradient(parser, node);
+    if (!parse_common_gradient(parser, node)) return;
     double cx = 0.5;
     double cy = 0.5;
     double fx = 0.0;
@@ -999,16 +1049,24 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     }
 
     parser.temporary_gradient_.second.set_gradient_type(RADIAL);
-    parser.temporary_gradient_.second.set_control_points(fx,fy,cx,cy,r);
-    // add this here in case we have no end tag, will be replaced if we do
-    parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
+    parser.temporary_gradient_.second.set_control_points(fx, fy, cx, cy, r);
 
+    // parse stops
+    for (auto const* child = node->first_node();
+         child; child = child->next_sibling())
+    {
+        if (std::strcmp(child->name(), "stop") == 0)
+        {
+            parse_gradient_stop(parser, child);
+        }
+    }
+    parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
     //MAPNIK_LOG_DEBUG(svg_parser) << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r;
 }
 
 void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    parse_common_gradient(parser, node);
+    if (!parse_common_gradient(parser, node)) return;
 
     double x1 = 0.0;
     double x2 = 1.0;
@@ -1046,8 +1104,17 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     }
 
     parser.temporary_gradient_.second.set_gradient_type(LINEAR);
-    parser.temporary_gradient_.second.set_control_points(x1,y1,x2,y2);
-    // add this here in case we have no end tag, will be replaced if we do
+    parser.temporary_gradient_.second.set_control_points(x1, y1, x2, y2);
+
+    // parse stops
+    for (auto const* child = node->first_node();
+         child; child = child->next_sibling())
+    {
+        if (std::strcmp(child->name(), "stop") == 0)
+        {
+            parse_gradient_stop(parser, child);
+        }
+    }
     parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
 }
 
