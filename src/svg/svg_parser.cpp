@@ -241,11 +241,6 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             parse_radial_gradient(parser, node);
         }
-        //else if (std::strcmp(name, "stop") == 0)
-        //{
-        //    parse_gradient_stop(parser, node);
-        //}
-
         if (!parser.is_defs_) // FIXME
         {
             if (std::strcmp(name, "g") == 0)
@@ -382,16 +377,6 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
                 // try parsing again
                 auto const* gradient_node = parser.unresolved_gradient_map_[id];
                 traverse_tree(parser, gradient_node);
-
-                //if (std::strcmp(gradient_node->name(), "linearGradient"))
-                //{
-                //    parse_linear_gradient(parser, gradient_node);
-                //}
-                //else if (std::strcmp(gradient_node->name(), "radialGradient"))
-                //{
-                //    parse_radial_gradient(parser, gradient_node);
-                //}
-
                 if (parser.gradient_map_.count(id) > 0)
                 {
                     parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
@@ -445,15 +430,6 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
                 // try parsing again
                 auto const* gradient_node = parser.unresolved_gradient_map_[id];
                 traverse_tree(parser, gradient_node);
-                //if (std::strcmp(gradient_node->name(), "linearGradient"))
-                //{
-                //    parse_linear_gradient(parser, gradient_node);
-                //}
-                //else if (std::strcmp(gradient_node->name(), "radialGradient"))
-                //{
-                //    parse_radial_gradient(parser, gradient_node);
-                //}
-
                 if (parser.gradient_map_.count(id) > 0)
                 {
                     parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
