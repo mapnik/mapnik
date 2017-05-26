@@ -128,7 +128,7 @@ struct main_marker_visitor
     template <typename T>
     int operator() (T const&) const
     {
-        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
+        std::clog << "svg2png error: failed to process '" << svg_name_ << "'\n";
         return -1;
     }
 
@@ -156,8 +156,8 @@ int main (int argc,char** argv)
             ("help,h", "produce usage message")
             ("version,V","print version string")
             ("verbose,v","verbose output")
-            ("open","automatically open the file after rendering (os x only)")
-            ("strict","enables strict SVG parsing")
+            ("open,o","automatically open the file after rendering (os x only)")
+            ("strict,s","enables strict SVG parsing")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
 
