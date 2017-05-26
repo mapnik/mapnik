@@ -174,7 +174,7 @@ int main(int argc, char** argv)
     }
 #endif
 
-    mapnik::freetype_engine::register_fonts(vm["fonts"].as<std::string>(), true);
+    mapnik::freetype_engine::instance().register_fonts(vm["fonts"].as<std::string>(), true);
     mapnik::datasource_cache::instance().register_datasources(vm["plugins"].as<std::string>());
 
     boost::filesystem::path output_dir(vm["output-dir"].as<std::string>());

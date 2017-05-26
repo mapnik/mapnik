@@ -51,6 +51,7 @@ extern "C"
 
 namespace mapnik
 {
+template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
 
 freetype_engine::freetype_engine() {}
 freetype_engine::~freetype_engine() {}
@@ -382,12 +383,12 @@ face_ptr face_manager::get_face(std::string const& name)
     }
     else
     {
-        face_ptr face = freetype_engine::create_face(name,
+        face_ptr face = freetype_engine::instance().create_face(name,
                                                      library_,
                                                      font_file_mapping_,
                                                      font_memory_cache_,
-                                                     freetype_engine::get_mapping(),
-                                                     freetype_engine::get_cache());
+                                                     freetype_engine::instance().get_mapping(),
+                                                     freetype_engine::instance().get_cache());
         if (face)
         {
             face_cache_->emplace(name, face);
@@ -442,9 +443,9 @@ face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional
 }
 
 #ifdef MAPNIK_THREADSAFE
-std::mutex freetype_engine::mutex_;
+//std::mutex freetype_engine::mutex_;
 #endif
-freetype_engine::font_file_mapping_type freetype_engine::global_font_file_mapping_;
-freetype_engine::font_memory_cache_type freetype_engine::global_memory_fonts_;
+//freetype_engine::font_file_mapping_type freetype_engine::global_font_file_mapping_;
+//freetype_engine::font_memory_cache_type freetype_engine::global_memory_fonts_;
 
 }
