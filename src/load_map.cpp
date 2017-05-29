@@ -537,9 +537,9 @@ bool map_parser::parse_font(font_set & fset, xml_node const& f)
         else
         {
             found = freetype_engine::instance().can_open(face_name,
-                                          font_library_,
-                                          font_file_mapping_,
-                                          freetype_engine::instance().get_mapping());
+                                                         font_library_,
+                                                         font_file_mapping_,
+                                                         freetype_engine::instance().get_mapping());
             font_name_cache_.emplace(face_name,found);
         }
         if (found)
