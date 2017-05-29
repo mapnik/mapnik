@@ -53,9 +53,6 @@ namespace mapnik
 {
 template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
 
-freetype_engine::freetype_engine() {}
-freetype_engine::~freetype_engine() {}
-
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
     // only accept files that will be matched by freetype2's `figurefiletype()`

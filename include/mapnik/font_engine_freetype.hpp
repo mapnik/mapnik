@@ -85,14 +85,12 @@ public:
                          font_file_mapping_type const& global_font_file_mapping,
                          freetype_engine::font_memory_cache_type & global_memory_fonts);
     bool register_font_impl(std::string const& file_name,
-                                   font_library & libary,
-                                   font_file_mapping_type & font_file_mapping);
+                            font_library & libary,
+                            font_file_mapping_type & font_file_mapping);
     bool register_fonts_impl(std::string const& dir,
-                                    font_library & libary,
-                                    font_file_mapping_type & font_file_mapping,
-                                    bool recurse = false);
-    virtual ~freetype_engine();
-    freetype_engine();
+                             font_library & libary,
+                             font_file_mapping_type & font_file_mapping,
+                             bool recurse = false);
 private:
     bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
     bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
