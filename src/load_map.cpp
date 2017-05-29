@@ -84,7 +84,7 @@ using boost::optional;
 
 constexpr unsigned name2int(const char *str, int off = 0)
 {
-    return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ static_cast<unsigned>(str[off]);
+    return !str[off] ? 5381 : (name2int(str, off + 1) * 33) ^ static_cast<unsigned>(str[off]);
 }
 
 class map_parser : util::noncopyable
