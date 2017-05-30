@@ -26,8 +26,8 @@
 #include <mapnik/markers_placements/line.hpp>
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/markers_placements/interior.hpp>
-#include <mapnik/markers_placements/vertext_first.hpp>
-#include <mapnik/markers_placements/vertext_last.hpp>
+#include <mapnik/markers_placements/vertex_first.hpp>
+#include <mapnik/markers_placements/vertex_last.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 
 namespace mapnik

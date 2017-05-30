@@ -86,7 +86,7 @@ struct transform_path_adapter
         while (!ok)
         {
             command = geom_.vertex(x,y);
-            if (command == SEG_END)
+            if (command == SEG_END || command == SEG_CLOSE)
             {
                 return command;
             }
