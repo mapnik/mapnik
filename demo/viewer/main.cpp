@@ -48,7 +48,7 @@ int main( int argc, char **argv )
         {
             settings.setArrayIndex(index);
             QString font_dir = settings.value("dir").toString();
-            freetype_engine::register_fonts(font_dir.toStdString());
+            freetype_engine::instance().register_fonts(font_dir.toStdString());
         }
         settings.endArray();
 
