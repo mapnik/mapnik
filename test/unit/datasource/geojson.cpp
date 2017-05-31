@@ -32,6 +32,7 @@
 #include <mapnik/util/geometry_to_geojson.hpp>
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
+#include <locale>
 #include <algorithm>
 #include <boost/optional/optional_io.hpp>
 
