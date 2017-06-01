@@ -56,34 +56,48 @@ class MAPNIK_DECL freetype_engine : public singleton<freetype_engine, CreateUsin
                                     private util::noncopyable
 {
     friend class CreateUsingNew<freetype_engine>;
+    friend class Map;
 public:
     using font_file_mapping_type = std::map<std::string,std::pair<int,std::string>>;
     using font_memory_cache_type = std::map<std::string, std::pair<std::unique_ptr<char[]>, std::size_t>>;
-    bool is_font_file(std::string const& file_name);
-    /*! \brief register a font file
-     *  @param file_name path to a font file.
-     *  @return bool - true if at least one face was successfully registered in the file.
-     */
-    bool register_font(std::string const& file_name);
-    /*! \brief register a font files
-     *  @param dir - path to a directory containing fonts or subdirectories.
-     *  @param recurse - default false, whether to search for fonts in sub directories.
-     *  @return bool - true if at least one face was successfully registered.
-     */
-    bool register_fonts(std::string const& dir, bool recurse = false);
-    std::vector<std::string> face_names();
-    font_file_mapping_type const& get_mapping();
-    font_memory_cache_type & get_cache();
-    bool can_open(std::string const& face_name,
+
+    static bool is_font_file(std::string const& file_name);
+    static bool register_font(std::string const& file_name);
+    static bool register_fonts(std::string const& dir, bool recurse = false);
+    static std::vector<std::string> face_names();
+    static font_file_mapping_type const& get_mapping();
+    static font_memory_cache_type & get_cache();
+    static bool can_open(std::string const& face_name,
                          font_library & library,
                          font_file_mapping_type const& font_file_mapping,
                          font_file_mapping_type const& global_font_file_mapping);
-    face_ptr create_face(std::string const& face_name,
-                         font_library & library,
-                         font_file_mapping_type const& font_file_mapping,
-                         freetype_engine::font_memory_cache_type const& font_cache,
-                         font_file_mapping_type const& global_font_file_mapping,
-                         freetype_engine::font_memory_cache_type & global_memory_fonts);
+
+    static face_ptr create_face(std::string const& face_name,
+                                font_library & library,
+                                font_file_mapping_type const& font_file_mapping,
+                                freetype_engine::font_memory_cache_type const& font_cache,
+                                font_file_mapping_type const& global_font_file_mapping,
+                                freetype_engine::font_memory_cache_type & global_memory_fonts);
+private:
+    bool is_font_file_impl(std::string const& file_name);
+    std::vector<std::string> face_names_impl();
+    font_file_mapping_type const& get_mapping_impl();
+    font_memory_cache_type& get_cache_impl();
+    bool can_open_impl(std::string const& face_name,
+                  font_library & library,
+                  font_file_mapping_type const& font_file_mapping,
+                  font_file_mapping_type const& global_font_file_mapping);
+
+    face_ptr create_face_impl(std::string const& face_name,
+                              font_library & library,
+                              font_file_mapping_type const& font_file_mapping,
+                              freetype_engine::font_memory_cache_type const& font_cache,
+                              font_file_mapping_type const& global_font_file_mapping,
+                              freetype_engine::font_memory_cache_type & global_memory_fonts);
+    bool register_font_impl(std::string const& file_name);
+    bool register_fonts_impl(std::string const& dir, bool recurse);
+    bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
+    bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
     bool register_font_impl(std::string const& file_name,
                             font_library & libary,
                             font_file_mapping_type & font_file_mapping);
@@ -91,9 +105,6 @@ public:
                              font_library & libary,
                              font_file_mapping_type & font_file_mapping,
                              bool recurse = false);
-private:
-    bool register_font_impl(std::string const& file_name, FT_LibraryRec_ * library);
-    bool register_fonts_impl(std::string const& dir, FT_LibraryRec_ * library, bool recurse = false);
 #ifdef MAPNIK_THREADSAFE
     std::mutex mutex_;
 #endif
