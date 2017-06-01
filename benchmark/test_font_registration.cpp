@@ -10,14 +10,14 @@ public:
      : test_case(params) {}
     bool validate() const
     {
-        return mapnik::freetype_engine::instance().register_fonts("./fonts", true);
+        return mapnik::freetype_engine::register_fonts("./fonts", true);
     }
     bool operator()() const
     {
         unsigned long count = 0;
         for (unsigned i=0;i<iterations_;++i)
         {
-            mapnik::freetype_engine::instance().register_fonts("./fonts", true);
+            mapnik::freetype_engine::register_fonts("./fonts", true);
             count++;
         }
         return true;

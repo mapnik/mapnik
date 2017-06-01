@@ -104,7 +104,7 @@ int main (int argc,char** argv)
         }
 
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
-        mapnik::freetype_engine::instance().register_fonts("./fonts",true);
+        mapnik::freetype_engine::register_fonts("./fonts",true);
         mapnik::Map map(600,400);
         mapnik::load_map(map,xml_file,true);
         map.zoom_all();

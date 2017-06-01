@@ -291,10 +291,10 @@ bool Map::register_fonts(std::string const& dir, bool recurse)
 bool Map::load_fonts()
 {
     bool result = false;
-    auto const& global_mapping = freetype_engine::instance().get_mapping();
+    auto const& global_mapping = freetype_engine::get_mapping();
     for (auto const& kv : font_file_mapping_) // for every face-name -> idx/filepath
     {
-        auto const& file_path = kv.second.second;
+       auto const& file_path = kv.second.second;
         // do not attemp to re-cache in memory
         if (font_memory_cache_.find(file_path) != font_memory_cache_.end())
         {

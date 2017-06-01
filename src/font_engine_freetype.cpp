@@ -485,10 +485,4 @@ face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional
     }
 }
 
-#ifdef MAPNIK_THREADSAFE
-//std::mutex freetype_engine::mutex_;
-#endif
-//freetype_engine::font_file_mapping_type freetype_engine::global_font_file_mapping_;
-//freetype_engine::font_memory_cache_type freetype_engine::global_memory_fonts_;
-
 }
