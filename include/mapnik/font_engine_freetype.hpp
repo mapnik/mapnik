@@ -36,10 +36,6 @@
 #include <utility> // pair
 #include <vector>
 
-#ifdef MAPNIK_THREADSAFE
-#include <mutex>
-#endif
-
 namespace boost { template <class T> class optional; }
 
 namespace mapnik
@@ -105,9 +101,6 @@ private:
                              font_library & libary,
                              font_file_mapping_type & font_file_mapping,
                              bool recurse = false);
-#ifdef MAPNIK_THREADSAFE
-    std::mutex mutex_;
-#endif
     font_file_mapping_type global_font_file_mapping_;
     font_memory_cache_type global_memory_fonts_;
 };
