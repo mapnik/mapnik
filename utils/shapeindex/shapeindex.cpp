@@ -37,7 +37,7 @@
 #pragma GCC diagnostic pop
 
 const int DEFAULT_DEPTH = 8;
-const double DEFAULT_RATIO=0.55;
+const double DEFAULT_RATIO = 0.55;
 
 int main (int argc,char** argv)
 {
@@ -278,7 +278,8 @@ int main (int argc,char** argv)
         }
         else
         {
-            std::clog << "No non-empty geometries in shapefile" << std::endl;
+            std::clog << "Failed to read any features from \"" << filename << "\"" << std::endl;
+            return EXIT_FAILURE;
         }
     }
 
