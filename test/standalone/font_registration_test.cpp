@@ -20,8 +20,8 @@ SECTION("registration") {
         mapnik::logger::severity_type original_severity = logger.get_severity();
 
         // grab references to global statics of registered/cached fonts
-        auto const& global_mapping = mapnik::freetype_engine::get_mapping();
-        auto const& global_cache = mapnik::freetype_engine::get_cache();
+        auto const& global_mapping = mapnik::freetype_engine::instance().get_mapping();
+        auto const& global_cache = mapnik::freetype_engine::instance().get_cache();
 
         // mapnik.Map object has parallel structure for localized fonts
         mapnik::Map m(1,1);
@@ -62,11 +62,11 @@ SECTION("registration") {
         std::vector<std::string> face_names;
         std::string foo("foo");
         // fake directories
-        REQUIRE( !mapnik::freetype_engine::register_fonts(foo , true ) );
-        face_names = mapnik::freetype_engine::face_names();
+        REQUIRE( !mapnik::freetype_engine::instance().register_fonts(foo , true ) );
+        face_names = mapnik::freetype_engine::instance().face_names();
         REQUIRE( face_names.size() == 0 );
-        REQUIRE( !mapnik::freetype_engine::register_fonts(foo) );
-        face_names = mapnik::freetype_engine::face_names();
+        REQUIRE( !mapnik::freetype_engine::instance().register_fonts(foo) );
+        face_names = mapnik::freetype_engine::instance().face_names();
         REQUIRE( face_names.size() == 0 );
 
         // directories without fonts
@@ -76,31 +76,31 @@ SECTION("registration") {
         // an empty directory will not return true
         // we need to register at least one font and not fail on any
         // to return true
-        REQUIRE( mapnik::freetype_engine::register_font(src) == false );
-        REQUIRE( mapnik::freetype_engine::register_fonts(src, true) == false );
-        REQUIRE( mapnik::freetype_engine::face_names().size() == 0 );
+        REQUIRE( mapnik::freetype_engine::instance().register_font(src) == false );
+        REQUIRE( mapnik::freetype_engine::instance().register_fonts(src, true) == false );
+        REQUIRE( mapnik::freetype_engine::instance().face_names().size() == 0 );
 
         // bogus, emtpy file that looks like font
-        REQUIRE( mapnik::freetype_engine::register_font("test/data/fonts/fake.ttf") == false );
-        REQUIRE( mapnik::freetype_engine::register_fonts("test/data/fonts/fake.ttf") == false );
-        REQUIRE( mapnik::freetype_engine::face_names().size() == 0 );
+        REQUIRE( mapnik::freetype_engine::instance().register_font("test/data/fonts/fake.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::instance().register_fonts("test/data/fonts/fake.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::instance().face_names().size() == 0 );
 
-        REQUIRE( mapnik::freetype_engine::register_font("test/data/fonts/intentionally-broken.ttf") == false );
-        REQUIRE( mapnik::freetype_engine::register_fonts("test/data/fonts/intentionally-broken.ttf") == false );
-        REQUIRE( mapnik::freetype_engine::face_names().size() == 0 );
+        REQUIRE( mapnik::freetype_engine::instance().register_font("test/data/fonts/intentionally-broken.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::instance().register_fonts("test/data/fonts/intentionally-broken.ttf") == false );
+        REQUIRE( mapnik::freetype_engine::instance().face_names().size() == 0 );
 
         // now restore the original severity
         logger.set_severity(original_severity);
 
         // single dejavu font in separate location
         std::string dejavu_bold_oblique("test/data/fonts/DejaVuSansMono-BoldOblique.ttf");
-        REQUIRE( mapnik::freetype_engine::register_font(dejavu_bold_oblique) );
-        face_names = mapnik::freetype_engine::face_names();
+        REQUIRE( mapnik::freetype_engine::instance().register_font(dejavu_bold_oblique) );
+        face_names = mapnik::freetype_engine::instance().face_names();
         REQUIRE( face_names.size() == 1 );
 
         // now, inspect font mapping and confirm the correct 'DejaVu Sans Mono Bold Oblique' is registered
         using font_file_mapping = std::map<std::string, std::pair<int,std::string> >;
-        font_file_mapping const& name2file = mapnik::freetype_engine::get_mapping();
+        font_file_mapping const& name2file = mapnik::freetype_engine::instance().get_mapping();
         bool found_dejavu = false;
         for (auto const& item : name2file)
         {
@@ -114,8 +114,8 @@ SECTION("registration") {
         REQUIRE( found_dejavu );
 
         // recurse to find all dejavu fonts
-        REQUIRE( mapnik::freetype_engine::register_fonts(fontdir, true) );
-        face_names = mapnik::freetype_engine::face_names();
+        REQUIRE( mapnik::freetype_engine::instance().register_fonts(fontdir, true) );
+        face_names = mapnik::freetype_engine::instance().face_names();
         REQUIRE( face_names.size() == 22 );
 
         // we should have re-registered 'DejaVu Sans Mono Bold Oblique' again,
@@ -148,21 +148,21 @@ SECTION("registration") {
         // check that we can correctly read a .ttc containing
         // multiple valid faces
         // https://github.com/mapnik/mapnik/issues/2274
-        REQUIRE( mapnik::freetype_engine::register_font("test/data/fonts/NotoSans-Regular.ttc") );
-        face_names = mapnik::freetype_engine::face_names();
+        REQUIRE( mapnik::freetype_engine::instance().register_font("test/data/fonts/NotoSans-Regular.ttc") );
+        face_names = mapnik::freetype_engine::instance().face_names();
         REQUIRE( face_names.size() == 24 );
 
         // now blindly register as many system fonts as possible
         // the goal here to make sure we don't crash
         // linux
-        mapnik::freetype_engine::register_fonts("/usr/share/fonts/", true);
-        mapnik::freetype_engine::register_fonts("/usr/local/share/fonts/", true);
+        mapnik::freetype_engine::instance().register_fonts("/usr/share/fonts/", true);
+        mapnik::freetype_engine::instance().register_fonts("/usr/local/share/fonts/", true);
         // osx
-        mapnik::freetype_engine::register_fonts("/Library/Fonts/", true);
-        mapnik::freetype_engine::register_fonts("/System/Library/Fonts/", true);
+        mapnik::freetype_engine::instance().register_fonts("/Library/Fonts/", true);
+        mapnik::freetype_engine::instance().register_fonts("/System/Library/Fonts/", true);
         // windows
-        mapnik::freetype_engine::register_fonts("C:\\Windows\\Fonts", true);
-        face_names = mapnik::freetype_engine::face_names();
+        mapnik::freetype_engine::instance().register_fonts("C:\\Windows\\Fonts", true);
+        face_names = mapnik::freetype_engine::instance().face_names();
         REQUIRE( face_names.size() > 22 );
     }
     catch (std::exception const & ex)

@@ -99,7 +99,7 @@ int main(int argc, char** argv)
             std::clog << "please provide a name for this test\n";
             return -1;
         }
-        mapnik::freetype_engine::register_fonts("./fonts/",true);
+        mapnik::freetype_engine::instance().register_fonts("./fonts/",true);
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         {
             test test_runner(params);

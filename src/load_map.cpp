@@ -84,7 +84,7 @@ using boost::optional;
 
 constexpr unsigned name2int(const char *str, int off = 0)
 {
-    return !str[off] ? 5381 : (name2int(str, off+1)*33) ^ static_cast<unsigned>(str[off]);
+    return !str[off] ? 5381 : (name2int(str, off + 1) * 33) ^ static_cast<unsigned>(str[off]);
 }
 
 class map_parser : util::noncopyable
@@ -536,10 +536,10 @@ bool map_parser::parse_font(font_set & fset, xml_node const& f)
         }
         else
         {
-            found = freetype_engine::can_open(face_name,
-                                          font_library_,
-                                          font_file_mapping_,
-                                          freetype_engine::get_mapping());
+            found = freetype_engine::instance().can_open(face_name,
+                                                         font_library_,
+                                                         font_file_mapping_,
+                                                         freetype_engine::instance().get_mapping());
             font_name_cache_.emplace(face_name,found);
         }
         if (found)
@@ -1599,10 +1599,10 @@ void map_parser::ensure_font_face(std::string const& face_name)
     }
     else
     {
-        found = freetype_engine::can_open(face_name,
+        found = freetype_engine::instance().can_open(face_name,
                                       font_library_,
                                       font_file_mapping_,
-                                      freetype_engine::get_mapping());
+                                      freetype_engine::instance().get_mapping());
         font_name_cache_.emplace(face_name,found);
     }
     if (!found)
