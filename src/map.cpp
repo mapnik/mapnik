@@ -285,7 +285,7 @@ std::map<std::string,font_set> & Map::fontsets()
 bool Map::register_fonts(std::string const& dir, bool recurse)
 {
     font_library library;
-    return freetype_engine::register_fonts_impl(dir, library, font_file_mapping_, recurse);
+    return freetype_engine::instance().register_fonts_impl(dir, library, font_file_mapping_, recurse);
 }
 
 bool Map::load_fonts()

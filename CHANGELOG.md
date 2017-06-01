@@ -26,7 +26,7 @@ Released: February 8, 2017
 - GeoJSON: expose `num_features_to_query` datasource parameter + unit test (#3515)
 - Fixed intersecting extents in different projections (PR #3525 )
 - Fixed `blur` implementation by taking into account `scale_factor`
-- postgis.input - use 2D box for pgraster bounding box (PR #3551)
+- pgraster.input - use 2D box for pgraster bounding box (PR #3551)
 - Fixed GroupSymbolizer PairLayout with 3+ items (#3526)
 - Simplified `hash` implementation (204d30e58d3553278ab6bcda2d4122b0f13f6392)
 - Simplified `mapnik::value` conversion rules (#3570)
