@@ -926,7 +926,6 @@ bool parse_common_gradient(svg_parser & parser, std::string const& id, mapnik::g
             else
             {
                 // save node for later
-                std::cerr << "Unresolved Gradient: " << id << std::endl;
                 parser.unresolved_gradient_map_.emplace(id, node);
                 return false;
             }
