@@ -76,6 +76,14 @@ public:
         return timer_stats_.end();
     }
 
+    std::string dump() {
+        std::stringstream out;
+        for(auto metric : timer_stats_) {
+            out << metric.first << "\tcpu_time = " << metric.second.cpu_elapsed << " ms\twall_time = " << metric.second.wall_clock_elapsed << " ms" << std::endl;
+        }
+        return out.str();
+    }
+
 private:
     metrics_hash_t timer_stats_;
 };
