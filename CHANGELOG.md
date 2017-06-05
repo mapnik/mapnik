@@ -6,12 +6,20 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## 3.0.x
+## 3.0.14
+
+Released: June XX, 2017
+
+(Packaged from xxxxxx)
 
 #### Summary
 
 - Fixed problems with high levels of overzooming in the GDAL and raster plugin where data would be slightly offset
 - High levels of overzooming on raster data no longer results in the return of a transparent image.
+- Fixed bug in `mapnik::util::file::data()` (a220bda05d2aa1)
+- TIFF I/O - added support for grey scale multiband images + fixed and made generic `read_stripped` and `read_generic`.
+- shapeindex - return error code when no features can read from shapefile (#3198)
+- Upgrade Scons to `2.5.1`
 
 ## 3.0.13
 
