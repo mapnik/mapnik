@@ -3,7 +3,7 @@
 
 class test : public benchmark::test_case
 {
-    std::shared_ptr<image_rgba8> im_;
+    std::shared_ptr<mapnik::image_rgba8> im_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params) {
@@ -13,7 +13,7 @@ public:
         {
             throw mapnik::image_reader_exception("Failed to load: " + filename);
         }
-        im_ = std::make_shared<image_rgba8>(reader->width(),reader->height());
+        im_ = std::make_shared<mapnik::image_rgba8>(reader->width(),reader->height());
         reader->read(0,0,*im_);
     }
     bool validate() const
