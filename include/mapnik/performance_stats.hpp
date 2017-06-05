@@ -84,6 +84,13 @@ public:
         return out.str();
     }
 
+    std::string flush() {
+        std::string out = dump();
+        reset_all();
+        return out;
+    }
+
+
 private:
     metrics_hash_t timer_stats_;
 };
