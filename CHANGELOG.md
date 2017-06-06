@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released: June 5, 2017
 
-(Packaged from 7660b9e)
+(Packaged from 2b42e17)
 
 #### Summary
 
