@@ -20,6 +20,7 @@ Released: June 5, 2017
 - TIFF I/O - added support for grey scale multiband images + fixed and made generic `read_stripped` and `read_generic`.
 - shapeindex - return error code when no features can read from shapefile (#3198)
 - Upgrade Scons to `2.5.1`
+- Fixed bug (typo) in `raster_featureset.cpp` (#3696)
 
 ## 3.0.13
 
