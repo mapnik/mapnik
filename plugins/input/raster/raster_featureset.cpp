@@ -97,7 +97,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                     // clip to available data
                     if (x_off >= image_width) x_off = image_width - 1;
-                    if (y_off >= image_width) y_off = image_width - 1;
+                    if (y_off >= image_height) y_off = image_height - 1;
                     if (x_off < 0) x_off = 0;
                     if (y_off < 0) y_off = 0;
                     if (end_x > image_width)  end_x = image_width;
