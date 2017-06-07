@@ -250,9 +250,7 @@ void agg_renderer<T0,T1>::end_layer_processing(layer const& lyr)
     {
         composite_mode_e comp_op = lyr.comp_op() ? *lyr.comp_op() : src_over;
         composite(previous_buffer, current_buffer,
-                  comp_op, lyr.get_opacity(),
-                  -common_.t_.offset(),
-                  -common_.t_.offset());
+                  comp_op, lyr.get_opacity(), 0, 0);
         internal_buffers_.pop();
     }
 }
