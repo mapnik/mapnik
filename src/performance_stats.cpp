@@ -69,4 +69,33 @@ std::string timer_stats::flush() {
     return out;
 }
 
+
+
+stats_timer::stats_timer(std::string const& metric_name)
+    : metric_name_(metric_name)
+{}
+
+stats_timer::~stats_timer()
+{
+    if (! stopped_)
+        {
+            stop();
+        }
 }
+
+void stats_timer::stop() const
+{
+    timer::stop();
+    try
+        {
+            timer_stats::instance().add(metric_name_, cpu_elapsed(), wall_clock_elapsed());
+        }
+    catch (...) {} // eat any exceptions
+}
+
+void stats_timer::discard()
+{
+    stopped_ = true;
+}
+
+} // end of ns

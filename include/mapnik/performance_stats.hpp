@@ -70,36 +70,14 @@ extern template class MAPNIK_DECL singleton<timer_stats, CreateStatic>;
 
 
 //  A stats_timer behaves like a timer except that the destructor stores
-//  elapsed and CPU times for later retrieval from global timer_stats
+//  elapsed and CPU times for later retrieval from singleton timer_stats
 class stats_timer : public timer
 {
 public:
-    stats_timer(std::string const& metric_name)
-        : metric_name_(metric_name)
-    {}
-
-    ~stats_timer()
-    {
-        if (! stopped_)
-        {
-            stop();
-        }
-    }
-
-    void stop() const
-    {
-        timer::stop();
-        try
-        {
-            timer_stats::instance().add(metric_name_, cpu_elapsed(), wall_clock_elapsed());
-        }
-        catch (...) {} // eat any exceptions
-    }
-
-    void discard()
-    {
-        stopped_ = true;
-    }
+    stats_timer(std::string const& metric_name);
+    ~stats_timer();
+    void stop() const;
+    void discard();
 
 private:
     std::string metric_name_;
