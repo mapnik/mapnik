@@ -70,7 +70,7 @@ auto const rotate_action = [] (auto const& ctx)
     }
     else
     {
-        agg::trans_affine t = agg::trans_affine_translation(-cx,-cy);
+        agg::trans_affine t = agg::trans_affine_translation(-cx, -cy);
         t *= agg::trans_affine_rotation(deg2rad(a));
         t *= agg::trans_affine_translation(cx, cy);
         tr = t * tr;
@@ -131,7 +131,7 @@ auto const scale = x3::rule<class scale_tag> {} = no_case[lit("scale")]
 
 auto const rotate = x3::rule<class rotate_tag> {} = no_case[lit("rotate")]
     > lit('(')
-    > (double_ > -(lit(',') > double_) > -(lit(',') > double_))[rotate_action]
+    > (double_ > -lit(',') > -double_ > -lit(',') > -double_)[rotate_action]
     > lit(')') ;
 
 auto const skewX = x3::rule<class skewX_tag> {} = no_case[lit("skewX")]
