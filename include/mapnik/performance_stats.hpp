@@ -35,7 +35,10 @@
 // mapnik
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/timer.hpp>
+#include <mapnik/util/singleton.hpp>
 
+using mapnik::singleton;
+using mapnik::CreateStatic;
 
 namespace mapnik {
 
@@ -46,10 +49,9 @@ struct timer_metrics {
 
 typedef std::unordered_map<std::string, timer_metrics> metrics_hash_t;
 
-class MAPNIK_DECL timer_stats
+class MAPNIK_DECL timer_stats : public singleton<timer_stats, CreateStatic>
 {
 public:
-    static timer_stats & instance();
     void add(std::string const& metric_name, double cpu_elapsed, double wall_clock_elapsed);
     timer_metrics get(std::string const& metric_name);
     void reset(std::string metric_name);
@@ -60,8 +62,11 @@ public:
     std::string flush();
 
 private:
+    friend class CreateStatic<timer_stats>;
     metrics_hash_t metrics_;
 };
+
+extern template class MAPNIK_DECL singleton<timer_stats, CreateStatic>;
 
 
 //  A stats_timer behaves like a timer except that the destructor stores

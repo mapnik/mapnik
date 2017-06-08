@@ -24,11 +24,7 @@
 
 namespace mapnik {
 
-timer_stats & timer_stats::instance()
-{
-    static timer_stats ts;
-    return ts;
-}
+template class MAPNIK_DECL singleton<timer_stats, CreateStatic>;
 
 void timer_stats::add(std::string const& metric_name, double cpu_elapsed, double wall_clock_elapsed)
 {
