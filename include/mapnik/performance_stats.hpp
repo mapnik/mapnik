@@ -32,7 +32,9 @@
 #include <unordered_map>
 #include <iterator>
 
-#include "timer.hpp"
+// mapnik
+#include <mapnik/config.hpp>            // for MAPNIK_DECL
+#include <mapnik/timer.hpp>
 
 
 namespace mapnik {
@@ -44,59 +46,22 @@ struct timer_metrics {
 
 typedef std::unordered_map<std::string, timer_metrics> metrics_hash_t;
 
-class timer_stats_
+class MAPNIK_DECL timer_stats
 {
 public:
-    void add(std::string const& metric_name, double cpu_elapsed, double wall_clock_elapsed)
-    {
-        timer_metrics& metrics = timer_stats_[metric_name];
-        metrics.cpu_elapsed += cpu_elapsed;
-        metrics.wall_clock_elapsed += wall_clock_elapsed;
-        timer_stats_[metric_name] = metrics;
-    }
-
-    timer_metrics get(std::string const& metric_name)
-    {
-        return timer_stats_[metric_name];
-    }
-
-    void reset(std::string metric_name) {
-        timer_stats_.erase(metric_name);
-    }
-
-    void reset_all() {
-        timer_stats_.clear();
-    }
-
-    metrics_hash_t::iterator begin() {
-        return timer_stats_.begin();
-    }
-
-    metrics_hash_t::iterator end() {
-        return timer_stats_.end();
-    }
-
-    std::string dump() {
-        std::stringstream out;
-        for(auto metric : timer_stats_) {
-            out << metric.first << "\tcpu_time = " << metric.second.cpu_elapsed << " ms\twall_time = " << metric.second.wall_clock_elapsed << " ms" << std::endl;
-        }
-        return out.str();
-    }
-
-    std::string flush() {
-        std::string out = dump();
-        reset_all();
-        return out;
-    }
-
+    static timer_stats & instance();
+    void add(std::string const& metric_name, double cpu_elapsed, double wall_clock_elapsed);
+    timer_metrics get(std::string const& metric_name);
+    void reset(std::string metric_name);
+    void reset_all();
+    metrics_hash_t::iterator begin();
+    metrics_hash_t::iterator end();
+    std::string dump();
+    std::string flush();
 
 private:
-    metrics_hash_t timer_stats_;
+    metrics_hash_t metrics_;
 };
-
-timer_stats_ timer_stats;
-
 
 
 //  A stats_timer behaves like a timer except that the destructor stores
@@ -121,7 +86,7 @@ public:
         timer::stop();
         try
         {
-            timer_stats.add(metric_name_, cpu_elapsed(), wall_clock_elapsed());
+            timer_stats::instance().add(metric_name_, cpu_elapsed(), wall_clock_elapsed());
         }
         catch (...) {} // eat any exceptions
     }
