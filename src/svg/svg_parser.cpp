@@ -78,6 +78,7 @@ namespace rapidxml = boost::property_tree::detail::rapidxml;
     bool traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node);
+    void parse_use(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_polygon(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_polyline(svg_parser& parser, rapidxml::xml_node<char> const* node);
@@ -112,6 +113,19 @@ auto const key_value_sequence_ordered_def = key_value % ';';
 BOOST_SPIRIT_DEFINE(key, value, key_value, key_value_sequence_ordered);
 
 }}
+
+
+boost::property_tree::detail::rapidxml::xml_attribute<char> const * parse_id(svg_parser & parser, rapidxml::xml_node<char> const* node)
+{
+    auto const* id_attr = node->first_attribute("xml:id");
+    if (id_attr == nullptr) id_attr = node->first_attribute("id");
+
+    if (id_attr && parser.node_cache_.count(id_attr->value()) == 0)
+    {
+        parser.node_cache_.emplace(id_attr->value(), node);
+    }
+    return id_attr;
+}
 
 template <typename T>
 mapnik::color parse_color(T & err_handler, const char* str)
@@ -156,6 +170,7 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
     x3::symbols<double> units;
     units.add
         ("px", 1.0)
+        ("em", 1.0) // (?)
         ("pt", DPI/72.0)
         ("pc", DPI/6.0)
         ("mm", DPI/25.4)
@@ -248,12 +263,22 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 if (node->first_node() != nullptr)
                 {
                     parser.path_.push_attr();
+                    parse_id(parser, node);
                     parse_attr(parser, node);
                 }
+            }
+            else if (std::strcmp(name, "use") == 0)
+            {
+                parser.path_.push_attr();
+                parse_id(parser, node);
+                parse_attr(parser, node);
+                parse_use(parser, node);
+                parser.path_.pop_attr();
             }
             else
             {
                 parser.path_.push_attr();
+                parse_id(parser, node);
                 parse_attr(parser, node);
                 if (parser.path_.display())
                 {
@@ -291,12 +316,18 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     }
                     else
                     {
-                        //parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
+                        parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
                     }
                 }
                 parser.path_.pop_attr();
             }
         }
+        else
+        {
+            // save node for later
+            parse_id(parser, node);
+        }
+
 
         for (auto const* child = node->first_node();
              child; child = child->next_sibling())
@@ -372,10 +403,10 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             {
                 parser.path_.add_fill_gradient(parser.gradient_map_[id]);
             }
-            else if (parser.unresolved_gradient_map_.count(id) > 0)
+            else if (parser.node_cache_.count(id) > 0)
             {
                 // try parsing again
-                auto const* gradient_node = parser.unresolved_gradient_map_[id];
+                auto const* gradient_node = parser.node_cache_[id];
                 traverse_tree(parser, gradient_node);
                 if (parser.gradient_map_.count(id) > 0)
                 {
@@ -425,10 +456,10 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             {
                 parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
             }
-            else if (parser.unresolved_gradient_map_.count(id) > 0)
+            else if (parser.node_cache_.count(id) > 0)
             {
                 // try parsing again
-                auto const* gradient_node = parser.unresolved_gradient_map_[id];
+                auto const* gradient_node = parser.node_cache_[id];
                 traverse_tree(parser, gradient_node);
                 if (parser.gradient_map_.count(id) > 0)
                 {
@@ -597,8 +628,7 @@ void parse_path(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
             if (!mapnik::svg::parse_path(value, parser.path_))
             {
-                auto const* id_attr = node->first_attribute("xml:id");
-                if (id_attr == nullptr) id_attr = node->first_attribute("id");
+                auto const* id_attr = parse_id(parser, node);
                 if (id_attr)
                 {
                     parser.err_handler().on_error(std::string("unable to parse invalid svg <path> with id '")
@@ -610,6 +640,39 @@ void parse_path(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 }
             }
             parser.path_.end_path();
+        }
+    }
+}
+
+void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
+{
+    auto * attr = node->first_attribute("xlink:href");
+    if (attr)
+    {
+        auto const* value = attr->value();
+        if (std::strlen(value) > 1 && value[0] == '#')
+        {
+            std::string id(&value[1]);
+            if (parser.node_cache_.count(id) > 0)
+            {
+                auto const* base_node = parser.node_cache_[id];
+                double x = 0.0;
+                double y = 0.0;
+                bool percent = false;
+                attr = node->first_attribute("x");
+                if (attr != nullptr)
+                {
+                    x = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                }
+
+                attr = node->first_attribute("y");
+                if (attr != nullptr)
+                {
+                    y = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                }
+                parser.path_.transform().premultiply(agg::trans_affine_translation(x, y));
+                traverse_tree(parser, base_node);
+            }
         }
     }
 }
@@ -926,7 +989,7 @@ bool parse_common_gradient(svg_parser & parser, std::string const& id, mapnik::g
             else
             {
                 // save node for later
-                parser.unresolved_gradient_map_.emplace(id, node);
+                parser.node_cache_.emplace(id, node);
                 return false;
             }
         }
@@ -957,10 +1020,8 @@ bool parse_common_gradient(svg_parser & parser, std::string const& id, mapnik::g
 
 void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    auto * attr = node->first_attribute("xml:id");
-    if (attr == nullptr) attr = node->first_attribute("id");
+    auto * attr = parse_id(parser, node);
     if (attr == nullptr) return;
-
     std::string id = attr->value();
 
     mapnik::gradient gr;
@@ -1028,8 +1089,7 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
 
 void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    auto * attr = node->first_attribute("xml:id");
-    if (attr == nullptr) attr = node->first_attribute("id");
+    auto const* attr = parse_id(parser, node);
     if (attr == nullptr) return;
 
     std::string id = attr->value();
