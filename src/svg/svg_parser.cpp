@@ -316,7 +316,7 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     }
                     else
                     {
-                        parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
+                        //parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
                     }
                 }
                 parser.path_.pop_attr();
