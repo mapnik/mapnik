@@ -61,7 +61,7 @@ before_install:
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export BENCH=${BENCH:-false}
- - git_submodule_update --init --depth=10
+ - git_submodule_update --init
 
 install:
  - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
