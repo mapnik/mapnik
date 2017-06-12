@@ -732,7 +732,6 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
         std::size_t start_y = (y0 / rows_per_strip_) * rows_per_strip_;
         std::size_t end_y = std::min(y0 + height, height_);
         std::size_t tx0, tx1, ty0, ty1;
-
         tx0 = x0;
         tx1 = std::min(width + x0, width_);
         std::size_t row = 0;
@@ -758,7 +757,7 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData & i
 
             if (detail::tiff_reader_traits<ImageData>::reverse)
             {
-                std::size_t num_rows = std::min(end_y - y, static_cast<std::size_t>(rows_per_strip_));
+                std::size_t num_rows = std::min(height_ - y, static_cast<std::size_t>(rows_per_strip_));
                 for (std::size_t ty = ty0; ty < ty1; ++ty)
                 {
                     // This is in reverse because the TIFFReadRGBAStrip reads are inverted
