@@ -55,7 +55,8 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
       extent_(extent),
       bbox_(q.get_bbox()),
       curIter_(policy_.begin()),
-      endIter_(policy_.end())
+      endIter_(policy_.end()),
+      filter_factor_(q.get_filter_factor())
 {
 }
 
@@ -115,7 +116,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                         rem.maxy() + y_off + height);
                     feature_raster_extent = t.backward(feature_raster_extent);
                     mapnik::image_any data = reader->read(x_off, y_off, width, height);
-                    mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), 1.0);
+                    mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), filter_factor_);
                     feature->set_raster(raster);
                 }
             }
