@@ -28,6 +28,9 @@ template class MAPNIK_DECL singleton<timer_stats, CreateStatic>;
 
 void timer_stats::add(std::string const& metric_name, double cpu_elapsed, double wall_clock_elapsed)
 {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     timer_metrics& metrics = metrics_[metric_name];
     metrics.cpu_elapsed += cpu_elapsed;
     metrics.wall_clock_elapsed += wall_clock_elapsed;
@@ -36,26 +39,46 @@ void timer_stats::add(std::string const& metric_name, double cpu_elapsed, double
 
 timer_metrics timer_stats::get(std::string const& metric_name)
 {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     return metrics_[metric_name];
 }
 
-void timer_stats::reset(std::string metric_name) {
+void timer_stats::reset(std::string metric_name)
+{
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     metrics_.erase(metric_name);
 }
 
-void timer_stats::reset_all() {
+void timer_stats::reset_all()
+{
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     metrics_.clear();
 }
 
 metrics_hash_t::iterator timer_stats::begin() {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     return metrics_.begin();
 }
 
 metrics_hash_t::iterator timer_stats::end() {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     return metrics_.end();
 }
 
 std::string timer_stats::dump() {
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(metrics_mutex_);
+#endif
     std::stringstream out;
     for(auto metric : metrics_) {
         out << metric.first << "\tcpu_time = " << metric.second.cpu_elapsed << " ms\twall_time = " << metric.second.wall_clock_elapsed << " ms" << std::endl;

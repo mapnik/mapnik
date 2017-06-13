@@ -32,6 +32,11 @@
 #include <unordered_map>
 #include <iterator>
 
+#ifdef MAPNIK_THREADSAFE
+#include <mutex>
+#endif
+
+
 // mapnik
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/timer.hpp>
@@ -64,6 +69,9 @@ public:
 private:
     friend class CreateStatic<timer_stats>;
     metrics_hash_t metrics_;
+#ifdef MAPNIK_THREADSAFE
+    std::mutex metrics_mutex_;
+#endif
 };
 
 extern template class MAPNIK_DECL singleton<timer_stats, CreateStatic>;
