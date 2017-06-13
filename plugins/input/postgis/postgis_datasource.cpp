@@ -937,7 +937,9 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             s << " LIMIT " << row_limit_;
         }
 
+        mapnik::stats_timer __stats_timer__("postgis_datasource::features_with_context::get_resultset");
         std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
+        __stats_timer__.stop();
         return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(),
                                                     key_field_as_attribute_, twkb_encoding_);
 
