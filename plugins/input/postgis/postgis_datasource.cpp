@@ -1025,7 +1025,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
                 s << " LIMIT " << row_limit_;
             }
 
-            mapnik::stats_timer __stats_timer__("postgis::get_resultset");
+            mapnik::stats_timer __stats_timer__("postgis_datasource::features_at_point::get_resultset");
             std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
             __stats_timer__.stop();
 
