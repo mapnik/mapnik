@@ -321,6 +321,7 @@ private:
     mapnik::box2d<double> bbox_;
     iterator_type curIter_;
     iterator_type endIter_;
+    double filter_factor_;
 };
 
 #endif // RASTER_FEATURESET_HPP

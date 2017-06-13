@@ -148,6 +148,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     view_transform t(raster_width_, raster_height_, raster_extent_, 0, 0);
     box2d<double> intersect = raster_extent_.intersect(q.get_bbox());
     box2d<double> box = t.forward(intersect);
+    double filter_factor = q.get_filter_factor();
 
     //size of resized output pixel in source image domain
     double margin_x = 1.0 / (std::fabs(dx_) * std::get<0>(q.resolution()));
@@ -224,7 +225,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
-                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, 0.0);
+                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
                 // set nodata value to be used in raster colorizer
                 if (nodata_value_) raster->set_nodata(*nodata_value_);
                 else raster->set_nodata(raster_nodata);
@@ -244,7 +245,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
-                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, 0.0);
+                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
                 // set nodata value to be used in raster colorizer
                 if (nodata_value_) raster->set_nodata(*nodata_value_);
                 else raster->set_nodata(raster_nodata);
@@ -263,7 +264,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
-                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, 0.0);
+                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
                 // set nodata value to be used in raster colorizer
                 if (nodata_value_) raster->set_nodata(*nodata_value_);
                 else raster->set_nodata(raster_nodata);
@@ -283,7 +284,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
-                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, 0.0);
+                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
                 // set nodata value to be used in raster colorizer
                 if (nodata_value_) raster->set_nodata(*nodata_value_);
                 else raster->set_nodata(raster_nodata);
@@ -583,7 +584,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     }
                 }
             }
-            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, 0.0);
+            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
             // set nodata value to be used in raster colorizer
             if (nodata_value_) raster->set_nodata(*nodata_value_);
             else raster->set_nodata(raster_nodata);
