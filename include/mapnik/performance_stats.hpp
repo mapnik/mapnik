@@ -61,8 +61,8 @@ public:
     timer_metrics get(std::string const& metric_name);
     void reset(std::string metric_name);
     void reset_all();
-    std::string dump();
-    std::string flush();
+    metrics_hash_t dump();
+    metrics_hash_t flush();
 
 private:
     friend class CreateStatic<timer_stats>;

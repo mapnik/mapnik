@@ -61,19 +61,15 @@ void timer_stats::reset_all()
     metrics_.clear();
 }
 
-std::string timer_stats::dump() {
+metrics_hash_t timer_stats::dump() {
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(metrics_mutex_);
 #endif
-    std::stringstream out;
-    for(auto metric : metrics_) {
-        out << metric.first << "\tcpu_time = " << metric.second.cpu_elapsed << " ms\twall_time = " << metric.second.wall_clock_elapsed << " ms" << std::endl;
-    }
-    return out.str();
+    return metrics_;
 }
 
-std::string timer_stats::flush() {
-    std::string out = dump();
+metrics_hash_t timer_stats::flush() {
+    metrics_hash_t out = dump();
     reset_all();
     return out;
 }
