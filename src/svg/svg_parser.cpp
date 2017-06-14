@@ -482,7 +482,7 @@ void parse_transform(svg_parser & parser, char const* value)
     parser.path_.transform().premultiply(tr);
 }
 
-void parse_sroke_dash(svg_parser & parser, char const* value)
+void parse_stroke_dash(svg_parser & parser, char const* value)
 {
     dash_array dash;
     if (util::parse_dasharray(value, dash))
