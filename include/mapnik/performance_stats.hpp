@@ -61,8 +61,6 @@ public:
     timer_metrics get(std::string const& metric_name);
     void reset(std::string metric_name);
     void reset_all();
-    metrics_hash_t::iterator begin();
-    metrics_hash_t::iterator end();
     std::string dump();
     std::string flush();
 

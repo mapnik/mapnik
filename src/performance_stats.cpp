@@ -61,20 +61,6 @@ void timer_stats::reset_all()
     metrics_.clear();
 }
 
-metrics_hash_t::iterator timer_stats::begin() {
-#ifdef MAPNIK_THREADSAFE
-    std::lock_guard<std::mutex> lock(metrics_mutex_);
-#endif
-    return metrics_.begin();
-}
-
-metrics_hash_t::iterator timer_stats::end() {
-#ifdef MAPNIK_THREADSAFE
-    std::lock_guard<std::mutex> lock(metrics_mutex_);
-#endif
-    return metrics_.end();
-}
-
 std::string timer_stats::dump() {
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(metrics_mutex_);
