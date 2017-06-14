@@ -30,7 +30,7 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
-
+#include <mapnik/util/name_to_int.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"
@@ -54,6 +54,9 @@
 #include <fstream>
 
 namespace mapnik { namespace svg {
+
+using util::name_to_int;
+
 struct viewbox
 {
     double x0;
@@ -78,6 +81,7 @@ namespace rapidxml = boost::property_tree::detail::rapidxml;
     bool traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node);
+    void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char> const* node);
     void parse_use(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void parse_polygon(svg_parser& parser, rapidxml::xml_node<char> const* node);
@@ -239,85 +243,56 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
     case rapidxml::node_element:
     {
-        if (std::strcmp(name, "defs") == 0)
+        switch(name_to_int(name))
+        {
+        case name_to_int("defs"):
         {
             if (node->first_node() != nullptr)
             {
                 parser.is_defs_ = true;
             }
+            break;
         }
         // the gradient tags *should* be in defs, but illustrator seems not to put them in there so
         // accept them anywhere
-        else if (std::strcmp(name, "linearGradient") == 0)
-        {
+        case name_to_int("linearGradient"):
             parse_linear_gradient(parser, node);
-        }
-        else if (std::strcmp(name, "radialGradient") == 0)
-        {
+            break;
+        case name_to_int("radialGradient"):
             parse_radial_gradient(parser, node);
+            break;
+        case name_to_int("symbol"):
+            parse_id(parser, node);
+            //parse_dimensions(parser, node);
+            break;
         }
+
         if (!parser.is_defs_) // FIXME
         {
-            if (std::strcmp(name, "g") == 0)
+            switch (name_to_int(name))
             {
+            case name_to_int("g"):
                 if (node->first_node() != nullptr)
                 {
                     parser.path_.push_attr();
                     parse_id(parser, node);
                     parse_attr(parser, node);
                 }
-            }
-            else if (std::strcmp(name, "use") == 0)
-            {
+                break;
+            case name_to_int("use"):
                 parser.path_.push_attr();
                 parse_id(parser, node);
                 parse_attr(parser, node);
                 parse_use(parser, node);
                 parser.path_.pop_attr();
-            }
-            else
-            {
+                break;
+            default:
                 parser.path_.push_attr();
                 parse_id(parser, node);
                 parse_attr(parser, node);
                 if (parser.path_.display())
                 {
-                    if (std::strcmp(name, "path") == 0)
-                    {
-                        parse_path(parser, node);
-                    }
-                    else if (std::strcmp("polygon", name) == 0)
-                    {
-                        parse_polygon(parser, node);
-                    }
-                    else if (std::strcmp("polyline", name) == 0)
-                    {
-                        parse_polyline(parser, node);
-                    }
-                    else if (std::strcmp(name, "line") == 0)
-                    {
-                        parse_line(parser, node);
-                    }
-                    else if (std::strcmp(name,  "rect") == 0)
-                    {
-                        parse_rect(parser, node);
-                    }
-                    else if (std::strcmp(name,  "circle") == 0)
-                    {
-                        parse_circle(parser, node);
-                    }
-                    else if (std::strcmp(name,  "ellipse") == 0)
-                    {
-                        parse_ellipse(parser, node);
-                    }
-                    else if (std::strcmp(name,  "svg") == 0)
-                    {
-                        parse_dimensions(parser, node);
-                    }
-                    else
-                    {
-                        //parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
-                    }
+                    parse_element(parser, name, node);
                 }
                 parser.path_.pop_attr();
             }
@@ -327,7 +302,6 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             // save node for later
             parse_id(parser, node);
         }
-
 
         for (auto const* child = node->first_node();
              child; child = child->next_sibling())
@@ -350,7 +324,7 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             // whitespace trimmed.
             //std::string trimmed = node->value();
             //mapnik::util::trim(trimmed);
-            std::cerr << "CDATA:" << node->value() << std::endl;
+            //std::cerr << "CDATA:" << node->value() << std::endl;
         }
     }
     break;
@@ -381,96 +355,62 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
     }
 }
 
-void parse_attr(svg_parser & parser, char const* name, char const* value )
+void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<char> const* node)
 {
-    if (std::strcmp(name, "transform") == 0)
+    switch (name_to_int(name))
     {
-        agg::trans_affine tr;
-        mapnik::svg::parse_svg_transform(value,tr);
-        parser.path_.transform().premultiply(tr);
+    case name_to_int("path"):
+        parse_path(parser, node);
+        break;
+    case name_to_int("polygon"):
+        parse_polygon(parser, node);
+        break;
+    case name_to_int("polyline"):
+        parse_polyline(parser, node);
+        break;
+    case name_to_int("line"):
+        parse_line(parser, node);
+        break;
+    case name_to_int("rect"):
+        parse_rect(parser, node);
+        break;
+    case name_to_int("circle"):
+        parse_circle(parser, node);
+        break;
+    case name_to_int("ellipse"):
+        parse_ellipse(parser, node);
+        break;
+    case name_to_int("svg"):
+        parse_dimensions(parser, node);
+        break;
+    default:
+        //parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
+        break;
     }
-    else if (std::strcmp(name, "fill") == 0)
+}
+
+void parse_stroke(svg_parser& parser, char const* value)
+{
+    std::string id;
+    if (std::strcmp(value, "none") == 0)
     {
-        std::string id;
-        if (std::strcmp(value, "none") == 0)
-        {
-            parser.path_.fill_none();
-        }
-        else if (parse_id_from_url(value, id))
-        {
-            // see if we have a known gradient fill
-            if (parser.gradient_map_.count(id) > 0)
-            {
-                parser.path_.add_fill_gradient(parser.gradient_map_[id]);
-            }
-            else if (parser.node_cache_.count(id) > 0)
-            {
-                // try parsing again
-                auto const* gradient_node = parser.node_cache_[id];
-                traverse_tree(parser, gradient_node);
-                if (parser.gradient_map_.count(id) > 0)
-                {
-                    parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
-                }
-                else
-                {
-                    std::stringstream ss;
-                    ss << "Failed to find gradient fill: " << id;
-                    parser.err_handler().on_error(ss.str());
-                }
-            }
-            else
-            {
-                std::stringstream ss;
-                ss << "Failed to find gradient fill: " << id;
-                parser.err_handler().on_error(ss.str());
-            }
-        }
-        else
-        {
-            parser.path_.fill(parse_color_agg(parser.err_handler(), value));
-        }
+        parser.path_.stroke_none();
     }
-    else if (std::strcmp(name,"fill-opacity") == 0)
+    else if (parse_id_from_url(value, id))
     {
-        parser.path_.fill_opacity(parse_double(parser.err_handler(), value));
-    }
-    else if (std::strcmp(name, "fill-rule") == 0)
-    {
-        if (std::strcmp(value, "evenodd") == 0)
+        // see if we have a known gradient fill
+        if (parser.gradient_map_.count(id) > 0)
         {
-            parser.path_.even_odd(true);
+            parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
         }
-    }
-    else if (std::strcmp(name, "stroke") == 0)
-    {
-        std::string id;
-        if (std::strcmp(value, "none") == 0)
+        else if (parser.node_cache_.count(id) > 0)
         {
-            parser.path_.stroke_none();
-        }
-        else if (parse_id_from_url(value, id))
-        {
-            // see if we have a known gradient fill
+            // try parsing again
+            auto const* gradient_node = parser.node_cache_[id];
+            traverse_tree(parser, gradient_node);
             if (parser.gradient_map_.count(id) > 0)
             {
                 parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
-            }
-            else if (parser.node_cache_.count(id) > 0)
-            {
-                // try parsing again
-                auto const* gradient_node = parser.node_cache_[id];
-                traverse_tree(parser, gradient_node);
-                if (parser.gradient_map_.count(id) > 0)
-                {
-                    parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
-                }
-                else
-                {
-                    std::stringstream ss;
-                    ss << "Failed to find gradient stroke: " << id;
-                    parser.err_handler().on_error(ss.str());
-                }
             }
             else
             {
@@ -481,69 +421,145 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         }
         else
         {
-            parser.path_.stroke(parse_color_agg(parser.err_handler(), value));
+            std::stringstream ss;
+            ss << "Failed to find gradient stroke: " << id;
+            parser.err_handler().on_error(ss.str());
         }
     }
-    else if (std::strcmp(name, "stroke-width") == 0)
+    else
     {
+        parser.path_.stroke(parse_color_agg(parser.err_handler(), value));
+    }
+}
+
+void parse_fill(svg_parser& parser, char const* value)
+{
+    std::string id;
+    if (std::strcmp(value, "none") == 0)
+    {
+        parser.path_.fill_none();
+    }
+    else if (parse_id_from_url(value, id))
+    {
+        // see if we have a known gradient fill
+        if (parser.gradient_map_.count(id) > 0)
+        {
+            parser.path_.add_fill_gradient(parser.gradient_map_[id]);
+        }
+        else if (parser.node_cache_.count(id) > 0)
+        {
+            // try parsing again
+            auto const* gradient_node = parser.node_cache_[id];
+            traverse_tree(parser, gradient_node);
+            if (parser.gradient_map_.count(id) > 0)
+            {
+                parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << "Failed to find gradient fill: " << id;
+                parser.err_handler().on_error(ss.str());
+            }
+        }
+        else
+        {
+            std::stringstream ss;
+            ss << "Failed to find gradient fill: " << id;
+            parser.err_handler().on_error(ss.str());
+        }
+    }
+    else
+    {
+        parser.path_.fill(parse_color_agg(parser.err_handler(), value));
+    }
+}
+
+void parse_transform(svg_parser & parser, char const* value)
+{
+    agg::trans_affine tr;
+    mapnik::svg::parse_svg_transform(value,tr);
+    parser.path_.transform().premultiply(tr);
+}
+
+void parse_sroke_dash(svg_parser & parser, char const* value)
+{
+    dash_array dash;
+    if (util::parse_dasharray(value, dash))
+    {
+        parser.path_.dash_array(std::move(dash));
+    }
+}
+
+void parse_attr(svg_parser & parser, char const* name, char const* value )
+{
+    switch (name_to_int(name))
+    {
+    case name_to_int("transform"):
+        parse_transform(parser, value);
+        break;
+    case name_to_int("fill"):
+        parse_fill(parser, value);
+        break;
+    case name_to_int("fill-opacity"):
+        parser.path_.fill_opacity(parse_double(parser.err_handler(), value));
+        break;
+    case name_to_int("fill-rule"):
+        if (std::strcmp(value, "evenodd") == 0)
+        {
+            parser.path_.even_odd(true);
+        }
+        break;
+    case name_to_int("stroke"):
+        parse_stroke(parser, value);
+        break;
+    case name_to_int("stroke-width"):
         bool percent;
         parser.path_.stroke_width(parse_svg_value(parser.err_handler(), value, percent));
-    }
-    else if (std::strcmp(name, "stroke-opacity") == 0)
-    {
+        break;
+    case name_to_int("stroke-opacity"):
         parser.path_.stroke_opacity(parse_double(parser.err_handler(), value));
-    }
-    else if(std::strcmp(name, "stroke-linecap") == 0)
-    {
+        break;
+    case name_to_int("stroke-linecap"):
         if(std::strcmp(value, "butt") == 0)
             parser.path_.line_cap(agg::butt_cap);
         else if(std::strcmp(value, "round") == 0)
             parser.path_.line_cap(agg::round_cap);
         else if(std::strcmp(value, "square") == 0)
             parser.path_.line_cap(agg::square_cap);
-    }
-    else if(std::strcmp(name, "stroke-linejoin") == 0)
-    {
-        if(std::strcmp(value, "miter") == 0)
+        break;
+    case name_to_int("stroke-linejoin"):
+        if (std::strcmp(value, "miter") == 0)
             parser.path_.line_join(agg::miter_join);
-        else if(std::strcmp(value, "round") == 0)
+        else if (std::strcmp(value, "round") == 0)
             parser.path_.line_join(agg::round_join);
-        else if(std::strcmp(value, "bevel") == 0)
+        else if (std::strcmp(value, "bevel") == 0)
             parser.path_.line_join(agg::bevel_join);
-    }
-    else if(std::strcmp(name, "stroke-miterlimit") == 0)
-    {
+        break;
+    case name_to_int("stroke-miterlimit"):
         parser.path_.miter_limit(parse_double(parser.err_handler(),value));
-    }
-    else if (std::strcmp(name,"stroke-dasharray") == 0)
-    {
-        dash_array dash;
-        if (util::parse_dasharray(value, dash))
-        {
-            parser.path_.dash_array(std::move(dash));
-        }
-    }
-    else if (std::strcmp(name,"stroke-dashoffset") == 0)
-    {
-        double offset = parse_double(parser.err_handler(), value);
-        parser.path_.dash_offset(offset);
-    }
-    else if(std::strcmp(name,  "opacity") == 0)
-    {
-        double opacity = parse_double(parser.err_handler(), value);
-        parser.path_.opacity(opacity);
-    }
-    else if (std::strcmp(name,  "visibility") == 0)
-    {
+        break;
+    case name_to_int("stroke-dasharray"):
+        parse_stroke_dash(parser, value);
+        break;
+    case name_to_int("stroke-dashoffset"):
+        parser.path_.dash_offset(parse_double(parser.err_handler(), value));
+        break;
+    case name_to_int("opacity"):
+        parser.path_.opacity(parse_double(parser.err_handler(), value));
+        break;
+    case name_to_int("visibility"):
         parser.path_.visibility(std::strcmp(value,  "hidden") != 0);
-    }
-    else if (std::strcmp(name,  "display") == 0  && std::strcmp(value,  "none") == 0)
-    {
-        parser.path_.display(false);
-    }
-    else
-    {
+        break;
+    case name_to_int("display"):
+        if (std::strcmp(value,  "none") == 0)
+        {
+            parser.path_.display(false);
+        }
+        break;
+    default:
         //parser.err_handler().on_error(std::string("Unsupported attribute:\"") + name);
+        break;
     }
 }
 
@@ -658,6 +674,8 @@ void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 auto const* base_node = parser.node_cache_[id];
                 double x = 0.0;
                 double y = 0.0;
+                double w = 0.0;
+                double h = 0.0;
                 bool percent = false;
                 attr = node->first_attribute("x");
                 if (attr != nullptr)
@@ -670,7 +688,33 @@ void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 {
                     y = parse_svg_value(parser.err_handler(), attr->value(), percent);
                 }
-                parser.path_.transform().premultiply(agg::trans_affine_translation(x, y));
+
+                attr = node->first_attribute("width");
+                if (attr != nullptr)
+                {
+                    w = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                }
+                attr = node->first_attribute("height");
+                if (attr)
+                {
+                    h = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                }
+                agg::trans_affine t{};
+                if (w != 0.0 && h != 0.0)
+                {
+                    if(w < 0.0)
+                    {
+                        parser.err_handler().on_error("parse_use: Invalid width");
+                    }
+                    else if(h < 0.0)
+                    {
+                        parser.err_handler().on_error("parse_use: Invalid height");
+                    }
+                    double scale = std::min(double(w/parser.path_.width()), double(h/parser.path_.height()));
+                    t *= agg::trans_affine_scaling(scale);
+                }
+                t *= agg::trans_affine_translation(x, y);
+                parser.path_.transform().premultiply(t);
                 traverse_tree(parser, base_node);
             }
         }
