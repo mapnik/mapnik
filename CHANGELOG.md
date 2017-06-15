@@ -6,6 +6,21 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.15
+
+Released: June 15, 2017
+
+#### Summary
+
+(Packaged from xxxxxxx)
+
+- Restored `filter_factor` logic in `gdal.input` and added to `raster.input` (#3699)
+   (updated tests https://github.com/mapnik/test-data-visual/commit/fd518f1f512b8aea4ac740c2ce12c249616a291c)
+- Fixed bug related to rows swapping implementation in `tiff_reader` ref #3679
+   (updated visual tests to catch this regression in the future
+      https://github.com/mapnik/test-data-visual/commit/be0ba965cd2240576a8edfca84801cbb7a4832d6)
+- TIFF I/O - port memory mapped based I/O from master
+
 ## 3.0.14
 
 Released: June 5, 2017
