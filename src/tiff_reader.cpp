@@ -446,7 +446,6 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
         read_tiled<image_type>(x0, y0, data);
         return image_any(std::move(data));
     }
-    // TODO: temp disable and default to `scanline` method for stripped images.
     else if (read_method_ == stripped)
     {
         image_type data(width, height);
