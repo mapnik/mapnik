@@ -52,7 +52,7 @@ struct timer_metrics {
     double wall_clock_elapsed;
 };
 
-typedef std::unordered_map<std::string, timer_metrics> metrics_hash_t;
+using metrics_hash_t = std::unordered_map<std::string, timer_metrics>;
 
 class MAPNIK_DECL timer_stats : public singleton<timer_stats, CreateStatic>
 {
