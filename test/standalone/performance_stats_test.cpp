@@ -8,7 +8,7 @@
 
 TEST_CASE("performance_stats") {
 SECTION("collect_and_flush") {
-    CHECK(mapnik::timer_stats::instance().flush().length() == 0);
+    CHECK(mapnik::timer_stats::instance().flush().size() == 0);
     {
         mapnik::stats_timer __stats__("dummy::sleep");
         usleep(10000);
@@ -28,9 +28,11 @@ SECTION("collect_and_flush") {
     }
     __stats__.stop();
 
-    std::string out = mapnik::timer_stats::instance().flush();
-    CHECK(out.length() > 0);
-    std::cout << out;
-    CHECK(mapnik::timer_stats::instance().flush().length() == 0);
+    auto metrics = mapnik::timer_stats::instance().flush();
+    CHECK(metrics.size() == 2);
+    CHECK(metrics["dummy::sleep"].cpu_elapsed <= metrics["dummy::sleep"].wall_clock_elapsed);
+    CHECK(metrics["dummy::sleep"].cpu_elapsed <= metrics["busy::wait"].cpu_elapsed);
+
+    CHECK(mapnik::timer_stats::instance().flush().size() == 0);
 }
 }
