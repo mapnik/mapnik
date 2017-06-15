@@ -31,7 +31,10 @@ SECTION("collect_and_flush") {
     auto metrics = mapnik::timer_stats::instance().flush();
     CHECK(metrics.size() == 2);
     CHECK(metrics["dummy::sleep"].cpu_elapsed <= metrics["dummy::sleep"].wall_clock_elapsed);
-    CHECK(metrics["dummy::sleep"].cpu_elapsed <= metrics["busy::wait"].cpu_elapsed);
+    CHECK(metrics["dummy::sleep"].cpu_elapsed >= 0);
+    CHECK(metrics["dummy::sleep"].wall_clock_elapsed >= 0);
+    CHECK(metrics["busy::wait"].cpu_elapsed >= 0);
+    CHECK(metrics["busy::wait"].wall_clock_elapsed >= 0);
 
     CHECK(mapnik::timer_stats::instance().flush().size() == 0);
 }
