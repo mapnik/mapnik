@@ -69,7 +69,7 @@ metrics_hash_t timer_stats::dump() {
 }
 
 metrics_hash_t timer_stats::flush() {
-    metrics_hash_t out = dump();
+    metrics_hash_t out(dump());
     reset_all();
     return out;
 }
