@@ -11,11 +11,17 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/fs.hpp>
-
+#include <boost/interprocess/streams/bufferstream.hpp>
 #include "../../../src/tiff_reader.cpp"
 
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+using source_type = boost::interprocess::ibufferstream;
+#else
+using source_type = std::filebuf;
+#endif
+
 #define TIFF_ASSERT(filename)                                           \
-    mapnik::tiff_reader<std::filebuf> tiff_reader(filename);            \
+    mapnik::tiff_reader<source_type> tiff_reader(filename);            \
     REQUIRE( tiff_reader.width() == 256 );                              \
     REQUIRE( tiff_reader.height() == 256 );                             \
     REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG );      \
@@ -141,7 +147,7 @@ void test_tiff_reader(std::string const& pattern)
         if (boost::iends_with(path,".tif")
             && boost::istarts_with(mapnik::util::basename(path), pattern))
         {
-            mapnik::tiff_reader<std::filebuf> tiff_reader(path);
+            mapnik::tiff_reader<source_type> tiff_reader(path);
             auto width = tiff_reader.width();
             auto height = tiff_reader.height();
             {
@@ -180,7 +186,7 @@ TEST_CASE("tiff io")
     SECTION("scan rgb8 striped")
     {
         std::string filename("./test/data/tiff/scan_512x512_rgb8_striped.tif");
-        mapnik::tiff_reader<std::filebuf> tiff_reader(filename);
+        mapnik::tiff_reader<source_type> tiff_reader(filename);
         REQUIRE( tiff_reader.width() == 512 );
         REQUIRE( tiff_reader.height() == 512 );
         REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG );
@@ -210,7 +216,7 @@ TEST_CASE("tiff io")
 
     SECTION("scan rgb8 tiled") {
         std::string filename("./test/data/tiff/scan_512x512_rgb8_tiled.tif");
-        mapnik::tiff_reader<std::filebuf> tiff_reader(filename);
+        mapnik::tiff_reader<source_type> tiff_reader(filename);
         REQUIRE( tiff_reader.width() == 512 );
         REQUIRE( tiff_reader.height() == 512 );
         REQUIRE( tiff_reader.planar_config() == PLANARCONFIG_CONTIG );

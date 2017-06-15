@@ -29,11 +29,20 @@ extern "C"
 #include <tiffio.h>
 }
 
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
+#pragma GCC diagnostic pop
+#include <mapnik/mapped_memory_cache.hpp>
+#endif
+
 // stl
 #include <memory>
 #include <fstream>
 
-namespace mapnik { namespace impl {
+namespace mapnik { namespace detail {
 
 static toff_t tiff_seek_proc(thandle_t handle, toff_t off, int whence)
 {
@@ -93,6 +102,19 @@ static int tiff_map_proc(thandle_t, tdata_t* , toff_t*)
     return 0;
 }
 
+template <typename T>
+struct tiff_io_traits
+{
+    using input_stream_type = std::istream;
+};
+
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+template <>
+struct tiff_io_traits<boost::interprocess::ibufferstream>
+{
+    using input_stream_type = boost::interprocess::ibufferstream;
+};
+#endif
 }
 
 template <typename T>
@@ -100,16 +122,16 @@ class tiff_reader : public image_reader
 {
     using tiff_ptr = std::shared_ptr<TIFF>;
     using source_type = T;
-    using input_stream = std::istream;
+    using input_stream = typename detail::tiff_io_traits<source_type>::input_stream_type;
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    mapnik::mapped_region_ptr mapped_region_;
+#endif
 
     struct tiff_closer
     {
         void operator() (TIFF * tif)
         {
-            if (tif != 0)
-            {
-                TIFFClose(tif);
-            }
+            if (tif != 0) TIFFClose(tif);
         }
     };
 
@@ -183,7 +205,11 @@ namespace
 
 image_reader* create_tiff_reader(std::string const& filename)
 {
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    return new tiff_reader<boost::interprocess::ibufferstream>(filename);
+#else
     return new tiff_reader<std::filebuf>(filename);
+#endif
 }
 
 image_reader* create_tiff_reader2(char const * data, std::size_t size)
@@ -198,27 +224,49 @@ const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
 
 template <typename T>
 tiff_reader<T>::tiff_reader(std::string const& filename)
-    : source_(),
-      stream_(&source_),
-      tif_(nullptr),
-      read_method_(generic),
-      rows_per_strip_(0),
-      tile_width_(0),
-      tile_height_(0),
-      width_(0),
-      height_(0),
-      bps_(0),
-      sample_format_(SAMPLEFORMAT_UINT),
-      photometric_(0),
-      bands_(1),
-      planar_config_(PLANARCONFIG_CONTIG),
-      compression_(COMPRESSION_NONE),
-      has_alpha_(false),
-      is_tiled_(false)
+    :
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    stream_(),
+#else
+    source_(),
+    stream_(&source_),
+#endif
+
+    tif_(nullptr),
+    read_method_(generic),
+    rows_per_strip_(0),
+    tile_width_(0),
+    tile_height_(0),
+    width_(0),
+    height_(0),
+    bps_(0),
+    sample_format_(SAMPLEFORMAT_UINT),
+    photometric_(0),
+    bands_(1),
+    planar_config_(PLANARCONFIG_CONTIG),
+    compression_(COMPRESSION_NONE),
+    has_alpha_(false),
+    is_tiled_(false)
 {
-    source_.open(filename, std::ios_base::in | std::ios_base::binary);
-    if (!stream_) throw image_reader_exception("TIFF reader: cannot open file "+ filename);
-    init();
+
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+     boost::optional<mapnik::mapped_region_ptr> memory =
+         mapnik::mapped_memory_cache::instance().find(filename,true);
+
+     if (memory)
+     {
+         mapped_region_ = *memory;
+         stream_.buffer(static_cast<char*>(mapped_region_->get_address()),mapped_region_->get_size());
+     }
+     else
+     {
+         throw image_reader_exception("could not create file mapping for " + filename);
+     }
+#else
+     source_.open(filename, std::ios_base::in | std::ios_base::binary);
+#endif
+     if (!stream_) throw image_reader_exception("TIFF reader: cannot open file " + filename);
+     init();
 }
 
 template <typename T>
@@ -303,7 +351,7 @@ void tiff_reader<T>::init()
         if (extrasamples > 0 &&
             sampleinfo[0] == EXTRASAMPLE_UNSPECIFIED)
         {
-            throw std::runtime_error("Unspecified provided for extra samples to tiff reader.");
+            throw image_reader_exception("Unspecified provided for extra samples to tiff reader.");
         }
     }
     // Try extracting bounding box from geoTIFF tags
@@ -398,7 +446,6 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
         read_tiled<image_type>(x0, y0, data);
         return image_any(std::move(data));
     }
-    // TODO: temp disable and default to `scanline` method for stripped images.
     else if (read_method_ == stripped)
     {
         image_type data(width, height);
@@ -558,7 +605,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -576,7 +623,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -598,7 +645,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -620,7 +667,7 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
             }
             default:
             {
-                throw std::runtime_error("tiff_reader: This sample format is not supported for this bits per sample");
+                throw image_reader_exception("tiff_reader: This sample format is not supported for this bits per sample");
             }
             }
         }
@@ -649,7 +696,7 @@ template <typename T>
 template <typename ImageData>
 void tiff_reader<T>::read_generic(std::size_t, std::size_t, ImageData &)
 {
-    throw std::runtime_error("tiff_reader: TODO - tiff is not stripped or tiled");
+    throw image_reader_exception("tiff_reader: TODO - tiff is not stripped or tiled");
 }
 
 template <typename T>
@@ -782,13 +829,13 @@ TIFF* tiff_reader<T>::open(std::istream & input)
     {
         tif_ = tiff_ptr(TIFFClientOpen("tiff_input_stream", "rcm",
                                        reinterpret_cast<thandle_t>(&input),
-                                       impl::tiff_read_proc,
-                                       impl::tiff_write_proc,
-                                       impl::tiff_seek_proc,
-                                       impl::tiff_close_proc,
-                                       impl::tiff_size_proc,
-                                       impl::tiff_map_proc,
-                                       impl::tiff_unmap_proc), tiff_closer());
+                                       detail::tiff_read_proc,
+                                       detail::tiff_write_proc,
+                                       detail::tiff_seek_proc,
+                                       detail::tiff_close_proc,
+                                       detail::tiff_size_proc,
+                                       detail::tiff_map_proc,
+                                       detail::tiff_unmap_proc), tiff_closer());
     }
     return tif_.get();
 }
