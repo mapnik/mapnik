@@ -36,6 +36,7 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/safe_cast.hpp>
+#include <mapnik/performance_stats.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
 #endif
@@ -61,6 +62,7 @@ MAPNIK_DECL std::string save_to_string(T const& image,
                                        std::string const& type,
                                        rgba_palette const& palette)
 {
+    mapnik::stats_timer __stats_timer__("save_to_string");
     std::ostringstream ss(std::ios::out|std::ios::binary);
     save_to_stream(image, ss, type, palette);
     return ss.str();
@@ -70,6 +72,7 @@ template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
                                        std::string const& type)
 {
+    mapnik::stats_timer __stats_timer__("save_to_string");
     std::ostringstream ss(std::ios::out|std::ios::binary);
     save_to_stream(image, ss, type);
     return ss.str();
