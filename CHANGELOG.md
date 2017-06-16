@@ -8,11 +8,11 @@ For a complete change history, see the git log.
 
 ## 3.0.15
 
-Released: June 15, 2017
+Released: June 16, 2017
 
 #### Summary
 
-(Packaged from xxxxxxx)
+(Packaged from 6e6cf84)
 
 - Restored `filter_factor` logic in `gdal.input` and added to `raster.input` (#3699)
    (updated tests https://github.com/mapnik/test-data-visual/commit/fd518f1f512b8aea4ac740c2ce12c249616a291c)
