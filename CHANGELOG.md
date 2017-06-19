@@ -6,12 +6,36 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## 3.0.x
+## 3.0.15
+
+Released: June 16, 2017
+
+#### Summary
+
+(Packaged from 6e6cf84)
+
+- Restored `filter_factor` logic in `gdal.input` and added to `raster.input` (#3699)
+   (updated tests https://github.com/mapnik/test-data-visual/commit/fd518f1f512b8aea4ac740c2ce12c249616a291c)
+- Fixed bug related to rows swapping implementation in `tiff_reader` ref #3679
+   (updated visual tests to catch this regression in the future
+      https://github.com/mapnik/test-data-visual/commit/be0ba965cd2240576a8edfca84801cbb7a4832d6)
+- TIFF I/O - port memory mapped based I/O from master
+
+## 3.0.14
+
+Released: June 5, 2017
+
+(Packaged from 2b42e17)
 
 #### Summary
 
 - Fixed problems with high levels of overzooming in the GDAL and raster plugin where data would be slightly offset
 - High levels of overzooming on raster data no longer results in the return of a transparent image.
+- Fixed bug in `mapnik::util::file::data()` (a220bda05d2aa1)
+- TIFF I/O - added support for grey scale multiband images + fixed and made generic `read_stripped` and `read_generic`.
+- shapeindex - return error code when no features can read from shapefile (#3198)
+- Upgrade Scons to `2.5.1`
+- Fixed bug (typo) in `raster_featureset.cpp` (#3696)
 
 ## 3.0.13
 
@@ -26,7 +50,7 @@ Released: February 8, 2017
 - GeoJSON: expose `num_features_to_query` datasource parameter + unit test (#3515)
 - Fixed intersecting extents in different projections (PR #3525 )
 - Fixed `blur` implementation by taking into account `scale_factor`
-- pgraster.input - use 2D box for pgraster bounding box (PR #3551)
+- postgis.input - use 2D box for pgraster bounding box (PR #3551)
 - Fixed GroupSymbolizer PairLayout with 3+ items (#3526)
 - Simplified `hash` implementation (204d30e58d3553278ab6bcda2d4122b0f13f6392)
 - Simplified `mapnik::value` conversion rules (#3570)
