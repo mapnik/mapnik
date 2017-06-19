@@ -71,7 +71,7 @@ function check_and_tag() {
         step "test data already tagged, no need to initialize submodule"
     else
         step "tagging test data"
-        git submodule update --depth 100 --init ${REPO_DIR}
+        git submodule update --init ${REPO_DIR}
         cd ${REPO_DIR}/
         git remote set-url origin git@github.com:mapnik/${REPO_NAME}
         git tag ${MAPNIK_VERSION} -a -m "tagging for ${MAPNIK_VERSION}"
