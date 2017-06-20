@@ -90,11 +90,7 @@ stats_timer::~stats_timer()
 void stats_timer::stop() const
 {
     timer::stop();
-    try
-        {
-            timer_stats::instance().add(metric_name_, cpu_elapsed(), wall_clock_elapsed());
-        }
-    catch (...) {} // eat any exceptions
+    timer_stats::instance().add(metric_name_, cpu_elapsed(), wall_clock_elapsed());
 }
 
 void stats_timer::discard()
