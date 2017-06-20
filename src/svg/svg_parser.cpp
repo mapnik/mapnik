@@ -74,9 +74,10 @@ BOOST_FUSION_ADAPT_STRUCT (
     (double, y1)
     )
 
+
 namespace mapnik { namespace svg {
 
-namespace rapidxml = boost::property_tree::detail::rapidxml;
+    namespace rapidxml = boost::property_tree::detail::rapidxml;
 
     bool traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
     void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node);
@@ -129,6 +130,13 @@ boost::property_tree::detail::rapidxml::xml_attribute<char> const * parse_id(svg
         parser.node_cache_.emplace(id_attr->value(), node);
     }
     return id_attr;
+}
+
+boost::property_tree::detail::rapidxml::xml_attribute<char> const * parse_href(rapidxml::xml_node<char> const* node)
+{
+    auto const* attr = node->first_attribute("xlink:href");
+    if (attr == nullptr) attr = node->first_attribute("href");
+    return attr;
 }
 
 template <typename T>
@@ -662,7 +670,7 @@ void parse_path(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
 void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    auto * attr = node->first_attribute("xlink:href");
+    auto * attr = parse_href(node);
     if (attr)
     {
         auto const* value = attr->value();
@@ -1019,7 +1027,7 @@ void parse_gradient_stop(svg_parser & parser, mapnik::gradient& gr, rapidxml::xm
 bool parse_common_gradient(svg_parser & parser, std::string const& id, mapnik::gradient& gr, rapidxml::xml_node<char> const* node)
 {
     // check if we should inherit from another tag
-    auto * attr = node->first_attribute("xlink:href");
+    auto * attr = parse_href(node);
     if (attr != nullptr)
     {
         auto const* value = attr->value();
