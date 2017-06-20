@@ -34,7 +34,6 @@ void timer_stats::add(std::string const& metric_name, double cpu_elapsed, double
     timer_metrics& metrics = metrics_[metric_name];
     metrics.cpu_elapsed += cpu_elapsed;
     metrics.wall_clock_elapsed += wall_clock_elapsed;
-    metrics_[metric_name] = metrics;
 }
 
 timer_metrics timer_stats::get(std::string const& metric_name)
