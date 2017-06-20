@@ -61,15 +61,15 @@ void timer_stats::reset_all()
     metrics_.clear();
 }
 
-metrics_hash_t timer_stats::dump() {
+timer_stats::metrics_hash_t timer_stats::dump() {
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(metrics_mutex_);
 #endif
     return metrics_;
 }
 
-metrics_hash_t timer_stats::flush() {
-    metrics_hash_t out(dump());
+timer_stats::metrics_hash_t timer_stats::flush() {
+    timer_stats::metrics_hash_t out(dump());
     reset_all();
     return out;
 }
