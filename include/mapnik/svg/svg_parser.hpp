@@ -73,6 +73,7 @@ public:
     bool strict_;
     std::map<std::string, gradient> gradient_map_;
     std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> node_cache_;
+    agg::trans_affine viewbox_tr_{};
     error_handler err_handler_;
 };
 
