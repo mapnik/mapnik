@@ -61,8 +61,8 @@ struct viewbox
 {
     double x0;
     double y0;
-    double x1;
-    double y1;
+    double width;
+    double height;
 };
 }}
 
@@ -70,8 +70,8 @@ BOOST_FUSION_ADAPT_STRUCT (
     mapnik::svg::viewbox,
     (double, x0)
     (double, y0)
-    (double, x1)
-    (double, y1)
+    (double, width)
+    (double, height)
     )
 
 
@@ -368,24 +368,31 @@ void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<cha
     switch (name_to_int(name))
     {
     case name_to_int("path"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_path(parser, node);
         break;
     case name_to_int("polygon"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_polygon(parser, node);
         break;
     case name_to_int("polyline"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_polyline(parser, node);
         break;
     case name_to_int("line"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_line(parser, node);
         break;
     case name_to_int("rect"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_rect(parser, node);
         break;
     case name_to_int("circle"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_circle(parser, node);
         break;
     case name_to_int("ellipse"):
+        parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_ellipse(parser, node);
         break;
     case name_to_int("svg"):
@@ -615,28 +622,49 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
         height = parse_svg_value(parser.err_handler(), height_attr->value(), has_percent_height);
     }
+
     auto const* viewbox_attr = node->first_attribute("viewBox");
     if (viewbox_attr)
     {
         has_viewbox = parse_viewbox(parser.err_handler(), viewbox_attr->value(), vbox);
-    }
+        if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
+        {
+            agg::trans_affine t{};
+            double sx = width / vbox.width;
+            double sy = height / vbox.height;
+            double scale = std::min(sx, sy);
+            // xMidYMid (the default)
+            t = agg::trans_affine_scaling(scale, scale) * t;
+            double ratio1 = vbox.width / vbox.height;
+            double ratio2 = width / height;
 
+            if (ratio1 > ratio2)
+            {
+                t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
+            }
+            else if (ratio2 > ratio1)
+            {
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0) * t;
+            }
+            t = agg::trans_affine_translation(-vbox.x0, -vbox.y0) * t;
+            parser.viewbox_tr_ = t;
+        }
+    }
     if (has_percent_width && !has_percent_height && has_viewbox)
     {
-        aspect_ratio = vbox.x1 / vbox.y1;
+        aspect_ratio = vbox.width / vbox.height;
         width = aspect_ratio * height;
     }
     else if (!has_percent_width && has_percent_height && has_viewbox)
     {
-        aspect_ratio = vbox.x1 / vbox.y1;
+        aspect_ratio = vbox.width/vbox.height;
         height = height / aspect_ratio;
     }
     else if (has_percent_width && has_percent_height && has_viewbox)
     {
-        width = vbox.x1;
-        height = vbox.y1;
+        width = vbox.width;
+        height = vbox.height;
     }
-
     parser.path_.set_dimensions(width, height);
 }
 
@@ -701,26 +729,31 @@ void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 if (attr != nullptr)
                 {
                     w = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                    if (percent) w *= parser.path_.width();
                 }
                 attr = node->first_attribute("height");
                 if (attr)
                 {
                     h = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                    if (percent) h *= parser.path_.height();
                 }
+
                 agg::trans_affine t{};
-                if (w != 0.0 && h != 0.0)
+
+                if (!node->first_attribute("transform") && w != 0.0 && h != 0.0)
                 {
-                    if(w < 0.0)
+                    if (w < 0.0)
                     {
                         parser.err_handler().on_error("parse_use: Invalid width");
                     }
-                    else if(h < 0.0)
+                    else if (h < 0.0)
                     {
                         parser.err_handler().on_error("parse_use: Invalid height");
                     }
-                    double scale = std::min(double(w/parser.path_.width()), double(h/parser.path_.height()));
+                    double scale = std::min(double(w / parser.path_.width()), double(h / parser.path_.height()));
                     t *= agg::trans_affine_scaling(scale);
                 }
+
                 t *= agg::trans_affine_translation(x, y);
                 parser.path_.transform().premultiply(t);
                 traverse_tree(parser, base_node);
