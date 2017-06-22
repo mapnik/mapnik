@@ -74,29 +74,28 @@ BOOST_FUSION_ADAPT_STRUCT (
     (double, height)
     )
 
-
 namespace mapnik { namespace svg {
 
-    namespace rapidxml = boost::property_tree::detail::rapidxml;
+namespace rapidxml = boost::property_tree::detail::rapidxml;
 
-    bool traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char> const* node);
-    void parse_use(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_polygon(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_polyline(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_line(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_rect(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_circle(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_ellipse(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_linear_gradient(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    bool parse_common_gradient(svg_parser& parser, std::string const& id, mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
-    void parse_gradient_stop(svg_parser& parser, mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
-    void parse_attr(svg_parser& parser, rapidxml::xml_node<char> const* node);
-    void parse_attr(svg_parser& parser, char const* name, char const* value);
+bool traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char> const* node);
+void parse_use(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_polygon(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_polyline(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_line(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_rect(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_circle(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_ellipse(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_linear_gradient(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* node);
+bool parse_common_gradient(svg_parser& parser, std::string const& id, mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
+void parse_gradient_stop(svg_parser& parser, mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
+void parse_attr(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void parse_attr(svg_parser& parser, char const* name, char const* value);
 
 namespace { namespace grammar {
 
@@ -182,14 +181,15 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
     x3::symbols<double> units;
     units.add
         ("px", 1.0)
-        ("em", 1.0) // (?)
         ("pt", DPI/72.0)
         ("pc", DPI/6.0)
         ("mm", DPI/25.4)
         ("cm", DPI/2.54)
         ("in", static_cast<double>(DPI))
+        //("em", 1.0/16.0) // default pixel size for body (usually 16px)
+        // ^^ this doesn't work currently as 'e' in 'em' interpreted as part of scientific notation.
         ;
-    const char* cur = str; // phrase_parse modifies the first iterator
+    const char* cur = str; // phrase_parse mutates the first iterator
     const char* end = str + std::strlen(str);
 
     auto apply_value =   [&](auto const& ctx) { val = _attr(ctx); is_percent = false; };
@@ -214,7 +214,7 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
 }
 
 template <typename T, typename V>
-bool parse_viewbox(T & err_handler, const char* str, V & viewbox)
+bool parse_viewbox(T & err_handler, char const* str, V & viewbox)
 {
     namespace x3 = boost::spirit::x3;
     if ( !x3::phrase_parse(str, str + std::strlen(str),
@@ -227,6 +227,56 @@ bool parse_viewbox(T & err_handler, const char* str, V & viewbox)
         return false;
     }
     return true;
+}
+
+enum aspect_ratio_alignment
+{
+    none = 0,
+    xMinYMin,
+    xMidYMin,
+    xMaxYMin,
+    xMinYMid,
+    xMidYMid,
+    xMaxYMid,
+    xMinYMax,
+    xMidYMax,
+    xMaxYMax
+};
+
+template <typename T>
+std::pair<unsigned,bool> parse_preserve_aspect_ratio(T & err_handler, char const* str)
+{
+    namespace x3 = boost::spirit::x3;
+    x3::symbols<unsigned> align;
+    align.add
+        ("none", none)
+        ("xMinYMin", xMinYMin)
+        ("xMidYMin", xMidYMin)
+        ("xMaxYMin", xMaxYMin)
+        ("xMinYMid", xMinYMid)
+        ("xMidYMid", xMidYMid)
+        ("xMaxYMid", xMaxYMid)
+        ("xMinYMax", xMinYMax)
+        ("xMidYMax", xMidYMax)
+        ("xMaxYMax", xMaxYMax);
+
+    std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true };
+    char const* cur = str; // phrase_parse mutates the first iterator
+    char const* end = str + std::strlen(str);
+    auto apply_align = [&](auto const& ctx) { preserve_aspect_ratio.first = _attr(ctx);};
+    auto apply_slice = [&](auto const& ctx) { preserve_aspect_ratio.second = false;};
+    try
+    {
+        x3::phrase_parse(cur, end, -x3::lit("defer") // only applicable to <image> which we don't support currently
+                         > align[apply_align]
+                         > -(x3::lit("meet") | x3::lit("slice")[apply_slice]), x3::space);
+    }
+    catch (x3::expectation_failure<char const*> const& ex)
+    {
+        err_handler.on_error("Failed to parse \"preserveAspectRatio\" attribute: '" + std::string(str)  + "'");
+        return {xMidYMid, true} ; // default
+    }
+    return preserve_aspect_ratio;
 }
 
 bool parse_style (char const* str, grammar::pairs_type & v)
@@ -630,25 +680,67 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
         if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
         {
             agg::trans_affine t{};
+            std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true};
+            auto const* aspect_ratio_attr = node->first_attribute("preserveAspectRatio");
+            if (aspect_ratio_attr)
+            {
+                preserve_aspect_ratio = parse_preserve_aspect_ratio(parser.err_handler(), aspect_ratio_attr->value());
+            }
+
             double sx = width / vbox.width;
             double sy = height / vbox.height;
-            double scale = std::min(sx, sy);
-            // xMidYMid (the default)
-            t = agg::trans_affine_scaling(scale, scale) * t;
-            double ratio1 = vbox.width / vbox.height;
-            double ratio2 = width / height;
-
-            if (ratio1 > ratio2)
+            double scale = preserve_aspect_ratio.second ? std::min(sx, sy) : std::max(sx, sy);
+            switch (preserve_aspect_ratio.first)
             {
+            case none:
+                t = agg::trans_affine_scaling(sx, sy) * t;
+                break;
+            case xMinYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                break;
+            case xMinYMid:
+                t = agg::trans_affine_scaling(scale, scale) * t;
                 t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
-            }
-            else if (ratio2 > ratio1)
-            {
-                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0) * t;
-            }
+                break;
+            case xMinYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            case xMidYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0) * t;
+                break;
+            case xMidYMid: // (the default)
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                  -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMidYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                  -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            case xMaxYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0) * t;
+                break;
+            case xMaxYMid:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                  -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMaxYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                  -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            };
+
             t = agg::trans_affine_translation(-vbox.x0, -vbox.y0) * t;
             parser.viewbox_tr_ = t;
         }
+
+
     }
     if (has_percent_width && !has_percent_height && has_viewbox)
     {
@@ -737,23 +829,21 @@ void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     h = parse_svg_value(parser.err_handler(), attr->value(), percent);
                     if (percent) h *= parser.path_.height();
                 }
-
+                if (w < 0.0)
+                {
+                    parser.err_handler().on_error("parse_use: Invalid width");
+                }
+                else if (h < 0.0)
+                {
+                    parser.err_handler().on_error("parse_use: Invalid height");
+                }
                 agg::trans_affine t{};
-
                 if (!node->first_attribute("transform") && w != 0.0 && h != 0.0)
                 {
-                    if (w < 0.0)
-                    {
-                        parser.err_handler().on_error("parse_use: Invalid width");
-                    }
-                    else if (h < 0.0)
-                    {
-                        parser.err_handler().on_error("parse_use: Invalid height");
-                    }
+                    // FIXME
                     double scale = std::min(double(w / parser.path_.width()), double(h / parser.path_.height()));
                     t *= agg::trans_affine_scaling(scale);
                 }
-
                 t *= agg::trans_affine_translation(x, y);
                 parser.path_.transform().premultiply(t);
                 traverse_tree(parser, base_node);
