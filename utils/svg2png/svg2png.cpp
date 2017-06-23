@@ -69,32 +69,19 @@ struct main_marker_visitor
         agg::scanline_u8 sl;
 
         double opacity = 1;
-        double w = 0;//marker.width();
-        double h = 0;//marker.height();
-        if (w == 0 || h == 0)
-        {
-            // fallback to svg width/height and/or viewBox
-            std::tie(w, h) = marker.dimensions();
-        }
+        double w, h;
+        std::tie(w, h) = marker.dimensions();
         if (verbose_)
         {
             std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
         }
-        // 10 pixel buffer to avoid edge clipping of 100% svg's
         mapnik::image_rgba8 im(static_cast<int>(w + 0.5), static_cast<int>(h + 0.5));
         agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
         pixfmt pixf(buf);
         renderer_base renb(pixf);
 
-        //mapnik::box2d<double> const& bbox = marker.get_data()->bounding_box();
         mapnik::box2d<double> const& bbox = {0, 0, w, h};
-        std::cerr << "BBOX:" << bbox << std::endl;
-        mapnik::coord<double,2> c = bbox.center();
-        // center the svg marker on '0,0'
-        agg::trans_affine mtx = {};//agg::trans_affine_translation(-c.x,-c.y);
-        // render the marker at the center of the marker box
-        //mtx.translate(0.5 * im.width(), 0.5 * im.height());
-
+        agg::trans_affine mtx = {};
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
         mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
