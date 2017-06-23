@@ -52,6 +52,7 @@
 #include <vector>
 #include <cstring>
 #include <fstream>
+#include <array>
 
 namespace mapnik { namespace svg {
 
@@ -97,7 +98,76 @@ void parse_gradient_stop(svg_parser& parser, mapnik::gradient& gr, rapidxml::xml
 void parse_attr(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_attr(svg_parser& parser, char const* name, char const* value);
 
-namespace { namespace grammar {
+namespace {
+
+static std::array<unsigned, 5> unsupported_elements
+{ {name_to_int("symbol"),
+   name_to_int("marker"),
+   name_to_int("view"),
+   name_to_int("text"),
+   name_to_int("a")}
+};
+
+
+static std::array<unsigned, 43> unsupported_attributes
+{ {name_to_int("alignment-baseline"),
+   name_to_int("baseline-shift"),
+   name_to_int("clip"),
+   name_to_int("clip-path"),
+   name_to_int("clip-rule"),
+   name_to_int("color-interpolation"),
+   name_to_int("color-interpolation-filters"),
+   name_to_int("color-profile"),
+   name_to_int("color-rendering"),
+   name_to_int("cursor"),
+   name_to_int("direction"),
+   name_to_int("dominant-baseline"),
+   name_to_int("enable-background"),
+   name_to_int("filter"),
+   name_to_int("flood-color"),
+   name_to_int("flood-opacity"),
+   name_to_int("font-family"),
+   name_to_int("font-size"),
+   name_to_int("font-size-adjust"),
+   name_to_int("font-stretch"),
+   name_to_int("font-style"),
+   name_to_int("font-variant"),
+   name_to_int("font-weight"),
+   name_to_int("glyph-orientation-horizontal"),
+   name_to_int("glyph-orientation-vertical"),
+   name_to_int("image-rendering"),
+   name_to_int("kerning"),
+   name_to_int("letter-spacing"),
+   name_to_int("lighting-color"),
+   name_to_int("marker-end"),
+   name_to_int("marker-mid"),
+   name_to_int("marker-start"),
+   name_to_int("mask"),
+   name_to_int("overflow"),
+   name_to_int("pointer-events"),
+   name_to_int("shape-rendering"),
+   name_to_int("text-anchor"),
+   name_to_int("text-decoration"),
+   name_to_int("text-rendering"),
+   name_to_int("unicode-bidi"),
+   name_to_int("word-spacing"),
+   name_to_int("writing-mode")}
+};
+
+template <typename T>
+void handle_unsupported(svg_parser& parser, T const& ar, char const* name)
+{
+    unsigned element = name_to_int(name);
+    for (auto const& e : ar)
+    {
+        if (e == element)
+        {
+            parser.err_handler().on_error(std::string("Unsupported:\"") + name);
+        }
+    }
+}
+
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
@@ -449,7 +519,7 @@ void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<cha
         parse_dimensions(parser, node);
         break;
     default:
-        //parser.err_handler().on_error(std::string("Unsupported element:\"") + node->name());
+        handle_unsupported(parser, unsupported_elements, name);
         break;
     }
 }
@@ -623,7 +693,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         }
         break;
     default:
-        //parser.err_handler().on_error(std::string("Unsupported attribute:\"") + name);
+        handle_unsupported(parser, unsupported_attributes, name);
         break;
     }
 }
