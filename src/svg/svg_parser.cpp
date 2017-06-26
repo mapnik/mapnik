@@ -102,11 +102,13 @@ void parse_attr(svg_parser& parser, char const* name, char const* value);
 
 namespace {
 
-static std::array<unsigned, 5> const unsupported_elements
+static std::array<unsigned, 7> const unsupported_elements
 { {name_to_int("symbol"),
    name_to_int("marker"),
    name_to_int("view"),
    name_to_int("text"),
+   name_to_int("switch"),
+   name_to_int("image"),
    name_to_int("a")}
 };
 
