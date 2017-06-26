@@ -30,9 +30,12 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 // stl
 #include <map>
+
+namespace boost { namespace property_tree { namespace detail { namespace rapidxml {
+template <typename T> class xml_node;
+}}}}
 
 namespace  mapnik { namespace svg {
 
