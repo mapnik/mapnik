@@ -45,6 +45,7 @@
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #pragma GCC diagnostic pop
 
 #include <string>
@@ -93,14 +94,15 @@ void parse_circle(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_ellipse(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_linear_gradient(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* node);
-bool parse_common_gradient(svg_parser& parser, std::string const& id, mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
+bool parse_common_gradient(svg_parser& parser, std::string const& id,
+                           mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
 void parse_gradient_stop(svg_parser& parser, mapnik::gradient& gr, rapidxml::xml_node<char> const* node);
 void parse_attr(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_attr(svg_parser& parser, char const* name, char const* value);
 
 namespace {
 
-static std::array<unsigned, 5> unsupported_elements
+static std::array<unsigned, 5> const unsupported_elements
 { {name_to_int("symbol"),
    name_to_int("marker"),
    name_to_int("view"),
@@ -109,7 +111,7 @@ static std::array<unsigned, 5> unsupported_elements
 };
 
 
-static std::array<unsigned, 43> unsupported_attributes
+static std::array<unsigned, 43> const unsupported_attributes
 { {name_to_int("alignment-baseline"),
    name_to_int("baseline-shift"),
    name_to_int("clip"),
