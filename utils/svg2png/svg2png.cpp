@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -69,30 +69,19 @@ struct main_marker_visitor
         agg::scanline_u8 sl;
 
         double opacity = 1;
-        int w = marker.width();
-        int h = marker.height();
-        if (w == 0 || h == 0)
-        {
-            // fallback to svg width/height or viewBox
-            std::tie(w, h) = marker.dimensions();
-        }
+        double w, h;
+        std::tie(w, h) = marker.dimensions();
         if (verbose_)
         {
             std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
         }
-        // 10 pixel buffer to avoid edge clipping of 100% svg's
-        mapnik::image_rgba8 im(w+0,h+0);
+        mapnik::image_rgba8 im(static_cast<int>(w + 0.5), static_cast<int>(h + 0.5));
         agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
         pixfmt pixf(buf);
         renderer_base renb(pixf);
 
-        mapnik::box2d<double> const& bbox = marker.get_data()->bounding_box();
-        mapnik::coord<double,2> c = bbox.center();
-        // center the svg marker on '0,0'
-        agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
-        // render the marker at the center of the marker box
-        mtx.translate(0.5 * im.width(), 0.5 * im.height());
-
+        mapnik::box2d<double> const& bbox = {0, 0, w, h};
+        agg::trans_affine mtx = {};
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
         mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
@@ -128,7 +117,7 @@ struct main_marker_visitor
     template <typename T>
     int operator() (T const&) const
     {
-        std::clog << "svg2png error: '" << svg_name_ << "' is not a valid vector!\n";
+        std::clog << "svg2png error: failed to process '" << svg_name_ << "'\n";
         return -1;
     }
 
@@ -144,6 +133,7 @@ int main (int argc,char** argv)
 
     bool verbose = false;
     bool auto_open = false;
+    bool strict = false;
     int status = 0;
     std::vector<std::string> svg_files;
     mapnik::logger::instance().set_severity(mapnik::logger::error);
@@ -155,19 +145,20 @@ int main (int argc,char** argv)
             ("help,h", "produce usage message")
             ("version,V","print version string")
             ("verbose,v","verbose output")
-            ("open","automatically open the file after rendering (os x only)")
+            ("open,o","automatically open the file after rendering (os x only)")
+            ("strict,s","enables strict SVG parsing")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
 
         po::positional_options_description p;
-        p.add("svg",-1);
+        p.add("svg", -1);
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
 
         if (vm.count("version"))
         {
-            std::clog <<"version " << MAPNIK_VERSION_STRING << std::endl;
+            std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
             return 1;
         }
 
@@ -185,6 +176,11 @@ int main (int argc,char** argv)
         if (vm.count("open"))
         {
             auto_open = true;
+        }
+
+        if (vm.count("strict"))
+        {
+            strict = true;
         }
 
         if (vm.count("svg"))
@@ -211,8 +207,7 @@ int main (int argc,char** argv)
             {
                 std::clog << "found: " << svg_name << "\n";
             }
-
-            std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+            std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false, strict);
             main_marker_visitor visitor(svg_name, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
