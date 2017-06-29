@@ -116,6 +116,7 @@ PLUGINS = { # plugins with external dependencies
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'geobuf':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'}
             }
 
