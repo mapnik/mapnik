@@ -486,21 +486,17 @@ private:
     mapnik::geometry::multi_polygon<double> read_multi_polygon(T & pbf, boost::optional<std::vector<int>> const& lengths)
     {
         mapnik::geometry::multi_polygon<double> multi_poly;
-#if 0 // FIXME
         auto size = pbf.varint();
         if (!lengths)
         {
-            //std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
-            mapnik::geometry::polygon<double> poly;
-            read_linear_ring(pbf, 0, size, poly, true);
-            paths.push_back(poly.release());
+            auto poly = read_polygon(pbf, lengths);
+            multi_poly.push_back(std::move(poly));
         }
         else if ((*lengths).size() > 0)
         {
             int j = 1;
             for (int i = 0; i < (*lengths)[0]; ++i)
             {
-                //std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::geometry_type::types::Polygon));
                 mapnik::geometry::polygon<double> poly;
                 for (int k = 0; k < (*lengths)[j]; ++k)
                 {
@@ -512,7 +508,6 @@ private:
                 j += (*lengths)[j] + 1;
             }
         }
-#endif
         return multi_poly;
     }
 
