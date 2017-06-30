@@ -168,9 +168,8 @@ void geobuf_datasource::parse_geobuf(std::uint8_t const* data, std::size_t size)
             {
                 extent_.expand_to_include(box);
             }
+            values.emplace_back(box, std::make_pair(geometry_index, 0));
         }
-
-        values.emplace_back(box, std::make_pair(geometry_index,0));
         ++geometry_index;
     }
     // packing algorithm
