@@ -157,6 +157,7 @@ void composite_color_bitmap(T & pixmap, FT_Bitmap *bitmap, int x, int y, double 
   int scaled_height = bitmap->rows * scale;
   image_rgba8 scaled_image(scaled_width, scaled_height);
   scale_image_agg(scaled_image, image , SCALING_BILINEAR , scale, scale, 0.0, 0.0, 1.0, 0);
+  set_premultiplied_alpha(scaled_image, true);
   composite(pixmap, scaled_image, comp_op, opacity, x, y);
 }
 
