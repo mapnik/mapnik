@@ -354,6 +354,7 @@ private:
     {
         int num_polys = read_integer();
         mapnik::geometry::multi_polygon<double> multi_poly;
+        multi_poly.reserve(num_polys);
         for (int i = 0; i < num_polys; ++i)
         {
             pos_ += 5;
@@ -366,6 +367,7 @@ private:
     {
         int num_geometries = read_integer();
         mapnik::geometry::geometry_collection<double> collection;
+        collection.reserve(num_geometries);
         for (int i = 0; i < num_geometries; ++i)
         {
             pos_ += 1; // skip byte order
