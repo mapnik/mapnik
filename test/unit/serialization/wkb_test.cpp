@@ -129,8 +129,8 @@ TEST_CASE("Well-known-geometries")
             geom_3.emplace_back(0,0);
             geom_3.emplace_back(1,1);
             geom_3.emplace_back(2,2);
-            REQUIRE(mapnik::util::to_wkt(wkt0, geom_2));
-            REQUIRE(mapnik::util::to_wkt(wkt1, geom_3));
+            REQUIRE(mapnik::util::to_wkt(wkt0, mapnik::geometry::geometry<std::int64_t>(geom_2)));
+            REQUIRE(mapnik::util::to_wkt(wkt1, mapnik::geometry::geometry<std::int64_t>(geom_3)));
             if (!mapnik::geometry::is_empty(geom_2) && !mapnik::geometry::is_empty(geom_3))
             {
                 REQUIRE(wkt2 == wkt3);
