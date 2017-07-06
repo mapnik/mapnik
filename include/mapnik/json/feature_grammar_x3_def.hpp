@@ -164,6 +164,15 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
     }
 } geometry_type_symbols;
 
+auto assign_name = [](auto const& ctx)
+{
+    std::get<0>(_val(ctx)) = std::move(_attr(ctx));
+};
+auto assign_value = [](auto const& ctx)
+{
+    std::get<1>(_val(ctx)) = std::move(_attr(ctx));
+};
+
 auto const assign_geometry_type = [] (auto const& ctx)
 {
     std::get<0>(_val(ctx)) = _attr(ctx);
@@ -254,7 +263,7 @@ auto const geometry_tuple_def = (geometry_type[assign_geometry_type]
                                  (omit[geojson_string] > lit(':') > omit[value])) % lit(',');
 
 
-auto const property_def = geojson_string[assign_key] > lit(':') > value[assign_value];
+auto const property_def = geojson_string[assign_name] > lit(':') > value[assign_value];
 
 auto const properties_def = property[assign_property] % lit(',');
 
