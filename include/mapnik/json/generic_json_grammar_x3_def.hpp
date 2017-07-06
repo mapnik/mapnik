@@ -46,22 +46,6 @@ auto make_false = [] (auto const& ctx)
     _val(ctx) = false;
 };
 
-auto assign = [](auto const& ctx)
-{
-    _val(ctx) = _attr(ctx);
-};
-
-auto assign_key = [](auto const& ctx)
-{
-    std::get<0>(_val(ctx)) = _attr(ctx);
-};
-
-auto assign_value = [](auto const& ctx)
-{
-    std::get<1>(_val(ctx)) = _attr(ctx);
-};
-
-
 using x3::lit;
 using x3::string;
 // exported rules
