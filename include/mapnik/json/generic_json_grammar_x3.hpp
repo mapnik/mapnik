@@ -43,17 +43,17 @@ BOOST_SPIRIT_DECLARE(generic_json_grammar_type);
 BOOST_SPIRIT_DECLARE(generic_json_key_value_type);
 }
 
-inline auto assign = [](auto const& ctx)
+auto assign = [](auto const& ctx)
 {
     _val(ctx) = _attr(ctx);
 };
 
-inline auto assign_key = [](auto const& ctx)
+auto assign_key = [](auto const& ctx)
 {
-    std::get<0>(_val(ctx)) = std::move(_attr(ctx));
+    std::get<0>(_val(ctx)) = _attr(ctx);
 };
 
-inline auto assign_value = [](auto const& ctx)
+auto assign_value = [](auto const& ctx)
 {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
