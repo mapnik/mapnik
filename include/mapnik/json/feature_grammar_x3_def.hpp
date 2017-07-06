@@ -164,6 +164,8 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
     }
 } geometry_type_symbols;
 
+namespace {
+
 auto assign_name = [](auto const& ctx)
 {
     std::get<0>(_val(ctx)) = std::move(_attr(ctx));
@@ -172,6 +174,8 @@ auto assign_value = [](auto const& ctx)
 {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
+
+} // VS2017
 
 auto const assign_geometry_type = [] (auto const& ctx)
 {
