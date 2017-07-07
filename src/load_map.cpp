@@ -1354,7 +1354,6 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & node)
             {
                 found_colorizer = true;
                 raster_colorizer_ptr colorizer = std::make_shared<raster_colorizer>();
-                put(raster_sym, keys::colorizer, colorizer);
                 if (parse_raster_colorizer(colorizer, css))
                     put(raster_sym, keys::colorizer, colorizer);
             }
