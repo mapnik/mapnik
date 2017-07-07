@@ -113,7 +113,7 @@ static std::array<unsigned, 7> const unsupported_elements
    name_to_int("a")}
 };
 
-
+#if 0 // disable to reduce verbosity
 static std::array<unsigned, 43> const unsupported_attributes
 { {name_to_int("alignment-baseline"),
    name_to_int("baseline-shift"),
@@ -158,6 +158,8 @@ static std::array<unsigned, 43> const unsupported_attributes
    name_to_int("word-spacing"),
    name_to_int("writing-mode")}
 };
+
+#endif
 
 template <typename T>
 void handle_unsupported(svg_parser& parser, T const& ar, char const* name)
@@ -713,7 +715,8 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         }
         break;
     default:
-        handle_unsupported(parser, unsupported_attributes, name);
+        //handle_unsupported(parser, unsupported_attributes, name);
+        // disable for now to reduce verbosity
         break;
     }
 }
