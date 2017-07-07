@@ -545,7 +545,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             if (alpha)
             {
                 MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: processing alpha band...";
-                if (!raster_has_nodata)
+                if (!raster_has_nodata || (red && green && blue))
                 {
                     raster_io_error = alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 3,
                                                       image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
