@@ -36,6 +36,7 @@ Released: June 5, 2017
 - shapeindex - return error code when no features can read from shapefile (#3198)
 - Upgrade Scons to `2.5.1`
 - Fixed bug (typo) in `raster_featureset.cpp` (#3696)
+- Made `freetype_engine` singleton again. This allows for better control of its life-time. Original interface is preserved via adding static methods (#3688)
 
 ## 3.0.13
 
