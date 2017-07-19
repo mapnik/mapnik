@@ -31,6 +31,8 @@
 // std
 #include <cstdint>
 #include <string>
+// icu
+#include <unicode/unistr.h>
 
 struct UConverter;
 
