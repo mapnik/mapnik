@@ -40,6 +40,7 @@
 #include <mapnik/warning_ignore.hpp>
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
+#include <unicode/uvernum.h>
 #include <unicode/uscript.h>
 #pragma GCC diagnostic pop
 
@@ -55,7 +56,8 @@ static inline hb_script_t _icu_script_to_script(UScriptCode script)
 static inline const uint16_t * uchar_to_utf16(const UChar* src)
 {
    static_assert(sizeof(UChar) == sizeof(uint16_t),"UChar is eq size to uint16_t");
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || (U_ICU_VERSION_MAJOR_NUM >= 59)
+   // ^^ http://site.icu-project.org/download/59#TOC-ICU4C-char16_t1
    return reinterpret_cast<const uint16_t *>(src);
 #else
    return src;
