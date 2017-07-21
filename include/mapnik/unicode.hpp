@@ -32,7 +32,12 @@
 #include <cstdint>
 #include <string>
 // icu
+#if (U_ICU_VERSION_MAJOR_NUM >= 59)
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
+#pragma GCC diagnostic pop
+#endif
 
 struct UConverter;
 
