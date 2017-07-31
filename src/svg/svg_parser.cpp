@@ -80,7 +80,7 @@ namespace mapnik { namespace svg {
 
 namespace rapidxml = boost::property_tree::detail::rapidxml;
 
-bool traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
+void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node);
 void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char> const* node);
@@ -370,7 +370,7 @@ bool parse_id_from_url (char const* str, std::string & id)
                             x3::space);
 }
 
-bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
+void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     auto const* name = node->name();
     switch (node->type())
@@ -466,7 +466,6 @@ bool traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
     default:
         break;
     }
-    return true;
 }
 
 
@@ -1406,7 +1405,7 @@ svg_parser::svg_parser(svg_converter<svg_path_adapter,
 
 svg_parser::~svg_parser() {}
 
-bool svg_parser::parse(std::string const& filename)
+void svg_parser::parse(std::string const& filename)
 {
 #ifdef _WINDOWS
     std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
@@ -1417,8 +1416,7 @@ bool svg_parser::parse(std::string const& filename)
     {
         std::stringstream ss;
         ss << "Unable to open '" << filename << "'";
-        err_handler_.on_error(ss.str());
-        return false;
+        throw std::runtime_error(ss.str());
     }
 
     stream.unsetf(std::ios::skipws);
@@ -1436,8 +1434,7 @@ bool svg_parser::parse(std::string const& filename)
     {
         std::stringstream ss;
         ss << "svg_parser::parse - Unable to parse '" << filename << "'";
-        err_handler_.on_error(ss.str());
-        return false;
+        throw std::runtime_error(ss.str());
     }
 
     for (rapidxml::xml_node<char> const* child = doc.first_node();
@@ -1445,10 +1442,9 @@ bool svg_parser::parse(std::string const& filename)
     {
         traverse_tree(*this, child);
     }
-    return err_handler_.error_messages().empty() ? true : false;
 }
 
-bool svg_parser::parse_from_string(std::string const& svg)
+void svg_parser::parse_from_string(std::string const& svg)
 {
     const int flags = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
     rapidxml::xml_document<> doc;
@@ -1462,15 +1458,13 @@ bool svg_parser::parse_from_string(std::string const& svg)
     {
         std::stringstream ss;
         ss << "Unable to parse '" << svg << "'";
-        err_handler_.on_error(ss.str());
-        return false;
+        throw std::runtime_error(ss.str());
     }
     for (rapidxml::xml_node<char> const* child = doc.first_node();
          child; child = child->next_sibling())
     {
         traverse_tree(*this, child);
     }
-    return err_handler_.error_messages().empty() ? true : false;
 }
 
 svg_parser::error_handler & svg_parser::err_handler()
