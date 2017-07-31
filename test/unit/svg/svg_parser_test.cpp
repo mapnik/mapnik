@@ -44,11 +44,11 @@ namespace // internal
         mapnik::svg::svg_converter_type svg;
         mapnik::svg::svg_parser p;
 
-        test_parser()
+        explicit test_parser(bool strict = false)
             : stl_storage(path.source())
             , svg_path(stl_storage)
             , svg(svg_path, path.attributes())
-            , p(svg)
+            , p(svg, strict)
         {}
 
         mapnik::svg::svg_parser* operator->()
@@ -91,8 +91,14 @@ TEST_CASE("SVG parser") {
         };
 
         test_parser p;
-        REQUIRE(!p->parse(svg_name));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        try
+        {
+            p->parse(svg_name);
+        }
+        catch (std::exception const& ex)
+        {
+            REQUIRE(ex.what() == join(expected_errors));
+        }
     }
 
     SECTION("SVG::parse_from_string syntax error")
@@ -108,8 +114,14 @@ TEST_CASE("SVG parser") {
                         std::istreambuf_iterator<char>());
 
         test_parser p;
-        REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        try
+        {
+            p->parse_from_string(svg_str);
+        }
+        catch (std::exception const& ex)
+        {
+            REQUIRE(ex.what() == join(expected_errors));
+        }
     }
 
     SECTION("SVG::parse_from_string syntax error")
@@ -121,8 +133,14 @@ TEST_CASE("SVG parser") {
         };
 
         test_parser p;
-        REQUIRE(!p->parse(svg_name));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        try
+        {
+            p->parse(svg_name);
+        }
+        catch (std::exception const& ex)
+        {
+            REQUIRE(ex.what() == join(expected_errors));
+        }
     }
 
     SECTION("SVG parser color <fail>")
@@ -140,9 +158,22 @@ TEST_CASE("SVG parser") {
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        test_parser p;
-        REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        {
+            test_parser p;
+            p->parse_from_string(svg_str);
+            REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        }
+        {
+            test_parser p(true);
+            try
+            {
+                p->parse_from_string(svg_str);
+            }
+            catch (std::exception const& ex)
+            {
+                REQUIRE(ex.what() == std::string(expected_errors[0]));
+            }
+        }
     }
 
     SECTION("SVG - cope with erroneous geometries")
@@ -170,9 +201,24 @@ TEST_CASE("SVG parser") {
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        test_parser p;
-        REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        {
+            test_parser p;
+            p->parse_from_string(svg_str);
+            REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        }
+
+        {
+            // strict
+            test_parser p(true);
+            try
+            {
+                p->parse_from_string(svg_str);
+            }
+            catch (std::exception const& ex)
+            {
+                REQUIRE(ex.what() == std::string(expected_errors[0]));
+            }
+        }
     }
 
     SECTION("SVG parser double % <fail>")
@@ -188,9 +234,22 @@ TEST_CASE("SVG parser") {
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        test_parser p;
-        REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        {
+            test_parser p;
+            p->parse_from_string(svg_str);
+            REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        }
+        {
+            test_parser p(true);
+            try
+            {
+                p->parse_from_string(svg_str);
+            }
+            catch (std::exception const& ex)
+            {
+                REQUIRE(ex.what() == std::string(expected_errors[0]));
+            }
+        }
     }
 
     SECTION("SVG parser display=none")
@@ -327,7 +386,7 @@ TEST_CASE("SVG parser") {
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
         test_parser p;
-        REQUIRE(p->parse_from_string(svg_str));
+        p->parse_from_string(svg_str);
         auto width = p.svg.width();
         auto height = p.svg.height();
         REQUIRE(width == 100);
@@ -610,10 +669,22 @@ TEST_CASE("SVG parser") {
             "Failed to find gradient fill: MyGradient",
             "Failed to find gradient stroke: MyGradient",
         };
-
-        test_parser p;
-        REQUIRE(!p->parse(svg_name));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        {
+            test_parser p;
+            p->parse(svg_name);
+            REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        }
+        {
+            test_parser p(true);
+            try
+            {
+                p->parse(svg_name);
+            }
+            catch (std::exception const& ex)
+            {
+                REQUIRE(ex.what() == std::string(expected_errors[0]));
+            }
+        }
     }
 
     SECTION("SVG missing <gradient> id")
@@ -629,9 +700,22 @@ TEST_CASE("SVG parser") {
         std::string svg_str((std::istreambuf_iterator<char>(in)),
                         std::istreambuf_iterator<char>());
 
-        test_parser p;
-        REQUIRE(!p->parse_from_string(svg_str));
-        REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        {
+            test_parser p;
+            p->parse_from_string(svg_str);
+            REQUIRE(join(p->err_handler().error_messages()) == join(expected_errors));
+        }
+        {
+            test_parser p(true);
+            try
+            {
+                p->parse_from_string(svg_str);
+            }
+            catch (std::exception const& ex)
+            {
+                REQUIRE(ex.what() == std::string(expected_errors[0]));
+            }
+        }
     }
 
     SECTION("SVG missing <gradient> inheritance")

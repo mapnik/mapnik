@@ -69,8 +69,8 @@ public:
     explicit svg_parser(svg_converter_type & path, bool strict = false);
     ~svg_parser();
     error_handler & err_handler();
-    bool parse(std::string const& filename);
-    bool parse_from_string(std::string const& svg);
+    void parse(std::string const& filename);
+    void parse_from_string(std::string const& svg);
     svg_converter_type & path_;
     bool is_defs_;
     bool strict_;
