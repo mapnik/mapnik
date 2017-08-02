@@ -169,7 +169,7 @@ void handle_unsupported(svg_parser& parser, T const& ar, char const* name)
     {
         if (e == element)
         {
-            parser.err_handler().on_error(std::string("Unsupported:\"") + name);
+            parser.err_handler().on_error(std::string("Unsupported:'") + name + "'");
         }
     }
 }
