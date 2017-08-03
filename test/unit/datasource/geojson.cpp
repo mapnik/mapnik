@@ -33,6 +33,8 @@
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
 #include <algorithm>
+#include <cctype>
+#include <locale>
 #include <boost/optional/optional_io.hpp>
 
 /*

@@ -31,6 +31,8 @@ namespace mapnik { namespace json { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
+namespace {
+
 auto make_null = [] (auto const& ctx)
 {
     _val(ctx) = mapnik::value_null{};
@@ -48,19 +50,20 @@ auto make_false = [] (auto const& ctx)
 
 auto assign = [](auto const& ctx)
 {
-    _val(ctx) = _attr(ctx);
+    _val(ctx) = std::move(_attr(ctx));
 };
 
 auto assign_key = [](auto const& ctx)
 {
-    std::get<0>(_val(ctx)) = _attr(ctx);
+    std::get<0>(_val(ctx)) = std::move(_attr(ctx));
 };
 
 auto assign_value = [](auto const& ctx)
 {
-    std::get<1>(_val(ctx)) = _attr(ctx);
+    std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
+} // VS2017
 
 using x3::lit;
 using x3::string;

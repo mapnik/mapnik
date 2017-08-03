@@ -171,7 +171,7 @@ struct transform_node
         : base_() {}
 
     template <typename T>
-    transform_node(T const& val)
+    explicit transform_node(T const& val)
         : base_(val) {}
 
     template <typename T>
