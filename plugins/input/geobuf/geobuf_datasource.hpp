@@ -90,7 +90,7 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    void parse_geobuf(std::uint8_t const* buffer, std::size_t size);
+    void parse_geobuf(char const* buffer, std::size_t size);
 private:
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;

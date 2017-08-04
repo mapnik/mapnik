@@ -114,7 +114,7 @@ geobuf_datasource::geobuf_datasource(parameters const& params)
     {
         throw mapnik::datasource_exception("Geobuf Plugin: could not open: '" + filename_ + "'");
     }
-    std::vector<std::uint8_t> geobuf;
+    std::vector<char> geobuf;
     geobuf.resize(in.size());
     std::fread(geobuf.data(), in.size(), 1, in.get());
     parse_geobuf(geobuf.data(), geobuf.size());
@@ -137,7 +137,7 @@ struct push_feature
 }
 
 
-void geobuf_datasource::parse_geobuf(std::uint8_t const* data, std::size_t size)
+void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
 {
     using push_feature_callback = push_feature<std::vector<mapnik::feature_ptr>>;
     push_feature_callback callback(features_);
