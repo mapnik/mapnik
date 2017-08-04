@@ -1,6 +1,6 @@
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2015 Artem Pavlenko
+# Copyright (C) 2017 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -1604,6 +1604,7 @@ if not preconfigured:
     env.Prepend(LIBPATH = '#deps/agg')
     env.Prepend(CPPPATH = '#deps/mapbox/variant/include')
     env.Prepend(CPPPATH = '#deps/mapbox/geometry/include')
+    env.Prepend(CPPPATH = '#deps/mapbox/protozero/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
