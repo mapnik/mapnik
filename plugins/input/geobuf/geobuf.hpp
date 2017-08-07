@@ -197,17 +197,14 @@ private:
     template <typename T, typename Feature>
     void read_props(T & reader, Feature & feature)
     {
-        //char const* end = reader.get_data().first + reader.get_uint32();
         auto pi = reader.get_packed_uint32();
         for (auto it = pi.first; it != pi.second; ++it)
-            //while (reader.get_data().first < end)
         {
             auto key_index = *it++;
             auto value_index = *it;
             assert(key_index < keys_.size());
             assert(value_index< values_.size());
             std::string const& name = keys_[key_index];
-            //std::cerr << "name:" << name << std::endl;
             mapnik::util::apply_visitor(detail::value_visitor(feature, *tr_, name), values_[value_index]);
         }
         values_.clear();
@@ -297,23 +294,14 @@ private:
     template <typename T>
     mapnik::geometry::point<double> read_point(T & reader)
     {
-        auto size = reader.get_uint32();
-        char const* end = reader.get_data().first + size;
+        double x = 0.0;
+        double y = 0.0;
+        auto pi = reader.get_packed_sint64();
         std::size_t count = 0;
-        double x, y;
-        while (reader.get_data().first < end)
+        for (auto it = pi.first ; it != pi.second; ++it, ++count)
         {
-            auto p = reader.get_sint32();
-            auto index = count % dim;
-            if ( index == 0)
-            {
-                x = transform(p);
-            }
-            else if (index == 1)
-            {
-                y = transform(p);
-            }
-            ++count;
+            if (count == 0) x = transform(*it);
+            else if (count == 1) y = transform(*it);
         }
         return mapnik::geometry::point<double>(x, y);
     }
@@ -383,7 +371,7 @@ private:
     {
         double x = 0.0;
         double y = 0.0;
-        auto size = std::distance(begin, end);
+        auto size = std::distance(begin, end) / dim;
         ring.reserve(close ? size + 1 : size);
         std::size_t count = 0;
 
@@ -412,17 +400,22 @@ private:
         mapnik::geometry::multi_point<double> multi_point;
         double x = 0.0;
         double y = 0.0;
-        auto size = reader.get_uint32();
-        char const* end = reader.get_data().first + size;
-        while (reader.get_data().first < end)
+        auto pi = reader.get_packed_sint64();
+        auto size = std::distance(pi.first, pi.second) / dim;
+        multi_point.reserve(size);
+        std::size_t count = 0;
+        for (auto it = pi.first; it != pi.second; ++it)
         {
-            for (unsigned d = 0; d < dim; ++d)
+            auto delta = *it;
+            auto d = count % dim;
+            if (d == 0) x += delta;
+            else if (d == 1)
             {
-                if (d == 0) x += reader.get_int32();
-                else if (d == 1) y += reader.get_int32();
+                y += delta;
+                mapnik::geometry::point<double> pt(transform(x), transform(y));
+                multi_point.push_back(std::move(pt));
             }
-            mapnik::geometry::point<double> pt(transform(x), transform(y));
-            multi_point.push_back(std::move(pt));
+            ++count;
         }
         return multi_point;
     }
@@ -442,11 +435,11 @@ private:
     {
         mapnik::geometry::multi_line_string<double> multi_line;
         multi_line.reserve(!lengths ? 1 : lengths->size());
-        //auto size = reader.get_uint32();
+        auto pi = reader.get_packed_sint64();
         if (!lengths)
         {
             mapnik::geometry::line_string<double> line;
-            //read_linear_ring(reader, 0, size, line);
+            read_linear_ring(reader, pi.first, pi.second, line);
             multi_line.push_back(std::move(line));
         }
         else
@@ -454,8 +447,9 @@ private:
             for (auto len : *lengths)
             {
                 mapnik::geometry::line_string<double> line;
-                //read_linear_ring(reader, len, size, line);
+                read_linear_ring(reader, pi.first, std::next(pi.first, dim * len), line);
                 multi_line.push_back(std::move(line));
+                std::advance(pi.first, dim * len);
             }
         }
         return multi_line;
@@ -499,10 +493,10 @@ private:
         {
             int j = 1;
             auto pi = reader.get_packed_sint64();
-            for (int i = 0; i < (*lengths)[0]; ++i)
+            for (std::size_t i = 0; i < (*lengths)[0]; ++i)
             {
                 mapnik::geometry::polygon<double> poly;
-                for (int k = 0; k < (*lengths)[j]; ++k)
+                for (std::size_t k = 0; k < (*lengths)[j]; ++k)
                 {
                     mapnik::geometry::linear_ring<double> ring;
                     std::size_t len = dim * (*lengths)[j + k + 1];
