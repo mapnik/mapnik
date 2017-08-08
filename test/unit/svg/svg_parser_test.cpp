@@ -87,7 +87,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("FAIL");
         char const* expected_errors[] =
         {
-            "Unable to open 'FAIL'"
+            "SVG error: unbale to open \"FAIL\""
         };
 
         test_parser p;
@@ -106,7 +106,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/invalid.svg");
         char const* expected_errors[] =
         {
-            "Unable to parse '<?xml version=\"1.0\"?>\n<svg width=\"12cm\" height=\"4cm\" viewBox=\"0 0 1200 400\"\nxmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\">\n'"
+            "SVG error: unable to parse \"<?xml version=\"1.0\"?>\n<svg width=\"12cm\" height=\"4cm\" viewBox=\"0 0 1200 400\"\nxmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny\">\n\""
         };
 
         std::ifstream in(svg_name.c_str());
@@ -129,7 +129,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/invalid.svg");
         char const* expected_errors[] =
         {
-            "svg_parser::parse - Unable to parse './test/data/svg/invalid.svg'"
+            "SVG error: unable to parse \"./test/data/svg/invalid.svg\""
         };
 
         test_parser p;
@@ -149,9 +149,9 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/color_fail.svg");
         char const* expected_errors[] =
         {
-            "Failed to parse color: \"fail\"",
-            "Failed to parse SVG value: 'fail'",
-            "Failed to parse color: \"fail\"",
+            "SVG parse error: failed to parse <color> with value \"fail\"",
+            "SVG parse error: failed to parse <number> with value \"fail\"",
+            "SVG parse error: failed to parse <color> with value \"fail\""
         };
 
         std::ifstream in(svg_name.c_str());
@@ -181,20 +181,20 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/errors.svg");
         char const* expected_errors[] =
         {
-            "parse_rect: Invalid width",
-            "Failed to parse SVG value: 'FAIL'",
-            "parse_rect: Invalid height",
-            "parse_rect: Invalid rx",
-            "parse_rect: Invalid ry",
-            "Failed to parse SVG value: '100invalidunit', trailing garbage: 'validunit'",
-            "unable to parse invalid svg <path>",
-            "unable to parse invalid svg <path> with id 'fail-path'",
-            "unable to parse invalid svg <path> with id 'fail-path'",
-            "parse_circle: Invalid radius",
-            "Failed to parse <polygon> 'points'",
-            "Failed to parse <polyline> 'points'",
-            "parse_ellipse: Invalid rx",
-            "parse_ellipse: Invalid ry",
+            "SVG validation error: invalid <rect> width \"-100\"",
+            "SVG parse error: failed to parse <number> with value \"FAIL\"",
+            "SVG validation error: invalid <rect> height \"-100\"",
+            "SVG validation error: invalid <rect> rx \"-1000\"",
+            "SVG validation error: invalid <rect> ry \"-1000\"",
+            "SVG parse error: failed to parse <number> with value \"100invalidunit\"",
+            "SVG parse error: failed to parse <path>",
+            "SVG parse error: failed to parse <path> with <id> \"fail-path\"",
+            "SVG parse error: failed to parse <path> with <id> \"fail-path\"",
+            "SVG validation error: invalid <circle> radius \"-50\"",
+            "SVG parse error: failed to parse <polygon> points",
+            "SVG parse error: failed to parse <polyline> points",
+            "SVG validation error: invalid <ellipse> rx \"-10\"",
+            "SVG validation error: invalid <ellipse> ry \"-10\""
         };
 
         std::ifstream in(svg_name.c_str());
@@ -227,7 +227,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/gradient-radial-error.svg");
         char const* expected_errors[] =
         {
-            "Failed to parse SVG value: 'FAIL'"
+            "SVG parse error: failed to parse <number> with value \"FAIL\""
         };
 
         std::ifstream in(svg_name.c_str());
@@ -666,8 +666,8 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/gradient-nodef.svg");
         char const* expected_errors[] =
         {
-            "Failed to find gradient fill: MyGradient",
-            "Failed to find gradient stroke: MyGradient",
+            "SVG parse error: failed to locate <gradient> fill with <id> \"MyGradient\"",
+            "SVG parse error: failed to locate <gradient> stroke with <id> \"MyGradient\""
         };
         {
             test_parser p;
@@ -692,8 +692,8 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/gradient-no-id.svg");
         char const* expected_errors[] =
         {
-            "Failed to find gradient fill: MyGradient",
-            "Failed to find gradient stroke: MyGradient",
+            "SVG parse error: failed to locate <gradient> fill with <id> \"MyGradient\"",
+            "SVG parse error: failed to locate <gradient> stroke with <id> \"MyGradient\""
         };
 
         std::ifstream in(svg_name.c_str());
