@@ -168,7 +168,7 @@ void handle_unsupported(svg_parser& parser, T const& ar, char const* name)
     {
         if (e == element)
         {
-            parser.err_handler().on_error(std::string("Unsupported:'") + name + "'");
+            parser.err_handler().on_error(std::string("SVG support error: <" + std::string(name) + "> element is not supported"));
         }
     }
 }
@@ -224,7 +224,7 @@ mapnik::color parse_color(T & err_handler, const char* str)
     }
     catch (mapnik::config_error const& ex)
     {
-        err_handler.on_error(ex.what());
+        err_handler.on_error("SVG parse error: failed to parse <color> with value \"" + std::string(str) + "\"");
     }
     return c;
 }
@@ -243,7 +243,7 @@ double parse_double(T & err_handler, const char* str)
     double val = 0.0;
     if (!parse(str, str + std::strlen(str), double_, val))
     {
-        err_handler.on_error("Failed to parse double: \"" + std::string(str) + "\"");
+        err_handler.on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
     }
     return val;
 }
@@ -277,14 +277,9 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
                           > - (units[apply_units]
                                |
                                x3::lit('%')[apply_percent]),
-                          x3::space))
+                          x3::space) || (cur != end))
     {
-        err_handler.on_error("Failed to parse SVG value: '" + std::string(str) + "'");
-    }
-    else if (cur != end)
-    {
-        err_handler.on_error("Failed to parse SVG value: '" + std::string(str) +
-                             "', trailing garbage: '" + cur + "'");
+        err_handler.on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
     }
     return val;
 }
@@ -299,7 +294,7 @@ bool parse_viewbox(T & err_handler, char const* str, V & viewbox)
                            x3::double_ > -x3::lit(',') >
                            x3::double_, x3::space, viewbox))
     {
-        err_handler.on_error("failed to parse SVG viewbox from " + std::string(str));
+        err_handler.on_error("SVG parse error: failed to parse <viewbox> with value \"" + std::string(str) + "\"");
         return false;
     }
     return true;
@@ -349,7 +344,7 @@ std::pair<unsigned,bool> parse_preserve_aspect_ratio(T & err_handler, char const
     }
     catch (x3::expectation_failure<char const*> const& ex)
     {
-        err_handler.on_error("Failed to parse \"preserveAspectRatio\" attribute: '" + std::string(str)  + "'");
+        err_handler.on_error("SVG parse error: failed to parse <preserveAspectRatio> with value \""  + std::string(str)  + "\"");
         return {xMidYMid, true} ; // default
     }
     return preserve_aspect_ratio;
@@ -538,7 +533,7 @@ void parse_stroke(svg_parser& parser, char const* value)
     }
     else if (parse_id_from_url(value, id))
     {
-        // see if we have a known gradient fill
+        // see if we have a known gradient stroke
         if (parser.gradient_map_.count(id) > 0)
         {
             parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
@@ -555,14 +550,14 @@ void parse_stroke(svg_parser& parser, char const* value)
             else
             {
                 std::stringstream ss;
-                ss << "Failed to find gradient stroke: " << id;
+                ss << "SVG parse error: failed to locate <gradient> stroke with <id> \"" << id << "\"";
                 parser.err_handler().on_error(ss.str());
             }
         }
         else
         {
             std::stringstream ss;
-            ss << "Failed to find gradient stroke: " << id;
+            ss << "SVG parse error: failed to locate <gradient> stroke with <id> \"" << id << "\"";
             parser.err_handler().on_error(ss.str());
         }
     }
@@ -598,14 +593,14 @@ void parse_fill(svg_parser& parser, char const* value)
             else
             {
                 std::stringstream ss;
-                ss << "Failed to find gradient fill: " << id;
+                ss << "SVG parse error: failed to locate <gradient> fill with <id> \"" << id << "\"";
                 parser.err_handler().on_error(ss.str());
             }
         }
         else
         {
             std::stringstream ss;
-            ss << "Failed to find gradient fill: " << id;
+            ss << "SVG parse error: failed to locate <gradient> fill with <id> \"" << id << "\"";
             parser.err_handler().on_error(ss.str());
         }
     }
@@ -851,12 +846,12 @@ void parse_path(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 auto const* id_attr = parse_id(parser, node);
                 if (id_attr)
                 {
-                    parser.err_handler().on_error(std::string("unable to parse invalid svg <path> with id '")
-                             + id_attr->value() + "'");
+                    parser.err_handler().on_error(std::string("SVG parse error: failed to parse <path> with <id> \"")
+                                                  + id_attr->value() + "\"");
                 }
                 else
                 {
-                    parser.err_handler().on_error(std::string("unable to parse invalid svg <path>"));
+                    parser.err_handler().on_error(std::string("SVG parse error: failed to parse <path>"));
                 }
             }
             parser.path_.end_path();
@@ -907,11 +902,15 @@ void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 }
                 if (w < 0.0)
                 {
-                    parser.err_handler().on_error("parse_use: Invalid width");
+                    std::stringstream ss;
+                    ss << "SVG validation error: invalid <use> width \"" << w <<  "\"";
+                    parser.err_handler().on_error(ss.str());
                 }
                 else if (h < 0.0)
                 {
-                    parser.err_handler().on_error("parse_use: Invalid height");
+                    std::stringstream ss;
+                    ss << "SVG validation error: invalid <use> height \"" << w <<  "\"";
+                    parser.err_handler().on_error(ss.str());
                 }
                 agg::trans_affine t{};
                 if (!node->first_attribute("transform") && w != 0.0 && h != 0.0)
@@ -936,7 +935,7 @@ void parse_polygon(svg_parser & parser, rapidxml::xml_node<char> const* node)
         parser.path_.begin_path();
         if (!mapnik::svg::parse_points(attr->value(), parser.path_))
         {
-            parser.err_handler().on_error(std::string("Failed to parse <polygon> 'points'"));
+            parser.err_handler().on_error(std::string("SVG parse error: failed to parse <polygon> points"));
         }
         parser.path_.close_subpath();
         parser.path_.end_path();
@@ -951,7 +950,7 @@ void parse_polyline(svg_parser & parser, rapidxml::xml_node<char> const* node)
         parser.path_.begin_path();
         if (!mapnik::svg::parse_points(attr->value(), parser.path_))
         {
-            parser.err_handler().on_error(std::string("Failed to parse <polyline> 'points'"));
+            parser.err_handler().on_error(std::string("SVG parse error: failed to parse <polyline> points"));
         }
         parser.path_.end_path();
     }
@@ -1011,7 +1010,9 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
         if (r < 0.0)
         {
-            parser.err_handler().on_error("parse_circle: Invalid radius");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <circle> radius \"" << r << "\"";
+            parser.err_handler().on_error(ss.str());
         }
         else
         {
@@ -1055,14 +1056,17 @@ void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
 
     if (rx != 0.0 && ry != 0.0)
     {
-
         if (rx < 0.0)
         {
-            parser.err_handler().on_error("parse_ellipse: Invalid rx");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <ellipse> rx \"" << rx << "\"";
+            parser.err_handler().on_error(ss.str());
         }
         else if (ry < 0.0)
         {
-            parser.err_handler().on_error("parse_ellipse: Invalid ry");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <ellipse> ry \"" << ry << "\"";
+            parser.err_handler().on_error(ss.str());
         }
         else
         {
@@ -1134,21 +1138,29 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
     if (w != 0.0 && h != 0.0)
     {
-        if(w < 0.0)
+        if (w < 0.0)
         {
-            parser.err_handler().on_error("parse_rect: Invalid width");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <rect> width \"" << w << "\"";
+            parser.err_handler().on_error(ss.str());
         }
-        else if(h < 0.0)
+        else if (h < 0.0)
         {
-            parser.err_handler().on_error("parse_rect: Invalid height");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <rect> height \"" << h << "\"";
+            parser.err_handler().on_error(ss.str());
         }
-        else if(rx < 0.0)
+        else if (rx < 0.0)
         {
-            parser.err_handler().on_error("parse_rect: Invalid rx");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <rect> rx \"" << rx << "\"";
+            parser.err_handler().on_error(ss.str());
         }
-        else if(ry < 0.0)
+        else if (ry < 0.0)
         {
-            parser.err_handler().on_error("parse_rect: Invalid ry");
+            std::stringstream ss;
+            ss << "SVG validation error: invalid <rect> ry \"" << ry << "\"";
+            parser.err_handler().on_error(ss.str());
         }
         else
         {
@@ -1415,7 +1427,7 @@ void svg_parser::parse(std::string const& filename)
     if (!stream)
     {
         std::stringstream ss;
-        ss << "Unable to open '" << filename << "'";
+        ss << "SVG error: unbale to open \"" << filename << "\"";
         throw std::runtime_error(ss.str());
     }
 
@@ -1433,7 +1445,7 @@ void svg_parser::parse(std::string const& filename)
     catch (rapidxml::parse_error const& ex)
     {
         std::stringstream ss;
-        ss << "svg_parser::parse - Unable to parse '" << filename << "'";
+        ss << "SVG error: unable to parse \"" << filename << "\"";
         throw std::runtime_error(ss.str());
     }
 
@@ -1457,7 +1469,8 @@ void svg_parser::parse_from_string(std::string const& svg)
     catch (rapidxml::parse_error const& ex)
     {
         std::stringstream ss;
-        ss << "Unable to parse '" << svg << "'";
+        std::string str = (svg.length() > 1024) ? svg.substr(0, 1024) + "..." : svg;
+        ss << "SVG error: unable to parse \"" << str << "\"";
         throw std::runtime_error(ss.str());
     }
     for (rapidxml::xml_node<char> const* child = doc.first_node();
