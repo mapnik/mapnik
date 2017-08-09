@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,8 +46,6 @@ mapnik::feature_ptr geobuf_featureset::next()
 #if BOOST_VERSION >= 105600
         geobuf_datasource::item_type const& item = *index_itr_++;
         std::size_t index = item.second.first;
-        //std::size_t size = item.second.second;
-        //std::cerr << file_offset << " (" << size << ") " << item.first << std::endl;
 #else
         std::size_t index = *index_itr_++;
 #endif
