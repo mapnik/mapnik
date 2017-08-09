@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2014 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -143,7 +143,6 @@ void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
     push_feature_callback callback(features_);
     mapnik::util::geobuf<push_feature_callback> buf(data, size, callback);
     buf.read();
-    std::cerr << "Num of features  = " << features_.size() << std::endl;
     using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
     values_container values;
     values.reserve(features_.size());
