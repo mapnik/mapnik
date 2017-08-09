@@ -372,10 +372,7 @@ private:
     {
         double x = 0.0;
         double y = 0.0;
-        auto size = std::distance(begin, end) / dim;
-        ring.reserve(close ? size + 1 : size);
         std::size_t count = 0;
-
         for (auto it = begin; it != end; ++it)
         {
             std::int64_t delta= *it;
@@ -402,8 +399,6 @@ private:
         double x = 0.0;
         double y = 0.0;
         auto pi = reader.get_packed_sint64();
-        auto size = std::distance(pi.first, pi.second) / dim;
-        multi_point.reserve(size);
         std::size_t count = 0;
         for (auto it = pi.first; it != pi.second; ++it)
         {
