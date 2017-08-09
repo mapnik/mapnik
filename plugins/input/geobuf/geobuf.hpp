@@ -125,20 +125,25 @@ public:
                 read_feature_collection(feature_collection);
                 break;
             }
-            case 6:
+            case 5:
             {
-                reader_.get_message();
-                MAPNIK_LOG_DEBUG(geobuf) << "standalone Geometry is not supported";
+                // standalone Feature
+                auto message = reader_.get_message();
+                read_feature(message);
                 break;
             }
-            case 7:
+            case 6:
             {
-                reader_.get_message();
-                MAPNIK_LOG_DEBUG(geobuf) << "Topology is not supported";
+                // standalone Geometry
+                auto feature = feature_factory::create(ctx_,1);
+                auto message = reader_.get_message();
+                feature->set_geometry(std::move(read_geometry(message)));
+                callback_(feature);
                 break;
             }
             default:
                 MAPNIK_LOG_DEBUG(geobuf) << "Unsupported tag=" << reader_.tag();
+                reader_.skip();
                 break;
             }
         }
@@ -203,7 +208,7 @@ private:
             auto key_index = *it++;
             auto value_index = *it;
             assert(key_index < keys_.size());
-            assert(value_index< values_.size());
+            assert(value_index < values_.size());
             std::string const& name = keys_[key_index];
             util::apply_visitor(detail::value_visitor(feature, *tr_, name), values_[value_index]);
         }
@@ -280,13 +285,11 @@ private:
                 read_value(message);
                 break;
             }
-            case 15:
+            default:
             {
                 reader.skip();
                 break;
             }
-            default:
-                break;
             }
         }
     }
@@ -336,18 +339,16 @@ private:
         case MultiLineString:
         {
             geom = read_multi_linestring(reader, lengths);
+            break;
         }
         case MultiPolygon:
         {
             geom = read_multi_polygon(reader, lengths);
             break;
         }
-        case GeometryCollection:
-        {
-            throw std::runtime_error("GeometryCollection is not supported");
-        }
         default:
         {
+            reader.skip();
             break;
         }
         }
@@ -528,7 +529,8 @@ private:
             }
             case 2:
             {
-                lengths = std::move(read_lengths(reader));
+                auto val = read_lengths(reader);
+                if (!val.empty()) lengths = std::move(val);
                 break;
             }
             case 3:
@@ -541,7 +543,8 @@ private:
                 if (geom.is<geometry::geometry_empty>())
                     geom = geometry::geometry_collection<double>();
                 auto & collection = geom.get<geometry::geometry_collection<double>>();
-                collection.push_back(std::move(read_coords(reader, type, lengths)));
+                auto message = reader.get_message();
+                collection.push_back(std::move(read_geometry(message)));
                 break;
             }
             case 13:
@@ -550,14 +553,11 @@ private:
                 read_value(value);
                 break;
             }
-            case 14:
-            case 15:
+            default:
             {
                 reader.skip();
                 break;
             }
-            default:
-                break;
             }
         }
         return geom;
