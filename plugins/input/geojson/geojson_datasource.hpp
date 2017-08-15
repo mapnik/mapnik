@@ -75,7 +75,7 @@ class geojson_datasource : public mapnik::datasource
 {
 public:
     using box_type = mapnik::box2d<double>;
-    using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t> >;
+    using item_type = std::pair<box_type, std::pair<std::uint64_t, std::uint64_t> >;
     using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
 
     // constructor

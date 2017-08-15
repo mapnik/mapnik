@@ -117,7 +117,7 @@ public:
         root_ = nodes_[0].get();
     }
 
-    void insert(value_type data, bbox_type const& box)
+    void insert(value_type const& data, bbox_type const& box)
     {
         unsigned int depth = 0;
         do_insert_data(data, box, root_, depth);
@@ -207,13 +207,9 @@ private:
         }
     }
 
-    void do_insert_data(value_type data, bbox_type const& box, node * n, unsigned int& depth)
+    void do_insert_data(value_type const& data, bbox_type const& box, node * n, unsigned int& depth)
     {
-        if (++depth >= max_depth_)
-        {
-            n->cont_.push_back(data);
-        }
-        else
+        if (++depth < max_depth_)
         {
             bbox_type const& node_extent = n->extent();
             bbox_type ext[4];
@@ -225,17 +221,17 @@ private:
                     if (!n->children_[i])
                     {
                         nodes_.push_back(std::make_unique<node>(ext[i]));
-                        n->children_[i]=nodes_.back().get();
+                        n->children_[i] = nodes_.back().get();
                     }
-                    do_insert_data(data,box,n->children_[i],depth);
+                    do_insert_data(data, box, n->children_[i], depth);
                     return;
                 }
             }
-            n->cont_.push_back(data);
         }
+        n->cont_.push_back(data);
     }
 
-    void split_box(bbox_type const& node_extent,bbox_type * ext)
+    void split_box(bbox_type const& node_extent, bbox_type * ext)
     {
         typename bbox_type::value_type width = node_extent.width();
         typename bbox_type::value_type height = node_extent.height();

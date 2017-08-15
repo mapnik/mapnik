@@ -183,7 +183,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
 namespace {
 
 using box_type = box2d<double>;
-using boxes_type = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
+using boxes_type = std::vector<std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
 using base_iterator_type = char const*;
 const mapnik::transcoder geojson_datasource_static_tr("utf8");
 
@@ -206,7 +206,7 @@ void geojson_datasource::initialise_descriptor(mapnik::feature_ptr const& featur
 void geojson_datasource::initialise_disk_index(std::string const& filename)
 {
     // read extent
-    using value_type = std::pair<std::size_t, std::size_t>;
+    using value_type = std::pair<std::uint64_t, std::uint64_t>;
     std::ifstream index(filename_ + ".index", std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
     extent_ = mapnik::util::spatial_index<value_type,
@@ -321,7 +321,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
 
         features_.push_back(std::move(feature));
 
-        using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
+        using values_container = std::vector< std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
         values_container values;
         values.reserve(features_.size());
 
@@ -394,7 +394,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
         features_.push_back(std::move(feature));
     }
 
-    using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
+    using values_container = std::vector< std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
     values_container values;
     values.reserve(features_.size());
 
@@ -453,7 +453,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
     int multi_type = 0;
     if (has_disk_index_)
     {
-        using value_type = std::pair<std::size_t, std::size_t>;
+        using value_type = std::pair<std::uint64_t, std::uint64_t>;
         std::ifstream index(filename_ + ".index", std::ios::binary);
         if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
         mapnik::filter_in_box filter(extent_);
@@ -527,8 +527,8 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
         for (std::size_t count = 0; itr !=end &&  count < num_features_to_query_; ++itr,++count)
         {
             geojson_datasource::item_type const& item = *itr;
-            std::size_t file_offset = item.second.first;
-            std::size_t size = item.second.second;
+            std::uint64_t file_offset = item.second.first;
+            std::uint64_t size = item.second.second;
 
             std::fseek(file.get(), file_offset, SEEK_SET);
             std::vector<char> json;
