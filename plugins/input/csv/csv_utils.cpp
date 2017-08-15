@@ -505,8 +505,8 @@ mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> con
     return geom;
 }
 
-template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<double>, std::pair<std::size_t, std::size_t>>> & boxes);
+template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<double>, std::pair<std::uint64_t, std::uint64_t>>> & boxes);
 
-template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<float>, std::pair<std::size_t, std::size_t>>> & boxes);
+template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<float>, std::pair<std::uint64_t, std::uint64_t>>> & boxes);
 
 } // namespace csv_utils

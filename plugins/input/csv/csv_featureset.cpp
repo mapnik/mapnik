@@ -88,8 +88,8 @@ mapnik::feature_ptr csv_featureset::next()
     if (index_itr_ != index_end_)
     {
         csv_datasource::item_type const& item = *index_itr_++;
-        std::size_t file_offset = item.second.first;
-        std::size_t size = item.second.second;
+        std::uint64_t file_offset = item.second.first;
+        std::uint64_t size = item.second.second;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
         char const* start = (char const*)mapped_region_->get_address() + file_offset;
         char const*  end = start + size;

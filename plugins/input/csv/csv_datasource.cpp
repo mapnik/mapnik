@@ -153,7 +153,7 @@ csv_datasource::csv_datasource(parameters const& params)
         if (has_disk_index_ && !extent_initialized_)
         {
             // read bounding box from *.index
-            using value_type = std::pair<std::size_t, std::size_t>;
+            using value_type = std::pair<std::uint64_t, std::uint64_t>;
             std::ifstream index(filename_ + ".index", std::ios::binary);
             if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
             extent_ = mapnik::util::spatial_index<value_type,
@@ -283,8 +283,8 @@ csv_datasource::get_geometry_type_impl(std::istream & stream) const
         for (std::size_t count = 0; itr !=end &&  count < 5; ++itr, ++count)
         {
             csv_datasource::item_type const& item = *itr;
-            std::size_t file_offset = item.second.first;
-            std::size_t size = item.second.second;
+            std::uint64_t file_offset = item.second.first;
+            std::uint64_t size = item.second.second;
             stream.seekg(file_offset);
             std::vector<char> record;
             record.resize(size);
@@ -316,7 +316,7 @@ csv_datasource::get_geometry_type_impl(std::istream & stream) const
     else
     {
         // try reading *.index
-        using value_type = std::pair<std::size_t, std::size_t>;
+        using value_type = std::pair<std::uint64_t, std::uint64_t>;
         std::ifstream index(filename_ + ".index", std::ios::binary);
         if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
 
