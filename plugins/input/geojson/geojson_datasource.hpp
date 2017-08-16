@@ -38,6 +38,7 @@
 #include <boost/optional.hpp>
 #include <boost/version.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#include <boost/interprocess/managed_mapped_file.hpp>
 #pragma GCC diagnostic pop
 
 // stl
@@ -46,7 +47,7 @@
 #include <string>
 #include <map>
 #include <deque>
-
+#include <functional>
 
 template <std::size_t Max, std::size_t Min>
 struct geojson_linear : boost::geometry::index::linear<Max,Min> {};
@@ -74,10 +75,13 @@ struct options_type<geojson_linear<Max,Min> >
 class geojson_datasource : public mapnik::datasource
 {
 public:
-    using box_type = mapnik::box2d<double>;
+    using box_type = mapnik::box2d<float>;
     using item_type = std::pair<box_type, std::pair<std::uint64_t, std::uint64_t> >;
-    using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
-
+    using indexable_type = boost::geometry::index::indexable<item_type>;
+    using equal_to_type = boost::geometry::index::equal_to<item_type>;
+    using allocator_type = boost::interprocess::allocator<item_type, boost::interprocess::managed_mapped_file::segment_manager>;
+    using spatial_index_type = boost::geometry::index::rtree<item_type, boost::geometry::index::linear<16>, indexable_type, equal_to_type, allocator_type>;
+    //using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
     // constructor
     geojson_datasource(mapnik::parameters const& params);
     virtual ~geojson_datasource ();
@@ -101,11 +105,18 @@ private:
     bool from_inline_string_;
     mapnik::box2d<double> extent_;
     std::vector<mapnik::feature_ptr> features_;
-    std::unique_ptr<spatial_index_type> tree_;
+    std::unique_ptr<spatial_index_type, std::function<void(spatial_index_type*)>> tree_;
+    boost::interprocess::managed_mapped_file index_file_;
     bool cache_features_ = true;
     bool has_disk_index_ = false;
     const std::size_t num_features_to_query_;
 };
 
+struct record
+{
+    std::uint64_t off;
+    std::uint64_t size;
+    float box[4];
+};
 
 #endif // GEOJSON_DATASOURCE_HPP

@@ -34,8 +34,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
-geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::filter_in_box const& filter)
+geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::bounding_box_filter<float> const& filter)
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     //
@@ -44,7 +45,8 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
 #else
     file_(std::fopen(filename.c_str(),"rb"), std::fclose),
 #endif
-    ctx_(std::make_shared<mapnik::context_type>())
+    ctx_(std::make_shared<mapnik::context_type>()),
+    query_box_(filter.box_)
 {
 
 #if defined (MAPNIK_MEMORY_MAPPED_FILE)
@@ -65,11 +67,20 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
     std::ifstream index(indexname.c_str(), std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: can't open index file " + indexname);
     mapnik::util::spatial_index<value_type,
-                                mapnik::filter_in_box,
-                                std::ifstream>::query(filter, index, positions_);
+                                mapnik::bounding_box_filter<float>,
+                                std::ifstream,
+                                mapnik::box2d<float>>::query(filter, index, positions_);
+
+    std::cerr << "#1 Num features:" << positions_.size() << std::endl;
+    positions_.erase(std::remove_if(positions_.begin(),
+                                    positions_.end(),
+                                    [&](value_type const& pos)
+                                    { return !mapnik::box2d<float>{pos.box[0], pos.box[1], pos.box[2], pos.box[3]}.intersects(query_box_);}),
+                     positions_.end());
+    std::cerr << "#2 Num features:" << positions_.size() << std::endl;
 
     std::sort(positions_.begin(), positions_.end(),
-              [](value_type const& lhs, value_type const& rhs) { return lhs.first < rhs.first;});
+              [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});
     itr_ = positions_.begin();
 }
 
@@ -81,13 +92,13 @@ mapnik::feature_ptr geojson_index_featureset::next()
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        char const* start = (char const*)mapped_region_->get_address() + pos.first;
-        char const*  end = start + pos.second;
+        char const* start = (char const*)mapped_region_->get_address() + pos.off;
+        char const*  end = start + pos.size;
 #else
-        std::fseek(file_.get(), pos.first, SEEK_SET);
+        std::fseek(file_.get(), pos.off, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        auto count = std::fread(record.data(), pos.second, 1, file_.get());
+        auto count = std::fread(record.data(), pos.size, 1, file_.get());
         auto const* start = record.data();
         auto const*  end = (count == 1) ? start + record.size() : start;
 #endif
@@ -96,8 +107,7 @@ mapnik::feature_ptr geojson_index_featureset::next()
         using mapnik::json::grammar::iterator_type;
         mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure
         // skip empty geometries
-        if (mapnik::geometry::is_empty(feature->get_geometry()))
-            continue;
+        if (mapnik::geometry::is_empty(feature->get_geometry())) continue;
         return feature;
     }
     return mapnik::feature_ptr();

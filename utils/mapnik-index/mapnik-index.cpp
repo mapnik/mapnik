@@ -68,6 +68,7 @@ int main (int argc, char** argv)
     char separator = 0;
     char quote = 0;
     std::string manual_headers;
+    po::variables_map vm;
     try
     {
         po::options_description desc("Mapnik CSV/GeoJSON index utility");
@@ -82,11 +83,11 @@ int main (int argc, char** argv)
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
             ("files",po::value<std::vector<std::string> >(),"Files to index: file1 file2 ...fileN")
             ("validate-features", "Validate GeoJSON features")
+            ("bbox,b", "output bounding boxes")
             ;
 
         po::positional_options_description p;
         p.add("files",-1);
-        po::variables_map vm;
         po::store(po::command_line_parser(argc, argv)
                   .options(desc)
                   .style(po::command_line_style::unix_style | po::command_line_style::allow_long_disguise)
@@ -208,29 +209,61 @@ int main (int argc, char** argv)
         {
             std::clog << extent << std::endl;
             mapnik::box2d<double> extent_d(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
-            mapnik::quad_tree<std::pair<std::uint64_t, std::uint64_t>> tree(extent_d, depth, ratio);
-            for (auto const& item : boxes)
+            if (vm.count("bbox"))
             {
-                auto ext_f = std::get<0>(item);
-                tree.insert(std::get<1>(item), mapnik::box2d<double>(ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy()));
-            }
-
-            std::fstream file((filename + ".index").c_str(),
-                              std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
-            if (!file)
-            {
-                std::clog << "cannot open index file for writing file \""
-                          << (filename + ".index") << "\"" << std::endl;
+                std::fstream file((filename + ".bbox").c_str(),
+                                  std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+                if (!file)
+                {
+                    std::clog << "cannot open index file for writing file \""
+                              << (filename + ".bbox") << "\"" << std::endl;
+                }
+                else
+                {
+                    for (auto const& item : boxes)
+                    {
+                        auto ext_f = std::get<0>(item);
+                        auto pos = std::get<1>(item);
+                        file.write(reinterpret_cast<char const*>(&pos.first), sizeof(std::uint64_t));
+                        file.write(reinterpret_cast<char const*>(&pos.second), sizeof(std::uint64_t));
+                        file.write(reinterpret_cast<char const*>(&ext_f), sizeof(ext_f));
+                    }
+                }
             }
             else
             {
-                tree.trim();
-                std::clog <<  "number nodes=" << tree.count() << std::endl;
-                std::clog <<  "number element=" << tree.count_items() << std::endl;
-                file.exceptions(std::ios::failbit | std::ios::badbit);
-                tree.write(file);
-                file.flush();
-                file.close();
+                struct record {
+                    std::uint64_t off;
+                    std::uint64_t size;
+                    float box[4];
+                } rec;
+
+                mapnik::quad_tree<record, mapnik::box2d<float>> tree(extent, depth, ratio);
+                for (auto const& item : boxes)
+                {
+                    auto ext_f = std::get<0>(item);
+                    rec = { std::get<1>(item).first, std::get<1>(item).second, { ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy() }};
+                    //tree.insert(rec, mapnik::box2d<double>(ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy()));
+                    tree.insert(rec, ext_f);
+                }
+
+                std::fstream file((filename + ".index").c_str(),
+                                  std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+                if (!file)
+                {
+                    std::clog << "cannot open index file for writing file \""
+                              << (filename + ".index") << "\"" << std::endl;
+                }
+                else
+                {
+                    tree.trim();
+                    std::clog << "number nodes=" << tree.count() << std::endl;
+                    std::clog << "number element=" << tree.count_items() << std::endl;
+                    file.exceptions(std::ios::failbit | std::ios::badbit);
+                    tree.write(file);
+                    file.flush();
+                    file.close();
+                }
             }
         }
         else

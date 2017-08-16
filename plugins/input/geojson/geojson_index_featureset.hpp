@@ -41,9 +41,9 @@
 
 class geojson_index_featureset : public mapnik::Featureset
 {
-    using value_type = std::pair<std::uint64_t, std::uint64_t>;
+    using value_type = record;
 public:
-    geojson_index_featureset(std::string const& filename, mapnik::filter_in_box const& filter);
+    geojson_index_featureset(std::string const& filename, mapnik::bounding_box_filter<float> const& filter);
     virtual ~geojson_index_featureset();
     mapnik::feature_ptr next();
 
@@ -57,6 +57,7 @@ private:
 #endif
     mapnik::value_integer feature_id_ = 1;
     mapnik::context_ptr ctx_;
+    mapnik::box2d<float> query_box_;
     std::vector<value_type> positions_;
     std::vector<value_type>::iterator itr_;
 };
