@@ -14,3 +14,7 @@
 	path = deps/mapbox/geometry
 	url = https://github.com/mapbox/geometry.hpp.git
         branch = master
+[submodule "deps/mapbox/protozero"]
+	path = deps/mapbox/protozero
+	url = https://github.com/mapbox/protozero.git
+        branch = master
