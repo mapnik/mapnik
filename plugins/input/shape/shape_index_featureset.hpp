@@ -50,13 +50,13 @@ namespace mapnik { namespace detail
 struct node
 {
     node() = default;
-    node(int offset_, int start_, int end_)
+    node(std::uint64_t offset_, std::int32_t start_, std::int32_t end_)
         : offset(offset_),
           start(start_),
           end(end_) {}
-    int offset;
-    int start;
-    int end;
+    std::uint64_t offset;
+    std::int32_t start;
+    std::int32_t end;
 };
 }} // ns
 
