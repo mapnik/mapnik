@@ -27,7 +27,6 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geometry.hpp>
 // stl
 #include <string>
@@ -36,7 +35,7 @@
 #include <fstream>
 
 csv_index_featureset::csv_index_featureset(std::string const& filename,
-                                           mapnik::filter_in_box const& filter,
+                                           mapnik::bounding_box_filter<float> const& filter,
                                            locator_type const& locator,
                                            char separator,
                                            char quote,
@@ -76,11 +75,16 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
     std::ifstream index(indexname.c_str(), std::ios::binary);
     if (!index) throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
     mapnik::util::spatial_index<value_type,
-                                mapnik::filter_in_box,
-                                std::ifstream>::query(filter, index, positions_);
-
+                                mapnik::bounding_box_filter<float>,
+                                std::ifstream,
+                                mapnik::box2d<float>>::query(filter, index, positions_);
+    positions_.erase(std::remove_if(positions_.begin(),
+                                    positions_.end(),
+                                    [&](value_type const& pos)
+                                    { return !mapnik::box2d<float>{pos.box[0], pos.box[1], pos.box[2], pos.box[3]}.intersects(filter.box_);}),
+                     positions_.end());
     std::sort(positions_.begin(), positions_.end(),
-              [](value_type const& lhs, value_type const& rhs) { return lhs.first < rhs.first;});
+              [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});
     itr_ = positions_.begin();
 }
 
@@ -113,13 +117,13 @@ mapnik::feature_ptr csv_index_featureset::next()
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        char const* start = (char const*)mapped_region_->get_address() + pos.first;
-        char const*  end = start + pos.second;
+        char const* start = (char const*)mapped_region_->get_address() + pos.off;
+        char const*  end = start + pos.size;
 #else
-        std::fseek(file_.get(), pos.first, SEEK_SET);
+        std::fseek(file_.get(), pos.off, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        if (std::fread(record.data(), pos.second, 1, file_.get()) != 1)
+        if (std::fread(record.data(), pos.size, 1, file_.get()) != 1)
         {
             return mapnik::feature_ptr();
         }

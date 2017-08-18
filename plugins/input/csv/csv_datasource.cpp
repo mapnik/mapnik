@@ -153,12 +153,15 @@ csv_datasource::csv_datasource(parameters const& params)
         if (has_disk_index_ && !extent_initialized_)
         {
             // read bounding box from *.index
-            using value_type = std::pair<std::uint64_t, std::uint64_t>;
+            using value_type = mapnik::util::index_record;
             std::ifstream index(filename_ + ".index", std::ios::binary);
             if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
-            extent_ = mapnik::util::spatial_index<value_type,
-                                                  mapnik::filter_in_box,
-                                                  std::ifstream>::bounding_box(index);
+            auto ext_f = mapnik::util::spatial_index<value_type,
+                                                     mapnik::bounding_box_filter<float>,
+                                                     std::ifstream,
+                                                     mapnik::box2d<float>>::bounding_box(index);
+            extent_ = { ext_f.minx(), ext_f.miny(),ext_f.maxx(), ext_f.maxy() };
+
         }
         //in.close(); no need to call close, rely on dtor
     }
@@ -316,22 +319,22 @@ csv_datasource::get_geometry_type_impl(std::istream & stream) const
     else
     {
         // try reading *.index
-        using value_type = std::pair<std::uint64_t, std::uint64_t>;
+        using value_type = mapnik::util::index_record;
         std::ifstream index(filename_ + ".index", std::ios::binary);
         if (!index) throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + ".index'");
-
-        mapnik::filter_in_box filter(extent_);
+        mapnik::bounding_box_filter<float> filter{mapnik::box2d<float>(extent_.minx(), extent_.miny(), extent_.maxx(), extent_.maxy())};
         std::vector<value_type> positions;
         mapnik::util::spatial_index<value_type,
-                                    mapnik::filter_in_box,
-                                    std::ifstream>::query_first_n(filter, index, positions, 5);
+                                    mapnik::bounding_box_filter<float>,
+                                    std::ifstream,
+                                    mapnik::box2d<float>>::query_first_n(filter, index, positions, 5);
         int multi_type = 0;
         for (auto const& val : positions)
         {
-            stream.seekg(val.first);
+            stream.seekg(val.off);
             std::vector<char> record;
-            record.resize(val.second);
-            stream.read(record.data(), val.second);
+            record.resize(val.size);
+            stream.read(record.data(), val.size);
             std::string str(record.begin(), record.end());
             try
             {
@@ -427,7 +430,8 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         }
         else if (has_disk_index_)
         {
-            mapnik::filter_in_box filter(q.get_bbox());
+            auto const& bbox = q.get_bbox();
+            mapnik::bounding_box_filter<float> const filter(mapnik::box2d<float>(bbox.minx(), bbox.miny(), bbox.maxx(), bbox.maxy()));
             return std::make_shared<csv_index_featureset>(filename_, filter, locator_, separator_, quote_, headers_, ctx_);
         }
     }

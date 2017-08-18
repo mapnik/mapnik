@@ -25,7 +25,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
-#include <mapnik/util/spatial_index.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/json/parse_feature.hpp>
@@ -45,8 +44,7 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
 #else
     file_(std::fopen(filename.c_str(),"rb"), std::fclose),
 #endif
-    ctx_(std::make_shared<mapnik::context_type>()),
-    query_box_(filter.box_)
+    ctx_(std::make_shared<mapnik::context_type>())
 {
 
 #if defined (MAPNIK_MEMORY_MAPPED_FILE)
@@ -71,13 +69,11 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
                                 std::ifstream,
                                 mapnik::box2d<float>>::query(filter, index, positions_);
 
-    std::cerr << "#1 Num features:" << positions_.size() << std::endl;
     positions_.erase(std::remove_if(positions_.begin(),
                                     positions_.end(),
                                     [&](value_type const& pos)
-                                    { return !mapnik::box2d<float>{pos.box[0], pos.box[1], pos.box[2], pos.box[3]}.intersects(query_box_);}),
+                                    { return !mapnik::box2d<float>{pos.box[0], pos.box[1], pos.box[2], pos.box[3]}.intersects(filter.box_);}),
                      positions_.end());
-    std::cerr << "#2 Num features:" << positions_.size() << std::endl;
 
     std::sort(positions_.begin(), positions_.end(),
               [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});

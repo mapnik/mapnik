@@ -175,21 +175,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
         }
         else
         {
-            //initialise_index(start, end);
-            std::string index_filename = filename_ + ".bbox.rtree";
-            std::cerr << "loading " << index_filename << " .." << std::endl;
-            index_file_ = boost::interprocess::managed_mapped_file(boost::interprocess::open_only, index_filename.c_str());
-            tree_ = std::unique_ptr<spatial_index_type, std::function<void(spatial_index_type*)>>
-                (index_file_.find<spatial_index_type>("rtree-index").first,
-                 [](spatial_index_type* si) {std::cerr << "calling deleter:" << si << std::endl;});
-            std::cerr << "TREE:" << tree_.get() << std::endl;
-            auto bounds = tree_->bounds();
-            double min_x = bounds.min_corner().get<0>();
-            double min_y = bounds.min_corner().get<1>();
-            double max_x = bounds.max_corner().get<0>();
-            double max_y = bounds.max_corner().get<1>();
-            std::cerr << "Bounding box: " << min_x << "," << min_y << "," << max_x << "," << max_y << std::endl;
-            extent_ = { min_x, min_y, max_x, max_y };
+            initialise_index(start, end);
         }
     }
 }
@@ -220,15 +206,14 @@ void geojson_datasource::initialise_descriptor(mapnik::feature_ptr const& featur
 void geojson_datasource::initialise_disk_index(std::string const& filename)
 {
     // read extent
-    using value_type = record;//std::pair<std::uint64_t, std::uint64_t>;
+    using value_type = mapnik::util::index_record;
     std::ifstream index(filename_ + ".index", std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
     auto ext_f = mapnik::util::spatial_index<value_type,
-                                          mapnik::filter_in_box,
+                                          mapnik::bounding_box_filter<float>,
                                           std::ifstream,
                                           mapnik::box2d<float>>::bounding_box(index);
     extent_ = { ext_f.minx(), ext_f.miny(),ext_f.maxx(), ext_f.maxy() };
-    std::cerr << "EXTENT:" << extent_ << std::endl;
     mapnik::bounding_box_filter<float> filter(ext_f);
     std::vector<value_type> positions;
     mapnik::util::spatial_index<value_type,
@@ -365,7 +350,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             }
         }
         // packing algorithm
-        //tree_ = std::make_unique<spatial_index_type>(values);
+        tree_ = std::make_unique<spatial_index_type>(values);
     }
     desc_.order_by_name();
 }
@@ -437,7 +422,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
         ++geometry_index;
     }
     // packing algorithm
-    //tree_ = std::make_unique<spatial_index_type>(values);
+    tree_ = std::make_unique<spatial_index_type>(values);
 }
 
 geojson_datasource::~geojson_datasource() {}
@@ -468,7 +453,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
     int multi_type = 0;
     if (has_disk_index_)
     {
-        using value_type = record;//std::pair<std::uint64_t, std::uint64_t>;
+        using value_type = mapnik::util::index_record;
         std::ifstream index(filename_ + ".index", std::ios::binary);
         if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
         mapnik::bounding_box_filter<float> filter(mapnik::box2d<float>(extent_.minx(),extent_.miny(), extent_.maxx(),extent_.maxy()));
@@ -602,18 +587,15 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
             }
             else
             {
-                std::cerr << "Num features:" << index_array.size() << std::endl;
                 return std::make_shared<geojson_memory_index_featureset>(filename_, std::move(index_array));
             }
         }
         else if (has_disk_index_)
         {
-            //mapnik::filter_in_box filter(q.get_bbox());
             auto const& bbox = q.get_bbox();
             mapnik::bounding_box_filter<float> const filter(mapnik::box2d<float>(bbox.minx(), bbox.miny(), bbox.maxx(), bbox.maxy()));
             return std::make_shared<geojson_index_featureset>(filename_, filter);
         }
-
     }
     // otherwise return an empty featureset
     return mapnik::make_invalid_featureset();

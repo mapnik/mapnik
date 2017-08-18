@@ -26,6 +26,7 @@
 #include "geojson_datasource.hpp"
 #include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
+#include <mapnik/util/spatial_index.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
@@ -41,7 +42,7 @@
 
 class geojson_index_featureset : public mapnik::Featureset
 {
-    using value_type = record;
+    using value_type = mapnik::util::index_record;
 public:
     geojson_index_featureset(std::string const& filename, mapnik::bounding_box_filter<float> const& filter);
     virtual ~geojson_index_featureset();
@@ -57,7 +58,6 @@ private:
 #endif
     mapnik::value_integer feature_id_ = 1;
     mapnik::context_ptr ctx_;
-    mapnik::box2d<float> query_box_;
     std::vector<value_type> positions_;
     std::vector<value_type>::iterator itr_;
 };
