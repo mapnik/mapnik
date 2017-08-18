@@ -69,21 +69,24 @@ int main (int argc, char** argv)
     char separator = 0;
     char quote = 0;
     std::string manual_headers;
+    mapnik::box2d<float> bbox;
+    bool use_bbox = false;
     po::variables_map vm;
     try
     {
         po::options_description desc("Mapnik CSV/GeoJSON index utility");
         desc.add_options()
-            ("help,h", "produce usage message")
-            ("version,V","print version string")
-            ("verbose,v","verbose output")
-            ("depth,d", po::value<unsigned int>(), "max tree depth\n(default 8)")
-            ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
+            ("help,h", "Produce usage message")
+            ("version,V","Print version string")
+            ("verbose,v","Verbose output")
+            ("depth,d", po::value<unsigned int>(), "Max tree depth\n(default 8)")
+            ("ratio,r",po::value<double>(),"Split ratio (default 0.55)")
             ("separator,s", po::value<char>(), "CSV columns separator")
             ("quote,q", po::value<char>(), "CSV columns quote")
             ("manual-headers,H", po::value<std::string>(), "CSV manual headers string")
             ("files",po::value<std::vector<std::string> >(),"Files to index: file1 file2 ...fileN")
             ("validate-features", "Validate GeoJSON features")
+            ("bbox,b", po::value<std::string>(), "Only index features within bounding box: --bbox=minx,miny,maxx,maxy")
             ;
 
         po::positional_options_description p;
@@ -136,6 +139,10 @@ int main (int argc, char** argv)
         if (vm.count("files"))
         {
             files=vm["files"].as<std::vector<std::string> >();
+        }
+        if (vm.count("bbox") && bbox.from_string(vm["bbox"].as<std::string>()))
+        {
+            use_bbox = true;
         }
     }
     catch (std::exception const& ex)
@@ -214,6 +221,7 @@ int main (int argc, char** argv)
             for (auto const& item : boxes)
             {
                 auto ext_f = std::get<0>(item);
+                if (use_bbox && !bbox.intersects(ext_f)) continue;
                 mapnik::util::index_record rec =
                     {std::get<1>(item).first, std::get<1>(item).second, {ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy()}};
                 tree.insert(rec, ext_f);
