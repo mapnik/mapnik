@@ -210,9 +210,9 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
     std::ifstream index(filename_ + ".index", std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + filename_ + ".index'");
     auto ext_f = mapnik::util::spatial_index<value_type,
-                                          mapnik::bounding_box_filter<float>,
-                                          std::ifstream,
-                                          mapnik::box2d<float>>::bounding_box(index);
+                                             mapnik::bounding_box_filter<float>,
+                                             std::ifstream,
+                                             mapnik::box2d<float>>::bounding_box(index);
     extent_ = { ext_f.minx(), ext_f.miny(),ext_f.maxx(), ext_f.maxy() };
     mapnik::bounding_box_filter<float> filter(ext_f);
     std::vector<value_type> positions;

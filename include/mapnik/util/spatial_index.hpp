@@ -41,7 +41,7 @@ struct index_record
 {
     std::uint64_t off;
     std::uint64_t size;
-    float box[4];
+    box2d<float> box;
 };
 
 template <typename InputStream>

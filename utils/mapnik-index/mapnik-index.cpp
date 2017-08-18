@@ -222,7 +222,7 @@ int main (int argc, char** argv)
                 auto ext_f = std::get<0>(item);
                 if (use_bbox && !bbox.intersects(ext_f)) continue;
                 mapnik::util::index_record rec =
-                    {std::get<1>(item).first, std::get<1>(item).second, {ext_f.minx(), ext_f.miny(), ext_f.maxx(), ext_f.maxy()}};
+                    {std::get<1>(item).first, std::get<1>(item).second, ext_f};
                 tree.insert(rec, ext_f);
             }
 

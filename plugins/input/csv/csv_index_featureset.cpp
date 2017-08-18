@@ -81,7 +81,7 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
     positions_.erase(std::remove_if(positions_.begin(),
                                     positions_.end(),
                                     [&](value_type const& pos)
-                                    { return !mapnik::box2d<float>{pos.box[0], pos.box[1], pos.box[2], pos.box[3]}.intersects(filter.box_);}),
+                                    { return !pos.box.intersects(filter.box_);}),
                      positions_.end());
     std::sort(positions_.begin(), positions_.end(),
               [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});
