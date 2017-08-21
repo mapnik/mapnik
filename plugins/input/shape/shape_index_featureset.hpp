@@ -50,13 +50,15 @@ namespace mapnik { namespace detail
 struct node
 {
     node() = default;
-    node(std::uint64_t offset_, std::int32_t start_, std::int32_t end_)
+    node(std::uint64_t offset_, std::int32_t start_, std::int32_t end_, box2d<float> && box_)
         : offset(offset_),
           start(start_),
-          end(end_) {}
+          end(end_),
+          box(std::move(box_)) {}
     std::uint64_t offset;
     std::int32_t start;
     std::int32_t end;
+    mapnik::box2d<float> box;
 };
 }} // ns
 
@@ -78,7 +80,7 @@ private:
     context_ptr ctx_;
     std::unique_ptr<shape_io> shape_ptr_;
     const std::unique_ptr<mapnik::transcoder> tr_;
-    std::vector<mapnik::detail::node> offsets_;
+    std::vector<mapnik::detail::node> positions_;
     std::vector<mapnik::detail::node>::iterator itr_;
     std::vector<int> attr_ids_;
     mapnik::value_integer row_limit_;

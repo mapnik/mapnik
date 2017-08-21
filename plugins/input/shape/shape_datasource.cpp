@@ -236,21 +236,24 @@ featureset_ptr shape_datasource::features(query const& q) const
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features");
 #endif
 
-    filter_in_box filter(q.get_bbox());
+    auto const& query_box = q.get_bbox();
+
     if (indexed_)
     {
         std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
+        mapnik::bounding_box_filter<float> filter(mapnik::box2d<float>(query_box.minx(), query_box.miny(), query_box.maxx(), query_box.maxy()));
         return featureset_ptr
-            (new shape_index_featureset<filter_in_box>(filter,
-                                                       std::move(shape_ptr),
-                                                       q.property_names(),
-                                                       desc_.get_encoding(),
-                                                       shape_name_,
-                                                       row_limit_));
+            (new shape_index_featureset<mapnik::bounding_box_filter<float>>(filter,
+                                                                            std::move(shape_ptr),
+                                                                            q.property_names(),
+                                                                            desc_.get_encoding(),
+                                                                            shape_name_,
+                                                                            row_limit_));
     }
     else
     {
-        return std::make_shared<shape_featureset<filter_in_box> >(filter,
+        mapnik::bounding_box_filter<double> filter(q.get_bbox());
+        return std::make_shared<shape_featureset< mapnik::bounding_box_filter<double>>>(filter,
                                                                   shape_name_,
                                                                   q.property_names(),
                                                                   desc_.get_encoding(),
@@ -264,7 +267,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");
 #endif
 
-    filter_at_point filter(pt,tol);
+
     // collect all attribute names
     auto const& desc = desc_.get_descriptors();
     std::set<std::string> names;
@@ -277,16 +280,18 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     if (indexed_)
     {
         std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
+        mapnik::at_point_filter<float> filter(mapnik::coord2f(pt.x, pt.y));
         return featureset_ptr
-            (new shape_index_featureset<filter_at_point>(filter,
-                                                         std::move(shape_ptr),
-                                                         names,
-                                                         desc_.get_encoding(),
-                                                         shape_name_,
-                                                         row_limit_));
+            (new shape_index_featureset<mapnik::at_point_filter<float>>(filter,
+                                                                        std::move(shape_ptr),
+                                                                        names,
+                                                                        desc_.get_encoding(),
+                                                                        shape_name_,
+                                                                        row_limit_));
     }
     else
     {
+        filter_at_point filter(pt,tol);
         return std::make_shared<shape_featureset<filter_at_point> >(filter,
                                                                     shape_name_,
                                                                     names,

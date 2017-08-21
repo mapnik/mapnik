@@ -26,7 +26,7 @@
 #include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
-#include <mapnik/util/spatial_index.hpp>
+//#include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geometry/envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
@@ -172,7 +172,12 @@ int main (int argc,char** argv)
         }
         int pos = 50;
         shx.seek(pos * 2);
-        mapnik::quad_tree<mapnik::detail::node> tree(extent, depth, ratio);
+        mapnik::box2d<float> extent_f { static_cast<float>(extent.minx()),
+                static_cast<float>(extent.miny()),
+                static_cast<float>(extent.maxx()),
+                static_cast<float>(extent.maxy())};
+
+        mapnik::quad_tree<mapnik::detail::node, mapnik::box2d<float> > tree(extent_f, depth, ratio);
         int count = 0;
 
         if (shape_type != shape_io::shape_null)
@@ -238,7 +243,11 @@ int main (int argc,char** argv)
                             {
                                 std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                             }
-                            tree.insert(mapnik::detail::node(offset * 2, start, end),item_ext);
+                            mapnik::box2d<float> ext_f {static_cast<float>(item_ext.minx()),
+                                    static_cast<float>(item_ext.miny()),
+                                    static_cast<float>(item_ext.maxx()),
+                                    static_cast<float>(item_ext.maxy())};
+                            tree.insert(mapnik::detail::node(offset * 2, start, end, std::move(ext_f)), ext_f);
                             ++count;
                         }
                     }
@@ -255,7 +264,12 @@ int main (int argc,char** argv)
                     {
                         std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                     }
-                    tree.insert(mapnik::detail::node(offset * 2,-1,0),item_ext);
+                    mapnik::box2d<float> ext_f {static_cast<float>(item_ext.minx()),
+                            static_cast<float>(item_ext.miny()),
+                            static_cast<float>(item_ext.maxx()),
+                            static_cast<float>(item_ext.maxy())};
+
+                    tree.insert(mapnik::detail::node(offset * 2, -1, 0, std::move(ext_f)), ext_f);
                     ++count;
                 }
             }

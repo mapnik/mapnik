@@ -212,20 +212,24 @@ struct bounding_box_filter
 
 using filter_in_box = bounding_box_filter<double>;
 
-struct filter_at_point
+template <typename T>
+struct at_point_filter
 {
-    box2d<double> box_;
-    explicit filter_at_point(coord2d const& pt, double tol = 0)
+    using value_type = T;
+    box2d<value_type> box_;
+    explicit at_point_filter(coord<value_type, 2> const& pt, double tol = 0)
         : box_(pt, pt)
     {
         box_.pad(tol);
     }
 
-    bool pass(box2d<double> const& extent) const
+    bool pass(box2d<value_type> const& extent) const
     {
         return extent.intersects(box_);
     }
 };
+
+using filter_at_point = at_point_filter<double>;
 
 ////////////////////////////////////////////////////////////////////////////
 template <typename PathType>

@@ -52,7 +52,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
       ctx_(std::make_shared<mapnik::context_type>()),
       shape_ptr_(std::move(shape_ptr)),
       tr_(new mapnik::transcoder(encoding)),
-      offsets_(),
+      positions_(),
       itr_(),
       attr_ids_(),
       row_limit_(row_limit),
@@ -60,21 +60,33 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
       feature_bbox_()
 {
     shape_ptr_->shp().skip(100);
-    setup_attributes(ctx_, attribute_names, shape_name, *shape_ptr_,attr_ids_);
+    setup_attributes(ctx_, attribute_names, shape_name, *shape_ptr_, attr_ids_);
 
     auto index = shape_ptr_->index();
     if (index)
     {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        mapnik::util::spatial_index<mapnik::detail::node, filterT,boost::interprocess::ibufferstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<mapnik::detail::node,
+                                    filterT,
+                                    boost::interprocess::ibufferstream,
+                                    mapnik::box2d<typename filterT::value_type>>::query(filter, index->file(), positions_);
 #else
-        mapnik::util::spatial_index<mapnik::detail::node, filterT, std::ifstream>::query(filter, index->file(), offsets_);
+        mapnik::util::spatial_index<mapnik::detail::node,
+                                    filterT,
+                                    std::ifstream,
+                                    mapnik::box2d<typename filterT::value_type>>::query(filter, index->file(), positions_);
 #endif
     }
-    std::sort(offsets_.begin(), offsets_.end(), [](mapnik::detail::node const& n0, mapnik::detail::node const& n1)
+    // filter
+    positions_.erase(std::remove_if(positions_.begin(),
+                                    positions_.end(),
+                                    [&](mapnik::detail::node const& pos)
+                                    { return !pos.box.intersects(filter.box_);}),
+                     positions_.end());
+    std::sort(positions_.begin(), positions_.end(), [](mapnik::detail::node const& n0, mapnik::detail::node const& n1)
               {return n0.offset != n1.offset ? n0.offset < n1.offset : n0.start < n1.start;});
-    MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << offsets_.size();
-    itr_ = offsets_.begin();
+    MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << positions_.size();
+    itr_ = positions_.begin();
 }
 
 template <typename filterT>
@@ -85,12 +97,12 @@ feature_ptr shape_index_featureset<filterT>::next()
         return feature_ptr();
     }
 
-    while ( itr_ != offsets_.end())
+    while ( itr_ != positions_.end())
     {
         std::uint64_t offset = itr_->offset;
         shape_ptr_->move_to(offset);
         std::vector<std::pair<int,int>> parts;
-        while (itr_ != offsets_.end() && itr_->offset == offset)
+        while (itr_ != positions_.end() && itr_->offset == offset)
         {
             if (itr_->start!= -1) parts.emplace_back(itr_->start, itr_->end);
             ++itr_;
@@ -117,7 +129,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         case shape_io::shape_multipointz:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            //if (!filter_.pass(feature_bbox_)) continue;
             int num_points = record.read_ndr_integer();
             mapnik::geometry::multi_point<double> multi_point;
             for (int i = 0; i < num_points; ++i)
@@ -134,7 +146,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         case shape_io::shape_polylinez:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            //if (!filter_.pass(feature_bbox_)) continue;
             if (parts.size() < 2) feature->set_geometry(shape_io::read_polyline(record));
             else feature->set_geometry(shape_io::read_polyline_parts(record, parts));
             break;
@@ -144,7 +156,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         case shape_io::shape_polygonz:
         {
             shape_io::read_bbox(record, feature_bbox_);
-            if (!filter_.pass(feature_bbox_)) continue;
+            //if (!filter_.pass(feature_bbox_)) continue;
             if (parts.size() < 2) feature->set_geometry(shape_io::read_polygon(record));
             else feature->set_geometry(shape_io::read_polygon_parts(record, parts));
             break;
@@ -181,5 +193,5 @@ feature_ptr shape_index_featureset<filterT>::next()
 template <typename filterT>
 shape_index_featureset<filterT>::~shape_index_featureset() {}
 
-template class shape_index_featureset<mapnik::filter_in_box>;
-template class shape_index_featureset<mapnik::filter_at_point>;
+template class shape_index_featureset<mapnik::bounding_box_filter<float>>;
+template class shape_index_featureset<mapnik::at_point_filter<float>>;
