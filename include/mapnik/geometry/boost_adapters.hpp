@@ -30,6 +30,9 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #undef B0
+#if BOOST_VERSION == 106400
+#include <boost/qvm/mat_operations.hpp>
+#endif
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/ring.hpp>
