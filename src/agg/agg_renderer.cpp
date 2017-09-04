@@ -70,7 +70,11 @@ namespace mapnik
 
 template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+#ifdef MAPNIK_METRICS
+    : feature_style_processor<agg_renderer>(m, scale_factor, pixmap.metrics_),
+#else
     : feature_style_processor<agg_renderer>(m, scale_factor),
+#endif
       pixmap_(pixmap),
       internal_buffer_(),
       current_buffer_(&pixmap),
@@ -85,7 +89,11 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor
 
 template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, attributes const& vars, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+#ifdef MAPNIK_METRICS
+    : feature_style_processor<agg_renderer>(m, scale_factor, pixmap.metrics_),
+#else
     : feature_style_processor<agg_renderer>(m, scale_factor),
+#endif
       pixmap_(pixmap),
       internal_buffer_(),
       current_buffer_(&pixmap),
@@ -101,7 +109,11 @@ agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, attributes c
 template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1> detector,
                               double scale_factor, unsigned offset_x, unsigned offset_y)
+#ifdef MAPNIK_METRICS
+    : feature_style_processor<agg_renderer>(m, scale_factor, pixmap.metrics_),
+#else
     : feature_style_processor<agg_renderer>(m, scale_factor),
+#endif
       pixmap_(pixmap),
       internal_buffer_(),
       current_buffer_(&pixmap),

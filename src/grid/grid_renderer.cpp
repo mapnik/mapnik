@@ -62,7 +62,11 @@ namespace mapnik
 
 template <typename T>
 grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+#ifdef MAPNIK_METRICS
+    : feature_style_processor<grid_renderer>(m, scale_factor, pixmap.metrics_),
+#else
     : feature_style_processor<grid_renderer>(m, scale_factor),
+#endif
       pixmap_(pixmap),
       ras_ptr(new grid_rasterizer),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
@@ -72,7 +76,11 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
 
 template <typename T>
 grid_renderer<T>::grid_renderer(Map const& m, request const& req, attributes const& vars, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+#ifdef MAPNIK_METRICS
+    : feature_style_processor<grid_renderer>(m, scale_factor, pixmap.metrics_),
+#else
     : feature_style_processor<grid_renderer>(m, scale_factor),
+#endif
       pixmap_(pixmap),
       ras_ptr(new grid_rasterizer),
       common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
