@@ -99,7 +99,11 @@ image<T>::image(image<T> const& rhs)
       offset_(rhs.offset_),
       scaling_(rhs.scaling_),
       premultiplied_alpha_(rhs.premultiplied_alpha_),
-      painted_(rhs.painted_) {}
+      painted_(rhs.painted_)
+#ifdef MAPNIK_METRICS
+     ,metrics_(rhs.metrics_)
+#endif
+{}
 
 template <typename T>
 image<T>::image(image<T> && rhs) noexcept
@@ -109,14 +113,40 @@ image<T>::image(image<T> && rhs) noexcept
       scaling_(rhs.scaling_),
       premultiplied_alpha_(rhs.premultiplied_alpha_),
       painted_(rhs.painted_)
+#ifdef MAPNIK_METRICS
+     ,metrics_(std::move(rhs.metrics_))
+#endif
 {
     rhs.dimensions_ = { 0, 0 };
 }
 
 template <typename T>
-image<T>& image<T>::operator=(image<T> rhs)
+image<T>& image<T>::operator=(image<T> const &rhs)
 {
-    swap(rhs);
+    dimensions_ = rhs.dimensions_;
+    buffer_ = rhs.buffer_;
+    offset_ = rhs.offset_;
+    scaling_ = rhs.scaling_;
+    premultiplied_alpha_ = rhs.premultiplied_alpha_;
+    painted_ = rhs.painted_;
+#ifdef MAPNIK_METRICS
+    metrics_ = rhs.metrics_;
+#endif
+    return *this;
+}
+
+template <typename T>
+image<T>& image<T>::operator=(image<T>&& rhs) noexcept
+{
+    dimensions_ = std::move(rhs.dimensions_);
+    buffer_ = std::move(rhs.buffer_);
+    offset_ = rhs.offset_;
+    scaling_ = rhs.scaling_;
+    premultiplied_alpha_ = rhs.premultiplied_alpha_;
+    painted_ = rhs.painted_;
+#ifdef MAPNIK_METRICS
+    metrics_ = std::move(rhs.metrics_);
+#endif
     return *this;
 }
 
@@ -141,6 +171,9 @@ void image<T>::swap(image<T> & rhs)
     std::swap(scaling_, rhs.scaling_);
     std::swap(premultiplied_alpha_, rhs.premultiplied_alpha_);
     std::swap(painted_, rhs.painted_);
+#ifdef MAPNIK_METRICS
+    std::swap(metrics_, rhs.metrics_);
+#endif
 }
 
 template <typename T>
@@ -322,5 +355,4 @@ inline image_dtype image<T>::get_dtype()  const
 {
     return dtype;
 }
-
 } // end ns

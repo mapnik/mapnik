@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/metrics.hpp>
 #include <mapnik/pixel_types.hpp>
 
 namespace mapnik {
@@ -39,7 +40,7 @@ struct MAPNIK_DECL buffer
     buffer(buffer const& rhs);
     ~buffer();
     buffer& operator=(buffer rhs);
-    inline bool operator!() const {return (data_ == nullptr)? true : false;}
+    inline bool operator!() const {return (data_ == nullptr);}
     inline unsigned char* data() {return data_;}
     inline unsigned char const* data() const {return data_;}
     inline std::size_t size() const {return size_;}
@@ -61,7 +62,7 @@ private:
     std::size_t height_;
 };
 
-} // end ns detail
+} // namespace detail
 
 template <typename T>
 class image
@@ -80,6 +81,10 @@ private:
     double scaling_;
     bool premultiplied_alpha_;
     bool painted_;
+#ifdef MAPNIK_METRICS
+public:
+    metrics metrics_ = metrics(false);
+#endif
 public:
     image();
     image(int width,
@@ -94,9 +99,12 @@ public:
           bool painted = false);
     image(image<T> const& rhs);
     image(image<T> && rhs) noexcept;
-    image<T>& operator=(image<T> rhs);
+    image<T>& operator=(image<T> const& rhs);
+    image<T>& operator=(image<T>&& rhs) noexcept;
     bool operator==(image<T> const& rhs) const;
     bool operator<(image<T> const& rhs) const;
+
+    ~image() = default;
 
     void swap(image<T> & rhs);
     pixel_type& operator() (std::size_t i, std::size_t j);
@@ -131,6 +139,7 @@ public:
     void painted(bool painted);
     bool painted() const;
     image_dtype get_dtype() const;
+
 };
 
 using image_null = image<null_t>;
@@ -146,6 +155,6 @@ using image_gray64 = image<gray64_t>;
 using image_gray64s = image<gray64s_t>;
 using image_gray64f = image<gray64f_t>;
 
-} // end ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_HPP
