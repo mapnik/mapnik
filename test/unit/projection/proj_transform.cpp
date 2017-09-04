@@ -119,4 +119,70 @@ SECTION("test pj_transform failure behavior")
 
 #endif
 
+// Github Issue https://github.com/mapnik/mapnik/issues/2648
+SECTION("Test proj antimeridian bbox")
+{
+    mapnik::projection prj_geog("+init=epsg:4326");
+    mapnik::projection prj_proj("+init=epsg:2193");
+
+    mapnik::proj_transform prj_trans_fwd(prj_proj, prj_geog);
+    mapnik::proj_transform prj_trans_rev(prj_geog, prj_proj);
+
+    // bad = mapnik.Box2d(-177.31453250437079, -62.33374815225163, 178.02778363316355, -24.584597490955804)
+    const mapnik::box2d<double> better(-180.0, -62.33374815225163,
+                                        180.0, -24.584597490955804);
+
+    {
+        mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
+        prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS);
+        CHECK(ext.minx() == Approx(better.minx()));
+        CHECK(ext.miny() == Approx(better.miny()));
+        CHECK(ext.maxx() == Approx(better.maxx()));
+        CHECK(ext.maxy() == Approx(better.maxy()));
+    }
+
+    {
+        // check the same logic works for .backward()
+        mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
+        prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS);
+        CHECK(ext.minx() == Approx(better.minx()));
+        CHECK(ext.miny() == Approx(better.miny()));
+        CHECK(ext.maxx() == Approx(better.maxx()));
+        CHECK(ext.maxy() == Approx(better.maxy()));
+    }
+
+    {
+        // checks for not being snapped (ie. not antimeridian)
+        mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
+        prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS);
+        CHECK(ext.minx() == Approx(better.minx()));
+        CHECK(ext.miny() == Approx(better.miny()));
+        CHECK(ext.maxx() == Approx(better.maxx()));
+        CHECK(ext.maxy() == Approx(better.maxy()));
+    }
+
+    const mapnik::box2d<double> normal(148.766759749, -60.1222810238,
+                                       159.95484893, -24.9774643167);
+
+    {
+        // checks for not being snapped (ie. not antimeridian)
+        mapnik::box2d<double> ext(274000, 3087000, 276000, 7173000);
+        prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS);
+        CHECK(ext.minx() == Approx(normal.minx()));
+        CHECK(ext.miny() == Approx(normal.miny()));
+        CHECK(ext.maxx() == Approx(normal.maxx()));
+        CHECK(ext.maxy() == Approx(normal.maxy()));
+    }
+
+    {
+        // check the same logic works for .backward()
+        mapnik::box2d<double> ext(274000, 3087000, 276000, 7173000);
+        prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS);
+        CHECK(ext.minx() == Approx(normal.minx()));
+        CHECK(ext.miny() == Approx(normal.miny()));
+        CHECK(ext.maxx() == Approx(normal.maxx()));
+        CHECK(ext.maxy() == Approx(normal.maxy()));
+    }
+}
+
 }
