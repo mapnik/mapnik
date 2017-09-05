@@ -24,21 +24,22 @@
 #define MAPNIK_GRID_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/image.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/grid/grid_view.hpp>
-#include <mapnik/global.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/util/conversions.hpp>
+#include <mapnik/global.hpp>
+#include <mapnik/grid/grid_view.hpp>
+#include <mapnik/image.hpp>
+#include <mapnik/metrics.hpp>
 #include <mapnik/safe_cast.hpp>
+#include <mapnik/util/conversions.hpp>
+#include <mapnik/value.hpp>
 
 // stl
+#include <cmath>
 #include <map>
 #include <set>
-#include <cmath>
 #include <string>
 #include <vector>
 
@@ -215,9 +216,15 @@ public:
             }
         }
     }
+
+#ifdef MAPNIK_METRICS
+public:
+    metrics metrics_ = metrics(false);
+#endif
+
 };
 
 using grid = hit_grid<mapnik::value_integer_pixel>;
 
-}
+} //namespace mapnik
 #endif //MAPNIK_GRID_HPP

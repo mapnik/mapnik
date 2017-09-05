@@ -65,6 +65,9 @@ hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
       f_keys_(rhs.f_keys_),
       features_(rhs.features_),
       ctx_(rhs.ctx_)
+#ifdef MAPNIK_METRICS
+     ,metrics_(rhs.metrics_)
+#endif
 {
     f_keys_[base_mask] = "";
     data_.set(base_mask);
@@ -80,6 +83,9 @@ void hit_grid<T>::clear()
     f_keys_[base_mask] = "";
     data_.set(base_mask);
     ctx_ = std::make_shared<mapnik::context_type>();
+#ifdef MAPNIK_METRICS
+    metrics_ = metrics(false);
+#endif
 }
 
 template <typename T>
