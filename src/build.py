@@ -241,6 +241,7 @@ source = Split(
     text/placement_finder.cpp
     text/properties_util.cpp
     text/renderer.cpp
+    text/color_font_renderer.cpp
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
     text/font_feature_settings.cpp

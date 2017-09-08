@@ -38,12 +38,17 @@ namespace mapnik
 {
 
 font_face::font_face(FT_Face face)
-    : face_(face)
+    : face_(face),
+      color_font_(init_color_font())
+{
+}
+
+bool font_face::init_color_font()
 {
     static const uint32_t tag = FT_MAKE_TAG('C', 'B', 'D', 'T');
     unsigned long length = 0;
     FT_Load_Sfnt_Table(face_, tag, 0, nullptr, &length);
-    if (length) color_font_ = true;
+    return length > 0;
 }
 
 bool font_face::set_character_sizes(double size)
@@ -85,6 +90,15 @@ bool font_face::glyph_dimensions(glyph_info & glyph) const
     glyph.unscaled_ymax = glyph_bbox.yMax;
     glyph.unscaled_advance = face_->glyph->advance.x;
     glyph.unscaled_line_height = face_->size->metrics.height;
+
+    if (color_font_)
+    {
+        double scale_multiplier = 2048.0 / (face_->size->metrics.height);
+        glyph.unscaled_ymin *= scale_multiplier;
+        glyph.unscaled_ymax *= scale_multiplier;
+        glyph.unscaled_advance *= scale_multiplier;
+    }
+
     return true;
 }
 

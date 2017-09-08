@@ -30,6 +30,22 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_any.hpp>
+#include <mapnik/agg_rasterizer.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
+#include "agg_scanline_u.h"
+#include "agg_image_filters.h"
+#include "agg_trans_bilinear.h"
+#include "agg_span_allocator.h"
+#include "agg_image_accessors.h"
+#include "agg_span_image_filter_rgba.h"
+#include "agg_renderer_base.h"
+#include "agg_renderer_scanline.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -112,7 +128,8 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
         FT_Glyph image;
         error = FT_Get_Glyph(face->glyph, &image);
         if (error) continue;
-        glyphs_.emplace_back(image, *glyph.format, pos, size);
+        box2d<double> bbox(0, glyph_pos.glyph.ymin(), glyph_pos.glyph.advance(), glyph_pos.glyph.ymax());
+        glyphs_.emplace_back(image, *glyph.format, pos, glyph_pos.rot, size, bbox);
     }
 }
 
@@ -133,32 +150,6 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
             }
         }
     }
-}
-
-template <typename T>
-void composite_color_bitmap(T & pixmap, FT_Bitmap *bitmap, int x, int y, double size, double opacity, composite_mode_e comp_op)
-{
-  image_rgba8 image(bitmap->width, bitmap->rows);
-
-  for (unsigned i = 0, p = 0; i < bitmap->width; ++i, p += 4)
-  {
-      for (unsigned j = 0, q = 0; j < bitmap->rows; ++j, ++q)
-      {
-          std::uint8_t b = bitmap->buffer[q * bitmap->width * 4 + p];
-          std::uint8_t g = bitmap->buffer[q * bitmap->width * 4 + p + 1];
-          std::uint8_t r = bitmap->buffer[q * bitmap->width * 4 + p + 2];
-          std::uint8_t a = bitmap->buffer[q * bitmap->width * 4 + p + 3];
-          unsigned c = static_cast<unsigned>((a << 24) | (b << 16) | (g << 8) | (r));
-          image(i, j) = c;
-      }
-  }
-  double scale = size/image.height();
-  int scaled_width = bitmap->width * scale;
-  int scaled_height = bitmap->rows * scale;
-  image_rgba8 scaled_image(scaled_width, scaled_height);
-  scale_image_agg(scaled_image, image , SCALING_BILINEAR , scale, scale, 0.0, 0.0, 1.0, 0);
-  set_premultiplied_alpha(scaled_image, true);
-  composite(pixmap, scaled_image, comp_op, opacity, x, y);
 }
 
 template <typename T>
@@ -229,28 +220,58 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 if (!error)
                 {
                     FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
-                    composite_bitmap(pixmap_,
-                                     &bit->bitmap,
-                                     halo_fill,
-                                     bit->left,
-                                     height - bit->top,
-                                     halo_opacity,
-                                     halo_comp_op_);
+                    if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        composite_bitmap(pixmap_,
+                                         &bit->bitmap,
+                                         halo_fill,
+                                         bit->left,
+                                         height - bit->top,
+                                         halo_opacity,
+                                         halo_comp_op_);
+                    }
                 }
             }
             else
             {
                 error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
-                if (!error)
+                if (error)
                 {
-                    FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
-                    render_halo(&bit->bitmap,
-                                halo_fill,
-                                bit->left,
-                                height - bit->top,
-                                halo_radius,
-                                halo_opacity,
-                                halo_comp_op_);
+                    continue;
+                }
+                FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
+                if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
+                {
+                    pixel_position render_pos(base_point);
+                    image_rgba8 glyph_image(render_glyph_image(glyph,
+                                                               bit->bitmap,
+                                                               transform_,
+                                                               render_pos));
+                    const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
+                    render_halo<pixel_size>(glyph_image.bytes(),
+                                            glyph_image.width(),
+                                            glyph_image.height(),
+                                            halo_fill,
+                                            render_pos.x, render_pos.y,
+                                            halo_radius,
+                                            halo_opacity,
+                                            halo_comp_op_);
+                }
+                else
+                {
+                    render_halo<1>(bit->bitmap.buffer,
+                                   bit->bitmap.width,
+                                   bit->bitmap.rows,
+                                   halo_fill,
+                                   bit->left,
+                                   height - bit->top,
+                                   halo_radius,
+                                   halo_opacity,
+                                   halo_comp_op_);
                 }
             }
         }
@@ -267,22 +288,27 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         error = 0;
         if ( glyph.image->format != FT_GLYPH_FORMAT_BITMAP )
         {
-
             error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL, 0, 1);
         }
         if (error == 0)
         {
             FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(glyph.image);
             int pixel_mode = bit->bitmap.pixel_mode;
-            if (pixel_mode == 7)
+            if (pixel_mode == FT_PIXEL_MODE_BGRA)
             {
-                int x = (start.x >> 6) + glyph.pos.x;
-                int y = height - (start.y >> 6) + glyph.pos.y;
-                composite_color_bitmap(pixmap_,
-                                       &bit->bitmap,
-                                       x,y, glyph.size,
-                                       text_opacity,
-                                       comp_op_);
+                int x = base_point.x + glyph.pos.x;
+                int y = base_point.y - glyph.pos.y;
+                agg::trans_affine transform(
+                    glyph_transform(transform_,
+                                    bit->bitmap.rows,
+                                    x, y,
+                                    -glyph.rot.angle(),
+                                    glyph.bbox));
+                composite_color_glyph(pixmap_,
+                                      bit->bitmap,
+                                      transform,
+                                      text_opacity,
+                                      comp_op_);
             }
             else
             {
@@ -299,7 +325,6 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     }
 
 }
-
 
 template <typename T>
 void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer feature_id)
@@ -329,11 +354,31 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
         if (!error)
         {
             FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(glyph.image);
-            render_halo_id(&bit->bitmap,
-                           feature_id,
-                           bit->left,
-                           height - bit->top,
-                           static_cast<int>(halo_radius));
+            if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
+            {
+                pixel_position render_pos(base_point);
+                image_rgba8 glyph_image(render_glyph_image(glyph,
+                                                           bit->bitmap,
+                                                           transform_,
+                                                           render_pos));
+                const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
+                render_halo_id<pixel_size>(glyph_image.bytes(),
+                                           glyph_image.width(),
+                                           glyph_image.height(),
+                                           feature_id,
+                                           render_pos.x, render_pos.y,
+                                           static_cast<int>(halo_radius));
+            }
+            else
+            {
+                render_halo_id<1>(bit->bitmap.buffer,
+                                  bit->bitmap.width,
+                                  bit->bitmap.rows,
+                                  feature_id,
+                                  bit->left,
+                                  height - bit->top,
+                                  static_cast<int>(halo_radius));
+            }
         }
         FT_Done_Glyph(glyph.image);
     }
@@ -341,16 +386,17 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
 
 
 template <typename T>
-void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
-                 unsigned rgba,
-                 int x1,
-                 int y1,
-                 double halo_radius,
-                 double opacity,
-                 composite_mode_e comp_op)
+template <std::size_t PixelWidth>
+void agg_text_renderer<T>::render_halo(unsigned char *buffer,
+                                       unsigned width,
+                                       unsigned height,
+                                       unsigned rgba,
+                                       int x1,
+                                       int y1,
+                                       double halo_radius,
+                                       double opacity,
+                                       composite_mode_e comp_op)
 {
-    int width = bitmap->width;
-    int height = bitmap->rows;
     int x, y;
     if (halo_radius < 1.0)
     {
@@ -358,7 +404,7 @@ void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
         {
             for (y=0; y < height; y++)
             {
-                int gray = bitmap->buffer[y*bitmap->width+x];
+                int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
                 if (gray)
                 {
                     mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
@@ -382,7 +428,7 @@ void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
         {
             for (y=0; y < height; y++)
             {
-                int gray = bitmap->buffer[y*bitmap->width+x];
+                int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
                 if (gray)
                 {
                     for (int n=-halo_radius; n <=halo_radius; ++n)
@@ -395,21 +441,21 @@ void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
 }
 
 template <typename T>
-void grid_text_renderer<T>::render_halo_id(
-                    FT_Bitmap *bitmap,
-                    mapnik::value_integer feature_id,
-                    int x1,
-                    int y1,
-                    int halo_radius)
+template <std::size_t PixelWidth>
+void grid_text_renderer<T>::render_halo_id(unsigned char *buffer,
+                                           unsigned width,
+                                           unsigned height,
+                                           mapnik::value_integer feature_id,
+                                           int x1,
+                                           int y1,
+                                           int halo_radius)
 {
-    int width = bitmap->width;
-    int height = bitmap->rows;
     int x, y;
     for (x=0; x < width; x++)
     {
         for (y=0; y < height; y++)
         {
-            int gray = bitmap->buffer[y*bitmap->width+x];
+            int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
             if (gray)
             {
                 for (int n=-halo_radius; n <=halo_radius; ++n)
