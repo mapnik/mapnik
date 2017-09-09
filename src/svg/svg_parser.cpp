@@ -1433,7 +1433,7 @@ svg_parser::svg_parser(svg_converter<svg_path_adapter,
 
 svg_parser::~svg_parser() {}
 
-void svg_parser::parse(std::string const& filename)
+bool svg_parser::parse(std::string const& filename)
 {
 #ifdef _WINDOWS
     std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
@@ -1470,9 +1470,10 @@ void svg_parser::parse(std::string const& filename)
     {
         traverse_tree(*this, child);
     }
+    return !err_handler_.error_messages().empty();
 }
 
-void svg_parser::parse_from_string(std::string const& svg)
+bool svg_parser::parse_from_string(std::string const& svg)
 {
     const int flags = rapidxml::parse_trim_whitespace | rapidxml::parse_validate_closing_tags;
     rapidxml::xml_document<> doc;
@@ -1494,6 +1495,7 @@ void svg_parser::parse_from_string(std::string const& svg)
     {
         traverse_tree(*this, child);
     }
+    return !err_handler_.error_messages().empty();
 }
 
 svg_parser::error_handler & svg_parser::err_handler()
