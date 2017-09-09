@@ -18,6 +18,8 @@ cache:
   directories:
   - $HOME/.ccache
 
+dist: precise
+
 matrix:
   include:
     - os: linux
