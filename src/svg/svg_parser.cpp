@@ -1443,7 +1443,7 @@ void svg_parser::parse(std::string const& filename)
     if (!stream)
     {
         std::stringstream ss;
-        ss << "SVG error: unbale to open \"" << filename << "\"";
+        ss << "SVG error: unable to open \"" << filename << "\"";
         throw std::runtime_error(ss.str());
     }
 
