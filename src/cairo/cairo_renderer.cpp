@@ -149,7 +149,6 @@ void cairo_renderer<T>::setup(Map const& map)
     {
         cairo_save_restore guard(context_);
         context_.set_color(*bg);
-        context_.set_operator(composite_mode_e::src);
         context_.paint();
     }
     boost::optional<std::string> const& image_filename = map.background_image();
