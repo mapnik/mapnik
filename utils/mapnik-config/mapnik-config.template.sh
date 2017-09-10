@@ -27,9 +27,9 @@ Known values for OPTION are:
   --cflags          all include paths, compiler flags, and pre-processor defines (for back-compatibility)
   --cxx             c++ compiler used to build mapnik (new in 2.2.0)
   --all-flags       all compile and link flags (new in 2.2.0)
-  --gdal-data       path to GDAL_DATA directory, if known (relevant only for packaged builds of Mapnik) (new in 3.0.0)
-  --proj-lib        path to PROJ_LIB directory, if known (relevant only for packaged builds of Mapnik) (new in 3.0.0)
-  --icu-data        path to ICU_DATA directory, if known (relevant only for packaged builds of Mapnik) (new in 3.0.0)
+  --gdal-data       path to GDAL_DATA directory, if detected at build time (new in 3.0.16)
+  --proj-lib        path to PROJ_LIB directory, if detected at build time (new in 3.0.16)
+  --icu-data        path to ICU_DATA directory, if detected at build time (new in 3.0.16)
 EOF
 
     exit $1
@@ -132,15 +132,15 @@ while test $# -gt 0; do
       ;;
 
     --gdal-data)
-      if [[ ${CONFIG_MAPNIK_GDAL_DATA:-unset} != "unset" ]]; then echo ${CONFIG_PREFIX}/${CONFIG_MAPNIK_GDAL_DATA}; fi;
+      if [[ ${CONFIG_MAPNIK_GDAL_DATA:-unset} != "unset" ]]; then echo ${CONFIG_MAPNIK_GDAL_DATA}; fi;
       ;;
 
     --proj-lib)
-      if [[ ${CONFIG_MAPNIK_PROJ_LIB:-unset} != "unset" ]]; then echo ${CONFIG_PREFIX}/${CONFIG_MAPNIK_PROJ_LIB}; fi;
+      if [[ ${CONFIG_MAPNIK_PROJ_LIB:-unset} != "unset" ]]; then echo ${CONFIG_MAPNIK_PROJ_LIB}; fi;
       ;;
 
     --icu-data)
-      if [[ ${CONFIG_MAPNIK_ICU_DATA:-unset} != "unset" ]]; then echo ${CONFIG_PREFIX}/${CONFIG_MAPNIK_ICU_DATA}; fi;
+      if [[ ${CONFIG_MAPNIK_ICU_DATA:-unset} != "unset" ]]; then echo ${CONFIG_MAPNIK_ICU_DATA}; fi;
       ;;
 
     *)
