@@ -37,7 +37,6 @@
 #include <mapnik/renderer_common.hpp>
 // stl
 #include <memory>
-#include <stack>
 
 // fwd declaration to avoid dependence on agg headers
 namespace agg { struct trans_affine; }
@@ -161,13 +160,15 @@ protected:
     void draw_geo_extent(box2d<double> const& extent,mapnik::color const& color);
 
 private:
-    std::stack<std::reference_wrapper<buffer_type>> buffers_;
-    std::stack<buffer_type> internal_buffers_;
+    buffer_type & pixmap_;
+    std::shared_ptr<buffer_type> internal_buffer_;
+    mutable buffer_type * current_buffer_;
+    mutable bool style_level_compositing_;
     const std::unique_ptr<rasterizer> ras_ptr;
     gamma_method_enum gamma_method_;
     double gamma_;
     renderer_common common_;
-    void setup(Map const & m, buffer_type & pixmap);
+    void setup(Map const& m);
 };
 
 extern template class MAPNIK_DECL agg_renderer<image<rgba8_t>>;

@@ -42,13 +42,9 @@ layer::layer(std::string const& _name, std::string const& _srs)
       cache_features_(false),
       group_by_(),
       styles_(),
-      layers_(),
       ds_(),
       buffer_size_(),
-      maximum_extent_(),
-      comp_op_(),
-      opacity_(1.0f)
-{}
+      maximum_extent_() {}
 
 layer::layer(layer const& rhs)
     : name_(rhs.name_),
@@ -61,13 +57,9 @@ layer::layer(layer const& rhs)
       cache_features_(rhs.cache_features_),
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
-      layers_(rhs.layers_),
       ds_(rhs.ds_),
       buffer_size_(rhs.buffer_size_),
-      maximum_extent_(rhs.maximum_extent_),
-      comp_op_(rhs.comp_op_),
-      opacity_(rhs.opacity_)
-{}
+      maximum_extent_(rhs.maximum_extent_) {}
 
 layer::layer(layer && rhs)
     : name_(std::move(rhs.name_)),
@@ -80,13 +72,9 @@ layer::layer(layer && rhs)
       cache_features_(std::move(rhs.cache_features_)),
       group_by_(std::move(rhs.group_by_)),
       styles_(std::move(rhs.styles_)),
-      layers_(std::move(rhs.layers_)),
       ds_(std::move(rhs.ds_)),
       buffer_size_(std::move(rhs.buffer_size_)),
-      maximum_extent_(std::move(rhs.maximum_extent_)),
-      comp_op_(std::move(rhs.comp_op_)),
-      opacity_(std::move(rhs.opacity_))
-{}
+      maximum_extent_(std::move(rhs.maximum_extent_)) {}
 
 layer& layer::operator=(layer rhs)
 {
@@ -104,8 +92,6 @@ layer& layer::operator=(layer rhs)
     std::swap(this->ds_, rhs.ds_);
     std::swap(this->buffer_size_, rhs.buffer_size_);
     std::swap(this->maximum_extent_, rhs.maximum_extent_);
-    std::swap(this->comp_op_, rhs.comp_op_);
-    std::swap(this->opacity_, rhs.opacity_);
     return *this;
 }
 
@@ -123,9 +109,7 @@ bool layer::operator==(layer const& rhs) const
         (styles_ == rhs.styles_) &&
         ((ds_ && rhs.ds_) ? *ds_ == *rhs.ds_ : ds_ == rhs.ds_) &&
         (buffer_size_ == rhs.buffer_size_) &&
-        (maximum_extent_ == rhs.maximum_extent_) &&
-        (comp_op_ == rhs.comp_op_) &&
-        (opacity_ == rhs.opacity_);
+        (maximum_extent_ == rhs.maximum_extent_);
 }
 
 layer::~layer() {}
@@ -163,21 +147,6 @@ std::vector<std::string> const& layer::styles() const
 std::vector<std::string> & layer::styles()
 {
     return styles_;
-}
-
-void layer::add_layer(layer const& l)
-{
-    layers_.emplace_back(l);
-}
-
-void layer::add_layer(layer && l)
-{
-    layers_.push_back(std::move(l));
-}
-
-std::vector<layer> const& layer::layers() const
-{
-    return layers_;
 }
 
 void layer::set_minimum_scale_denominator(double minimum_scale_denom)
@@ -299,26 +268,6 @@ void layer::set_group_by(std::string const& column)
 std::string const& layer::group_by() const
 {
     return group_by_;
-}
-
-void layer::set_comp_op(composite_mode_e comp_op)
-{
-    comp_op_ = comp_op;
-}
-
-boost::optional<composite_mode_e> layer::comp_op() const
-{
-    return comp_op_;
-}
-
-void layer::set_opacity(double opacity)
-{
-    opacity_ = opacity;
-}
-
-double layer::get_opacity() const
-{
-    return opacity_;
 }
 
 }

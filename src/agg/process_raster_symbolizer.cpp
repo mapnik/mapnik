@@ -55,7 +55,7 @@ void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
         sym, feature, prj_trans, common_,
         [&](image_rgba8 const & target, composite_mode_e comp_op, double opacity,
             int start_x, int start_y) {
-            composite(buffers_.top().get(), target,
+            composite(*current_buffer_, target,
                       comp_op, opacity, start_x, start_y);
         }
     );

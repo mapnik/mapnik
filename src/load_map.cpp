@@ -101,10 +101,7 @@ public:
 private:
     void parse_map_include(Map & map, xml_node const& node);
     void parse_style(Map & map, xml_node const& node);
-
-    template <typename Parent>
-    void parse_layer(Parent & parent, xml_node const& node);
-
+    void parse_layer(Map & map, xml_node const& node);
     void parse_symbolizer_base(symbolizer_base &sym, xml_node const& node);
     void parse_fontset(Map & map, xml_node const & node);
     bool parse_font(font_set & fset, xml_node const& f);
@@ -559,8 +556,7 @@ bool map_parser::parse_font(font_set & fset, xml_node const& f)
     return false;
 }
 
-template <typename Parent>
-void map_parser::parse_layer(Parent & parent, xml_node const& node)
+void map_parser::parse_layer(Map & map, xml_node const& node)
 {
     std::string name;
     try
@@ -576,7 +572,7 @@ void map_parser::parse_layer(Parent & parent, xml_node const& node)
         name = node.get_attr("name", std::string("Unnamed"));
 
         // If no projection is given inherit from map
-        std::string srs = node.get_attr("srs", parent.srs());
+        std::string srs = node.get_attr("srs", map.srs());
         try
         {
             // create throwaway projection object here to ensure it is valid
@@ -680,24 +676,6 @@ void map_parser::parse_layer(Parent & parent, xml_node const& node)
             }
         }
 
-        // compositing
-        optional<std::string> comp_op_name = node.get_opt_attr<std::string>("comp-op");
-        if (comp_op_name)
-        {
-            optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
-            if (comp_op)
-            {
-                lyr.set_comp_op(*comp_op);
-            }
-            else
-            {
-                throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
-            }
-        }
-
-        optional<double> opacity = node.get_opt_attr<double>("opacity");
-        if (opacity) lyr.set_opacity(*opacity);
-
         for (auto const& child: node)
         {
 
@@ -777,12 +755,8 @@ void map_parser::parse_layer(Parent & parent, xml_node const& node)
                     throw config_error("Unknown exception occurred attempting to create datasoure for layer '" + lyr.name() + "'");
                 }
             }
-            else if (child.is("Layer"))
-            {
-                parse_layer(lyr, child);
-            }
         }
-        parent.add_layer(std::move(lyr));
+        map.add_layer(std::move(lyr));
     }
     catch (config_error const& ex)
     {

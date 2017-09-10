@@ -71,41 +71,47 @@ namespace mapnik
 template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
-      buffers_(),
-      internal_buffers_(),
+      pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),
+      style_level_compositing_(false),
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
 {
-    setup(m, pixmap);
+    setup(m);
 }
 
 template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, request const& req, attributes const& vars, T0 & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
-      buffers_(),
-      internal_buffers_(),
+      pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),
+      style_level_compositing_(false),
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
       common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
-    setup(m, pixmap);
+    setup(m);
 }
 
 template <typename T0, typename T1>
 agg_renderer<T0,T1>::agg_renderer(Map const& m, T0 & pixmap, std::shared_ptr<T1> detector,
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
-      buffers_(),
-      internal_buffers_(),
+      pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),
+      style_level_compositing_(false),
       ras_ptr(new rasterizer),
       gamma_method_(GAMMA_POWER),
       gamma_(1.0),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector)
 {
-    setup(m, pixmap);
+    setup(m);
 }
 
 template <typename buffer_type>
@@ -151,11 +157,9 @@ struct setup_agg_bg_visitor
 };
 
 template <typename T0, typename T1>
-void agg_renderer<T0,T1>::setup(Map const &m, buffer_type & pixmap)
+void agg_renderer<T0,T1>::setup(Map const &m)
 {
-    buffers_.emplace(pixmap);
-
-    mapnik::set_premultiplied_alpha(pixmap, true);
+    mapnik::set_premultiplied_alpha(pixmap_, true);
     boost::optional<color> const& bg = m.background();
     if (bg)
     {
@@ -163,13 +167,13 @@ void agg_renderer<T0,T1>::setup(Map const &m, buffer_type & pixmap)
         {
             mapnik::color bg_color = *bg;
             bg_color.premultiply();
-            mapnik::fill(pixmap, bg_color);
+            mapnik::fill(pixmap_, bg_color);
         }
         else
         {
             mapnik::color bg_color = *bg;
             bg_color.set_premultiplied(true);
-            mapnik::fill(pixmap, bg_color);
+            mapnik::fill(pixmap_,bg_color);
         }
     }
 
@@ -178,7 +182,7 @@ void agg_renderer<T0,T1>::setup(Map const &m, buffer_type & pixmap)
     {
         // NOTE: marker_cache returns premultiplied image, if needed
         std::shared_ptr<mapnik::marker const> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
-        setup_agg_bg_visitor<buffer_type> visitor(pixmap,
+        setup_agg_bg_visitor<buffer_type> visitor(pixmap_,
                                      common_,
                                      m.background_image_comp_op(),
                                      m.background_image_opacity());
@@ -200,7 +204,7 @@ void agg_renderer<T0,T1>::start_map_processing(Map const& map)
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::end_map_processing(Map const& map)
 {
-    mapnik::demultiply_alpha(buffers_.top().get());
+    mapnik::demultiply_alpha(pixmap_);
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
@@ -222,45 +226,28 @@ void agg_renderer<T0,T1>::start_layer_processing(layer const& lay, box2d<double>
     {
         common_.query_extent_.clip(*maximum_extent);
     }
-
-    if (lay.comp_op() || lay.get_opacity() < 1.0)
-    {
-        internal_buffers_.emplace(common_.width_, common_.height_);
-        buffers_.emplace(internal_buffers_.top());
-        set_premultiplied_alpha(buffers_.top().get(), true);
-    }
-    else
-    {
-        buffers_.emplace(buffers_.top().get());
-    }
 }
 
 template <typename T0, typename T1>
-void agg_renderer<T0,T1>::end_layer_processing(layer const& lyr)
+void agg_renderer<T0,T1>::end_layer_processing(layer const&)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
-
-    buffer_type & current_buffer = buffers_.top().get();
-    buffers_.pop();
-    buffer_type & previous_buffer = buffers_.top().get();
-
-    if (&current_buffer != &previous_buffer)
-    {
-        composite_mode_e comp_op = lyr.comp_op() ? *lyr.comp_op() : src_over;
-        composite(previous_buffer, current_buffer,
-                  comp_op, lyr.get_opacity(),
-                  -common_.t_.offset(),
-                  -common_.t_.offset());
-        internal_buffers_.pop();
-    }
 }
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing style";
-
     if (st.comp_op() || st.image_filters().size() > 0 || st.get_opacity() < 1)
+    {
+        style_level_compositing_ = true;
+    }
+    else
+    {
+        style_level_compositing_ = false;
+    }
+
+    if (style_level_compositing_)
     {
         if (st.image_filters_inflate())
         {
@@ -279,69 +266,81 @@ void agg_renderer<T0,T1>::start_style_processing(feature_type_style const& st)
             unsigned target_width = common_.width_ + (offset * 2);
             unsigned target_height = common_.height_ + (offset * 2);
             ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
-            internal_buffers_.emplace(target_width, target_height);
+            if (!internal_buffer_ ||
+               (internal_buffer_->width() < target_width ||
+                internal_buffer_->height() < target_height))
+            {
+                internal_buffer_ = std::make_shared<buffer_type>(target_width,target_height);
+            }
+            else
+            {
+                mapnik::fill(*internal_buffer_, 0); // fill with transparent colour
+            }
         }
         else
         {
-            internal_buffers_.emplace(common_.width_, common_.height_);
+            if (!internal_buffer_)
+            {
+                internal_buffer_ = std::make_shared<buffer_type>(common_.width_,common_.height_);
+            }
+            else
+            {
+                mapnik::fill(*internal_buffer_, 0); // fill with transparent colour
+            }
             common_.t_.set_offset(0);
             ras_ptr->clip_box(0,0,common_.width_,common_.height_);
         }
-        buffers_.emplace(internal_buffers_.top());
-        set_premultiplied_alpha(buffers_.top().get(), true);
+        current_buffer_ = internal_buffer_.get();
+        set_premultiplied_alpha(*current_buffer_,true);
     }
     else
     {
         common_.t_.set_offset(0);
         ras_ptr->clip_box(0,0,common_.width_,common_.height_);
-        buffers_.emplace(buffers_.top().get());
+        current_buffer_ = &pixmap_;
     }
 }
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
 {
-    buffer_type & current_buffer = buffers_.top().get();
-    buffers_.pop();
-    buffer_type & previous_buffer = buffers_.top().get();
-    if (&current_buffer != &previous_buffer)
+    if (style_level_compositing_)
     {
         bool blend_from = false;
         if (st.image_filters().size() > 0)
         {
             blend_from = true;
-            mapnik::filter::filter_visitor<buffer_type> visitor(current_buffer, common_.scale_factor_);
+            mapnik::filter::filter_visitor<buffer_type> visitor(*current_buffer_, common_.scale_factor_);
             for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
             {
                 util::apply_visitor(visitor, filter_tag);
             }
-            mapnik::premultiply_alpha(current_buffer);
+            mapnik::premultiply_alpha(*current_buffer_);
         }
         if (st.comp_op())
         {
-            composite(previous_buffer, current_buffer,
+            composite(pixmap_, *current_buffer_,
                       *st.comp_op(), st.get_opacity(),
                       -common_.t_.offset(),
                       -common_.t_.offset());
         }
         else if (blend_from || st.get_opacity() < 1.0)
         {
-            composite(previous_buffer, current_buffer,
+            composite(pixmap_, *current_buffer_,
                       src_over, st.get_opacity(),
                       -common_.t_.offset(),
                       -common_.t_.offset());
         }
-        internal_buffers_.pop();
     }
     if (st.direct_image_filters().size() > 0)
     {
         // apply any 'direct' image filters
-        mapnik::filter::filter_visitor<buffer_type> visitor(previous_buffer, common_.scale_factor_);
+        mapnik::filter::filter_visitor<buffer_type> visitor(pixmap_, common_.scale_factor_);
         for (mapnik::filter::filter_type const& filter_tag : st.direct_image_filters())
         {
             util::apply_visitor(visitor, filter_tag);
         }
-        mapnik::premultiply_alpha(previous_buffer);
+        mapnik::premultiply_alpha(pixmap_);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
@@ -350,7 +349,7 @@ template <typename buffer_type>
 struct agg_render_marker_visitor
 {
     agg_render_marker_visitor(renderer_common & common,
-                              buffer_type & current_buffer,
+                              buffer_type * current_buffer,
                               std::unique_ptr<rasterizer> const& ras_ptr,
                               gamma_method_enum & gamma_method,
                               double & gamma,
@@ -387,10 +386,10 @@ struct agg_render_marker_visitor
             gamma_ = 1.0;
         }
         agg::scanline_u8 sl;
-        agg::rendering_buffer buf(current_buffer_.bytes(),
-                                  current_buffer_.width(),
-                                  current_buffer_.height(),
-                                  current_buffer_.row_size());
+        agg::rendering_buffer buf(current_buffer_->bytes(),
+                                  current_buffer_->width(),
+                                  current_buffer_->height(),
+                                  current_buffer_->row_size());
         pixfmt_comp_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(comp_op_));
         renderer_base renb(pixf);
@@ -436,10 +435,10 @@ struct agg_render_marker_visitor
             gamma_ = 1.0;
         }
         agg::scanline_u8 sl;
-        agg::rendering_buffer buf(current_buffer_.bytes(),
-                                  current_buffer_.width(),
-                                  current_buffer_.height(),
-                                  current_buffer_.row_size());
+        agg::rendering_buffer buf(current_buffer_->bytes(),
+                                  current_buffer_->width(),
+                                  current_buffer_->height(),
+                                  current_buffer_->row_size());
         pixfmt_comp_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(comp_op_));
         renderer_base renb(pixf);
@@ -454,7 +453,7 @@ struct agg_render_marker_visitor
         {
             double cx = 0.5 * width;
             double cy = 0.5 * height;
-            composite(current_buffer_, marker.get_data(),
+            composite(*current_buffer_, marker.get_data(),
                       comp_op_, opacity_,
                       std::floor(pos_.x - cx + .5),
                       std::floor(pos_.y - cy + .5));
@@ -518,7 +517,7 @@ struct agg_render_marker_visitor
 
   private:
     renderer_common & common_;
-    buffer_type & current_buffer_;
+    buffer_type * current_buffer_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
     gamma_method_enum & gamma_method_;
     double & gamma_;
@@ -537,7 +536,7 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
                                     composite_mode_e comp_op)
 {
     agg_render_marker_visitor<buffer_type> visitor(common_,
-                                                   buffers_.top().get(),
+                                                   current_buffer_,
                                                    ras_ptr,
                                                    gamma_method_,
                                                    gamma_,
@@ -551,24 +550,23 @@ void agg_renderer<T0,T1>::render_marker(pixel_position const& pos,
 template <typename T0, typename T1>
 bool agg_renderer<T0,T1>::painted()
 {
-    return buffers_.top().get().painted();
+    return pixmap_.painted();
 }
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::painted(bool painted)
 {
-    buffers_.top().get().painted(painted);
+    pixmap_.painted(painted);
 }
 
 template <typename T0, typename T1>
 void agg_renderer<T0,T1>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    buffer_type & current_buffer = buffers_.top().get();
-    agg::rendering_buffer buf(current_buffer.bytes(),
-                              current_buffer.width(),
-                              current_buffer.height(),
-                              current_buffer.row_size());
+    agg::rendering_buffer buf(current_buffer_->bytes(),
+                              current_buffer_->width(),
+                              current_buffer_->height(),
+                              current_buffer_->row_size());
     debug_draw_box(buf, box, x, y, angle);
 }
 
@@ -621,13 +619,13 @@ void agg_renderer<T0,T1>::draw_geo_extent(box2d<double> const& extent, mapnik::c
     unsigned rgba = color.rgba();
     for (double x=x0; x<x1; x++)
     {
-        mapnik::set_pixel(buffers_.top().get(), x, y0, rgba);
-        mapnik::set_pixel(buffers_.top().get(), x, y1, rgba);
+        mapnik::set_pixel(pixmap_, x, y0, rgba);
+        mapnik::set_pixel(pixmap_, x, y1, rgba);
     }
     for (double y=y0; y<y1; y++)
     {
-        mapnik::set_pixel(buffers_.top().get(), x0, y, rgba);
-        mapnik::set_pixel(buffers_.top().get(), x1, y, rgba);
+        mapnik::set_pixel(pixmap_, x0, y, rgba);
+        mapnik::set_pixel(pixmap_, x1, y, rgba);
     }
 }
 

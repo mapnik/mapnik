@@ -132,8 +132,7 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buffer_type & current_buffer = buffers_.top().get();
-    buf_type render_buffer(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
+    buf_type render_buffer(current_buffer_->bytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->row_size());
     box2d<double> clip_box = clipping_extent(common_);
 
     using renderer_context_type = detail::agg_markers_renderer_context<svg_renderer_type,

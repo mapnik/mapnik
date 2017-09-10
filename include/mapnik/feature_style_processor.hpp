@@ -30,7 +30,6 @@
 #include <mapnik/feature_style_processor_context.hpp>
 
 // stl
-#include <vector>
 #include <set>
 #include <string>
 
@@ -94,12 +93,6 @@ private:
                       featureset_ptr features,
                       proj_transform const& prj_trans);
 
-    void prepare_layers(layer_rendering_material & parent_mat,
-                        std::vector<layer> const & layers,
-                        feature_style_context_map & ctx_map,
-                        Processor & p,
-                        double scale_denom);
-
     /*!
      * \brief prepare features for rendering asynchronously.
      */
@@ -118,7 +111,6 @@ private:
      * \brief render features list queued when they are available.
      */
     void render_material(layer_rendering_material const & mat, Processor & p );
-    void render_submaterials(layer_rendering_material const & mat, Processor & p);
 
     Map const& m_;
 };

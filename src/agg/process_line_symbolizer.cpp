@@ -112,8 +112,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buffer_type & current_buffer = buffers_.top().get();
-    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
+    agg::rendering_buffer buf(current_buffer_->bytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->row_size());
 
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;
@@ -140,7 +139,7 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {
-        double padding = static_cast<double>(common_.query_extent_.width() / common_.width_);
+        double padding = static_cast<double>(common_.query_extent_.width()/pixmap_.width());
         double half_stroke = 0.5 * width;
         if (half_stroke > 1)
         {

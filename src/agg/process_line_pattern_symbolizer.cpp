@@ -61,12 +61,14 @@ template <typename buffer_type>
 struct agg_renderer_process_visitor_l
 {
     agg_renderer_process_visitor_l(renderer_common & common,
-                                 buffer_type & current_buffer,
+                                 buffer_type & pixmap,
+                                 buffer_type * current_buffer,
                                  std::unique_ptr<rasterizer> const& ras_ptr,
                                  line_pattern_symbolizer const& sym,
                                  mapnik::feature_impl & feature,
                                  proj_transform const& prj_trans)
         : common_(common),
+          pixmap_(pixmap),
           current_buffer_(current_buffer),
           ras_ptr_(ras_ptr),
           sym_(sym),
@@ -110,8 +112,8 @@ private:
         value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
         value_double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
 
-        agg::rendering_buffer buf(current_buffer_.bytes(), current_buffer_.width(),
-                                  current_buffer_.height(), current_buffer_.row_size());
+        agg::rendering_buffer buf(current_buffer_->bytes(),current_buffer_->width(),
+                                  current_buffer_->height(), current_buffer_->row_size());
         pixfmt_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_)));
         renderer_base ren_base(pixf);
@@ -132,7 +134,7 @@ private:
         box2d<double> clip_box = clipping_extent(common_);
         if (clip)
         {
-            double padding = (double)(common_.query_extent_.width() / common_.width_);
+            double padding = (double)(common_.query_extent_.width()/pixmap_.width());
             if (half_stroke > 1)
                 padding *= half_stroke;
             if (std::fabs(offset) > 0)
@@ -161,7 +163,8 @@ private:
     }
 
     renderer_common & common_;
-    buffer_type & current_buffer_;
+    buffer_type & pixmap_;
+    buffer_type * current_buffer_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
     line_pattern_symbolizer const& sym_;
     mapnik::feature_impl & feature_;
@@ -186,7 +189,8 @@ void  agg_renderer<T0,T1>::process(line_pattern_symbolizer const& sym,
     }
     std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
     agg_renderer_process_visitor_l<buffer_type> visitor(common_,
-                                         buffers_.top().get(),
+                                         pixmap_,
+                                         current_buffer_,
                                          ras_ptr,
                                          sym,
                                          feature,

@@ -62,8 +62,7 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
     using ren_base = agg::renderer_base<agg::pixfmt_rgba32_pre>;
     using renderer = agg::renderer_scanline_aa_solid<ren_base>;
 
-    buffer_type & current_buffer = buffers_.top().get();
-    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
+    agg::rendering_buffer buf(current_buffer_->bytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->row_size());
     agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
 

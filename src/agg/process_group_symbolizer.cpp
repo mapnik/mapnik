@@ -61,10 +61,10 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 
     thunk_renderer(renderer_type &ren,
                    std::unique_ptr<rasterizer> const& ras_ptr,
-                   buffer_type & buf,
+                   buffer_type *buf,
                    renderer_common &common)
         : ren_(ren), ras_ptr_(ras_ptr), buf_(buf), common_(common),
-          tex_(buf, HALO_RASTERIZER_FULL, src_over, src_over,
+          tex_(*buf, HALO_RASTERIZER_FULL, src_over, src_over,
                common.scale_factor_, common.font_manager_.get_stroker())
     {}
 
@@ -80,7 +80,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
                                                         renderer_type,
                                                         pixfmt_comp_type>;
         ras_ptr_->reset();
-        buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
+        buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -101,7 +101,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
         ras_ptr_->reset();
-        buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
+        buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -135,7 +135,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 private:
     renderer_type &ren_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
-    buffer_type & buf_;
+    buffer_type *buf_;
     renderer_common &common_;
     text_renderer_type tex_;
 };
@@ -145,7 +145,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    thunk_renderer<buffer_type> ren(*this, ras_ptr, buffers_.top().get(), common_);
+    thunk_renderer<buffer_type> ren(*this, ras_ptr, current_buffer_, common_);
 
     render_group_symbolizer(
         sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_,
