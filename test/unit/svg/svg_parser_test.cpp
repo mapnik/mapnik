@@ -87,7 +87,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("FAIL");
         char const* expected_errors[] =
         {
-            "SVG error: unbale to open \"FAIL\""
+            "SVG error: unable to open \"FAIL\""
         };
 
         test_parser p;
