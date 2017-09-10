@@ -188,25 +188,12 @@ void cairo_renderer<T>::start_layer_processing(layer const& lay, box2d<double> c
         common_.detector_->clear();
     }
     common_.query_extent_ = query_extent;
-
-    if (lay.comp_op() || lay.get_opacity() < 1.0)
-    {
-        context_.push_group();
-    }
 }
 
 template <typename T>
-void cairo_renderer<T>::end_layer_processing(layer const& lay)
+void cairo_renderer<T>::end_layer_processing(layer const&)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer: End layer processing";
-
-    if (lay.comp_op() || lay.get_opacity() < 1.0)
-    {
-        context_.pop_group();
-        composite_mode_e comp_op = lay.comp_op() ? *lay.comp_op() : src_over;
-        context_.set_operator(comp_op);
-        context_.paint(lay.get_opacity());
-    }
 }
 
 template <typename T>
