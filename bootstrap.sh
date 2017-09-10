@@ -59,9 +59,6 @@ function install_mason_deps() {
     install proj 4.9.3 libproj
     install pixman 0.34.0 libpixman-1
     install cairo 1.14.8 libcairo
-    install protobuf 3.2.0
-    # technically protobuf is not a mapnik core dep, but installing
-    # here by default helps make mapnik-vector-tile builds easier
     install webp 0.6.0 libwebp
     install libgdal 2.1.3 libgdal
     install boost 1.63.0

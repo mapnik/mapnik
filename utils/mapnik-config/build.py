@@ -67,9 +67,9 @@ CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapni
 CONFIG_DEP_INCLUDES="%(dep_includes)s"
 CONFIG_CXXFLAGS="%(cxxflags)s"
 CONFIG_CXX='%(cxx)s'
-CONFIG_MAPNIK_GDAL_DATA='%(mapnik_bundled_gdal_data)s'
-CONFIG_MAPNIK_PROJ_LIB='%(mapnik_bundled_proj_data)s'
-CONFIG_MAPNIK_ICU_DATA='%(mapnik_bundled_icu_data)s'
+CONFIG_MAPNIK_GDAL_DATA='%(found_gdal_data)s'
+CONFIG_MAPNIK_PROJ_LIB='%(found_proj_data)s'
+CONFIG_MAPNIK_ICU_DATA='%(found_icu_data)s'
 
 '''
 
@@ -135,9 +135,9 @@ if lib_root in inputpluginspath:
 
 lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 
-mapnik_bundled_gdal_data = ''
-mapnik_bundled_proj_data = ''
-mapnik_bundled_icu_data = ''
+found_gdal_data = config_env['QUERIED_GDAL_DATA']
+found_proj_data = config_env['QUERIED_PROJ_LIB']
+found_icu_data = config_env['QUERIED_ICU_DATA']
 
 configuration = {
     "git_revision": git_revision,
@@ -154,9 +154,9 @@ configuration = {
     "defines":defines,
     "cxxflags":cxxflags,
     "cxx":env['CXX'],
-    "mapnik_bundled_gdal_data":mapnik_bundled_gdal_data,
-    "mapnik_bundled_proj_data":mapnik_bundled_proj_data,
-    "mapnik_bundled_icu_data":mapnik_bundled_icu_data,
+    "found_gdal_data":found_gdal_data,
+    "found_proj_data":found_proj_data,
+    "found_icu_data":found_icu_data,
 }
 
 ## if we are statically linking dependencies
