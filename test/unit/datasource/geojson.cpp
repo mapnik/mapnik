@@ -108,14 +108,7 @@ TEST_CASE("geojson") {
                 params["type"] = "geojson";
                 params["file"] = "./test/data/json/empty_featurecollection.json";
                 params["cache_features"] = cache_features;
-                auto ds = mapnik::datasource_cache::instance().create(params);
-                CHECK(ds != nullptr);
-                auto fs = all_features(ds);
-                REQUIRE(!mapnik::is_valid(fs));
-                while (auto f = fs->next())
-                {
-                    CHECK(false); // shouldn't get here
-                }
+                REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
             }
         }
 

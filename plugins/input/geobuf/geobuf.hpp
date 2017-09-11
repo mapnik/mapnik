@@ -83,7 +83,7 @@ struct geobuf : util::noncopyable
     double precision = std::pow(10,6);
     bool is_topo = false;
     bool transformed = false;
-    //std::size_t lengths = 0;
+    std::size_t lengths = 0;
     std::vector<std::string> keys_;
     std::vector<value_type> values_;
     protozero::pbf_reader reader_;
@@ -429,11 +429,6 @@ private:
     template <typename T>
     geometry::multi_line_string<double> read_multi_linestring(T & reader, boost::optional<std::vector<std::uint32_t>> const& lengths)
     {
-        if (!lengths) {
-            std::clog << "rml not set!\n";
-        } else {
-            std::clog << "rml lengths: " << lengths->size() << "\n";
-        }
         geometry::multi_line_string<double> multi_line;
         multi_line.reserve(!lengths ? 1 : lengths->size());
         auto pi = reader.get_packed_sint64();
@@ -460,11 +455,6 @@ private:
     geometry::polygon<double> read_polygon(T & reader, boost::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::polygon<double> poly;
-        if (!lengths) {
-            std::clog << "rp not set!\n";
-        } else {
-            std::clog << "rp lengths: " << lengths->size() << "\n";
-        }
         poly.reserve(!lengths ? 1 : lengths->size());
         auto pi = reader.get_packed_sint64();
         if (!lengths)
@@ -490,11 +480,6 @@ private:
     geometry::multi_polygon<double> read_multi_polygon(T & reader, boost::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::multi_polygon<double> multi_poly;
-        if (!lengths) {
-            std::clog << "rmp not set!\n";
-        } else {
-            std::clog << "rmp lengths: " << lengths->size() << "\n";
-        }
         if (!lengths)
         {
             auto poly = read_polygon(reader, lengths);
@@ -539,12 +524,8 @@ private:
             }
             case 2:
             {
-                std::clog << "here\n";
                 auto val = read_lengths(reader);
-                if (!val.empty()) {
-                    std::clog << "lenghts " << val.size() << "\n";
-                    lengths = std::move(val);
-                }
+                if (!val.empty()) lengths = std::move(val);
                 break;
             }
             case 3:
