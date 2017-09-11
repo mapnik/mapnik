@@ -155,14 +155,14 @@ inline double point_to_segment_distance(double x, double y,
         return distance(x,y,ax,ay);
     }
 
-    double r = ((x - ax)*(bx - ax) + (y - ay)*(by -ay))/len2;
+    double r = ((x - ax)*(bx - ax) + (y - ay)*(by - ay))/len2;
     if ( r < 0 )
     {
         return distance(x,y,ax,ay);
     }
     else if (r > 1)
     {
-        return distance(x,y,bx,by);
+        return distance(x, y, bx, by);
     }
     double s = ((ay - y)*(bx - ax) - (ax - x)*(by - ay))/len2;
     return std::fabs(s) * std::sqrt(len2);
