@@ -99,7 +99,10 @@ pretty_dep_names = {
     'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
-    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
+    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
+    'PROJ_LIB':'The directory where proj4 stores its data files. Must exist for proj4 to work correctly',
+    'GDAL_DATA':'The directory where GDAL stores its data files. Must exist for GDAL to work correctly',
+    'ICU_DATA':'The directory where icu stores its data files. If ICU reports a path, it must exist. ICU can also be built without .dat files and in that case this path is empty'
     }
 
 # Core plugin build configuration
@@ -473,7 +476,10 @@ pickle_store = [# Scons internal variables
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER',
         'BIGINT',
-        'HOST'
+        'HOST',
+        'QUERIED_GDAL_DATA',
+        'QUERIED_ICU_DATA',
+        'QUERIED_PROJ_LIB'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -800,6 +806,117 @@ int main()
     context.Result(ret)
     return ret
 
+def CheckIcuData(context, silent=False):
+
+    if not silent:
+        context.Message('Checking for ICU data directory...')
+    ret = context.TryRun("""
+
+#include <unicode/putil.h>
+#include <iostream>
+
+int main() {
+    std::string result = u_getDataDirectory();
+    std::cout << result;
+    if (result.empty()) {
+        return -1;
+    }
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    if ret[0]:
+        context.Result('u_getDataDirectory returned %s' % ret[1])
+    else:
+        context.Result('Failed to detect (mapnik-config will have null value)')
+    return ret[1].strip()
+
+def CheckGdalData(context, silent=False):
+
+    if not silent:
+        context.Message('Checking for GDAL data directory...')
+    ret = context.TryRun("""
+
+#include "cpl_config.h"
+#include <iostream>
+
+int main() {
+    std::cout << GDAL_PREFIX << "/share/gdal" << std::endl;
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    if ret[0]:
+        context.Result('GDAL_PREFIX returned %s' % ret[1])
+    else:
+        context.Result('Failed to detect (mapnik-config will have null value)')
+    return ret[1].strip()
+
+def CheckProjData(context, silent=False):
+
+    if not silent:
+        context.Message('Checking for PROJ_LIB directory...')
+    ret = context.TryRun("""
+
+// This is narly, could eventually be replaced using https://github.com/OSGeo/proj.4/pull/551]
+#include <proj_api.h>
+#include <iostream>
+
+static void my_proj4_logger(void * user_data, int /*level*/, const char * msg)
+{
+    std::string* posMsg = static_cast<std::string*>(user_data);
+    *posMsg += msg;
+}
+
+// https://github.com/OSGeo/gdal/blob/ddbf6d39aa4b005a77ca4f27c2d61a3214f336f8/gdal/alg/gdalapplyverticalshiftgrid.cpp#L616-L633
+
+std::string find_proj_path(const char * pszFilename) {
+    std::string osMsg;
+    std::string osFilename;
+    projCtx ctx = pj_ctx_alloc();
+    pj_ctx_set_app_data(ctx, &osMsg);
+    pj_ctx_set_debug(ctx, PJ_LOG_DEBUG_MAJOR);
+    pj_ctx_set_logger(ctx, my_proj4_logger);
+    PAFile f = pj_open_lib(ctx, pszFilename, "rb");
+    if( f )
+    {
+        pj_ctx_fclose(ctx, f);
+    }
+    size_t nPos = osMsg.find("fopen(");
+    if( nPos != std::string::npos )
+    {
+        osFilename = osMsg.substr(nPos + strlen("fopen("));
+        nPos = osFilename.find(")");
+        if( nPos != std::string::npos )
+            osFilename = osFilename.substr(0, nPos);
+    }
+    pj_ctx_free(ctx);
+    return osFilename;
+}
+
+
+int main() {
+    std::string result = find_proj_path(" ");
+    std::cout << result;
+    if (result.empty()) {
+        return -1;
+    }
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    if ret[0]:
+        context.Result('pj_open_lib returned %s' % ret[1])
+    else:
+        context.Result('Failed to detect (mapnik-config will have null value)')
+    return ret[1].strip()
+
 def CheckCairoHasFreetype(context, silent=False):
     if not silent:
         context.Message('Checking for cairo freetype font support ... ')
@@ -1068,6 +1185,9 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGVersion'       : CheckPKGVersion,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
+               'CheckIcuData'          : CheckIcuData,
+               'CheckProjData'         : CheckProjData,
+               'CheckGdalData'         : CheckGdalData,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
                'CheckHasDlfcn'         : CheckHasDlfcn,
                'GetBoostLibVersion'    : GetBoostLibVersion,
@@ -1164,6 +1284,10 @@ if not preconfigured:
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
     env['SQLITE_LINKFLAGS'] = []
+    env['QUERIED_PROJ_LIB'] = None
+    env['QUERIED_ICU_DATA'] = None
+    env['QUERIED_GDAL_DATA'] = None
+
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1481,6 +1605,31 @@ if not preconfigured:
     if env['HOST']:
         SQLITE_HAS_RTREE = True
 
+    if not env['HOST']:
+        env['QUERIED_PROJ_LIB'] = conf.CheckProjData()
+        if os.environ.get('PROJ_LIB'):
+            env['QUERIED_PROJ_LIB'] = os.environ['PROJ_LIB']
+            color_print(4,'Detected PROJ_LIB in environ, using env value instead: %s' % os.environ['PROJ_LIB'] )
+        env['QUERIED_ICU_DATA'] = conf.CheckIcuData()
+        if os.environ.get('ICU_DATA'):
+            env['QUERIED_ICU_DATA'] = os.environ['ICU_DATA']
+            color_print(4,'Detected ICU_DATA in environ, using env value instead: %s' % os.environ['ICU_DATA'] )
+        env['QUERIED_GDAL_DATA'] = conf.CheckGdalData()
+        if os.environ.get('GDAL_DATA'):
+            env['QUERIED_GDAL_DATA'] = os.environ['GDAL_DATA']
+            color_print(4,'Detected GDAL_DATA in environ, using env value instead: %s' % os.environ['GDAL_DATA'] )
+        # now validate the paths actually exist
+        if env['QUERIED_PROJ_LIB'] and not os.path.exists(env['QUERIED_PROJ_LIB']):
+            color_print(1,'%s not detected on your system' % env['QUERIED_PROJ_LIB'] )
+            env['MISSING_DEPS'].append('PROJ_LIB')
+        if env['QUERIED_GDAL_DATA'] and not os.path.exists(env['QUERIED_GDAL_DATA']):
+            color_print(1,'%s not detected on your system' % env['QUERIED_GDAL_DATA'] )
+            env['MISSING_DEPS'].append('GDAL_DATA')
+        if env['QUERIED_ICU_DATA'] and not os.path.exists(env['QUERIED_ICU_DATA']):
+            color_print(1,'%s not detected on your system' % env['QUERIED_ICU_DATA'] )
+            env['MISSING_DEPS'].append('ICU_DATA')
+
+
     CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
 
     if len(env['REQUESTED_PLUGINS']):
@@ -1742,10 +1891,6 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
-        # faster compile
-        # http://www.boost.org/doc/libs/1_47_0/libs/spirit/doc/html/spirit/what_s_new/spirit_2_5.html#spirit.what_s_new.spirit_2_5.breaking_changes
-        env.Append(CPPDEFINES = '-DBOOST_SPIRIT_NO_PREDEFINED_TERMINALS=1')
-        env.Append(CPPDEFINES = '-DBOOST_PHOENIX_NO_PREDEFINED_TERMINALS=1')
         # c++11 support / https://github.com/mapnik/mapnik/issues/1683
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
         env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
