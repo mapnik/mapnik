@@ -807,7 +807,7 @@ int main()
     return ret
 
 def CheckIcuData(context, silent=False):
- 
+
     if not silent:
         context.Message('Checking for ICU data directory...')
     ret = context.TryRun("""
@@ -834,7 +834,7 @@ int main() {
     return ret[1].strip()
 
 def CheckGdalData(context, silent=False):
- 
+
     if not silent:
         context.Message('Checking for GDAL data directory...')
     ret = context.TryRun("""
@@ -857,7 +857,7 @@ int main() {
     return ret[1].strip()
 
 def CheckProjData(context, silent=False):
- 
+
     if not silent:
         context.Message('Checking for PROJ_LIB directory...')
     ret = context.TryRun("""
@@ -1891,10 +1891,6 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
-        # faster compile
-        # http://www.boost.org/doc/libs/1_47_0/libs/spirit/doc/html/spirit/what_s_new/spirit_2_5.html#spirit.what_s_new.spirit_2_5.breaking_changes
-        env.Append(CPPDEFINES = '-DBOOST_SPIRIT_NO_PREDEFINED_TERMINALS=1')
-        env.Append(CPPDEFINES = '-DBOOST_PHOENIX_NO_PREDEFINED_TERMINALS=1')
         # c++11 support / https://github.com/mapnik/mapnik/issues/1683
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
         env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
