@@ -39,22 +39,7 @@ void console_report::report(result const & r)
         s << '-' << r.tiles.width << 'x' << r.tiles.height;
     }
     s << '-' << std::fixed << std::setprecision(1) << r.scale_factor << "\" with " << r.renderer_name << "... ";
-
-    switch (r.state)
-    {
-        case STATE_OK:
-            s << "OK";
-            break;
-        case STATE_FAIL:
-            s << "FAILED (" << r.diff << " different pixels)";
-            break;
-        case STATE_OVERWRITE:
-            s << "OVERWRITTEN (" << r.diff << " different pixels)";
-            break;
-        case STATE_ERROR:
-            s << "ERROR (" << r.error_message << ")";
-            break;
-    }
+    report_state(r);
 
     if (show_duration)
     {
@@ -115,7 +100,50 @@ unsigned console_report::summary(result_list const & results)
         s << "total: \t" << duration_cast<milliseconds>(total).count() << " milliseconds" << std::endl;
     }
 
+    s << std::endl;
+    report_failures(results);
+    s << std::endl;
+
     return fail + error;
+}
+
+void console_report::report_state(result const & r)
+{
+    switch (r.state)
+    {
+        case STATE_OK:
+            s << "OK";
+            break;
+        case STATE_FAIL:
+            s << "FAILED (" << r.diff << " different pixels)";
+            break;
+        case STATE_OVERWRITE:
+            s << "OVERWRITTEN (" << r.diff << " different pixels)";
+            break;
+        case STATE_ERROR:
+            s << "ERROR (" << r.error_message << ")";
+            break;
+    }
+}
+
+void console_report::report_failures(result_list const & results)
+{
+    for (auto const & r : results)
+    {
+        if (r.state == STATE_OK)
+        {
+            continue;
+        }
+
+        s << r.name << " ";
+        report_state(r);
+        s << std::endl;
+        if (!r.actual_image_path.empty())
+        {
+            s << "    " << r.actual_image_path << " (actual)" << std::endl;
+            s << "    " << r.reference_image_path << " (reference)" << std::endl;
+        }
+    }
 }
 
 void console_short_report::report(result const & r)
