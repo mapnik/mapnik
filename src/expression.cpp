@@ -50,7 +50,7 @@ expression_ptr parse_expression(std::string const& str)
     }
     catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
     {
-        // no need to show "boost::spirit::qi::expectation_failure" which is a std::runtime_error
+        // no need to show "boost::spirit::x3::expectation_failure" which is a std::runtime_error
         throw config_error("Failed to parse expression: \"" + str + "\"");
     }
     catch (std::exception const& ex)

@@ -213,8 +213,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay,
 
     if (!mat.active_styles_.empty())
     {
+        p.start_layer_processing(mat.lay_, mat.layer_ext2_);
+
         render_material(mat,p);
         render_submaterials(mat, p);
+
+        p.end_layer_processing(mat.lay_);
     }
 }
 
