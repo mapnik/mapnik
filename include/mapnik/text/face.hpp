@@ -77,8 +77,10 @@ public:
     ~font_face();
 
 private:
+    bool init_color_font();
+
     FT_Face face_;
-    bool color_font_ = false;
+    const bool color_font_;
 };
 using face_ptr = std::shared_ptr<font_face>;
 

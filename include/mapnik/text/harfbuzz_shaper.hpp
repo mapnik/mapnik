@@ -284,7 +284,7 @@ static void shape_text(text_line & line,
                         double tmp_height = g.height();
                         if (g.face->is_color())
                         {
-                            tmp_height = size;
+                            tmp_height = g.ymax();
                         }
                         if (tmp_height > max_glyph_height) max_glyph_height = tmp_height;
                         width_map[char_index] += g.advance();
