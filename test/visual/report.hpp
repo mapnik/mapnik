@@ -48,6 +48,9 @@ public:
     unsigned summary(result_list const & results);
 
 protected:
+    void report_state(result const & r);
+    void report_failures(result_list const & results);
+
     std::ostream & s;
     bool show_duration;
 };
