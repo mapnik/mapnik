@@ -25,11 +25,14 @@
 
 // stl
 #include <vector>
+#include <set>
 #include <string>
 #include <chrono>
 
 // boost
 #include <boost/filesystem.hpp>
+
+#include <mapnik/box2d.hpp>
 
 namespace visual_tests
 {
@@ -47,12 +50,16 @@ struct config
     config() : status(true),
                scales({ 1.0, 2.0 }),
                sizes({ { 500, 100 } }),
-               tiles({ { 1, 1 } }) { }
+               tiles({ { 1, 1 } }),
+               bbox(),
+               ignored_renderers() { }
 
     bool status;
     std::vector<double> scales;
     std::vector<map_size> sizes;
     std::vector<map_size> tiles;
+    mapnik::box2d<double> bbox;
+    std::set<std::string> ignored_renderers;
 };
 
 enum result_state : std::uint8_t
