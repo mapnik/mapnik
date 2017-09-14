@@ -31,6 +31,8 @@
 // boost
 #include <boost/filesystem.hpp>
 
+#include <mapnik/geometry/box2d.hpp>
+
 namespace visual_tests
 {
 
@@ -47,12 +49,14 @@ struct config
     config() : status(true),
                scales({ 1.0, 2.0 }),
                sizes({ { 500, 100 } }),
-               tiles({ { 1, 1 } }) { }
+               tiles({ { 1, 1 } }),
+               bbox() { }
 
     bool status;
     std::vector<double> scales;
     std::vector<map_size> sizes;
     std::vector<map_size> tiles;
+    mapnik::box2d<double> bbox;
 };
 
 enum result_state : std::uint8_t

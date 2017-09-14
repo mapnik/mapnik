@@ -249,6 +249,34 @@ result_list runner::test_range(files_iterator begin,
     return results;
 }
 
+void runner::parse_params(mapnik::parameters const & params, config & cfg) const
+{
+    cfg.status = *params.get<mapnik::value_bool>("status", cfg.status);
+
+    boost::optional<std::string> sizes = params.get<std::string>("sizes");
+
+    if (sizes)
+    {
+        cfg.sizes.clear();
+        parse_map_sizes(*sizes, cfg.sizes);
+    }
+
+    boost::optional<std::string> tiles = params.get<std::string>("tiles");
+
+    if (tiles)
+    {
+        cfg.tiles.clear();
+        parse_map_sizes(*tiles, cfg.tiles);
+    }
+
+    boost::optional<std::string> bbox_string = params.get<std::string>("bbox");
+
+    if (bbox_string)
+    {
+        cfg.bbox.from_string(*bbox_string);
+    }
+}
+
 result_list runner::test_one(runner::path_type const& style_path,
                              report_type & report,
                              std::atomic<std::size_t> & fail_count) const
@@ -272,37 +300,11 @@ result_list runner::test_one(runner::path_type const& style_path,
         throw;
     }
 
-    mapnik::parameters const & params = map.get_extra_parameters();
+    parse_params(map.get_extra_parameters(), cfg);
 
-    boost::optional<mapnik::value_integer> status = params.get<mapnik::value_integer>("status", cfg.status);
-
-    if (!*status)
+    if (!cfg.status)
     {
         return results;
-    }
-
-    boost::optional<std::string> sizes = params.get<std::string>("sizes");
-
-    if (sizes)
-    {
-        cfg.sizes.clear();
-        parse_map_sizes(*sizes, cfg.sizes);
-    }
-
-    boost::optional<std::string> tiles = params.get<std::string>("tiles");
-
-    if (tiles)
-    {
-        cfg.tiles.clear();
-        parse_map_sizes(*tiles, cfg.tiles);
-    }
-
-    boost::optional<std::string> bbox_string = params.get<std::string>("bbox");
-    mapnik::box2d<double> box;
-
-    if (bbox_string)
-    {
-        box.from_string(*bbox_string);
     }
 
     std::string name(style_path.stem().string());
@@ -325,9 +327,9 @@ result_list runner::test_one(runner::path_type const& style_path,
                 for (auto const & ren : renderers_)
                 {
                     map.resize(size.width, size.height);
-                    if (box.valid())
+                    if (cfg.bbox.valid())
                     {
-                        map.zoom_to_box(box);
+                        map.zoom_to_box(cfg.bbox);
                     }
                     else
                     {
