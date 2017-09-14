@@ -34,6 +34,15 @@
 namespace visual_tests
 {
 
+struct renderer_name_visitor
+{
+    template <typename Renderer>
+    std::string operator()(Renderer const&) const
+    {
+        return Renderer::renderer_type::name;
+    }
+};
+
 class renderer_visitor
 {
 public:
@@ -275,6 +284,16 @@ void runner::parse_params(mapnik::parameters const & params, config & cfg) const
     {
         cfg.bbox.from_string(*bbox_string);
     }
+
+    for (auto const & renderer : renderers_)
+    {
+        std::string renderer_name = mapnik::util::apply_visitor(renderer_name_visitor(), renderer);
+        boost::optional<mapnik::value_bool> enabled = params.get<mapnik::value_bool>(renderer_name);
+        if (enabled && !*enabled)
+        {
+            cfg.ignored_renderers.insert(renderer_name);
+        }
+    }
 }
 
 result_list runner::test_one(runner::path_type const& style_path,
@@ -326,6 +345,12 @@ result_list runner::test_one(runner::path_type const& style_path,
 
                 for (auto const & ren : renderers_)
                 {
+                    std::string renderer_name = mapnik::util::apply_visitor(renderer_name_visitor(), ren);
+                    if (cfg.ignored_renderers.count(renderer_name))
+                    {
+                        continue;
+                    }
+
                     map.resize(size.width, size.height);
                     if (cfg.bbox.valid())
                     {
