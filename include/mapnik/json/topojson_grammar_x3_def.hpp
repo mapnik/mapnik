@@ -288,9 +288,9 @@ using arcs_type = util::variant<std::vector<index_type>,
                                 std::vector<std::vector<index_type>>,
                                 std::vector<std::vector<std::vector<index_type>>>>;
 
-struct geometry_type_ : x3::symbols<int>
+struct topojson_geometry_type_ : x3::symbols<int>
 {
-    geometry_type_()
+    topojson_geometry_type_()
     {
         add
             ("\"Point\"",1)
@@ -301,7 +301,7 @@ struct geometry_type_ : x3::symbols<int>
             ("\"MultiPolygon\"",6)
             ;
     }
-} geometry_type;
+} topojson_geometry_type;
 
 // start rule
 topojson_grammar_type const topology = "Topology";
@@ -365,7 +365,7 @@ auto const objects_def = lit("\"objects\"") > lit(':')
     ;
 
 auto const geometry_tuple_def =
-    ((lit("\"type\"") > lit(':') > geometry_type[assign_geometry_type])
+    ((lit("\"type\"") > lit(':') > topojson_geometry_type[assign_geometry_type])
      |
      (lit("\"coordinates\"") > lit(':') > coordinates[assign_coordinates])
      |
