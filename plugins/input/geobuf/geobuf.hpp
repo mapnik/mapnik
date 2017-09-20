@@ -421,6 +421,7 @@ private:
     {
         geometry::line_string<double> line;
         auto pi = reader.get_packed_sint64();
+        line.reserve(pi.size());
         read_linear_ring(reader, pi.first, pi.second, line);
         return line;
 
@@ -435,6 +436,7 @@ private:
         if (!lengths)
         {
             geometry::line_string<double> line;
+            line.reserve(pi.size());
             read_linear_ring(reader, pi.first, pi.second, line);
             multi_line.push_back(std::move(line));
         }
@@ -443,6 +445,7 @@ private:
             for (auto len : *lengths)
             {
                 geometry::line_string<double> line;
+                line.reserve(len);
                 read_linear_ring(reader, pi.first, std::next(pi.first, dim * len), line);
                 multi_line.push_back(std::move(line));
                 std::advance(pi.first, dim * len);
@@ -460,6 +463,7 @@ private:
         if (!lengths)
         {
             geometry::linear_ring<double> ring;
+            ring.reserve(pi.size());
             read_linear_ring(reader, pi.first, pi.second, ring, true);
             poly.push_back(std::move(ring));
         }
@@ -468,6 +472,7 @@ private:
             for (auto len : *lengths)
             {
                 geometry::linear_ring<double> ring;
+                ring.reserve(len);
                 read_linear_ring(reader, pi.first, std::next(pi.first, dim * len), ring, true);
                 poly.push_back(std::move(ring));
                 std::advance(pi.first, dim * len);
@@ -495,10 +500,11 @@ private:
                 for (std::size_t k = 0; k < (*lengths)[j]; ++k)
                 {
                     geometry::linear_ring<double> ring;
-                    std::size_t len = dim * (*lengths)[j + k + 1];
-                    read_linear_ring(reader, pi.first, std::next(pi.first, len), ring, true);
+                    std::size_t len = (*lengths)[j + k + 1];
+                    ring.reserve(len);
+                    read_linear_ring(reader, pi.first, std::next(pi.first, len * dim), ring, true);
                     poly.push_back(std::move(ring));
-                    std::advance(pi.first, len);
+                    std::advance(pi.first, len * dim);
                 }
                 multi_poly.push_back(std::move(poly));
                 j += (*lengths)[j] + 1;
