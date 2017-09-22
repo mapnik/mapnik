@@ -51,9 +51,7 @@ struct point_point
     {
         result.distance
             = strategy.apply_point_point(point1, point2);
-        // The projected point makes not really sense in point-point.
-        // We just assign one on the other
-        geometry::convert(point1, result.closest_point);
+        geometry::convert(point2, result.closest_point);
     }
 };
 
