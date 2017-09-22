@@ -170,6 +170,7 @@ source = Split(
     datasource_cache_static.cpp
     debug.cpp
     geometry/box2d.cpp
+    geometry/closest_point.cpp
     geometry/reprojection.cpp
     geometry/envelope.cpp
     expression_node.cpp
