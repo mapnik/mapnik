@@ -331,56 +331,60 @@ bool middle_point(PathType & path, double & x, double & y)
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
-    double x0 = 0.0;
-    double y0 = 0.0;
-    double x1 = 0.0;
-    double y1 = 0.0;
-    double start_x;
-    double start_y;
+    geometry::point<double> p0, p1, move_to, start;
 
     path.rewind(0);
-    unsigned command = path.vertex(&x0, &y0);
+    unsigned command = path.vertex(&p0.x, &p0.y);
     if (command == SEG_END) return false;
 
-    start_x = x0;
-    start_y = y0;
+    start = move_to = p0;
 
     double atmp = 0.0;
     double xtmp = 0.0;
     double ytmp = 0.0;
     unsigned count = 1;
-    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    while (SEG_END != (command = path.vertex(&p1.x, &p1.y)))
     {
-        if (command == SEG_CLOSE) continue;
-        double dx0 = x0 - start_x;
-        double dy0 = y0 - start_y;
-        double dx1 = x1 - start_x;
-        double dy1 = y1 - start_y;
+        switch (command)
+        {
+            case SEG_MOVETO:
+                move_to = p1;
+                break;
+            case SEG_CLOSE:
+                p1 = move_to;
+            case SEG_LINETO:
+                double dx0 = p0.x - start.x;
+                double dy0 = p0.y - start.y;
+                double dx1 = p1.x - start.x;
+                double dy1 = p1.y - start.y;
 
-        double ai = dx0 * dy1 - dx1 * dy0;
-        atmp += ai;
-        xtmp += (dx1 + dx0) * ai;
-        ytmp += (dy1 + dy0) * ai;
-        x0 = x1;
-        y0 = y1;
+                double ai = dx0 * dy1 - dx1 * dy0;
+                atmp += ai;
+                xtmp += (dx1 + dx0) * ai;
+                ytmp += (dy1 + dy0) * ai;
+                break;
+
+        }
+        p0 = p1;
         ++count;
     }
 
-    if (count <= 2) {
-        x = (start_x + x0) * 0.5;
-        y = (start_y + y0) * 0.5;
+    if (count <= 2)
+    {
+        x = (start.x + p0.x) * 0.5;
+        y = (start.y + p0.y) * 0.5;
         return true;
     }
 
     if (atmp != 0)
     {
-        x = (xtmp/(3*atmp)) + start_x;
-        y = (ytmp/(3*atmp)) + start_y;
+        x = (xtmp / (3 * atmp)) + start.x;
+        y = (ytmp / (3 * atmp)) + start.y;
     }
     else
     {
-        x = x0;
-        y = y0;
+        x = p0.x;
+        y = p0.y;
     }
     return true;
 }
