@@ -321,56 +321,60 @@ bool middle_point(PathType & path, double & x, double & y)
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
-    double x0 = 0.0;
-    double y0 = 0.0;
-    double x1 = 0.0;
-    double y1 = 0.0;
-    double start_x;
-    double start_y;
+    geometry::point<double> p0, p1, move_to, start;
 
     path.rewind(0);
-    unsigned command = path.vertex(&x0, &y0);
+    unsigned command = path.vertex(&p0.x, &p0.y);
     if (command == SEG_END) return false;
 
-    start_x = x0;
-    start_y = y0;
+    start = move_to = p0;
 
     double atmp = 0.0;
     double xtmp = 0.0;
     double ytmp = 0.0;
     unsigned count = 1;
-    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    while (SEG_END != (command = path.vertex(&p1.x, &p1.y)))
     {
-        if (command == SEG_CLOSE) continue;
-        double dx0 = x0 - start_x;
-        double dy0 = y0 - start_y;
-        double dx1 = x1 - start_x;
-        double dy1 = y1 - start_y;
+        switch (command)
+        {
+            case SEG_MOVETO:
+                move_to = p1;
+                break;
+            case SEG_CLOSE:
+                p1 = move_to;
+            case SEG_LINETO:
+                double dx0 = p0.x - start.x;
+                double dy0 = p0.y - start.y;
+                double dx1 = p1.x - start.x;
+                double dy1 = p1.y - start.y;
 
-        double ai = dx0 * dy1 - dx1 * dy0;
-        atmp += ai;
-        xtmp += (dx1 + dx0) * ai;
-        ytmp += (dy1 + dy0) * ai;
-        x0 = x1;
-        y0 = y1;
+                double ai = dx0 * dy1 - dx1 * dy0;
+                atmp += ai;
+                xtmp += (dx1 + dx0) * ai;
+                ytmp += (dy1 + dy0) * ai;
+                break;
+
+        }
+        p0 = p1;
         ++count;
     }
 
-    if (count <= 2) {
-        x = (start_x + x0) * 0.5;
-        y = (start_y + y0) * 0.5;
+    if (count <= 2)
+    {
+        x = (start.x + p0.x) * 0.5;
+        y = (start.y + p0.y) * 0.5;
         return true;
     }
 
     if (atmp != 0)
     {
-        x = (xtmp/(3*atmp)) + start_x;
-        y = (ytmp/(3*atmp)) + start_y;
+        x = (xtmp / (3 * atmp)) + start.x;
+        y = (ytmp / (3 * atmp)) + start.y;
     }
     else
     {
-        x = x0;
-        y = y0;
+        x = p0.x;
+        y = p0.y;
     }
     return true;
 }
@@ -524,47 +528,50 @@ bool interior_position(PathType & path, double & x, double & y)
     // center of the widest intersection between the polygon and the line.
 
     std::vector<double> intersections; // only need to store the X as we know the y
+    geometry::point<double> p0, p1, move_to;
+    unsigned command = SEG_END;
 
-    double x0 = 0;
-    double y0 = 0;
     path.rewind(0);
-    unsigned command = path.vertex(&x0, &y0);
-    double x1 = 0;
-    double y1 = 0;
-    while (SEG_END != (command = path.vertex(&x1, &y1)))
+
+    while (SEG_END != (command = path.vertex(&p0.x, &p0.y)))
     {
-        if (command == SEG_CLOSE)
-            continue;
-        if (command != SEG_MOVETO)
+        switch (command)
         {
-            // if the segments overlap
-            if (y0==y1)
-            {
-                if (y0==y)
+            case SEG_MOVETO:
+                move_to = p0;
+                break;
+            case SEG_CLOSE:
+                p0 = move_to;
+            case SEG_LINETO:
+                // if the segments overlap
+                if (p0.y == p1.y)
                 {
-                    double xi = (x0+x1)/2.0;
+                    if (p0.y == y)
+                    {
+                        double xi = (p0.x + p1.x) / 2.0;
+                        intersections.push_back(xi);
+                    }
+                }
+                // if the path segment crosses the bisector
+                else if ((p0.y <= y && p1.y >= y) ||
+                         (p0.y >= y && p1.y <= y))
+                {
+                    // then calculate the intersection
+                    double xi = p0.x;
+                    if (p0.x != p1.x)
+                    {
+                        double m = (p1.y - p0.y) / (p1.x - p0.x);
+                        double c = p0.y - m * p0.x;
+                        xi = (y - c) / m;
+                    }
+
                     intersections.push_back(xi);
                 }
-            }
-            // if the path segment crosses the bisector
-            else if ((y0 <= y && y1 >= y) ||
-                     (y0 >= y && y1 <= y))
-            {
-                // then calculate the intersection
-                double xi = x0;
-                if (x0 != x1)
-                {
-                    double m = (y1-y0)/(x1-x0);
-                    double c = y0 - m*x0;
-                    xi = (y-c)/m;
-                }
-
-                intersections.push_back(xi);
-            }
+                break;
         }
-        x0 = x1;
-        y0 = y1;
+        p1 = p0;
     }
+
     // no intersections we just return the default
     if (intersections.empty())
         return true;
