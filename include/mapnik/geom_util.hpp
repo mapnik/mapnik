@@ -28,6 +28,8 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/point.hpp>
+
 // stl
 #include <cmath>
 #include <vector>
@@ -532,47 +534,50 @@ bool interior_position(PathType & path, double & x, double & y)
     // center of the widest intersection between the polygon and the line.
 
     std::vector<double> intersections; // only need to store the X as we know the y
+    geometry::point<double> p0, p1, move_to;
+    unsigned command = SEG_END;
 
-    double x0 = 0;
-    double y0 = 0;
     path.rewind(0);
-    unsigned command = path.vertex(&x0, &y0);
-    double x1 = 0;
-    double y1 = 0;
-    while (SEG_END != (command = path.vertex(&x1, &y1)))
+
+    while (SEG_END != (command = path.vertex(&p0.x, &p0.y)))
     {
-        if (command == SEG_CLOSE)
-            continue;
-        if (command != SEG_MOVETO)
+        switch (command)
         {
-            // if the segments overlap
-            if (y0==y1)
-            {
-                if (y0==y)
+            case SEG_MOVETO:
+                move_to = p0;
+                break;
+            case SEG_CLOSE:
+                p0 = move_to;
+            case SEG_LINETO:
+                // if the segments overlap
+                if (p0.y == p1.y)
                 {
-                    double xi = (x0+x1)/2.0;
+                    if (p0.y == y)
+                    {
+                        double xi = (p0.x + p1.x) / 2.0;
+                        intersections.push_back(xi);
+                    }
+                }
+                // if the path segment crosses the bisector
+                else if ((p0.y <= y && p1.y >= y) ||
+                         (p0.y >= y && p1.y <= y))
+                {
+                    // then calculate the intersection
+                    double xi = p0.x;
+                    if (p0.x != p1.x)
+                    {
+                        double m = (p1.y - p0.y) / (p1.x - p0.x);
+                        double c = p0.y - m * p0.x;
+                        xi = (y - c) / m;
+                    }
+
                     intersections.push_back(xi);
                 }
-            }
-            // if the path segment crosses the bisector
-            else if ((y0 <= y && y1 >= y) ||
-                     (y0 >= y && y1 <= y))
-            {
-                // then calculate the intersection
-                double xi = x0;
-                if (x0 != x1)
-                {
-                    double m = (y1-y0)/(x1-x0);
-                    double c = y0 - m*x0;
-                    xi = (y-c)/m;
-                }
-
-                intersections.push_back(xi);
-            }
+                break;
         }
-        x0 = x1;
-        y0 = y1;
+        p1 = p0;
     }
+
     // no intersections we just return the default
     if (intersections.empty())
         return true;
