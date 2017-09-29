@@ -31,6 +31,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/geometry/centroid.hpp>
+#include <mapnik/geometry/polylabel.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
@@ -306,6 +307,12 @@ void base_symbolizer_helper::initialize_points() const
                     {
                         points_.emplace_back(label_x, label_y);
                     }
+                }
+                else if (how_placed == POLYLABEL_PLACEMENT)
+                {
+                    double precision = geometry::polylabel_precision(tranformed_poly);
+                    geometry::point<double> pt = geometry::polylabel(tranformed_poly, precision);
+                    points_.emplace_back(pt.x, pt.y);
                 }
                 continue;
             }
