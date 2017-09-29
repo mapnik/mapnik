@@ -68,6 +68,7 @@ static const char * marker_placement_strings[] = {
     "vertex-first",
     "vertex-last",
     "angled-point",
+    "polylabel",
     ""
 };
 
@@ -117,6 +118,7 @@ static const char * label_placement_strings[] = {
     "line",
     "vertex",
     "interior",
+    "polylabel",
     ""
 };
 
