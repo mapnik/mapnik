@@ -37,6 +37,7 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/ring.hpp>
 #include <boost/geometry/geometries/register/linestring.hpp>
+#include <boost/geometry/geometries/register/multi_point.hpp>
 #pragma GCC diagnostic pop
 // mapnik
 #include <mapnik/geometry.hpp>
@@ -47,6 +48,7 @@ BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<double>, double, boost:
 BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<std::int64_t>, std::int64_t, boost::geometry::cs::cartesian, x, y)
 BOOST_GEOMETRY_REGISTER_LINESTRING_TEMPLATED(mapnik::geometry::line_string)
 BOOST_GEOMETRY_REGISTER_RING_TEMPLATED(mapnik::geometry::linear_ring)
+BOOST_GEOMETRY_REGISTER_MULTI_POINT(mapnik::geometry::multi_point<double>)
 // needed by box2d<T>
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, boost::geometry::cs::cartesian, x, y)
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2f, float,  boost::geometry::cs::cartesian, x, y)

@@ -26,6 +26,7 @@
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/interior.hpp>
 
 namespace mapnik {
 
@@ -58,7 +59,7 @@ public:
         }
         else
         {
-            if (!label::interior_position(this->locator_, x, y))
+            if (!geometry::interior(this->locator_, x, y))
             {
                 this->done_ = true;
                 return false;
