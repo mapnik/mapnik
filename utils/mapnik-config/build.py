@@ -43,7 +43,7 @@ def GetMapnikLibVersion():
     return version_string
 
 if (GetMapnikLibVersion() != config_env['MAPNIK_VERSION_STRING']):
-    print 'Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING'])
+    print('Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING']))
     Exit(1)
 
 config_variables = '''#!/usr/bin/env bash
