@@ -178,13 +178,16 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 if (!error)
                 {
                     FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
-                    composite_bitmap(pixmap_,
-                                     &bit->bitmap,
-                                     halo_fill,
-                                     bit->left,
-                                     height - bit->top,
-                                     halo_opacity,
-                                     halo_comp_op_);
+                    if (bit->bitmap.pixel_mode != FT_PIXEL_MODE_BGRA)
+                    {
+                        composite_bitmap(pixmap_,
+                                         &bit->bitmap,
+                                         halo_fill,
+                                         bit->left,
+                                         height - bit->top,
+                                         halo_opacity,
+                                         halo_comp_op_);
+                    }
                 }
             }
             else
