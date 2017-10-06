@@ -220,11 +220,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 if (!error)
                 {
                     FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
-                    if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
-                    {
-                        continue;
-                    }
-                    else
+                    if (bit->bitmap.pixel_mode != FT_PIXEL_MODE_BGRA)
                     {
                         composite_bitmap(pixmap_,
                                          &bit->bitmap,
