@@ -40,6 +40,10 @@
 #include <mapnik/text/placement_finder_impl.hpp>
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements/dummy.hpp>
+#include <mapnik/geometry/transform.hpp>
+#include <mapnik/geometry/strategy.hpp>
+#include <mapnik/proj_strategy.hpp>
+#include <mapnik/view_strategy.hpp>
 
 namespace mapnik {
 namespace geometry {
@@ -286,11 +290,24 @@ void base_symbolizer_helper::initialize_points() const
                     success = true;
                 }
             }
-            else if (how_placed == INTERIOR_PLACEMENT && type == geometry::geometry_types::Polygon)
+            else if (type == geometry::geometry_types::Polygon)
             {
-                auto const& poly = mapnik::util::get<geometry::polygon<double> >(geom);
-                geometry::polygon_vertex_adapter<double> va(poly);
-                success = label::interior_position(va, label_x, label_y);
+                auto const& poly = util::get<geometry::polygon<double>>(geom);
+                proj_transform backwart_transform(prj_trans_.dest(), prj_trans_.source());
+                view_strategy vs(t_);
+                proj_strategy ps(backwart_transform);
+                using transform_group_type = geometry::strategy_group<proj_strategy, view_strategy>;
+                transform_group_type transform_group(ps, vs);
+                geometry::polygon<double> tranformed_poly(geometry::transform<double>(poly, transform_group));
+                if (how_placed == INTERIOR_PLACEMENT)
+                {
+                    geometry::polygon_vertex_adapter<double> va(tranformed_poly);
+                    if (label::interior_position(va, label_x, label_y))
+                    {
+                        points_.emplace_back(label_x, label_y);
+                    }
+                }
+                continue;
             }
             else
             {
