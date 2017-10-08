@@ -228,7 +228,8 @@ markers_dispatch_params::markers_dispatch_params(box2d<double> const& size,
         get<value_double, keys::max_error>(sym, feature, vars),
         get<value_bool, keys::allow_overlap>(sym, feature, vars),
         get<value_bool, keys::avoid_edges>(sym, feature, vars),
-        get<direction_enum, keys::direction>(sym, feature, vars)}
+        get<direction_enum, keys::direction>(sym, feature, vars),
+        scale}
     , placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars))
     , ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars))
     , snap_to_pixels(snap)
