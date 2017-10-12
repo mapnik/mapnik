@@ -38,9 +38,16 @@ public:
         : markers_basic_placement(params),
           locator_(locator),
           detector_(detector),
-          done_(false)
+          done_(false),
+          use_angle_(false)
     {
         locator_.rewind(0);
+    }
+
+    // Use angle of line
+    void use_angle(bool enable)
+    {
+        use_angle_ = enable;
     }
 
     // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
@@ -58,9 +65,11 @@ public:
             return false;
         }
 
+        angle = 0;
+
         if (this->locator_.type() == geometry::geometry_types::LineString)
         {
-            if (!label::middle_point(this->locator_, x, y))
+            if (!label::middle_point(this->locator_, x, y, use_angle_ ? boost::optional<double&>(angle) : boost::none))
             {
                 this->done_ = true;
                 return false;
@@ -75,8 +84,6 @@ public:
             }
         }
 
-        angle = 0;
-
         if (!this->push_to_detector(x, y, angle, ignore_placement))
         {
             return false;
@@ -90,6 +97,7 @@ protected:
     Locator & locator_;
     Detector & detector_;
     bool done_;
+    bool use_angle_;
 
     // Checks transformed box placement with collision detector.
     // returns false if the box:
