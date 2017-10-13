@@ -20,18 +20,21 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_MARKERS_PLACEMENTS_INTERIOR_HPP
-#define MAPNIK_MARKERS_PLACEMENTS_INTERIOR_HPP
+#ifndef MAPNIK_MARKERS_PLACEMENTS_POLYLABEL_HPP
+#define MAPNIK_MARKERS_PLACEMENTS_POLYLABEL_HPP
 
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
-#include <mapnik/geometry/interior.hpp>
+#include <mapnik/geometry/polygon_vertex_processor.hpp>
+
+#include <mapnik/geometry/point.hpp>
+#include <mapnik/geometry/polylabel.hpp>
 
 namespace mapnik {
 
 template <typename Locator, typename Detector>
-class markers_interior_placement : public markers_point_placement<Locator, Detector>
+class markers_polylabel_placement : public markers_point_placement<Locator, Detector>
 {
 public:
     using point_placement = markers_point_placement<Locator, Detector>;
@@ -44,28 +47,18 @@ public:
             return false;
         }
 
-        if (this->locator_.type() == geometry::geometry_types::Point)
+        if (this->locator_.type() != geometry::geometry_types::Polygon)
         {
             return point_placement::get_point(x, y, angle, ignore_placement);
         }
 
-        if (this->locator_.type() == geometry::geometry_types::LineString)
-        {
-            if (!label::middle_point(this->locator_, x, y))
-            {
-                this->done_ = true;
-                return false;
-            }
-        }
-        else
-        {
-            if (!geometry::interior(this->locator_, x, y))
-            {
-                this->done_ = true;
-                return false;
-            }
-        }
+        geometry::polygon_vertex_processor<double> vertex_processor;
+        vertex_processor.add_path(this->locator_);
+        double precision = geometry::polylabel_precision(vertex_processor.polygon_);
+        geometry::point<double> placement = geometry::polylabel(vertex_processor.polygon_, precision);
 
+        x = placement.x;
+        y = placement.y;
         angle = 0;
 
         if (!this->push_to_detector(x, y, angle, ignore_placement))
@@ -80,4 +73,4 @@ public:
 
 }
 
-#endif // MAPNIK_MARKERS_PLACEMENTS_INTERIOR_HPP
+#endif // MAPNIK_MARKERS_PLACEMENTS_POLYLABEL_HPP

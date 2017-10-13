@@ -18,3 +18,6 @@
 	path = deps/mapbox/protozero
 	url = https://github.com/mapbox/protozero.git
         branch = master
+[submodule "deps/mapbox/polylabel"]
+	path = deps/mapbox/polylabel
+	url = https://github.com/mapbox/polylabel.git
