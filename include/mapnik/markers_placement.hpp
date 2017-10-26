@@ -49,6 +49,10 @@ public:
         case MARKER_POINT_PLACEMENT:
             construct(&point_, locator, detector, params);
             break;
+        case MARKER_ANGLED_POINT_PLACEMENT:
+            construct(&point_, locator, detector, params);
+            point_.use_angle(true);
+            break;
         case MARKER_INTERIOR_PLACEMENT:
             construct(&interior_, locator, detector, params);
             break;
@@ -70,6 +74,7 @@ public:
         {
         default:
         case MARKER_POINT_PLACEMENT:
+        case MARKER_ANGLED_POINT_PLACEMENT:
             destroy(&point_);
             break;
         case MARKER_INTERIOR_PLACEMENT:
@@ -94,6 +99,7 @@ public:
         {
         default:
         case MARKER_POINT_PLACEMENT:
+        case MARKER_ANGLED_POINT_PLACEMENT:
             return point_.get_point(x, y, angle, ignore_placement);
         case MARKER_INTERIOR_PLACEMENT:
             return interior_.get_point(x, y, angle, ignore_placement);

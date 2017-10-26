@@ -35,6 +35,12 @@
 #include <vector>
 #include <algorithm>
 
+// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
 namespace mapnik
 {
 template <typename T>
@@ -298,7 +304,7 @@ bool hit_test_first(PathType & path, double x, double y)
 namespace label {
 
 template <typename PathType>
-bool middle_point(PathType & path, double & x, double & y)
+bool middle_point(PathType & path, double & x, double & y, boost::optional<double&> angle = boost::none)
 {
     double x0 = 0;
     double y0 = 0;
@@ -319,6 +325,10 @@ bool middle_point(PathType & path, double & x, double & y)
             double r = (mid_length - dist)/seg_length;
             x = x0 + (x1 - x0) * r;
             y = y0 + (y1 - y0) * r;
+            if (angle)
+            {
+                *angle = atan2(y1 - y0, x1 - x0);
+            }
             break;
         }
         dist += seg_length;

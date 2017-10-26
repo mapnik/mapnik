@@ -105,6 +105,7 @@ enum marker_placement_enum : std::uint8_t
     MARKER_LINE_PLACEMENT,
     MARKER_VERTEX_FIRST_PLACEMENT,
     MARKER_VERTEX_LAST_PLACEMENT,
+    MARKER_ANGLED_POINT_PLACEMENT,
     marker_placement_enum_MAX
 };
 
