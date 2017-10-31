@@ -22,7 +22,7 @@
 
 namespace mapnik { namespace util {
 
-constexpr unsigned name_to_int(const char *str, int off = 0)
+constexpr unsigned name_to_int(const char *str, unsigned off = 0)
 {
     return !str[off] ? 5381 : (name_to_int(str, off + 1) * 33) ^ static_cast<unsigned>(str[off]);
 }
