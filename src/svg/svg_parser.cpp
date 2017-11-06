@@ -1211,7 +1211,8 @@ void parse_gradient_stop(svg_parser & parser, mapnik::gradient& gr, rapidxml::xm
     auto * attr = node->first_attribute("offset");
     if (attr != nullptr)
     {
-        offset = parse_double(parser.err_handler(),attr->value());
+        bool percent = false;
+        offset = parse_svg_value(parser.err_handler(),attr->value(), percent);
     }
 
     attr = node->first_attribute("style");
@@ -1378,7 +1379,7 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     double x1 = 0.0;
     double x2 = 1.0;
     double y1 = 0.0;
-    double y2 = 1.0;
+    double y2 = 0.0;
 
     bool has_percent=true;
     attr = node->first_attribute("x1");
