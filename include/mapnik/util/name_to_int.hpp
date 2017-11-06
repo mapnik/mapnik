@@ -27,4 +27,9 @@ constexpr unsigned name_to_int(const char *str, unsigned off = 0)
     return !str[off] ? 5381 : (name_to_int(str, off + 1) * 33) ^ static_cast<unsigned>(str[off]);
 }
 
+constexpr unsigned operator"" _case(char const* str, std::size_t)
+{
+    return name_to_int(str);
+}
+
 }}

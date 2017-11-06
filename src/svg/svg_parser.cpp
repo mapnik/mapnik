@@ -58,6 +58,7 @@
 namespace mapnik { namespace svg {
 
 using util::name_to_int;
+using util::operator"" _case;
 
 struct viewbox
 {
@@ -103,59 +104,59 @@ void parse_attr(svg_parser& parser, char const* name, char const* value);
 namespace {
 
 static std::array<unsigned, 7> const unsupported_elements
-{ {name_to_int("symbol"),
-   name_to_int("marker"),
-   name_to_int("view"),
-   name_to_int("text"),
-   name_to_int("switch"),
-   name_to_int("image"),
-   name_to_int("a")}
+{ {"symbol"_case,
+   "marker"_case,
+   "view"_case,
+   "text"_case,
+   "switch"_case,
+   "image"_case,
+   "a"_case}
 };
 
 #if 0 // disable to reduce verbosity
 static std::array<unsigned, 43> const unsupported_attributes
-{ {name_to_int("alignment-baseline"),
-   name_to_int("baseline-shift"),
-   name_to_int("clip"),
-   name_to_int("clip-path"),
-   name_to_int("clip-rule"),
-   name_to_int("color-interpolation"),
-   name_to_int("color-interpolation-filters"),
-   name_to_int("color-profile"),
-   name_to_int("color-rendering"),
-   name_to_int("cursor"),
-   name_to_int("direction"),
-   name_to_int("dominant-baseline"),
-   name_to_int("enable-background"),
-   name_to_int("filter"),
-   name_to_int("flood-color"),
-   name_to_int("flood-opacity"),
-   name_to_int("font-family"),
-   name_to_int("font-size"),
-   name_to_int("font-size-adjust"),
-   name_to_int("font-stretch"),
-   name_to_int("font-style"),
-   name_to_int("font-variant"),
-   name_to_int("font-weight"),
-   name_to_int("glyph-orientation-horizontal"),
-   name_to_int("glyph-orientation-vertical"),
-   name_to_int("image-rendering"),
-   name_to_int("kerning"),
-   name_to_int("letter-spacing"),
-   name_to_int("lighting-color"),
-   name_to_int("marker-end"),
-   name_to_int("marker-mid"),
-   name_to_int("marker-start"),
-   name_to_int("mask"),
-   name_to_int("overflow"),
-   name_to_int("pointer-events"),
-   name_to_int("shape-rendering"),
-   name_to_int("text-anchor"),
-   name_to_int("text-decoration"),
-   name_to_int("text-rendering"),
-   name_to_int("unicode-bidi"),
-   name_to_int("word-spacing"),
-   name_to_int("writing-mode")}
+{ {"alignment-baseline"_case,
+   "baseline-shift"_case,
+   "clip"_case,
+   "clip-path"_case,
+   "clip-rule"_case,
+   "color-interpolation"_case,
+   "color-interpolation-filters"_case,
+   "color-profile"_case,
+   "color-rendering"_case,
+   "cursor"_case,
+   "direction"_case,
+   "dominant-baseline"_case,
+   "enable-background"_case,
+   "filter"_case,
+   "flood-color"_case,
+   "flood-opacity"_case,
+   "font-family"_case,
+   "font-size"_case,
+   "font-size-adjust"_case,
+   "font-stretch"_case,
+   "font-style"_case,
+   "font-variant"_case,
+   "font-weight"_case,
+   "glyph-orientation-horizontal"_case,
+   "glyph-orientation-vertical"_case,
+   "image-rendering"_case,
+   "kerning"_case,
+   "letter-spacing"_case,
+   "lighting-color"_case,
+   "marker-end"_case,
+   "marker-mid"_case,
+   "marker-start"_case,
+   "mask"_case,
+   "overflow"_case,
+   "pointer-events"_case,
+   "shape-rendering"_case,
+   "text-anchor"_case,
+   "text-decoration"_case,
+   "text-rendering"_case,
+   "unicode-bidi"_case,
+   "word-spacing"_case,
+   "writing-mode"_case}
 };
 
 #endif
@@ -374,7 +375,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
         switch(name_to_int(name))
         {
-        case name_to_int("defs"):
+        case "defs"_case:
         {
             if (node->first_node() != nullptr)
             {
@@ -384,13 +385,13 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         }
         // the gradient tags *should* be in defs, but illustrator seems not to put them in there so
         // accept them anywhere
-        case name_to_int("linearGradient"):
+        case "linearGradient"_case:
             parse_linear_gradient(parser, node);
             break;
-        case name_to_int("radialGradient"):
+        case "radialGradient"_case:
             parse_radial_gradient(parser, node);
             break;
-        case name_to_int("symbol"):
+        case "symbol"_case:
             parse_id(parser, node);
             //parse_dimensions(parser, node);
             break;
@@ -400,7 +401,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             switch (name_to_int(name))
             {
-            case name_to_int("g"):
+            case "g"_case:
                 if (node->first_node() != nullptr)
                 {
                     parser.path_.push_attr();
@@ -408,7 +409,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     parse_attr(parser, node);
                 }
                 break;
-            case name_to_int("use"):
+            case "use"_case:
                 parser.path_.push_attr();
                 parse_id(parser, node);
                 parse_attr(parser, node);
@@ -487,35 +488,35 @@ void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<cha
 {
     switch (name_to_int(name))
     {
-    case name_to_int("path"):
+    case "path"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_path(parser, node);
         break;
-    case name_to_int("polygon"):
+    case "polygon"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_polygon(parser, node);
         break;
-    case name_to_int("polyline"):
+    case "polyline"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_polyline(parser, node);
         break;
-    case name_to_int("line"):
+    case "line"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_line(parser, node);
         break;
-    case name_to_int("rect"):
+    case "rect"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_rect(parser, node);
         break;
-    case name_to_int("circle"):
+    case "circle"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_circle(parser, node);
         break;
-    case name_to_int("ellipse"):
+    case "ellipse"_case:
         parser.path_.transform().multiply(parser.viewbox_tr_);
         parse_ellipse(parser, node);
         break;
-    case name_to_int("svg"):
+    case "svg"_case:
         parse_dimensions(parser, node);
         break;
     default:
@@ -630,32 +631,32 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
 {
     switch (name_to_int(name))
     {
-    case name_to_int("transform"):
+    case "transform"_case:
         parse_transform(parser, value);
         break;
-    case name_to_int("fill"):
+    case "fill"_case:
         parse_fill(parser, value);
         break;
-    case name_to_int("fill-opacity"):
+    case "fill-opacity"_case:
         parser.path_.fill_opacity(parse_double(parser.err_handler(), value));
         break;
-    case name_to_int("fill-rule"):
+    case "fill-rule"_case:
         if (std::strcmp(value, "evenodd") == 0)
         {
             parser.path_.even_odd(true);
         }
         break;
-    case name_to_int("stroke"):
+    case "stroke"_case:
         parse_stroke(parser, value);
         break;
-    case name_to_int("stroke-width"):
+    case "stroke-width"_case:
         bool percent;
         parser.path_.stroke_width(parse_svg_value(parser.err_handler(), value, percent));
         break;
-    case name_to_int("stroke-opacity"):
+    case "stroke-opacity"_case:
         parser.path_.stroke_opacity(parse_double(parser.err_handler(), value));
         break;
-    case name_to_int("stroke-linecap"):
+    case "stroke-linecap"_case:
         if(std::strcmp(value, "butt") == 0)
             parser.path_.line_cap(agg::butt_cap);
         else if(std::strcmp(value, "round") == 0)
@@ -663,7 +664,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         else if(std::strcmp(value, "square") == 0)
             parser.path_.line_cap(agg::square_cap);
         break;
-    case name_to_int("stroke-linejoin"):
+    case "stroke-linejoin"_case:
         if (std::strcmp(value, "miter") == 0)
             parser.path_.line_join(agg::miter_join);
         else if (std::strcmp(value, "round") == 0)
@@ -671,22 +672,22 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         else if (std::strcmp(value, "bevel") == 0)
             parser.path_.line_join(agg::bevel_join);
         break;
-    case name_to_int("stroke-miterlimit"):
+    case "stroke-miterlimit"_case:
         parser.path_.miter_limit(parse_double(parser.err_handler(),value));
         break;
-    case name_to_int("stroke-dasharray"):
+    case "stroke-dasharray"_case:
         parse_stroke_dash(parser, value);
         break;
-    case name_to_int("stroke-dashoffset"):
+    case "stroke-dashoffset"_case:
         parser.path_.dash_offset(parse_double(parser.err_handler(), value));
         break;
-    case name_to_int("opacity"):
+    case "opacity"_case:
         parser.path_.opacity(parse_double(parser.err_handler(), value));
         break;
-    case name_to_int("visibility"):
+    case "visibility"_case:
         parser.path_.visibility(std::strcmp(value,  "hidden") != 0);
         break;
-    case name_to_int("display"):
+    case "display"_case:
         if (std::strcmp(value,  "none") == 0)
         {
             parser.path_.display(false);

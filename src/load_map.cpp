@@ -83,6 +83,7 @@ namespace mapnik
 {
 using boost::optional;
 using util::name_to_int;
+using util::operator"" _case;
 
 class map_parser : util::noncopyable
 {
@@ -859,55 +860,55 @@ void map_parser::parse_symbolizers(rule & rule, xml_node const & node)
     {
         switch (name_to_int(sym_node.name().c_str()))
         {
-        case name_to_int("PointSymbolizer"):
+        case "PointSymbolizer"_case:
             parse_point_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("LinePatternSymbolizer"):
+        case "LinePatternSymbolizer"_case:
             parse_line_pattern_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("PolygonPatternSymbolizer"):
+        case "PolygonPatternSymbolizer"_case:
             parse_polygon_pattern_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("TextSymbolizer"):
+        case "TextSymbolizer"_case:
             parse_text_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("ShieldSymbolizer"):
+        case "ShieldSymbolizer"_case:
             parse_shield_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("LineSymbolizer"):
+        case "LineSymbolizer"_case:
             parse_line_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("PolygonSymbolizer"):
+        case "PolygonSymbolizer"_case:
             parse_polygon_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("BuildingSymbolizer"):
+        case "BuildingSymbolizer"_case:
             parse_building_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("RasterSymbolizer"):
+        case "RasterSymbolizer"_case:
             parse_raster_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("MarkersSymbolizer"):
+        case "MarkersSymbolizer"_case:
             parse_markers_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("GroupSymbolizer"):
+        case "GroupSymbolizer"_case:
             parse_group_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("DebugSymbolizer"):
+        case "DebugSymbolizer"_case:
             parse_debug_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
-        case name_to_int("DotSymbolizer"):
+        case "DotSymbolizer"_case:
             parse_dot_symbolizer(rule, sym_node);
             sym_node.set_processed(true);
             break;
