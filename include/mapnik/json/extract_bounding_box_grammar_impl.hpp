@@ -61,10 +61,13 @@ struct push_box_impl
     template <typename T0, typename T1, typename T2, typename T3>
     void operator() (T0 & boxes, T1 const& begin, T2 const& box, T3 const& range) const
     {
-        boxes.emplace_back(box,
-                           std::make_pair(std::distance(begin,
-                                                        range.begin()),
-                                          std::distance(range.begin(), range.end())));
+        if (box.valid())
+        {
+            boxes.emplace_back(box,
+                               std::make_pair(std::distance(begin,
+                                                            range.begin()),
+                                              std::distance(range.begin(), range.end())));
+        }
     }
 };
 
