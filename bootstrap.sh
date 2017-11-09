@@ -11,7 +11,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="v0.11.1"
+MASON_VERSION="7026e94"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -45,6 +45,7 @@ function install() {
 }
 
 ICU_VERSION="57.1"
+BOOST_VERSION="1.65.1"
 
 function install_mason_deps() {
     install ccache 3.3.1
@@ -61,15 +62,15 @@ function install_mason_deps() {
     install cairo 1.14.8 libcairo
     install webp 0.6.0 libwebp
     install libgdal 2.1.3 libgdal
-    install boost 1.63.0
-    install boost_libsystem 1.63.0
-    install boost_libfilesystem 1.63.0
-    install boost_libprogram_options 1.63.0
-    install boost_libregex_icu57 1.63.0
+    install boost ${BOOST_VERSION}
+    install boost_libsystem ${BOOST_VERSION}
+    install boost_libfilesystem ${BOOST_VERSION}
+    install boost_libprogram_options ${BOOST_VERSION}
+    install boost_libregex_icu57 ${BOOST_VERSION}
     # technically boost thread and python are not a core dep, but installing
     # here by default helps make python-mapnik builds easier
-    install boost_libthread 1.63.0
-    install boost_libpython 1.63.0
+    install boost_libthread ${BOOST_VERSION}
+    install boost_libpython ${BOOST_VERSION}
     install freetype 2.7.1 libfreetype
     install harfbuzz 1.4.4-ft libharfbuzz
 }
