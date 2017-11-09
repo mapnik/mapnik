@@ -106,6 +106,9 @@ script:
  # (and might work) for the next build
  - DURATION=2400
  - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
+ # dump glibcxx symbols >= 3.4.20 (if this returns output
+ # then it means the binaries will not run on ubuntu trusty without upgrading libstdc++)
+ - nm src/libmapnik* | grep "GLIBCXX_3.4.2[0-9]" || true
  - RESULT=0
  - make test || RESULT=$?
  # we allow visual failures with g++ for now: https://github.com/mapnik/mapnik/issues/3567
