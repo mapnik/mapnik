@@ -308,6 +308,7 @@ opts.AddVariables(
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     BoolVariable('NO_ATEXIT', 'Will prevent Singletons from being deleted atexit of main thread', 'False'),
     BoolVariable('NO_DLCLOSE', 'Will prevent plugins from being unloaded', 'False'),
+    BoolVariable('ENABLE_GLIBC_WORKAROUND', "Workaround known GLIBC symbol exports to allow building against libstdc++-4.8 without binaries needing throw_out_of_range_fmt", 'False'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
     BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
@@ -1871,6 +1872,9 @@ if not preconfigured:
 
         if env['NO_DLCLOSE'] or env['COVERAGE']:
             env.Append(CPPDEFINES = '-DMAPNIK_NO_DLCLOSE')
+
+        if env['ENABLE_GLIBC_WORKAROUND']:
+            env.Append(CPPDEFINES = '-DMAPNIK_ENABLE_GLIBC_WORKAROUND')
 
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
