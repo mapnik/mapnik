@@ -32,6 +32,7 @@ database:
     - ./.mason/mason link clang++ ${LLVM_VERSION}
     - ./configure CC="$(pwd)/mason_packages/.link/bin/clang" CXX="$(pwd)/mason_packages/.link/bin/ccache $(pwd)/mason_packages/.link/bin/clang++ -Qunused-arguments"
     - make
+    - nm src/libmapnik* | grep "GLIBCXX_3.4.2[0-9]" || true
   override:
     - psql -c 'create database template_postgis;'
     - psql -c 'create extension postgis;' -d template_postgis
