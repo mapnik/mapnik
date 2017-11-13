@@ -34,6 +34,13 @@ using x3::double_;
 using x3::no_case;
 using x3::omit;
 
+namespace {
+auto assign_helper = [](auto const& ctx)
+{
+    _val(ctx) = std::move(_attr(ctx));
+};
+} // anonymous ns
+
 // start rule
 positions_grammar_type const positions("Positions");
 // rules
@@ -42,7 +49,7 @@ x3::rule<class ring_class, ring> const ring("Ring");
 x3::rule<class rings_class, rings> const rings("Rings");
 x3::rule<class rings_array_class, rings_array> const rings_array("RingsArray");
 
-auto const positions_def = rings_array | rings | ring | point ;
+auto const positions_def = rings_array[assign_helper] | rings[assign_helper] | ring[assign_helper] | point[assign_helper] ;
 auto const point_def = lit('[') > double_ > lit(',') > double_ > omit[*(lit(',') > double_)] > lit(']');
 auto const ring_def = lit('[') >> -(point % lit(',')) >> lit(']');
 auto const rings_def = lit('[') >> (ring % lit(',') > lit(']'));
