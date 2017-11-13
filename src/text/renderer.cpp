@@ -393,12 +393,11 @@ void agg_text_renderer<T>::render_halo(unsigned char *buffer,
                                        double opacity,
                                        composite_mode_e comp_op)
 {
-    int x, y;
     if (halo_radius < 1.0)
     {
-        for (x=0; x < width; x++)
+        for (unsigned x = 0; x < width; ++x)
         {
-            for (y=0; y < height; y++)
+            for (unsigned y = 0; y < height; ++y)
             {
                 int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
                 if (gray)
@@ -420,9 +419,9 @@ void agg_text_renderer<T>::render_halo(unsigned char *buffer,
     }
     else
     {
-        for (x=0; x < width; x++)
+        for (unsigned x = 0; x < width; ++x)
         {
-            for (y=0; y < height; y++)
+            for (unsigned y = 0; y < height; ++y)
             {
                 int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
                 if (gray)
@@ -446,16 +445,15 @@ void grid_text_renderer<T>::render_halo_id(unsigned char *buffer,
                                            int y1,
                                            int halo_radius)
 {
-    int x, y;
-    for (x=0; x < width; x++)
+    for (unsigned x = 0; x < width; ++x)
     {
-        for (y=0; y < height; y++)
+        for (unsigned y = 0; y < height; ++y)
         {
             int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
             if (gray)
             {
-                for (int n=-halo_radius; n <=halo_radius; ++n)
-                    for (int m=-halo_radius; m <= halo_radius; ++m)
+                for (int n = -halo_radius; n <=halo_radius; ++n)
+                    for (int m = -halo_radius; m <= halo_radius; ++m)
                         pixmap_.setPixel(x+x1+m,y+y1+n,feature_id);
             }
         }
