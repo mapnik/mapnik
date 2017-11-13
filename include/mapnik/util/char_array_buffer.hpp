@@ -68,6 +68,13 @@ private:
         return end_ - current_;
     }
 
+    pos_type seekpos(pos_type off,
+                     std::ios_base::openmode /*which*/)
+    {
+        current_ = std::min(begin_ + off, end_);
+        return pos_type(off_type(current_ - begin_));
+    }
+
     pos_type seekoff(off_type off, std::ios_base::seekdir dir,
                      std::ios_base::openmode which = std::ios_base::in | std::ios_base::out )
     {
