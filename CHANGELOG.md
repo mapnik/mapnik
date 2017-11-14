@@ -6,6 +6,24 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.16
+
+Released: November xx, 2017
+
+(Packaged from xxxxxxx)
+
+    - Added "strict" SVG parsing mode with consistent error handling  and disabled processing of unsupported attributes.
+    - Added support for `<use>` element.
+    - Implemented compile time string literal to integer conversion, to be able to convert large `if/else if/else` statements to `switch`.
+    - WKB reader - pre-allocate optimisations in `multi_polygon` and `geometry_collection`.
+    - Set alpha values in RGBA TIFFs even when `NODATA` value is pesent.
+    - Support building with ICU >= 59.
+    - SCons - added ICU_DATA, PROJ_LIB and GDAL_DATA settings, available via `mapnik-config`
+    - Fixed centroid and interior text placement algorithms (#3771)
+    - Fixed memory leak (#3775)
+    - SVG parser - fixed default gradient vector in linear gradient.
+    - Fixed bounding box collection logic (#3709)
+
 ## 3.0.15
 
 Released: June 16, 2017
