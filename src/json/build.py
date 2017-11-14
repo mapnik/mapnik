@@ -27,7 +27,28 @@ lib_env = env.Clone()
 lib_env.Append(CXXFLAGS='-fPIC')
 
 name = "mapnik-json"
-lib = lib_env.StaticLibrary(name, glob('./' + '*.cpp'), LIBS=[])
+
+source = Split(
+    """
+    unicode_string_grammar_x3.cpp
+    positions_grammar_x3.cpp
+    generic_json_grammar_x3.cpp
+    feature_grammar_x3.cpp
+    geojson_grammar_x3.cpp
+    topojson_grammar_x3.cpp
+    mapnik_json_generator_grammar.cpp
+    parse_feature.cpp
+    feature_from_geojson.cpp
+    geometry_from_geojson.cpp
+    mapnik_feature_to_geojson.cpp
+    mapnik_geometry_to_geojson.cpp
+    extract_bounding_boxes_x3.cpp
+    """
+    )
+
+lib = lib_env.StaticLibrary(name, source, LIBS=[])
+
+
 target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], env.subst('${LIBPREFIX}%s${LIBSUFFIX}' % name))
 result = env.InstallAs(target=target, source=lib)
 env.Alias(target='install', source=result)

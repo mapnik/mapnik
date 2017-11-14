@@ -59,7 +59,6 @@ struct extract_positions
             auto offset = std::distance(start_, r.begin());
             auto size = std::distance(r.begin(), r.end());
             boxes_.emplace_back(std::make_pair(box_type(b.minx(), b.miny(), b.maxx(), b.maxy()), std::make_pair(offset, size)));
-            //boxes_.emplace_back(std::make_tuple(bbox,offset, size));
         }
     }
     Iterator start_;
@@ -82,7 +81,6 @@ struct feature_callback_tag;
 
 namespace x3 = boost::spirit::x3;
 using space_type = x3::standard::space_type;
-//using iterator_type = char const*;
 
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 
