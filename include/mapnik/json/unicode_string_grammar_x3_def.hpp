@@ -149,11 +149,6 @@ BOOST_SPIRIT_DEFINE(
 
 #pragma GCC diagnostic pop
 
-}
-grammar::unicode_string_grammar_type const& unicode_string_grammar()
-{
-    return grammar::unicode_string;
-}
-}}
+}}}
 
 #endif // MAPNIK_JSON_UNICODE_STRING_GRAMMAR_X3_DEF_HPP

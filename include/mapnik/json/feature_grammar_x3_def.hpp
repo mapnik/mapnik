@@ -140,11 +140,12 @@ using x3::omit;
 using x3::char_;
 
 namespace {
-auto const& value = generic_json_grammar();
 // import unicode string rule
 auto const& geojson_string = unicode_string_grammar();
 // import positions rule
 auto const& positions_rule = positions_grammar();
+// import generic rule
+auto const& value = generic_json_grammar();
 }
 
 // geometry types symbols
@@ -235,13 +236,15 @@ auto assign_property = [](auto const& ctx)
 
 //exported rules
 feature_grammar_type const feature_rule = "Feature Rule";
-geometry_grammar_type const geometry_rule = "Feature Rule";
+geometry_grammar_type const geometry_rule = "Geometry Rule";
 
 // rules
 x3::rule<struct feature_type_tag> const feature_type = "Feature Type";
 x3::rule<struct geometry_type_tag, mapnik::geometry::geometry_types> const geometry_type = "Geometry Type";
 x3::rule<struct coordinates_tag, mapnik::json::positions> const coordinates = "Coordinates";
-x3::rule<struct geomerty_tag, std::tuple<mapnik::geometry::geometry_types, mapnik::json::positions, mapnik::geometry::geometry_collection<double>>> const geometry_tuple = "Geometry";
+x3::rule<struct geomerty_tag, std::tuple<mapnik::geometry::geometry_types,
+                                         mapnik::json::positions,
+                                         mapnik::geometry::geometry_collection<double>>> const geometry_tuple = "Geometry";
 x3::rule<struct property, std::tuple<std::string, json_value>> const property = "Property";
 x3::rule<struct properties_tag> const properties = "Properties";
 x3::rule<struct feature_part_rule_tag> const feature_part = "Feature part";
@@ -304,19 +307,5 @@ BOOST_SPIRIT_DEFINE(
 #pragma GCC diagnostic pop
 
 }}}
-
-namespace mapnik { namespace json {
-
-grammar::feature_grammar_type const& feature_grammar()
-{
-    return grammar::feature_rule;
-}
-
-grammar::geometry_grammar_type const& geometry_grammar()
-{
-    return grammar::geometry_rule;
-}
-
-}}
 
 #endif // MAPNIK_JSON_FEATURE_GRAMMAR_X3_DEF_HPP

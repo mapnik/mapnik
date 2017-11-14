@@ -64,11 +64,4 @@ BOOST_SPIRIT_DEFINE(
     );
 }}}
 
-namespace mapnik { namespace json {
-grammar::positions_grammar_type const& positions_grammar()
-{
-    return grammar::positions;
-}
-}}
-
 #endif // MAPNIK_JSON_POSITIONS_GRAMMAR_X3_DEF_HPP

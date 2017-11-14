@@ -42,5 +42,11 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extr
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
+}
 
-}}}
+grammar::unicode_string_grammar_type const& unicode_string_grammar()
+{
+    return grammar::unicode_string;
+}
+
+}}

@@ -41,4 +41,11 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(positions_grammar_type, iterator_type, extract_b
 BOOST_SPIRIT_INSTANTIATE_UNUSED(positions_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(positions_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
 
-}}}
+}
+
+grammar::positions_grammar_type const& positions_grammar()
+{
+    return grammar::positions;
+}
+
+}}

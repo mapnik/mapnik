@@ -31,4 +31,16 @@ BOOST_SPIRIT_INSTANTIATE(geometry_grammar_type, iterator_type, phrase_parse_cont
 BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_grammar_type, iterator_type, feature_context_const_type);
 
-}}}
+}
+
+grammar::feature_grammar_type const& feature_grammar()
+{
+    return grammar::feature_rule;
+}
+
+grammar::geometry_grammar_type const& geometry_grammar()
+{
+    return grammar::geometry_rule;
+}
+
+}}

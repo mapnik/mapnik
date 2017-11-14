@@ -38,4 +38,16 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(geojson_grammar_type, iterator_type, extract_bou
 BOOST_SPIRIT_INSTANTIATE_UNUSED(geojson_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(geojson_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
 
-}}}
+}
+
+grammar::geojson_grammar_type const& geojson_grammar()
+{
+    return grammar::value;
+}
+
+grammar::key_value_type const& key_value_grammar()
+{
+    return grammar::key_value;
+}
+
+}}
