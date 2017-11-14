@@ -153,6 +153,7 @@ else: # unix, non-macos
 source = Split(
     """
     expression_grammar_x3.cpp
+    css_color_grammar_x3.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp
@@ -229,7 +230,6 @@ source = Split(
     svg/svg_transform_parser.cpp
     svg/svg_path_grammar_x3.cpp
     warp.cpp
-    css_color_grammar_x3.cpp
     vertex_cache.cpp
     vertex_adapters.cpp
     text/font_library.cpp
