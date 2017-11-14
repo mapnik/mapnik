@@ -23,9 +23,9 @@
 #ifndef MAPNIK_JSON_TOPOJSON_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_JSON_TOPOJSON_GRAMMAR_X3_DEF_HPP
 
-#include <mapnik/json/topojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/generic_json_grammar_x3.hpp>
+#include <mapnik/json/topojson_grammar_x3.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/adapted/struct.hpp>
@@ -434,12 +434,5 @@ BOOST_SPIRIT_DEFINE(
     );
 
 }}}
-
-namespace mapnik { namespace json {
-grammar::topojson_grammar_type const& topojson_grammar()
-{
-    return grammar::topology;
-}
-}}
 
 #endif //MAPNIK_TOPOJSON_GRAMMAR_X3_DEF_HPP

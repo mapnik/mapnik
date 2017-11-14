@@ -34,4 +34,15 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(generic_json_grammar_type, iterator_type, phrase
 BOOST_SPIRIT_INSTANTIATE_UNUSED(generic_json_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(generic_json_grammar_type, iterator_type, feature_context_const_type);
 
-}}}
+}
+
+grammar::generic_json_grammar_type const& generic_json_grammar()
+{
+    return grammar::value;
+}
+grammar::generic_json_key_value_type const& generic_json_key_value()
+{
+    return grammar::key_value;
+}
+
+}}

@@ -166,18 +166,4 @@ BOOST_SPIRIT_DEFINE(
 
 }}}
 
-namespace mapnik { namespace json {
-
-grammar::geojson_grammar_type const& geojson_grammar()
-{
-    return grammar::value;
-}
-
-grammar::key_value_type const& key_value_grammar()
-{
-    return grammar::key_value;
-}
-
-}}
-
 #endif // MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP

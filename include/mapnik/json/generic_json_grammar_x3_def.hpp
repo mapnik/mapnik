@@ -67,6 +67,10 @@ auto assign_value = [](auto const& ctx)
 
 using x3::lit;
 using x3::string;
+
+// import unicode string rule
+namespace { auto const& json_string = mapnik::json::unicode_string_grammar(); }
+
 // exported rules
 // start
 generic_json_grammar_type const value("JSON Value");
@@ -79,9 +83,7 @@ x3::rule<class json_number_tag, json_value> const number("JSON Number");
 auto const json_double = x3::real_parser<value_double, x3::strict_real_policies<value_double>>();
 auto const json_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
-// import unicode string rule
-namespace { auto const& json_string = mapnik::json::unicode_string_grammar(); }
- // generic json types
+// generic json types
 auto const value_def = object | array | json_string | number
     ;
 
@@ -120,17 +122,5 @@ BOOST_SPIRIT_DEFINE(
 
 }}}
 
-namespace mapnik { namespace json {
-
-grammar::generic_json_grammar_type const& generic_json_grammar()
-{
-    return grammar::value;
-}
-grammar::generic_json_key_value_type const& generic_json_key_value()
-{
-    return grammar::key_value;
-}
-
-}}
 
 #endif // MAPNIK_JSON_GENERIC_JSON_GRAMMAR_X3_DEF_HPP
