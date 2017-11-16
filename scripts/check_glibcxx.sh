@@ -12,6 +12,9 @@ if ENABLE_GLIBC_WORKAROUND is set.
 If symbols >= 3.4.20 then it means the binaries would not run on ubuntu trusty without upgrading libstdc++
 
 '
+
+FINAL_RETURN_CODE=0
+
 function check() {
     local RESULT=0
     nm ${1} | grep "GLIBCXX_3.4.2[0-9]" > /tmp/out.txt || RESULT=$?
@@ -19,13 +22,15 @@ function check() {
         echo "Success: GLIBCXX_3.4.2[0-9] symbols not present in binary (as expected)"
     else
         echo "$(cat /tmp/out.txt | c++filt)"
-        exit 1
+        if [[ ${ENABLE_GLIBC_WORKAROUND:-false} == true ]]; then
+            FINAL_RETURN_CODE=1
+        fi
     fi
 }
 
-if [[ ${ENABLE_GLIBC_WORKAROUND:-false} == true ]]; then
-    for i in src/libmapnik*; do
-        echo "checking $i"
-        check $i
-    done
-fi
+for i in src/libmapnik*; do
+    echo "checking $i"
+    check $i
+done
+
+return ${FINAL_RETURN_CODE}
