@@ -42,7 +42,7 @@ if env['RUNTIME_LINK'] == 'static':
     cmd = 'pkg-config libpq --libs --static'
     try:
         plugin_env.ParseConfig(cmd)
-    except OSError, e:
+    except OSError as e:
         plugin_env.Append(LIBS='pq')
 else:
     plugin_env.Append(LIBS='pq')

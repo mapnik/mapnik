@@ -137,7 +137,7 @@ env = Environment(ENV=os.environ)
 init_environment(env)
 
 def fix_path(path):
-    return os.path.abspath(path)
+    return str(os.path.abspath(path))
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -146,15 +146,15 @@ def color_print(color,text,newline=True):
     # 4 - blue
     text = "\033[9%sm%s\033[0m" % (color,text)
     if not newline:
-        print text,
+        print(text, end=" ")
     else:
-        print text
+        print (text)
 
 def regular_print(color,text,newline=True):
     if not newline:
-        print text,
+        print (text, end = " ")
     else:
-        print text
+        print (text)
 
 def call(cmd, silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
@@ -511,7 +511,7 @@ elif HELP_REQUESTED:
 # https://github.com/mapnik/mapnik/issues/2112
 if not os.path.exists(SCONS_LOCAL_LOG) and not os.path.exists(SCONS_CONFIGURE_CACHE) \
   and ('-c' in command_line_args or '--clean' in command_line_args):
-    print 'all good: nothing to clean, but you might want to run "make distclean"'
+    print ('all good: nothing to clean, but you might want to run "make distclean"')
     Exit(0)
 
 # initially populate environment with defaults and any possible custom arguments
@@ -622,9 +622,9 @@ def parse_config(context, config, checks='--libs --cflags'):
             else:
                 env.ParseConfig(cmd)
             parsed = True
-        except OSError, e:
+        except OSError as e:
             ret = False
-            print ' (xml2-config not found!)'
+            print (' (xml2-config not found!)')
     if not parsed:
         if config in ('GDAL_CONFIG'):
             # optional deps...
@@ -658,9 +658,9 @@ def get_pkg_lib(context, config, lib):
             else:
                 # osx 1.8 install gives '-framework GDAL'
                 libname = 'gdal'
-        except Exception, e:
+        except Exception as e:
             ret = False
-            print ' unable to determine library name:'# %s' % str(e)
+            print (' unable to determine library name:# {}'.format(str(e)))
             return None
     context.Result( libname )
     return libname
@@ -808,7 +808,7 @@ int main()
     return ret
 
 def CheckIcuData(context, silent=False):
- 
+
     if not silent:
         context.Message('Checking for ICU data directory...')
     ret = context.TryRun("""
@@ -835,7 +835,7 @@ int main() {
     return ret[1].strip()
 
 def CheckGdalData(context, silent=False):
- 
+
     if not silent:
         context.Message('Checking for GDAL data directory...')
     ret = context.TryRun("""
@@ -858,7 +858,7 @@ int main() {
     return ret[1].strip()
 
 def CheckProjData(context, silent=False):
- 
+
     if not silent:
         context.Message('Checking for PROJ_LIB directory...')
     ret = context.TryRun("""
@@ -1236,7 +1236,7 @@ if not preconfigured:
                 if os.path.exists(conf):
                     opts.files.append(conf)
                     color_print(4,"SCons CONFIG found: '%s', variables will be inherited..." % conf)
-                    optfile = file(conf)
+                    optfile = open(conf, 'r')
                     #print optfile.read().replace("\n", " ").replace("'","").replace(" = ","=")
                     optfile.close()
 
@@ -1407,7 +1407,7 @@ if not preconfigured:
                 temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
                 if 'bz2' in temp_env['LIBS']:
                     env['EXTRA_FREETYPE_LIBS'].append('bz2')
-            except OSError,e:
+            except OSError as e:
                 pass
 
     # libxml2 should be optional but is currently not
@@ -1481,7 +1481,7 @@ if not preconfigured:
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
-        conf.prioritize_paths(silent=True)
+        pass#conf.prioritize_paths(silent=True)
 
     # test for C++14 support, which is required
     if not env['HOST'] and not conf.supports_cxx14():
@@ -1539,7 +1539,7 @@ if not preconfigured:
 
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
         if env['PRIORITIZE_LINKING']:
-            conf.prioritize_paths(silent=True)
+            pass#conf.prioritize_paths(silent=True)
 
         if not env['HOST']:
             # if the user is not setting custom boost configuration
@@ -1708,7 +1708,7 @@ if not preconfigured:
                                         if not lib in env['LIBS']:
                                             env["SQLITE_LINKFLAGS"].append(lib)
                                             env.Append(LIBS=lib)
-                                except OSError,e:
+                                except OSError as e:
                                     for lib in ["sqlite3","dl","pthread"]:
                                         if not lib in env['LIBS']:
                                             env["SQLITE_LINKFLAGS"].append("lib")
@@ -1793,7 +1793,7 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairo')
             else:
-                print 'Checking for cairo lib and include paths... ',
+                print ('Checking for cairo lib and include paths... ', end=" ")
                 cmd = 'pkg-config --libs --cflags cairo'
                 if env['RUNTIME_LINK'] == 'static':
                     cmd += ' --static'
@@ -1810,8 +1810,8 @@ if not preconfigured:
                         if not inc in env['CPPPATH']:
                             env["CAIRO_CPPPATHS"].append(inc)
                     env['HAS_CAIRO'] = True
-                    print 'yes'
-                except OSError,e:
+                    print ('yes')
+                except OSError as e:
                     color_print(1,'no')
                     env['SKIPPED_DEPS'].append('cairo')
                     color_print(1,'pkg-config reported: %s' % e)
@@ -1961,35 +1961,35 @@ if not preconfigured:
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
         if env['PRIORITIZE_LINKING']:
-            conf.prioritize_paths(silent=True)
+            pass#conf.prioritize_paths(silent=True)
 
         # finish config stage and pickle results
         env = conf.Finish()
-        env_cache = open(SCONS_CONFIGURE_CACHE, 'w')
+        env_cache = open(SCONS_CONFIGURE_CACHE, 'wb')
         pickle_dict = {}
         for i in pickle_store:
             pickle_dict[i] = env.get(i)
-        pickle.dump(pickle_dict,env_cache)
+        pickle.dump(pickle_dict, env_cache)
         env_cache.close()
         # fix up permissions on configure outputs
         # this is hackish but avoids potential problems
         # with a non-root configure following a root install
         # that also triggered a re-configure
         try:
-            os.chmod(SCONS_CONFIGURE_CACHE,0666)
+            os.chmod(SCONS_CONFIGURE_CACHE,0o666)
         except: pass
         try:
-            os.chmod(SCONS_LOCAL_CONFIG,0666)
+            os.chmod(SCONS_LOCAL_CONFIG,0o666)
         except: pass
         try:
-            os.chmod('.sconsign.dblite',0666)
+            os.chmod('.sconsign.dblite',0o666)
         except: pass
         try:
-            os.chmod(SCONS_LOCAL_LOG,0666)
+            os.chmod(SCONS_LOCAL_LOG,0o666)
         except: pass
         try:
             for item in glob('%s/*' % SCONF_TEMP_DIR):
-                os.chmod(item,0666)
+                os.chmod(item,0o666)
         except: pass
 
         if 'configure' in command_line_args:

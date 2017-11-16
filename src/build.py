@@ -19,7 +19,6 @@
 #
 #
 
-
 import os
 import sys
 import glob
@@ -35,7 +34,7 @@ def call(cmd, silent=True):
     if not stderr:
         return stdin.strip()
     elif not silent:
-        print stderr
+        print (stderr)
 
 def ldconfig(*args,**kwargs):
     call('ldconfig')
