@@ -313,6 +313,13 @@ cairo/process_markers_symbolizer.cpp
 cairo/process_group_symbolizer.cpp
 """)
 
+if env['ENABLE_GLIBC_WORKAROUND']:
+    source += Split(
+            """
+            glibc_workaround.cpp
+            """
+        )
+
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
     lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
