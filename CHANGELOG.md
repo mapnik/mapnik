@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.16
 
-Released: November xx, 2017
+Released: November 16, 2017
 
-(Packaged from xxxxxxx)
+(Packaged from 8d7b75e)
 
     - Added "strict" SVG parsing mode with consistent error handling  and disabled processing of unsupported attributes.
     - Added support for `<use>` element.
