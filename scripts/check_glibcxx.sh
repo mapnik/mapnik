@@ -33,4 +33,4 @@ for i in src/libmapnik*; do
     check $i
 done
 
-return ${FINAL_RETURN_CODE}
+exit ${FINAL_RETURN_CODE}
