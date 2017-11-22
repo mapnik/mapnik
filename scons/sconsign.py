@@ -2,7 +2,7 @@
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001 - 2016 The SCons Foundation
+# Copyright (c) 2001 - 2017 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,15 +23,18 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "src/script/sconsign.py rel_2.5.1:3735:9dc6cee5c168 2016/11/03 14:02:02 bdbaddog"
 
-__version__ = "2.5.1"
+from __future__ import print_function
 
-__build__ = "rel_2.5.1:3735:9dc6cee5c168[MODIFIED]"
+__revision__ = "src/script/sconsign.py 74b2c53bc42290e911b334a6b44f187da698a668 2017/11/14 13:16:53 bdbaddog"
 
-__buildsys__ = "mongodog"
+__version__ = "3.0.1"
 
-__date__ = "2016/11/03 14:02:02"
+__build__ = "74b2c53bc42290e911b334a6b44f187da698a668"
+
+__buildsys__ = "hpmicrodog"
+
+__date__ = "2017/11/14 13:16:53"
 
 __developer__ = "bdbaddog"
 
@@ -55,14 +58,7 @@ import sys
 # engine modules if they're in either directory.
 
 
-if sys.version_info >= (3,0,0):
-    msg = "sconsign: *** Version %s does not run under Python version %s.\n\
-Python 3 is not yet supported.\n"
-    sys.stderr.write(msg % (__version__, sys.version.split()[0]))
-    sys.exit(1)
-
-
-script_dir = sys.path[0]
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 if script_dir in sys.path:
     sys.path.remove(script_dir)
@@ -95,7 +91,7 @@ try:
 except ImportError:
     pass
 else:
-    # when running from an egg add the egg's directory 
+    # when running from an egg add the egg's directory
     try:
         d = pkg_resources.get_distribution('scons')
     except pkg_resources.DistributionNotFound:
@@ -182,9 +178,14 @@ sys.path = libs + sys.path
 # END STANDARD SCons SCRIPT HEADER
 ##############################################################################
 
-import SCons.compat   # so pickle will import cPickle instead
+import SCons.compat
 
-import whichdb
+try:
+    import whichdb
+    whichdb = whichdb.whichdb
+except ImportError as e:
+    from dbm import whichdb
+
 import time
 import pickle
 import imp
@@ -202,8 +203,14 @@ def my_whichdb(filename):
         pass
     return _orig_whichdb(filename)
 
-_orig_whichdb = whichdb.whichdb
-whichdb.whichdb = my_whichdb
+
+# Should work on python2
+_orig_whichdb = whichdb
+whichdb = my_whichdb
+
+# was changed for python3
+#_orig_whichdb = whichdb.whichdb
+#dbm.whichdb = my_whichdb
 
 def my_import(mname):
     if '.' in mname:
@@ -235,6 +242,11 @@ def default_mapper(entry, name):
         val = eval("entry."+name)
     except:
         val = None
+    if sys.version_info.major >= 3 and isinstance(val, bytes):
+        # This is a dirty hack for py 2/3 compatibility. csig is a bytes object
+        # in Python3 while Python2 bytes are str. Hence, we decode the csig to a
+        # Python3 string
+        val = val.decode()
     return str(val)
 
 def map_action(entry, name):
@@ -323,14 +335,14 @@ def printfield(name, entry, prefix=""):
     outlist = field("implicit", entry, 0)
     if outlist:
         if Verbose:
-            print "    implicit:"
-        print "        " + outlist
+            print("    implicit:")
+        print("        " + outlist)
     outact = field("action", entry, 0)
     if outact:
         if Verbose:
-            print "    action: " + outact
+            print("    action: " + outact)
         else:
-            print "        " + outact
+            print("        " + outact)
 
 def printentries(entries, location):
     if Print_Entries:
@@ -343,9 +355,9 @@ def printentries(entries, location):
                 try:
                     ninfo = entry.ninfo
                 except AttributeError:
-                    print name + ":"
+                    print(name + ":")
                 else:
-                    print nodeinfo_string(name, entry.ninfo)
+                    print(nodeinfo_string(name, entry.ninfo))
                 printfield(name, entry.binfo)
     else:
         for name in sorted(entries.keys()):
@@ -353,9 +365,9 @@ def printentries(entries, location):
             try:
                 ninfo = entry.ninfo
             except AttributeError:
-                print name + ":"
+                print(name + ":")
             else:
-                print nodeinfo_string(name, entry.ninfo)
+                print(nodeinfo_string(name, entry.ninfo))
             printfield(name, entry.binfo)
 
 class Do_SConsignDB(object):
@@ -374,7 +386,7 @@ class Do_SConsignDB(object):
             #   .sconsign               => .sconsign.dblite
             #   .sconsign.dblite        => .sconsign.dblite.dblite
             db = self.dbm.open(fname, "r")
-        except (IOError, OSError), e:
+        except (IOError, OSError) as e:
             print_e = e
             try:
                 # That didn't work, so try opening the base name,
@@ -388,7 +400,7 @@ class Do_SConsignDB(object):
                 # suffix-mangling).
                 try:
                     open(fname, "r")
-                except (IOError, OSError), e:
+                except (IOError, OSError) as e:
                     # Nope, that file doesn't even exist, so report that
                     # fact back.
                     print_e = e
@@ -399,7 +411,7 @@ class Do_SConsignDB(object):
         except pickle.UnpicklingError:
             sys.stderr.write("sconsign: ignoring invalid `%s' file `%s'\n" % (self.dbm_name, fname))
             return
-        except Exception, e:
+        except Exception as e:
             sys.stderr.write("sconsign: ignoring invalid `%s' file `%s': %s\n" % (self.dbm_name, fname, e))
             return
 
@@ -416,13 +428,13 @@ class Do_SConsignDB(object):
                 self.printentries(dir, db[dir])
 
     def printentries(self, dir, val):
-        print '=== ' + dir + ':'
+        print('=== ' + dir + ':')
         printentries(pickle.loads(val), dir)
 
 def Do_SConsignDir(name):
     try:
         fp = open(name, 'rb')
-    except (IOError, OSError), e:
+    except (IOError, OSError) as e:
         sys.stderr.write("sconsign: %s\n" % (e))
         return
     try:
@@ -432,7 +444,7 @@ def Do_SConsignDir(name):
     except pickle.UnpicklingError:
         sys.stderr.write("sconsign: ignoring invalid .sconsign file `%s'\n" % (name))
         return
-    except Exception, e:
+    except Exception as e:
         sys.stderr.write("sconsign: ignoring invalid .sconsign file `%s': %s\n" % (name, e))
         return
     printentries(sconsign.entries, args[0])
@@ -494,13 +506,13 @@ for o, a in opts:
                     SCons.dblite.ignore_corrupt_dbfiles = 0
             except:
                 sys.stderr.write("sconsign: illegal file format `%s'\n" % a)
-                print helpstr
+                print(helpstr)
                 sys.exit(2)
             Do_Call = Do_SConsignDB(a, dbm)
         else:
             Do_Call = Do_SConsignDir
     elif o in ('-h', '--help'):
-        print helpstr
+        print(helpstr)
         sys.exit(0)
     elif o in ('-i', '--implicit'):
         Print_Flags['implicit'] = 1
@@ -515,12 +527,13 @@ for o, a in opts:
     elif o in ('-v', '--verbose'):
         Verbose = 1
 
+
 if Do_Call:
     for a in args:
         Do_Call(a)
 else:
     for a in args:
-        dbm_name = whichdb.whichdb(a)
+        dbm_name = whichdb(a)
         if dbm_name:
             Map_Module = {'SCons.dblite' : 'dblite'}
             if dbm_name != "SCons.dblite":
