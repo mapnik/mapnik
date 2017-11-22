@@ -146,15 +146,15 @@ def color_print(color,text,newline=True):
     # 4 - blue
     text = "\033[9%sm%s\033[0m" % (color,text)
     if not newline:
-        print text,
+        print(text,)
     else:
-        print text
+        print(text)
 
 def regular_print(color,text,newline=True):
     if not newline:
-        print text,
+        print(text,)
     else:
-        print text
+        print(text)
 
 def call(cmd, silent=False):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
@@ -511,7 +511,7 @@ elif HELP_REQUESTED:
 # https://github.com/mapnik/mapnik/issues/2112
 if not os.path.exists(SCONS_LOCAL_LOG) and not os.path.exists(SCONS_CONFIGURE_CACHE) \
   and ('-c' in command_line_args or '--clean' in command_line_args):
-    print 'all good: nothing to clean, but you might want to run "make distclean"'
+    print('all good: nothing to clean, but you might want to run "make distclean"')
     Exit(0)
 
 # initially populate environment with defaults and any possible custom arguments
@@ -536,7 +536,7 @@ if not force_configure:
 # rebuilds, e.g. for folks following trunk
 for opt in pickle_store:
     if not opt in env:
-        #print 'missing opt', opt
+        #print('missing opt', opt)
         preconfigured = False
 
 # if custom arguments are supplied make sure to accept them
@@ -624,7 +624,7 @@ def parse_config(context, config, checks='--libs --cflags'):
             parsed = True
         except OSError, e:
             ret = False
-            print ' (xml2-config not found!)'
+            print(' (xml2-config not found!)')
     if not parsed:
         if config in ('GDAL_CONFIG'):
             # optional deps...
@@ -660,7 +660,7 @@ def get_pkg_lib(context, config, lib):
                 libname = 'gdal'
         except Exception, e:
             ret = False
-            print ' unable to determine library name:'# %s' % str(e)
+            print(' unable to determine library name:\'# %s' % str(e))
             return None
     context.Result( libname )
     return libname
@@ -1237,7 +1237,7 @@ if not preconfigured:
                     opts.files.append(conf)
                     color_print(4,"SCons CONFIG found: '%s', variables will be inherited..." % conf)
                     optfile = file(conf)
-                    #print optfile.read().replace("\n", " ").replace("'","").replace(" = ","=")
+                    #print(optfile.read().replace("\n", " ").replace("'","").replace(" = ","="))
                     optfile.close()
 
                 elif not conf == SCONS_LOCAL_CONFIG:
@@ -1793,7 +1793,7 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairo')
             else:
-                print 'Checking for cairo lib and include paths... ',
+                print('Checking for cairo lib and include paths... ',)
                 cmd = 'pkg-config --libs --cflags cairo'
                 if env['RUNTIME_LINK'] == 'static':
                     cmd += ' --static'
@@ -1810,7 +1810,7 @@ if not preconfigured:
                         if not inc in env['CPPPATH']:
                             env["CAIRO_CPPPATHS"].append(inc)
                     env['HAS_CAIRO'] = True
-                    print 'yes'
+                    print('yes')
                 except OSError,e:
                     color_print(1,'no')
                     env['SKIPPED_DEPS'].append('cairo')
