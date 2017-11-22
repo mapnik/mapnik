@@ -264,7 +264,7 @@ def tee_to_file(command, log):
     return '%s 2>&1 | tee %s' % (command, log)
 
 
-    
+
 class SConsTimer(object):
     """
     Usage: scons-time SUBCOMMAND [ARGUMENTS]
@@ -360,7 +360,7 @@ class SConsTimer(object):
         'SCons'         : 'Total SCons execution time',
         'commands'      : 'Total command execution time',
     }
-    
+
     time_string_all = 'Total .* time'
 
     #
