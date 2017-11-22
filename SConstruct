@@ -16,6 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from __future__ import print_function # support python2
 
 import os
 import sys
@@ -146,13 +147,13 @@ def color_print(color,text,newline=True):
     # 4 - blue
     text = "\033[9%sm%s\033[0m" % (color,text)
     if not newline:
-        print(text, end=" ")
+        print (text, end='')
     else:
         print (text)
 
 def regular_print(color,text,newline=True):
     if not newline:
-        print (text, end = " ")
+        print (text, end = '')
     else:
         print (text)
 
@@ -1793,7 +1794,7 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairo')
             else:
-                print ('Checking for cairo lib and include paths... ', end=" ")
+                print ('Checking for cairo lib and include paths... ', end = '')
                 cmd = 'pkg-config --libs --cflags cairo'
                 if env['RUNTIME_LINK'] == 'static':
                     cmd += ' --static'
