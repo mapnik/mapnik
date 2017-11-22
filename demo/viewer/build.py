@@ -43,5 +43,5 @@ ini = ini_template % locals()
 open('viewer.ini','w').write(ini)
 
 try:
-    os.chmod('viewer.ini',0666)
+    os.chmod('viewer.ini',0o666)
 except: pass
