@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2015 Artem Pavlenko
+# Copyright (C) 2017 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -287,17 +287,17 @@ if env['PLUGIN_LINKING'] == 'static':
                 lib_env.Append(CPPDEFINES = DEF)
                 if DEF not in libmapnik_defines:
                     libmapnik_defines.append(DEF)
-                if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
+                if 'SOURCES' in plugin_env and plugin_env['SOURCES']:
                     source += ['../plugins/input/%s/%s' % (plugin, src) for src in plugin_env['SOURCES']]
-                if plugin_env.has_key('CPPDEFINES') and plugin_env['CPPDEFINES']:
+                if 'CPPDEFINES' in plugin_env  and plugin_env['CPPDEFINES']:
                     lib_env.AppendUnique(CPPDEFINES=plugin_env['CPPDEFINES'])
-                if plugin_env.has_key('CXXFLAGS') and plugin_env['CXXFLAGS']:
+                if 'CXXFLAGS' in plugin_env and plugin_env['CXXFLAGS']:
                     lib_env.AppendUnique(CXXFLAGS=plugin_env['CXXFLAGS'])
-                if plugin_env.has_key('LINKFLAGS') and plugin_env['LINKFLAGS']:
+                if 'LINKFLAGS' in plugin_env and plugin_env['LINKFLAGS']:
                     lib_env.AppendUnique(LINKFLAGS=plugin_env['LINKFLAGS'])
-                if plugin_env.has_key('CPPPATH') and plugin_env['CPPPATH']:
+                if 'CPPPATH' in plugin_env and plugin_env['CPPPATH']:
                     lib_env.AppendUnique(CPPPATH=copy(plugin_env['CPPPATH']))
-                if plugin_env.has_key('LIBS') and plugin_env['LIBS']:
+                if 'LIBS' in plugin_env and plugin_env['LIBS']:
                     lib_env.AppendUnique(LIBS=plugin_env['LIBS'])
         else:
             print("Notice: dependencies not met for plugin '%s', not building..." % plugin)
