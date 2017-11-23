@@ -246,7 +246,7 @@ def sort_paths(items,priority):
             path_types['other'].append(i)
     # build up new list based on priority list
     for path in priority:
-        if path_types.has_key(path):
+        if path in path_types:
             dirs = path_types[path]
             new.extend(dirs)
             path_types.pop(path)
@@ -554,7 +554,7 @@ elif preconfigured:
         color_print(4,'Using previous successful configuration...')
         color_print(4,'Re-configure by running "python scons/scons.py configure".')
 
-if env.has_key('COLOR_PRINT') and env['COLOR_PRINT'] == False:
+if 'COLOR_PRINT' in env and env['COLOR_PRINT'] == False:
     color_print = regular_print
 
 if sys.platform == "win32":
@@ -564,13 +564,13 @@ color_print(4,'\nWelcome to Mapnik...\n')
 
 #### Custom Configure Checks ###
 
-def prioritize_paths(context,silent=True):
+def prioritize_paths(context, silent=True):
     env = context.env
     prefs = env['LINK_PRIORITY'].split(',')
     if not silent:
         context.Message( 'Sorting lib and inc compiler paths...')
-    env['LIBPATH'] = sort_paths(env['LIBPATH'],prefs)
-    env['CPPPATH'] = sort_paths(env['CPPPATH'],prefs)
+    env['LIBPATH'] = sort_paths(env['LIBPATH'], prefs)
+    env['CPPPATH'] = sort_paths(env['CPPPATH'], prefs)
     if silent:
         context.did_show_result=1
     ret = context.Result( True )
@@ -1482,7 +1482,7 @@ if not preconfigured:
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
-        pass#conf.prioritize_paths(silent=True)
+        conf.prioritize_paths(silent=True)
 
     # test for C++14 support, which is required
     if not env['HOST'] and not conf.supports_cxx14():
@@ -1540,7 +1540,7 @@ if not preconfigured:
 
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
         if env['PRIORITIZE_LINKING']:
-            pass#conf.prioritize_paths(silent=True)
+            conf.prioritize_paths(silent=True)
 
         if not env['HOST']:
             # if the user is not setting custom boost configuration
@@ -1962,7 +1962,7 @@ if not preconfigured:
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
         if env['PRIORITIZE_LINKING']:
-            pass#conf.prioritize_paths(silent=True)
+            conf.prioritize_paths(silent=True)
 
         # finish config stage and pickle results
         env = conf.Finish()
