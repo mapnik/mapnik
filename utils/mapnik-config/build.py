@@ -43,7 +43,7 @@ def GetMapnikLibVersion():
     return version_string
 
 if (GetMapnikLibVersion() != config_env['MAPNIK_VERSION_STRING']):
-    print 'Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING'])
+    print ('Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING']))
     Exit(1)
 
 config_variables = '''#!/usr/bin/env bash
@@ -77,7 +77,7 @@ def write_config(configuration,template,config_file):
     template = open(template,'r').read()
     open(config_file,'w').write(config_variables  % configuration + template)
     try:
-        os.chmod(config_file,0755)
+        os.chmod(config_file, 0o755)
     except: pass
 
 
@@ -183,7 +183,7 @@ if 'install' in COMMAND_LINE_TARGETS:
     env.Command(full_target, config_file,
        [
        Copy("$TARGET","$SOURCE"),
-       Chmod("$TARGET", 0755),
+       Chmod("$TARGET", 0o755),
        ])
 
 config_env['create_uninstall_target'](env,os.path.join(target_path,config_file))

@@ -9,7 +9,7 @@
 #
 
 #
-# Copyright (c) 2001 - 2016 The SCons Foundation
+# Copyright (c) 2001 - 2017 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -29,10 +29,9 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from __future__ import division
-from __future__ import nested_scopes
+from __future__ import division, print_function
 
-__revision__ = "src/script/scons-time.py rel_2.5.1:3735:9dc6cee5c168 2016/11/03 14:02:02 bdbaddog"
+__revision__ = "src/script/scons-time.py 74b2c53bc42290e911b334a6b44f187da698a668 2017/11/14 13:16:53 bdbaddog"
 
 import getopt
 import glob
@@ -66,8 +65,8 @@ def HACK_for_exec(cmd, *args):
     internal functions.
     '''
     if not args:          exec(cmd)
-    elif len(args) == 1:  exec cmd in args[0]
-    else:                 exec cmd in args[0], args[1]
+    elif len(args) == 1:  exec(cmd, args[0])
+    else:                 exec(cmd, args[0], args[1])
 
 class Plotter(object):
     def increment_size(self, largest):
@@ -103,7 +102,7 @@ class Line(object):
 
     def print_label(self, inx, x, y):
         if self.label:
-            print 'set label %s "%s" at %s,%s right' % (inx, self.label, x, y)
+            print('set label %s "%s" at %0.1f,%0.1f right' % (inx, self.label, x, y))
 
     def plot_string(self):
         if self.title:
@@ -116,15 +115,15 @@ class Line(object):
         if fmt is None:
             fmt = self.fmt
         if self.comment:
-            print '# %s' % self.comment
+            print('# %s' % self.comment)
         for x, y in self.points:
             # If y is None, it usually represents some kind of break
             # in the line's index number.  We might want to represent
             # this some way rather than just drawing the line straight
             # between the two points on either side.
             if not y is None:
-                print fmt % (x, y)
-        print 'e'
+                print(fmt % (x, y))
+        print('e')
 
     def get_x_values(self):
         return [ p[0] for p in self.points ]
@@ -210,8 +209,8 @@ class Gnuplotter(Plotter):
             return
 
         if self.title:
-            print 'set title "%s"' % self.title
-        print 'set key %s' % self.key_location
+            print('set title "%s"' % self.title)
+        print('set key %s' % self.key_location)
 
         min_y = self.get_min_y()
         max_y = self.max_graph_value(self.get_max_y())
@@ -226,7 +225,7 @@ class Gnuplotter(Plotter):
             inx += 1
 
         plot_strings = [ self.plot_string(l) for l in self.lines ]
-        print 'plot ' + ', \\\n     '.join(plot_strings)
+        print('plot ' + ', \\\n     '.join(plot_strings))
 
         for line in self.lines:
             line.print_points()
@@ -249,7 +248,7 @@ def unzip(fname):
             os.makedirs(dir)
         except:
             pass
-        open(name, 'w').write(zf.read(name))
+        open(name, 'wb').write(zf.read(name))
 
 def read_tree(dir):
     for dirpath, dirnames, filenames in os.walk(dir):
@@ -460,7 +459,9 @@ class SConsTimer(object):
         output = os.popen(command).read()
         if self.verbose:
             sys.stdout.write(output)
-        open(log, 'wb').write(output)
+        # TODO: Figure out
+        # Not sure we need to write binary here
+        open(log, 'w').write(output)
 
     #
 
@@ -497,7 +498,7 @@ class SConsTimer(object):
         header_fmt = ' '.join(['%12s'] * len(columns))
         line_fmt = header_fmt + '    %s'
 
-        print header_fmt % columns
+        print(header_fmt % columns)
 
         for file in files:
             t = line_function(file, *args, **kw)
@@ -507,7 +508,7 @@ class SConsTimer(object):
             if diff > 0:
                 t += [''] * diff
             t.append(file_function(file))
-            print line_fmt % tuple(t)
+            print(line_fmt % tuple(t))
 
     def collect_results(self, files, function, *args, **kw):
         results = {}
@@ -647,7 +648,7 @@ class SConsTimer(object):
         """
         try:
             import pstats
-        except ImportError, e:
+        except ImportError as e:
             sys.stderr.write('%s: func: %s\n' % (self.name, e))
             sys.stderr.write('%s  This version of Python is missing the profiler.\n' % self.name_spaces)
             sys.stderr.write('%s  Cannot use the "func" subcommand.\n' % self.name_spaces)
@@ -708,7 +709,7 @@ class SConsTimer(object):
             return self.default(argv)
         try:
             return func(argv)
-        except TypeError, e:
+        except TypeError as e:
             sys.stderr.write("%s %s: %s\n" % (self.name, cmdName, e))
             import traceback
             traceback.print_exc(file=sys.stderr)
@@ -813,7 +814,7 @@ class SConsTimer(object):
                 self.title = a
 
         if self.config_file:
-            exec open(self.config_file, 'rU').read() in self.__dict__
+            exec(open(self.config_file, 'r').read(), self.__dict__)
 
         if self.chdir:
             os.chdir(self.chdir)
@@ -846,13 +847,13 @@ class SConsTimer(object):
                 try:
                     f, line, func, time = \
                             self.get_function_profile(file, function_name)
-                except ValueError, e:
+                except ValueError as e:
                     sys.stderr.write("%s: func: %s: %s\n" %
                                      (self.name, file, e))
                 else:
                     if f.startswith(cwd_):
                         f = f[len(cwd_):]
-                    print "%.3f %s:%d(%s)" % (time, f, line, func)
+                    print("%.3f %s:%d(%s)" % (time, f, line, func))
 
         elif format == 'gnuplot':
 
@@ -932,7 +933,7 @@ class SConsTimer(object):
                 self.title = a
 
         if self.config_file:
-            HACK_for_exec(open(self.config_file, 'rU').read(), self.__dict__)
+            HACK_for_exec(open(self.config_file, 'r').read(), self.__dict__)
 
         if self.chdir:
             os.chdir(self.chdir)
@@ -1052,7 +1053,7 @@ class SConsTimer(object):
         object_name = args.pop(0)
 
         if self.config_file:
-            HACK_for_exec(open(self.config_file, 'rU').read(), self.__dict__)
+            HACK_for_exec(open(self.config_file, 'r').read(), self.__dict__)
 
         if self.chdir:
             os.chdir(self.chdir)
@@ -1190,7 +1191,7 @@ class SConsTimer(object):
             sys.exit(1)
 
         if self.config_file:
-            exec open(self.config_file, 'rU').read() in self.__dict__
+            exec(open(self.config_file, 'r').read(), self.__dict__)
 
         if args:
             self.archive_list = args
@@ -1423,14 +1424,14 @@ class SConsTimer(object):
             elif o in ('--title',):
                 self.title = a
             elif o in ('--which',):
-                if not a in self.time_strings.keys():
+                if not a in list(self.time_strings.keys()):
                     sys.stderr.write('%s: time: Unrecognized timer "%s".\n' % (self.name, a))
                     sys.stderr.write('%s  Type "%s help time" for help.\n' % (self.name_spaces, self.name))
                     sys.exit(1)
                 which = a
 
         if self.config_file:
-            HACK_for_exec(open(self.config_file, 'rU').read(), self.__dict__)
+            HACK_for_exec(open(self.config_file, 'r').read(), self.__dict__)
 
         if self.chdir:
             os.chdir(self.chdir)
