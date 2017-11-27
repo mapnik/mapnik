@@ -33,7 +33,7 @@ matrix:
     - os: linux
       sudo: false
       compiler: ": clang"
-      env: JOBS=8 CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" ENABLE_GLIBC_WORKAROUND=True TRIGGER=true
+      env: JOBS=8 CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" ENABLE_GLIBC_WORKAROUND=true TRIGGER=true
       addons:
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
@@ -98,7 +98,7 @@ before_script:
 
 script:
  - export SCONSFLAGS='--debug=time'
- - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-False}
+ - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false}
  - cat config.log
  # we limit the `make` to 40 min
  # to ensure that slow builds still upload their
