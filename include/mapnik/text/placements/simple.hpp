@@ -33,7 +33,7 @@ class feature_impl;
 struct attribute;
 
 // Automatically generates placement options from a user selected list of directions and text sizes.
-class text_placements_simple: public text_placements
+class MAPNIK_DECL text_placements_simple: public text_placements
 {
 public:
     text_placements_simple(symbolizer_base::value_type const& positions);
@@ -53,7 +53,7 @@ private:
 
 // Simple placement strategy.
 // See parent class for documentation of each function.
-class text_placement_info_simple : public text_placement_info
+class MAPNIK_DECL text_placement_info_simple : public text_placement_info
 {
 public:
     text_placement_info_simple(text_placements_simple const* parent,
