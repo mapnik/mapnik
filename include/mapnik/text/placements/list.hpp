@@ -30,7 +30,7 @@ class feature_impl;
 struct attribute;
 
 // Tries a list of placements.
-class text_placements_list: public text_placements
+class MAPNIK_DECL text_placements_list: public text_placements
 {
 public:
     text_placements_list();
@@ -47,7 +47,7 @@ private:
 
 // List placement strategy.
 // See parent class for documentation of each function.
-class text_placement_info_list : public text_placement_info
+class MAPNIK_DECL text_placement_info_list : public text_placement_info
 {
 public:
     text_placement_info_list(text_placements_list const* parent, double _scale_factor) :
