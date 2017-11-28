@@ -28,7 +28,6 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/geometry_types.hpp>
-#include <mapnik/geometry.hpp>
 // stl
 #include <cmath>
 #include <vector>
