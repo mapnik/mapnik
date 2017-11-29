@@ -31,6 +31,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/geometry/centroid.hpp>
+#include <mapnik/geometry/interior.hpp>
 #include <mapnik/geometry/polylabel.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/geom_util.hpp>
@@ -302,11 +303,8 @@ void base_symbolizer_helper::initialize_points() const
                 geometry::polygon<double> tranformed_poly(geometry::transform<double>(poly, transform_group));
                 if (how_placed == INTERIOR_PLACEMENT)
                 {
-                    geometry::polygon_vertex_adapter<double> va(tranformed_poly);
-                    if (label::interior_position(va, label_x, label_y))
-                    {
-                        points_.emplace_back(label_x, label_y);
-                    }
+                    geometry::point<double> pt = geometry::interior(tranformed_poly, scale_factor_);
+                    points_.emplace_back(pt.x, pt.y);
                 }
                 else if (how_placed == POLYLABEL_PLACEMENT)
                 {
