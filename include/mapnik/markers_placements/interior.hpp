@@ -26,6 +26,8 @@
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/interior.hpp>
+#include <mapnik/geometry/polygon_vertex_processor.hpp>
 
 namespace mapnik {
 
@@ -58,11 +60,13 @@ public:
         }
         else
         {
-            if (!label::interior_position(this->locator_, x, y))
-            {
-                this->done_ = true;
-                return false;
-            }
+            geometry::polygon_vertex_processor<double> vertex_processor;
+            vertex_processor.add_path(this->locator_);
+            geometry::point<double> placement = geometry::interior(vertex_processor.polygon_,
+                                                                   this->params_.scale_factor);
+
+            x = placement.x;
+            y = placement.y;
         }
 
         angle = 0;
