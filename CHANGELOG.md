@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.17
 
-Released: November xx, 2017
+Released: November 29, 2017
 
-(Packaged from xxxxxxx)
+(Packaged from ebdd96c61)
 
     - Use `Scons 3` as an internal build sytsem + support both Python 2 and 3.
     - Added glibcxx workaround to support libstdc++-4.8
