@@ -6,6 +6,15 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.18
+
+Released: xxxxxx XX, 201X
+
+(Packaged from xxxxxxxxx)
+
+    - SVG parser - fixed logic for calculating dimensions when `width` and `height` expressed in
+      percentage units (#3812)
+
 ## 3.0.17
 
 Released: November 29, 2017
