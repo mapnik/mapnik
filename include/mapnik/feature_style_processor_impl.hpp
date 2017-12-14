@@ -45,6 +45,7 @@
 #include <mapnik/util/featureset_buffer.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/symbolizer_dispatch.hpp>
+#include <mapnik/performance_stats.hpp>
 
 // stl
 #include <vector>
@@ -87,6 +88,7 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 template <typename Processor>
 void feature_style_processor<Processor>::apply(double scale_denom)
 {
+    mapnik::stats_timer __stats__("total_map_rendering");
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
 
