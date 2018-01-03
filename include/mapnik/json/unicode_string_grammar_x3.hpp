@@ -32,8 +32,7 @@
 namespace mapnik { namespace json { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-class unicode_string_tag;
-using unicode_string_grammar_type = x3::rule<unicode_string_tag, std::string>;
+using unicode_string_grammar_type = x3::rule<class unicode_string_tag, std::string>;
 
 BOOST_SPIRIT_DECLARE(unicode_string_grammar_type);
 
