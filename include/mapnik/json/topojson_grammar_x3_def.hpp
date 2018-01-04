@@ -304,7 +304,7 @@ struct topojson_geometry_type_ : x3::symbols<int>
 } topojson_geometry_type;
 
 // start rule
-topojson_grammar_type const topology = "Topology";
+topojson_grammar_type const topology __attribute__((init_priority(104))) ("Topology");
 // rules
 x3::rule<class transform_tag, mapnik::topojson::transform> const transform = "Transform";
 x3::rule<class bbox_tag, mapnik::topojson::bounding_box> const bbox = "Bounding Box";
@@ -373,7 +373,7 @@ auto const geometry_tuple_def =
      |
      properties[assign_properties]
      |
-     (omit[json_string] > lit(':') > omit[json_value])) % lit(',')
+     omit[json_string] > lit(':') > omit[json_value]) % lit(',')
     ;
 
 auto const geometry_def = lit("{") > geometry_tuple[create_geometry] > lit("}");

@@ -42,7 +42,7 @@ auto assign_helper = [](auto const& ctx)
 } // anonymous ns
 
 // start rule
-positions_grammar_type const positions("Positions");
+positions_grammar_type const positions __attribute__((init_priority(103))) ("Positions");
 // rules
 x3::rule<class point_class, point> const point("Position");
 x3::rule<class ring_class, ring> const ring("Ring");
