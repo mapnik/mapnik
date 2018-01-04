@@ -109,7 +109,7 @@ x3::uint_parser<std::uint16_t, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
 // start rule
-unicode_string_grammar_type const unicode_string("Unicode String");
+unicode_string_grammar_type const unicode_string __attribute__((init_priority(101))) ("Unicode String");
 // rules
 x3::rule<class double_quoted_tag, std::string> const double_quoted("Double-quoted string");
 x3::rule<class escaped_tag, std::string> const escaped("Escaped Character");
