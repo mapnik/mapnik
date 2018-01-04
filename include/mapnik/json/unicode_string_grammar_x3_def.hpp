@@ -24,6 +24,7 @@
 #define MAPNIK_JSON_UNICODE_STRING_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
+#include <mapnik/init_priority.hpp>
 // boost
 #include <boost/regex/pending/unicode_iterator.hpp>
 //
@@ -109,7 +110,7 @@ x3::uint_parser<std::uint16_t, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
 // start rule
-unicode_string_grammar_type const unicode_string __attribute__((init_priority(101))) ("Unicode String");
+unicode_string_grammar_type const unicode_string MAPNIK_INIT_PRIORITY(101) ("Unicode String");
 // rules
 x3::rule<class double_quoted_tag, std::string> const double_quoted("Double-quoted string");
 x3::rule<class escaped_tag, std::string> const escaped("Escaped Character");
