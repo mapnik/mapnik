@@ -26,6 +26,8 @@
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/generic_json_grammar_x3.hpp>
 #include <mapnik/json/topojson_grammar_x3.hpp>
+#include <mapnik/init_priority.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/adapted/struct.hpp>
@@ -304,7 +306,7 @@ struct topojson_geometry_type_ : x3::symbols<int>
 } topojson_geometry_type;
 
 // start rule
-topojson_grammar_type const topology __attribute__((init_priority(104))) ("Topology");
+topojson_grammar_type const topology MAPNIK_INIT_PRIORITY(104) ("Topology");
 // rules
 x3::rule<class transform_tag, mapnik::topojson::transform> const transform = "Transform";
 x3::rule<class bbox_tag, mapnik::topojson::bounding_box> const bbox = "Bounding Box";

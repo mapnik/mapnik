@@ -23,10 +23,11 @@
 #ifndef MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP
 
-
 #include <mapnik/json/geojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
+#include <mapnik/init_priority.hpp>
+
 #include <boost/fusion/include/std_pair.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
@@ -89,8 +90,8 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 
 // exported rules
 // start
-geojson_grammar_type const value  __attribute__((init_priority(106))) ("JSON Value");
-key_value_type const key_value  __attribute__((init_priority(107))) ("JSON key/value");
+geojson_grammar_type const value MAPNIK_INIT_PRIORITY(106) ("JSON Value");
+key_value_type const key_value MAPNIK_INIT_PRIORITY(107) ("JSON key/value");
 // rules
 x3::rule<class json_object_tag, geojson_object> const object("JSON Object");
 x3::rule<class json_array_tag, geojson_array> const array("JSON Array");
