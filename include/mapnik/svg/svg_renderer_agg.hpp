@@ -103,7 +103,7 @@ private:
 };
 
 template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
-class svg_renderer_agg : util::noncopyable
+class renderer_agg : util::noncopyable
 {
 public:
     using curved_type = agg::conv_curve<VertexSource>;
@@ -122,7 +122,7 @@ public:
     using vertex_source_type = VertexSource;
     using attribute_source_type = AttributeSource;
 
-    svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
+    renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
           curved_(source_),
           curved_dashed_(curved_),
