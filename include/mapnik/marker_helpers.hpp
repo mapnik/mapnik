@@ -29,7 +29,7 @@
 #include <mapnik/geometry/centroid.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/marker.hpp> // for svg_storage_type
+#include <mapnik/marker.hpp> // svg_attribute_type, svg_storage_type
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/geometry/box2d.hpp>
