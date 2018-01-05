@@ -108,7 +108,6 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                               feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    using namespace mapnik::svg;
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;
     using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
@@ -116,11 +115,10 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-    using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
-                                               svg_attribute_type,
-                                               renderer_type,
-                                               pixfmt_comp_type>;
-
+    using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                svg_attribute_type,
+                                                renderer_type,
+                                                pixfmt_comp_type>;
     ras_ptr->reset();
 
     double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);

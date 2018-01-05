@@ -94,7 +94,7 @@ bool push_explicit_style(svg_attribute_type const& src,
         for(unsigned i = 0; i < src.size(); ++i)
         {
             dst.push_back(src[i]);
-            mapnik::svg::path_attributes & attr = dst.last();
+            mapnik::svg::path_attributes & attr = dst.back();
             if (!attr.visibility_flag)
                 continue;
             success = true;

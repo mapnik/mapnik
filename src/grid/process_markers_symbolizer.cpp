@@ -141,12 +141,10 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     using buf_type = grid_rendering_buffer;
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-
-    using namespace mapnik::svg;
-    using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
-                                               svg_attribute_type,
-                                               renderer_type,
-                                               pixfmt_type>;
+    using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                svg_attribute_type,
+                                                renderer_type,
+                                                pixfmt_type>;
 
     buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     ras_ptr->reset();
