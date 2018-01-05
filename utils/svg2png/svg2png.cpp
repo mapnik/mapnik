@@ -84,8 +84,9 @@ struct main_marker_visitor
         agg::trans_affine mtx = {};
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
-        mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
-            agg::pod_bvector<mapnik::svg::path_attributes>,
+        mapnik::svg::renderer_agg<
+            mapnik::svg_path_adapter,
+            mapnik::svg_attribute_type,
             renderer_solid,
             agg::pixfmt_rgba32_pre > svg_renderer_this(svg_path,
                                                        marker.get_data()->attributes());
