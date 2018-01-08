@@ -250,7 +250,7 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars,
                 converter.apply(va, proc);
             }
         }
-        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
+        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT || placement == MARKER_POLYLABEL_PLACEMENT) &&
                  multi_policy == MARKER_LARGEST_MULTI)
         {
             // Only apply to path with largest envelope area
