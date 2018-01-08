@@ -23,7 +23,7 @@ SECTION("empty geometry") {
     mapnik::markers_placement_params params {
         mapnik::box2d<double>(0, 0, 10, 10),
         agg::trans_affine(),
-        0, 0, false, false, DIRECTION_AUTO };
+        0, 0, false, false, DIRECTION_AUTO, 1.0 };
 
     placement_type placement(va, detector, params);
 
@@ -45,7 +45,7 @@ SECTION("point") {
     mapnik::markers_placement_params params {
         mapnik::box2d<double>(0, 0, 10, 10),
         agg::trans_affine(),
-        0, 0, false, false, DIRECTION_AUTO };
+        0, 0, false, false, DIRECTION_AUTO, 1.0 };
 
     placement_type placement(va, detector, params);
 
@@ -75,7 +75,7 @@ SECTION("line string") {
     mapnik::markers_placement_params params {
         mapnik::box2d<double>(0, 0, 10, 10),
         agg::trans_affine(),
-        0, 0, false, false, DIRECTION_AUTO };
+        0, 0, false, false, DIRECTION_AUTO, 1.0 };
 
     placement_type placement(va, detector, params);
 
@@ -109,7 +109,7 @@ SECTION("polygon") {
     mapnik::markers_placement_params params {
         mapnik::box2d<double>(0, 0, 10, 10),
         agg::trans_affine(),
-        0, 0, false, false, DIRECTION_AUTO };
+        0, 0, false, false, DIRECTION_AUTO, 1.0 };
 
     placement_type placement(va, detector, params);
 
