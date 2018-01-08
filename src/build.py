@@ -173,6 +173,8 @@ source = Split(
     geometry/closest_point.cpp
     geometry/reprojection.cpp
     geometry/envelope.cpp
+    geometry/interior.cpp
+    geometry/polylabel.cpp
     expression_node.cpp
     expression_string.cpp
     expression.cpp
