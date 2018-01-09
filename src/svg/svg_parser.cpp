@@ -368,6 +368,7 @@ bool parse_id_from_url (char const* str, std::string & id)
 
 void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
+    if (parser.ignore_) return;
     auto const* name = node->name();
     switch (node->type())
     {
@@ -381,6 +382,11 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             {
                 parser.is_defs_ = true;
             }
+            break;
+        }
+        case "clipPath"_case:
+        {
+            parser.ignore_ = true;
             break;
         }
         // the gradient tags *should* be in defs, but illustrator seems not to put them in there so
@@ -467,20 +473,24 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
 void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    auto const* name = node->name();
-    if (!parser.is_defs_ && std::strcmp(name, "g") == 0)
+    auto name = name_to_int(node->name());
+    if (!parser.is_defs_ && (name == "g"_case))
     {
         if (node->first_node() != nullptr)
         {
             parser.path_.pop_attr();
         }
     }
-    else if (std::strcmp(name,  "defs") == 0)
+    else if (name == "defs"_case)
     {
         if (node->first_node() != nullptr)
         {
             parser.is_defs_ = false;
         }
+    }
+    else if(name == "clipPath"_case)
+    {
+        parser.ignore_ = false;
     }
 }
 
@@ -1414,6 +1424,7 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
 svg_parser::svg_parser(svg_converter_type & path, bool strict)
     : path_(path),
       is_defs_(false),
+      ignore_(false),
       err_handler_(strict) {}
 
 svg_parser::~svg_parser() {}
