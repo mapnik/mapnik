@@ -833,4 +833,18 @@ TEST_CASE("SVG parser") {
         REQUIRE(y2 == 0.10);
         REQUIRE(r == 0.75);
     }
+
+    SECTION("SVG <clipPath>")
+    {
+        std::string svg_name("./test/data/svg/clippath.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+
+        // Check whether the clipPath doesn't add to the bounding box.
+        auto bbox = svg.bounding_box();
+        CHECK(bbox.width() == Approx(100));
+        CHECK(bbox.height() == Approx(100));
+    }
 }
