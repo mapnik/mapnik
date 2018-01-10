@@ -35,8 +35,8 @@ protected:
 public:
     test_case(mapnik::parameters const& params)
        : params_(params),
-         threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads",0))),
-         iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations",0)))
+         threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads", 0))),
+         iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations", 0)))
          {}
     std::size_t threads() const
     {
@@ -240,7 +240,7 @@ int run(T const& test_runner, std::string const& name)
         big_number_fmt ips(5, total_iters / seconds<double>(elapsed_nonzero).count());
 
         std::snprintf(msg, sizeof(msg),
-                "%-43s %3zu threads %*.0f%s iters %6.0f milliseconds %*.0f%s i/s\n",
+                "%-43s %3zu thread(s) %*.0f%s iters %6.0f milliseconds %*.0f%s i/s\n",
                 name.c_str(),
                 num_threads,
                 itersf.w, itersf.v, itersf.u,
