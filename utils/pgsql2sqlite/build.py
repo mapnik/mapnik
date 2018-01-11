@@ -46,7 +46,7 @@ if env['RUNTIME_LINK'] == 'static':
     cmd = 'pkg-config libpq --libs --static'
     try:
         program_env.ParseConfig(cmd)
-    except OSError, e:
+    except OSError as e:
         program_env.Append(LIBS='pq')
 else:
     program_env.Append(LIBS='pq')
