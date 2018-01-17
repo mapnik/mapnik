@@ -24,6 +24,7 @@
 #define MAPNIK_GEOMETRY_POLYGON_VERTEX_PROCESSOR_HPP
 
 // geometry
+#include <mapnik/geometry/point.hpp>
 #include <mapnik/geometry/polygon.hpp>
 
 namespace mapnik { namespace geometry {
@@ -46,7 +47,10 @@ struct polygon_vertex_processor
                     ring.emplace_back(p);
                     break;
                 case SEG_CLOSE:
-                    ring.emplace_back(ring.front());
+                    if (!ring.empty())
+                    {
+                        ring.emplace_back(ring.front());
+                    }
                     polygon_.emplace_back(std::move(ring));
                     ring = linear_ring<T>();
                     break;
