@@ -47,7 +47,10 @@ struct polygon_vertex_processor
                     ring.emplace_back(p);
                     break;
                 case SEG_CLOSE:
-                    ring.emplace_back(ring.front());
+                    if (!ring.empty())
+                    {
+                        ring.emplace_back(ring.front());
+                    }
                     if (exterior)
                     {
                         polygon_.exterior_ring = std::move(ring);
