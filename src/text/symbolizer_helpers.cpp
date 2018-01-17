@@ -312,8 +312,11 @@ void base_symbolizer_helper::initialize_points() const
                 else if (how_placed == POLYLABEL_PLACEMENT)
                 {
                     double precision = geometry::polylabel_precision(tranformed_poly, scale_factor_);
-                    geometry::point<double> pt = geometry::polylabel(tranformed_poly, precision);
-                    points_.emplace_back(pt.x, pt.y);
+                    geometry::point<double> pt;
+                    if (geometry::polylabel(tranformed_poly, precision, pt))
+                    {
+                        points_.emplace_back(pt.x, pt.y);
+                    }
                 }
                 continue;
             }
