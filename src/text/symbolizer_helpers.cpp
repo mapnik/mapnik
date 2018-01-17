@@ -300,8 +300,11 @@ void base_symbolizer_helper::initialize_points() const
                 using transform_group_type = geometry::strategy_group<proj_strategy, view_strategy>;
                 transform_group_type transform_group(ps, vs);
                 geometry::polygon<double> tranformed_poly(geometry::transform<double>(poly, transform_group));
-                geometry::point<double> pt = geometry::interior(tranformed_poly, scale_factor_);
-                points_.emplace_back(pt.x, pt.y);
+                geometry::point<double> pt;
+                if (geometry::interior(tranformed_poly, scale_factor_, pt))
+                {
+                    points_.emplace_back(pt.x, pt.y);
+                }
                 continue;
             }
             else

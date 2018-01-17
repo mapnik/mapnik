@@ -24,11 +24,14 @@
 #define MAPNIK_GEOMETRY_INTERIOR_HPP
 
 #include <mapnik/geometry.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 namespace mapnik { namespace geometry {
 
 template <class T>
-point<T> interior(polygon<T> const& polygon, double scale_factor);
+MAPNIK_DECL bool interior(polygon<T> const& polygon,
+                          double scale_factor,
+                          point<T> & pt);
 
 } }
 

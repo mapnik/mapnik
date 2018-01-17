@@ -30,6 +30,11 @@
 #include <iostream>
 #include <queue>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
 namespace mapnik { namespace geometry {
 
 // Interior algorithm is realized as a modification of Polylabel algorithm
@@ -148,8 +153,13 @@ struct cell
 };
 
 template <class T>
-point<T> polylabel(const polygon<T>& polygon, T precision = 1)
+boost::optional<point<T>> polylabel(polygon<T> const& polygon, T precision = 1)
 {
+    if (polygon.exterior_ring.empty())
+    {
+        return boost::none;
+    }
+
     // find the bounding box of the outer ring
     const box2d<T> bbox = envelope(polygon.exterior_ring);
     const point<T> size { bbox.width(), bbox.height() };
@@ -167,14 +177,14 @@ point<T> polylabel(const polygon<T>& polygon, T precision = 1)
 
     if (cell_size == 0)
     {
-        return { bbox.minx(), bbox.miny() };
+        return point<T>{ bbox.minx(), bbox.miny() };
     }
 
     point<T> centroid;
     if (!mapnik::geometry::centroid(polygon, centroid))
     {
         auto center = bbox.center();
-        return { center.x, center.y };
+        return point<T>{ center.x, center.y };
     }
 
     fitness_functor<T> fitness_func(centroid, size);
@@ -220,15 +230,21 @@ point<T> polylabel(const polygon<T>& polygon, T precision = 1)
 } // namespace detail
 
 template <class T>
-point<T> interior(polygon<T> const& polygon, double scale_factor)
+bool interior(polygon<T> const& polygon, double scale_factor, point<T> & pt)
 {
     // This precision has been chosen to work well in the map (viewport) coordinates.
     double precision = 10.0 * scale_factor;
-    return detail::polylabel(polygon, precision);
+    if (boost::optional<point<T>> opt = detail::polylabel(polygon, precision))
+    {
+        pt = *opt;
+        return true;
+    }
+
+    return false;
 }
 
 template
-point<double> interior(polygon<double> const& polygon, double scale_factor);
+bool interior(polygon<double> const& polygon, double scale_factor, point<double> & pt);
 
 } }
 

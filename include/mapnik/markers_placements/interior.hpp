@@ -62,8 +62,14 @@ public:
         {
             geometry::polygon_vertex_processor<double> vertex_processor;
             vertex_processor.add_path(this->locator_);
-            geometry::point<double> placement = geometry::interior(vertex_processor.polygon_,
-                                                                   this->params_.scale_factor);
+            geometry::point<double> placement;
+            if (!geometry::interior(vertex_processor.polygon_,
+                                   this->params_.scale_factor,
+                                   placement))
+            {
+                this->done_ = true;
+                return false;
+            }
 
             x = placement.x;
             y = placement.y;
