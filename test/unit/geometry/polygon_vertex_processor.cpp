@@ -40,7 +40,7 @@ SECTION("empty inner ring") {
     proc.add_path(path);
 
     REQUIRE(proc.polygon_.size() == 2);
-    auto outer_ring = proc.polygon_.front();
+    auto const& outer_ring = proc.polygon_.front();
     REQUIRE(outer_ring.size() == 5);
 
     CHECK(outer_ring[0].x == Approx(-1));

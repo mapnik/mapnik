@@ -80,7 +80,7 @@ void render_point_symbolizer(point_symbolizer const &sym,
         else if (type == mapnik::geometry::geometry_types::Polygon)
         {
             auto const& poly = mapnik::util::get<geometry::polygon<double> >(geometry);
-            pt = geometry::interior(poly, common.scale_factor_);
+            if (!geometry::interior(poly, common.scale_factor_, pt)) return;
         }
         else
         {
