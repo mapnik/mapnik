@@ -23,16 +23,20 @@
 #ifndef MAPNIK_GEOMETRY_POLYLABEL_HPP
 #define MAPNIK_GEOMETRY_POLYLABEL_HPP
 
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 #include <mapnik/geometry/polygon.hpp>
 #include <mapnik/geometry/point.hpp>
 
 namespace mapnik { namespace geometry {
 
 template <class T>
-point<T> polylabel(polygon<T> const& polygon, T precision);
+MAPNIK_DECL bool polylabel(polygon<T> const& polygon,
+                           T precision,
+                           point<T> & pt);
 
 template <class T>
-T polylabel_precision(polygon<T> const& polygon, double scale_factor);
+MAPNIK_DECL T polylabel_precision(polygon<T> const& polygon,
+                                  double scale_factor);
 
 } }
 

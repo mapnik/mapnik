@@ -34,16 +34,25 @@ T polylabel_precision(polygon<T> const& polygon, double scale_factor)
 }
 
 template <class T>
-point<T> polylabel(polygon<T> const& polygon, T precision)
+bool polylabel(polygon<T> const& polygon, T precision, point<T> & pt)
 {
-    return mapbox::polylabel(polygon, precision);
+    if (polygon.empty() || polygon.front().empty())
+    {
+        return false;
+    }
+
+    pt = mapbox::polylabel(polygon, precision);
+    return true;
 }
 
 template
-point<double> polylabel(polygon<double> const& polygon, double precision);
+bool polylabel(polygon<double> const& polygon,
+               double precision,
+               point<double> & pt);
 
 template
-double polylabel_precision(polygon<double> const& polygon, double scale_factor);
+double polylabel_precision(polygon<double> const& polygon,
+                           double scale_factor);
 
 } }
 
