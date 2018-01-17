@@ -303,8 +303,11 @@ void base_symbolizer_helper::initialize_points() const
                 geometry::polygon<double> tranformed_poly(geometry::transform<double>(poly, transform_group));
                 if (how_placed == INTERIOR_PLACEMENT)
                 {
-                    geometry::point<double> pt = geometry::interior(tranformed_poly, scale_factor_);
-                    points_.emplace_back(pt.x, pt.y);
+                    geometry::point<double> pt;
+                    if (geometry::interior(tranformed_poly, scale_factor_, pt))
+                    {
+                        points_.emplace_back(pt.x, pt.y);
+                    }
                 }
                 else if (how_placed == POLYLABEL_PLACEMENT)
                 {
