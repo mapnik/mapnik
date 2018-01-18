@@ -548,25 +548,13 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     }
     else if (cache_features)
     {
-        std::shared_ptr<featureset_buffer> cache = std::make_shared<featureset_buffer>();
-        featureset_ptr features = *featureset_ptr_list.begin();
-        if (features)
-        {
-            // Cache all features into the memory_datasource before rendering.
-            feature_ptr feature;
-            while ((feature = features->next()))
-            {
-
-                cache->push(feature);
-            }
-        }
+        featureset_ptr features = *featureset_ptr_list.cbegin();
         std::size_t i = 0;
         for (feature_type_style const* style : active_styles)
         {
-            cache->prepare();
             render_style(p, style,
                          rule_caches[i],
-                         cache, prj_trans);
+                         features, prj_trans);
             ++i;
         }
     }
