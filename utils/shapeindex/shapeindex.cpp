@@ -40,7 +40,12 @@
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;
 
+#ifdef _WINDOWS
+#include <windows.h>
+int main ()
+#else
 int main (int argc,char** argv)
+#endif
 {
     using namespace mapnik;
     namespace po = boost::program_options;
@@ -67,7 +72,15 @@ int main (int argc,char** argv)
         po::positional_options_description p;
         p.add("shape_files",-1);
         po::variables_map vm;
+#ifdef _WINDOWS
+        std::vector<std::string> args;
+        const auto wargs = po::split_winmain(GetCommandLineW());
+        for( auto it = wargs.begin() + 1; it != wargs.end(); ++it )
+            args.push_back(mapnik::utf16_to_utf8(*it));
+        po::store(po::command_line_parser(args).options(desc).positional(p).run(), vm);
+#else
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+#endif
         po::notify(vm);
 
         if (vm.count("version"))
@@ -278,7 +291,11 @@ int main (int argc,char** argv)
         if (count > 0)
         {
             std::clog << " number shapes=" << count << std::endl;
+#ifdef _WINDOWS
+            std::ofstream file(mapnik::utf8_to_utf16(shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
+#else
             std::ofstream file((shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
+#endif
             if (!file)
             {
                 std::clog << "cannot open index file for writing file \""
