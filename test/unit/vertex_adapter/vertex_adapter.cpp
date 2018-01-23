@@ -268,4 +268,70 @@ SECTION("polygon with hole") {
     REQUIRE( y == 0 );
 }
 
+SECTION("polygon with empty exterior ring") {
+    mapnik::geometry::polygon<double> g;
+    g.emplace_back();
+
+    mapnik::geometry::polygon_vertex_adapter<double> va(g);
+    double x,y;
+    unsigned cmd;
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_END );
+    CHECK( x == Approx(0) );
+    CHECK( y == Approx(0) );
+}
+
+SECTION("polygon with empty interior ring") {
+    mapnik::geometry::polygon<double> g;
+    g.emplace_back();
+    g.back().emplace_back(-1, -1);
+    g.back().emplace_back( 1, -1);
+    g.back().emplace_back( 1,  1);
+    g.back().emplace_back(-1,  1);
+    g.back().emplace_back(-1, -1);
+
+    // Emplace empty interior ring
+    g.emplace_back();
+
+    mapnik::geometry::polygon_vertex_adapter<double> va(g);
+    double x,y;
+    unsigned cmd;
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_MOVETO );
+    CHECK( x == Approx(-1) );
+    CHECK( y == Approx(-1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_LINETO );
+    CHECK( x == Approx(1) );
+    CHECK( y == Approx(-1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_LINETO );
+    CHECK( x == Approx(1) );
+    CHECK( y == Approx(1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_LINETO );
+    CHECK( x == Approx(-1) );
+    CHECK( y == Approx(1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_CLOSE );
+    CHECK( x == Approx(0) );
+    CHECK( y == Approx(0) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_CLOSE );
+    CHECK( x == Approx(0) );
+    CHECK( y == Approx(0) );
+
+    cmd = va.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_END );
+    REQUIRE( x == Approx(0) );
+    REQUIRE( y == Approx(0) );
+}
+
 }
