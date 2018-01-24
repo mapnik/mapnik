@@ -59,6 +59,7 @@ private:
                          report_type & report,
                          std::atomic<std::size_t> & fail_limit) const;
     void parse_map_sizes(std::string const & str, std::vector<map_size> & sizes) const;
+    void parse_params(mapnik::parameters const & params, config & cfg) const;
 
     const map_sizes_grammar<std::string::const_iterator> map_sizes_parser_;
     const path_type styles_dir_;

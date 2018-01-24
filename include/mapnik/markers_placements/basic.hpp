@@ -46,6 +46,7 @@ struct markers_placement_params
     bool allow_overlap;
     bool avoid_edges;
     direction_enum direction;
+    double scale_factor;
 };
 
 class markers_basic_placement : util::noncopyable
