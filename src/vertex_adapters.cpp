@@ -146,6 +146,12 @@ unsigned polygon_vertex_adapter<T>::vertex(coord_type * x, coord_type * y) const
     {
         current_index_ = 0;
         end_index_ = poly_.interior_rings[rings_itr_ - 1].size();
+        if (end_index_ == 0)
+        {
+            *x = 0;
+            *y = 0;
+            return mapnik::SEG_CLOSE;
+        }
         point<T> const& coord = poly_.interior_rings[rings_itr_ - 1][current_index_++];
         *x = coord.x;
         *y = coord.y;

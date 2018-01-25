@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/vertex_adapters.hpp>
@@ -265,6 +264,58 @@ SECTION("polygon with hole") {
     REQUIRE( cmd == mapnik::SEG_CLOSE );
     REQUIRE( x == 0 );
     REQUIRE( y == 0 );
+}
+
+SECTION("polygon with empty interior ring") {
+    mapnik::geometry::polygon<double> g;
+    g.exterior_ring.add_coord(-1, -1);
+    g.exterior_ring.add_coord( 1, -1);
+    g.exterior_ring.add_coord( 1,  1);
+    g.exterior_ring.add_coord(-1,  1);
+    g.exterior_ring.add_coord(-1, -1);
+
+    // Emplace empty interior ring
+    mapnik::geometry::linear_ring<double> empty_ring;
+    g.add_hole(std::move(empty_ring));
+
+    mapnik::geometry::polygon_vertex_adapter<double> va(g);
+    double x,y;
+    unsigned cmd;
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_MOVETO );
+    CHECK( x == Approx(-1) );
+    CHECK( y == Approx(-1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_LINETO );
+    CHECK( x == Approx(1) );
+    CHECK( y == Approx(-1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_LINETO );
+    CHECK( x == Approx(1) );
+    CHECK( y == Approx(1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_LINETO );
+    CHECK( x == Approx(-1) );
+    CHECK( y == Approx(1) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_CLOSE );
+    CHECK( x == Approx(0) );
+    CHECK( y == Approx(0) );
+
+    cmd = va.vertex(&x,&y);
+    CHECK( cmd == mapnik::SEG_CLOSE );
+    CHECK( x == Approx(0) );
+    CHECK( y == Approx(0) );
+
+    cmd = va.vertex(&x,&y);
+    REQUIRE( cmd == mapnik::SEG_END );
+    REQUIRE( x == Approx(0) );
+    REQUIRE( y == Approx(0) );
 }
 
 }
