@@ -336,4 +336,49 @@ SECTION("s curve") {
     }
 }
 
+SECTION("offsect converter does not skip SEG_MOVETO or SEG_CLOSE vertices") {
+
+    const double offset = 0.2;
+
+    fake_path path = {};
+    path.vertices_.emplace_back(-2, -2, mapnik::SEG_MOVETO);
+    path.vertices_.emplace_back( 2, -2, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 2,  2, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-2,  2, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-2,  -1.9, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 0,  0, mapnik::SEG_CLOSE);
+    path.vertices_.emplace_back(-1.9, -1.9, mapnik::SEG_MOVETO);
+    path.vertices_.emplace_back( 1, -1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 1,  1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-1,  1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-1, -1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 0,  0, mapnik::SEG_CLOSE);
+    path.rewind(0);
+
+    mapnik::offset_converter<fake_path> off_path(path);
+    off_path.set_offset(offset);
+
+    unsigned cmd;
+    double x, y;
+
+    unsigned move_to_count = 0;
+    unsigned close_count = 0;
+
+    while((cmd = off_path.vertex(&x, &y)) != mapnik::SEG_END)
+    {
+        switch (cmd)
+        {
+            case mapnik::SEG_MOVETO:
+                move_to_count++;
+            break;
+            case mapnik::SEG_CLOSE:
+                close_count++;
+            break;
+        }
+    }
+
+    CHECK(move_to_count == 2);
+    CHECK(close_count == 2);
+}
+
 }
