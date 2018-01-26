@@ -25,11 +25,13 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/featureset.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor_context.hpp>
+#include <mapnik/featureset.hpp>
+#include <mapnik/metrics.hpp>
 
 // stl
+#include <memory>
 #include <set>
 #include <string>
 
@@ -56,6 +58,11 @@ class MAPNIK_DECL feature_style_processor
 public:
     explicit feature_style_processor(Map const& m,
                                      double scale_factor = 1.0);
+#ifdef MAPNIK_METRICS
+    explicit feature_style_processor(Map const& m,
+                                     double scale_factor,
+                                     metrics& metr);
+#endif
 
     /*!
      * \brief apply renderer to all map layers.
@@ -113,7 +120,12 @@ private:
     void render_material(layer_rendering_material const & mat, Processor & p );
 
     Map const& m_;
+
+#ifdef MAPNIK_METRICS
+public:
+    metrics metrics_ = metrics(false);
+#endif
 };
-}
+} //namespace mapnik
 
 #endif // MAPNIK_FEATURE_STYLE_PROCESSOR_HPP

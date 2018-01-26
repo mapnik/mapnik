@@ -72,6 +72,9 @@ struct MAPNIK_DECL image_any : image_base
     image_dtype get_dtype() const;
     void set_offset(double val);
     void set_scaling(double val);
+#ifdef MAPNIK_METRICS
+    metrics&  get_metrics();
+#endif
 };
 
 MAPNIK_DECL image_any create_image_any(int width,
@@ -81,6 +84,6 @@ MAPNIK_DECL image_any create_image_any(int width,
                                        bool premultiplied = false,
                                        bool painted = false);
 
-} // end mapnik ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_ANY_HPP

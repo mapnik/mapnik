@@ -390,6 +390,7 @@ opts.AddVariables(
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
+    BoolVariable('ENABLE_METRICS', 'Enable internal metrics during map processing', 'False'),
     ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities) + ')', 'error'),
 
     # Plugin linking
@@ -1922,6 +1923,10 @@ if not preconfigured:
         if env['ENABLE_STATS']:
             debug_defines.append('-DMAPNIK_STATS')
             ndebug_defines.append('-DMAPNIK_STATS')
+
+        # Enable metrics
+        if env['ENABLE_METRICS']:
+            env.Append(CPPDEFINES = '-DMAPNIK_METRICS')
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux

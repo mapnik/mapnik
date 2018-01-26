@@ -69,6 +69,10 @@ public:
     void painted(bool) {}
     bool painted() const { return false; }
     image_dtype get_dtype() const { return dtype; }
+#ifdef MAPNIK_METRICS
+public:
+    metrics metrics_ = metrics(false);
+#endif
 };
 
 } // end ns mapnik

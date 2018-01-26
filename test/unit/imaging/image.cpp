@@ -142,6 +142,10 @@ SECTION("test gray16") {
     CHECK(im2(0,1) == 514);
     CHECK(im2(1,1) == 50);
 
+#ifdef MAPNIK_METRICS
+    CHECK(im.metrics_.enabled_ == false);
+#endif
+
 } // END SECTION
 
 SECTION("image_null")
@@ -188,6 +192,10 @@ SECTION("image_null")
     CHECK(e1 == nullptr);
     CHECK(e2 == nullptr);
 
+#ifdef MAPNIK_METRICS
+    CHECK(im_null.metrics_.enabled_ == false);
+#endif
+
 } // END SECTION
 
 SECTION("image any")
@@ -216,6 +224,10 @@ SECTION("image any")
     im_any.set_scaling(2.1);
     CHECK(im_any.get_scaling() == 2.1);
     CHECK_FALSE(im_any.painted());
+
+#ifdef MAPNIK_METRICS
+    CHECK(im_any.get_metrics().enabled_ == false);
+#endif
 
 } // END SECTION
 
@@ -330,12 +342,24 @@ SECTION("Image copy/move")
         pixel = mapnik::color(0,255,0).rgba(); // green
     }
 
+#ifdef MAPNIK_METRICS
+    im.metrics_.enabled_ = true;
+    im.metrics_.measure_add("check");
+    REQUIRE(im.metrics_.find("check"));
+#endif
+
     // move
     mapnik::image_rgba8 im2(std::move(im));
     CHECK (im.data() == nullptr);
     CHECK (im.bytes() == nullptr);
     CHECK (im.width() == 0);
     CHECK (im.height() == 0);
+
+#ifdef MAPNIK_METRICS
+    CHECK(im2.metrics_.enabled_ == true);
+    CHECK(im2.metrics_.find("check"));
+#endif
+
     for (auto const& pixel : im2)
     {
         // expect `green`
@@ -361,6 +385,27 @@ SECTION("Image copy/move")
         // expect `red`
         CHECK( pixel == mapnik::color(255,0,0).rgba());
     }
+
+#ifdef MAPNIK_METRICS
+    CHECK(im3.metrics_.enabled_ == true);
+    CHECK(im3.metrics_.find("check"));
+#endif
+
+    mapnik::image_rgba8 im4;
+    im4 = im2;
+
+    for (auto & pixel : im4)
+    {
+        CHECK( pixel == mapnik::color(255,0,0).rgba());
+    }
+
+#ifdef MAPNIK_METRICS
+    CHECK(im3.metrics_.enabled_ == true);
+    CHECK(im3.metrics_.find("check"));
+    CHECK(im4.metrics_.enabled_ == true);
+    CHECK(im4.metrics_.find("check"));
+#endif
+
 }
 
 SECTION("image::swap")
@@ -375,6 +420,12 @@ SECTION("image::swap")
     im2.set(blue);
     im3.set(orange);
 
+#ifdef MAPNIK_METRICS
+    im2.metrics_.enabled_ = true;
+    im2.metrics_.measure_add("check");
+    REQUIRE(im2.metrics_.find("check"));
+#endif
+
     // swap two non-empty images
     CHECK_NOTHROW(im2.swap(im3));
     CHECK(im2(0, 0) == orange);
@@ -387,6 +438,12 @@ SECTION("image::swap")
     {
         CHECK(im(0, 0) == blue);
     }
+#ifdef MAPNIK_METRICS
+    CHECK(im.metrics_.enabled_ == true);
+    CHECK(im.metrics_.find("check"));
+    CHECK(im3.metrics_.enabled_ == false);
+    CHECK(!im3.metrics_.find("check"));
+#endif
 }
 
 } // END TEST CASE
