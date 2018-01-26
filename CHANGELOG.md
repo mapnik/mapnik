@@ -8,12 +8,15 @@ For a complete change history, see the git log.
 
 ## 3.0.18
 
-Released: xxxxxx XX, 201X
+Released: January XX, 2018
 
 (Packaged from xxxxxxxxx)
 
     - SVG parser - fixed logic for calculating dimensions when `width` and `height` expressed in
       percentage units (#3812)
+    - New improved `interior` placement algorithm (#3839)
+    - Fixed handling an empty interior rings in `polygon_vertex_processor` (#3833)
+    - Fixed handling an empty interior rings in `vertex_adapter' (#3842)(#3838)
 
 ## 3.0.17
 
