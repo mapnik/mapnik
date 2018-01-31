@@ -4,6 +4,8 @@
 
 TEST_CASE("geometry closest point") {
 
+#if BOOST_VERSION >= 106200
+
 SECTION("geometry_empty") {
 
     mapnik::geometry::point<double> pt(0, 0);
@@ -83,5 +85,5 @@ SECTION("polygon") {
         REQUIRE(result.distance == 0.0);
     }
 }
-
+#endif
 }
