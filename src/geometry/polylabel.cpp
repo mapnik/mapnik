@@ -29,8 +29,9 @@ namespace mapnik { namespace geometry {
 template <class T>
 T polylabel_precision(polygon<T> const& polygon, double scale_factor)
 {
-    // This precision has been chosen to work well in the map (viewport) coordinates.
-    return 10.0 * scale_factor;
+    const box2d<T> bbox = mapnik::geometry::envelope(polygon);
+    // Let the precision be 1% of the polygon size to be independent to map scale.
+    return (std::max(bbox.width(), bbox.height()) / 100.0) * scale_factor;
 }
 
 template <class T>
