@@ -153,15 +153,8 @@ struct cell
 };
 
 template <class T>
-boost::optional<point<T>> polylabel(polygon<T> const& polygon, T precision = 1)
+point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox , T precision = 1)
 {
-    if (polygon.exterior_ring.empty())
-    {
-        return boost::none;
-    }
-
-    // find the bounding box of the outer ring
-    const box2d<T> bbox = envelope(polygon.exterior_ring);
     const point<T> size { bbox.width(), bbox.height() };
 
     const T cell_size = std::min(size.x, size.y);
@@ -177,14 +170,14 @@ boost::optional<point<T>> polylabel(polygon<T> const& polygon, T precision = 1)
 
     if (cell_size == 0)
     {
-        return point<T>{ bbox.minx(), bbox.miny() };
+        return { bbox.minx(), bbox.miny() };
     }
 
     point<T> centroid;
     if (!mapnik::geometry::centroid(polygon, centroid))
     {
         auto center = bbox.center();
-        return point<T>{ center.x, center.y };
+        return { center.x, center.y };
     }
 
     fitness_functor<T> fitness_func(centroid, size);
@@ -232,15 +225,18 @@ boost::optional<point<T>> polylabel(polygon<T> const& polygon, T precision = 1)
 template <class T>
 bool interior(polygon<T> const& polygon, double scale_factor, point<T> & pt)
 {
-    // This precision has been chosen to work well in the map (viewport) coordinates.
-    double precision = 10.0 * scale_factor;
-    if (boost::optional<point<T>> opt = detail::polylabel(polygon, precision))
+    if (polygon.exterior_ring.empty())
     {
-        pt = *opt;
-        return true;
+        return false;
     }
 
-    return false;
+    const box2d<T> bbox = envelope(polygon.exterior_ring);
+
+    // Let the precision be 1% of the polygon size to be independent to map scale.
+    double precision = (std::max(bbox.width(), bbox.height()) / 100.0) * scale_factor;
+
+    pt = detail::polylabel(polygon, bbox, precision);
+    return true;
 }
 
 template
