@@ -273,7 +273,7 @@ SECTION("polygon with empty exterior ring") {
     g.emplace_back();
 
     mapnik::geometry::polygon_vertex_adapter<double> va(g);
-    double x,y;
+    double x = 0, y = 0;
     unsigned cmd;
 
     cmd = va.vertex(&x,&y);
