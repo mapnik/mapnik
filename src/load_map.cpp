@@ -1169,6 +1169,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& node)
             set_symbolizer_property<symbolizer_base,composite_mode_e>(sym, keys::halo_comp_op, node);
             set_symbolizer_property<symbolizer_base,halo_rasterizer_enum>(sym, keys::halo_rasterizer, node);
             set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::halo_transform, node);
+            set_symbolizer_property<symbolizer_base,value_double>(sym, keys::offset, node);
             rule.append(std::move(sym));
         }
     }
@@ -1210,6 +1211,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base,double>(sym, keys::shield_dy, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
         set_symbolizer_property<symbolizer_base,value_bool>(sym, keys::unlock_image, node);
+        set_symbolizer_property<symbolizer_base,value_double>(sym, keys::offset, node);
 
         std::string file = node.get_attr<std::string>("file");
         if (file.empty())
