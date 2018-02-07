@@ -119,6 +119,8 @@ static const char * label_placement_strings[] = {
     "vertex",
     "interior",
     "polylabel",
+    "grid",
+    "alternating-grid",
     ""
 };
 
