@@ -168,14 +168,17 @@ private:
 
     double get_hit_bitmap_scale(box2d<T> const& envelope) const
     {
-        T size = envelope.width() * envelope.height();
-        // Polygon with huge area can lead to excessive memory allocation.
-        // This is more or less arbitrarily chosen limit for the maximum bitmap resolution.
-        // Bitmap bigger than this limit is scaled down to fit into this resolution.
-        const std::size_t max_size = 8192 * 8192;
-        if (size > max_size)
+        if (envelope.valid())
         {
-            return std::sqrt(max_size / size);
+            T size = envelope.width() * envelope.height();
+            // Polygon with huge area can lead to excessive memory allocation.
+            // This is more or less arbitrarily chosen limit for the maximum bitmap resolution.
+            // Bitmap bigger than this limit is scaled down to fit into this resolution.
+            const std::size_t max_size = 8192 * 8192;
+            if (size > max_size)
+            {
+                return std::sqrt(max_size / size);
+            }
         }
         return 1;
     }
@@ -212,15 +215,17 @@ private:
                                         double scale_factor) const
     {
         mapnik::geometry::point<T> interior;
-        if (!mapnik::geometry::interior(poly, scale_factor, interior))
+        if (envelope.valid())
         {
-            auto center = envelope.center();
-            interior.x = center.x;
-            interior.y = center.y;
+            if (!mapnik::geometry::interior(poly, scale_factor, interior))
+            {
+                auto center = envelope.center();
+                interior.x = center.x;
+                interior.y = center.y;
+            }
+
+            vt_.forward(&interior.x, &interior.y);
         }
-
-        vt_.forward(&interior.x, &interior.y);
-
         return interior;
     }
 
