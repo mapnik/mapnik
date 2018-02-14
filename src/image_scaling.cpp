@@ -24,6 +24,7 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_scaling_traits.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -99,7 +100,7 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
 template <typename T>
 void scale_image_agg(T & target, T const& source, scaling_method_e scaling_method,
                      double image_ratio_x, double image_ratio_y, double x_off_f, double y_off_f,
-                     double filter_factor, boost::optional<double> const & nodata_value)
+                     double filter_factor, boost::optional<double> const& nodata_value)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
@@ -160,7 +161,7 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
         boost::optional<typename span_gen_type::value_type> nodata;
         if (nodata_value)
         {
-            nodata = nodata_value;
+            nodata.emplace(safe_cast<typename span_gen_type::value_type>(*nodata_value));
         }
         span_gen_type sg(img_src, interpolator, filter, nodata);
         agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
@@ -168,7 +169,7 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
 }
 
 template MAPNIK_DECL void scale_image_agg(image_rgba8 &, image_rgba8 const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+                                          double, double , double, double , double, boost::optional<double> const &);
 
 template MAPNIK_DECL void scale_image_agg(image_gray8 &, image_gray8 const&, scaling_method_e,
                               double, double , double, double , double, boost::optional<double> const &);

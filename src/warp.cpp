@@ -30,6 +30,7 @@
 #include <mapnik/view_transform.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -153,7 +154,7 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
                     boost::optional<typename span_gen_type::value_type> nodata;
                     if (nodata_value)
                     {
-                        nodata = nodata_value;
+                        nodata = safe_cast<typename span_gen_type::value_type>(*nodata_value);
                     }
                     span_gen_type sg(ia, interpolator, filter, nodata);
                     agg::render_scanlines_bin(rasterizer, scanline, rb, sa, sg);
