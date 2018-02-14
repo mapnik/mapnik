@@ -586,8 +586,14 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             }
             mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
             // set nodata value to be used in raster colorizer
-            if (nodata_value_) raster->set_nodata(*nodata_value_);
-            else raster->set_nodata(raster_nodata);
+            if (nodata_value_)
+            {
+                raster->set_nodata(*nodata_value_);
+            }
+            else if (raster_has_nodata)
+            {
+                raster->set_nodata(raster_nodata);
+            }
             feature->set_raster(raster);
         }
         // report actual/original source nodata in feature attributes
