@@ -80,6 +80,8 @@ struct evaluated_text_properties : util::noncopyable
     bool allow_overlap;
     bool largest_bbox_only;
     text_upright_e upright;
+    double grid_cell_width;
+    double grid_cell_height;
 };
 
 }
@@ -172,6 +174,8 @@ struct text_properties_expressions
     symbolizer_base::value_type allow_overlap = false;
     symbolizer_base::value_type largest_bbox_only = true;
     symbolizer_base::value_type upright = enumeration_wrapper(UPRIGHT_AUTO);
+    symbolizer_base::value_type grid_cell_width = 0.0;
+    symbolizer_base::value_type grid_cell_height = 0.0;
 };
 
 // Contains all text symbolizer properties which are not directly related to text formatting and layout.

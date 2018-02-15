@@ -61,6 +61,8 @@ evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_propertie
     prop->allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.allow_overlap);
     prop->largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.largest_bbox_only);
     prop->upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), text_prop.expressions.upright);
+    prop->grid_cell_width = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.grid_cell_width);
+    prop->grid_cell_height = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.grid_cell_height);
     return prop;
 }
 
@@ -108,6 +110,8 @@ void text_symbolizer_properties::text_properties_from_xml(xml_node const& node)
     set_property_from_xml<value_bool>(expressions.largest_bbox_only, "largest-bbox-only", node);
     set_property_from_xml<value_double>(expressions.max_char_angle_delta, "max-char-angle-delta", node);
     set_property_from_xml<text_upright_e>(expressions.upright, "upright", node);
+    set_property_from_xml<value_double>(expressions.grid_cell_width, "grid-cell-width", node);
+    set_property_from_xml<value_double>(expressions.grid_cell_height, "grid-cell-height", node);
 }
 
 void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
@@ -175,6 +179,14 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     {
         serialize_property("upright", expressions.upright, node);
     }
+    if (!(expressions.grid_cell_width == dfl.expressions.grid_cell_width) || explicit_defaults)
+    {
+        serialize_property("grid-cell-width", expressions.grid_cell_width, node);
+    }
+    if (!(expressions.grid_cell_height == dfl.expressions.grid_cell_height) || explicit_defaults)
+    {
+        serialize_property("grid-cell-height", expressions.grid_cell_height, node);
+    }
 
     layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
     format_defaults.to_xml(node, explicit_defaults, dfl.format_defaults);
@@ -197,6 +209,8 @@ void text_symbolizer_properties::add_expressions(expression_set & output) const
     if (is_expression(expressions.allow_overlap)) output.insert(util::get<expression_ptr>(expressions.allow_overlap));
     if (is_expression(expressions.largest_bbox_only)) output.insert(util::get<expression_ptr>(expressions.largest_bbox_only));
     if (is_expression(expressions.upright)) output.insert(util::get<expression_ptr>(expressions.upright));
+    if (is_expression(expressions.grid_cell_width)) output.insert(util::get<expression_ptr>(expressions.grid_cell_width));
+    if (is_expression(expressions.grid_cell_height)) output.insert(util::get<expression_ptr>(expressions.grid_cell_height));
 
     layout_defaults.add_expressions(output);
     format_defaults.add_expressions(output);
