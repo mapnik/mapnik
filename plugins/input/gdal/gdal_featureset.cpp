@@ -406,7 +406,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     }
                 }
 
-                /* Use dataset RasterIO in priority in 99.9% of the cases */
+                // Use dataset RasterIO in priority in 99.9% of the cases
                 if( red->GetBand() == 1 && green->GetBand() == 2 && blue->GetBand() == 3 )
                 {
                     int nBandsToRead = 3;
@@ -590,16 +590,16 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             {
                 raster->set_nodata(*nodata_value_);
             }
-            else if (raster_has_nodata)
+            else if (raster_has_nodata && !std::isnan(raster_nodata))
             {
                 raster->set_nodata(raster_nodata);
             }
             feature->set_raster(raster);
         }
         // report actual/original source nodata in feature attributes
-        if (raster_has_nodata)
+        if (raster_has_nodata && !std::isnan(raster_nodata))
         {
-            feature->put("nodata",raster_nodata);
+            feature->put("nodata", raster_nodata);
         }
         return feature;
     }
@@ -648,7 +648,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
                 feature_ptr feature = feature_factory::create(ctx_,1);
                 feature->set_geometry(mapnik::geometry::point<double>(pt.x,pt.y));
                 feature->put_new("value",value);
-                if (raster_has_nodata)
+                if (raster_has_nodata && !std::isnan(raster_nodata))
                 {
                     feature->put_new("nodata",nodata);
                 }
