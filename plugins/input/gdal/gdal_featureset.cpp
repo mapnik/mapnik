@@ -642,15 +642,15 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             if (raster_io_error == CE_Failure) {
                 throw datasource_exception(CPLGetLastErrorMsg());
             }
-            if (! raster_has_nodata || value != nodata)
+            if (!raster_has_nodata || value != nodata)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
                 feature->set_geometry(mapnik::geometry::point<double>(pt.x,pt.y));
                 feature->put_new("value",value);
-                if (raster_has_nodata && !std::isnan(raster_nodata))
+                if (raster_has_nodata && !std::isnan(nodata))
                 {
-                    feature->put_new("nodata",nodata);
+                    feature->put_new("nodata", nodata);
                 }
                 return feature;
             }
