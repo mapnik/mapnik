@@ -866,6 +866,7 @@ def CheckProjData(context, silent=False):
 // This is narly, could eventually be replaced using https://github.com/OSGeo/proj.4/pull/551]
 #include <proj_api.h>
 #include <iostream>
+#include <cstring>
 
 static void my_proj4_logger(void * user_data, int /*level*/, const char * msg)
 {
