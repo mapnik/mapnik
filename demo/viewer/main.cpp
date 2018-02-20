@@ -30,9 +30,9 @@ int main( int argc, char **argv )
 {
     using mapnik::datasource_cache;
     using mapnik::freetype_engine;
-
     try
     {
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
         QCoreApplication::setOrganizationName("Mapnik");
         QCoreApplication::setOrganizationDomain("mapnik.org");
         QCoreApplication::setApplicationName("Viewer");
