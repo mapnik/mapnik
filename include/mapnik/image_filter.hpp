@@ -28,7 +28,6 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/hsl.hpp>
-
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/gil/gil_all.hpp>
@@ -687,36 +686,37 @@ void apply_color_blind_filter(Src & src, ColorBlindFilter const& op)
     rgba8_view_t src_view = rgba8_view(src);
     bool premultiplied = src.get_premultiplied();
 
+    static constexpr double gamma = 2.2;
+    static constexpr double inv_gamma = 1.0/gamma;
+
     for (std::ptrdiff_t y = 0; y < src_view.height(); ++y)
     {
         rgba8_view_t::x_iterator src_it = src_view.row_begin(static_cast<long>(y));
         for (std::ptrdiff_t x = 0; x < src_view.width(); ++x)
         {
-            // formula taken from boost/gil/color_convert.hpp:rgb_to_luminance
             uint8_t & r = get_color(src_it[x], red_t());
             uint8_t & g = get_color(src_it[x], green_t());
             uint8_t & b = get_color(src_it[x], blue_t());
             uint8_t & a = get_color(src_it[x], alpha_t());
-            double dr = static_cast<double>(r)/255.0;
-            double dg = static_cast<double>(g)/255.0;
-            double db = static_cast<double>(b)/255.0;
-            double da = static_cast<double>(a)/255.0;
             // demultiply
-            if (da <= 0.0)
+            if (a == 0)
             {
                 r = g = b = 0;
                 continue;
             }
             else if (premultiplied)
             {
-                dr /= da;
-                dg /= da;
-                db /= da;
+                std::uint32_t cr = (r * 255) / a;
+                std::uint32_t cg = (g * 255) / a;
+                std::uint32_t cb = (b * 255) / a;
+                r = static_cast<uint8_t>((cr > 255) ? 255 : cr);
+                g = static_cast<uint8_t>((cg > 255) ? 255 : cg);
+                b = static_cast<uint8_t>((cb > 255) ? 255 : cb);
             }
             // Convert source color into XYZ color space
-            double pow_r = std::pow(dr, 2.2);
-            double pow_g = std::pow(dg, 2.2);
-            double pow_b = std::pow(db, 2.2);
+            double pow_r = std::pow(r, gamma);
+            double pow_g = std::pow(g, gamma);
+            double pow_b = std::pow(b, gamma);
             double X = (0.412424 * pow_r) + (0.357579 * pow_g) + (0.180464 * pow_b);
             double Y = (0.212656 * pow_r) + (0.715158 * pow_g) + (0.0721856 * pow_b);
             double Z = (0.0193324 * pow_r) + (0.119193 * pow_g) + (0.950444 * pow_b);
@@ -733,10 +733,6 @@ void apply_color_blind_filter(Src & src, ColorBlindFilter const& op)
             if (std::abs(m_div2) < (std::numeric_limits<double>::epsilon())) continue;
             double deviate_x = (op.yint - yint) / (m - op.m);
             double deviate_y = (m * deviate_x) + yint;
-            if (std::abs(deviate_y) < (std::numeric_limits<double>::epsilon()))
-            {
-                deviate_y = std::numeric_limits<double>::epsilon() * 2.0;
-            }
             // Compute the simulated color's XYZ coords
             X = deviate_x * Y / deviate_y;
             Z = (1.0 - (deviate_x + deviate_y)) * Y / deviate_y;
@@ -746,25 +742,14 @@ void apply_color_blind_filter(Src & src, ColorBlindFilter const& op)
             // Difference between simulated color and neutral grey
             double diff_X = neutral_X - X;
             double diff_Z = neutral_Z - Z;
-            double diff_r = diff_X * 3.24071 + diff_Z * -0.498571; // XYZ->RGB (sRGB:D65)
-            double diff_g = diff_X * -0.969258 + diff_Z * 0.0415557;
-            double diff_b = diff_X * 0.0556352 + diff_Z * 1.05707;
-            if (std::abs(diff_r) < (std::numeric_limits<double>::epsilon()))
-            {
-                diff_r = std::numeric_limits<double>::epsilon() * 2.0;
-            }
-            if (std::abs(diff_g) < (std::numeric_limits<double>::epsilon()))
-            {
-                diff_g = std::numeric_limits<double>::epsilon() * 2.0;
-            }
-            if (std::abs(diff_b) < (std::numeric_limits<double>::epsilon()))
-            {
-                diff_b = std::numeric_limits<double>::epsilon() * 2.0;
-            }
-            // Convert to RGB color space
-            dr = X * 3.24071 + Y * -1.53726 + Z * -0.498571; // XYZ->RGB (sRGB:D65)
-            dg = X * -0.969258 + Y * 1.87599 + Z * 0.0415557;
-            db = X * 0.0556352 + Y * -0.203996 + Z * 1.05707;
+            // XYZ->RGB (sRGB:D65)
+            double diff_r = diff_X * 3.2407100 + diff_Z *-0.4985710;
+            double diff_g = diff_X *-0.9692580 + diff_Z * 0.0415557;
+            double diff_b = diff_X * 0.0556352 + diff_Z * 1.0570700;
+            // XYZ->RGB (sRGB:D65)
+            double dr = X * 3.2407100 + Y *-1.537260 + Z *-0.4985710;
+            double dg = X *-0.9692580 + Y * 1.875990 + Z * 0.0415557;
+            double db = X * 0.0556352 + Y *-0.203996 + Z * 1.0570700;
             // Compensate simulated color towards a neutral fit in RGB space
             double fit_r = ((dr < 0.0 ? 0.0 : 1.0) - dr) / diff_r;
             double fit_g = ((dg < 0.0 ? 0.0 : 1.0) - dg) / diff_g;
@@ -774,27 +759,24 @@ void apply_color_blind_filter(Src & src, ColorBlindFilter const& op)
                                     );
             adjust = std::max((fit_b > 1.0 || fit_b < 0.0) ? 0.0 : fit_b, adjust);
             // Shift proportional to the greatest shift
-            dr = dr + (adjust * diff_r);
-            dg = dg + (adjust * diff_g);
-            db = db + (adjust * diff_b);
+            dr += adjust * diff_r;
+            dg += adjust * diff_g;
+            db += adjust * diff_b;
             // Apply gamma correction
-            dr = std::pow(dr, 1.0 / 2.2);
-            dg = std::pow(dg, 1.0 / 2.2);
-            db = std::pow(db, 1.0 / 2.2);
-            // premultiply
-            dr *= da;
-            dg *= da;
-            db *= da;
+            dr = std::pow(dr, inv_gamma);
+            dg = std::pow(dg, inv_gamma);
+            db = std::pow(db, inv_gamma);
             // Clamp values
-            if(dr < 0.0)  dr = 0.0;
-            if(dr > 1.0) dr = 1.0;
-            if(dg < 0.0) dg = 0.0;
-            if(dg > 1.0) dg = 1.0;
-            if(db < 0.0) db = 0.0;
-            if(db > 1.0) db = 1.0;
-            r = static_cast<uint8_t>(dr * 255.0);
-            g = static_cast<uint8_t>(dg * 255.0);
-            b = static_cast<uint8_t>(db * 255.0);
+            if(dr < 0.0 || std::isnan(dr)) dr = 0.0;
+            if(dr > 255.0) dr = 255.0;
+            if(dg < 0.0 || std::isnan(dg)) dg = 0.0;
+            if(dg > 255.0) dg = 255.0;
+            if(db < 0.0 || std::isnan(db)) db = 0.0;
+            if(db > 255.0) db = 255.0;
+            // premultiply
+            r = (static_cast<uint8_t>(dr) * a + 255) >> 8;
+            g = (static_cast<uint8_t>(dg) * a + 255) >> 8;
+            b = (static_cast<uint8_t>(db) * a + 255) >> 8;
         }
     }
     // set as premultiplied
