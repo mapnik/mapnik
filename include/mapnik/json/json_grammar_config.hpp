@@ -43,7 +43,8 @@ enum well_known_names
     features,
     geometry,
     coordinates,
-    properties
+    properties,
+    geometries
 };
 
 constexpr char const* wkn_to_string(well_known_names val)
@@ -56,6 +57,7 @@ constexpr char const* wkn_to_string(well_known_names val)
     case geometry: return "geometry";
     case coordinates: return "coordinates";
     case properties: return "properties";
+    case geometries: return "geometries";
     default: return "unknown";
     }
 }
@@ -73,6 +75,7 @@ inline keys_map get_keys()
         ("coordinates", well_known_names::coordinates)
         ("properties", well_known_names::properties)
         ("id", well_known_names::id)
+        ("geometries",well_known_names::geometries)
         ;
     return keys;
 }
