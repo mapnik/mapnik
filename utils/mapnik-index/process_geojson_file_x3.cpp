@@ -51,6 +51,11 @@ constexpr mapnik::json::well_known_names geometry_properties[] = {
     mapnik::json::well_known_names::type,
     mapnik::json::well_known_names::coordinates}; // sorted
 
+constexpr mapnik::json::well_known_names geometry_collection_properties[] = {
+    mapnik::json::well_known_names::type,
+    mapnik::json::well_known_names::geometries}; // sorted
+
+
 template <typename Keys>
 std::string join(Keys const& keys)
 {
@@ -117,9 +122,12 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                       {
                           return std::get<0>(e0) < std::get<0>(e1);
                       });
-            if (!has_keys(geometry.begin(), geometry.end(), geometry_properties))
+
+            if (!has_keys(geometry.begin(), geometry.end(), geometry_properties)
+                && !has_keys(geometry.begin(), geometry.end(), geometry_collection_properties))
             {
-                if (verbose) std::clog << "Expecting one of " << join(geometry_properties) << std::endl;
+                if (verbose) std::clog << "\"geometry\": xxx <-- expecting one of " << join(geometry_properties)
+                                       << " or " << join(geometry_collection_properties) << std::endl;
                 return false;
             }
 
