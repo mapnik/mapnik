@@ -831,9 +831,16 @@ int main() {
         context.did_show_result=1
     if ret[0]:
         context.Result('u_getDataDirectory returned %s' % ret[1])
+        return ret[1].strip()
     else:
-        context.Result('Failed to detect (mapnik-config will have null value)')
-    return ret[1].strip()
+        ret = call("icu-config --icudatadir", silent=True)
+        if ret:
+            context.Result('icu-config returned %s' % ret)
+            return ret
+        else:
+            context.Result('Failed to detect (mapnik-config will have null value)')
+            return ''
+
 
 def CheckGdalData(context, silent=False):
 
