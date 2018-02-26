@@ -129,6 +129,14 @@ struct offset_converter
             //break; // uncomment this to see all the curls
 
             vertex2d const& u0 = vertices_[i];
+
+            // End or beginning of a line or ring must not be filtered out
+            // to not to join lines or rings together.
+            if (u0.cmd == SEG_CLOSE || u0.cmd == SEG_MOVETO)
+            {
+                break;
+            }
+
             vertex2d const& u1 = vertices_[i+1];
             double const dx = u0.x - cur_.x;
             double const dy = u0.y - cur_.y;
