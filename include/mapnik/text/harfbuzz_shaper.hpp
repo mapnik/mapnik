@@ -186,7 +186,7 @@ static void shape_text(text_line & line,
             auto script = detail::_icu_script_to_script(text_item.script);
             auto language = detail::script_to_language(script);
             MAPNIK_LOG_DEBUG(harfbuzz_shaper) << "RUN:[" << text_item.start << "," << text_item.end << "]"
-                                              << " LANGUAGE:" << hb_language_to_string(language)
+                                              << " LANGUAGE:" << ((language != nullptr) ? hb_language_to_string(language) : "unknown")
                                               << " SCRIPT:" << script << "(" << text_item.script << ") " << uscript_getShortName(text_item.script)
                                               << " FONT:" << face->family_name();
             if (language != HB_LANGUAGE_INVALID)
