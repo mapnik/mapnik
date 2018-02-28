@@ -835,8 +835,8 @@ int main() {
     else:
         ret = call("icu-config --icudatadir", silent=True)
         if ret:
-            context.Result('icu-config returned %s' % ret)
-            return ret
+            context.Result('icu-config returned %s' % ret.decode("utf8"))
+            return ret.decode('utf8')
         else:
             context.Result('Failed to detect (mapnik-config will have null value)')
             return ''
