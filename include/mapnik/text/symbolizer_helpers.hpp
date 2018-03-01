@@ -161,7 +161,7 @@ public:
 protected:
     void init_converters();
     void initialize_points() const;
-    template <template <typename, typename> typename GridAdapter>
+    template <template <typename, typename> class GridAdapter>
     void initialize_grid_points() const;
     bool next_point_placement() const;
     bool next_line_placement() const;
