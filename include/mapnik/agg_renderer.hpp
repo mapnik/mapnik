@@ -81,18 +81,21 @@ public:
         }
         else
         {
-            position_--;
+            --position_;
             mapnik::fill(*position_, 0); // fill with transparent colour
         }
         return *position_;
     }
+    bool in_range() const
+    {
+        return (position_ != buffers_.end());
+    }
 
     void pop()
     {
-        if (position_ != buffers_.end())
-        {
-            position_++;
-        }
+        // ^ ensure irator is not out-of-range
+        // prior calling this method
+        ++position_;
     }
 
     T & top() const

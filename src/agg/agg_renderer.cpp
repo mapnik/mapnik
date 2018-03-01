@@ -340,7 +340,8 @@ void agg_renderer<T0,T1>::end_style_processing(feature_type_style const& st)
                       -common_.t_.offset(),
                       -common_.t_.offset());
         }
-        if (&current_buffer == &internal_buffers_.top())
+        if (internal_buffers_.in_range()
+            && &current_buffer == &internal_buffers_.top())
         {
             internal_buffers_.pop();
         }
