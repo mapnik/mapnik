@@ -6,6 +6,20 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.19
+
+Released: March 06, 2018
+
+(Packaged from d50562d54)
+
+    - Backported scaling of precision by polygon size  (#3844)
+    - Backported GRID placement (#3847, #3854, #3855)
+    - Added missing `MAPNIK_DECL` to all `text_placement_` types (7ce142a5aa8e9da5ddd11266a054c1e69052230d)
+    - Fixed invalid memory access if input_buffer size is zero (a602c65354a4b595821d2300f38ebc107d07e2a9)
+    - Fixed handling of an empty polygon in grid_vertex_converter (2f2dcf1eeae71aaa7878f4bc9a39741321f07e68)
+    - Fixed PROJ_LIB detection logic (44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5)
+    - Default to `icu-config` for obtaining `ICU_DATA` if `u_getDataDirectory fails (2cef98d7f76cdd302afcf15f1c585379537e8f1d)
+
 ## 3.0.18
 
 Released: January 26, 2018
@@ -44,7 +58,6 @@ Released: November 16, 2017
     - Fixed memory leak (#3775)
     - SVG parser - fixed default gradient vector in linear gradient.
     - Fixed bounding box collection logic (#3709)
-
 
 ## 3.0.15
 
