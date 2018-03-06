@@ -8,7 +8,7 @@ For a complete change history, see the git log.
 
 ## 3.0.19
 
-Released: March XX, 2018
+Released: March 06, 2018
 
 (Packaged from xxxxxxxxx)
 
