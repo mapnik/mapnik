@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released: March 06, 2018
 
-(Packaged from xxxxxxxxx)
+(Packaged from d50562d54)
 
     - Backported scaling of precision by polygon size  (#3844)
     - Backported GRID placement (#3847, #3854, #3855)
