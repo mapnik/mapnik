@@ -60,7 +60,7 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
 static std::once_flag once_flag;
-
+#if 0
 extern "C" MAPNIK_EXP void on_plugin_load()
 {
     // initialize ogr formats
@@ -69,6 +69,7 @@ extern "C" MAPNIK_EXP void on_plugin_load()
         OGRRegisterAll();
     });
 }
+#endif
 
 ogr_datasource::ogr_datasource(parameters const& params)
     : datasource(params),

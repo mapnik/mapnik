@@ -36,7 +36,7 @@ else:
     PLUGIN_NAME = 'csv'
 
     plugin_env = plugin_base.Clone()
-
+    #plugin_env[LINKFLAGS] = '-lmapnik' + plugin_env[LINKFLAGS]
     plugin_sources = Split(
         """
         %(PLUGIN_NAME)s_utils.cpp
@@ -54,7 +54,7 @@ else:
 
     if env['PLUGIN_LINKING'] == 'shared':
         libraries.append('boost_system%s' % env['BOOST_APPEND'])
-        libraries.insert(0,env['MAPNIK_NAME'])
+        #libraries.insert(0,env['MAPNIK_NAME'])
         libraries.append(env['ICU_LIB_NAME'])
 
         TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,

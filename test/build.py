@@ -5,6 +5,10 @@ from copy import copy
 Import ('env')
 
 test_env = env.Clone()
+test_env.Prepend(LINKFLAGS='-lmapnik')# + test_env['LINKFLAGS']
+test_env.Append(LIBS='/home/artem/projects/mason/mason_packages/linux-x86_64/llvm/7.0.0/lib/libc++.a')
+#test_env.Append(LIBS='/home/artem/projects/mason/mason_packages/linux-x86_64/llvm/7.0.0/lib/libc++abi.a')
+#test_env.Append(LIBS='/home/artem/projects/mason/mason_packages/linux-x86_64/llvm/7.0.0/lib/libunwind.a')
 
 if not env['CPP_TESTS']:
     for cpp_test_bin in glob.glob('./*/*-bin'):
@@ -30,10 +34,10 @@ else:
     test_env.AppendUnique(LIBS='boost_program_options%s' % env['BOOST_APPEND'])
     test_env_local = test_env.Clone()
 
-
     # unit tests
     sources = glob.glob('./unit/*/*.cpp')
     sources.extend(glob.glob('./unit/*.cpp'))
+    sources.append('/home/artem/projects/mason/mason_packages/linux-x86_64/llvm/7.0.0/lib/libc++.a')
     test_program = test_env_local.Program("./unit/run", source=sources)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
     Depends(test_program, env.subst('../src/json/libmapnik-json${LIBSUFFIX}'))
@@ -57,6 +61,7 @@ else:
         visual/parse_map_sizes.cpp
         """
         )
+    source.append('/home/artem/projects/mason/mason_packages/linux-x86_64/llvm/7.0.0/lib/libc++.a')
     test_program3 = test_env_local.Program('visual/run', source=source)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
 

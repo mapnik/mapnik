@@ -37,13 +37,14 @@ plugin_sources = Split(
 libraries = [ 'sqlite3' ]
 
 linkflags = []
+plugin_env.Append(LINKFLAGS='-lmapnik')
 if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
     plugin_env.Append(LINKFLAGS=linkflags)
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
-    libraries.insert(0,env['MAPNIK_NAME'])
+    #libraries.insert(0,env['MAPNIK_NAME'])
     libraries.append(env['ICU_LIB_NAME'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,

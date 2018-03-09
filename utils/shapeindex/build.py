@@ -28,6 +28,7 @@ Import ('env')
 Import ('plugin_base')
 
 program_env = plugin_base.Clone()
+program_env['LINKFLAGS'] = '-lmapnik -lmapnik-json' + program_env['LINKFLAGS']
 
 source = Split(
     """

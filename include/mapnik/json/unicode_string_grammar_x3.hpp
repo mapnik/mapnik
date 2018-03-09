@@ -41,7 +41,7 @@ BOOST_SPIRIT_DECLARE(escaped_unicode_type);
 }
 
 grammar::unicode_string_grammar_type const& unicode_string_grammar();
-grammar::escaped_unicode_type const& escaped_unicode_grammar();
+__attribute__((visibility("default"))) grammar::escaped_unicode_type const& escaped_unicode_grammar();
 
 }}
 

@@ -12,6 +12,7 @@ source = Split(
     )
 
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+program_env['LINKFLAGS'] = '-lmapnik -lmapnik-json ' + program_env['LINKFLAGS']
 program_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 if env['HAS_CAIRO']:
@@ -19,7 +20,7 @@ if env['HAS_CAIRO']:
     program_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries = [env['MAPNIK_NAME'],boost_program_options]
+libraries = [boost_program_options]
 libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     libraries.append('dl')

@@ -25,13 +25,13 @@
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
-BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, mapnik::grammar::iterator_type, mapnik::grammar::context_type);
+BOOST_SPIRIT_INSTANTIATE(escaped_unicode_type, mapnik::grammar::iterator_type, mapnik::grammar::context_type);
 }
 
-grammar::escaped_unicode_type const& escaped_unicode_grammar()
-{
-    return grammar::escaped_unicode;
-}
+//grammar::escaped_unicode_type const& escaped_unicode_grammar()
+//{
+//    return grammar::escaped_unicode;
+//}
 
 }}
 
