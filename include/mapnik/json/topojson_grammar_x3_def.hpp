@@ -306,7 +306,7 @@ struct topojson_geometry_type_ : x3::symbols<int>
 } topojson_geometry_type;
 
 // start rule
-topojson_grammar_type const topology MAPNIK_INIT_PRIORITY(104) ("Topology");
+topojson_grammar_type const topology MAPNIK_INIT_PRIORITY(105) ("Topology");
 // rules
 x3::rule<class transform_tag, mapnik::topojson::transform> const transform = "Transform";
 x3::rule<class bbox_tag, mapnik::topojson::bounding_box> const bbox = "Bounding Box";
