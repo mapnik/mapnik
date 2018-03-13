@@ -1361,7 +1361,6 @@ if not preconfigured:
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
     env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
-    print(env.Dump())
     ### platform specific bits
 
     thread_suffix = 'mt'
