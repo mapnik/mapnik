@@ -26,6 +26,7 @@ from copy import copy
 PLUGIN_NAME = 'pgraster'
 
 plugin_env = plugin_base.Clone()
+plugin_env['SHLINKCOM'] = '$SHLINK -o $TARGET $SOURCES $SHLINKFLAGS $__SHLIBVERSIONFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
 
 plugin_sources = Split(
   """

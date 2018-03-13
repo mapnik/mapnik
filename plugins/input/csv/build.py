@@ -36,7 +36,7 @@ else:
     PLUGIN_NAME = 'csv'
 
     plugin_env = plugin_base.Clone()
-    #plugin_env[LINKFLAGS] = '-lmapnik' + plugin_env[LINKFLAGS]
+    plugin_env['SHLINKCOM'] = '$SHLINK -o $TARGET $SOURCES $SHLINKFLAGS $__SHLIBVERSIONFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
     plugin_sources = Split(
         """
         %(PLUGIN_NAME)s_utils.cpp
