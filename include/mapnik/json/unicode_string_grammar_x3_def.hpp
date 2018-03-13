@@ -110,11 +110,11 @@ x3::uint_parser<std::uint16_t, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
 // start rule
-unicode_string_grammar_type const unicode_string MAPNIK_INIT_PRIORITY(102) ("Unicode String");
+unicode_string_grammar_type const unicode_string MAPNIK_INIT_PRIORITY(101) ("Unicode String");
+escaped_unicode_type const escaped_unicode ("Escaped Unicode code point(s)");
 // rules
 x3::rule<class double_quoted_tag, std::string> const double_quoted("Double-quoted string");
 x3::rule<class escaped_tag, std::string> const escaped("Escaped Character");
-escaped_unicode_type const escaped_unicode MAPNIK_INIT_PRIORITY(101) ("Escaped Unicode code point(s)");
 x3::rule<class utf16_string_tag, std::vector<std::uint16_t>> const utf16_string("UTF16 encoded string");
 
 auto unicode_string_def = double_quoted

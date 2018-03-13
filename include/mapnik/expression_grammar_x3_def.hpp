@@ -24,7 +24,7 @@
 #define MAPNIK_EXPRESSIONS_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/expression_grammar_x3.hpp>
-#include <mapnik/json/unicode_string_grammar_x3.hpp>
+#include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/unicode.hpp>
@@ -67,7 +67,7 @@ namespace mapnik { namespace grammar {
     x3::uint_parser<char, 16, 2, 2> const hex2 {};
 
     namespace {
-    auto const& escaped_unicode = json::escaped_unicode_grammar();
+    auto const& escaped_unicode = json::grammar::escaped_unicode;
     }
 
     auto append = [](auto const& ctx)
