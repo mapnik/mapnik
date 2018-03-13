@@ -44,7 +44,8 @@
 namespace mapnik
 {
 
-struct _mapnik_lib_t {
+struct _mapnik_lib_t
+{
     handle dl;
 };
 
@@ -59,27 +60,27 @@ PluginInfo::PluginInfo(std::string const& filename,
           if (module_ && module_->dl)
           {
               callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-                if (name_call) name_ = name_call();
-                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
-                if (init_once) {
-                    init_once();
-                }
+              if (name_call) name_ = name_call();
+              callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
+              if (init_once)  init_once();
           }
 #else
-  #ifdef MAPNIK_HAS_DLCFN
+#ifdef MAPNIK_HAS_DLCFN
           if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
           if (module_ && module_->dl)
           {
                 callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
                 if (name_call) name_ = name_call();
                 callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
-                if (init_once) {
-                    init_once();
-                }
+                if (init_once)init_once();
           }
-  #else
+          else
+          {
+              throw std::runtime_error(dlerror());
+          }
+#else
           throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
-  #endif
+#endif
 #endif
       }
 
