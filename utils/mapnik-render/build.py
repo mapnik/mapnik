@@ -20,7 +20,7 @@ if env['HAS_CAIRO']:
     program_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries = [boost_program_options]
+libraries = [env['MAPNIK_NAME'], boost_program_options]
 libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     libraries.append('dl')
