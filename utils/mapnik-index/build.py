@@ -27,7 +27,7 @@ Import ('env')
 Import ('plugin_base')
 
 program_env = plugin_base.Clone()
-program_env['LINKFLAGS'] = '-lmapnik plugins/input/csv/csv_utils.os' + program_env['LINKFLAGS']
+program_env['LINKFLAGS'] = '-l%s plugins/input/csv/csv_utils.os'  % plugin_base['MAPNIK_NAME']  + program_env['LINKFLAGS']
 source = Split(
     """
     mapnik-index.cpp

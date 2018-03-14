@@ -37,7 +37,7 @@ plugin_sources = Split(
 libraries = [ 'sqlite3' ]
 
 linkflags = []
-plugin_env.Append(LINKFLAGS='-lmapnik')
+
 if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
     plugin_env.Append(LINKFLAGS=linkflags)
