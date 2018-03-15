@@ -12,7 +12,7 @@ source = Split(
     )
 
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
-program_env['LINKFLAGS'] = '-lmapnik -lmapnik-json ' + program_env['LINKFLAGS']
+program_env['LINKFLAGS'] = '-l%s' % program_env['MAPNIK_NAME'] + program_env['LINKFLAGS']
 program_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 if env['HAS_CAIRO']:

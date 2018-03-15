@@ -22,13 +22,6 @@
 
 #include <mapnik/expression_grammar_x3_def.hpp>
 #include <mapnik/expression_grammar_x3_config.hpp>
-#include <mapnik/json/unicode_string_grammar_x3_def.hpp>
-
-namespace mapnik { namespace json { namespace grammar {
-BOOST_SPIRIT_INSTANTIATE(escaped_unicode_type, mapnik::grammar::iterator_type, mapnik::grammar::context_type);
-}
-
-}}
 
 namespace mapnik { namespace grammar {
 
