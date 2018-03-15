@@ -22,7 +22,6 @@
 
 #include <mapnik/expression_grammar_x3_def.hpp>
 #include <mapnik/expression_grammar_x3_config.hpp>
-
 #include <mapnik/json/unicode_string_grammar_x3_def.hpp>
 
 namespace mapnik { namespace json { namespace grammar {

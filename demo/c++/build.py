@@ -36,7 +36,7 @@ demo_env = env.Clone()
 demo_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
 demo_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
-demo_env['LINKFLAGS'] = '-l%s ' % env['MAPNIK_NAME'] +  demo_env['LINKFLAGS']
+demo_env['LINKFLAGS'] = '-l%s -lmapnik-json' % env['MAPNIK_NAME'] +  demo_env['LINKFLAGS']
 
 if env['HAS_CAIRO']:
     demo_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
