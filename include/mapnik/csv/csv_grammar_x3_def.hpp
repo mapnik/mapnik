@@ -38,9 +38,9 @@ using x3::lit;
 using x3::lexeme;
 using ascii::char_;
 
-struct unesc_char_ : x3::symbols<char>
+struct csv_unesc_chars_ : x3::symbols<char>
 {
-    unesc_char_()
+    csv_unesc_chars_()
     {
         add("\\a", '\a')
             ("\\b", '\b')
@@ -55,7 +55,7 @@ struct unesc_char_ : x3::symbols<char>
             ("\"\"", '\"') // double quote
             ;
     }
-} unesc_char;
+} csv_unesc_chars;
 
 template <typename T>
 struct literal : x3::parser<literal<T>>
@@ -97,7 +97,7 @@ auto const column_def = quoted_text | *(char_ - separator)
 auto const quoted_text_def = quote > text > quote // support unmatched quotes or not (??)
     ;
 
-auto const text_def = *(unesc_char | (char_ - quote))
+auto const text_def = *(csv_unesc_chars | (char_ - quote))
     ;
 
 BOOST_SPIRIT_DEFINE (
