@@ -74,7 +74,7 @@ namespace { auto const& json_string = mapnik::json::unicode_string_grammar(); }
 
 // exported rules
 // start
-generic_json_grammar_type const value MAPNIK_INIT_PRIORITY(103) ("JSON Value");
+generic_json_grammar_type const value MAPNIK_INIT_PRIORITY(102) ("JSON Value");
 generic_json_key_value_type const key_value("JSON Object element");
 // rules
 x3::rule<class json_object_tag, json_object> const object("JSON Object");
