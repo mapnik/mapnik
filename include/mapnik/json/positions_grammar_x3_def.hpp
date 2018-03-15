@@ -43,7 +43,7 @@ auto assign_helper = [](auto const& ctx)
 } // anonymous ns
 
 // start rule
-positions_grammar_type const positions MAPNIK_INIT_PRIORITY(104) ("Positions");
+positions_grammar_type const positions MAPNIK_INIT_PRIORITY(103) ("Positions");
 // rules
 x3::rule<class point_class, point> const point("Position");
 x3::rule<class ring_class, ring> const ring("Ring");
