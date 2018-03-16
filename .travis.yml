@@ -104,7 +104,7 @@ script:
  # to ensure that slow builds still upload their
  # ccache results and therefore should be faster
  # (and might work) for the next build
- - DURATION=2400
+ - DURATION=3200
  - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
  - RESULT=0
  - make test || RESULT=$?
