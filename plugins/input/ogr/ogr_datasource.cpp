@@ -41,6 +41,7 @@
 
 // stl
 #include <fstream>
+#include <mutex>
 #include <sstream>
 #include <stdexcept>
 
