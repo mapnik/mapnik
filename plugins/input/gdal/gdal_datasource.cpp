@@ -32,6 +32,8 @@
 
 #include <gdal_version.h>
 
+#include <mutex>
+
 using mapnik::datasource;
 using mapnik::parameters;
 
