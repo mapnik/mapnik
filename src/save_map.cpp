@@ -542,12 +542,12 @@ void serialize_layer( ptree & map_node, layer const& lyr, bool explicit_defaults
 
     if ( lyr.minimum_scale_denominator() != 0 || explicit_defaults )
     {
-        set_attr( layer_node, "minimum_scale_denominator", lyr.minimum_scale_denominator() );
+        set_attr( layer_node, "minimum-scale-denominator", lyr.minimum_scale_denominator() );
     }
 
     if ( lyr.maximum_scale_denominator() != std::numeric_limits<double>::max() || explicit_defaults )
     {
-        set_attr( layer_node, "maximum_scale_denominator", lyr.maximum_scale_denominator() );
+        set_attr( layer_node, "maximum-scale-denominator", lyr.maximum_scale_denominator() );
     }
 
     if ( lyr.queryable() || explicit_defaults )
