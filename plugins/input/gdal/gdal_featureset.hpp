@@ -66,7 +66,8 @@ public:
                     double dx,
                     double dy,
                     boost::optional<double> const& nodata,
-                    double nodata_tolerance);
+                    double nodata_tolerance,
+                    int64_t max_image_area);
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
 
@@ -85,6 +86,7 @@ private:
     int nbands_;
     boost::optional<double> nodata_value_;
     double nodata_tolerance_;
+    int64_t max_image_area_;
     bool first_;
 };
 

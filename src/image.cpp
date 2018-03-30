@@ -84,7 +84,7 @@ void buffer::swap(buffer & rhs)
     std::swap(owns_, rhs.owns_);
 }
 
-template struct MAPNIK_DECL image_dimensions<65535>;
+template struct MAPNIK_DECL image_dimensions<4294836225>;
 
 } // end ns detail
 

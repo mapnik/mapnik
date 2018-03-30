@@ -89,7 +89,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  double dx,
                                  double dy,
                                  boost::optional<double> const& nodata,
-                                 double nodata_tolerance)
+                                 double nodata_tolerance,
+                                 int64_t max_image_area)
     : dataset_(dataset),
       ctx_(std::make_shared<mapnik::context_type>()),
       band_(band),
@@ -102,6 +103,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       nbands_(nbands),
       nodata_value_(nodata),
       nodata_tolerance_(nodata_tolerance),
+      max_image_area_(max_image_area),
       first_(true)
 {
     ctx_->push("nodata");
@@ -155,6 +157,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     //size of resized output pixel in source image domain
     double margin_x = 1.0 / (std::fabs(dx_) * std::get<0>(q.resolution()));
     double margin_y = 1.0 / (std::fabs(dy_) * std::get<1>(q.resolution()));
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: margin_x=" << margin_x;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: margin_y=" << margin_y;
     if (margin_x < 1)
     {
         margin_x = 1.0;
@@ -169,6 +173,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     int y_off = rint(box.miny() - margin_y);
     int end_x = rint(box.maxx() + margin_x);
     int end_y = rint(box.maxy() + margin_y);
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: x_off=" << x_off;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: y_off=" << y_off;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: end_x=" << end_x;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: end_y=" << end_y;
 
     //clip to available data
     if (x_off < 0)
@@ -187,21 +195,134 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     {
         end_y = raster_height_;
     }
+
+    // width and height of the portion of the source image we are requesting
     int width = end_x - x_off;
     int height = end_y - y_off;
 
+    // In many cases we want GDAL to simply return the exact image so we
+    // can handle resampling internally in mapnik. In other cases such as 
+    // when overviews exist or when the image allocated might be too large
+    // we want to utilize some resampling in GDAL instead.
+    int im_height = height;
+    int im_width = width;
+    double im_offset_x = x_off;
+    double im_offset_y = y_off;
+    int current_width = (int)raster_width_;
+    int current_height = (int)raster_height_;
+
+    // loop through overviews -- snap up in resolution to closest overview if necessary
+    // we find an image size that most resembles the resolution of our output image.
+    double width_res = std::get<0>(q.resolution());
+    double height_res = std::get<1>(q.resolution());
+    int res_adjusted_raster_width = static_cast<int>(std::floor(((double)raster_width_ * width_res) + .5));
+    int res_adjusted_raster_height = static_cast<int>(std::floor(((double)raster_height_ * height_res) + .5));
+    if (band_ > 0 && band_ < nbands_)
+    {
+        GDALRasterBand * band = dataset_.GetRasterBand(band_);
+        int band_overviews = band->GetOverviewCount();
+        if (band_overviews > 0)
+        {
+            for (int b = 0; b < band_overviews; b++)
+            {
+                GDALRasterBand * overview = band->GetOverview(b);
+                int overview_width = overview->GetXSize();
+                int overview_height = overview->GetYSize();
+                if ((overview_width < current_width || overview_height < current_height) &&
+                    res_adjusted_raster_width <= overview_width &&
+                    res_adjusted_raster_height <= overview_height)
+                {
+                    current_width = overview_width;
+                    current_height = overview_height;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < nbands_; ++i)
+        {
+            GDALRasterBand * band = dataset_.GetRasterBand(i + 1);
+            int band_overviews = band->GetOverviewCount();
+            if (band_overviews > 0)
+            {
+                for (int b = 0; b < band_overviews; b++)
+                {
+                    GDALRasterBand * overview = band->GetOverview(b);
+                    int overview_width = overview->GetXSize();
+                    int overview_height = overview->GetYSize();
+                    if ((overview_width < current_width || overview_height < current_height) &&
+                        res_adjusted_raster_width <= overview_width &&
+                        res_adjusted_raster_height <= overview_height)
+                    {
+                        current_width = overview_width;
+                        current_height = overview_height;
+                    }
+                }
+            }
+        }
+    }
+    if (current_width != (int)raster_width_ || current_height != (int)raster_height_)
+    {
+        if (current_width != (int)raster_width_)
+        {
+            double ratio = (double)current_width / (double)raster_width_;
+            int adjusted_width = static_cast<int>(std::floor((ratio * im_width) + 0.5));
+            double adjusted_ratio = (double)adjusted_width / (double)im_width;
+            im_offset_x = adjusted_ratio * im_offset_x;
+            im_width = adjusted_width;
+        }
+        if (current_height != (int)raster_height_)
+        {
+            double ratio = (double)current_height / (double)raster_height_;
+            int adjusted_height = static_cast<int>(std::floor((ratio * im_height) + 0.5));
+            double adjusted_ratio = (double)adjusted_height / (double)im_height;
+            im_offset_y = adjusted_ratio * im_offset_y;
+            im_height = adjusted_height;
+        }
+    }
+    
+    int64_t im_area = (int64_t)im_width * (int64_t)im_height;
+    if (im_area > max_image_area_)
+    {
+        int adjusted_width = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_width / (double)im_height))));
+        int adjusted_height = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_height / (double)im_width))));
+        if (adjusted_width < 1)
+        {
+            adjusted_width = 1;
+        }
+        if (adjusted_height < 1)
+        {
+            adjusted_height = 1;
+        }
+        double ratio_x = (double)adjusted_width / (double)im_width;
+        double ratio_y = (double)adjusted_height / (double)im_height;
+        im_offset_x = ratio_x * im_offset_x;
+        im_offset_y = ratio_y * im_offset_y;
+        im_width = adjusted_width;
+        im_height = adjusted_height;
+        current_width = static_cast<int>(std::floor((ratio_x * current_width) + 0.5));
+        current_height = static_cast<int>(std::floor((ratio_y * current_height) + 0.5));
+    }
+    
     //calculate actual box2d of returned raster
-    box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
-    feature_raster_extent = t.backward(feature_raster_extent);
+    view_transform t2(current_width, current_height, raster_extent_, 0, 0);
+    box2d<double> feature_raster_extent(im_offset_x, im_offset_y, im_offset_x + im_width, im_offset_y + im_height);
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
+    feature_raster_extent = t2.backward(feature_raster_extent);
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Raster extent=" << raster_extent_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: View extent=" << intersect;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Query resolution=" << std::get<0>(q.resolution()) << "," << std::get<1>(q.resolution());
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: StartX=" << x_off << " StartY=" << y_off << " Width=" << width << " Height=" << height;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: IM StartX=" << im_offset_x << " StartY=" << im_offset_y << " Width=" << im_width << " Height=" << im_height;
 
     if (width > 0 && height > 0)
     {
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << width << "," << height << ")";
+
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Requested Image Size=(" << width << "," << height << ")";
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
         if (band_ > 0) // we are querying a single band
         {
@@ -217,7 +338,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             {
             case GDT_Byte:
             {
-                mapnik::image_gray8 image(width, height);
+                mapnik::image_gray8 image(im_width, im_height);
                 image.set(std::numeric_limits<std::uint8_t>::max());
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
@@ -237,7 +358,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             case GDT_Float64:
             case GDT_Float32:
             {
-                mapnik::image_gray32f image(width, height);
+                mapnik::image_gray32f image(im_width, im_height);
                 image.set(std::numeric_limits<float>::max());
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
@@ -256,7 +377,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             }
             case GDT_UInt16:
             {
-                mapnik::image_gray16 image(width, height);
+                mapnik::image_gray16 image(im_width, im_height);
                 image.set(std::numeric_limits<std::uint16_t>::max());
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
@@ -276,7 +397,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             default:
             case GDT_Int16:
             {
-                mapnik::image_gray16s image(width, height);
+                mapnik::image_gray16s image(im_width, im_height);
                 image.set(std::numeric_limits<std::int16_t>::max());
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
@@ -297,7 +418,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         }
         else // working with all bands
         {
-            mapnik::image_rgba8 image(width, height);
+            mapnik::image_rgba8 image(im_width, im_height);
             image.set(std::numeric_limits<std::uint32_t>::max());
             for (int i = 0; i < nbands_; ++i)
             {

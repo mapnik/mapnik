@@ -39,8 +39,10 @@ image_dimensions<max_size>::image_dimensions(int width, int height)
     : width_(width),
       height_(height)
 {
-    if (width < 0 || static_cast<std::size_t>(width) > max_size) throw std::runtime_error("Invalid width for image dimensions requested");
-    if (height < 0 || static_cast<std::size_t>(height) > max_size) throw std::runtime_error("Invalid height for image dimensions requested");
+    int64_t area = (int64_t)width * (int64_t)height;
+    if (width < 0) throw std::runtime_error("Invalid width for image dimensions requested");
+    if (height < 0) throw std::runtime_error("Invalid height for image dimensions requested");
+    if (area > max_size) throw std::runtime_error("Image area too large based on image dimensions");
 }
 
 template <std::size_t max_size>
