@@ -68,6 +68,7 @@ private:
     bool shared_dataset_;
     boost::optional<double> nodata_value_;
     double nodata_tolerance_;
+    int64_t max_image_area_;
 };
 
 #endif // GDAL_DATASOURCE_HPP

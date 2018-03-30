@@ -89,7 +89,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  double dx,
                                  double dy,
                                  boost::optional<double> const& nodata,
-                                 double nodata_tolerance)
+                                 double nodata_tolerance,
+                                 int64_t max_image_area)
     : dataset_(dataset),
       ctx_(std::make_shared<mapnik::context_type>()),
       band_(band),
@@ -102,6 +103,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       nbands_(nbands),
       nodata_value_(nodata),
       nodata_tolerance_(nodata_tolerance),
+      max_image_area_(max_image_area),
       first_(true)
 {
     ctx_->push("nodata");
@@ -280,16 +282,11 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         }
     }
     
-    // Maximum memory limitation for image will be simply based on the maximum
-    // area we allow for an image. The true memory footprint therefore will vary based
-    // on the type of imagery that exists. 
-    // max_im_area based on 50 mb limit for RGBA
-    constexpr int64_t max_im_area = (50*1024*1024) / 4;
     int64_t im_area = (int64_t)im_width * (int64_t)im_height;
-    if (im_area > max_im_area)
+    if (im_area > max_image_area_)
     {
-        int adjusted_width = static_cast<int>(std::round(std::sqrt(max_im_area * ((double)im_width / (double)im_height))));
-        int adjusted_height = static_cast<int>(std::round(std::sqrt(max_im_area * ((double)im_height / (double)im_width))));
+        int adjusted_width = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_width / (double)im_height))));
+        int adjusted_height = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_height / (double)im_width))));
         if (adjusted_width < 1)
         {
             adjusted_width = 1;
