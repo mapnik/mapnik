@@ -213,6 +213,7 @@ void text_layout::layout()
 // At the end everything that is left over is added as the final line.
 void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
 {
+    using BreakIterator = icu::BreakIterator;
     text_line line(line_limits.first, line_limits.second);
     shape_text(line);
 
@@ -234,7 +235,7 @@ void text_layout::break_line_icu(std::pair<unsigned, unsigned> && line_limits)
     }
 
     mapnik::value_unicode_string const& text = itemizer_.text();
-    Locale locale; // TODO: Is the default constructor correct?
+    icu::Locale locale; // TODO: Is the default constructor correct?
     UErrorCode status = U_ZERO_ERROR;
     std::unique_ptr<BreakIterator> breakitr(BreakIterator::createLineInstance(locale, status));
 
@@ -342,6 +343,7 @@ inline int adjust_last_break_position (int pos, bool repeat_wrap_char)
 
 void text_layout::break_line(std::pair<unsigned, unsigned> && line_limits)
 {
+    using BreakIterator = icu::BreakIterator;
     text_line line(line_limits.first, line_limits.second);
     shape_text(line);
     double scaled_wrap_width = wrap_width_ * scale_factor_;
