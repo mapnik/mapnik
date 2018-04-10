@@ -37,7 +37,7 @@ struct ParenStackEntry
     UScriptCode scriptCode = USCRIPT_INVALID_CODE;
 };
 
-class ScriptRun : public UObject {
+class ScriptRun : public icu::UObject {
 public:
     ScriptRun();
 
