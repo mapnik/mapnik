@@ -32,6 +32,8 @@
 
 #include <gdal_version.h>
 
+#include <mutex>
+
 using mapnik::datasource;
 using mapnik::parameters;
 
@@ -82,6 +84,13 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     shared_dataset_ = *params.get<mapnik::boolean_type>("shared", false);
     band_ = *params.get<mapnik::value_integer>("band", -1);
+    
+    // Maximum memory limitation for image will be simply based on the maximum
+    // area we allow for an image. The true memory footprint therefore will vary based
+    // on the type of imagery that exists. This is not the maximum size of an image
+    // on disk but rather the maximum size we will load into mapnik from GDAL.
+    // max_im_area based on 50 mb limit for RGBA
+    max_image_area_ = *params.get<mapnik::value_integer>("max_image_area", (50*1024*1024) / 4);
 
 #if GDAL_VERSION_NUM >= 1600
     if (shared_dataset_)
@@ -235,7 +244,8 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               dx_,
                                               dy_,
                                               nodata_value_,
-                                              nodata_tolerance_);
+                                              nodata_tolerance_,
+                                              max_image_area_);
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -254,5 +264,6 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
                                               dx_,
                                               dy_,
                                               nodata_value_,
-                                              nodata_tolerance_);
+                                              nodata_tolerance_,
+                                              max_image_area_);
 }

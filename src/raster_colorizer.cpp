@@ -129,20 +129,25 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
 {
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
-    // TODO: assuming in/out have the same width/height for now
-    std::uint32_t * out_data = out.data();
-    pixel_type const* in_data = in.data();
-    int len = out.width() * out.height();
-    for (int i=0; i<len; ++i)
+
+    const std::size_t width = std::min(in.width(), out.width());
+    const std::size_t height = std::min(in.height(), out.height());
+
+    for (std::size_t y = 0; y < height; ++y)
     {
-        pixel_type val = in_data[i];
-        if (nodata && (std::fabs(val - *nodata) < epsilon_))
+        pixel_type const * in_row = in.get_row(y);
+        image_rgba8::pixel_type * out_row = out.get_row(y);
+        for (std::size_t x = 0; x < width; ++x)
         {
-            out_data[i] = 0; // rgba(0,0,0,0)
-        }
-        else
-        {
-            out_data[i] = get_color(val);
+            pixel_type val = in_row[x];
+            if (nodata && (std::fabs(val - *nodata) < epsilon_))
+            {
+                out_row[x] = 0; // rgba(0,0,0,0)
+            }
+            else
+            {
+                out_row[x] = get_color(val);
+            }
         }
     }
 }
