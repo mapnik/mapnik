@@ -108,7 +108,7 @@ struct apply_vertex_placement
     proj_transform const& prj_trans_;
 };
 
-template <template <typename, typename> typename GridAdapter, typename T, typename Points>
+template <template <typename, typename> class GridAdapter, typename T, typename Points>
 struct grid_placement_finder_adapter
 {
     grid_placement_finder_adapter(T dx, T dy, Points & points, double scale_factor)
@@ -560,7 +560,7 @@ void text_symbolizer_helper::init_marker() const
     finder_.set_marker(std::make_shared<marker_info>(marker, trans), bbox, unlock_image, marker_displacement);
 }
 
-template <template <typename, typename> typename GridAdapter>
+template <template <typename, typename> class GridAdapter>
 void text_symbolizer_helper::initialize_grid_points() const
 {
     for (auto const& geom : geometries_to_process_)
