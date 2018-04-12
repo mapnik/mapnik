@@ -6,6 +6,17 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.20
+
+Released: April 12, 2018
+
+(Packaged from f02c7bcdb)
+
+    - Make max_image_area a datasource parameter for GDAL.
+    - GDAL Driver Overview Fix and Memory Reduction (#3872)
+    - Raster colorizer: check image bounds (#3879)
+    - Removed usage of `typename` in template template declarations (available in c++17) (#3882)
+
 ## 3.0.19
 
 Released: March 06, 2018
