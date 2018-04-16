@@ -84,31 +84,31 @@ using space_type = x3::standard::space_type;
 
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 
-using context_type = x3::with_context<keys_tag, std::reference_wrapper<keys_map> const,
-                                      phrase_parse_context_type>::type;
+using context_type = x3::context<keys_tag, std::reference_wrapper<keys_map> const,
+                                 phrase_parse_context_type>;
 
 using extract_bounding_boxes_context_type =
-    x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
-                     x3::with_context<feature_callback_tag, std::reference_wrapper<callback_type> const,
-                                      context_type>::type>::type;
+    x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
+                     x3::context<feature_callback_tag, std::reference_wrapper<callback_type> const,
+                                      context_type>>;
 
 using extract_bounding_boxes_reverse_context_type =
-    x3::with_context<keys_tag, std::reference_wrapper<keys_map> const,
-                     x3::with_context<feature_callback_tag, std::reference_wrapper<callback_type> const,
-                                      x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
-                                                       phrase_parse_context_type>::type>::type>::type;
+    x3::context<keys_tag, std::reference_wrapper<keys_map> const,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type> const,
+                            x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
+                                        phrase_parse_context_type>>>;
 
 
 using extract_bounding_boxes_context_type_f =
-    x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
-                     x3::with_context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
-                                      context_type>::type>::type;
+    x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
+                            context_type>>;
 
 using extract_bounding_boxes_reverse_context_type_f =
-    x3::with_context<keys_tag, std::reference_wrapper<keys_map> const,
-                     x3::with_context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
-                                      x3::with_context<bracket_tag, std::reference_wrapper<std::size_t> const,
-                                                       phrase_parse_context_type>::type>::type>::type;
+    x3::context<keys_tag, std::reference_wrapper<keys_map> const,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
+                            x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
+                                        phrase_parse_context_type>>>;
 
 }}}
 
