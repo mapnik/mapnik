@@ -281,7 +281,10 @@ operator<<(std::ostream & os, const mapnik::enumeration<ENUM, THE_MAX> & e)
     using name = enumeration<e, e ## _MAX>;
 #else
 #define DEFINE_ENUM( name, e)                   \
-    using name = enumeration<e, e ## _MAX>;
+    using name = enumeration<e, e ## _MAX>; \
+    template <> MAPNIK_DECL const char ** name ::our_strings_; \
+    template <> MAPNIK_DECL std::string name ::our_name_; \
+    template <> MAPNIK_DECL bool name ::our_verified_flag_;
 #endif
 
 /** Helper macro. Runs the verify_mapnik_enum() method during static initialization.
