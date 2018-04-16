@@ -26,6 +26,7 @@
 #include <mapnik/vertex.hpp>
 
 #pragma GCC diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
 #include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
 #include <boost/msm/back/state_machine.hpp>
