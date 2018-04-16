@@ -34,9 +34,9 @@ using iterator_type = std::string::const_iterator;
 using phrase_context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
 // define combined context
-using context_type = x3::with_context<transcoder_tag,
-                                      std::reference_wrapper<mapnik::transcoder const> const,
-                                      phrase_context_type>::type;
+using context_type = x3::context<transcoder_tag,
+                                 std::reference_wrapper<mapnik::transcoder const> const,
+                                 phrase_context_type>;
 
 }}
 

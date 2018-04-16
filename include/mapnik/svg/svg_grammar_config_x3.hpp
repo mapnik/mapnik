@@ -40,9 +40,9 @@ using space_type = x3::standard::space_type;
 using iterator_type = char const*;
 
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
-using svg_parse_context_type = x3::with_context<relative_tag, std::reference_wrapper<bool> const,
-                                                x3::with_context<svg_path_tag,std::reference_wrapper<svg_converter_type> const,
-                                                                 phrase_parse_context_type>::type>::type;
+using svg_parse_context_type = x3::context<relative_tag, std::reference_wrapper<bool> const,
+                                           x3::context<svg_path_tag,std::reference_wrapper<svg_converter_type> const,
+                                                       phrase_parse_context_type>>;
 
 inline double deg2rad(double deg) {return (M_PI * deg) / 180.0;}
 
