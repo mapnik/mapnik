@@ -84,30 +84,27 @@ using space_type = x3::standard::space_type;
 
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 
-using context_type = x3::context<keys_tag, std::reference_wrapper<keys_map> const,
-                                 phrase_parse_context_type>;
-
 using extract_bounding_boxes_context_type =
-    x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
-                     x3::context<feature_callback_tag, std::reference_wrapper<callback_type> const,
-                                      context_type>>;
+    x3::context<bracket_tag, std::reference_wrapper<std::size_t>,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type>,
+                            context_type>>;
 
 using extract_bounding_boxes_reverse_context_type =
-    x3::context<keys_tag, std::reference_wrapper<keys_map> const,
-                x3::context<feature_callback_tag, std::reference_wrapper<callback_type> const,
-                            x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
+    x3::context<keys_tag, std::reference_wrapper<keys_map>,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type>,
+                            x3::context<bracket_tag, std::reference_wrapper<std::size_t>,
                                         phrase_parse_context_type>>>;
 
 
 using extract_bounding_boxes_context_type_f =
-    x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
-                x3::context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
+    x3::context<bracket_tag, std::reference_wrapper<std::size_t>,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type_f>,
                             context_type>>;
 
 using extract_bounding_boxes_reverse_context_type_f =
-    x3::context<keys_tag, std::reference_wrapper<keys_map> const,
-                x3::context<feature_callback_tag, std::reference_wrapper<callback_type_f> const,
-                            x3::context<bracket_tag, std::reference_wrapper<std::size_t> const,
+    x3::context<keys_tag, std::reference_wrapper<keys_map>,
+                x3::context<feature_callback_tag, std::reference_wrapper<callback_type_f>,
+                            x3::context<bracket_tag, std::reference_wrapper<std::size_t>,
                                         phrase_parse_context_type>>>;
 
 }}}
