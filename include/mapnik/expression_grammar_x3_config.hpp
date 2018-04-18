@@ -35,7 +35,7 @@ using phrase_context_type = x3::phrase_parse_context<x3::ascii::space_type>::typ
 
 // define combined context
 using context_type = x3::context<transcoder_tag,
-                                 std::reference_wrapper<mapnik::transcoder const>,
+                                 mapnik::transcoder const,
                                  phrase_context_type>;
 
 }}
