@@ -35,7 +35,7 @@ expression_ptr parse_expression(std::string const& str)
     auto node = std::make_shared<expr_node>();
     using boost::spirit::x3::ascii::space;
     mapnik::transcoder const tr("utf8");
-    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
         [
             mapnik::expression_grammar()
         ];

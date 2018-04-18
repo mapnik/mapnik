@@ -46,7 +46,7 @@ using x3::no_case;
 
 auto const matrix_action = [] (auto const& ctx)
 {
-    auto & tr = x3::get<svg_transform_tag>(ctx).get();
+    auto & tr = x3::get<svg_transform_tag>(ctx);
     auto const& attr = _attr(ctx);
     auto a = boost::fusion::at_c<0>(attr);
     auto b = boost::fusion::at_c<1>(attr);
@@ -59,7 +59,7 @@ auto const matrix_action = [] (auto const& ctx)
 
 auto const rotate_action = [] (auto const& ctx)
 {
-    auto & tr = x3::get<svg_transform_tag>(ctx).get();
+    auto & tr = x3::get<svg_transform_tag>(ctx);
     auto const& attr = _attr(ctx);
     auto a = boost::fusion::at_c<0>(attr);
     auto cx = boost::fusion::at_c<1>(attr) ? *boost::fusion::at_c<1>(attr) : 0.0;
@@ -79,7 +79,7 @@ auto const rotate_action = [] (auto const& ctx)
 
 auto const translate_action = [] (auto const& ctx)
 {
-    auto & tr = x3::get<svg_transform_tag>(ctx).get();
+    auto & tr = x3::get<svg_transform_tag>(ctx);
     auto const& attr = _attr(ctx);
     auto tx = boost::fusion::at_c<0>(attr);
     auto ty = boost::fusion::at_c<1>(attr);
@@ -89,7 +89,7 @@ auto const translate_action = [] (auto const& ctx)
 
 auto const scale_action = [] (auto const& ctx)
 {
-    auto & tr = x3::get<svg_transform_tag>(ctx).get();
+    auto & tr = x3::get<svg_transform_tag>(ctx);
     auto const& attr = _attr(ctx);
     auto sx = boost::fusion::at_c<0>(attr);
     auto sy = boost::fusion::at_c<1>(attr);
@@ -99,14 +99,14 @@ auto const scale_action = [] (auto const& ctx)
 
 auto const skewX_action = [] (auto const& ctx)
 {
-    auto & tr = x3::get<svg_transform_tag>(ctx).get();
+    auto & tr = x3::get<svg_transform_tag>(ctx);
     auto skew_x = _attr(ctx);
     tr = agg::trans_affine_skewing(deg2rad(skew_x), 0.0) * tr;
 };
 
 auto const skewY_action = [] (auto const& ctx)
 {
-    auto & tr = x3::get<svg_transform_tag>(ctx).get();
+    auto & tr = x3::get<svg_transform_tag>(ctx);
     auto skew_y= _attr(ctx);
     tr = agg::trans_affine_skewing(0.0, deg2rad(skew_y)) * tr;
 };

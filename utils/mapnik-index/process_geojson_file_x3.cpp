@@ -285,7 +285,7 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     using namespace boost::spirit;
     using space_type = mapnik::json::grammar::space_type;
     auto keys = mapnik::json::get_keys();
-    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
+    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(keys)
         [ geojson_value ];
     for (auto const& item : boxes)
     {

@@ -92,20 +92,20 @@ using iterator_type = char const*;
 
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 using context_type = x3::context<keys_tag,
-                                 std::reference_wrapper<keys_map>,
+                                 keys_map,
                                  phrase_parse_context_type>;
 
 using feature_context_type = x3::context<transcoder_tag,
-                                         std::reference_wrapper<mapnik::transcoder>,
+                                         mapnik::transcoder const,
                                          x3::context<feature_tag,
-                                                          std::reference_wrapper<mapnik::feature_impl>,
-                                                          phrase_parse_context_type>>;
+                                                     mapnik::feature_impl,
+                                                     phrase_parse_context_type>>;
 
 // our spirit x3 grammars needs this one with changed order of feature_impl and transcoder (??)
 using feature_context_const_type = x3::context<feature_tag,
-                                               std::reference_wrapper<mapnik::feature_impl>,
+                                               mapnik::feature_impl,
                                                x3::context<transcoder_tag,
-                                                           std::reference_wrapper<mapnik::transcoder const>,
+                                                           mapnik::transcoder const,
                                                            phrase_parse_context_type>>;
 
 // helper macro

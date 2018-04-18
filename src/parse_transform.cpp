@@ -37,7 +37,7 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
     mapnik::transcoder const tr(encoding);
-    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
         [
             mapnik::transform_expression_grammar()
         ];

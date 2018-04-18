@@ -40,8 +40,8 @@ bool parse_points(const char* wkt, PathType& p)
     iterator_type last = wkt + std::strlen(wkt);
     bool relative = false;
 
-    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(std::ref(p))
-        [ x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(p)
+        [ x3::with<mapnik::svg::grammar::relative_tag>(relative)
           [mapnik::svg::svg_points_grammar()]];
 
     try

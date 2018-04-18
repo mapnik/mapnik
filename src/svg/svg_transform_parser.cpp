@@ -37,7 +37,7 @@ bool parse_svg_transform(const char* wkt, Transform& tr)
     iterator_type first = wkt;
     iterator_type last = wkt + std::strlen(wkt);
     using space_type = mapnik::svg::grammar::space_type;
-    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(std::ref(tr))
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(tr)
           [mapnik::svg::svg_transform_grammar()];
 
     try
