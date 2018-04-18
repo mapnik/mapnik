@@ -27,8 +27,6 @@ namespace mapnik { namespace json { namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(feature_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE(geometry_grammar_type, iterator_type, phrase_parse_context_type);
-
-BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_grammar_type, iterator_type, feature_context_const_type);
 
 }
