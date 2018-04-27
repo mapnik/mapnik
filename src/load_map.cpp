@@ -149,51 +149,69 @@ private:
     std::string xml_base_path_;
 };
 
-void map_allow_overlap_optimization(Map &map)
+
+struct allow_overlap_visitor
 {
-    // Due manual rule optimization for marker symbolizers. If all styles
-    // use only marker symbolizers and all rules of the styles have explictly
-    // define allow_overlap=true, then set ignore_placement=true. This has
-    // both performance benefits and allows the rendering to run in constant space
-    // as the collision quadtree is not used.
-    // Note that the code can be generalized to include texts and points.
+    bool operator()(point_symbolizer const&)            { return true; }
+    bool operator()(line_symbolizer const&)             { return false; }
+    bool operator()(line_pattern_symbolizer const&)     { return false; }
+    bool operator()(polygon_symbolizer const&)          { return false; }
+    bool operator()(polygon_pattern_symbolizer const&)  { return false; }
+    bool operator()(raster_symbolizer const&)           { return false; }
+    bool operator()(shield_symbolizer const&)           { return false; }
+    bool operator()(text_symbolizer const&)             { return true; }
+    bool operator()(building_symbolizer const&)         { return false; }
+    bool operator()(markers_symbolizer const&)          { return true; }
+    bool operator()(group_symbolizer const&)            { return false; }
+    bool operator()(debug_symbolizer const&)            { return true; } //Requires the quadtree
+    bool operator()(dot_symbolizer const&)              { return false; }
+};
+
+// If all symbolizers declare 'allow_overlap: true' (their placement is independent
+// from already placed symbols), there is no need to check collisions with subsequent
+// symbolizers. To avoid building the quadtree unnecessarily we set
+// the 'ignore_placement' flag
+void map_apply_overlap_optimization(Map &map)
+{
     bool ignore_placement = true;
-    for (auto style_it = map.begin_styles(); style_it != map.end_styles(); style_it++)
+    for (auto const & style : map.styles())
     {
-        for (auto & rule : style_it->second.get_rules_nonconst())
+        for (auto const & rule : style.second.get_rules())
         {
-            for (auto & sym : rule)
+            for (auto const & sym : rule)
             {
-                if (sym.is<markers_symbolizer>())
+                struct allow_overlap_visitor visitor;
+                if (util::apply_visitor(visitor, sym))
                 {
-                    markers_symbolizer & marker = sym.get<markers_symbolizer>();
-                    auto prop_it = marker.properties.find(keys::allow_overlap);
-                    if (prop_it != marker.properties.end())
+                    symbolizer_base const & sb = sym.get_unchecked<markers_symbolizer>();
+                    auto prop_it = sb.properties.find(keys::allow_overlap);
+                    if (prop_it != sb.properties.end())
                     {
                         if (prop_it->second == true)
                         {
                             continue;
                         }
                     }
+                    ignore_placement = false;
+                    break;
                 }
-                // In all other cases (non-marker symbolizer, allow_overlap not explictly true) do not set ignore_placement
-                ignore_placement = false;
-                break;
             }
         }
     }
+
     if (ignore_placement)
     {
-        for (auto style_it = map.begin_styles(); style_it != map.end_styles(); style_it++)
+        for (auto & style : map.styles())
         {
-            for (auto & rule : style_it->second.get_rules_nonconst())
+            for (auto & rule : style.second.get_rules_nonconst())
             {
                 for (auto & sym : rule)
                 {
-                    if (sym.is<markers_symbolizer>())
+                    struct allow_overlap_visitor visitor;
+                    if (util::apply_visitor(visitor, sym))
                     {
-                        markers_symbolizer & marker = sym.get<markers_symbolizer>();
-                        marker.properties[keys::ignore_placement] = true;
+                        symbolizer_base & sb = sym.get_unchecked<markers_symbolizer>();
+                        sb.properties[keys::ignore_placement] = true;
                     }
                 }
             }
@@ -209,7 +227,7 @@ void load_map(Map & map, std::string const& filename, bool strict, std::string b
     read_xml(filename, tree.root());
     map_parser parser(map, strict, filename);
     parser.parse_map(map, tree.root(), base_path);
-    map_allow_overlap_optimization(map);
+    map_apply_overlap_optimization(map);
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string base_path)
@@ -225,7 +243,7 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     }
     map_parser parser(map, strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
-    map_allow_overlap_optimization(map);
+    map_apply_overlap_optimization(map);
 }
 
 void map_parser::parse_map(Map & map, xml_node const& node, std::string const& base_path)
