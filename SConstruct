@@ -1275,7 +1275,10 @@ if not preconfigured:
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
     cxx_version = call("%s --version" % env["CXX"] ,silent=True)
-    color_print(5, "CXX %s" % cxx_version.decode("utf8"))
+    if cxx_version:
+        color_print(5, "CXX %s" % cxx_version.decode("utf8"))
+    else:
+        color_print(5, "Could not detect CXX compiler")
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
