@@ -67,7 +67,7 @@ public:
 
     inline std::string id() const
     {
-        return connection_string();
+        return connection_string_safe();
     }
 
     inline std::string connection_string() const
