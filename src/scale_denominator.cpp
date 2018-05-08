@@ -23,13 +23,14 @@
 // mapnik
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/global.hpp>
+#include <mapnik/well_known_srs.hpp>
 
 // stl
 #include <cmath>
 
 namespace mapnik {
 
-static const double meters_per_degree = 6378137 * 2 * M_PI / 360;
+static const double meters_per_degree = EARTH_CIRCUMFERENCE / 360;
 
 double scale_denominator(double map_scale, bool geographic)
 {
