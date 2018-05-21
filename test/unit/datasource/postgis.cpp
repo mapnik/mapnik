@@ -28,6 +28,7 @@
 #include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/fs.hpp>
+#include "../../../plugins/input/postgis/connection_manager.hpp"
 
 /*
   Compile and run just this test:
@@ -405,4 +406,21 @@ TEST_CASE("postgis") {
 */
 
     }
+}
+
+
+TEST_CASE("ConnectionCreator") {
+
+SECTION("ConnectionCreator::id() should not expose password")
+{
+    ConnectionCreator<Connection> creator(boost::optional<std::string>("host"),
+                                          boost::optional<std::string>("12345"),
+                                          boost::optional<std::string>("dbname"),
+                                          boost::optional<std::string>("user"),
+                                          boost::optional<std::string>("pass"),
+                                          boost::optional<std::string>("111"));
+
+    CHECK(creator.id() == "host=host port=12345 dbname=dbname user=user connect_timeout=111");
+}
+
 }

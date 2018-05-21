@@ -314,6 +314,12 @@ bool middle_point(PathType & path, double & x, double & y, boost::optional<doubl
     path.rewind(0);
     unsigned command = path.vertex(&x0,&y0);
     if (command == SEG_END) return false;
+    if (std::abs(mid_length) < std::numeric_limits<double>::epsilon())
+    {
+        x = x0;
+        y = y0;
+        return true;
+    }
     double dist = 0.0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
