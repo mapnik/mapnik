@@ -67,7 +67,7 @@ public:
 
     inline std::string id() const
     {
-        return connection_string();
+        return connection_string_safe();
     }
 
     inline std::string connection_string() const
@@ -115,6 +115,9 @@ public:
 
     bool registerPool(ConnectionCreator<Connection> const& creator,unsigned initialSize,unsigned maxSize)
     {
+#ifdef MAPNIK_THREADSAFE
+        std::lock_guard<std::mutex> lock(mutex_);
+#endif
         ContType::const_iterator itr = pools_.find(creator.id());
 
         if (itr != pools_.end())
@@ -134,6 +137,9 @@ public:
 
     std::shared_ptr<PoolType> getPool(std::string const& key)
     {
+#ifdef MAPNIK_THREADSAFE
+        std::lock_guard<std::mutex> lock(mutex_);
+#endif
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end())
         {

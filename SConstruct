@@ -1401,6 +1401,7 @@ if not preconfigured:
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
     ]
 
+    CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
         REQUIRED_LIBSHEADERS.insert(0,['freetype','ft2build.h',True,'C'])
         if env.get('FREETYPE_INCLUDES'):
@@ -1409,6 +1410,21 @@ if not preconfigured:
         if env.get('FREETYPE_LIBS'):
             lib_path = env['FREETYPE_LIBS']
             env.AppendUnique(LIBPATH = fix_path(lib_path))
+    elif CHECK_PKG_CONFIG and conf.CheckPKG('freetype2'):
+        # Freetype 2.9+ doesn't use freetype-config and uses pkg-config instead
+        cmd = 'pkg-config freetype2 --libs --cflags'
+        if env['RUNTIME_LINK'] == 'static':
+            cmd += ' --static'
+
+        temp_env = Environment(ENV=os.environ)
+        try:
+            temp_env.ParseConfig(cmd)
+            for lib in temp_env['LIBS']:
+                env.AppendUnique(LIBPATH = fix_path(lib))
+            for inc in temp_env['CPPPATH']:
+                env.AppendUnique(CPPPATH = fix_path(inc))
+        except OSError as e:
+            pass
     elif conf.parse_config('FREETYPE_CONFIG'):
         # check if freetype links to bz2
         if env['RUNTIME_LINK'] == 'static':
@@ -1641,9 +1657,6 @@ if not preconfigured:
         if env['QUERIED_ICU_DATA'] and not os.path.exists(env['QUERIED_ICU_DATA']):
             color_print(1,'%s not detected on your system' % env['QUERIED_ICU_DATA'] )
             env['MISSING_DEPS'].append('ICU_DATA')
-
-
-    CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
 
     if len(env['REQUESTED_PLUGINS']):
         if env['HOST']:
