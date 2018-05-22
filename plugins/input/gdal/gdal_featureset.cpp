@@ -213,8 +213,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     // we find an image size that most resembles the resolution of our output image.
     double width_res = std::get<0>(q.resolution());
     double height_res = std::get<1>(q.resolution());
-    int res_adjusted_raster_width = static_cast<int>(std::floor(((double)raster_width_ * width_res) + .5));
-    int res_adjusted_raster_height = static_cast<int>(std::floor(((double)raster_height_ * height_res) + .5));
+    int res_adjusted_raster_width = static_cast<int>(std::floor(((double)raster_extent_.width() * width_res) + .5));
+    int res_adjusted_raster_height = static_cast<int>(std::floor(((double)raster_extent_.height() * height_res) + .5));
     if (band_ > 0 && band_ < nbands_)
     {
         GDALRasterBand * band = dataset_.GetRasterBand(band_);
