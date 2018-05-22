@@ -119,54 +119,92 @@ struct render_marker_symbolizer_visitor
 
     void operator() (marker_null const&) const {}
 
-    void operator() (marker_svg const& mark) const
+    void operator() (marker_svg const& mark)
     {
         using namespace mapnik::svg;
+        auto &csym = const_cast<markers_symbolizer &>(sym_);
+        if (csym.cacheable == markers_symbolizer::cache_status::UNCHECKED)
+        {
+            if (std::all_of(csym.properties.begin(), csym.properties.end(),
+                [](symbolizer_base::cont_type::value_type const& key_prop)
+                  { return !is_expression(key_prop.second);}))
+            {
+                csym.cacheable = markers_symbolizer::cache_status::CACHEABLE;
+            }
+            else
+            {
+                csym.cacheable = markers_symbolizer::cache_status::UNCACHEABLE;
+            }
+        }
 
         // https://github.com/mapnik/mapnik/issues/1316
         bool snap_to_pixels = !mapnik::marker_cache::instance().is_uri(filename_);
 
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
 
-        svg_path_ptr stock_vector_marker = mark.get_data();
-        svg_path_ptr marker_ptr = stock_vector_marker;
-        bool is_ellipse = false;
+        boost::optional<svg_path_ptr> const& stock_vector_marker = mark.get_data();
+        svg_path_ptr marker_ptr = *stock_vector_marker;
 
-        svg_attribute_type s_attributes;
-        auto const& r_attributes = get_marker_attributes(stock_vector_marker, s_attributes);
+        std::shared_ptr<svg_attribute_type> r_attributes = nullptr;
 
-        // special case for simple ellipse markers
-        // to allow for full control over rx/ry dimensions
-        if (filename_ == "shape://ellipse"
-           && (has_key(sym_,keys::width) || has_key(sym_,keys::height)))
+        bool cacheable = (csym.cacheable == markers_symbolizer::cache_status::CACHEABLE);
+
+        if (cacheable)
         {
-            marker_ptr = std::make_shared<svg_storage_type>();
-            is_ellipse = true;
+            r_attributes = csym.cached_attributes;
+        }
+
+        if (r_attributes == nullptr)
+        {
+            svg_attribute_type s_attributes;
+            r_attributes = std::make_shared<svg_attribute_type>(get_marker_attributes(*stock_vector_marker, s_attributes));
+
+            if (cacheable)
+            {
+                csym.cached_attributes = r_attributes;
+            }
+        }
+
+        if (filename_ != "shape://ellipse" ||
+            !((has_key(csym,keys::width) || has_key(csym,keys::height))))
+        {
+            box2d<double> const& bbox = mark.bounding_box();
+            setup_transform_scaling(image_tr, bbox.width(), bbox.height(), feature_, common_.vars_, csym);
         }
         else
         {
-            box2d<double> const& bbox = mark.bounding_box();
-            setup_transform_scaling(image_tr, bbox.width(), bbox.height(), feature_, common_.vars_, sym_);
+            // special case for simple ellipse markers to allow for full control over rx/ry dimensions
+            // Ellipses are built procedurally. We do caching of the built ellipses, this is useful for rendering stages
+            marker_ptr = cacheable ? csym.cached_ellipse : nullptr;
+            if (!marker_ptr)
+            {
+                marker_ptr = std::make_shared<svg_storage_type>();
+                vertex_stl_adapter<svg_path_storage> stl_storage(marker_ptr->source());
+                svg_path_adapter svg_path(stl_storage);
+                build_ellipse(csym, feature_, common_.vars_, *marker_ptr, svg_path);
+
+                // Since the symbolizer has either width or height and their value isn't
+                // an expression we can cache the output of the ellipse per symbolizer
+                if (cacheable)
+                {
+                    csym.cached_ellipse = marker_ptr;
+                }
+            }
         }
 
         vertex_stl_adapter<svg_path_storage> stl_storage(marker_ptr->source());
         svg_path_adapter svg_path(stl_storage);
 
-        if (is_ellipse)
-        {
-            build_ellipse(sym_, feature_, common_.vars_, *marker_ptr, svg_path);
-        }
-
-        if (auto image_transform = get_optional<transform_type>(sym_, keys::image_transform))
+        if (auto image_transform = get_optional<transform_type>(csym, keys::image_transform))
         {
             evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         }
 
         vector_dispatch_type rasterizer_dispatch(marker_ptr,
                                                  svg_path,
-                                                 r_attributes,
+                                                 *r_attributes,
                                                  image_tr,
-                                                 sym_,
+                                                 csym,
                                                  *common_.detector_,
                                                  common_.scale_factor_,
                                                  feature_,

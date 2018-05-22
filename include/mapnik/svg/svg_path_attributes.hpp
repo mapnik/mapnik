@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/gradient.hpp>
-#include <mapnik/symbolizer_base.hpp> // dash_array
+#include <mapnik/image.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -34,7 +34,14 @@
 #include "agg_trans_affine.h"
 #pragma GCC diagnostic pop
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 namespace mapnik {
+
+using dash_array = std::vector<std::pair<double,double> >;
+
 namespace svg {
 
 struct path_attributes
@@ -61,6 +68,20 @@ struct path_attributes
     bool         display_flag;
     dash_array   dash;
     double       dash_offset;
+
+    // this determines subpixel precision. The larger the value, the closer the solution
+    // will be compared to the reference but will reduce the cache hits
+    static constexpr int sampling_rate = 8;
+
+    struct cache_line
+    {
+        std::shared_ptr<image_rgba8> fill_img = nullptr;
+        std::shared_ptr<image_rgba8> stroke_img = nullptr;
+        bool set = false;
+    };
+
+    std::vector<cache_line> cached_images;
+
     // Empty constructor
     path_attributes() :
         fill_gradient(),
@@ -84,7 +105,8 @@ struct path_attributes
         visibility_flag(true),
         display_flag(true),
         dash(),
-        dash_offset(0.0)
+        dash_offset(0.0),
+        cached_images({})
     {}
 
     // Copy constructor
@@ -110,7 +132,8 @@ struct path_attributes
           visibility_flag(attr.visibility_flag),
           display_flag(attr.display_flag),
           dash(attr.dash),
-          dash_offset(attr.dash_offset)
+          dash_offset(attr.dash_offset),
+          cached_images(attr.cached_images)
     {}
     // Copy constructor with new index value
     path_attributes(path_attributes const& attr, unsigned idx)
@@ -135,7 +158,8 @@ struct path_attributes
           visibility_flag(attr.visibility_flag),
           display_flag(attr.display_flag),
           dash(attr.dash),
-          dash_offset(attr.dash_offset)
+          dash_offset(attr.dash_offset),
+          cached_images(attr.cached_images)
     {}
 };
 
