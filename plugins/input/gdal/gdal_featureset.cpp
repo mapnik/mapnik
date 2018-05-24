@@ -267,18 +267,14 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         if (current_width != (int)raster_width_)
         {
             double ratio = (double)current_width / (double)raster_width_;
-            int adjusted_width = static_cast<int>(std::floor((ratio * im_width) + 0.5));
-            double adjusted_ratio = (double)adjusted_width / (double)im_width;
-            im_offset_x = adjusted_ratio * im_offset_x;
-            im_width = adjusted_width;
+            im_offset_x = std::floor(ratio * im_offset_x);
+            im_width = static_cast<int>(std::ceil(ratio * im_width));
         }
         if (current_height != (int)raster_height_)
         {
             double ratio = (double)current_height / (double)raster_height_;
-            int adjusted_height = static_cast<int>(std::floor((ratio * im_height) + 0.5));
-            double adjusted_ratio = (double)adjusted_height / (double)im_height;
-            im_offset_y = adjusted_ratio * im_offset_y;
-            im_height = adjusted_height;
+            im_offset_y = std::floor(ratio * im_offset_y);
+            im_height = static_cast<int>(std::ceil(ratio * im_height));
         }
     }
     
