@@ -40,6 +40,8 @@
 namespace mapnik
 {
 
+static constexpr double offset_converter_default_threshold = 5.0;
+
 template <typename Geometry>
 struct offset_converter
 {
@@ -48,7 +50,7 @@ struct offset_converter
     offset_converter(Geometry & geom)
         : geom_(geom)
         , offset_(0.0)
-        , threshold_(5.0)
+        , threshold_(offset_converter_default_threshold)
         , half_turn_segments_(16)
         , status_(initial)
         , pre_first_(vertex2d::no_init)
