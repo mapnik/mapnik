@@ -6,6 +6,7 @@ First clone mapnik from github and initialize submodules
 
 ```bash
 git clone https://github.com/mapnik/mapnik.git
+cd mapnik
 git submodule update --init
 ```
 
