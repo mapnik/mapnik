@@ -124,6 +124,33 @@ feature_ptr gdal_featureset::next()
     return feature_ptr();
 }
 
+void gdal_featureset::find_best_overview(int bandNumber,
+                                         int ideal_width,
+                                         int ideal_height,
+                                         int & current_width,
+                                         int & current_height) const
+{
+    GDALRasterBand * band = dataset_.GetRasterBand(bandNumber);
+    int band_overviews = band->GetOverviewCount();
+    if (band_overviews > 0)
+    {
+        for (int b = 0; b < band_overviews; b++)
+        {
+            GDALRasterBand * overview = band->GetOverview(b);
+            int overview_width = overview->GetXSize();
+            int overview_height = overview->GetYSize();
+            if ((overview_width < current_width ||
+                 overview_height < current_height) &&
+                ideal_width <= overview_width &&
+                ideal_height <= overview_height)
+            {
+                current_width = overview_width;
+                current_height = overview_height;
+            }
+        }
+    }
+}
+
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 {
     feature_ptr feature = feature_factory::create(ctx_,1);
@@ -206,61 +233,43 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     int im_width = width;
     double im_offset_x = x_off;
     double im_offset_y = y_off;
-    int current_width = (int)raster_width_;
-    int current_height = (int)raster_height_;
+    int current_width = static_cast<int>(raster_width_);
+    int current_height = static_cast<int>(raster_height_);
 
-    // loop through overviews -- snap up in resolution to closest overview if necessary
-    // we find an image size that most resembles the resolution of our output image.
-    double width_res = std::get<0>(q.resolution());
-    double height_res = std::get<1>(q.resolution());
-    int res_adjusted_raster_width = static_cast<int>(std::floor(((double)raster_extent_.width() * width_res * filter_factor) + .5));
-    int res_adjusted_raster_height = static_cast<int>(std::floor(((double)raster_extent_.height() * height_res * filter_factor) + .5));
+    // loop through overviews -- snap up in resolution to closest overview
+    // if necessary we find an image size that most resembles
+    // the resolution of our output image.
+    const double width_res = std::get<0>(q.resolution());
+    const double height_res = std::get<1>(q.resolution());
+    const int ideal_raster_width = static_cast<int>(
+        std::floor(raster_extent_.width() *
+            width_res * filter_factor) + .5);
+    const int ideal_raster_height = static_cast<int>(
+        std::floor(raster_extent_.height() *
+            height_res * filter_factor) + .5);
+
     if (band_ > 0 && band_ < nbands_)
     {
-        GDALRasterBand * band = dataset_.GetRasterBand(band_);
-        int band_overviews = band->GetOverviewCount();
-        if (band_overviews > 0)
-        {
-            for (int b = 0; b < band_overviews; b++)
-            {
-                GDALRasterBand * overview = band->GetOverview(b);
-                int overview_width = overview->GetXSize();
-                int overview_height = overview->GetYSize();
-                if ((overview_width < current_width || overview_height < current_height) &&
-                    res_adjusted_raster_width <= overview_width &&
-                    res_adjusted_raster_height <= overview_height)
-                {
-                    current_width = overview_width;
-                    current_height = overview_height;
-                }
-            }
-        }
+        find_best_overview(band_,
+                           ideal_raster_width,
+                           ideal_raster_height,
+                           current_width,
+                           current_height);
     }
     else
     {
         for (int i = 0; i < nbands_; ++i)
         {
-            GDALRasterBand * band = dataset_.GetRasterBand(i + 1);
-            int band_overviews = band->GetOverviewCount();
-            if (band_overviews > 0)
-            {
-                for (int b = 0; b < band_overviews; b++)
-                {
-                    GDALRasterBand * overview = band->GetOverview(b);
-                    int overview_width = overview->GetXSize();
-                    int overview_height = overview->GetYSize();
-                    if ((overview_width < current_width || overview_height < current_height) &&
-                        res_adjusted_raster_width <= overview_width &&
-                        res_adjusted_raster_height <= overview_height)
-                    {
-                        current_width = overview_width;
-                        current_height = overview_height;
-                    }
-                }
-            }
+            find_best_overview(i + 1,
+                               ideal_raster_width,
+                               ideal_raster_height,
+                               current_width,
+                               current_height);
         }
     }
-    if (current_width != (int)raster_width_ || current_height != (int)raster_height_)
+
+    if (current_width != (int)raster_width_ ||
+        current_height != (int)raster_height_)
     {
         if (current_width != (int)raster_width_)
         {
