@@ -1597,8 +1597,8 @@ if not preconfigured:
         # around. See https://svn.boost.org/trac/boost/ticket/6779 for more
         # details.
         if not env['HOST']:
-            boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_')]
             if not conf.CheckBoostScopedEnum():
+                boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_') if x]
                 if boost_version < [1, 51]:
                     env.Append(CXXFLAGS = '-DBOOST_NO_SCOPED_ENUMS')
                 elif boost_version < [1, 57]:
