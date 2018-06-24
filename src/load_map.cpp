@@ -545,7 +545,7 @@ void map_parser::parse_style(Map & map, xml_node const& node)
 
         if (!map.insert_style(name, std::move(style)))
         {
-            if (map.find_style(name))
+            if (strict_ && map.find_style(name))
             {
                 throw config_error("duplicate style name");
             }
