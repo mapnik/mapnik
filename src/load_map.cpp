@@ -545,11 +545,25 @@ void map_parser::parse_style(Map & map, xml_node const& node)
 
         if (!map.insert_style(name, std::move(style)))
         {
-            if (strict_ && map.find_style(name))
+            boost::optional<const feature_type_style &> dupe = map.find_style(name);
+            if (strict_)
             {
-                throw config_error("duplicate style name");
+                if (dupe)
+                {
+                    throw config_error("duplicate style name");
+                }
+                throw config_error("failed to insert style to the map");
             }
-            throw config_error("failed to insert style to the map");
+            else
+            {
+                std::string s_err("failed to insert style '");
+                s_err += name + "' to the map";
+                if (dupe)
+                {
+                    s_err += " since it was already added";
+                }
+                MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
+            }
         }
     }
     catch (config_error const& ex)
