@@ -1038,10 +1038,15 @@ int main()
     return False
 
 def harfbuzz_version(context):
-    ret = context.TryRun("""
+    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
+    ret, out = context.TryRun("""
 
 #include "harfbuzz/hb.h"
 #include <iostream>
+
+#ifndef HB_VERSION_ATLEAST
+#define HB_VERSION_ATLEAST(...) 0
+#endif
 
 int main()
 {
@@ -1050,24 +1055,20 @@ int main()
 }
 
 """ % HARFBUZZ_MIN_VERSION, '.cpp')
-    # hack to avoid printed output
-    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
-    context.did_show_result=1
-    result = ret[1].strip()
-    if not result:
-        context.Result('error, could not get version from hb.h')
-        return False
-
-    items = result.split(';')
-    if items[0] == '1':
-        color_print(4,'found: HarfBuzz %s' % items[1])
-        return True
-
-    color_print(1,'\nHarfbuzz >= %s required but found ... %s' % (HARFBUZZ_MIN_VERSION_STRING,items[1]))
-    return False
+    if not ret:
+        context.Result('error (could not get version from hb.h)')
+    else:
+        ok_str, found_version_str = out.strip().split(';', 1)
+        ret = int(ok_str)
+        if ret:
+            context.Result('yes (found HarfBuzz %s)' % found_version_str)
+        else:
+            context.Result('no (found HarfBuzz %s)' % found_version_str)
+    return ret
 
 def harfbuzz_with_freetype_support(context):
-    ret = context.TryRun("""
+    context.Message('Checking for HarfBuzz with freetype support... ')
+    ret, out = context.TryRun("""
 
 #include "harfbuzz/hb-ft.h"
 #include <iostream>
@@ -1078,11 +1079,8 @@ int main()
 }
 
 """, '.cpp')
-    context.Message('Checking for HarfBuzz with freetype support\n')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
