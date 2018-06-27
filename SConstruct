@@ -1008,8 +1008,9 @@ int main()
     context.Result(ret)
     return ret
 
-def icu_at_least_four_two(context):
-    ret = context.TryRun("""
+def icu_at_least(context, min_version_str):
+    context.Message('Checking for ICU version >= %s... ' % min_version_str)
+    ret, out = context.TryRun("""
 
 #include <unicode/uversion.h>
 #include <iostream>
@@ -1021,20 +1022,19 @@ int main()
 }
 
 """, '.cpp')
-    # hack to avoid printed output
-    context.Message('Checking for ICU version >= 4.2... ')
-    context.did_show_result=1
-    result = ret[1].strip()
-    if not result:
-        context.Result('error, could not get major and minor version from unicode/uversion.h')
+    try:
+        found_version_str = out.strip()
+        found_version = tuple(map(int, found_version_str.split('.')))
+        min_version = tuple(map(int, min_version_str.split('.')))
+    except:
+        context.Result('error (could not get version from unicode/uversion.h)')
         return False
 
-    major, minor = map(int,result.split('.'))
-    if major >= 4 and minor >= 0:
-        color_print(4,'found: icu %s' % result)
+    if found_version >= min_version:
+        context.Result('yes (found ICU %s)' % found_version_str)
         return True
 
-    color_print(1,'\nFound insufficient icu version... %s' % result)
+    context.Result('no (found ICU %s)' % found_version_str)
     return False
 
 def harfbuzz_version(context):
@@ -1204,7 +1204,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'ogr_enabled'           : ogr_enabled,
                'get_pkg_lib'           : get_pkg_lib,
                'rollback_option'       : rollback_option,
-               'icu_at_least_four_two' : icu_at_least_four_two,
+               'icu_at_least'          : icu_at_least,
                'harfbuzz_version'      : harfbuzz_version,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
@@ -1526,7 +1526,7 @@ if not preconfigured:
             else:
                 if libname == env['ICU_LIB_NAME']:
                     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-                        if not conf.icu_at_least_four_two():
+                        if not conf.icu_at_least("4.0"):
                             # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
                             env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
                 elif libname == 'harfbuzz':
