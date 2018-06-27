@@ -34,6 +34,20 @@ try:
 except:
     HAS_DISTUTILS = False
 
+try:
+    # Python 3.3+
+    from shlex import quote as shquote
+except:
+    # Python 2.7
+    from pipes import quote as shquote
+
+try:
+    # Python 3.3+
+    from subprocess import DEVNULL
+except:
+    # Python 2.7
+    DEVNULL = open(os.devnull, 'w')
+
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
 
@@ -157,12 +171,41 @@ def regular_print(color,text,newline=True):
     else:
         print (text)
 
-def call(cmd, silent=False):
-    stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
-    if not stderr:
-        return stdin.strip()
-    elif not silent:
-        color_print(1,'Problem encounted with SCons scripts, please post bug report to: https://github.com/mapnik/mapnik/issues \nError was: %s' % stderr)
+def shell_command(cmd, *args, **kwargs):
+    """ Run command through shell.
+
+    `cmd` should be a valid, properly shell-quoted command.
+
+    Additional positional arguments, if provided, will each
+    be individually quoted as necessary and appended to `cmd`,
+    separated by spaces.
+
+    Additional keyword arguments will be passed to `Popen`.
+
+    Returns a tuple `(result, output)` where:
+    `result` = True if the command completed successfully,
+               False otherwise
+    `output` = string capturing the command's stdout (utf-8)
+               with trailing whitespace removed
+    """
+    # `cmd` itself is intentionally not wrapped in `shquote` here
+    # in order to support passing user-provided commands that may
+    # include arguments. For example:
+    #
+    #   ret, out = shell_command(env['CXX'], '--version')
+    #
+    # needs to work even if `env['CXX'] == 'ccache c++'`
+    #
+    if args:
+        cmdstr = ' '.join([cmd] + [shquote(a) for a in args])
+    else:
+        cmdstr = cmd
+    proc = Popen(cmdstr, shell=True, stdout=PIPE, **kwargs)
+    out, err = proc.communicate()
+    return proc.returncode == 0, out.decode('utf-8').rstrip()
+
+def silent_command(cmd, *args):
+    return shell_command(cmd, *args, stderr=DEVNULL)
 
 def strip_first(string,find,replace=''):
     if string.startswith(find):
@@ -578,19 +621,22 @@ def prioritize_paths(context, silent=True):
 
 def CheckPKGConfig(context, version):
     context.Message( 'Checking for pkg-config... ' )
-    ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+    context.sconf.cached = False
+    ret, _ = silent_command('pkg-config --atleast-pkgconfig-version', version)
     context.Result( ret )
     return ret
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
-    ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    context.sconf.cached = False
+    ret, _ = silent_command('pkg-config --exists', name)
     context.Result( ret )
     return ret
 
 def CheckPKGVersion(context, name, version):
     context.Message( 'Checking for at least version %s for %s... ' % (version,name) )
-    ret = context.TryAction('pkg-config --atleast-version=%s \'%s\'' % (version,name))[0]
+    context.sconf.cached = False
+    ret, _ = silent_command('pkg-config --atleast-version', version, name)
     context.Result( ret )
     return ret
 
@@ -601,8 +647,9 @@ def parse_config(context, config, checks='--libs --cflags'):
     if config in ('GDAL_CONFIG'):
         toolname += ' %s' % checks
     context.Message( 'Checking for %s... ' % toolname)
-    cmd = '%s %s' % (env[config],checks)
-    ret = context.TryAction(cmd)[0]
+    context.sconf.cached = False
+    cmd = '%s %s' % (env[config], checks)
+    ret, value = silent_command(cmd)
     parsed = False
     if ret:
         try:
@@ -613,7 +660,6 @@ def parse_config(context, config, checks='--libs --cflags'):
                 # and thus breaks knowledge below that gdal worked
                 # TODO - upgrade our scons logic to support Framework linking
                 if env['PLATFORM'] == 'Darwin':
-                    value = call(cmd,silent=True)
                     if value and '-framework GDAL' in value:
                         env['LIBS'].append('gdal')
                         if os.path.exists('/Library/Frameworks/GDAL.framework/unix/lib'):
@@ -643,12 +689,11 @@ def get_pkg_lib(context, config, lib):
     libname = None
     env = context.env
     context.Message( 'Checking for name of %s library... ' % lib)
-    cmd = '%s --libs' % env[config]
-    ret = context.TryAction(cmd)[0]
+    context.sconf.cached = False
+    ret, value = silent_command(env[config], '--libs')
     parsed = False
     if ret:
         try:
-            value = call(cmd, silent=True).decode("utf8")
             if ' ' in value:
                 parts = value.split(' ')
                 if len(parts) > 1:
@@ -671,10 +716,10 @@ def parse_pg_config(context, config):
     env = context.env
     tool = config.lower()
     context.Message( 'Checking for %s... ' % tool)
-    ret = context.TryAction(env[config])[0]
+    context.sconf.cached = False
+    ret, lib_path = silent_command(env[config], '--libdir')
+    ret, inc_path = silent_command(env[config], '--includedir')
     if ret:
-        lib_path = call('%s --libdir' % env[config]).decode("utf8")
-        inc_path = call('%s --includedir' % env[config]).decode("utf8")
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
         lpq = env['PLUGINS']['postgis']['lib']
@@ -688,7 +733,8 @@ def parse_pg_config(context, config):
 def ogr_enabled(context):
     env = context.env
     context.Message( 'Checking if gdal is ogr enabled... ')
-    ret = context.TryAction('%s --ogr-enabled' % env['GDAL_CONFIG'])[0]
+    context.sconf.cached = False
+    ret, _ = silent_command(env['GDAL_CONFIG'], '--ogr-enabled')
     if not ret:
         if 'ogr' not in env['SKIPPED_DEPS']:
             env['SKIPPED_DEPS'].append('ogr')
@@ -833,10 +879,10 @@ int main() {
         context.Result('u_getDataDirectory returned %s' % ret[1])
         return ret[1].strip()
     else:
-        ret = call("icu-config --icudatadir", silent=True)
+        ret, value = silent_command('icu-config --icudatadir')
         if ret:
-            context.Result('icu-config returned %s' % ret.decode("utf8"))
-            return ret.decode('utf8')
+            context.Result('icu-config returned %s' % value)
+            return value
         else:
             context.Result('Failed to detect (mapnik-config will have null value)')
             return ''
@@ -1274,11 +1320,11 @@ if not preconfigured:
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
-    cxx_version = call("%s --version" % env["CXX"] ,silent=True)
-    if cxx_version:
-        color_print(5, "CXX %s" % cxx_version.decode("utf8"))
+    ret, cxx_version = silent_command(env['CXX'], '--version')
+    if ret:
+        color_print(5, "C++ compiler: %s" % cxx_version)
     else:
-        color_print(5, "Could not detect CXX compiler")
+        color_print(5, "Could not detect C++ compiler")
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
