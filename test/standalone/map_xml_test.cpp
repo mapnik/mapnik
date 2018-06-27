@@ -156,6 +156,17 @@ TEST_CASE("map xml I/O") {
         }
     } // END SECTION
 
+    SECTION("duplicate styles only throw in strict mode") {
+        std::string duplicate_stylename("test/data/broken_maps/duplicate_stylename.xml");
+        CAPTURE(duplicate_stylename);
+        mapnik::Map m(256, 256);
+        REQUIRE(m.register_fonts("fonts", true));
+        REQUIRE_NOTHROW(mapnik::load_map(m, duplicate_stylename, false));
+        mapnik::Map m2(256, 256);
+        REQUIRE(m2.register_fonts("fonts", true));
+        REQUIRE_THROWS(mapnik::load_map(m2, duplicate_stylename, true));
+    } // END SECTION
+
     SECTION("broken maps") {
         std::vector<bfs::path> broken_maps;
         add_xml_files("test/data/broken_maps", broken_maps);
