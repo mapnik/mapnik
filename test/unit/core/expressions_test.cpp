@@ -9,7 +9,7 @@
 #include <mapnik/unicode.hpp>
 
 #include <functional>
-#include <vector>
+#include <map>
 
 namespace {
 
@@ -57,7 +57,7 @@ std::string parse_and_dump(std::string const& str)
 TEST_CASE("expressions")
 {
     using namespace std::placeholders;
-    using properties_type = std::vector<std::pair<std::string, mapnik::value> > ;
+    using properties_type = std::map<std::string, mapnik::value>;
     mapnik::transcoder tr("utf8");
 
     properties_type prop = {{ "foo"   , tr.transcode("bar") },
