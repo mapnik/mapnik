@@ -812,7 +812,7 @@ def CheckIcuData(context, silent=False):
 
     if not silent:
         context.Message('Checking for ICU data directory...')
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <unicode/putil.h>
 #include <iostream>
@@ -829,9 +829,10 @@ int main() {
 """, '.cpp')
     if silent:
         context.did_show_result=1
-    if ret[0]:
-        context.Result('u_getDataDirectory returned %s' % ret[1])
-        return ret[1].strip()
+    if ret:
+        value = out.strip()
+        context.Result('u_getDataDirectory returned %s' % value)
+        return value
     else:
         ret = call("icu-config --icudatadir", silent=True)
         if ret:
@@ -845,8 +846,8 @@ int main() {
 def CheckGdalData(context, silent=False):
 
     if not silent:
-        context.Message('Checking for GDAL data directory...')
-    ret = context.TryRun("""
+        context.Message('Checking for GDAL data directory... ')
+    ret, out = context.TryRun("""
 
 #include "cpl_config.h"
 #include <iostream>
@@ -857,19 +858,20 @@ int main() {
 }
 
 """, '.cpp')
+    value = out.strip()
     if silent:
         context.did_show_result=1
-    if ret[0]:
-        context.Result('GDAL_PREFIX returned %s' % ret[1])
+    if ret:
+        context.Result('GDAL_PREFIX returned %s' % value)
     else:
         context.Result('Failed to detect (mapnik-config will have null value)')
-    return ret[1].strip()
+    return value
 
 def CheckProjData(context, silent=False):
 
     if not silent:
         context.Message('Checking for PROJ_LIB directory...')
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 // This is narly, could eventually be replaced using https://github.com/OSGeo/proj.4/pull/551]
 #include <proj_api.h>
@@ -919,20 +921,21 @@ int main() {
 }
 
 """, '.cpp')
+    value = out.strip()
     if silent:
         context.did_show_result=1
-    if ret[0]:
-        context.Result('pj_open_lib returned %s' % ret[1])
+    if ret:
+        context.Result('pj_open_lib returned %s' % value)
     else:
         context.Result('Failed to detect (mapnik-config will have null value)')
-    return ret[1].strip()
+    return value
 
 def CheckCairoHasFreetype(context, silent=False):
     if not silent:
         context.Message('Checking for cairo freetype font support ... ')
     context.env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
 
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <cairo-features.h>
 
@@ -945,7 +948,7 @@ int main()
     #endif
 }
 
-""", '.cpp')[0]
+""", '.cpp')
     if silent:
         context.did_show_result=1
     context.Result(ret)
@@ -972,7 +975,7 @@ int main()
     return ret
 
 def GetBoostLibVersion(context):
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <boost/version.hpp>
 #include <iostream>
@@ -987,8 +990,8 @@ return 0;
 """, '.cpp')
     # hack to avoid printed output
     context.did_show_result=1
-    context.Result(ret[0])
-    return ret[1].strip()
+    context.Result(ret)
+    return out.strip()
 
 def CheckBoostScopedEnum(context, silent=False):
     if not silent:
@@ -1089,7 +1092,8 @@ def boost_regex_has_icu(context):
             if lib_name in context.env['LIBS']:
                 context.env['LIBS'].remove(lib_name)
             context.env.Append(LIBS=lib_name)
-    ret = context.TryRun("""
+    context.Message('Checking if boost_regex was built with ICU unicode support... ')
+    ret, out = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
 #include <unicode/unistr.h>
@@ -1109,11 +1113,8 @@ int main()
 }
 
 """, '.cpp')
-    context.Message('Checking if boost_regex was built with ICU unicode support... ')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def sqlite_has_rtree(context, silent=False):
     """ check an sqlite3 install has rtree support.
@@ -1122,7 +1123,9 @@ def sqlite_has_rtree(context, silent=False):
     http://www.sqlite.org/c3ref/compileoption_get.html
     """
 
-    ret = context.TryRun("""
+    if not silent:
+        context.Message('Checking if SQLite supports RTREE... ')
+    ret, out = context.TryRun("""
 
 #include <sqlite3.h>
 #include <stdio.h>
@@ -1154,17 +1157,15 @@ int main()
 }
 
 """, '.c')
-    if not silent:
-        context.Message('Checking if SQLite supports RTREE... ')
     if silent:
         context.did_show_result=1
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def supports_cxx14(context,silent=False):
-    ret = context.TryRun("""
+    if not silent:
+        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
+    ret, out = context.TryRun("""
 
 int main()
 {
@@ -1176,14 +1177,10 @@ int main()
 }
 
 """, '.cpp')
-    if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
     if silent:
         context.did_show_result=1
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 
 
