@@ -760,6 +760,8 @@ def ogr_enabled(context):
     context.Message( 'Checking if gdal is ogr enabled... ')
     context.sconf.cached = False
     ret, out = config_command(env['GDAL_CONFIG'], '--ogr-enabled')
+    if ret and out:
+        ret = (out == 'yes')
     if not ret:
         if 'ogr' not in env['SKIPPED_DEPS']:
             env['SKIPPED_DEPS'].append('ogr')
