@@ -180,13 +180,17 @@ def shell_command(cmd, *args, **kwargs):
     be individually quoted as necessary and appended to `cmd`,
     separated by spaces.
 
+    `logstream` optional keyword argument should be either:
+        - a file-like object, into which the command-line
+          and the command's STDERR output will be written; or
+        - None, in which case STDERR will go to DEVNULL.
+
     Additional keyword arguments will be passed to `Popen`.
 
     Returns a tuple `(result, output)` where:
     `result` = True if the command completed successfully,
                False otherwise
-    `output` = string capturing the command's stdout (utf-8)
-               with trailing whitespace removed
+    `output` = captured STDOUT with trailing whitespace removed
     """
     # `cmd` itself is intentionally not wrapped in `shquote` here
     # in order to support passing user-provided commands that may
@@ -200,12 +204,33 @@ def shell_command(cmd, *args, **kwargs):
         cmdstr = ' '.join([cmd] + [shquote(a) for a in args])
     else:
         cmdstr = cmd
+    # redirect STDERR to `logstream` if provided
+    try:
+        logstream = kwargs.pop('logstream')
+    except KeyError:
+        logstream = None
+    else:
+        if logstream is not None:
+            logstream.write(cmdstr + '\n')
+            kwargs['stderr'] = logstream
+        else:
+            kwargs['stderr'] = DEVNULL
+    # execute command and capture output
     proc = Popen(cmdstr, shell=True, stdout=PIPE, **kwargs)
     out, err = proc.communicate()
-    return proc.returncode == 0, out.decode('utf-8').rstrip()
+    try:
+        outtext = out.decode(sys.stdout.encoding or 'UTF-8').rstrip()
+    except UnicodeDecodeError:
+        outtext = out.decode('UTF-8', errors='replace').rstrip()
+    if logstream is not None and outtext:
+        logstream.write('->\t' + outtext.replace('\n', '\n->\t') + '\n')
+    return proc.returncode == 0, outtext
 
 def silent_command(cmd, *args):
     return shell_command(cmd, *args, stderr=DEVNULL)
+
+def config_command(cmd, *args):
+    return shell_command(cmd, *args, logstream=conf.logstream)
 
 def strip_first(string,find,replace=''):
     if string.startswith(find):
@@ -622,21 +647,21 @@ def prioritize_paths(context, silent=True):
 def CheckPKGConfig(context, version):
     context.Message( 'Checking for pkg-config... ' )
     context.sconf.cached = False
-    ret, _ = silent_command('pkg-config --atleast-pkgconfig-version', version)
+    ret, _ = config_command('pkg-config --atleast-pkgconfig-version', version)
     context.Result( ret )
     return ret
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
     context.sconf.cached = False
-    ret, _ = silent_command('pkg-config --exists', name)
+    ret, _ = config_command('pkg-config --exists', name)
     context.Result( ret )
     return ret
 
 def CheckPKGVersion(context, name, version):
     context.Message( 'Checking for at least version %s for %s... ' % (version,name) )
     context.sconf.cached = False
-    ret, _ = silent_command('pkg-config --atleast-version', version, name)
+    ret, _ = config_command('pkg-config --atleast-version', version, name)
     context.Result( ret )
     return ret
 
@@ -649,7 +674,7 @@ def parse_config(context, config, checks='--libs --cflags'):
     context.Message( 'Checking for %s... ' % toolname)
     context.sconf.cached = False
     cmd = '%s %s' % (env[config], checks)
-    ret, value = silent_command(cmd)
+    ret, value = config_command(cmd)
     parsed = False
     if ret:
         try:
@@ -690,7 +715,7 @@ def get_pkg_lib(context, config, lib):
     env = context.env
     context.Message( 'Checking for name of %s library... ' % lib)
     context.sconf.cached = False
-    ret, value = silent_command(env[config], '--libs')
+    ret, value = config_command(env[config], '--libs')
     parsed = False
     if ret:
         try:
@@ -717,8 +742,8 @@ def parse_pg_config(context, config):
     tool = config.lower()
     context.Message( 'Checking for %s... ' % tool)
     context.sconf.cached = False
-    ret, lib_path = silent_command(env[config], '--libdir')
-    ret, inc_path = silent_command(env[config], '--includedir')
+    ret, lib_path = config_command(env[config], '--libdir')
+    ret, inc_path = config_command(env[config], '--includedir')
     if ret:
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
@@ -734,7 +759,7 @@ def ogr_enabled(context):
     env = context.env
     context.Message( 'Checking if gdal is ogr enabled... ')
     context.sconf.cached = False
-    ret, _ = silent_command(env['GDAL_CONFIG'], '--ogr-enabled')
+    ret, out = config_command(env['GDAL_CONFIG'], '--ogr-enabled')
     if not ret:
         if 'ogr' not in env['SKIPPED_DEPS']:
             env['SKIPPED_DEPS'].append('ogr')
@@ -879,7 +904,7 @@ int main() {
         context.Result('u_getDataDirectory returned %s' % ret[1])
         return ret[1].strip()
     else:
-        ret, value = silent_command('icu-config --icudatadir')
+        ret, value = config_command('icu-config --icudatadir')
         if ret:
             context.Result('icu-config returned %s' % value)
             return value
@@ -1320,7 +1345,7 @@ if not preconfigured:
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
 
-    ret, cxx_version = silent_command(env['CXX'], '--version')
+    ret, cxx_version = config_command(env['CXX'], '--version')
     if ret:
         color_print(5, "C++ compiler: %s" % cxx_version)
     else:
