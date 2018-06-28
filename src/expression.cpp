@@ -27,15 +27,16 @@
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
 
+namespace x3 = boost::spirit::x3;
+
 namespace mapnik
 {
 
 expression_ptr parse_expression(std::string const& str)
 {
     auto node = std::make_shared<expr_node>();
-    using boost::spirit::x3::ascii::space;
     mapnik::transcoder const tr("utf8");
-    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+    auto parser = x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
         [
             mapnik::expression_grammar()
         ];
@@ -46,9 +47,9 @@ expression_ptr parse_expression(std::string const& str)
 
     try
     {
-        r = boost::spirit::x3::phrase_parse(itr, end, parser, space, *node);
+        r = x3::phrase_parse(itr, end, parser, x3::ascii::space, *node);
     }
-    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    catch (x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         // no need to show "boost::spirit::x3::expectation_failure" which is a std::runtime_error
         throw config_error("Failed to parse expression: \"" + str + "\"");

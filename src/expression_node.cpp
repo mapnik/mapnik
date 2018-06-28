@@ -25,136 +25,66 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#if defined(BOOST_REGEX_HAS_ICU)
-#include <boost/regex/icu.hpp>
-#else
-#include <boost/regex.hpp>
-#endif
-#pragma GCC diagnostic pop
-
 namespace mapnik
 {
 
-#if defined(BOOST_REGEX_HAS_ICU)
-static void fromUTF32toUTF8(std::basic_string<UChar32> const& src, std::string & dst)
+regex_pattern_node::regex_pattern_node(value_unicode_string const& pat)
 {
-    int32_t len = safe_cast<int32_t>(src.length());
-    value_unicode_string::fromUTF32(src.data(), len).toUTF8String(dst);
+    UErrorCode status = U_ZERO_ERROR;
+    pattern_.reset(RegexPattern::compile(pat, 0, status));
+    if (U_FAILURE(status))
+    {
+        throw std::runtime_error("Failed to parse regex: " + to_utf8(pat));
+    }
 }
-#endif
 
-struct _regex_match_impl : util::noncopyable {
-#if defined(BOOST_REGEX_HAS_ICU)
-    _regex_match_impl(value_unicode_string const& ustr) :
-        pattern_(boost::make_u32regex(ustr)) {}
-    boost::u32regex pattern_;
-#else
-    _regex_match_impl(std::string const& ustr) :
-        pattern_(ustr) {}
-    boost::regex pattern_;
-#endif
-};
-
-struct _regex_replace_impl : util::noncopyable {
-#if defined(BOOST_REGEX_HAS_ICU)
-    _regex_replace_impl(value_unicode_string const& ustr, value_unicode_string const& f) :
-        pattern_(boost::make_u32regex(ustr)),
-        format_(f) {}
-    boost::u32regex pattern_;
-    value_unicode_string format_;
-#else
-    _regex_replace_impl(std::string const& ustr,std::string const& f) :
-        pattern_(ustr),
-        format_(f) {}
-    boost::regex pattern_;
-    std::string format_;
-#endif
-};
-
-
-regex_match_node::regex_match_node(transcoder const& tr,
-                                   expr_node const& a,
-                                   std::string const& ustr)
-    : expr(a),
-      impl_(new _regex_match_impl(
-#if defined(BOOST_REGEX_HAS_ICU)
-        tr.transcode(ustr.c_str())
-#else
-        ustr
-#endif
-        )) {}
+regex_match_node::regex_match_node(expr_node && arg,
+                                   value_unicode_string const& pat)
+    : regex_pattern_node(pat),
+      expr(std::move(arg)) {}
 
 value regex_match_node::apply(value const& v) const
 {
-    auto const& pattern = impl_.get()->pattern_;
-#if defined(BOOST_REGEX_HAS_ICU)
-    return boost::u32regex_match(v.to_unicode(),pattern);
-#else
-    return boost::regex_match(v.to_string(),pattern);
-#endif
+    auto const& subject = v.to_unicode();
+    UErrorCode status = U_ZERO_ERROR;
+    std::unique_ptr<RegexMatcher> m;
+    m.reset(pattern_->matcher(subject, status));
+    return m && m->find(0, status);
 }
 
 std::string regex_match_node::to_string() const
 {
     std::string str_;
-    str_ +=".match('";
-    auto const& pattern = impl_.get()->pattern_;
-#if defined(BOOST_REGEX_HAS_ICU)
-    fromUTF32toUTF8(pattern.str(), str_);
-#else
-    str_ += pattern.str();
-#endif
-    str_ +="')";
+    str_ += ".match('";
+    pattern_->pattern().toUTF8String(str_); // FIXME escape ['\\]
+    str_ += "')";
     return str_;
 }
 
-regex_replace_node::regex_replace_node(transcoder const& tr,
-                                       expr_node const& a,
-                                       std::string const& ustr,
-                                       std::string const& f)
-    : expr(a),
-      impl_(new _regex_replace_impl(
-#if defined(BOOST_REGEX_HAS_ICU)
-                     tr.transcode(ustr.c_str()),
-                     tr.transcode(f.c_str())
-#else
-                     ustr,
-                     f
-#endif
-                     )) {}
+regex_replace_node::regex_replace_node(expr_node && arg,
+                                       value_unicode_string const& pat,
+                                       value_unicode_string const& fmt)
+    : regex_pattern_node(pat),
+      expr(std::move(arg)),
+      format(fmt) {}
 
 value regex_replace_node::apply(value const& v) const
 {
-    auto const& pattern = impl_.get()->pattern_;
-    auto const& format = impl_.get()->format_;
-#if defined(BOOST_REGEX_HAS_ICU)
-    return boost::u32regex_replace(v.to_unicode(), pattern, format);
-#else
-    std::string repl = boost::regex_replace(v.to_string(), pattern, format);
-    transcoder tr_("utf8");
-    return tr_.transcode(repl.c_str());
-#endif
+    auto const& subject = v.to_unicode();
+    UErrorCode status = U_ZERO_ERROR;
+    std::unique_ptr<RegexMatcher> m;
+    m.reset(pattern_->matcher(subject, status));
+    return m ? m->replaceAll(format, status) : value{};
 }
 
 std::string regex_replace_node::to_string() const
 {
     std::string str_;
-    str_ +=".replace(";
-    str_ += "'";
-    auto const& pattern = impl_.get()->pattern_;
-    auto const& format = impl_.get()->format_;
-#if defined(BOOST_REGEX_HAS_ICU)
-    fromUTF32toUTF8(pattern.str(), str_);
-    str_ +="','";
+    str_ += ".replace('";
+    pattern_->pattern().toUTF8String(str_); // FIXME escape ['\\]
+    str_ += "','";
     format.toUTF8String(str_);
-#else
-    str_ += pattern.str();
-    str_ +="','";
-    str_ += format;
-#endif
-    str_ +="')";
+    str_ += "')";
     return str_;
 }
 

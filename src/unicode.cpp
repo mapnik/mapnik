@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/safe_cast.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value/types.hpp>
 
@@ -46,11 +47,10 @@ transcoder::transcoder (std::string const& encoding)
     }
 }
 
-mapnik::value_unicode_string transcoder::transcode(const char* data, std::int32_t length) const
+value_unicode_string transcoder::transcode(char const* data, std::int32_t length) const
 {
-    UErrorCode err = U_ZERO_ERROR;
-
-    mapnik::value_unicode_string ustr(data,length,conv_,err);
+    UErrorCode status = U_ZERO_ERROR;
+    value_unicode_string ustr(data, length, conv_, status);
     if (ustr.isBogus())
     {
         ustr.remove();
@@ -63,8 +63,24 @@ transcoder::~transcoder()
     if (conv_) ucnv_close(conv_);
 }
 
+value_unicode_string transcoder::operator() (char const* data, std::int32_t length) const
+{
+    return transcode(data, length);
+}
 
-void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
+value_unicode_string transcoder::operator() (std::string const& str) const
+{
+    return transcode(str.data(), safe_cast<std::int32_t>(str.size()));
+}
+
+std::string to_utf8(value_unicode_string const& input)
+{
+    std::string target;
+    input.toUTF8String(target);
+    return target;
+}
+
+void to_utf8(value_unicode_string const& input, std::string & target)
 {
     target.clear(); // mimic previous target.assign(...) semantics
     input.toUTF8String(target); // this appends to target

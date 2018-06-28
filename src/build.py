@@ -53,13 +53,11 @@ ABI_VERSION = env['ABI_VERSION']
 
 enabled_imaging_libraries = []
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
 # note: order matters on linux: see lorder | tsort
-lib_env['LIBS'] = [filesystem,
-                   regex]
+lib_env['LIBS'] = [filesystem]
 
 if env['COVERAGE']:
     lib_env.Append(LINKFLAGS='--coverage')
@@ -90,9 +88,6 @@ if '-DHAVE_WEBP' in env['CPPDEFINES']:
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     lib_env['LIBS'].append('xml2')
 
-if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
-    lib_env['LIBS'].append('icui18n')
-
 lib_env['LIBS'].append(system)
 
 lib_env['LIBS'].append('harfbuzz')
@@ -102,6 +97,7 @@ if '-DHAVE_JPEG' in env['CPPDEFINES']:
    enabled_imaging_libraries.append('jpeg_reader.cpp')
 
 lib_env['LIBS'].append(env['ICU_LIB_NAME'])
+lib_env['LIBS'].append('icui18n')
 
 lib_env['LIBS'].append('freetype')
 

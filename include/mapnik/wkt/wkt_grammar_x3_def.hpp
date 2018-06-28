@@ -40,7 +40,7 @@ struct is_substitute<T&, Attribute&, Enable>
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
+
 using x3::lit;
 using x3::double_;
 using x3::no_case;

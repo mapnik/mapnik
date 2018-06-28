@@ -119,34 +119,34 @@ public:
 
     mapnik::value operator()(std::string const& val) const
     {
-        return mapnik::value(tr_.transcode(val.c_str()));
+        return tr_(val);
     }
 
     mapnik::value operator()(mapnik::json::geojson_array const& array) const
     {
         std::string str = stringifier(keys_)(array);
-        return mapnik::value(tr_.transcode(str.c_str()));
+        return tr_(str);
     }
 
     mapnik::value operator()(mapnik::json::geojson_object const& object) const
     {
         std::string str = stringifier(keys_)(object);
-        return mapnik::value(tr_.transcode(str.c_str()));
+        return tr_(str);
     }
 
     mapnik::value operator() (mapnik::value_bool val) const
     {
-        return mapnik::value(val);
+        return val;
     }
 
     mapnik::value operator() (mapnik::value_integer val) const
     {
-        return mapnik::value(val);
+        return val;
     }
 
     mapnik::value operator() (mapnik::value_double val) const
     {
-        return mapnik::value(val);
+        return val;
     }
 
     template <typename T>

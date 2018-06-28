@@ -28,25 +28,26 @@
 #include <string>
 #include <stdexcept>
 
+namespace x3 = boost::spirit::x3;
+
 namespace mapnik {
 
 transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
 {
-    using boost::spirit::x3::ascii::space;
     transform_list_ptr trans_list = std::make_shared<transform_list>();
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
     mapnik::transcoder const tr(encoding);
-    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+    auto const parser = x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
         [
             mapnik::transform_expression_grammar()
         ];
     bool status = false;
     try
     {
-        status = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
+        status = x3::phrase_parse(itr, end, parser, x3::ascii::space, *trans_list);
     }
-    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    catch (x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         throw config_error("Failed to parse transform expression: \"" + str + "\"");
     }

@@ -47,14 +47,19 @@ class MAPNIK_DECL transcoder : private util::noncopyable
 {
 public:
     explicit transcoder (std::string const& encoding);
-    mapnik::value_unicode_string transcode(const char* data, std::int32_t length = -1) const;
     ~transcoder();
+
+    value_unicode_string transcode(char const* data, std::int32_t length = -1) const;
+    value_unicode_string operator() (char const* data, std::int32_t length = -1) const;
+    value_unicode_string operator() (std::string const& str) const;
+
 private:
     UConverter * conv_;
 };
 
-// convinience method
-void MAPNIK_DECL to_utf8(mapnik::value_unicode_string const& input, std::string & target);
+// convenience functions
+std::string MAPNIK_DECL to_utf8(value_unicode_string const& input);
+void MAPNIK_DECL to_utf8(value_unicode_string const& input, std::string & target);
 
 }
 

@@ -108,25 +108,25 @@ public:
 
     mapnik::value operator()(std::string const& val) const
     {
-        return mapnik::value(tr_.transcode(val.c_str()));
+        return tr_(val);
     }
 
     mapnik::value operator()(std::vector<mapnik::json::json_value> const& array) const
     {
         std::string str = stringifier()(array);
-        return mapnik::value(tr_.transcode(str.c_str()));
+        return tr_(str);
     }
 
     mapnik::value operator()(std::vector<std::pair<std::string, mapnik::json::json_value> > const& object) const
     {
         std::string str = stringifier()(object);
-        return mapnik::value(tr_.transcode(str.c_str()));
+        return tr_(str);
     }
 
     template <typename T>
     mapnik::value operator()(T const& val) const
     {
-        return mapnik::value(val);
+        return val;
     }
 
     mapnik::transcoder const& tr_;
