@@ -491,6 +491,12 @@ for opt in opts.options:
     if opt.key not in pickle_store:
         pickle_store.append(opt.key)
 
+def rollback_option(env, variable):
+    global opts
+    for item in opts.options:
+        if item.key == variable:
+            env[variable] = item.default
+
 # Method of adding configure behavior to Scons adapted from:
 # http://freeorion.svn.sourceforge.net/svnroot/freeorion/trunk/FreeOrion/SConstruct
 preconfigured = False
@@ -631,7 +637,7 @@ def parse_config(context, config, checks='--libs --cflags'):
             # optional deps...
             if tool not in env['SKIPPED_DEPS']:
                 env['SKIPPED_DEPS'].append(tool)
-            conf.rollback_option(config)
+            rollback_option(env, config)
         else: # freetype and libxml2, not optional
             if tool not in env['MISSING_DEPS']:
                 env['MISSING_DEPS'].append(tool)
@@ -681,7 +687,7 @@ def parse_pg_config(context, config):
         env.Append(LIBS = lpq)
     else:
         env['SKIPPED_DEPS'].append(tool)
-        conf.rollback_option(config)
+        rollback_option(env, config)
     context.Result( ret )
     return ret
 
@@ -694,13 +700,6 @@ def ogr_enabled(context):
             env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
-
-def rollback_option(context,variable):
-    global opts
-    env = context.env
-    for item in opts.options:
-        if item.key == variable:
-            env[variable] = item.default
 
 def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
@@ -1200,7 +1199,6 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'parse_pg_config'       : parse_pg_config,
                'ogr_enabled'           : ogr_enabled,
                'get_pkg_lib'           : get_pkg_lib,
-               'rollback_option'       : rollback_option,
                'icu_at_least'          : icu_at_least,
                'harfbuzz_version'      : harfbuzz_version,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
