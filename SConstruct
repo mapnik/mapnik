@@ -188,13 +188,6 @@ def create_uninstall_target(env, path, is_glob=False):
                 ])
                 env.Alias("uninstall", "uninstall-"+path)
 
-def shortest_name(libs):
-    name = '-'*200
-    for lib in libs:
-        if len(name) > len(lib):
-            name = lib
-    return name
-
 def rm_path(item,set,_env):
     for i in _env[set]:
         if i.startswith(item):
@@ -726,7 +719,7 @@ def FindBoost(context, prefixes, thread_flag):
         if len(libItems) >= 1 and len(incItems) >= 1:
             BOOST_LIB_DIR = os.path.dirname(libItems[0])
             BOOST_INCLUDE_DIR = incItems[0].rstrip('boost/')
-            shortest_lib_name = shortest_name(libItems)
+            shortest_lib_name = min(libItems, key=len)
             match = re.search(r'%s(.*)\..*' % search_lib, shortest_lib_name)
             if hasattr(match,'groups'):
                 BOOST_APPEND = match.groups()[0]
