@@ -122,11 +122,6 @@ using attr = std::tuple<std::string, mapnik::value>;
         } \
     } while (0)
 
-inline void require_attributes(mapnik::feature_ptr feature,
-                        std::initializer_list<attr> const &attrs) {
-    REQUIRE_ATTRIBUTES(feature, attrs);
-}
-
 namespace detail {
 struct feature_count {
     template <typename T>
