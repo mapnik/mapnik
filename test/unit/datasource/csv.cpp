@@ -295,8 +295,8 @@ TEST_CASE("csv") {
                         , attr { "Phone", mapnik::value_unicode_string("(212) 334-0711") }
                         , attr { "Address", mapnik::value_unicode_string("19 Elizabeth Street") }
                         , attr { "Precinct", mapnik::value_unicode_string("5th Precinct") }
-                        , attr { "geo_longitude", mapnik::value_integer(-70) }
-                        , attr { "geo_latitude", mapnik::value_integer(40) }
+                        , attr { "geo_longitude", mapnik::value_double(-70.0) }
+                        , attr { "geo_latitude", mapnik::value_double(40.0) }
                     };
                 REQUIRE_ATTRIBUTES(feature, expected_attr);
                 REQUIRE_ATTRIBUTES(feature2, expected_attr);
