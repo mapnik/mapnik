@@ -834,7 +834,7 @@ TEST_CASE("geojson") {
                     std::initializer_list<attr> attrs = {
                         attr{"name", tr.transcode("Test")},
                         attr{"NOM_FR", tr.transcode("Québec")},
-                        attr{"boolean", mapnik::value_bool("true")},
+                        attr{"boolean", mapnik::value_bool(true)},
                         attr{"description", tr.transcode("Test: \u005C")},
                         attr{"double", mapnik::value_double(1.1)},
                         attr{"int", mapnik::value_integer(1)},
