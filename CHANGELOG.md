@@ -12,13 +12,13 @@ Released: March 06, 2018
 
 (Packaged from d50562d54)
 
-    - Backported scaling of precision by polygon size  (#3844)
-    - Backported GRID placement (#3847, #3854, #3855)
-    - Added missing `MAPNIK_DECL` to all `text_placement_` types (7ce142a5aa8e9da5ddd11266a054c1e69052230d)
-    - Fixed invalid memory access if input_buffer size is zero (a602c65354a4b595821d2300f38ebc107d07e2a9)
-    - Fixed handling of an empty polygon in grid_vertex_converter (2f2dcf1eeae71aaa7878f4bc9a39741321f07e68)
-    - Fixed PROJ_LIB detection logic (44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5)
-    - Default to `icu-config` for obtaining `ICU_DATA` if `u_getDataDirectory fails (2cef98d7f76cdd302afcf15f1c585379537e8f1d)
+  - Backported scaling of precision by polygon size  (#3844)
+  - Backported GRID placement (#3847, #3854, #3855)
+  - Added missing `MAPNIK_DECL` to all `text_placement_` types (7ce142a5aa8e9da5ddd11266a054c1e69052230d)
+  - Fixed invalid memory access if input_buffer size is zero (a602c65354a4b595821d2300f38ebc107d07e2a9)
+  - Fixed handling of an empty polygon in grid_vertex_converter (2f2dcf1eeae71aaa7878f4bc9a39741321f07e68)
+  - Fixed PROJ_LIB detection logic (44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5)
+  - Default to `icu-config` for obtaining `ICU_DATA` if `u_getDataDirectory` fails (2cef98d7f76cdd302afcf15f1c585379537e8f1d)
 
 ## 3.0.18
 
@@ -26,11 +26,11 @@ Released: January 26, 2018
 
 (Packaged from 44ef46c81)
 
-    - SVG parser - fixed logic for calculating dimensions when `width` and `height` expressed in
-      percentage units (#3812)
-    - New improved `interior` placement algorithm (#3839)
-    - Fixed handling of an empty interior rings in `polygon_vertex_processor` (#3833)
-    - Fixed handling of an empty interior rings in `vertex_adapter' (#3842)(#3838)
+  - SVG parser - fixed logic for calculating dimensions when `width` and `height` expressed in
+    percentage units (#3812)
+  - New improved `interior` placement algorithm (#3839)
+  - Fixed handling of an empty interior rings in `polygon_vertex_processor` (#3833)
+  - Fixed handling of an empty interior rings in `vertex_adapter' (#3842)(#3838)
 
 ## 3.0.17
 
@@ -38,8 +38,8 @@ Released: November 29, 2017
 
 (Packaged from ebdd96c61)
 
-    - Use `Scons 3` as an internal build sytsem + support both Python 2 and 3.
-    - Added glibcxx workaround to support libstdc++-4.8
+  - Use `Scons 3` as an internal build sytsem + support both Python 2 and 3.
+  - Added glibcxx workaround to support libstdc++-4.8
 
 ## 3.0.16
 
@@ -47,17 +47,17 @@ Released: November 16, 2017
 
 (Packaged from 8d7b75e)
 
-    - Added "strict" SVG parsing mode with consistent error handling  and disabled processing of unsupported attributes.
-    - Added support for `<use>` element.
-    - Implemented compile time string literal to integer conversion, to be able to convert large `if/else if/else` statements to `switch`.
-    - WKB reader - pre-allocate optimisations in `multi_polygon` and `geometry_collection`.
-    - Set alpha values in RGBA TIFFs even when `NODATA` value is pesent.
-    - Support building with ICU >= 59.
-    - SCons - added ICU_DATA, PROJ_LIB and GDAL_DATA settings, available via `mapnik-config`
-    - Fixed centroid and interior text placement algorithms (#3771)
-    - Fixed memory leak (#3775)
-    - SVG parser - fixed default gradient vector in linear gradient.
-    - Fixed bounding box collection logic (#3709)
+  - Added "strict" SVG parsing mode with consistent error handling  and disabled processing of unsupported attributes.
+  - Added support for `<use>` element.
+  - Implemented compile time string literal to integer conversion, to be able to convert large `if/else if/else` statements to `switch`.
+  - WKB reader - pre-allocate optimisations in `multi_polygon` and `geometry_collection`.
+  - Set alpha values in RGBA TIFFs even when `NODATA` value is pesent.
+  - Support building with ICU >= 59.
+  - SCons - added ICU_DATA, PROJ_LIB and GDAL_DATA settings, available via `mapnik-config`
+  - Fixed centroid and interior text placement algorithms (#3771)
+  - Fixed memory leak (#3775)
+  - SVG parser - fixed default gradient vector in linear gradient.
+  - Fixed bounding box collection logic (#3709)
 
 ## 3.0.15
 
@@ -134,7 +134,7 @@ Released: September 8, 2016
 - Added geojson unit test for property types/values
 - JSON - added support for object and array type in `json_value` and update `stringifier`
 - GDAL.input - fallback to using `overviews` if present (8e8482803bb435726534c3b686a56037b7d3e8ad)
-- TopoJSON.input - improved and simplified grammer/parser implementation (https://github.com/mapnik/mapnik/pull/3429)
+- TopoJSON.input - improved and simplified grammar/parser implementation (https://github.com/mapnik/mapnik/pull/3429)
 - GDAL.input - Added support for non-alpha mask band
 - TopoJSON.input - fixed order of ellements limitation (ref #3434)
 - Fixed stroke-width size not included in markers ellipse bounding box (ref #3445)
@@ -419,7 +419,7 @@ The 3.0 release is a major milestone for Mapnik and includes many performance an
 
 - Supports being built with clang++ using `-fvisibility=hidden -flto` for smaller binaries
 
-- Supports being built with Visual Studio 2014 CTP #3
+- Supports being built with Visual Studio 2014 CTP \#3
 
 - Shield icons are now pixel snapped for crisp rendering
 
@@ -680,7 +680,7 @@ Summary: The 2.2.0 release is primarily a performance and stability release. The
 
 - Added support for `background-image` in cairo_renderer (#1724)
 
-- Fixed building symbolizer rendering to be fully sensitive to alpha (8b66128c892 / bc8ea1c5a7a)
+- Fixed building symbolizer rendering to be fully sensitive to alpha (8b66128c892, bc8ea1c5a7a)
 
 - `<Filter>[attr]</Filter>` now returns false if attr is an empty string (#1665)
 
@@ -845,7 +845,7 @@ Released Aug 3, 2012
 
 - XML: Fixed to avoid throwing if a `<Parameters>` element is encountered (which is supported in >= 2.1.x)
 
-- Support for PostGIS 2.0 in the pgsql2sqlite command (e69c44e/47e5b3c)
+- Support for PostGIS 2.0 in the pgsql2sqlite command (e69c44e, 47e5b3c)
 
 - Fixed reference counting of Py_None when returning null attributes from Postgres during UTFGrid encoding, which could cause a Fatal Python error: deallocating None (#1221)
 
@@ -888,7 +888,7 @@ Released April 10, 2012
 
 - Fix to avoid modifying a feature if an attribute is requested that does not exist (0f5ab18ed)
 
-- Fixed ability to save to jpeg format from python (7387afd9) (#896)
+- Fixed ability to save to jpeg format from python (7387afd96) (#896)
 
 
 ## Mapnik 2.0.0
@@ -1035,7 +1035,7 @@ Released Oct 18, 2011
 
 Released March 23, 2010
 
-(Packaged from r1745/db89f1ca75)
+(Packaged from db89f1ca75 / r1745)
 
 - Rasters: Various fixes and improvements to 8bit png output ([#522](https://github.com/mapnik/mapnik/issues/522),[#475](https://github.com/mapnik/mapnik/issues/475))
 
@@ -1077,7 +1077,7 @@ Released March 23, 2010
 
 Released January, 19 2010
 
-(Packaged from r1574/a0da946be9)
+(Packaged from a0da946be9 / r1574)
 
 - Core: Fixed linking to external libagg (r1297,r1299)
 
@@ -1219,7 +1219,7 @@ Released January, 19 2010
 
 Released July 14, 2009
 
-(Packaged from r1247/353ff576c7)
+(Packaged from 353ff576c7 / r1247)
 
 - Plugins: expose list of registered plugins as a `plugin_names()` method of DatasourceCache (r1180)
 
@@ -1304,7 +1304,7 @@ Released July 14, 2009
 
 Released April 1, 2009
 
-(Packaged from r1066/c88e03436f)
+(Packaged from c88e03436f / r1066)
 
 - Python: Added support for aspect_fix_mode (r1013)
 
