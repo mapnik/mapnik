@@ -184,7 +184,7 @@ TEST_CASE("expressions")
 
     // regex
     // replace
-    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));
+    TRY_CHECK(eval(" [foo].replace(\"(\\B)|( )\",'$1 ') ") == tr.transcode("b a r"));
 
     // https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
     //'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C' - black chess figures
@@ -195,14 +195,19 @@ TEST_CASE("expressions")
     TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
     TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode
     // \u+NNNN \U+NNNNNNNN \xNN\xNN
-    auto val3 = eval(u8"'\u262f\xF0\x9F\x8D\xB7'");
-    auto val4 = eval(u8"'\U0000262f\U0001F377'");
+    auto val3 = eval("'\\u262f\\xF0\\x9F\\x8D\\xB7'");
+    auto val4 = eval("'\\U0000262f\\U0001F377'");
+    auto val5 = eval("\"\\u262f\\xF0\\x9F\\x8D\\xB7\"");
+    auto val6 = eval("\"\\U0000262f\\U0001F377\"");
     // UTF16 surrogate pairs work also ;)
     // \ud83d\udd7a\ud83c\udffc => \U0001F57A\U0001F3FC works also
     // TODO: find a way to enter UTF16 pairs
     TRY_CHECK(val3 == val4);
+    TRY_CHECK(val5 == val6);
     TRY_CHECK(val3.to_string() == val4.to_string()); // UTF-8
-    TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicode
+    TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicod
+    TRY_CHECK(val5.to_string() == val6.to_string()); // UTF-8
+    TRY_CHECK(val5.to_unicode() == val6.to_unicode()); // Unicode
 
     // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
     TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode("Q u é b e c"));
