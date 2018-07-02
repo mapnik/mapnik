@@ -184,7 +184,8 @@ TEST_CASE("expressions")
 
     // regex
     // replace
-    TRY_CHECK(eval(" [foo].replace(\"(\\B)|( )\",'$1 ') ") == tr.transcode("b a r"));
+    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r")); // single quotes
+    TRY_CHECK(eval(" [foo].replace(\"(\\B)|( )\",\"$1 \") ") == tr.transcode("b a r")); // double quotes
 
     // https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
     //'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C' - black chess figures
@@ -195,8 +196,10 @@ TEST_CASE("expressions")
     TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
     TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode
     // \u+NNNN \U+NNNNNNNN \xNN\xNN
+    // single quotes
     auto val3 = eval("'\\u262f\\xF0\\x9F\\x8D\\xB7'");
     auto val4 = eval("'\\U0000262f\\U0001F377'");
+    // double quotes
     auto val5 = eval("\"\\u262f\\xF0\\x9F\\x8D\\xB7\"");
     auto val6 = eval("\"\\U0000262f\\U0001F377\"");
     // UTF16 surrogate pairs work also ;)
