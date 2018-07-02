@@ -256,13 +256,6 @@ def create_uninstall_target(env, path, is_glob=False):
                 ])
                 env.Alias("uninstall", "uninstall-"+path)
 
-def shortest_name(libs):
-    name = '-'*200
-    for lib in libs:
-        if len(name) > len(lib):
-            name = lib
-    return name
-
 def rm_path(item,set,_env):
     for i in _env[set]:
         if i.startswith(item):
@@ -559,6 +552,12 @@ for opt in opts.options:
     if opt.key not in pickle_store:
         pickle_store.append(opt.key)
 
+def rollback_option(env, variable):
+    global opts
+    for item in opts.options:
+        if item.key == variable:
+            env[variable] = item.default
+
 # Method of adding configure behavior to Scons adapted from:
 # http://freeorion.svn.sourceforge.net/svnroot/freeorion/trunk/FreeOrion/SConstruct
 preconfigured = False
@@ -702,7 +701,7 @@ def parse_config(context, config, checks='--libs --cflags'):
             # optional deps...
             if tool not in env['SKIPPED_DEPS']:
                 env['SKIPPED_DEPS'].append(tool)
-            conf.rollback_option(config)
+            rollback_option(env, config)
         else: # freetype and libxml2, not optional
             if tool not in env['MISSING_DEPS']:
                 env['MISSING_DEPS'].append(tool)
@@ -751,7 +750,7 @@ def parse_pg_config(context, config):
         env.Append(LIBS = lpq)
     else:
         env['SKIPPED_DEPS'].append(tool)
-        conf.rollback_option(config)
+        rollback_option(env, config)
     context.Result( ret )
     return ret
 
@@ -767,13 +766,6 @@ def ogr_enabled(context):
             env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
-
-def rollback_option(context,variable):
-    global opts
-    env = context.env
-    for item in opts.options:
-        if item.key == variable:
-            env[variable] = item.default
 
 def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
@@ -800,7 +792,7 @@ def FindBoost(context, prefixes, thread_flag):
         if len(libItems) >= 1 and len(incItems) >= 1:
             BOOST_LIB_DIR = os.path.dirname(libItems[0])
             BOOST_INCLUDE_DIR = incItems[0].rstrip('boost/')
-            shortest_lib_name = shortest_name(libItems)
+            shortest_lib_name = min(libItems, key=len)
             match = re.search(r'%s(.*)\..*' % search_lib, shortest_lib_name)
             if hasattr(match,'groups'):
                 BOOST_APPEND = match.groups()[0]
@@ -885,7 +877,7 @@ def CheckIcuData(context, silent=False):
 
     if not silent:
         context.Message('Checking for ICU data directory...')
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <unicode/putil.h>
 #include <iostream>
@@ -902,9 +894,10 @@ int main() {
 """, '.cpp')
     if silent:
         context.did_show_result=1
-    if ret[0]:
-        context.Result('u_getDataDirectory returned %s' % ret[1])
-        return ret[1].strip()
+    if ret:
+        value = out.strip()
+        context.Result('u_getDataDirectory returned %s' % value)
+        return value
     else:
         ret, value = config_command('icu-config --icudatadir')
         if ret:
@@ -918,8 +911,8 @@ int main() {
 def CheckGdalData(context, silent=False):
 
     if not silent:
-        context.Message('Checking for GDAL data directory...')
-    ret = context.TryRun("""
+        context.Message('Checking for GDAL data directory... ')
+    ret, out = context.TryRun("""
 
 #include "cpl_config.h"
 #include <iostream>
@@ -930,19 +923,20 @@ int main() {
 }
 
 """, '.cpp')
+    value = out.strip()
     if silent:
         context.did_show_result=1
-    if ret[0]:
-        context.Result('GDAL_PREFIX returned %s' % ret[1])
+    if ret:
+        context.Result('GDAL_PREFIX returned %s' % value)
     else:
         context.Result('Failed to detect (mapnik-config will have null value)')
-    return ret[1].strip()
+    return value
 
 def CheckProjData(context, silent=False):
 
     if not silent:
         context.Message('Checking for PROJ_LIB directory...')
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 // This is narly, could eventually be replaced using https://github.com/OSGeo/proj.4/pull/551]
 #include <proj_api.h>
@@ -992,20 +986,21 @@ int main() {
 }
 
 """, '.cpp')
+    value = out.strip()
     if silent:
         context.did_show_result=1
-    if ret[0]:
-        context.Result('pj_open_lib returned %s' % ret[1])
+    if ret:
+        context.Result('pj_open_lib returned %s' % value)
     else:
         context.Result('Failed to detect (mapnik-config will have null value)')
-    return ret[1].strip()
+    return value
 
 def CheckCairoHasFreetype(context, silent=False):
     if not silent:
         context.Message('Checking for cairo freetype font support ... ')
     context.env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
 
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <cairo-features.h>
 
@@ -1018,7 +1013,7 @@ int main()
     #endif
 }
 
-""", '.cpp')[0]
+""", '.cpp')
     if silent:
         context.did_show_result=1
     context.Result(ret)
@@ -1045,7 +1040,7 @@ int main()
     return ret
 
 def GetBoostLibVersion(context):
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <boost/version.hpp>
 #include <iostream>
@@ -1060,8 +1055,8 @@ return 0;
 """, '.cpp')
     # hack to avoid printed output
     context.did_show_result=1
-    context.Result(ret[0])
-    return ret[1].strip()
+    context.Result(ret)
+    return out.strip()
 
 def CheckBoostScopedEnum(context, silent=False):
     if not silent:
@@ -1081,8 +1076,9 @@ int main()
     context.Result(ret)
     return ret
 
-def icu_at_least_four_two(context):
-    ret = context.TryRun("""
+def icu_at_least(context, min_version_str):
+    context.Message('Checking for ICU version >= %s... ' % min_version_str)
+    ret, out = context.TryRun("""
 
 #include <unicode/uversion.h>
 #include <iostream>
@@ -1094,27 +1090,31 @@ int main()
 }
 
 """, '.cpp')
-    # hack to avoid printed output
-    context.Message('Checking for ICU version >= 4.2... ')
-    context.did_show_result=1
-    result = ret[1].strip()
-    if not result:
-        context.Result('error, could not get major and minor version from unicode/uversion.h')
+    try:
+        found_version_str = out.strip()
+        found_version = tuple(map(int, found_version_str.split('.')))
+        min_version = tuple(map(int, min_version_str.split('.')))
+    except:
+        context.Result('error (could not get version from unicode/uversion.h)')
         return False
 
-    major, minor = map(int,result.split('.'))
-    if major >= 4 and minor >= 0:
-        color_print(4,'found: icu %s' % result)
+    if found_version >= min_version:
+        context.Result('yes (found ICU %s)' % found_version_str)
         return True
 
-    color_print(1,'\nFound insufficient icu version... %s' % result)
+    context.Result('no (found ICU %s)' % found_version_str)
     return False
 
 def harfbuzz_version(context):
-    ret = context.TryRun("""
+    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
+    ret, out = context.TryRun("""
 
 #include "harfbuzz/hb.h"
 #include <iostream>
+
+#ifndef HB_VERSION_ATLEAST
+#define HB_VERSION_ATLEAST(...) 0
+#endif
 
 int main()
 {
@@ -1123,24 +1123,20 @@ int main()
 }
 
 """ % HARFBUZZ_MIN_VERSION, '.cpp')
-    # hack to avoid printed output
-    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
-    context.did_show_result=1
-    result = ret[1].strip()
-    if not result:
-        context.Result('error, could not get version from hb.h')
-        return False
-
-    items = result.split(';')
-    if items[0] == '1':
-        color_print(4,'found: HarfBuzz %s' % items[1])
-        return True
-
-    color_print(1,'\nHarfbuzz >= %s required but found ... %s' % (HARFBUZZ_MIN_VERSION_STRING,items[1]))
-    return False
+    if not ret:
+        context.Result('error (could not get version from hb.h)')
+    else:
+        ok_str, found_version_str = out.strip().split(';', 1)
+        ret = int(ok_str)
+        if ret:
+            context.Result('yes (found HarfBuzz %s)' % found_version_str)
+        else:
+            context.Result('no (found HarfBuzz %s)' % found_version_str)
+    return ret
 
 def harfbuzz_with_freetype_support(context):
-    ret = context.TryRun("""
+    context.Message('Checking for HarfBuzz with freetype support... ')
+    ret, out = context.TryRun("""
 
 #include "harfbuzz/hb-ft.h"
 #include <iostream>
@@ -1151,11 +1147,8 @@ int main()
 }
 
 """, '.cpp')
-    context.Message('Checking for HarfBuzz with freetype support\n')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
@@ -1164,7 +1157,8 @@ def boost_regex_has_icu(context):
             if lib_name in context.env['LIBS']:
                 context.env['LIBS'].remove(lib_name)
             context.env.Append(LIBS=lib_name)
-    ret = context.TryRun("""
+    context.Message('Checking if boost_regex was built with ICU unicode support... ')
+    ret, out = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
 #include <unicode/unistr.h>
@@ -1184,11 +1178,8 @@ int main()
 }
 
 """, '.cpp')
-    context.Message('Checking if boost_regex was built with ICU unicode support... ')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def sqlite_has_rtree(context, silent=False):
     """ check an sqlite3 install has rtree support.
@@ -1197,7 +1188,9 @@ def sqlite_has_rtree(context, silent=False):
     http://www.sqlite.org/c3ref/compileoption_get.html
     """
 
-    ret = context.TryRun("""
+    if not silent:
+        context.Message('Checking if SQLite supports RTREE... ')
+    ret, out = context.TryRun("""
 
 #include <sqlite3.h>
 #include <stdio.h>
@@ -1229,17 +1222,15 @@ int main()
 }
 
 """, '.c')
-    if not silent:
-        context.Message('Checking if SQLite supports RTREE... ')
     if silent:
         context.did_show_result=1
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def supports_cxx14(context,silent=False):
-    ret = context.TryRun("""
+    if not silent:
+        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
+    ret, out = context.TryRun("""
 
 int main()
 {
@@ -1251,14 +1242,10 @@ int main()
 }
 
 """, '.cpp')
-    if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
     if silent:
         context.did_show_result=1
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 
 
@@ -1278,8 +1265,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'parse_pg_config'       : parse_pg_config,
                'ogr_enabled'           : ogr_enabled,
                'get_pkg_lib'           : get_pkg_lib,
-               'rollback_option'       : rollback_option,
-               'icu_at_least_four_two' : icu_at_least_four_two,
+               'icu_at_least'          : icu_at_least,
                'harfbuzz_version'      : harfbuzz_version,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
@@ -1601,7 +1587,7 @@ if not preconfigured:
             else:
                 if libname == env['ICU_LIB_NAME']:
                     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-                        if not conf.icu_at_least_four_two():
+                        if not conf.icu_at_least("4.0"):
                             # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
                             env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
                 elif libname == 'harfbuzz':
