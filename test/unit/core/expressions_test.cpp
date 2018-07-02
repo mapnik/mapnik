@@ -203,14 +203,19 @@ TEST_CASE("expressions")
     auto val5 = eval("\"\\u262f\\xF0\\x9F\\x8D\\xB7\"");
     auto val6 = eval("\"\\U0000262f\\U0001F377\"");
     // UTF16 surrogate pairs work also ;)
-    // \ud83d\udd7a\ud83c\udffc => \U0001F57A\U0001F3FC works also
-    // TODO: find a way to enter UTF16 pairs
+    auto val7 = eval("'\\ud83d\\udd7a\\ud83c\\udffc'");
+    auto val8 = eval("'\\U0001F57A\\U0001F3FC'");
+
     TRY_CHECK(val3 == val4);
     TRY_CHECK(val5 == val6);
     TRY_CHECK(val3.to_string() == val4.to_string()); // UTF-8
-    TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicod
+    TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicode
     TRY_CHECK(val5.to_string() == val6.to_string()); // UTF-8
     TRY_CHECK(val5.to_unicode() == val6.to_unicode()); // Unicode
+    TRY_CHECK(val7 == val8);
+    TRY_CHECK(val7.to_string() == val8.to_string()); // UTF-8
+    TRY_CHECK(val7.to_unicode() == val8.to_unicode()); // Unicode
+
 
     // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
     TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode("Q u é b e c"));
