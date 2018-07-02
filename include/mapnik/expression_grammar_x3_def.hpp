@@ -315,14 +315,14 @@ namespace mapnik { namespace grammar {
     auto const single_quoted_string = x3::rule<class single_quoted_string, std::string> {} = lit('\'')
         >> no_skip[*(unesc_char[append]
                      |
-                     //(lit('\\') > escaped_unicode[append]) // FIXME (!)
-                     //|
+                     (lit('\\') >> escaped_unicode[append])
+                     |
                      (~char_('\''))[append])] > lit('\'');
 
     auto const double_quoted_string = x3::rule<class double_quoted_string, std::string> {} = lit('"')
         >> no_skip[*(unesc_char[append]
                      |
-                     (lit('\\') > escaped_unicode[append])
+                     (lit('\\') >> escaped_unicode[append])
                      |
                      (~char_('"'))[append])] > lit('"');
 
