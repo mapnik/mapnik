@@ -850,6 +850,18 @@ TEST_CASE("geojson") {
                     };
                     auto feature = fs->next();
                     REQUIRE(bool(feature));
+                    // ensure types are the types we'd expect
+                    CHECK(feature->get("name").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("NOM_FR").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("boolean").is<mapnik::value_bool>());
+                    CHECK(feature->get("description").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("double").is<mapnik::value_double>());
+                    CHECK(feature->get("int").is<mapnik::value_integer>());
+                    CHECK(feature->get("object").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("spaces").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("array").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("empty_array").is<mapnik::value_unicode_string>());
+                    CHECK(feature->get("empty_object").is<mapnik::value_unicode_string>());
                     REQUIRE_ATTRIBUTES(feature, attrs);
                 }
                 // cleanup
