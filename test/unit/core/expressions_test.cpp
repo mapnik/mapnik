@@ -9,7 +9,7 @@
 #include <mapnik/unicode.hpp>
 
 #include <functional>
-#include <vector>
+#include <map>
 
 namespace {
 
@@ -57,7 +57,7 @@ std::string parse_and_dump(std::string const& str)
 TEST_CASE("expressions")
 {
     using namespace std::placeholders;
-    using properties_type = std::vector<std::pair<std::string, mapnik::value> > ;
+    using properties_type = std::map<std::string, mapnik::value>;
     mapnik::transcoder tr("utf8");
 
     properties_type prop = {{ "foo"   , tr.transcode("bar") },
@@ -65,6 +65,7 @@ TEST_CASE("expressions")
                             { "grass" , tr.transcode("grow")},
                             { "wind"  , tr.transcode("blow")},
                             { "sky"   , tr.transcode("is blue")},
+                            { "τ"     , mapnik::value_double(6.2831853)},
                             { "double", mapnik::value_double(1.23456)},
                             { "int"   , mapnik::value_integer(123)},
                             { "bool"  , mapnik::value_bool(true)},
@@ -73,8 +74,6 @@ TEST_CASE("expressions")
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
     auto eval = std::bind(evaluate_string, feature, _1);
     auto approx = Approx::custom().epsilon(1e-6);
-
-    TRY_CHECK(eval(" [foo]='bar' ") == true);
 
     // primary expressions
     // null
@@ -97,6 +96,17 @@ TEST_CASE("expressions")
     TRY_CHECK(parse_and_dump("pi") == "3.14159");
     TRY_CHECK(parse_and_dump("deg_to_rad") == "0.0174533");
     TRY_CHECK(parse_and_dump("rad_to_deg") == "57.2958");
+
+    // ascii attribute name
+    TRY_CHECK(eval(" [foo]='bar' ") == true);
+
+    // unicode attribute name
+    TRY_CHECK(eval("[τ]") == prop.at("τ"));
+    TRY_CHECK(eval("[τ]") == eval(u8"[\u03C4]"));
+
+    // change to TRY_CHECK once \u1234 escape sequence in attribute name
+    // is implemented in expression grammar
+    CHECK_NOFAIL(eval("[τ]") == eval("[\\u03C3]"));
 
     // unary functions
     // sin / cos
