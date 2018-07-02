@@ -72,6 +72,12 @@ public:
     mapnik::feature_ptr next();
 
 private:
+    void find_best_overview(int bandNumber,
+                            int ideal_width,
+                            int ideal_height,
+                            int & current_width,
+                            int & current_height) const;
+
     mapnik::feature_ptr get_feature(mapnik::query const& q);
     mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
     GDALDataset & dataset_;
