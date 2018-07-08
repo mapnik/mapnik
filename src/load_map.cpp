@@ -380,14 +380,11 @@ void map_parser::parse_map(Map & map, xml_node const& node, std::string const& b
                 }
                 if (success)
                 {
-                    int min_version = (n[0] * 100000) + (n[1] * 100) + (n[2]);
-                    if (min_version > MAPNIK_VERSION)
+                    if (!MAPNIK_VERSION_AT_LEAST(n[0], n[1], n[2]))
                     {
                         throw config_error(std::string("This map uses features only present in Mapnik version ") + *min_version_string + " and newer");
                     }
-
                 }
-
             }
         }
         catch (config_error const& ex)
