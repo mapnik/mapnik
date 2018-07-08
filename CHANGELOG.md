@@ -30,7 +30,7 @@ Released: January 26, 2018
     percentage units ([#3812](https://github.com/mapnik/mapnik/issues/3812))
   - New improved `interior` placement algorithm ([#3839](https://github.com/mapnik/mapnik/issues/3839))
   - Fixed handling of an empty interior rings in `polygon_vertex_processor` ([#3833](https://github.com/mapnik/mapnik/issues/3833))
-  - Fixed handling of an empty interior rings in `vertex_adapter' ([#3842](https://github.com/mapnik/mapnik/issues/3842))([#3838](https://github.com/mapnik/mapnik/issues/3838))
+  - Fixed handling of an empty interior rings in `vertex_adapter` ([#3842](https://github.com/mapnik/mapnik/issues/3842))([#3838](https://github.com/mapnik/mapnik/issues/3838))
 
 ## 3.0.17
 
@@ -236,7 +236,7 @@ Released: October 23, 2015
    support for memory mapped files across Mapnik plugins (currently shape, csv, and geojson).
  - Unified `mapnik-index` utility supporting GeoJSON and CSV formats
  - Increased unit test coverage for GeoJSON and CSV plugins
- - shape.input - re-factor to support *.shx and improve handling various bogus shapefiles
+ - shape.input - re-factor to support \*.shx and improve handling various bogus shapefiles
  - geojson.input - make JSON parser stricter + support single Feature/Geometry as well as FeatureCollection
  - maintain 'FT_LOAD_NO_HINTING' + support >= harfbuzz 1.0.5
  - geojson.input - implement on-disk-index support
@@ -286,7 +286,7 @@ Released: September 16, 2015
 - `colorize-alpha` image filter: fixed normalization of color components ([#3058](https://github.com/mapnik/mapnik/pull/3058))
 - `colorize-alpha` image filter: added support for transparent colors ([#3061](https://github.com/mapnik/mapnik/pull/3061))
 - Enable reading optional `MAPNIK_LOG_FORMAT` environment variable([6d1ffc8](https://github.com/mapnik/mapnik/commit/6d1ffc8a93008b8c0a89d87d68b59afb2cb3757f))
-- CSV.input uses memory mapped file by default on *nix.
+- CSV.input uses memory mapped file by default on \*nix.
 - Updated bundled fonts to the latest version
 - Topojson.input - fixed geometry_index logic which was causing missing features
 - Fixed SVG file loading from unicode paths ([mapnik/node-mapnik#517](https://github.com/mapnik/node-mapnik/issues/517))
@@ -1047,7 +1047,7 @@ Released March 23, 2010
   system. LINK_PRIORITY defaults to prioritizing internal sources of the mapnik source folder, then local/user
   installed libraries over system libraries, but the option can be customized. Sorting not only ensures that
   compiling and linking will more likely match the desired libraries but also gives more likelyhood to avoid
-  the scenario where libraries are linked that don`t match the includes libmapnik compiled against.
+  the scenario where libraries are linked that don't match the includes libmapnik compiled against.
 
 - XML: Fixed behavior of PolygonPatternSymbolizer and LinePatternSymbolizer whereby width, height,
   and type of images is actually allowed to be optionally ommitted ([#508](https://github.com/mapnik/mapnik/issues/508)). This was added in r1543 but
@@ -1113,14 +1113,15 @@ Released January, 19 2010
     * Pass the bbox token inside a subquery like: !bbox!
 
     * Valid Usages include:
-
+      ```sql
         <Parameter name="table">
           (Select ST_Union(geom) as geom from table where ST_Intersects(geometry,!bbox!)) as map
         </Parameter>
 
         <Parameter name="table">
-          (Select * from table where geom &amp;&amp; !bbox!) as map
+          (Select * from table where geom && !bbox!) as map
         </Parameter>
+      ```
 
 - PostGIS Plugin: Added `scale_denominator` substitution ability in sql query string ([#415](https://github.com/mapnik/mapnik/issues/415)/[#465](https://github.com/mapnik/mapnik/issues/465))
 
@@ -1289,7 +1290,7 @@ Released July 14, 2009
 
 - Tests: Added testing framework in Python using nose (r1101-r1105)
 
-- Raster Plugin: Added a tile/bbox-based read policy for large (rasters width * height > 1024*1024 will be loaded in chunks) (r1089)
+- Raster Plugin: Added a tile/bbox-based read policy for large (rasters width * height > 1024 * 1024 will be loaded in chunks) (r1089)
 
 - OGCServer: Made lxml dependency optional (r1085) ([#303](https://github.com/mapnik/mapnik/issues/303))
 
