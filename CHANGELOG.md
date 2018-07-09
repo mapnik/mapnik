@@ -9,8 +9,13 @@ For a complete change history, see the git log.
 
 ## UNRELEASED
 
+#### Notice
+
+- Mapnik now requires C++14 compliant compiler (`-std=c++14`)
+
 #### Core
 
+- Rewrote parser grammars using Boost.Spirit X3 (replacing Boost.Spirit Qi)
 - Fixed segfault when ShieldSymbolizer has invalid placements ([5464ae9](https://github.com/mapnik/mapnik/commit/5464ae9cdfd32983883463bcc2396dc0e51d885f), [#3604](https://github.com/mapnik/mapnik/issues/3604#issuecomment-281542148))
 - Slightly improved `sql_utils::table_from_sql` ([2587bb3](https://github.com/mapnik/mapnik/commit/2587bb3a1d8db397acfa8dcc2d332da3a8a9399f))
 - Added wrappers for proper quoting in SQL query construction: `sql_utils::identifier`, `sql_utils::literal` ([7b21713](https://github.com/mapnik/mapnik/commit/7b217133e2749b82c2638551045c4edbece15086))
