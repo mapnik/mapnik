@@ -39,10 +39,11 @@ Released: March 06, 2018
   - Backported scaling of precision by polygon size  ([#3844](https://github.com/mapnik/mapnik/issues/3844))
   - Backported GRID placement ([#3847](https://github.com/mapnik/mapnik/issues/3847), [#3854](https://github.com/mapnik/mapnik/issues/3854), [#3855](https://github.com/mapnik/mapnik/issues/3855))
   - Added missing `MAPNIK_DECL` to all `text_placement_` types ([7ce142a](https://github.com/mapnik/mapnik/commit/7ce142a5aa8e9da5ddd11266a054c1e69052230d))
-  - Fixed invalid memory access if input_buffer size is zero ([a602c65](https://github.com/mapnik/mapnik/commit/a602c65354a4b595821d2300f38ebc107d07e2a9))
-  - Fixed handling of an empty polygon in grid_vertex_converter ([2f2dcf1](https://github.com/mapnik/mapnik/commit/2f2dcf1eeae71aaa7878f4bc9a39741321f07e68))
-  - Fixed PROJ_LIB detection logic ([44f1ae3](https://github.com/mapnik/mapnik/commit/44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5))
+  - Fixed invalid memory access if input buffer size is zero ([a602c65](https://github.com/mapnik/mapnik/commit/a602c65354a4b595821d2300f38ebc107d07e2a9))
+  - Fixed handling of an empty polygon in `grid_vertex_converter` ([2f2dcf1](https://github.com/mapnik/mapnik/commit/2f2dcf1eeae71aaa7878f4bc9a39741321f07e68))
+  - Fixed `PROJ_LIB` detection logic ([44f1ae3](https://github.com/mapnik/mapnik/commit/44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5))
   - Default to `icu-config` for obtaining `ICU_DATA` if `u_getDataDirectory` fails ([2cef98d](https://github.com/mapnik/mapnik/commit/2cef98d7f76cdd302afcf15f1c585379537e8f1d))
+
 
 ## 3.0.18
 
@@ -56,6 +57,7 @@ Released: January 26, 2018
   - Fixed handling of an empty interior rings in `polygon_vertex_processor` ([#3833](https://github.com/mapnik/mapnik/issues/3833))
   - Fixed handling of an empty interior rings in `vertex_adapter` ([#3842](https://github.com/mapnik/mapnik/issues/3842))([#3838](https://github.com/mapnik/mapnik/issues/3838))
 
+
 ## 3.0.17
 
 Released: November 29, 2017
@@ -64,6 +66,7 @@ Released: November 29, 2017
 
   - Use `Scons 3` as an internal build sytsem + support both Python 2 and 3.
   - Added glibcxx workaround to support libstdc++-4.8
+
 
 ## 3.0.16
 
@@ -75,19 +78,18 @@ Released: November 16, 2017
   - Added support for `<use>` element.
   - Implemented compile time string literal to integer conversion, to be able to convert large `if/else if/else` statements to `switch`.
   - WKB reader - pre-allocate optimisations in `multi_polygon` and `geometry_collection`.
-  - Set alpha values in RGBA TIFFs even when `NODATA` value is pesent.
+  - Set alpha values in RGBA TIFFs even when `NODATA` value is present. ([#3714](https://github.com/mapnik/mapnik/issues/3714))
   - Support building with ICU >= 59.
-  - SCons - added ICU_DATA, PROJ_LIB and GDAL_DATA settings, available via `mapnik-config`
+  - SCons - added `ICU_DATA`, `PROJ_LIB` and `GDAL_DATA` settings, available via `mapnik-config`
   - Fixed centroid and interior text placement algorithms ([#3771](https://github.com/mapnik/mapnik/issues/3771))
   - Fixed memory leak ([#3775](https://github.com/mapnik/mapnik/issues/3775))
   - SVG parser - fixed default gradient vector in linear gradient.
   - Fixed bounding box collection logic ([#3709](https://github.com/mapnik/mapnik/issues/3709))
 
+
 ## 3.0.15
 
 Released: June 16, 2017
-
-#### Summary
 
 (Packaged from [6e6cf84](https://github.com/mapnik/mapnik/commit/6e6cf84))
 
@@ -98,13 +100,12 @@ Released: June 16, 2017
       [mapnik/test-data-visual@be0ba96](https://github.com/mapnik/test-data-visual/commit/be0ba965cd2240576a8edfca84801cbb7a4832d6))
 - TIFF I/O - port memory mapped based I/O from master
 
+
 ## 3.0.14
 
 Released: June 5, 2017
 
 (Packaged from [2b42e17](https://github.com/mapnik/mapnik/commit/2b42e17))
-
-#### Summary
 
 - Fixed problems with high levels of overzooming in the GDAL and raster plugin where data would be slightly offset
 - High levels of overzooming on raster data no longer results in the return of a transparent image.
@@ -115,13 +116,12 @@ Released: June 5, 2017
 - Fixed bug (typo) in `raster_featureset.cpp` ([#3696](https://github.com/mapnik/mapnik/issues/3696))
 - Made `freetype_engine` singleton again. This allows for better control of its life-time. Original interface is preserved via adding static methods ([#3688](https://github.com/mapnik/mapnik/issues/3688))
 
+
 ## 3.0.13
 
 Released: February 8, 2017
 
 (Packaged from [2a153c0](https://github.com/mapnik/mapnik/commit/2a153c0))
-
-#### Summary
 
 - Unbundle `unifont` font from distribution
 - GeoJSON: improved parsing grammar avoiding temp synthesised attribute ([#3507](https://github.com/mapnik/mapnik/issues/3507))
@@ -138,13 +138,12 @@ Released: February 8, 2017
 - GeoJSON - handle empty elements in position grammar (ref [#3609](https://github.com/mapnik/mapnik/issues/3609))
 - mapnik-index - return failure on invalid bounding box (ref [#3611](https://github.com/mapnik/mapnik/issues/3611))
 
+
 ## 3.0.12
 
 Released: September 8, 2016
 
 (Packaged from [1d22d86](https://github.com/mapnik/mapnik/commit/1d22d86))
-
-#### Summary
 
 - Ensured gdal.input is registered once (refs [#3093](https://github.com/mapnik/mapnik/issues/3093) [#3339](https://github.com/mapnik/mapnik/issues/3339) [#3340](https://github.com/mapnik/mapnik/issues/3340))
 - Fixed `mapnik::util::is_clockwise` implementation to use coordinates relative to the origin and avoid numeric precision issues
@@ -178,13 +177,12 @@ Released: September 8, 2016
 - Fixed image swap (ref [#3513](https://github.com/mapnik/mapnik/issues/3513))
 - Stop bundling testdata in source tarball (ref [#3335](https://github.com/mapnik/mapnik/issues/3335))
 
+
 ## 3.0.11
 
 Released: April 1, 2016
 
 (Packaged from [8d9dc27](https://github.com/mapnik/mapnik/commit/8d9dc27))
-
-#### Summary
 
  - Raster scaling: fixed crash and clipping negative pixel values of floating point rasters ([#3349](https://github.com/mapnik/mapnik/pull/3349))
  - Restored support for unquoted strings in expressions ([#3390](https://github.com/mapnik/mapnik/pull/3390))
@@ -192,13 +190,12 @@ Released: April 1, 2016
  - Visual test runner can render SVG, PDF and Postscript with Cairo renderer ([#3418](https://github.com/mapnik/mapnik/pull/3418))
  - Scale factor is now applied also to `text-line-spacing` and transforms ([#3416](https://github.com/mapnik/mapnik/pull/3416))
 
+
 ## 3.0.10
 
 Released: February 25, 2016
 
 (Packaged from [5c0d496](https://github.com/mapnik/mapnik/commit/5c0d496))
-
-#### Summary
 
  - The `shapeindex` command now has a `--index-parts` option. When used the index will be bigger
    but will allow the Shapefile datasource to only parse polygon parts within the query bounds.
@@ -222,14 +219,11 @@ Released: February 25, 2016
  - Compare: https://github.com/mapnik/mapnik/compare/v3.0.9...v3.0.10
 
 
-
 ## 3.0.9
 
 Released: November 26, 2015
 
 (Packaged from [03a0926](https://github.com/mapnik/mapnik/commit/03a0926))
-
-#### Summary
 
  - Fixed offsetting of complex paths and sharp angles ([#3160](https://github.com/mapnik/mapnik/pull/3160)) (via [@winni159](https://github.com/winni159))
  - Fixed mapnik.util.variant issue when compiling with gcc-5.x and SSO enabled by default ([#3103](https://github.com/mapnik/mapnik/issues/3103)) (via [@nkovacs](https://github.com/nkovacs))
@@ -248,13 +242,12 @@ Released: November 26, 2015
  - Centroid algorithm: fixed invalid input handling, particularly empty geometries ([#3185](https://github.com/mapnik/mapnik/pull/3185))
  - Updated SCons build system to the latest version 2.4.1 (http://scons.org/)
 
+
 ## 3.0.8
 
 Released: October 23, 2015
 
 (Packaged from [2d15567](https://github.com/mapnik/mapnik/commit/2d15567))
-
-#### Summary
 
  - Renamed `SHAPE_MEMORY_MAPPED_FILE` define to `MAPNIK_MEMORY_MAPPED_FILE`. Pass `./configure MEMORY_MAPPED_FILE=True|False` to request
    support for memory mapped files across Mapnik plugins (currently shape, csv, and geojson).
@@ -265,13 +258,12 @@ Released: October 23, 2015
  - maintain 'FT_LOAD_NO_HINTING' + support >= harfbuzz 1.0.5
  - geojson.input - implement on-disk-index support
 
+
 ## 3.0.7
 
 Released: October 12, 2015
 
 (Packaged from [e161253](https://github.com/mapnik/mapnik/commit/e161253))
-
-#### Summary
 
  - Removed `MAPNIK_VERSION_IS_RELEASE` define / `mapnik-config --version` not longer reports `-pre` for non-release versions.
    Use `mapnik-config --git-revision` instead ([#3123](https://github.com/mapnik/mapnik/issues/3123))
@@ -279,13 +271,12 @@ Released: October 12, 2015
  - PostGIS: Fixed handling of all attributes when `key_field_as_attribute=false` ([#3120](https://github.com/mapnik/mapnik/issues/3120))
  - PostGIS: Fixed parsing of `key_field_as_attribute` as boolean: now `true/false` can be used in addition to `0/1`
 
+
 ## 3.0.6
 
 Released: October 7, 2015
 
 (Packaged from [3cebe97](https://github.com/mapnik/mapnik/commit/3cebe97))
-
-#### Summary
 
 - PostGIS plugin: added `key_field_as_attribute` option. Defaults to `True` to preserve current behavior of having the `key_field` added both
   as an attribute and as the `feature.id` value. If `key_field_as_attribute=false` is passed then the attribute is discarded ([#3115](https://github.com/mapnik/mapnik/issues/3115))
@@ -297,13 +288,12 @@ Released: October 7, 2015
 - Removed mapnik::Feature type alias of mapnik::feature_impl ([#3099](https://github.com/mapnik/mapnik/pull/3099))
 - Fixed linking order for plugins to avoid possible linking errors on linux systems ([#3105](https://github.com/mapnik/mapnik/issues/3105))
 
+
 ## 3.0.5
 
 Released: September 16, 2015
 
 (Packaged from [165c704](https://github.com/mapnik/mapnik/commit/165c704))
-
-#### Summary
 
 - `scale-hsla` image filter: parameters are no longer limited by interval \[0, 1\] ([#3054](https://github.com/mapnik/mapnik/pull/3054))
 - Windows: Fixed SVG file loading from unicode paths
@@ -318,13 +308,12 @@ Released: September 16, 2015
 - Revive `zero allocation image interface` and add unit tests
 - Benchmark: use return values of test runner.
 
+
 ## 3.0.4
 
 Released: August 26, 2015
 
 (Packaged from [17bb81c](https://github.com/mapnik/mapnik/commit/17bb81c))
-
-#### Summary
 
 - CSV.input: plug-in has been re-factored to minimise memory usage and to improve handling of larger input.
   (NOTE: [large_csv](https://github.com/mapnik/mapnik/tree/large_csv) branch adds experimental trunsduction parser with deferred string initialisation)
@@ -332,13 +321,12 @@ Released: August 26, 2015
 - Fixed deadlock in recursive datasource registration via [@zerebubuth](https://github.com/zerebubuth) ([#3038](https://github.com/mapnik/mapnik/pull/3038))
 - Introduced new command line argument `--limit` or `-l` to limit number of failed tests via [@talaj](https://github.com/talaj) ([#2996](https://github.com/mapnik/mapnik/pull/2996))
 
+
 ## 3.0.3
 
 Released: August 12, 2015
 
 (Packaged from [3d262c7](https://github.com/mapnik/mapnik/commit/3d262c7))
-
-#### Summary
 
 - Fixed an issue with fields over size of `int32` in `OGR` plugin ([mapnik/node-mapnik#499](https://github.com/mapnik/node-mapnik/issues/499))
 - Added 3 new image-filters to simulate types of colorblindness (`color-blind-protanope`,`color-blind-deuteranope`,`color-blind-tritanope`)
@@ -346,6 +334,7 @@ Released: August 12, 2015
 - Patch to add legacy method for setting JPEG quality in images ( [#3024](https://github.com/mapnik/mapnik/issues/3024) )
 - Added `filter_image` method which can modify an image in place or return a new image that is filtered
 - Added missing typedef's in `mapnik::geometry` to allow experimenting with different containers
+
 
 ## 3.0.2
 
@@ -367,6 +356,7 @@ This release is centered around improvements to the SVG parsing within mapnik. M
 - Fixed dimensions parsing
 - Remove libxml2 dependency
 
+
 ## 3.0.1
 
 Released: July 27th, 2015
@@ -386,6 +376,7 @@ The 3.0.1 fixes a few bugs in geojson parsing, svg parsing, and rendering. It al
 - Fixed parsing of GeoJSON when properties contained `{}` ([#2964](https://github.com/mapnik/mapnik/issues/2964))
 - Fixed potential hang due to invalid use of `line-geometry-transform` ([6d6cb15](https://github.com/mapnik/mapnik/commit/6d6cb15))
 - Moved unmaintained plugins out of core: `osm`, `occi`, and `rasterlite` ([#2980](https://github.com/mapnik/mapnik/issues/2980))
+
 
 ## 3.0.0
 
