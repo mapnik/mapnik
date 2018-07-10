@@ -106,10 +106,7 @@ script:
  # (and might work) for the next build
  - DURATION=2400
  - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
- - RESULT=0
- - make test || RESULT=$?
- # we allow visual failures with g++ for now: https://github.com/mapnik/mapnik/issues/3567
- - if [[ ${RESULT} != 0 ]] && [[ ${CXX} =~ 'clang++' ]]; then false; fi;
+ - make test
  - enabled ${COVERAGE} coverage
  - enabled ${BENCH} make bench
  - ./scripts/check_glibcxx.sh
