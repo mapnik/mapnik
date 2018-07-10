@@ -30,6 +30,18 @@ For a complete change history, see the git log.
 - PGraster: using parameter `estimate_extent` now requires PostGIS >= 2.1.0 ([#3624](https://github.com/mapnik/mapnik/issues/3624))
 
 
+## 3.0.20
+
+Released: April 12, 2018
+
+(Packaged from [f02c7bc](https://github.com/mapnik/mapnik/commit/f02c7bcdb))
+
+- Make `max_image_area` a datasource parameter for GDAL.
+- GDAL Driver Overview Fix and Memory Reduction ([#3872](https://github.com/mapnik/mapnik/issues/3872))
+- Raster colorizer: check image bounds ([#3879](https://github.com/mapnik/mapnik/issues/3879))
+- Removed usage of `typename` in template template declarations (available in C++17) ([#3882](https://github.com/mapnik/mapnik/issues/3882))
+
+
 ## 3.0.19
 
 Released: March 06, 2018
