@@ -36,13 +36,13 @@ Released: March 06, 2018
 
 (Packaged from [d50562d](https://github.com/mapnik/mapnik/commit/d50562d54))
 
-  - Backported scaling of precision by polygon size  ([#3844](https://github.com/mapnik/mapnik/issues/3844))
-  - Backported GRID placement ([#3847](https://github.com/mapnik/mapnik/issues/3847), [#3854](https://github.com/mapnik/mapnik/issues/3854), [#3855](https://github.com/mapnik/mapnik/issues/3855))
-  - Added missing `MAPNIK_DECL` to all `text_placement_` types ([7ce142a](https://github.com/mapnik/mapnik/commit/7ce142a5aa8e9da5ddd11266a054c1e69052230d))
-  - Fixed invalid memory access if input buffer size is zero ([a602c65](https://github.com/mapnik/mapnik/commit/a602c65354a4b595821d2300f38ebc107d07e2a9))
-  - Fixed handling of an empty polygon in `grid_vertex_converter` ([2f2dcf1](https://github.com/mapnik/mapnik/commit/2f2dcf1eeae71aaa7878f4bc9a39741321f07e68))
-  - Fixed `PROJ_LIB` detection logic ([44f1ae3](https://github.com/mapnik/mapnik/commit/44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5))
-  - Default to `icu-config` for obtaining `ICU_DATA` if `u_getDataDirectory` fails ([2cef98d](https://github.com/mapnik/mapnik/commit/2cef98d7f76cdd302afcf15f1c585379537e8f1d))
+- Backported scaling of precision by polygon size  ([#3844](https://github.com/mapnik/mapnik/issues/3844))
+- Backported GRID placement ([#3847](https://github.com/mapnik/mapnik/issues/3847), [#3854](https://github.com/mapnik/mapnik/issues/3854), [#3855](https://github.com/mapnik/mapnik/issues/3855))
+- Added missing `MAPNIK_DECL` to all `text_placement_` types ([7ce142a](https://github.com/mapnik/mapnik/commit/7ce142a5aa8e9da5ddd11266a054c1e69052230d))
+- Fixed invalid memory access if input buffer size is zero ([a602c65](https://github.com/mapnik/mapnik/commit/a602c65354a4b595821d2300f38ebc107d07e2a9))
+- Fixed handling of an empty polygon in `grid_vertex_converter` ([2f2dcf1](https://github.com/mapnik/mapnik/commit/2f2dcf1eeae71aaa7878f4bc9a39741321f07e68))
+- Fixed `PROJ_LIB` detection logic ([44f1ae3](https://github.com/mapnik/mapnik/commit/44f1ae3a6e9e9979d1a93343f40db6cd7dbf51d5))
+- Default to `icu-config` for obtaining `ICU_DATA` if `u_getDataDirectory` fails ([2cef98d](https://github.com/mapnik/mapnik/commit/2cef98d7f76cdd302afcf15f1c585379537e8f1d))
 
 
 ## 3.0.18
@@ -51,11 +51,11 @@ Released: January 26, 2018
 
 (Packaged from [44ef46c](https://github.com/mapnik/mapnik/commit/44ef46c81))
 
-  - SVG parser - fixed logic for calculating dimensions when `width` and `height` expressed in
-    percentage units ([#3812](https://github.com/mapnik/mapnik/issues/3812))
-  - New improved `interior` placement algorithm ([#3839](https://github.com/mapnik/mapnik/issues/3839))
-  - Fixed handling of an empty interior rings in `polygon_vertex_processor` ([#3833](https://github.com/mapnik/mapnik/issues/3833))
-  - Fixed handling of an empty interior rings in `vertex_adapter` ([#3842](https://github.com/mapnik/mapnik/issues/3842))([#3838](https://github.com/mapnik/mapnik/issues/3838))
+- SVG parser - fixed logic for calculating dimensions when `width` and `height` expressed in
+  percentage units ([#3812](https://github.com/mapnik/mapnik/issues/3812))
+- New improved `interior` placement algorithm ([#3839](https://github.com/mapnik/mapnik/issues/3839))
+- Fixed handling of an empty interior rings in `polygon_vertex_processor` ([#3833](https://github.com/mapnik/mapnik/issues/3833))
+- Fixed handling of an empty interior rings in `vertex_adapter` ([#3842](https://github.com/mapnik/mapnik/issues/3842))([#3838](https://github.com/mapnik/mapnik/issues/3838))
 
 
 ## 3.0.17
@@ -64,8 +64,8 @@ Released: November 29, 2017
 
 (Packaged from [ebdd96c](https://github.com/mapnik/mapnik/commit/ebdd96c61))
 
-  - Use `Scons 3` as an internal build sytsem + support both Python 2 and 3.
-  - Added glibcxx workaround to support libstdc++-4.8
+- Use `Scons 3` as an internal build sytsem + support both Python 2 and 3.
+- Added glibcxx workaround to support libstdc++-4.8
 
 
 ## 3.0.16
@@ -74,17 +74,17 @@ Released: November 16, 2017
 
 (Packaged from [8d7b75e](https://github.com/mapnik/mapnik/commit/8d7b75e))
 
-  - Added "strict" SVG parsing mode with consistent error handling  and disabled processing of unsupported attributes.
-  - Added support for `<use>` element.
-  - Implemented compile time string literal to integer conversion, to be able to convert large `if/else if/else` statements to `switch`.
-  - WKB reader - pre-allocate optimisations in `multi_polygon` and `geometry_collection`.
-  - Set alpha values in RGBA TIFFs even when `NODATA` value is present. ([#3714](https://github.com/mapnik/mapnik/issues/3714))
-  - Support building with ICU >= 59.
-  - SCons - added `ICU_DATA`, `PROJ_LIB` and `GDAL_DATA` settings, available via `mapnik-config`
-  - Fixed centroid and interior text placement algorithms ([#3771](https://github.com/mapnik/mapnik/issues/3771))
-  - Fixed memory leak ([#3775](https://github.com/mapnik/mapnik/issues/3775))
-  - SVG parser - fixed default gradient vector in linear gradient.
-  - Fixed bounding box collection logic ([#3709](https://github.com/mapnik/mapnik/issues/3709))
+- Added "strict" SVG parsing mode with consistent error handling  and disabled processing of unsupported attributes.
+- Added support for `<use>` element.
+- Implemented compile time string literal to integer conversion, to be able to convert large `if/else if/else` statements to `switch`.
+- WKB reader - pre-allocate optimisations in `multi_polygon` and `geometry_collection`.
+- Set alpha values in RGBA TIFFs even when `NODATA` value is present. ([#3714](https://github.com/mapnik/mapnik/issues/3714))
+- Support building with ICU >= 59.
+- SCons - added `ICU_DATA`, `PROJ_LIB` and `GDAL_DATA` settings, available via `mapnik-config`
+- Fixed centroid and interior text placement algorithms ([#3771](https://github.com/mapnik/mapnik/issues/3771))
+- Fixed memory leak ([#3775](https://github.com/mapnik/mapnik/issues/3775))
+- SVG parser - fixed default gradient vector in linear gradient.
+- Fixed bounding box collection logic ([#3709](https://github.com/mapnik/mapnik/issues/3709))
 
 
 ## 3.0.15
