@@ -17,7 +17,12 @@ For a complete change history, see the git log.
 
 - Rewrote parser grammars using Boost.Spirit X3 (replacing Boost.Spirit Qi)
 - Fixed bbox reprojection ([#3935](https://github.com/mapnik/mapnik/issues/3935))
+- Fixed missing MarkersSymbolizer placement on zero-length lines ([#3899](https://github.com/mapnik/mapnik/issues/3899))
 - Fixed segfault when ShieldSymbolizer has invalid placements ([5464ae9](https://github.com/mapnik/mapnik/commit/5464ae9cdfd32983883463bcc2396dc0e51d885f), [#3604](https://github.com/mapnik/mapnik/issues/3604#issuecomment-281542148))
+- Fixed `apply_color_blind_filter` ([#3862](https://github.com/mapnik/mapnik/issues/3862))
+- Fixed GroupSymbolizer crash, `svg::path_attributes` are now stored in `std::deque` ([#3455](https://github.com/mapnik/mapnik/issues/3455))
+- Duplicate Style name in map XML now throws `config_error` in strict mode ([#3770](https://github.com/mapnik/mapnik/issues/3770), [#3917](https://github.com/mapnik/mapnik/issues/3917))
+- Improved padding calculation for polygon/line clipping ([#3909](https://github.com/mapnik/mapnik/issues/3909))
 - Slightly improved `sql_utils::table_from_sql` ([2587bb3](https://github.com/mapnik/mapnik/commit/2587bb3a1d8db397acfa8dcc2d332da3a8a9399f))
 - Added wrappers for proper quoting in SQL query construction: `sql_utils::identifier`, `sql_utils::literal` ([7b21713](https://github.com/mapnik/mapnik/commit/7b217133e2749b82c2638551045c4edbece15086))
 - Added two-argument `sql_utils::unquote`, `sql_utils::unquote_copy` that also collapse inner quotes ([a4e8ea2](https://github.com/mapnik/mapnik/commit/a4e8ea21be297d89bbf36ba594d6c661a7a9ac81))
