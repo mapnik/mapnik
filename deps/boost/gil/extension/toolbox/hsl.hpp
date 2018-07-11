@@ -44,7 +44,11 @@ typedef mpl::vector3< hsl_color_space::hue_t
 typedef layout<hsl_t> hsl_layout_t;
 
 
+#if BOOST_VERSION >= 106800
+GIL_DEFINE_ALL_TYPEDEFS( 32f, float32_t, hsl );
+#else
 GIL_DEFINE_ALL_TYPEDEFS( 32f, hsl );
+#endif
 
 /// \ingroup ColorConvert
 /// \brief RGB to HSL
@@ -55,6 +59,9 @@ struct default_color_converter_impl< rgb_t, hsl_t >
    void operator()( const P1& src, P2& dst ) const
    {
       using namespace hsl_color_space;
+#if BOOST_VERSION >= 106800
+      using bits32f = float32_t;
+#endif
 
       // only bits32f for hsl is supported
       bits32f temp_red   = channel_convert<bits32f>( get_color( src, red_t()   ));
@@ -157,6 +164,9 @@ struct default_color_converter_impl<hsl_t,rgb_t>
    void operator()( const P1& src, P2& dst) const
    {
       using namespace hsl_color_space;
+#if BOOST_VERSION >= 106800
+      using bits32f = float32_t;
+#endif
 
       bits32f red, green, blue;
 

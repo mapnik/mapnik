@@ -165,7 +165,11 @@ struct double_buffer
 template <typename Src, typename Dst, typename Conv>
 void process_channel_impl (Src const& src, Dst & dst, Conv const& k)
 {
+#if BOOST_VERSION >= 106800
+    using bits32f = boost::gil::float32_t;
+#else
     using boost::gil::bits32f;
+#endif
 
     bits32f out_value =
         k[0]*src[0] + k[1]*src[1] + k[2]*src[2] +
@@ -210,7 +214,11 @@ void process_channel (Src const& src, Dst & dst, mapnik::filter::edge_detect)
 template <typename Src, typename Dst>
 void process_channel (Src const& src, Dst & dst, mapnik::filter::sobel)
 {
+#if BOOST_VERSION >= 106800
+    using bits32f = boost::gil::float32_t;
+#else
     using boost::gil::bits32f;
+#endif
 
     bits32f x_gradient = (src[2] + 2*src[5] + src[8])
         - (src[0] + 2*src[3] + src[6]);
@@ -230,7 +238,11 @@ void process_channel (Src const& src, Dst & dst, mapnik::filter::sobel)
 template <typename Src, typename Dst, typename Filter>
 void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& filter)
 {
+#if BOOST_VERSION >= 106800
+    using bits32f = boost::gil::float32_t;
+#else
     using boost::gil::bits32f;
+#endif
     using boost::gil::point2;
 
     // p0 p1 p2
