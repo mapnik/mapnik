@@ -10,7 +10,7 @@ function run {
     local threads="$2"
     local iters="$3"
     shift 3
-    $runner --threads 1 --iterations $iters "$@"
+    $runner --threads 0 --iterations $iters "$@"
     if test $threads -gt 0; then
         $runner --threads $threads --iterations $((iters/threads)) "$@"
     fi
