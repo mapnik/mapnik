@@ -25,34 +25,12 @@ if env['PLATFORM'] == 'Darwin':
 
 test_env_local = test_env.Clone()
 
-#benchmarks = glob.glob('test*cpp')
-benchmarks = [
-    #"test_array_allocation.cpp",
-    #"test_png_encoding1.cpp",
-    #"test_png_encoding2.cpp",
-    #"test_to_string1.cpp",
-    #"test_to_string2.cpp",
-    #"test_to_bool.cpp",
-    #"test_to_double.cpp",
-    #"test_to_int.cpp",
-    #"test_utf_encoding.cpp"
-    "test_polygon_clipping.cpp",
-    #"test_polygon_clipping_rendering.cpp",
-    "test_proj_transform1.cpp",
-    "test_expression_parse.cpp",
-    "test_face_ptr_creation.cpp",
-    "test_font_registration.cpp",
-    "test_rendering.cpp",
-    "test_rendering_shared_map.cpp",
-    "test_offset_converter.cpp",
-    "test_marker_cache.cpp",
-    "test_quad_tree.cpp",
-    "test_noop_rendering.cpp",
-    "test_getline.cpp",
-#    "test_numeric_cast_vs_static_cast.cpp",
-]
-for cpp_test in benchmarks:
-    test_program = test_env_local.Program('out/'+cpp_test.replace('.cpp',''), source=[cpp_test])
+benchmarks = glob.glob("src/*.cpp")
+
+for src in benchmarks:
+    name, ext = os.path.splitext(os.path.basename(src))
+    out = os.path.join("out", name)
+    test_program = test_env_local.Program(out, source=[src])
     if 'install' in COMMAND_LINE_TARGETS:
         env.Alias('install',test_program)
     #Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
