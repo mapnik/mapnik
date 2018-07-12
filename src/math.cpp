@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/util/math.hpp>
-#include <mapnik/global.hpp>
 
 // stl
 #include <cmath>
@@ -33,13 +32,26 @@ namespace util {
 
     double normalize_angle(double angle)
     {
-        while (angle >= M_PI)
+        if (angle > pi)
         {
-            angle -= 2.0 * M_PI;
+            if (angle > 16 * tau)
+            {
+                // the angle is too large; better compute the remainder
+                // directly to avoid subtracting circles ad infinitum
+                return std::remainder(angle, tau);
+            }
+            // std::remainder would take longer than a few subtractions
+            while ((angle -= tau) > pi)
+                ;
         }
-        while (angle < -M_PI)
+        else if (angle < -pi)
         {
-            angle += 2.0 * M_PI;
+            if (angle < -16 * tau)
+            {
+                return std::remainder(angle, tau);
+            }
+            while ((angle += tau) < -pi)
+                ;
         }
         return angle;
     }

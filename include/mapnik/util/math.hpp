@@ -27,9 +27,11 @@
 
 namespace mapnik { namespace util {
 
+constexpr double pi = 3.1415926535897932384626433832795;
+constexpr double tau = 6.283185307179586476925286766559;
+
 MAPNIK_DECL double normalize_angle(double angle);
 
 }}
 
 #endif
-
