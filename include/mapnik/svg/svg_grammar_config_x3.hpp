@@ -24,6 +24,7 @@
 #define MAPNIK_SVG_GRAMMAR_CONFIG_X3_HPP
 
 #include <mapnik/svg/svg_path_parser.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -43,8 +44,6 @@ using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 using svg_parse_context_type = x3::context<relative_tag, std::reference_wrapper<bool> const,
                                            x3::context<svg_path_tag,std::reference_wrapper<svg_converter_type> const,
                                                        phrase_parse_context_type>>;
-
-inline double deg2rad(double deg) {return (M_PI * deg) / 180.0;}
 
 }}}
 
