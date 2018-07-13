@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/svg/svg_transform_grammar_x3.hpp>
+
 // boost::fusion
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -66,12 +67,12 @@ auto const rotate_action = [] (auto const& ctx)
     auto cy = boost::fusion::at_c<2>(attr) ? *boost::fusion::at_c<2>(attr) : 0.0;
     if (cx == 0.0 && cy == 0.0)
     {
-        tr = agg::trans_affine_rotation(deg2rad(a)) * tr;
+        tr = agg::trans_affine_rotation(agg::deg2rad(a)) * tr;
     }
     else
     {
         agg::trans_affine t = agg::trans_affine_translation(-cx, -cy);
-        t *= agg::trans_affine_rotation(deg2rad(a));
+        t *= agg::trans_affine_rotation(agg::deg2rad(a));
         t *= agg::trans_affine_translation(cx, cy);
         tr = t * tr;
     }
@@ -101,14 +102,14 @@ auto const skewX_action = [] (auto const& ctx)
 {
     auto & tr = x3::get<svg_transform_tag>(ctx).get();
     auto skew_x = _attr(ctx);
-    tr = agg::trans_affine_skewing(deg2rad(skew_x), 0.0) * tr;
+    tr = agg::trans_affine_skewing(agg::deg2rad(skew_x), 0.0) * tr;
 };
 
 auto const skewY_action = [] (auto const& ctx)
 {
     auto & tr = x3::get<svg_transform_tag>(ctx).get();
     auto skew_y= _attr(ctx);
-    tr = agg::trans_affine_skewing(0.0, deg2rad(skew_y)) * tr;
+    tr = agg::trans_affine_skewing(0.0, agg::deg2rad(skew_y)) * tr;
 };
 
 //exported rule

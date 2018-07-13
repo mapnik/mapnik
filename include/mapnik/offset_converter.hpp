@@ -28,6 +28,7 @@
 #endif
 #include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/util/math.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/vertex_cache.hpp>
 
@@ -572,14 +573,16 @@ private:
             {
                 // inside turn (sharp/obtuse angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Sharp joint [<< inside turn " << int(joint_angle*180/M_PI)
+                    << " Sharp joint [<< inside turn "
+                    << static_cast<int>(util::degrees(joint_angle))
                     << " degrees >>]";
             }
             else
             {
                 // outside turn (reflex angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Bulge joint >)) outside turn " << int(joint_angle*180/M_PI)
+                    << " Bulge joint >)) outside turn "
+                    << static_cast<int>(util::degrees(joint_angle))
                     << " degrees ((< with " << bulge_steps << " segments";
             }
             #endif

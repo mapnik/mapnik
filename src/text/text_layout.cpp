@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
+#include <mapnik/util/math.hpp>
 #include <mapnik/make_unique.hpp>
 
 #pragma GCC diagnostic push
@@ -117,7 +118,7 @@ text_layout::text_layout(face_manager_freetype & font_manager,
         if (!wrap_str.empty()) wrap_char_ = wrap_str[0];
         wrap_width_ = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.wrap_width);
         double angle = util::apply_visitor(extract_value<value_double>(feature,attrs), layout_properties_.orientation);
-        orientation_.init(angle * M_PI/ 180.0);
+        orientation_.init(util::radians(angle));
         wrap_before_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), layout_properties_.wrap_before);
         repeat_wrap_char_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), layout_properties_.repeat_wrap_char);
         rotate_displacement_ = util::apply_visitor(extract_value<value_bool>(feature,attrs), layout_properties_.rotate_displacement);
