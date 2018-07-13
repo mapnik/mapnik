@@ -245,6 +245,30 @@ private:
         return false;
     }
 
+    double joint_angle(double x1x0, double y1y0, double x1x2, double y1y2) const
+    {
+        double dot = x1x0 * x1x2 + y1y0 * y1y2; // dot product
+        double det = x1x0 * y1y2 - y1y0 * x1x2; // determinant
+        double angle = std::atan2(det, dot); // atan2(y, x) or atan2(sin, cos)
+        // angle in [-tau/2; tau/2]
+
+        if (offset_ > 0.0)
+        {
+            angle = util::tau - angle; // angle in [tau/2; tau*3/2]
+        }
+        else if (angle < 0)
+        {
+            angle += util::tau; // angle in [tau/2; tau]
+            // angle may now be equal to tau, because if the original angle
+            // is very small, the addition cancels it (epsilon + tau == tau)
+        }
+        if (angle >= util::tau)
+        {
+            angle -= util::tau;
+        }
+        return angle;
+    }
+
     /**
      *  @brief  Translate (vx, vy) by rotated (dx, dy).
      */
@@ -424,13 +448,8 @@ private:
             cpt++;
             angle_a = std::atan2(-v_y1y0, -v_x1x0);
         }
-        // dot product
-        double dot;
-        // determinate
-        double det;
         double angle_b = std::atan2(v_y1y2, v_x1x2);
         // Angle between the two vectors
-        double joint_angle;
         double curve_angle;
 
         if (!is_polygon)
@@ -441,18 +460,7 @@ private:
         }
         else
         {
-            dot = v_x1x0 * v_x1x2 + v_y1y0 * v_y1y2;      // dot product
-            det = v_x1x0 * v_y1y2 - v_y1y0 * v_x1x2;      // determinant
-
-            joint_angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-            if (joint_angle < 0) joint_angle = joint_angle + 2 * M_PI;
-            joint_angle = std::fmod(joint_angle, 2 * M_PI);
-
-            if (offset_ > 0.0)
-            {
-                joint_angle = 2 * M_PI - joint_angle;
-            }
-
+            double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
             if (std::abs(joint_angle) > M_PI)
@@ -546,18 +554,7 @@ private:
             // Calculate the new angle_b
             angle_b = std::atan2(v_y1y2, v_x1x2);
 
-            dot = v_x1x0 * v_x1x2 + v_y1y0 * v_y1y2;      // dot product
-            det = v_x1x0 * v_y1y2 - v_y1y0 * v_x1x2;      // determinant
-
-            joint_angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-            if (joint_angle < 0) joint_angle = joint_angle + 2 * M_PI;
-            joint_angle = std::fmod(joint_angle, 2 * M_PI);
-
-            if (offset_ > 0.0)
-            {
-                joint_angle = 2 * M_PI - joint_angle;
-            }
-
+            double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
             if (std::abs(joint_angle) > M_PI)
