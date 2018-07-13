@@ -26,7 +26,6 @@
 #ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
 #endif
-#include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/util/math.hpp>
 #include <mapnik/vertex.hpp>
@@ -185,13 +184,13 @@ private:
 
     static double explement_reflex_angle(double angle)
     {
-        if (angle > M_PI)
+        if (angle > util::pi)
         {
-            return angle - 2 * M_PI;
+            return angle - util::tau;
         }
-        else if (angle < -M_PI)
+        else if (angle < -util::pi)
         {
-            return angle + 2 * M_PI;
+            return angle + util::tau;
         }
         else
         {
@@ -463,12 +462,12 @@ private:
             double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
-            if (std::abs(joint_angle) > M_PI)
+            if (std::abs(joint_angle) > util::pi)
             {
                 curve_angle = explement_reflex_angle(angle_b - angle_a);
                 // Bulge steps should be determined by the inverse of the joint angle.
                 double half_turns = half_turn_segments_ * std::fabs(curve_angle);
-                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
             if (bulge_steps == 0)
@@ -557,12 +556,12 @@ private:
             double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
-            if (std::abs(joint_angle) > M_PI)
+            if (std::abs(joint_angle) > util::pi)
             {
                 curve_angle = explement_reflex_angle(angle_b - angle_a);
                 // Bulge steps should be determined by the inverse of the joint angle.
                 double half_turns = half_turn_segments_ * std::fabs(curve_angle);
-                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
             #ifdef MAPNIK_LOG
