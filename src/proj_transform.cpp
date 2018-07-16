@@ -195,11 +195,11 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
 
     if (wgs84_to_merc_)
     {
-        return lonlat2merc(x,y,point_count);
+        return lonlat2merc(x, y, point_count, offset);
     }
     else if (merc_to_wgs84_)
     {
-        return merc2lonlat(x,y,point_count);
+        return merc2lonlat(x, y, point_count, offset);
     }
 
 #ifdef MAPNIK_USE_PROJ4
@@ -244,11 +244,11 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
 
     if (wgs84_to_merc_)
     {
-        return merc2lonlat(x,y,point_count);
+        return merc2lonlat(x, y, point_count, offset);
     }
     else if (merc_to_wgs84_)
     {
-        return lonlat2merc(x,y,point_count);
+        return lonlat2merc(x, y, point_count, offset);
     }
 
 #ifdef MAPNIK_USE_PROJ4
