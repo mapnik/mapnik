@@ -195,4 +195,73 @@ SECTION("Test proj antimeridian bbox")
     }
 }
 
+SECTION("proj_transform of coordinate arrays with stride > 1")
+{
+    mapnik::projection const proj_4326("+init=epsg:4326");
+    mapnik::projection const proj_3857("+init=epsg:3857");
+    mapnik::projection const proj_2193("+init=epsg:2193");
+
+    SECTION("lonlat <-> Web Mercator")
+    {
+        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:3857 <<END
+        //      170.142139 -43.595056
+        //      175.566667 -39.283333
+        //  END
+        //
+        //  170.142139 -43.595056   18940136.2759583741 -5402988.5324898539
+        //  175.566667 -39.283333   19543991.9707122259 -4762338.2380718365
+        //
+        mapnik::geometry::point<double> points[] = {{ 170.142139, -43.595056 },
+                                                    { 175.566667, -39.283333 }};
+        // this transform is calculated by Mapnik (well_known_srs.cpp)
+        mapnik::proj_transform lonlat_to_webmerc(proj_4326, proj_3857);
+        CHECKED_IF(lonlat_to_webmerc.forward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(18940136.2759583741));
+            CHECK(points[0].y == Approx(-5402988.5324898539));
+            CHECK(points[1].x == Approx(19543991.9707122259));
+            CHECK(points[1].y == Approx(-4762338.2380718365));
+        }
+        CHECKED_IF(lonlat_to_webmerc.backward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(170.142139));
+            CHECK(points[0].y == Approx(-43.595056));
+            CHECK(points[1].x == Approx(175.566667));
+            CHECK(points[1].y == Approx(-39.283333));
+        }
+    }
+
+    #ifdef MAPNIK_USE_PROJ4
+    SECTION("lonlat <-> New Zealand Transverse Mercator 2000")
+    {
+        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:2193 <<END
+        //      170.142139 -43.595056
+        //      175.566667 -39.283333
+        //  END
+        //
+        //  170.142139 -43.595056   1369316.0970041484  5169132.9750701785
+        //  175.566667 -39.283333   1821377.9170061364  5648640.2106032455
+        //
+        mapnik::geometry::point<double> points[] = {{ 170.142139, -43.595056 },
+                                                    { 175.566667, -39.283333 }};
+        // this transform is not calculated by Mapnik (needs Proj4)
+        mapnik::proj_transform lonlat_to_nztm(proj_4326, proj_2193);
+        CHECKED_IF(lonlat_to_nztm.forward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(1369316.0970041484));
+            CHECK(points[0].y == Approx(5169132.9750701785));
+            CHECK(points[1].x == Approx(1821377.9170061364));
+            CHECK(points[1].y == Approx(5648640.2106032455));
+        }
+        CHECKED_IF(lonlat_to_nztm.backward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(170.142139));
+            CHECK(points[0].y == Approx(-43.595056));
+            CHECK(points[1].x == Approx(175.566667));
+            CHECK(points[1].y == Approx(-39.283333));
+        }
+    }
+    #endif // MAPNIK_USE_PROJ4
+}
+
 }
