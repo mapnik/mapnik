@@ -92,25 +92,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
     // max_im_area based on 50 mb limit for RGBA
     max_image_area_ = *params.get<mapnik::value_integer>("max_image_area", (50*1024*1024) / 4);
 
-#if GDAL_VERSION_NUM >= 1600
-    if (shared_dataset_)
-    {
-        auto ds = GDALOpenShared(dataset_name_.c_str(), GA_ReadOnly);
-        dataset_.reset(static_cast<GDALDataset*>(ds));
-    }
-    else
-#endif
-    {
-        auto ds = GDALOpen(dataset_name_.c_str(), GA_ReadOnly);
-        dataset_.reset(static_cast<GDALDataset*>(ds));
-    }
-
-    if (! dataset_)
-    {
-        throw datasource_exception(CPLGetLastErrorMsg());
-    }
-
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: opened Dataset=" << dataset_.get();
+    open_dataset(dataset_name_.c_str(), shared_dataset_);
 
     nbands_ = dataset_->GetRasterCount();
     width_ = dataset_->GetRasterXSize();
@@ -195,12 +177,74 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
-
 }
 
 gdal_datasource::~gdal_datasource()
 {
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << dataset_.get();
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Closing Dataset=" << dataset_.get();
+}
+
+// check whether a workaround is needed for these
+//
+//      https://github.com/mapnik/mapnik/issues/3093
+//      https://github.com/mapnik/mapnik/issues/3339
+//
+// the culprit was fixed in GDAL 2.0.2
+//
+//      https://trac.osgeo.org/gdal/wiki/Release/2.0.2-News
+//      https://trac.osgeo.org/gdal/changeset/31110
+//
+#define WORKAROUND_XTIFFInitialize_RACE \
+        ( defined(MAPNIK_THREADSAFE) && \
+          ( !defined(GDAL_COMPUTE_VERSION) || \
+            GDAL_VERSION_NUM < GDAL_COMPUTE_VERSION(2,0,2) ) )
+
+#if WORKAROUND_XTIFFInitialize_RACE
+static std::atomic<bool> xtiff_initialized(false);
+static std::mutex xtiff_mutex;
+#endif
+
+void gdal_datasource::open_dataset(char const* name, bool shared)
+{
+#if WORKAROUND_XTIFFInitialize_RACE
+    std::unique_lock<std::mutex> lock(xtiff_mutex);
+    if (xtiff_initialized)
+    {
+        lock.unlock();
+    }
+#endif
+
+    GDALDatasetH ds;
+
+#if GDAL_VERSION_NUM >= 1600
+    if (shared)
+    {
+        ds = GDALOpenShared(name, GA_ReadOnly);
+    }
+    else
+#endif
+    {
+        ds = GDALOpen(name, GA_ReadOnly);
+    }
+
+    if (ds == nullptr)
+    {
+        throw datasource_exception(CPLGetLastErrorMsg());
+    }
+
+#if WORKAROUND_XTIFFInitialize_RACE
+    if (!xtiff_initialized)
+    {
+        auto driver = GDALGetDatasetDriver(ds);
+        auto desc = GDALGetDescription(driver);
+        xtiff_initialized = (std::strcmp(desc, "GTiff") == 0);
+        lock.unlock();
+    }
+#endif
+
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: opened Dataset=" << ds;
+
+    dataset_.reset(static_cast<GDALDataset*>(ds));
 }
 
 datasource::datasource_t gdal_datasource::type() const
