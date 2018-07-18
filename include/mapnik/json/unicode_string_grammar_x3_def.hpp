@@ -105,7 +105,7 @@ using x3::char_;
 using x3::eol;
 using x3::no_skip;
 
-x3::uint_parser<char,  16, 2, 2> const hex2 {};
+x3::uint_parser<std::uint8_t,  16, 2, 2> const hex2 {};
 x3::uint_parser<std::uint16_t, 16, 4, 4> const hex4 {};
 x3::uint_parser<uchar, 16, 8, 8> const hex8 {};
 
