@@ -12,6 +12,7 @@
 #include <chrono>
 #include <cmath> // log10, round
 #include <cstdio> // snprintf
+#include <iomanip>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -239,14 +240,19 @@ int run(T const& test_runner, std::string const& name)
         big_number_fmt itersf(4, total_iters);
         big_number_fmt ips(5, total_iters / seconds<double>(elapsed_nonzero).count());
 
+        std::clog << std::left << std::setw(43) << name;
+        std::clog << std::resetiosflags(std::ios::adjustfield);
+        if (num_threads > 0) {
+            std::clog << ' ' << std::setw(3) << num_threads
+                << " worker" << (num_threads > 1 ? "s" : " ");
+        }
+        else {
+            std::clog << " main thread";
+        }
         std::snprintf(msg, sizeof(msg),
-                "%-43s %3zu thread(s) %*.0f%s iters %6.0f milliseconds %*.0f%s i/s\n",
-                name.c_str(),
-                num_threads,
-                itersf.w, itersf.v, itersf.u,
-                dur_total,
-                ips.w, ips.v, ips.u
-                );
+                " %*.0f%s iters %6.0f milliseconds %*.0f%s i/t/s\n",
+                itersf.w, itersf.v, itersf.u, dur_total,
+                ips.w, ips.v, ips.u);
         std::clog << msg;
         return 0;
     }

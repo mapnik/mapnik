@@ -140,23 +140,12 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {
-        double padding = static_cast<double>(common_.query_extent_.width() / common_.width_);
-        double half_stroke = 0.5 * width;
-        if (half_stroke > 1)
-        {
-            padding *= half_stroke;
-        }
-        if (std::fabs(offset) > 0)
-        {
-            padding *= std::fabs(offset) * 1.2;
-        }
+        double pad_per_pixel = static_cast<double>(common_.query_extent_.width()/common_.width_);
+        double pixels = std::ceil(std::max(width / 2.0 + std::fabs(offset),
+                                          (std::fabs(offset) * offset_converter_default_threshold)));
+        double padding = pad_per_pixel * pixels * common_.scale_factor_;
 
-        padding *= common_.scale_factor_;
         clip_box.pad(padding);
-        // debugging
-        //box2d<double> inverse = query_extent_;
-        //inverse.pad(-padding);
-        //draw_geo_extent(inverse,mapnik::color("red"));
     }
 
     if (rasterizer_e == RASTERIZER_FAST)
