@@ -6,6 +6,7 @@ First clone mapnik from github and initialize submodules
 
 ```bash
 git clone https://github.com/mapnik/mapnik.git
+cd mapnik
 git submodule update --init
 ```
 
@@ -191,6 +192,6 @@ Mapnik is great for building your own mapping applications. Visit
 https://github.com/mapnik/mapnik/wiki/LearningMapnik for basic
 tutorials on how to programmatically use Mapnik.
 
-### Contributers
+### Contributors
 
-Read docs/contributing.md for resources for getting involved with Mapnik development.
+Read [docs/contributing.md](docs/contributing.md) for resources for getting involved with Mapnik development.
