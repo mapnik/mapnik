@@ -290,6 +290,26 @@ TEST_CASE("postgis") {
             REQUIRE(ext.maxy() == 4);
         }
 
+        SECTION("Postgis substitutes numeric !tokens! always with decimal point")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "(SELECT geom,"
+                                     " pg_typeof(!pixel_width!)::text as t_pixel_width,"
+                                     " pg_typeof(!pixel_height!)::text as t_pixel_height,"
+                                     " pg_typeof(!scale_denominator!)::text as t_scale_denom"
+                              " FROM public.test LIMIT 1) as data";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            auto featureset = all_features(ds);
+            auto feature = featureset->next();
+            CHECKED_IF(feature != nullptr)
+            {
+                CHECK(feature->get("t_pixel_width").to_string() == "numeric");
+                CHECK(feature->get("t_pixel_height").to_string() == "numeric");
+                CHECK(feature->get("t_scale_denom").to_string() == "numeric");
+            }
+        }
+
         SECTION("Postgis doesn't interpret @domain in email address as @variable")
         {
             mapnik::parameters params(base_params);
