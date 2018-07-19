@@ -49,7 +49,6 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
-#include <iomanip>
 
 DATASOURCE_PLUGIN(pgraster_datasource)
 
@@ -598,6 +597,7 @@ layer_descriptor pgraster_datasource::get_descriptor() const
 std::string pgraster_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
+    b.precision(16);
 
     if (srid_ > 0)
     {
@@ -605,7 +605,6 @@ std::string pgraster_datasource::sql_bbox(box2d<double> const& env) const
     }
 
     b << "'BOX(";
-    b << std::setprecision(16);
     b << env.minx() << " " << env.miny() << ",";
     b << env.maxx() << " " << env.maxy() << ")'::box2d";
 
@@ -636,6 +635,9 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
     std::cmatch m;
     char const* start = sql.data();
     char const* end = start + sql.size();
+
+    populated_sql.precision(16);
+    populated_sql << std::showpoint;
 
     while (std::regex_search(start, end, m, re_tokens_))
     {
