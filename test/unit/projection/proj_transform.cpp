@@ -25,20 +25,23 @@ SECTION("Test bounding box transforms - 4326 to 3857")
     double maxy = 75.0;
 
     mapnik::box2d<double> bbox(minx, miny, maxx, maxy);
-
-    prj_trans.forward(bbox);
     INFO(bbox.to_string());
-    CHECK(bbox.minx() == Approx(-5009377.085697311));
-    CHECK(bbox.miny() == Approx(7361866.1130511891));
-    CHECK(bbox.maxx() == Approx(-4452779.631730943));
-    CHECK(bbox.maxy() == Approx(12932243.1119920239));
 
-    prj_trans.backward(bbox);
-    CHECK(bbox.minx() == Approx(minx));
-    CHECK(bbox.miny() == Approx(miny));
-    CHECK(bbox.maxx() == Approx(maxx));
-    CHECK(bbox.maxy() == Approx(maxy));
+    CHECKED_IF(prj_trans.forward(bbox))
+    {
+        CHECK(bbox.minx() == Approx(-5009377.085697311));
+        CHECK(bbox.miny() == Approx(7361866.1130511891));
+        CHECK(bbox.maxx() == Approx(-4452779.631730943));
+        CHECK(bbox.maxy() == Approx(12932243.1119920239));
+    }
 
+    CHECKED_IF(prj_trans.backward(bbox))
+    {
+        CHECK(bbox.minx() == Approx(minx));
+        CHECK(bbox.miny() == Approx(miny));
+        CHECK(bbox.maxx() == Approx(maxx));
+        CHECK(bbox.maxy() == Approx(maxy));
+    }
 }
 
 
@@ -145,21 +148,25 @@ SECTION("Test proj antimeridian bbox")
 
     {
         mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
-        prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS);
-        CHECK(ext.minx() == Approx(better.minx()));
-        CHECK(ext.miny() == Approx(better.miny()));
-        CHECK(ext.maxx() == Approx(better.maxx()));
-        CHECK(ext.maxy() == Approx(better.maxy()));
+        CHECKED_IF(prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(better.minx()));
+            CHECK(ext.miny() == Approx(better.miny()));
+            CHECK(ext.maxx() == Approx(better.maxx()));
+            CHECK(ext.maxy() == Approx(better.maxy()));
+        }
     }
 
     {
         // check the same logic works for .backward()
         mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
-        prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS);
-        CHECK(ext.minx() == Approx(better.minx()));
-        CHECK(ext.miny() == Approx(better.miny()));
-        CHECK(ext.maxx() == Approx(better.maxx()));
-        CHECK(ext.maxy() == Approx(better.maxy()));
+        CHECKED_IF(prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(better.minx()));
+            CHECK(ext.miny() == Approx(better.miny()));
+            CHECK(ext.maxx() == Approx(better.maxx()));
+            CHECK(ext.maxy() == Approx(better.maxy()));
+        }
     }
 
     // reference values taken from proj4 command line tool:
@@ -177,21 +184,25 @@ SECTION("Test proj antimeridian bbox")
     {
         // checks for not being snapped (ie. not antimeridian)
         mapnik::box2d<double> ext(274000, 3087000, 276000, 7173000);
-        prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS);
-        CHECK(ext.minx() == Approx(normal.minx()));
-        CHECK(ext.miny() == Approx(normal.miny()));
-        CHECK(ext.maxx() == Approx(normal.maxx()));
-        CHECK(ext.maxy() == Approx(normal.maxy()));
+        CHECKED_IF(prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(normal.minx()));
+            CHECK(ext.miny() == Approx(normal.miny()));
+            CHECK(ext.maxx() == Approx(normal.maxx()));
+            CHECK(ext.maxy() == Approx(normal.maxy()));
+        }
     }
 
     {
         // check the same logic works for .backward()
         mapnik::box2d<double> ext(274000, 3087000, 276000, 7173000);
-        prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS);
-        CHECK(ext.minx() == Approx(normal.minx()));
-        CHECK(ext.miny() == Approx(normal.miny()));
-        CHECK(ext.maxx() == Approx(normal.maxx()));
-        CHECK(ext.maxy() == Approx(normal.maxy()));
+        CHECKED_IF(prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(normal.minx()));
+            CHECK(ext.miny() == Approx(normal.miny()));
+            CHECK(ext.maxx() == Approx(normal.maxx()));
+            CHECK(ext.maxy() == Approx(normal.maxy()));
+        }
     }
 }
 
