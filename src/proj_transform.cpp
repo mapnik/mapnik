@@ -21,12 +21,16 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geometry_adapters.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/util/is_clockwise.hpp>
+
+// boost
+#include <boost/geometry/algorithms/envelope.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
 // proj4
@@ -38,6 +42,56 @@
 #include <stdexcept>
 
 namespace mapnik {
+
+namespace { // (local)
+
+// Returns points in clockwise order. This allows us to do anti-meridian checks.
+template <typename T>
+auto envelope_points(box2d<T> const& env, std::size_t num_points)
+    -> geometry::multi_point<T>
+{
+    auto width = env.width();
+    auto height = env.height();
+
+    geometry::multi_point<T> coords;
+    coords.reserve(num_points);
+
+    // top side: left >>> right
+    // gets extra point if (num_points % 4 >= 1)
+    for (std::size_t i = 0, n = (num_points + 3) / 4; i < n; ++i)
+    {
+        auto x = env.minx() + (i * width) / n;
+        coords.emplace_back(x, env.maxy());
+    }
+
+    // right side: top >>> bottom
+    // gets extra point if (num_points % 4 >= 3)
+    for (std::size_t i = 0, n = (num_points + 1) / 4; i < n; ++i)
+    {
+        auto y = env.maxy() - (i * height) / n;
+        coords.emplace_back(env.maxx(), y);
+    }
+
+    // bottom side: right >>> left
+    // gets extra point if (num_points % 4 >= 2)
+    for (std::size_t i = 0, n = (num_points + 2) / 4; i < n; ++i)
+    {
+        auto x = env.maxx() - (i * width) / n;
+        coords.emplace_back(x, env.miny());
+    }
+
+    // left side: bottom >>> top
+    // never gets extra point
+    for (std::size_t i = 0, n = (num_points + 0) / 4; i < n; ++i)
+    {
+        auto y = env.miny() + (i * height) / n;
+        coords.emplace_back(env.minx(), y);
+    }
+
+    return coords;
+}
+
+} // namespace mapnik::(local)
 
 proj_transform::proj_transform(projection const& source,
                                projection const& dest)
@@ -334,49 +388,6 @@ bool proj_transform::backward (box2d<double> & box) const
     return true;
 }
 
-// Returns points in clockwise order. This allows us to do anti-meridian checks.
-void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env, int points)
-{
-    double width = env.width();
-    double height = env.height();
-
-    int steps;
-
-    if (points <= 4) {
-        steps = 0;
-    } else {
-        steps = static_cast<int>(std::ceil((points - 4) / 4.0));
-    }
-
-    steps += 1;
-    double xstep = width / steps;
-    double ystep = height / steps;
-
-    coords.resize(points);
-    for (int i=0; i<steps; i++) {
-        // top: left>right
-        coords[i] = coord<double, 2>(env.minx() + i * xstep, env.maxy());
-        // right: top>bottom
-        coords[i + steps] = coord<double, 2>(env.maxx(), env.maxy() - i * ystep);
-        // bottom: right>left
-        coords[i + steps * 2] = coord<double, 2>(env.maxx() - i * xstep, env.miny());
-        // left: bottom>top
-        coords[i + steps * 3] = coord<double, 2>(env.minx(), env.miny() + i * ystep);
-    }
-}
-
-box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
-    std::vector<coord<double,2> >::iterator it = points.begin();
-    std::vector<coord<double,2> >::iterator it_end = points.end();
-
-    box2d<double> env(*it, *(++it));
-    for (; it!=it_end; ++it) {
-        env.expand_to_include(*it);
-    }
-    return env;
-}
-
-
 // More robust, but expensive, bbox transform
 // in the face of proj4 out of bounds conditions.
 // Can result in 20 -> 10 r/s performance hit.
@@ -393,18 +404,18 @@ bool proj_transform::backward(box2d<double>& env, int points) const
         return backward(env);
     }
 
-    std::vector<coord<double,2> > coords;
-    envelope_points(coords, env, points);  // this is always clockwise
+    auto coords = envelope_points(env, points);  // this is always clockwise
 
-    double z;
-    for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
-        z = 0;
-        if (!backward(it->x, it->y, z)) {
+    for (auto & p : coords)
+    {
+        double z = 0;
+        if (!backward(p.x, p.y, z))
             return false;
-        }
     }
 
-    box2d<double> result = calculate_bbox(coords);
+    box2d<double> result;
+    boost::geometry::envelope(coords, result);
+
     if (is_source_longlat_ && !util::is_clockwise(coords))
     {
         // we've gone to a geographic CS, and our clockwise envelope has
@@ -432,18 +443,17 @@ bool proj_transform::forward(box2d<double>& env, int points) const
         return forward(env);
     }
 
-    std::vector<coord<double,2> > coords;
-    envelope_points(coords, env, points);  // this is always clockwise
+    auto coords = envelope_points(env, points);  // this is always clockwise
 
-    double z;
-    for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
-        z = 0;
-        if (!forward(it->x, it->y, z)) {
+    for (auto & p : coords)
+    {
+        double z = 0;
+        if (!forward(p.x, p.y, z))
             return false;
-        }
     }
 
-    box2d<double> result = calculate_bbox(coords);
+    box2d<double> result;
+    boost::geometry::envelope(coords, result);
 
     if (is_dest_longlat_ && !util::is_clockwise(coords))
     {
