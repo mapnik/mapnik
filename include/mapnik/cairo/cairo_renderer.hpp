@@ -171,7 +171,6 @@ public:
                        agg::trans_affine const& mtx,
                        double opacity=1.0,
                        bool recenter=true);
-    void render_box(box2d<double> const& b);
 protected:
     Map const& m_;
     cairo_context context_;
