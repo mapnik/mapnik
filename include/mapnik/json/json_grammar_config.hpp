@@ -90,23 +90,33 @@ struct feature_tag;
 namespace x3 = boost::spirit::x3;
 using space_type = x3::standard::space_type;
 using iterator_type = char const*;
-
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
+
+#if BOOST_VERSION >= 106700
+using keys_map_type = keys_map;
+using transcoder_type =  mapnik::transcoder const;
+using feature_impl_type = mapnik::feature_impl;
+#else
+using keys_map_type = std::reference_wrapper<keys_map> const;
+using transcoder_type = std::reference_wrapper<mapnik::transcoder const> const;
+using feature_impl_type = std::reference_wrapper<mapnik::feature_impl> const;
+#endif
+
 using context_type = x3::context<keys_tag,
-                                 keys_map,
+                                 keys_map_type,
                                  phrase_parse_context_type>;
 
 using feature_context_type = x3::context<transcoder_tag,
-                                         mapnik::transcoder const,
+                                         transcoder_type,
                                          x3::context<feature_tag,
-                                                     mapnik::feature_impl,
+                                                     feature_impl_type,
                                                      phrase_parse_context_type>>;
 
 // our spirit x3 grammars needs this one with changed order of feature_impl and transcoder (??)
 using feature_context_const_type = x3::context<feature_tag,
-                                               mapnik::feature_impl,
+                                              feature_impl_type,
                                                x3::context<transcoder_tag,
-                                                           mapnik::transcoder const,
+                                                           transcoder_type,
                                                            phrase_parse_context_type>>;
 
 }}}
