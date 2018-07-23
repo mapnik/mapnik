@@ -70,6 +70,12 @@ namespace mapnik { namespace grammar {
     auto const& escaped_unicode = json::grammar::escaped_unicode;
     }
 
+    template <typename Context>
+    inline mapnik::transcoder const& extract_transcoder(Context const& ctx)
+    {
+        return x3::get<transcoder_tag>(ctx);
+    }
+
     auto append = [](auto const& ctx)
     {
         _val(ctx) += _attr(ctx);
@@ -130,7 +136,7 @@ namespace mapnik { namespace grammar {
 
     auto do_unicode = [] (auto const& ctx)
     {
-        auto const& tr = x3::get<transcoder_tag>(ctx).get();
+        auto const& tr = extract_transcoder(ctx);
         _val(ctx) = std::move(tr.transcode(_attr(ctx).c_str()));
     };
 
@@ -188,13 +194,13 @@ namespace mapnik { namespace grammar {
 // regex
     auto do_regex_match = [] (auto const& ctx)
     {
-        auto const& tr = x3::get<transcoder_tag>(ctx).get();
+        auto const& tr = extract_transcoder(ctx);
         _val(ctx) = std::move(mapnik::regex_match_node(tr, std::move(_val(ctx)) , std::move(_attr(ctx))));
     };
 
     auto do_regex_replace = [] (auto const& ctx)
     {
-        auto const& tr = x3::get<transcoder_tag>(ctx).get();
+        auto const& tr = extract_transcoder(ctx);
         auto const& pair = _attr(ctx);
         auto const& pattern = std::get<0>(pair);
         auto const& format = std::get<1>(pair);

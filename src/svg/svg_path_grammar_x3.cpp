@@ -21,15 +21,9 @@
  *****************************************************************************/
 
 #include <mapnik/svg/svg_path_grammar_x3_def.hpp>
+#include <mapnik/boost_spirit_instantiate.hpp>
 
 namespace mapnik { namespace svg { namespace grammar {
-
-#define BOOST_SPIRIT_INSTANTIATE_UNUSED(rule_type, Iterator, Context)   \
-    template bool parse_rule<Iterator, Context, boost::spirit::x3::unused_type const>( \
-        rule_type rule_                                                 \
-        , Iterator& first, Iterator const& last                         \
-        , Context const& context, boost::spirit::x3::unused_type const& ); \
-    /***/
 
 BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_path_grammar_type, iterator_type, svg_parse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_points_grammar_type, iterator_type, svg_parse_context_type);

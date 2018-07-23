@@ -39,9 +39,17 @@ namespace x3 = boost::spirit::x3;
 using space_type = x3::standard::space_type;
 using iterator_type = char const*;
 
+#if BOOST_VERSION >= 106700
+using svg_converter_wrapper_type = svg_converter_type;
+using relative_type = bool;
+#else
+using svg_converter_wrapper_type = std::reference_wrapper<svg_converter_type> const;
+using relative_type = std::reference_wrapper<bool> const;
+#endif
+
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
-using svg_parse_context_type = x3::context<relative_tag, std::reference_wrapper<bool> const,
-                                           x3::context<svg_path_tag,std::reference_wrapper<svg_converter_type> const,
+using svg_parse_context_type = x3::context<relative_tag, relative_type,
+                                           x3::context<svg_path_tag, svg_converter_wrapper_type,
                                                        phrase_parse_context_type>>;
 
 inline double deg2rad(double deg) {return (M_PI * deg) / 180.0;}
