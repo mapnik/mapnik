@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2017 Artem Pavlenko
+ * Copyright (C) 2018 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,25 +20,20 @@
  *
  *****************************************************************************/
 
-#include <mapnik/json/json_grammar_config.hpp>
-#include <mapnik/json/feature_grammar_x3_def.hpp>
+#ifndef MAPNIK_BOOST_SPIRIT_INSTANTIATE_HPP
+#define MAPNIK_BOOST_SPIRIT_INSTANTIATE_HPP
 
-namespace mapnik { namespace json { namespace grammar {
-
-BOOST_SPIRIT_INSTANTIATE(feature_grammar_type, iterator_type, feature_context_type);
-BOOST_SPIRIT_INSTANTIATE(geometry_grammar_type, iterator_type, phrase_parse_context_type);
-BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_grammar_type, iterator_type, feature_context_const_type);
-
-}
-
-grammar::feature_grammar_type const& feature_grammar()
+namespace boost { namespace spirit { namespace x3
 {
-    return grammar::feature_rule;
-}
+// helper macro
+#define BOOST_SPIRIT_INSTANTIATE_UNUSED(rule_type, Iterator, Context)   \
+    template bool parse_rule<Iterator, Context, boost::spirit::x3::unused_type const>( \
+        rule_type rule_                                                 \
+        , Iterator& first, Iterator const& last                         \
+        , Context const& context, boost::spirit::x3::unused_type const& ); \
+    /***/
 
-grammar::geometry_grammar_type const& geometry_grammar()
-{
-    return grammar::geometry_rule;
-}
+}}}
 
-}}
+
+#endif // MAPNIK_BOOST_SPIRIT_INSTANTIATE_HPP

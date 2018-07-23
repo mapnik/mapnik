@@ -31,9 +31,15 @@ void parse_feature(Iterator start, Iterator end, feature_impl& feature, mapnik::
 {
     namespace x3 = boost::spirit::x3;
     using space_type = mapnik::json::grammar::space_type;
+#if BOOST_VERSION >= 106700
+    auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(tr)
+        [x3::with<mapnik::json::grammar::feature_tag>(feature)
+         [ mapnik::json::feature_grammar() ]];
+#else
     auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(std::ref(tr))
         [x3::with<mapnik::json::grammar::feature_tag>(std::ref(feature))
-          [ mapnik::json::feature_grammar() ]];
+         [ mapnik::json::feature_grammar() ]];
+#endif
     if (!x3::phrase_parse(start, end, grammar, space_type()))
     {
         throw std::runtime_error("Can't parser GeoJSON Feature");

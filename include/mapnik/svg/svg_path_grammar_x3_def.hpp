@@ -43,24 +43,36 @@ using x3::no_case;
 
 using coord_type = std::tuple<double,double>;
 
+template <typename Context>
+svg_converter_type & extract_path(Context const& ctx)
+{
+    return x3::get<svg_path_tag>(ctx);
+}
+
+template <typename Context>
+bool & extract_relative(Context const& ctx)
+{
+    return x3::get<relative_tag>(ctx);
+}
+
 auto const move_to = [] (auto const& ctx)
 {
-    x3::get<svg_path_tag>(ctx).get().move_to(std::get<0>(_attr(ctx)), std::get<1>(_attr(ctx)), x3::get<relative_tag>(ctx));
+    extract_path(ctx).move_to(std::get<0>(_attr(ctx)), std::get<1>(_attr(ctx)), x3::get<relative_tag>(ctx));
 };
 
 auto const line_to = [] (auto const & ctx)
 {
-    x3::get<svg_path_tag>(ctx).get().line_to(std::get<0>(_attr(ctx)), std::get<1>(_attr(ctx)), x3::get<relative_tag>(ctx));
+    extract_path(ctx).line_to(std::get<0>(_attr(ctx)), std::get<1>(_attr(ctx)), x3::get<relative_tag>(ctx));
 };
 
 auto const hline_to = [] (auto const& ctx)
 {
-    x3::get<svg_path_tag>(ctx).get().hline_to(_attr(ctx), x3::get<relative_tag>(ctx));
+    extract_path(ctx).hline_to(_attr(ctx), x3::get<relative_tag>(ctx));
 };
 
 auto const vline_to = [] (auto const& ctx)
 {
-    x3::get<svg_path_tag>(ctx).get().vline_to(_attr(ctx), x3::get<relative_tag>(ctx));
+    extract_path(ctx).vline_to(_attr(ctx), x3::get<relative_tag>(ctx));
 };
 
 auto const curve4 = [] (auto const& ctx)
@@ -69,7 +81,7 @@ auto const curve4 = [] (auto const& ctx)
     auto const& p0 = boost::fusion::at_c<0>(attr);
     auto const& p1 = boost::fusion::at_c<1>(attr);
     auto const& p2 = boost::fusion::at_c<2>(attr);
-    x3::get<svg_path_tag>(ctx).get().curve4(std::get<0>(p0),std::get<1>(p0),
+    extract_path(ctx).curve4(std::get<0>(p0),std::get<1>(p0),
                                             std::get<0>(p1),std::get<1>(p1),
                                             std::get<0>(p2),std::get<1>(p2),
                                             x3::get<relative_tag>(ctx));
@@ -80,7 +92,7 @@ auto const curve4_smooth = [] (auto const& ctx)
     auto const& attr = _attr(ctx);
     auto const& p0 = boost::fusion::at_c<0>(attr);
     auto const& p1 = boost::fusion::at_c<1>(attr);
-    x3::get<svg_path_tag>(ctx).get().curve4(std::get<0>(p0),std::get<1>(p0),
+    extract_path(ctx).curve4(std::get<0>(p0),std::get<1>(p0),
                                             std::get<0>(p1),std::get<1>(p1),
                                             x3::get<relative_tag>(ctx));
 };
@@ -90,7 +102,7 @@ auto const curve3 = [] (auto const& ctx)
     auto const& attr = _attr(ctx);
     auto const& p0 = boost::fusion::at_c<0>(attr);
     auto const& p1 = boost::fusion::at_c<1>(attr);
-    x3::get<svg_path_tag>(ctx).get().curve3(std::get<0>(p0),std::get<1>(p0),
+    extract_path(ctx).curve3(std::get<0>(p0),std::get<1>(p0),
                                             std::get<0>(p1),std::get<1>(p1),
                                             x3::get<relative_tag>(ctx));
 };
@@ -98,7 +110,7 @@ auto const curve3 = [] (auto const& ctx)
 auto const curve3_smooth = [] (auto const& ctx)
 {
     auto const& attr = _attr(ctx);
-    x3::get<svg_path_tag>(ctx).get().curve3(std::get<0>(attr),std::get<1>(attr),
+    extract_path(ctx).curve3(std::get<0>(attr),std::get<1>(attr),
                                             x3::get<relative_tag>(ctx));
 };
 
@@ -111,7 +123,7 @@ auto const arc_to = [] (auto & ctx)
     int large_arc_flag = boost::fusion::at_c<2>(attr);
     int sweep_flag = boost::fusion::at_c<3>(attr);
     auto const& v = boost::fusion::at_c<4>(attr);
-    x3::get<svg_path_tag>(ctx).get().arc_to(std::get<0>(p),std::get<1>(p),
+    extract_path(ctx).arc_to(std::get<0>(p),std::get<1>(p),
                                             deg2rad(angle), large_arc_flag, sweep_flag,
                                             std::get<0>(v),std::get<1>(v),
                                             x3::get<relative_tag>(ctx));
@@ -119,17 +131,17 @@ auto const arc_to = [] (auto & ctx)
 
 auto const close_path = [] (auto const& ctx)
 {
-    x3::get<svg_path_tag>(ctx).get().close_subpath();
+    extract_path(ctx).close_subpath();
 };
 
 auto const relative = [] (auto const& ctx)
 {
-    x3::get<relative_tag>(ctx).get() = true;
+    extract_relative(ctx) = true;
 };
 
 auto const absolute = [] (auto const& ctx)
 {
-    x3::get<relative_tag>(ctx).get() = false;
+    extract_relative(ctx) = false;
 };
 
 // exported rules

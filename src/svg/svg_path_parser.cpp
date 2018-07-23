@@ -40,10 +40,15 @@ bool parse_path(const char* wkt, PathType& p)
     iterator_type last = wkt + std::strlen(wkt);
     bool relative = false;
     using space_type = mapnik::svg::grammar::space_type;
+#if BOOST_VERSION >= 106700
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(p)
+        [ x3::with<mapnik::svg::grammar::relative_tag>(relative)
+          [mapnik::svg::svg_path_grammar()]];
+#else
     auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(std::ref(p))
         [ x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))
           [mapnik::svg::svg_path_grammar()]];
-
+#endif
     try
     {
         if (!x3::phrase_parse(first, last, grammar, space_type())

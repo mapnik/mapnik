@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/css_color_grammar_x3_def.hpp>
-
+#include <mapnik/image_filter_types.hpp>
 namespace mapnik { namespace css_color_grammar {
 
 namespace x3 = boost::spirit::x3;
@@ -29,5 +29,8 @@ using iterator_type = std::string::const_iterator;
 using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
 BOOST_SPIRIT_INSTANTIATE(css_color_grammar_type, iterator_type, context_type);
+
+template bool parse_rule<iterator_type, context_type, mapnik::filter::color_to_alpha>
+(css_color_grammar_type, iterator_type&, iterator_type const&, context_type const&, mapnik::filter::color_to_alpha&);
 
 }}
