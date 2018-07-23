@@ -73,11 +73,7 @@ namespace mapnik { namespace grammar {
     template <typename Context>
     inline mapnik::transcoder const& extract_transcoder(Context const& ctx)
     {
-#if BOOST_VERSION >= 106700
         return x3::get<transcoder_tag>(ctx);
-#else
-        return x3::get<transcoder_tag>(ctx).get();
-#endif
     }
 
     auto append = [](auto const& ctx)

@@ -34,7 +34,6 @@
 
 namespace mapnik { namespace svg { namespace grammar {
 
-
 namespace x3 = boost::spirit::x3;
 
 using x3::lit;
@@ -43,8 +42,6 @@ using x3::int_;
 using x3::no_case;
 
 using coord_type = std::tuple<double,double>;
-
-#if BOOST_VERSION >= 106700
 
 template <typename Context>
 svg_converter_type & extract_path(Context const& ctx)
@@ -57,19 +54,6 @@ bool & extract_relative(Context const& ctx)
 {
     return x3::get<relative_tag>(ctx);
 }
-
-#else
-template <typename Context>
-svg_converter_type & extract_path(Context const& ctx)
-{
-    return x3::get<svg_path_tag>(ctx).get();
-}
-template <typename Context>
-bool & extract_relative(Context const& ctx)
-{
-    return x3::get<relative_tag>(ctx).get();
-}
-#endif
 
 auto const move_to = [] (auto const& ctx)
 {

@@ -44,19 +44,11 @@ using x3::lit;
 using x3::double_;
 using x3::no_case;
 
-#if BOOST_VERSION >= 106700
 template <typename Context>
-auto & extract_transform(Context const& ctx)
+agg::trans_affine & extract_transform(Context const& ctx)
 {
     return x3::get<svg_transform_tag>(ctx);
 }
-#else
-template <typename Context>
-auto & extract_transform(Context const& ctx)
-{
-    return x3::get<svg_transform_tag>(ctx).get();
-}
-#endif
 
 auto const matrix_action = [] (auto const& ctx)
 {
