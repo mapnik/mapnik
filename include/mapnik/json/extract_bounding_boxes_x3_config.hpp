@@ -67,12 +67,23 @@ struct extract_positions
 
 using box_type = mapnik::box2d<double>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
-using callback_type = extract_positions<grammar::iterator_type, boxes_type>;
+
 
 using box_type_f = mapnik::box2d<float>;
 using boxes_type_f = std::vector<std::pair<box_type_f, std::pair<std::uint64_t, std::uint64_t>>>;
-using callback_type_f = extract_positions<grammar::iterator_type, boxes_type_f>;
 
+
+#if BOOST_VERSION >= 106700
+using size_type = std::size_t;
+using keys_map_type = keys_map;
+using callback_type = extract_positions<grammar::iterator_type, boxes_type>;
+using callback_type_f = extract_positions<grammar::iterator_type, boxes_type_f>;
+#else
+using size_type = std::reference_wrapper<std::size_t> const;
+using keys_map_type = std::reference_wrapper<keys_map> const;
+using callback_type = std::reference_wrapper<extract_positions<grammar::iterator_type, boxes_type>> const;
+using callback_type_f = std::reference_wrapper<extract_positions<grammar::iterator_type, boxes_type_f>> const;
+#endif
 
 namespace grammar {
 
@@ -85,26 +96,26 @@ using space_type = x3::standard::space_type;
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 
 using extract_bounding_boxes_context_type =
-    x3::context<bracket_tag, std::size_t,
+    x3::context<bracket_tag, size_type,
                 x3::context<feature_callback_tag, callback_type,
                             context_type>>;
 
 using extract_bounding_boxes_reverse_context_type =
-    x3::context<keys_tag, keys_map,
+    x3::context<keys_tag, keys_map_type,
                 x3::context<feature_callback_tag, callback_type,
-                            x3::context<bracket_tag, std::size_t,
+                            x3::context<bracket_tag, size_type,
                                         phrase_parse_context_type>>>;
 
 
 using extract_bounding_boxes_context_type_f =
-    x3::context<bracket_tag, std::size_t,
+    x3::context<bracket_tag, size_type,
                 x3::context<feature_callback_tag, callback_type_f,
                             context_type>>;
 
 using extract_bounding_boxes_reverse_context_type_f =
-    x3::context<keys_tag, keys_map,
+    x3::context<keys_tag, keys_map_type,
                 x3::context<feature_callback_tag, callback_type_f,
-                            x3::context<bracket_tag, std::size_t,
+                            x3::context<bracket_tag, size_type,
                                         phrase_parse_context_type>>>;
 
 }}}

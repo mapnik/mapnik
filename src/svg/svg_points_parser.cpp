@@ -40,10 +40,15 @@ bool parse_points(const char* wkt, PathType& p)
     iterator_type last = wkt + std::strlen(wkt);
     bool relative = false;
 
+#if BOOST_VERSION >= 106700
     auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(p)
         [ x3::with<mapnik::svg::grammar::relative_tag>(relative)
           [mapnik::svg::svg_points_grammar()]];
-
+#else
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(std::ref(p))
+        [ x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))
+          [mapnik::svg::svg_points_grammar()]];
+#endif
     try
     {
         if (!x3::phrase_parse(first, last, grammar, space_type())

@@ -35,11 +35,17 @@ expression_ptr parse_expression(std::string const& str)
     auto node = std::make_shared<expr_node>();
     using boost::spirit::x3::ascii::space;
     mapnik::transcoder const tr("utf8");
+#if BOOST_VERSION >=106700
     auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
         [
             mapnik::expression_grammar()
         ];
-
+#else
+    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+        [
+            mapnik::expression_grammar()
+        ];
+#endif
     bool r = false;
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator const end = str.end();
