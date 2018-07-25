@@ -8,8 +8,11 @@ _/      _/    _/_/_/  _/_/_/    _/    _/  _/  _/    _/
                     _/
 ```
 
-[![Build Status Linux](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
-[![Build Status Windows](https://ci.appveyor.com/api/projects/status/hc9l7okdjtucfqqn?branch=master&svg=true)](https://ci.appveyor.com/project/Mapbox/mapnik)
+
+[![CircleCI](https://circleci.com/gh/mapnik/mapnik/tree/master.svg?style=svg)](https://circleci.com/gh/mapnik/mapnik/tree/master)
+
+[![TravisCI](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
+
 [![codecov](https://codecov.io/gh/mapnik/mapnik/branch/master/graph/badge.svg)](https://codecov.io/gh/mapnik/mapnik)
 
 Mapnik is an open source toolkit for developing mapping applications. At the core is a C++ shared library providing algorithms and patterns for spatial data access and visualization.
