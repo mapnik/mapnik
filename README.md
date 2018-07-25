@@ -8,8 +8,7 @@ _/      _/    _/_/_/  _/_/_/    _/    _/  _/  _/    _/
                     _/
 ```
 
-[![CircleCI](https://circleci.com/gh/mapnik/mapnik.svg?style=svg)](https://circleci.com/gh/mapnik/mapnik)
-[![CircleCI](https://circleci.com/gh/mapnik/mapnik/tree/master.svg?style=svg)](https://circleci.com/gh/mapnik/mapnik/tree/master)
+[![CircleCI](https://circleci.com/gh/mapnik/mapnik/tree/master.svg?style=svg&circle-token=a6d83ccccf24d2ac90e73e96df1ca72171f3eb2f)](https://circleci.com/gh/mapnik/mapnik/tree/master)
 [![TravisCI](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
 [![codecov](https://codecov.io/gh/mapnik/mapnik/branch/master/graph/badge.svg)](https://codecov.io/gh/mapnik/mapnik)
 
