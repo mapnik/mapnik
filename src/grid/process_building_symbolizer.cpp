@@ -29,8 +29,6 @@
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/transform_path_adapter.hpp>
-#include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -59,7 +57,6 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-    using transform_path_type = transform_path_adapter<view_transform, vertex_adapter>;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
@@ -72,13 +69,12 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 
     double height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
 
-    render_building_symbolizer(
-        feature, height,
+    render_building_symbolizer::apply(
+        feature, prj_trans, common_.t_, height,
         [&](path_type const& faces)
         {
             vertex_adapter va(faces);
-            transform_path_type faces_path (common_.t_,va,prj_trans);
-            ras_ptr->add_path(faces_path);
+            ras_ptr->add_path(va);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
@@ -86,18 +82,16 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
         [&](path_type const& frame)
         {
             vertex_adapter va(frame);
-            transform_path_type path(common_.t_,va,prj_trans);
-            agg::conv_stroke<transform_path_type> stroke(path);
+            agg::conv_stroke<vertex_adapter> stroke(va);
+            stroke.miter_limit(common_.scale_factor_ / 2.0);
             ras_ptr->add_path(stroke);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
         },
-        [&](path_type const& roof)
+        [&](render_building_symbolizer::roof_type & roof)
         {
-            vertex_adapter va(roof);
-            transform_path_type roof_path (common_.t_,va,prj_trans);
-            ras_ptr->add_path(roof_path);
+            ras_ptr->add_path(roof);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
         });
