@@ -24,8 +24,8 @@
 #define MAPNIK_SVG_PATH_COMMANDS_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/util/math.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -34,12 +34,6 @@
 
 namespace mapnik {
 namespace svg {
-
-
-inline double deg2rad(double deg)
-{
-    return (M_PI * deg) / 180.0;
-}
 
 struct move_to
 {
@@ -137,7 +131,7 @@ struct arc_to
     void operator()(PathType& path, T0 const& rv, T1 const& angle, T2 large_arc_flag, T3 sweep_flag, T4 const& v, T5 rel) const
     {
         path.arc_to(boost::fusion::at_c<0>(rv), boost::fusion::at_c<1>(rv),
-                    deg2rad(angle), large_arc_flag, sweep_flag,
+                    util::radians(angle), large_arc_flag, sweep_flag,
                     boost::fusion::at_c<0>(v), boost::fusion::at_c<1>(v),
                     rel);
     }
