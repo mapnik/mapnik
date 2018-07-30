@@ -24,9 +24,10 @@
 #define MAPNIK_SVG_PATH_GRAMMAR_X3_DEF_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/svg/svg_path_grammar_x3.hpp>
+#include <mapnik/util/math.hpp>
+
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
@@ -123,8 +124,9 @@ auto const arc_to = [] (auto & ctx)
     int large_arc_flag = boost::fusion::at_c<2>(attr);
     int sweep_flag = boost::fusion::at_c<3>(attr);
     auto const& v = boost::fusion::at_c<4>(attr);
-    extract_path(ctx).arc_to(std::get<0>(p),std::get<1>(p),
-                                            deg2rad(angle), large_arc_flag, sweep_flag,
+    x3::get<svg_path_tag>(ctx).get().arc_to(std::get<0>(p),std::get<1>(p),
+                                            util::radians(angle),
+                                            large_arc_flag, sweep_flag,
                                             std::get<0>(v),std::get<1>(v),
                                             x3::get<relative_tag>(ctx));
 };

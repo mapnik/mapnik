@@ -22,6 +22,7 @@
 // mapnik
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/text_layout.hpp>
+#include <mapnik/util/math.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -59,7 +60,7 @@ evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_propertie
     prop->minimum_distance = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_distance);
     prop->minimum_padding = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_padding);
     prop->minimum_path_length = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.minimum_path_length);
-    prop->max_char_angle_delta = util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.max_char_angle_delta) * M_PI/180;
+    prop->max_char_angle_delta = util::radians(util::apply_visitor(extract_value<value_double>(feature,attrs), text_prop.expressions.max_char_angle_delta));
     prop->allow_overlap = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.allow_overlap);
     prop->largest_bbox_only = util::apply_visitor(extract_value<value_bool>(feature,attrs), text_prop.expressions.largest_bbox_only);
     prop->upright = util::apply_visitor(extract_value<text_upright_enum>(feature,attrs), text_prop.expressions.upright);

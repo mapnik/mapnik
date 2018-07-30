@@ -26,8 +26,8 @@
 #ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
 #endif
-#include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/util/math.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/vertex_cache.hpp>
 
@@ -184,13 +184,13 @@ private:
 
     static double explement_reflex_angle(double angle)
     {
-        if (angle > M_PI)
+        if (angle > util::pi)
         {
-            return angle - 2 * M_PI;
+            return angle - util::tau;
         }
-        else if (angle < -M_PI)
+        else if (angle < -util::pi)
         {
-            return angle + 2 * M_PI;
+            return angle + util::tau;
         }
         else
         {
@@ -242,6 +242,30 @@ private:
 
         // the first line is too short
         return false;
+    }
+
+    double joint_angle(double x1x0, double y1y0, double x1x2, double y1y2) const
+    {
+        double dot = x1x0 * x1x2 + y1y0 * y1y2; // dot product
+        double det = x1x0 * y1y2 - y1y0 * x1x2; // determinant
+        double angle = std::atan2(det, dot); // atan2(y, x) or atan2(sin, cos)
+        // angle in [-tau/2; tau/2]
+
+        if (offset_ > 0.0)
+        {
+            angle = util::tau - angle; // angle in [tau/2; tau*3/2]
+        }
+        else if (angle < 0)
+        {
+            angle += util::tau; // angle in [tau/2; tau]
+            // angle may now be equal to tau, because if the original angle
+            // is very small, the addition cancels it (epsilon + tau == tau)
+        }
+        if (angle >= util::tau)
+        {
+            angle -= util::tau;
+        }
+        return angle;
     }
 
     /**
@@ -423,13 +447,8 @@ private:
             cpt++;
             angle_a = std::atan2(-v_y1y0, -v_x1x0);
         }
-        // dot product
-        double dot;
-        // determinate
-        double det;
         double angle_b = std::atan2(v_y1y2, v_x1x2);
         // Angle between the two vectors
-        double joint_angle;
         double curve_angle;
 
         if (!is_polygon)
@@ -440,26 +459,15 @@ private:
         }
         else
         {
-            dot = v_x1x0 * v_x1x2 + v_y1y0 * v_y1y2;      // dot product
-            det = v_x1x0 * v_y1y2 - v_y1y0 * v_x1x2;      // determinant
-
-            joint_angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-            if (joint_angle < 0) joint_angle = joint_angle + 2 * M_PI;
-            joint_angle = std::fmod(joint_angle, 2 * M_PI);
-
-            if (offset_ > 0.0)
-            {
-                joint_angle = 2 * M_PI - joint_angle;
-            }
-
+            double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
-            if (std::abs(joint_angle) > M_PI)
+            if (std::abs(joint_angle) > util::pi)
             {
                 curve_angle = explement_reflex_angle(angle_b - angle_a);
                 // Bulge steps should be determined by the inverse of the joint angle.
                 double half_turns = half_turn_segments_ * std::fabs(curve_angle);
-                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
             if (bulge_steps == 0)
@@ -545,26 +553,15 @@ private:
             // Calculate the new angle_b
             angle_b = std::atan2(v_y1y2, v_x1x2);
 
-            dot = v_x1x0 * v_x1x2 + v_y1y0 * v_y1y2;      // dot product
-            det = v_x1x0 * v_y1y2 - v_y1y0 * v_x1x2;      // determinant
-
-            joint_angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-            if (joint_angle < 0) joint_angle = joint_angle + 2 * M_PI;
-            joint_angle = std::fmod(joint_angle, 2 * M_PI);
-
-            if (offset_ > 0.0)
-            {
-                joint_angle = 2 * M_PI - joint_angle;
-            }
-
+            double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
-            if (std::abs(joint_angle) > M_PI)
+            if (std::abs(joint_angle) > util::pi)
             {
                 curve_angle = explement_reflex_angle(angle_b - angle_a);
                 // Bulge steps should be determined by the inverse of the joint angle.
                 double half_turns = half_turn_segments_ * std::fabs(curve_angle);
-                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
             #ifdef MAPNIK_LOG
@@ -572,14 +569,16 @@ private:
             {
                 // inside turn (sharp/obtuse angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Sharp joint [<< inside turn " << int(joint_angle*180/M_PI)
+                    << " Sharp joint [<< inside turn "
+                    << static_cast<int>(util::degrees(joint_angle))
                     << " degrees >>]";
             }
             else
             {
                 // outside turn (reflex angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Bulge joint >)) outside turn " << int(joint_angle*180/M_PI)
+                    << " Bulge joint >)) outside turn "
+                    << static_cast<int>(util::degrees(joint_angle))
                     << " degrees ((< with " << bulge_steps << " segments";
             }
             #endif
