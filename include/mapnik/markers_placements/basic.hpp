@@ -75,24 +75,27 @@ protected:
                 angle = 0;
                 return true;
             case DIRECTION_DOWN:
-                angle = M_PI;
+                angle = util::pi;
                 return true;
             case DIRECTION_AUTO:
-                if (std::fabs(util::normalize_angle(angle)) > 0.5 * M_PI)
-                    angle += M_PI;
+                angle = util::normalize_angle(angle);
+                if (std::abs(angle) > util::pi / 2)
+                    angle += util::pi;
                 return true;
             case DIRECTION_AUTO_DOWN:
-                if (std::fabs(util::normalize_angle(angle)) < 0.5 * M_PI)
-                    angle += M_PI;
+                angle = util::normalize_angle(angle);
+                if (std::abs(angle) < util::pi / 2)
+                    angle += util::pi;
                 return true;
             case DIRECTION_LEFT:
-                angle += M_PI;
+                angle += util::pi;
                 return true;
             case DIRECTION_LEFT_ONLY:
-                angle += M_PI;
-                return std::fabs(util::normalize_angle(angle)) < 0.5 * M_PI;
+                angle = util::normalize_angle(angle + util::pi);
+                return std::fabs(angle) < util::pi / 2;
             case DIRECTION_RIGHT_ONLY:
-                return std::fabs(util::normalize_angle(angle)) < 0.5 * M_PI;
+                angle = util::normalize_angle(angle);
+                return std::fabs(angle) < util::pi / 2;
             case DIRECTION_RIGHT:
             default:
                 return true;

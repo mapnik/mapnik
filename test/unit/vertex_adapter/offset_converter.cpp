@@ -4,6 +4,7 @@
 
 // mapnik
 #include <mapnik/offset_converter.hpp>
+#include <mapnik/util/math.hpp>
 
 // stl
 #include <iostream>
@@ -134,7 +135,7 @@ void test_offset_curve(double const &offset) {
     std::vector<double> pos, off_pos;
     const size_t max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i) {
-        double x = M_PI * double(i) / max_i;
+        double x = mapnik::util::pi * double(i) / max_i;
         pos.push_back(-std::cos(x)); pos.push_back(std::sin(x));
         off_pos.push_back(-r * std::cos(x)); off_pos.push_back(r * std::sin(x));
     }
@@ -185,12 +186,12 @@ void test_s_shaped_curve(double const &offset) {
     std::vector<double> pos, off_pos;
     const size_t max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i) {
-        double x = M_PI * double(i) / max_i;
+        double x = mapnik::util::pi * double(i) / max_i;
         pos.push_back(-std::cos(x) - 1); pos.push_back(std::sin(x));
         off_pos.push_back(-r * std::cos(x) - 1); off_pos.push_back(r * std::sin(x));
     }
     for (size_t i = 0; i <= max_i; ++i) {
-        double x = M_PI * double(i) / max_i;
+        double x = mapnik::util::pi * double(i) / max_i;
         pos.push_back(-std::cos(x) + 1); pos.push_back(-std::sin(x));
         off_pos.push_back(-r2 * std::cos(x) + 1); off_pos.push_back(-r2 * std::sin(x));
     }

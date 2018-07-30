@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 // mapnik
-#include <mapnik/global.hpp>
+#include <mapnik/util/math.hpp>
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/make_unique.hpp>
@@ -75,7 +75,7 @@ double vertex_cache::angle(double width)
             angle_ = current_segment_angle();
         }
     }
-    return width >= 0 ? angle_ : angle_ + M_PI;
+    return width >= 0 ? angle_ : angle_ + util::pi;
 }
 
 bool vertex_cache::next_subpath()
