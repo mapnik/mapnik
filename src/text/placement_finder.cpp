@@ -135,11 +135,13 @@ text_upright_e placement_finder::simplify_upright(text_upright_e upright, double
 {
     if (upright == UPRIGHT_AUTO)
     {
-        return (std::fabs(util::normalize_angle(angle)) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        angle = util::normalize_angle(angle);
+        return std::abs(angle) > util::tau / 4 ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     if (upright == UPRIGHT_AUTO_DOWN)
     {
-        return (std::fabs(util::normalize_angle(angle)) < 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        angle = util::normalize_angle(angle);
+        return std::abs(angle) < util::tau / 4 ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     if (upright == UPRIGHT_LEFT_ONLY)
     {
@@ -332,7 +334,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     last_cluster_angle = angle;
                 }
 
-                if (std::abs(angle) > M_PI/2)
+                if (std::abs(angle) > util::tau / 4)
                 {
                     ++upside_down_glyph_count;
                 }
