@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-set -eu
-set -o pipefail
-
 : '
 
 todo
@@ -15,13 +12,15 @@ MASON_VERSION="e4c1746"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
-        git clone https://github.com/mapbox/mason.git ./.mason
-        (cd ./.mason && git checkout ${MASON_VERSION})
-    else
-        echo "Updating to latest mason"
-        (cd ./.mason && git fetch && git checkout ${MASON_VERSION} && git pull origin ${MASON_VERSION})
+        git clone https://github.com/mapbox/mason.git .mason || return
+    elif ! git -C .mason rev-parse -q --verify "$MASON_VERSION" >/dev/null; then
+        git -C .mason fetch --all || true # non-fatal
     fi
-    export PATH=$(pwd)/.mason:$PATH
+    git -C .mason checkout --detach "$MASON_VERSION" -- || return
+    case ":$PATH:" in
+        *":$PWD/.mason:"*) : already there ;;
+        *) export PATH="$PWD/.mason:$PATH" ;;
+    esac
     export CXX=${CXX:-clang++}
     export CC=${CC:-clang}
 }
@@ -130,22 +129,47 @@ function setup_runtime_settings() {
     echo "export PROJ_LIB=${MASON_LINKED_ABS}/share/proj" > mapnik-settings.env
     echo "export ICU_DATA=${MASON_LINKED_ABS}/share/icu/${ICU_VERSION}" >> mapnik-settings.env
     echo "export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal" >> mapnik-settings.env
-    source mapnik-settings.env
+}
+
+# turn arguments of the form NAME=VALUE into exported variables;
+# any other arguments are reported and cause error return status
+function export_variables() {
+    local arg= ret=0
+    for arg
+    do
+        if [[ "$arg" =~ [[:alpha:]][_[:alnum:]]*= ]]
+        then
+            local -n var="${arg%%=*}"
+            export var="${arg#*=}"
+        else
+            printf >&2 "bootstrap.sh: invalid argument: %s\n" "$arg"
+            ret=1
+        fi
+    done
+    return $ret
 }
 
 function main() {
-    setup_mason
-    install_mason_deps
-    make_config > ./config.py
-    setup_runtime_settings
-    echo "Ready, now run:"
-    echo ""
-    echo "    ./configure && make"
+    export_variables "$@" || return
+    # setup_mason must not run in subshell, because it sets default
+    # values of CC, CXX and adds mason to PATH, which we want to keep
+    # when sourced
+    setup_mason || return
+    (
+        # this is wrapped in subshell to allow sourcing this script
+        # without having the terminal closed on error
+        set -eu
+        set -o pipefail
+
+        install_mason_deps
+        make_config > ./config.py
+        setup_runtime_settings
+
+        printf "\n\e[1;32m%s\e[m\n" "bootstrap successful, now run:"
+        echo ""
+        echo "    ./configure && make"
+        echo ""
+    )
 }
 
-main
-
-# allow sourcing of script without
-# causing the terminal to bail on error
-set +eu
-set +o pipefail
+main "$@"
