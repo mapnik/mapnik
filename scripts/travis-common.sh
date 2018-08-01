@@ -28,6 +28,10 @@ on () {
     esac
 }
 
+test_ok () {
+    return $TRAVIS_TEST_RESULT
+}
+
 git_submodule_update () {
     git submodule update "$@" && return
     # failed, search branch and pull request heads for matching commit

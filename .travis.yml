@@ -62,11 +62,8 @@ before_install:
  - source scripts/travis-common.sh
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
- - export MASON_PUBLISH=${MASON_PUBLISH:-false}
  - export BENCH=${BENCH:-false}
- - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
- - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
- - git_submodule_update --init
+ - git_submodule_update --init deps/
 
 install:
  - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
@@ -104,11 +101,12 @@ script:
  # to ensure that slow builds still upload their
  # ccache results and therefore should be faster
  # (and might work) for the next build
- - DURATION=2400
- - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline=$(( $(date +%s) + ${DURATION} )) make
- - make test
- - enabled ${COVERAGE} coverage
- - enabled ${BENCH} make bench
+ - DEADLINE=$(( $(date +%s) + 40 * 60 ))
+ - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline="$DEADLINE" make
+ - test_ok && git_submodule_update --init --depth=50 test/
+ - test_ok && make test
+ - test_ok && enabled ${COVERAGE} coverage
+ - test_ok && enabled ${BENCH} make bench
  - ./scripts/check_glibcxx.sh
 
 after_success:
