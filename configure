@@ -1,8 +1,8 @@
-#!/bin/bash
+#! /bin/sh
 
 set -eu
 
-PYTHON=${PYTHON:-python}
+: ${PYTHON:=python}
 
 # mapnik-settings.env is an optional file to store
 # environment variables that should be used before
@@ -10,9 +10,9 @@ PYTHON=${PYTHON:-python}
 # These do not normally need to be set except when
 # building against binary versions of dependencies like
 # done via bootstrap.sh
-if [[ -f mapnik-settings.env ]]; then
+if [ -f mapnik-settings.env ]; then
     echo "Inheriting from mapnik-settings.env"
-    source mapnik-settings.env
+    . ./mapnik-settings.env
 fi
 
 $PYTHON scons/scons.py --implicit-deps-changed configure "$@"
