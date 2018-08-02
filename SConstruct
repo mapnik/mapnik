@@ -56,7 +56,7 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX14_CXXFLAGS = " -std=c++14"
+DEFAULT_CXX14_CXXFLAGS = " -std=c++14 -DU_USING_ICU_NAMESPACE=0"
 DEFAULT_CXX14_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
