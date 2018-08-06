@@ -65,32 +65,32 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     grid_renderer_base_type renb(pixf);
     renderer_type ren(renb);
 
-    ras_ptr->reset();
+    render_building_symbolizer rebus{sym, feature, common_};
 
-    double height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
-
-    render_building_symbolizer::apply(
-        feature, prj_trans, common_.t_, height,
-        [&](path_type const& faces)
+    rebus.apply(
+        feature, prj_trans,
+        [&](path_type const& faces, color const& )
         {
             vertex_adapter va(faces);
+            ras_ptr->reset();
             ras_ptr->add_path(va);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
-            ras_ptr->reset();
         },
-        [&](path_type const& frame)
+        [&](path_type const& frame, color const& )
         {
             vertex_adapter va(frame);
             agg::conv_stroke<vertex_adapter> stroke(va);
-            stroke.miter_limit(common_.scale_factor_ / 2.0);
+            stroke.width(rebus.stroke_width);
+            stroke.miter_limit(1.0);
+            ras_ptr->reset();
             ras_ptr->add_path(stroke);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);
-            ras_ptr->reset();
         },
-        [&](render_building_symbolizer::roof_type & roof)
+        [&](render_building_symbolizer::roof_type & roof, color const& )
         {
+            ras_ptr->reset();
             ras_ptr->add_path(roof);
             ren.color(color_type(feature.id()));
             agg::render_scanlines(*ras_ptr, sl, ren);

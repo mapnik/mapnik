@@ -63,17 +63,10 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
     agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
     agg::pixfmt_rgba32_pre pixf(buf);
     ren_base renb(pixf);
-
-    value_double opacity = get<value_double,keys::fill_opacity>(sym,feature, common_.vars_);
-    color const& fill = get<color, keys::fill>(sym, feature, common_.vars_);
-    unsigned r=fill.red();
-    unsigned g=fill.green();
-    unsigned b=fill.blue();
-    unsigned a=fill.alpha();
     renderer ren(renb);
     agg::scanline_u8 sl;
+    render_building_symbolizer rebus{sym, feature, common_};
 
-    ras_ptr->reset();
     double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);
     gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym, feature, common_.vars_);
     if (gamma != gamma_ || gamma_method != gamma_method_)
@@ -83,33 +76,34 @@ void agg_renderer<T0,T1>::process(building_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    double height = get<double, keys::height>(sym, feature, common_.vars_) * common_.scale_factor_;
+    rebus.setup_colors(sym, feature);
 
-    render_building_symbolizer::apply(
-        feature, prj_trans, common_.t_, height,
-        [&,r,g,b,a,opacity](path_type const& faces)
+    rebus.apply(
+        feature, prj_trans,
+        [&](path_type const& faces, color const& c)
         {
             vertex_adapter va(faces);
+            ras_ptr->reset();
             ras_ptr->add_path(va);
-            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
+            ren.color(agg::rgba8_pre(c.red(), c.green(), c.blue(), c.alpha()));
             agg::render_scanlines(*ras_ptr, sl, ren);
-            this->ras_ptr->reset();
         },
-        [&,r,g,b,a,opacity](path_type const& frame)
+        [&](path_type const& frame, color const& c)
         {
             vertex_adapter va(frame);
             agg::conv_stroke<vertex_adapter> stroke(va);
-            stroke.width(common_.scale_factor_);
-            stroke.miter_limit(common_.scale_factor_ / 2.0);
-            ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * opacity)));
-            agg::render_scanlines(*ras_ptr, sl, ren);
+            stroke.width(rebus.stroke_width);
+            stroke.miter_limit(1.0);
             ras_ptr->reset();
+            ras_ptr->add_path(stroke);
+            ren.color(agg::rgba8_pre(c.red(), c.green(), c.blue(), c.alpha()));
+            agg::render_scanlines(*ras_ptr, sl, ren);
         },
-        [&,r,g,b,a,opacity](render_building_symbolizer::roof_type & roof)
+        [&](render_building_symbolizer::roof_type & roof, color const& c)
         {
+            ras_ptr->reset();
             ras_ptr->add_path(roof);
-            ren.color(agg::rgba8_pre(r, g, b, int(a * opacity)));
+            ren.color(agg::rgba8_pre(c.red(), c.green(), c.blue(), c.alpha()));
             agg::render_scanlines(*ras_ptr, sl, ren);
         });
 }

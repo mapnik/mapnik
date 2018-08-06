@@ -44,36 +44,34 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
                                   proj_transform const& prj_trans)
 {
     cairo_save_restore guard(context_);
-    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
-    mapnik::color fill = get<color, keys::fill>(sym, feature, common_.vars_);
-    value_double opacity = get<value_double, keys::fill_opacity>(sym, feature, common_.vars_);
-    value_double height = get<value_double, keys::height>(sym, feature, common_.vars_);
+    render_building_symbolizer rebus{sym, feature, common_};
 
+    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
     context_.set_operator(comp_op);
 
-    render_building_symbolizer::apply(
-        feature, prj_trans, common_.t_, height,
-        [&](path_type const& faces)
+    rebus.setup_colors(sym, feature);
+
+    rebus.apply(
+        feature, prj_trans,
+        [&](path_type const& faces, color const& c)
         {
             vertex_adapter va(faces);
-            context_.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8 / 255.0,
-                               fill.blue() * 0.8 / 255.0, fill.alpha() * opacity / 255.0);
+            context_.set_color(c);
             context_.add_path(va);
             context_.fill();
         },
-        [&](path_type const& frame)
+        [&](path_type const& frame, color const& c)
         {
             vertex_adapter va(frame);
-            context_.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8/255.0,
-                              fill.blue() * 0.8 / 255.0, fill.alpha() * opacity / 255.0);
-            context_.set_line_width(common_.scale_factor_);
-            context_.set_miter_limit(common_.scale_factor_ / 2.0);
+            context_.set_color(c);
+            context_.set_line_width(rebus.stroke_width);
+            context_.set_miter_limit(1.0);
             context_.add_path(va);
             context_.stroke();
         },
-        [&](render_building_symbolizer::roof_type & roof)
+        [&](render_building_symbolizer::roof_type & roof, color const& c)
         {
-            context_.set_color(fill, opacity);
+            context_.set_color(c);
             context_.add_path(roof);
             context_.fill();
         });
