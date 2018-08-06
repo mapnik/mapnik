@@ -30,26 +30,22 @@
 #include <mapnik/path.hpp>
 #include <mapnik/transform_path_adapter.hpp>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore_agg.hpp>
-#include "agg_conv_transform.h"
-#pragma GCC diagnostic pop
-
 namespace mapnik {
 
 struct render_building_symbolizer
 {
-    using vertex_adapter_type = geometry::polygon_vertex_adapter<double>;
-    using transform_path_type = transform_path_adapter<view_transform, vertex_adapter_type>;
-    using roof_type = agg::conv_transform<transform_path_type>;
-
 private:
 
     using size_t = std::size_t;
     using uint8_t = std::uint8_t;
 
+    static constexpr uint8_t SEG_MOVETO_LHR = SEG_MOVETO | 0x10;
+    static constexpr uint8_t SEG_MOVETO_RHR = SEG_MOVETO | 0x20;
+
     renderer_common const& rencom_;
     double const height_;
+    bool render_back_side_ = false;
+    path_type roof_vertices_{path_type::types::Polygon};
 
 public:
 
@@ -69,6 +65,21 @@ public:
                      * rencom_.scale_factor_)
     {
         // colors are not always needed so they're not extracted here
+    }
+
+    bool has_transparent_fill() const
+    {
+        return (fill_color.alpha_ & wall_fill_color.alpha_) != 255;
+    }
+
+    bool render_back_side() const
+    {
+        return render_back_side_;
+    }
+
+    void render_back_side(bool value)
+    {
+        render_back_side_ = value;
     }
 
     void setup_colors(building_symbolizer const& sym,
@@ -124,81 +135,258 @@ public:
         safe_mul(base_stroke_color.alpha_, stroke_opacity);
     }
 
-    template <typename F1, typename F2, typename F3>
+    template <typename Context>
     void apply(feature_impl const& feature,
                proj_transform const& prj_trans,
-               F1 face_func, F2 frame_func, F3 roof_func)
+               Context & painter)
     {
         auto const& geom = feature.get_geometry();
+
+        roof_vertices_->clear();
+
         if (geom.is<geometry::polygon<double>>())
         {
             auto const& poly = geom.get<geometry::polygon<double>>();
-            vertex_adapter_type va(poly);
-            transform_path_type transformed(rencom_.t_, va, prj_trans);
-            make_building(transformed, face_func, frame_func, roof_func);
+            render_ground(poly, prj_trans, painter);
         }
         else if (geom.is<geometry::multi_polygon<double>>())
         {
             auto const& multi_poly = geom.get<geometry::multi_polygon<double>>();
             for (auto const& poly : multi_poly)
             {
-                vertex_adapter_type va(poly);
-                transform_path_type transformed(rencom_.t_, va, prj_trans);
-                make_building(transformed, face_func, frame_func, roof_func);
+                render_ground(poly, prj_trans, painter);
             }
+        }
+        if (roof_vertices_.size() > 0)
+        {
+            render_walls(painter);
+            render_roof(painter);
         }
     }
 
 private:
-    template <typename F>
-    void render_face(double x0, double y0, double x, double y, F & face_func, path_type & frame)
-    {
-        path_type faces(path_type::types::Polygon);
-        faces.move_to(x0, y0);
-        faces.line_to(x, y);
-        faces.line_to(x, y - height_);
-        faces.line_to(x0, y0 - height_);
-        face_func(faces, wall_fill_color);
 
-        frame.move_to(x0, y0);
-        frame.line_to(x, y);
-        frame.line_to(x, y - height_);
-        frame.line_to(x0, y0 - height_);
+    bool is_visible(int orientation) const
+    {
+        return orientation > 0 || (orientation < 0 && render_back_side_);
     }
 
-    template <typename Geom, typename F1, typename F2, typename F3>
-    void make_building(Geom & poly, F1 & face_func, F2 & frame_func, F3 & roof_func)
+    template <typename T, typename Context>
+    void render_ground(geometry::polygon<T> const& poly,
+                       proj_transform const& prj_trans,
+                       Context & painter)
     {
-        path_type frame(path_type::types::LineString);
+        using vertex_adapter_type = geometry::polygon_vertex_adapter<T>;
+        using transform_path_type = transform_path_adapter<view_transform, vertex_adapter_type>;
+
+        vertex_adapter_type va(poly);
+        transform_path_type transformed(rencom_.t_, va, prj_trans);
+        painter.set_color(base_stroke_color);
+        paint_outline(transformed, painter);
+    }
+
+    template <typename Context>
+    void render_roof(Context & painter) const
+    {
+        vertex_adapter va(roof_vertices_);
+        painter.set_color(stroke_color);
+        painter.stroke_preserve(va);
+        painter.set_color(fill_color);
+        painter.fill();
+    }
+
+    template <typename Context>
+    void render_walls(Context & painter)
+    {
+        size_t const size = roof_vertices_.size();
+        size_t strip_begin = size;
+        size_t wrap_begin = size;
+        size_t wrap_end = size;
+        double x = 0;
+        double y = 0;
+        int poly_orientation = 0;
+        int strip_orientation = 0;
+        int wrap_orientation = 0;
+
+        painter.set_color(wall_fill_color);
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            double x0 = x;
+            unsigned cmd = roof_vertices_->get_vertex(i, &x, &y);
+
+            // SEG_LINETO is the most likely command
+            // SEG_CLOSE contains coordinates from previous MOVETO
+            if (cmd == SEG_LINETO || cmd == SEG_CLOSE)
+            {
+                double dx = (x - x0) * poly_orientation;
+                int wall_orientation = (dx < 0 ? -1 : dx > 0 ? 1 : 0);
+
+                if (wall_orientation && wall_orientation != strip_orientation)
+                {
+                    if (wrap_orientation == 0)
+                    {
+                        wrap_orientation = strip_orientation;
+                        wrap_end = i;
+                    }
+                    else
+                    {
+                        paint_wall(strip_orientation,
+                                   strip_begin, i, i, i, painter);
+                    }
+                    strip_orientation = wall_orientation;
+                    strip_begin = i - 1;
+                }
+
+                if (cmd == SEG_CLOSE)
+                {
+                    if (wrap_orientation != strip_orientation)
+                    {
+                        paint_wall(wrap_orientation,
+                                   wrap_begin, wrap_end, i, i, painter);
+                        wrap_end = wrap_begin;
+                    }
+                    paint_wall(strip_orientation, strip_begin, i + 1,
+                               wrap_begin, wrap_end, painter);
+                }
+            }
+            else if (cmd == SEG_MOVETO_LHR || cmd == SEG_MOVETO_RHR)
+            {
+                poly_orientation = (cmd == SEG_MOVETO_RHR ? -1 : 1);
+                strip_orientation = 0;
+                strip_begin = size;
+                wrap_orientation = 0;
+                wrap_begin = i;
+                wrap_end = i;
+                // restore plain SEG_MOVETO command for `render_roof`
+                roof_vertices_->set_command(i, SEG_MOVETO);
+            }
+        }
+    }
+
+    template <typename VertexSource, typename Context>
+    void paint_outline(VertexSource & poly, Context & painter)
+    {
         double ring_begin_x, ring_begin_y;
         double x0 = 0;
         double y0 = 0;
         double x, y;
+        double area = 0;
+        size_t ring_begin = roof_vertices_.size();
+        uint8_t ring_begin_cmd = SEG_MOVETO;
+
+        // stroke ground outline, collect transformed points in roof_vertices_
+        // and figure out exterior ring orientation along the way
         poly.rewind(0);
-        for (unsigned cm = poly.vertex(&x, &y); cm != SEG_END; cm = poly.vertex(&x, &y))
+        while (unsigned cmd = poly.vertex(&x, &y))
         {
-            if (cm == SEG_MOVETO)
+            if (cmd == SEG_LINETO) // the most likely command
             {
-                ring_begin_x = x;
-                ring_begin_y = y;
+                if (ring_begin_cmd == SEG_MOVETO) // exterior ring
+                {
+                    double ax = x0 - ring_begin_x;
+                    double ay = y0 - ring_begin_y;
+                    double bx = x - ring_begin_x;
+                    double by = y - ring_begin_y;
+                    area += ax * by - bx * ay;
+                }
+                roof_vertices_.line_to(x, y - height_);
+                painter.stroke_to(x, y);
+                x0 = x;
+                y0 = y;
             }
-            else if (cm == SEG_LINETO)
+            else if (cmd == SEG_MOVETO)
             {
-                render_face(x0, y0, x, y, face_func, frame);
+                ring_begin = roof_vertices_.size();
+                ring_begin_x = x0 = x;
+                ring_begin_y = y0 = y;
+                roof_vertices_.move_to(x, y - height_);
+                painter.stroke_from(x, y);
             }
-            else if (cm == SEG_CLOSE)
+            else if (cmd == SEG_CLOSE)
             {
-                render_face(x0, y0, ring_begin_x, ring_begin_y, face_func, frame);
+                if (ring_begin_cmd == SEG_MOVETO) // exterior ring
+                {
+                    // because in screen coordinates `y` grows downward,
+                    // negative area means counter-clockwise orientation
+                    // (left-hand-rule, inside is on the left)
+                    ring_begin_cmd = (area < 0 ? SEG_MOVETO_LHR : SEG_MOVETO_RHR);
+                }
+                if (ring_begin < roof_vertices_.size())
+                {
+                    // modify SEG_MOVETO command so that `render_walls` knows
+                    // how front-side and back-side walls are oriented
+                    roof_vertices_->set_command(ring_begin, ring_begin_cmd);
+                }
+                painter.stroke_close();
+                painter.stroke();
+                x0 = ring_begin_x;
+                y0 = ring_begin_y;
+                // add close path command including coordinates;
+                // we utilize these when rendering walls
+                roof_vertices_.push_vertex(x0, y0 - height_, SEG_CLOSE);
             }
-            x0 = x;
-            y0 = y;
+        }
+    }
+
+    template <typename Context>
+    void paint_wall(int orientation,
+                    size_t begin1, size_t end1,
+                    size_t begin2, size_t end2,
+                    Context & painter) const
+    {
+        if (is_visible(orientation))
+        {
+            paint_wall_faces(begin1, end1, begin2, end2, painter);
+        }
+    }
+
+    template <typename Context>
+    void paint_wall_faces(size_t begin1, size_t end1,
+                          size_t begin2, size_t end2,
+                          Context & painter) const
+    {
+        if (begin1 >= end1)
+            return;
+
+        double x, y;
+        roof_vertices_->get_vertex(begin1, &x, &y);
+        painter.fill_from(x, y);
+
+        double x0 = x;
+
+        for (size_t i = begin1; ++i < end1; )
+        {
+            roof_vertices_->get_vertex(i, &x, &y);
+            painter.fill_to(x, y);
+        }
+        for (size_t i = begin2; i < end2; ++i)
+        {
+            roof_vertices_->get_vertex(i, &x, &y);
+            painter.fill_to(x, y);
         }
 
-        frame_func(frame, wall_fill_color);
+        double sx = stroke_width * (x < x0 ? -0.5 : 0.5);
+        painter.fill_to(x + sx, y);
+        painter.fill_to(x + sx, y + height_);
+        painter.fill_to(x, y + height_);
 
-        agg::trans_affine_translation tr(0, -height_);
-        roof_type roof(poly, tr);
-        roof_func(roof, fill_color);
+        for (size_t i = end2; i-- > begin2; )
+        {
+            roof_vertices_->get_vertex(i, &x, &y);
+            painter.fill_to(x, y + height_);
+        }
+        for (size_t i = end1; i-- > begin1; )
+        {
+            roof_vertices_->get_vertex(i, &x, &y);
+            painter.fill_to(x, y + height_);
+        }
+
+        painter.fill_to(x - sx, y + height_);
+        painter.fill_to(x - sx, y);
+        painter.fill_to(x, y);
+        painter.fill_close();
+        painter.fill();
     }
 
     static void safe_mul(uint8_t & v, double opacity)

@@ -306,6 +306,7 @@ public:
     void line_to(double x, double y);
     void rectangle(double x, double y, double w, double h);
     void stroke();
+    void stroke_preserve();
     void fill();
     void paint();
     void paint(double opacity);

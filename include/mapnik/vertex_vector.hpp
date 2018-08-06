@@ -83,6 +83,12 @@ public:
             ::operator delete(vertices_);
         }
     }
+
+    void clear()
+    {
+        pos_ = 0;
+    }
+
     size_type size() const
     {
         return pos_;

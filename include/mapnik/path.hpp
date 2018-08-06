@@ -60,6 +60,10 @@ public:
         : type_(type)
     {}
 
+    // underlying container access
+    container_type const* operator->() const { return &cont_; }
+    container_type* operator->() { return &cont_; }
+
     types type() const
     {
         return static_cast<types>(type_ & types::Polygon);

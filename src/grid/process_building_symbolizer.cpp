@@ -23,7 +23,6 @@
 #if defined(GRID_RENDERER)
 
 // mapnik
-#include <mapnik/make_unique.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
@@ -32,69 +31,66 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/renderer_common/agg_building_symbolizer_context.hpp>
 #include <mapnik/renderer_common/process_building_symbolizer.hpp>
 
-// stl
-#include <deque>
-#include <memory>
-
+// agg
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
-#include "agg_conv_stroke.h"
 #pragma GCC diagnostic pop
 
-namespace mapnik
+namespace mapnik {
+
+namespace { // (local)
+
+struct grid_building_context
+    : detail::agg_building_symbolizer_context<grid_building_context, grid_rasterizer>
 {
+    using base = detail::agg_building_symbolizer_context<grid_building_context, grid_rasterizer>;
+    using renderer_base = grid_renderer_base_type;
+    using renderer_type = agg::renderer_scanline_bin_solid<renderer_base>;
+    using pixfmt_type = typename renderer_base::pixfmt_type;
+    using color_type = typename renderer_base::pixfmt_type::color_type;
+
+    pixfmt_type pixf_;
+    renderer_base renb_;
+    renderer_type ren_;
+    agg::scanline_bin sl_;
+
+    grid_building_context(grid_rendering_buffer & buf, grid_rasterizer & ras)
+        : base(ras), pixf_(buf), renb_(pixf_), ren_(renb_) {}
+
+    void render_scanlines(grid_rasterizer & ras)
+    {
+        agg::render_scanlines(ras, sl_, ren_);
+    }
+
+    void set_feature(value_integer id)
+    {
+        ren_.color(color_type(id));
+    }
+};
+
+} // namespace mapnik::(local)
 
 template <typename T>
 void grid_renderer<T>::process(building_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
-    using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
-    using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-    agg::scanline_bin sl;
-
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
-    pixfmt_type pixf(buf);
-
-    grid_renderer_base_type renb(pixf);
-    renderer_type ren(renb);
-
+    grid_building_context ctx{buf, *ras_ptr};
     render_building_symbolizer rebus{sym, feature, common_};
 
-    rebus.apply(
-        feature, prj_trans,
-        [&](path_type const& faces, color const& )
-        {
-            vertex_adapter va(faces);
-            ras_ptr->reset();
-            ras_ptr->add_path(va);
-            ren.color(color_type(feature.id()));
-            agg::render_scanlines(*ras_ptr, sl, ren);
-        },
-        [&](path_type const& frame, color const& )
-        {
-            vertex_adapter va(frame);
-            agg::conv_stroke<vertex_adapter> stroke(va);
-            stroke.width(rebus.stroke_width);
-            stroke.miter_limit(1.0);
-            ras_ptr->reset();
-            ras_ptr->add_path(stroke);
-            ren.color(color_type(feature.id()));
-            agg::render_scanlines(*ras_ptr, sl, ren);
-        },
-        [&](render_building_symbolizer::roof_type & roof, color const& )
-        {
-            ras_ptr->reset();
-            ras_ptr->add_path(roof);
-            ren.color(color_type(feature.id()));
-            agg::render_scanlines(*ras_ptr, sl, ren);
-        });
+    ctx.stroke_gen.width(rebus.stroke_width);
+    ctx.stroke_gen.line_join(agg::round_join);
+    ctx.set_feature(feature.id());
+
+    rebus.render_back_side(false);
+    rebus.apply(feature, prj_trans, ctx);
 
     pixmap_.add_feature(feature);
 }
