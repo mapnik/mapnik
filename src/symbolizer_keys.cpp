@@ -159,7 +159,8 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "avoid-edges",nullptr, property_types::target_bool },
     property_meta_type{ "font-feature-settings", nullptr, property_types::target_font_feature_settings },
     property_meta_type{ "extend", nullptr, property_types::target_double},
-
+    property_meta_type{ "wall-fill", nullptr, property_types::target_color },
+    property_meta_type{ "base-stroke", nullptr, property_types::target_color },
 };
 
 property_meta_type const& get_meta(mapnik::keys key)
