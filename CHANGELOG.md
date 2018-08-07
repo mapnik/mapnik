@@ -21,6 +21,7 @@ For a complete change history, see the git log.
 - Fixed segfault when ShieldSymbolizer has invalid placements ([5464ae9](https://github.com/mapnik/mapnik/commit/5464ae9cdfd32983883463bcc2396dc0e51d885f), [#3604](https://github.com/mapnik/mapnik/issues/3604#issuecomment-281542148))
 - Fixed `apply_color_blind_filter` ([#3862](https://github.com/mapnik/mapnik/issues/3862))
 - Fixed GroupSymbolizer crash, `svg::path_attributes` are now stored in `std::deque` ([#3455](https://github.com/mapnik/mapnik/issues/3455))
+- Fixed compilation with ICU >= 61 ([#3880](https://github.com/mapnik/mapnik/issues/3880), [#3965](https://github.com/mapnik/mapnik/issues/3965))
 - Duplicate Style name in map XML now throws `config_error` in strict mode ([#3770](https://github.com/mapnik/mapnik/issues/3770), [#3917](https://github.com/mapnik/mapnik/issues/3917))
 - Improved padding calculation for polygon/line clipping ([#3909](https://github.com/mapnik/mapnik/issues/3909))
 - Slightly improved `sql_utils::table_from_sql` ([2587bb3](https://github.com/mapnik/mapnik/commit/2587bb3a1d8db397acfa8dcc2d332da3a8a9399f))
@@ -29,6 +30,7 @@ For a complete change history, see the git log.
 
 #### Plugins
 
+- GDAL: fixed several issues with overviews ([#3912](https://github.com/mapnik/mapnik/issues/3912))
 - PostGIS: changed syntax for user `@variable` interpolation to `!@variable!` ([#3618](https://github.com/mapnik/mapnik/issues/3618))
 - PostGIS: using parameter `estimate_extent` now requires PostGIS >= 2.1.0 ([#3624](https://github.com/mapnik/mapnik/issues/3624))
 - PGraster: added variable interpolation like in PostGIS plugin ([#3618](https://github.com/mapnik/mapnik/issues/3618))
