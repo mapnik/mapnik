@@ -6,6 +6,19 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+
+## UNRELEASED
+
+#### Core
+
+- Fixed compilation with ICU >= 61 (#3963)
+- Fixed bbox reprojection (#3940)
+
+#### Plugins
+
+- GDAL: Fixed several issues with overviews (#3939)
+
+
 ## 3.0.20
 
 Released: April 12, 2018
