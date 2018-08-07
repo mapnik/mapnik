@@ -124,11 +124,11 @@ auto const arc_to = [] (auto & ctx)
     int large_arc_flag = boost::fusion::at_c<2>(attr);
     int sweep_flag = boost::fusion::at_c<3>(attr);
     auto const& v = boost::fusion::at_c<4>(attr);
-    x3::get<svg_path_tag>(ctx).get().arc_to(std::get<0>(p),std::get<1>(p),
-                                            util::radians(angle),
-                                            large_arc_flag, sweep_flag,
-                                            std::get<0>(v),std::get<1>(v),
-                                            x3::get<relative_tag>(ctx));
+    x3::get<svg_path_tag>(ctx).arc_to(std::get<0>(p),std::get<1>(p),
+                                      util::radians(angle),
+                                      large_arc_flag, sweep_flag,
+                                      std::get<0>(v),std::get<1>(v),
+                                      x3::get<relative_tag>(ctx));
 };
 
 auto const close_path = [] (auto const& ctx)
