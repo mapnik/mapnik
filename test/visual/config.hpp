@@ -43,6 +43,36 @@ struct map_size
     map_size() { }
     std::size_t width = 0;
     std::size_t height = 0;
+    std::size_t margin_left = 0;
+    std::size_t margin_right = 0;
+    std::size_t margin_top = 0;
+    std::size_t margin_bottom = 0;
+
+    bool has_margin() const
+    {
+        return 0 != (margin_left | margin_right | margin_top | margin_bottom);
+    }
+
+    void inflate_by_margin(mapnik::box2d<double> & box) const
+    {
+        std::size_t xm = margin_left + margin_right;
+        if (xm > 0 && xm < width)
+        {
+            double pixel_width = box.width() / (width - xm);
+            box.minx_ -= pixel_width * margin_left;
+            box.maxx_ += pixel_width * margin_right;
+        }
+        std::size_t ym = margin_top + margin_bottom;
+        if (ym > 0 && ym < height)
+        {
+            double pixel_height = box.height() / (height - ym);
+            // FIXME this will swap top/bottom margins
+            // if map coordinate system has `y` growing in
+            // the same direction as screen coordinates
+            box.maxy_ += pixel_height * margin_top;
+            box.miny_ -= pixel_height * margin_bottom;
+        }
+    }
 };
 
 struct config

@@ -352,14 +352,19 @@ result_list runner::test_one(runner::path_type const& style_path,
                     }
 
                     map.resize(size.width, size.height);
-                    if (cfg.bbox.valid())
-                    {
-                        map.zoom_to_box(cfg.bbox);
-                    }
-                    else
+
+                    auto bbox = cfg.bbox;
+                    if (!bbox.valid())
                     {
                         map.zoom_all();
+                        bbox = map.get_current_extent();
                     }
+                    if (size.has_margin())
+                    {
+                        size.inflate_by_margin(bbox);
+                    }
+                    map.zoom_to_box(bbox);
+
                     mapnik::util::apply_visitor(renderer_visitor(name,
                                                                  map,
                                                                  tiles_count,
