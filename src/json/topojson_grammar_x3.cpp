@@ -23,15 +23,30 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/topojson_grammar_x3_def.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik { namespace topojson { namespace grammar {
 
-BOOST_SPIRIT_INSTANTIATE(topojson_grammar_type, iterator_type, phrase_parse_context_type);
+using json::grammar::iterator_type;
+using json::grammar::phrase_parse_context_type;
 
-}
+MAPNIK_SPIRIT_INSTANTIATE(start_rule, iterator_type, phrase_parse_context_type);
 
-grammar::topojson_grammar_type const& topojson_grammar()
-{
-    return grammar::topology;
-}
+MAPNIK_SPIRIT_RULE_NAME(arc) = "Arc";
+MAPNIK_SPIRIT_RULE_NAME(arcs) = "Arcs";
+MAPNIK_SPIRIT_RULE_NAME(bbox) = "Bounding box";
+MAPNIK_SPIRIT_RULE_NAME(empty_array) = "Empty array";
+MAPNIK_SPIRIT_RULE_NAME(geometry_collection) = "Geometry collection";
+MAPNIK_SPIRIT_RULE_NAME(geometry) = "Geometry object";
+MAPNIK_SPIRIT_RULE_NAME(geometry_tuple) = "Geometry tuple";
+MAPNIK_SPIRIT_RULE_NAME(line_indices) = "Array of Line/Ring arc indices";
+MAPNIK_SPIRIT_RULE_NAME(mpoly_indices) = "Array of MultiPolygon arc indices";
+MAPNIK_SPIRIT_RULE_NAME(objects) = "Objects";
+MAPNIK_SPIRIT_RULE_NAME(poly_indices) = "Array of MultiLine/Polygon arc indices";
+MAPNIK_SPIRIT_RULE_NAME(position) = "Position";
+MAPNIK_SPIRIT_RULE_NAME(positions) = "Array of positions";
+MAPNIK_SPIRIT_RULE_NAME(properties) = "Properties";
+MAPNIK_SPIRIT_RULE_NAME(property) = "Property";
+MAPNIK_SPIRIT_RULE_NAME(rings_array) = "Array of arc indices";
+MAPNIK_SPIRIT_RULE_NAME(start_rule) = "Topology";
+MAPNIK_SPIRIT_RULE_NAME(transform) = "Transform";
 
-}}
+}}}
