@@ -65,7 +65,17 @@ bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology
         std::cerr << "failed to parse TopoJSON..." << std::endl;
         std::cerr << ex.what() << std::endl;
         std::cerr << "Expected: " << ex.which();
-        std::cerr << " Got: \"" << std::string(ex.where(), ex.where() + 200) << "...\"" << std::endl;
+        std::cerr << "\nGot: \"";
+        auto ctx = ex.where();
+        std::streamsize len = 0;
+        // stop before NUL terminator or after 200 bytes, whichever comes first
+        for (; ctx[len] && len < 200; ++len)
+            ;
+        // extend to UTF-8 character boundary or 210 bytes, whichever comes first
+        for (; len < 210 && ((unsigned char)ctx[len] & 0xC0) == 0x80; ++len)
+            ;
+        std::cerr.write(ctx, len);
+        std::cerr << (ctx[len] ? "..." : "") << '"' << std::endl;
         return false;
     }
     return (itr == end);
