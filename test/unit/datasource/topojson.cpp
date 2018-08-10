@@ -29,7 +29,11 @@
 #include <mapnik/json/topojson_grammar_x3.hpp>
 #include <mapnik/json/topojson_utils.hpp>
 
+#define HEREDOC(...) #__VA_ARGS__
+
 namespace {
+
+bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology & topo);
 
 bool parse_topology(std::string const& filename, mapnik::topojson::topology & topo)
 {
@@ -38,6 +42,17 @@ bool parse_topology(std::string const& filename, mapnik::topojson::topology & to
     buffer.resize(file.size());
     std::fread(&buffer[0], buffer.size(), 1, file.get());
     if (!file) return false;
+    return parse_topology_string(buffer, topo);
+}
+
+bool parse_topology_string(std::string const& buffer)
+{
+    mapnik::topojson::topology topo;
+    return parse_topology_string(buffer, topo);
+}
+
+bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology & topo)
+{
     using space_type = boost::spirit::x3::standard::space_type;
     char const* itr = buffer.c_str();
     char const* end = itr + buffer.length();
@@ -58,8 +73,44 @@ bool parse_topology(std::string const& filename, mapnik::topojson::topology & to
 
 }
 
-TEST_CASE("topojson")
+TEST_CASE("TopoJSON")
 {
+    SECTION("Minimal Topology")
+    {
+        // + A topology must have a member with the name “objects” whose value is another object.
+        // + A topology must have a member with the name “arcs” whose value is an array of arcs.
+        CHECK(parse_topology_string(HEREDOC(
+              {
+                  "type": "Topology", "objects": {}, "arcs": []
+              }
+              )));
+        CHECK(parse_topology_string(HEREDOC(
+              {
+                  "type": "Topology", "arcs": [], "objects": {}
+              }
+              )));
+        CHECK(parse_topology_string(HEREDOC(
+              {
+                  "objects": {}, "type": "Topology", "arcs": []
+              }
+              )));
+        CHECK(parse_topology_string(HEREDOC(
+              {
+                  "objects": {}, "arcs": [], "type": "Topology"
+              }
+              )));
+        CHECK(parse_topology_string(HEREDOC(
+              {
+                  "arcs": [], "type": "Topology", "objects": {}
+              }
+              )));
+        CHECK(parse_topology_string(HEREDOC(
+              {
+                  "arcs": [], "objects": {}, "type": "Topology"
+              }
+              )));
+    }
+
     SECTION("geometry parsing")
     {
         mapnik::value_integer feature_id = 0;
