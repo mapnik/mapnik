@@ -121,6 +121,63 @@ TEST_CASE("TopoJSON")
               )));
     }
 
+    SECTION("Empty MultiPoint")
+    {
+        mapnik::topojson::topology topo;
+        REQUIRE(parse_topology_string(HEREDOC(
+                {
+                    "type" : "Topology",
+                    "objects" : {
+                        "THING" : {
+                            "type" : "MultiPoint",
+                            "coordinates" : []
+                        }
+                    },
+                    "arcs" : []
+                }
+                ), topo));
+        REQUIRE(topo.geometries.size() == 1);
+        REQUIRE(topo.geometries.at(0).get<mapnik::topojson::multi_point>().points.empty());
+    }
+
+    SECTION("Empty MultiLineString")
+    {
+        mapnik::topojson::topology topo;
+        REQUIRE(parse_topology_string(HEREDOC(
+                {
+                    "type" : "Topology",
+                    "objects" : {
+                        "THING" : {
+                            "type" : "MultiLineString",
+                            "arcs" : []
+                        }
+                    },
+                    "arcs" : []
+                }
+                ), topo));
+        REQUIRE(topo.geometries.size() == 1);
+        REQUIRE(topo.geometries.at(0).get<mapnik::topojson::multi_linestring>().lines.empty());
+    }
+
+    SECTION("Empty MultiPolygon")
+    {
+        mapnik::topojson::topology topo;
+        REQUIRE(parse_topology_string(HEREDOC(
+                {
+                    "type" : "Topology",
+                    "objects" : {
+                        "THING" : {
+                            "type" : "MultiPolygon",
+                            "arcs" : []
+                        }
+                    },
+                    "arcs" : []
+                }
+                ), topo));
+        REQUIRE(topo.geometries.size() == 1);
+        REQUIRE(topo.geometries.at(0).get<mapnik::topojson::multi_polygon>().polygons.empty());
+    }
+
     SECTION("geometry parsing")
     {
         mapnik::value_integer feature_id = 0;
