@@ -379,7 +379,7 @@ auto const geometry_tuple_def =
      |
      properties[assign_properties]
      |
-     omit[json_string] > lit(':') > omit[json_value]) % lit(',')
+     (omit[json_string] > lit(':') > omit[json_value])) % lit(',')
     ;
 
 auto const geometry_def = lit("{") > geometry_tuple[create_geometry] > lit("}");
