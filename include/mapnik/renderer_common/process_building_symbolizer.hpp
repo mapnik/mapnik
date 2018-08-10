@@ -171,6 +171,17 @@ private:
         return orientation > 0 || (orientation < 0 && render_back_side_);
     }
 
+    template <typename VertexSource>
+    void cache_outline(VertexSource & vs)
+    {
+        double x, y;
+        vs.rewind(0);
+        while (unsigned cmd = vs.vertex(&x, &y))
+        {
+            roof_vertices_.push_vertex(x, y, static_cast<CommandType>(cmd));
+        }
+    }
+
     template <typename T, typename Context>
     void render_ground(geometry::polygon<T> const& poly,
                        proj_transform const& prj_trans,
@@ -181,8 +192,16 @@ private:
 
         vertex_adapter_type va(poly);
         transform_path_type transformed(rencom_.t_, va, prj_trans);
-        painter.set_color(base_stroke_color);
-        paint_outline(transformed, painter);
+
+        if (height_ <= 0)
+        {
+            cache_outline(transformed);
+        }
+        else
+        {
+            painter.set_color(base_stroke_color);
+            paint_outline(transformed, painter);
+        }
     }
 
     template <typename Context>
@@ -198,6 +217,9 @@ private:
     template <typename Context>
     void render_walls(Context & painter)
     {
+        if (height_ <= 0)
+            return;
+
         size_t const size = roof_vertices_.size();
         size_t strip_begin = size;
         size_t wrap_begin = size;
