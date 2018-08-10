@@ -42,7 +42,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::arc,
-    (std::list<mapnik::topojson::coordinate>, coordinates)
+    (mapnik::topojson::position_array, coordinates)
     )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -63,7 +63,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 namespace mapnik { namespace json { namespace grammar {
 
-using index_type = topojson::index_type;
 struct create_point
 {
     using result_type = mapnik::topojson::point;
@@ -88,10 +87,10 @@ struct create_multi_point
     result_type operator()(T0 & coords, T1 & props) const
     {
         mapnik::topojson::multi_point mpt;
-        if (coords.template is<std::vector<mapnik::topojson::coordinate>>())
+        if (coords.template is<topojson::position_array>())
         {
-            auto const& points = coords.template get<std::vector<mapnik::topojson::coordinate>>();
-            mpt. points = points;
+            auto const& points = coords.template get<topojson::position_array>();
+            mpt.points = points;
             mpt.props = props;
         }
         return mpt;
@@ -105,10 +104,10 @@ struct create_line_string
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::linestring line;
-        if (arcs.template is<std::vector<index_type>>())
+        if (arcs.template is<topojson::index_array>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<index_type>>();
-            line.rings = arcs_;
+            auto const& arcs_ = arcs.template get<topojson::index_array>();
+            line.arcs = arcs_;
             line.props = props;
         }
         return line;
@@ -122,9 +121,9 @@ struct create_multi_line_string
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::multi_linestring mline;
-        if (arcs.template is<std::vector<std::vector<index_type>>>())
+        if (arcs.template is<topojson::index_array2>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<std::vector<index_type>>>();
+            auto const& arcs_ = arcs.template get<topojson::index_array2>();
             mline.lines = arcs_;
             mline.props = props;
         }
@@ -139,9 +138,9 @@ struct create_polygon
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::polygon poly;
-        if (arcs.template is<std::vector<std::vector<index_type>>>())
+        if (arcs.template is<topojson::index_array2>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<std::vector<index_type>>>();
+            auto const& arcs_ = arcs.template get<topojson::index_array2>();
             poly.rings = arcs_;
             poly.props = props;
         }
@@ -156,9 +155,9 @@ struct create_multi_polygon
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::multi_polygon mpoly;
-        if (arcs.template is<std::vector<std::vector<std::vector<index_type>>>>())
+        if (arcs.template is<topojson::index_array3>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<std::vector<std::vector<index_type>>>>();
+            auto const& arcs_ = arcs.template get<topojson::index_array3>();
             mpoly.polygons = arcs_;
             mpoly.props = props;
         }
@@ -285,10 +284,13 @@ auto const& json_string = json::unicode_string_grammar();
 auto const& json_value = json::generic_json_grammar();
 }
 
-using coordinates_type = util::variant<topojson::coordinate,std::vector<topojson::coordinate>>;
-using arcs_type = util::variant<std::vector<index_type>,
-                                std::vector<std::vector<index_type>>,
-                                std::vector<std::vector<std::vector<index_type>>>>;
+using coordinates_type = util::variant<topojson::coordinate,
+                                       topojson::position_array>;
+
+using arcs_type = util::variant<topojson::empty,
+                                topojson::index_array,
+                                topojson::index_array2,
+                                topojson::index_array3>;
 
 struct topojson_geometry_type_ : x3::symbols<int>
 {
@@ -324,8 +326,8 @@ x3::rule<class coordinate_tag, mapnik::topojson::coordinate> const coordinate = 
 x3::rule<class coordinates_tag, coordinates_type> const coordinates = "Coordinates";
 x3::rule<class arc_tag, mapnik::topojson::arc> const arc = "Arc";
 x3::rule<class arcs_tag, std::vector<mapnik::topojson::arc>> const arcs = "Arcs";
-x3::rule<class ring_type, std::vector<index_type>> const ring = "Ring";
-x3::rule<class rings_type, std::vector<std::vector<index_type>>> const rings = "Rings";
+x3::rule<class ring_type, topojson::index_array> const ring = "Ring";
+x3::rule<class rings_type, topojson::index_array2> const rings = "Rings";
 x3::rule<class rings_array_type, arcs_type> const rings_array = "Rings Array";
 
 // defs

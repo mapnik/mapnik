@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_TOPOLOGY_HPP
-#define MAPNIK_TOPOLOGY_HPP
+#ifndef MAPNIK_JSON_TOPOLOGY_HPP
+#define MAPNIK_JSON_TOPOLOGY_HPP
 
 #include <mapnik/json/json_value.hpp>
 #include <mapnik/util/variant.hpp>
@@ -33,11 +33,13 @@
 
 #include <tuple>
 #include <vector>
-#include <list>
 
 namespace mapnik { namespace topojson {
 
 using index_type = int;
+using index_array = std::vector<index_type>;
+using index_array2 = std::vector<index_array>;
+using index_array3 = std::vector<index_array2>;
 
 struct coordinate
 {
@@ -45,7 +47,9 @@ struct coordinate
     double y;
 };
 
-using property = std::tuple<std::string, json::json_value >;
+using position_array = std::vector<coordinate>;
+
+using property = std::tuple<std::string, json::json_value>;
 using properties = std::vector<property>;
 
 struct point
@@ -56,31 +60,31 @@ struct point
 
 struct multi_point
 {
-    std::vector<coordinate> points;
+    position_array points;
     boost::optional<properties> props;
 };
 
 struct linestring
 {
-    std::vector<index_type> rings ;
+    index_array arcs;
     boost::optional<properties> props;
 };
 
 struct multi_linestring
 {
-    std::vector<std::vector<index_type> > lines;
+    index_array2 lines;
     boost::optional<properties> props;
 };
 
 struct polygon
 {
-    std::vector<std::vector<index_type> > rings;
+    index_array2 rings;
     boost::optional<properties> props;
 };
 
 struct multi_polygon
 {
-    std::vector<std::vector<std::vector<index_type> > > polygons;
+    index_array3 polygons;
     boost::optional<properties> props;
 };
 
@@ -98,7 +102,7 @@ using pair_type = std::tuple<double,double>;
 
 struct arc
 {
-    std::list<coordinate> coordinates;
+    position_array coordinates;
 };
 
 struct transform
@@ -127,4 +131,4 @@ struct topology
 
 }}
 
-#endif // MAPNIK_TOPOLOGY_HPP
+#endif // MAPNIK_JSON_TOPOLOGY_HPP
