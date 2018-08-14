@@ -260,7 +260,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
-    double buffer_padding = 2.0 * scale;
+    double buffer_padding = 2.0 * scale * p.scale_factor();
     boost::optional<int> layer_buffer_size = lay.buffer_size();
     if (layer_buffer_size) // if layer overrides buffer size, use this value to compute buffered extent
     {
