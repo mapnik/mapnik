@@ -276,7 +276,7 @@ using x3::lit;
 using x3::double_;
 using x3::int_;
 using x3::omit;
-using x3::char_;
+
 namespace
 {
 // import unicode string rule
@@ -360,9 +360,13 @@ auto const  bbox_def = lit("\"bbox\"") > lit(':')
     ;
 
 
+// A topology must have an “objects” member whose value is an object.
+// This object may have any number of members, whose value must be a geometry object.
 auto const objects_def = lit("\"objects\"") > lit(':')
     > lit('{')
-    > ((omit[*~char_(':')] > lit(':') > ((geometry_collection[push_collection] | geometry[push_geometry]))) % lit(','))
+    > -((omit[json_string] > ':' > ( geometry_collection[push_collection]
+                                   | geometry[push_geometry]
+                                   )) % ',')
     > lit('}')
     ;
 
@@ -375,7 +379,7 @@ auto const geometry_tuple_def =
      |
      properties[assign_properties]
      |
-     omit[json_string] > lit(':') > omit[json_value]) % lit(',')
+     (omit[json_string] > lit(':') > omit[json_value])) % lit(',')
     ;
 
 auto const geometry_def = lit("{") > geometry_tuple[create_geometry] > lit("}");
