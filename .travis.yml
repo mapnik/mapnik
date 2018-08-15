@@ -11,43 +11,45 @@ env:
    - HEAVY_JOBS="2"
    - PREFIX=/tmp/mapnik
    - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
-addons:
-  postgresql: "9.4"
 
 cache:
   directories:
   - $HOME/.ccache
 
-dist: precise
+services:
+  - postgresql
+
+dist: trusty
+sudo: false
 
 matrix:
   include:
     - os: linux
-      sudo: false
-      compiler: ": clang"
+      name: Linux gcc-6
       env: JOBS=4 CXX="ccache g++-6" CC="gcc-6"
       addons:
+        postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev']
+          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: linux
-      sudo: false
-      compiler: ": clang"
+      name: Linux clang-3.9
       env: JOBS=8 CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" ENABLE_GLIBC_WORKAROUND=true TRIGGER=true
       addons:
+        postgresql: "9.5"
         apt:
-          sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-4.9-dev', 'xutils-dev']
+          sources: [ 'ubuntu-toolchain-r-test' ]
+          packages: [ 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: linux
-      sudo: false
-      compiler: ": clang-coverage"
+      name: Linux clang-3.9 + coverage
       env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9"
       addons:
+        postgresql: "9.5"
         apt:
-          sources: [ 'ubuntu-toolchain-r-test']
-          packages: ['libstdc++-4.9-dev', 'xutils-dev' ]
+          sources: [ 'ubuntu-toolchain-r-test' ]
+          packages: ['libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: osx
-      compiler: ": clang-osx"
+      name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
       env: JOBS=4 CXX="ccache clang++ -Qunused-arguments"
