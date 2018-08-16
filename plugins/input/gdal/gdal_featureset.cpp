@@ -208,10 +208,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     int im_height = int(height_res * intersect.height() + 0.5);
 
     //calculate actual box2d of returned raster
-    view_transform t2(im_width, im_height, raster_extent_, 0, 0);
-    box2d<double> feature_raster_extent(im_offset_x, im_offset_y, im_offset_x + im_width, im_offset_y + im_height);
+    box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
-    feature_raster_extent = t2.backward(feature_raster_extent);
+    feature_raster_extent = t.backward(feature_raster_extent);
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Raster extent=" << raster_extent_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
