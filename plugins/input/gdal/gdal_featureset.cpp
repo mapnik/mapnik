@@ -124,33 +124,6 @@ feature_ptr gdal_featureset::next()
     return feature_ptr();
 }
 
-void gdal_featureset::find_best_overview(int bandNumber,
-                                         int ideal_width,
-                                         int ideal_height,
-                                         int & current_width,
-                                         int & current_height) const
-{
-    GDALRasterBand * band = dataset_.GetRasterBand(bandNumber);
-    int band_overviews = band->GetOverviewCount();
-    if (band_overviews > 0)
-    {
-        for (int b = 0; b < band_overviews; b++)
-        {
-            GDALRasterBand * overview = band->GetOverview(b);
-            int overview_width = overview->GetXSize();
-            int overview_height = overview->GetYSize();
-            if ((overview_width < current_width ||
-                 overview_height < current_height) &&
-                ideal_width <= overview_width &&
-                ideal_height <= overview_height)
-            {
-                current_width = overview_width;
-                current_height = overview_height;
-            }
-        }
-    }
-}
-
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 {
     feature_ptr feature = feature_factory::create(ctx_,1);
@@ -225,91 +198,17 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     int width = end_x - x_off;
     int height = end_y - y_off;
 
-    // In many cases we want GDAL to simply return the exact image so we
-    // can handle resampling internally in mapnik. In other cases such as 
-    // when overviews exist or when the image allocated might be too large
-    // we want to utilize some resampling in GDAL instead.
-    int im_height = height;
-    int im_width = width;
     double im_offset_x = x_off;
     double im_offset_y = y_off;
-    int current_width = static_cast<int>(raster_width_);
-    int current_height = static_cast<int>(raster_height_);
 
-    // loop through overviews -- snap up in resolution to closest overview
-    // if necessary we find an image size that most resembles
-    // the resolution of our output image.
+    // resolution is 1 / requested pixel size
     const double width_res = std::get<0>(q.resolution());
     const double height_res = std::get<1>(q.resolution());
-    const int ideal_raster_width = static_cast<int>(
-        std::floor(raster_extent_.width() *
-            width_res * filter_factor) + .5);
-    const int ideal_raster_height = static_cast<int>(
-        std::floor(raster_extent_.height() *
-            height_res * filter_factor) + .5);
+    int im_width = int(width_res * intersect.width() + 0.5);
+    int im_height = int(height_res * intersect.height() + 0.5);
 
-    if (band_ > 0 && band_ < nbands_)
-    {
-        find_best_overview(band_,
-                           ideal_raster_width,
-                           ideal_raster_height,
-                           current_width,
-                           current_height);
-    }
-    else
-    {
-        for (int i = 0; i < nbands_; ++i)
-        {
-            find_best_overview(i + 1,
-                               ideal_raster_width,
-                               ideal_raster_height,
-                               current_width,
-                               current_height);
-        }
-    }
-
-    if (current_width != (int)raster_width_ ||
-        current_height != (int)raster_height_)
-    {
-        if (current_width != (int)raster_width_)
-        {
-            double ratio = (double)current_width / (double)raster_width_;
-            im_offset_x = std::floor(ratio * im_offset_x);
-            im_width = static_cast<int>(std::ceil(ratio * im_width));
-        }
-        if (current_height != (int)raster_height_)
-        {
-            double ratio = (double)current_height / (double)raster_height_;
-            im_offset_y = std::floor(ratio * im_offset_y);
-            im_height = static_cast<int>(std::ceil(ratio * im_height));
-        }
-    }
-    
-    int64_t im_area = (int64_t)im_width * (int64_t)im_height;
-    if (im_area > max_image_area_)
-    {
-        int adjusted_width = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_width / (double)im_height))));
-        int adjusted_height = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_height / (double)im_width))));
-        if (adjusted_width < 1)
-        {
-            adjusted_width = 1;
-        }
-        if (adjusted_height < 1)
-        {
-            adjusted_height = 1;
-        }
-        double ratio_x = (double)adjusted_width / (double)im_width;
-        double ratio_y = (double)adjusted_height / (double)im_height;
-        im_offset_x = ratio_x * im_offset_x;
-        im_offset_y = ratio_y * im_offset_y;
-        im_width = adjusted_width;
-        im_height = adjusted_height;
-        current_width = static_cast<int>(std::floor((ratio_x * current_width) + 0.5));
-        current_height = static_cast<int>(std::floor((ratio_y * current_height) + 0.5));
-    }
-    
     //calculate actual box2d of returned raster
-    view_transform t2(current_width, current_height, raster_extent_, 0, 0);
+    view_transform t2(im_width, im_height, raster_extent_, 0, 0);
     box2d<double> feature_raster_extent(im_offset_x, im_offset_y, im_offset_x + im_width, im_offset_y + im_height);
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
     feature_raster_extent = t2.backward(feature_raster_extent);
