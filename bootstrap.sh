@@ -137,7 +137,7 @@ function export_variables() {
     local arg= ret=0
     for arg
     do
-        if [[ "$arg" =~ [[:alpha:]][_[:alnum:]]*= ]]
+        if [[ "$arg" =~ ^[[:alpha:]][_[:alnum:]]*= ]]
         then
             local -n var="${arg%%=*}"
             export var="${arg#*=}"
