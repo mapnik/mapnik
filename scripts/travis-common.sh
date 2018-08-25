@@ -77,10 +77,11 @@ config_override () {
 
 configure () {
     if enabled ${COVERAGE}; then
-        ./configure "$@" PREFIX=${PREFIX} PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
-            COVERAGE=True DEBUG=True
+        ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@" \
+                    COVERAGE=True DEBUG=True \
+                    PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False
     else
-        ./configure "$@" PREFIX=${PREFIX}
+        ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@"
     fi
     # print final config values, sorted and indented
     sort -sk1,1 ./config.py | sed -e 's/^/	/'
@@ -97,7 +98,7 @@ coverage () {
         -g "./.sconf_temp/**" \
         -g "./scons/**" \
         -g "./test/**" \
-        -x "llvm-cov gcov >/dev/null 2>&1"
+        -x "${LLVM_COV:-llvm-cov} gcov >/dev/null 2>&1"
 }
 
 trigger_downstream() {

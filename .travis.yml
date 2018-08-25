@@ -31,20 +31,32 @@ matrix:
           packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.4-postgis-2.3' ]
     - os: linux
       name: Linux clang-3.9
-      env: JOBS=8 CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9" ENABLE_GLIBC_WORKAROUND=true TRIGGER=true
+      env: >-
+          JOBS=8
+          CXX="ccache clang++-3.9 -Qunused-arguments"
+          CC="clang-3.9"
+          LINKFLAGS="-fuse-ld=gold-2.26"
+          ENABLE_GLIBC_WORKAROUND=true
+          TRIGGER=true
       addons:
         postgresql: "9.4"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.4-postgis-2.3' ]
+          packages: [ 'clang-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.4-postgis-2.3' ]
     - os: linux
       name: Linux clang-3.9 + coverage
-      env: JOBS=8 COVERAGE=true CXX="ccache clang++-3.9 -Qunused-arguments" CC="clang-3.9"
+      env: >-
+          JOBS=8
+          COVERAGE=true
+          LLVM_COV="llvm-cov-3.9"
+          CXX="ccache clang++-3.9 -Qunused-arguments"
+          CC="clang-3.9"
+          LINKFLAGS="-fuse-ld=gold-2.26"
       addons:
         postgresql: "9.4"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: ['libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.4-postgis-2.3' ]
+          packages: [ 'clang-3.9', 'llvm-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.4-postgis-2.3' ]
     - os: osx
       name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
@@ -75,15 +87,6 @@ install:
 
 before_script:
  - source bootstrap.sh
- - |
-   if [[ $(uname -s) == 'Linux' ]]; then
-     mason install clang++ 3.9.1
-     export PATH=$(mason prefix clang++ 3.9.1)/bin:${PATH}
-     mason install llvm-cov 3.9.1
-     export PATH=$(mason prefix llvm-cov 3.9.1)/bin:${PATH}
-     which llvm-cov
-     export LLVM_COV="$(mason prefix llvm-cov 3.9.1)/bin/llvm-cov"
-   fi
  - ccache --version
  - ccache -p || true
  - ccache --show-stats || true
