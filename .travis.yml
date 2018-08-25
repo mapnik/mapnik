@@ -52,13 +52,10 @@ matrix:
       env: JOBS=4 CXX="ccache clang++ -Qunused-arguments"
 
 before_install:
+ - source scripts/travis-common.sh
  # workaround travis rvm bug
  # http://superuser.com/questions/1044130/why-am-i-having-how-can-i-fix-this-error-shell-session-update-command-not-f
- - |
-   if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-     rvm get head || true
-   fi
- - source scripts/travis-common.sh
+ - on 'osx' rvm get head || true
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export BENCH=${BENCH:-false}
