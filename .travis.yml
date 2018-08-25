@@ -16,9 +16,6 @@ cache:
   directories:
   - $HOME/.ccache
 
-services:
-  - postgresql
-
 dist: trusty
 sudo: false
 
