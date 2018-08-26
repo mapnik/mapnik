@@ -8,7 +8,6 @@ env:
   global:
    - CCACHE_TEMPDIR=/tmp/.ccache-temp
    - CCACHE_COMPRESS=1
-   - HEAVY_JOBS="2"
    - PREFIX=/tmp/mapnik
    - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 
@@ -23,7 +22,9 @@ matrix:
   include:
     - os: linux
       name: Linux gcc-6
-      env: JOBS=4 CXX="ccache g++-6" CC="gcc-6"
+      env: >-
+          CXX="ccache g++-6"
+          CC="gcc-6"
       addons:
         postgresql: "9.4"
         apt:
@@ -32,11 +33,11 @@ matrix:
     - os: linux
       name: Linux clang-3.9
       env: >-
-          JOBS=8
           CXX="ccache clang++-3.9 -Qunused-arguments"
           CC="clang-3.9"
-          LINKFLAGS="-fuse-ld=gold-2.26"
           ENABLE_GLIBC_WORKAROUND=true
+      before_install:
+        - export LINKFLAGS="-fuse-ld=gold-2.26"
       addons:
         postgresql: "9.4"
         apt:
@@ -45,12 +46,12 @@ matrix:
     - os: linux
       name: Linux clang-3.9 + coverage
       env: >-
-          JOBS=8
-          COVERAGE=true
-          LLVM_COV="llvm-cov-3.9"
           CXX="ccache clang++-3.9 -Qunused-arguments"
           CC="clang-3.9"
-          LINKFLAGS="-fuse-ld=gold-2.26"
+          COVERAGE=true
+      before_install:
+        - export LINKFLAGS="-fuse-ld=gold-2.26"
+        - export LLVM_COV="llvm-cov-3.9"
       addons:
         postgresql: "9.4"
         apt:
@@ -60,9 +61,10 @@ matrix:
       name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
       osx_image: xcode7.3 # upgrades clang from 6 -> 7
-      env: JOBS=4 CXX="ccache clang++ -Qunused-arguments"
+      env: >-
+          CXX="ccache clang++ -Qunused-arguments"
 
-before_install:
+install:
  - source scripts/travis-common.sh
  # workaround travis rvm bug
  # http://superuser.com/questions/1044130/why-am-i-having-how-can-i-fix-this-error-shell-session-update-command-not-f
@@ -70,9 +72,6 @@ before_install:
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export BENCH=${BENCH:-false}
- - git_submodule_update --init deps/
-
-install:
  - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
  - on 'osx' rm -rf ${DATA_PATH}
  - on 'osx' initdb ${DATA_PATH} -E utf8
@@ -85,6 +84,9 @@ install:
  - enabled ${COVERAGE} chmod +x codecov
 
 before_script:
+ - export JOBS=${JOBS:-4}
+ - export HEAVY_JOBS=${HEAVY_JOBS:-2}
+ - export SCONSFLAGS='--debug=time'
  - source bootstrap.sh
  - ccache --version
  - ccache -p || true
@@ -92,7 +94,7 @@ before_script:
  - commit_message_parse
 
 script:
- - export SCONSFLAGS='--debug=time'
+ - git_submodule_update --init deps/
  - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false}
  - cat config.log
  # we limit the `make` to 40 min
