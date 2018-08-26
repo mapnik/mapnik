@@ -37,7 +37,6 @@ matrix:
           CC="clang-3.9"
           LINKFLAGS="-fuse-ld=gold-2.26"
           ENABLE_GLIBC_WORKAROUND=true
-          TRIGGER=true
       addons:
         postgresql: "9.5"
         apt:
@@ -107,6 +106,3 @@ script:
  - test_ok && enabled ${COVERAGE} coverage
  - test_ok && enabled ${BENCH} make bench
  - ./scripts/check_glibcxx.sh
-
-after_success:
- - enabled ${TRIGGER} trigger_downstream
