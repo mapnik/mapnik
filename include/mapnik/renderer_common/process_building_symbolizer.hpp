@@ -29,6 +29,10 @@
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/path.hpp>
 #include <mapnik/transform_path_adapter.hpp>
+#include <mapnik/util/math.hpp>
+
+// stl
+#include <cmath>
 
 namespace mapnik {
 
@@ -44,6 +48,7 @@ private:
 
     renderer_common const& rencom_;
     double const height_;
+    double flat_wall_cos2_ = 0.9921875; // approx. cos²(5.0709°)
     bool render_back_side_ = false;
     path_type roof_vertices_{path_type::types::Polygon};
 
@@ -67,9 +72,31 @@ public:
         // colors are not always needed so they're not extracted here
     }
 
-    bool has_transparent_fill() const
+    bool has_transparent_roof() const
     {
-        return (fill_color.alpha_ & wall_fill_color.alpha_) != 255;
+        return fill_color.alpha_ < 255;
+    }
+
+    bool has_transparent_walls() const
+    {
+        return wall_fill_color.alpha_ < 255;
+    }
+
+    void flat_wall_tolerance(double angle)
+    {
+        if (angle > -180 && angle < 180)
+        {
+            double cosa = std::cos(util::radians(angle));
+            // Preserve the sign of the cosine, so that comparisons against
+            // this value are consistent, including when the tolerance is
+            // greater than 90 degrees. Still, setting it above 45 degrees
+            // is not recommended.
+            flat_wall_cos2_ = std::abs(cosa) * cosa;
+        }
+        else
+        {
+            flat_wall_cos2_ = -1;
+        }
     }
 
     bool render_back_side() const
@@ -165,6 +192,35 @@ public:
     }
 
 private:
+
+    bool is_flat_wall(double ax, double ay, double bx, double by,
+                      double cx, double cy) const
+    {
+        // less than `stroke-width` pixels away from the previous corner;
+        // use the points' Euclidean distance, not just delta-x, because
+        // slight overlap at east||west-facing wall corners is desirable
+        double ux = bx - ax;
+        double uy = by - ay;
+        double u2 = ux * ux + uy * uy;
+        if (u2 < stroke_width * stroke_width)
+            return true;
+
+        // less than 1/16 of a pixel away from the next joint (E. distance)
+        // is too close for the angle to be reliable, could just be jittery
+        // geometry;
+        // so if such a short segment also starts less than `stroke-width`
+        // away from the previous corner (measuring only delta-x to prevent
+        // stroke overlap), assume zero deflection
+        double vx = cx - bx;
+        double vy = cy - by;
+        double v2 = vx * vx + vy * vy;
+        if (v2 < 1.0 / (16 * 16) && std::abs(ux) < stroke_width)
+            return true;
+
+        // true if deflection angle is within flat wall tolerance
+        double dot = ux * vx + uy * vy;
+        return std::abs(dot) * dot >= u2 * v2 * flat_wall_cos2_;
+    }
 
     bool is_visible(int orientation) const
     {
@@ -360,6 +416,54 @@ private:
         if (is_visible(orientation))
         {
             paint_wall_faces(begin1, end1, begin2, end2, painter);
+            paint_wall_edges(begin1, end1, begin2, end2, painter);
+        }
+    }
+
+    template <typename Context>
+    void paint_wall_edge(double x, double y, Context & painter) const
+    {
+        painter.stroke_from(x, y);
+        painter.stroke_to(x, y + height_);
+        painter.stroke();
+    }
+
+    template <typename Context>
+    void paint_wall_edges(size_t begin1, size_t end1,
+                          size_t begin2, size_t end2,
+                          Context & painter) const
+    {
+        if (begin1 >= end1 || flat_wall_cos2_ <= -1)
+            return;
+
+        double x, y;
+        roof_vertices_->get_vertex(begin1, &x, &y);
+        x = std::floor(x) + 0.5; // snap to pixel center
+
+        double x0 = x, y0 = y; // last vertex
+        double x1 = x, y1 = y; // last stroked joint
+
+        for (size_t i = begin1; ++i < end1; )
+        {
+            roof_vertices_->get_vertex(i, &x, &y);
+            x = std::floor(x) + 0.5; // snap to pixel center
+            if (!is_flat_wall(x1, y1, x0, y0, x, y))
+            {
+                paint_wall_edge(x1 = x0, y1 = y0, painter);
+            }
+            x0 = x;
+            y0 = y;
+        }
+        for (size_t i = begin2; i < end2; ++i)
+        {
+            roof_vertices_->get_vertex(i, &x, &y);
+            x = std::floor(x) + 0.5; // snap to pixel center
+            if (!is_flat_wall(x1, y1, x0, y0, x, y))
+            {
+                paint_wall_edge(x1 = x0, y1 = y0, painter);
+            }
+            x0 = x;
+            y0 = y;
         }
     }
 

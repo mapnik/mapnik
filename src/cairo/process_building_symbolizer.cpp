@@ -79,7 +79,15 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
     context_.set_line_join(ROUND_JOIN);
 
     rebus.setup_colors(sym, feature);
-    rebus.render_back_side(rebus.has_transparent_fill());
+    if (rebus.has_transparent_walls())
+    {
+        rebus.render_back_side(true);
+    }
+    else
+    {
+        rebus.render_back_side(rebus.has_transparent_roof());
+        rebus.flat_wall_tolerance(181);
+    }
     rebus.apply(feature, prj_trans, ctx);
 }
 

@@ -90,6 +90,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     ctx.set_feature(feature.id());
 
     rebus.render_back_side(false);
+    rebus.flat_wall_tolerance(181);
     rebus.apply(feature, prj_trans, ctx);
 
     pixmap_.add_feature(feature);
