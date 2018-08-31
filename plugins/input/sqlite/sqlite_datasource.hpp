@@ -62,7 +62,7 @@ private:
     // Fill init_statements with any statements
     // needed to attach auxillary databases
     void parse_attachdb(std::string const& attachdb) const;
-    std::string populate_tokens(std::string const& sql) const;
+    std::string populate_tokens(std::string const& sql, double pixel_width, double pixel_height) const;
 
     mapnik::box2d<double> extent_;
     bool extent_initialized_;
@@ -80,6 +80,8 @@ private:
     mapnik::value_integer row_limit_;
     // TODO - also add to postgis.input
     const std::string intersects_token_;
+    const std::string pixel_width_token_;
+    const std::string pixel_height_token_;
     mapnik::layer_descriptor desc_;
     mapnik::wkbFormat format_;
     bool twkb_encoding_;
