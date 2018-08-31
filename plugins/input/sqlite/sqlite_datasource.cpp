@@ -67,6 +67,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
       row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       intersects_token_("!intersects!"),
+      pixel_width_token_("!pixel_width!"),
+      pixel_height_token_("!pixel_height!"),
       desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
       format_(mapnik::wkbAuto),
       twkb_encoding_(false)
@@ -217,7 +219,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     if (using_subquery_)
     {
         std::ostringstream s;
-        std::string query = populate_tokens(table_);
+        std::string query = populate_tokens(table_, 0, 0);
         s << "SELECT " << fields_ << " FROM (" << query << ") LIMIT 1";
         found_types_via_subquery = sqlite_utils::detect_types_from_subquery(
             s.str(),
@@ -339,7 +341,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(detect_extent)");
 #endif
         // TODO - clean this up - reducing arguments
-        std::string query = populate_tokens(table_);
+        std::string query = populate_tokens(table_, 0, 0);
         if (!sqlite_utils::detect_extent(dataset_,
                                          has_spatial_index_,
                                          extent_,
@@ -362,13 +364,25 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
 
 }
 
-std::string sqlite_datasource::populate_tokens(std::string const& sql) const
+std::string sqlite_datasource::populate_tokens(std::string const& sql, double pixel_width, double pixel_height) const
 {
     std::string populated_sql = sql;
     if (boost::algorithm::ifind_first(populated_sql, intersects_token_))
     {
         // replace with dummy comparison that is true
         boost::algorithm::ireplace_first(populated_sql, intersects_token_, "1=1");
+    }
+    if (boost::algorithm::icontains(sql, pixel_width_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_width;
+        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
+    }
+     if (boost::algorithm::icontains(sql, pixel_height_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_height;
+        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
     }
     return populated_sql;
 }
@@ -496,6 +510,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         mapnik::box2d<double> const& e = q.get_bbox();
 
         std::ostringstream s;
+
+        const double px_gw = 1.0 / std::get<0>(q.resolution());
+        const double px_gh = 1.0 / std::get<1>(q.resolution());
+
         mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         s << "SELECT " << geometry_field_;
@@ -530,10 +548,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
                                                geometry_table_,
                                                intersects_token_);
         }
-        else
-        {
-            query = populate_tokens(table_);
-        }
+
+        query = populate_tokens(query, px_gw, px_gh);
 
         s << query ;
 
@@ -611,10 +627,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
                                                geometry_table_,
                                                intersects_token_);
         }
-        else
-        {
-            query = populate_tokens(table_);
-        }
+
+        query = populate_tokens(query, 0, 0);
 
         s << query ;
 
