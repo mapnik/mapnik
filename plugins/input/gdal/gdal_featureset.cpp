@@ -204,8 +204,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     // resolution is 1 / requested pixel size
     const double width_res = std::get<0>(q.resolution());
     const double height_res = std::get<1>(q.resolution());
-    int im_width = int(width_res * intersect.width() + 0.5);
-    int im_height = int(height_res * intersect.height() + 0.5);
+    int im_width = int(width_res * intersect.width() * filter_factor + 0.5);
+    int im_height = int(height_res * intersect.height() * filter_factor + 0.5);
 
     //calculate actual box2d of returned raster
     box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
