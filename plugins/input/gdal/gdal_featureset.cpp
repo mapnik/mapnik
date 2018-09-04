@@ -89,8 +89,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  double dx,
                                  double dy,
                                  boost::optional<double> const& nodata,
-                                 double nodata_tolerance,
-                                 int64_t max_image_area)
+                                 double nodata_tolerance)
     : dataset_(dataset),
       ctx_(std::make_shared<mapnik::context_type>()),
       band_(band),
@@ -103,7 +102,6 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       nbands_(nbands),
       nodata_value_(nodata),
       nodata_tolerance_(nodata_tolerance),
-      max_image_area_(max_image_area),
       first_(true)
 {
     ctx_->push("nodata");
