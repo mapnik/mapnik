@@ -292,6 +292,12 @@ void cairo_context::stroke()
     check_object_status_and_throw_exception(*this);
 }
 
+void cairo_context::stroke_preserve()
+{
+    cairo_stroke_preserve(cairo_.get());
+    check_object_status_and_throw_exception(*this);
+}
+
 void cairo_context::fill()
 {
     cairo_fill(cairo_.get());

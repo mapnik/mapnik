@@ -93,6 +93,8 @@ enum class keys : std::uint8_t
     avoid_edges,
     ff_settings,
     extend,
+    wall_fill,
+    base_stroke,
     MAX_SYMBOLIZER_KEY
 };
 
