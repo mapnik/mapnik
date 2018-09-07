@@ -79,12 +79,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       use_overviews_(*params.get<mapnik::boolean_type>("use_overviews", false)),
       clip_rasters_(*params.get<mapnik::boolean_type>("clip_rasters", false)),
       desc_(*params.get<std::string>("type"), "utf-8"),
-      creator_(params.get<std::string>("host"),
-             params.get<std::string>("port"),
-             params.get<std::string>("dbname"),
-             params.get<std::string>("user"),
-             params.get<std::string>("password"),
-             params.get<std::string>("connect_timeout", "4")),
+      creator_(params),
       re_tokens_("!(@?\\w+)!"), // matches  !mapnik_var!  or  !@user_var!
       pool_max_size_(*params_.get<value_integer>("max_size", 10)),
       persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
