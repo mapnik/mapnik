@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
+#include <mapnik/cairo/render_polygon_pattern.hpp>
 #include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/vertex_processor.hpp>
@@ -38,13 +39,16 @@
 namespace mapnik
 {
 
-struct cairo_renderer_process_visitor_l
+namespace
 {
-    cairo_renderer_process_visitor_l(renderer_common const& common,
-                                   line_pattern_symbolizer const& sym,
-                                   mapnik::feature_impl & feature,
-                                   std::size_t & width,
-                                   std::size_t & height)
+
+struct prepare_pattern_visitor
+{
+    prepare_pattern_visitor(renderer_common const& common,
+                            symbolizer_base const& sym,
+                            feature_impl const& feature,
+                            std::size_t & width,
+                            std::size_t & height)
         : common_(common),
           sym_(sym),
           feature_(feature),
@@ -79,86 +83,156 @@ struct cairo_renderer_process_visitor_l
 
   private:
     renderer_common const& common_;
-    line_pattern_symbolizer const& sym_;
-    mapnik::feature_impl & feature_;
+    symbolizer_base const& sym_;
+    feature_impl const& feature_;
     std::size_t & width_;
     std::size_t & height_;
 };
 
+template <typename... Converters>
+using vertex_converter_type = vertex_converter<clip_line_tag,
+                                               transform_tag,
+                                               affine_transform_tag,
+                                               simplify_tag,
+                                               smooth_tag,
+                                               offset_transform_tag,
+                                               Converters...>;
+
+struct warp_pattern : cairo_pattern_base
+{
+    using vc_type = vertex_converter_type<>;
+
+    warp_pattern(mapnik::marker const& marker,
+                 renderer_common const& common,
+                 symbolizer_base const& sym,
+                 mapnik::feature_impl const& feature,
+                 proj_transform const& prj_trans)
+        : cairo_pattern_base{marker, common, sym, feature, prj_trans},
+          clip_(get<value_bool, keys::clip>(sym, feature, common.vars_)),
+          offset_(get<value_double, keys::offset>(sym, feature, common.vars_)),
+          clip_box_(clipping_extent(common)),
+          tr_(geom_transform()),
+          converter_(clip_box_, sym, common.t_, prj_trans, tr_,
+                     feature, common.vars_, common.scale_factor_)
+    {
+        value_double offset = get<value_double, keys::offset>(sym, feature, common.vars_);
+        value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common.vars_);
+        value_double smooth = get<value_double, keys::smooth>(sym, feature, common.vars_);
+
+        if (std::fabs(offset) > 0.0) converter_.template set<offset_transform_tag>();
+        converter_.template set<affine_transform_tag>();
+        if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>();
+        if (smooth > 0.0) converter_.template set<smooth_tag>();
+        if (clip_) converter_.template set<clip_line_tag>();
+    }
+
+    box2d<double> clip_box() const
+    {
+        box2d<double> clipping_extent = common_.query_extent_;
+        if (clip_)
+        {
+            double pad_per_pixel = static_cast<double>(common_.query_extent_.width() / common_.width_);
+            double pixels = std::ceil(std::max(marker_.width() / 2.0 + std::fabs(offset_),
+                                              (std::fabs(offset_) * offset_converter_default_threshold)));
+            double padding = pad_per_pixel * pixels * common_.scale_factor_;
+
+            clipping_extent.pad(padding);
+        }
+        return clipping_extent;
+    }
+
+    void render(cairo_context & context)
+    {
+        std::size_t width = marker_.width();
+        std::size_t height = marker_.height();
+
+        // TODO - re-implement at renderer level like polygon_pattern symbolizer
+        prepare_pattern_visitor visit(common_, sym_, feature_, width, height);
+        std::shared_ptr<cairo_pattern> pattern = util::apply_visitor(visit, marker_);
+        pattern->set_extend(CAIRO_EXTEND_REPEAT);
+        pattern->set_filter(CAIRO_FILTER_BILINEAR);
+
+        composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym_, feature_, common_.vars_);
+
+        cairo_save_restore guard(context);
+        context.set_operator(comp_op);
+        context.set_line_width(height);
+
+        using rasterizer_type = line_pattern_rasterizer<cairo_context>;
+        rasterizer_type ras(context, *pattern, width, height);
+
+        using apply_vertex_converter_type = detail::apply_vertex_converter<
+            vc_type, rasterizer_type>;
+        using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
+        apply_vertex_converter_type apply(converter_, ras);
+        mapnik::util::apply_visitor(vertex_processor_type(apply), feature_.get_geometry());
+    }
+
+    const bool clip_;
+    const double offset_;
+    const box2d<double> clip_box_;
+    const agg::trans_affine tr_;
+    vc_type converter_;
+};
+
+using repeat_pattern_base = cairo_polygon_pattern<vertex_converter_type<dash_tag,
+                                                                        stroke_tag>>;
+
+struct repeat_pattern : repeat_pattern_base
+{
+    using repeat_pattern_base::cairo_polygon_pattern;
+
+    void render(cairo_context & context)
+    {
+        if (has_key(sym_, keys::stroke_dasharray))
+        {
+            converter_.template set<dash_tag>();
+        }
+
+        if (clip_) converter_.template set<clip_line_tag>();
+
+        value_double offset = get<value_double, keys::offset>(sym_, feature_, common_.vars_);
+        if (std::fabs(offset) > 0.0) converter_.template set<offset_transform_tag>();
+
+        repeat_pattern_base::render(CAIRO_FILL_RULE_WINDING, context);
+    }
+};
+
+}
+
 template <typename T>
 void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                feature_impl & feature,
+                                proj_transform const& prj_trans)
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
-    composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
-    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
-    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
-    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
-    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
+    std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
 
-    if (filename.empty())
+    if (marker->is<mapnik::marker_null>())
     {
         return;
     }
 
-    std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
-
-    if (marker->is<mapnik::marker_null>()) return;
-
-    std::size_t width = marker->width();
-    std::size_t height = marker->height();
-
-    cairo_save_restore guard(context_);
-    context_.set_operator(comp_op);
-    // TODO - re-implement at renderer level like polygon_pattern symbolizer
-    cairo_renderer_process_visitor_l visit(common_,
-                                           sym,
-                                           feature,
-                                           width,
-                                           height);
-    std::shared_ptr<cairo_pattern> pattern = util::apply_visitor(visit, *marker);
-
-    context_.set_line_width(height);
-
-    pattern->set_extend(CAIRO_EXTEND_REPEAT);
-    pattern->set_filter(CAIRO_FILTER_BILINEAR);
-
-    agg::trans_affine tr;
-    auto geom_transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (geom_transform) { evaluate_transform(tr, feature, common_.vars_, *geom_transform, common_.scale_factor_); }
-
-    box2d<double> clipping_extent = common_.query_extent_;
-    if (clip)
+    line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
+    switch (pattern)
     {
-        double pad_per_pixel = static_cast<double>(common_.query_extent_.width()/common_.width_);
-        double pixels = std::ceil(std::max(width / 2.0 + std::fabs(offset),
-                                          (std::fabs(offset) * offset_converter_default_threshold)));
-        double padding = pad_per_pixel * pixels * common_.scale_factor_;
-
-        clipping_extent.pad(padding);
+        case LINE_PATTERN_WARP:
+        {
+            warp_pattern pattern(*marker, common_, sym, feature, prj_trans);
+            pattern.render(context_);
+            break;
+        }
+        case LINE_PATTERN_REPEAT:
+        {
+            repeat_pattern pattern(*marker, common_, sym, feature, prj_trans);
+            pattern.render(context_);
+            break;
+        }
+        case line_pattern_enum_MAX:
+        default:
+            MAPNIK_LOG_ERROR(process_line_pattern_symbolizer) << "Incorrect line-pattern value.";
     }
 
-    using rasterizer_type = line_pattern_rasterizer<cairo_context>;
-    rasterizer_type ras(context_, *pattern, width, height);
-    using vertex_converter_type = vertex_converter<clip_line_tag, transform_tag,
-                                                   affine_transform_tag,
-                                                   simplify_tag, smooth_tag,
-                                                   offset_transform_tag>;
-
-    vertex_converter_type converter(clipping_extent,sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
-
-    if (clip) converter.set<clip_line_tag>();
-    converter.set<transform_tag>(); // always transform
-    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
-    converter.set<affine_transform_tag>(); // optional affine transform
-    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
-    using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
-    using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
-    apply_vertex_converter_type apply(converter, ras);
-    mapnik::util::apply_visitor(vertex_processor_type(apply), feature.get_geometry());
 }
 
 template void cairo_renderer<cairo_ptr>::process(line_pattern_symbolizer const&,
