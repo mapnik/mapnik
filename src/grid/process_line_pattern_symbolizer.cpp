@@ -85,7 +85,9 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    std::size_t stroke_width = mark->width();
+    line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
+    std::size_t stroke_width = (pattern == LINE_PATTERN_WARP) ? mark->width() :
+        get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
