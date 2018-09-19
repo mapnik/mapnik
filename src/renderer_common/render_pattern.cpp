@@ -41,8 +41,7 @@
 namespace mapnik {
 
 template <>
-void render_pattern<image_rgba8>(rasterizer & ras,
-                                 marker_svg const& marker,
+void render_pattern<image_rgba8>(marker_svg const& marker,
                                  agg::trans_affine const& tr,
                                  double opacity,
                                  image_rgba8 & image)
@@ -62,13 +61,13 @@ void render_pattern<image_rgba8>(rasterizer & ras,
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
-    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
-    mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
-                                  agg::pod_bvector<mapnik::svg::path_attributes>,
-                                  renderer_solid,
-                                  pixfmt > svg_renderer(svg_path,
-                                                        marker.get_data()->attributes());
+    svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(marker.get_data()->source());
+    svg_path_adapter svg_path(stl_storage);
+    svg::svg_renderer_agg<svg_path_adapter,
+                          svg_attribute_type,
+                          renderer_solid,
+                          pixfmt> svg_renderer(svg_path, marker.get_data()->attributes());
+    rasterizer ras;
 
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
 }

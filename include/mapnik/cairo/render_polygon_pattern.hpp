@@ -52,10 +52,9 @@ struct cairo_renderer_process_visitor_p
 
     void operator() (marker_svg const& marker)
     {
-        mapnik::rasterizer ras;
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr_;
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
-        render_pattern<image_rgba8>(ras, marker, image_tr_, 1.0, image);
+        render_pattern<image_rgba8>(marker, image_tr_, 1.0, image);
         cairo_pattern pattern(image, opacity_);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
         pattern.set_origin(offset_x_, offset_y_);

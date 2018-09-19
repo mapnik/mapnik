@@ -38,8 +38,7 @@ struct rasterizer;
 struct marker_svg;
 
 template <typename T>
-void render_pattern(rasterizer & ras,
-                    marker_svg const& marker,
+void render_pattern(marker_svg const& marker,
                     agg::trans_affine const& tr,
                     double opacity,
                     T & image);
