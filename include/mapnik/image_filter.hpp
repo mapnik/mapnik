@@ -52,6 +52,14 @@
 // stl
 #include <cmath>
 
+#if BOOST_VERSION >= 106800
+namespace boost {
+namespace gil {
+    using bits32f = boost::gil::float32_t;
+}
+}
+#endif
+
 // 8-bit YUV
 //Y = ( (  66 * R + 129 * G +  25 * B + 128) >> 8) +  16
 //U = ( ( -38 * R -  74 * G + 112 * B + 128) >> 8) + 128

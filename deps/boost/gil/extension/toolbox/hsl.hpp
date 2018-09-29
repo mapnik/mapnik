@@ -48,8 +48,12 @@ typedef mpl::vector3< hsl_color_space::hue_t
 /// \ingroup LayoutModel
 typedef layout<hsl_t> hsl_layout_t;
 
-
+#if BOOST_VERSION >= 106800
+using bits32f = boost::gil::float32_t;
+GIL_DEFINE_ALL_TYPEDEFS( 32f, float32_t, hsl );
+#else
 GIL_DEFINE_ALL_TYPEDEFS( 32f, hsl );
+#endif
 
 /// \ingroup ColorConvert
 /// \brief RGB to HSL
