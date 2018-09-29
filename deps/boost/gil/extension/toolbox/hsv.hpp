@@ -44,7 +44,13 @@ typedef mpl::vector3< hsv_color_space::hue_t
 typedef layout<hsv_t> hsv_layout_t;
 
 
-GIL_DEFINE_ALL_TYPEDEFS( 32f, hsv )
+#if BOOST_VERSION >= 106800
+using bits32 = uint32_t;
+using bits32f = float32_t;
+GIL_DEFINE_ALL_TYPEDEFS( 32f, float32_t, hsv )
+#else
+GIL_DEFINE_ALL_TYPEDEFS( 32f, hsv );
+#endif
 
 /// \ingroup ColorConvert
 /// \brief RGB to HSV
