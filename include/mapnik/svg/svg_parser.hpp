@@ -74,6 +74,7 @@ public:
     svg_converter_type & path_;
     bool is_defs_;
     bool strict_;
+    bool ignore_;
     std::map<std::string, gradient> gradient_map_;
     std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> node_cache_;
     agg::trans_affine viewbox_tr_{};

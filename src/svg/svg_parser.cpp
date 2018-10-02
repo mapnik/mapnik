@@ -103,17 +103,17 @@ void parse_attr(svg_parser& parser, char const* name, char const* value);
 
 namespace {
 
-static std::array<unsigned, 7> const unsupported_elements
+static std::array<unsigned, 8> const unsupported_elements
 { {name_to_int("symbol"),
    name_to_int("marker"),
    name_to_int("view"),
    name_to_int("text"),
    name_to_int("switch"),
    name_to_int("image"),
-   name_to_int("a")}
+   name_to_int("a"),
+   name_to_int("clipPath")}
 };
 
-#if 0 // disable to reduce verbosity
 static std::array<unsigned, 43> const unsupported_attributes
 { {name_to_int("alignment-baseline"),
    name_to_int("baseline-shift"),
@@ -159,17 +159,19 @@ static std::array<unsigned, 43> const unsupported_attributes
    name_to_int("writing-mode")}
 };
 
-#endif
-
 template <typename T>
-void handle_unsupported(svg_parser& parser, T const& ar, char const* name)
+void handle_unsupported(svg_parser& parser, T const& ar, char const* name, char const* type)
 {
     unsigned element = name_to_int(name);
     for (auto const& e : ar)
     {
         if (e == element)
         {
-            parser.err_handler().on_error(std::string("SVG support error: <" + std::string(name) + "> element is not supported"));
+            parser.err_handler().on_error(std::string("SVG support error: <"
+                                                      + std::string(name)
+                                                      + "> "
+                                                      + std::string(type)
+                                                      +" is not supported"));
         }
     }
 }
@@ -383,6 +385,7 @@ std::pair<unsigned,bool> parse_preserve_aspect_ratio(T & err_handler, char const
 
 void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
+    if (parser.ignore_) return;
     auto const* name = node->name();
     switch (node->type())
     {
@@ -398,6 +401,11 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             }
             break;
         }
+        case name_to_int("clipPath"):
+        {
+            parser.ignore_ = true;
+            break;
+        }
         // the gradient tags *should* be in defs, but illustrator seems not to put them in there so
         // accept them anywhere
         case name_to_int("linearGradient"):
@@ -407,8 +415,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parse_radial_gradient(parser, node);
             break;
         case name_to_int("symbol"):
-            parse_id(parser, node);
-            //parse_dimensions(parser, node);
+            parser.ignore_ = true;
             break;
         }
 
@@ -490,13 +497,21 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parser.path_.pop_attr();
         }
     }
-    else if (std::strcmp(name,  "defs") == 0)
+    else if (std::strcmp(name, "defs") == 0)
     {
         if (node->first_node() != nullptr)
         {
             parser.is_defs_ = false;
         }
     }
+    else if(std::strcmp(name, "clipPath") == 0)
+    {
+        parser.ignore_ = false;
+    }
+    else if(std::strcmp(name,"symbol") == 0)
+    {
+        parser.ignore_ = false;
+}
 }
 
 void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<char> const* node)
@@ -535,7 +550,7 @@ void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<cha
         parse_dimensions(parser, node);
         break;
     default:
-        handle_unsupported(parser, unsupported_elements, name);
+        handle_unsupported(parser, unsupported_elements, name, "element");
         break;
     }
 }
@@ -709,8 +724,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         }
         break;
     default:
-        //handle_unsupported(parser, unsupported_attributes, name);
-        // disable for now to reduce verbosity
+        handle_unsupported(parser, unsupported_attributes, name, "attribute");
         break;
     }
 }
@@ -1429,6 +1443,7 @@ svg_parser::svg_parser(svg_converter<svg_path_adapter,
                        agg::pod_bvector<mapnik::svg::path_attributes> > & path, bool strict)
     : path_(path),
       is_defs_(false),
+      ignore_(false),
       err_handler_(strict) {}
 
 svg_parser::~svg_parser() {}
