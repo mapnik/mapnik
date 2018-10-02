@@ -113,7 +113,6 @@ static std::array<unsigned, 7> const unsupported_elements
    "a"_case}
 };
 
-#if 0 // disable to reduce verbosity
 static std::array<unsigned, 43> const unsupported_attributes
 { {"alignment-baseline"_case,
    "baseline-shift"_case,
@@ -159,17 +158,19 @@ static std::array<unsigned, 43> const unsupported_attributes
    "writing-mode"_case}
 };
 
-#endif
-
 template <typename T>
-void handle_unsupported(svg_parser& parser, T const& ar, char const* name)
+void handle_unsupported(svg_parser& parser, T const& ar, char const* name, char const* type)
 {
     unsigned element = name_to_int(name);
     for (auto const& e : ar)
     {
         if (e == element)
         {
-            parser.err_handler().on_error(std::string("SVG support error: <" + std::string(name) + "> element is not supported"));
+            parser.err_handler().on_error(std::string("SVG support error: <"
+                                                      + std::string(name)
+                                                      + "> "
+                                                      + std::string(type)
+                                                      + " is not supported"));
         }
     }
 }
@@ -398,8 +399,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parse_radial_gradient(parser, node);
             break;
         case "symbol"_case:
-            parse_id(parser, node);
-            //parse_dimensions(parser, node);
+            parser.ignore_ = true;
             break;
         }
 
@@ -492,6 +492,10 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
     {
         parser.ignore_ = false;
     }
+    else if(name == "symbol"_case)
+    {
+        parser.ignore_ = false;
+    }
 }
 
 void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<char> const* node)
@@ -530,7 +534,7 @@ void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<cha
         parse_dimensions(parser, node);
         break;
     default:
-        handle_unsupported(parser, unsupported_elements, name);
+        handle_unsupported(parser, unsupported_elements, name, "element");
         break;
     }
 }
@@ -704,8 +708,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         }
         break;
     default:
-        //handle_unsupported(parser, unsupported_attributes, name);
-        // disable for now to reduce verbosity
+        handle_unsupported(parser, unsupported_attributes, name, "attribute");
         break;
     }
 }
