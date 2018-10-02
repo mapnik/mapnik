@@ -50,7 +50,6 @@ svg_points_grammar<Iterator, PathType,SkipType>::svg_points_grammar()
     // commands
     function<move_to> move_to_;
     function<line_to> line_to_;
-    function<close> close_;
 
     start = coord[move_to_(_r1, _1, false)] // move_to
         >> *(-lit(',') >> coord [ line_to_(_r1, _1,false) ] ); // *line_to
