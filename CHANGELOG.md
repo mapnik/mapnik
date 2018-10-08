@@ -7,12 +7,17 @@ Developers: Please commit along with changes.
 For a complete change history, see the git log.
 
 
-## UNRELEASED
+## 3.0.21
+
+Released: October 8, 2018
+
+(Packaged from 1dbb1d2c1)
 
 #### Core
 
 - Fixed compilation with ICU >= 61 (#3963)
 - Fixed bbox reprojection (#3940)
+- SVG: enabled unsupported attributes handling
 
 #### Plugins
 
