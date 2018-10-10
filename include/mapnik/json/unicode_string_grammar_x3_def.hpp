@@ -41,7 +41,7 @@ auto append = [](auto const& ctx)
 
 namespace detail {
 
-void push_utf8_impl(std::string & str, uchar code_point)
+static void push_utf8_impl(std::string & str, uchar code_point)
 {
     using insert_iterator = std::back_insert_iterator<std::string>;
     insert_iterator iter(str);
@@ -117,25 +117,25 @@ x3::rule<class escaped_tag, std::string> const escaped("Escaped Character");
 x3::rule<class escaped_unicode_tag, std::string> const escaped_unicode("Escaped Unicode code point(s)");
 x3::rule<class utf16_string_tag, std::vector<std::uint16_t>> const utf16_string("UTF16 encoded string");
 
-auto unicode_string_def = double_quoted
+static auto unicode_string_def = double_quoted
     ;
-auto utf16_string_def = lit('u') > hex4 > *(lit("\\u") > hex4)
+static auto utf16_string_def = lit('u') > hex4 > *(lit("\\u") > hex4)
     ;
-auto escaped_unicode_def =
+static auto escaped_unicode_def =
     (lit('x') > hex2[push_char])
     |
     utf16_string[push_utf16]
     |
     (lit('U') > hex8[push_utf8])
     ;
-auto const escaped_def = lit('\\') >
+static auto const escaped_def = lit('\\') >
     (escaped_unicode[append]
      |
      char_("0abtnvfre\"/\\N_LP \t")[push_esc]
      |
      eol) // continue to next line
     ;
-auto const double_quoted_def = lit('"') > no_skip[*(escaped[append] | (~char_('"'))[append])] > lit('"');
+static auto const double_quoted_def = lit('"') > no_skip[*(escaped[append] | (~char_('"'))[append])] > lit('"');
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
