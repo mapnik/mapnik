@@ -103,14 +103,15 @@ void parse_attr(svg_parser& parser, char const* name, char const* value);
 
 namespace {
 
-static std::array<unsigned, 7> const unsupported_elements
+static std::array<unsigned, 8> const unsupported_elements
 { {"symbol"_case,
    "marker"_case,
    "view"_case,
    "text"_case,
    "switch"_case,
    "image"_case,
-   "a"_case}
+   "a"_case,
+   "clipPath"_case}
 };
 
 static std::array<unsigned, 43> const unsupported_attributes
