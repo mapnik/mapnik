@@ -369,6 +369,13 @@ struct symbolizer_default<value_bool, keys::avoid_edges>
 
 // font-feature-settings
 
+// line-pattern
+template <>
+struct symbolizer_default<line_pattern_enum, keys::line_pattern>
+{
+    static line_pattern_enum value() { return LINE_PATTERN_WARP; }
+};
+
 } // namespace mapnik
 
 #endif // MAPNIK_SYMBOLIZER_DEFAULT_VALUES_HPP

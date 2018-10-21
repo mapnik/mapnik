@@ -25,6 +25,13 @@
 #define MAPNIK_PATTERN_ALIGNMENT_HPP
 
 #include <mapnik/geometry.hpp>
+#include <mapnik/vertex_adapters.hpp>
+#include <mapnik/transform_path_adapter.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
+#include "agg_conv_clip_polygon.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace detail {
 

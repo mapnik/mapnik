@@ -204,4 +204,12 @@ static const char * gamma_method_strings[] = {
 
 IMPLEMENT_ENUM( gamma_method_e, gamma_method_strings )
 
+static const char * line_pattern_strings[] = {
+    "warp",
+    "repeat",
+    ""
+};
+
+IMPLEMENT_ENUM( line_pattern_e, line_pattern_strings )
+
 } // namespace mapnik
