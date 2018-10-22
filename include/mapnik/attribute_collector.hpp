@@ -161,8 +161,10 @@ private:
 struct symbolizer_attributes
 {
     symbolizer_attributes(std::set<std::string>& names,
-                          double & filter_factor)
+                          double & filter_factor,
+                          scaling_method_e & method_)
         : filter_factor_(filter_factor),
+          method_(method_),
           f_attrs_(names),
           g_attrs_(names, true) {}
 
@@ -190,8 +192,13 @@ struct symbolizer_attributes
                 filter_factor_ = 2;
             }
         }
+
+        boost::optional<scaling_method_e> scaling_method = get_optional<scaling_method_e>(sym, keys::scaling);
+        method_ = scaling_method.get_value_or(SCALING_NEAR);
+
         for (auto const& prop : sym.properties)
         {
+
             util::apply_visitor(f_attrs_, prop.second);
         }
     }
@@ -203,6 +210,7 @@ struct symbolizer_attributes
 
 private:
     double & filter_factor_;
+    scaling_method_e & method_;
     extract_attribute_names<std::set<std::string> > f_attrs_;
     group_attribute_collector g_attrs_;
 };
@@ -213,18 +221,21 @@ class attribute_collector : public util::noncopyable
 private:
     std::set<std::string> & names_;
     double filter_factor_;
+    scaling_method_e method_;
     expression_attributes<std::set<std::string> > f_attr;
 public:
 
     attribute_collector(std::set<std::string>& names)
         : names_(names),
           filter_factor_(1.0),
+          method_(SCALING_NEAR),
           f_attr(names) {}
     template <typename RuleType>
     void operator() (RuleType const& r)
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
-        symbolizer_attributes s_attr(names_,filter_factor_);
+        symbolizer_attributes s_attr(names_,filter_factor_,method_);
+
         for (auto const& sym : symbols)
         {
             util::apply_visitor(std::ref(s_attr), sym);
@@ -237,6 +248,11 @@ public:
     double get_filter_factor() const
     {
         return filter_factor_;
+    }
+
+    scaling_method_e get_scaling_method() const
+    {
+        return method_;
     }
 };
 
