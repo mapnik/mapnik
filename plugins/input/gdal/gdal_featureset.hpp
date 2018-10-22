@@ -30,6 +30,9 @@
 // boost
 #include <boost/optional.hpp>
 
+// gdal
+#include <gdal_priv.h>
+
 class GDALDataset;
 class GDALRasterBand;
 
@@ -73,6 +76,7 @@ public:
 private:
     mapnik::feature_ptr get_feature(mapnik::query const& q);
     mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
+    GDALRIOResampleAlg get_gdal_resample_alg(mapnik::scaling_method_e mapnik_scaling_method);
     GDALDataset & dataset_;
     mapnik::context_ptr ctx_;
     int band_;
