@@ -97,13 +97,11 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     box2d<double> clipping_extent = common_.query_extent_;
     if (clip)
     {
-        double padding = (double)(common_.query_extent_.width()/pixmap_.width());
-        double half_stroke = stroke_width/2.0;
-        if (half_stroke > 1)
-            padding *= half_stroke;
-        if (std::fabs(offset) > 0)
-            padding *= std::fabs(offset) * 1.2;
-        padding *= common_.scale_factor_;
+        double pad_per_pixel = static_cast<double>(common_.query_extent_.width()/common_.width_);
+        double pixels = std::ceil(std::max(stroke_width / 2.0 + std::fabs(offset),
+                                          (std::fabs(offset) * offset_converter_default_threshold)));
+        double padding = pad_per_pixel * pixels * common_.scale_factor_;
+
         clipping_extent.pad(padding);
     }
 
