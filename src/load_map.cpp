@@ -1056,6 +1056,13 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & nod
         set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
         set_symbolizer_property<symbolizer_base,transform_type>(sym, keys::image_transform, node);
+        set_symbolizer_property<symbolizer_base,value_double>(sym, keys::stroke_miterlimit, node);
+        set_symbolizer_property<symbolizer_base,value_double>(sym, keys::stroke_width, node);
+        set_symbolizer_property<symbolizer_base,line_join_enum>(sym, keys::stroke_linejoin, node);
+        set_symbolizer_property<symbolizer_base,line_cap_enum>(sym, keys::stroke_linecap, node);
+        set_symbolizer_property<symbolizer_base,dash_array>(sym, keys::stroke_dasharray, node);
+        set_symbolizer_property<symbolizer_base,line_pattern_enum>(sym, keys::line_pattern, node);
+        set_symbolizer_property<symbolizer_base,pattern_alignment_enum>(sym, keys::alignment, node);
         rule.append(std::move(sym));
     }
     catch (config_error const& ex)
