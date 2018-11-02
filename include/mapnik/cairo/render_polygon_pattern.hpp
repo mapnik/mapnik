@@ -27,40 +27,92 @@
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/renderer_common/pattern_alignment.hpp>
-#include <mapnik/renderer_common/render_pattern.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
-#include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/cairo/cairo_render_vector.hpp>
 #include <mapnik/marker.hpp>
 
 namespace mapnik {
 
 struct cairo_renderer_process_visitor_p
 {
-    cairo_renderer_process_visitor_p(agg::trans_affine & image_tr)
-        : image_tr_(image_tr)
+    cairo_renderer_process_visitor_p(agg::trans_affine const& image_tr,
+                                     double opacity)
+        : image_tr_(image_tr),
+          opacity_(opacity)
     {}
 
-    image_rgba8 operator() (marker_null const&)
+    cairo_surface_ptr operator()(marker_svg const & marker) const
     {
-        return image_rgba8();
+        box2d<double> bbox(marker.bounding_box());
+        agg::trans_affine tr(transform(bbox));
+
+        double width = std::max(1.0, std::round(bbox.width()));
+        double height = std::max(1.0, std::round(bbox.height()));
+        cairo_rectangle_t extent { 0, 0, width, height };
+        cairo_surface_ptr surface(
+            cairo_recording_surface_create(
+                CAIRO_CONTENT_COLOR_ALPHA, &extent),
+            cairo_surface_closer());
+
+        cairo_ptr cairo = create_context(surface);
+        cairo_context context(cairo);
+
+        svg_storage_type & svg = *marker.get_data();
+        svg_attribute_type const& svg_attributes = svg.attributes();
+        svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(
+            svg.source());
+        svg::svg_path_adapter svg_path(stl_storage);
+
+        render_vector_marker(context, svg_path, svg_attributes,
+            bbox, tr, opacity_);
+
+        return surface;
     }
 
-    image_rgba8 operator() (marker_svg const& marker)
+    cairo_surface_ptr operator()(marker_rgba8 const& marker) const
     {
-        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr_;
-        mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
-        render_pattern<image_rgba8>(marker, image_tr_, 1.0, image);
-        return image;
+        box2d<double> bbox(marker.bounding_box());
+        agg::trans_affine tr(transform(bbox));
+
+        cairo_rectangle_t extent { 0, 0, bbox.width(), bbox.height() };
+        cairo_surface_ptr surface(
+            cairo_recording_surface_create(
+                CAIRO_CONTENT_COLOR_ALPHA, &extent),
+            cairo_surface_closer());
+
+        cairo_ptr cairo = create_context(surface);
+        cairo_context context(cairo);
+
+        context.add_image(tr, marker.get_data(), opacity_);
+
+        return surface;
     }
 
-    image_rgba8 operator() (marker_rgba8 const& marker)
+    cairo_surface_ptr operator() (marker_null const&) const
     {
-        return marker.get_data();
+        cairo_surface_ptr surface(
+            cairo_recording_surface_create(
+                CAIRO_CONTENT_COLOR_ALPHA, nullptr),
+            cairo_surface_closer());
+        cairo_ptr cairo = create_context(surface);
+        cairo_context context(cairo);
+        return surface;
     }
 
-  private:
-    agg::trans_affine & image_tr_;
+private:
+    agg::trans_affine transform(box2d<double> & bbox) const
+    {
+        bbox *= image_tr_;
+        coord<double, 2> c = bbox.center();
+        agg::trans_affine mtx = agg::trans_affine_translation(
+            0.5 * bbox.width() - c.x,
+            0.5 * bbox.height() - c.y);
+        return image_tr_ * mtx;
+    }
+
+    agg::trans_affine const& image_tr_;
+    const double opacity_;
 };
 
 struct cairo_pattern_base
@@ -121,10 +173,19 @@ struct cairo_polygon_pattern : cairo_pattern_base
         cairo_save_restore guard(context);
         context.set_operator(comp_op);
 
-        image_rgba8 pattern_img(util::apply_visitor(cairo_renderer_process_visitor_p(image_tr), marker_));
-        coord<double, 2> offset(pattern_offset(sym_, feature_, prj_trans_, common_,
-                                               pattern_img.width(), pattern_img.height()));
-        cairo_pattern pattern(pattern_img, opacity);
+        cairo_renderer_process_visitor_p visitor(image_tr, opacity);
+        cairo_surface_ptr surface(util::apply_visitor(visitor, this->marker_));
+
+        coord<double, 2> offset(0, 0);
+
+        cairo_rectangle_t pattern_surface_extent;
+        if (cairo_recording_surface_get_extents(surface.get(), &pattern_surface_extent))
+        {
+            offset = pattern_offset(sym_, feature_, prj_trans_, common_,
+                pattern_surface_extent.width, pattern_surface_extent.height);
+        }
+
+        cairo_pattern pattern(surface);
         pattern.set_extend(CAIRO_EXTEND_REPEAT);
         pattern.set_origin(-offset.x, -offset.y);
         context.set_pattern(pattern);
