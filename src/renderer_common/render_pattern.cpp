@@ -41,8 +41,7 @@
 namespace mapnik {
 
 template <>
-void render_pattern<image_rgba8>(rasterizer & ras,
-                                 marker_svg const& marker,
+void render_pattern<image_rgba8>(marker_svg const& marker,
                                  agg::trans_affine const& tr,
                                  double opacity,
                                  image_rgba8 & image)
@@ -68,6 +67,7 @@ void render_pattern<image_rgba8>(rasterizer & ras,
                       svg_attribute_type,
                       renderer_solid,
                       pixfmt> svg_renderer(svg_path, marker.get_data()->attributes());
+    rasterizer ras;
 
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
 }

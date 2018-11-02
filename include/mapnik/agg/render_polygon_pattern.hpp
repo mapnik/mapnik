@@ -29,6 +29,7 @@
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -107,29 +108,14 @@ struct agg_polygon_pattern : agg_pattern_base
 
     void render(renderer_base & ren_base, rasterizer & ras)
     {
-        pattern_alignment_enum alignment = get<pattern_alignment_enum, keys::alignment>(
-                sym_, feature_, common_.vars_);
-        unsigned offset_x=0;
-        unsigned offset_y=0;
-
-        if (alignment == LOCAL_ALIGNMENT)
-        {
-            double x0 = 0;
-            double y0 = 0;
-            using apply_local_alignment = detail::apply_local_alignment;
-            apply_local_alignment apply(common_.t_, prj_trans_, clip_box_, x0, y0);
-            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
-
-            offset_x = unsigned(ren_base.width() - x0);
-            offset_y = unsigned(ren_base.height() - y0);
-        }
-
+        coord<double, 2> offset(pattern_offset(sym_, feature_, prj_trans_, common_,
+                                               pattern_img_.width(), pattern_img_.height()));
         agg::rendering_buffer pattern_rbuf((agg::int8u*)pattern_img_.bytes(),
                                            pattern_img_.width(), pattern_img_.height(),
                                            pattern_img_.width() * 4);
         agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
         img_source_type img_src(pixf_pattern);
-        span_gen_type sg(img_src, offset_x, offset_y);
+        span_gen_type sg(img_src, safe_cast<unsigned>(offset.x), safe_cast<unsigned>(offset.y));
 
         agg::span_allocator<agg::rgba8> sa;
         value_double opacity = get<double, keys::opacity>(sym_, feature_, common_.vars_);
