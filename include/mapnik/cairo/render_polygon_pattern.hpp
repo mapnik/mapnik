@@ -37,45 +37,30 @@ namespace mapnik {
 
 struct cairo_renderer_process_visitor_p
 {
-    cairo_renderer_process_visitor_p(cairo_context & context,
-                                     agg::trans_affine & image_tr,
-                                     unsigned offset_x,
-                                     unsigned offset_y,
-                                     float opacity)
-        : context_(context),
-          image_tr_(image_tr),
-          offset_x_(offset_x),
-          offset_y_(offset_y),
-          opacity_(opacity) {}
+    cairo_renderer_process_visitor_p(agg::trans_affine & image_tr)
+        : image_tr_(image_tr)
+    {}
 
-    void operator() (marker_null const&) {}
-
-    void operator() (marker_svg const& marker)
+    image_rgba8 operator() (marker_null const&)
     {
-        mapnik::rasterizer ras;
-        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr_;
-        mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
-        render_pattern<image_rgba8>(ras, marker, image_tr_, 1.0, image);
-        cairo_pattern pattern(image, opacity_);
-        pattern.set_extend(CAIRO_EXTEND_REPEAT);
-        pattern.set_origin(offset_x_, offset_y_);
-        context_.set_pattern(pattern);
+        return image_rgba8();
     }
 
-    void operator() (marker_rgba8 const& marker)
+    image_rgba8 operator() (marker_svg const& marker)
     {
-        cairo_pattern pattern(marker.get_data(), opacity_);
-        pattern.set_extend(CAIRO_EXTEND_REPEAT);
-        pattern.set_origin(offset_x_, offset_y_);
-        context_.set_pattern(pattern);
+        mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr_;
+        mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
+        render_pattern<image_rgba8>(marker, image_tr_, 1.0, image);
+        return image;
+    }
+
+    image_rgba8 operator() (marker_rgba8 const& marker)
+    {
+        return marker.get_data();
     }
 
   private:
-    cairo_context & context_;
     agg::trans_affine & image_tr_;
-    unsigned offset_x_;
-    unsigned offset_y_;
-    float opacity_;
 };
 
 struct cairo_pattern_base
@@ -123,20 +108,6 @@ struct cairo_polygon_pattern : cairo_pattern_base
 
     void render(cairo_fill_rule_t fill_rule, cairo_context & context)
     {
-        unsigned offset_x=0;
-        unsigned offset_y=0;
-        pattern_alignment_enum alignment = get<pattern_alignment_enum, keys::alignment>(sym_, feature_, common_.vars_);
-        if (alignment == LOCAL_ALIGNMENT)
-        {
-            double x0 = 0.0;
-            double y0 = 0.0;
-            using apply_local_alignment = detail::apply_local_alignment;
-            apply_local_alignment apply(common_.t_, prj_trans_, clip_box_, x0, y0);
-            util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature_.get_geometry());
-            offset_x = std::abs(clip_box_.width() - x0);
-            offset_y = std::abs(clip_box_.height() - y0);
-        }
-
         value_double opacity = get<value_double, keys::opacity>(sym_, feature_, common_.vars_);
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
@@ -150,8 +121,13 @@ struct cairo_polygon_pattern : cairo_pattern_base
         cairo_save_restore guard(context);
         context.set_operator(comp_op);
 
-        util::apply_visitor(cairo_renderer_process_visitor_p(
-            context, image_tr, offset_x, offset_y, opacity), marker_);
+        image_rgba8 pattern_img(util::apply_visitor(cairo_renderer_process_visitor_p(image_tr), marker_));
+        coord<double, 2> offset(pattern_offset(sym_, feature_, prj_trans_, common_,
+                                               pattern_img.width(), pattern_img.height()));
+        cairo_pattern pattern(pattern_img, opacity);
+        pattern.set_extend(CAIRO_EXTEND_REPEAT);
+        pattern.set_origin(-offset.x, -offset.y);
+        context.set_pattern(pattern);
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<VertexConverter, cairo_context>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
