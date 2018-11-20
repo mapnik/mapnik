@@ -16,8 +16,8 @@ class test_datasource : public mapnik::memory_datasource
 {
 public:
     test_datasource(mapnik::box2d<double> const& expected_query_bbox)
-        : expected_query_bbox_(expected_query_bbox),
-          mapnik::memory_datasource(prepare_params())
+        : mapnik::memory_datasource(prepare_params()),
+          expected_query_bbox_(expected_query_bbox)
     {
     }
 
@@ -97,4 +97,3 @@ SECTION("query extent with buffer-size should not be affected by scale-factor") 
 }
 
 }
-
