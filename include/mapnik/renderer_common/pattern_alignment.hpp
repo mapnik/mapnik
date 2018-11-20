@@ -27,10 +27,10 @@
 
 namespace mapnik {
 
-class symbolizer_base;
+struct symbolizer_base;
 class feature_impl;
 class proj_transform;
-class renderer_common;
+struct renderer_common;
 
 coord<double, 2> pattern_offset(
     symbolizer_base const & sym,
