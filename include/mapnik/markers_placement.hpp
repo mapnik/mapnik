@@ -44,7 +44,7 @@ public:
                              markers_placement_params const& params)
         : placement_type_(placement_type)
     {
-        switch (placement_type)
+        switch (marker_placement_enum(placement_type))
         {
         default:
         case MARKER_POINT_PLACEMENT:
@@ -74,7 +74,7 @@ public:
 
     ~markers_placement_finder()
     {
-        switch (placement_type_)
+        switch (marker_placement_enum(placement_type_))
         {
         default:
         case MARKER_POINT_PLACEMENT:
@@ -102,7 +102,7 @@ public:
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
-        switch (placement_type_)
+        switch (marker_placement_enum(placement_type_))
         {
         default:
         case MARKER_POINT_PLACEMENT:
