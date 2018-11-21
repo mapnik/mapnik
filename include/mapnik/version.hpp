@@ -25,8 +25,8 @@
 
 #include <mapnik/stringify_macro.hpp>
 
-#define MAPNIK_MAJOR_VERSION 3
-#define MAPNIK_MINOR_VERSION 1
+#define MAPNIK_MAJOR_VERSION 4
+#define MAPNIK_MINOR_VERSION 0
 #define MAPNIK_PATCH_VERSION 0
 
 #define MAPNIK_VERSION          MAPNIK_MAKE_VERSION(MAPNIK_MAJOR_VERSION, \
