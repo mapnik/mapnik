@@ -121,6 +121,30 @@ private:
     cairo_face_cache cache_;
 };
 
+struct cairo_closer
+{
+    void operator() (cairo_t * obj)
+    {
+        if (obj) cairo_destroy(obj);
+    }
+};
+
+struct cairo_surface_closer
+{
+    void operator() (cairo_surface_t * surface)
+    {
+        if (surface) cairo_surface_destroy(surface);
+    }
+};
+
+using cairo_ptr = std::shared_ptr<cairo_t>;
+using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
+
+inline cairo_ptr create_context(cairo_surface_ptr const& surface)
+{
+    return cairo_ptr(cairo_create(&*surface),cairo_closer());
+}
+
 class cairo_pattern : private util::noncopyable
 {
 public:
@@ -131,9 +155,15 @@ public:
         const unsigned int *in_end = in_ptr + pixels;
         unsigned int *out_ptr;
 
-        surface_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, static_cast<int>(data.width()), static_cast<int>(data.height()));
+        surface_ = cairo_surface_ptr(
+            cairo_image_surface_create(
+                CAIRO_FORMAT_ARGB32,
+                static_cast<int>(data.width()),
+                static_cast<int>(data.height())),
+            cairo_surface_closer());
 
-        out_ptr = reinterpret_cast<unsigned int *>(cairo_image_surface_get_data(surface_));
+        out_ptr = reinterpret_cast<unsigned int *>(
+            cairo_image_surface_get_data(surface_.get()));
 
         while (in_ptr < in_end)
         {
@@ -150,13 +180,18 @@ public:
             *out_ptr++ = (a << 24) | (r << 16) | (g << 8) | b;
         }
         // mark the surface as dirty as we've modified it behind cairo's back
-        cairo_surface_mark_dirty(surface_);
-        pattern_ = cairo_pattern_create_for_surface(surface_);
+        cairo_surface_mark_dirty(surface_.get());
+        pattern_ = cairo_pattern_create_for_surface(surface_.get());
+    }
+
+    cairo_pattern(cairo_surface_ptr const& surface) :
+        surface_(surface),
+        pattern_(cairo_pattern_create_for_surface(surface_.get()))
+    {
     }
 
     ~cairo_pattern()
     {
-        if (surface_) cairo_surface_destroy(surface_);
         if (pattern_) cairo_pattern_destroy(pattern_);
     }
 
@@ -190,7 +225,7 @@ public:
     }
 
 private:
-    cairo_surface_t * surface_;
+    cairo_surface_ptr surface_;
     cairo_pattern_t *  pattern_;
 };
 
@@ -254,30 +289,6 @@ private:
     gradient_unit_e units_;
 
 };
-
-struct cairo_closer
-{
-    void operator() (cairo_t * obj)
-    {
-        if (obj) cairo_destroy(obj);
-    }
-};
-
-struct cairo_surface_closer
-{
-    void operator() (cairo_surface_t * surface)
-    {
-        if (surface) cairo_surface_destroy(surface);
-    }
-};
-
-using cairo_ptr = std::shared_ptr<cairo_t>;
-using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
-
-inline cairo_ptr create_context(cairo_surface_ptr const& surface)
-{
-    return cairo_ptr(cairo_create(&*surface),cairo_closer());
-}
 
 class cairo_context : private util::noncopyable
 {
