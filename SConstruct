@@ -360,8 +360,6 @@ opts.AddVariables(
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
     BoolVariable('COVERAGE', 'Compile a libmapnik and plugins with --coverage', 'False'),
-    BoolVariable('DEBUG_UNDEFINED', 'Compile a version of Mapnik using clang/llvm undefined behavior asserts', 'False'),
-    BoolVariable('DEBUG_SANITIZE', 'Compile a version of Mapnik using clang/llvm address sanitation', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
 
@@ -2036,12 +2034,6 @@ if not preconfigured:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:
             env.Append(CXXFLAGS = common_cxx_flags + '-O%s' % (env['OPTIMIZATION']))
-        if env['DEBUG_UNDEFINED']:
-            env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
-
-        if env['DEBUG_SANITIZE']:
-            env.Append(CXXFLAGS = ['-fsanitize=address','-fno-omit-frame-pointer'])
-            env.Append(LINKFLAGS = ['-fsanitize=address'])
 
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
