@@ -16,7 +16,12 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
+#if BOOST_VERSION >= 106900
+#include <boost/gil.hpp>
+#else
 #include <boost/gil/gil_all.hpp>
+#endif
+
 #pragma GCC diagnostic pop
 
 namespace boost { namespace gil {
@@ -26,11 +31,11 @@ namespace boost { namespace gil {
 namespace hsl_color_space
 {
 /// \brief Hue
-struct hue_t {};    
+struct hue_t {};
 /// \brief Saturation
 struct saturation_t {};
 /// \brief Lightness
-struct lightness_t {}; 
+struct lightness_t {};
 }
 /// \}
 
@@ -102,12 +107,12 @@ struct default_color_converter_impl< rgb_t, hsl_t >
 
          if( lightness < 0.5f )
          {
-            saturation = diff 
+            saturation = diff
                        / ( min_color + max_color );
          }
          else
          {
-            saturation = ( max_color - min_color ) 
+            saturation = ( max_color - min_color )
                        / ( 2.f - diff );
 
          }
@@ -116,7 +121,7 @@ struct default_color_converter_impl< rgb_t, hsl_t >
          if( std::abs( max_color - temp_red ) < 0.0001f )
          {
             // max_color is red
-            hue = ( temp_green - temp_blue ) 
+            hue = ( temp_green - temp_blue )
                 / diff;
 
          }
@@ -124,8 +129,8 @@ struct default_color_converter_impl< rgb_t, hsl_t >
          {
             // max_color is green
             // 2.0 + (b - r) / (maxColor - minColor)
-            hue = 2.f 
-                + ( temp_blue - temp_red ) 
+            hue = 2.f
+                + ( temp_blue - temp_red )
                 / diff;
 
          }
@@ -133,13 +138,13 @@ struct default_color_converter_impl< rgb_t, hsl_t >
          {
              // max_color is blue
              // 4.0 + (r - g) /  (maxColor - minColor)
-             hue = 4.f 
-                 + ( temp_red - temp_green ) 
+             hue = 4.f
+                 + ( temp_red - temp_green )
                  / diff;
          }
 
          hue /= 6.f;
-         
+
          if( hue < 0.f )
          {
             hue += 1.f;
@@ -177,29 +182,29 @@ struct default_color_converter_impl<hsl_t,rgb_t>
          float tempr, tempg, tempb;
 
          //Set the temporary values
-         if( get_color( src, lightness_t() ) < 0.5 ) 
+         if( get_color( src, lightness_t() ) < 0.5 )
          {
             temp2 = get_color( src, lightness_t() )
                   * ( 1.f + get_color( src, saturation_t() ) );
          }
          else
          {
-            temp2 = ( get_color( src, lightness_t() ) + get_color( src, saturation_t() )) 
+            temp2 = ( get_color( src, lightness_t() ) + get_color( src, saturation_t() ))
                   - ( get_color( src, lightness_t() ) * get_color( src, saturation_t() ));
          }
 
          temp1 = 2.f
-               * get_color( src, lightness_t() ) 
+               * get_color( src, lightness_t() )
                - temp2;
 
-         tempr = get_color( src, hue_t() ) + 1.f / 3.f;    
+         tempr = get_color( src, hue_t() ) + 1.f / 3.f;
 
          if( tempr > 1.f )
          {
             tempr--;
          }
 
-         tempg = get_color( src, hue_t() );     
+         tempg = get_color( src, hue_t() );
          tempb = get_color( src, hue_t() ) - 1.f / 3.f;
 
          if( tempb < 0.f )
@@ -207,7 +212,7 @@ struct default_color_converter_impl<hsl_t,rgb_t>
             tempb++;
          }
 
-         //Red     
+         //Red
          if( tempr < 1.f / 6.f )
          {
             red = temp1 + ( temp2 - temp1 ) * 6.f * tempr;
@@ -218,7 +223,7 @@ struct default_color_converter_impl<hsl_t,rgb_t>
          }
          else if( tempr < 2.f / 3.f )
          {
-            red = temp1 + (temp2 - temp1) 
+            red = temp1 + (temp2 - temp1)
                 * (( 2.f / 3.f ) - tempr) * 6.f;
          }
          else
@@ -226,7 +231,7 @@ struct default_color_converter_impl<hsl_t,rgb_t>
             red = temp1;
          }
 
-         //Green       
+         //Green
          if( tempg < 1.f / 6.f )
          {
             green = temp1 + ( temp2 - temp1 ) * 6.f * tempg;
@@ -245,7 +250,7 @@ struct default_color_converter_impl<hsl_t,rgb_t>
             green = temp1;
          }
 
-         //Blue    
+         //Blue
          if( tempb < 1.f / 6.f )
          {
             blue = temp1 + (temp2 - temp1) * 6.f * tempb;
@@ -256,7 +261,7 @@ struct default_color_converter_impl<hsl_t,rgb_t>
          }
          else if( tempb < 2.f / 3.f )
          {
-            blue = temp1 + (temp2 - temp1) 
+            blue = temp1 + (temp2 - temp1)
                  * (( 2.f / 3.f ) - tempb) * 6.f;
          }
          else
