@@ -16,7 +16,12 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
+#if BOOST_VERSION >= 106900
+#include <boost/gil.hpp>
+#else
 #include <boost/gil/gil_all.hpp>
+#endif
+
 #pragma GCC diagnostic pop
 
 namespace boost { namespace gil {
@@ -26,11 +31,11 @@ namespace boost { namespace gil {
 namespace hsv_color_space
 {
 /// \brief Hue
-struct hue_t {};    
+struct hue_t {};
 /// \brief Saturation
 struct saturation_t{};
 /// \brief Value
-struct value_t {}; 
+struct value_t {};
 }
 /// \}
 
@@ -80,11 +85,11 @@ struct default_color_converter_impl< rgb_t, hsv_t >
       bits32f diff = max_color - min_color;
 
       if( max_color < 0.0001f )
-      {  
+      {
          saturation = 0.f;
       }
-      else  
-      {      
+      else
+      {
          saturation = diff / max_color;
       }
 
@@ -92,10 +97,10 @@ struct default_color_converter_impl< rgb_t, hsv_t >
       if( saturation < 0.0001f )
       {
          //it doesn't matter what value it has
-         hue = 0.f; 
-      }   
+         hue = 0.f;
+      }
       else
-      { 
+      {
          if( temp_red == max_color )
          {
             hue = ( temp_green - temp_blue )
@@ -103,17 +108,17 @@ struct default_color_converter_impl< rgb_t, hsv_t >
          }
          else if( temp_green == max_color )
          {
-            hue = 2.f + ( temp_blue - temp_red ) 
+            hue = 2.f + ( temp_blue - temp_red )
                 / diff;
          }
          else
          {
-            hue = 4.f + ( temp_red - temp_green ) 
+            hue = 4.f + ( temp_red - temp_green )
                 / diff;
          }
 
          //to bring it to a number between 0 and 1
-         hue /= 6.f; 
+         hue /= 6.f;
 
          if( hue < 0.f )
          {
@@ -161,7 +166,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
          frac = h - i;
 
          // p = value * (1 - saturation)
-         p = get_color( src, value_t() ) 
+         p = get_color( src, value_t() )
            * ( 1.f - get_color( src, saturation_t() ));
 
          // q = value * (1 - saturation * hue_frac)
@@ -171,11 +176,11 @@ struct default_color_converter_impl<hsv_t,rgb_t>
 
          // t = value * (1 - (saturation * (1 - hue_frac))
          // it grows with increasing distance from floor(hue)
-         t = get_color( src, value_t() ) 
+         t = get_color( src, value_t() )
            * ( 1.f - ( get_color( src, saturation_t() ) * ( 1.f - frac )));
 
          switch( i % 6 )
-         {         
+         {
             case 0: // red to yellow
             {
                red   = get_color( src, value_t() );
@@ -224,7 +229,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
             case 5: // magenta to red
             {
                red   = get_color( src, value_t() );
-               green = p; 
+               green = p;
                blue  = q;
 
                break;
