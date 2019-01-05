@@ -10,7 +10,7 @@ source bootstrap.sh
 
 When the bootstrap script exits successfully, you can continue with usual `./configure && make` combination.
 
-The bootstrap script generates `config.py` in the root of the repository with options for the `configure` script. Be aware that setting custom options to the configure script can override options from `config.py`. This can possibly lead to a failed build. For example, `CUSTOM_CXXFLAGS = '-D_GLIBCXX_USE_CXX11_ABI=0'` is being set in `config.py`, thus you must not forget to include `-D_GLIBCXX_USE_CXX11_ABI=0` if you override `CUSTOM_CXXFLAGS` option of the configure script, otherwise the build will fail. This doesn't mean custom configure options in bootstrapped environment shoud be avoided. It should be perfectly fine to use custom compiler, for example:
+The bootstrap script generates `config.py` in the root of the repository with options for the `configure` script. Be aware that setting custom options to the configure script can override options from `config.py`. This can possibly lead to a failed build. For example, `CUSTOM_CXXFLAGS = '-D_GLIBCXX_USE_CXX11_ABI=0'` is being set in `config.py`, thus you must not forget to include `-D_GLIBCXX_USE_CXX11_ABI=0` if you override `CUSTOM_CXXFLAGS` option of the configure script, otherwise the build will fail. This doesn't mean custom configure options in bootstrapped environment should be avoided. It should be perfectly fine to use custom compiler, for example:
 
 ```sh
 ./configure CXX=g++-6.4.0 CC=gcc-6.4.0
@@ -119,7 +119,7 @@ Visual rendering: 0 failed / 8 passed / 0 overwritten / 0 errors
 It is possible to limit testing to particular renderer and scale factor:
 
 ```console
- $ ./test/visual/run tiff-reprojection-1 -v --agg -s 1
+$ ./test/visual/run tiff-reprojection-1 -v --agg -s 1
 "tiff-reprojection-1-250-250-1.0" with agg... OK
 
 Visual rendering: 0 failed / 1 passed / 0 overwritten / 0 errors
@@ -157,13 +157,16 @@ Styles used for visual tests can have additional information describing the test
 ```xml
 <Map>
     <Parameters>
-        <!-- Size of output image. -->
+        <!-- Size of output image. Multiple sizes are separated by semicolon. -->
         <Parameter name="sizes">256,256</Parameter>
         <!-- Map extent. -->
         <Parameter name="bbox">-1, -1, 1, 1</Parameter>
-        <!-- Tiled rendering. The test renders one complete image and one image stitched out of 4x4 tiles. -->
+        <!-- Tiled rendering. Multiple tile layouts are separated by semicolon. -->
+        <!-- In this case the test renders one complete image and one image stitched out of 4x4 tiles. -->
         <Parameter name="tiles">1,1;4,4</Parameter>
-        <!-- Disable this test for cairo renderer. -->
+        <!-- The test can be disabled. -->
+        <Parameter name="status">on</Parameter>
+        <!-- Test can be disabled for particular renderer. -->
         <Parameter name="cairo">off</Parameter>
     </Parameters>
     ...
