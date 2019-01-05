@@ -6,6 +6,16 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.22
+
+Released:
+
+(Packaged from )
+
+- Improved padding calculation for clipping polygons and lines ([#4001](https://github.com/mapnik/mapnik/pull/4001))
+- New option `line-pattern="repeat"` of LinePatternSymbolizer to repeat the pattern in the area given by `stroke-` options ([#4004](https://github.com/mapnik/mapnik/pull/4004))
+- Fixed global and local pattern alignment ([#4005](https://github.com/mapnik/mapnik/pull/4005))
+- SVG patterns are rendered as vectors into PDF or SVG with Cairo backend ([#4012](https://github.com/mapnik/mapnik/pull/4012))
 
 ## 3.0.21
 
