@@ -218,7 +218,7 @@ struct named_colors_ : x3::symbols<color>
 
 x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
-x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
+x3::uint_parser<std::uint16_t, 10, 1, 3> dec3;
 
 // starting rule
 css_color_grammar_type const css_color("css_color");
@@ -390,7 +390,7 @@ auto const rgba_color_percent_def = lit("rgba")
     >> lit(',') >> dec3[percent_blue] >> lit('%')
     >> lit(',') >> double_[opacity] >> lit(')');
 
-auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint8_t,std::uint8_t,std::uint8_t, double >> {} =
+auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint16_t,std::uint8_t,std::uint8_t, double >> {} =
     lit("hsl")
     >> lit('(') >> dec3
     >> lit(',') >> dec3 >> lit('%')
@@ -398,7 +398,7 @@ auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint8_t,std::
     >> attr(1.0) >> lit(')')
     ;
 
-auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint8_t,std::uint8_t,std::uint8_t, double >> {} =
+auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint16_t,std::uint8_t,std::uint8_t, double >> {} =
     lit("hsla")
     >> lit('(') >> dec3
     >> lit(',') >> dec3 >> lit('%')
