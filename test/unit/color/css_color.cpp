@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <mapnik/safe_cast.hpp>
@@ -84,6 +83,29 @@ TEST_CASE("CSS color") {
             CHECK( c.green() == 64 );
             CHECK( c.blue() == 191 );
         }
+        // hsl (hue range 0..360)
+        {
+            std::string s1("hsl(0, 100%, 50%)");
+            std::string s2("hsl(120, 100%, 50%)");
+            std::string s3("hsl(240, 100%, 50%)");
+            std::string s4("hsl(360, 100%, 50%)");
+            std::string s5("hsl(480, 100%, 50%)"); // larger values are
+            std::string s6("hsl(600, 100%, 50%)"); // normalised to fit into 0..360
+
+            mapnik::color c1, c2, c3, c4, c5, c6;
+            CHECK( boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c1) );
+            CHECK( boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c2) );
+            CHECK( boost::spirit::x3::phrase_parse(s3.cbegin(), s3.cend(), color_grammar, space, c3) );
+            CHECK( boost::spirit::x3::phrase_parse(s4.cbegin(), s4.cend(), color_grammar, space, c4) );
+            CHECK( boost::spirit::x3::phrase_parse(s5.cbegin(), s5.cend(), color_grammar, space, c5) );
+            CHECK( boost::spirit::x3::phrase_parse(s6.cbegin(), s6.cend(), color_grammar, space, c6) );
+            CHECK(c1 == mapnik::color("red"));
+            CHECK(c2 == mapnik::color("lime"));
+            CHECK(c3 == mapnik::color("blue"));
+            CHECK(c1 == c4);
+            CHECK(c2 == c5);
+            CHECK(c3 == c6);
+        }
         // hsla
         {
             std::string s("hsla(240,50%,50%,0.5)");
@@ -93,6 +115,29 @@ TEST_CASE("CSS color") {
             CHECK( c.red() == 64 );
             CHECK( c.green() == 64 );
             CHECK( c.blue() == 191 );
+        }
+        // hsla (hue range 0..360)
+        {
+            std::string s1("hsla(0, 100%, 50%, 1)");
+            std::string s2("hsla(120, 100%, 50%, 1)");
+            std::string s3("hsla(240, 100%, 50%, 1)");
+            std::string s4("hsla(360, 100%, 50%, 1)");
+            std::string s5("hsla(480, 100%, 50%, 1)"); // larger values are
+            std::string s6("hsla(600, 100%, 50%, 1)"); // normalised to fit into 0..360
+
+            mapnik::color c1, c2, c3, c4, c5, c6;
+            CHECK( boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c1) );
+            CHECK( boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c2) );
+            CHECK( boost::spirit::x3::phrase_parse(s3.cbegin(), s3.cend(), color_grammar, space, c3) );
+            CHECK( boost::spirit::x3::phrase_parse(s4.cbegin(), s4.cend(), color_grammar, space, c4) );
+            CHECK( boost::spirit::x3::phrase_parse(s5.cbegin(), s5.cend(), color_grammar, space, c5) );
+            CHECK( boost::spirit::x3::phrase_parse(s6.cbegin(), s6.cend(), color_grammar, space, c6) );
+            CHECK(c1 == mapnik::color("red"));
+            CHECK(c2 == mapnik::color("lime"));
+            CHECK(c3 == mapnik::color("blue"));
+            CHECK(c1 == c4);
+            CHECK(c2 == c5);
+            CHECK(c3 == c6);
         }
         // hex colours
         {
