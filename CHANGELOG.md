@@ -8,9 +8,9 @@ For a complete change history, see the git log.
 
 ## 3.0.22
 
-Released:
+Released: January 22, 2019
 
-(Packaged from )
+(Packaged from c338cacd7)
 
 - Improved padding calculation for clipping polygons and lines ([#4001](https://github.com/mapnik/mapnik/pull/4001))
 - New option `line-pattern="repeat"` of LinePatternSymbolizer to repeat the pattern in the area given by `stroke-` options ([#4004](https://github.com/mapnik/mapnik/pull/4004))
