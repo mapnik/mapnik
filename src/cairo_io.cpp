@@ -82,6 +82,7 @@ void save_to_cairo_file(mapnik::Map const& map,
         else if (type == "svg")
         {
             surface = cairo_surface_ptr(cairo_svg_surface_create(filename.c_str(),width,height),cairo_surface_closer());
+            cairo_svg_surface_restrict_to_version(surface.get(), CAIRO_SVG_VERSION_1_2);
         }
 #endif
 #ifdef CAIRO_HAS_PS_SURFACE
