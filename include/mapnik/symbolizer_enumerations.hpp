@@ -231,6 +231,15 @@ enum line_pattern_enum : std::uint8_t
 
 DEFINE_ENUM (line_pattern_e, line_pattern_enum );
 
+enum smooth_algorithm_enum : std::uint8_t
+{
+    SMOOTH_ALGORITHM_BASIC = 0,
+    SMOOTH_ALGORITHM_ADAPTIVE,
+    smooth_algorithm_enum_MAX
+};
+
+DEFINE_ENUM (smooth_algorithm_e, smooth_algorithm_enum );
+
 }
 
 #endif //MAPNIK_SYMBOLIZER_ENUMERATIONS_HPP

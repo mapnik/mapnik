@@ -95,6 +95,10 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "mesh-size", nullptr, property_types::target_double },
     property_meta_type{ "premultiplied",  nullptr, property_types::target_bool },
     property_meta_type{ "smooth",  nullptr, property_types::target_double },
+    property_meta_type{ "smooth-algorithm",
+                        [](enumeration_wrapper e)
+                        {return enumeration<smooth_algorithm_enum,smooth_algorithm_enum_MAX>(smooth_algorithm_enum(e.value)).as_string();},
+                        property_types::target_smooth_algorithm },
     property_meta_type{ "simplify-algorithm",
                         [](enumeration_wrapper e)
                         {

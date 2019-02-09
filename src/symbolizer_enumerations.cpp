@@ -215,4 +215,12 @@ static const char * line_pattern_strings[] = {
 
 IMPLEMENT_ENUM( line_pattern_e, line_pattern_strings )
 
+static const char * smooth_algorithm_strings[] = {
+    "basic",
+    "adaptive",
+    ""
+};
+
+IMPLEMENT_ENUM( smooth_algorithm_e, smooth_algorithm_strings )
+
 } // namespace mapnik
