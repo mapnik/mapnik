@@ -96,7 +96,7 @@ before_script:
 script:
  - git_submodule_update --init deps/
  - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false}
- - cat config.log
+ #- cat config.log => comment out to reduce log size limit on travis-ci
  # we limit the `make` to 40 min
  # to ensure that slow builds still upload their
  # ccache results and therefore should be faster
