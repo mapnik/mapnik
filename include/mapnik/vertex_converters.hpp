@@ -37,6 +37,7 @@
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/extend_converter.hpp>
+#include <mapnik/adaptive_smooth.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -77,11 +78,12 @@ template <typename T>
 struct converter_traits<T, mapnik::smooth_tag>
 {
     using geometry_type = T;
-    using conv_type = typename agg::conv_smooth_poly1_curve<geometry_type>;
+    using conv_type = smooth_converter<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
+        geom.algorithm(get<smooth_algorithm_enum,keys::smooth_algorithm>(args.sym, args.feature, args.vars));
         geom.smooth_value(get<value_double, keys::smooth>(args.sym, args.feature, args.vars));
     }
 };
