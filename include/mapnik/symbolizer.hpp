@@ -96,6 +96,7 @@ enum class property_types : std::uint8_t
     target_direction,
     target_font_feature_settings,
     target_line_pattern,
+    target_smooth_algorithm,
 };
 
 template <typename T>
@@ -191,6 +192,7 @@ ENUM_FROM_STRING( text_upright_enum )
 ENUM_FROM_STRING( direction_enum )
 ENUM_FROM_STRING( gamma_method_enum )
 ENUM_FROM_STRING( line_pattern_enum )
+ENUM_FROM_STRING( smooth_algorithm_enum )
 
 // enum
 template <typename T, bool is_enum = true>

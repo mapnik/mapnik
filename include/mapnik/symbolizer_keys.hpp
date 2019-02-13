@@ -67,6 +67,7 @@ enum class keys : std::uint8_t
     mesh_size,
     premultiplied,
     smooth,
+    smooth_algorithm,
     simplify_algorithm,
     simplify_tolerance,
     halo_rasterizer,

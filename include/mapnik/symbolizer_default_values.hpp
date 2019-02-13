@@ -383,6 +383,12 @@ struct symbolizer_default<value_double, keys::extend>
     static value_double value() { return 0.0; }
 };
 
+template <>
+struct symbolizer_default<smooth_algorithm_enum, keys::smooth_algorithm>
+{
+    static smooth_algorithm_enum value() { return SMOOTH_ALGORITHM_BASIC; }
+};
+
 } // namespace mapnik
 
 #endif // MAPNIK_SYMBOLIZER_DEFAULT_VALUES_HPP

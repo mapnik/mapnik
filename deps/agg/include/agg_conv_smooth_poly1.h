@@ -28,53 +28,64 @@
 namespace agg
 {
 
-    //-------------------------------------------------------conv_smooth_poly1
-    template<class VertexSource> 
-    struct conv_smooth_poly1 : 
-    public conv_adaptor_vcgen<VertexSource, vcgen_smooth_poly1>
+    //-------------------------------------------------------conv_smooth
+    template<class VertexSource, class VertexGenerator>
+    struct conv_smooth :
+    public conv_adaptor_vcgen<VertexSource, VertexGenerator>
     {
-        typedef conv_adaptor_vcgen<VertexSource, vcgen_smooth_poly1> base_type;
+        typedef conv_adaptor_vcgen<VertexSource, VertexGenerator> base_type;
 
-        conv_smooth_poly1(VertexSource& vs) : 
-            conv_adaptor_vcgen<VertexSource, vcgen_smooth_poly1>(vs)
+        conv_smooth(VertexSource& vs) :
+            conv_adaptor_vcgen<VertexSource, VertexGenerator>(vs)
         {
         }
+
+        conv_smooth(conv_smooth<VertexSource, VertexGenerator> &&) = default;
+
+        conv_smooth(const conv_smooth<VertexSource, VertexGenerator>&) = delete;
+        const conv_smooth<VertexSource, VertexGenerator>&
+            operator = (const conv_smooth<VertexSource, VertexGenerator>&) = delete;
 
         void   smooth_value(double v) { base_type::generator().smooth_value(v); }
         double smooth_value() const { return base_type::generator().smooth_value(); }
         unsigned type() const { return base_type::type(); }
-
-    private:
-        conv_smooth_poly1(const conv_smooth_poly1<VertexSource>&);
-        const conv_smooth_poly1<VertexSource>& 
-            operator = (const conv_smooth_poly1<VertexSource>&);
     };
 
+    template<class VertexSource>
+    using conv_smooth_poly1 = conv_smooth<VertexSource, vcgen_smooth_poly1>;
 
-
-    //-------------------------------------------------conv_smooth_poly1_curve
-    template<class VertexSource> 
-    struct conv_smooth_poly1_curve : 
-    public conv_curve<conv_smooth_poly1<VertexSource> >
+    //-------------------------------------------------conv_smooth_curve
+    template<class VertexSource, class VertexGenerator>
+    struct conv_smooth_curve :
+    public conv_curve<conv_smooth<VertexSource, VertexGenerator>>
     {
-        conv_smooth_poly1_curve(VertexSource& vs) :
-            conv_curve<conv_smooth_poly1<VertexSource> >(m_smooth),
+        conv_smooth_curve(VertexSource& vs) :
+            conv_curve<conv_smooth<VertexSource, VertexGenerator>>(m_smooth),
             m_smooth(vs)
         {
         }
+
+        conv_smooth_curve(conv_smooth_curve<VertexSource, VertexGenerator> && rhs) :
+            conv_curve<conv_smooth<VertexSource, VertexGenerator>>(std::move(rhs)),
+            m_smooth(std::move(rhs.m_smooth))
+        {
+            this->attach(m_smooth);
+        }
+
+        conv_smooth_curve(const conv_smooth_curve<VertexSource, VertexGenerator>&) = delete;
+        const conv_smooth_curve<VertexSource, VertexGenerator>&
+            operator = (const conv_smooth_curve<VertexSource, VertexGenerator>&) = delete;
 
         void   smooth_value(double v) { m_smooth.generator().smooth_value(v); }
         double smooth_value() const { return m_smooth.generator().smooth_value(); }
         unsigned type() const { return m_smooth.type(); }
 
     private:
-        conv_smooth_poly1_curve(const conv_smooth_poly1_curve<VertexSource>&);
-        const conv_smooth_poly1_curve<VertexSource>& 
-            operator = (const conv_smooth_poly1_curve<VertexSource>&);
-
-        conv_smooth_poly1<VertexSource> m_smooth;
+        conv_smooth<VertexSource, VertexGenerator> m_smooth;
     };
 
+    template<class VertexSource>
+    using conv_smooth_poly1_curve = conv_smooth_curve<VertexSource, vcgen_smooth_poly1>;
 }
 
 
