@@ -180,7 +180,17 @@ struct cairo_vector_renderer : vector_renderer_base
 };
 
 #ifdef CAIRO_HAS_SVG_SURFACE
-struct cairo_svg_renderer : cairo_vector_renderer<cairo_svg_surface_create_for_stream>
+inline cairo_surface_t *create_svg_1_2(cairo_write_func_t write_func,
+                                       void *closure,
+                                       double width,
+                                       double height)
+{
+    cairo_surface_t * surface = cairo_svg_surface_create_for_stream(write_func, closure, width, height);
+    cairo_svg_surface_restrict_to_version(surface, CAIRO_SVG_VERSION_1_2);
+    return surface;
+}
+
+struct cairo_svg_renderer : cairo_vector_renderer<create_svg_1_2>
 {
     static constexpr const char * name = "cairo-svg";
     static constexpr const char * ext = ".svg";
