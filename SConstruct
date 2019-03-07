@@ -149,6 +149,7 @@ def init_environment(env):
 
 #### SCons build options and initial setup ####
 env = Environment(ENV=os.environ)
+
 init_environment(env)
 
 def fix_path(path):
@@ -472,6 +473,7 @@ opts.AddVariables(
     BoolVariable('MAPNIK_RENDER', 'Compile and install a utility to render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
+    BoolVariable('QUIET', 'Reduce build verbosity', 'False'),
     )
 
 # variables to pickle after successful configure step
@@ -540,7 +542,8 @@ pickle_store = [# Scons internal variables
         'HOST',
         'QUERIED_GDAL_DATA',
         'QUERIED_ICU_DATA',
-        'QUERIED_PROJ_LIB'
+        'QUERIED_PROJ_LIB',
+        'QUIET'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -2118,6 +2121,13 @@ if not HELP_REQUESTED:
             replace_path('CXXFLAGS',search,replace)
             replace_path('CAIRO_LIBPATHS',search,replace)
             replace_path('CAIRO_CPPPATHS',search,replace)
+
+    # Adjust verbosity
+    if env['QUIET']:
+        env.Append(CXXCOMSTR = "Compiling $SOURCE")
+        env.Append(SHCXXCOMSTR = "Compiling shared $SOURCE")
+        env.Append(LINKCOMSTR = "Linking $TARGET")
+        env.Append(SHLINKCOMSTR = "Linking shared $TARGET")
 
     # export env so it is available in build.py files
     Export('env')
