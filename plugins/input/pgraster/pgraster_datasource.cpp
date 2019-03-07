@@ -1117,7 +1117,7 @@ box2d<double> pgraster_datasource::envelope() const
                   throw mapnik::datasource_exception("Pgraster Plugin: " + s_error.str());
                 }
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_EstimatedExtent('";
+                  << " FROM (SELECT ST_EstimatedExtent(";
 
                 if (! sch.empty())
                 {
