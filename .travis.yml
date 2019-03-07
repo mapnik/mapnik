@@ -49,6 +49,7 @@ matrix:
           CXX="ccache clang++-3.9 -Qunused-arguments"
           CC="clang-3.9"
           COVERAGE=true
+          QUIET=true
       before_install:
         - export LINKFLAGS="-fuse-ld=gold-2.26"
         - export LLVM_COV="llvm-cov-3.9"
@@ -95,7 +96,7 @@ before_script:
 
 script:
  - git_submodule_update --init deps/
- - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false}
+ - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false} QUIET=${QUIET:-false}
  #- cat config.log => comment out to reduce log size limit on travis-ci
  # we limit the `make` to 40 min
  # to ensure that slow builds still upload their
