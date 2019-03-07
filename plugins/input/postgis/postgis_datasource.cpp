@@ -1019,7 +1019,7 @@ box2d<double> postgis_datasource::envelope() const
             if (estimate_extent_)
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_EstimatedExtent('";
+                  << " FROM (SELECT ST_EstimatedExtent(";
                 if (!parsed_schema_.empty())
                 {
                     s << literal(parsed_schema_) << ',';
