@@ -194,10 +194,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     }
 
     //select minimum raster containing whole box
-    int x_off = rint(box.minx() - margin_x);
-    int y_off = rint(box.miny() - margin_y);
-    int end_x = rint(box.maxx() + margin_x);
-    int end_y = rint(box.maxy() + margin_y);
+    int x_off = static_cast<int>(std::floor((box.minx() - margin_x) + .5));
+    int y_off = static_cast<int>(std::floor((box.miny() - margin_y) + .5));
+    int end_x = static_cast<int>(std::floor((box.maxx() + margin_x) + .5));
+    int end_y = static_cast<int>(std::floor((box.maxy() + margin_y) + .5));
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: x_off=" << x_off;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: y_off=" << y_off;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: end_x=" << end_x;

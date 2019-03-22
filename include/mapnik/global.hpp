@@ -111,12 +111,6 @@ inline void read_double_xdr(const char* data, double & val)
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
-// msvc doesn't have rint in <cmath>
-inline int rint(double val)
-{
-    return int(std::floor(val + 0.5));
-}
-
 inline double round(double val)
 {
     return std::floor(val);
@@ -124,7 +118,5 @@ inline double round(double val)
 #endif
 
 }
-
-
 
 #endif // MAPNIK_GLOBAL_HPP

@@ -611,7 +611,7 @@ struct convert<value_integer>
 
     value_integer operator()(value_double val) const
     {
-        return static_cast<value_integer>(rint(val));
+        return static_cast<value_integer>(std::floor(val) + .5);
     }
 
     value_integer operator()(value_bool val) const
