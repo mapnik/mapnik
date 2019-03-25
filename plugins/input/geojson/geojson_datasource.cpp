@@ -274,7 +274,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
     try
     {
         mapnik::json::extract_bounding_boxes(itr, end, boxes);
-        if (itr != end || boxes.empty()) throw std::exception();
+        if (itr != end) throw std::exception();
         // bulk insert initialise r-tree
         tree_ = std::make_unique<spatial_index_type>(boxes);
         // calculate total extent
@@ -366,7 +366,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
     {
         boxes_type boxes;
         mapnik::json::extract_bounding_boxes(itr, end, boxes);
-        if (itr != end || boxes.empty()) throw std::exception(); //ensure we've consumed all input and we extracted at least one bbox;
+        if (itr != end) throw std::exception(); //ensure we've consumed all input
         for (auto const& item : boxes)
         {
             auto const& geometry_index = std::get<1>(item);
