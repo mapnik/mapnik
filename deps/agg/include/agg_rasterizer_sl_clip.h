@@ -17,6 +17,9 @@
 
 #include "agg_clip_liang_barsky.h"
 
+#include <algorithm>
+#include <limits>
+
 namespace agg
 {
     //--------------------------------------------------------poly_max_coord_e
@@ -31,6 +34,7 @@ namespace agg
         typedef int coord_type;
         static AGG_INLINE int mul_div(double a, double b, double c)
         {
+            if (std::abs(c) < std::numeric_limits<double>::epsilon()) return 0;
             return iround(a * b / c);
         }
         static int xi(int v) { return v; }
@@ -145,8 +149,8 @@ namespace agg
         //------------------------------------------------------------------------
         template<class Rasterizer>
         AGG_INLINE void line_clip_y(Rasterizer& ras,
-                                    coord_type x1, coord_type y1, 
-                                    coord_type x2, coord_type y2, 
+                                    double x1, double y1,
+                                    double x2, double y2,
                                     unsigned   f1, unsigned   f2) const
         {
             f1 &= 10;
@@ -164,10 +168,10 @@ namespace agg
                     return;
                 }
 
-                coord_type tx1 = x1;
-                coord_type ty1 = y1;
-                coord_type tx2 = x2;
-                coord_type ty2 = y2;
+                double tx1 = x1;
+                double ty1 = y1;
+                double tx2 = x2;
+                double ty2 = y2;
 
                 if(f1 & 8) // y1 < clip.y1
                 {
@@ -192,8 +196,9 @@ namespace agg
                     tx2 = x1 + Conv::mul_div(m_clip_box.y2-y1, x2-x1, y2-y1);
                     ty2 = m_clip_box.y2;
                 }
-                ras.line(Conv::xi(tx1), Conv::yi(ty1), 
-                         Conv::xi(tx2), Conv::yi(ty2)); 
+
+                ras.line(Conv::xi(iround(tx1)), Conv::yi(iround(ty1)),
+                         Conv::xi(iround(tx2)), Conv::yi(iround(ty2)));
             }
         }
 

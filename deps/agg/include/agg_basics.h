@@ -16,7 +16,10 @@
 #ifndef AGG_BASICS_INCLUDED
 #define AGG_BASICS_INCLUDED
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
+
 #include "agg_config.h"
 
 //---------------------------------------------------------AGG_CUSTOM_ALLOCATOR
@@ -121,19 +124,23 @@ namespace agg
 
     AGG_INLINE int iround(double v)
     {
-        return int((v < 0.0) ? v - 0.5 : v + 0.5);
+        return static_cast<int>(v < 0.0 ?
+            std::max(v - 0.5, static_cast<double>(std::numeric_limits<int>::lowest())) :
+            std::min(v + 0.5, static_cast<double>(std::numeric_limits<int>::max()))
+        );
     }
     AGG_INLINE int uround(double v)
     {
-        return unsigned(v + 0.5);
+        return static_cast<unsigned>(v < 0.0 ? 0 :
+			std::min(v + 0.5, static_cast<double>(std::numeric_limits<int>::max())));
     }
     AGG_INLINE unsigned ufloor(double v)
     {
-        return unsigned(v);
+        return static_cast<unsigned>(v);
     }
     AGG_INLINE unsigned uceil(double v)
     {
-        return unsigned(std::ceil(v));
+        return static_cast<unsigned>(std::ceil(v));
     }
 
     //---------------------------------------------------------------saturation

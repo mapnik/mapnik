@@ -47,8 +47,8 @@ namespace agg
 
         bool operator () (const line_aa_vertex& val)
         {
-            double dx = val.x - x;
-            double dy = val.y - y;
+            double dx = static_cast<double>(val.x) - x;
+            double dy = static_cast<double>(val.y) - y;
             return (len = uround(sqrt(dx * dx + dy * dy))) > 
                    (line_subpixel_scale + line_subpixel_scale / 2);
         }

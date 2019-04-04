@@ -13,8 +13,9 @@
 //          http://www.antigrain.com
 //----------------------------------------------------------------------------
 
-#include <math.h>
 #include "agg_line_aa_basics.h"
+
+#include <cmath>
 
 namespace agg
 {
@@ -52,27 +53,38 @@ void bisectrix(const line_parameters& l1,
                const line_parameters& l2,
                int* x, int* y)
 {
-    double k = double(l2.len) / double(l1.len);
-    double tx = l2.x2 - (l2.x1 - l1.x1) * k;
-    double ty = l2.y2 - (l2.y1 - l1.y1) * k;
+	double l1_x1 = static_cast<double>(l1.x1);
+	double l1_y1 = static_cast<double>(l1.y1);
+	double l2_x1 = static_cast<double>(l2.x1);
+	double l2_x2 = static_cast<double>(l2.x2);
+	double l2_y1 = static_cast<double>(l2.y1);
+	double l2_y2 = static_cast<double>(l2.y2);;
+
+    double k = static_cast<double>(l2.len) / static_cast<double>(l1.len);
+    double tx = l2_x2 - (l2_x1 - l1_x1) * k;
+    double ty = l2_y2 - (l2_y1 - l1_y1) * k;
 
     //All bisectrices must be on the right of the line
     //If the next point is on the left (l1 => l2.2)
     //then the bisectix should be rotated by 180 degrees.
-    if(double(l2.x2 - l2.x1) * double(l2.y1 - l1.y1) <
-       double(l2.y2 - l2.y1) * double(l2.x1 - l1.x1) + 100.0)
+    if((l2_x2 - l2_x1) * (l2_y1 - l1_y1) <
+       (l2_y2 - l2_y1) * (l2_x1 - l1_x1) + 100.0)
     {
-        tx -= (tx - l2.x1) * 2.0;
-        ty -= (ty - l2.y1) * 2.0;
+        tx -= (tx - l2_x1) * 2.0;
+        ty -= (ty - l2_y1) * 2.0;
     }
 
     // Check if the bisectrix is too short
-    double dx = tx - l2.x1;
-    double dy = ty - l2.y1;
-    if((int)sqrt(dx * dx + dy * dy) < line_subpixel_scale)
+    double dx = tx - l2_x1;
+    double dy = ty - l2_y1;
+    if(std::sqrt(dx * dx + dy * dy) < static_cast<double>(line_subpixel_scale))
     {
-        *x = (l2.x1 + l2.x1 + (l2.y1 - l1.y1) + (l2.y2 - l2.y1)) >> 1;
-        *y = (l2.y1 + l2.y1 - (l2.x1 - l1.x1) - (l2.x2 - l2.x1)) >> 1;
+//        *x = (l2.x1 + l2.x1 + (l2.y1 - l1.y1) + (l2.y2 - l2.y1)) >> 1;
+//        *y = (l2.y1 + l2.y1 - (l2.x1 - l1.x1) - (l2.x2 - l2.x1)) >> 1;
+        double x_value = (l2_x1 + l2_x1 + (l2_y1 - l1_y1) + (l2_y2 - l2_y1)) / 2;
+        double y_value = (l2_y1 + l2_y1 - (l2_x1 - l1_x1) - (l2_x2 - l2_x1)) / 2;
+        *x = iround(x_value);
+        *y = iround(y_value);
         return;
     }
     *x = iround(tx);

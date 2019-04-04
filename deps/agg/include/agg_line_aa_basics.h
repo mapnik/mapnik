@@ -82,10 +82,10 @@ namespace agg
     {
         //---------------------------------------------------------------------
         line_parameters() {}
-        line_parameters(int x1_, int y1_, int x2_, int y2_, int len_) :
+        line_parameters(long int x1_, long int y1_, long int x2_, long int y2_, int len_) :
             x1(x1_), y1(y1_), x2(x2_), y2(y2_),
-            dx(std::abs(x2_ - x1_)),
-            dy(std::abs(y2_ - y1_)),
+            dx(agg::iround(std::abs(x2_ - x1_))),
+            dy(agg::iround(std::abs(y2_ - y1_))),
             sx((x2_ > x1_) ? 1 : -1),
             sy((y2_ > y1_) ? 1 : -1),
             vertical(dy >= dx),
