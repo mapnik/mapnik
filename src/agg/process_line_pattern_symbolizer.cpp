@@ -198,7 +198,8 @@ struct agg_renderer_process_visitor_l
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
         if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
-        image_rgba8 image(bbox_image.width(), bbox_image.height());
+        using pixel_type = mapnik::image_rgba8::pixel::type;
+        mapnik::image_rgba8 image(safe_cast<pixel_type>(bbox_image.width()), safe_cast<pixel_type>(bbox_image.height()));
         render_pattern<buffer_type>(marker, image_tr, 1.0, image);
         render_by_pattern_type(image);
     }

@@ -32,6 +32,7 @@
 #include <mapnik/transform_path_adapter.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/util/is_clockwise.hpp>
+#include <mapnik/safe_cast.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore_agg.hpp>
@@ -50,17 +51,17 @@ namespace {
 template <typename T>
 void draw_rect(T &pixmap, box2d<double> const& box)
 {
-    int x0 = static_cast<int>(box.minx());
-    int x1 = static_cast<int>(box.maxx());
-    int y0 = static_cast<int>(box.miny());
-    int y1 = static_cast<int>(box.maxy());
+    std::size_t x0 = safe_cast<std::size_t >(box.minx());
+    std::size_t x1 = safe_cast<std::size_t >(box.maxx());
+    std::size_t y0 = safe_cast<std::size_t >(box.miny());
+    std::size_t y1 = safe_cast<std::size_t >(box.maxy());
     unsigned color1 = 0xff0000ff;
-    for (int x=x0; x<x1; x++)
+    for (std::size_t x = x0; x < x1; x++)
     {
         mapnik::set_pixel(pixmap, x, y0, color1);
         mapnik::set_pixel(pixmap, x, y1, color1);
     }
-    for (int y=y0; y<y1; y++)
+    for (std::size_t y = y0; y < y1; y++)
     {
         mapnik::set_pixel(pixmap, x0, y, color1);
         mapnik::set_pixel(pixmap, x1, y, color1);

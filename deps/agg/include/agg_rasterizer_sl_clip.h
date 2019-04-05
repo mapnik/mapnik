@@ -227,6 +227,11 @@ namespace agg
                 coord_type y3, y4;
                 unsigned   f3, f4;
 
+                double sub_bx1_x1 = static_cast<double>(m_clip_box.x1) - static_cast<double>(x1);
+                double sub_bx2_x1 = static_cast<double>(m_clip_box.x2) - static_cast<double>(x1);
+                double sub_y2_y1 = static_cast<double>(y2) - static_cast<double>(y1);
+                double sub_x2_x1 = static_cast<double>(x2) - static_cast<double>(x1);
+
                 switch(((f1 & 5) << 1) | (f2 & 5))
                 {
                 case 0: // Visible by X
@@ -234,14 +239,14 @@ namespace agg
                     break;
 
                 case 1: // x2 > clip.x2
-                    y3 = y1 + Conv::mul_div(m_clip_box.x2-x1, y2-y1, x2-x1);
+                    y3 = y1 + Conv::mul_div(sub_bx2_x1, sub_y2_y1, sub_x2_x1);
                     f3 = clipping_flags_y(y3, m_clip_box);
                     line_clip_y(ras, x1, y1, m_clip_box.x2, y3, f1, f3);
                     line_clip_y(ras, m_clip_box.x2, y3, m_clip_box.x2, y2, f3, f2);
                     break;
 
                 case 2: // x1 > clip.x2
-                    y3 = y1 + Conv::mul_div(m_clip_box.x2-x1, y2-y1, x2-x1);
+                    y3 = y1 + Conv::mul_div(sub_bx2_x1, sub_y2_y1, sub_x2_x1);
                     f3 = clipping_flags_y(y3, m_clip_box);
                     line_clip_y(ras, m_clip_box.x2, y1, m_clip_box.x2, y3, f1, f3);
                     line_clip_y(ras, m_clip_box.x2, y3, x2, y2, f3, f2);
@@ -252,15 +257,15 @@ namespace agg
                     break;
 
                 case 4: // x2 < clip.x1
-                    y3 = y1 + Conv::mul_div(m_clip_box.x1-x1, y2-y1, x2-x1);
+                    y3 = y1 + Conv::mul_div(sub_bx1_x1, sub_y2_y1, sub_x2_x1);
                     f3 = clipping_flags_y(y3, m_clip_box);
                     line_clip_y(ras, x1, y1, m_clip_box.x1, y3, f1, f3);
                     line_clip_y(ras, m_clip_box.x1, y3, m_clip_box.x1, y2, f3, f2);
                     break;
 
                 case 6: // x1 > clip.x2 && x2 < clip.x1
-                    y3 = y1 + Conv::mul_div(m_clip_box.x2-x1, y2-y1, x2-x1);
-                    y4 = y1 + Conv::mul_div(m_clip_box.x1-x1, y2-y1, x2-x1);
+                    y3 = y1 + Conv::mul_div(sub_bx2_x1, sub_y2_y1, sub_x2_x1);
+                    y4 = y1 + Conv::mul_div(sub_bx1_x1, sub_y2_y1, sub_x2_x1);
                     f3 = clipping_flags_y(y3, m_clip_box);
                     f4 = clipping_flags_y(y4, m_clip_box);
                     line_clip_y(ras, m_clip_box.x2, y1, m_clip_box.x2, y3, f1, f3);
@@ -269,15 +274,15 @@ namespace agg
                     break;
 
                 case 8: // x1 < clip.x1
-                    y3 = y1 + Conv::mul_div(m_clip_box.x1-x1, y2-y1, x2-x1);
+                    y3 = y1 + Conv::mul_div(sub_bx1_x1, sub_y2_y1, sub_x2_x1);
                     f3 = clipping_flags_y(y3, m_clip_box);
                     line_clip_y(ras, m_clip_box.x1, y1, m_clip_box.x1, y3, f1, f3);
                     line_clip_y(ras, m_clip_box.x1, y3, x2, y2, f3, f2);
                     break;
 
                 case 9:  // x1 < clip.x1 && x2 > clip.x2
-                    y3 = y1 + Conv::mul_div(m_clip_box.x1-x1, y2-y1, x2-x1);
-                    y4 = y1 + Conv::mul_div(m_clip_box.x2-x1, y2-y1, x2-x1);
+                    y3 = y1 + Conv::mul_div(sub_bx1_x1, sub_y2_y1, sub_x2_x1);
+                    y4 = y1 + Conv::mul_div(sub_bx2_x1, sub_y2_y1, sub_x2_x1);
                     f3 = clipping_flags_y(y3, m_clip_box);
                     f4 = clipping_flags_y(y4, m_clip_box);
                     line_clip_y(ras, m_clip_box.x1, y1, m_clip_box.x1, y3, f1, f3);
