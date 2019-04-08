@@ -38,7 +38,7 @@ namespace agg
         //static T*   allocate(unsigned num)       { return static_cast<T*>(::operator new(sizeof(T)*num));}
         //static void deallocate(T* ptr, unsigned) { ::operator delete(ptr) ;}
         static T*   allocate(unsigned num)       { return new T [num]; }
-        static void deallocate(T* ptr, unsigned) { delete [] ptr;      }
+        static void deallocate(T* ptr, unsigned) { if (ptr) delete [] ptr; }
     };
 
     // Single object allocator. It's also can be replaced with your custom
