@@ -149,8 +149,8 @@ namespace agg
         //------------------------------------------------------------------------
         template<class Rasterizer>
         AGG_INLINE void line_clip_y(Rasterizer& ras,
-                                    double x1, double y1,
-                                    double x2, double y2,
+                                    coord_type x1, coord_type y1,
+                                    coord_type x2, coord_type y2,
                                     unsigned   f1, unsigned   f2) const
         {
             f1 &= 10;
@@ -173,32 +173,46 @@ namespace agg
                 double tx2 = x2;
                 double ty2 = y2;
 
+                double sub_by1_y1 = std::max(static_cast<double>(std::numeric_limits<coord_type>::lowest()),
+                                             static_cast<double>(m_clip_box.y1) - ty1);
+                double sub_by2_y1 = std::max(static_cast<double>(std::numeric_limits<coord_type>::lowest()),
+                                             static_cast<double>(m_clip_box.y2) - ty1);
+                double sub_y2_y1 = std::max(static_cast<double>(std::numeric_limits<coord_type>::lowest()),
+                                            ty2 - ty1);
+                double sub_x2_x1 = std::max(static_cast<double>(std::numeric_limits<coord_type>::lowest()),
+                                            tx2 - tx1);
+
                 if(f1 & 8) // y1 < clip.y1
                 {
-                    tx1 = x1 + Conv::mul_div(m_clip_box.y1-y1, x2-x1, y2-y1);
+                    tx1 = x1 + Conv::mul_div(sub_by1_y1, sub_x2_x1, sub_y2_y1);
                     ty1 = m_clip_box.y1;
                 }
 
                 if(f1 & 2) // y1 > clip.y2
                 {
-                    tx1 = x1 + Conv::mul_div(m_clip_box.y2-y1, x2-x1, y2-y1);
+                    tx1 = x1 + Conv::mul_div(sub_by2_y1, sub_x2_x1, sub_y2_y1);
                     ty1 = m_clip_box.y2;
                 }
 
                 if(f2 & 8) // y2 < clip.y1
                 {
-                    tx2 = x1 + Conv::mul_div(m_clip_box.y1-y1, x2-x1, y2-y1);
+                    tx2 = x1 + Conv::mul_div(sub_by1_y1, sub_x2_x1, sub_y2_y1);
                     ty2 = m_clip_box.y1;
                 }
 
                 if(f2 & 2) // y2 > clip.y2
                 {
-                    tx2 = x1 + Conv::mul_div(m_clip_box.y2-y1, x2-x1, y2-y1);
+                    tx2 = x1 + Conv::mul_div(sub_by2_y1, sub_x2_x1, sub_y2_y1);
                     ty2 = m_clip_box.y2;
                 }
 
-                ras.line(Conv::xi(iround(tx1)), Conv::yi(iround(ty1)),
-                         Conv::xi(iround(tx2)), Conv::yi(iround(ty2)));
+                tx1 = std::min(static_cast<double>(std::numeric_limits<coord_type>::max()), tx1);
+                ty1 = std::min(static_cast<double>(std::numeric_limits<coord_type>::max()), ty1);
+                tx2 = std::min(static_cast<double>(std::numeric_limits<coord_type>::max()), tx2);
+                ty2 = std::min(static_cast<double>(std::numeric_limits<coord_type>::max()), ty2);
+
+                ras.line(Conv::xi(tx1), Conv::yi(ty1),
+                         Conv::xi(tx2), Conv::yi(ty2));
             }
         }
 
