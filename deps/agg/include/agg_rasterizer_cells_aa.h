@@ -214,8 +214,8 @@ namespace agg
                                                             int x1, int y1, 
                                                             int x2, int y2)
     {
-        int ex1 = x1 >> poly_subpixel_shift;
-        int ex2 = x2 >> poly_subpixel_shift;
+        int ex1 = x1 / poly_subpixel_scale;
+        int ex2 = x2 / poly_subpixel_scale;
         int fx1 = x1 & poly_subpixel_mask;
         int fx2 = x2 & poly_subpixel_mask;
 
@@ -319,7 +319,7 @@ namespace agg
     {
         enum dx_limit_e { dx_limit = 16384 << poly_subpixel_shift };
 
-        int dx = x2 - x1;
+        long int dx = static_cast<long int>(x2) - static_cast<long int>(x1);
 
         if(dx >= dx_limit || dx <= -dx_limit)
         {
@@ -335,11 +335,11 @@ namespace agg
             line(cx, cy, x2, y2);
         }
 
-        int dy = y2 - y1;
-        int ex1 = x1 >> poly_subpixel_shift;
-        int ex2 = x2 >> poly_subpixel_shift;
-        int ey1 = y1 >> poly_subpixel_shift;
-        int ey2 = y2 >> poly_subpixel_shift;
+        int dy = agg::iround(static_cast<double>(y2) - static_cast<double>(y1));
+        int ex1 = x1 / poly_subpixel_scale;
+        int ex2 = x2 / poly_subpixel_scale;
+        int ey1 = y1 / poly_subpixel_scale;
+        int ey2 = y2 / poly_subpixel_scale;
         int fy1 = y1 & poly_subpixel_mask;
         int fy2 = y2 & poly_subpixel_mask;
 
@@ -371,8 +371,8 @@ namespace agg
         incr  = 1;
         if(dx == 0)
         {
-            int ex = x1 >> poly_subpixel_shift;
-            int two_fx = (x1 - (ex << poly_subpixel_shift)) << 1;
+            int ex = x1 / poly_subpixel_scale;
+            int two_fx = (x1 - (ex * poly_subpixel_scale)) * 2;
             int area;
 
             first = poly_subpixel_scale;
@@ -434,7 +434,7 @@ namespace agg
         render_hline(ey1, x1, fy1, x_from, first);
 
         ey1 += incr;
-        set_curr_cell(x_from >> poly_subpixel_shift, ey1);
+        set_curr_cell(x_from / poly_subpixel_scale, ey1);
 
         if(ey1 != ey2)
         {
@@ -464,7 +464,7 @@ namespace agg
                 x_from = x_to;
 
                 ey1 += incr;
-                set_curr_cell(x_from >> poly_subpixel_shift, ey1);
+                set_curr_cell(x_from / poly_subpixel_scale, ey1);
             }
         }
         render_hline(ey1, x_from, poly_subpixel_scale - first, x2, fy2);
