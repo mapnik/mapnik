@@ -23,10 +23,9 @@
 
 // mapnik
 #include <mapnik/wkb.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/geom_util.hpp>
-#include <mapnik/util/noncopyable.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/geometry/correct.hpp>
+#include <mapnik/util/noncopyable.hpp>
 #include <cmath>
 
 namespace mapnik { namespace detail {
