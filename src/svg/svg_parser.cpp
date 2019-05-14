@@ -402,6 +402,9 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         case "symbol"_case:
             parser.ignore_ = true;
             break;
+        case "pattern"_case:
+            parser.ignore_ = true;
+            break;
         }
 
         if (!parser.is_defs_) // FIXME
@@ -494,6 +497,10 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
         parser.ignore_ = false;
     }
     else if(name == "symbol"_case)
+    {
+        parser.ignore_ = false;
+    }
+    else if(name == "pattern"_case)
     {
         parser.ignore_ = false;
     }
