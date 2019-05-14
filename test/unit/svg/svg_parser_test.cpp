@@ -666,8 +666,8 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/gradient-nodef.svg");
         char const* expected_errors[] =
         {
-            "SVG parse error: failed to locate <gradient> fill with <id> \"MyGradient\"",
-            "SVG parse error: failed to locate <gradient> stroke with <id> \"MyGradient\""
+            "SVG parse error: failed to locate fill with <id> \"MyGradient\"",
+            "SVG parse error: failed to locate stroke with <id> \"MyGradient\""
         };
         {
             test_parser p;
@@ -692,8 +692,8 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/gradient-no-id.svg");
         char const* expected_errors[] =
         {
-            "SVG parse error: failed to locate <gradient> fill with <id> \"MyGradient\"",
-            "SVG parse error: failed to locate <gradient> stroke with <id> \"MyGradient\""
+            "SVG parse error: failed to locate fill with <id> \"MyGradient\"",
+            "SVG parse error: failed to locate stroke with <id> \"MyGradient\""
         };
 
         std::ifstream in(svg_name.c_str());
