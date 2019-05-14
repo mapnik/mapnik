@@ -573,14 +573,14 @@ void parse_stroke(svg_parser& parser, char const* value)
             else
             {
                 std::stringstream ss;
-                ss << "SVG parse error: failed to locate <gradient> stroke with <id> \"" << id << "\"";
+                ss << "SVG parse error: failed to locate stroke with <id> \"" << id << "\"";
                 parser.err_handler().on_error(ss.str());
             }
         }
         else
         {
             std::stringstream ss;
-            ss << "SVG parse error: failed to locate <gradient> stroke with <id> \"" << id << "\"";
+            ss << "SVG parse error: failed to locate stroke with <id> \"" << id << "\"";
             parser.err_handler().on_error(ss.str());
         }
     }
@@ -616,14 +616,14 @@ void parse_fill(svg_parser& parser, char const* value)
             else
             {
                 std::stringstream ss;
-                ss << "SVG parse error: failed to locate <gradient> fill with <id> \"" << id << "\"";
+                ss << "SVG parse error: failed to locate fill with <id> \"" << id << "\"";
                 parser.err_handler().on_error(ss.str());
             }
         }
         else
         {
             std::stringstream ss;
-            ss << "SVG parse error: failed to locate <gradient> fill with <id> \"" << id << "\"";
+            ss << "SVG parse error: failed to locate fill with <id> \"" << id << "\"";
             parser.err_handler().on_error(ss.str());
         }
     }
