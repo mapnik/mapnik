@@ -43,21 +43,6 @@ matrix:
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
           packages: [ 'clang-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
-    - os: linux
-      name: Linux clang-3.9 + coverage
-      env: >-
-          CXX="ccache clang++-3.9 -Qunused-arguments"
-          CC="clang-3.9"
-          COVERAGE=true
-          QUIET=true
-      before_install:
-        - export LINKFLAGS="-fuse-ld=gold-2.26"
-        - export LLVM_COV="llvm-cov-3.9"
-      addons:
-        postgresql: "9.5"
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'clang-3.9', 'llvm-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: osx
       name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
