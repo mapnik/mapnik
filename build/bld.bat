@@ -3,7 +3,7 @@
 :: Pedro Vicente
 
 @echo off
-set MSVC_VERSION="Visual Studio 14 2015 Win64"
+set MSVC_VERSION="Visual Studio 14 2015"
 echo using %MSVC_VERSION%
 
 :build_mapnik
@@ -16,6 +16,9 @@ cmake .. ^
 -DFREE_TYPE_INCLUDE=L:\freetype-2.10.0\include ^
 -DZLIB_INCLUDE=L:\zlib-1.2.11 ^
 -DLIBXML2_INCLUDE=L:\libxml2-2.9.9\include ^
--DLIBICONV_INCLUDE=L:\libiconv-1.14\source\include
+-DLIBICONV_INCLUDE=L:\libiconv-1.14\source\include ^
+-Dlibboost_regex=F:\wt.extensions\boost_1_65_1\stage\lib\boost_regex-vc140-mt-gd-1_65_1.lib ^
+-Dlibboost_filesystem=F:\wt.extensions\boost_1_65_1\stage\lib\boost_filesystem-vc140-mt-gd-1_65_1.lib ^
+-Dlibboost_system=F:\wt.extensions\boost_1_65_1\stage\lib\libboost_system-vc140-mt-gd-1_65_1.lib 
 )
 echo done

@@ -147,6 +147,9 @@ set(mapnik_lib mapnik)
 #//////////////////////////
 
 set(lib_dep ${lib_dep})
+set(lib_dep ${lib_dep} ${libboost_regex})
+set(lib_dep ${lib_dep} ${libboost_filesystem})
+set(lib_dep ${lib_dep} ${libboost_system})
 
 #//////////////////////////
 #example program
