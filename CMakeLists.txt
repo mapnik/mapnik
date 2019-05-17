@@ -14,7 +14,7 @@ include_directories(${LIBXML2_INCLUDE})
 include_directories(${LIBICONV_INCLUDE})
 
 #//////////////////////////
-#napnik lib sources 
+#napnik core lib sources 
 #//////////////////////////
 
 set(sources ${sources})
@@ -116,7 +116,30 @@ set(sources ${sources} src/text_properties.cpp)
 set(sources ${sources} src/xml_tree.cpp)
 set(sources ${sources} src/config_error.cpp)
 set(sources ${sources} src/color_factory.cpp)
+
+#//////////////////////////
+#napnik agg renderer sources 
+#//////////////////////////
+
+set(sources ${sources} src/agg/agg_renderer.cpp)
+set(sources ${sources} src/agg/process_building_symbolizer.cpp)
+set(sources ${sources} src/agg/process_line_symbolizer.cpp)
+set(sources ${sources} src/agg/process_line_pattern_symbolizer.cpp)
+set(sources ${sources} src/agg/process_text_symbolizer.cpp)
+set(sources ${sources} src/agg/process_point_symbolizer.cpp)
+set(sources ${sources} src/agg/process_polygon_symbolizer.cpp)
+set(sources ${sources} src/agg/process_polygon_pattern_symbolizer.cpp)
+set(sources ${sources} src/agg/process_raster_symbolizer.cpp)
+set(sources ${sources} src/agg/process_shield_symbolizer.cpp)
+set(sources ${sources} src/agg/process_markers_symbolizer.cpp)
+set(sources ${sources} src/agg/process_debug_symbolizer.cpp)
+
+#//////////////////////////
+#napnik library 
+#//////////////////////////
+
 add_library(mapnik ${sources})
+set(mapnik_lib mapnik)
 
 #//////////////////////////
 #link with libraries
@@ -130,4 +153,4 @@ set(lib_dep ${lib_dep})
 #//////////////////////////
 
 add_executable(example_01 example/example_01.cpp)
-target_link_libraries (example_01 ${mapnik} ${lib_dep})
+target_link_libraries (example_01 ${mapnik_lib} ${lib_dep})
