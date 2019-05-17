@@ -11,6 +11,7 @@ include_directories(${ICU_INCLUDE})
 include_directories(${FREE_TYPE_INCLUDE})
 include_directories(${ZLIB_INCLUDE})
 include_directories(${LIBXML2_INCLUDE})
+include_directories(${LIBICONV_INCLUDE})
 
 set(sources ${sources})
 set(sources ${sources} src/fs.cpp)

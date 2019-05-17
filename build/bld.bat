@@ -15,6 +15,7 @@ cmake .. ^
 -DICU_INCLUDE=L:\icu\source\common ^
 -DFREE_TYPE_INCLUDE=L:\freetype-2.10.0\include ^
 -DZLIB_INCLUDE=L:\zlib-1.2.11 ^
--DLIBXML2_INCLUDE=L:\libxml2-2.9.9\include
+-DLIBXML2_INCLUDE=L:\libxml2-2.9.9\include ^
+-DLIBICONV_INCLUDE=L:\libiconv-1.14\source\include
 )
 echo done
