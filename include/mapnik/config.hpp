@@ -26,6 +26,7 @@
 // Windows DLL support
 
 #ifdef _WINDOWS
+# ifdef WINDOWS_DLL_SUPPORT
 #  define MAPNIK_EXP __declspec (dllexport)
 #  define MAPNIK_IMP __declspec (dllimport)
 #  ifdef MAPNIK_EXPORTS
@@ -33,6 +34,11 @@
 #  else
 #    define MAPNIK_DECL __declspec (dllimport)
 #  endif
+# else
+#  define MAPNIK_DECL
+#  define MAPNIK_EXP
+#  define MAPNIK_IMP
+# endif //WINDOWS_DLL_SUPPORT
 #  pragma warning( disable: 4251 )
 #  pragma warning( disable: 4275 )
 #  if (_MSC_VER >= 1400) // vc8

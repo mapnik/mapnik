@@ -11,6 +11,10 @@ echo building Mapnik
 rm -rf CMakeCache.txt CMakeFiles
 cmake .. ^
 -G %MSVC_VERSION% ^
--DBOOST_PREFIX=F:\wt.extensions\boost_1_65_1
+-DBOOST_PREFIX=F:\wt.extensions\boost_1_65_1 ^
+-DICU_INCLUDE=L:\icu\source\common ^
+-DFREE_TYPE_INCLUDE=L:\freetype-2.10.0\include ^
+-DZLIB_INCLUDE=L:\zlib-1.2.11 ^
+-DLIBXML2_INCLUDE=L:\libxml2-2.9.9\include
 )
 echo done
