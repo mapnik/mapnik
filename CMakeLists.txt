@@ -13,6 +13,10 @@ include_directories(${ZLIB_INCLUDE})
 include_directories(${LIBXML2_INCLUDE})
 include_directories(${LIBICONV_INCLUDE})
 
+#//////////////////////////
+#napnik lib sources 
+#//////////////////////////
+
 set(sources ${sources})
 set(sources ${sources} src/fs.cpp)
 set(sources ${sources} src/debug_symbolizer.cpp)
@@ -113,3 +117,17 @@ set(sources ${sources} src/xml_tree.cpp)
 set(sources ${sources} src/config_error.cpp)
 set(sources ${sources} src/color_factory.cpp)
 add_library(mapnik ${sources})
+
+#//////////////////////////
+#link with libraries
+#lib_dep contains a cascade definition of all the libraries needed to link
+#//////////////////////////
+
+set(lib_dep ${lib_dep})
+
+#//////////////////////////
+#example program
+#//////////////////////////
+
+add_executable(example_01 example/example_01.cpp)
+target_link_libraries (example_01 ${mapnik} ${lib_dep})
