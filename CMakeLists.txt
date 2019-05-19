@@ -135,7 +135,7 @@ set(sources ${sources} src/agg/process_markers_symbolizer.cpp)
 set(sources ${sources} src/agg/process_debug_symbolizer.cpp)
 
 #//////////////////////////
-#napnik library 
+#mapnik library 
 #//////////////////////////
 
 add_library(mapnik ${sources})
@@ -150,6 +150,7 @@ set(lib_dep ${lib_dep})
 set(lib_dep ${lib_dep} ${libboost_regex})
 set(lib_dep ${lib_dep} ${libboost_filesystem})
 set(lib_dep ${lib_dep} ${libboost_system})
+set(lib_dep ${lib_dep} ${LIB_ICU})
 
 #//////////////////////////
 #example program

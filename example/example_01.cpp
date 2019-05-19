@@ -6,7 +6,7 @@
 int main()
 {
   mapnik::Map m(256, 256);
-  mapnik::load_map(m, "rockland.osm");
+  mapnik::load_map(m, "style_01.xml");
   m.zoom_all();
   mapnik::image_32 im(m.width(), m.height());
   mapnik::agg_renderer<mapnik::image_32> ren(m, im);
