@@ -6,18 +6,38 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories(include)
 include_directories(deps)
 include_directories(deps/agg/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+message("-- Source directory: " ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${BOOST_PREFIX})
 include_directories(${ICU_INCLUDE})
 include_directories(${FREE_TYPE_INCLUDE})
 include_directories(${ZLIB_INCLUDE})
-include_directories(${LIBXML2_INCLUDE})
 include_directories(${LIBICONV_INCLUDE})
 
+if (MSVC)
+add_definitions(-D_WINDOWS)
+endif(MSVC)
+
 #//////////////////////////
-#napnik core lib sources 
+#mapnik core lib sources 
+#${sources} contains a cascade definition of all the source files
 #//////////////////////////
 
 set(sources ${sources})
+
+#//////////////////////////
+#LIBXML2 
+#//////////////////////////
+
+include_directories(${LIBXML2_INCLUDE})
+add_definitions(-DHAVE_LIBXML2)
+set(sources ${sources} src/libxml2_loader.cpp)
+
+
+#//////////////////////////
+#mapnik core lib sources 
+#//////////////////////////
+
 set(sources ${sources} src/fs.cpp)
 set(sources ${sources} src/debug_symbolizer.cpp)
 set(sources ${sources} src/request.cpp)
@@ -116,9 +136,12 @@ set(sources ${sources} src/text_properties.cpp)
 set(sources ${sources} src/xml_tree.cpp)
 set(sources ${sources} src/config_error.cpp)
 set(sources ${sources} src/color_factory.cpp)
+#for windows
+set(sources ${sources} src/utils.cpp)
+
 
 #//////////////////////////
-#napnik agg renderer sources 
+#mapnik agg renderer sources 
 #//////////////////////////
 
 set(sources ${sources} src/agg/agg_renderer.cpp)
@@ -135,10 +158,41 @@ set(sources ${sources} src/agg/process_markers_symbolizer.cpp)
 set(sources ${sources} src/agg/process_debug_symbolizer.cpp)
 
 #//////////////////////////
+#agg library in dep 
+#//////////////////////////
+
+set(sources ${sources} deps/agg/src/agg_arc.cpp)
+set(sources ${sources} deps/agg/src/agg_image_filters.cpp)
+set(sources ${sources} deps/agg/src/agg_trans_double_path.cpp)
+set(sources ${sources} deps/agg/src/agg_vcgen_smooth_poly1.cpp)
+set(sources ${sources} deps/agg/src/agg_arrowhead.cpp)
+set(sources ${sources} deps/agg/src/agg_line_aa_basics.cpp)
+set(sources ${sources} deps/agg/src/agg_trans_single_path.cpp)
+set(sources ${sources} deps/agg/src/agg_vcgen_stroke.cpp)
+set(sources ${sources} deps/agg/src/agg_bezier_arc.cpp)
+set(sources ${sources} deps/agg/src/agg_line_profile_aa.cpp)
+set(sources ${sources} deps/agg/src/agg_trans_warp_magnifier.cpp)
+set(sources ${sources} deps/agg/src/agg_vpgen_clip_polygon.cpp)
+set(sources ${sources} deps/agg/src/agg_bspline.cpp)
+set(sources ${sources} deps/agg/src/agg_pixfmt_rgba.cpp)
+set(sources ${sources} deps/agg/src/agg_vcgen_bspline.cpp)
+set(sources ${sources} deps/agg/src/agg_vpgen_clip_polyline.cpp)
+set(sources ${sources} deps/agg/src/agg_curves.cpp)
+set(sources ${sources} deps/agg/src/agg_rounded_rect.cpp)
+set(sources ${sources} deps/agg/src/agg_vcgen_contour.cpp)
+set(sources ${sources} deps/agg/src/agg_vpgen_segmentator.cpp)
+set(sources ${sources} deps/agg/src/agg_embedded_raster_fonts.cpp)
+set(sources ${sources} deps/agg/src/agg_sqrt_tables.cpp)
+set(sources ${sources} deps/agg/src/agg_vcgen_dash.cpp)
+set(sources ${sources} deps/agg/src/agg_gsv_text.cpp)
+set(sources ${sources} deps/agg/src/agg_trans_affine.cpp)
+set(sources ${sources} deps/agg/src/agg_vcgen_markers_term.cpp)
+
+#//////////////////////////
 #mapnik library 
 #//////////////////////////
 
-add_library(mapnik ${sources})
+add_library(mapnik STATIC ${sources})
 set(mapnik_lib mapnik)
 
 #//////////////////////////
@@ -151,6 +205,8 @@ set(lib_dep ${lib_dep} ${libboost_regex})
 set(lib_dep ${lib_dep} ${libboost_filesystem})
 set(lib_dep ${lib_dep} ${libboost_system})
 set(lib_dep ${lib_dep} ${LIB_ICU})
+set(lib_dep ${lib_dep} ${LIB_FREETYPE})
+set(lib_dep ${lib_dep} ${LIB_LIBXML2})
 
 #//////////////////////////
 #example program

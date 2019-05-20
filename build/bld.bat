@@ -21,10 +21,12 @@ cmake .. ^
 -Dlibboost_system=M:\mapnik\boost_1_65_1\stage\lib\libboost_system-vc140-mt-gd-1_65_1.lib ^
 -DICU_INCLUDE=M:\mapnik\icu4c-64_2\source\common ^
 -DLIB_ICU=M:\mapnik\icu4c-64_2\lib64\icuucd.lib ^
--DFREE_TYPE_INCLUDE=L:\freetype-2.10.0\include ^
--DZLIB_INCLUDE=L:\zlib-1.2.11 ^
--DLIBXML2_INCLUDE=L:\libxml2-2.9.9\include ^
--DLIBICONV_INCLUDE=L:\libiconv-1.14\source\include 
+-DFREE_TYPE_INCLUDE=M:\mapnik\freetype-2.10.0\include ^
+-DLIB_FREETYPE=M:\mapnik\freetype-2.10.0\objs\x64\Debug\freetype.lib ^
+-DLIBXML2_INCLUDE=M:\mapnik\libxml2-2.9.9\include ^
+-DLIB_LIBXML2=M:\mapnik\libxml2-2.9.9\win32\VC10\x64\Debug\libxml2.lib ^
+-DLIBICONV_INCLUDE=M:\mapnik\libiconv-1.14\source\include ^
+-DZLIB_INCLUDE=L:\zlib-1.2.11 
 :: 
 :: build
 ::
