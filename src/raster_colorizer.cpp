@@ -42,6 +42,8 @@ static const char *colorizer_mode_strings[] = {
     "linear",
     "discrete",
     "exact",
+    "linear-rgba",
+    "linear-bgra",
     ""
 };
 
@@ -255,6 +257,35 @@ unsigned raster_colorizer::get_color(float val) const
             outputColor.set_alpha(a);
         }
 
+    }
+    break;
+    case COLORIZER_LINEAR_RGBA:
+    {
+        if(nextStopValue == stopValue)
+        {
+            return stopColor.rgba();
+        }
+
+        double fraction = (val - stopValue) / (nextStopValue - stopValue);
+        double colorStart = static_cast<double>(stopColor.rgba());
+        double colorEnd = static_cast<double>(nextStopColor.rgba());
+        outputColor = color(colorStart + fraction * (colorEnd - colorStart));
+    }
+    break;
+    case COLORIZER_LINEAR_BGRA:
+    {
+        if(nextStopValue == stopValue)
+        {
+            return stopColor.rgba();
+        }
+
+        double fraction = (val - stopValue) / (nextStopValue - stopValue);
+        std::swap(stopColor.red_, stopColor.blue_);
+        std::swap(nextStopColor.red_, nextStopColor.blue_);
+        double colorStart = static_cast<double>(stopColor.rgba());
+        double colorEnd = static_cast<double>(nextStopColor.rgba());
+        outputColor = color(colorStart + fraction * (colorEnd - colorStart));
+        std::swap(outputColor.red_, outputColor.blue_);
     }
     break;
     case COLORIZER_DISCRETE:
