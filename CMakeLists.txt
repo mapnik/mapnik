@@ -189,6 +189,16 @@ set(sources ${sources} deps/agg/src/agg_trans_affine.cpp)
 set(sources ${sources} deps/agg/src/agg_vcgen_markers_term.cpp)
 
 #//////////////////////////
+#OSM plugin 
+#//////////////////////////
+
+set(sources ${sources} plugins/input/osm/osm.cpp)
+set(sources ${sources} plugins/input/osm/osm_datasource.cpp)
+set(sources ${sources} plugins/input/osm/osm_featureset.cpp)
+set(sources ${sources} plugins/input/osm/osmparser.cpp)
+set(sources ${sources} plugins/input/osm/dataset_deliverer.cpp)
+
+#//////////////////////////
 #mapnik library 
 #//////////////////////////
 
