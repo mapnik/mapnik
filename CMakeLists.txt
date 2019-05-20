@@ -189,16 +189,6 @@ set(sources ${sources} deps/agg/src/agg_trans_affine.cpp)
 set(sources ${sources} deps/agg/src/agg_vcgen_markers_term.cpp)
 
 #//////////////////////////
-#OSM plugin 
-#//////////////////////////
-
-set(sources ${sources} plugins/input/osm/osm.cpp)
-set(sources ${sources} plugins/input/osm/osm_datasource.cpp)
-set(sources ${sources} plugins/input/osm/osm_featureset.cpp)
-set(sources ${sources} plugins/input/osm/osmparser.cpp)
-set(sources ${sources} plugins/input/osm/dataset_deliverer.cpp)
-
-#//////////////////////////
 #mapnik library 
 #//////////////////////////
 
@@ -217,6 +207,28 @@ set(lib_dep ${lib_dep} ${libboost_system})
 set(lib_dep ${lib_dep} ${LIB_ICU})
 set(lib_dep ${lib_dep} ${LIB_FREETYPE})
 set(lib_dep ${lib_dep} ${LIB_LIBXML2})
+
+#//////////////////////////
+#OSM plugin 
+#plugin depends on libmapnik and its dependencies
+#//////////////////////////
+
+set(osm_sources ${osm_sources})
+set(osm_sources ${osm_sources} plugins/input/osm/osm.cpp)
+set(osm_sources ${osm_sources} plugins/input/osm/osm_datasource.cpp)
+set(osm_sources ${osm_sources} plugins/input/osm/osm_featureset.cpp)
+set(osm_sources ${osm_sources} plugins/input/osm/osmparser.cpp)
+set(osm_sources ${osm_sources} plugins/input/osm/dataset_deliverer.cpp)
+add_library(osm SHARED ${osm_sources})
+target_link_libraries(osm ${mapnik_lib} ${lib_dep})
+message("-- Building OSM plugin...")
+
+#//////////////////////////
+#demo program
+#//////////////////////////
+
+add_executable(demo demo/c++/rundemo.cpp)
+target_link_libraries (demo ${mapnik_lib} ${lib_dep})
 
 #//////////////////////////
 #example program
