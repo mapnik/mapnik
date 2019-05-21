@@ -27,7 +27,9 @@ cmake .. ^
 -DLIB_LIBXML2=M:\mapnik\libxml2-2.9.9\win32\VC10\x64\Debug\libxml2.lib ^
 -DLIBICONV_INCLUDE=M:\mapnik\libiconv-1.14\source\include ^
 -DPNG_INCLUDES=M:\mapnik\libpng-1.6.37 ^
--DPNG_LIBS=M:\mapnik\libpng-1.6.37\projects\vstudio\x64\Debug\libpng16.lib
+-DPNG_LIBS=M:\mapnik\libpng-1.6.37\projects\vstudio\x64\Debug\libpng16.lib ^
+-DZLIB_INCLUDE=M:\mapnik\zlib ^
+-DZLIB_LIB=M:\mapnik\libpng-1.6.37\projects\vstudio\x64\Debug\zlib.lib
 
 :: 
 :: build

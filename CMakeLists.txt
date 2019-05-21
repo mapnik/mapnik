@@ -31,9 +31,16 @@ set(sources ${sources})
 #LIBXML2 
 #//////////////////////////
 
-include_directories(${LIBXML2_INCLUDE})
 add_definitions(-DHAVE_LIBXML2)
+include_directories(${LIBXML2_INCLUDE})
 set(sources ${sources} src/libxml2_loader.cpp)
+
+#//////////////////////////
+#PNG
+#//////////////////////////
+
+add_definitions(-DHAVE_PNG)
+include_directories(${PNG_INCLUDES})
 
 
 #//////////////////////////
@@ -209,14 +216,8 @@ set(lib_dep ${lib_dep} ${libboost_system})
 set(lib_dep ${lib_dep} ${LIB_ICU})
 set(lib_dep ${lib_dep} ${LIB_FREETYPE})
 set(lib_dep ${lib_dep} ${LIB_LIBXML2})
-
-#//////////////////////////
-#optional libraries
-#//////////////////////////
-
-add_definitions(-DHAVE_PNG)
-include_directories(${PNG_INCLUDES})
 set(lib_dep ${lib_dep} ${PNG_LIBS})
+set(lib_dep ${lib_dep} ${ZLIB_LIB})
 
 #//////////////////////////
 #OSM plugin 
