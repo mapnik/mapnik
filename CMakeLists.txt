@@ -16,7 +16,9 @@ include_directories(${LIBICONV_INCLUDE})
 
 if (MSVC)
 add_definitions(-D_WINDOWS)
+add_definitions(-DMAPNIK_EXPORTS)
 endif(MSVC)
+add_definitions(-DMAPNIK_HAS_DLCFN)
 
 #//////////////////////////
 #mapnik core lib sources 
@@ -207,6 +209,14 @@ set(lib_dep ${lib_dep} ${libboost_system})
 set(lib_dep ${lib_dep} ${LIB_ICU})
 set(lib_dep ${lib_dep} ${LIB_FREETYPE})
 set(lib_dep ${lib_dep} ${LIB_LIBXML2})
+
+#//////////////////////////
+#optional libraries
+#//////////////////////////
+
+add_definitions(-DHAVE_PNG)
+include_directories(${PNG_INCLUDES})
+set(lib_dep ${lib_dep} ${PNG_LIBS})
 
 #//////////////////////////
 #OSM plugin 
