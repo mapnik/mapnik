@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map background-color="#f2efe9" srs="+proj=latlong +datum=WGS84">
+<Layer name="highways" status="on" srs="+proj=latlong +datum=WGS84">
+    <Datasource>
+        <Parameter name="type">osm</Parameter>
+        <Parameter name="file">rockland.osm</Parameter>
+    </Datasource>
+</Layer>
+</Map>

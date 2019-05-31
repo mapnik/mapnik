@@ -48,7 +48,7 @@ struct weighted_vertex : private mapnik::noncopyable
 
     struct ascending_sort
     {
-        bool operator() (const weighted_vertex *a, const weighted_vertex *b)
+        bool operator() (const weighted_vertex *a, const weighted_vertex *b) const
         {
             return b->weight > a->weight;
         }
