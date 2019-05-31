@@ -4,16 +4,17 @@
 
 @echo off
 if not defined DevEnvDir (
- call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64
+ call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
  if errorlevel 1 goto :eof
 )
-set MSVC_VERSION="Visual Studio 14 2015 Win64"
+set MSVC_VERSION="Visual Studio 16 2019"
 echo using %MSVC_VERSION%
 
 :build_mapnik
 echo building Mapnik
 rm -rf CMakeCache.txt CMakeFiles
 cmake .. ^
+-A x64 ^
 -G %MSVC_VERSION% ^
 -DBOOST_PREFIX=M:\mapnik\boost_1_65_1 ^
 -Dlibboost_regex=M:\mapnik\boost_1_65_1\stage\lib\libboost_regex-vc140-mt-gd-1_65_1.lib ^
