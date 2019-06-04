@@ -32,7 +32,9 @@ int main( int argc, char **argv )
     using mapnik::freetype_engine;
     try
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)        
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif        
         QCoreApplication::setOrganizationName("Mapnik");
         QCoreApplication::setOrganizationDomain("mapnik.org");
         QCoreApplication::setApplicationName("Viewer");
