@@ -90,7 +90,12 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "shield-dy", nullptr, property_types::target_double },
     property_meta_type{ "unlock-image", nullptr, property_types::target_bool },
     property_meta_type{ "mode", nullptr, property_types::target_double },
-    property_meta_type{ "scaling", nullptr, property_types::target_double },
+    property_meta_type{ "scaling",
+                        [](enumeration_wrapper e)
+                        {
+                            return *scaling_method_to_string(scaling_method_e(e.value));
+                        },
+                        property_types::target_scaling_method},
     property_meta_type{ "filter-factor",  nullptr, property_types::target_double },
     property_meta_type{ "mesh-size", nullptr, property_types::target_double },
     property_meta_type{ "premultiplied",  nullptr, property_types::target_bool },

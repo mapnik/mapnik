@@ -68,10 +68,11 @@ struct enumeration_wrapper
     explicit enumeration_wrapper(T value_)
         : value(value_) {}
 
-    inline operator int() const
+    inline bool operator==(enumeration_wrapper const& rhs) const
     {
-        return value;
+        return value == rhs.value;
     }
+
 };
 
 using dash_array = std::vector<std::pair<double,double> >;
@@ -82,8 +83,8 @@ using text_placements_ptr = std::shared_ptr<text_placements>;
 namespace detail {
 
 using value_base_type = util::variant<value_bool,
-                                      value_integer,
                                       enumeration_wrapper,
+                                      value_integer,
                                       value_double,
                                       std::string,
                                       color,
