@@ -97,6 +97,7 @@ enum class property_types : std::uint8_t
     target_font_feature_settings,
     target_line_pattern,
     target_smooth_algorithm,
+    target_scaling_method
 };
 
 template <typename T>
