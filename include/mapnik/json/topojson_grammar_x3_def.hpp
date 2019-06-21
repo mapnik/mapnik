@@ -42,7 +42,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::arc,
-    (std::list<mapnik::topojson::coordinate>, coordinates)
+    (mapnik::topojson::position_array, coordinates)
     )
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -61,9 +61,8 @@ BOOST_FUSION_ADAPT_STRUCT(
     (double, maxy)
     )
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik { namespace topojson { namespace grammar {
 
-using index_type = topojson::index_type;
 struct create_point
 {
     using result_type = mapnik::topojson::point;
@@ -88,10 +87,10 @@ struct create_multi_point
     result_type operator()(T0 & coords, T1 & props) const
     {
         mapnik::topojson::multi_point mpt;
-        if (coords.template is<std::vector<mapnik::topojson::coordinate>>())
+        if (coords.template is<topojson::position_array>())
         {
-            auto const& points = coords.template get<std::vector<mapnik::topojson::coordinate>>();
-            mpt. points = points;
+            auto const& points = coords.template get<topojson::position_array>();
+            mpt.points = points;
             mpt.props = props;
         }
         return mpt;
@@ -105,10 +104,10 @@ struct create_line_string
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::linestring line;
-        if (arcs.template is<std::vector<index_type>>())
+        if (arcs.template is<topojson::index_array>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<index_type>>();
-            line.rings = arcs_;
+            auto const& arcs_ = arcs.template get<topojson::index_array>();
+            line.arcs = arcs_;
             line.props = props;
         }
         return line;
@@ -122,9 +121,9 @@ struct create_multi_line_string
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::multi_linestring mline;
-        if (arcs.template is<std::vector<std::vector<index_type>>>())
+        if (arcs.template is<topojson::index_array2>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<std::vector<index_type>>>();
+            auto const& arcs_ = arcs.template get<topojson::index_array2>();
             mline.lines = arcs_;
             mline.props = props;
         }
@@ -139,9 +138,9 @@ struct create_polygon
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::polygon poly;
-        if (arcs.template is<std::vector<std::vector<index_type>>>())
+        if (arcs.template is<topojson::index_array2>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<std::vector<index_type>>>();
+            auto const& arcs_ = arcs.template get<topojson::index_array2>();
             poly.rings = arcs_;
             poly.props = props;
         }
@@ -156,9 +155,9 @@ struct create_multi_polygon
     result_type operator()(T0 & arcs, T1 & props) const
     {
         mapnik::topojson::multi_polygon mpoly;
-        if (arcs.template is<std::vector<std::vector<std::vector<index_type>>>>())
+        if (arcs.template is<topojson::index_array3>())
         {
-            auto const& arcs_ = arcs.template get<std::vector<std::vector<std::vector<index_type>>>>();
+            auto const& arcs_ = arcs.template get<topojson::index_array3>();
             mpoly.polygons = arcs_;
             mpoly.props = props;
         }
@@ -285,14 +284,18 @@ auto const& json_string = json::unicode_string_grammar();
 auto const& json_value = json::generic_json_grammar();
 }
 
-using coordinates_type = util::variant<topojson::coordinate,std::vector<topojson::coordinate>>;
-using arcs_type = util::variant<std::vector<index_type>,
-                                std::vector<std::vector<index_type>>,
-                                std::vector<std::vector<std::vector<index_type>>>>;
+using coordinates_type = util::variant<topojson::coordinate,
+                                       topojson::position_array>;
+
+using arcs_type = util::variant<topojson::empty,
+                                topojson::index_array,
+                                topojson::index_array2,
+                                topojson::index_array3>;
 
 struct topojson_geometry_type_ : x3::symbols<int>
 {
     topojson_geometry_type_()
+        : x3::symbols<int>(std::string("Geometry type"))
     {
         add
             ("\"Point\"",1)
@@ -303,47 +306,10 @@ struct topojson_geometry_type_ : x3::symbols<int>
             ("\"MultiPolygon\"",6)
             ;
     }
-} topojson_geometry_type;
+} const topojson_geometry_type = {};
 
-// start rule
-topojson_grammar_type const topology MAPNIK_INIT_PRIORITY(104) ("Topology");
-// rules
-x3::rule<class transform_tag, mapnik::topojson::transform> const transform = "Transform";
-x3::rule<class bbox_tag, mapnik::topojson::bounding_box> const bbox = "Bounding Box";
-x3::rule<class objects_tag, std::vector<mapnik::topojson::geometry>> const objects= "Objects";
-x3::rule<class property_tag, mapnik::topojson::property> const property = "Property";
-x3::rule<class properties_tag, mapnik::topojson::properties> const properties = "Properties";
-x3::rule<class geometry_tag, mapnik::topojson::geometry> const geometry = "Geometry";
-x3::rule<class geometry_collection_tag, std::vector<mapnik::topojson::geometry>> const geometry_collection = "Geometry Collection";
-x3::rule<class geometry_tuple_tag,
-         std::tuple<int,
-                    coordinates_type,
-                    arcs_type,
-                    mapnik::topojson::properties>> const geometry_tuple = "Geometry Tuple";
-x3::rule<class coordinate_tag, mapnik::topojson::coordinate> const coordinate = "Coordinate";
-x3::rule<class coordinates_tag, coordinates_type> const coordinates = "Coordinates";
-x3::rule<class arc_tag, mapnik::topojson::arc> const arc = "Arc";
-x3::rule<class arcs_tag, std::vector<mapnik::topojson::arc>> const arcs = "Arcs";
-x3::rule<class ring_type, std::vector<index_type>> const ring = "Ring";
-x3::rule<class rings_type, std::vector<std::vector<index_type>>> const rings = "Rings";
-x3::rule<class rings_array_type, arcs_type> const rings_array = "Rings Array";
-
-// defs
-auto const topology_def = lit('{') >
-    -(((lit("\"type\"") > lit(':') > lit("\"Topology\""))
-       |
-       bbox[assign_bbox]
-       |
-       transform[assign_transform]
-       |
-       objects[assign_objects]
-       |
-       arcs[assign_arcs]) % lit(','))
-      > lit('}')
-      ;
-
-
-auto const transform_def = lit("\"transform\"") > lit(':') > lit('{')
+MAPNIK_SPIRIT_LOCAL_RULE(transform, topojson::transform)
+    = lit("\"transform\"") > ':' > '{'
     > lit("\"scale\"") > lit(':')
     > lit('[')
     > double_ > lit(',')
@@ -353,91 +319,123 @@ auto const transform_def = lit("\"transform\"") > lit(':') > lit('{')
     > lit('}')
     ;
 
-auto const  bbox_def = lit("\"bbox\"") > lit(':')
+MAPNIK_SPIRIT_LOCAL_RULE(bbox, topojson::bounding_box)
+    = lit("\"bbox\"") > ':'
     > lit('[') > double_ > lit(',') > double_
     > lit(',') > double_ > lit(',') > double_
     > lit(']')
     ;
 
-
-// A topology must have an “objects” member whose value is an object.
-// This object may have any number of members, whose value must be a geometry object.
-auto const objects_def = lit("\"objects\"") > lit(':')
-    > lit('{')
-    > -((omit[json_string] > ':' > ( geometry_collection[push_collection]
-                                   | geometry[push_geometry]
-                                   )) % ',')
-    > lit('}')
+MAPNIK_SPIRIT_LOCAL_RULE(position, topojson::coordinate)
+    = '['
+    > double_ > ',' > double_
+    > *(',' > omit[double_])
+    > ']'
     ;
 
-auto const geometry_tuple_def =
+// A MultiPoint can have no points.
+MAPNIK_SPIRIT_LOCAL_RULE(positions, topojson::position_array)
+    = '[' >> -(position % ',') >> ']'
+    ;
+
+// A MultiLineString or MultiPolygon can have no components.
+MAPNIK_SPIRIT_LOCAL_RULE(empty_array, topojson::empty)
+    = lit('[') >> ']'
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(line_indices, topojson::index_array)
+    = '[' >> (int_ % ',') >> ']'
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(poly_indices, topojson::index_array2)
+    = '[' >> (line_indices % ',') >> ']'
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(mpoly_indices, topojson::index_array3)
+    = '[' >> (poly_indices % ',') >> ']'
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(rings_array, arcs_type)
+    = empty_array
+    | line_indices
+    | poly_indices
+    | mpoly_indices
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(property, topojson::property)
+    = json_string[assign_prop_name] > ':' > json_value[assign_prop_value]
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(properties, topojson::properties)
+    = '{' > -(property % ',') > '}'
+    ;
+
+MAPNIK_SPIRIT_LOCAL_RULE(geometry_tuple,
+                         std::tuple<int,
+                                    coordinates_type,
+                                    arcs_type,
+                                    topojson::properties>)
+    =
     ((lit("\"type\"") > lit(':') > topojson_geometry_type[assign_geometry_type])
      |
-     (lit("\"coordinates\"") > lit(':') > coordinates[assign_coordinates])
+     (lit("\"coordinates\"") > ':' > ( positions[assign_coordinates]
+                                     | position[assign_coordinates]
+                                     ))
      |
      (lit("\"arcs\"") > lit(':') > rings_array[assign_rings])
      |
-     properties[assign_properties]
+     (lit("\"properties\"") > ':' > properties[assign_properties])
      |
      (omit[json_string] > lit(':') > omit[json_value])) % lit(',')
     ;
 
-auto const geometry_def = lit("{") > geometry_tuple[create_geometry] > lit("}");
-
-auto const geometry_collection_def = (lit('{') >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"") >> -omit[lit(',') >> bbox])
-    > lit(',') > lit("\"geometries\"") > lit(':')
-    > lit('[')
-    > -(geometry[push_geometry] % lit(','))
-    > lit(']')
-    > lit('}')
+MAPNIK_SPIRIT_LOCAL_RULE(geometry, topojson::geometry)
+    = '{' > geometry_tuple[create_geometry] > '}'
     ;
 
-
-auto const ring_def = lit('[') >> (int_ % lit(',')) >> lit(']')
-    ;
-auto const rings_def = lit('[') >> (ring % lit(',')) >> lit(']')
-    ;
-auto const rings_array_def = (lit('[') >> (rings % lit(',')) >> lit(']'))
-    |
-    rings
-    |
-    ring
-    ;
-
-auto const property_def = json_string[assign_prop_name] > lit(':') > json_value[assign_prop_value]
+MAPNIK_SPIRIT_LOCAL_RULE(geometry_collection, std::vector<topojson::geometry>)
+    = '{'
+    // FIXME "type" need not be the first key, but if we allow it later,
+    //       we'll have to check (after the closing '}') that the object
+    //       had "type" : "GeometryCollection", and fail otherwise
+    >> (lit("\"type\"") >> ':' >> "\"GeometryCollection\"")
+    >> *(',' > ( (lit("\"geometries\"") > ':'
+                  > '[' > -(geometry[push_geometry] % ',') > ']')
+               | (omit[json_string] > ':' > omit[json_value])
+               ))
+    >> '}'
     ;
 
-auto const properties_def = lit("\"properties\"")
-    > lit(':')
-    > lit('{') > (property % lit(',')) > lit('}')
+// A topology must have an "objects" member whose value is an object.
+// This object may have any number of members, whose value must be a geometry object.
+MAPNIK_SPIRIT_LOCAL_RULE(objects, std::vector<topojson::geometry>)
+    = lit("\"objects\"") > ':'
+    > '{'
+    > -((omit[json_string] > ':' > ( geometry_collection[push_collection]
+                                   | geometry[push_geometry]
+                                   )) % ',')
+    > '}'
     ;
 
-auto const arcs_def = lit("\"arcs\"") >> lit(':') >> lit('[') >> -( arc % lit(',')) >> lit(']') ;
+// Each arc must be an array of two or more positions.
+MAPNIK_SPIRIT_LOCAL_RULE(arc, topojson::arc)
+    = '[' >> (position % ',') >> ']'
+    ;
 
-auto const arc_def = lit('[') >> -(coordinate % lit(',')) >> lit(']') ;
+MAPNIK_SPIRIT_LOCAL_RULE(arcs, std::vector<topojson::arc>)
+    = lit("\"arcs\"") > ':' > '[' > -(arc % ',') > ']'
+    ;
 
-auto const coordinate_def = lit('[') >> double_ >> lit(',') >> double_ >> omit[*(lit(',') >> double_)] >> lit(']');
-
-auto const coordinates_def = (lit('[') >> coordinate % lit(',') >> lit(']')) | coordinate;
-
-BOOST_SPIRIT_DEFINE(
-    topology,
-    transform,
-    bbox,
-    objects,
-    geometry_tuple,
-    geometry,
-    geometry_collection,
-    ring,
-    rings,
-    rings_array,
-    property,
-    properties,
-    arcs,
-    arc,
-    coordinate,
-    coordinates
-    );
+MAPNIK_SPIRIT_EXTERN_RULE_DEF(start_rule)
+    = '{'
+    > -(( (lit("\"type\"") > ':' > "\"Topology\"")
+        | bbox[assign_bbox]
+        | transform[assign_transform]
+        | objects[assign_objects]
+        | arcs[assign_arcs]
+        ) % ',')
+    > '}'
+    ;
 
 }}}
 

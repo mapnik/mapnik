@@ -25,24 +25,21 @@
 
 // mapnik
 #include <mapnik/json/topology.hpp>
+#include <mapnik/util/spirit_rule.hpp>
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+namespace mapnik { namespace topojson { namespace grammar {
 
-namespace mapnik { namespace json { namespace grammar {
+MAPNIK_SPIRIT_EXTERN_RULE(start_rule, topojson::topology);
 
-namespace x3 = boost::spirit::x3;
+}}} // namespace mapnik::topojson::grammar
 
-using topojson_grammar_type = x3::rule<class topojson_rule_tag, topojson::topology>;
+namespace mapnik { namespace json {
 
-BOOST_SPIRIT_DECLARE(topojson_grammar_type);
-
+inline auto topojson_grammar()
+{
+    return topojson::grammar::start_rule;
 }
 
-grammar::topojson_grammar_type const& topojson_grammar();
-
-}}
+}} // namespace mapnik::json
 
 #endif //MAPNIK_TOPOJSON_GRAMMAR_X3_HPP

@@ -90,7 +90,7 @@ struct bounding_box_visitor
         bool first = true;
         if (num_arcs_ > 0)
         {
-            for (auto index : line.rings)
+            for (auto index : line.arcs)
             {
                 index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
                 if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
@@ -327,7 +327,7 @@ struct feature_generator
         {
             mapnik::geometry::line_string<double> line_string;
 
-            for (auto index : line.rings)
+            for (auto index : line.arcs)
             {
                 index_type arc_index = index < 0 ? std::abs(index) - 1 : index;
                 if (arc_index >= 0 && arc_index < static_cast<int>(num_arcs_))
