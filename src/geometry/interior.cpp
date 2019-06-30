@@ -85,15 +85,19 @@ auto point_to_polygon_dist(const point<T>& point, const polygon<T>& polygon)
 
     for (const auto& ring : polygon)
     {
-        for (std::size_t i = 0, len = ring.size(), j = len - 1; i < len; j = i++)
+        std::size_t length = ring.size();
+        if (length > 1)
         {
-            const auto& a = ring[i];
-            const auto& b = ring[j];
+            for (std::size_t i = 0, j = length - 1; i < length; j = i++)
+            {
+                const auto& a = ring[i];
+                const auto& b = ring[j];
 
-            if ((a.y > point.y) != (b.y > point.y) &&
-                (point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x)) inside = !inside;
+                if ((a.y > point.y) != (b.y > point.y) &&
+                    (point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x)) inside = !inside;
 
-            min_dist_sq = std::min(min_dist_sq, segment_dist_sq(point, a, b));
+                min_dist_sq = std::min(min_dist_sq, segment_dist_sq(point, a, b));
+            }
         }
     }
 
@@ -235,4 +239,3 @@ template
 bool interior(polygon<double> const& polygon, double scale_factor, point<double> & pt);
 
 } }
-

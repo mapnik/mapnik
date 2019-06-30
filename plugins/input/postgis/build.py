@@ -26,7 +26,7 @@ from copy import copy
 PLUGIN_NAME = 'postgis'
 
 plugin_env = plugin_base.Clone()
-
+plugin_env['SHLINKCOM'] = '$SHLINK -o $TARGET $SOURCES $SHLINKFLAGS $__SHLIBVERSIONFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
 plugin_sources = Split(
   """
   %(PLUGIN_NAME)s_datasource.cpp
@@ -54,7 +54,6 @@ if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.insert(0,env['MAPNIK_NAME'])
     libraries.append(env['ICU_LIB_NAME'])
-
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                       SHLIBPREFIX='',
                                       SHLIBSUFFIX='.input',

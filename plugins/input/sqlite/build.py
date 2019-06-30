@@ -25,7 +25,7 @@ Import ('env')
 PLUGIN_NAME = 'sqlite'
 
 plugin_env = plugin_base.Clone()
-
+plugin_env['SHLINKCOM'] = '$SHLINK -o $TARGET $SOURCES $SHLINKFLAGS $__SHLIBVERSIONFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
 plugin_sources = Split(
   """
   %(PLUGIN_NAME)s_datasource.cpp
@@ -37,6 +37,7 @@ plugin_sources = Split(
 libraries = [ 'sqlite3' ]
 
 linkflags = []
+
 if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
     plugin_env.Append(LINKFLAGS=linkflags)
@@ -45,7 +46,6 @@ if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
     libraries.insert(0,env['MAPNIK_NAME'])
     libraries.append(env['ICU_LIB_NAME'])
-
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                        SHLIBPREFIX='',
                                        SHLIBSUFFIX='.input',

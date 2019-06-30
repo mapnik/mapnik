@@ -27,13 +27,12 @@ Import ('env')
 Import ('plugin_base')
 
 program_env = plugin_base.Clone()
-
+program_env['LINKFLAGS'] = '-l%s plugins/input/csv/csv_utils.os'  % plugin_base['MAPNIK_NAME']  + program_env['LINKFLAGS']
 source = Split(
     """
     mapnik-index.cpp
     process_csv_file.cpp
     process_geojson_file_x3.cpp
-    ../../plugins/input/csv/csv_utils.os
     """
     )
 

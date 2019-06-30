@@ -5,6 +5,8 @@ from copy import copy
 Import ('env')
 
 test_env = env.Clone()
+test_env['LINKCOM'] = '$LINK -o $TARGET $SOURCES $LINKFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
+test_env['LINKFLAGS'] =  '-l%s' % env['MAPNIK_NAME']  + test_env['LINKFLAGS']
 
 if not env['CPP_TESTS']:
     for cpp_test_bin in glob.glob('./*/*-bin'):
@@ -12,7 +14,7 @@ if not env['CPP_TESTS']:
     if os.path.exists('./unit/run'): os.unlink('./unit/run')
     if os.path.exists('./visual/run'): os.unlink('./visual/run')
 else:
-    test_env['LIBS'] = [env['MAPNIK_NAME']]
+    test_env['LIBS'] = []
     test_env.AppendUnique(LIBS='mapnik-wkt')
     test_env.AppendUnique(LIBS='mapnik-json')
     test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
@@ -29,8 +31,7 @@ else:
         test_env['LINKFLAGS'].append('-pthread')
     test_env.AppendUnique(LIBS='boost_program_options%s' % env['BOOST_APPEND'])
     test_env_local = test_env.Clone()
-
-
+    test_env_local['LINKCOM'] = '$LINK -o $TARGET $SOURCES $LINKFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
     # unit tests
     sources = glob.glob('./unit/*/*.cpp')
     sources.extend(glob.glob('./unit/*.cpp'))

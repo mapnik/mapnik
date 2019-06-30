@@ -1360,7 +1360,8 @@ if not preconfigured:
     env['QUERIED_PROJ_LIB'] = None
     env['QUERIED_ICU_DATA'] = None
     env['QUERIED_GDAL_DATA'] = None
-
+    #'LINKCOM': '$LINK -o $TARGET $LINKFLAGS $__RPATH $SOURCES $_LIBDIRFLAGS $_LIBFLAGS'
+    env['LINKCOM'] = '$LINK -o $TARGET $SOURCES $LINKFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS'
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1423,7 +1424,6 @@ if not preconfigured:
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
     env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
-
     ### platform specific bits
 
     thread_suffix = 'mt'
