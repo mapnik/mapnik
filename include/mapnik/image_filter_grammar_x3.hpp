@@ -41,15 +41,10 @@ namespace image_filter
 struct image_filter_class;
 using image_filter_grammar_type = x3::rule<image_filter_class, std::vector<filter::filter_type> >;
 
+image_filter_grammar_type const start = "start";
+
 BOOST_SPIRIT_DECLARE(image_filter_grammar_type);
 
-
 }}
-
-namespace mapnik {
-
-image_filter::image_filter_grammar_type const& image_filter_grammar();
-
-}
 
 #endif // MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP

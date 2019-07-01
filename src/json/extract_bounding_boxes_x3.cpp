@@ -92,11 +92,10 @@ auto on_feature_callback = [] (auto const& ctx)
     x3::get<feature_callback_tag>(ctx)(_attr(ctx));
 };
 
-namespace { auto const& geojson_value = geojson_grammar();}
 // import unicode string rule
-namespace { auto const& geojson_string = unicode_string_grammar(); }
+namespace { auto const& geojson_string = unicode_string; }
 // import positions rule
-namespace { auto const& positions_rule = positions_grammar(); }
+namespace { auto const& positions_rule = positions; }
 
 // extract bounding box from GeoJSON Feature
 

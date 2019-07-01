@@ -146,10 +146,6 @@ auto const absolute = [] (auto const& ctx)
     extract_relative(ctx) = false;
 };
 
-// exported rules
-svg_path_grammar_type const svg_path = "SVG Path";
-svg_points_grammar_type const svg_points = "SVG_Points";
-
 // rules
 auto const coord = x3::rule<class coord_tag, coord_type>{} = double_ > -lit(',') > double_;
 
@@ -200,18 +196,6 @@ BOOST_SPIRIT_DEFINE(
     );
 #pragma GCC diagnostic pop
 
-}
-
-grammar::svg_path_grammar_type const& svg_path_grammar()
-{
-    return grammar::svg_path;
-}
-
-grammar::svg_points_grammar_type const& svg_points_grammar()
-{
-    return grammar::svg_points;
-}
-
-}}
+}}}
 
 #endif // MAPNIK_SVG_PATH_GRAMMAR_X3_HPP

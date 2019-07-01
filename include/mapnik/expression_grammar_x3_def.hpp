@@ -300,8 +300,7 @@ namespace mapnik { namespace grammar {
                 ;
         }
     } unesc_char;
-    // starting rule
-    expression_grammar_type const expression("expression");
+
     // rules
     x3::rule<class logical_expression, mapnik::expr_node> const logical_expression("logical expression");
     x3::rule<class not_expression, mapnik::expr_node> const not_expression("not expression");
@@ -450,13 +449,5 @@ namespace mapnik { namespace grammar {
         );
 
     }}
-
-namespace mapnik
-{
-grammar::expression_grammar_type const& expression_grammar()
-{
-    return grammar::expression;
-}
-}
 
 #endif  // MAPNIK_EXPRESSIONS_GRAMMAR_X3_DEF_HPP

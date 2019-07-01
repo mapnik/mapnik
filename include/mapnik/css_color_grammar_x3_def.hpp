@@ -220,8 +220,6 @@ x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
 x3::uint_parser<std::uint16_t, 10, 1, 3> dec3;
 
-// starting rule
-css_color_grammar_type const css_color("css_color");
 // rules
 x3::rule<class hex2_color, color> const hex2_color("hex2_color");
 x3::rule<class hex1_color, color> const hex1_color("hex1_color");
@@ -443,12 +441,6 @@ BOOST_SPIRIT_DEFINE(
 #pragma GCC diagnostic pop
 
 } // ns
-
-css_color_grammar::css_color_grammar_type const& color_grammar()
-{
-    return css_color_grammar::css_color;
-}
-
 } //ns mapnik
 
 #endif //MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP

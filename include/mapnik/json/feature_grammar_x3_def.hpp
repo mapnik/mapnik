@@ -141,11 +141,9 @@ using x3::char_;
 
 namespace {
 // import unicode string rule
-auto const& geojson_string = unicode_string_grammar();
+auto const& geojson_string = unicode_string;
 // import positions rule
-auto const& positions_rule = positions_grammar();
-// import generic rule
-auto const& value = generic_json_grammar();
+auto const& positions_rule = positions;
 }
 
 // geometry types symbols
@@ -233,10 +231,6 @@ auto assign_property = [](auto const& ctx)
                                                 std::get<1>(_attr(ctx))));
 };
 
-
-//exported rules
-feature_grammar_type const feature_rule = "Feature Rule";
-geometry_grammar_type const geometry_rule = "Geometry Rule";
 
 // rules
 x3::rule<struct feature_type_tag> const feature_type = "Feature Type";

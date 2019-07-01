@@ -21,7 +21,7 @@ TEST_CASE("CSS color") {
 
     SECTION("CSS colors")
     {
-        auto const& color_grammar = mapnik::color_grammar();
+        auto const& color_grammar = mapnik::css_color_grammar::css_color;
         boost::spirit::x3::ascii::space_type space;
         {
             // rgb

@@ -40,12 +40,12 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
 #if BOOST_VERSION >= 106700
     auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
         [
-            mapnik::transform_expression_grammar()
+            mapnik::grammar::transform
         ];
 #else
     auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
         [
-            mapnik::transform_expression_grammar()
+            mapnik::grammar::transform
         ];
 #endif
 

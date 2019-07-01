@@ -27,11 +27,4 @@ namespace mapnik { namespace json { namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(topojson_grammar_type, iterator_type, phrase_parse_context_type);
 
-}
-
-grammar::topojson_grammar_type const& topojson_grammar()
-{
-    return grammar::topology;
-}
-
-}}
+}}}
