@@ -60,6 +60,8 @@ struct quote_tag;
 struct csv_line_class;
 using csv_line_grammar_type = x3::rule<csv_line_class, csv_line>;
 
+csv_line_grammar_type const line = "csv-line";
+
 BOOST_SPIRIT_DECLARE(csv_line_grammar_type);
 
 }}

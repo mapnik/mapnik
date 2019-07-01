@@ -197,7 +197,7 @@ mapnik::csv_line parse_line(char const* start, char const* end, char separator, 
     namespace x3 = boost::spirit::x3;
     auto parser = x3::with<mapnik::grammar::quote_tag>(quote)
         [ x3::with<mapnik::grammar::separator_tag>(separator)
-          [ mapnik::csv_line_grammar()]
+          [ mapnik::grammar::line ]
             ];
 
     mapnik::csv_line values;

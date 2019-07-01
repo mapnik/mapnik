@@ -36,14 +36,11 @@ namespace x3 = boost::spirit::x3;
 struct wkt_class; // top-most ID
 using wkt_grammar_type = x3::rule<wkt_class, mapnik::geometry::geometry<double>>;
 
+wkt_grammar_type const wkt("wkt");
+
 BOOST_SPIRIT_DECLARE(wkt_grammar_type);
 
 }}
-
-namespace mapnik
-{
-grammar::wkt_grammar_type const& wkt_grammar();
-}
 
 
 #endif // MAPNIK_WKT_GRAMMAR_X3_HPP

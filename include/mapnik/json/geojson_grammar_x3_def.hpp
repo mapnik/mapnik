@@ -26,7 +26,6 @@
 #include <mapnik/json/geojson_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/positions_grammar_x3.hpp>
-#include <mapnik/init_priority.hpp>
 
 #include <boost/fusion/include/std_pair.hpp>
 
@@ -88,40 +87,35 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
     }
 } geometry_type_sym;
 
-// exported rules
-// start
-geojson_grammar_type const value MAPNIK_INIT_PRIORITY(106) ("JSON Value");
-key_value_type const key_value MAPNIK_INIT_PRIORITY(107) ("JSON key/value");
 // rules
 x3::rule<class json_object_tag, geojson_object> const object("JSON Object");
 x3::rule<class json_array_tag, geojson_array> const array("JSON Array");
-x3::rule<class json_number_tag, geojson_value> const number("JSON Number");
-//x3::rule<class key_value_tag, geojson_object_element> key_value("JSON key/value");
+x3::rule<class json_number_tag, json::geojson_value> const number("JSON Number");
+x3::rule<class key_value_tag, geojson_object_element> key_value("JSON key/value");
 // GeoJSON
 x3::rule<class geojson_coordinates_tag, geojson_object_element> const coordinates("GeoJSON Coordinates");
 x3::rule<class geojson_geometry_type_tag, geojson_object_element> const geometry_type("GeoJSON Geometry Type");
-x3::rule<class geojson_key_value_type_tag, geojson_object_element> const geojson_key_value("GeoJSON Key/Value Type");
 auto const geojson_double = x3::real_parser<value_double, x3::strict_real_policies<value_double>>();
 auto const geojson_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
 // import unicode string rule
-namespace { auto const& geojson_string = mapnik::json::unicode_string_grammar(); }
+namespace { auto const& geojson_string = unicode_string; }
 // import positions rule
-namespace { auto const& positions_rule = mapnik::json::positions_grammar(); }
+namespace { auto const& positions_rule = positions; }
 
 // GeoJSON types
-auto const value_def =  object | array | geojson_string | number
+auto const geojson_value_def =  object | array | geojson_string | number
     ;
 
 auto const coordinates_def = lexeme[lit('"') >> (string("coordinates") > lit('"'))][assign_key]
-    > lit(':') > (positions_rule[assign_value] | value[assign_value])
+    > lit(':') > (positions_rule[assign_value] | geojson_value[assign_value])
     ;
 
 auto const geometry_type_def = lexeme[lit('"') >> (string("type") > lit('"'))][assign_key]
-    > lit(':') > (geometry_type_sym[assign_value] | value[assign_value])
+    > lit(':') > (geometry_type_sym[assign_value] | geojson_value[assign_value])
     ;
 
-auto const key_value_def = geojson_string[assign_key] > lit(':') > value[assign_value]
+auto const key_value_def = geojson_string[assign_key] > lit(':') > geojson_value[assign_value]
     ;
 
 auto const geojson_key_value_def =
@@ -138,7 +132,7 @@ auto const object_def = lit('{')
     ;
 
 auto const array_def = lit('[')
-    > -(value % lit(','))
+    > -(geojson_value % lit(','))
     > lit(']')
     ;
 
@@ -153,7 +147,7 @@ auto const number_def = geojson_double[assign]
 #include <mapnik/warning_ignore.hpp>
 
 BOOST_SPIRIT_DEFINE(
-    value,
+    geojson_value,
     geometry_type,
     coordinates,
     object,

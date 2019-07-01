@@ -118,8 +118,6 @@ auto const skewY_action = [] (auto const& ctx)
     tr = agg::trans_affine_skewing(0.0, agg::deg2rad(skew_y)) * tr;
 };
 
-//exported rule
-svg_transform_grammar_type const svg_transform = "SVG Transform";
 // rules
 auto const matrix = x3::rule<class matrix_tag> {} = no_case[lit("matrix")]
     > lit('(') > (double_ > -lit(',')
@@ -157,14 +155,6 @@ BOOST_SPIRIT_DEFINE(
     );
 #pragma GCC diagnostic pop
 
-}
-
-grammar::svg_transform_grammar_type const& svg_transform_grammar()
-{
-    return grammar::svg_transform;
-}
-
-}}
-
+}}}
 
 #endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP

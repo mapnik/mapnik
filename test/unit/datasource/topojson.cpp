@@ -58,7 +58,7 @@ bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology
     char const* end = itr + buffer.length();
     try
     {
-        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::topojson_grammar(), space_type() , topo);
+        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type() , topo);
     }
     catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
     {

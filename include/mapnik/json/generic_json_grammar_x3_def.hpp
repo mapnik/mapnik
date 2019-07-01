@@ -26,7 +26,6 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <mapnik/json/generic_json_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
-#include <mapnik/init_priority.hpp>
 
 namespace mapnik { namespace json { namespace grammar {
 
@@ -70,12 +69,8 @@ using x3::lit;
 using x3::string;
 
 // import unicode string rule
-namespace { auto const& json_string = mapnik::json::unicode_string_grammar(); }
+namespace { auto const& json_string = mapnik::json::grammar::unicode_string; }
 
-// exported rules
-// start
-generic_json_grammar_type const value MAPNIK_INIT_PRIORITY(102) ("JSON Value");
-generic_json_key_value_type const key_value("JSON Object element");
 // rules
 x3::rule<class json_object_tag, json_object> const object("JSON Object");
 x3::rule<class json_array_tag, json_array> const array("JSON Array");

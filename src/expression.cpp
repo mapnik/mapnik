@@ -38,12 +38,12 @@ expression_ptr parse_expression(std::string const& str)
 #if BOOST_VERSION >=106700
     auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
         [
-            mapnik::expression_grammar()
+            mapnik::grammar::expression
         ];
 #else
     auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
         [
-            mapnik::expression_grammar()
+            mapnik::grammar::expression
         ];
 #endif
     bool r = false;

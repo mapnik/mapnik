@@ -127,8 +127,6 @@ auto const construct_rotate = [](auto const& ctx)
     _val(ctx) = mapnik::rotate_node(a, sx, sy);
 };
 
-// starting rule
-transform_expression_grammar_type const transform("transform");
 // rules
 x3::rule<class transform_list_class, mapnik::transform_list> transform_list_rule("transform list");
 x3::rule<class transform_node_class, mapnik::transform_node> transform_node_rule("transform node");
@@ -155,7 +153,7 @@ auto const atom = x3::rule<class atom_tag, expr_node> {} = double_[create_expr_n
 auto const sep_atom = x3::rule<class sep_atom_tag, expr_node> {} = -lit(',') >> double_[create_expr_node]
     ;
 
-auto const expr_def = expression_grammar();
+auto const expr_def = expression;
 // Individual arguments in lists containing one or more compound
 // expressions are separated by a comma.
 auto const sep_expr_def = lit(',') > expr
@@ -211,13 +209,5 @@ BOOST_SPIRIT_DEFINE (
     skewY);
 
 }} // ns
-
-namespace mapnik
-{
-grammar::transform_expression_grammar_type const& transform_expression_grammar()
-{
-    return grammar::transform;
-}
-}
 
 #endif

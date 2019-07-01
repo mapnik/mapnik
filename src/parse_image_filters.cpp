@@ -32,7 +32,7 @@ namespace filter {
 
 bool parse_image_filters(std::string const& str, std::vector<filter_type> & image_filters)
 {
-    auto const& grammar = mapnik::image_filter_grammar();
+    auto const& grammar = mapnik::image_filter::start;
     auto itr = str.begin();
     auto end = str.end();
 

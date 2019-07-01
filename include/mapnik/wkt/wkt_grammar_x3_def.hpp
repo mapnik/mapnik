@@ -57,8 +57,6 @@ auto add_ring = [](auto const& ctx)
     _val(ctx).push_back(std::move(ring));
 };
 
-// start rule
-wkt_grammar_type const wkt("wkt");
 // rules
 x3::rule<class empty, mapnik::geometry::geometry_empty> const empty("EMPTY");
 x3::rule<class point, mapnik::geometry::geometry<double> > const point("POINT");
@@ -125,13 +123,5 @@ BOOST_SPIRIT_DEFINE(
     geometry_collection
     );
 }}
-
-namespace mapnik
-{
-grammar::wkt_grammar_type const& wkt_grammar()
-{
-    return grammar::wkt;
-}
-}
 
 #endif // MAPNIK_WKT_GRAMMAR_X3_DEF_HPP

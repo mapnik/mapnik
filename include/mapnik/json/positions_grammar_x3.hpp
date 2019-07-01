@@ -39,12 +39,10 @@ namespace grammar {
 namespace x3 = boost::spirit::x3;
 using positions_grammar_type = x3::rule<class positions_tag, positions>;
 
+positions_grammar_type const positions = "Positions";
+
 BOOST_SPIRIT_DECLARE(positions_grammar_type);
 
-}
-
-grammar::positions_grammar_type const& positions_grammar();
-
-}}
+}}}
 
 #endif // MAPNIK_JSON_POSITIONS_GRAMMAR_X3_HPP

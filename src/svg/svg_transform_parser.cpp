@@ -40,11 +40,11 @@ bool parse_svg_transform(const char* wkt, Transform& tr)
 
 #if BOOST_VERSION >= 106700
     auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(tr)
-        [mapnik::svg::svg_transform_grammar()];
+        [mapnik::svg::grammar::svg_transform];
 
 #else
     auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(std::ref(tr))
-        [mapnik::svg::svg_transform_grammar()];
+        [mapnik::svg::grammar::svg_transform];
 #endif
 
     try
