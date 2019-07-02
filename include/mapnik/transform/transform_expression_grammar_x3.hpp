@@ -39,13 +39,10 @@ namespace grammar {
 struct transform_expression_class; // top-most ID
 using transform_expression_grammar_type = x3::rule<transform_expression_class, mapnik::transform_list>;
 
+transform_expression_grammar_type const transform("transform");
+
 BOOST_SPIRIT_DECLARE(transform_expression_grammar_type);
 
 }}  // ns
-
-namespace mapnik
-{
-grammar::transform_expression_grammar_type const& transform_expression_grammar();
-}
 
 #endif

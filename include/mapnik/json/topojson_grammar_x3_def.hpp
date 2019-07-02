@@ -26,7 +26,6 @@
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 #include <mapnik/json/generic_json_grammar_x3.hpp>
 #include <mapnik/json/topojson_grammar_x3.hpp>
-#include <mapnik/init_priority.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
@@ -280,9 +279,9 @@ using x3::omit;
 namespace
 {
 // import unicode string rule
-auto const& json_string = json::unicode_string_grammar();
+auto const& json_string = json::grammar::unicode_string;
 // json value
-auto const& json_value = json::generic_json_grammar();
+auto const& json_value = json::grammar::value;
 }
 
 using coordinates_type = util::variant<topojson::coordinate,std::vector<topojson::coordinate>>;
@@ -305,8 +304,6 @@ struct topojson_geometry_type_ : x3::symbols<int>
     }
 } topojson_geometry_type;
 
-// start rule
-topojson_grammar_type const topology MAPNIK_INIT_PRIORITY(104) ("Topology");
 // rules
 x3::rule<class transform_tag, mapnik::topojson::transform> const transform = "Transform";
 x3::rule<class bbox_tag, mapnik::topojson::bounding_box> const bbox = "Bounding Box";

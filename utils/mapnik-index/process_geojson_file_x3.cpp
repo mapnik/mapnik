@@ -224,7 +224,7 @@ using box_type = mapnik::box2d<float>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
 using base_iterator_type = char const*;
 
-auto const& geojson_value = mapnik::json::geojson_grammar();
+auto const& geojson_value = mapnik::json::grammar::geojson_value;
 
 }
 

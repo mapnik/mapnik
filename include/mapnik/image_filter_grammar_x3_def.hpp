@@ -108,10 +108,8 @@ auto percent = [](auto & ctx)
 x3::uint_parser<unsigned, 10, 1, 3> radius;
 
 // Import the expression rule
-namespace { auto const& css_color = color_grammar(); }
+namespace { using css_color_grammar::css_color; }
 
-// starting rule
-image_filter_grammar_type const start("start");
 // rules
 x3::rule<class filter_class, filter::filter_type > const filter("filter");
 
@@ -250,12 +248,6 @@ BOOST_SPIRIT_DEFINE(
 #pragma GCC diagnostic pop
 
 } // image_filter
-
-image_filter::image_filter_grammar_type const& image_filter_grammar()
-{
-    return image_filter::start;
-}
-
 } //ns mapnik
 
 #endif //MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP

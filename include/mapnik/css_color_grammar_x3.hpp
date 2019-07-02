@@ -41,15 +41,10 @@ namespace css_color_grammar
 struct css_color_class;
 using css_color_grammar_type = x3::rule<css_color_class, mapnik::color>;
 
+css_color_grammar_type const css_color = "css_color";
+
 BOOST_SPIRIT_DECLARE(css_color_grammar_type);
 
 }}
-
-
-namespace mapnik
-{
-css_color_grammar::css_color_grammar_type const& color_grammar();
-}
-
 
 #endif // MAPNIK_CSS_COLOR_GRAMMAR_X3_HPP
