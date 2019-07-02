@@ -44,15 +44,10 @@ struct transcoder_tag;
 struct expression_class; // top-most ID
 using expression_grammar_type = x3::rule<expression_class, expr_node>;
 
+expression_grammar_type const expression("expression");
+
 BOOST_SPIRIT_DECLARE(expression_grammar_type);
 
 }}
-
-
-namespace mapnik
-{
-grammar::expression_grammar_type const& expression_grammar();
-}
-
 
 #endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP

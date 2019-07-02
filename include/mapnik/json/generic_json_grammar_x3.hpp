@@ -39,13 +39,13 @@ namespace grammar {
 
 using generic_json_grammar_type = x3::rule<class generic_json_tag, json_value>;
 using generic_json_key_value_type = x3::rule<class json_object_element_tag, json_object_element>;
+
+generic_json_grammar_type const value = "JSON Value";
+generic_json_key_value_type const key_value = "JSON Object element";
+
 BOOST_SPIRIT_DECLARE(generic_json_grammar_type);
 BOOST_SPIRIT_DECLARE(generic_json_key_value_type);
-}
 
-grammar::generic_json_grammar_type const& generic_json_grammar();
-grammar::generic_json_key_value_type const& generic_json_key_value();
-
-}}
+}}}
 
 #endif // MAPNIK_JSON_GENERIC_JSON_GRAMMAR_X3_HPP

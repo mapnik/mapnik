@@ -32,7 +32,7 @@ bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & 
 {
     namespace x3 = boost::spirit::x3;
     using space_type = mapnik::json::grammar::space_type;
-    auto grammar = mapnik::json::geometry_grammar();
+    auto grammar = mapnik::json::grammar::geometry_rule;
     try
     {
         const char* start = json.c_str();

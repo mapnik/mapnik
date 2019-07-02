@@ -37,12 +37,10 @@ namespace x3 = boost::spirit::x3;
 
 using topojson_grammar_type = x3::rule<class topojson_rule_tag, topojson::topology>;
 
+topojson_grammar_type const topology = "Topology";
+
 BOOST_SPIRIT_DECLARE(topojson_grammar_type);
 
-}
-
-grammar::topojson_grammar_type const& topojson_grammar();
-
-}}
+}}}
 
 #endif //MAPNIK_TOPOJSON_GRAMMAR_X3_HPP

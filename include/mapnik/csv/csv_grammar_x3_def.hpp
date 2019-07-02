@@ -81,8 +81,6 @@ struct literal : x3::parser<literal<T>>
 auto static const separator = literal<separator_tag>{};
 auto static const quote = literal<quote_tag>{};
 
-// starting rule
-csv_line_grammar_type const line("csv-line");
 // rules
 x3::rule<class csv_column, csv_value> column("csv-column");
 x3::rule<class csv_text, csv_value> text("csv-text");
@@ -108,12 +106,6 @@ BOOST_SPIRIT_DEFINE (
     );
 
 } // grammar
-
-grammar::csv_line_grammar_type const& csv_line_grammar()
-{
-    return grammar::line;
-}
-
 } // namespace mapnik
 
 

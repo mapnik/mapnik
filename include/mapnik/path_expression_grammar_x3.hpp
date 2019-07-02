@@ -37,12 +37,10 @@ namespace x3 = boost::spirit::x3;
 struct path_expression_class; // top-most ID
 using path_expression_grammar_type = x3::rule<path_expression_class, path_expression>;
 
+path_expression_grammar_type const path_expression = "path_expression";
+
 BOOST_SPIRIT_DECLARE(path_expression_grammar_type);
 
-}
-
-grammar::path_expression_grammar_type const& path_expression_grammar();
-
-}
+}}
 
 #endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP

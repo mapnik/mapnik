@@ -32,15 +32,12 @@ namespace x3 = boost::spirit::x3;
 using svg_path_grammar_type = x3::rule<class svg_path_rule_tag>;
 using svg_points_grammar_type = x3::rule<class svg_points_rule_tag>;
 
+svg_path_grammar_type const svg_path = "SVG Path";
+svg_points_grammar_type const svg_points = "SVG_Points";
+
 BOOST_SPIRIT_DECLARE(svg_path_grammar_type,
                      svg_points_grammar_type);
 
-}
-
-grammar::svg_path_grammar_type const& svg_path_grammar();
-
-grammar::svg_points_grammar_type const& svg_points_grammar();
-
-}}
+}}}
 
 #endif // MAPNIK_SVG_PATH_GRAMMAR_X3_HPP

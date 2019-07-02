@@ -31,7 +31,7 @@ namespace mapnik {
 color parse_color(std::string const& str)
 {
     // TODO - early return for @color?
-    auto const& grammar = mapnik::color_grammar();
+    auto const& grammar = mapnik::css_color_grammar::css_color;
     color c;
     std::string::const_iterator first = str.begin();
     std::string::const_iterator last =  str.end();

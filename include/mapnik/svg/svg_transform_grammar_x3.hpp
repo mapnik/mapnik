@@ -32,12 +32,10 @@ using namespace boost::spirit::x3;
 
 using svg_transform_grammar_type = x3::rule<class svg_transform_rule_tag>;
 
+svg_transform_grammar_type const svg_transform = "SVG Transform";
+
 BOOST_SPIRIT_DECLARE(svg_transform_grammar_type);
 
-}
-
-grammar::svg_transform_grammar_type const& svg_transform_grammar();
-
-}}
+}}}
 
 #endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP

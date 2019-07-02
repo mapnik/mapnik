@@ -184,7 +184,7 @@ void topojson_datasource::parse_topojson(T const& buffer)
     using space_type = boost::spirit::x3::standard::space_type;
     try
     {
-        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::topojson_grammar(), space_type(), topo_);
+        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type(), topo_);
     }
     catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
     {
