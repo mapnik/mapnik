@@ -43,7 +43,6 @@ public:
     text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
     std::string get_positions() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
-    void init_positions(std::string const& positions) const;
     std::vector<directions_e> direction_;
     std::vector<int> text_sizes_;
 private:
