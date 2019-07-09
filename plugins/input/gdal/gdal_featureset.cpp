@@ -234,8 +234,14 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     // resolution is 1 / requested pixel size
     const double width_res = std::get<0>(q.resolution());
     const double height_res = std::get<1>(q.resolution());
-    int im_width = int(width_res * intersect.width() * filter_factor + 0.5);
-    int im_height = int(height_res * intersect.height() * filter_factor + 0.5);
+    int im_width = int(width_res * intersect.width() + 0.5);
+    int im_height = int(height_res * intersect.height() + 0.5);
+
+    // no upsampling in gdal
+    if (im_width > width)
+      {im_width=width;}
+    if (im_height > height)
+      {im_height=height;}
 
     //calculate actual box2d of returned raster
     box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
@@ -253,8 +259,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     if (width > 0 && height > 0)
     {
 
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Requested Image Size=(" << width << "," << height << ")";
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Requested Size from gdal=(" << width << "," << height << ")";
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Internal Image Size=(" << im_width << "," << im_height << ")";
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: requested resampling method=" << scaling_method_to_string(q.get_scaling_method());
         GDALRasterIOExtraArg psExtraArg;
