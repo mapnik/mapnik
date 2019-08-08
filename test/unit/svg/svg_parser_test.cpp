@@ -150,8 +150,7 @@ TEST_CASE("SVG parser") {
         char const* expected_errors[] =
         {
             "SVG parse error: failed to parse <color> with value \"fail\"",
-            "SVG parse error: failed to parse <number> with value \"fail\"",
-            "SVG parse error: failed to parse <color> with value \"fail\""
+            "SVG parse error: failed to parse <number> with value \"fail\""
         };
 
         std::ifstream in(svg_name.c_str());
@@ -188,7 +187,6 @@ TEST_CASE("SVG parser") {
             "SVG validation error: invalid <rect> ry \"-1000\"",
             "SVG parse error: failed to parse <number> with value \"100invalidunit\"",
             "SVG parse error: failed to parse <path>",
-            "SVG parse error: failed to parse <path> with <id> \"fail-path\"",
             "SVG parse error: failed to parse <path> with <id> \"fail-path\"",
             "SVG validation error: invalid <circle> radius \"-50\"",
             "SVG parse error: failed to parse <polygon> points",

@@ -103,7 +103,7 @@ void parse_attr(svg_parser& parser, char const* name, char const* value);
 
 namespace {
 
-static std::array<unsigned, 8> const unsupported_elements
+static std::array<unsigned, 9> const unsupported_elements
 { {"symbol"_case,
    "marker"_case,
    "view"_case,
@@ -111,7 +111,8 @@ static std::array<unsigned, 8> const unsupported_elements
    "switch"_case,
    "image"_case,
    "a"_case,
-   "clipPath"_case}
+   "clipPath"_case,
+   "pattern"_case}
 };
 
 static std::array<unsigned, 43> const unsupported_attributes
@@ -172,6 +173,7 @@ void handle_unsupported(svg_parser& parser, T const& ar, char const* name, char 
                                                       + "> "
                                                       + std::string(type)
                                                       + " is not supported"));
+            break;
         }
     }
 }
@@ -387,6 +389,8 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             break;
         }
         case "clipPath"_case:
+        case "symbol"_case:
+        case "pattern"_case:
         {
             parser.ignore_ = true;
             break;
@@ -398,12 +402,6 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             break;
         case "radialGradient"_case:
             parse_radial_gradient(parser, node);
-            break;
-        case "symbol"_case:
-            parser.ignore_ = true;
-            break;
-        case "pattern"_case:
-            parser.ignore_ = true;
             break;
         }
 
@@ -492,17 +490,10 @@ void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parser.is_defs_ = false;
         }
     }
-    else if(name == "clipPath"_case)
+    else if(name == "clipPath"_case || name == "symbol"_case || name == "pattern"_case)
     {
         parser.ignore_ = false;
-    }
-    else if(name == "symbol"_case)
-    {
-        parser.ignore_ = false;
-    }
-    else if(name == "pattern"_case)
-    {
-        parser.ignore_ = false;
+        handle_unsupported(parser, unsupported_elements, node->name(), "element");
     }
 }
 
