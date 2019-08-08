@@ -32,6 +32,7 @@
 #include <mapnik/util/noncopyable.hpp>
 // stl
 #include <map>
+#include <algorithm>
 
 namespace boost { namespace property_tree { namespace detail { namespace rapidxml {
 template <typename T> class xml_node;
@@ -49,7 +50,14 @@ public:
     void on_error(std::string const& msg)
     {
         if (strict_) throw std::runtime_error(msg);
-        else error_messages_.push_back(msg);
+        else
+        {
+            // avoid duplicate messages
+            if (std::find(std::begin(error_messages_),std::end(error_messages_), msg) == std::end(error_messages_))
+            {
+                error_messages_.push_back(msg);
+            }
+        }
     }
     error_message_container const& error_messages() const
     {
