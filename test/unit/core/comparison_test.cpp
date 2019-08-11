@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
 
 TEST_CASE("comparison")

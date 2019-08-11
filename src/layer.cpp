@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,9 +31,9 @@
 namespace mapnik
 {
 
-layer::layer(std::string const& name, std::string const& srs)
-    : name_(name),
-      srs_(srs),
+layer::layer(std::string const& _name, std::string const& _srs)
+    : name_(_name),
+      srs_(_srs),
       minimum_scale_denom_(0),
       maximum_scale_denom_(std::numeric_limits<double>::max()),
       active_(true),
@@ -42,9 +42,13 @@ layer::layer(std::string const& name, std::string const& srs)
       cache_features_(false),
       group_by_(),
       styles_(),
+      layers_(),
       ds_(),
       buffer_size_(),
-      maximum_extent_() {}
+      maximum_extent_(),
+      comp_op_(),
+      opacity_(1.0f)
+{}
 
 layer::layer(layer const& rhs)
     : name_(rhs.name_),
@@ -57,9 +61,13 @@ layer::layer(layer const& rhs)
       cache_features_(rhs.cache_features_),
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
+      layers_(rhs.layers_),
       ds_(rhs.ds_),
       buffer_size_(rhs.buffer_size_),
-      maximum_extent_(rhs.maximum_extent_) {}
+      maximum_extent_(rhs.maximum_extent_),
+      comp_op_(rhs.comp_op_),
+      opacity_(rhs.opacity_)
+{}
 
 layer::layer(layer && rhs)
     : name_(std::move(rhs.name_)),
@@ -72,9 +80,13 @@ layer::layer(layer && rhs)
       cache_features_(std::move(rhs.cache_features_)),
       group_by_(std::move(rhs.group_by_)),
       styles_(std::move(rhs.styles_)),
+      layers_(std::move(rhs.layers_)),
       ds_(std::move(rhs.ds_)),
       buffer_size_(std::move(rhs.buffer_size_)),
-      maximum_extent_(std::move(rhs.maximum_extent_)) {}
+      maximum_extent_(std::move(rhs.maximum_extent_)),
+      comp_op_(std::move(rhs.comp_op_)),
+      opacity_(std::move(rhs.opacity_))
+{}
 
 layer& layer::operator=(layer rhs)
 {
@@ -92,6 +104,8 @@ layer& layer::operator=(layer rhs)
     std::swap(this->ds_, rhs.ds_);
     std::swap(this->buffer_size_, rhs.buffer_size_);
     std::swap(this->maximum_extent_, rhs.maximum_extent_);
+    std::swap(this->comp_op_, rhs.comp_op_);
+    std::swap(this->opacity_, rhs.opacity_);
     return *this;
 }
 
@@ -109,14 +123,16 @@ bool layer::operator==(layer const& rhs) const
         (styles_ == rhs.styles_) &&
         ((ds_ && rhs.ds_) ? *ds_ == *rhs.ds_ : ds_ == rhs.ds_) &&
         (buffer_size_ == rhs.buffer_size_) &&
-        (maximum_extent_ == rhs.maximum_extent_);
+        (maximum_extent_ == rhs.maximum_extent_) &&
+        (comp_op_ == rhs.comp_op_) &&
+        (opacity_ == rhs.opacity_);
 }
 
 layer::~layer() {}
 
-void layer::set_name( std::string const& name)
+void layer::set_name( std::string const& _name)
 {
-    name_ = name;
+    name_ = _name;
 }
 
 std::string const& layer::name() const
@@ -124,9 +140,9 @@ std::string const& layer::name() const
     return name_;
 }
 
-void layer::set_srs(std::string const& srs)
+void layer::set_srs(std::string const& _srs)
 {
-    srs_ = srs;
+    srs_ = _srs;
 }
 
 std::string const& layer::srs() const
@@ -149,6 +165,21 @@ std::vector<std::string> & layer::styles()
     return styles_;
 }
 
+void layer::add_layer(layer const& l)
+{
+    layers_.emplace_back(l);
+}
+
+void layer::add_layer(layer && l)
+{
+    layers_.push_back(std::move(l));
+}
+
+std::vector<layer> const& layer::layers() const
+{
+    return layers_;
+}
+
 void layer::set_minimum_scale_denominator(double minimum_scale_denom)
 {
     minimum_scale_denom_=minimum_scale_denom;
@@ -169,9 +200,9 @@ double layer::maximum_scale_denominator() const
     return maximum_scale_denom_;
 }
 
-void layer::set_active(bool active)
+void layer::set_active(bool _active)
 {
-    active_=active;
+    active_ = _active;
 }
 
 bool layer::active() const
@@ -184,9 +215,9 @@ bool layer::visible(double scale_denom) const
     return active() && scale_denom >= minimum_scale_denom_ - 1e-6 && scale_denom < maximum_scale_denom_ + 1e-6;
 }
 
-void layer::set_queryable(bool queryable)
+void layer::set_queryable(bool _queryable)
 {
-    queryable_=queryable;
+    queryable_ = _queryable;
 }
 
 bool layer::queryable() const
@@ -250,9 +281,9 @@ bool layer::clear_label_cache() const
     return clear_label_cache_;
 }
 
-void layer::set_cache_features(bool cache_features)
+void layer::set_cache_features(bool _cache_features)
 {
-    cache_features_ = cache_features;
+    cache_features_ = _cache_features;
 }
 
 bool layer::cache_features() const
@@ -268,6 +299,26 @@ void layer::set_group_by(std::string const& column)
 std::string const& layer::group_by() const
 {
     return group_by_;
+}
+
+void layer::set_comp_op(composite_mode_e comp_op)
+{
+    comp_op_ = comp_op;
+}
+
+boost::optional<composite_mode_e> layer::comp_op() const
+{
+    return comp_op_;
+}
+
+void layer::set_opacity(double opacity)
+{
+    opacity_ = opacity;
+}
+
+double layer::get_opacity() const
+{
+    return opacity_;
 }
 
 }

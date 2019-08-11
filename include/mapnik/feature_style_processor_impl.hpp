@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@
 #include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/rule_cache.hpp>
@@ -63,6 +63,7 @@ struct layer_rendering_material
     std::vector<feature_type_style const*> active_styles_;
     std::vector<featureset_ptr> featureset_ptr_list_;
     std::vector<rule_cache> rule_caches_;
+    std::vector<layer_rendering_material> materials_;
 
     layer_rendering_material(layer const& lay, projection const& dest)
         :
@@ -85,6 +86,41 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 }
 
 template <typename Processor>
+void feature_style_processor<Processor>::prepare_layers(layer_rendering_material & parent_mat,
+                                                        std::vector<layer> const & layers,
+                                                        feature_style_context_map & ctx_map,
+                                                        Processor & p,
+                                                        double scale_denom)
+{
+    for (layer const& lyr : layers)
+    {
+        if (lyr.visible(scale_denom))
+        {
+            std::set<std::string> names;
+            layer_rendering_material mat(lyr, parent_mat.proj0_);
+
+            prepare_layer(mat,
+                          ctx_map,
+                          p,
+                          m_.scale(),
+                          scale_denom,
+                          m_.width(),
+                          m_.height(),
+                          m_.get_current_extent(),
+                          m_.buffer_size(),
+                          names);
+
+            // Store active material
+            if (!mat.active_styles_.empty())
+            {
+                prepare_layers(mat, lyr.layers(), ctx_map, p, scale_denom);
+                parent_mat.materials_.emplace_back(std::move(mat));
+            }
+        }
+    }
+}
+
+template <typename Processor>
 void feature_style_processor<Processor>::apply(double scale_denom)
 {
     Processor & p = static_cast<Processor&>(*this);
@@ -101,44 +137,16 @@ void feature_style_processor<Processor>::apply(double scale_denom)
     // in a second time, we fetch the results and
     // do the actual rendering
 
-    std::vector<layer_rendering_material> mat_list;
-
     // Define processing context map used by datasources
     // implementing asynchronous queries
     feature_style_context_map ctx_map;
 
-    for ( layer const& lyr : m_.layers() )
+    if (!m_.layers().empty())
     {
-        if (lyr.visible(scale_denom))
-        {
-            std::set<std::string> names;
-            layer_rendering_material mat(lyr, proj);
+        layer_rendering_material root_mat(m_.layers().front(), proj);
+        prepare_layers(root_mat, m_.layers(), ctx_map, p, scale_denom);
 
-            prepare_layer(mat,
-                          ctx_map,
-                          p,
-                          m_.scale(),
-                          scale_denom,
-                          m_.width(),
-                          m_.height(),
-                          m_.get_current_extent(),
-                          m_.buffer_size(),
-                          names);
-
-            // Store active material
-            if (!mat.active_styles_.empty())
-            {
-                mat_list.emplace_back(std::move(mat));
-            }
-        }
-    }
-
-    for ( layer_rendering_material const & mat : mat_list )
-    {
-        if (!mat.active_styles_.empty())
-        {
-            render_material(mat, p);
-        }
+        render_submaterials(root_mat, p);
     }
 
     p.end_map_processing(m_);
@@ -201,9 +209,16 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay,
                   buffer_size,
                   names);
 
+    prepare_layers(mat, lay.layers(), ctx_map, p, scale_denom);
+
     if (!mat.active_styles_.empty())
     {
+        p.start_layer_processing(mat.lay_, mat.layer_ext2_);
+
         render_material(mat,p);
+        render_submaterials(mat, p);
+
+        p.end_layer_processing(mat.lay_);
     }
 }
 
@@ -245,7 +260,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
-    double buffer_padding = 2.0 * scale;
+    double buffer_padding = 2.0 * scale * p.scale_factor();
     boost::optional<int> layer_buffer_size = lay.buffer_size();
     if (layer_buffer_size) // if layer overrides buffer size, use this value to compute buffered extent
     {
@@ -266,6 +281,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     box2d<double> layer_ext = lay.envelope();
+    const box2d<double> buffered_query_ext_map_srs = buffered_query_ext;
     bool fw_success = false;
     bool early_return = false;
 
@@ -281,9 +297,9 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         early_return = true;
     }
     // next try intersection of layer extent back projected into map srs
-    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
+    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext_map_srs.intersects(layer_ext))
     {
-        layer_ext.clip(buffered_query_ext);
+        layer_ext.clip(buffered_query_ext_map_srs);
         // forward project layer extent back into native projection
         if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
@@ -367,10 +383,10 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
             continue;
         }
 
-        std::vector<rule> const& rules = style->get_rules();
+        std::vector<rule> const& style_rules = style->get_rules();
         bool active_rules = false;
         rule_cache rc;
-        for(rule const& r : rules)
+        for(rule const& r : style_rules)
         {
             if (r.active(scale_denom))
             {
@@ -440,10 +456,27 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 }
 
+template <typename Processor>
+void feature_style_processor<Processor>::render_submaterials(layer_rendering_material const & parent_mat,
+                                                             Processor & p)
+{
+    for (layer_rendering_material const & mat : parent_mat.materials_)
+    {
+        if (!mat.active_styles_.empty())
+        {
+            p.start_layer_processing(mat.lay_, mat.layer_ext2_);
+
+            render_material(mat, p);
+            render_submaterials(mat, p);
+
+            p.end_layer_processing(mat.lay_);
+        }
+    }
+}
 
 template <typename Processor>
 void feature_style_processor<Processor>::render_material(layer_rendering_material const & mat,
-                                                         Processor & p )
+                                                         Processor & p)
 {
     std::vector<feature_type_style const*> const & active_styles = mat.active_styles_;
     std::vector<featureset_ptr> const & featureset_ptr_list = mat.featureset_ptr_list_;
@@ -458,8 +491,6 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
         }
         return;
     }
-
-    p.start_layer_processing(mat.lay_, mat.layer_ext2_);
 
     layer const& lay = mat.lay_;
 
@@ -554,7 +585,6 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
             ++i;
         }
     }
-    p.end_layer_processing(mat.lay_);
 }
 
 template <typename Processor>

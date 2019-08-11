@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_OUTPUT_ATTRIBUTES
-#define MAPNIK_SVG_OUTPUT_ATTRIBUTES
+#ifndef MAPNIK_SVG_OUTPUT_ATTRIBUTES_HPP
+#define MAPNIK_SVG_OUTPUT_ATTRIBUTES_HPP
 
 // mapnik
 #include <mapnik/color.hpp>
@@ -121,12 +121,12 @@ namespace mapnik { namespace svg {
               fill_color_("#000000")
         {}
 
-        rect_output_attributes(const int x, const int y, const unsigned width, const unsigned height, color const& fill_color)
+        rect_output_attributes(const int x, const int y, const unsigned width, const unsigned height, color const& _fill_color)
             : x_(x),
               y_(y),
               width_(width),
               height_(height),
-              fill_color_(fill_color.to_hex_string())
+              fill_color_(_fill_color.to_hex_string())
         {}
 
         void set_x(const int x);
@@ -199,4 +199,4 @@ namespace mapnik { namespace svg {
     };
     }}
 
-#endif // MAPNIK_SVG_OUTPUT_ATTRIBUTES
+#endif // MAPNIK_SVG_OUTPUT_ATTRIBUTES_HPP

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define MAPNIK_QUERY_HPP
 
 //mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/attribute.hpp>
 
 // stl
@@ -40,12 +40,12 @@ public:
     using resolution_type = std::tuple<double,double>;
 
     query(box2d<double> const& bbox,
-          resolution_type const& resolution,
-          double scale_denominator,
+          resolution_type const& _resolution,
+          double _scale_denominator,
           box2d<double> const& unbuffered_bbox)
         : bbox_(bbox),
-          resolution_(resolution),
-          scale_denominator_(scale_denominator),
+          resolution_(_resolution),
+          scale_denominator_(_scale_denominator),
           filter_factor_(1.0),
           unbuffered_bbox_(unbuffered_bbox),
           names_(),
@@ -53,11 +53,11 @@ public:
     {}
 
     query(box2d<double> const& bbox,
-          resolution_type const& resolution,
-          double scale_denominator = 1.0)
+          resolution_type const& _resolution,
+          double _scale_denominator = 1.0)
         : bbox_(bbox),
-          resolution_(resolution),
-          scale_denominator_(scale_denominator),
+          resolution_(_resolution),
+          scale_denominator_(_scale_denominator),
           filter_factor_(1.0),
           unbuffered_bbox_(bbox),
           names_(),

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,13 +26,12 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/geometry/point.hpp>
+// stl
+#include <vector>
 
 namespace mapnik {
 
-namespace geometry {
-template <typename T> struct point;
-template <typename T> struct line_string;
-}
 class projection;
 template <typename T> class box2d;
 
@@ -50,8 +49,8 @@ public:
     bool backward (double *x, double *y , double *z, int point_count, int offset = 1) const;
     bool forward (geometry::point<double> & p) const;
     bool backward (geometry::point<double> & p) const;
-    unsigned int forward (geometry::line_string<double> & ls) const;
-    unsigned int backward (geometry::line_string<double> & ls) const;
+    unsigned int forward (std::vector<geometry::point<double>> & ls) const;
+    unsigned int backward (std::vector<geometry::point<double>> & ls) const;
     bool forward (box2d<double> & box) const;
     bool backward (box2d<double> & box) const;
     bool forward (box2d<double> & box, int points) const;

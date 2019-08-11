@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
 #include <mapnik/coord.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include "agg_trans_affine.h"
 
 TEST_CASE("box2d") {

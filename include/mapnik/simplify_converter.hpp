@@ -41,7 +41,7 @@ struct weighted_vertex : private util::noncopyable
         vertex2d const& A = prev->coord;
         vertex2d const& B = next->coord;
         vertex2d const& C = coord;
-        return std::abs((double)((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
+        return std::abs(static_cast<double>((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
     }
 
     struct ascending_sort
@@ -120,11 +120,11 @@ public:
         return algorithm_;
     }
 
-    void set_simplify_algorithm(simplify_algorithm_e value)
+    void set_simplify_algorithm(simplify_algorithm_e val)
     {
-        if (algorithm_ != value)
+        if (algorithm_ != val)
         {
-            algorithm_ = value;
+            algorithm_ = val;
             reset();
         }
     }
@@ -134,11 +134,11 @@ public:
         return tolerance_;
     }
 
-    void set_simplify_tolerance(double value)
+    void set_simplify_tolerance(double val)
     {
-        if (tolerance_ != value)
+        if (tolerance_ != val)
         {
-            tolerance_ = value;
+            tolerance_ = val;
             reset();
         }
     }

@@ -1,6 +1,4 @@
-language: c
-
-sudo: false
+language: generic
 
 git:
   depth: 10
@@ -8,86 +6,91 @@ git:
 
 env:
   global:
-   - secure: "N3a5nzzsgpuu45k8qWdYsHNxrSnqeAGLTOYpfYoAH7B94vuf7pa7XV1tQjXbxrnx2D6ryTdtUtyRKwy7zXbwXxGt4DpczWEo8f6DUd6+obAp3kdnXABg2Sj4oA7KMs0F0CmoADy0jdUZD5YyOJHu64LCIIgzEQ9q49PFMNbU3IE="
-   - secure: "iQYPNpMtejcgYeUkWZGIWz1msIco5qydJrhZTSCQOYahAQerdT7q5WZEpEo3G6IWOGgO1eo7GFuY8DvqQjw1+jC9b9mhkRNdo3LhGTKS9Gsbl5Q27k0rjlaFZmmQHrfPlQJwhfAIp+KLugHtQw5bCoLh+95E3j0F0DayF1tuJ3s="
-addons:
-  postgresql: "9.4"
-  apt:
-    sources:
-     - ubuntu-toolchain-r-test
-     - llvm-toolchain-precise-3.5
-    packages:
-     - clang-3.5
+   - CCACHE_TEMPDIR=/tmp/.ccache-temp
+   - CCACHE_COMPRESS=1
+   - PREFIX=/tmp/mapnik
+   - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 
 cache:
   directories:
   - $HOME/.ccache
 
+dist: trusty
+sudo: false
+
 matrix:
   include:
     - os: linux
-      compiler: clang
-      env: JOBS=8 CXX="ccache clang++-3.5 -Qunused-arguments" CC="clang-3.5" MASON_PUBLISH=true BENCH=True
+      name: Linux gcc-6
+      env: >-
+          CXX="ccache g++-6"
+          CC="gcc-6"
       addons:
+        postgresql: "9.5"
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5' ]
-          packages: [ 'clang-3.5' ]
-    # OOM killer knocking out build on render_markers_symbolizer.cpp
-    #
-    #- os: linux
-    #  compiler: gcc
-    #  env: JOBS=6 CXX="ccache g++-4.9" CC="gcc-4.9"
-    #  addons:
-    #    apt:
-    #      sources: [ 'ubuntu-toolchain-r-test' ]
-    #      packages: [ 'gcc-4.9', 'g++-4.9', 'libstdc++-4.9-dev', 'libstdc++6' ]
+          sources: [ 'ubuntu-toolchain-r-test']
+          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
+    - os: linux
+      name: Linux clang-3.9
+      env: >-
+          CXX="ccache clang++-3.9 -Qunused-arguments"
+          CC="clang-3.9"
+          ENABLE_GLIBC_WORKAROUND=true
+      before_install:
+        - export LINKFLAGS="-fuse-ld=gold-2.26"
+      addons:
+        postgresql: "9.5"
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test' ]
+          packages: [ 'clang-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: osx
-      compiler: clang
+      name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
-      osx_image: xcode7.2 # upgrades clang from 6 -> 7
-      env: JOBS=8 MASON_PUBLISH=true HEAVY_JOBS=3
-    - os: osx
-      compiler: clang
-      osx_image: xcode7.2 # upgrades clang from 6 -> 7
-      env: JOBS=8 COVERAGE=true HEAVY_JOBS=3
-
-before_install:
- - source scripts/travis-common.sh
- - export PYTHONUSERBASE=$(pwd)/mason_packages/.link
- - export PATH=${PYTHONUSERBASE}/bin:${PATH}
- - export COVERAGE=${COVERAGE:-false}
- - export MASON_PUBLISH=${MASON_PUBLISH:-false}
- - export BENCH=${BENCH:-false}
- - if [[ ${TRAVIS_BRANCH} != 'master' ]]; then export MASON_PUBLISH=false; fi
- - if [[ ${TRAVIS_PULL_REQUEST} != 'false' ]]; then export MASON_PUBLISH=false; fi
- - git_submodule_update --init --depth=10
+      osx_image: xcode7.3 # upgrades clang from 6 -> 7
+      env: >-
+          CXX="ccache clang++ -Qunused-arguments"
 
 install:
- - on 'linux' export PYTHONPATH=${PYTHONUSERBASE}/lib/python2.7/site-packages
- - on 'osx' export PYTHONPATH=${PYTHONUSERBASE}/lib/python/site-packages
- - on 'osx' brew rm postgis --force
- - on 'osx' brew install postgis --force
- - on 'osx' pg_ctl -w start -l postgres.log --pgdata /usr/local/var/postgres
+ - source scripts/travis-common.sh
+ # workaround travis rvm bug
+ # http://superuser.com/questions/1044130/why-am-i-having-how-can-i-fix-this-error-shell-session-update-command-not-f
+ - on 'osx' rvm get head || true
+ - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
+ - export COVERAGE=${COVERAGE:-false}
+ - export BENCH=${BENCH:-false}
+ - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
+ - on 'osx' rm -rf ${DATA_PATH}
+ - on 'osx' initdb ${DATA_PATH} -E utf8
+ - on 'osx' pg_ctl -w start -l postgres.log --pgdata ${DATA_PATH};
+ - on 'osx' cat postgres.log;
  - on 'osx' createuser -s postgres
  - psql -c 'create database template_postgis;' -U postgres
  - psql -c 'create extension postgis;' -d template_postgis -U postgres
- - enabled ${COVERAGE} pip install --user cpp-coveralls
+ - enabled ${COVERAGE} curl -S -f https://codecov.io/bash -o codecov
+ - enabled ${COVERAGE} chmod +x codecov
 
 before_script:
+ - export JOBS=${JOBS:-4}
+ - export HEAVY_JOBS=${HEAVY_JOBS:-2}
+ - export SCONSFLAGS='--debug=time'
  - source bootstrap.sh
+ - ccache --version
+ - ccache -p || true
+ - ccache --show-stats || true
  - commit_message_parse
 
 script:
- - export SCONSFLAGS='--debug=time'
- - configure BENCHMARK=${BENCH}
- - make
- - make test
- - enabled ${COVERAGE} coverage
- - enabled ${BENCH} make bench
-
-after_success:
- - if enabled ${MASON_PUBLISH}; then
-     ./mason_latest.sh build &&
-     ./mason_latest.sh link &&
-     ./mason_latest.sh publish;
-   fi
+ - git_submodule_update --init deps/
+ - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false} QUIET=${QUIET:-false}
+ #- cat config.log => comment out to reduce log size limit on travis-ci
+ # we limit the `make` to 40 min
+ # to ensure that slow builds still upload their
+ # ccache results and therefore should be faster
+ # (and might work) for the next build
+ - DEADLINE=$(( $(date +%s) + 40 * 60 ))
+ - scripts/travis-command-wrapper.py -s "date" -i 120 --deadline="$DEADLINE" make
+ - test_ok && git_submodule_update --init --depth=50 test/
+ - test_ok && make test
+ - test_ok && enabled ${COVERAGE} coverage
+ - test_ok && enabled ${BENCH} make bench
+ - ./scripts/check_glibcxx.sh

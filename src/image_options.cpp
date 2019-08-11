@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,54 +24,99 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #pragma GCC diagnostic pop
 
-namespace mapnik { namespace detail {
-
-namespace qi = boost::spirit::qi;
-
-template <typename Iterator>
-struct image_options_grammar
-    : qi::grammar<Iterator, image_options_map(), boost::spirit::ascii::space_type>
+#if defined(HAVE_PNG)
+extern "C"
 {
-    using pair_type = std::pair<std::string, boost::optional<std::string>>;
-    image_options_grammar()
-        : image_options_grammar::base_type(start)
-    {
-        qi::lit_type lit;
-        qi::char_type char_;
-        start = pair >> *(lit(':') >> pair)
-            ;
-        pair = key >> -('=' >> value)
-            ;
-        key = char_("a-zA-Z_") >> *char_("a-zA-Z_0-9\\.\\-")
-            ;
-        value = +char_("a-zA-Z_0-9\\.\\-")
-            ;
-    }
+#include <png.h>
+}
+#endif // HAVE_PNG
 
-    qi::rule<Iterator, image_options_map(), boost::spirit::ascii::space_type> start;
-    qi::rule<Iterator, pair_type(), boost::spirit::ascii::space_type> pair;
-    qi::rule<Iterator, std::string(), boost::spirit::ascii::space_type> key, value;
-};
+namespace mapnik { namespace grammar {
 
-} // ns detail
+namespace x3 = boost::spirit::x3;
+
+using x3::lit;
+using x3::ascii::char_;
+using pair_type = std::pair<std::string, boost::optional<std::string>>;
+
+x3::rule<class image_options, image_options_map> const image_options("image options");
+x3::rule<class key_value, pair_type> const key_value("key_value");
+x3::rule<class key, std::string> const key("key");
+x3::rule<class value, std::string> const value("value");
+
+auto const key_def = char_("a-zA-Z_") > *char_("a-zA-Z_0-9\\.\\-");
+auto const value_def = +char_("a-zA-Z_0-9\\.\\-|");
+auto const key_value_def = key > -('=' > value);
+auto const image_options_def = key_value % lit(':');
+
+BOOST_SPIRIT_DEFINE(key);
+BOOST_SPIRIT_DEFINE(value);
+BOOST_SPIRIT_DEFINE(key_value);
+BOOST_SPIRIT_DEFINE(image_options);
+
+} // grammar
 
 image_options_map parse_image_options(std::string const& str)
 {
-     auto const begin = str.begin();
+     auto begin = str.begin();
      auto const end = str.end();
-     boost::spirit::ascii::space_type space;
-     mapnik::detail::image_options_grammar<std::string::const_iterator> g;
+     using boost::spirit::x3::space;
+     using mapnik::grammar::image_options;
      image_options_map options;
-     bool success = boost::spirit::qi::phrase_parse(begin, end, g, space, options);
-     if (!success)
+     try
      {
-         throw std::runtime_error("Can't parse image options: " + str);
+         bool success = boost::spirit::x3::phrase_parse(begin, end, image_options, space, options);
+         if (!success || begin != end)
+         {
+             throw std::runtime_error("Can't parse image options: " + str);
+         }
+     }
+     catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
+     {
+         throw std::runtime_error("Can't parse image options: " + str + " " + ex.what());
      }
      return options;   // RVO
 }
+
+#if defined(HAVE_PNG)
+
+int parse_png_filters(std::string const& str)
+{
+    auto begin = str.begin();
+    auto const end = str.end();
+    using boost::spirit::x3::space;
+    using boost::spirit::x3::symbols;
+    symbols<int> filter;
+    filter.add
+        ("none", PNG_FILTER_NONE)
+        ("sub", PNG_FILTER_SUB)
+        ("up", PNG_FILTER_UP)
+        ("avg", PNG_FILTER_AVG)
+        ("paeth", PNG_FILTER_PAETH)
+        ;
+
+    std::vector<int> opts;
+    try
+    {
+        bool success = boost::spirit::x3::phrase_parse(begin, end, filter % "|" , space , opts);
+        if (!success || begin != end)
+        {
+            throw std::runtime_error("Can't parse PNG filters: " + str);
+        }
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
+    {
+        throw std::runtime_error("Can't parse PNG filters: " + str + " " + ex.what());
+    }
+    int filters = 0;
+    std::for_each(opts.begin(), opts.end(), [&filters] (int f) { filters |= f;});
+    return filters;
+}
+
+#endif // HAVE_PNG
 
 } // ns mapnik

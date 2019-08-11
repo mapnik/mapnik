@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,16 +32,17 @@
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 // boost
 #include <boost/optional.hpp>
 
 // stl
+#include <regex>
 #include <vector>
 #include <string>
 #include <memory>
@@ -90,24 +91,26 @@ public:
 
 private:
     std::string sql_bbox(box2d<double> const& env) const;
-    std::string populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const;
+    std::string populate_tokens(std::string const& sql, double scale_denom,
+                                box2d<double> const& env,
+                                double pixel_width, double pixel_height,
+                                mapnik::attributes const& vars,
+                                bool intersect = true) const;
     std::string populate_tokens(std::string const& sql) const;
     std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
     static const std::string RASTER_COLUMNS;
     static const std::string RASTER_OVERVIEWS;
     static const std::string SPATIAL_REF_SYS;
-    static const double FMAX;
 
     const std::string uri_;
     const std::string username_;
     const std::string password_;
     // table name (schema qualified or not) or subquery
     const std::string table_;
-    // schema name (possibly extracted from table_)
-    std::string schema_;
-    // table name (possibly extracted from table_)
-    std::string raster_table_;
+    const std::string raster_table_; // possibly schema-qualified
     const std::string raster_field_;
+    std::string parsed_schema_; // extracted from raster_table_ or table_
+    std::string parsed_table_; // extracted from raster_table_ or table_
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;
@@ -129,10 +132,7 @@ private:
     bool clip_rasters_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
-    const std::string bbox_token_;
-    const std::string scale_denom_token_;
-    const std::string pixel_width_token_;
-    const std::string pixel_height_token_;
+    std::regex re_tokens_;
     int pool_max_size_;
     bool persist_connection_;
     bool extent_from_subquery_;

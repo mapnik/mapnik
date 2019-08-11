@@ -176,6 +176,10 @@ namespace agg
             {
                 m_rows.resize(height);
             }
+            else if(height == 0)
+            {
+                return;
+            }
 
             T* row_ptr = m_buf;
 

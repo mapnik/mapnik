@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,9 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
-// agg
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -40,6 +42,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -60,9 +63,10 @@ void agg_renderer<T0,T1>::process(polygon_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    box2d<double> clip_box = clipping_extent(common_);
-    agg::rendering_buffer buf(current_buffer_->bytes(),current_buffer_->width(),current_buffer_->height(), current_buffer_->row_size());
+    buffer_type & current_buffer = buffers_.top().get();
+    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
 
+    box2d<double> clip_box = clipping_extent(common_);
     render_polygon_symbolizer<vertex_converter_type>(
         sym, feature, prj_trans, common_, clip_box, *ras_ptr,
         [&](color const &fill, double opacity) {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -50,7 +50,7 @@ void test_path_parser(std::string const& str, Expected const& expected)
         vec.emplace_back(x, y, cmd);
         //std::cerr << "std::make_tuple(" << x << ", " << y << ", " << cmd  << ")," << std::endl;
     }
-    REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(), detail::vertex_equal<3>()));
+    REQUIRE(std::equal(expected.begin(),expected.end(), vec.begin(), vertex_equal<3>()));
 }
 } // anonymous ns
 

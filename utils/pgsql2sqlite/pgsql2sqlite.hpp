@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,8 @@
 #include <mapnik/global.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
-#include <mapnik/geometry_is_empty.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 #include "connection_manager.hpp"
 #include "cursorresultset.hpp"
@@ -352,23 +352,23 @@ void pgsql2sqlite(Connection conn,
                     break;
                 }
                 case 23:
-                    output_rec.push_back(sqlite::value_type(int4net(buf)));
+                    output_rec.emplace_back(int4net(buf));
                     break;
                 case 21:
-                    output_rec.push_back(sqlite::value_type(int2net(buf)));
+                    output_rec.emplace_back(int(int2net(buf)));
                     break;
                 case 700:
                 {
                     float val;
                     float4net(val,buf);
-                    output_rec.push_back(sqlite::value_type(val));
+                    output_rec.emplace_back(double(val));
                     break;
                 }
                 case 701:
                 {
                     double val;
                     float8net(val,buf);
-                    output_rec.push_back(sqlite::value_type(val));
+                    output_rec.emplace_back(val);
                     break;
                 }
                 case 1700:
@@ -377,7 +377,7 @@ void pgsql2sqlite(Connection conn,
                     double val;
                     if (mapnik::util::string2double(str,val))
                     {
-                        output_rec.push_back(sqlite::value_type(val));
+                        output_rec.emplace_back(val);
                     }
                     break;
                 }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,10 +25,13 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>
@@ -47,6 +50,10 @@ struct value_holder : value_holder_base
     // default
     value_holder()
         : value_holder_base() {}
+
+    // C-string -> std::string
+    value_holder(char const* str)
+        : value_holder(std::string(str)) {}
 
     // perfect forwarding
     template <typename T>

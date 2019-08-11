@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,13 +24,15 @@
 #define MAPNIK_EXPRESSION_NODE_HPP
 
 // mapnik
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/function_call.hpp>
 #include <mapnik/expression_node_types.hpp>
+// stl
+#include <memory>
 
 namespace mapnik
 {
@@ -57,6 +59,9 @@ template <> struct make_op<mapnik::tags::logical_or> { using type =  std::logica
 template <typename Tag>
 struct unary_node
 {
+    unary_node (expr_node && a)
+        : expr(std::move(a)) {}
+
     unary_node (expr_node const& a)
         : expr(a) {}
 
@@ -71,6 +76,10 @@ struct unary_node
 template <typename Tag>
 struct binary_node
 {
+    binary_node(expr_node && a, expr_node && b)
+        : left(std::move(a)),
+          right(std::move(b)) {}
+
     binary_node(expr_node const& a, expr_node const& b)
         : left(a),
           right(b) {}
@@ -127,81 +136,6 @@ struct MAPNIK_DECL regex_replace_node
     // TODO - use unique_ptr once https://github.com/mapnik/mapnik/issues/2457 is fixed
     std::shared_ptr<_regex_replace_impl> impl_;
 };
-
-inline expr_node & operator- (expr_node& expr)
-{
-    return expr = unary_node<mapnik::tags::negate>(expr);
-}
-
-inline expr_node & operator += ( expr_node &left, expr_node const& right)
-{
-    return left =  binary_node<mapnik::tags::plus>(left,right);
-}
-
-inline expr_node & operator -= ( expr_node &left, expr_node const& right)
-{
-    return left =  binary_node<mapnik::tags::minus>(left,right);
-}
-
-inline expr_node & operator *= ( expr_node &left , expr_node const& right)
-{
-    return left =  binary_node<mapnik::tags::mult>(left,right);
-}
-
-inline expr_node & operator /= ( expr_node &left , expr_node const& right)
-{
-    return left =  binary_node<mapnik::tags::div>(left,right);
-}
-
-inline expr_node & operator %= ( expr_node &left , expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::mod>(left,right);
-}
-
-inline expr_node & operator < ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::less>(left,right);
-}
-
-inline expr_node & operator <= ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::less_equal>(left,right);
-}
-
-inline expr_node & operator > ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::greater>(left,right);
-}
-
-inline expr_node & operator >= ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::greater_equal>(left,right);
-}
-
-inline expr_node & operator == ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::equal_to>(left,right);
-}
-
-inline expr_node & operator != ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::not_equal_to>(left,right);
-}
-
-inline expr_node & operator ! (expr_node & expr)
-{
-    return expr = unary_node<mapnik::tags::logical_not>(expr);
-}
-
-inline expr_node & operator && ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::logical_and>(left,right);
-}
-
-inline expr_node & operator || ( expr_node &left, expr_node const& right)
-{
-    return left = binary_node<mapnik::tags::logical_or>(left,right);
-}
 
 }
 

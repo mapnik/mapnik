@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,11 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
-#include <mapnik/feature.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
+
+#include <memory>
 
 namespace mapnik
 {
@@ -103,13 +105,13 @@ public:
         switch (format_)
         {
         case wkbSpatiaLite:
-            byteOrder_ = (wkbByteOrder) wkb_[1];
+            byteOrder_ = static_cast<wkbByteOrder>(wkb_[1]);
             pos_ = 39;
             break;
 
         case wkbGeneric:
         default:
-            byteOrder_ = (wkbByteOrder) wkb_[0];
+            byteOrder_ = static_cast<wkbByteOrder>(wkb_[0]);
             pos_ = 1;
             break;
         }
@@ -124,8 +126,12 @@ public:
         switch (type)
         {
         case wkbPoint:
-            geom = read_point();
+        {
+            auto pt = read_point();
+            if (!std::isnan(pt.x) && !std::isnan(pt.y))
+                geom = std::move(pt);
             break;
+        }
         case wkbLineString:
             geom = read_linestring();
             break;
@@ -146,11 +152,19 @@ public:
             break;
         case wkbPointZ:
         case wkbPointM:
-            geom = read_point<true>();
+        {
+            auto pt = read_point<true>();
+            if (!std::isnan(pt.x) && !std::isnan(pt.y))
+                geom = std::move(pt);
             break;
+        }
         case wkbPointZM:
-            geom = read_point<true,true>();
+        {
+            auto pt = read_point<true,true>();
+            if (!std::isnan(pt.x) && !std::isnan(pt.y))
+                geom = std::move(pt);
             break;
+        }
         case wkbLineStringZ:
         case wkbLineStringM:
             geom = read_linestring<true>();
@@ -317,11 +331,7 @@ private:
     {
         int num_rings = read_integer();
         mapnik::geometry::polygon<double> poly;
-        if (num_rings > 1)
-        {
-            poly.interior_rings.reserve(num_rings - 1);
-        }
-
+        poly.reserve(num_rings);
         for (int i = 0; i < num_rings; ++i)
         {
             mapnik::geometry::linear_ring<double> ring;
@@ -331,8 +341,7 @@ private:
                 ring.reserve(num_points);
                 read_coords<mapnik::geometry::linear_ring<double>, M, Z>(ring, num_points);
             }
-            if ( i == 0) poly.set_exterior_ring(std::move(ring));
-            else poly.add_hole(std::move(ring));
+            poly.push_back(std::move(ring));
         }
         return poly;
     }
@@ -342,6 +351,7 @@ private:
     {
         int num_polys = read_integer();
         mapnik::geometry::multi_polygon<double> multi_poly;
+        multi_poly.reserve(num_polys);
         for (int i = 0; i < num_polys; ++i)
         {
             pos_ += 5;
@@ -354,6 +364,7 @@ private:
     {
         int num_geometries = read_integer();
         mapnik::geometry::geometry_collection<double> collection;
+        collection.reserve(num_geometries);
         for (int i = 0; i < num_geometries; ++i)
         {
             pos_ += 1; // skip byte order

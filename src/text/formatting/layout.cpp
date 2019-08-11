@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,8 +35,10 @@
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/boolean.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik { namespace formatting {
 
@@ -73,9 +75,9 @@ node_ptr layout_node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     if (xml.has_attribute("text-ratio")) set_property_from_xml<double>(n->text_ratio, "text-ratio", xml);
     if (xml.has_attribute("wrap-width")) set_property_from_xml<double>(n->wrap_width, "wrap-width", xml);
     if (xml.has_attribute("wrap-character")) set_property_from_xml<std::string>(n->wrap_char, "wrap-character", xml);
-    if (xml.has_attribute("wrap-before")) set_property_from_xml<mapnik::boolean_type>(n->wrap_before, "wrap-before", xml);
-    if (xml.has_attribute("repeat-wrap-character")) set_property_from_xml<mapnik::boolean_type>(n->repeat_wrap_char, "repeat-wrap-character", xml);
-    if (xml.has_attribute("rotate-displacement")) set_property_from_xml<mapnik::boolean_type>(n->rotate_displacement, "rotate-displacement", xml);
+    if (xml.has_attribute("wrap-before")) set_property_from_xml<mapnik::value_bool>(n->wrap_before, "wrap-before", xml);
+    if (xml.has_attribute("repeat-wrap-character")) set_property_from_xml<mapnik::value_bool>(n->repeat_wrap_char, "repeat-wrap-character", xml);
+    if (xml.has_attribute("rotate-displacement")) set_property_from_xml<mapnik::value_bool>(n->rotate_displacement, "rotate-displacement", xml);
     if (xml.has_attribute("orientation")) set_property_from_xml<double>(n->orientation, "orientation", xml);
     if (xml.has_attribute("horizontal-alignment")) set_property_from_xml<horizontal_alignment_e>(n->halign, "horizontal-alignment", xml);
     if (xml.has_attribute("vertical-alignment")) set_property_from_xml<vertical_alignment_e>(n->valign, "vertical-alignment", xml);

@@ -5,7 +5,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/geometry_reprojection.hpp>
+#include <mapnik/geometry/reprojection.hpp>
 
 TEST_CASE("geometry reprojection") {
 
@@ -321,43 +321,49 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
     mapnik::proj_transform proj_trans1(source, dest);
     mapnik::proj_transform proj_trans2(dest, source);
     polygon<double> geom1;
-    geom1.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1.exterior_ring.emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
-    geom1.exterior_ring.emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
-    geom1.exterior_ring.emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
-    geom1.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1.interior_rings.emplace_back();
-    geom1.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
-    geom1.interior_rings.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
-    geom1.interior_rings.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
-    geom1.interior_rings.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
-    geom1.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    // exterior
+    geom1.emplace_back();
+    geom1.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    geom1.back().emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
+    geom1.back().emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
+    geom1.back().emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
+    geom1.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    // interior
+    geom1.emplace_back();
+    geom1.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    geom1.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
+    geom1.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
+    geom1.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
+    geom1.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
     polygon<double> geom2;
-    geom2.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2.exterior_ring.emplace_back(point<double>(-10886008.694318, 4223757.308982));
-    geom2.exterior_ring.emplace_back(point<double>(-10865217.822625, 4210763.014174));
-    geom2.exterior_ring.emplace_back(point<double>(-10845649.943384, 4229566.523132));
-    geom2.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2.interior_rings.emplace_back();
-    geom2.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
-    geom2.interior_rings.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
-    geom2.interior_rings.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
-    geom2.interior_rings.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
-    geom2.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    // interior
+    geom2.emplace_back();
+    geom2.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    geom2.back().emplace_back(point<double>(-10886008.694318, 4223757.308982));
+    geom2.back().emplace_back(point<double>(-10865217.822625, 4210763.014174));
+    geom2.back().emplace_back(point<double>(-10845649.943384, 4229566.523132));
+    geom2.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    // exterior
+    geom2.emplace_back();
+    geom2.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    geom2.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
+    geom2.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
+    geom2.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
+    geom2.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
     unsigned int err = 0;
     {
         // Test Standard Transform
         // Add extra vector to outer ring.
-        geom1.interior_rings.emplace_back();
-        REQUIRE(geom1.interior_rings.size() == 2);
+        geom1.emplace_back();
+        REQUIRE(geom1.size() == 3);
         polygon<double> new_geom = reproject_copy(geom1, proj_trans1, err);
         REQUIRE(err == 0);
         // Should remove the empty ring added to back of geom1
-        REQUIRE(new_geom.interior_rings.size() == 1);
+        REQUIRE(new_geom.size() == 2);
         assert_g_equal(new_geom, geom2);
         // Remove extra ring for future validity tests.
-        geom1.interior_rings.pop_back();
-        REQUIRE(geom1.interior_rings.size() == 1);
+        geom1.pop_back();
+        REQUIRE(geom1.size() == 2);
     }
     {
         // Transform in reverse
@@ -380,13 +386,13 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Object") {
     {
         // Transform in place
         polygon<double> geom3(geom1);
-        geom3.interior_rings.emplace_back();
+        geom3.emplace_back();
         REQUIRE(reproject(geom3, proj_trans1));
         // Should NOT remove the empty ring added to back of geom1
-        REQUIRE(geom3.interior_rings.size() == 2);
+        REQUIRE(geom3.size() == 3);
         // Remove so asserts that geometries are the same
-        geom3.interior_rings.pop_back();
-        REQUIRE(geom3.interior_rings.size() == 1);
+        geom3.pop_back();
+        REQUIRE(geom3.size() == 2);
         assert_g_equal(geom3, geom2);
         // Transform in place reverse
         REQUIRE(reproject(geom3, proj_trans2));
@@ -410,29 +416,36 @@ SECTION("test_projection_4326_3857 - Polygon Geometry Variant Object") {
     mapnik::proj_transform proj_trans1(source, dest);
     mapnik::proj_transform proj_trans2(dest, source);
     polygon<double> geom1_;
-    geom1_.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1_.exterior_ring.emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
-    geom1_.exterior_ring.emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
-    geom1_.exterior_ring.emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
-    geom1_.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1_.interior_rings.emplace_back();
-    geom1_.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
-    geom1_.interior_rings.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
-    geom1_.interior_rings.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
-    geom1_.interior_rings.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
-    geom1_.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    // exterior
+    geom1_.emplace_back();
+    geom1_.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    geom1_.back().emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
+    geom1_.back().emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
+    geom1_.back().emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
+    geom1_.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    // interior
+    geom1_.emplace_back();
+    geom1_.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    geom1_.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
+    geom1_.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
+    geom1_.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
+    geom1_.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+
     polygon<double> geom2_;
-    geom2_.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2_.exterior_ring.emplace_back(point<double>(-10886008.694318, 4223757.308982));
-    geom2_.exterior_ring.emplace_back(point<double>(-10865217.822625, 4210763.014174));
-    geom2_.exterior_ring.emplace_back(point<double>(-10845649.943384, 4229566.523132));
-    geom2_.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2_.interior_rings.emplace_back();
-    geom2_.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
-    geom2_.interior_rings.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
-    geom2_.interior_rings.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
-    geom2_.interior_rings.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
-    geom2_.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    // exterior
+    geom2_.emplace_back();
+    geom2_.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    geom2_.back().emplace_back(point<double>(-10886008.694318, 4223757.308982));
+    geom2_.back().emplace_back(point<double>(-10865217.822625, 4210763.014174));
+    geom2_.back().emplace_back(point<double>(-10845649.943384, 4229566.523132));
+    geom2_.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    // interior
+    geom2_.emplace_back();
+    geom2_.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    geom2_.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
+    geom2_.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
+    geom2_.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
+    geom2_.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
     polygon<double> geom0_;
     geometry<double> geom0(geom0_);
     geometry<double> geom1(geom1_);
@@ -791,31 +804,37 @@ SECTION("test_projection_4326_3857 - Multi_Polygon Geometry Object") {
     mapnik::proj_transform proj_trans1(source, dest);
     mapnik::proj_transform proj_trans2(dest, source);
     polygon<double> geom1a;
-    geom1a.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a.interior_rings.emplace_back();
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    // exterior
+    geom1a.emplace_back();
+    geom1a.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    geom1a.back().emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
+    geom1a.back().emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
+    geom1a.back().emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
+    geom1a.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    // interior
+    geom1a.emplace_back();
+    geom1a.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    geom1a.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
+    geom1a.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
+    geom1a.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
+    geom1a.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
     multi_polygon<double> geom1;
     geom1.emplace_back(geom1a);
     polygon<double> geom2a;
-    geom2a.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a.exterior_ring.emplace_back(point<double>(-10886008.694318, 4223757.308982));
-    geom2a.exterior_ring.emplace_back(point<double>(-10865217.822625, 4210763.014174));
-    geom2a.exterior_ring.emplace_back(point<double>(-10845649.943384, 4229566.523132));
-    geom2a.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a.interior_rings.emplace_back();
-    geom2a.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    // exterior
+    geom2a.emplace_back();
+    geom2a.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    geom2a.back().emplace_back(point<double>(-10886008.694318, 4223757.308982));
+    geom2a.back().emplace_back(point<double>(-10865217.822625, 4210763.014174));
+    geom2a.back().emplace_back(point<double>(-10845649.943384, 4229566.523132));
+    geom2a.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    // interior
+    geom2a.emplace_back();
+    geom2a.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    geom2a.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
+    geom2a.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
+    geom2a.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
+    geom2a.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
     multi_polygon<double> geom2;
     geom2.emplace_back(geom2a);
     unsigned int err = 0;
@@ -884,31 +903,37 @@ SECTION("test_projection_4326_3857 - Multi_Polygon Geometry Variant Object") {
     mapnik::proj_transform proj_trans1(source, dest);
     mapnik::proj_transform proj_trans2(dest, source);
     polygon<double> geom1a_;
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a_.interior_rings.emplace_back();
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    // exterior
+    geom1a_.emplace_back();
+    geom1a_.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    geom1a_.back().emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
+    geom1a_.back().emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
+    geom1a_.back().emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
+    geom1a_.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    // interior
+    geom1a_.emplace_back();
+    geom1a_.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    geom1a_.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
+    geom1a_.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
+    geom1a_.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
+    geom1a_.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
     multi_polygon<double> geom1_;
     geom1_.emplace_back(geom1a_);
     polygon<double> geom2a_;
-    geom2a_.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10886008.694318, 4223757.308982));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10865217.822625, 4210763.014174));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10845649.943384, 4229566.523132));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a_.interior_rings.emplace_back();
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    // exterior
+    geom2a_.emplace_back();
+    geom2a_.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    geom2a_.back().emplace_back(point<double>(-10886008.694318, 4223757.308982));
+    geom2a_.back().emplace_back(point<double>(-10865217.822625, 4210763.014174));
+    geom2a_.back().emplace_back(point<double>(-10845649.943384, 4229566.523132));
+    geom2a_.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    // interior
+    geom2a_.emplace_back();
+    geom2a_.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    geom2a_.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
+    geom2a_.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
+    geom2a_.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
+    geom2a_.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
     multi_polygon<double> geom2_;
     geom2_.emplace_back(geom2a_);
     multi_polygon<double> geom0_;
@@ -973,31 +998,37 @@ SECTION("test_projection_4326_3857 - Geometry Collection Object") {
     mapnik::proj_transform proj_trans1(source, dest);
     mapnik::proj_transform proj_trans2(dest, source);
     polygon<double> geom1a;
-    geom1a.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
-    geom1a.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a.interior_rings.emplace_back();
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
-    geom1a.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    // exterior
+    geom1a.emplace_back();
+    geom1a.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    geom1a.back().emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
+    geom1a.back().emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
+    geom1a.back().emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
+    geom1a.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    // interior
+    geom1a.emplace_back();
+    geom1a.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    geom1a.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
+    geom1a.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
+    geom1a.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
+    geom1a.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
     geometry_collection<double> geom1;
     geom1.emplace_back(geometry<double>(geom1a));
     polygon<double> geom2a;
-    geom2a.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a.exterior_ring.emplace_back(point<double>(-10886008.694318, 4223757.308982));
-    geom2a.exterior_ring.emplace_back(point<double>(-10865217.822625, 4210763.014174));
-    geom2a.exterior_ring.emplace_back(point<double>(-10845649.943384, 4229566.523132));
-    geom2a.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a.interior_rings.emplace_back();
-    geom2a.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
-    geom2a.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    // exerior
+    geom2a.emplace_back();
+    geom2a.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    geom2a.back().emplace_back(point<double>(-10886008.694318, 4223757.308982));
+    geom2a.back().emplace_back(point<double>(-10865217.822625, 4210763.014174));
+    geom2a.back().emplace_back(point<double>(-10845649.943384, 4229566.523132));
+    geom2a.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    // interior
+    geom2a.emplace_back();
+    geom2a.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    geom2a.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
+    geom2a.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
+    geom2a.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
+    geom2a.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
     geometry_collection<double> geom2;
     geom2.emplace_back(geometry<double>(geom2a));
     unsigned int err = 0;
@@ -1066,31 +1097,37 @@ SECTION("test_projection_4326_3857 - Geometry Collection Variant Object") {
     mapnik::proj_transform proj_trans1(source, dest);
     mapnik::proj_transform proj_trans2(dest, source);
     polygon<double> geom1a_;
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
-    geom1a_.exterior_ring.emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
-    geom1a_.interior_rings.emplace_back();
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
-    geom1a_.interior_rings.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    // exterior
+    geom1a_.emplace_back();
+    geom1a_.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    geom1a_.back().emplace_back(point<double>(-97.79067993164062, 35.43941441533686));
+    geom1a_.back().emplace_back(point<double>(-97.60391235351562, 35.34425514918409));
+    geom1a_.back().emplace_back(point<double>(-97.42813110351562, 35.48191987272801));
+    geom1a_.back().emplace_back(point<double>(-97.62588500976562, 35.62939577711732));
+    // interior
+    geom1a_.emplace_back();
+    geom1a_.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
+    geom1a_.back().emplace_back(point<double>(-97.61489868164062, 35.54116627999813));
+    geom1a_.back().emplace_back(point<double>(-97.53799438476562, 35.459551379037606));
+    geom1a_.back().emplace_back(point<double>(-97.62451171875, 35.42598697382711));
+    geom1a_.back().emplace_back(point<double>(-97.66571044921875, 35.46849952318069));
     geometry_collection<double> geom1_;
     geom1_.emplace_back(geometry<double>(geom1a_));
     polygon<double> geom2a_;
-    geom2a_.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10886008.694318, 4223757.308982));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10865217.822625, 4210763.014174));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10845649.943384, 4229566.523132));
-    geom2a_.exterior_ring.emplace_back(point<double>(-10867663.807530, 4249745.898599));
-    geom2a_.interior_rings.emplace_back();
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
-    geom2a_.interior_rings.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    // exterior
+    geom2a_.emplace_back();
+    geom2a_.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    geom2a_.back().emplace_back(point<double>(-10886008.694318, 4223757.308982));
+    geom2a_.back().emplace_back(point<double>(-10865217.822625, 4210763.014174));
+    geom2a_.back().emplace_back(point<double>(-10845649.943384, 4229566.523132));
+    geom2a_.back().emplace_back(point<double>(-10867663.807530, 4249745.898599));
+    // interior
+    geom2a_.emplace_back();
+    geom2a_.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
+    geom2a_.back().emplace_back(point<double>(-10866440.815077, 4237668.848130));
+    geom2a_.back().emplace_back(point<double>(-10857879.867909, 4226509.042001));
+    geom2a_.back().emplace_back(point<double>(-10867510.933473, 4221922.820303));
+    geom2a_.back().emplace_back(point<double>(-10872097.155170, 4227732.034453));
     geometry_collection<double> geom2_;
     geom2_.emplace_back(geometry<double>(geom2a_));
     multi_polygon<double> geom0_;

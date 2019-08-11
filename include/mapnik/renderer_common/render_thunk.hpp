@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2016 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,8 +107,7 @@ struct text_render_thunk : util::movable
 using render_thunk = util::variant<vector_marker_render_thunk,
                                    raster_marker_render_thunk,
                                    text_render_thunk>;
-using render_thunk_ptr = std::unique_ptr<render_thunk>;
-using render_thunk_list = std::list<render_thunk_ptr>;
+using render_thunk_list = std::list<render_thunk>;
 
 } // namespace mapnik
 

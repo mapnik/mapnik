@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,14 +20,16 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_XML_NODE_H
-#define MAPNIK_XML_NODE_H
+#ifndef MAPNIK_XML_NODE_HPP
+#define MAPNIK_XML_NODE_HPP
 
 //mapnik
 #include <mapnik/config.hpp> // for MAPNIK_DECL
 
-//boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 //stl
 #include <list>
@@ -51,8 +53,8 @@ class MAPNIK_DECL node_not_found: public std::exception
 {
 public:
     node_not_found(std::string const& node_name);
-    virtual const char* what() const throw();
-    ~node_not_found() throw ();
+    virtual const char* what() const noexcept;
+    ~node_not_found();
 private:
     std::string node_name_;
 protected:
@@ -63,8 +65,8 @@ class MAPNIK_DECL attribute_not_found: public std::exception
 {
 public:
     attribute_not_found(std::string const& node_name, std::string const& attribute_name);
-    virtual const char* what() const throw();
-    ~attribute_not_found() throw ();
+    virtual const char* what() const noexcept;
+    ~attribute_not_found();
 private:
     std::string node_name_;
     std::string attribute_name_;
@@ -76,8 +78,8 @@ class MAPNIK_DECL more_than_one_child: public std::exception
 {
 public:
     more_than_one_child(std::string const& node_name);
-    virtual const char* what() const throw();
-    ~more_than_one_child() throw ();
+    virtual const char* what() const noexcept;
+    ~more_than_one_child();
 private:
     std::string node_name_;
 protected:
@@ -148,4 +150,4 @@ private:
 
 } //ns mapnik
 
-#endif // MAPNIK_XML_NODE_H
+#endif // MAPNIK_XML_NODE_HPP

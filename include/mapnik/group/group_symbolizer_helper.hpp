@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 //mapnik
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/placements/base.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/pixel_position.hpp>
 
 namespace mapnik {
@@ -66,16 +66,6 @@ public:
     inline void add_box_element(box2d<double> const& box, value_unicode_string const& repeat_key = "")
     {
         box_elements_.push_back(box_element(box, repeat_key));
-    }
-
-    inline void clear_box_elements()
-    {
-        box_elements_.clear();
-    }
-
-    inline text_symbolizer_properties const& get_properties() const
-    {
-        return info_ptr_->properties;
     }
 
     pixel_position_list const& get();

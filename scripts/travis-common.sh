@@ -28,30 +28,26 @@ on () {
     esac
 }
 
+test_ok () {
+    return $TRAVIS_TEST_RESULT
+}
+
 git_submodule_update () {
     git submodule update "$@" && return
-    # failed, search pull requests for matching commits
+    # failed, search branch and pull request heads for matching commit
     git submodule foreach \
         '
         test "$sha1" = "`git rev-parse HEAD`" ||
-        git ls-remote origin "refs/pull/*/head" |
+        git ls-remote origin "refs/heads/*" "refs/pull/*/head" |
         while read hash ref; do
             if test "$hash" = "$sha1"; then
-                git config --add remote.origin.fetch "+$ref:$ref";
+                git config --add remote.origin.fetch "+$ref:$ref"
+                break
             fi
         done
         '
     # try again with added fetch refs
     git submodule update "$@"
-}
-
-# install and call pip
-pip () {
-    if ! which pip >/dev/null; then
-        easy_install --user pip && \
-        export PATH="$HOME/Library/Python/2.7/bin:$PATH"
-    fi
-    command pip "$@"
 }
 
 # commit_message_contains TEXT
@@ -81,29 +77,16 @@ config_override () {
 
 configure () {
     if enabled ${COVERAGE}; then
-        ./configure "$@" PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False \
-            CUSTOM_LDFLAGS='--coverage' CUSTOM_CXXFLAGS='--coverage' \
-            CUSTOM_CFLAGS='--coverage' DEBUG=True
-    elif enabled ${MASON_PUBLISH}; then
-        export MASON_NAME=mapnik
-        export MASON_VERSION=latest
-        export MASON_LIB_FILE=lib/libmapnik-wkt.a
-        source ./.mason/mason.sh
-        ./configure "$@" PREFIX=${MASON_PREFIX} \
-            PATH_REPLACE='' MAPNIK_BUNDLED_SHARE_DIRECTORY=True \
-            RUNTIME_LINK='static'
+        ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@" \
+                    COVERAGE=True DEBUG=True \
+                    PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False
     else
-        ./configure "$@"
+        ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@"
     fi
     # print final config values, sorted and indented
     sort -sk1,1 ./config.py | sed -e 's/^/	/'
 }
 
 coverage () {
-    ./mason_packages/.link/bin/cpp-coveralls \
-        --build-root . --gcov-options '\-lp' --exclude mason_packages \
-        --exclude .sconf_temp --exclude benchmark --exclude deps \
-        --exclude scons --exclude test --exclude demo --exclude docs \
-        --exclude fonts --exclude utils \
-        > /dev/null
+    ./codecov -x "${LLVM_COV:-llvm-cov} gcov" -Z
 }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,15 +23,15 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/geometry_is_empty.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
 // ogr
 #include "sqlite_featureset.hpp"
@@ -49,6 +49,7 @@ sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                                      std::string const& encoding,
                                      mapnik::box2d<double> const& bbox,
                                      mapnik::wkbFormat format,
+                                     bool twkb_encoding,
                                      bool spatial_index,
                                      bool using_subquery)
     : rs_(rs),
@@ -56,6 +57,7 @@ sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
       tr_(new transcoder(encoding)),
       bbox_(bbox),
       format_(format),
+      twkb_encoding_(twkb_encoding),
       spatial_index_(spatial_index),
       using_subquery_(using_subquery)
 {}
@@ -81,7 +83,9 @@ feature_ptr sqlite_featureset::next()
         }
 
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
-        mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(data, size, format_);
+        mapnik::geometry::geometry<double> geom;
+        if (twkb_encoding_) geom = geometry_utils::from_twkb(data, size);
+        else geom = geometry_utils::from_wkb(data, size, format_);
         if (mapnik::geometry::is_empty(geom))
         {
             continue;

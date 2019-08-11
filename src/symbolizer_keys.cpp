@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -90,11 +90,20 @@ static const property_meta_type key_meta[const_max_key] =
     property_meta_type{ "shield-dy", nullptr, property_types::target_double },
     property_meta_type{ "unlock-image", nullptr, property_types::target_bool },
     property_meta_type{ "mode", nullptr, property_types::target_double },
-    property_meta_type{ "scaling", nullptr, property_types::target_double },
+    property_meta_type{ "scaling",
+                        [](enumeration_wrapper e)
+                        {
+                            return *scaling_method_to_string(scaling_method_e(e.value));
+                        },
+                        property_types::target_scaling_method},
     property_meta_type{ "filter-factor",  nullptr, property_types::target_double },
     property_meta_type{ "mesh-size", nullptr, property_types::target_double },
     property_meta_type{ "premultiplied",  nullptr, property_types::target_bool },
     property_meta_type{ "smooth",  nullptr, property_types::target_double },
+    property_meta_type{ "smooth-algorithm",
+                        [](enumeration_wrapper e)
+                        {return enumeration<smooth_algorithm_enum,smooth_algorithm_enum_MAX>(smooth_algorithm_enum(e.value)).as_string();},
+                        property_types::target_smooth_algorithm },
     property_meta_type{ "simplify-algorithm",
                         [](enumeration_wrapper e)
                         {
@@ -158,6 +167,10 @@ static const property_meta_type key_meta[const_max_key] =
                         property_types::target_direction},
     property_meta_type{ "avoid-edges",nullptr, property_types::target_bool },
     property_meta_type{ "font-feature-settings", nullptr, property_types::target_font_feature_settings },
+    property_meta_type{ "extend", nullptr, property_types::target_double},
+    property_meta_type{ "line-pattern",  [](enumeration_wrapper e)
+                        {return enumeration<line_pattern_enum,line_pattern_enum_MAX>(line_pattern_enum(e.value)).as_string();},
+                        property_types::target_line_pattern},
 
 };
 

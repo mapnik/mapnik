@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,8 @@
 #include <mapnik/renderer_common/clipping_extent.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
@@ -44,6 +45,7 @@
 #include "agg_scanline_u.h"
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -54,7 +56,6 @@ struct agg_markers_renderer_context : markers_renderer_context
 {
     using renderer_base = typename SvgRenderer::renderer_base;
     using vertex_source_type = typename SvgRenderer::vertex_source_type;
-    using attribute_source_type = typename SvgRenderer::attribute_source_type;
     using pixfmt_type = typename renderer_base::pixfmt_type;
 
     agg_markers_renderer_context(symbolizer_base const& sym,
@@ -107,7 +108,6 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
                               feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    using namespace mapnik::svg;
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;
     using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
@@ -115,12 +115,10 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-    using svg_attribute_type = agg::pod_bvector<path_attributes>;
-    using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
-                                               svg_attribute_type,
-                                               renderer_type,
-                                               pixfmt_comp_type>;
-
+    using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                svg_attribute_type,
+                                                renderer_type,
+                                                pixfmt_comp_type>;
     ras_ptr->reset();
 
     double gamma = get<value_double, keys::gamma>(sym, feature, common_.vars_);
@@ -132,13 +130,14 @@ void agg_renderer<T0,T1>::process(markers_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buf_type render_buffer(current_buffer_->bytes(), current_buffer_->width(), current_buffer_->height(), current_buffer_->row_size());
+    buffer_type & current_buffer = buffers_.top().get();
+    buf_type render_buffer(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
     box2d<double> clip_box = clipping_extent(common_);
 
-    using context_type = detail::agg_markers_renderer_context<svg_renderer_type,
+    using renderer_context_type = detail::agg_markers_renderer_context<svg_renderer_type,
                                                               buf_type,
                                                               rasterizer>;
-    context_type renderer_context(sym, feature, common_.vars_, render_buffer, *ras_ptr);
+    renderer_context_type renderer_context(sym, feature, common_.vars_, render_buffer, *ras_ptr);
 
     render_markers_symbolizer(
         sym, feature, prj_trans, common_, clip_box, renderer_context);

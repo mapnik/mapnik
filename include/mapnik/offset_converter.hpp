@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,8 @@
 #ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
 #endif
-#include <mapnik/global.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/util/math.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/vertex_cache.hpp>
 
@@ -40,6 +40,8 @@
 namespace mapnik
 {
 
+static constexpr double offset_converter_default_threshold = 5.0;
+
 template <typename Geometry>
 struct offset_converter
 {
@@ -48,7 +50,7 @@ struct offset_converter
     offset_converter(Geometry & geom)
         : geom_(geom)
         , offset_(0.0)
-        , threshold_(5.0)
+        , threshold_(offset_converter_default_threshold)
         , half_turn_segments_(16)
         , status_(initial)
         , pre_first_(vertex2d::no_init)
@@ -77,18 +79,18 @@ struct offset_converter
         return threshold_;
     }
 
-    void set_offset(double value)
+    void set_offset(double val)
     {
-        if (offset_ != value)
+        if (offset_ != val)
         {
-            offset_ = value;
+            offset_ = val;
             reset();
         }
     }
 
-    void set_threshold(double value)
+    void set_threshold(double val)
     {
-        threshold_ = value;
+        threshold_ = val;
         // no need to reset(), since threshold doesn't affect
         // offset vertices' computation, it only controls how
         // far will we be looking for self-intersections
@@ -129,6 +131,14 @@ struct offset_converter
             //break; // uncomment this to see all the curls
 
             vertex2d const& u0 = vertices_[i];
+
+            // End or beginning of a line or ring must not be filtered out
+            // to not to join lines or rings together.
+            if (u0.cmd == SEG_CLOSE || u0.cmd == SEG_MOVETO)
+            {
+                break;
+            }
+
             vertex2d const& u1 = vertices_[i+1];
             double const dx = u0.x - cur_.x;
             double const dy = u0.y - cur_.y;
@@ -174,13 +184,13 @@ private:
 
     static double explement_reflex_angle(double angle)
     {
-        if (angle > M_PI)
+        if (angle > util::pi)
         {
-            return angle - 2 * M_PI;
+            return angle - util::tau;
         }
-        else if (angle < -M_PI)
+        else if (angle < -util::pi)
         {
-            return angle + 2 * M_PI;
+            return angle + util::tau;
         }
         else
         {
@@ -234,6 +244,30 @@ private:
         return false;
     }
 
+    double joint_angle(double x1x0, double y1y0, double x1x2, double y1y2) const
+    {
+        double dot = x1x0 * x1x2 + y1y0 * y1y2; // dot product
+        double det = x1x0 * y1y2 - y1y0 * x1x2; // determinant
+        double angle = std::atan2(det, dot); // atan2(y, x) or atan2(sin, cos)
+        // angle in [-tau/2; tau/2]
+
+        if (offset_ > 0.0)
+        {
+            angle = util::tau - angle; // angle in [tau/2; tau*3/2]
+        }
+        else if (angle < 0)
+        {
+            angle += util::tau; // angle in [tau/2; tau]
+            // angle may now be equal to tau, because if the original angle
+            // is very small, the addition cancels it (epsilon + tau == tau)
+        }
+        if (angle >= util::tau)
+        {
+            angle -= util::tau;
+        }
+        return angle;
+    }
+
     /**
      *  @brief  Translate (vx, vy) by rotated (dx, dy).
      */
@@ -269,7 +303,7 @@ private:
         if (position < -1e-6) return -1;
         return 0;
     }
-    
+
     void displace2(vertex2d & v1, vertex2d const& v0, vertex2d const& v2, double a, double b) const
     {
         double sa = offset_ * std::sin(a);
@@ -284,14 +318,14 @@ private:
         double abs_hcasa = std::abs(hcasa);
         double abs_hsa = std::abs(hsa);
         double abs_hca = std::abs(hca);
-                
-        vertex2d v_tmp(vertex2d::no_init);    
+
+        vertex2d v_tmp(vertex2d::no_init);
         v_tmp.x = v1.x - sa - hca;
         v_tmp.y = v1.y + ca - hsa;
         v_tmp.cmd = v1.cmd;
-        
+
         int same = point_line_position(v0, v2, v_tmp)*point_line_position(v0, v2, v1);
-        
+
         if (same >= 0 && std::abs(h) < 10)
         {
             v1.x = v_tmp.x;
@@ -314,14 +348,14 @@ private:
             v1.y = v1.y + ca - hsa;
         }
         else
-        {      
+        {
             if (abs_hsaca*abs_hsaca + abs_hcasa*abs_hcasa > abs_offset*abs_offset)
             {
                 double d = (abs_hsaca*abs_hsaca + abs_hcasa*abs_hcasa);
                 d = d < 1e-6 ? 1. : d;
                 double scale = (abs_offset*abs_offset)/d;
                 v1.x = v1.x + hcasa*scale;
-                v1.y = v1.y + hsaca*scale;                
+                v1.y = v1.y + hsaca*scale;
             }
             else
             {
@@ -330,8 +364,7 @@ private:
             }
         }
     }
-    
-    
+
     status init_vertices()
     {
         if (status_ != initial) // already initialized
@@ -414,13 +447,8 @@ private:
             cpt++;
             angle_a = std::atan2(-v_y1y0, -v_x1x0);
         }
-        // dot product
-        double dot;
-        // determinate
-        double det;
         double angle_b = std::atan2(v_y1y2, v_x1x2);
         // Angle between the two vectors
-        double joint_angle;
         double curve_angle;
 
         if (!is_polygon)
@@ -431,26 +459,15 @@ private:
         }
         else
         {
-            dot = v_x1x0 * v_x1x2 + v_y1y0 * v_y1y2;      // dot product
-            det = v_x1x0 * v_y1y2 - v_y1y0 * v_x1x2;      // determinant
-
-            joint_angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-            if (joint_angle < 0) joint_angle = joint_angle + 2 * M_PI;
-            joint_angle = std::fmod(joint_angle, 2 * M_PI);
-
-            if (offset_ > 0.0)
-            {
-                joint_angle = 2 * M_PI - joint_angle;
-            }
-
+            double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
-            if (std::abs(joint_angle) > M_PI)
+            if (std::abs(joint_angle) > util::pi)
             {
                 curve_angle = explement_reflex_angle(angle_b - angle_a);
                 // Bulge steps should be determined by the inverse of the joint angle.
                 double half_turns = half_turn_segments_ * std::fabs(curve_angle);
-                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
             if (bulge_steps == 0)
@@ -482,8 +499,9 @@ private:
         }
         start_v2.x = v2.x;
         start_v2.y = v2.y;
+
         vertex2d tmp_prev(vertex2d::no_init);
-        
+
         while (i < points.size())
         {
             v1 = v2;
@@ -535,26 +553,15 @@ private:
             // Calculate the new angle_b
             angle_b = std::atan2(v_y1y2, v_x1x2);
 
-            dot = v_x1x0 * v_x1x2 + v_y1y0 * v_y1y2;      // dot product
-            det = v_x1x0 * v_y1y2 - v_y1y0 * v_x1x2;      // determinant
-
-            joint_angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-            if (joint_angle < 0) joint_angle = joint_angle + 2 * M_PI;
-            joint_angle = std::fmod(joint_angle, 2 * M_PI);
-
-            if (offset_ > 0.0)
-            {
-                joint_angle = 2 * M_PI - joint_angle;
-            }
-
+            double joint_angle = this->joint_angle(v_x1x0, v_y1y0, v_x1x2, v_y1y2);
             int bulge_steps = 0;
 
-            if (std::abs(joint_angle) > M_PI)
+            if (std::abs(joint_angle) > util::pi)
             {
                 curve_angle = explement_reflex_angle(angle_b - angle_a);
                 // Bulge steps should be determined by the inverse of the joint angle.
                 double half_turns = half_turn_segments_ * std::fabs(curve_angle);
-                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / M_PI));
+                bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
             #ifdef MAPNIK_LOG
@@ -562,21 +569,23 @@ private:
             {
                 // inside turn (sharp/obtuse angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Sharp joint [<< inside turn " << int(joint_angle*180/M_PI)
+                    << " Sharp joint [<< inside turn "
+                    << static_cast<int>(util::degrees(joint_angle))
                     << " degrees >>]";
             }
             else
             {
                 // outside turn (reflex angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Bulge joint >)) outside turn " << int(joint_angle*180/M_PI)
+                    << " Bulge joint >)) outside turn "
+                    << static_cast<int>(util::degrees(joint_angle))
                     << " degrees ((< with " << bulge_steps << " segments";
             }
             #endif
             tmp_prev.cmd = v1.cmd;
             tmp_prev.x = v1.x;
             tmp_prev.y = v1.y;
-            
+
             if (v1.cmd == SEG_MOVETO)
             {
                 if (bulge_steps == 0)

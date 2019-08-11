@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,6 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geometry.hpp>
 // stl
 #include <string>
@@ -36,8 +35,8 @@
 #include <fstream>
 
 csv_index_featureset::csv_index_featureset(std::string const& filename,
-                                           mapnik::filter_in_box const& filter,
-                                           detail::geometry_column_locator const& locator,
+                                           mapnik::bounding_box_filter<float> const& filter,
+                                           locator_type const& locator,
                                            char separator,
                                            char quote,
                                            std::vector<std::string> const& headers,
@@ -76,11 +75,16 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
     std::ifstream index(indexname.c_str(), std::ios::binary);
     if (!index) throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
     mapnik::util::spatial_index<value_type,
-                                mapnik::filter_in_box,
-                                std::ifstream>::query(filter, index, positions_);
-
+                                mapnik::bounding_box_filter<float>,
+                                std::ifstream,
+                                mapnik::box2d<float>>::query(filter, index, positions_);
+    positions_.erase(std::remove_if(positions_.begin(),
+                                    positions_.end(),
+                                    [&](value_type const& pos)
+                                    { return !pos.box.intersects(filter.box_);}),
+                     positions_.end());
     std::sort(positions_.begin(), positions_.end(),
-              [](value_type const& lhs, value_type const& rhs) { return lhs.first < rhs.first;});
+              [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});
     itr_ = positions_.begin();
 }
 
@@ -89,12 +93,12 @@ csv_index_featureset::~csv_index_featureset() {}
 mapnik::feature_ptr csv_index_featureset::parse_feature(char const* beg, char const* end)
 {
     auto values = csv_utils::parse_line(beg, end, separator_, quote_, headers_.size());
-    auto geom = detail::extract_geometry(values, locator_);
+    auto geom = csv_utils::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, ++feature_id_));
         feature->set_geometry(std::move(geom));
-        detail::process_properties(*feature, headers_, values, locator_, tr_);
+        csv_utils::process_properties(*feature, headers_, values, locator_, tr_);
         return feature;
     }
     return mapnik::feature_ptr();
@@ -113,13 +117,16 @@ mapnik::feature_ptr csv_index_featureset::next()
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        char const* start = (char const*)mapped_region_->get_address() + pos.first;
-        char const*  end = start + pos.second;
+        char const* start = (char const*)mapped_region_->get_address() + pos.off;
+        char const*  end = start + pos.size;
 #else
-        std::fseek(file_.get(), pos.first, SEEK_SET);
+        std::fseek(file_.get(), pos.off, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        std::fread(record.data(), pos.second, 1, file_.get());
+        if (std::fread(record.data(), pos.size, 1, file_.get()) != 1)
+        {
+            return mapnik::feature_ptr();
+        }
         auto const* start = record.data();
         auto const*  end = start + record.size();
 #endif

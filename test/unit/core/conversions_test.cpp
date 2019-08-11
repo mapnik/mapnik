@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
@@ -283,16 +283,19 @@ SECTION("to string") {
         REQUIRE( string2bool("true",val) );
         REQUIRE( val == true );
 
-        // mapnik::value hashability
-        using values_container = std::unordered_map<mapnik::value, unsigned>;
+        // mapnik::value hash() and operator== works for all T in value<Types...>
+        mapnik::transcoder tr("utf8");
+        using values_container = std::unordered_map<mapnik::value, mapnik::value>;
         values_container vc;
-        mapnik::value val2(1);
-        vc[val2] = 1;
-        REQUIRE( vc[1] == static_cast<int>(1) );
+        mapnik::value keys[5] = {true, 123456789, 3.14159f, tr.transcode("Мапник"), mapnik::value_null()} ;
+        for (auto const& k : keys)
+        {
+            vc.insert({k, k});
+            REQUIRE( vc[k] == k );
+        }
 
         // mapnik::value << to ostream
         std::stringstream s;
-        mapnik::transcoder tr("utf-8");
         mapnik::value_unicode_string ustr = tr.transcode("hello world!");
         mapnik::value streamable(ustr);
         s << streamable;

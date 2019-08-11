@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,12 @@
 #define MAPNIK_UTILS_PROCESS_CSV_FILE_HPP
 
 #include <utility>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik { namespace detail {
 
 template <typename T>
-std::pair<bool, box2d<double>> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote);
+std::pair<bool, typename T::value_type::first_type> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote);
 
 }}
 

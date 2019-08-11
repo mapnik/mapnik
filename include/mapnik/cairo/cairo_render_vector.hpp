@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,19 +26,14 @@
 #define MAPNIK_CAIRO_RENDER_VECTOR_HPP
 
 // mapnik
-#include <mapnik/svg/svg_path_adapter.hpp>
-
-namespace agg { struct trans_affine; }
+#include <mapnik/marker.hpp>
 
 namespace mapnik {
 
 class cairo_context;
-struct pixel_position;
-template <typename T> class box2d;
-namespace svg { struct path_attributes; }
 
-void render_vector_marker(cairo_context & context, svg::svg_path_adapter & svg_path,
-                          agg::pod_bvector<svg::path_attributes> const & attributes,
+void render_vector_marker(cairo_context & context, svg_path_adapter & svg_path,
+                          svg_attribute_type const& attributes,
                           box2d<double> const& bbox, agg::trans_affine const& tr,
                           double opacity);
 

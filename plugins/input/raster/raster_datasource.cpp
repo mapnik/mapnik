@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -62,7 +62,7 @@ raster_datasource::raster_datasource(parameters const& params)
         filename_ = *file;
 
     multi_tiles_ = *params.get<mapnik::boolean_type>("multi", false);
-    tile_size_ = *params.get<mapnik::value_integer>("tile_size", 256);
+    tile_size_ = *params.get<mapnik::value_integer>("tile_size", 1024);
     tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
     boost::optional<std::string> format_from_filename = mapnik::type_from_filename(*file);
@@ -224,5 +224,5 @@ featureset_ptr raster_datasource::features_at_point(coord2d const&, double tol) 
 {
     MAPNIK_LOG_WARN(raster) << "raster_datasource: feature_at_point not supported";
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }

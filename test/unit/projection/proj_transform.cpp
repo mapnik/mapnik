@@ -2,7 +2,7 @@
 
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
 // proj4
@@ -25,20 +25,23 @@ SECTION("Test bounding box transforms - 4326 to 3857")
     double maxy = 75.0;
 
     mapnik::box2d<double> bbox(minx, miny, maxx, maxy);
-
-    prj_trans.forward(bbox);
     INFO(bbox.to_string());
-    CHECK(bbox.minx() == Approx(-5009377.085697311));
-    CHECK(bbox.miny() == Approx(7361866.1130511891));
-    CHECK(bbox.maxx() == Approx(-4452779.631730943));
-    CHECK(bbox.maxy() == Approx(12932243.1119920239));
 
-    prj_trans.backward(bbox);
-    CHECK(bbox.minx() == Approx(minx));
-    CHECK(bbox.miny() == Approx(miny));
-    CHECK(bbox.maxx() == Approx(maxx));
-    CHECK(bbox.maxy() == Approx(maxy));
+    CHECKED_IF(prj_trans.forward(bbox))
+    {
+        CHECK(bbox.minx() == Approx(-5009377.085697311));
+        CHECK(bbox.miny() == Approx(7361866.1130511891));
+        CHECK(bbox.maxx() == Approx(-4452779.631730943));
+        CHECK(bbox.maxy() == Approx(12932243.1119920239));
+    }
 
+    CHECKED_IF(prj_trans.backward(bbox))
+    {
+        CHECK(bbox.minx() == Approx(minx));
+        CHECK(bbox.miny() == Approx(miny));
+        CHECK(bbox.maxx() == Approx(maxx));
+        CHECK(bbox.maxy() == Approx(maxy));
+    }
 }
 
 
@@ -118,5 +121,158 @@ SECTION("test pj_transform failure behavior")
 }
 
 #endif
+
+// Github Issue https://github.com/mapnik/mapnik/issues/2648
+SECTION("Test proj antimeridian bbox")
+{
+    mapnik::projection prj_geog("+init=epsg:4326");
+    mapnik::projection prj_proj("+init=epsg:2193");
+
+    mapnik::proj_transform prj_trans_fwd(prj_proj, prj_geog);
+    mapnik::proj_transform prj_trans_rev(prj_geog, prj_proj);
+
+    // reference values taken from proj4 command line tool:
+    // (non-corner points assume PROJ_ENVELOPE_POINTS == 20)
+    //
+    //  cs2cs -Ef %.10f +init=epsg:2193 +to +init=epsg:4326 <<END
+    //        2105800 3087000 # left-most
+    //        1495200 3087000 # bottom-most
+    //        2105800 7173000 # right-most
+    //        3327000 7173000 # top-most
+    //  END
+    //
+    // wrong = mapnik.Box2d(-177.3145325044, -62.3337481525,
+    //                       178.0277836332, -24.5845974912)
+    const mapnik::box2d<double> better(-180.0, -62.3337481525,
+                                        180.0, -24.5845974912);
+
+    {
+        mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
+        CHECKED_IF(prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(better.minx()));
+            CHECK(ext.miny() == Approx(better.miny()));
+            CHECK(ext.maxx() == Approx(better.maxx()));
+            CHECK(ext.maxy() == Approx(better.maxy()));
+        }
+    }
+
+    {
+        // check the same logic works for .backward()
+        mapnik::box2d<double> ext(274000, 3087000, 3327000, 7173000);
+        CHECKED_IF(prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(better.minx()));
+            CHECK(ext.miny() == Approx(better.miny()));
+            CHECK(ext.maxx() == Approx(better.maxx()));
+            CHECK(ext.maxy() == Approx(better.maxy()));
+        }
+    }
+
+    // reference values taken from proj4 command line tool:
+    //
+    //  cs2cs -Ef %.10f +init=epsg:2193 +to +init=epsg:4326 <<END
+    //        274000 3087000 # left-most
+    //        276000 3087000 # bottom-most
+    //        276000 7173000 # right-most
+    //        274000 7173000 # top-most
+    //  END
+    //
+    const mapnik::box2d<double> normal(148.7667597489, -60.1222810241,
+                                       159.9548489296, -24.9771195155);
+
+    {
+        // checks for not being snapped (ie. not antimeridian)
+        mapnik::box2d<double> ext(274000, 3087000, 276000, 7173000);
+        CHECKED_IF(prj_trans_fwd.forward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(normal.minx()));
+            CHECK(ext.miny() == Approx(normal.miny()));
+            CHECK(ext.maxx() == Approx(normal.maxx()));
+            CHECK(ext.maxy() == Approx(normal.maxy()));
+        }
+    }
+
+    {
+        // check the same logic works for .backward()
+        mapnik::box2d<double> ext(274000, 3087000, 276000, 7173000);
+        CHECKED_IF(prj_trans_rev.backward(ext, PROJ_ENVELOPE_POINTS))
+        {
+            CHECK(ext.minx() == Approx(normal.minx()));
+            CHECK(ext.miny() == Approx(normal.miny()));
+            CHECK(ext.maxx() == Approx(normal.maxx()));
+            CHECK(ext.maxy() == Approx(normal.maxy()));
+        }
+    }
+}
+
+SECTION("proj_transform of coordinate arrays with stride > 1")
+{
+    mapnik::projection const proj_4326("+init=epsg:4326");
+    mapnik::projection const proj_3857("+init=epsg:3857");
+    mapnik::projection const proj_2193("+init=epsg:2193");
+
+    SECTION("lonlat <-> Web Mercator")
+    {
+        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:3857 <<END
+        //      170.142139 -43.595056
+        //      175.566667 -39.283333
+        //  END
+        //
+        //  170.142139 -43.595056   18940136.2759583741 -5402988.5324898539
+        //  175.566667 -39.283333   19543991.9707122259 -4762338.2380718365
+        //
+        mapnik::geometry::point<double> points[] = {{ 170.142139, -43.595056 },
+                                                    { 175.566667, -39.283333 }};
+        // this transform is calculated by Mapnik (well_known_srs.cpp)
+        mapnik::proj_transform lonlat_to_webmerc(proj_4326, proj_3857);
+        CHECKED_IF(lonlat_to_webmerc.forward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(18940136.2759583741));
+            CHECK(points[0].y == Approx(-5402988.5324898539));
+            CHECK(points[1].x == Approx(19543991.9707122259));
+            CHECK(points[1].y == Approx(-4762338.2380718365));
+        }
+        CHECKED_IF(lonlat_to_webmerc.backward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(170.142139));
+            CHECK(points[0].y == Approx(-43.595056));
+            CHECK(points[1].x == Approx(175.566667));
+            CHECK(points[1].y == Approx(-39.283333));
+        }
+    }
+
+    #ifdef MAPNIK_USE_PROJ4
+    SECTION("lonlat <-> New Zealand Transverse Mercator 2000")
+    {
+        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:2193 <<END
+        //      170.142139 -43.595056
+        //      175.566667 -39.283333
+        //  END
+        //
+        //  170.142139 -43.595056   1369316.0970041484  5169132.9750701785
+        //  175.566667 -39.283333   1821377.9170061364  5648640.2106032455
+        //
+        mapnik::geometry::point<double> points[] = {{ 170.142139, -43.595056 },
+                                                    { 175.566667, -39.283333 }};
+        // this transform is not calculated by Mapnik (needs Proj4)
+        mapnik::proj_transform lonlat_to_nztm(proj_4326, proj_2193);
+        CHECKED_IF(lonlat_to_nztm.forward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(1369316.0970041484));
+            CHECK(points[0].y == Approx(5169132.9750701785));
+            CHECK(points[1].x == Approx(1821377.9170061364));
+            CHECK(points[1].y == Approx(5648640.2106032455));
+        }
+        CHECKED_IF(lonlat_to_nztm.backward(&points[0].x, &points[0].y, nullptr, 2, 2))
+        {
+            CHECK(points[0].x == Approx(170.142139));
+            CHECK(points[0].y == Approx(-43.595056));
+            CHECK(points[1].x == Approx(175.566667));
+            CHECK(points[1].y == Approx(-39.283333));
+        }
+    }
+    #endif // MAPNIK_USE_PROJ4
+}
 
 }

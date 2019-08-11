@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,8 @@
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
-#include <mapnik/box2d.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/geometry/box2d.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 #if defined(GRID_RENDERER)
@@ -37,7 +37,8 @@
 #pragma GCC diagnostic pop
 #endif
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -57,6 +58,7 @@
 #include "agg_gradient_lut.h"
 #include "agg_gamma_lut.h"
 #include "agg_span_interpolator_linear.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik  {
 namespace svg {
@@ -101,7 +103,7 @@ private:
 };
 
 template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
-class svg_renderer_agg : util::noncopyable
+class renderer_agg : util::noncopyable
 {
 public:
     using curved_type = agg::conv_curve<VertexSource>;
@@ -120,7 +122,7 @@ public:
     using vertex_source_type = VertexSource;
     using attribute_source_type = AttributeSource;
 
-    svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
+    renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
           curved_(source_),
           curved_dashed_(curved_),

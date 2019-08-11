@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,13 +25,22 @@
 
 #include <map>
 #include <string>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
 
 namespace mapnik {
 
 using image_options_map = std::map<std::string, boost::optional<std::string> >;
 inline std::string to_string(boost::optional<std::string> const& val) { return val ? *val : "<unitialised>";}
 image_options_map parse_image_options(std::string const& options);
+
+#if defined(HAVE_PNG)
+int parse_png_filters(std::string const& str);
+#endif
 
 }
 

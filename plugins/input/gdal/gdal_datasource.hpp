@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 
@@ -55,8 +55,7 @@ public:
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
 private:
-    GDALDataset* open_dataset() const;
-    GDALDataset* dataset_;
+    std::unique_ptr<GDALDataset, decltype(&GDALClose)> dataset_;
     mapnik::box2d<double> extent_;
     std::string dataset_name_;
     int band_;
@@ -69,6 +68,7 @@ private:
     bool shared_dataset_;
     boost::optional<double> nodata_value_;
     double nodata_tolerance_;
+    int64_t max_image_area_;
 };
 
 #endif // GDAL_DATASOURCE_HPP

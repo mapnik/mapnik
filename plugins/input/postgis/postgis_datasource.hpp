@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,19 +28,19 @@
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/attribute.hpp>
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/regex.hpp>
 
 // stl
 #include <memory>
+#include <regex>
 #include <vector>
 #include <string>
 
@@ -84,20 +84,22 @@ private:
                                 box2d<double> const& env,
                                 double pixel_width,
                                 double pixel_height,
-                                mapnik::attributes const& vars) const;
+                                mapnik::attributes const& vars,
+                                bool intersect = true) const;
     std::string populate_tokens(std::string const& sql) const;
+    void append_geometry_table(std::ostream & os) const;
     std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
-    static const double FMAX;
 
     const std::string uri_;
     const std::string username_;
     const std::string password_;
     const std::string table_;
-    std::string schema_;
-    std::string geometry_table_;
+    const std::string geometry_table_;
     const std::string geometry_field_;
+    std::string parsed_schema_;
+    std::string parsed_table_;
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;
@@ -109,17 +111,20 @@ private:
     bool simplify_geometries_;
     layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
-    const std::string bbox_token_;
-    const std::string scale_denom_token_;
-    const std::string pixel_width_token_;
-    const std::string pixel_height_token_;
     int pool_max_size_;
     bool persist_connection_;
     bool extent_from_subquery_;
     bool estimate_extent_;
     int max_async_connections_;
     bool asynchronous_request_;
-    boost::regex pattern_;
+    bool twkb_encoding_;
+    mapnik::value_double twkb_rounding_adjustment_;
+    mapnik::value_double simplify_snap_ratio_;
+    mapnik::value_double simplify_dp_ratio_;
+    mapnik::value_double simplify_prefilter_;
+    bool simplify_dp_preserve_;
+    mapnik::value_double simplify_clip_resolution_;
+    std::regex re_tokens_;
     int intersect_min_scale_;
     int intersect_max_scale_;
     bool key_field_as_attribute_;

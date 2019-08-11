@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/util/is_clockwise.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 using mapnik::datasource_exception;
 const std::string shape_io::SHP = ".shp";
@@ -114,7 +114,7 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
         {
             double x = record.read_double();
             double y = record.read_double();
-            line.add_coord(x, y);
+            line.emplace_back(x, y);
         }
         geom = std::move(line);
     }
@@ -144,7 +144,7 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                line.add_coord(x, y);
+                line.emplace_back(x, y);
             }
             multi_line.push_back(std::move(line));
         }
@@ -210,17 +210,17 @@ mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_typ
         }
         if (k == 0)
         {
-            poly.set_exterior_ring(std::move(ring));
+            poly.push_back(std::move(ring));
         }
         else if (mapnik::util::is_clockwise(ring))
         {
             multi_poly.emplace_back(std::move(poly));
-            poly.interior_rings.clear();
-            poly.set_exterior_ring(std::move(ring));
+            poly.clear();
+            poly.push_back(std::move(ring));
         }
         else
         {
-            poly.add_hole(std::move(ring));
+            poly.push_back(std::move(ring));
         }
     }
 
@@ -260,17 +260,17 @@ mapnik::geometry::geometry<double> shape_io::read_polygon_parts(shape_file::reco
         }
         if (k == 0)
         {
-            poly.set_exterior_ring(std::move(ring));
+            poly.push_back(std::move(ring));
         }
         else if (mapnik::util::is_clockwise(ring))
         {
             multi_poly.emplace_back(std::move(poly));
-            poly.interior_rings.clear();
-            poly.set_exterior_ring(std::move(ring));
+            poly.clear();
+            poly.push_back(std::move(ring));
         }
         else
         {
-            poly.add_hole(std::move(ring));
+            poly.push_back(std::move(ring));
         }
     }
 

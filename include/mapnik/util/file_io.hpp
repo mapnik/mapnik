@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,9 +58,14 @@ public:
         }
      }
 
-    inline bool open() const
+    inline bool is_open() const
     {
         return file_ ? true : false;
+    }
+
+    explicit operator bool() const
+    {
+        return this->is_open();
     }
 
     inline std::FILE * get() const
@@ -78,7 +83,8 @@ public:
         if (!size_) return nullptr;
         std::fseek(file_.get(), 0, SEEK_SET);
         data_type buffer(new char[size_]);
-        std::fread(buffer.get(), size_, 1, file_.get());
+        auto count = std::fread(buffer.get(), size_, 1, file_.get());
+        if (count != 1) return nullptr;
         return buffer;
     }
 private:

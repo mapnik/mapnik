@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@
 #include "csv_utils.hpp"
 #include "csv_datasource.hpp"
 #include <deque>
-#include <cstdio>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #pragma GCC diagnostic push
@@ -41,7 +40,7 @@
 
 class csv_featureset : public mapnik::Featureset
 {
-    using locator_type = detail::geometry_column_locator;
+    using locator_type = csv_utils::geometry_column_locator;
 public:
     using array_type = std::deque<csv_datasource::item_type>;
     csv_featureset(std::string const& filename,
@@ -70,7 +69,7 @@ private:
     array_type::const_iterator index_end_;
     mapnik::context_ptr ctx_;
     mapnik::value_integer feature_id_ = 0;
-    detail::geometry_column_locator const& locator_;
+    locator_type const& locator_;
     mapnik::transcoder tr_;
 };
 

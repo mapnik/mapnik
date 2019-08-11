@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,12 +32,15 @@
 #include <mapnik/simplify.hpp>
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/extend_converter.hpp>
+#include <mapnik/adaptive_smooth.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"
 #include "agg_conv_clip_polygon.h"
@@ -46,6 +49,7 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <type_traits>
@@ -63,6 +67,7 @@ struct stroke_tag {};
 struct dash_tag {};
 struct affine_transform_tag {};
 struct offset_transform_tag {};
+struct extend_tag {};
 
 namespace  detail {
 
@@ -73,11 +78,12 @@ template <typename T>
 struct converter_traits<T, mapnik::smooth_tag>
 {
     using geometry_type = T;
-    using conv_type = typename agg::conv_smooth_poly1_curve<geometry_type>;
+    using conv_type = smooth_converter<geometry_type>;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
+        geom.algorithm(get<smooth_algorithm_enum,keys::smooth_algorithm>(args.sym, args.feature, args.vars));
         geom.smooth_value(get<value_double, keys::smooth>(args.sym, args.feature, args.vars));
     }
 };
@@ -252,6 +258,23 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     }
 };
 
+template <typename T>
+struct converter_traits<T, mapnik::extend_tag>
+{
+    using geometry_type = T;
+    using conv_type = extend_converter<geometry_type>;
+
+    template <typename Args>
+    static void setup(geometry_type & geom, Args const& args)
+    {
+        auto const& sym = args.sym;
+        auto const& feat = args.feature;
+        auto const& vars = args.vars;
+        double extend = get<value_double, keys::extend>(sym, feat, vars);
+        geom.set_extend(extend * args.scale_factor);
+    }
+};
+
 
 template <typename T0, typename T1>
 struct is_switchable
@@ -275,7 +298,7 @@ template <typename Dispatcher, typename... ConverterTypes>
 struct converters_helper;
 
 template <typename Dispatcher, typename Current, typename... ConverterTypes>
-struct converters_helper<Dispatcher,Current,ConverterTypes...>
+struct converters_helper<Dispatcher, Current, ConverterTypes...>
 {
     template <typename Converter>
     static void set(Dispatcher & disp, std::size_t state)

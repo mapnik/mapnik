@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,9 +23,9 @@
 #define MAPNIK_TEXT_LAYOUT_HPP
 
 //mapnik
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>
 #include <mapnik/text/text_properties.hpp>
@@ -143,8 +143,8 @@ private:
     // note: this probably isn't the best solution. it would be better to have an object for each cluster, but
     // it needs to be implemented with no overhead.
     std::map<unsigned, double> width_map_;
-    double width_;
-    double height_;
+    double width_ = 0.0;
+    double height_ = 0.0;
     unsigned glyphs_count_;
 
     // output
@@ -173,7 +173,7 @@ private:
     bool rotate_displacement_ = false;
     double text_ratio_ = 0.0;
     pixel_position displacement_ = {0,0};
-    box2d<double> bounds_;
+    box2d<double> bounds_ = {0, 0, 0, 0};
 
     // children
     text_layout_vector child_layout_list_;

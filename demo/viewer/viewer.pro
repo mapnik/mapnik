@@ -1,15 +1,14 @@
 ######################################################################
 # Mapnik viewer - Copyright (C) 2007 Artem Pavlenko
 ######################################################################
-QMAKE_MAC_SDK = macosx10.11
 TEMPLATE = app
 QT += core gui widgets
+LIBS += $$system(mapnik-config --libs --dep-libs)
 QMAKE_CXX = $$system(mapnik-config --cxx)
 QMAKE_LINK = $$system(mapnik-config --cxx)
 QMAKE_CXXFLAGS += $$system(mapnik-config --cxxflags)
 QMAKE_CXXFLAGS += $$system(mapnik-config --includes --dep-includes --defines)
-QMAKE_LFLAGS += $$system(mapnik-config --libs)
-QMAKE_LFLAGS += $$system(mapnik-config --ldflags --dep-libs)
+QMAKE_LFLAGS += $$system(mapnik-config --ldflags)
 # Input
 
 CONFIG += qt debug_and_release

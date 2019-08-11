@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,8 +32,8 @@
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/symbolizer_dispatch.hpp>
 #include <mapnik/vertex_processor.hpp>
-#include <mapnik/geometry_transform.hpp>
-#include <mapnik/geometry_to_path.hpp>
+#include <mapnik/geometry/transform.hpp>
+#include <mapnik/geometry/to_path.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/safe_cast.hpp>
 // boost

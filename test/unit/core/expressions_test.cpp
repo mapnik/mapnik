@@ -9,7 +9,7 @@
 #include <mapnik/unicode.hpp>
 
 #include <functional>
-#include <vector>
+#include <map>
 
 namespace {
 
@@ -57,7 +57,7 @@ std::string parse_and_dump(std::string const& str)
 TEST_CASE("expressions")
 {
     using namespace std::placeholders;
-    using properties_type = std::vector<std::pair<std::string, mapnik::value> > ;
+    using properties_type = std::map<std::string, mapnik::value>;
     mapnik::transcoder tr("utf8");
 
     properties_type prop = {{ "foo"   , tr.transcode("bar") },
@@ -65,6 +65,7 @@ TEST_CASE("expressions")
                             { "grass" , tr.transcode("grow")},
                             { "wind"  , tr.transcode("blow")},
                             { "sky"   , tr.transcode("is blue")},
+                            { "τ"     , mapnik::value_double(6.2831853)},
                             { "double", mapnik::value_double(1.23456)},
                             { "int"   , mapnik::value_integer(123)},
                             { "bool"  , mapnik::value_bool(true)},
@@ -73,8 +74,6 @@ TEST_CASE("expressions")
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
     auto eval = std::bind(evaluate_string, feature, _1);
     auto approx = Approx::custom().epsilon(1e-6);
-
-    TRY_CHECK(eval(" [foo]='bar' ") == true);
 
     // primary expressions
     // null
@@ -87,6 +86,7 @@ TEST_CASE("expressions")
     // integer
     TRY_CHECK(parse_and_dump("123") == "123");
     // unicode
+    TRY_CHECK(parse_and_dump("''") == "''");
     TRY_CHECK(parse_and_dump("'single-quoted string'") == "'single-quoted string'");
     TRY_CHECK(parse_and_dump("\"double-quoted string\"") == "'double-quoted string'");
     TRY_CHECK(parse_and_dump("'escaped \\' apostrophe'") == "'escaped \\' apostrophe'");
@@ -97,6 +97,17 @@ TEST_CASE("expressions")
     TRY_CHECK(parse_and_dump("deg_to_rad") == "0.0174533");
     TRY_CHECK(parse_and_dump("rad_to_deg") == "57.2958");
 
+    // ascii attribute name
+    TRY_CHECK(eval(" [foo]='bar' ") == true);
+
+    // unicode attribute name
+    TRY_CHECK(eval("[τ]") == prop.at("τ"));
+    TRY_CHECK(eval("[τ]") == eval(u8"[\u03C4]"));
+
+    // change to TRY_CHECK once \u1234 escape sequence in attribute name
+    // is implemented in expression grammar
+    CHECK_NOFAIL(eval("[τ]") == eval("[\\u03C3]"));
+
     // unary functions
     // sin / cos
     TRY_CHECK(eval(" sin(0.25 * pi) / cos(0.25 * pi) ").to_double() == approx(1.0));
@@ -106,6 +117,9 @@ TEST_CASE("expressions")
     TRY_CHECK(eval(" rad_to_deg * atan(1.0) ").to_double() == approx(45.0));
     // exp
     TRY_CHECK(eval(" exp(0.0) ") == 1.0);
+    // log
+    TRY_CHECK(eval(" log(1.0) ") == 0.0);
+    TRY_CHECK(eval(" log(exp(1.0)) ") == 1.0);
     // abs
     TRY_CHECK(eval(" abs(cos(-pi)) ") == 1.0);
     // length (string)
@@ -121,9 +135,9 @@ TEST_CASE("expressions")
 
     // geometry types
     TRY_CHECK(eval(" [mapnik::geometry_type] = point ") == true);
-    TRY_CHECK(eval(" [mapnik::geometry_type] <> linestring ") == true);
-    TRY_CHECK(eval(" [mapnik::geometry_type] != polygon ") == true);
-    TRY_CHECK(eval(" [mapnik::geometry_type] neq collection ") == true);
+    TRY_CHECK(eval(" [ mapnik::geometry_type] <> linestring ") == true);
+    TRY_CHECK(eval(" [mapnik::geometry_type ] != polygon ") == true);
+    TRY_CHECK(eval(" [ mapnik::geometry_type ] neq collection ") == true);
     TRY_CHECK(eval(" [mapnik::geometry_type] eq collection ") == false);
 
     //unary expression
@@ -170,7 +184,42 @@ TEST_CASE("expressions")
 
     // regex
     // replace
-    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));
+    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r")); // single quotes
+    TRY_CHECK(eval(" [foo].replace(\"(\\B)|( )\",\"$1 \") ") == tr.transcode("b a r")); // double quotes
+
+    // https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+    //'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C' - black chess figures
+    // replace black knights with white knights
+    auto val0 = eval(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')");
+    auto val1 = eval("'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
+    TRY_CHECK(val0 == val1);
+    TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
+    TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode
+    // \u+NNNN \U+NNNNNNNN \xNN\xNN
+    // single quotes
+    auto val3 = eval("'\\u262f\\xF0\\x9F\\x8D\\xB7'");
+    auto val4 = eval("'\\U0000262f\\U0001F377'");
+    // double quotes
+    auto val5 = eval("\"\\u262f\\xF0\\x9F\\x8D\\xB7\"");
+    auto val6 = eval("\"\\U0000262f\\U0001F377\"");
+    // UTF16 surrogate pairs work also ;)
+    auto val7 = eval("'\\ud83d\\udd7a\\ud83c\\udffc'");
+    auto val8 = eval("'\\U0001F57A\\U0001F3FC'");
+
+    TRY_CHECK(val3 == val4);
+    TRY_CHECK(val5 == val6);
+    TRY_CHECK(val3.to_string() == val4.to_string()); // UTF-8
+    TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicode
+    TRY_CHECK(val5.to_string() == val6.to_string()); // UTF-8
+    TRY_CHECK(val5.to_unicode() == val6.to_unicode()); // Unicode
+    TRY_CHECK(val7 == val8);
+    TRY_CHECK(val7.to_string() == val8.to_string()); // UTF-8
+    TRY_CHECK(val7.to_unicode() == val8.to_unicode()); // Unicode
+
+
+    // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
+    TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode("Q u é b e c"));
+    TRY_CHECK(eval("'Москва'.replace('(?<!^)(\\B|b)(?!$)',' ')") == tr.transcode("М о с к в а"));
     // 'foo' =~ s:(\w)\1:$1x:r
     TRY_CHECK(eval(" 'foo'.replace('(\\w)\\1', '$1x') ") == tr.transcode("fox"));
     TRY_CHECK(parse_and_dump(" 'foo'.replace('(\\w)\\1', '$1x') ") == "'foo'.replace('(\\w)\\1','$1x')");
@@ -180,4 +229,10 @@ TEST_CASE("expressions")
     // 'Québec' =~ m:^Q\S*$:
     TRY_CHECK(eval(" [name].match('^Q\\S*$') ") == true);
     TRY_CHECK(parse_and_dump(" [name].match('^Q\\S*$') ") == "[name].match('^Q\\S*$')");
+
+    // string & value concatenation
+    // this should evaluate as two strings concatenating
+    TRY_CHECK(eval("Hello + '!'") == eval("'Hello!'"));
+    // this should evaulate as a combination of an int value and string
+    TRY_CHECK(eval("[int]+m") == eval("'123m'"));
 }

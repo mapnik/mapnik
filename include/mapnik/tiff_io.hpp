@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +28,18 @@
 #include <mapnik/image_any.hpp>
 #include <mapnik/util/variant.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 extern "C"
 {
 #include <tiffio.h>
 #define RealTIFFOpen TIFFClientOpen
 #define RealTIFFClose TIFFClose
 }
+
+#pragma GCC diagnostic pop
+
 
 //std
 #include <memory>

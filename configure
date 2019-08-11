@@ -1,5 +1,18 @@
-#!/bin/sh
+#! /bin/sh
 
-PYTHON=${PYTHON:-python}
+set -eu
+
+: ${PYTHON:=python}
+
+# mapnik-settings.env is an optional file to store
+# environment variables that should be used before
+# running tests like PROJ_LIB, GDAL_DATA, and ICU_DATA
+# These do not normally need to be set except when
+# building against binary versions of dependencies like
+# done via bootstrap.sh
+if [ -f mapnik-settings.env ]; then
+    echo "Inheriting from mapnik-settings.env"
+    . ./mapnik-settings.env
+fi
 
 $PYTHON scons/scons.py --implicit-deps-changed configure "$@"

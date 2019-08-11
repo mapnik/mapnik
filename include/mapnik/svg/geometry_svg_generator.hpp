@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,15 +36,13 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_statement.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 #pragma GCC diagnostic pop
 
+#include <tuple>
 
 // adapted to conform to the concepts
 // required by Karma to be recognized as a container of
@@ -147,7 +145,7 @@ struct svg_path_generator :
 {
 
     using path_type = Path;
-    using coord_type = typename boost::remove_pointer<typename path_type::value_type>::type;
+    using coordinate_type = typename boost::remove_pointer<typename path_type::value_type>::type;
 
     svg_path_generator();
     // rules
@@ -155,7 +153,7 @@ struct svg_path_generator :
     karma::rule<OutputIterator, path_type const& ()> point;
     karma::rule<OutputIterator, path_type const& ()> linestring;
     karma::rule<OutputIterator, path_type const& ()> polygon;
-    karma::rule<OutputIterator, coord_type ()> svg_point;
+    karma::rule<OutputIterator, coordinate_type ()> svg_point;
     karma::rule<OutputIterator, path_type const& ()> svg_path;
 
     // phoenix functions

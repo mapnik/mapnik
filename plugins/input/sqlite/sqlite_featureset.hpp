@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,6 +44,7 @@ public:
                       std::string const& encoding,
                       mapnik::box2d<double> const& bbox,
                       mapnik::wkbFormat format,
+                      bool twkb_encoding,
                       bool spatial_index,
                       bool using_subquery);
     virtual ~sqlite_featureset();
@@ -55,6 +56,7 @@ private:
     const std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::box2d<double> bbox_;
     mapnik::wkbFormat format_;
+    bool twkb_encoding_;
     bool spatial_index_;
     bool using_subquery_;
 

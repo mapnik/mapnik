@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,22 +23,17 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/util/char_array_buffer.hpp>
 
 extern "C"
 {
 #include <png.h>
 }
 
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
-#pragma GCC diagnostic pop
-
 // stl
 #include <cstring>
 #include <memory>
+#include <fstream>
 
 namespace mapnik
 {
@@ -47,7 +42,7 @@ template <typename T>
 class png_reader : public image_reader
 {
     using source_type = T;
-    using input_stream = boost::iostreams::stream<source_type>;
+    using input_stream = std::istream;
 
     struct png_struct_guard
     {
@@ -73,7 +68,7 @@ private:
     int color_type_;
     bool has_alpha_;
 public:
-    explicit png_reader(std::string const& file_name);
+    explicit png_reader(std::string const& filename);
     png_reader(char const* data, std::size_t size);
     ~png_reader();
     unsigned width() const final;
@@ -90,14 +85,14 @@ private:
 namespace
 {
 
-image_reader* create_png_reader(std::string const& file)
+image_reader* create_png_reader(std::string const& filename)
 {
-      return new png_reader<boost::iostreams::file_source>(file);
+    return new png_reader<std::filebuf>(filename);
 }
 
 image_reader* create_png_reader2(char const * data, std::size_t size)
 {
-    return new png_reader<boost::iostreams::array_source>(data, size);
+    return new png_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
 const bool registered = register_image_reader("png",create_png_reader);
@@ -128,31 +123,30 @@ void png_reader<T>::png_read_data(png_structp png_ptr, png_bytep data, png_size_
 }
 
 template <typename T>
-png_reader<T>::png_reader(std::string const& file_name)
-    : source_(file_name,std::ios_base::in | std::ios_base::binary),
-      stream_(source_),
+png_reader<T>::png_reader(std::string const& filename)
+    : source_(),
+      stream_(&source_),
       width_(0),
       height_(0),
       bit_depth_(0),
       color_type_(0),
       has_alpha_(false)
 {
-    if (!source_.is_open()) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
-    if (!stream_) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
+    source_.open(filename, std::ios_base::in | std::ios_base::binary);
+    if (!source_.is_open()) throw image_reader_exception("PNG reader: cannot open file '"+ filename + "'");
     init();
 }
 
 template <typename T>
 png_reader<T>::png_reader(char const* data, std::size_t size)
     : source_(data,size),
-      stream_(source_),
+      stream_(&source_),
       width_(0),
       height_(0),
       bit_depth_(0),
       color_type_(0),
       has_alpha_(false)
 {
-
     if (!stream_) throw image_reader_exception("PNG reader: cannot open image stream");
     init();
 }

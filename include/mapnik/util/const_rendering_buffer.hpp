@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,10 @@
 
 #include <mapnik/safe_cast.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
+#pragma GCC diagnostic pop
 
 #include <cstdint>
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -74,9 +74,8 @@ public:
     static constexpr image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
 private:
-    detail::image_dimensions<65535> dimensions_;
+    detail::image_dimensions<4294836225> dimensions_;
     detail::buffer buffer_;
-    pixel_type *pData_;
     double offset_;
     double scaling_;
     bool premultiplied_alpha_;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,8 @@
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/span_image_filter.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_pixfmt_gray.h"
@@ -36,6 +37,7 @@
 #include "agg_span_image_filter_gray.h"
 #include "agg_span_image_filter_rgba.h"
 #include "agg_span_interpolator_linear.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik  { namespace detail {
 

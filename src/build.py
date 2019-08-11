@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2015 Artem Pavlenko
+# Copyright (C) 2017 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,6 @@
 #
 #
 
-
 import os
 import sys
 import glob
@@ -35,7 +34,7 @@ def call(cmd, silent=True):
     if not stderr:
         return stdin.strip()
     elif not silent:
-        print stderr
+        print (stderr)
 
 def ldconfig(*args,**kwargs):
     call('ldconfig')
@@ -61,6 +60,10 @@ system = 'boost_system%s' % env['BOOST_APPEND']
 # note: order matters on linux: see lorder | tsort
 lib_env['LIBS'] = [filesystem,
                    regex]
+
+if env['COVERAGE']:
+    lib_env.Append(LINKFLAGS='--coverage')
+    lib_env.Append(CXXFLAGS='--coverage')
 
 if env['HAS_CAIRO']:
     lib_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
@@ -148,27 +151,35 @@ else: # unix, non-macos
 
 source = Split(
     """
-    expression_grammar.cpp
+    expression_grammar_x3.cpp
+    css_color_grammar_x3.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp
     params.cpp
-    image_filter_types.cpp
-    image_filter_grammar.cpp
+    parse_image_filters.cpp
+    generate_image_filters.cpp
+    image_filter_grammar_x3.cpp
     color.cpp
-    conversions.cpp
+    conversions_numeric.cpp
+    conversions_string.cpp
     image_copy.cpp
     image_compositing.cpp
     image_scaling.cpp
-    box2d.cpp
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
-    geometry_reprojection.cpp
+    geometry/box2d.cpp
+    geometry/closest_point.cpp
+    geometry/reprojection.cpp
+    geometry/envelope.cpp
+    geometry/interior.cpp
+    geometry/polylabel.cpp
     expression_node.cpp
     expression_string.cpp
     expression.cpp
     transform_expression.cpp
+    transform_expression_grammar_x3.cpp
     feature_kv_iterator.cpp
     feature_style_processor.cpp
     feature_type_style.cpp
@@ -177,6 +188,7 @@ source = Split(
     font_set.cpp
     function_call.cpp
     gradient.cpp
+    path_expression_grammar_x3.cpp
     parse_path.cpp
     image_reader.cpp
     cairo_io.cpp
@@ -195,12 +207,11 @@ source = Split(
     load_map.cpp
     palette.cpp
     marker_helpers.cpp
-    transform_expression_grammar.cpp
-    geometry_envelope.cpp
     plugin.cpp
     rule.cpp
     save_map.cpp
     wkb.cpp
+    twkb.cpp
     projection.cpp
     proj_transform.cpp
     scale_denominator.cpp
@@ -218,9 +229,10 @@ source = Split(
     svg/svg_path_parser.cpp
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
+    svg/svg_path_grammar_x3.cpp
     warp.cpp
-    css_color_grammar.cpp
     vertex_cache.cpp
+    vertex_adapters.cpp
     text/font_library.cpp
     text/text_layout.cpp
     text/text_line.cpp
@@ -231,6 +243,7 @@ source = Split(
     text/placement_finder.cpp
     text/properties_util.cpp
     text/renderer.cpp
+    text/color_font_renderer.cpp
     text/symbolizer_helpers.cpp
     text/text_properties.cpp
     text/font_feature_settings.cpp
@@ -256,7 +269,9 @@ source = Split(
     renderer_common/render_markers_symbolizer.cpp
     renderer_common/render_pattern.cpp
     renderer_common/render_thunk_extractor.cpp
-    math.cpp
+    renderer_common/pattern_alignment.cpp
+    util/math.cpp
+    value.cpp
     """
     )
 
@@ -275,17 +290,17 @@ if env['PLUGIN_LINKING'] == 'static':
                 lib_env.Append(CPPDEFINES = DEF)
                 if DEF not in libmapnik_defines:
                     libmapnik_defines.append(DEF)
-                if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
+                if 'SOURCES' in plugin_env and plugin_env['SOURCES']:
                     source += ['../plugins/input/%s/%s' % (plugin, src) for src in plugin_env['SOURCES']]
-                if plugin_env.has_key('CPPDEFINES') and plugin_env['CPPDEFINES']:
+                if 'CPPDEFINES' in plugin_env  and plugin_env['CPPDEFINES']:
                     lib_env.AppendUnique(CPPDEFINES=plugin_env['CPPDEFINES'])
-                if plugin_env.has_key('CXXFLAGS') and plugin_env['CXXFLAGS']:
+                if 'CXXFLAGS' in plugin_env and plugin_env['CXXFLAGS']:
                     lib_env.AppendUnique(CXXFLAGS=plugin_env['CXXFLAGS'])
-                if plugin_env.has_key('LINKFLAGS') and plugin_env['LINKFLAGS']:
+                if 'LINKFLAGS' in plugin_env and plugin_env['LINKFLAGS']:
                     lib_env.AppendUnique(LINKFLAGS=plugin_env['LINKFLAGS'])
-                if plugin_env.has_key('CPPPATH') and plugin_env['CPPPATH']:
+                if 'CPPPATH' in plugin_env and plugin_env['CPPPATH']:
                     lib_env.AppendUnique(CPPPATH=copy(plugin_env['CPPPATH']))
-                if plugin_env.has_key('LIBS') and plugin_env['LIBS']:
+                if 'LIBS' in plugin_env and plugin_env['LIBS']:
                     lib_env.AppendUnique(LIBS=plugin_env['LIBS'])
         else:
             print("Notice: dependencies not met for plugin '%s', not building..." % plugin)
@@ -299,6 +314,13 @@ source += Split("""
 cairo/process_markers_symbolizer.cpp
 cairo/process_group_symbolizer.cpp
 """)
+
+if env['ENABLE_GLIBC_WORKAROUND']:
+    source += Split(
+            """
+            glibc_workaround.cpp
+            """
+        )
 
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])

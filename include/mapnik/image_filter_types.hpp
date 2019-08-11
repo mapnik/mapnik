@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -56,32 +56,41 @@ struct y_gradient : image_filter_base {};
 struct invert : image_filter_base {};
 
 // http://vision.psychol.cam.ac.uk/jdmollon/papers/colourmaps.pdf
-struct color_blind_protanope : image_filter_base 
+struct color_blind_filter : image_filter_base
 {
-    const double x = 0.7465;
-    const double y = 0.2535;
-    const double m = 1.273463;
-    const double yint = -0.073894;
+    color_blind_filter(double x_, double y_, double m_, double yint_)
+        : x(x_), y(y_), m(m_), yint(yint_) {}
+    double x;
+    double y;
+    double m;
+    double yint;
 };
 
-struct color_blind_deuteranope : image_filter_base
+struct color_blind_protanope : color_blind_filter
 {
-    const double x = 1.4;
-    const double y = -0.4;
-    const double m = 0.968437;
-    const double yint = 0.003331;
+    color_blind_protanope()
+        : color_blind_filter(0.7465, 0.2535, 1.273463, -0.073894) {}
 };
 
-struct color_blind_tritanope : image_filter_base
+struct color_blind_deuteranope : color_blind_filter
 {
-    const double x = 0.1748;
-    const double y = 0.0;
-    const double m = 0.062921;
-    const double yint = 0.292119;
+    color_blind_deuteranope()
+        : color_blind_filter(1.4, -0.4, 0.968437, 0.003331) {}
 };
+
+struct color_blind_tritanope : color_blind_filter
+{
+    color_blind_tritanope()
+        : color_blind_filter(0.1748, 0.0, 0.062921, 0.292119) {}
+};
+
 
 struct agg_stack_blur : image_filter_base
 {
+    agg_stack_blur()
+        : rx(1), ry(1) {}
+    agg_stack_blur(unsigned r)
+        : rx(r), ry(r) {}
     agg_stack_blur(unsigned rx_, unsigned ry_)
         : rx(rx_),ry(ry_) {}
     inline bool operator==(agg_stack_blur const& rhs) const
@@ -94,6 +103,7 @@ struct agg_stack_blur : image_filter_base
 
 struct color_to_alpha : image_filter_base
 {
+    color_to_alpha() {}
     color_to_alpha(mapnik::color const& c)
         : color(c) {}
     inline bool operator==(color_to_alpha const& rhs) const
@@ -105,6 +115,7 @@ struct color_to_alpha : image_filter_base
 
 struct scale_hsla : image_filter_base
 {
+    scale_hsla() {}
     scale_hsla(double _h0, double _h1,
          double _s0, double _s1,
          double _l0, double _l1,

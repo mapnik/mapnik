@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ enum CommandType : std::uint8_t {
 
 template <typename T,int dim>
 struct vertex {
-    using coord_type = T;
+    using coordinate_type = T;
 };
 
 template <typename T>
@@ -47,9 +47,9 @@ struct vertex<T,2>
 {
     enum no_init_t : std::uint8_t { no_init };
 
-    using coord_type = T;
-    coord_type x;
-    coord_type y;
+    using coordinate_type = T;
+    coordinate_type x;
+    coordinate_type y;
     unsigned cmd;
 
     vertex()
@@ -58,13 +58,13 @@ struct vertex<T,2>
     explicit vertex(no_init_t)
         {}
 
-    vertex(coord_type x_,coord_type y_,unsigned cmd_)
+    vertex(coordinate_type x_,coordinate_type y_,unsigned cmd_)
         : x(x_),y(y_),cmd(cmd_) {}
 
     template <typename T2>
     vertex(vertex<T2,2> const& rhs)
-        : x(coord_type(rhs.x)),
-          y(coord_type(rhs.y)),
+        : x(coordinate_type(rhs.x)),
+          y(coordinate_type(rhs.y)),
           cmd(rhs.cmd) {}
 
     template <typename T2>

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2016 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,9 +42,9 @@ struct render_thunk_list_dispatch
     {
         offset_ = offset;
 
-        for (render_thunk_ptr const& thunk : thunks)
+        for (render_thunk const& thunk : thunks)
         {
-            util::apply_visitor(std::ref(*this), *thunk);
+            util::apply_visitor(std::ref(*this), thunk);
         }
     }
 

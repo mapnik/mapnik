@@ -50,6 +50,9 @@ namespace agg
             m_source(&source), 
             m_status(initial)
         {}
+
+        conv_adaptor_vcgen(conv_adaptor_vcgen<VertexSource, Generator, Markers> &&) = default;
+
         void attach(VertexSource& source) { m_source = &source; }
 
         Generator& generator() { return m_generator; }

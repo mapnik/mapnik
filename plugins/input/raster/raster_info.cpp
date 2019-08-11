@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,7 +44,7 @@ raster_info::raster_info(const raster_info& rhs)
 {
 }
 
-void raster_info::swap(raster_info& other) //throw()
+void raster_info::swap(raster_info& other)
 {
     std::swap(file_,other.file_);
     std::swap(format_,other.format_);

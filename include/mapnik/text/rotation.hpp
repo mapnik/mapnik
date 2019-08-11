@@ -17,6 +17,11 @@ struct rotation
     double cos;
     rotation operator~() const { return rotation(sin, -cos); }
     rotation operator!() const { return rotation(-sin, cos); }
+
+    double angle() const
+    {
+        return std::atan2(sin, cos);
+    }
 };
 }
 

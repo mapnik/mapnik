@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,11 +36,12 @@
 // stl
 #include <list>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
 #include <unicode/ushape.h>
 #include <unicode/schriter.h>
-
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {

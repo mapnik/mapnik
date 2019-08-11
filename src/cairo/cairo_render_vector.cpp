@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,18 +31,16 @@
 
 namespace mapnik
 {
+void render_vector_marker(cairo_context & context, svg_path_adapter & svg_path,
+                          svg_attribute_type const& attributes,
 
-void render_vector_marker(cairo_context & context, svg::svg_path_adapter & svg_path,
-                          agg::pod_bvector<svg::path_attributes> const & attributes,
                           box2d<double> const& bbox, agg::trans_affine const& tr,
                           double opacity)
 {
-    using namespace mapnik::svg;
     agg::trans_affine transform;
 
-    for(unsigned i = 0; i < attributes.size(); ++i)
+    for (auto const& attr : attributes)
     {
-        mapnik::svg::path_attributes const& attr = attributes[i];
         if (!attr.visibility_flag)
             continue;
         cairo_save_restore guard(context);

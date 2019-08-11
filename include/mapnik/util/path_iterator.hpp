@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,11 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/path.hpp>
-// boost
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <tuple>

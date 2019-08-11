@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,15 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 // std
 #include <stdexcept>
 
-// icu
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <unicode/ucnv.h>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -60,4 +62,12 @@ transcoder::~transcoder()
 {
     if (conv_) ucnv_close(conv_);
 }
+
+
+void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
+{
+    target.clear(); // mimic previous target.assign(...) semantics
+    input.toUTF8String(target); // this appends to target
+}
+
 }

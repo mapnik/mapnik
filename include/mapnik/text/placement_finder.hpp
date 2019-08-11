@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 #define MAPNIK_PLACEMENT_FINDER_HPP
 
 //mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/glyph_positions.hpp>
@@ -67,8 +67,6 @@ private:
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
     // Moves dx pixels but makes sure not to fall of the end.
     void path_move_dx(vertex_cache & pp, double dx);
-    // Normalize angle in range [-pi, +pi].
-    static double normalize_angle(double angle);
     // Adjusts user defined spacing to place an integer number of labels.
     double get_spacing(double path_length, double layout_width) const;
     // Checks for collision.
@@ -78,7 +76,6 @@ private:
     // Maps upright==auto, left-only and right-only to left,right to simplify processing.
     // angle = angle of at start of line (to estimate best option for upright==auto)
     text_upright_e simplify_upright(text_upright_e upright, double angle) const;
-    box2d<double> get_bbox(text_layout const& layout, glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     feature_impl const& feature_;
     attributes const& attr_;
     DetectorType & detector_;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@ class feature_impl;
 struct attribute;
 
 // Automatically generates placement options from a user selected list of directions and text sizes.
-class text_placements_simple: public text_placements
+class MAPNIK_DECL text_placements_simple: public text_placements
 {
 public:
     text_placements_simple(symbolizer_base::value_type const& positions);
@@ -43,7 +43,6 @@ public:
     text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
     std::string get_positions() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
-    void init_positions(std::string const& positions) const;
     std::vector<directions_e> direction_;
     std::vector<int> text_sizes_;
 private:
@@ -53,7 +52,7 @@ private:
 
 // Simple placement strategy.
 // See parent class for documentation of each function.
-class text_placement_info_simple : public text_placement_info
+class MAPNIK_DECL text_placement_info_simple : public text_placement_info
 {
 public:
     text_placement_info_simple(text_placements_simple const* parent,

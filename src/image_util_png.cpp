@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,10 @@ extern "C"
 {
 #include <png.h>
 }
+#ifndef PNG_FAST_FILTERS // libpng < 1.6
+#define PNG_FAST_FILTERS ( PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP )
 #endif
+#endif // HAVE_PNG
 
 // mapnik
 #if defined(HAVE_PNG)
@@ -153,6 +156,19 @@ void handle_png_options(std::string const& type,
             {
                 throw image_writer_exception("invalid compression strategy parameter: " + *val);
             }
+        }
+        else if (key == "f")
+        {
+            // filters = PNG_NO_FILTERS;
+            // filters = PNG_ALL_FILTERS;
+            // filters = PNG_FAST_FILTERS;
+            // filters = PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP | PNG_FILTER_AVG | PNG_FILTER_PAETH;
+
+            if (!val) throw image_writer_exception("invalid filters parameter: <uninitialised>");
+            if (*val == "no") opts.filters = PNG_NO_FILTERS;
+            else if (*val == "all") opts.filters = PNG_ALL_FILTERS;
+            else if (*val == "fast") opts.filters = PNG_FAST_FILTERS;
+            else opts.filters = parse_png_filters(*val); // none | sub | up | avg | paeth
         }
         else
         {
@@ -316,7 +332,6 @@ void png_saver_pal::operator() (T const& image) const
 #endif
 }
 
-template void png_saver::operator()<image_rgba8> (image_rgba8 const& image) const;
 template void png_saver::operator()<image_gray8> (image_gray8 const& image) const;
 template void png_saver::operator()<image_gray8s> (image_gray8s const& image) const;
 template void png_saver::operator()<image_gray16> (image_gray16 const& image) const;
@@ -327,7 +342,6 @@ template void png_saver::operator()<image_gray32f> (image_gray32f const& image) 
 template void png_saver::operator()<image_gray64> (image_gray64 const& image) const;
 template void png_saver::operator()<image_gray64s> (image_gray64s const& image) const;
 template void png_saver::operator()<image_gray64f> (image_gray64f const& image) const;
-template void png_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const;
 template void png_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
 template void png_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
 template void png_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;
@@ -338,7 +352,6 @@ template void png_saver::operator()<image_view_gray32f> (image_view_gray32f cons
 template void png_saver::operator()<image_view_gray64> (image_view_gray64 const& image) const;
 template void png_saver::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
 template void png_saver::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
-template void png_saver_pal::operator()<image_rgba8> (image_rgba8 const& image) const;
 template void png_saver_pal::operator()<image_gray8> (image_gray8 const& image) const;
 template void png_saver_pal::operator()<image_gray8s> (image_gray8s const& image) const;
 template void png_saver_pal::operator()<image_gray16> (image_gray16 const& image) const;
@@ -349,7 +362,6 @@ template void png_saver_pal::operator()<image_gray32f> (image_gray32f const& ima
 template void png_saver_pal::operator()<image_gray64> (image_gray64 const& image) const;
 template void png_saver_pal::operator()<image_gray64s> (image_gray64s const& image) const;
 template void png_saver_pal::operator()<image_gray64f> (image_gray64f const& image) const;
-template void png_saver_pal::operator()<image_view_rgba8> (image_view_rgba8 const& image) const;
 template void png_saver_pal::operator()<image_view_gray8> (image_view_gray8 const& image) const;
 template void png_saver_pal::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
 template void png_saver_pal::operator()<image_view_gray16> (image_view_gray16 const& image) const;

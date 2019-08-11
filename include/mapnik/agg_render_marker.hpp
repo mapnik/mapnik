@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,21 @@
  *
  *****************************************************************************/
 
+#ifndef MAPNIK_AGG_RENDER_MARKER_HPP
+#define MAPNIK_AGG_RENDER_MARKER_HPP
+
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/vertex_converters.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/util/const_rendering_buffer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
@@ -43,6 +47,7 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_span_image_filter_rgba.h"
 #include "agg_span_interpolator_linear.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -146,3 +151,5 @@ void render_raster_marker(RendererType renb, RasterizerType & ras, image_rgba8 c
 }
 
 }
+
+#endif // MAPNIK_AGG_RENDER_MARKER_HPP

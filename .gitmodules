@@ -9,3 +9,15 @@
 [submodule "deps/mapbox/variant"]
 	path = deps/mapbox/variant
 	url = https://github.com/mapbox/variant.git
+        branch = master
+[submodule "deps/mapbox/geometry"]
+	path = deps/mapbox/geometry
+	url = https://github.com/mapbox/geometry.hpp.git
+        branch = master
+[submodule "deps/mapbox/protozero"]
+	path = deps/mapbox/protozero
+	url = https://github.com/mapbox/protozero.git
+        branch = master
+[submodule "deps/mapbox/polylabel"]
+	path = deps/mapbox/polylabel
+	url = https://github.com/mapbox/polylabel.git

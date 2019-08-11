@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,9 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 // freetype2
 extern "C"
 {
@@ -35,6 +38,8 @@ extern "C"
 #include FT_FREETYPE_H
 #include FT_MODULE_H
 }
+
+#pragma GCC diagnostic pop
 
 namespace {
 

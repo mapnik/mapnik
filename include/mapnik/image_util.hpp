@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -56,9 +56,9 @@ public:
     image_writer_exception(std::string const& message)
         : message_(message) {}
 
-    ~image_writer_exception() throw() {}
+    ~image_writer_exception(){}
 
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return message_.c_str();
     }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -321,6 +321,7 @@ private:
     mapnik::box2d<double> bbox_;
     iterator_type curIter_;
     iterator_type endIter_;
+    double filter_factor_;
 };
 
 #endif // RASTER_FEATURESET_HPP

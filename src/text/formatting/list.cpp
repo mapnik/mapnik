@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/property_tree/ptree.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 using boost::property_tree::ptree;
@@ -35,27 +37,27 @@ namespace formatting {
 
 void list_node::to_xml(boost::property_tree::ptree & xml) const
 {
-    for (node_ptr const& node : children_)
+    for (node_ptr const& n : children_)
     {
-        node->to_xml(xml);
+        n->to_xml(xml);
     }
 }
 
 
 void list_node::apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout & output) const
 {
-    for (node_ptr const& node : children_)
+    for (node_ptr const& n : children_)
     {
-        node->apply(p, feature, vars, output);
+        n->apply(p, feature, vars, output);
     }
 }
 
 
 void list_node::add_expressions(expression_set &output) const
 {
-    for (node_ptr const& node : children_)
+    for (node_ptr const& n : children_)
     {
-        node->add_expressions(output);
+        n->add_expressions(output);
     }
 }
 

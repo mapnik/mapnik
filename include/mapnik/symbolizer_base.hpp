@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/symbolizer_keys.hpp>
@@ -58,7 +58,7 @@ MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr,
                                     feature_impl const& feature,
                                     attributes const& vars,
                                     transform_type const& trans_expr,
-                                    double scale_factor=1.0);
+                                    double scale_factor);
 
 struct enumeration_wrapper
 {
@@ -68,10 +68,11 @@ struct enumeration_wrapper
     explicit enumeration_wrapper(T value_)
         : value(value_) {}
 
-    inline operator int() const
+    inline bool operator==(enumeration_wrapper const& rhs) const
     {
-        return value;
+        return value == rhs.value;
     }
+
 };
 
 using dash_array = std::vector<std::pair<double,double> >;
@@ -82,8 +83,8 @@ using text_placements_ptr = std::shared_ptr<text_placements>;
 namespace detail {
 
 using value_base_type = util::variant<value_bool,
-                                      value_integer,
                                       enumeration_wrapper,
+                                      value_integer,
                                       value_double,
                                       std::string,
                                       color,
@@ -100,18 +101,13 @@ struct strict_value : value_base_type
 {
     strict_value() = default;
 
-    strict_value(const char* val)
-        : value_base_type(val) {}
+    strict_value(const char* val) noexcept(false)
+        : value_base_type(std::string(val)) {}
 
-    template <typename T>
-    strict_value(T const& obj)
-        : value_base_type(typename detail::mapnik_value_type<T>::type(obj))
-    {}
-
-    template <typename T>
+    template <typename T, typename U = detail::mapnik_value_type_t<T>>
     strict_value(T && obj)
-        noexcept(std::is_nothrow_constructible<value_base_type, T && >::value)
-        : value_base_type(std::forward<T>(obj))
+        noexcept(std::is_nothrow_constructible<value_base_type, U>::value)
+        : value_base_type(U(std::forward<T>(obj)))
     {}
 };
 

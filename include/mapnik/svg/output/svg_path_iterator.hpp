@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -117,8 +117,8 @@ private:
     void increment()
     {
         // variables used to extract vertex components.
-        geometry_type::coord_type x;
-        geometry_type::coord_type y;
+        geometry_type::coordinate_type x;
+        geometry_type::coordinate_type y;
 
         // extract next vertex components.
         unsigned cmd = path_.vertex(&x, &y);
@@ -170,7 +170,7 @@ private:
 // Specialization of geometry_iterator, as needed by mapnik::svg::svg_path_data_grammar.
 // The Value type is a std::tuple that holds 5 elements, the command and the x and y coordinate.
 // Each coordinate is stored twice to match the needs of the grammar.
-//using path_iterator_type = path_iterator<std::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
+//using path_iterator_type = path_iterator<std::tuple<unsigned, geometry_type::coordinate_type, geometry_type::value_type>,
 //                      transform_path_adapter<view_transform, geometry_type> >;
 
 }}

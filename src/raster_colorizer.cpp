@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp> // for to_double
 #include <mapnik/feature.hpp>
 #include <mapnik/raster.hpp>
@@ -42,16 +42,18 @@ static const char *colorizer_mode_strings[] = {
     "linear",
     "discrete",
     "exact",
+    "linear-rgba",
+    "linear-bgra",
     ""
 };
 
 IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings )
 
 
-colorizer_stop::colorizer_stop(float value, colorizer_mode mode,
+colorizer_stop::colorizer_stop(float val, colorizer_mode mode,
                                color const& _color,
                                std::string const& label)
-: value_(value)
+: value_(val)
     , mode_(mode)
     , color_(_color)
     , label_(label)
@@ -129,30 +131,35 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
 {
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
-    // TODO: assuming in/out have the same width/height for now
-    std::uint32_t * out_data = out.data();
-    pixel_type const* in_data = in.data();
-    int len = out.width() * out.height();
-    for (int i=0; i<len; ++i)
+
+    const std::size_t width = std::min(in.width(), out.width());
+    const std::size_t height = std::min(in.height(), out.height());
+
+    for (std::size_t y = 0; y < height; ++y)
     {
-        pixel_type value = in_data[i];
-        if (nodata && (std::fabs(value - *nodata) < epsilon_))
+        pixel_type const * in_row = in.get_row(y);
+        image_rgba8::pixel_type * out_row = out.get_row(y);
+        for (std::size_t x = 0; x < width; ++x)
         {
-            out_data[i] = 0; // rgba(0,0,0,0)
-        }
-        else
-        {
-            out_data[i] = get_color(value);
+            pixel_type val = in_row[x];
+            if (nodata && (std::fabs(val - *nodata) < epsilon_))
+            {
+                out_row[x] = 0; // rgba(0,0,0,0)
+            }
+            else
+            {
+                out_row[x] = get_color(val);
+            }
         }
     }
 }
 
 inline unsigned interpolate(unsigned start, unsigned end, float fraction)
 {
-    return static_cast<unsigned>(fraction * ((float)end - (float)start) + start);
+    return static_cast<unsigned>(fraction * (static_cast<float>(end) - static_cast<float>(start)) + static_cast<float>(start));
 }
 
-unsigned raster_colorizer::get_color(float value) const
+unsigned raster_colorizer::get_color(float val) const
 {
     int stopCount = stops_.size();
 
@@ -162,13 +169,13 @@ unsigned raster_colorizer::get_color(float value) const
         return default_color_.rgba();
     }
 
-    //1 - Find the stop that the value is in
+    //1 - Find the stop that the val is in
     int stopIdx = -1;
     bool foundStopIdx = false;
 
     for(int i=0; i<stopCount; ++i)
     {
-        if(value < stops_[i].get_value())
+        if (val < stops_[i].get_value())
         {
             stopIdx = i-1;
             foundStopIdx = true;
@@ -215,7 +222,7 @@ unsigned raster_colorizer::get_color(float value) const
     {
         stopColor = default_color_;
         nextStopColor = stops_[nextStopIdx].get_color();
-        stopValue = value;
+        stopValue = val;
         nextStopValue = stops_[nextStopIdx].get_value();
     }
     else
@@ -237,7 +244,7 @@ unsigned raster_colorizer::get_color(float value) const
         }
         else
         {
-            float fraction = (value - stopValue) / (nextStopValue - stopValue);
+            float fraction = (val - stopValue) / (nextStopValue - stopValue);
 
             unsigned r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
             unsigned g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
@@ -252,13 +259,42 @@ unsigned raster_colorizer::get_color(float value) const
 
     }
     break;
+    case COLORIZER_LINEAR_RGBA:
+    {
+        if(nextStopValue == stopValue)
+        {
+            return stopColor.rgba();
+        }
+
+        double fraction = (val - stopValue) / (nextStopValue - stopValue);
+        double colorStart = static_cast<double>(stopColor.rgba());
+        double colorEnd = static_cast<double>(nextStopColor.rgba());
+        outputColor = color(colorStart + fraction * (colorEnd - colorStart));
+    }
+    break;
+    case COLORIZER_LINEAR_BGRA:
+    {
+        if(nextStopValue == stopValue)
+        {
+            return stopColor.rgba();
+        }
+
+        double fraction = (val - stopValue) / (nextStopValue - stopValue);
+        std::swap(stopColor.red_, stopColor.blue_);
+        std::swap(nextStopColor.red_, nextStopColor.blue_);
+        double colorStart = static_cast<double>(stopColor.rgba());
+        double colorEnd = static_cast<double>(nextStopColor.rgba());
+        outputColor = color(colorStart + fraction * (colorEnd - colorStart));
+        std::swap(outputColor.red_, outputColor.blue_);
+    }
+    break;
     case COLORIZER_DISCRETE:
         outputColor = stopColor;
         break;
     case COLORIZER_EXACT:
     default:
         //approximately equal (within epsilon)
-        if(std::fabs(value - stopValue) < epsilon_)
+        if (std::fabs(val - stopValue) < epsilon_)
         {
             outputColor = stopColor;
         }
@@ -271,7 +307,7 @@ unsigned raster_colorizer::get_color(float value) const
 
 
     /*
-      MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << value;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << val;
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopIdx: " << stopIdx;
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopIdx: " << nextStopIdx;
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopValue: " << stopValue;

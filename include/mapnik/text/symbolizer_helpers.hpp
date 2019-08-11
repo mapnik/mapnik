@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -59,7 +59,14 @@ struct placement_finder_adapter
 
 };
 
-using vertex_converter_type = vertex_converter<clip_line_tag , transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
+using vertex_converter_type = vertex_converter<clip_line_tag,
+                                               clip_poly_tag,
+                                               transform_tag,
+                                               affine_transform_tag,
+                                               extend_tag,
+                                               simplify_tag,
+                                               smooth_tag,
+                                               offset_transform_tag>;
 
 class base_symbolizer_helper
 {
@@ -69,6 +76,7 @@ public:
     using line_string_cref = std::reference_wrapper<geometry::line_string<double> const>;
     using polygon_cref = std::reference_wrapper<geometry::polygon<double> const>;
     using geometry_cref = util::variant<point_cref, line_string_cref, polygon_cref>;
+
     // Using list instead of vector, because we delete random elements and need iterators to stay valid.
     using geometry_container_type = std::list<geometry_cref>;
     base_symbolizer_helper(symbolizer_base const& sym,
@@ -110,6 +118,10 @@ protected:
     evaluated_text_properties_ptr text_props_;
 };
 
+namespace geometry {
+MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
+}
+
 // Helper object that does all the TextSymbolizer placement finding
 // work except actually rendering the object.
 
@@ -147,6 +159,10 @@ public:
     // Return all placements.
     placements_list const& get() const;
 protected:
+    void init_converters();
+    void initialize_points() const;
+    template <template <typename, typename> class GridAdapter>
+    void initialize_grid_points() const;
     bool next_point_placement() const;
     bool next_line_placement() const;
 
@@ -158,6 +174,10 @@ protected:
     void init_marker() const;
 };
 
-} //namespace
+namespace geometry {
+MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
+}
+
+} //namespace mapnik
 
 #endif // SYMBOLIZER_HELPERS_HPP

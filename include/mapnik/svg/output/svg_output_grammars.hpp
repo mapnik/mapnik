@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,52 +40,7 @@ namespace mapnik { namespace svg {
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma_nonterminal.hpp>
 #include <boost/spirit/include/karma_rule.hpp>
-#include <boost/fusion/adapted/struct.hpp>
 #pragma GCC diagnostic pop
-
-/*!
- * mapnik::svg::path_output_attributes is adapted as a fusion sequence
- * in order to be used directly by the svg_path_attributes_grammar (below).
- *
- * This adaptation is the primary reason why the attributes are stored in
- * this structure before being passed to the generate_path method.
- */
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::svg::path_output_attributes,
-    (std::string, fill_color_)
-    (double, fill_opacity_)
-    (std::string, stroke_color_)
-    (double, stroke_opacity_)
-    (double, stroke_width_)
-    (std::string, stroke_linecap_)
-    (std::string, stroke_linejoin_)
-    (double, stroke_dashoffset_)
-    );
-
-/*!
- * mapnik::svg::rect_output_attributes is adapted as a fusion sequence
- * in order to be used directly by the svg_rect_attributes_grammar (below).
- */
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::svg::rect_output_attributes,
-    (int, x_)
-    (int, y_)
-    (unsigned, width_)
-    (unsigned, height_)
-    (std::string, fill_color_)
-    );
-
-/*!
- * mapnik::svg::root_output_attributes is adapted as a fusion sequence
- * in order to be used directly by the svg_root_attributes_grammar (below).
- */
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::svg::root_output_attributes,
-    (unsigned, width_)
-    (unsigned, height_)
-    (double, svg_version_)
-    (std::string, svg_namespace_url_)
-    );
 
 namespace mapnik { namespace svg {
 

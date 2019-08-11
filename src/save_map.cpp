@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,7 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer_utils.hpp>
-#include <mapnik/transform_processor.hpp>
+#include <mapnik/transform/transform_processor.hpp>
 #include <mapnik/group/group_rule.hpp>
 #include <mapnik/group/group_layout.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
@@ -488,7 +488,8 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
 
 void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
 {
-    if (params.size()) {
+    if (params.size())
+    {
         ptree & params_node = map_node.push_back(
             ptree::value_type("Parameters", ptree()))->second;
 
@@ -513,6 +514,17 @@ void serialize_layer( ptree & map_node, layer const& lyr, bool explicit_defaults
         set_attr( layer_node, "name", lyr.name() );
     }
 
+    auto const comp_op = lyr.comp_op();
+
+    if (comp_op)
+    {
+        set_attr(layer_node, "comp-op", *comp_op_to_string(*comp_op));
+    }
+    else if (explicit_defaults)
+    {
+        set_attr(layer_node, "comp-op", "src-over");
+    }
+
     if ( lyr.srs() != "" )
     {
         set_attr( layer_node, "srs", lyr.srs() );
@@ -530,12 +542,12 @@ void serialize_layer( ptree & map_node, layer const& lyr, bool explicit_defaults
 
     if ( lyr.minimum_scale_denominator() != 0 || explicit_defaults )
     {
-        set_attr( layer_node, "minimum_scale_denominator", lyr.minimum_scale_denominator() );
+        set_attr( layer_node, "minimum-scale-denominator", lyr.minimum_scale_denominator() );
     }
 
     if ( lyr.maximum_scale_denominator() != std::numeric_limits<double>::max() || explicit_defaults )
     {
-        set_attr( layer_node, "maximum_scale_denominator", lyr.maximum_scale_denominator() );
+        set_attr( layer_node, "maximum-scale-denominator", lyr.maximum_scale_denominator() );
     }
 
     if ( lyr.queryable() || explicit_defaults )
@@ -581,6 +593,12 @@ void serialize_layer( ptree & map_node, layer const& lyr, bool explicit_defaults
     if ( datasource )
     {
         serialize_datasource( layer_node, datasource );
+    }
+
+    // serialize nested layers
+    for (auto const& child : lyr.layers())
+    {
+        serialize_layer(layer_node, child, explicit_defaults );
     }
 }
 

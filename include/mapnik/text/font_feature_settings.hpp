@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,11 @@
 #include <memory>
 #include <limits>
 #include <ostream>
-// harfbuzz
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <harfbuzz/hb.h>
+#pragma GCC diagnostic pop
 
 // EqualityComparable
 inline bool operator==(hb_feature_t const& lhs, hb_feature_t const& rhs)
@@ -86,7 +89,10 @@ inline bool operator==(font_feature_settings const& lhs, font_feature_settings c
 constexpr unsigned int font_feature_range_global_start = 0u;
 static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 constexpr hb_feature_t font_feature_liga_off = { HB_TAG('l', 'i', 'g', 'a'), 0, font_feature_range_global_start, font_feature_range_global_end };
+#pragma GCC diagnostic pop
 
 } // mapnik namespace
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -65,7 +65,7 @@ datasource_cache::~datasource_cache()
 datasource_ptr datasource_cache::create(parameters const& params)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
-    if ( ! type)
+    if (!type)
     {
         throw config_error(std::string("Could not create datasource. Required ") +
                            "parameter 'type' is missing");
@@ -117,7 +117,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #endif
         create_ds create_datasource = reinterpret_cast<create_ds>(itr->second->get_symbol("create"));
 
-    if (! create_datasource)
+    if (!create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  itr->second->get_error());

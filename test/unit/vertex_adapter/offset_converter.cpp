@@ -1,64 +1,15 @@
+
 #include "catch.hpp"
+#include "fake_path.hpp"
 
 // mapnik
-#include <mapnik/vertex.hpp>
 #include <mapnik/offset_converter.hpp>
+#include <mapnik/util/math.hpp>
 
 // stl
 #include <iostream>
-#include <vector>
-#include <tuple>
 
 namespace offset_test {
-
-struct fake_path
-{
-    using coord_type = std::tuple<double, double, unsigned>;
-    using cont_type = std::vector<coord_type>;
-    cont_type vertices_;
-    cont_type::iterator itr_;
-
-    fake_path(std::initializer_list<double> l)
-        : fake_path(l.begin(), l.size()) {
-    }
-
-    fake_path(std::vector<double> const &v, bool make_invalid = false)
-        : fake_path(v.begin(), v.size(), make_invalid) {
-    }
-
-    template <typename Itr>
-    fake_path(Itr itr, size_t sz, bool make_invalid = false) {
-        size_t num_coords = sz >> 1;
-        vertices_.reserve(num_coords + (make_invalid ? 1 : 0));
-        if (make_invalid)
-        {
-            vertices_.push_back(std::make_tuple(0,0,mapnik::SEG_END));
-        }
-
-        for (size_t i = 0; i < num_coords; ++i) {
-            double x = *itr++;
-            double y = *itr++;
-            unsigned cmd = (i == 0) ? mapnik::SEG_MOVETO : mapnik::SEG_LINETO;
-            vertices_.push_back(std::make_tuple(x, y, cmd));
-        }
-        itr_ = vertices_.begin();
-    }
-
-    unsigned vertex(double *x, double *y) {
-        if (itr_ == vertices_.end()) {
-            return mapnik::SEG_END;
-        }
-        *x = std::get<0>(*itr_);
-        *y = std::get<1>(*itr_);
-        unsigned cmd = std::get<2>(*itr_);
-        ++itr_;
-        return cmd;
-    }
-
-    void rewind(unsigned) {
-        itr_ = vertices_.begin();
-    }
-};
 
 static double DELTA_BUFF = 0.5;
 
@@ -184,7 +135,7 @@ void test_offset_curve(double const &offset) {
     std::vector<double> pos, off_pos;
     const size_t max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i) {
-        double x = M_PI * double(i) / max_i;
+        double x = mapnik::util::pi * double(i) / max_i;
         pos.push_back(-std::cos(x)); pos.push_back(std::sin(x));
         off_pos.push_back(-r * std::cos(x)); off_pos.push_back(r * std::sin(x));
     }
@@ -235,12 +186,12 @@ void test_s_shaped_curve(double const &offset) {
     std::vector<double> pos, off_pos;
     const size_t max_i = 1000;
     for (size_t i = 0; i <= max_i; ++i) {
-        double x = M_PI * double(i) / max_i;
+        double x = mapnik::util::pi * double(i) / max_i;
         pos.push_back(-std::cos(x) - 1); pos.push_back(std::sin(x));
         off_pos.push_back(-r * std::cos(x) - 1); off_pos.push_back(r * std::sin(x));
     }
     for (size_t i = 0; i <= max_i; ++i) {
-        double x = M_PI * double(i) / max_i;
+        double x = mapnik::util::pi * double(i) / max_i;
         pos.push_back(-std::cos(x) + 1); pos.push_back(-std::sin(x));
         off_pos.push_back(-r2 * std::cos(x) + 1); off_pos.push_back(-r2 * std::sin(x));
     }
@@ -384,6 +335,51 @@ SECTION("s curve") {
         std::cerr << ex.what() << "\n";
         REQUIRE(false);
     }
+}
+
+SECTION("offsect converter does not skip SEG_MOVETO or SEG_CLOSE vertices") {
+
+    const double offset = 0.2;
+
+    fake_path path = {};
+    path.vertices_.emplace_back(-2, -2, mapnik::SEG_MOVETO);
+    path.vertices_.emplace_back( 2, -2, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 2,  2, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-2,  2, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-2,  -1.9, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 0,  0, mapnik::SEG_CLOSE);
+    path.vertices_.emplace_back(-1.9, -1.9, mapnik::SEG_MOVETO);
+    path.vertices_.emplace_back( 1, -1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 1,  1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-1,  1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back(-1, -1, mapnik::SEG_LINETO);
+    path.vertices_.emplace_back( 0,  0, mapnik::SEG_CLOSE);
+    path.rewind(0);
+
+    mapnik::offset_converter<fake_path> off_path(path);
+    off_path.set_offset(offset);
+
+    unsigned cmd;
+    double x, y;
+
+    unsigned move_to_count = 0;
+    unsigned close_count = 0;
+
+    while((cmd = off_path.vertex(&x, &y)) != mapnik::SEG_END)
+    {
+        switch (cmd)
+        {
+            case mapnik::SEG_MOVETO:
+                move_to_count++;
+            break;
+            case mapnik::SEG_CLOSE:
+                close_count++;
+            break;
+        }
+    }
+
+    CHECK(move_to_count == 2);
+    CHECK(close_count == 2);
 }
 
 }

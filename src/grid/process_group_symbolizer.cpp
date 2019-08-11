@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,8 +37,10 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/renderer_common/render_group_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -70,25 +72,20 @@ struct thunk_renderer : render_thunk_list_dispatch
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
         using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-
-        using namespace mapnik::svg;
-        using svg_attribute_type = agg::pod_bvector<path_attributes>;
-        using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
-                                                   svg_attribute_type,
-                                                   renderer_type,
-                                                   pixfmt_type>;
-
+        using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                    svg_attribute_type,
+                                                    renderer_type,
+                                                    pixfmt_type>;
         buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
         ras_.reset();
         pixfmt_type pixf(render_buf);
         grid_renderer_base_type renb(pixf);
         renderer_type ren(renb);
-        vertex_stl_adapter<svg_path_storage> stl_storage(thunk.src_->source());
+        svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(thunk.src_->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_type svg_renderer(svg_path, thunk.attrs_);
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
-        //render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(), offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
         agg::scanline_bin sl;
         svg_renderer.render_id(ras_, sl, renb, feature_.id(), offset_tr, thunk.opacity_, thunk.src_->bounding_box());
         pixmap_.add_feature(feature_);

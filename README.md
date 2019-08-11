@@ -8,9 +8,9 @@ _/      _/    _/_/_/  _/_/_/    _/    _/  _/  _/    _/
                     _/
 ```
 
-[![Build Status Linux](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
-[![Build Status Windows](https://ci.appveyor.com/api/projects/status/hc9l7okdjtucfqqn?branch=master&svg=true)](https://ci.appveyor.com/project/Mapbox/mapnik)
-[![Coverage Status](https://coveralls.io/repos/mapnik/mapnik/badge.svg?branch=master&service=github)](https://coveralls.io/github/mapnik/mapnik?branch=master)
+[![CircleCI](https://circleci.com/gh/mapnik/mapnik/tree/master.svg?style=shield&circle-token=a6d83ccccf24d2ac90e73e96df1ca72171f3eb2f)](https://circleci.com/gh/mapnik/mapnik/tree/master)
+[![TravisCI](https://api.travis-ci.org/mapnik/mapnik.svg?branch=master)](http://travis-ci.org/mapnik/mapnik)
+[![codecov](https://codecov.io/gh/mapnik/mapnik/branch/master/graph/badge.svg)](https://codecov.io/gh/mapnik/mapnik)
 
 Mapnik is an open source toolkit for developing mapping applications. At the core is a C++ shared library providing algorithms and patterns for spatial data access and visualization.
 
@@ -20,7 +20,7 @@ For further information see [http://mapnik.org](http://mapnik.org) and also our 
 
 # Installation
 
-See [INSTALL.md](https://github.com/mapnik/mapnik/blob/master/INSTALL.md) for installation instructions and the [Install](https://github.com/mapnik/mapnik/wiki/Mapnik-Installation) page on the wiki for guides.
+See [INSTALL.md](INSTALL.md) for installation instructions and the [Install](https://github.com/mapnik/mapnik/wiki/Mapnik-Installation) page on the wiki for guides.
 
 # Code of Conduct
 
@@ -28,4 +28,4 @@ Please note that this project is released with a [Contributor Code of Conduct](h
 
 # License
 
-Mapnik software is free and is released under the LGPL ([GNU Lesser General Public License](http://www.gnu.org/licenses/lgpl.html_)). Please see [COPYING](https://github.com/mapnik/mapnik/blob/master/COPYING) for more information.
+Mapnik software is free and is released under the LGPL v2.1 ([GNU Lesser General Public License, version 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)). Please see [COPYING](https://github.com/mapnik/mapnik/blob/master/COPYING) for more information.

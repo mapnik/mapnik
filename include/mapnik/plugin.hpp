@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,8 @@ using mapnik_lib_t = struct _mapnik_lib_t;
 class PluginInfo : util::noncopyable
 {
 public:
-    using name_func = const char* (*) ();
+    using callable_returning_string = const char* (*) ();
+    using callable_returning_void = void (*) ();
     PluginInfo (std::string const& filename,
                 std::string const& library_name);
     ~PluginInfo();

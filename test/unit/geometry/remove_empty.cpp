@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include <mapnik/geometry_remove_empty.hpp>
+#include <mapnik/geometry/remove_empty.hpp>
 
 TEST_CASE("geometry remove_empty") {
 
@@ -18,9 +18,9 @@ SECTION("multi-linestring") {
     using geom_type = mapnik::geometry::multi_line_string<double>;
     geom_type geom;
     mapnik::geometry::line_string<double> line;
-    line.add_coord(0, 0);
-    line.add_coord(0, 25);
-    line.add_coord(0, 50);
+    line.emplace_back(0, 0);
+    line.emplace_back(0, 25);
+    line.emplace_back(0, 50);
     geom.emplace_back(std::move(line));
     geom.emplace_back();
 
@@ -36,18 +36,18 @@ SECTION("multi-polygon") {
     geom_type geom;
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::linear_ring<double> ring;
-    ring.add_coord(0, 0);
-    ring.add_coord(1, 0);
-    ring.add_coord(1, 1);
-    ring.add_coord(0, 1);
-    ring.add_coord(0, 0);
-    poly.set_exterior_ring(std::move(ring));
+    ring.emplace_back(0, 0);
+    ring.emplace_back(1, 0);
+    ring.emplace_back(1, 1);
+    ring.emplace_back(0, 1);
+    ring.emplace_back(0, 0);
+    poly.push_back(std::move(ring));
     geom.emplace_back(std::move(poly));
     geom.emplace_back();
-
+    //geom.back().emplace_back(); //add an empty exterior ring
     REQUIRE(geom.size() == 2);
     geom_type geom2 = mapnik::geometry::remove_empty(geom);
     REQUIRE(geom2.size() == 1);
-    REQUIRE(geom2[0].exterior_ring.size() == 5);
+    REQUIRE(geom2.front().front().size() == 5);
 }
 }

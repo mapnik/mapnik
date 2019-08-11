@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -98,7 +98,7 @@ mapnik::geometry::line_string<double> ogr_converter::convert_linestring(OGRLineS
     geom.reserve(num_points);
     for (int i = 0; i < num_points; ++i)
     {
-       geom.add_coord(ogr_geom->getX(i), ogr_geom->getY(i));
+       geom.emplace_back(ogr_geom->getX(i), ogr_geom->getY(i));
     }
     return geom;
 }
@@ -127,7 +127,7 @@ mapnik::geometry::polygon<double> ogr_converter::convert_polygon(OGRPolygon* ogr
     {
         exterior.emplace_back(ogr_exterior->getX(i), ogr_exterior->getY(i));
     }
-    geom.set_exterior_ring(std::move(exterior));
+    geom.push_back(std::move(exterior));
 
     int num_interior = ogr_geom->getNumInteriorRings();
     for (int r = 0; r < num_interior; ++r)
@@ -140,7 +140,7 @@ mapnik::geometry::polygon<double> ogr_converter::convert_polygon(OGRPolygon* ogr
         {
             interior.emplace_back(ogr_interior->getX(i), ogr_interior->getY(i));
         }
-        geom.add_hole(std::move(interior));
+        geom.push_back(std::move(interior));
     }
     return geom;
 }

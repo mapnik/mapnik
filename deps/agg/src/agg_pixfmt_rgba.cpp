@@ -1,9 +1,13 @@
-
 #include "agg_pixfmt_rgba.h"
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 106900
+#include <boost/gil.hpp>
+#else
 #include <boost/gil/gil_all.hpp>
+#endif
 #include <boost/gil/extension/toolbox/hsv.hpp>
 #include <boost/gil/extension/toolbox/hsl.hpp>
 #pragma GCC diagnostic pop

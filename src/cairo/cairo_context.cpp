@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -304,6 +304,12 @@ void cairo_context::paint()
     check_object_status_and_throw_exception(*this);
 }
 
+void cairo_context::paint(double opacity)
+{
+    cairo_paint_with_alpha(cairo_.get(), opacity);
+    check_object_status_and_throw_exception(*this);
+}
+
 void cairo_context::set_pattern(cairo_pattern const& pattern)
 {
     cairo_set_source(cairo_.get(), pattern.pattern());
@@ -487,6 +493,18 @@ void cairo_context::add_text(glyph_positions const& pos,
         show_glyph(glyph.glyph_index, pixel_position(sx + new_pos.x, sy - new_pos.y));
     }
 
+}
+
+void cairo_context::push_group()
+{
+    cairo_push_group(cairo_.get());
+    check_object_status_and_throw_exception(*this);
+}
+
+void cairo_context::pop_group()
+{
+    cairo_pop_group_to_source(cairo_.get());
+    check_object_status_and_throw_exception(*this);
 }
 
 cairo_face_manager::cairo_face_manager(std::shared_ptr<font_library> font_library)

@@ -6,6 +6,7 @@ First clone mapnik from github and initialize submodules
 
 ```bash
 git clone https://github.com/mapnik/mapnik.git
+cd mapnik
 git submodule update --init
 ```
 
@@ -98,7 +99,7 @@ Additional optional dependencies:
  * PostgreSQL (for PostGIS plugin support)
     - libpq - PostreSQL libraries
     - pg_config - PostgreSQL installation capabilities
- * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
+ * libgdal - GDAL/OGR input (For gdal and ogr plugin support) (>= GDAL 2.0.2 for thread safety - https://github.com/mapnik/mapnik/issues/3339)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
 
 Instructions for installing many of these dependencies on
@@ -191,6 +192,6 @@ Mapnik is great for building your own mapping applications. Visit
 https://github.com/mapnik/mapnik/wiki/LearningMapnik for basic
 tutorials on how to programmatically use Mapnik.
 
-### Contributers
+### Contributors
 
-Read docs/contributing.md for resources for getting involved with Mapnik development.
+Read [docs/contributing.md](docs/contributing.md) for resources for getting involved with Mapnik development.

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,8 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -37,8 +38,10 @@
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
 #include "agg_bounding_rect.h"
+#pragma GCC diagnostic pop
 
 // stl
+#include <deque>
 #include <stdexcept>
 
 namespace mapnik {
@@ -59,16 +62,16 @@ public:
     void begin_path()
     {
         std::size_t idx = source_.start_new_path();
-        attributes_.add(path_attributes(cur_attr(), safe_cast<unsigned>(idx)));
+        attributes_.emplace_back(cur_attr(), safe_cast<unsigned>(idx));
     }
 
     void end_path()
     {
-        if(attributes_.size() == 0)
+        if (attributes_.empty())
         {
             throw std::runtime_error("end_path : The path was not begun");
         }
-        path_attributes& attr = attributes_[attributes_.size() - 1];
+        path_attributes& attr = attributes_.back();
         unsigned idx = attr.index;
         attr = cur_attr();
         attr.index = idx;
@@ -181,17 +184,19 @@ public:
 
     void push_attr()
     {
-        attr_stack_.add(attr_stack_.size() ?
-                        attr_stack_[attr_stack_.size() - 1] :
-                        path_attributes());
+        if (attr_stack_.empty())
+            attr_stack_.push_back(path_attributes());
+        else
+            attr_stack_.push_back(attr_stack_.back());
     }
+
     void pop_attr()
     {
-        if(attr_stack_.size() == 0)
+        if (attr_stack_.empty())
         {
             throw std::runtime_error("pop_attr : Attribute stack is empty");
         }
-        attr_stack_.remove_last();
+        attr_stack_.pop_back();
     }
 
     // Attribute setting functions.
@@ -224,15 +229,18 @@ public:
         attr.stroke_color.opacity(a * s.opacity());
         attr.stroke_flag = true;
     }
+
     void dash_array(dash_array && dash)
     {
         path_attributes& attr = cur_attr();
         attr.dash = std::move(dash);
     }
+
     void dash_offset(double offset)
     {
         cur_attr().dash_offset = offset;
     }
+
     void even_odd(bool flag)
     {
         cur_attr().even_odd_flag = flag;
@@ -262,6 +270,7 @@ public:
     {
         cur_attr().stroke_width = w;
     }
+
     void fill_none()
     {
         cur_attr().fill_none = true;
@@ -350,11 +359,11 @@ public:
 
     path_attributes& cur_attr()
     {
-        if(attr_stack_.size() == 0)
+        if (attr_stack_.empty())
         {
             throw std::runtime_error("cur_attr : Attribute stack is empty");
         }
-        return attr_stack_[attr_stack_.size() - 1];
+        return attr_stack_.back();
     }
 
 private:
@@ -368,7 +377,7 @@ private:
 };
 
 
-using svg_converter_type = svg_converter<svg_path_adapter,agg::pod_bvector<mapnik::svg::path_attributes> >;
+using svg_converter_type = svg_converter<svg_path_adapter, std::deque<path_attributes> >;
 
 }}
 

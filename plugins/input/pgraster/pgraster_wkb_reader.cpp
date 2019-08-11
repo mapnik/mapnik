@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/box2d.hpp> // for box2d
+#include <mapnik/geometry/box2d.hpp> // for box2d
 #include <functional>
 
 #include <cstdint>
@@ -66,7 +66,7 @@ read_uint16(const uint8_t** from, uint8_t littleEndian) {
 /*
 int16_t
 read_int16(const uint8_t** from, uint8_t littleEndian) {
-    assert(NULL != from);
+    assert(nullptr != from);
 
     return read_uint16(from, littleEndian);
 }
@@ -183,17 +183,16 @@ mapnik::raster_ptr read_data_band(mapnik::box2d<double> const& bbox,
 {
   mapnik::image_gray32f image(width, height);
   float* data = image.data();
-  double val;
-  val = reader(); // nodata value, need to read anyway
+  double nodataval = reader();
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
-      val = reader();
+      double val = reader();
       int off = y * width + x;
       data[off] = val;
     }
   }
   mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(bbox, image, 1.0);
-  if ( hasnodata ) raster->set_nodata(val);
+  if ( hasnodata ) raster->set_nodata(nodataval);
   return raster;
 }
 
@@ -270,15 +269,13 @@ mapnik::raster_ptr read_grayscale_band(mapnik::box2d<double> const& bbox,
   image.set(0xffffffff);
 
 
-  int val;
-  int nodataval;
   uint8_t * data = image.bytes();
   int ps = 4; // sizeof(image::pixel_type)
   int off;
-  nodataval = reader(); // nodata value, need to read anyway
+  int nodataval = reader();
   for (int y=0; y<height; ++y) {
     for (int x=0; x<width; ++x) {
-      val = reader();
+      int val = reader();
       // Apply harsh type clipping rules ala GDAL
       if ( val < 0 ) val = 0;
       if ( val > 255 ) val = 255;
@@ -298,7 +295,7 @@ mapnik::raster_ptr read_grayscale_band(mapnik::box2d<double> const& bbox,
     }
   }
   mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(bbox, image, 1.0);
-  if ( hasnodata ) raster->set_nodata(val);
+  if ( hasnodata ) raster->set_nodata(nodataval);
   return raster;
 }
 

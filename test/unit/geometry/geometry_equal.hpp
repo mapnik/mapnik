@@ -1,3 +1,6 @@
+#ifndef MAPNIK_UNIT_GEOMETRY_EQUAL
+#define MAPNIK_UNIT_GEOMETRY_EQUAL
+
 #include "catch.hpp"
 
 // boost
@@ -81,7 +84,15 @@ auto zip_crange(Conts&... conts)
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/variant.hpp>
 
-using namespace mapnik::geometry;
+using mapnik::geometry::geometry;
+using mapnik::geometry::geometry_empty;
+using mapnik::geometry::point;
+using mapnik::geometry::line_string;
+using mapnik::geometry::polygon;
+using mapnik::geometry::multi_point;
+using mapnik::geometry::multi_line_string;
+using mapnik::geometry::multi_polygon;
+using mapnik::geometry::geometry_collection;
 
 template <typename T>
 void assert_g_equal(geometry<T> const& g1, geometry<T> const& g2);
@@ -95,6 +106,7 @@ struct geometry_equal_visitor
         REQUIRE(false);
     }
 
+    template <typename T>
     void operator() (geometry_empty const&, geometry_empty const&) const
     {
         REQUIRE(true);
@@ -108,7 +120,7 @@ struct geometry_equal_visitor
     }
 
     template <typename T>
-    void operator() (line_string<T> const& ls1, line_string<T> const& ls2) const
+    void operator() (std::vector<point<T>> const& ls1, std::vector<point<T>> const& ls2) const
     {
         if (ls1.size() != ls2.size())
         {
@@ -125,24 +137,32 @@ struct geometry_equal_visitor
     template <typename T>
     void operator() (polygon<T> const& p1, polygon<T> const& p2) const
     {
-        (*this)(static_cast<line_string<T> const&>(p1.exterior_ring), static_cast<line_string<T> const&>(p2.exterior_ring));
-
-        if (p1.interior_rings.size() != p2.interior_rings.size())
+        if (p1.size() != p2.size())
         {
             REQUIRE(false);
         }
 
-        for (auto const& p : zip_crange(p1.interior_rings, p2.interior_rings))
+        for (auto const& p : zip_crange(p1, p2))
         {
-            (*this)(static_cast<line_string<T> const&>(p.template get<0>()),static_cast<line_string<T> const&>(p.template get<1>()));
+            (*this)(static_cast<std::vector<point<T>> const&>(p.template get<0>()),
+                    static_cast<std::vector<point<T>> const&>(p.template get<1>()));
         }
+    }
+
+    template <typename T>
+    void operator() (line_string<T> const& ls1, line_string<T> const& ls2) const
+    {
+        (*this)(static_cast<std::vector<point<T>> const&>(ls1),
+                static_cast<std::vector<point<T>> const&>(ls2));
     }
 
     template <typename T>
     void operator() (multi_point<T> const& mp1, multi_point<T> const& mp2) const
     {
-        (*this)(static_cast<line_string<T> const&>(mp1), static_cast<line_string<T> const&>(mp2));
+        (*this)(static_cast<std::vector<point<T>> const&>(mp1),
+                static_cast<std::vector<point<T>> const&>(mp2));
     }
+
 
     template <typename T>
     void operator() (multi_line_string<T> const& mls1, multi_line_string<T> const& mls2) const
@@ -214,3 +234,5 @@ void assert_g_equal(T const& g1, T const& g2)
 {
     return geometry_equal_visitor()(g1,g2);
 }
+
+#endif // MAPNIK_UNIT_GEOMETRY_EQUAL

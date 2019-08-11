@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@ image_view<T>::image_view(std::size_t x, std::size_t y, std::size_t width, std::
       data_(data)
 {
     if (x_ >= data_.width() && data_.width() > 0) x_ = data_.width() - 1;
-    if (y_ >= data_.height() && data.height() > 0) y_ = data_.height() - 1;
+    if (y_ >= data_.height() && data_.height() > 0) y_ = data_.height() - 1;
     if (x_ + width_ > data_.width()) width_ = data_.width() - x_;
     if (y_ + height_ > data_.height()) height_ = data_.height() - y_;
 }

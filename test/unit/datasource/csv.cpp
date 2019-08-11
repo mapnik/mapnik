@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,11 +24,12 @@
 #include "ds_test_util.hpp"
 
 #include <mapnik/map.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_types.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
@@ -79,31 +80,11 @@ mapnik::datasource_ptr get_csv_ds(std::string const& file_name, bool strict = tr
     return ds;
 }
 
-int create_disk_index(std::string const& filename, bool silent = true)
-{
-    std::string cmd;
-    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
-    {
-        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
-    }
-    cmd += "mapnik-index " + filename;
-    if (silent)
-    {
-#ifndef _WINDOWS
-        cmd += " 2>/dev/null";
-#else
-        cmd += " 2> nul";
-#endif
-    }
-    return std::system(cmd.c_str());
-}
-
 } // anonymous namespace
-
-static const std::string csv_plugin("./plugins/input/csv.input");
 
 TEST_CASE("csv") {
 
+    std::string csv_plugin("./plugins/input/csv.input");
     if (mapnik::util::exists(csv_plugin))
     {
         // make the tests silent since we intentionally test error conditions that are noisy
@@ -161,7 +142,7 @@ TEST_CASE("csv") {
                             int ret_posix = (ret >> 8) & 0x000000ff;
                             INFO(ret);
                             INFO(ret_posix);
-                            require_fail = (path == "test/data/csv/warns/feature_id_counting.csv") ? false : true;
+                            require_fail = (boost::iends_with(path,"feature_id_counting.csv")) ? false : true;
                             if (!require_fail)
                             {
                                 REQUIRE(mapnik::util::exists(path + ".index"));
@@ -208,7 +189,7 @@ TEST_CASE("csv") {
                             int ret_posix = (ret >> 8) & 0x000000ff;
                             INFO(ret);
                             INFO(ret_posix);
-                            if (path != "test/data/csv/more_headers_than_column_values.csv") // mapnik-index won't create *.index for 0 features
+                            if (!boost::iends_with(path,"more_headers_than_column_values.csv")) // mapnik-index won't create *.index for 0 features
                             {
                                 CHECK(mapnik::util::exists(path + ".index"));
                             }
@@ -260,7 +241,7 @@ TEST_CASE("csv") {
                     auto features = ds->features(query);
                     auto feature = features->next();
 
-                    require_attributes(feature, {
+                    REQUIRE_ATTRIBUTES(feature, {
                             attr { lon_name, mapnik::value_integer(0) },
                                 attr { "lat", mapnik::value_integer(0) }
                         });
@@ -314,11 +295,11 @@ TEST_CASE("csv") {
                         , attr { "Phone", mapnik::value_unicode_string("(212) 334-0711") }
                         , attr { "Address", mapnik::value_unicode_string("19 Elizabeth Street") }
                         , attr { "Precinct", mapnik::value_unicode_string("5th Precinct") }
-                        , attr { "geo_longitude", mapnik::value_integer(-70) }
-                        , attr { "geo_latitude", mapnik::value_integer(40) }
+                        , attr { "geo_longitude", mapnik::value_double(-70.0) }
+                        , attr { "geo_latitude", mapnik::value_double(40.0) }
                     };
-                require_attributes(feature, expected_attr);
-                require_attributes(feature2, expected_attr);
+                REQUIRE_ATTRIBUTES(feature, expected_attr);
+                REQUIRE_ATTRIBUTES(feature2, expected_attr);
                 if (mapnik::util::exists(filepath + ".index"))
                 {
                     mapnik::util::remove(filepath + ".index");
@@ -386,7 +367,7 @@ TEST_CASE("csv") {
 
                 auto featureset = all_features(ds);
                 auto feature = featureset->next();
-                require_attributes(feature, {
+                REQUIRE_ATTRIBUTES(feature, {
                         attr { "x", mapnik::value_integer(0) }
                         , attr { "empty_column", mapnik::value_unicode_string("") }
                         , attr { "text", mapnik::value_unicode_string("a b") }
@@ -435,15 +416,15 @@ TEST_CASE("csv") {
                 require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
 
                 auto featureset = all_features(ds);
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}
                         , attr{"y", 0}
                         , attr{"name", mapnik::value_unicode_string("a/a") } });
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 1}
                         , attr{"y", 4}
                         , attr{"name", mapnik::value_unicode_string("b/b") } });
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 10}
                         , attr{"y", 2.5}
                         , attr{"name", mapnik::value_unicode_string("c/c") } });
@@ -550,7 +531,7 @@ TEST_CASE("csv") {
                 auto fields = ds->get_descriptor().get_descriptors();
                 require_field_names(fields, {"x", "y", "1990", "1991", "1992"});
                 auto feature = all_features(ds)->next();
-                require_attributes(feature, {
+                REQUIRE_ATTRIBUTES(feature, {
                         attr{"x", 0}
                         , attr{"y", 0}
                         , attr{"1990", 1}
@@ -594,15 +575,15 @@ TEST_CASE("csv") {
                 require_field_names(fields, {"x", "y", "label"});
                 auto featureset = all_features(ds);
 
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"label", ustring("0,0") } });
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 5}, attr{"y", 5}, attr{"label", ustring("5,5") } });
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 5}, attr{"label", ustring("0,5") } });
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 5}, attr{"y", 0}, attr{"label", ustring("5,0") } });
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 2.5}, attr{"y", 2.5}, attr{"label", ustring("2.5,2.5") } });
                 if (mapnik::util::exists(filename + ".index"))
                 {
@@ -634,7 +615,7 @@ TEST_CASE("csv") {
                     auto ds = get_csv_ds(filename);
                     auto fields = ds->get_descriptor().get_descriptors();
                     require_field_names(fields, {"x", "y", "z"});
-                    require_attributes(all_features(ds)->next(), {
+                    REQUIRE_ATTRIBUTES(all_features(ds)->next(), {
                             attr{"x", 1}, attr{"y", 10}, attr{"z", 9999.9999} });
                     if (mapnik::util::exists(filename + ".index"))
                     {
@@ -672,7 +653,7 @@ TEST_CASE("csv") {
                     auto ds = get_csv_ds(filename);
                     auto fields = ds->get_descriptor().get_descriptors();
                     require_field_names(fields, {"x", "y", "line"});
-                    require_attributes(all_features(ds)->next(), {
+                    REQUIRE_ATTRIBUTES(all_features(ds)->next(), {
                             attr{"x", 0}, attr{"y", 0}
                             , attr{"line", ustring("many\n  lines\n  of text\n  with unix newlines")} });
                     if (mapnik::util::exists(filename + ".index"))
@@ -703,7 +684,7 @@ TEST_CASE("csv") {
                 auto ds = get_csv_ds(filename);
                 auto fields = ds->get_descriptor().get_descriptors();
                 require_field_names(fields, {"x", "y", "z"});
-                require_attributes(all_features(ds)->next(), {
+                REQUIRE_ATTRIBUTES(all_features(ds)->next(), {
                         attr{"x", -122}, attr{"y", 48}, attr{"z", 0} });
                 if (mapnik::util::exists(filename + ".index"))
                 {
@@ -738,7 +719,7 @@ TEST_CASE("csv") {
                     auto ds = get_csv_ds(filename);
                     auto fields = ds->get_descriptor().get_descriptors();
                     require_field_names(fields, {"x", "y", "z"});
-                    require_attributes(all_features(ds)->next(), {
+                    REQUIRE_ATTRIBUTES(all_features(ds)->next(), {
                             attr{"x", 0}, attr{"y", 0}, attr{"z", ustring("hello")} });
                     if (mapnik::util::exists(filename + ".index"))
                     {
@@ -773,9 +754,9 @@ TEST_CASE("csv") {
                 require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::Boolean});
 
                 auto featureset = all_features(ds);
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"null", ustring("null")}, attr{"boolean", true}});
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"null", ustring("")}, attr{"boolean", false}});
 
                 if (mapnik::util::exists(filename + ".index"))
@@ -848,11 +829,11 @@ TEST_CASE("csv") {
                 require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
 
                 auto featureset = all_features(ds);
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("001")}});
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("003")}});
-                require_attributes(featureset->next(), {
+                REQUIRE_ATTRIBUTES(featureset->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"fips", ustring("005")}});
                 if (mapnik::util::exists(filename + ".index"))
                 {
@@ -896,7 +877,15 @@ TEST_CASE("csv") {
                 auto feature = all_features(ds)->next();
                 REQUIRE(bool(feature));
                 REQUIRE(feature->has_key("Name"));
-                CHECK(feature->get("Name") == ustring(name.c_str()));
+                std::string utf8;
+                mapnik::transcoder tr("utf-8");
+                ustring expected_string = tr.transcode(name.c_str());
+                mapnik::value val(expected_string);
+                mapnik::to_utf8(expected_string,utf8);
+                INFO(feature->get("Name"));
+                INFO(utf8);
+                INFO(val);
+                CHECK(feature->get("Name") == val);
             }
         } // END SECTION
 
@@ -1001,7 +990,7 @@ TEST_CASE("csv") {
                 auto fields = ds->get_descriptor().get_descriptors();
                 require_field_names(fields, {"x", "y", "name"});
                 require_field_types(fields, {mapnik::Integer, mapnik::Integer, mapnik::String});
-                require_attributes(all_features(ds)->next(), {
+                REQUIRE_ATTRIBUTES(all_features(ds)->next(), {
                         attr{"x", 0}, attr{"y", 0}, attr{"name", ustring("data_name")} });
                 REQUIRE(count_features(all_features(ds)) == r.second);
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
@@ -1018,13 +1007,13 @@ TEST_CASE("csv") {
 
             auto fs = all_features(ds);
             auto feature = fs->next();
-            require_attributes(feature, {
+            REQUIRE_ATTRIBUTES(feature, {
                     attr{"x", 0}, attr{"y", 0}, attr{"bigint", 2147483648} });
 
             feature = fs->next();
-            require_attributes(feature, {
+            REQUIRE_ATTRIBUTES(feature, {
                     attr{"x", 0}, attr{"y", 0}, attr{"bigint", 9223372036854775807ll} });
-            require_attributes(feature, {
+            REQUIRE_ATTRIBUTES(feature, {
                     attr{"x", 0}, attr{"y", 0}, attr{"bigint", 0x7FFFFFFFFFFFFFFFll} });
         } // END SECTION
 #pragma GCC diagnostic pop

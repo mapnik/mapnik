@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,14 +23,16 @@
 #ifndef MAPNIK_SVG_PATH_ATTRIBUTES_HPP
 #define MAPNIK_SVG_PATH_ATTRIBUTES_HPP
 
-// agg
-#include "agg_math_stroke.h"
-#include "agg_color_rgba.h"
-#include "agg_trans_affine.h"
-
 // mapnik
 #include <mapnik/gradient.hpp>
 #include <mapnik/symbolizer_base.hpp> // dash_array
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
+#include "agg_math_stroke.h"
+#include "agg_color_rgba.h"
+#include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 namespace svg {
