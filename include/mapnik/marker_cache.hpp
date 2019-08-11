@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,7 @@ public:
     inline bool is_uri(std::string const& path) { return is_svg_uri(path) || is_image_uri(path); }
     bool is_svg_uri(std::string const& path);
     bool is_image_uri(std::string const& path);
-    std::shared_ptr<marker const> find(std::string const& key, bool update_cache = false);
+    std::shared_ptr<marker const> find(std::string const& key, bool update_cache = false, bool strict = false);
     void clear();
 };
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,12 +27,14 @@
 #include <mapnik/config.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/iterator/filter_iterator.hpp>
+#pragma GCC diagnostic pop
 
 // stl
 #include <map>
@@ -44,12 +46,11 @@ class feature_impl;
 
 class MAPNIK_DECL feature_kv_iterator :
         public boost::iterator_facade<feature_kv_iterator,
-                                      std::tuple<std::string , value> const,
+                                      std::tuple<std::string, value> const,
                                       boost::forward_traversal_tag>
 {
 public:
     using value_type = std::tuple<std::string,value>;
-
     feature_kv_iterator (feature_impl const& f, bool begin = false);
 private:
     friend class boost::iterator_core_access;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@
 #include <mapnik/svg/geometry_svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 
 namespace mapnik { namespace svg {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,94 +22,79 @@
 
 // mapnik
 #include <mapnik/json/geometry_generator_grammar.hpp>
-#include <mapnik/util/spirit_transform_attribute.hpp>
-#include <mapnik/geometry_types.hpp>
-
-// boost
-#pragma GCC diagnostic push
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/fusion/include/at.hpp>
-#pragma GCC diagnostic pop
+#include <mapnik/geometry/fusion_adapted.hpp>
 
 namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
-namespace phoenix = boost::phoenix;
 
 template <typename OutputIterator, typename Geometry>
 geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar()
     : geometry_generator_grammar::base_type(geometry)
 {
-    boost::spirit::karma::_val_type _val;
-    boost::spirit::karma::_1_type _1;
-    boost::spirit::karma::_a_type _a;
     boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::uint_type uint_;
-    boost::spirit::karma::eps_type eps;
 
-    geometry = geometry_dispatch.alias()
-        ;
-
-    geometry_dispatch = eps[_a = geometry_type(_val)] <<
-        (&uint_(geometry::geometry_types::Point)[_1 = _a]
-         << (point | lit("null")))
+    geometry =
+        point
         |
-        (&uint_(geometry::geometry_types::LineString)[_1 = _a]
-         << (linestring | lit("null")))
+        linestring
         |
-        (&uint_(geometry::geometry_types::Polygon)[_1 = _a]
-         << (polygon | lit("null")))
+        polygon
         |
-        (&uint_(geometry::geometry_types::MultiPoint)[_1 = _a]
-         << (multi_point | lit("null")))
+        multi_point
         |
-        (&uint_(geometry::geometry_types::MultiLineString)[_1 = _a]
-         << (multi_linestring | lit("null")))
+        multi_linestring
         |
-        (&uint_(geometry::geometry_types::MultiPolygon)[_1 = _a]
-         << (multi_polygon | lit("null")))
+        multi_polygon
         |
-        (&uint_(geometry::geometry_types::GeometryCollection)[_1 = _a]
-         << (geometry_collection | lit("null")))
+        geometry_collection
         |
-        lit("null")
+        lit("null") // geometry_empty
         ;
 
     point = lit("{\"type\":\"Point\",\"coordinates\":") << point_coord << lit("}")
         ;
-    linestring = lit("{\"type\":\"LineString\",\"coordinates\":[") << linestring_coord << lit("]}")
+
+    linestring = lit("{\"type\":\"LineString\",\"coordinates\":") << linestring_coord << lit("}")
         ;
-    polygon = lit("{\"type\":\"Polygon\",\"coordinates\":[") << polygon_coord << lit("]}")
+
+    polygon = lit("{\"type\":\"Polygon\",\"coordinates\":") << polygon_coord << lit("}")
         ;
-    multi_point = lit("{\"type\":\"MultiPoint\",\"coordinates\":[") << multi_point_coord << lit("]}")
+
+    multi_point = lit("{\"type\":\"MultiPoint\",\"coordinates\":") << multi_point_coord << lit("}")
         ;
-    multi_linestring = lit("{\"type\":\"MultiLineString\",\"coordinates\":[") << multi_linestring_coord << lit("]}")
+
+    multi_linestring = lit("{\"type\":\"MultiLineString\",\"coordinates\":") << multi_linestring_coord << lit("}")
         ;
-    multi_polygon = lit("{\"type\":\"MultiPolygon\",\"coordinates\":[") << multi_polygon_coord << lit("]}")
+
+    multi_polygon = lit("{\"type\":\"MultiPolygon\",\"coordinates\":") << multi_polygon_coord << lit("}")
         ;
+
     geometry_collection = lit("{\"type\":\"GeometryCollection\",\"geometries\":[") << geometries  << lit("]}")
         ;
+
     point_coord = lit('[') << coordinate << lit(',') << coordinate  << lit(']')
         ;
-    linestring_coord = point_coord % lit(',')
+
+    linestring_coord = lit('[') << -(point_coord % lit(',')) << lit(']')
         ;
-    polygon_coord = lit('[') << exterior_ring_coord << lit(']') << interior_ring_coord
+
+    linear_ring_coord = lit('[') << -(point_coord % lit(',')) << lit(']')//linestring_coord.alias()
         ;
-    exterior_ring_coord = linestring_coord.alias()
+
+    polygon_coord = lit('[') << linear_ring_coord % lit(',') << lit(']')
         ;
-    interior_ring_coord =  *(lit(",[") << exterior_ring_coord << lit(']'))
+
+    multi_point_coord = lit('[') << -(point_coord % lit(',')) << lit(']');//linestring_coord.alias()
         ;
-    multi_point_coord = linestring_coord.alias()
+
+    multi_linestring_coord = lit('[') << linestring_coord  % lit(',') << lit(']')
         ;
-    multi_linestring_coord = (lit('[') << linestring_coord << lit(']')) % lit(',')
+
+    multi_polygon_coord = lit('[') << polygon_coord  % lit(',') << lit("]")
         ;
-    multi_polygon_coord = (lit('[') << polygon_coord << lit(']')) % lit(',')
-        ;
-    geometries =  geometry % lit(',')
+
+    geometries = geometry % lit(',')
         ;
 }
 

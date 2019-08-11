@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,6 +36,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/feature_type_style.hpp>
 
 // agg
 #include "agg/include/agg_trans_affine.h"  // for trans_affine, etc
@@ -58,7 +59,8 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
       m_(m),
       context_(cairo),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor),
-      face_manager_(common_.shared_font_library_)
+      face_manager_(common_.shared_font_library_),
+      style_level_compositing_(false)
 {
     setup(m);
 }
@@ -75,7 +77,9 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
       m_(m),
       context_(cairo),
       common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor),
-      face_manager_(common_.shared_font_library_)
+      face_manager_(common_.shared_font_library_),
+      style_level_compositing_(false)
+
 {
     setup(m);
 }
@@ -91,7 +95,9 @@ cairo_renderer<T>::cairo_renderer(Map const& m,
       m_(m),
       context_(cairo),
       common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector),
-      face_manager_(common_.shared_font_library_)
+      face_manager_(common_.shared_font_library_),
+      style_level_compositing_(false)
+
 {
     setup(m);
 }
@@ -143,6 +149,7 @@ void cairo_renderer<T>::setup(Map const& map)
     {
         cairo_save_restore guard(context_);
         context_.set_color(*bg);
+        context_.set_operator(composite_mode_e::src);
         context_.paint();
     }
     boost::optional<std::string> const& image_filename = map.background_image();
@@ -182,24 +189,52 @@ void cairo_renderer<T>::start_layer_processing(layer const& lay, box2d<double> c
         common_.detector_->clear();
     }
     common_.query_extent_ = query_extent;
+
+    if (lay.comp_op() || lay.get_opacity() < 1.0)
+    {
+        context_.push_group();
+    }
 }
 
 template <typename T>
-void cairo_renderer<T>::end_layer_processing(layer const&)
+void cairo_renderer<T>::end_layer_processing(layer const& lay)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer: End layer processing";
+
+    if (lay.comp_op() || lay.get_opacity() < 1.0)
+    {
+        context_.pop_group();
+        composite_mode_e comp_op = lay.comp_op() ? *lay.comp_op() : src_over;
+        context_.set_operator(comp_op);
+        context_.paint(lay.get_opacity());
+    }
 }
 
 template <typename T>
-void cairo_renderer<T>::start_style_processing(feature_type_style const&)
+void cairo_renderer<T>::start_style_processing(feature_type_style const & st)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:start style processing";
+
+    style_level_compositing_ = st.comp_op() || st.get_opacity() < 1;
+
+    if (style_level_compositing_)
+    {
+        context_.push_group();
+    }
 }
 
 template <typename T>
-void cairo_renderer<T>::end_style_processing(feature_type_style const&)
+void cairo_renderer<T>::end_style_processing(feature_type_style const & st)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:end style processing";
+
+    if (style_level_compositing_)
+    {
+        context_.pop_group();
+        composite_mode_e comp_op = st.comp_op() ? *st.comp_op() : src_over;
+        context_.set_operator(comp_op);
+        context_.paint(st.get_opacity());
+    }
 }
 
 struct cairo_render_marker_visitor
@@ -233,7 +268,7 @@ struct cairo_render_marker_visitor
                 marker_tr *= tr_;
             }
             marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
-            agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
+            auto const& attributes = vmarker->attributes();
             svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(vmarker->source());
             svg::svg_path_adapter svg_path(stl_storage);
             marker_tr.translate(pos_.x, pos_.y);

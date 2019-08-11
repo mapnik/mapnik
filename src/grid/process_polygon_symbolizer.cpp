@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,10 +34,12 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

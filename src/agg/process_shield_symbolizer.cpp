@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,7 +51,7 @@ void  agg_renderer<T0,T1>::process(shield_symbolizer const& sym,
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature, common_.vars_, HALO_RASTERIZER_FULL);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
-    agg_text_renderer<T0> ren(*current_buffer_,
+    agg_text_renderer<T0> ren(buffers_.top().get(),
                               halo_rasterizer,
                               comp_op,
                               halo_comp_op,

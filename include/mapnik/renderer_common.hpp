@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 #include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
-#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/geometry/box2d.hpp>     // for box2d
 #include <mapnik/view_transform.hpp>    // for view_transform
 #include <mapnik/attribute.hpp>
 #include <mapnik/util/noncopyable.hpp>

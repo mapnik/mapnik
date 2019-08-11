@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -60,7 +60,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
     if (halo_transform)
     {
         agg::trans_affine halo_affine_transform;
-        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform);
+        evaluate_transform(halo_affine_transform, feature, common_.vars_, *halo_transform, common_.scale_factor_);
         ren.set_halo_transform(halo_affine_transform);
     }
 

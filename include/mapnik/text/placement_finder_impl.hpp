@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,12 +21,9 @@
  *****************************************************************************/
 
 // mapnik
-//#include <mapnik/label_collision_detector.hpp>
-//#include <mapnik/view_transform.hpp>
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/text_layout.hpp>
 #include <mapnik/text/text_properties.hpp>
-//#include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/tolerance_iterator.hpp>
 #include <mapnik/symbolizer_enumerations.hpp>

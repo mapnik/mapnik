@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,10 +23,18 @@
 #ifndef MAPNIK_SPAN_IMAGE_FILTER_INCLUDED
 #define MAPNIK_SPAN_IMAGE_FILTER_INCLUDED
 
+#include <mapnik/safe_cast.hpp>
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_span_image_filter_gray.h"
 #include "agg_span_image_filter_rgba.h"
-
-#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 #include <limits>
 
@@ -79,16 +87,19 @@ public:
         {
             base_type::interpolator().coordinates(&x, &y);
 
-            int src_x = x >> agg::image_subpixel_shift;
-            int src_y = y >> agg::image_subpixel_shift;
-            const value_type* pix = reinterpret_cast<const value_type*>(base_type::source().span(src_x, src_y, 0));
-            if (nodata_value_ && *nodata_value_ == *pix)
+            if (nodata_value_)
             {
-                span->v = *nodata_value_;
-                span->a = base_mask;
-                ++span;
-                ++base_type::interpolator();
-                continue;
+                int src_x = x >> agg::image_subpixel_shift;
+                int src_y = y >> agg::image_subpixel_shift;
+                const value_type* pix = reinterpret_cast<const value_type*>(base_type::source().span(src_x, src_y, 1));
+                if (*nodata_value_ == *pix)
+                {
+                    span->v = *nodata_value_;
+                    span->a = base_mask;
+                    ++span;
+                    ++base_type::interpolator();
+                    continue;
+                }
             }
 
             x += base_type::filter_dx_int() - radius_x;
@@ -131,19 +142,15 @@ public:
                 fg_ptr = reinterpret_cast<const value_type*>(base_type::source().next_y());
             }
 
-            fg /= total_weight;
-            if (fg < std::numeric_limits<value_type>::min())
+            if (total_weight == 0)
             {
-                span->v = std::numeric_limits<value_type>::min();
-            }
-            else if (fg > std::numeric_limits<value_type>::max())
-            {
-                span->v = std::numeric_limits<value_type>::max();
+                span->v = *nodata_value_;
             }
             else
             {
-                span->v = static_cast<value_type>(fg);
+                span->v = safe_cast<value_type>(fg / total_weight);
             }
+
             span->a = base_mask;
 
             ++span;
@@ -169,9 +176,9 @@ public:
 
     span_image_resample_rgba_affine(source_type & src,
                                     interpolator_type & inter,
-                                    agg::image_filter_lut const & filter,
+                                    agg::image_filter_lut const & _filter,
                                     boost::optional<value_type> const & nodata_value) :
-        agg::span_image_resample_rgba_affine<Source>(src, inter, filter)
+        agg::span_image_resample_rgba_affine<Source>(src, inter, _filter)
     { }
 };
 

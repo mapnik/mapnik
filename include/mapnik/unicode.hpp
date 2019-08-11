@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,18 @@
 //mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 // std
 #include <cstdint>
 #include <string>
+// icu
+#if (U_ICU_VERSION_MAJOR_NUM >= 59)
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <unicode/unistr.h>
+#pragma GCC diagnostic pop
+#endif
 
 struct UConverter;
 
@@ -45,6 +52,10 @@ public:
 private:
     UConverter * conv_;
 };
+
+// convinience method
+void MAPNIK_DECL to_utf8(mapnik::value_unicode_string const& input, std::string & target);
+
 }
 
 #endif // MAPNIK_UNICODE_HPP

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,17 @@
  *
  *****************************************************************************/
 
+
+#ifndef MAPNIK_UNIT_DATSOURCE_UTIL
+#define MAPNIK_UNIT_DATSOURCE_UTIL
+
 #include "catch.hpp"
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_types.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 namespace {
 
@@ -102,58 +106,70 @@ inline std::size_t count_features(mapnik::featureset_ptr features) {
 }
 
 using attr = std::tuple<std::string, mapnik::value>;
-inline void require_attributes(mapnik::feature_ptr feature,
-                        std::initializer_list<attr> const &attrs) {
-    REQUIRE(bool(feature));
-    for (auto const &kv : attrs) {
-        REQUIRE(feature->has_key(std::get<0>(kv)));
-        CHECK(feature->get(std::get<0>(kv)) == std::get<1>(kv));
-    }
-}
+
+#define REQUIRE_ATTRIBUTES(feature, ...) \
+    do { \
+        auto const& _feat = (feature); /* evaluate feature only once */ \
+        REQUIRE(_feat != nullptr); \
+        for (auto const& kv : __VA_ARGS__) { \
+            auto& key = std::get<0>(kv); \
+            auto& val = std::get<1>(kv); \
+            CAPTURE(key); \
+            CHECKED_IF(_feat->has_key(key)) { \
+                CHECK(_feat->get(key) == val); \
+                CHECK(_feat->get(key).which() == val.which()); \
+            } \
+        } \
+    } while (0)
 
 namespace detail {
-struct feature_count {
-    template <typename T>
-    std::size_t operator()(T const &geom) const {
+
+template <typename T>
+struct feature_count
+{
+    template <typename U>
+    std::size_t operator()(U const &geom) const
+    {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    std::size_t operator()(mapnik::geometry::geometry_empty const &) const {
+    std::size_t operator()(mapnik::geometry::geometry_empty const &) const
+    {
         return 0;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::point<T> const &) const {
+    std::size_t operator()(mapnik::geometry::point<T> const &) const
+    {
         return 1;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::line_string<T> const &) const {
+    std::size_t operator()(mapnik::geometry::line_string<T> const &) const
+    {
         return 1;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::polygon<T> const &) const {
+    std::size_t operator()(mapnik::geometry::polygon<T> const &) const
+    {
         return 1;
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::multi_point<T> const &mp) const {
+    std::size_t operator()(mapnik::geometry::multi_point<T> const &mp) const
+    {
         return mp.size();
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::multi_line_string<T> const &mls) const {
+    std::size_t operator()(mapnik::geometry::multi_line_string<T> const &mls) const
+    {
         return mls.size();
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::multi_polygon<T> const &mp) const {
+    std::size_t operator()(mapnik::geometry::multi_polygon<T> const &mp) const
+    {
         return mp.size();
     }
 
-    template <typename T>
-    std::size_t operator()(mapnik::geometry::geometry_collection<T> const &col) const {
+    std::size_t operator()(mapnik::geometry::geometry_collection<T> const &col) const
+    {
         std::size_t sum = 0;
         for (auto const &geom : col) {
             sum += operator()(geom);
@@ -165,7 +181,7 @@ struct feature_count {
 
 template <typename T>
 inline std::size_t feature_count(mapnik::geometry::geometry<T> const &g) {
-    return detail::feature_count()(g);
+    return detail::feature_count<T>()(g);
 }
 
 inline void require_geometry(mapnik::feature_ptr feature,
@@ -176,4 +192,25 @@ inline void require_geometry(mapnik::feature_ptr feature,
     CHECK(feature_count(feature->get_geometry()) == num_parts);
 }
 
+inline int create_disk_index(std::string const& filename, bool silent = true)
+{
+    std::string cmd;
+    if (std::getenv("DYLD_LIBRARY_PATH") != nullptr)
+    {
+        cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
+    }
+    cmd += "mapnik-index " + filename;
+    if (silent)
+    {
+#ifndef _WINDOWS
+        cmd += " 2>/dev/null";
+#else
+        cmd += " 2> nul";
+#endif
+    }
+    return std::system(cmd.c_str());
 }
+
+}
+
+#endif // MAPNIK_UNIT_DATSOURCE_UTIL

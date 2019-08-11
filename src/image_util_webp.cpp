@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -360,7 +360,6 @@ void webp_saver::operator() (T const& image) const
     throw image_writer_exception("Mapnik does not support webp grayscale images");
 }
 
-template void webp_saver::operator()<image_rgba8> (image_rgba8 const& image) const;
 template void webp_saver::operator()<image_gray8> (image_gray8 const& image) const;
 template void webp_saver::operator()<image_gray8s> (image_gray8s const& image) const;
 template void webp_saver::operator()<image_gray16> (image_gray16 const& image) const;
@@ -371,7 +370,6 @@ template void webp_saver::operator()<image_gray32f> (image_gray32f const& image)
 template void webp_saver::operator()<image_gray64> (image_gray64 const& image) const;
 template void webp_saver::operator()<image_gray64s> (image_gray64s const& image) const;
 template void webp_saver::operator()<image_gray64f> (image_gray64f const& image) const;
-template void webp_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const;
 template void webp_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
 template void webp_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
 template void webp_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;

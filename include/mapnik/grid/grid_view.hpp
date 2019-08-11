@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 #define MAPNIK_GRID_VIEW_HPP
 
 #include <mapnik/image.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
@@ -52,7 +52,7 @@ public:
 
     hit_grid_view(unsigned x, unsigned y,
                   unsigned width, unsigned height,
-                  T const& data,
+                  T const& _data,
                   std::string const& key,
                   std::string const& id_name,
                   std::set<std::string> const& names,
@@ -63,7 +63,7 @@ public:
           y_(y),
           width_(width),
           height_(height),
-          data_(data),
+          data_(_data),
           key_(key),
           id_name_(id_name),
           names_(names),

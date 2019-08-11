@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,14 +46,11 @@ class MAPNIK_DECL datasource_exception : public std::exception
 public:
     datasource_exception(std::string const& message)
       : message_(message)
-    {
-    }
+    {}
 
-    ~datasource_exception() throw()
-    {
-    }
+    ~datasource_exception() {}
 
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return message_.c_str();
     }
@@ -69,8 +66,8 @@ public:
         Raster
     };
 
-    datasource (parameters const& params)
-       : params_(params) {}
+    datasource (parameters const& _params)
+       : params_(_params) {}
 
     /*!
      * @brief Get the configuration parameters of the data source.

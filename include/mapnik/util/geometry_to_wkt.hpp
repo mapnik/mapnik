@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,29 +24,15 @@
 #define MAPNIK_GEOMETRY_TO_WKT_HPP
 
 // mapnik
-#include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/wkt/wkt_generator_grammar.hpp>
-
-// boost
-#include <boost/spirit/include/karma.hpp>
+#include <mapnik/geometry.hpp>
+// stl
+#include <string>
 
 namespace mapnik { namespace util {
 
-inline bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<double> const& geom)
-{
-    using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double>> generator;
-    sink_type sink(wkt);
-    return boost::spirit::karma::generate(sink, generator, geom);
-}
+bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<double> const& geom);
 
-inline bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<std::int64_t> const& geom)
-{
-    using sink_type = std::back_insert_iterator<std::string>;
-    static const mapnik::wkt::wkt_generator_grammar<sink_type, mapnik::geometry::geometry<std::int64_t>> generator;
-    sink_type sink(wkt);
-    return boost::spirit::karma::generate(sink, generator, geom);
-}
+bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<std::int64_t> const& geom);
 
 }}
 

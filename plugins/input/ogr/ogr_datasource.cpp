@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,6 +41,7 @@
 
 // stl
 #include <fstream>
+#include <mutex>
 #include <sstream>
 #include <stdexcept>
 
@@ -59,6 +60,16 @@ using mapnik::datasource_exception;
 using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
+static std::once_flag once_flag;
+
+extern "C" MAPNIK_EXP void on_plugin_load()
+{
+    // initialize ogr formats
+    // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
+    std::call_once(once_flag,[](){
+        OGRRegisterAll();
+    });
+}
 
 ogr_datasource::ogr_datasource(parameters const& params)
     : datasource(params),
@@ -86,10 +97,6 @@ void ogr_datasource::init(mapnik::parameters const& params)
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "ogr_datasource::init");
 #endif
-
-    // initialize ogr formats
-    // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
-    OGRRegisterAll();
 
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
@@ -371,7 +378,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     mapnik::parameters & extra_params = desc_.get_extra_parameters();
     OGRSpatialReference * srs_ref = layer->GetSpatialRef();
-    char * srs_output = NULL;
+    char * srs_output = nullptr;
     if (srs_ref && srs_ref->exportToProj4( &srs_output ) == OGRERR_NONE ) {
         extra_params["proj4"] = mapnik::util::trim_copy(srs_output);
     }
@@ -554,7 +561,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
         }
     }
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }
 
 featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -597,5 +604,5 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
         }
     }
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,8 +43,8 @@ struct evaluate_expression
 {
     using value_type = T;
 
-    explicit evaluate_expression(Attributes const& attributes)
-        : attributes_(attributes) {}
+    explicit evaluate_expression(Attributes const& attrs)
+        : attrs_(attrs) {}
 
     value_type operator() (attribute const&) const
     {
@@ -53,8 +53,8 @@ struct evaluate_expression
 
     value_type operator() (global_attribute const& attr) const
     {
-        auto itr = attributes_.find(attr.name);
-        if (itr != attributes_.end())
+        auto itr = attrs_.find(attr.name);
+        if (itr != attrs_.end())
         {
             return itr->second;
         }
@@ -129,7 +129,7 @@ struct evaluate_expression
         return value_type(val);
     }
 
-    Attributes const& attributes_;
+    Attributes const& attrs_;
 };
 
 template <typename T>
@@ -221,7 +221,7 @@ struct evaluate_expression<T, boost::none_t>
 struct assign_value
 {
     template<typename Attributes>
-    static void apply(symbolizer_base::value_type & val, expression_ptr const& expr, Attributes const& attributes, property_types target )
+    static void apply(symbolizer_base::value_type & val, expression_ptr const& expr, Attributes const& attrs, property_types target )
     {
 
         switch (target)
@@ -230,24 +230,24 @@ struct assign_value
         {
             // evaluate expression as a string then parse as css color
             std::string str = util::apply_visitor(mapnik::evaluate_expression<mapnik::value,
-                                               Attributes>(attributes),*expr).to_string();
+                                               Attributes>(attrs),*expr).to_string();
             try { val = parse_color(str); }
             catch (...) { val = color(0,0,0);}
             break;
         }
         case property_types::target_double:
         {
-            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes),*expr).to_double();
+            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attrs),*expr).to_double();
             break;
         }
         case property_types::target_integer:
         {
-            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes),*expr).to_int();
+            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attrs),*expr).to_int();
             break;
         }
         case property_types::target_bool:
         {
-            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attributes),*expr).to_bool();
+            val = util::apply_visitor(mapnik::evaluate_expression<mapnik::value, Attributes>(attrs),*expr).to_bool();
             break;
         }
         default: // no-op
@@ -276,14 +276,14 @@ struct evaluate_global_attributes : util::noncopyable
     template <typename Attributes>
     struct evaluator
     {
-        evaluator(symbolizer_base::cont_type::value_type & prop, Attributes const& attributes)
+        evaluator(symbolizer_base::cont_type::value_type & prop, Attributes const& attrs)
             : prop_(prop),
-              attributes_(attributes) {}
+              attrs_(attrs) {}
 
         void operator() (expression_ptr const& expr) const
         {
             auto const& meta = get_meta(prop_.first);
-            assign_value::apply(prop_.second, expr, attributes_, std::get<2>(meta));
+            assign_value::apply(prop_.second, expr, attrs_, std::get<2>(meta));
         }
 
         template <typename T>
@@ -292,28 +292,28 @@ struct evaluate_global_attributes : util::noncopyable
             // no-op
         }
         symbolizer_base::cont_type::value_type & prop_;
-        Attributes const& attributes_;
+        Attributes const& attrs_;
     };
 
     template <typename Attributes>
     struct extract_symbolizer
     {
-        extract_symbolizer(Attributes const& attributes)
-            : attributes_(attributes) {}
+        extract_symbolizer(Attributes const& attrs)
+            : attrs_(attrs) {}
 
         template <typename Symbolizer>
         void operator() (Symbolizer & sym) const
         {
             for (auto & prop : sym.properties)
             {
-                util::apply_visitor(evaluator<Attributes>(prop, attributes_), prop.second);
+                util::apply_visitor(evaluator<Attributes>(prop, attrs_), prop.second);
             }
         }
-        Attributes const& attributes_;
+        Attributes const& attrs_;
     };
 
     template <typename Attributes>
-    static void apply(Map & m, Attributes const& attributes)
+    static void apply(Map & m, Attributes const& attrs)
     {
         for ( auto & val :  m.styles() )
         {
@@ -321,7 +321,7 @@ struct evaluate_global_attributes : util::noncopyable
             {
                 for (auto & sym : rule)
                 {
-                    util::apply_visitor(extract_symbolizer<Attributes>(attributes), sym);
+                    util::apply_visitor(extract_symbolizer<Attributes>(attrs), sym);
                 }
             }
         }

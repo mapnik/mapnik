@@ -9,7 +9,7 @@ TEST_CASE("geometry") {
 
 SECTION("json point") {
     mapnik::util::file input("./test/data/json/point1.json");
-    REQUIRE( input.open() );
+    REQUIRE( input );
     mapnik::geometry::geometry<double> geom;
     REQUIRE( input.data() );
     std::string json_string(input.data().get(), input.size());
@@ -24,7 +24,7 @@ SECTION("json point") {
 
 SECTION("json point reversed") {
     mapnik::util::file input("./test/data/json/point2.json");
-    REQUIRE( input.open() );
+    REQUIRE( input );
     mapnik::geometry::geometry<double> geom;
     REQUIRE( input.data() );
     std::string json_string(input.data().get(), input.size());
@@ -37,7 +37,7 @@ SECTION("json point reversed") {
 
 SECTION("json point reversed + extra attributes") {
     mapnik::util::file input("./test/data/json/point3.json");
-    REQUIRE( input.open() );
+    REQUIRE( input );
     mapnik::geometry::geometry<double> geom;
     REQUIRE( input.data() );
     std::string json_string(input.data().get(), input.size());

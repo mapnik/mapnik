@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,25 +21,27 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/renderer_common/render_pattern.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_pixfmt_gray.h"
 #include "agg_color_rgba.h"
 #include "agg_color_gray.h"
 #include "agg_scanline_u.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
 template <>
-void render_pattern<image_rgba8>(rasterizer & ras,
-                                 marker_svg const& marker,
+void render_pattern<image_rgba8>(marker_svg const& marker,
                                  agg::trans_affine const& tr,
                                  double opacity,
                                  image_rgba8 & image)
@@ -59,13 +61,13 @@ void render_pattern<image_rgba8>(rasterizer & ras,
     pixfmt pixf(buf);
     renderer_base renb(pixf);
 
-    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
-    mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
-                                  agg::pod_bvector<mapnik::svg::path_attributes>,
-                                  renderer_solid,
-                                  pixfmt > svg_renderer(svg_path,
-                                                        marker.get_data()->attributes());
+    svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(marker.get_data()->source());
+    svg_path_adapter svg_path(stl_storage);
+    svg::renderer_agg<svg_path_adapter,
+                      svg_attribute_type,
+                      renderer_solid,
+                      pixfmt> svg_renderer(svg_path, marker.get_data()->attributes());
+    rasterizer ras;
 
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
 }

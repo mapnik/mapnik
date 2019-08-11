@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -121,7 +121,7 @@ stop_array const& gradient::get_stop_array() const
     return stops_;
 }
 
-void gradient::swap(gradient& other) throw()
+void gradient::swap(gradient& other) noexcept
 {
     std::swap(gradient_type_, other.gradient_type_);
     std::swap(stops_, other.stops_);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,13 +27,17 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-// freetype2
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+
 extern "C"
 {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 }
+
+#pragma GCC diagnostic pop
 
 //stl
 #include <memory>
@@ -68,10 +72,15 @@ public:
 
     bool glyph_dimensions(glyph_info &glyph) const;
 
+    inline bool is_color() const { return color_font_;}
+
     ~font_face();
 
 private:
+    bool init_color_font();
+
     FT_Face face_;
+    const bool color_font_;
 };
 using face_ptr = std::shared_ptr<font_face>;
 

@@ -1,5 +1,23 @@
 # Contributing
 
+## Building Mapnik for development
+
+Since tests, especially visual tests, are sensitive to versions of dependencies and their configuration, all tests are made against fixed versions of dependencies in prepared environment. There is [bootstrap](https://github.com/mapnik/mapnik/blob/master/bootstrap.sh) script to prepare the environment. Use it by sourcing the script, so all needed variables can be set in your shell session:
+
+```sh
+source bootstrap.sh
+```
+
+When the bootstrap script exits successfully, you can continue with usual `./configure && make` combination.
+
+The bootstrap script generates `config.py` in the root of the repository with options for the `configure` script. Be aware that setting custom options to the configure script can override options from `config.py`. This can possibly lead to a failed build. For example, `CUSTOM_CXXFLAGS = '-D_GLIBCXX_USE_CXX11_ABI=0'` is being set in `config.py`, thus you must not forget to include `-D_GLIBCXX_USE_CXX11_ABI=0` if you override `CUSTOM_CXXFLAGS` option of the configure script, otherwise the build will fail. This doesn't mean custom configure options in bootstrapped environment should be avoided. It should be perfectly fine to use custom compiler, for example:
+
+```sh
+./configure CXX=g++-6.4.0 CC=gcc-6.4.0
+```
+
+Once the build is successful, run tests to ensure all is prepared to start work on Mapnik.
+
 ## Testing
 
 Developers adding new features or fixing bugs should always write tests alongside.
@@ -35,6 +53,124 @@ After updating the test data you can then do:
     git status
     # now commit the changes to the submodule
     git commit test/data test/data-visual -m "update visual tests and data"
+
+### Visual tests
+
+Visual tests are very helpful when developing a software with visual output such as Mapnik. Mapnik has quite sofisticated tool for running visual tests. You can run it by `./test/visual/run` which runs all visual tests by default. There are many options you can set to the visual test runner:
+
+```console
+$ ./test/visual/run -h
+visual test runner:
+  -h [ --help ]                         produce usage message
+  -v [ --verbose ]                      verbose output
+  -o [ --overwrite ]                    overwrite reference image
+  -d [ --duration ]                     output rendering duration
+  -i [ --iterations ] arg (=1)          number of iterations for benchmarking
+  -j [ --jobs ] arg (=1)                number of parallel threads
+  -l [ --limit ] arg (=0)               limit number of failures
+  --styles-dir arg (=test/data-visual/styles)
+                                        directory with styles
+  --images-dir arg (=test/data-visual/images)
+                                        directory with reference images
+  --output-dir arg (=/tmp/mapnik-visual-images)
+                                        directory for output files
+  -u [ --unique-subdir ]                write output files to subdirectory with
+                                        unique name
+  --styles arg                          selected styles to test
+  --fonts arg (=fonts)                  font search path
+  --plugins arg (=plugins/input)        input plugins search path
+  -s [ --scale-factor ] arg (=1.0, 2.0) scale factor
+  --agg                                 render with AGG renderer
+  --cairo                               render with Cairo renderer
+  --cairo-svg                           render with Cairo SVG renderer
+  --cairo-ps                            render with Cairo PS renderer
+  --cairo-pdf                           render with Cairo PDF renderer
+  --svg                                 render with SVG renderer
+  --grid                                render with Grid renderer
+
+```
+
+Most commonly needed during development is to run particular visual test or a set of visual tests. This can be done by referencing test by its name or its path.
+
+This command will run test `tiff-reprojection-1` by looking for it in the default path with visual tests `test/data-visual/styles`.
+
+```console
+$ ./test/visual/run tiff-reprojection-1
+........
+Visual rendering: 0 failed / 8 passed / 0 overwritten / 0 errors
+```
+
+With `8 passed` it might seem like more visual tests were running. In fact the test was running with different renderers and scale factors. You can see more by adding verbose option:
+
+```console
+$ ./test/visual/run tiff-reprojection-1 -v
+"tiff-reprojection-1-250-250-1.0" with agg... OK
+"tiff-reprojection-1-250-250-1.0" with cairo... OK
+"tiff-reprojection-1-250-250-1.0" with svg... OK
+"tiff-reprojection-1-250-250-1.0" with grid... OK
+"tiff-reprojection-1-250-250-2.0" with agg... OK
+"tiff-reprojection-1-250-250-2.0" with cairo... OK
+"tiff-reprojection-1-250-250-2.0" with svg... OK
+"tiff-reprojection-1-250-250-2.0" with grid... OK
+
+Visual rendering: 0 failed / 8 passed / 0 overwritten / 0 errors
+```
+
+It is possible to limit testing to particular renderer and scale factor:
+
+```console
+$ ./test/visual/run tiff-reprojection-1 -v --agg -s 1
+"tiff-reprojection-1-250-250-1.0" with agg... OK
+
+Visual rendering: 0 failed / 1 passed / 0 overwritten / 0 errors
+```
+
+When a visual test fails, HTML report is generated:
+
+```console
+$ ./test/visual/run tiff-reprojection-1 -v --agg -s 1
+"tiff-reprojection-1-250-250-1.0" with agg... FAILED (20427 different pixels)
+
+Visual rendering: 1 failed / 0 passed / 0 overwritten / 0 errors
+
+tiff-reprojection-1 FAILED (20427 different pixels)
+    "/tmp/mapnik-visual-images/tiff-reprojection-1-250-250-1.0-agg.png" (actual)
+    "test/data-visual/images/tiff-reprojection-1-250-250-1.0-agg-reference.png" (reference)
+
+View failure report at "/tmp/mapnik-visual-images/visual-test-results/index.html"
+```
+
+When you think the failed test is actually correct, you can overwrite the reference image by `-o` option.
+
+If the visual test name ends with `.xml`, it is interpreted as a path to the visual test style. You can use visual test runner to render your style then.
+
+```console
+$ ./test/visual/run test/data-visual/styles/tiff-reprojection-1.xml
+........
+Visual rendering: 0 failed / 8 passed / 0 overwritten / 0 errors
+```
+
+#### Visual test style format
+
+Styles used for visual tests can have additional information describing the test.
+
+```xml
+<Map>
+    <Parameters>
+        <!-- Size of output image. Multiple sizes are separated by semicolon. -->
+        <Parameter name="sizes">256,256</Parameter>
+        <!-- Map extent. -->
+        <Parameter name="bbox">-1, -1, 1, 1</Parameter>
+        <!-- Tiled rendering. Multiple tile layouts are separated by semicolon. -->
+        <!-- In this case the test renders one complete image and one image stitched out of 4x4 tiles. -->
+        <Parameter name="tiles">1,1;4,4</Parameter>
+        <!-- The test can be disabled. -->
+        <Parameter name="status">on</Parameter>
+        <!-- Test can be disabled for particular renderer. -->
+        <Parameter name="cairo">off</Parameter>
+    </Parameters>
+    ...
+```
 
 ## Community
 
@@ -228,7 +364,7 @@ Since Mapnik 3.0 use std::make_shared.
 
     if (!file)
     {
-        throw mapnik::datasource_exception("not found"); // please    
+        throw mapnik::datasource_exception("not found"); // please
     }
 
     if (!file)
@@ -262,8 +398,8 @@ Many also follow the useful [Google style guide](http://google-styleguide.google
 
 To auto-convert to the above syntax you can put this in an .emacs file:
 
-    ;;  mapnik c++ 
-    
+    ;;  mapnik c++
+
     (setq c-default-style "bsd")
     ;; no tabs please
     (setq indent-tabs-mode nil)
@@ -280,5 +416,5 @@ To auto-convert to the above syntax you can put this in an .emacs file:
  * On OS X do `xcrun -f llvm-cov` to see the location of the binary
 * Build and link mapnik with `--coverage` and ensure optimization is off and profile flags are present. For example pass following options to Scons: `CUSTOM_CXXFLAGS='--coverage -g -O0' LDFLAGS='--coverage'`
 * Run test(s) e.g `make test`
-* To generate *.gcov file(s) run `llvm-cov gcov <path-to-cpp-file>` 
-* *.gcov files can be viewed in text editor 
+* To generate *.gcov file(s) run `llvm-cov gcov <path-to-cpp-file>`
+* *.gcov files can be viewed in text editor

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-#set -eu
-
 : '
 
 todo
@@ -10,15 +8,19 @@ todo
 - shrink icu data
 '
 
+MASON_VERSION="e4c1746"
+
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
-        git clone --depth 1 https://github.com/mapbox/mason.git ./.mason
-    else
-        echo "Updating to latest mason"
-        (cd ./.mason && git pull)
+        git clone https://github.com/mapbox/mason.git .mason || return
+    elif ! git -C .mason rev-parse -q --verify "$MASON_VERSION" >/dev/null; then
+        git -C .mason fetch --all || true # non-fatal
     fi
-    export MASON_DIR=$(pwd)/.mason
-    export PATH=$(pwd)/.mason:$PATH
+    git -C .mason checkout --detach "$MASON_VERSION" -- || return
+    case ":$PATH:" in
+        *":$PWD/.mason:"*) : already there ;;
+        *) export PATH="$PWD/.mason:$PATH" ;;
+    esac
     export CXX=${CXX:-clang++}
     export CC=${CC:-clang}
 }
@@ -27,43 +29,49 @@ function install() {
     MASON_PLATFORM_ID=$(mason env MASON_PLATFORM_ID)
     if [[ ! -d ./mason_packages/${MASON_PLATFORM_ID}/${1}/${2} ]]; then
         mason install $1 $2
-        mason link $1 $2
-        if [[ $3 ]]; then
-            LA_FILE=$(${MASON_DIR:-~/.mason}/mason prefix $1 $2)/lib/$3.la
+        if [[ ${3:-false} != false ]]; then
+            LA_FILE=$(mason prefix $1 $2)/lib/$3.la
             if [[ -f ${LA_FILE} ]]; then
-               perl -i -p -e 's:\Q$ENV{HOME}/build/mapbox/mason\E:$ENV{PWD}:g' ${LA_FILE}
+                perl -i -p -e 's:\Q$ENV{HOME}/build/mapbox/mason\E:$ENV{PWD}:g' ${LA_FILE}
             else
                 echo "$LA_FILE not found"
             fi
         fi
     fi
+    # the rm here is to workaround https://github.com/mapbox/mason/issues/230
+    rm -f ./mason_packages/.link/mason.ini
+    mason link $1 $2
 }
 
-ICU_VERSION="55.1"
+ICU_VERSION="57.1"
+BOOST_VERSION="1.65.1"
 
 function install_mason_deps() {
-    install jpeg_turbo 1.4.0 libjpeg &
-    install libpng 1.6.20 libpng &
-    install libtiff 4.0.4beta libtiff &
-    install libpq 9.4.1 &
-    install sqlite 3.8.8.3 libsqlite3 &
-    install expat 2.1.0 libexpat &
-    wait
-    install icu ${ICU_VERSION} &
-    install proj 4.8.0 libproj &
-    install pixman 0.32.6 libpixman-1 &
-    install cairo 1.14.2 libcairo &
-    install protobuf 2.6.1 &
-    # technically protobuf is not a mapnik core dep, but installing
-    # here by default helps make mapnik-vector-tile builds easier
-    wait
-    install webp 0.4.2 libwebp &
-    install gdal 1.11.2 libgdal &
-    install boost 1.59.0 &
-    install boost_liball 1.59.0 &
-    install freetype 2.6 libfreetype &
-    install harfbuzz 0.9.41 libharfbuzz &
-    wait
+    install ccache 3.3.1
+    install zlib 1.2.8
+    install jpeg_turbo 1.5.1 libjpeg
+    install libpng 1.6.28 libpng
+    install libtiff 4.0.7 libtiff
+    install libpq 9.6.2
+    install sqlite 3.17.0 libsqlite3
+    install expat 2.2.0 libexpat
+    install icu ${ICU_VERSION}
+    install proj 4.9.3 libproj
+    install pixman 0.34.0 libpixman-1
+    install cairo 1.14.8 libcairo
+    install webp 0.6.0 libwebp
+    install libgdal 2.1.3 libgdal
+    install boost ${BOOST_VERSION}
+    install boost_libsystem ${BOOST_VERSION}
+    install boost_libfilesystem ${BOOST_VERSION}
+    install boost_libprogram_options ${BOOST_VERSION}
+    install boost_libregex_icu57 ${BOOST_VERSION}
+    # technically boost thread and python are not a core dep, but installing
+    # here by default helps make python-mapnik builds easier
+    install boost_libthread ${BOOST_VERSION}
+    install boost_libpython ${BOOST_VERSION}
+    install freetype 2.7.1 libfreetype
+    install harfbuzz 1.4.4-ft libharfbuzz
 }
 
 MASON_LINKED_ABS=$(pwd)/mason_packages/.link
@@ -76,6 +84,7 @@ function make_config() {
     echo "
 CXX = '$CXX'
 CC = '$CC'
+CUSTOM_CXXFLAGS = '-D_GLIBCXX_USE_CXX11_ABI=0'
 RUNTIME_LINK = 'static'
 INPUT_PLUGINS = 'all'
 PATH = '${MASON_LINKED_REL}/bin'
@@ -120,17 +129,47 @@ function setup_runtime_settings() {
     echo "export PROJ_LIB=${MASON_LINKED_ABS}/share/proj" > mapnik-settings.env
     echo "export ICU_DATA=${MASON_LINKED_ABS}/share/icu/${ICU_VERSION}" >> mapnik-settings.env
     echo "export GDAL_DATA=${MASON_LINKED_ABS}/share/gdal" >> mapnik-settings.env
-    source mapnik-settings.env
+}
+
+# turn arguments of the form NAME=VALUE into exported variables;
+# any other arguments are reported and cause error return status
+function export_variables() {
+    local arg= ret=0
+    for arg
+    do
+        if [[ "$arg" =~ ^[[:alpha:]][_[:alnum:]]*= ]]
+        then
+            local -n var="${arg%%=*}"
+            export var="${arg#*=}"
+        else
+            printf >&2 "bootstrap.sh: invalid argument: %s\n" "$arg"
+            ret=1
+        fi
+    done
+    return $ret
 }
 
 function main() {
-    setup_mason
-    install_mason_deps
-    make_config > ./config.py
-    setup_runtime_settings
-    echo "Ready, now run:"
-    echo ""
-    echo "    ./configure && make"
+    export_variables "$@" || return
+    # setup_mason must not run in subshell, because it sets default
+    # values of CC, CXX and adds mason to PATH, which we want to keep
+    # when sourced
+    setup_mason || return
+    (
+        # this is wrapped in subshell to allow sourcing this script
+        # without having the terminal closed on error
+        set -eu
+        set -o pipefail
+
+        install_mason_deps
+        make_config > ./config.py
+        setup_runtime_settings
+
+        printf "\n\e[1;32m%s\e[m\n" "bootstrap successful, now run:"
+        echo ""
+        echo "    ./configure && make"
+        echo ""
+    )
 }
 
-main
+main "$@"

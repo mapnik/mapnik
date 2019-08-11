@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,19 +32,20 @@
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/safe_cast.hpp>
 #ifdef SSE_MATH
 #include <mapnik/sse.hpp>
-
 #endif
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
+#pragma GCC diagnostic pop
 
 // stl
 #include <string>

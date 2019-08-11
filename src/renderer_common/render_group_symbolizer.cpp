@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2016 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -66,7 +66,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
 
     // keep track of which lists of render thunks correspond to
     // entries in the group_layout_manager.
-    std::vector<render_thunk_list> layout_thunks;
+    std::list<render_thunk_list> layout_thunks;
 
     // layout manager to store and arrange bboxes of matched features
     group_layout_manager layout_manager(props->get_layout());
@@ -182,11 +182,13 @@ void render_group_symbolizer(group_symbolizer const& sym,
     pixel_position_list const& positions = helper.get();
     for (pixel_position const& pos : positions)
     {
-        for (size_t layout_i = 0; layout_i < layout_thunks.size(); ++layout_i)
+        size_t layout_i = 0;
+        for (auto const& thunks : layout_thunks)
         {
             pixel_position const& offset = layout_manager.offset_at(layout_i);
             pixel_position render_offset = pos + offset;
-            render_thunks.render_list(layout_thunks[layout_i], render_offset);
+            render_thunks.render_list(thunks, render_offset);
+            ++layout_i;
         }
     }
 }

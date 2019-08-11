@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -67,8 +67,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
       row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       intersects_token_("!intersects!"),
+      pixel_width_token_("!pixel_width!"),
+      pixel_height_token_("!pixel_height!"),
       desc_(sqlite_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
-      format_(mapnik::wkbAuto)
+      format_(mapnik::wkbAuto),
+      twkb_encoding_(false)
 {
     /* TODO
        - throw if no primary key but spatial index is present?
@@ -112,6 +115,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         else if (*wkb == "generic")
         {
             format_ = mapnik::wkbGeneric;
+        }
+        else if (*wkb == "twkb")
+        {
+            format_ = mapnik::wkbGeneric;
+            twkb_encoding_ = true;
         }
         else
         {
@@ -211,7 +219,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     if (using_subquery_)
     {
         std::ostringstream s;
-        std::string query = populate_tokens(table_);
+        std::string query = populate_tokens(table_, 0, 0);
         s << "SELECT " << fields_ << " FROM (" << query << ") LIMIT 1";
         found_types_via_subquery = sqlite_utils::detect_types_from_subquery(
             s.str(),
@@ -333,7 +341,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(detect_extent)");
 #endif
         // TODO - clean this up - reducing arguments
-        std::string query = populate_tokens(table_);
+        std::string query = populate_tokens(table_, 0, 0);
         if (!sqlite_utils::detect_extent(dataset_,
                                          has_spatial_index_,
                                          extent_,
@@ -356,13 +364,25 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
 
 }
 
-std::string sqlite_datasource::populate_tokens(std::string const& sql) const
+std::string sqlite_datasource::populate_tokens(std::string const& sql, double pixel_width, double pixel_height) const
 {
     std::string populated_sql = sql;
     if (boost::algorithm::ifind_first(populated_sql, intersects_token_))
     {
         // replace with dummy comparison that is true
         boost::algorithm::ireplace_first(populated_sql, intersects_token_, "1=1");
+    }
+    if (boost::algorithm::icontains(sql, pixel_width_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_width;
+        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
+    }
+     if (boost::algorithm::icontains(sql, pixel_height_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_height;
+        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
     }
     return populated_sql;
 }
@@ -448,7 +468,10 @@ boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_t
             if (data)
             {
 
-                mapnik::geometry::geometry<double> geom = mapnik::geometry_utils::from_wkb(data, size, format_);
+                mapnik::geometry::geometry<double> geom;
+
+                if (twkb_encoding_) geom = mapnik::geometry_utils::from_twkb(data, size);
+                else geom = mapnik::geometry_utils::from_wkb(data, size, format_);
                 if (mapnik::geometry::is_empty(geom))
                 {
                     continue;
@@ -487,6 +510,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         mapnik::box2d<double> const& e = q.get_bbox();
 
         std::ostringstream s;
+
+        const double px_gw = 1.0 / std::get<0>(q.resolution());
+        const double px_gh = 1.0 / std::get<1>(q.resolution());
+
         mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         s << "SELECT " << geometry_field_;
@@ -521,10 +548,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
                                                geometry_table_,
                                                intersects_token_);
         }
-        else
-        {
-            query = populate_tokens(table_);
-        }
+
+        query = populate_tokens(query, px_gw, px_gh);
 
         s << query ;
 
@@ -547,11 +572,12 @@ featureset_ptr sqlite_datasource::features(query const& q) const
                                                      desc_.get_encoding(),
                                                      e,
                                                      format_,
+                                                     twkb_encoding_,
                                                      has_spatial_index_,
                                                      using_subquery_);
     }
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }
 
 featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -601,10 +627,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
                                                geometry_table_,
                                                intersects_token_);
         }
-        else
-        {
-            query = populate_tokens(table_);
-        }
+
+        query = populate_tokens(query, 0, 0);
 
         s << query ;
 
@@ -627,9 +651,10 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
                                                      desc_.get_encoding(),
                                                      e,
                                                      format_,
+                                                     twkb_encoding_,
                                                      has_spatial_index_,
                                                      using_subquery_);
     }
 
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }

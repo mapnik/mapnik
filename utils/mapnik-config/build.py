@@ -43,7 +43,7 @@ def GetMapnikLibVersion():
     return version_string
 
 if (GetMapnikLibVersion() != config_env['MAPNIK_VERSION_STRING']):
-    print 'Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING'])
+    print ('Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING']))
     Exit(1)
 
 config_variables = '''#!/usr/bin/env bash
@@ -67,9 +67,9 @@ CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapni
 CONFIG_DEP_INCLUDES="%(dep_includes)s"
 CONFIG_CXXFLAGS="%(cxxflags)s"
 CONFIG_CXX='%(cxx)s'
-CONFIG_MAPNIK_GDAL_DATA='%(mapnik_bundled_gdal_data)s'
-CONFIG_MAPNIK_PROJ_LIB='%(mapnik_bundled_proj_data)s'
-CONFIG_MAPNIK_ICU_DATA='%(mapnik_bundled_icu_data)s'
+CONFIG_MAPNIK_GDAL_DATA='%(found_gdal_data)s'
+CONFIG_MAPNIK_PROJ_LIB='%(found_proj_data)s'
+CONFIG_MAPNIK_ICU_DATA='%(found_icu_data)s'
 
 '''
 
@@ -77,10 +77,18 @@ def write_config(configuration,template,config_file):
     template = open(template,'r').read()
     open(config_file,'w').write(config_variables  % configuration + template)
     try:
-        os.chmod(config_file,0755)
+        os.chmod(config_file,0o755)
     except: pass
 
-cxxflags = ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
+
+cxxflags_raw = config_env['LIBMAPNIK_CXXFLAGS'];
+# strip clang specific flags to avoid breaking gcc
+# while it is not recommended to mix compilers, this nevertheless
+# makes it easier to compile apps with gcc and mapnik-config against mapnik built with clang
+to_remove = ['-Wno-unsequenced','-Wno-unknown-warning-option','-Wtautological-compare','-Wheader-hygiene']
+cxxflags_cleaned = [item for item in config_env['LIBMAPNIK_CXXFLAGS'] if item not in to_remove];
+
+cxxflags = ' '.join(cxxflags_cleaned)
 
 defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
@@ -127,14 +135,9 @@ if lib_root in inputpluginspath:
 
 lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 
-mapnik_bundled_gdal_data = ''
-mapnik_bundled_proj_data = ''
-mapnik_bundled_icu_data = ''
-
-if config_env.get('MAPNIK_BUNDLED_SHARE_DIRECTORY'):
-    mapnik_bundled_gdal_data = 'lib/mapnik/share/gdal'
-    mapnik_bundled_proj_data = 'lib/mapnik/share/proj'
-    mapnik_bundled_icu_data = 'lib/mapnik/share/icu'
+found_gdal_data = config_env['QUERIED_GDAL_DATA']
+found_proj_data = config_env['QUERIED_PROJ_LIB']
+found_icu_data = config_env['QUERIED_ICU_DATA']
 
 configuration = {
     "git_revision": git_revision,
@@ -151,12 +154,12 @@ configuration = {
     "defines":defines,
     "cxxflags":cxxflags,
     "cxx":env['CXX'],
-    "mapnik_bundled_gdal_data":mapnik_bundled_gdal_data,
-    "mapnik_bundled_proj_data":mapnik_bundled_proj_data,
-    "mapnik_bundled_icu_data":mapnik_bundled_icu_data,
+    "found_gdal_data":found_gdal_data,
+    "found_proj_data":found_proj_data,
+    "found_icu_data":found_icu_data,
 }
 
-## if we are statically linking depedencies
+## if we are statically linking dependencies
 ## then they do not need to be reported in ldflags
 #if env['RUNTIME_LINK'] == 'static':
 #    configuration['ldflags'] = ''
@@ -180,7 +183,7 @@ if 'install' in COMMAND_LINE_TARGETS:
     env.Command(full_target, config_file,
        [
        Copy("$TARGET","$SOURCE"),
-       Chmod("$TARGET", 0755),
+       Chmod("$TARGET", 0o755),
        ])
 
 config_env['create_uninstall_target'](env,os.path.join(target_path,config_file))

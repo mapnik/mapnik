@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,11 @@
 #define GDAL_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
+#include <mapnik/featureset.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/util/variant.hpp>
 // boost
 #include <boost/optional.hpp>
-
-#include "gdal_datasource.hpp"
 
 class GDALDataset;
 class GDALRasterBand;
@@ -67,18 +66,20 @@ public:
                     double dx,
                     double dy,
                     boost::optional<double> const& nodata,
-                    double nodata_tolerance);
+                    double nodata_tolerance,
+                    int64_t max_image_area);
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
 
 private:
+    void find_best_overview(int bandNumber,
+                            int ideal_width,
+                            int ideal_height,
+                            int & current_width,
+                            int & current_height) const;
+
     mapnik::feature_ptr get_feature(mapnik::query const& q);
     mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
-
-#ifdef MAPNIK_LOG
-    void get_overview_meta(GDALRasterBand * band);
-#endif
-
     GDALDataset & dataset_;
     mapnik::context_ptr ctx_;
     int band_;
@@ -91,6 +92,7 @@ private:
     int nbands_;
     boost::optional<double> nodata_value_;
     double nodata_tolerance_;
+    int64_t max_image_area_;
     bool first_;
 };
 

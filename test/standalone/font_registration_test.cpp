@@ -40,11 +40,6 @@ SECTION("registration") {
         REQUIRE( mapnik::util::is_directory( fontdir ) );
 
         // test map cached fonts
-        REQUIRE( m.register_fonts(fontdir , false ) );
-        REQUIRE( m.get_font_memory_cache().size() == 0 );
-        REQUIRE( m.get_font_file_mapping().size() == 1 );
-        REQUIRE( m.load_fonts() );
-        REQUIRE( m.get_font_memory_cache().size() == 1 );
         REQUIRE( m.register_fonts(fontdir , true ) );
         REQUIRE( m.get_font_file_mapping().size() == 22 );
         REQUIRE( m.load_fonts() );
@@ -59,10 +54,10 @@ SECTION("registration") {
 
         // test font-directory from XML
         mapnik::Map m3(1,1);
-        mapnik::load_map_string(m3,"<Map font-directory=\"fonts/\"></Map>");
+        mapnik::load_map_string(m3,"<Map font-directory=\"test/data/fonts/Noto/\"></Map>");
         REQUIRE( m3.get_font_memory_cache().size() == 0 );
         REQUIRE( m3.load_fonts() );
-        REQUIRE( m3.get_font_memory_cache().size() == 1 );
+        REQUIRE( m3.get_font_memory_cache().size() == 2 );
 
         std::vector<std::string> face_names;
         std::string foo("foo");
@@ -97,22 +92,11 @@ SECTION("registration") {
         // now restore the original severity
         logger.set_severity(original_severity);
 
-        // register unifont, since we know it sits in the root fonts/ dir
-        REQUIRE( mapnik::freetype_engine::register_fonts(fontdir) );
-        face_names = mapnik::freetype_engine::face_names();
-        REQUIRE( face_names.size() > 0 );
-        REQUIRE( face_names.size() == 1 );
-
-        // re-register unifont, should not have any affect
-        REQUIRE( mapnik::freetype_engine::register_fonts(fontdir, false) );
-        face_names = mapnik::freetype_engine::face_names();
-        REQUIRE( face_names.size() == 1 );
-
         // single dejavu font in separate location
         std::string dejavu_bold_oblique("test/data/fonts/DejaVuSansMono-BoldOblique.ttf");
         REQUIRE( mapnik::freetype_engine::register_font(dejavu_bold_oblique) );
         face_names = mapnik::freetype_engine::face_names();
-        REQUIRE( face_names.size() == 2 );
+        REQUIRE( face_names.size() == 1 );
 
         // now, inspect font mapping and confirm the correct 'DejaVu Sans Mono Bold Oblique' is registered
         using font_file_mapping = std::map<std::string, std::pair<int,std::string> >;

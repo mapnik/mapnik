@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,13 +26,10 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_fusion_adapted.hpp>
 // boost
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunc
 #include <boost/spirit/home/karma/domain.hpp>
 #pragma GCC diagnostic pop
@@ -42,18 +39,6 @@ namespace mapnik { namespace json {
 namespace karma = boost::spirit::karma;
 
 namespace detail {
-
-template <typename Geometry>
-struct get_type
-{
-    using result_type = mapnik::geometry::geometry_types;
-    template <typename T>
-    result_type operator() (T const& geom) const
-    {
-        auto type = mapnik::geometry::geometry_type(geom);
-        return type;
-    }
-};
 
 template <typename T>
 struct json_coordinate_policy : karma::real_policies<T>
@@ -88,30 +73,28 @@ struct json_coordinate_policy : karma::real_policies<T>
 
 template <typename OutputIterator, typename Geometry>
 struct geometry_generator_grammar :
-        karma::grammar<OutputIterator, Geometry const&()>
+        karma::grammar<OutputIterator, Geometry()>
 {
+    using coord_type = typename Geometry::coordinate_type;
     geometry_generator_grammar();
-    karma::rule<OutputIterator, Geometry const&()> geometry;
-    karma::rule<OutputIterator, karma::locals<mapnik::geometry::geometry_types>, Geometry const&() > geometry_dispatch;
-    karma::rule<OutputIterator, geometry::geometry<double> const&()> point;
-    karma::rule<OutputIterator, geometry::point<double> const&()> point_coord;
-    karma::rule<OutputIterator, geometry::geometry<double> const&()> linestring;
-    karma::rule<OutputIterator, geometry::line_string<double> const&()> linestring_coord;
-    karma::rule<OutputIterator, geometry::geometry<double> const&()> polygon;
-    karma::rule<OutputIterator, geometry::polygon<double> const&()> polygon_coord;
-    karma::rule<OutputIterator, geometry::linear_ring<double> const&()> exterior_ring_coord;
-    karma::rule<OutputIterator, geometry::polygon<double>::rings_container const&()> interior_ring_coord;
-    karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_point;
-    karma::rule<OutputIterator, geometry::multi_point<double> const& ()> multi_point_coord;
-    karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_linestring;
-    karma::rule<OutputIterator, geometry::multi_line_string<double> const& ()> multi_linestring_coord;
-    karma::rule<OutputIterator, geometry::geometry<double> const& ()> multi_polygon;
-    karma::rule<OutputIterator, geometry::multi_polygon<double> const& ()> multi_polygon_coord;
-    karma::rule<OutputIterator, geometry::geometry<double> const& ()> geometry_collection;
-    karma::rule<OutputIterator, geometry::geometry_collection<double> const& ()> geometries;
-    boost::phoenix::function<detail::get_type<Geometry> > geometry_type;
-    karma::real_generator<double, detail::json_coordinate_policy<double> > coordinate;
-
+    karma::rule<OutputIterator, Geometry()> geometry;
+    karma::rule<OutputIterator, geometry::point<coord_type>()> point;
+    karma::rule<OutputIterator, geometry::point<coord_type>()> point_coord;
+    karma::rule<OutputIterator, geometry::line_string<coord_type>()> linestring;
+    karma::rule<OutputIterator, geometry::line_string<coord_type>()> linestring_coord;
+    karma::rule<OutputIterator, geometry::polygon<coord_type>()> polygon;
+    karma::rule<OutputIterator, geometry::polygon<coord_type>()> polygon_coord;
+    karma::rule<OutputIterator, geometry::linear_ring<coord_type>()> linear_ring_coord;
+    karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point;
+    karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point_coord;
+    karma::rule<OutputIterator, geometry::multi_line_string<coord_type>()> multi_linestring;
+    karma::rule<OutputIterator, geometry::multi_line_string<coord_type> ()> multi_linestring_coord;
+    karma::rule<OutputIterator, geometry::multi_polygon<coord_type>()> multi_polygon;
+    karma::rule<OutputIterator, geometry::multi_polygon<coord_type>()> multi_polygon_coord;
+    karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometry_collection;
+    karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometries;
+    //
+    karma::real_generator<coord_type, detail::json_coordinate_policy<coord_type> > coordinate;
 };
 
 }}

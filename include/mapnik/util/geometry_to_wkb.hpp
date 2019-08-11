@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 #include <mapnik/make_unique.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 // stl
 #include <sstream>
@@ -133,7 +133,7 @@ using wkb_buffer_ptr = std::unique_ptr<wkb_buffer>;
 
 wkb_buffer_ptr point_wkb( geometry::point<double> const& pt, wkbByteOrder byte_order)
 {
-    std::size_t size = 1 + 4 + 8 * 2 ; // byteOrder + wkbType + Point
+    std::size_t const size = 1 + 4 + 8 * 2 ; // byteOrder + wkbType + Point
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
@@ -148,7 +148,7 @@ wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByt
 {
     std::size_t num_points = line.size();
     assert(num_points > 1);
-    std::size_t size = 1 + 4 + 4 + 8 * 2 * num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
+    std::size_t const size = 1 + 4 + 4 + 8 * 2 * num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
     wkb_buffer_ptr wkb = std::make_unique<wkb_buffer>(size);
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
@@ -167,10 +167,8 @@ wkb_buffer_ptr line_string_wkb(geometry::line_string<double> const& line, wkbByt
 wkb_buffer_ptr polygon_wkb( geometry::polygon<double> const& poly, wkbByteOrder byte_order)
 {
     std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
-    size += 4 + 2 * 8 * poly.exterior_ring.size();
-    for ( auto const& ring : poly.interior_rings)
+    for ( auto const& ring : poly)
     {
-
         size += 4 + 2 * 8 * ring.size();
     }
 
@@ -178,17 +176,10 @@ wkb_buffer_ptr polygon_wkb( geometry::polygon<double> const& poly, wkbByteOrder 
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     write(ss, static_cast<int>(mapnik::geometry::geometry_types::Polygon), 4, byte_order);
-    write(ss, poly.num_rings(), 4, byte_order);
+    write(ss, poly.size(), 4, byte_order);
 
-    // exterior
-    write(ss, poly.exterior_ring.size(), 4, byte_order);
-    for (auto const& pt : poly.exterior_ring)
-    {
-        write(ss, pt.x, 8, byte_order);
-        write(ss, pt.y, 8, byte_order);
-    }
-    // interiors
-    for (auto const& ring : poly.interior_rings)
+    // exterior *interior
+    for (auto const& ring : poly)
     {
         write(ss, ring.size(), 4, byte_order);
         for ( auto const& pt : ring)
@@ -288,7 +279,7 @@ wkb_buffer_ptr multi_geom_wkb(MultiGeometry const& multi_geom, wkbByteOrder byte
     wkb_buffer_ptr multi_wkb = std::make_unique<wkb_buffer>(multi_size);
     wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    write(ss, static_cast<int>(geometry::detail::geometry_type()(multi_geom)) , 4, byte_order);
+    write(ss, static_cast<int>(geometry::detail::geometry_type<double>()(multi_geom)) , 4, byte_order);
     write(ss, multi_geom.size(), 4 ,byte_order);
 
     for ( wkb_buffer_ptr const& wkb : wkb_cont)

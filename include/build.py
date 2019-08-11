@@ -27,6 +27,7 @@ Import('env')
 base = './mapnik/'
 subdirs = [
     '',
+    'geometry',
     'csv',
     'svg',
     'wkt',
@@ -38,7 +39,10 @@ subdirs = [
     'text',
     'text/placements',
     'text/formatting',
-    'markers_placements'
+    'transform',
+    'markers_placements',
+    'geometry',
+    'value'
     ]
 
 if env['SVG_RENDERER']:

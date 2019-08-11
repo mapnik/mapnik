@@ -39,6 +39,20 @@ source = Split(
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
 program_env['LINKFLAGS'] = copy(env['LIBMAPNIK_LINKFLAGS'])
 program_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
+program_env['LIBS'] = []
+
+if env['RUNTIME_LINK'] == 'static':
+    # pkg-config is more reliable than pg_config across platforms
+    cmd = 'pkg-config libpq --libs --static'
+    try:
+        program_env.ParseConfig(cmd)
+    except OSError as e:
+        program_env.Append(LIBS='pq')
+else:
+    program_env.Append(LIBS='pq')
+
+# Link Library to Dependencies
+libraries = copy(program_env['LIBS'])
 
 if env['HAS_CAIRO']:
     program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
@@ -46,9 +60,8 @@ if env['HAS_CAIRO']:
 
 program_env.PrependUnique(CPPPATH=['#plugins/input/postgis'])
 
-libraries = []
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries.extend([boost_program_options,'sqlite3','pq',env['MAPNIK_NAME'],'icuuc'])
+libraries.extend([boost_program_options,'sqlite3',env['MAPNIK_NAME'],'icuuc'])
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
@@ -59,13 +72,8 @@ if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
 if env['SQLITE_LINKFLAGS']:
     program_env.Append(LINKFLAGS=env['SQLITE_LINKFLAGS'])
 
-if env['RUNTIME_LINK'] == 'static':
-    if env['PLATFORM'] == 'Darwin':
-        libraries.extend(['ldap', 'pam', 'ssl', 'crypto', 'krb5'])
-    else:
-        # TODO - parse back into libraries variable
-        program_env.ParseConfig('pg_config --libs')
-        libraries.append('dl')
+if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+    libraries.append('dl')
 
 pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))

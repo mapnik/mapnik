@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef OGR_INDEX_HH
-#define OGR_INDEX_HH
+#ifndef OGR_INDEX_HPP
+#define OGR_INDEX_HPP
 
 // stl
 #include <fstream>
 #include <vector>
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/query.hpp>
 
 using mapnik::box2d;
@@ -102,4 +102,4 @@ void ogr_index<filterT, IStream>::read_envelope(IStream& file, box2d<double>& en
     file.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
 }
 
-#endif // OGR_INDEX_HH
+#endif // OGR_INDEX_HPP

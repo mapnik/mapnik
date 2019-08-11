@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,10 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
-#include <mapnik/geometry.hpp>
-#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 #include <string>
+#include <mapnik/geometry/boost_spirit_karma_adapter.hpp>
+#include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 
 namespace mapnik { namespace wkt {
 

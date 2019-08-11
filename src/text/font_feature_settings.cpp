@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,10 +26,9 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/home/x3.hpp>
 #include <boost/version.hpp>
 #pragma GCC diagnostic pop
-
 
 // stl
 #include <algorithm>
@@ -52,23 +51,14 @@ font_feature_settings::font_feature_settings()
 void font_feature_settings::from_string(std::string const& features)
 {
     features_.clear();
-
     if (std::all_of(features.begin(), features.end(), isspace)) return;
 
-    namespace qi = boost::spirit::qi;
-    qi::char_type char_;
-    qi::as_string_type as_string;
-
-#if BOOST_VERSION <= 104800
-    // Call correct overload.
-    using std::placeholders::_1;
-    void (font_feature_settings::*append)(std::string const&) = &font_feature_settings::append;
-    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][std::bind(append, this, _1)] % ','))
-#else
-    auto app = [&](std::string const& s) { append(s); };
-    if (!qi::parse(features.begin(), features.end(), as_string[+(char_ - ',')][app] % ','))
-#endif
-
+    namespace x3 = boost::spirit::x3;
+    auto appender = [&](auto const& ctx)
+        {
+            this->append(_attr(ctx));
+        };
+    if (!x3::parse(features.begin(), features.end(), (+(x3::char_ - ','))[appender] % ','))
     {
         throw config_error("failed to parse font-feature-settings: '" + features + "'");
     }

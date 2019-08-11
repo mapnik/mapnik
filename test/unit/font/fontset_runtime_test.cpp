@@ -11,7 +11,7 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/text/formatting/text.hpp>

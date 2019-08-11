@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,13 +33,11 @@ extern "C"
 #include <webp/decode.h>
 }
 
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/stream.hpp>
 #pragma GCC diagnostic pop
 
 // stl
 #include <fstream>
+#include <memory>
 
 namespace mapnik
 {

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,9 +20,10 @@
  *
  *****************************************************************************/
 
-#include <mapnik/parse_transform.hpp>
-#include <mapnik/transform_expression_grammar.hpp>
-
+#include <mapnik/transform/parse_transform.hpp>
+#include <mapnik/transform/transform_expression_grammar_x3.hpp>
+#include <mapnik/expression_grammar_x3_config.hpp> // transcoder_tag
+#include <mapnik/config_error.hpp>
 // stl
 #include <string>
 #include <stdexcept>
@@ -31,14 +32,36 @@ namespace mapnik {
 
 transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
 {
-    static const transform_expression_grammar<std::string::const_iterator> g;
-    transform_list_ptr tl = std::make_shared<transform_list>();
+    using boost::spirit::x3::ascii::space;
+    transform_list_ptr trans_list = std::make_shared<transform_list>();
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space_type(), *tl);
-    if (r && itr == end)
+    mapnik::transcoder const tr(encoding);
+#if BOOST_VERSION >= 106700
+    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
+        [
+            mapnik::grammar::transform
+        ];
+#else
+    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
+        [
+            mapnik::grammar::transform
+        ];
+#endif
+
+    bool status = false;
+    try
     {
-        return tl;
+        status = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    {
+        throw config_error("Failed to parse transform expression: \"" + str + "\"");
+    }
+
+    if (status && itr == end)
+    {
+        return trans_list;
     }
     else
     {

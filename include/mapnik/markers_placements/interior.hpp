@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,9 @@
 
 #include <mapnik/markers_placements/point.hpp>
 #include <mapnik/geom_util.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/interior.hpp>
+#include <mapnik/geometry/polygon_vertex_processor.hpp>
 
 namespace mapnik {
 
@@ -33,14 +35,8 @@ template <typename Locator, typename Detector>
 class markers_interior_placement : public markers_point_placement<Locator, Detector>
 {
 public:
-    markers_interior_placement(Locator &locator, Detector &detector, markers_placement_params const& params)
-        : markers_point_placement<Locator, Detector>(locator, detector, params)
-    {
-    }
-
-    markers_interior_placement(markers_interior_placement && rhs)
-        : markers_point_placement<Locator, Detector>(std::move(rhs))
-    {}
+    using point_placement = markers_point_placement<Locator, Detector>;
+    using point_placement::point_placement;
 
     bool get_point(double &x, double &y, double &angle, bool ignore_placement)
     {
@@ -51,7 +47,7 @@ public:
 
         if (this->locator_.type() == geometry::geometry_types::Point)
         {
-            return markers_point_placement<Locator, Detector>::get_point(x, y, angle, ignore_placement);
+            return point_placement::get_point(x, y, angle, ignore_placement);
         }
 
         if (this->locator_.type() == geometry::geometry_types::LineString)
@@ -64,28 +60,26 @@ public:
         }
         else
         {
-            if (!label::interior_position(this->locator_, x, y))
+            geometry::polygon_vertex_processor<double> vertex_processor;
+            vertex_processor.add_path(this->locator_);
+            geometry::point<double> placement;
+            if (!geometry::interior(vertex_processor.polygon_,
+                                   this->params_.scale_factor,
+                                   placement))
             {
                 this->done_ = true;
                 return false;
             }
+
+            x = placement.x;
+            y = placement.y;
         }
 
         angle = 0;
 
-        box2d<double> box = this->perform_transform(angle, x, y);
-        if (this->params_.avoid_edges && !this->detector_.extent().contains(box))
+        if (!this->push_to_detector(x, y, angle, ignore_placement))
         {
             return false;
-        }
-        if (!this->params_.allow_overlap && !this->detector_.has_placement(box))
-        {
-            return false;
-        }
-
-        if (!ignore_placement)
-        {
-            this->detector_.insert(box);
         }
 
         this->done_ = true;

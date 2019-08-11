@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/vertex_processor.hpp>
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
-#include <mapnik/geometry_type.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
 
 namespace mapnik
 {
@@ -73,13 +73,11 @@ void cairo_renderer<T>::process(line_symbolizer const& sym,
     box2d<double> clipping_extent = common_.query_extent_;
     if (clip)
     {
-        double padding = (double)(common_.query_extent_.width()/common_.width_);
-        double half_stroke = width/2.0;
-        if (half_stroke > 1)
-            padding *= half_stroke;
-        if (std::fabs(offset) > 0)
-            padding *= std::fabs(offset) * 1.2;
-        padding *= common_.scale_factor_;
+        double pad_per_pixel = static_cast<double>(common_.query_extent_.width()/common_.width_);
+        double pixels = std::ceil(std::max(width / 2.0 + std::fabs(offset),
+                                          (std::fabs(offset) * offset_converter_default_threshold)));
+        double padding = pad_per_pixel * pixels * common_.scale_factor_;
+
         clipping_extent.pad(padding);
     }
     using vertex_converter_type =  vertex_converter<clip_line_tag,

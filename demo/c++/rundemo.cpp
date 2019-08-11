@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,7 @@ int main ( int, char** )
     try {
         std::cout << " running demo ... \n";
         datasource_cache::instance().register_datasources("plugins/input/");
-        freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.34/ttf/DejaVuSans.ttf");
+        freetype_engine::register_font("fonts/dejavu-fonts-ttf-2.37/ttf/DejaVuSans.ttf");
 
         Map m(800,600);
         m.set_background(parse_color("white"));
@@ -230,7 +230,7 @@ int main ( int, char** )
             parameters p;
             p["type"]="shape";
             p["file"]="demo/data/boundaries";
-            p["encoding"]="latin1";
+            p["encoding"]="utf8";
 
             layer lyr("Provinces");
             lyr.set_datasource(datasource_cache::instance().create(p));
@@ -295,7 +295,7 @@ int main ( int, char** )
             parameters p;
             p["type"]="shape";
             p["file"]="demo/data/popplaces";
-            p["encoding"] = "latin1";
+            p["encoding"] = "utf8";
             layer lyr("Populated Places");
             lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));

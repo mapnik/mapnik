@@ -29,7 +29,7 @@ if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
         can_build = True
 
 if not can_build:
-    print 'WARNING: skipping building the optional CSV datasource plugin which requires boost >= 1.56'
+    print ('WARNING: skipping building the optional CSV datasource plugin which requires boost >= 1.56')
 else:
     Import ('plugin_base')
 
@@ -39,6 +39,7 @@ else:
 
     plugin_sources = Split(
         """
+        %(PLUGIN_NAME)s_utils.cpp
         %(PLUGIN_NAME)s_datasource.cpp
         %(PLUGIN_NAME)s_featureset.cpp
         %(PLUGIN_NAME)s_inline_featureset.cpp

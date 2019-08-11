@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -285,7 +285,7 @@ std::map<std::string,font_set> & Map::fontsets()
 bool Map::register_fonts(std::string const& dir, bool recurse)
 {
     font_library library;
-    return freetype_engine::register_fonts_impl(dir, library, font_file_mapping_, recurse);
+    return freetype_engine::instance().register_fonts_impl(dir, library, font_file_mapping_, recurse);
 }
 
 bool Map::load_fonts()
@@ -307,7 +307,7 @@ bool Map::load_fonts()
             continue;
         }
         mapnik::util::file file(file_path);
-        if (file.open())
+        if (file)
         {
             auto item = font_memory_cache_.emplace(file_path, std::make_pair(file.data(),file.size()));
             if (item.second) result = true;
@@ -375,39 +375,39 @@ unsigned Map::height() const
     return height_;
 }
 
-void Map::set_width(unsigned width)
+void Map::set_width(unsigned _width)
 {
-    if (width != width_ &&
-        width >= MIN_MAPSIZE &&
-        width <= MAX_MAPSIZE)
+    if (_width != width_ &&
+        _width >= MIN_MAPSIZE &&
+        _width <= MAX_MAPSIZE)
     {
-        width_=width;
+        width_=_width;
         fixAspectRatio();
     }
 }
 
-void Map::set_height(unsigned height)
+void Map::set_height(unsigned _height)
 {
-    if (height != height_ &&
-        height >= MIN_MAPSIZE &&
-        height <= MAX_MAPSIZE)
+    if (_height != height_ &&
+        _height >= MIN_MAPSIZE &&
+        _height <= MAX_MAPSIZE)
     {
-        height_=height;
+        height_ = _height;
         fixAspectRatio();
     }
 }
 
-void Map::resize(unsigned width,unsigned height)
+void Map::resize(unsigned _width, unsigned _height)
 {
-    if ((width != width_ ||
-         height != height_) &&
-        width >= MIN_MAPSIZE &&
-        width <= MAX_MAPSIZE &&
-        height >= MIN_MAPSIZE &&
-        height <= MAX_MAPSIZE)
+    if ((_width != width_ ||
+         _height != height_) &&
+        _width >= MIN_MAPSIZE &&
+        _width <= MAX_MAPSIZE &&
+        _height >= MIN_MAPSIZE &&
+        _height <= MAX_MAPSIZE)
     {
-        width_=width;
-        height_=height;
+        width_ = _width;
+        height_ = _height;
         fixAspectRatio();
     }
 }
@@ -417,14 +417,14 @@ std::string const&  Map::srs() const
     return srs_;
 }
 
-void Map::set_srs(std::string const& srs)
+void Map::set_srs(std::string const& _srs)
 {
-    srs_ = srs;
+    srs_ = _srs;
 }
 
-void Map::set_buffer_size( int buffer_size)
+void Map::set_buffer_size(int _buffer_size)
 {
-    buffer_size_ = buffer_size;
+    buffer_size_ = _buffer_size;
 }
 
 int Map::buffer_size() const
@@ -695,7 +695,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
 {
     if (!current_extent_.valid())
     {
-        throw std::runtime_error("query_point: map extent is not intialized, you need to set a valid extent before querying");
+        throw std::runtime_error("query_point: map extent is not initialized, you need to set a valid extent before querying");
     }
     if (!current_extent_.intersects(x,y))
     {
@@ -746,7 +746,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         else s << " (map has no layers)";
         throw std::out_of_range(s.str());
     }
-    return featureset_ptr();
+    return mapnik::make_invalid_featureset();
 }
 
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const

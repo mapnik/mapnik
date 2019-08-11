@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,9 +29,10 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/geometry_centroid.hpp>
-#include <mapnik/geometry_type.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/centroid.hpp>
+#include <mapnik/geometry/interior.hpp>
+#include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/vertex_adapters.hpp>
 #include <mapnik/geom_util.hpp>
 
@@ -61,7 +62,7 @@ void render_point_symbolizer(point_symbolizer const &sym,
 
         agg::trans_affine tr;
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-        if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform);
+        if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform, common.scale_factor_);
 
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
@@ -79,9 +80,7 @@ void render_point_symbolizer(point_symbolizer const &sym,
         else if (type == mapnik::geometry::geometry_types::Polygon)
         {
             auto const& poly = mapnik::util::get<geometry::polygon<double> >(geometry);
-            geometry::polygon_vertex_adapter<double> va(poly);
-            if (!label::interior_position(va ,pt.x, pt.y))
-                return;
+            if (!geometry::interior(poly, common.scale_factor_, pt)) return;
         }
         else
         {

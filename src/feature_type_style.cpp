@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -148,9 +148,9 @@ std::vector<filter::filter_type> const&  feature_type_style::direct_image_filter
     return direct_filters_;
 }
 
-void feature_type_style::set_comp_op(composite_mode_e comp_op)
+void feature_type_style::set_comp_op(composite_mode_e _comp_op)
 {
-    comp_op_ = comp_op;
+    comp_op_ = _comp_op;
 }
 
 boost::optional<composite_mode_e> feature_type_style::comp_op() const

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,27 +21,48 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/svg/svg_transform_grammar.hpp>
+#include <mapnik/config.hpp>
+#include <mapnik/svg/svg_transform_grammar_x3_def.hpp>
 // stl
 #include <string>
 #include <cstring>
 
 namespace mapnik { namespace svg {
 
-    template <typename TransformType>
-    bool parse_svg_transform(const char * wkt, TransformType & p)
-    {
-        using namespace boost::spirit;
-        using iterator_type = const char *;
-        using skip_type = ascii::space_type;
-        // TODO - make it possible for this to be static const
-        // by avoiding ctor taking arg - https://github.com/mapnik/mapnik/pull/2231
-        svg_transform_grammar<iterator_type,skip_type,TransformType> g(p);
-        iterator_type first = wkt;
-        iterator_type last =  wkt + std::strlen(wkt);
-        return qi::phrase_parse(first, last, g, skip_type());
-    }
+template <typename Transform>
+bool parse_svg_transform(const char* wkt, Transform& tr)
+{
+    using namespace boost::spirit;
+    using iterator_type = char const*;
+    iterator_type first = wkt;
+    iterator_type last = wkt + std::strlen(wkt);
+    using space_type = mapnik::svg::grammar::space_type;
 
-    template MAPNIK_DECL bool parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
-}}
+#if BOOST_VERSION >= 106700
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(tr)
+        [mapnik::svg::grammar::svg_transform];
+
+#else
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(std::ref(tr))
+        [mapnik::svg::grammar::svg_transform];
+#endif
+
+    try
+    {
+        if (!x3::phrase_parse(first, last, grammar, space_type())
+            || first != last)
+        {
+            throw std::runtime_error("Failed to parse svg-transform");
+        }
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+template bool MAPNIK_DECL parse_svg_transform<agg::trans_affine>(const char*, agg::trans_affine&);
+
+} // namespace svg
+} // namespace mapnik

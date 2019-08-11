@@ -6,4 +6,4 @@ set -o pipefail
 CXXFLAGS="$(./utils/mapnik-config/mapnik-config --cflags)"
 CXX="$(./utils/mapnik-config/mapnik-config --cxx)"
 echo "Time taken to compile '$(basename $1)':"
-time ${CXX} $1 -I./test -I./deps/agg/include -Ideps -I./include $CXXFLAGS -o /tmp/header.out
+time ${CXX} $1 -I./test -I./deps/agg/include -Ideps -I./deps/mapbox/variant/include -I./include $CXXFLAGS -o /tmp/header.out

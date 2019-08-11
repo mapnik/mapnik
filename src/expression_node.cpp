@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/expression_node.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 
@@ -130,9 +130,9 @@ value regex_replace_node::apply(value const& v) const
     auto const& pattern = impl_.get()->pattern_;
     auto const& format = impl_.get()->format_;
 #if defined(BOOST_REGEX_HAS_ICU)
-    return boost::u32regex_replace(v.to_unicode(),pattern,format);
+    return boost::u32regex_replace(v.to_unicode(), pattern, format);
 #else
-    std::string repl = boost::regex_replace(v.to_string(),pattern,format);
+    std::string repl = boost::regex_replace(v.to_string(), pattern, format);
     transcoder tr_("utf8");
     return tr_.transcode(repl.c_str());
 #endif

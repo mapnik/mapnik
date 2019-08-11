@@ -26,7 +26,7 @@ function add() {
 CXX=${CXX:-clang++}
 
 function compile() {
-    ${CXX} -o ${app} ${cpp} -Wpadded -I./ -isystem ./mason_packages/.link/include `mapnik-config --all-flags` -Ideps -Lsrc -Ideps/agg/include -Iinclude
+    ${CXX} -o ${app} ${cpp} -Wpadded -I./ -I./deps/mapbox/variant/include -isystem ./mason_packages/.link/include -std=c++11 -Ideps -Lsrc -Ideps/agg/include -Iinclude
 }
 
 if [[ ${1:-unset} == "unset" ]] || [[ ${2:-unset} == "unset" ]] || [[ $@ == '-h' ]] || [[ $@ == '--help' ]]; then

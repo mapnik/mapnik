@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,8 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
       extent_(extent),
       bbox_(q.get_bbox()),
       curIter_(policy_.begin()),
-      endIter_(policy_.end())
+      endIter_(policy_.end()),
+      filter_factor_(q.get_filter_factor())
 {
 }
 
@@ -89,33 +90,34 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                     box2d<double> intersect = bbox_.intersect(curIter_->envelope());
                     box2d<double> ext = t.forward(intersect);
                     box2d<double> rem = policy_.transform(ext);
-                    if (ext.width() > 0.5 && ext.height() > 0.5 )
-                    {
-                        // select minimum raster containing whole ext
-                        int x_off = static_cast<int>(std::floor(ext.minx()));
-                        int y_off = static_cast<int>(std::floor(ext.miny()));
-                        int end_x = static_cast<int>(std::ceil(ext.maxx()));
-                        int end_y = static_cast<int>(std::ceil(ext.maxy()));
+                    // select minimum raster containing whole ext
+                    int x_off = static_cast<int>(std::floor(ext.minx()));
+                    int y_off = static_cast<int>(std::floor(ext.miny()));
+                    int end_x = static_cast<int>(std::ceil(ext.maxx()));
+                    int end_y = static_cast<int>(std::ceil(ext.maxy()));
 
-                        // clip to available data
-                        if (x_off < 0) x_off = 0;
-                        if (y_off < 0) y_off = 0;
-                        if (end_x > image_width)  end_x = image_width;
-                        if (end_y > image_height) end_y = image_height;
+                    // clip to available data
+                    if (x_off >= image_width) x_off = image_width - 1;
+                    if (y_off >= image_height) y_off = image_height - 1;
+                    if (x_off < 0) x_off = 0;
+                    if (y_off < 0) y_off = 0;
+                    if (end_x > image_width)  end_x = image_width;
+                    if (end_y > image_height) end_y = image_height;
 
-                        int width = end_x - x_off;
-                        int height = end_y - y_off;
+                    int width = end_x - x_off;
+                    int height = end_y - y_off;
+                    if (width < 1) width = 1;
+                    if (height < 1) height = 1;
 
-                        // calculate actual box2d of returned raster
-                        box2d<double> feature_raster_extent(rem.minx() + x_off,
-                                                            rem.miny() + y_off,
-                                                            rem.maxx() + x_off + width,
-                                                            rem.maxy() + y_off + height);
-                        intersect = t.backward(feature_raster_extent);
-                        mapnik::image_any data = reader->read(x_off, y_off, width, height);
-                        mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, std::move(data), 1.0);
-                        feature->set_raster(raster);
-                    }
+                    // calculate actual box2d of returned raster
+                    box2d<double> feature_raster_extent(rem.minx() + x_off,
+                                                        rem.miny() + y_off,
+                                                        rem.maxx() + x_off + width,
+                                                        rem.maxy() + y_off + height);
+                    feature_raster_extent = t.backward(feature_raster_extent);
+                    mapnik::image_any data = reader->read(x_off, y_off, width, height);
+                    mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), filter_factor_);
+                    feature->set_raster(raster);
                 }
             }
         }

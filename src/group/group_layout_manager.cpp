@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -90,30 +90,26 @@ struct process_layout
             return;
         }
 
-        bound_box layout_box;
-        int middle_ifirst = safe_cast<int>((member_boxes_.size() - 1) >> 1);
-        int top_i = 0;
-        int bottom_i = 0;
-        if (middle_ifirst % 2 == 0)
+        auto max_diff = layout.get_max_difference();
+        auto layout_box = make_horiz_pair(0, 0.0, 0, x_margin, max_diff);
+        auto y_shift = 0.5 * layout_box.height();
+
+        for (size_t i = 2; i < member_boxes_.size(); i += 2)
         {
-            layout_box = make_horiz_pair(0, 0.0, 0, x_margin, layout.get_max_difference());
-            top_i = middle_ifirst - 2;
-            bottom_i = middle_ifirst + 2;
-        }
-        else
-        {
-            top_i = middle_ifirst - 1;
-            bottom_i = middle_ifirst + 1;
+            auto y = layout_box.maxy() + y_margin;
+            auto pair_box = make_horiz_pair(i, y, 1, x_margin, max_diff);
+            layout_box.expand_to_include(pair_box);
         }
 
-        while (bottom_i >= 0 && top_i >= 0 && top_i < static_cast<int>(member_offsets_.size()))
-        {
-            layout_box.expand_to_include(make_horiz_pair(static_cast<std::size_t>(top_i), layout_box.miny() - y_margin, -1, x_margin, layout.get_max_difference()));
-            layout_box.expand_to_include(make_horiz_pair(static_cast<std::size_t>(bottom_i), layout_box.maxy() + y_margin, 1, x_margin, layout.get_max_difference()));
-            top_i -= 2;
-            bottom_i += 2;
-        }
+        // layout_box.center corresponds to the center of the first row;
+        // shift offsets so that the whole group is centered vertically
 
+        y_shift -= 0.5 * layout_box.height();
+
+        for (auto & offset : member_offsets_)
+        {
+            offset.y += y_shift;
+        }
     }
 
 private:
@@ -146,12 +142,12 @@ private:
     // stores corresponding offset, and returns modified bounding box
     bound_box box_offset_align(size_t i, double x, double y, int x_dir, int y_dir) const
     {
-        bound_box const& box = member_boxes_[i];
-        pixel_position offset((x_dir == 0 ? x - input_origin_.x : x - (x_dir < 0 ? box.maxx() : box.minx())),
-                             (y_dir == 0 ? y - input_origin_.y : y - (y_dir < 0 ? box.maxy() : box.miny())));
-
-        member_offsets_[i] = offset;
-        return bound_box(box.minx() + offset.x, box.miny() + offset.y, box.maxx() + offset.x, box.maxy() + offset.y);
+        auto box = member_boxes_[i];
+        auto & offset = member_offsets_[i];
+        offset.x = x - (x_dir == 0 ? input_origin_.x : (x_dir < 0 ? box.maxx() : box.minx()));
+        offset.y = y - (y_dir == 0 ? input_origin_.y : (y_dir < 0 ? box.maxy() : box.miny()));
+        box.move(offset.x, offset.y);
+        return box;
     }
 };
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -105,6 +105,8 @@ enum marker_placement_enum : std::uint8_t
     MARKER_LINE_PLACEMENT,
     MARKER_VERTEX_FIRST_PLACEMENT,
     MARKER_VERTEX_LAST_PLACEMENT,
+    MARKER_ANGLED_POINT_PLACEMENT,
+    MARKER_POLYLABEL_PLACEMENT,
     marker_placement_enum_MAX
 };
 
@@ -138,6 +140,9 @@ enum label_placement_enum : std::uint8_t
     LINE_PLACEMENT,
     VERTEX_PLACEMENT,
     INTERIOR_PLACEMENT,
+    POLYLABEL_PLACEMENT,
+    GRID_PLACEMENT,
+    ALTERNATING_GRID_PLACEMENT,
     label_placement_enum_MAX
 };
 
@@ -217,6 +222,23 @@ enum gamma_method_enum : std::uint8_t
 
 DEFINE_ENUM (gamma_method_e, gamma_method_enum );
 
+enum line_pattern_enum : std::uint8_t
+{
+    LINE_PATTERN_WARP,
+    LINE_PATTERN_REPEAT,
+    line_pattern_enum_MAX
+};
+
+DEFINE_ENUM (line_pattern_e, line_pattern_enum );
+
+enum smooth_algorithm_enum : std::uint8_t
+{
+    SMOOTH_ALGORITHM_BASIC = 0,
+    SMOOTH_ALGORITHM_ADAPTIVE,
+    smooth_algorithm_enum_MAX
+};
+
+DEFINE_ENUM (smooth_algorithm_e, smooth_algorithm_enum );
 
 }
 

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@
 #include <vector>
 #include <deque>
 
-csv_featureset::csv_featureset(std::string const& filename, detail::geometry_column_locator const& locator, char separator, char quote,
+csv_featureset::csv_featureset(std::string const& filename, locator_type const& locator, char separator, char quote,
                                std::vector<std::string> const& headers, mapnik::context_ptr const& ctx, array_type && index_array)
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
@@ -72,12 +72,12 @@ csv_featureset::~csv_featureset() {}
 mapnik::feature_ptr csv_featureset::parse_feature(char const* beg, char const* end)
 {
     auto values = csv_utils::parse_line(beg, end, separator_, quote_, headers_.size());
-    auto geom = detail::extract_geometry(values, locator_);
+    auto geom = csv_utils::extract_geometry(values, locator_);
     if (!geom.is<mapnik::geometry::geometry_empty>())
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, ++feature_id_));
         feature->set_geometry(std::move(geom));
-        detail::process_properties(*feature, headers_, values, locator_, tr_);
+        csv_utils::process_properties(*feature, headers_, values, locator_, tr_);
         return feature;
     }
     return mapnik::feature_ptr();
@@ -88,8 +88,8 @@ mapnik::feature_ptr csv_featureset::next()
     if (index_itr_ != index_end_)
     {
         csv_datasource::item_type const& item = *index_itr_++;
-        std::size_t file_offset = item.second.first;
-        std::size_t size = item.second.second;
+        std::uint64_t file_offset = item.second.first;
+        std::uint64_t size = item.second.second;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
         char const* start = (char const*)mapped_region_->get_address() + file_offset;
         char const*  end = start + size;
@@ -97,7 +97,10 @@ mapnik::feature_ptr csv_featureset::next()
         std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> record;
         record.resize(size);
-        std::fread(record.data(), size, 1, file_.get());
+        if (std::fread(record.data(), size, 1, file_.get()) != 1)
+        {
+            return mapnik::feature_ptr();
+        }
         auto const* start = record.data();
         auto const*  end = start + record.size();
 #endif

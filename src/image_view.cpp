@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,8 +28,6 @@
 
 namespace mapnik
 {
-
-template class MAPNIK_DECL image_view<image_null>;
 template class MAPNIK_DECL image_view<image_rgba8>;
 template class MAPNIK_DECL image_view<image_gray8>;
 template class MAPNIK_DECL image_view<image_gray8s>;

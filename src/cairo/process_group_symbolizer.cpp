@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,8 @@
 
 // mapnik symbolizer generics
 #include <mapnik/renderer_common/render_group_symbolizer.hpp>
+
+#include <memory>
 
 namespace mapnik
 {

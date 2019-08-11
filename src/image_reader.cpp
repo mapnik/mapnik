@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,21 +31,22 @@ namespace mapnik
 inline boost::optional<std::string> type_from_bytes(char const* data, size_t size)
 {
     using result_type = boost::optional<std::string>;
+    unsigned char const* header = reinterpret_cast<unsigned char const*>(data);
     if (size >= 4)
     {
-        unsigned int magic = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+        unsigned int magic = (header[0] << 24) | (header[1] << 16) | (header[2] << 8) | header[3];
         if (magic == 0x89504E47U)
         {
             return result_type("png");
         }
-        else if (magic == 0x49492A00 || magic == 0x4D4D002A)
+        else if (magic == 0x49492A00U || magic == 0x4D4D002AU)
         {
             return result_type("tiff");
         }
     }
     if (size>=2)
     {
-        unsigned int magic = ((data[0] << 8) | data[1]) & 0xffff;
+        unsigned int magic = ((header[0] << 8) | header[1]) & 0xffff;
         if (magic == 0xffd8)
         {
             return result_type("jpeg");
@@ -54,8 +55,8 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
 
     if (size>=12)
     {
-        if (data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F' &&
-            data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P')
+        if (header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F' &&
+            header[8] == 'W' && header[9] == 'E' && header[10] == 'B' && header[11] == 'P')
         {
             return result_type("webp");
         }
@@ -65,7 +66,7 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
 
 image_reader* get_image_reader(char const* data, size_t size)
 {
-    boost::optional<std::string> type = type_from_bytes(data,size);
+    boost::optional<std::string> type = type_from_bytes(data, size);
     if (type)
         return factory<image_reader,std::string,char const*,size_t>::instance().create_object(*type, data,size);
     else

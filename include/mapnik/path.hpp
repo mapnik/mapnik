@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
 namespace mapnik { namespace detail {
@@ -44,8 +44,8 @@ public:
         PolygonExterior = Polygon,
         PolygonInterior = Polygon | ( 1 << geometry_bits)
     };
-    using coord_type = T;
-    using container_type = Container<coord_type>;
+    using coordinate_type = T;
+    using container_type = Container<coordinate_type>;
     using value_type = typename container_type::value_type;
     using size_type = typename container_type::size_type;
     container_type cont_;
@@ -70,9 +70,9 @@ public:
         return static_cast<bool>(type_ >> geometry_bits);
     }
 
-    void set_type(types type)
+    void set_type(types _type)
     {
-        type_ = type;
+        type_ = _type;
     }
 
     container_type const& data() const
@@ -84,17 +84,17 @@ public:
     {
         return cont_.size();
     }
-    void push_vertex(coord_type x, coord_type y, CommandType c)
+    void push_vertex(coordinate_type x, coordinate_type y, CommandType c)
     {
         cont_.push_back(x,y,c);
     }
 
-    void line_to(coord_type x,coord_type y)
+    void line_to(coordinate_type x,coordinate_type y)
     {
         push_vertex(x,y,SEG_LINETO);
     }
 
-    void move_to(coord_type x,coord_type y)
+    void move_to(coordinate_type x,coordinate_type y)
     {
         push_vertex(x,y,SEG_MOVETO);
     }

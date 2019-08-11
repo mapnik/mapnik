@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,14 +24,22 @@
 #define MAPNIK_GEOM_UTIL_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/geometry_types.hpp>
+#include <mapnik/geometry/geometry_types.hpp>
+#include <mapnik/geometry/point.hpp>
+
 // stl
 #include <cmath>
 #include <vector>
 #include <algorithm>
+
+// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -132,96 +140,104 @@ inline T sqr(T x)
     return x * x;
 }
 
-inline double distance2(double x0,double y0,double x1,double y1)
+inline double distance2(double x0, double y0, double x1, double y1)
 {
     double dx = x1 - x0;
     double dy = y1 - y0;
     return sqr(dx) + sqr(dy);
 }
 
-inline double distance(double x0,double y0, double x1,double y1)
+inline double distance(double x0, double y0, double x1, double y1)
 {
-    return std::sqrt(distance2(x0,y0,x1,y1));
+    return std::sqrt(distance2(x0, y0, x1, y1));
 }
 
 inline double point_to_segment_distance(double x, double y,
                                         double ax, double ay,
                                         double bx, double by)
 {
-    double len2 = distance2(ax,ay,bx,by);
+    double len2 = distance2(ax, ay, bx, by);
 
     if (len2 < 1e-14)
     {
-        return distance(x,y,ax,ay);
+        return distance(x, y, ax, ay);
     }
 
-    double r = ((x - ax)*(bx - ax) + (y - ay)*(by -ay))/len2;
-    if ( r < 0 )
+    double r = ((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / len2;
+    if (r < 0)
     {
-        return distance(x,y,ax,ay);
+        return distance(x, y, ax, ay);
     }
     else if (r > 1)
     {
-        return distance(x,y,bx,by);
+        return distance(x, y, bx, by);
     }
-    double s = ((ay - y)*(bx - ax) - (ax - x)*(by - ay))/len2;
+    double s = ((ay - y) * (bx - ax) - (ax - x) * (by - ay)) / len2;
     return std::fabs(s) * std::sqrt(len2);
 }
 
 template <typename Iter>
-inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
+inline bool point_on_path(double x, double y, Iter start, Iter end, double tol)
 {
-    double x0=std::get<0>(*start);
-    double y0=std::get<1>(*start);
+    double x0 = std::get<0>(*start);
+    double y0 = std::get<1>(*start);
     double x1 = 0;
     double y1 = 0;
     while (++start != end)
     {
-        if ( std::get<2>(*start) == SEG_MOVETO)
+        if (std::get<2>(*start) == SEG_MOVETO)
         {
             x0 = std::get<0>(*start);
             y0 = std::get<1>(*start);
             continue;
         }
-        x1=std::get<0>(*start);
-        y1=std::get<1>(*start);
+        x1 = std::get<0>(*start);
+        y1 = std::get<1>(*start);
 
-        double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
+        double distance = point_to_segment_distance(x, y, x0, y0, x1, y1);
         if (distance < tol)
             return true;
-        x0=x1;
-        y0=y1;
+        x0 = x1;
+        y0 = y1;
     }
     return false;
 }
 
 // filters
-struct filter_in_box
+template <typename T>
+struct bounding_box_filter
 {
-    box2d<double> box_;
-    explicit filter_in_box(box2d<double> const& box)
+    using value_type = T;
+    box2d<value_type> box_;
+    explicit bounding_box_filter(box2d<value_type> const& box)
         : box_(box) {}
 
-    bool pass(box2d<double> const& extent) const
+    bool pass(box2d<value_type> const& extent) const
     {
         return extent.intersects(box_);
     }
 };
 
-struct filter_at_point
+using filter_in_box = bounding_box_filter<double>;
+
+template <typename T>
+struct at_point_filter
 {
-    box2d<double> box_;
-    explicit filter_at_point(coord2d const& pt, double tol=0)
-        : box_(pt,pt)
+    using value_type = T;
+    box2d<value_type> box_;
+    explicit at_point_filter(coord<value_type, 2> const& pt, double tol = 0)
+        : box_(pt, pt)
     {
         box_.pad(tol);
     }
 
-    bool pass(box2d<double> const& extent) const
+    bool pass(box2d<value_type> const& extent) const
     {
         return extent.intersects(box_);
     }
 };
+
+using filter_at_point = at_point_filter<double>;
 
 ////////////////////////////////////////////////////////////////////////////
 template <typename PathType>
@@ -288,7 +304,7 @@ bool hit_test_first(PathType & path, double x, double y)
 namespace label {
 
 template <typename PathType>
-bool middle_point(PathType & path, double & x, double & y)
+bool middle_point(PathType & path, double & x, double & y, boost::optional<double&> angle = boost::none)
 {
     double x0 = 0;
     double y0 = 0;
@@ -298,6 +314,12 @@ bool middle_point(PathType & path, double & x, double & y)
     path.rewind(0);
     unsigned command = path.vertex(&x0,&y0);
     if (command == SEG_END) return false;
+    if (std::abs(mid_length) < std::numeric_limits<double>::epsilon())
+    {
+        x = x0;
+        y = y0;
+        return true;
+    }
     double dist = 0.0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
@@ -309,6 +331,10 @@ bool middle_point(PathType & path, double & x, double & y)
             double r = (mid_length - dist)/seg_length;
             x = x0 + (x1 - x0) * r;
             y = y0 + (y1 - y0) * r;
+            if (angle)
+            {
+                *angle = atan2(y1 - y0, x1 - x0);
+            }
             break;
         }
         dist += seg_length;
@@ -321,56 +347,60 @@ bool middle_point(PathType & path, double & x, double & y)
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
-    double x0 = 0.0;
-    double y0 = 0.0;
-    double x1 = 0.0;
-    double y1 = 0.0;
-    double start_x;
-    double start_y;
+    geometry::point<double> p0, p1, move_to, start;
 
     path.rewind(0);
-    unsigned command = path.vertex(&x0, &y0);
+    unsigned command = path.vertex(&p0.x, &p0.y);
     if (command == SEG_END) return false;
 
-    start_x = x0;
-    start_y = y0;
+    start = move_to = p0;
 
     double atmp = 0.0;
     double xtmp = 0.0;
     double ytmp = 0.0;
     unsigned count = 1;
-    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    while (SEG_END != (command = path.vertex(&p1.x, &p1.y)))
     {
-        if (command == SEG_CLOSE) continue;
-        double dx0 = x0 - start_x;
-        double dy0 = y0 - start_y;
-        double dx1 = x1 - start_x;
-        double dy1 = y1 - start_y;
+        switch (command)
+        {
+            case SEG_MOVETO:
+                move_to = p1;
+                break;
+            case SEG_CLOSE:
+                p1 = move_to;
+            case SEG_LINETO:
+                double dx0 = p0.x - start.x;
+                double dy0 = p0.y - start.y;
+                double dx1 = p1.x - start.x;
+                double dy1 = p1.y - start.y;
 
-        double ai = dx0 * dy1 - dx1 * dy0;
-        atmp += ai;
-        xtmp += (dx1 + dx0) * ai;
-        ytmp += (dy1 + dy0) * ai;
-        x0 = x1;
-        y0 = y1;
+                double ai = dx0 * dy1 - dx1 * dy0;
+                atmp += ai;
+                xtmp += (dx1 + dx0) * ai;
+                ytmp += (dy1 + dy0) * ai;
+                break;
+
+        }
+        p0 = p1;
         ++count;
     }
 
-    if (count <= 2) {
-        x = (start_x + x0) * 0.5;
-        y = (start_y + y0) * 0.5;
+    if (count <= 2)
+    {
+        x = (start.x + p0.x) * 0.5;
+        y = (start.y + p0.y) * 0.5;
         return true;
     }
 
     if (atmp != 0)
     {
-        x = (xtmp/(3*atmp)) + start_x;
-        y = (ytmp/(3*atmp)) + start_y;
+        x = (xtmp / (3 * atmp)) + start.x;
+        y = (ytmp / (3 * atmp)) + start.y;
     }
     else
     {
-        x = x0;
-        y = y0;
+        x = p0.x;
+        y = p0.y;
     }
     return true;
 }
@@ -511,77 +541,6 @@ bool hit_test(PathType & path, double x, double y, double tol)
         return distance(x, y, x0, y0) <= tol;
     }
     return inside;
-}
-
-template <typename PathType>
-bool interior_position(PathType & path, double & x, double & y)
-{
-    // start with the centroid
-    if (!label::centroid(path, x,y))
-        return false;
-
-    // otherwise we find a horizontal line across the polygon and then return the
-    // center of the widest intersection between the polygon and the line.
-
-    std::vector<double> intersections; // only need to store the X as we know the y
-
-    double x0 = 0;
-    double y0 = 0;
-    path.rewind(0);
-    unsigned command = path.vertex(&x0, &y0);
-    double x1 = 0;
-    double y1 = 0;
-    while (SEG_END != (command = path.vertex(&x1, &y1)))
-    {
-        if (command == SEG_CLOSE)
-            continue;
-        if (command != SEG_MOVETO)
-        {
-            // if the segments overlap
-            if (y0==y1)
-            {
-                if (y0==y)
-                {
-                    double xi = (x0+x1)/2.0;
-                    intersections.push_back(xi);
-                }
-            }
-            // if the path segment crosses the bisector
-            else if ((y0 <= y && y1 >= y) ||
-                     (y0 >= y && y1 <= y))
-            {
-                // then calculate the intersection
-                double xi = x0;
-                if (x0 != x1)
-                {
-                    double m = (y1-y0)/(x1-x0);
-                    double c = y0 - m*x0;
-                    xi = (y-c)/m;
-                }
-
-                intersections.push_back(xi);
-            }
-        }
-        x0 = x1;
-        y0 = y1;
-    }
-    // no intersections we just return the default
-    if (intersections.empty())
-        return true;
-    std::sort(intersections.begin(), intersections.end());
-    double max_width = 0;
-    for (unsigned ii = 1; ii < intersections.size(); ii += 2)
-    {
-        double xlow = intersections[ii-1];
-        double xhigh = intersections[ii];
-        double width = xhigh - xlow;
-        if (width > max_width)
-        {
-            x = (xlow + xhigh) / 2.0;
-            max_width = width;
-        }
-    }
-    return true;
 }
 
 }}

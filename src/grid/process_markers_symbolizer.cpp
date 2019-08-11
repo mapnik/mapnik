@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,10 +55,12 @@ porting notes -->
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_rasterizer_scanline_aa.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -139,24 +141,21 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     using buf_type = grid_rendering_buffer;
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-
-    using namespace mapnik::svg;
-    using svg_attribute_type = agg::pod_bvector<path_attributes>;
-    using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
-                                               svg_attribute_type,
-                                               renderer_type,
-                                               pixfmt_type>;
+    using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                svg_attribute_type,
+                                                renderer_type,
+                                                pixfmt_type>;
 
     buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     ras_ptr->reset();
     box2d<double> clip_box = common_.query_extent_;
 
-    using context_type = detail::grid_markers_renderer_context<svg_renderer_type,
+    using renderer_context_type = detail::grid_markers_renderer_context<svg_renderer_type,
                                                                renderer_type,
                                                                buf_type,
                                                                grid_rasterizer,
                                                                buffer_type>;
-    context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
+    renderer_context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
 
     render_markers_symbolizer(
         sym, feature, prj_trans, common_, clip_box, renderer_context);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@
 #include <mapnik/debug.hpp>
 
 // stl
-#include <bitset>
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
@@ -45,9 +44,9 @@ public:
         what_( _what )
     {
     }
-    virtual ~illegal_enum_value() throw() {}
+    virtual ~illegal_enum_value() {}
 
-    virtual const char * what() const throw()
+    virtual const char * what() const noexcept
     {
         return what_.c_str();
     }
@@ -189,7 +188,12 @@ public:
         }
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
+#pragma GCC diagnostic ignored "-Wundefined-var-template"
             if (str_copy == our_strings_[i])
+#pragma GCC diagnostic pop
             {
                 value_ = static_cast<ENUM>(i);
                 if (deprecated)
@@ -199,14 +203,24 @@ public:
                 return;
             }
         }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
+#pragma GCC diagnostic ignored "-Wundefined-var-template"
         throw illegal_enum_value(std::string("Illegal enumeration value '") +
                                  str + "' for enum " + our_name_);
+#pragma GCC diagnostic pop
     }
 
     /** Returns the current value as a string identifier. */
     std::string as_string() const
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
+#pragma GCC diagnostic ignored "-Wpragmas" // gcc
+#pragma GCC diagnostic ignored "-Wundefined-var-template"
         return our_strings_[value_];
+#pragma GCC diagnostic pop
     }
 
     /** Static helper function to iterate over valid identifiers. */
@@ -267,7 +281,10 @@ operator<<(std::ostream & os, const mapnik::enumeration<ENUM, THE_MAX> & e)
     using name = enumeration<e, e ## _MAX>;
 #else
 #define DEFINE_ENUM( name, e)                   \
-    using name = enumeration<e, e ## _MAX>;
+    using name = enumeration<e, e ## _MAX>; \
+    template <> MAPNIK_DECL const char ** name ::our_strings_; \
+    template <> MAPNIK_DECL std::string name ::our_name_; \
+    template <> MAPNIK_DECL bool name ::our_verified_flag_;
 #endif
 
 /** Helper macro. Runs the verify_mapnik_enum() method during static initialization.

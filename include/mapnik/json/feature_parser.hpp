@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,25 +25,12 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/json/feature_grammar.hpp>
-
-// boost
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
+// stl
+#include <string>
 
 namespace mapnik { namespace json {
 
-inline bool from_geojson(std::string const& json, mapnik::feature_impl & feature)
-{
-    static const mapnik::transcoder tr("utf8");
-    using iterator_type = char const*;
-    static const mapnik::json::feature_grammar<iterator_type,mapnik::feature_impl> g(tr);
-    using namespace boost::spirit;
-    standard::space_type space;
-    iterator_type start = json.c_str();
-    iterator_type end = start + json.length();
-    return qi::phrase_parse(start, end, (g)(boost::phoenix::ref(feature)), space);
-}
+bool from_geojson(std::string const& json, mapnik::feature_impl & feature);
 
 }}
 

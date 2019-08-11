@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry.hpp>
-
+#include <mapnik/geometry/boost_spirit_karma_adapter.hpp>
 #include <mapnik/json/geometry_generator_grammar_impl.hpp>
 #include <mapnik/json/properties_generator_grammar_impl.hpp>
 #include <mapnik/json/feature_generator_grammar_impl.hpp>
@@ -31,5 +30,5 @@
 using sink_type = std::back_insert_iterator<std::string>;
 
 template struct mapnik::json::properties_generator_grammar<sink_type, mapnik::feature_impl>;
-template struct mapnik::json::feature_generator_grammar<sink_type, mapnik::feature_impl>;
 template struct mapnik::json::geometry_generator_grammar<sink_type, mapnik::geometry::geometry<double> >;
+template struct mapnik::json::feature_generator_grammar<sink_type, mapnik::feature_impl>;

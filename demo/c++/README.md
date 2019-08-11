@@ -52,11 +52,11 @@ If you do not have svn installed you can grab gyp from:
 
 Simply type:
 
-   make
+    make
 
 Then to run do:
 
-   ./rundemo `mapnik-config --prefix`
+    ./rundemo `mapnik-config --prefix`
 
 On OS X you can also create an xcode project:
 

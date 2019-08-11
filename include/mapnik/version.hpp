@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,19 +23,24 @@
 #ifndef MAPNIK_VERSION_HPP
 #define MAPNIK_VERSION_HPP
 
-#define MAPNIK_MAJOR_VERSION 3
+#include <mapnik/stringify_macro.hpp>
+
+#define MAPNIK_MAJOR_VERSION 4
 #define MAPNIK_MINOR_VERSION 0
-#define MAPNIK_PATCH_VERSION 10
+#define MAPNIK_PATCH_VERSION 0
 
-#define MAPNIK_VERSION (MAPNIK_MAJOR_VERSION*100000) + (MAPNIK_MINOR_VERSION*100) + (MAPNIK_PATCH_VERSION)
-
-#ifndef MAPNIK_STRINGIFY
-#define MAPNIK_STRINGIFY(n) MAPNIK_STRINGIFY_HELPER(n)
-#define MAPNIK_STRINGIFY_HELPER(n) #n
-#endif
+#define MAPNIK_VERSION          MAPNIK_MAKE_VERSION(MAPNIK_MAJOR_VERSION, \
+                                                    MAPNIK_MINOR_VERSION, \
+                                                    MAPNIK_PATCH_VERSION)
 
 #define MAPNIK_VERSION_STRING   MAPNIK_STRINGIFY(MAPNIK_MAJOR_VERSION) "." \
                                 MAPNIK_STRINGIFY(MAPNIK_MINOR_VERSION) "." \
                                 MAPNIK_STRINGIFY(MAPNIK_PATCH_VERSION)
+
+#define MAPNIK_VERSION_AT_LEAST(major, minor, patch) \
+        (MAPNIK_VERSION >= MAPNIK_MAKE_VERSION(major, minor, patch))
+
+#define MAPNIK_MAKE_VERSION(major, minor, patch) \
+        ((major) * 100000 + (minor) * 100 + (patch))
 
 #endif // MAPNIK_VERSION_HPP

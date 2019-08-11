@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,14 @@
  *
  *****************************************************************************/
 
-
 #include <iostream>
 #include <vector>
 #include <string>
+#include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
-#include <mapnik/geometry_envelope.hpp>
+//#include <mapnik/util/spatial_index.hpp>
+#include <mapnik/geometry/envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 #include "shape_index_featureset.hpp"
@@ -37,9 +38,14 @@
 #pragma GCC diagnostic pop
 
 const int DEFAULT_DEPTH = 8;
-const double DEFAULT_RATIO=0.55;
+const double DEFAULT_RATIO = 0.55;
 
+#ifdef _WINDOWS
+#include <windows.h>
+int main ()
+#else
 int main (int argc,char** argv)
+#endif
 {
     using namespace mapnik;
     namespace po = boost::program_options;
@@ -66,19 +72,27 @@ int main (int argc,char** argv)
         po::positional_options_description p;
         p.add("shape_files",-1);
         po::variables_map vm;
+#ifdef _WINDOWS
+        std::vector<std::string> args;
+        const auto wargs = po::split_winmain(GetCommandLineW());
+        for( auto it = wargs.begin() + 1; it != wargs.end(); ++it )
+            args.push_back(mapnik::utf16_to_utf8(*it));
+        po::store(po::command_line_parser(args).options(desc).positional(p).run(), vm);
+#else
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+#endif
         po::notify(vm);
 
         if (vm.count("version"))
         {
-            std::clog << "version 0.3.0" <<std::endl;
-            return 1;
+            std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
+            return EXIT_FAILURE;
         }
 
         if (vm.count("help"))
         {
             std::clog << desc << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
         if (vm.count("verbose"))
         {
@@ -105,7 +119,7 @@ int main (int argc,char** argv)
     catch (std::exception const& ex)
     {
         std::clog << "Error: " << ex.what() << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     std::clog << "max tree depth:" << depth << std::endl;
@@ -114,7 +128,7 @@ int main (int argc,char** argv)
     if (shape_files.size() == 0)
     {
         std::clog << "no shape files to index" << std::endl;
-        return 0;
+        return EXIT_FAILURE;
     }
     for (auto const& filename : shape_files)
     {
@@ -164,9 +178,19 @@ int main (int argc,char** argv)
         std::clog << "type=" << shape_type << std::endl;
         std::clog << "extent:" << extent << std::endl;
 
+        if (!extent.valid() || std::isnan(extent.width()) || std::isnan(extent.height()))
+        {
+            std::clog << "Invalid extent aborting..." << std::endl;
+            return EXIT_FAILURE;
+        }
         int pos = 50;
         shx.seek(pos * 2);
-        mapnik::quad_tree<mapnik::detail::node> tree(extent, depth, ratio);
+        mapnik::box2d<float> extent_f { static_cast<float>(extent.minx()),
+                static_cast<float>(extent.miny()),
+                static_cast<float>(extent.maxx()),
+                static_cast<float>(extent.maxy())};
+
+        mapnik::quad_tree<mapnik::detail::node, mapnik::box2d<float> > tree(extent_f, depth, ratio);
         int count = 0;
 
         if (shape_type != shape_io::shape_null)
@@ -182,7 +206,10 @@ int main (int argc,char** argv)
                 int shp_content_length = shp.read_xdr_integer();
                 if (shx_content_length != shp_content_length)
                 {
-                    std::clog << "Content length mismatch for record number " << record_number << std::endl;
+                    if (verbose)
+                    {
+                        std::clog << "Content length mismatch for record number " << record_number << std::endl;
+                    }
                     continue;
                 }
                 shape_type = shp.read_ndr_integer();
@@ -229,7 +256,11 @@ int main (int argc,char** argv)
                             {
                                 std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                             }
-                            tree.insert(mapnik::detail::node(offset * 2, start, end),item_ext);
+                            mapnik::box2d<float> ext_f {static_cast<float>(item_ext.minx()),
+                                    static_cast<float>(item_ext.miny()),
+                                    static_cast<float>(item_ext.maxx()),
+                                    static_cast<float>(item_ext.maxy())};
+                            tree.insert(mapnik::detail::node(offset * 2, start, end, std::move(ext_f)), ext_f);
                             ++count;
                         }
                     }
@@ -246,7 +277,12 @@ int main (int argc,char** argv)
                     {
                         std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                     }
-                    tree.insert(mapnik::detail::node(offset * 2,-1,0),item_ext);
+                    mapnik::box2d<float> ext_f {static_cast<float>(item_ext.minx()),
+                            static_cast<float>(item_ext.miny()),
+                            static_cast<float>(item_ext.maxx()),
+                            static_cast<float>(item_ext.maxy())};
+
+                    tree.insert(mapnik::detail::node(offset * 2, -1, 0, std::move(ext_f)), ext_f);
                     ++count;
                 }
             }
@@ -255,7 +291,11 @@ int main (int argc,char** argv)
         if (count > 0)
         {
             std::clog << " number shapes=" << count << std::endl;
+#ifdef _WINDOWS
+            std::ofstream file(mapnik::utf8_to_utf16(shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
+#else
             std::ofstream file((shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
+#endif
             if (!file)
             {
                 std::clog << "cannot open index file for writing file \""
@@ -273,10 +313,11 @@ int main (int argc,char** argv)
         }
         else
         {
-            std::clog << "No non-empty geometries in shapefile" << std::endl;
+            std::clog << "Failed to read any features from \"" << filename << "\"" << std::endl;
+            return EXIT_FAILURE;
         }
     }
 
     std::clog << "done!" << std::endl;
-    return 0;
+    return EXIT_SUCCESS;
 }

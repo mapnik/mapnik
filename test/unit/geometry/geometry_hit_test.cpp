@@ -2,7 +2,7 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/hit_test_filter.hpp>
-#include <mapnik/geometry_correct.hpp>
+#include <mapnik/geometry/correct.hpp>
 
 TEST_CASE("geometry ops") {
 
@@ -26,17 +26,17 @@ SECTION("hit_test_filter - double") {
     }
     {
         line_string<double> line;
-        line.add_coord(0,0);
-        line.add_coord(1,1);
-        line.add_coord(2,2);
+        line.emplace_back(0,0);
+        line.emplace_back(1,1);
+        line.emplace_back(2,2);
         geometry<double> geom(line);
         REQUIRE( mapnik::hit_test(geom,0,0,1.5) );
     }
     {
         line_string<double> line;
-        line.add_coord(0,0);
-        line.add_coord(1,1);
-        line.add_coord(2,2);
+        line.emplace_back(0,0);
+        line.emplace_back(1,1);
+        line.emplace_back(2,2);
         multi_line_string<double> multi_line;
         multi_line.emplace_back(std::move(line));
         geometry<double> geom(multi_line);
@@ -45,12 +45,12 @@ SECTION("hit_test_filter - double") {
     {
         polygon<double> poly;
         linear_ring<double> ring;
-        ring.add_coord(0,0);
-        ring.add_coord(-10,0);
-        ring.add_coord(-10,10);
-        ring.add_coord(0,10);
-        ring.add_coord(0,0);
-        poly.set_exterior_ring(std::move(ring));
+        ring.emplace_back(0,0);
+        ring.emplace_back(-10,0);
+        ring.emplace_back(-10,10);
+        ring.emplace_back(0,10);
+        ring.emplace_back(0,0);
+        poly.push_back(std::move(ring));
         geometry<double> geom(poly);
         REQUIRE( mapnik::hit_test(geom,-5,5,0) );
 
@@ -77,30 +77,30 @@ SECTION("hit_test_filter - double") {
         // polygon with hole
         polygon<double> poly;
         linear_ring<double> ring;
-        ring.add_coord(0,0);
-        ring.add_coord(-10,0);
-        ring.add_coord(-10,10);
-        ring.add_coord(0,10);
-        ring.add_coord(0,0);
-        poly.set_exterior_ring(std::move(ring));
+        ring.emplace_back(0,0);
+        ring.emplace_back(-10,0);
+        ring.emplace_back(-10,10);
+        ring.emplace_back(0,10);
+        ring.emplace_back(0,0);
+        poly.push_back(std::move(ring));
         linear_ring<double> hole;
-        hole.add_coord(-7,7);
-        hole.add_coord(-7,3);
-        hole.add_coord(-3,3);
-        hole.add_coord(-3,7);
-        hole.add_coord(-7,7);
-        poly.add_hole(std::move(hole));
+        hole.emplace_back(-7,7);
+        hole.emplace_back(-7,3);
+        hole.emplace_back(-3,3);
+        hole.emplace_back(-3,7);
+        hole.emplace_back(-7,7);
+        poly.push_back(std::move(hole));
         geometry<double> geom(poly);
         REQUIRE( !mapnik::hit_test(geom,-5,5,0) );
         // add another hole inside the first hole
         // which should be considered a hit
         linear_ring<double> fill;
-        fill.add_coord(-6,4);
-        fill.add_coord(-6,6);
-        fill.add_coord(-4,6);
-        fill.add_coord(-4,4);
-        fill.add_coord(-6,4);
-        poly.add_hole(std::move(fill));
+        fill.emplace_back(-6,4);
+        fill.emplace_back(-6,6);
+        fill.emplace_back(-4,6);
+        fill.emplace_back(-4,4);
+        fill.emplace_back(-6,4);
+        poly.push_back(std::move(fill));
         REQUIRE( mapnik::hit_test(geometry<double>(poly),-5,5,0) );
     }
 }

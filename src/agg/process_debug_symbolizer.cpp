@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,8 @@
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/util/is_clockwise.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_color_rgba.h"
@@ -41,6 +42,7 @@
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
 #include "agg_conv_stroke.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -178,22 +180,30 @@ struct render_ring_visitor
         }
     }
 
-    void operator()(mapnik::geometry::polygon<double> const& geom) const
+    void operator()(mapnik::geometry::polygon<double> const& poly) const
     {
         agg::rgba8 red(255,0,0,255);
         agg::rgba8 green(0,255,255,255);
         agg::rgba8 black(0,0,0,255);
-        renderer_.draw_ring(geom.exterior_ring,red);
-        if (mapnik::util::is_clockwise(geom.exterior_ring))
+        bool exterior = true;
+        for (auto const& ring : poly)
         {
-            renderer_.draw_outline(geom.exterior_ring,black);
-        }
-        for (auto const& ring : geom.interior_rings)
-        {
-            renderer_.draw_ring(ring,green);
-            if (!mapnik::util::is_clockwise(ring))
+            if (exterior)
             {
-                renderer_.draw_outline(ring,black);
+                exterior = false;
+                renderer_.draw_ring(ring, red);
+                if (mapnik::util::is_clockwise(ring))
+                {
+                    renderer_.draw_outline(ring,black);
+                }
+            }
+            else
+            {
+                renderer_.draw_ring(ring,green);
+                if (!mapnik::util::is_clockwise(ring))
+                {
+                    renderer_.draw_outline(ring,black);
+                }
             }
         }
     }
@@ -224,7 +234,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
 
     if (mode == DEBUG_SYM_MODE_RINGS)
     {
-        RingRenderer<buffer_type> renderer(*ras_ptr,*current_buffer_,common_.t_,prj_trans);
+        RingRenderer<buffer_type> renderer(*ras_ptr, buffers_.top().get(), common_.t_, prj_trans);
         render_ring_visitor<buffer_type> apply(renderer);
         mapnik::util::apply_visitor(apply,feature.get_geometry());
     }
@@ -232,13 +242,13 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     {
         for (auto const& n : *common_.detector_)
         {
-            draw_rect(pixmap_, n.get().box);
+            draw_rect(buffers_.top().get(), n.get().box);
         }
     }
     else if (mode == DEBUG_SYM_MODE_VERTEX)
     {
         using apply_vertex_mode = apply_vertex_mode<buffer_type>;
-        apply_vertex_mode apply(pixmap_, common_.t_, prj_trans);
+        apply_vertex_mode apply(buffers_.top().get(), common_.t_, prj_trans);
         util::apply_visitor(geometry::vertex_processor<apply_vertex_mode>(apply), feature.get_geometry());
     }
 }

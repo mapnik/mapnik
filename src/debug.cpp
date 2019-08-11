@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/stringify_macro.hpp>
 
 // stl
 #include <ctime>
@@ -74,14 +75,7 @@ logger::severity_type logger::severity_level_ {
 
 logger::severity_map logger::object_severity_level_ = logger::severity_map();
 
-
-// format
-
-#define __xstr__(s) __str__(s)
-#define __str__(s) #s
-std::string logger::format_ = __xstr__(MAPNIK_LOG_FORMAT);
-#undef __xstr__
-#undef __str__
+std::string logger::format_ = MAPNIK_STRINGIFY(MAPNIK_LOG_FORMAT);
 
 std::string logger::str()
 {

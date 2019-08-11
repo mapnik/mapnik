@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,7 @@
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
+#include <boost/spirit/home/x3.hpp>
 #pragma GCC diagnostic pop
 
 namespace mapnik {
@@ -58,15 +54,14 @@ inline bool setup_dashes(std::vector<double> & buf, dash_array & dash)
 }
 }
 
+
 bool parse_dasharray(std::string const& value, dash_array & dash)
 {
     using namespace boost::spirit;
-    qi::double_type double_;
-    qi::_1_type _1;
-    qi::lit_type lit;
-    qi::char_type char_;
-    qi::ascii::space_type space;
-    qi::no_skip_type no_skip;
+    using x3::no_skip;
+    using x3::double_;
+    using x3::char_;
+    boost::spirit::x3::ascii::space_type space;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
     // no support for 'percentage' as viewport is unknown at load_map
@@ -74,11 +69,9 @@ bool parse_dasharray(std::string const& value, dash_array & dash)
     std::vector<double> buf;
     auto first = value.begin();
     auto last = value.end();
-    bool r = qi::phrase_parse(first, last,
-                          (double_[boost::phoenix::push_back(boost::phoenix::ref(buf), _1)] %
-                          no_skip[char_(", ")]
-                          | lit("none")),
-                          space);
+    bool r = x3::phrase_parse(first, last,
+                              (double_ % no_skip[char_(", ")] | "none"),
+                              space, buf);
     if (r &&  first == last)
     {
         return setup_dashes(buf, dash);

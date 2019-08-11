@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,8 +35,10 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik {
 
@@ -59,10 +61,10 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 
     thunk_renderer(renderer_type &ren,
                    std::unique_ptr<rasterizer> const& ras_ptr,
-                   buffer_type *buf,
+                   buffer_type & buf,
                    renderer_common &common)
         : ren_(ren), ras_ptr_(ras_ptr), buf_(buf), common_(common),
-          tex_(*buf, HALO_RASTERIZER_FULL, src_over, src_over,
+          tex_(buf, HALO_RASTERIZER_FULL, src_over, src_over,
                common.scale_factor_, common.font_manager_.get_stroker())
     {}
 
@@ -73,13 +75,12 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-        using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
-        using svg_renderer_type = svg::svg_renderer_agg<svg_path_adapter,
-                                                        svg_attribute_type,
-                                                        renderer_type,
-                                                        pixfmt_comp_type>;
+        using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
+                                                    svg_attribute_type,
+                                                    renderer_type,
+                                                    pixfmt_comp_type>;
         ras_ptr_->reset();
-        buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
+        buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -89,7 +90,8 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
-        render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(), offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
+        render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(),
+                             offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
     }
 
     virtual void operator()(raster_marker_render_thunk const& thunk)
@@ -100,7 +102,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
         ras_ptr_->reset();
-        buf_type render_buffer(buf_->bytes(), buf_->width(), buf_->height(), buf_->row_size());
+        buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
         pixfmt_comp_type pixf(render_buffer);
         pixf.comp_op(static_cast<agg::comp_op_e>(thunk.comp_op_));
         renderer_base renb(pixf);
@@ -134,7 +136,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 private:
     renderer_type &ren_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
-    buffer_type *buf_;
+    buffer_type & buf_;
     renderer_common &common_;
     text_renderer_type tex_;
 };
@@ -144,7 +146,7 @@ void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    thunk_renderer<buffer_type> ren(*this, ras_ptr, current_buffer_, common_);
+    thunk_renderer<buffer_type> ren(*this, ras_ptr, buffers_.top().get(), common_);
 
     render_group_symbolizer(
         sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_,

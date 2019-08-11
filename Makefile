@@ -1,7 +1,4 @@
-
 OS := $(shell uname -s)
-
-PYTHON = python
 
 ifeq ($(JOBS),)
 	JOBS:=1
@@ -17,28 +14,10 @@ install:
 	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 release:
-	export MAPNIK_VERSION=$(shell ./utils/mapnik-config/mapnik-config --version) && \
-	export TARBALL_NAME="mapnik-v$${MAPNIK_VERSION}" && \
-	cd /tmp/ && \
-	rm -rf $${TARBALL_NAME} && \
-	git clone --depth 1 --branch v$${MAPNIK_VERSION} git@github.com:mapnik/mapnik.git $${TARBALL_NAME} && \
-	cd $${TARBALL_NAME} && \
-	git checkout "tags/v$${MAPNIK_VERSION}" && \
-	git submodule update --depth 1 --init && \
-	rm -rf test/data/.git && \
-	rm -rf test/data/.gitignore && \
-	rm -rf test/data-visual/.git && \
-	rm -rf test/data-visual/.gitignore && \
-	rm -rf .git && \
-	rm -rf .gitignore && \
-	cd ../ && \
-	tar cjf $${TARBALL_NAME}.tar.bz2 $${TARBALL_NAME}/ && \
-	aws s3 cp --acl public-read $${TARBALL_NAME}.tar.bz2 s3://mapnik/dist/v$${MAPNIK_VERSION}/
+	./scripts/publish_release.sh
 
-python:
-	if [ ! -d ./bindings/python ]; then git clone git@github.com:mapnik/python-mapnik.git --recursive ./bindings/python; else (cd bindings/python && git pull && git submodule update --init); fi;
-	make
-	python bindings/python/test/visual.py -q
+test-release:
+	./scripts/test_release.sh
 
 src/json/libmapnik-json.a:
 	# we first build memory intensive files with -j$(HEAVY_JOBS)
@@ -49,10 +28,19 @@ src/json/libmapnik-json.a:
 		src/renderer_common/render_thunk_extractor.os \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
-		src/css_color_grammar.os \
-		src/expression_grammar.os \
-		src/transform_expression_grammar.os \
-		src/image_filter_grammar.os \
+		src/css_color_grammar_x3.os \
+		src/expression_grammar_x3.os \
+		src/transform_expression_grammar_x3.os \
+		src/image_filter_grammar_x3.os \
+		src/marker_helpers.os \
+		src/svg/svg_transform_parser.os \
+		src/agg/process_line_symbolizer.os \
+		plugins/input/geojson/geojson_datasource.os \
+		src/svg/svg_path_parser.os \
+		src/svg/svg_parser.os \
+		src/svg/svg_points_parser.os \
+		src/svg/svg_transform_parser.os \
+
 
 mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
@@ -70,6 +58,8 @@ clean:
 	@find ./src/ -name "*.so" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./src/ -name "*.a" -exec rm {} \;
+	@find ./ -name "*.gcda" -exec rm {} \;
+	@find ./ -name "*.gcno" -exec rm {} \;
 
 distclean:
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
@@ -82,10 +72,13 @@ rebuild:
 uninstall:
 	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
-test/data:
-	git submodule update --init
+test/data-visual:
+	./scripts/ensure_test_data.sh
 
-test: ./test/data
+test/data:
+	./scripts/ensure_test_data.sh
+
+test: ./test/data test/data-visual
 	@./test/run
 
 check: test
@@ -95,13 +88,6 @@ bench:
 
 demo:
 	cd demo/c++; ./rundemo `mapnik-config --prefix`
-
-pep8:
-	# https://gist.github.com/1903033
-	# gsed on osx
-	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$$//'
-	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$$/{$$d;N;ba' -e '}'
-	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs ged -i '/./,/^$$/!d'
 
 # note: pass --gen-suppressions=yes to create new suppression entries
 grind:

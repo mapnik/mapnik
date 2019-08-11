@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,11 @@
 #include <mapnik/util/variant.hpp>
 // boost
 #include <memory>
-//sqlite3
+
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <sqlite3.h>
+#pragma GCC diagnostic pop
 
 //stl
 #ifdef MAPNIK_DEBUG

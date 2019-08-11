@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,8 +51,10 @@
 #include <map>
 #include <tuple>
 
-// boost
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -92,7 +94,10 @@ enum class property_types : std::uint8_t
     target_vertical_alignment,
     target_upright,
     target_direction,
-    target_font_feature_settings
+    target_font_feature_settings,
+    target_line_pattern,
+    target_smooth_algorithm,
+    target_scaling_method
 };
 
 template <typename T>
@@ -187,6 +192,8 @@ ENUM_FROM_STRING( text_transform_enum )
 ENUM_FROM_STRING( text_upright_enum )
 ENUM_FROM_STRING( direction_enum )
 ENUM_FROM_STRING( gamma_method_enum )
+ENUM_FROM_STRING( line_pattern_enum )
+ENUM_FROM_STRING( smooth_algorithm_enum )
 
 // enum
 template <typename T, bool is_enum = true>
@@ -460,7 +467,7 @@ T get(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return T();
+    return T{};
 }
 
 
@@ -485,7 +492,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return boost::optional<T>();
+    return boost::optional<T>{};
 }
 
 }

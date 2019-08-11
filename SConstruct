@@ -1,6 +1,6 @@
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2015 Artem Pavlenko
+# Copyright (C) 2017 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,6 +16,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+from __future__ import print_function # support python2
 
 import os
 import sys
@@ -33,6 +34,20 @@ try:
 except:
     HAS_DISTUTILS = False
 
+try:
+    # Python 3.3+
+    from shlex import quote as shquote
+except:
+    # Python 2.7
+    from pipes import quote as shquote
+
+try:
+    # Python 3.3+
+    from subprocess import DEVNULL
+except:
+    # Python 2.7
+    DEVNULL = open(os.devnull, 'w')
+
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
 
@@ -41,8 +56,8 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
-DEFAULT_CXX11_LINKFLAGS = ""
+DEFAULT_CXX14_CXXFLAGS = " -std=c++14 -DU_USING_ICU_NAMESPACE=0"
+DEFAULT_CXX14_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
     ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
@@ -61,7 +76,7 @@ SCONS_CONFIGURE_CACHE = 'config.cache'
 SCONF_TEMP_DIR = '.sconf_temp'
 # auto-search directories for boost libs/headers
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
-BOOST_MIN_VERSION = '1.47'
+BOOST_MIN_VERSION = '1.61'
 #CAIRO_MIN_VERSION = '1.8.0'
 
 HARFBUZZ_MIN_VERSION = (0, 9, 34)
@@ -99,7 +114,10 @@ pretty_dep_names = {
     'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
-    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
+    'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
+    'PROJ_LIB':'The directory where proj4 stores its data files. Must exist for proj4 to work correctly',
+    'GDAL_DATA':'The directory where GDAL stores its data files. Must exist for GDAL to work correctly',
+    'ICU_DATA':'The directory where icu stores its data files. If ICU reports a path, it must exist. ICU can also be built without .dat files and in that case this path is empty'
     }
 
 # Core plugin build configuration
@@ -116,6 +134,7 @@ PLUGINS = { # plugins with external dependencies
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'geobuf':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'}
             }
 
@@ -130,10 +149,11 @@ def init_environment(env):
 
 #### SCons build options and initial setup ####
 env = Environment(ENV=os.environ)
+
 init_environment(env)
 
 def fix_path(path):
-    return os.path.abspath(path)
+    return str(os.path.abspath(path))
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -142,22 +162,76 @@ def color_print(color,text,newline=True):
     # 4 - blue
     text = "\033[9%sm%s\033[0m" % (color,text)
     if not newline:
-        print text,
+        print (text, end='')
     else:
-        print text
+        print (text)
 
 def regular_print(color,text,newline=True):
     if not newline:
-        print text,
+        print (text, end = '')
     else:
-        print text
+        print (text)
 
-def call(cmd, silent=False):
-    stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
-    if not stderr:
-        return stdin.strip()
-    elif not silent:
-        color_print(1,'Problem encounted with SCons scripts, please post bug report to: https://github.com/mapnik/mapnik/issues \nError was: %s' % stderr)
+def shell_command(cmd, *args, **kwargs):
+    """ Run command through shell.
+
+    `cmd` should be a valid, properly shell-quoted command.
+
+    Additional positional arguments, if provided, will each
+    be individually quoted as necessary and appended to `cmd`,
+    separated by spaces.
+
+    `logstream` optional keyword argument should be either:
+        - a file-like object, into which the command-line
+          and the command's STDERR output will be written; or
+        - None, in which case STDERR will go to DEVNULL.
+
+    Additional keyword arguments will be passed to `Popen`.
+
+    Returns a tuple `(result, output)` where:
+    `result` = True if the command completed successfully,
+               False otherwise
+    `output` = captured STDOUT with trailing whitespace removed
+    """
+    # `cmd` itself is intentionally not wrapped in `shquote` here
+    # in order to support passing user-provided commands that may
+    # include arguments. For example:
+    #
+    #   ret, out = shell_command(env['CXX'], '--version')
+    #
+    # needs to work even if `env['CXX'] == 'ccache c++'`
+    #
+    if args:
+        cmdstr = ' '.join([cmd] + [shquote(a) for a in args])
+    else:
+        cmdstr = cmd
+    # redirect STDERR to `logstream` if provided
+    try:
+        logstream = kwargs.pop('logstream')
+    except KeyError:
+        logstream = None
+    else:
+        if logstream is not None:
+            logstream.write(cmdstr + '\n')
+            kwargs['stderr'] = logstream
+        else:
+            kwargs['stderr'] = DEVNULL
+    # execute command and capture output
+    proc = Popen(cmdstr, shell=True, stdout=PIPE, **kwargs)
+    out, err = proc.communicate()
+    try:
+        outtext = out.decode(sys.stdout.encoding or 'UTF-8').rstrip()
+    except UnicodeDecodeError:
+        outtext = out.decode('UTF-8', errors='replace').rstrip()
+    if logstream is not None and outtext:
+        logstream.write('->\t' + outtext.replace('\n', '\n->\t') + '\n')
+    return proc.returncode == 0, outtext
+
+def silent_command(cmd, *args):
+    return shell_command(cmd, *args, stderr=DEVNULL)
+
+def config_command(cmd, *args):
+    return shell_command(cmd, *args, logstream=conf.logstream)
 
 def strip_first(string,find,replace=''):
     if string.startswith(find):
@@ -182,13 +256,6 @@ def create_uninstall_target(env, path, is_glob=False):
                 Delete("$SOURCE"),
                 ])
                 env.Alias("uninstall", "uninstall-"+path)
-
-def shortest_name(libs):
-    name = '-'*200
-    for lib in libs:
-        if len(name) > len(lib):
-            name = lib
-    return name
 
 def rm_path(item,set,_env):
     for i in _env[set]:
@@ -241,7 +308,7 @@ def sort_paths(items,priority):
             path_types['other'].append(i)
     # build up new list based on priority list
     for path in priority:
-        if path_types.has_key(path):
+        if path in path_types:
             dirs = path_types[path]
             new.extend(dirs)
             path_types.pop(path)
@@ -293,8 +360,7 @@ opts.AddVariables(
     EnumVariable('OPTIMIZATION','Set compiler optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
-    BoolVariable('DEBUG_UNDEFINED', 'Compile a version of Mapnik using clang/llvm undefined behavior asserts', 'False'),
-    BoolVariable('DEBUG_SANITIZE', 'Compile a version of Mapnik using clang/llvm address sanitation', 'False'),
+    BoolVariable('COVERAGE', 'Compile a libmapnik and plugins with --coverage', 'False'),
     ListVariable('INPUT_PLUGINS','Input drivers to include',DEFAULT_PLUGINS,PLUGINS.keys()),
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
 
@@ -303,6 +369,8 @@ opts.AddVariables(
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     BoolVariable('NO_ATEXIT', 'Will prevent Singletons from being deleted atexit of main thread', 'False'),
+    BoolVariable('NO_DLCLOSE', 'Will prevent plugins from being unloaded', 'False'),
+    BoolVariable('ENABLE_GLIBC_WORKAROUND', "Workaround known GLIBC symbol exports to allow building against libstdc++-4.8 without binaries needing throw_out_of_range_fmt", 'False'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
     BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
@@ -317,7 +385,6 @@ opts.AddVariables(
     ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths (create multiple excludes separated by :)', ''),
     ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
     ('MAPNIK_NAME', 'Name of library', 'mapnik'),
-    BoolVariable('MAPNIK_BUNDLED_SHARE_DIRECTORY', 'For portable packaging: instruct mapnik-config to report relative paths to bundled GDAL_DATA, PROJ_LIB, and ICU_DATA','False'),
 
     # Boost variables
     # default is '/usr/include', see FindBoost method below
@@ -406,6 +473,7 @@ opts.AddVariables(
     BoolVariable('MAPNIK_RENDER', 'Compile and install a utility to render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
+    BoolVariable('QUIET', 'Reduce build verbosity', 'False'),
     )
 
 # variables to pickle after successful configure step
@@ -471,7 +539,11 @@ pickle_store = [# Scons internal variables
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER',
         'BIGINT',
-        'HOST'
+        'HOST',
+        'QUERIED_GDAL_DATA',
+        'QUERIED_ICU_DATA',
+        'QUERIED_PROJ_LIB',
+        'QUIET'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -480,6 +552,12 @@ pickle_store = [# Scons internal variables
 for opt in opts.options:
     if opt.key not in pickle_store:
         pickle_store.append(opt.key)
+
+def rollback_option(env, variable):
+    global opts
+    for item in opts.options:
+        if item.key == variable:
+            env[variable] = item.default
 
 # Method of adding configure behavior to Scons adapted from:
 # http://freeorion.svn.sourceforge.net/svnroot/freeorion/trunk/FreeOrion/SConstruct
@@ -502,7 +580,7 @@ elif HELP_REQUESTED:
 # https://github.com/mapnik/mapnik/issues/2112
 if not os.path.exists(SCONS_LOCAL_LOG) and not os.path.exists(SCONS_CONFIGURE_CACHE) \
   and ('-c' in command_line_args or '--clean' in command_line_args):
-    print 'all good: nothing to clean, but you might want to run "make distclean"'
+    print ('all good: nothing to clean, but you might want to run "make distclean"')
     Exit(0)
 
 # initially populate environment with defaults and any possible custom arguments
@@ -512,7 +590,7 @@ opts.Update(env)
 if not force_configure:
     if os.path.exists(SCONS_CONFIGURE_CACHE):
         try:
-            pickled_environment = open(SCONS_CONFIGURE_CACHE, 'r')
+            pickled_environment = open(SCONS_CONFIGURE_CACHE, 'rb')
             pickled_values = pickle.load(pickled_environment)
             for key, value in pickled_values.items():
                 env[key] = value
@@ -544,7 +622,7 @@ elif preconfigured:
         color_print(4,'Using previous successful configuration...')
         color_print(4,'Re-configure by running "python scons/scons.py configure".')
 
-if env.has_key('COLOR_PRINT') and env['COLOR_PRINT'] == False:
+if 'COLOR_PRINT' in env and env['COLOR_PRINT'] == False:
     color_print = regular_print
 
 if sys.platform == "win32":
@@ -554,13 +632,13 @@ color_print(4,'\nWelcome to Mapnik...\n')
 
 #### Custom Configure Checks ###
 
-def prioritize_paths(context,silent=True):
+def prioritize_paths(context, silent=True):
     env = context.env
     prefs = env['LINK_PRIORITY'].split(',')
     if not silent:
         context.Message( 'Sorting lib and inc compiler paths...')
-    env['LIBPATH'] = sort_paths(env['LIBPATH'],prefs)
-    env['CPPPATH'] = sort_paths(env['CPPPATH'],prefs)
+    env['LIBPATH'] = sort_paths(env['LIBPATH'], prefs)
+    env['CPPPATH'] = sort_paths(env['CPPPATH'], prefs)
     if silent:
         context.did_show_result=1
     ret = context.Result( True )
@@ -568,19 +646,22 @@ def prioritize_paths(context,silent=True):
 
 def CheckPKGConfig(context, version):
     context.Message( 'Checking for pkg-config... ' )
-    ret = context.TryAction('pkg-config --atleast-pkgconfig-version=%s' % version)[0]
+    context.sconf.cached = False
+    ret, _ = config_command('pkg-config --atleast-pkgconfig-version', version)
     context.Result( ret )
     return ret
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
-    ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    context.sconf.cached = False
+    ret, _ = config_command('pkg-config --exists', name)
     context.Result( ret )
     return ret
 
 def CheckPKGVersion(context, name, version):
     context.Message( 'Checking for at least version %s for %s... ' % (version,name) )
-    ret = context.TryAction('pkg-config --atleast-version=%s \'%s\'' % (version,name))[0]
+    context.sconf.cached = False
+    ret, _ = config_command('pkg-config --atleast-version', version, name)
     context.Result( ret )
     return ret
 
@@ -591,8 +672,9 @@ def parse_config(context, config, checks='--libs --cflags'):
     if config in ('GDAL_CONFIG'):
         toolname += ' %s' % checks
     context.Message( 'Checking for %s... ' % toolname)
-    cmd = '%s %s' % (env[config],checks)
-    ret = context.TryAction(cmd)[0]
+    context.sconf.cached = False
+    cmd = '%s %s' % (env[config], checks)
+    ret, value = config_command(cmd)
     parsed = False
     if ret:
         try:
@@ -603,7 +685,6 @@ def parse_config(context, config, checks='--libs --cflags'):
                 # and thus breaks knowledge below that gdal worked
                 # TODO - upgrade our scons logic to support Framework linking
                 if env['PLATFORM'] == 'Darwin':
-                    value = call(cmd,silent=True)
                     if value and '-framework GDAL' in value:
                         env['LIBS'].append('gdal')
                         if os.path.exists('/Library/Frameworks/GDAL.framework/unix/lib'):
@@ -613,15 +694,15 @@ def parse_config(context, config, checks='--libs --cflags'):
             else:
                 env.ParseConfig(cmd)
             parsed = True
-        except OSError, e:
+        except OSError as e:
             ret = False
-            print ' (xml2-config not found!)'
+            print (' (xml2-config not found!)')
     if not parsed:
         if config in ('GDAL_CONFIG'):
             # optional deps...
             if tool not in env['SKIPPED_DEPS']:
                 env['SKIPPED_DEPS'].append(tool)
-            conf.rollback_option(config)
+            rollback_option(env, config)
         else: # freetype and libxml2, not optional
             if tool not in env['MISSING_DEPS']:
                 env['MISSING_DEPS'].append(tool)
@@ -633,25 +714,24 @@ def get_pkg_lib(context, config, lib):
     libname = None
     env = context.env
     context.Message( 'Checking for name of %s library... ' % lib)
-    cmd = '%s --libs' % env[config]
-    ret = context.TryAction(cmd)[0]
+    context.sconf.cached = False
+    ret, value = config_command(env[config], '--libs')
     parsed = False
     if ret:
         try:
-            value = call(cmd,silent=True)
             if ' ' in value:
                 parts = value.split(' ')
                 if len(parts) > 1:
                     value = parts[1]
-            libnames = re.findall(libpattern,value)
+            libnames = re.findall(libpattern, value)
             if libnames:
                 libname = libnames[0]
             else:
                 # osx 1.8 install gives '-framework GDAL'
                 libname = 'gdal'
-        except Exception, e:
+        except Exception as e:
             ret = False
-            print ' unable to determine library name:'# %s' % str(e)
+            print (' unable to determine library name:# {0!s}'.format(e))
             return None
     context.Result( libname )
     return libname
@@ -661,36 +741,32 @@ def parse_pg_config(context, config):
     env = context.env
     tool = config.lower()
     context.Message( 'Checking for %s... ' % tool)
-    ret = context.TryAction(env[config])[0]
+    context.sconf.cached = False
+    ret, lib_path = config_command(env[config], '--libdir')
+    ret, inc_path = config_command(env[config], '--includedir')
     if ret:
-        lib_path = call('%s --libdir' % env[config])
-        inc_path = call('%s --includedir' % env[config])
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
         lpq = env['PLUGINS']['postgis']['lib']
         env.Append(LIBS = lpq)
     else:
         env['SKIPPED_DEPS'].append(tool)
-        conf.rollback_option(config)
+        rollback_option(env, config)
     context.Result( ret )
     return ret
 
 def ogr_enabled(context):
     env = context.env
     context.Message( 'Checking if gdal is ogr enabled... ')
-    ret = context.TryAction('%s --ogr-enabled' % env['GDAL_CONFIG'])[0]
+    context.sconf.cached = False
+    ret, out = config_command(env['GDAL_CONFIG'], '--ogr-enabled')
+    if ret and out:
+        ret = (out == 'yes')
     if not ret:
         if 'ogr' not in env['SKIPPED_DEPS']:
             env['SKIPPED_DEPS'].append('ogr')
     context.Result( ret )
     return ret
-
-def rollback_option(context,variable):
-    global opts
-    env = context.env
-    for item in opts.options:
-        if item.key == variable:
-            env[variable] = item.default
 
 def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
@@ -703,11 +779,7 @@ def FindBoost(context, prefixes, thread_flag):
     BOOST_INCLUDE_DIR = None
     BOOST_APPEND = None
     env['BOOST_APPEND'] = str()
-
-    if env['THREADING'] == 'multi':
-        search_lib = 'libboost_thread'
-    else:
-        search_lib = 'libboost_filesystem'
+    search_lib = 'libboost_filesystem'
 
     # note: must call normpath to strip trailing slash otherwise dirname
     # does not remove 'lib' and 'include'
@@ -721,7 +793,7 @@ def FindBoost(context, prefixes, thread_flag):
         if len(libItems) >= 1 and len(incItems) >= 1:
             BOOST_LIB_DIR = os.path.dirname(libItems[0])
             BOOST_INCLUDE_DIR = incItems[0].rstrip('boost/')
-            shortest_lib_name = shortest_name(libItems)
+            shortest_lib_name = min(libItems, key=len)
             match = re.search(r'%s(.*)\..*' % search_lib, shortest_lib_name)
             if hasattr(match,'groups'):
                 BOOST_APPEND = match.groups()[0]
@@ -802,12 +874,134 @@ int main()
     context.Result(ret)
     return ret
 
+def CheckIcuData(context, silent=False):
+
+    if not silent:
+        context.Message('Checking for ICU data directory...')
+    ret, out = context.TryRun("""
+
+#include <unicode/putil.h>
+#include <iostream>
+
+int main() {
+    std::string result = u_getDataDirectory();
+    std::cout << result;
+    if (result.empty()) {
+        return -1;
+    }
+    return 0;
+}
+
+""", '.cpp')
+    if silent:
+        context.did_show_result=1
+    if ret:
+        value = out.strip()
+        context.Result('u_getDataDirectory returned %s' % value)
+        return value
+    else:
+        ret, value = config_command('icu-config --icudatadir')
+        if ret:
+            context.Result('icu-config returned %s' % value)
+            return value
+        else:
+            context.Result('Failed to detect (mapnik-config will have null value)')
+            return ''
+
+
+def CheckGdalData(context, silent=False):
+
+    if not silent:
+        context.Message('Checking for GDAL data directory... ')
+    ret, out = context.TryRun("""
+
+#include "cpl_config.h"
+#include <iostream>
+
+int main() {
+    std::cout << GDAL_PREFIX << "/share/gdal" << std::endl;
+    return 0;
+}
+
+""", '.cpp')
+    value = out.strip()
+    if silent:
+        context.did_show_result=1
+    if ret:
+        context.Result('GDAL_PREFIX returned %s' % value)
+    else:
+        context.Result('Failed to detect (mapnik-config will have null value)')
+    return value
+
+def CheckProjData(context, silent=False):
+
+    if not silent:
+        context.Message('Checking for PROJ_LIB directory...')
+    ret, out = context.TryRun("""
+
+// This is narly, could eventually be replaced using https://github.com/OSGeo/proj.4/pull/551]
+#include <proj_api.h>
+#include <iostream>
+#include <cstring>
+
+static void my_proj4_logger(void * user_data, int /*level*/, const char * msg)
+{
+    std::string* posMsg = static_cast<std::string*>(user_data);
+    *posMsg += msg;
+}
+
+// https://github.com/OSGeo/gdal/blob/ddbf6d39aa4b005a77ca4f27c2d61a3214f336f8/gdal/alg/gdalapplyverticalshiftgrid.cpp#L616-L633
+
+std::string find_proj_path(const char * pszFilename) {
+    std::string osMsg;
+    std::string osFilename;
+    projCtx ctx = pj_ctx_alloc();
+    pj_ctx_set_app_data(ctx, &osMsg);
+    pj_ctx_set_debug(ctx, PJ_LOG_DEBUG_MAJOR);
+    pj_ctx_set_logger(ctx, my_proj4_logger);
+    PAFile f = pj_open_lib(ctx, pszFilename, "rb");
+    if( f )
+    {
+        pj_ctx_fclose(ctx, f);
+    }
+    size_t nPos = osMsg.find("fopen(");
+    if( nPos != std::string::npos )
+    {
+        osFilename = osMsg.substr(nPos + strlen("fopen("));
+        nPos = osFilename.find(")");
+        if( nPos != std::string::npos )
+            osFilename = osFilename.substr(0, nPos);
+    }
+    pj_ctx_free(ctx);
+    return osFilename;
+}
+
+
+int main() {
+    std::string result = find_proj_path(" ");
+    std::cout << result;
+    if (result.empty()) {
+        return -1;
+    }
+    return 0;
+}
+
+""", '.cpp')
+    value = out.strip()
+    if silent:
+        context.did_show_result=1
+    if ret:
+        context.Result('pj_open_lib returned %s' % value)
+    else:
+        context.Result('Failed to detect (mapnik-config will have null value)')
+    return value
+
 def CheckCairoHasFreetype(context, silent=False):
     if not silent:
         context.Message('Checking for cairo freetype font support ... ')
     context.env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
 
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <cairo-features.h>
 
@@ -820,7 +1014,7 @@ int main()
     #endif
 }
 
-""", '.cpp')[0]
+""", '.cpp')
     if silent:
         context.did_show_result=1
     context.Result(ret)
@@ -847,7 +1041,7 @@ int main()
     return ret
 
 def GetBoostLibVersion(context):
-    ret = context.TryRun("""
+    ret, out = context.TryRun("""
 
 #include <boost/version.hpp>
 #include <iostream>
@@ -862,8 +1056,8 @@ return 0;
 """, '.cpp')
     # hack to avoid printed output
     context.did_show_result=1
-    context.Result(ret[0])
-    return ret[1].strip()
+    context.Result(ret)
+    return out.strip()
 
 def CheckBoostScopedEnum(context, silent=False):
     if not silent:
@@ -883,8 +1077,9 @@ int main()
     context.Result(ret)
     return ret
 
-def icu_at_least_four_two(context):
-    ret = context.TryRun("""
+def icu_at_least(context, min_version_str):
+    context.Message('Checking for ICU version >= %s... ' % min_version_str)
+    ret, out = context.TryRun("""
 
 #include <unicode/uversion.h>
 #include <iostream>
@@ -896,27 +1091,31 @@ int main()
 }
 
 """, '.cpp')
-    # hack to avoid printed output
-    context.Message('Checking for ICU version >= 4.2... ')
-    context.did_show_result=1
-    result = ret[1].strip()
-    if not result:
-        context.Result('error, could not get major and minor version from unicode/uversion.h')
+    try:
+        found_version_str = out.strip()
+        found_version = tuple(map(int, found_version_str.split('.')))
+        min_version = tuple(map(int, min_version_str.split('.')))
+    except:
+        context.Result('error (could not get version from unicode/uversion.h)')
         return False
 
-    major, minor = map(int,result.split('.'))
-    if major >= 4 and minor >= 0:
-        color_print(4,'found: icu %s' % result)
+    if found_version >= min_version:
+        context.Result('yes (found ICU %s)' % found_version_str)
         return True
 
-    color_print(1,'\nFound insufficient icu version... %s' % result)
+    context.Result('no (found ICU %s)' % found_version_str)
     return False
 
 def harfbuzz_version(context):
-    ret = context.TryRun("""
+    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
+    ret, out = context.TryRun("""
 
 #include "harfbuzz/hb.h"
 #include <iostream>
+
+#ifndef HB_VERSION_ATLEAST
+#define HB_VERSION_ATLEAST(...) 0
+#endif
 
 int main()
 {
@@ -925,24 +1124,20 @@ int main()
 }
 
 """ % HARFBUZZ_MIN_VERSION, '.cpp')
-    # hack to avoid printed output
-    context.Message('Checking for HarfBuzz version >= %s... ' % HARFBUZZ_MIN_VERSION_STRING)
-    context.did_show_result=1
-    result = ret[1].strip()
-    if not result:
-        context.Result('error, could not get version from hb.h')
-        return False
-
-    items = result.split(';')
-    if items[0] == '1':
-        color_print(4,'found: HarfBuzz %s' % items[1])
-        return True
-
-    color_print(1,'\nHarfbuzz >= %s required but found ... %s' % (HARFBUZZ_MIN_VERSION_STRING,items[1]))
-    return False
+    if not ret:
+        context.Result('error (could not get version from hb.h)')
+    else:
+        ok_str, found_version_str = out.strip().split(';', 1)
+        ret = int(ok_str)
+        if ret:
+            context.Result('yes (found HarfBuzz %s)' % found_version_str)
+        else:
+            context.Result('no (found HarfBuzz %s)' % found_version_str)
+    return ret
 
 def harfbuzz_with_freetype_support(context):
-    ret = context.TryRun("""
+    context.Message('Checking for HarfBuzz with freetype support... ')
+    ret, out = context.TryRun("""
 
 #include "harfbuzz/hb-ft.h"
 #include <iostream>
@@ -953,11 +1148,8 @@ int main()
 }
 
 """, '.cpp')
-    context.Message('Checking for HarfBuzz with freetype support\n')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
@@ -966,7 +1158,8 @@ def boost_regex_has_icu(context):
             if lib_name in context.env['LIBS']:
                 context.env['LIBS'].remove(lib_name)
             context.env.Append(LIBS=lib_name)
-    ret = context.TryRun("""
+    context.Message('Checking if boost_regex was built with ICU unicode support... ')
+    ret, out = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
 #include <unicode/unistr.h>
@@ -986,11 +1179,8 @@ int main()
 }
 
 """, '.cpp')
-    context.Message('Checking if boost_regex was built with ICU unicode support... ')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 def sqlite_has_rtree(context, silent=False):
     """ check an sqlite3 install has rtree support.
@@ -999,7 +1189,9 @@ def sqlite_has_rtree(context, silent=False):
     http://www.sqlite.org/c3ref/compileoption_get.html
     """
 
-    ret = context.TryRun("""
+    if not silent:
+        context.Message('Checking if SQLite supports RTREE... ')
+    ret, out = context.TryRun("""
 
 #include <sqlite3.h>
 #include <stdio.h>
@@ -1031,21 +1223,19 @@ int main()
 }
 
 """, '.c')
-    if not silent:
-        context.Message('Checking if SQLite supports RTREE... ')
     if silent:
         context.did_show_result=1
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
-def supports_cxx11(context,silent=False):
-    ret = context.TryRun("""
+def supports_cxx14(context,silent=False):
+    if not silent:
+        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
+    ret, out = context.TryRun("""
 
 int main()
 {
-#if __cplusplus >= 201103
+#if __cplusplus >= 201402L
     return 0;
 #else
     return -1;
@@ -1053,14 +1243,10 @@ int main()
 }
 
 """, '.cpp')
-    if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++11 flag... ' % context.env.get('CXX','CXX'))
     if silent:
         context.did_show_result=1
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
+    context.Result(ret)
+    return ret
 
 
 
@@ -1070,6 +1256,9 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGVersion'       : CheckPKGVersion,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
+               'CheckIcuData'          : CheckIcuData,
+               'CheckProjData'         : CheckProjData,
+               'CheckGdalData'         : CheckGdalData,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
                'CheckHasDlfcn'         : CheckHasDlfcn,
                'GetBoostLibVersion'    : GetBoostLibVersion,
@@ -1077,13 +1266,12 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'parse_pg_config'       : parse_pg_config,
                'ogr_enabled'           : ogr_enabled,
                'get_pkg_lib'           : get_pkg_lib,
-               'rollback_option'       : rollback_option,
-               'icu_at_least_four_two' : icu_at_least_four_two,
+               'icu_at_least'          : icu_at_least,
                'harfbuzz_version'      : harfbuzz_version,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
-               'supports_cxx11'        : supports_cxx11,
+               'supports_cxx14'        : supports_cxx14,
                'CheckBoostScopedEnum'  : CheckBoostScopedEnum,
                }
 
@@ -1117,7 +1305,7 @@ if not preconfigured:
                 if os.path.exists(conf):
                     opts.files.append(conf)
                     color_print(4,"SCons CONFIG found: '%s', variables will be inherited..." % conf)
-                    optfile = file(conf)
+                    optfile = open(conf, 'r')
                     #print optfile.read().replace("\n", " ").replace("'","").replace(" = ","=")
                     optfile.close()
 
@@ -1132,6 +1320,7 @@ if not preconfigured:
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
 
+
     conf = Configure(env, custom_tests = conf_tests)
 
     if env['DEBUG']:
@@ -1139,8 +1328,17 @@ if not preconfigured:
     else:
         mode = 'release mode'
 
+    if env['COVERAGE']:
+        mode += ' (with coverage)'
+
     env['PLATFORM'] = platform.uname()[0]
     color_print(4,"Configuring on %s in *%s*..." % (env['PLATFORM'],mode))
+
+    ret, cxx_version = config_command(env['CXX'], '--version')
+    if ret:
+        color_print(5, "C++ compiler: %s" % cxx_version)
+    else:
+        color_print(5, "Could not detect C++ compiler")
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
@@ -1159,6 +1357,10 @@ if not preconfigured:
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
     env['SQLITE_LINKFLAGS'] = []
+    env['QUERIED_PROJ_LIB'] = None
+    env['QUERIED_ICU_DATA'] = None
+    env['QUERIED_GDAL_DATA'] = None
+
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1213,13 +1415,13 @@ if not preconfigured:
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
-        DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
-        DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
+        DEFAULT_CXX14_CXXFLAGS += ' -stdlib=libc++'
+        DEFAULT_CXX14_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
-    env.Append(CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
+    env.Append(CXXFLAGS = DEFAULT_CXX14_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
-    env.Append(LINKFLAGS = DEFAULT_CXX11_LINKFLAGS)
+    env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
@@ -1259,6 +1461,7 @@ if not preconfigured:
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
     ]
 
+    CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
         REQUIRED_LIBSHEADERS.insert(0,['freetype','ft2build.h',True,'C'])
         if env.get('FREETYPE_INCLUDES'):
@@ -1267,6 +1470,21 @@ if not preconfigured:
         if env.get('FREETYPE_LIBS'):
             lib_path = env['FREETYPE_LIBS']
             env.AppendUnique(LIBPATH = fix_path(lib_path))
+    elif CHECK_PKG_CONFIG and conf.CheckPKG('freetype2'):
+        # Freetype 2.9+ doesn't use freetype-config and uses pkg-config instead
+        cmd = 'pkg-config freetype2 --libs --cflags'
+        if env['RUNTIME_LINK'] == 'static':
+            cmd += ' --static'
+
+        temp_env = Environment(ENV=os.environ)
+        try:
+            temp_env.ParseConfig(cmd)
+            for lib in temp_env['LIBS']:
+                env.AppendUnique(LIBPATH = fix_path(lib))
+            for inc in temp_env['CPPPATH']:
+                env.AppendUnique(CPPPATH = fix_path(inc))
+        except OSError as e:
+            pass
     elif conf.parse_config('FREETYPE_CONFIG'):
         # check if freetype links to bz2
         if env['RUNTIME_LINK'] == 'static':
@@ -1277,7 +1495,7 @@ if not preconfigured:
                 temp_env.ParseConfig('%s --libs' % env['FREETYPE_CONFIG'])
                 if 'bz2' in temp_env['LIBS']:
                     env['EXTRA_FREETYPE_LIBS'].append('bz2')
-            except OSError,e:
+            except OSError as e:
                 pass
 
     # libxml2 should be optional but is currently not
@@ -1353,9 +1571,9 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
 
-    # test for C++11 support, which is required
-    if not env['HOST'] and not conf.supports_cxx11():
-        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler to at least g++ 4.7 (ideally 4.8)")
+    # test for C++14 support, which is required
+    if not env['HOST'] and not conf.supports_cxx14():
+        color_print(1,"C++ compiler does not support C++14 standard (-std=c++14), which is required. Please upgrade your compiler")
         Exit(1)
 
     if not env['HOST']:
@@ -1370,7 +1588,7 @@ if not preconfigured:
             else:
                 if libname == env['ICU_LIB_NAME']:
                     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-                        if not conf.icu_at_least_four_two():
+                        if not conf.icu_at_least("4.0"):
                             # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
                             env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
                 elif libname == 'harfbuzz':
@@ -1407,15 +1625,6 @@ if not preconfigured:
             ['program_options', 'boost/program_options.hpp', False]
         ]
 
-        if env['THREADING'] == 'multi':
-            BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-            # on solaris the configure checks for boost_thread
-            # require the -pthreads flag to be able to check for
-            # threading support, so we add as a global library instead
-            # of attaching to cxxflags after configure
-            if env['PLATFORM'] == 'SunOS':
-                env.Append(CXXFLAGS = '-pthreads')
-
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
         if env['PRIORITIZE_LINKING']:
             conf.prioritize_paths(silent=True)
@@ -1447,12 +1656,13 @@ if not preconfigured:
         # just turn it off like this, but seems the only available work-
         # around. See https://svn.boost.org/trac/boost/ticket/6779 for more
         # details.
-        boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_')]
-        if not conf.CheckBoostScopedEnum():
-            if boost_version < [1, 51]:
-                env.Append(CXXFLAGS = '-DBOOST_NO_SCOPED_ENUMS')
-            elif boost_version < [1, 57]:
-                env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
+        if not env['HOST']:
+            if not conf.CheckBoostScopedEnum():
+                boost_version = [int(x) for x in env.get('BOOST_LIB_VERSION_FROM_HEADER').split('_') if x]
+                if boost_version < [1, 51]:
+                    env.Append(CXXFLAGS = '-DBOOST_NO_SCOPED_ENUMS')
+                elif boost_version < [1, 57]:
+                    env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
 
     if not env['HOST'] and env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
@@ -1484,7 +1694,29 @@ if not preconfigured:
     if env['HOST']:
         SQLITE_HAS_RTREE = True
 
-    CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
+    if not env['HOST']:
+        env['QUERIED_PROJ_LIB'] = conf.CheckProjData()
+        if os.environ.get('PROJ_LIB'):
+            env['QUERIED_PROJ_LIB'] = os.environ['PROJ_LIB']
+            color_print(4,'Detected PROJ_LIB in environ, using env value instead: %s' % os.environ['PROJ_LIB'] )
+        env['QUERIED_ICU_DATA'] = conf.CheckIcuData()
+        if os.environ.get('ICU_DATA'):
+            env['QUERIED_ICU_DATA'] = os.environ['ICU_DATA']
+            color_print(4,'Detected ICU_DATA in environ, using env value instead: %s' % os.environ['ICU_DATA'] )
+        env['QUERIED_GDAL_DATA'] = conf.CheckGdalData()
+        if os.environ.get('GDAL_DATA'):
+            env['QUERIED_GDAL_DATA'] = os.environ['GDAL_DATA']
+            color_print(4,'Detected GDAL_DATA in environ, using env value instead: %s' % os.environ['GDAL_DATA'] )
+        # now validate the paths actually exist
+        if env['QUERIED_PROJ_LIB'] and not os.path.exists(env['QUERIED_PROJ_LIB']):
+            color_print(1,'%s not detected on your system' % env['QUERIED_PROJ_LIB'] )
+            env['MISSING_DEPS'].append('PROJ_LIB')
+        if env['QUERIED_GDAL_DATA'] and not os.path.exists(env['QUERIED_GDAL_DATA']):
+            color_print(1,'%s not detected on your system' % env['QUERIED_GDAL_DATA'] )
+            env['MISSING_DEPS'].append('GDAL_DATA')
+        if env['QUERIED_ICU_DATA'] and not os.path.exists(env['QUERIED_ICU_DATA']):
+            color_print(1,'%s not detected on your system' % env['QUERIED_ICU_DATA'] )
+            env['MISSING_DEPS'].append('ICU_DATA')
 
     if len(env['REQUESTED_PLUGINS']):
         if env['HOST']:
@@ -1561,7 +1793,7 @@ if not preconfigured:
                                         if not lib in env['LIBS']:
                                             env["SQLITE_LINKFLAGS"].append(lib)
                                             env.Append(LIBS=lib)
-                                except OSError,e:
+                                except OSError as e:
                                     for lib in ["sqlite3","dl","pthread"]:
                                         if not lib in env['LIBS']:
                                             env["SQLITE_LINKFLAGS"].append("lib")
@@ -1605,6 +1837,10 @@ if not preconfigured:
     # prepend to make sure we link locally
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
+    env.Prepend(CPPPATH = '#deps/mapbox/variant/include')
+    env.Prepend(CPPPATH = '#deps/mapbox/geometry/include')
+    env.Prepend(CPPPATH = '#deps/mapbox/protozero/include')
+    env.Prepend(CPPPATH = '#deps/mapbox/polylabel/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
@@ -1643,7 +1879,7 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairo')
             else:
-                print 'Checking for cairo lib and include paths... ',
+                print ('Checking for cairo lib and include paths... ', end = '')
                 cmd = 'pkg-config --libs --cflags cairo'
                 if env['RUNTIME_LINK'] == 'static':
                     cmd += ' --static'
@@ -1660,8 +1896,8 @@ if not preconfigured:
                         if not inc in env['CPPPATH']:
                             env["CAIRO_CPPPATHS"].append(inc)
                     env['HAS_CAIRO'] = True
-                    print 'yes'
-                except OSError,e:
+                    print ('yes')
+                except OSError as e:
                     color_print(1,'no')
                     env['SKIPPED_DEPS'].append('cairo')
                     color_print(1,'pkg-config reported: %s' % e)
@@ -1727,6 +1963,12 @@ if not preconfigured:
         if env['NO_ATEXIT']:
             env.Append(CPPDEFINES = '-DMAPNIK_NO_ATEXIT')
 
+        if env['NO_DLCLOSE'] or env['COVERAGE']:
+            env.Append(CPPDEFINES = '-DMAPNIK_NO_DLCLOSE')
+
+        if env['ENABLE_GLIBC_WORKAROUND']:
+            env.Append(CPPDEFINES = '-DMAPNIK_ENABLE_GLIBC_WORKAROUND')
+
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
             pthread = ''
@@ -1786,21 +2028,15 @@ if not preconfigured:
 
         # Common flags for g++/clang++ CXX compiler.
         # TODO: clean up code more to make -Wextra -Wsign-compare -Wsign-conversion -Wconversion viable
-        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare -Wshadow ' % (env['WARNING_CXXFLAGS'], pthread)
+        # -Wfloat-equal -Wold-style-cast -Wexit-time-destructors -Wglobal-constructors -Wreserved-id-macro -Wheader-hygiene -Wmissing-noreturn
+        common_cxx_flags = '-fvisibility=hidden -fvisibility-inlines-hidden -Wall %s %s -ftemplate-depth-300 -Wsign-compare ' % (env['WARNING_CXXFLAGS'], pthread)
 
         if 'clang++' in env['CXX']:
-            common_cxx_flags += ' -Wno-unsequenced '
-
+            common_cxx_flags += ' -Wno-unsequenced  -Wtautological-compare -Wheader-hygiene '
         if env['DEBUG']:
             env.Append(CXXFLAGS = common_cxx_flags + '-O0')
         else:
             env.Append(CXXFLAGS = common_cxx_flags + '-O%s' % (env['OPTIMIZATION']))
-        if env['DEBUG_UNDEFINED']:
-            env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
-
-        if env['DEBUG_SANITIZE']:
-            env.Append(CXXFLAGS = ['-fsanitize=address'])
-            env.Append(LINKFLAGS = ['-fsanitize=address'])
 
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
@@ -1809,31 +2045,31 @@ if not preconfigured:
 
         # finish config stage and pickle results
         env = conf.Finish()
-        env_cache = open(SCONS_CONFIGURE_CACHE, 'w')
+        env_cache = open(SCONS_CONFIGURE_CACHE, 'wb')
         pickle_dict = {}
         for i in pickle_store:
             pickle_dict[i] = env.get(i)
-        pickle.dump(pickle_dict,env_cache)
+        pickle.dump(pickle_dict, env_cache)
         env_cache.close()
         # fix up permissions on configure outputs
         # this is hackish but avoids potential problems
         # with a non-root configure following a root install
         # that also triggered a re-configure
         try:
-            os.chmod(SCONS_CONFIGURE_CACHE,0666)
+            os.chmod(SCONS_CONFIGURE_CACHE,0o666)
         except: pass
         try:
-            os.chmod(SCONS_LOCAL_CONFIG,0666)
+            os.chmod(SCONS_LOCAL_CONFIG,0o666)
         except: pass
         try:
-            os.chmod('.sconsign.dblite',0666)
+            os.chmod('.sconsign.dblite',0o666)
         except: pass
         try:
-            os.chmod(SCONS_LOCAL_LOG,0666)
+            os.chmod(SCONS_LOCAL_LOG,0o666)
         except: pass
         try:
             for item in glob('%s/*' % SCONF_TEMP_DIR):
-                os.chmod(item,0666)
+                os.chmod(item,0o666)
         except: pass
 
         if 'configure' in command_line_args:
@@ -1886,10 +2122,21 @@ if not HELP_REQUESTED:
             replace_path('CAIRO_LIBPATHS',search,replace)
             replace_path('CAIRO_CPPPATHS',search,replace)
 
+    # Adjust verbosity
+    if env['QUIET']:
+        env.Append(CXXCOMSTR = "Compiling $SOURCE")
+        env.Append(SHCXXCOMSTR = "Compiling shared $SOURCE")
+        env.Append(LINKCOMSTR = "Linking $TARGET")
+        env.Append(SHLINKCOMSTR = "Linking shared $TARGET")
+
     # export env so it is available in build.py files
     Export('env')
 
     plugin_base = env.Clone()
+
+    if env['COVERAGE']:
+        plugin_base.Append(LINKFLAGS='--coverage')
+        plugin_base.Append(CXXFLAGS='--coverage')
 
     Export('plugin_base')
 

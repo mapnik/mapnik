@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,11 +21,16 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/global.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
+#include <mapnik/geometry/box2d.hpp>
+#include <mapnik/geometry/multi_point.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
+#include <mapnik/util/is_clockwise.hpp>
+
+// boost
+#include <boost/geometry/algorithms/envelope.hpp>
 
 #ifdef MAPNIK_USE_PROJ4
 // proj4
@@ -37,6 +42,56 @@
 #include <stdexcept>
 
 namespace mapnik {
+
+namespace { // (local)
+
+// Returns points in clockwise order. This allows us to do anti-meridian checks.
+template <typename T>
+auto envelope_points(box2d<T> const& env, std::size_t num_points)
+    -> geometry::multi_point<T>
+{
+    auto width = env.width();
+    auto height = env.height();
+
+    geometry::multi_point<T> coords;
+    coords.reserve(num_points);
+
+    // top side: left >>> right
+    // gets extra point if (num_points % 4 >= 1)
+    for (std::size_t i = 0, n = (num_points + 3) / 4; i < n; ++i)
+    {
+        auto x = env.minx() + (i * width) / n;
+        coords.emplace_back(x, env.maxy());
+    }
+
+    // right side: top >>> bottom
+    // gets extra point if (num_points % 4 >= 3)
+    for (std::size_t i = 0, n = (num_points + 1) / 4; i < n; ++i)
+    {
+        auto y = env.maxy() - (i * height) / n;
+        coords.emplace_back(env.maxx(), y);
+    }
+
+    // bottom side: right >>> left
+    // gets extra point if (num_points % 4 >= 2)
+    for (std::size_t i = 0, n = (num_points + 2) / 4; i < n; ++i)
+    {
+        auto x = env.maxx() - (i * width) / n;
+        coords.emplace_back(x, env.miny());
+    }
+
+    // left side: bottom >>> top
+    // never gets extra point
+    for (std::size_t i = 0, n = (num_points + 0) / 4; i < n; ++i)
+    {
+        auto y = env.miny() + (i * height) / n;
+        coords.emplace_back(env.minx(), y);
+    }
+
+    return coords;
+}
+
+} // namespace mapnik::(local)
 
 proj_transform::proj_transform(projection const& source,
                                projection const& dest)
@@ -102,7 +157,7 @@ bool proj_transform::forward (geometry::point<double> & p) const
     return forward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
+unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls) const
 {
     std::size_t size = ls.size();
     if (size == 0) return 0;
@@ -124,7 +179,7 @@ unsigned int proj_transform::forward (geometry::line_string<double> & ls) const
     geometry::point<double> * ptr = ls.data();
     double * x = reinterpret_cast<double*>(ptr);
     double * y = x + 1;
-    double * z = NULL;
+    double * z = nullptr;
     if(!forward(x, y, z, size, 2))
     {
         return size;
@@ -140,11 +195,11 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
 
     if (wgs84_to_merc_)
     {
-        return lonlat2merc(x,y,point_count);
+        return lonlat2merc(x, y, point_count, offset);
     }
     else if (merc_to_wgs84_)
     {
-        return merc2lonlat(x,y,point_count);
+        return merc2lonlat(x, y, point_count, offset);
     }
 
 #ifdef MAPNIK_USE_PROJ4
@@ -189,30 +244,31 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
 
     if (wgs84_to_merc_)
     {
-        return merc2lonlat(x,y,point_count);
+        return merc2lonlat(x, y, point_count, offset);
     }
     else if (merc_to_wgs84_)
     {
-        return lonlat2merc(x,y,point_count);
+        return lonlat2merc(x, y, point_count, offset);
     }
 
 #ifdef MAPNIK_USE_PROJ4
     if (is_dest_longlat_)
     {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= DEG_TO_RAD;
-            y[i*offset] *= DEG_TO_RAD;
+        for (int i = 0; i < point_count; ++i)
+        {
+            x[i * offset] *= DEG_TO_RAD;
+            y[i * offset] *= DEG_TO_RAD;
         }
     }
 
-    if (pj_transform( dest_.proj_, source_.proj_, point_count,
-                      offset, x,y,z) != 0)
+    if (pj_transform(dest_.proj_, source_.proj_, point_count,
+                     offset, x, y, z) != 0)
     {
         return false;
     }
 
-    for(int j=0; j<point_count; j++) {
+    for (int j = 0; j < point_count; ++j)
+    {
         if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
         {
             return false;
@@ -221,10 +277,10 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
 
     if (is_source_longlat_)
     {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= RAD_TO_DEG;
-            y[i*offset] *= RAD_TO_DEG;
+        for (int i = 0; i < point_count; ++i)
+        {
+            x[i * offset] *= RAD_TO_DEG;
+            y[i * offset] *= RAD_TO_DEG;
         }
     }
 #endif
@@ -242,7 +298,7 @@ bool proj_transform::backward (geometry::point<double> & p) const
     return backward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
+unsigned int proj_transform::backward (std::vector<geometry::point<double>> & ls) const
 {
     std::size_t size = ls.size();
     if (size == 0) return 0;
@@ -264,8 +320,8 @@ unsigned int proj_transform::backward (geometry::line_string<double> & ls) const
     geometry::point<double> * ptr = ls.data();
     double * x = reinterpret_cast<double*>(ptr);
     double * y = x + 1;
-    double * z = NULL;
-    if(!backward(x, y, z, size, 2))
+    double * z = nullptr;
+    if (!backward(x, y, z, size, 2))
     {
         return size;
     }
@@ -311,91 +367,26 @@ bool proj_transform::backward (box2d<double> & box) const
     if (is_source_equal_dest_)
         return true;
 
-    double llx = box.minx();
-    double ulx = box.minx();
-    double lly = box.miny();
-    double lry = box.miny();
-    double lrx = box.maxx();
-    double urx = box.maxx();
-    double uly = box.maxy();
-    double ury = box.maxy();
-    double z = 0.0;
-    if (!backward(llx,lly,z))
+    double x[4], y[4];
+    x[0] = box.minx(); // llx 0
+    y[0] = box.miny(); // lly 1
+    x[1] = box.maxx(); // lrx 2
+    y[1] = box.miny(); // lry 3
+    x[2] = box.minx(); // ulx 4
+    y[2] = box.maxy(); // uly 5
+    x[3] = box.maxx(); // urx 6
+    y[3] = box.maxy(); // ury 7
+
+    if (!backward(x, y, nullptr, 4, 1))
         return false;
-    if (!backward(lrx,lry,z))
-        return false;
-    if (!backward(ulx,uly,z))
-        return false;
-    if (!backward(urx,ury,z))
-        return false;
-    double minx = std::min(ulx, llx);
-    double miny = std::min(lly, lry);
-    double maxx = std::max(urx, lrx);
-    double maxy = std::max(ury, uly);
-    box.init(minx,
-             miny,
-             maxx,
-             maxy);
+
+    double minx = std::min(x[0], x[2]);
+    double miny = std::min(y[0], y[1]);
+    double maxx = std::max(x[1], x[3]);
+    double maxy = std::max(y[2], y[3]);
+    box.init(minx, miny, maxx, maxy);
     return true;
 }
-
-// Returns points in clockwise order. This allows us to do anti-meridian checks.
-void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env, int points)
-{
-    double width = env.width();
-    double height = env.height();
-
-    int steps;
-
-    if (points <= 4) {
-        steps = 0;
-    } else {
-        steps = static_cast<int>(std::ceil((points - 4) / 4.0));
-    }
-
-    steps += 1;
-    double xstep = width / steps;
-    double ystep = height / steps;
-
-    coords.resize(points);
-    for (int i=0; i<steps; i++) {
-        // top: left>right
-        coords[i] = coord<double, 2>(env.minx() + i * xstep, env.maxy());
-        // right: top>bottom
-        coords[i + steps] = coord<double, 2>(env.maxx(), env.maxy() - i * ystep);
-        // bottom: right>left
-        coords[i + steps * 2] = coord<double, 2>(env.maxx() - i * xstep, env.miny());
-        // left: bottom>top
-        coords[i + steps * 3] = coord<double, 2>(env.minx(), env.miny() + i * ystep);
-    }
-}
-
-// determine if an ordered sequence of coordinates is in clockwise order
-bool is_clockwise(const std::vector< coord<double,2> > & coords)
-{
-    int n = coords.size();
-    coord<double,2> c1, c2;
-    double a = 0.0;
-
-    for (int i=0; i<n; i++) {
-        c1 = coords[i];
-        c2 = coords[(i + 1) % n];
-        a += (c1.x * c2.y - c2.x * c1.y);
-    }
-    return a <= 0.0;
-}
-
-box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
-    std::vector<coord<double,2> >::iterator it = points.begin();
-    std::vector<coord<double,2> >::iterator it_end = points.end();
-
-    box2d<double> env(*it, *(++it));
-    for (; it!=it_end; ++it) {
-        env.expand_to_include(*it);
-    }
-    return env;
-}
-
 
 // More robust, but expensive, bbox transform
 // in the face of proj4 out of bounds conditions.
@@ -413,19 +404,19 @@ bool proj_transform::backward(box2d<double>& env, int points) const
         return backward(env);
     }
 
-    std::vector<coord<double,2> > coords;
-    envelope_points(coords, env, points);  // this is always clockwise
+    auto coords = envelope_points(env, points);  // this is always clockwise
 
-    double z;
-    for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
-        z = 0;
-        if (!backward(it->x, it->y, z)) {
+    for (auto & p : coords)
+    {
+        double z = 0;
+        if (!backward(p.x, p.y, z))
             return false;
-        }
     }
 
-    box2d<double> result = calculate_bbox(coords);
-    if (is_source_longlat_ && !is_clockwise(coords))
+    box2d<double> result;
+    boost::geometry::envelope(coords, result);
+
+    if (is_source_longlat_ && !util::is_clockwise(coords))
     {
         // we've gone to a geographic CS, and our clockwise envelope has
         // changed into an anticlockwise one. This means we've crossed the antimeridian, and
@@ -439,7 +430,6 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     env.re_center(result.center().x, result.center().y);
     env.height(result.height());
     env.width(result.width());
-
     return true;
 }
 
@@ -453,20 +443,19 @@ bool proj_transform::forward(box2d<double>& env, int points) const
         return forward(env);
     }
 
-    std::vector<coord<double,2> > coords;
-    envelope_points(coords, env, points);  // this is always clockwise
+    auto coords = envelope_points(env, points);  // this is always clockwise
 
-    double z;
-    for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
-        z = 0;
-        if (!forward(it->x, it->y, z)) {
+    for (auto & p : coords)
+    {
+        double z = 0;
+        if (!forward(p.x, p.y, z))
             return false;
-        }
     }
 
-    box2d<double> result = calculate_bbox(coords);
+    box2d<double> result;
+    boost::geometry::envelope(coords, result);
 
-    if (is_dest_longlat_ && !is_clockwise(coords))
+    if (is_dest_longlat_ && !util::is_clockwise(coords))
     {
         // we've gone to a geographic CS, and our clockwise envelope has
         // changed into an anticlockwise one. This means we've crossed the antimeridian, and

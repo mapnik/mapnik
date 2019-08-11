@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,9 +39,11 @@
 #include <boost/algorithm/string.hpp>
 #pragma GCC diagnostic pop
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#pragma GCC diagnostic pop
 
 namespace mapnik
 {
@@ -139,7 +141,7 @@ struct visitor_create_marker
 } // end detail ns
 
 std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
-                                                         bool update_cache)
+                                                         bool update_cache, bool strict)
 {
     if (uri.empty())
     {
@@ -172,15 +174,15 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
             svg_path_adapter svg_path(stl_storage);
             svg_converter_type svg(svg_path, marker_path->attributes());
-            svg_parser p(svg);
+            svg_parser p(svg, strict);
+            p.parse_from_string(known_svg_string);
 
-            if (!p.parse_from_string(known_svg_string))
+            if (!strict)
             {
-                for (auto const& msg : p.error_messages())
+                for (auto const& msg : p.err_handler().error_messages())
                 {
-                    MAPNIK_LOG_ERROR(marker_cache) <<  "SVG PARSING ERROR:\"" << msg << "\"";
+                    MAPNIK_LOG_ERROR(marker_cache) << msg;
                 }
-                return std::make_shared<mapnik::marker const>(mapnik::marker_null());
             }
             //svg.arrange_orientations();
             double lox,loy,hix,hiy;
@@ -212,16 +214,15 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
-                svg_parser p(svg);
+                svg_parser p(svg, strict);
+                p.parse(uri);
 
-
-                if (!p.parse(uri))
+                if (!strict)
                 {
-                    for (auto const& msg : p.error_messages())
+                    for (auto const& msg : p.err_handler().error_messages())
                     {
-                        MAPNIK_LOG_ERROR(marker_cache) <<  "SVG PARSING ERROR:\"" << msg << "\"";
+                        MAPNIK_LOG_ERROR(marker_cache) << msg;
                     }
-                    return std::make_shared<mapnik::marker const>(mapnik::marker_null());
                 }
                 //svg.arrange_orientations();
                 double lox,loy,hix,hiy;
@@ -265,7 +266,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
                 else
                 {
-                    MAPNIK_LOG_ERROR(marker_cache) << "could not intialize reader for: '" << uri << "'";
+                    MAPNIK_LOG_ERROR(marker_cache) << "could not initialize reader for: '" << uri << "'";
                     return std::make_shared<mapnik::marker const>(mapnik::marker_null());
                 }
             }

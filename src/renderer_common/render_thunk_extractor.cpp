@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2016 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,7 @@ struct thunk_markers_renderer_context : markers_renderer_context
     {
         vector_marker_render_thunk thunk(src, attrs, marker_tr, params.opacity,
                                          comp_op_, params.snap_to_pixels);
-        thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
+        thunks_.emplace_back(std::move(thunk));
     }
 
     virtual void render_marker(image_rgba8 const& src,
@@ -64,7 +64,7 @@ struct thunk_markers_renderer_context : markers_renderer_context
     {
         raster_marker_render_thunk thunk(src, marker_tr, params.opacity,
                                          comp_op_, params.snap_to_pixels);
-        thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
+        thunks_.emplace_back(std::move(thunk));
     }
 
 private:
@@ -87,8 +87,8 @@ render_thunk_extractor::render_thunk_extractor(box2d<double> & box,
 
 void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
 {
-    using context_type = detail::thunk_markers_renderer_context;
-    context_type renderer_context(sym, feature_, vars_, thunks_);
+    using renderer_context_type = detail::thunk_markers_renderer_context;
+    renderer_context_type renderer_context(sym, feature_, vars_, thunks_);
 
     render_markers_symbolizer(
             sym, feature_, prj_trans_, common_, clipping_extent_, renderer_context);
@@ -128,7 +128,7 @@ void render_thunk_extractor::extract_text_thunk(text_render_thunk::helper_ptr &&
     halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature_, common_.vars_, HALO_RASTERIZER_FULL);
 
     text_render_thunk thunk(std::move(helper), opacity, comp_op, halo_rasterizer);
-    thunks_.push_back(std::make_unique<render_thunk>(std::move(thunk)));
+    thunks_.emplace_back(std::move(thunk));
 
     update_box();
 }

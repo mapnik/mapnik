@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,8 @@
 
 // mapnik
 #include <mapnik/well_known_srs.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // stl
 #include <vector>
@@ -95,6 +96,18 @@ public:
      *         (non-const version).
      */
     std::vector<std::string>& styles();
+
+    /*! \brief Add a child layer by copying it.
+     *  @param l The layer to add.
+     */
+    void add_layer(layer const& l);
+
+    /*! \brief Add a child layer by moving it.
+     *  @param l The layer to add.
+     */
+    void add_layer(layer && l);
+
+    std::vector<layer> const& layers() const;
 
     /*!
      * @param minimum_scale_denom The minimum scale denominator
@@ -197,6 +210,12 @@ public:
      */
     box2d<double> envelope() const;
 
+    // compositing
+    void set_comp_op(composite_mode_e comp_op);
+    boost::optional<composite_mode_e> comp_op() const;
+    void set_opacity(double opacity);
+    double get_opacity() const;
+
     void set_maximum_extent(box2d<double> const& box);
     boost::optional<box2d<double> > const&  maximum_extent() const;
     void reset_maximum_extent();
@@ -215,9 +234,12 @@ private:
     bool cache_features_;
     std::string group_by_;
     std::vector<std::string> styles_;
+    std::vector<layer> layers_;
     datasource_ptr ds_;
     boost::optional<int> buffer_size_;
     boost::optional<box2d<double> > maximum_extent_;
+    boost::optional<composite_mode_e> comp_op_;
+    double opacity_;
 };
 }
 

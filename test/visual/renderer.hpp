@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,10 +38,21 @@
 #if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
 #endif
+
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/cairo/cairo_image_util.hpp>
+#ifdef CAIRO_HAS_SVG_SURFACE
+#include <cairo-svg.h>
 #endif
+#ifdef CAIRO_HAS_PS_SURFACE
+#include <cairo-ps.h>
+#endif
+#ifdef CAIRO_HAS_PDF_SURFACE
+#include <cairo-pdf.h>
+#endif
+#endif
+
 #if defined(SVG_RENDERER)
 #include <mapnik/svg/output/svg_renderer.hpp>
 #endif
@@ -53,7 +64,7 @@ namespace visual_tests
 {
 
 template <typename ImageType>
-struct renderer_base
+struct raster_renderer_base
 {
     using image_type = ImageType;
 
@@ -80,7 +91,35 @@ struct renderer_base
     }
 };
 
-struct agg_renderer : renderer_base<mapnik::image_rgba8>
+struct vector_renderer_base
+{
+    using image_type = std::string;
+
+    static constexpr const bool support_tiles = false;
+
+    unsigned compare(image_type const & actual, boost::filesystem::path const& reference) const
+    {
+        std::ifstream stream(reference.string().c_str(), std::ios_base::in | std::ios_base::binary);
+        if (!stream)
+        {
+            throw std::runtime_error("Could not open: " + reference.string());
+        }
+        std::string expected(std::istreambuf_iterator<char>(stream.rdbuf()), std::istreambuf_iterator<char>());
+        return std::max(actual.size(), expected.size()) - std::min(actual.size(), expected.size());
+    }
+
+    void save(image_type const & image, boost::filesystem::path const& path) const
+    {
+        std::ofstream file(path.string().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+        if (!file)
+        {
+            throw std::runtime_error("Cannot open file for writing: " + path.string());
+        }
+        file << image;
+    }
+};
+
+struct agg_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
     static constexpr const char * name = "agg";
 
@@ -94,7 +133,7 @@ struct agg_renderer : renderer_base<mapnik::image_rgba8>
 };
 
 #if defined(HAVE_CAIRO)
-struct cairo_renderer : renderer_base<mapnik::image_rgba8>
+struct cairo_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
     static constexpr const char * name = "cairo";
 
@@ -111,14 +150,75 @@ struct cairo_renderer : renderer_base<mapnik::image_rgba8>
         return image;
     }
 };
+
+using surface_create_type = cairo_surface_t *(&)(cairo_write_func_t, void *, double, double);
+
+template <surface_create_type SurfaceCreateFunction>
+struct cairo_vector_renderer : vector_renderer_base
+{
+    static cairo_status_t write(void *closure,
+                                const unsigned char *data,
+                                unsigned int length)
+    {
+        std::ostringstream & ss = *reinterpret_cast<std::ostringstream*>(closure);
+        ss.write(reinterpret_cast<char const *>(data), length);
+        return ss ? CAIRO_STATUS_SUCCESS : CAIRO_STATUS_WRITE_ERROR;
+    }
+
+    image_type render(mapnik::Map const & map, double scale_factor) const
+    {
+        std::ostringstream ss(std::stringstream::binary);
+        mapnik::cairo_surface_ptr image_surface(
+            SurfaceCreateFunction(write, &ss, map.width(), map.height()),
+            mapnik::cairo_surface_closer());
+        mapnik::cairo_ptr image_context(mapnik::create_context(image_surface));
+        mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map, image_context, scale_factor);
+        ren.apply();
+        cairo_surface_finish(&*image_surface);
+        return ss.str();
+    }
+};
+
+#ifdef CAIRO_HAS_SVG_SURFACE
+inline cairo_surface_t *create_svg_1_2(cairo_write_func_t write_func,
+                                       void *closure,
+                                       double width,
+                                       double height)
+{
+    cairo_surface_t * surface = cairo_svg_surface_create_for_stream(write_func, closure, width, height);
+    cairo_svg_surface_restrict_to_version(surface, CAIRO_SVG_VERSION_1_2);
+    return surface;
+}
+
+struct cairo_svg_renderer : cairo_vector_renderer<create_svg_1_2>
+{
+    static constexpr const char * name = "cairo-svg";
+    static constexpr const char * ext = ".svg";
+};
+#endif
+
+#ifdef CAIRO_HAS_PS_SURFACE
+struct cairo_ps_renderer : cairo_vector_renderer<cairo_ps_surface_create_for_stream>
+{
+    static constexpr const char * name = "cairo-ps";
+    static constexpr const char * ext = ".ps";
+};
+#endif
+
+#ifdef CAIRO_HAS_PDF_SURFACE
+struct cairo_pdf_renderer : cairo_vector_renderer<cairo_pdf_surface_create_for_stream>
+{
+    static constexpr const char * name = "cairo-pdf";
+    static constexpr const char * ext = ".pdf";
+};
+#endif
 #endif
 
 #if defined(SVG_RENDERER)
-struct svg_renderer : renderer_base<std::string>
+struct svg_renderer : vector_renderer_base
 {
     static constexpr const char * name = "svg";
     static constexpr const char * ext = ".svg";
-    static constexpr const bool support_tiles = false;
 
     image_type render(mapnik::Map const & map, double scale_factor) const
     {
@@ -128,35 +228,11 @@ struct svg_renderer : renderer_base<std::string>
         ren.apply();
         return ss.str();
     }
-
-    unsigned compare(image_type const & actual, boost::filesystem::path const& reference) const
-    {
-        std::ifstream stream(reference.string().c_str(),std::ios_base::in|std::ios_base::binary);
-        if (!stream.is_open())
-        {
-            throw std::runtime_error("could not open: '" + reference.string() + "'");
-        }
-        std::string expected(std::istreambuf_iterator<char>(stream.rdbuf()),(std::istreambuf_iterator<char>()));
-        stream.close();
-        return std::max(actual.size(), expected.size()) - std::min(actual.size(), expected.size());
-    }
-
-    void save(image_type const & image, boost::filesystem::path const& path) const
-    {
-        std::ofstream file(path.string().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
-        if (!file) {
-            throw std::runtime_error((std::string("cannot open file for writing file ") + path.string()).c_str());
-        } else {
-            file << image;
-            file.close();
-        }
-    }
-
 };
 #endif
 
 #if defined(GRID_RENDERER)
-struct grid_renderer : renderer_base<mapnik::image_rgba8>
+struct grid_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
     static constexpr const char * name = "grid";
 
@@ -335,6 +411,15 @@ private:
 using renderer_type = mapnik::util::variant<renderer<agg_renderer>
 #if defined(HAVE_CAIRO)
                                             ,renderer<cairo_renderer>
+#ifdef CAIRO_HAS_SVG_SURFACE
+                                            ,renderer<cairo_svg_renderer>
+#endif
+#ifdef CAIRO_HAS_PS_SURFACE
+                                            ,renderer<cairo_ps_renderer>
+#endif
+#ifdef CAIRO_HAS_PDF_SURFACE
+                                            ,renderer<cairo_pdf_renderer>
+#endif
 #endif
 #if defined(SVG_RENDERER)
                                             ,renderer<svg_renderer>

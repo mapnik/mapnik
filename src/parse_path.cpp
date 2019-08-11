@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,12 +21,12 @@
  *****************************************************************************/
 
 #include <mapnik/parse_path.hpp>
-#include <mapnik/path_expression_grammar.hpp>
-#include <mapnik/path_expression_grammar_impl.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
+
+#include <mapnik/path_expression_grammar_x3.hpp>
 
 // stl
 #include <stdexcept>
@@ -35,12 +35,12 @@ namespace mapnik {
 
 path_expression_ptr parse_path(std::string const& str)
 {
-    static const path_expression_grammar<std::string::const_iterator> g;
+    namespace x3 = boost::spirit::x3;
     auto path = std::make_shared<path_expression>();
-    boost::spirit::standard_wide::space_type space;
+    using boost::spirit::x3::standard_wide::space;
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space, *path);
+    bool r = x3::phrase_parse(itr, end, grammar::path_expression, space, *path);
     if (r && itr == end)
     {
         return path;

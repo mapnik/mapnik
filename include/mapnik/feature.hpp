@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,11 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/geometry_envelope.hpp>
+#include <mapnik/geometry/envelope.hpp>
 //
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/util/noncopyable.hpp>
@@ -154,7 +154,7 @@ public:
 
     inline bool has_key(context_type::key_type const& key) const
     {
-        return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
+        return (ctx_->mapping_.count(key) == 1);
     }
 
     inline value_type const& get(context_type::key_type const& key) const
@@ -204,6 +204,11 @@ public:
     }
 
     inline geometry::geometry<double> const& get_geometry() const
+    {
+        return geom_;
+    }
+
+    inline geometry::geometry<double> & get_geometry()
     {
         return geom_;
     }

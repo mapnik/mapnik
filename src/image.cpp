@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -84,11 +84,10 @@ void buffer::swap(buffer & rhs)
     std::swap(owns_, rhs.owns_);
 }
 
-template struct MAPNIK_DECL image_dimensions<65535>;
+template struct MAPNIK_DECL image_dimensions<4294836225>;
 
 } // end ns detail
 
-template class MAPNIK_DECL image<null_t>;
 template class MAPNIK_DECL image<rgba8_t>;
 template class MAPNIK_DECL image<gray8_t>;
 template class MAPNIK_DECL image<gray8s_t>;

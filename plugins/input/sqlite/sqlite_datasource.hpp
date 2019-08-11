@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,11 +28,11 @@
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -62,7 +62,7 @@ private:
     // Fill init_statements with any statements
     // needed to attach auxillary databases
     void parse_attachdb(std::string const& attachdb) const;
-    std::string populate_tokens(std::string const& sql) const;
+    std::string populate_tokens(std::string const& sql, double pixel_width, double pixel_height) const;
 
     mapnik::box2d<double> extent_;
     bool extent_initialized_;
@@ -80,8 +80,11 @@ private:
     mapnik::value_integer row_limit_;
     // TODO - also add to postgis.input
     const std::string intersects_token_;
+    const std::string pixel_width_token_;
+    const std::string pixel_height_token_;
     mapnik::layer_descriptor desc_;
     mapnik::wkbFormat format_;
+    bool twkb_encoding_;
     bool use_spatial_index_;
     bool has_spatial_index_;
     bool using_subquery_;

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,24 +23,21 @@
 #ifndef MAPNIK_JSON_PROPERTIES_GENERATOR_GRAMMAR_HPP
 #define MAPNIK_JSON_PROPERTIES_GENERATOR_GRAMMAR_HPP
 
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/feature_kv_iterator.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/at.hpp>
-#include <boost/fusion/include/cons.hpp>
 #pragma GCC diagnostic pop
 
+#include <string>
+#include <tuple>
+
 namespace mapnik { namespace json {
+
+namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator>
 struct escaped_string

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,17 +24,18 @@
 #include "geojson_index_featureset.hpp"
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <mapnik/json/geometry_grammar.hpp>
-#include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
-#include <mapnik/util/spatial_index.hpp>
-#include <mapnik/geometry_is_empty.hpp>
+#include <mapnik/util/conversions.hpp>
+#include <mapnik/geometry/is_empty.hpp>
+#include <mapnik/json/parse_feature.hpp>
+#include <mapnik/json/json_grammar_config.hpp>
 // stl
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
-geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::filter_in_box const& filter)
+geojson_index_featureset::geojson_index_featureset(std::string const& filename, mapnik::bounding_box_filter<float> const& filter)
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     //
@@ -64,11 +65,18 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename, 
     std::ifstream index(indexname.c_str(), std::ios::binary);
     if (!index) throw mapnik::datasource_exception("GeoJSON Plugin: can't open index file " + indexname);
     mapnik::util::spatial_index<value_type,
-                                mapnik::filter_in_box,
-                                std::ifstream>::query(filter, index, positions_);
+                                mapnik::bounding_box_filter<float>,
+                                std::ifstream,
+                                mapnik::box2d<float>>::query(filter, index, positions_);
+
+    positions_.erase(std::remove_if(positions_.begin(),
+                                    positions_.end(),
+                                    [&](value_type const& pos)
+                                    { return !pos.box.intersects(filter.box_);}),
+                     positions_.end());
 
     std::sort(positions_.begin(), positions_.end(),
-              [](value_type const& lhs, value_type const& rhs) { return lhs.first < rhs.first;});
+              [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});
     itr_ = positions_.begin();
 }
 
@@ -80,28 +88,22 @@ mapnik::feature_ptr geojson_index_featureset::next()
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        char const* start = (char const*)mapped_region_->get_address() + pos.first;
-        char const*  end = start + pos.second;
+        char const* start = (char const*)mapped_region_->get_address() + pos.off;
+        char const*  end = start + pos.size;
 #else
-        std::fseek(file_.get(), pos.first, SEEK_SET);
+        std::fseek(file_.get(), pos.off, SEEK_SET);
         std::vector<char> record;
         record.resize(pos.second);
-        std::fread(record.data(), pos.second, 1, file_.get());
+        auto count = std::fread(record.data(), pos.size, 1, file_.get());
         auto const* start = record.data();
-        auto const*  end = start + record.size();
+        auto const*  end = (count == 1) ? start + record.size() : start;
 #endif
         static const mapnik::transcoder tr("utf8");
-        static const mapnik::json::feature_grammar<char const*, mapnik::feature_impl> grammar(tr);
-        using namespace boost::spirit;
-        standard::space_type space;
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_, feature_id_++));
-        if (!qi::phrase_parse(start, end, (grammar)(boost::phoenix::ref(*feature)), space) || start != end)
-        {
-            throw std::runtime_error("Failed to parse GeoJSON feature");
-        }
+        using mapnik::json::grammar::iterator_type;
+        mapnik::json::parse_feature(start, end, *feature, tr); // throw on failure
         // skip empty geometries
-        if (mapnik::geometry::is_empty(feature->get_geometry()))
-            continue;
+        if (mapnik::geometry::is_empty(feature->get_geometry())) continue;
         return feature;
     }
     return mapnik::feature_ptr();

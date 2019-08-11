@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +23,10 @@
 #ifndef MAPNIK_GRADIENT_HPP
 #define MAPNIK_GRADIENT_HPP
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include <agg_trans_affine.h>
+#pragma GCC diagnostic pop
 
 // mapnik
 #include <mapnik/color.hpp>
@@ -94,7 +96,7 @@ public:
     void get_control_points(double &x1, double &y1, double &x2, double &y2) const;
 
 private:
-    void swap(gradient& other) throw();
+    void swap(gradient& other) noexcept;
 };
 }
 

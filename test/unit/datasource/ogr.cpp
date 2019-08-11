@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "catch.hpp"
-
+#include <cstdlib>
 #include <mapnik/map.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -45,8 +45,10 @@ TEST_CASE("ogr") {
             mapnik::image_rgba8 im(256,256);
             mapnik::agg_renderer<mapnik::image_rgba8> ren(m, im);
             ren.apply();
-            //mapnik::save_to_file(im, "./test/data/images/point_json.png");
             std::string filename("./test/data/images/point_json.png");
+            if (std::getenv("UPDATE") != nullptr) {
+                mapnik::save_to_file(im, filename);
+            }
             std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,"png"));
             mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
             mapnik::image_rgba8 expected = mapnik::util::get<mapnik::image_rgba8>(data);

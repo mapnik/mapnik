@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value_types.hpp>
+#include <mapnik/value/types.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
@@ -49,14 +49,16 @@ postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
                                        bool key_field,
-                                       bool key_field_as_attribute)
+                                       bool key_field_as_attribute,
+                                       bool twkb_encoding)
     : rs_(rs),
       ctx_(ctx),
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
       feature_id_(1),
       key_field_(key_field),
-      key_field_as_attribute_(key_field_as_attribute)
+      key_field_as_attribute_(key_field_as_attribute),
+      twkb_encoding_(twkb_encoding)
 {
 }
 
@@ -123,8 +125,14 @@ feature_ptr postgis_featureset::next()
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
 
-        mapnik::geometry::geometry<double> geometry = geometry_utils::from_wkb(data, size);
-        feature->set_geometry(std::move(geometry));
+        if (twkb_encoding_ )
+        {
+            feature->set_geometry(geometry_utils::from_twkb(data, size));
+        }
+        else
+        {
+            feature->set_geometry(geometry_utils::from_wkb(data, size));
+        }
 
         totalGeomSize_ += size;
         unsigned num_attrs = ctx_->size() + 1;

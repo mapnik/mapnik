@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,14 +24,16 @@
 #define MAPNIK_TEXT_GLYPH_POSITIONS_HPP
 
 //mapnik
-#include <mapnik/box2d.hpp>
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/rotation.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/text/glyph_info.hpp>
 
-// agg
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
+#pragma GCC diagnostic pop
 
 //stl
 #include <vector>

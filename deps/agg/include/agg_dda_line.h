@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -27,8 +27,9 @@ namespace agg
 {
 
     //===================================================dda_line_interpolator
-    template<int FractionShift, int YShift=0> class dda_line_interpolator
+    template<int FractionShift, int YShift = 0> class dda_line_interpolator
     {
+        static constexpr int factor = 2 << (FractionShift - 1);
     public:
         //--------------------------------------------------------------------
         dda_line_interpolator() {}
@@ -36,7 +37,7 @@ namespace agg
         //--------------------------------------------------------------------
         dda_line_interpolator(int y1, int y2, unsigned count) :
             m_y(y1),
-            m_inc(((y2 - y1) << FractionShift) / int(count)),
+            m_inc(((y2 - y1) * factor) / static_cast<int>(count)),
             m_dy(0)
         {
         }
@@ -67,9 +68,8 @@ namespace agg
 
 
         //--------------------------------------------------------------------
-        int y()  const { return m_y + (m_dy >> (FractionShift-YShift)); }
+        int y()  const { return m_y + (m_dy >> (FractionShift - YShift)); }
         int dy() const { return m_dy; }
-
 
     private:
         int m_y;
@@ -234,15 +234,15 @@ namespace agg
             m_x2_lr(line_lr(x2)),
             m_y2_lr(line_lr(y2)),
             m_ver(std::abs(m_x2_lr - m_x1_lr) < std::abs(m_y2_lr - m_y1_lr)),
-            m_len(m_ver ? std::abs(m_y2_lr - m_y1_lr) : 
+            m_len(m_ver ? std::abs(m_y2_lr - m_y1_lr) :
                           std::abs(m_x2_lr - m_x1_lr)),
             m_inc(m_ver ? ((y2 > y1) ? 1 : -1) : ((x2 > x1) ? 1 : -1)),
-            m_interpolator(m_ver ? x1 : y1, 
-                           m_ver ? x2 : y2, 
+            m_interpolator(m_ver ? x1 : y1,
+                           m_ver ? x2 : y2,
                            m_len)
         {
         }
-    
+
         //--------------------------------------------------------------------
         bool     is_ver() const { return m_ver; }
         unsigned len()    const { return m_len; }

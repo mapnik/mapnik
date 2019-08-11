@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -63,17 +63,6 @@ struct end_container<mapnik::feature_impl const>
     }
 };
 
-template <>
-struct transform_attribute<const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>,
-                           mapnik::geometry::geometry<double> const& , karma::domain>
-{
-    using type = mapnik::geometry::geometry<double> const&;
-    static type pre(const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>& f)
-    {
-        return boost::fusion::at<mpl::int_<0> >(f).get_geometry();
-    }
-};
-
 }}}
 
 namespace mapnik { namespace json {
@@ -91,6 +80,15 @@ struct get_id
     }
 };
 
+struct extract_geometry
+{
+    using result_type = mapnik::geometry::geometry<double> const&;
+    template <typename T>
+    result_type operator() (T const& f) const
+    {
+        return f.get_geometry();
+    }
+};
 
 template <typename OutputIterator, typename FeatureType>
 struct feature_generator_grammar :
@@ -101,6 +99,7 @@ struct feature_generator_grammar :
     geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry<double> > geometry;
     properties_generator_grammar<OutputIterator, FeatureType> properties;
     boost::phoenix::function<get_id<FeatureType> > id_;
+    boost::phoenix::function<extract_geometry> geom_;
 };
 
 }}

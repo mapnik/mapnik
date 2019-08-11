@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -99,40 +99,24 @@ inline void read_int32_xdr(const char* data, std::int32_t & val)
 // read double XDR (big endian)
 inline void read_double_xdr(const char* data, double & val)
 {
-    std::int64_t bits = ((std::int64_t)data[7] & 0xff) |
-        ((std::int64_t)data[6] & 0xff) << 8   |
-        ((std::int64_t)data[5] & 0xff) << 16  |
-        ((std::int64_t)data[4] & 0xff) << 24  |
-        ((std::int64_t)data[3] & 0xff) << 32  |
-        ((std::int64_t)data[2] & 0xff) << 40  |
-        ((std::int64_t)data[1] & 0xff) << 48  |
-        ((std::int64_t)data[0] & 0xff) << 56  ;
+    std::int64_t bits = (static_cast<std::int64_t>(data[7]) & 0xff) |
+        (static_cast<std::int64_t>(data[6]) & 0xff) << 8   |
+        (static_cast<std::int64_t>(data[5]) & 0xff) << 16  |
+        (static_cast<std::int64_t>(data[4]) & 0xff) << 24  |
+        (static_cast<std::int64_t>(data[3]) & 0xff) << 32  |
+        (static_cast<std::int64_t>(data[2]) & 0xff) << 40  |
+        (static_cast<std::int64_t>(data[1]) & 0xff) << 48  |
+        (static_cast<std::int64_t>(data[0]) & 0xff) << 56  ;
     std::memcpy(&val,&bits,8);
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
-// msvc doesn't have rint in <cmath>
-inline int rint(double val)
-{
-    return int(std::floor(val + 0.5));
-}
-
 inline double round(double val)
 {
     return std::floor(val);
 }
 #endif
 
-#if defined(_MSC_VER)
-#define  _USE_MATH_DEFINES
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#endif
-
 }
-
-
 
 #endif // MAPNIK_GLOBAL_HPP

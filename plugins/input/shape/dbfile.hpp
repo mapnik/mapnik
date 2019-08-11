@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -77,7 +77,7 @@ public:
     field_descriptor const& descriptor(int col) const;
     void move_to(int index);
     std::string string_value(int col) const;
-    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const throw();
+    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const;
 private:
     void read_header();
     int read_short();

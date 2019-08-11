@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,9 +27,27 @@
 
 namespace mapnik { namespace util {
 
+constexpr double pi = 3.1415926535897932384626433832795;
+constexpr double tau = 6.283185307179586476925286766559;
+
+template <typename T>
+constexpr T const& clamp(T const& v, T const& lo, T const& hi)
+{
+    return v < lo ? lo : hi < v ? hi : v;
+}
+
+constexpr double degrees(double rad)
+{
+    return rad * (360 / tau);
+}
+
+constexpr double radians(double deg)
+{
+    return deg * (tau / 360);
+}
+
 MAPNIK_DECL double normalize_angle(double angle);
 
 }}
 
 #endif
-
