@@ -47,7 +47,6 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
-#include <iomanip>
 
 DATASOURCE_PLUGIN(postgis_datasource)
 
@@ -508,6 +507,7 @@ layer_descriptor postgis_datasource::get_descriptor() const
 std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
+    b.precision(16);
 
     if (srid_ > 0)
     {
@@ -515,7 +515,6 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
     }
 
     b << "'BOX3D(";
-    b << std::setprecision(16);
     b << env.minx() << " " << env.miny() << ",";
     b << env.maxx() << " " << env.maxy() << ")'::box3d";
 
@@ -547,6 +546,9 @@ std::string postgis_datasource::populate_tokens(
     std::cmatch m;
     char const* start = sql.data();
     char const* end = start + sql.size();
+
+    populated_sql.precision(16);
+    populated_sql << std::showpoint;
 
     while (std::regex_search(start, end, m, re_tokens_))
     {
