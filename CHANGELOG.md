@@ -32,9 +32,11 @@ For a complete change history, see the git log.
 
 - GDAL: fixed several issues with overviews ([#3912](https://github.com/mapnik/mapnik/issues/3912))
 - PostGIS: changed syntax for user `@variable` interpolation to `!@variable!` ([#3618](https://github.com/mapnik/mapnik/issues/3618))
-- PostGIS: using parameter `estimate_extent` now requires PostGIS >= 2.1.0 ([#3624](https://github.com/mapnik/mapnik/issues/3624))
 - PGraster: added variable interpolation like in PostGIS plugin ([#3618](https://github.com/mapnik/mapnik/issues/3618))
-- PGraster: using parameter `estimate_extent` now requires PostGIS >= 2.1.0 ([#3624](https://github.com/mapnik/mapnik/issues/3624))
+- PostGIS & PGraster: using parameter `estimate_extent` now requires PostGIS >= 2.1.0 ([#3624](https://github.com/mapnik/mapnik/issues/3624))
+- PostGIS & PGraster: added parameter `application_name` [#3984](https://github.com/mapnik/mapnik/pull/3984)
+- PostGIS & PGraster: substituted numeric `!tokens!` now always have decimal point ([#3942](https://github.com/mapnik/mapnik/pull/3942))
+- PostGIS & PGraster: substituted `!bbox!` is now constructed with `ST_MakeEnvelope` ([#3319](https://github.com/mapnik/mapnik/pull/3319))
 
 
 ## 3.0.20
