@@ -508,21 +508,10 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
     b.precision(16);
-
-    if (srid_ > 0)
-    {
-        b << "ST_SetSRID(";
-    }
-
-    b << "'BOX3D(";
-    b << env.minx() << " " << env.miny() << ",";
-    b << env.maxx() << " " << env.maxy() << ")'::box3d";
-
-    if (srid_ > 0)
-    {
-        b << ", " << srid_ << ")";
-    }
-
+    b << "ST_MakeEnvelope(";
+    b << env.minx() << "," << env.miny() << ",";
+    b << env.maxx() << "," << env.maxy() << ",";
+    b << std::max(srid_, 0) << ")";
     return b.str();
 }
 
