@@ -433,14 +433,16 @@ TEST_CASE("ConnectionCreator") {
 
 SECTION("ConnectionCreator::id() should not expose password")
 {
-    ConnectionCreator<Connection> creator(boost::optional<std::string>("host"),
-                                          boost::optional<std::string>("12345"),
-                                          boost::optional<std::string>("dbname"),
-                                          boost::optional<std::string>("user"),
-                                          boost::optional<std::string>("pass"),
-                                          boost::optional<std::string>("111"));
-
-    CHECK(creator.id() == "host=host port=12345 dbname=dbname user=user connect_timeout=111");
+    mapnik::parameters params;
+    params["host"]              = "H";
+    params["port"]              = "1234";
+    params["dbname"]            = "D";
+    params["user"]              = "U";
+    params["password"]          = "SECRET";
+    params["connect_timeout"]   = "5";
+    params["application_name"]  = "A";
+    ConnectionCreator<Connection> creator(params);
+    CHECK(creator.id() == "host=H port=1234 dbname=D user=U connect_timeout=5 application_name=A");
 }
 
 }

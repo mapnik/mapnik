@@ -26,16 +26,15 @@
 #include "connection.hpp"
 
 // mapnik
+#include <mapnik/params.hpp>
 #include <mapnik/pool.hpp>
 #include <mapnik/util/singleton.hpp>
 
 // boost
-#include <memory>
 #include <boost/optional.hpp>
 
 // stl
 #include <string>
-#include <sstream>
 #include <memory>
 
 using mapnik::Pool;
@@ -47,22 +46,19 @@ class ConnectionCreator
 {
 
 public:
-    ConnectionCreator(boost::optional<std::string> const& host,
-                      boost::optional<std::string> const& port,
-                      boost::optional<std::string> const& dbname,
-                      boost::optional<std::string> const& user,
-                      boost::optional<std::string> const& pass,
-                      boost::optional<std::string> const& connect_timeout)
-        : host_(host),
-          port_(port),
-          dbname_(dbname),
-          user_(user),
-          pass_(pass),
-          connect_timeout_(connect_timeout) {}
+    ConnectionCreator(mapnik::parameters const& params)
+        : host_{params.get<std::string>("host")},
+          port_{params.get<std::string>("port")},
+          dbname_{params.get<std::string>("dbname")},
+          user_{params.get<std::string>("user")},
+          password_{params.get<std::string>("password")},
+          connect_timeout_{params.get<std::string>("connect_timeout", "4")},
+          application_name_{params.get<std::string>("application_name")}
+      {}
 
     T* operator()() const
     {
-        return new T(connection_string_safe(),pass_);
+        return new T(connection_string_safe(), password_);
     }
 
     inline std::string id() const
@@ -73,29 +69,52 @@ public:
     inline std::string connection_string() const
     {
         std::string connect_str = connection_string_safe();
-        if (pass_   && !pass_->empty()) connect_str += " password=" + *pass_;
+        append_param(connect_str, "password=", password_);
         return connect_str;
     }
 
     inline std::string connection_string_safe() const
     {
         std::string connect_str;
-        if (host_   && !host_->empty()) connect_str += "host=" + *host_;
-        if (port_   && !port_->empty()) connect_str += " port=" + *port_;
-        if (dbname_ && !dbname_->empty()) connect_str += " dbname=" + *dbname_;
-        if (user_   && !user_->empty()) connect_str += " user=" + *user_;
-        if (connect_timeout_ && !connect_timeout_->empty())
-            connect_str +=" connect_timeout=" + *connect_timeout_;
+        append_param(connect_str, "host=", host_);
+        append_param(connect_str, "port=", port_);
+        append_param(connect_str, "dbname=", dbname_);
+        append_param(connect_str, "user=", user_);
+        append_param(connect_str, "connect_timeout=", connect_timeout_);
+        if (!append_param(connect_str, "application_name=", application_name_))
+        {
+            // only set fallback_application_name, so that application_name
+            // can still be overriden with PGAPPNAME environment variable
+            append_param(connect_str, "fallback_application_name=", "mapnik");
+        }
         return connect_str;
     }
 
 private:
+
+    static bool append_param(std::string & dest, char const* key,
+                             std::string const& val)
+    {
+        if (val.empty()) return false;
+        if (!dest.empty()) dest += ' ';
+        dest += key;
+        dest += val;
+        return true;
+    }
+
+    static bool append_param(std::string & dest, char const* key,
+                             boost::optional<std::string> const& opt)
+    {
+        return opt && append_param(dest, key, *opt);
+    }
+
     boost::optional<std::string> host_;
     boost::optional<std::string> port_;
     boost::optional<std::string> dbname_;
     boost::optional<std::string> user_;
-    boost::optional<std::string> pass_;
+    boost::optional<std::string> password_;
     boost::optional<std::string> connect_timeout_;
+    boost::optional<std::string> application_name_;
 };
 
 class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
