@@ -87,7 +87,17 @@ configure () {
 }
 
 coverage () {
-    ./codecov -x "llvm-cov gcov" -Z
+    ./codecov -Z \
+        -g "./benchmark/**" \
+        -g "./demo/**" \
+        -g "./deps/**" \
+        -g "./docs/**" \
+        -g "./fonts/**" \
+        -g "./mason_packages/**" \
+        -g "./.sconf_temp/**" \
+        -g "./scons/**" \
+        -g "./test/**" \
+        -x "llvm-cov gcov >/dev/null 2>&1"
 }
 
 trigger_downstream() {
