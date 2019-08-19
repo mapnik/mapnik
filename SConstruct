@@ -763,7 +763,7 @@ def ogr_enabled(context):
     context.Message( 'Checking if gdal is ogr enabled... ')
     context.sconf.cached = False
     ret, out = config_command(env['GDAL_CONFIG'], '--ogr-enabled')
-    if ret and out:
+    if ret:
         ret = (out == 'yes')
     if not ret:
         if 'ogr' not in env['SKIPPED_DEPS']:
@@ -913,28 +913,20 @@ int main() {
 
 
 def CheckGdalData(context, silent=False):
-
+    env = context.env
     if not silent:
         context.Message('Checking for GDAL data directory... ')
-    ret, out = context.TryRun("""
-
-#include "cpl_config.h"
-#include <iostream>
-
-int main() {
-    std::cout << GDAL_PREFIX << "/share/gdal" << std::endl;
-    return 0;
-}
-
-""", '.cpp')
+    context.sconf.cached = False
+    ret, out = config_command(env['GDAL_CONFIG'], '--datadir')
     value = out.strip()
     if silent:
         context.did_show_result=1
     if ret:
-        context.Result('GDAL_PREFIX returned %s' % value)
+        context.Result('%s returned %s' % (env['GDAL_CONFIG'], value))
     else:
         context.Result('Failed to detect (mapnik-config will have null value)')
     return value
+
 
 def CheckProjData(context, silent=False):
 
