@@ -29,18 +29,18 @@
 #define MAPNIK_MINOR_VERSION 0
 #define MAPNIK_PATCH_VERSION 0
 
-#define MAPNIK_VERSION          MAPNIK_MAKE_VERSION(MAPNIK_MAJOR_VERSION, \
-                                                    MAPNIK_MINOR_VERSION, \
-                                                    MAPNIK_PATCH_VERSION)
+#define MAPNIK_VERSION          MAPNIK_VERSION_ENCODE(MAPNIK_MAJOR_VERSION, \
+                                                      MAPNIK_MINOR_VERSION, \
+                                                      MAPNIK_PATCH_VERSION)
 
 #define MAPNIK_VERSION_STRING   MAPNIK_STRINGIFY(MAPNIK_MAJOR_VERSION) "." \
                                 MAPNIK_STRINGIFY(MAPNIK_MINOR_VERSION) "." \
                                 MAPNIK_STRINGIFY(MAPNIK_PATCH_VERSION)
 
 #define MAPNIK_VERSION_AT_LEAST(major, minor, patch) \
-        (MAPNIK_VERSION >= MAPNIK_MAKE_VERSION(major, minor, patch))
+        (MAPNIK_VERSION >= MAPNIK_VERSION_ENCODE(major, minor, patch))
 
-#define MAPNIK_MAKE_VERSION(major, minor, patch) \
+#define MAPNIK_VERSION_ENCODE(major, minor, patch) \
         ((major) * 100000 + (minor) * 100 + (patch))
 
 #endif // MAPNIK_VERSION_HPP
