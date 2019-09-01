@@ -339,6 +339,9 @@ def pretty_dep(dep):
         return '%s (%s)' % (dep,'more info see: https://github.com/mapnik/mapnik/wiki/Mapnik-Installation & http://www.boost.org')
     return dep
 
+def pretty_deps(indent, deps):
+    return indent + indent.join(pretty_dep(dep) for dep in deps)
+
 
 DEFAULT_PLUGINS = []
 for k,v in PLUGINS.items():
@@ -1528,7 +1531,7 @@ if not preconfigured:
         if conf.CheckHasDlfcn():
             env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
         else:
-            env['SKIPPED_DEPS'].extend(['dlfcn'])
+            env['SKIPPED_DEPS'].append('dlfcn')
 
     if env['JPEG']:
         OPTIONAL_LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C','-DHAVE_JPEG'])
@@ -1537,7 +1540,7 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
-        env['SKIPPED_DEPS'].extend(['jpeg'])
+        env['SKIPPED_DEPS'].append('jpeg')
 
     if env['PROJ']:
         OPTIONAL_LIBSHEADERS.append(['proj', 'proj_api.h', False,'C','-DMAPNIK_USE_PROJ4'])
@@ -1546,7 +1549,7 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
-        env['SKIPPED_DEPS'].extend(['proj'])
+        env['SKIPPED_DEPS'].append('proj')
 
     if env['PNG']:
         OPTIONAL_LIBSHEADERS.append(['png', 'png.h', False,'C','-DHAVE_PNG'])
@@ -1555,7 +1558,7 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
-        env['SKIPPED_DEPS'].extend(['png'])
+        env['SKIPPED_DEPS'].append('png')
 
     if env['WEBP']:
         OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
@@ -1564,7 +1567,7 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
-        env['SKIPPED_DEPS'].extend(['webp'])
+        env['SKIPPED_DEPS'].append('webp')
 
     if env['TIFF']:
         OPTIONAL_LIBSHEADERS.append(['tiff', 'tiff.h', False,'C','-DHAVE_TIFF'])
@@ -1573,7 +1576,7 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = fix_path(inc_path))
         env.AppendUnique(LIBPATH = fix_path(lib_path))
     else:
-        env['SKIPPED_DEPS'].extend(['tiff'])
+        env['SKIPPED_DEPS'].append('tiff')
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
@@ -1873,9 +1876,7 @@ if not preconfigured:
                 )
                 env["CAIRO_ALL_LIBS"] = ['cairo']
                 if env['RUNTIME_LINK'] == 'static':
-                    env["CAIRO_ALL_LIBS"].extend(
-                        ['pixman-1']
-                    )
+                    env["CAIRO_ALL_LIBS"].append('pixman-1')
                 # todo - run actual checkLib?
                 env['HAS_CAIRO'] = True
         else:
@@ -1922,10 +1923,10 @@ if not preconfigured:
 
     if env['MISSING_DEPS']:
         # if required dependencies are missing, print warnings and then let SCons finish without building or saving local config
-        color_print(1,'\nExiting... the following required dependencies were not found:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['MISSING_DEPS']]))
+        color_print(1,'\nExiting... the following required dependencies were not found:' + pretty_deps('\n   - ', env['MISSING_DEPS']))
         color_print(1,"\nSee '%s' for details on possible problems." % (fix_path(SCONS_LOCAL_LOG)))
         if env['SKIPPED_DEPS']:
-            color_print(4,'\nAlso, these OPTIONAL dependencies were not found:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
+            color_print(4,'\nAlso, these OPTIONAL dependencies were not found:' + pretty_deps('\n   - ', env['SKIPPED_DEPS']))
         color_print(4,"\nSet custom paths to these libraries and header files on the command-line or in a file called '%s'" % SCONS_LOCAL_CONFIG)
         color_print(4,"    ie. $ python scons/scons.py BOOST_INCLUDES=/usr/local/include BOOST_LIBS=/usr/local/lib")
         color_print(4, "\nOnce all required dependencies are found a local '%s' will be saved and then install:" % SCONS_LOCAL_CONFIG)
@@ -1952,7 +1953,7 @@ if not preconfigured:
           color_print(4,"Did not use user config file, no custom path variables will be saved...")
 
         if env['SKIPPED_DEPS']:
-            color_print(4,'\nNote: will build without these OPTIONAL dependencies:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
+            color_print(4,'\nNote: will build without these OPTIONAL dependencies:' + pretty_deps('\n   - ', env['SKIPPED_DEPS']))
             print
 
         # fetch the mapnik version header in order to set the
@@ -2000,13 +2001,13 @@ if not preconfigured:
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
             if env['DEFAULT_LOG_SEVERITY'] not in severities:
-                severities_list = ', '.join(["'%s'" % s for s in severities])
+                severities_list = ', '.join("'%s'" % s for s in severities)
                 color_print(1,"Cannot set default logger severity to '%s', available options are %s." % (env['DEFAULT_LOG_SEVERITY'], severities_list))
                 Exit(1)
             else:
                 log_severity = severities.index(env['DEFAULT_LOG_SEVERITY'])
         else:
-            severities_list = ', '.join(["'%s'" % s for s in severities])
+            severities_list = ', '.join("'%s'" % s for s in severities)
             color_print(1,"No logger severity specified, available options are %s." % severities_list)
             Exit(1)
 
