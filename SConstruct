@@ -1392,6 +1392,7 @@ if not preconfigured:
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++']
     ]
+    OPTIONAL_LIBSHEADERS = []
 
     if env.get('FREETYPE_LIBS') or env.get('FREETYPE_INCLUDES'):
         REQUIRED_LIBSHEADERS.insert(0,['freetype','ft2build.h',True,'C'])
@@ -1414,9 +1415,7 @@ if not preconfigured:
             except OSError as e:
                 pass
 
-    # libxml2 should be optional but is currently not
-    # https://github.com/mapnik/mapnik/issues/913
-    if env.get('XMLPARSER') and env['XMLPARSER'] == 'libxml2':
+    if env['XMLPARSER'] == 'libxml2':
         if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
             OPTIONAL_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
             if env.get('XML2_INCLUDES'):
@@ -1435,8 +1434,6 @@ if not preconfigured:
             env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
         else:
             env['SKIPPED_DEPS'].extend(['dlfcn'])
-
-    OPTIONAL_LIBSHEADERS = []
 
     if env['JPEG']:
         OPTIONAL_LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C','-DHAVE_JPEG'])
