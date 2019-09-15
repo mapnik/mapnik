@@ -92,7 +92,7 @@ cxxflags = ' '.join(cxxflags_cleaned)
 
 defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
-dep_includes = ''.join([' -I${NODE_CONFIG_PREFIX:-""}%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
+dep_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
 
 dep_includes += ' '
 
