@@ -87,22 +87,17 @@ template_env['CXX'] = re.sub(r'^ccache +', '', cxx_cleaned)
 
 template_env['DEFINES'] = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
-dep_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
-
-dep_includes += ' '
-
+dep_includes = ['-I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')]
 if config_env['HAS_CAIRO']:
-    dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
-template_env['DEP_INCLUDES'] = dep_includes
+    dep_includes += ['-I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')]
+template_env['DEP_INCLUDES'] = ' '.join(dep_includes)
 
-ldflags = ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
+ldflags = ' '.join('-L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#'))
 ldflags += config_env['LIBMAPNIK_LINKFLAGS']
 template_env['LDFLAGS'] = ldflags
 
-dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
-
 # remove local agg from public linking
-dep_libs = dep_libs.replace('-lagg','')
+dep_libs = ' '.join('-l%s' % i for i in env['LIBMAPNIK_LIBS'] if i != 'agg')
 template_env['DEP_LIBS'] = dep_libs
 
 try:
