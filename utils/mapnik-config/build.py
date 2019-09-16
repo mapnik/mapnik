@@ -24,6 +24,7 @@ import os
 import sys
 from copy import copy
 from subprocess import Popen, PIPE
+from SCons.Environment import OverrideEnvironment
 
 Import('env')
 
@@ -46,51 +47,45 @@ if (GetMapnikLibVersion() != config_env['MAPNIK_VERSION_STRING']):
     print ('Error: version.hpp mismatch (%s) to cached value (%s): please reconfigure mapnik' % (GetMapnikLibVersion(),config_env['MAPNIK_VERSION_STRING']))
     Exit(1)
 
-config_variables = '''#!/usr/bin/env bash
-
-## variables
-
-CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
-
-CONFIG_MAPNIK_VERSION_STRING='%(version_string)s'
-CONFIG_MAPNIK_VERSION='%(version)s'
-CONFIG_GIT_REVISION='%(git_revision)s'
-CONFIG_GIT_DESCRIBE='%(git_describe)s'
-CONFIG_FONTS="%(fonts)s"
-CONFIG_INPUT_PLUGINS="%(input_plugins)s"
-CONFIG_MAPNIK_DEFINES='%(defines)s'
-CONFIG_MAPNIK_LIBNAME='%(mapnik_libname)s'
-CONFIG_MAPNIK_LIBPATH="%(mapnik_libpath)s"
-CONFIG_DEP_LIBS='%(dep_libs)s'
-CONFIG_MAPNIK_LDFLAGS="%(ldflags)s"
-CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg -I${CONFIG_PREFIX}/include/mapnik"
-CONFIG_DEP_INCLUDES="%(dep_includes)s"
-CONFIG_CXXFLAGS="%(cxxflags)s"
-CONFIG_CXX='%(cxx)s'
-CONFIG_MAPNIK_GDAL_DATA='%(found_gdal_data)s'
-CONFIG_MAPNIK_PROJ_LIB='%(found_proj_data)s'
-CONFIG_MAPNIK_ICU_DATA='%(found_icu_data)s'
-
-'''
-
-def write_config(configuration,template,config_file):
-    template = open(template,'r').read()
-    open(config_file,'w').write(config_variables  % configuration + template)
+def write_config(env, template_filename, config_filename):
+    """
+    Load shell script `template_filename`, replace values in variable
+    assignments of the form `CONFIG_key='default'` with corresponding
+    value `env['key']`, and save the result as `config_filename`.
+    """
+    with open(template_filename, 'r') as template_file:
+        template = template_file.read()
+    with open(config_filename, 'w') as config_file:
+        escape = env['ESCAPE']
+        def subst(matchobj):
+            key = matchobj.group(1)
+            val = env.get(key)
+            if val is None:
+                return matchobj.group(0)
+            else:
+                return 'CONFIG_%s=%s' % (key, escape(str(val)))
+        config = re.sub(r'^CONFIG_(\w+)=.*', subst, template, flags=re.M)
+        config_file.write(config)
     try:
-        os.chmod(config_file,0o755)
+        os.chmod(config_filename, 0o755)
     except: pass
 
 
-cxxflags_raw = config_env['LIBMAPNIK_CXXFLAGS'];
+template_env = OverrideEnvironment(config_env, {})
+
+# strip any -Warning flags
+cxxflags_cleaned = [x for x in config_env['LIBMAPNIK_CXXFLAGS']
+                      if x.startswith('-Wp,') or not x.startswith('-W')]
 # strip clang specific flags to avoid breaking gcc
 # while it is not recommended to mix compilers, this nevertheless
 # makes it easier to compile apps with gcc and mapnik-config against mapnik built with clang
-to_remove = ['-Wno-unsequenced','-Wno-unknown-warning-option','-Wtautological-compare','-Wheader-hygiene']
-cxxflags_cleaned = [item for item in config_env['LIBMAPNIK_CXXFLAGS'] if item not in to_remove];
+cxxflags_cleaned = [x for x in cxxflags_cleaned if x != '-Qunused-arguments']
+cxx_cleaned = config_env['CXX'].replace(' -Qunused-arguments', '')
 
-cxxflags = ' '.join(cxxflags_cleaned)
+template_env['CXXFLAGS'] = ' '.join(cxxflags_cleaned)
+template_env['CXX'] = re.sub(r'^ccache +', '', cxx_cleaned)
 
-defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
+template_env['DEFINES'] = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
 dep_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
 
@@ -98,77 +93,42 @@ dep_includes += ' '
 
 if config_env['HAS_CAIRO']:
     dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
+template_env['DEP_INCLUDES'] = dep_includes
 
 ldflags = ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 ldflags += config_env['LIBMAPNIK_LINKFLAGS']
+template_env['LDFLAGS'] = ldflags
 
 dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
 # remove local agg from public linking
 dep_libs = dep_libs.replace('-lagg','')
-
-git_revision = 'N/A'
-git_describe = config_env['MAPNIK_VERSION_STRING']
+template_env['DEP_LIBS'] = dep_libs
 
 try:
-    git_cmd = "git rev-list --max-count=1 HEAD"
-    stdin, stderr = Popen(git_cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    stdin, stderr = Popen("git rev-list --max-count=1 HEAD",
+                        shell=True, universal_newlines=True,
+                        stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
-        git_revision = stdin.strip()
+        template_env["GIT_REVISION"] = stdin.strip()
 
-    git_cmd = "git describe"
-    stdin, stderr = Popen(git_cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    stdin, stderr = Popen("git describe",
+                        shell=True, universal_newlines=True,
+                        stdout=PIPE, stderr=PIPE).communicate()
     if not stderr:
-        git_describe = stdin.strip()
+        template_env["GIT_DESCRIBE"] = stdin.strip()
 except:
     pass
-
-# for fonts and input plugins we should try
-# to store the relative path, if feasible
-fontspath = config_env['MAPNIK_FONTS']
-lib_root = os.path.join(config_env['PREFIX'], config_env['LIBDIR_SCHEMA'])
-if lib_root in fontspath:
-    fontspath = "${CONFIG_PREFIX}/" + os.path.relpath(fontspath,config_env['PREFIX'])
-inputpluginspath = config_env['MAPNIK_INPUT_PLUGINS']
-if lib_root in inputpluginspath:
-    inputpluginspath = "${CONFIG_PREFIX}/" + os.path.relpath(inputpluginspath,config_env['PREFIX'])
-
-lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
-
-found_gdal_data = config_env['QUERIED_GDAL_DATA']
-found_proj_data = config_env['QUERIED_PROJ_LIB']
-found_icu_data = config_env['QUERIED_ICU_DATA']
-
-configuration = {
-    "git_revision": git_revision,
-    "git_describe": git_describe,
-    "version_string": config_env['MAPNIK_VERSION_STRING'],
-    "version": config_env['MAPNIK_VERSION'],
-    "mapnik_libname": env['MAPNIK_NAME'],
-    "mapnik_libpath": lib_path,
-    "ldflags": ldflags,
-    "dep_libs": dep_libs,
-    "dep_includes": dep_includes,
-    "fonts": fontspath,
-    "input_plugins": inputpluginspath,
-    "defines":defines,
-    "cxxflags":cxxflags,
-    "cxx":env['CXX'],
-    "found_gdal_data":found_gdal_data,
-    "found_proj_data":found_proj_data,
-    "found_icu_data":found_icu_data,
-}
 
 ## if we are statically linking dependencies
 ## then they do not need to be reported in ldflags
 #if env['RUNTIME_LINK'] == 'static':
-#    configuration['ldflags'] = ''
-#    configuration['dep_libs'] = ''
+#    template_env['LDFLAGS'] = ''
+#    template_env['DEP_LIBS'] = ''
 
 template = 'mapnik-config.template.sh'
 config_file = 'mapnik-config'
-source = config_file
-write_config(configuration,template,config_file)
+write_config(template_env, template, config_file)
 target_path = os.path.normpath(os.path.join(config_env['INSTALL_PREFIX'],'bin'))
 full_target = os.path.join(target_path,config_file)
 
