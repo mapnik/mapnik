@@ -1,3 +1,40 @@
+#! /usr/bin/env bash
+
+set -eu
+
+RUNTIME_PREFIX=$(cd -- "${BASH_SOURCE%"${BASH_SOURCE##*/}"}.." && pwd)
+
+## CONFIG variables substituted from build script
+
+CONFIG_MAPNIK_NAME="mapnik"
+CONFIG_MAPNIK_VERSION="unknown"
+CONFIG_MAPNIK_VERSION_STRING="unknown"
+CONFIG_GIT_REVISION="N/A"
+CONFIG_GIT_DESCRIBE="${CONFIG_MAPNIK_VERSION_STRING}"
+
+CONFIG_PREFIX="/usr/local"
+CONFIG_LIBDIR_SCHEMA="lib"
+CONFIG_LIB_DIR_NAME="mapnik"
+CONFIG_MAPNIK_LIB_BASE="${CONFIG_PREFIX}/${CONFIG_LIBDIR_SCHEMA}"
+CONFIG_MAPNIK_LIB_DIR="${CONFIG_MAPNIK_LIB_BASE}/${CONFIG_LIB_DIR_NAME}"
+CONFIG_MAPNIK_INPUT_PLUGINS="${CONFIG_MAPNIK_LIB_DIR}/input"
+CONFIG_MAPNIK_FONTS="${CONFIG_MAPNIK_LIB_DIR}/fonts"
+
+CONFIG_CXX="c++"
+CONFIG_CXXFLAGS=
+CONFIG_DEFINES=
+CONFIG_LDFLAGS=
+CONFIG_DEP_INCLUDES=
+CONFIG_DEP_LIBS=
+CONFIG_QUERIED_GDAL_DATA=
+CONFIG_QUERIED_PROJ_LIB=
+CONFIG_QUERIED_ICU_DATA=
+
+## D.R.Y. variables
+
+DRY_INCLUDES="-I${RUNTIME_PREFIX}/include -I${RUNTIME_PREFIX}/include/mapnik/agg -I${RUNTIME_PREFIX}/include/mapnik"
+DRY_CFLAGS="${DRY_INCLUDES} ${CONFIG_DEP_INCLUDES} ${CONFIG_DEFINES} ${CONFIG_CXXFLAGS}"
+DRY_LIBS="-L${RUNTIME_PREFIX}/${CONFIG_LIBDIR_SCHEMA} -l${CONFIG_MAPNIK_NAME}"
 
 ## program below
 
@@ -35,31 +72,18 @@ EOF
     exit $1
 }
 
-echoerr() { echo "$@" 1>&2; }
-
 if test $# -eq 0; then
     usage 1
 fi
 
 while test $# -gt 0; do
     case "$1" in
-    esac
 
-    case "$1" in
-
-    --help)
+    -h| --help)
       usage 0
       ;;
 
-    -h)
-      usage 0
-      ;;
-
-    -v)
-      echo ${CONFIG_MAPNIK_VERSION_STRING}
-      ;;
-
-    --version)
+    -v| --version)
       echo ${CONFIG_MAPNIK_VERSION_STRING}
       ;;
 
@@ -76,77 +100,77 @@ while test $# -gt 0; do
       ;;
 
     --fonts)
-      echo ${CONFIG_FONTS}
+      printf '%s\n' "${CONFIG_MAPNIK_FONTS/#"$CONFIG_PREFIX"/$RUNTIME_PREFIX}"
       ;;
 
     --input-plugins)
-      echo ${CONFIG_INPUT_PLUGINS}
+      printf '%s\n' "${CONFIG_MAPNIK_INPUT_PLUGINS/#"$CONFIG_PREFIX"/$RUNTIME_PREFIX}"
       ;;
 
     --defines)
-      echo ${CONFIG_MAPNIK_DEFINES}
+      printf '%s\n' "${CONFIG_DEFINES}"
       ;;
 
     --prefix)
-      echo ${CONFIG_PREFIX}
+      printf '%s\n' "${RUNTIME_PREFIX}"
       ;;
 
     --lib-name)
-      echo ${CONFIG_MAPNIK_LIBNAME}
+      printf '%s\n' "${CONFIG_MAPNIK_NAME}"
       ;;
 
     --libs)
-      echo -L${CONFIG_MAPNIK_LIBPATH} -l${CONFIG_MAPNIK_LIBNAME}
+      printf '%s\n' "${DRY_LIBS}"
       ;;
 
     --dep-libs)
-      echo ${CONFIG_DEP_LIBS}
+      printf '%s\n' "${CONFIG_DEP_LIBS}"
       ;;
 
     --ldflags)
-      echo ${CONFIG_MAPNIK_LDFLAGS}
+      printf '%s\n' "${CONFIG_LDFLAGS}"
       ;;
 
     --includes)
-      echo -I${CONFIG_MAPNIK_INCLUDE}
+      printf '%s\n' "${DRY_INCLUDES}"
       ;;
 
     --dep-includes)
-      echo ${CONFIG_DEP_INCLUDES}
+      printf '%s\n' "${CONFIG_DEP_INCLUDES}"
       ;;
 
     --cxxflags)
-      echo ${CONFIG_CXXFLAGS}
+      printf '%s\n' "${CONFIG_CXXFLAGS}"
       ;;
 
     --cflags)
-      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS}
+      printf '%s\n' "${DRY_CFLAGS}"
       ;;
 
     --cxx)
-      echo ${CONFIG_CXX}
+      printf '%s\n' "${CONFIG_CXX}"
       ;;
 
     --all-flags)
-      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS} -L${CONFIG_MAPNIK_LIBPATH} -l${CONFIG_MAPNIK_LIBNAME} ${CONFIG_MAPNIK_LDFLAGS} ${CONFIG_DEP_LIBS}
+      printf '%s\n' "${DRY_CFLAGS} ${DRY_LIBS} ${CONFIG_LDFLAGS} ${CONFIG_DEP_LIBS}"
       ;;
 
     --gdal-data)
-      if [[ ${CONFIG_MAPNIK_GDAL_DATA:-unset} != "unset" ]]; then echo ${CONFIG_MAPNIK_GDAL_DATA}; fi;
+      printf "%s${CONFIG_QUERIED_GDAL_DATA:+\\n}" "${CONFIG_QUERIED_GDAL_DATA}"
       ;;
 
     --proj-lib)
-      if [[ ${CONFIG_MAPNIK_PROJ_LIB:-unset} != "unset" ]]; then echo ${CONFIG_MAPNIK_PROJ_LIB}; fi;
+      printf "%s${CONFIG_QUERIED_PROJ_LIB:+\\n}" "${CONFIG_QUERIED_PROJ_LIB}"
       ;;
 
     --icu-data)
-      if [[ ${CONFIG_MAPNIK_ICU_DATA:-unset} != "unset" ]]; then echo ${CONFIG_MAPNIK_ICU_DATA}; fi;
+      printf "%s${CONFIG_QUERIED_ICU_DATA:+\\n}" "${CONFIG_QUERIED_ICU_DATA}"
       ;;
 
     *)
-  # push to stderr any invalid options
-  echo "unknown option $1" 1>&2;
-  ;;
+      # push to stderr any invalid options
+      echo "unknown option $1" >&2
+      ;;
     esac
     shift
 done
