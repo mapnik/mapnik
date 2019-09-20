@@ -24,37 +24,40 @@ from glob import glob
 
 Import('env')
 
-base = './mapnik/'
-subdirs = [
-    '',
-    'geometry',
-    'csv',
-    'svg',
-    'wkt',
-    'cairo',
-    'grid',
-    'json',
-    'util',
-    'group',
-    'text',
-    'text/placements',
-    'text/formatting',
-    'transform',
-    'markers_placements',
-    'geometry',
-    'value'
-    ]
+subdirglobs = [
+    ('.',                    'mapnik/*.hpp'),
+    ('agg',                  '../deps/agg/include/agg*'),
+    ('cairo',                'mapnik/cairo/*.hpp'),
+    ('csv',                  'mapnik/csv/*.hpp'),
+    ('deps/mapbox',          '../deps/mapbox/variant/include/mapbox/*.hpp'),
+    ('deps/mapbox',          '../deps/mapbox/geometry/include/mapbox/*.hpp'),
+    ('deps/mapbox/geometry', '../deps/mapbox/geometry/include/mapbox/geometry/*.hpp'),
+    ('geometry',             'mapnik/geometry/*.hpp'),
+    ('group',                'mapnik/group/*.hpp'),
+    ('json',                 'mapnik/json/*.hpp'),
+    ('markers_placements',   'mapnik/markers_placements/*.hpp'),
+    ('renderer_common',      'mapnik/renderer_common/*.hpp'),
+    ('sparsehash',           '../deps/mapnik/sparsehash/*'),
+    ('sparsehash/internal',  '../deps/mapnik/sparsehash/internal/*'),
+    ('svg',                  'mapnik/svg/*.hpp'),
+    ('text',                 'mapnik/text/*.hpp'),
+    ('text/formatting',      'mapnik/text/formatting/*.hpp'),
+    ('text/placements',      'mapnik/text/placements/*.hpp'),
+    ('transform',            'mapnik/transform/*.hpp'),
+    ('util',                 'mapnik/util/*.hpp'),
+    ('value',                'mapnik/value/*.hpp'),
+    ('wkt',                  'mapnik/wkt/*.hpp'),
+]
 
 if env['SVG_RENDERER']:
-    subdirs.append('svg/output')
+    subdirglobs.append(('svg/output', 'mapnik/svg/output/*.hpp'))
 
 if env['GRID_RENDERER']:
-    subdirs.append('grid')
+    subdirglobs.append(('grid', 'mapnik/grid/*.hpp'))
 
 if 'install' in COMMAND_LINE_TARGETS:
-    for subdir in subdirs:
-        pathdir = os.path.join(base,subdir,'*.hpp')
-        includes = glob(pathdir)
+    for subdir, filenamepattern in subdirglobs:
+        includes = glob(filenamepattern)
         inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/'+subdir)
         env.Alias(target='install', source=env.Install(inc_target, includes))
 
