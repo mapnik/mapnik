@@ -24,6 +24,7 @@
  *
  *****************************************************************************/
 
+#include "../pgcommon/sql_utils.hpp"
 #include "../postgis/connection_manager.hpp"
 #include "../postgis/asyncresultset.hpp"
 #include "pgraster_datasource.hpp"
@@ -58,6 +59,7 @@ const std::string pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using std::shared_ptr;
 using mapnik::attribute_descriptor;
+using mapnik::pgcommon::sql_bbox;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
 using mapnik::value_integer;
@@ -589,17 +591,6 @@ layer_descriptor pgraster_datasource::get_descriptor() const
     return desc_;
 }
 
-std::string pgraster_datasource::sql_bbox(box2d<double> const& env) const
-{
-    std::ostringstream b;
-    b.precision(16);
-    b << "ST_MakeEnvelope(";
-    b << env.minx() << "," << env.miny() << ",";
-    b << env.maxx() << "," << env.maxy() << ",";
-    b << std::max(srid_, 0) << ")";
-    return b.str();
-}
-
 std::string pgraster_datasource::populate_tokens(std::string const& sql) const
 {
     return populate_tokens(sql, FLT_MAX,
@@ -645,7 +636,7 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
         }
         else if (boost::algorithm::equals(m1, "bbox"))
         {
-            populated_sql << sql_bbox(env);
+            populated_sql << sql_bbox(env, srid_);
             intersect = false;
         }
         else if (boost::algorithm::equals(m1, "pixel_height"))
@@ -674,7 +665,7 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
         {
             populated_sql << " WHERE ST_Intersects("
                           << identifier(geometryColumn_) << ", "
-                          << sql_bbox(env) << ")";
+                          << sql_bbox(env, srid_) << ")";
         }
         else if (intersect_max_scale_ > 0 && (scale_denom >= intersect_max_scale_))
         {
@@ -684,7 +675,7 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
         {
             populated_sql << " WHERE "
                           << identifier(geometryColumn_) << " && "
-                          << sql_bbox(env);
+                          << sql_bbox(env, srid_);
         }
     }
 
@@ -889,7 +880,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         s << identifier(col);
 
         if (clip_rasters_) {
-          s << ", ST_Expand(" << sql_bbox(box)
+          s << ", ST_Expand(" << sql_bbox(box, srid_)
             << ", greatest(abs(ST_ScaleX("
             << identifier(col) << ")), abs(ST_ScaleY("
             << identifier(col) << ")))))";
