@@ -56,6 +56,7 @@ const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 using std::shared_ptr;
 using mapnik::attribute_descriptor;
 using mapnik::pgcommon::sql_bbox;
+using mapnik::pgcommon::sql_float;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
 
@@ -521,9 +522,6 @@ std::string postgis_datasource::populate_tokens(
     char const* start = sql.data();
     char const* end = start + sql.size();
 
-    populated_sql.precision(16);
-    populated_sql << std::showpoint;
-
     while (std::regex_search(start, end, m, re_tokens_))
     {
         populated_sql.write(start, m[0].first - start);
@@ -551,15 +549,15 @@ std::string postgis_datasource::populate_tokens(
         }
         else if (boost::algorithm::equals(m1, "pixel_height"))
         {
-            populated_sql << pixel_height;
+            populated_sql << sql_float(pixel_height);
         }
         else if (boost::algorithm::equals(m1, "pixel_width"))
         {
-            populated_sql << pixel_width;
+            populated_sql << sql_float(pixel_width);
         }
         else if (boost::algorithm::equals(m1, "scale_denominator"))
         {
-            populated_sql << scale_denom;
+            populated_sql << sql_float(scale_denom);
         }
         else
         {
@@ -779,9 +777,9 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             }
 
             // ! ST_RemoveRepeatedPoints()
-            s << "," << twkb_tolerance << ")";
+            s << "," << sql_float(twkb_tolerance) << ")";
             // ! ST_Simplify(), with parameter to keep collapsed geometries
-            s << "," << twkb_tolerance << ",true)";
+            s << "," << sql_float(twkb_tolerance) << ",true)";
             // ! ST_TWKB()
             s << "," << twkb_rounding << ") AS geom";
         }
@@ -808,7 +806,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             if (simplify_geometries_ && simplify_snap_ratio_ > 0.0)
             {
                 const double tolerance = px_sz * simplify_snap_ratio_;
-                s << "," << tolerance << ")";
+                s << "," << sql_float(tolerance) << ")";
             }
 
             // ! ST_ClipByBox2D()
@@ -821,7 +819,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             if (simplify_geometries_)
             {
                 const double tolerance = px_sz * simplify_dp_ratio_;
-                s << ", " << tolerance;
+                s << ", " << sql_float(tolerance);
                 // Add parameter to ST_Simplify to keep collapsed geometries
                 if (simplify_dp_preserve_)
                 {

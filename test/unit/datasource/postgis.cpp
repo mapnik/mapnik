@@ -316,9 +316,9 @@ TEST_CASE("postgis") {
             auto feature = featureset->next();
             CHECKED_IF(feature != nullptr)
             {
-                CHECK(feature->get("t_pixel_width").to_string() == "numeric");
-                CHECK(feature->get("t_pixel_height").to_string() == "numeric");
-                CHECK(feature->get("t_scale_denom").to_string() == "numeric");
+                CHECK(feature->get("t_pixel_width").to_string() == "double precision");
+                CHECK(feature->get("t_pixel_height").to_string() == "double precision");
+                CHECK(feature->get("t_scale_denom").to_string() == "double precision");
             }
         }
 

@@ -34,6 +34,48 @@
 namespace mapnik { namespace pgcommon {
 
 
+// sql_float4
+
+struct sql_float4
+{
+    float value;
+};
+
+inline sql_float4 sql_float(float value)
+{
+    return {value};
+}
+
+inline std::ostream & operator << (std::ostream & os, sql_float4 sf)
+{
+    char const fmt[] = "float4 '%a'";
+    char buf[sizeof(fmt) + 25];
+    int len = std::snprintf(buf, sizeof(buf), fmt, sf.value);
+    return os.write(buf, std::min(len, int(sizeof(buf)) - 1));
+}
+
+
+// sql_float8
+
+struct sql_float8
+{
+    double value;
+};
+
+inline sql_float8 sql_float(double value)
+{
+    return {value};
+}
+
+inline std::ostream & operator << (std::ostream & os, sql_float8 sf)
+{
+    char const fmt[] = "float8 '%a'";
+    char buf[sizeof(fmt) + 25];
+    int len = std::snprintf(buf, sizeof(buf), fmt, sf.value);
+    return os.write(buf, std::min(len, int(sizeof(buf)) - 1));
+}
+
+
 // sql_bbox
 
 struct sql_bbox : box2d<double>
