@@ -35,6 +35,7 @@ BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, iterator_type, extract_bou
 BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
 
+#if BOOST_VERSION < 107000
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, phrase_parse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, feature_context_const_type);
@@ -42,5 +43,6 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extr
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
+#endif
 
 }}}

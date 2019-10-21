@@ -30,7 +30,9 @@ using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
 BOOST_SPIRIT_INSTANTIATE(css_color_grammar_type, iterator_type, context_type);
 
+#if BOOST_VERSION < 107000
 template bool parse_rule<iterator_type, context_type, mapnik::filter::color_to_alpha>
 (css_color_grammar_type, iterator_type&, iterator_type const&, context_type const&, mapnik::filter::color_to_alpha&);
+#endif
 
 }}
