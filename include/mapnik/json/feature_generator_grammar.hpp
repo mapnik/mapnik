@@ -63,6 +63,18 @@ struct end_container<mapnik::feature_impl const>
     }
 };
 
+#if BOOST_VERSION >= 106900
+template <>
+struct transform_attribute<const mapnik::feature_impl, const mapnik::feature_impl &, boost::spirit::karma::domain, void>
+    : detail::transform_attribute_base<mapnik::feature_impl const, mapnik::feature_impl const&,  boost::spirit::karma::domain>
+{};
+
+template <>
+struct transform_attribute<const boost::fusion::cons<const mapnik::feature_impl &, boost::fusion::nil_>, const mapnik::feature_impl &,
+      boost::spirit::karma::domain, void>
+    : detail::transform_attribute_base<const boost::fusion::cons<const mapnik::feature_impl &, boost::fusion::nil_>, mapnik::feature_impl const&,  boost::spirit::karma::domain>
+{};
+#endif
 }}}
 
 namespace mapnik { namespace json {

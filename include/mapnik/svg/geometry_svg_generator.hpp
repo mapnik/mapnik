@@ -141,7 +141,7 @@ struct coordinate_policy : karma::real_policies<T>
 
 template <typename OutputIterator, typename Path>
 struct svg_path_generator :
-        karma::grammar<OutputIterator, Path const& ()>
+        karma::grammar<OutputIterator, Path()>
 {
 
     using path_type = Path;
@@ -149,12 +149,12 @@ struct svg_path_generator :
 
     svg_path_generator();
     // rules
-    karma::rule<OutputIterator, path_type const& ()> svg;
-    karma::rule<OutputIterator, path_type const& ()> point;
-    karma::rule<OutputIterator, path_type const& ()> linestring;
-    karma::rule<OutputIterator, path_type const& ()> polygon;
-    karma::rule<OutputIterator, coordinate_type ()> svg_point;
-    karma::rule<OutputIterator, path_type const& ()> svg_path;
+    karma::rule<OutputIterator, path_type()> svg;
+    karma::rule<OutputIterator, path_type()> point;
+    karma::rule<OutputIterator, path_type()> linestring;
+    karma::rule<OutputIterator, path_type()> polygon;
+    karma::rule<OutputIterator, coordinate_type()> svg_point;
+    karma::rule<OutputIterator, path_type()> svg_path;
 
     // phoenix functions
     phoenix::function<svg_detail::get_type<path_type> > _type;
