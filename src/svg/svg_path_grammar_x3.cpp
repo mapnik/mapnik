@@ -25,7 +25,12 @@
 
 namespace mapnik { namespace svg { namespace grammar {
 
+#if BOOST_VERSION >= 107000
+BOOST_SPIRIT_INSTANTIATE(svg_path_grammar_type, iterator_type, svg_parse_context_type);
+BOOST_SPIRIT_INSTANTIATE(svg_points_grammar_type, iterator_type, svg_parse_context_type);
+#else
 BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_path_grammar_type, iterator_type, svg_parse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_points_grammar_type, iterator_type, svg_parse_context_type);
+#endif
 
 }}}

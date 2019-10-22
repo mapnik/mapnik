@@ -60,8 +60,8 @@ struct extract_string
 };
 
 template <typename OutputIterator, typename KeyValueStore>
-struct properties_generator_grammar : karma::grammar<OutputIterator, KeyValueStore const&()>
-
+struct properties_generator_grammar
+    : karma::grammar<OutputIterator, KeyValueStore const&()>
 {
     using pair_type = std::tuple<std::string, mapnik::value>;
     properties_generator_grammar();
