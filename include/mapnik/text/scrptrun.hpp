@@ -24,6 +24,9 @@
 #include <unicode/uscript.h>
 #pragma GCC diagnostic pop
 
+const unsigned int STACK_SIZE = 1 << 7; // 2^n
+const unsigned int STACK_MASK = STACK_SIZE - 1;
+
 struct ScriptRecord
 {
     UChar32 startChar = 0;
@@ -85,7 +88,7 @@ private:
     int32_t scriptEnd;
     UScriptCode scriptCode;
 
-    ParenStackEntry parenStack[128];
+    ParenStackEntry parenStack[STACK_SIZE];
     int32_t parenSP;
 
     static int8_t highBit(int32_t value);
