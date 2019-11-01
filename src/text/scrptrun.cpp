@@ -161,7 +161,7 @@ UBool ScriptRun::next()
         // characters above it on the stack will be poped.
         if (pairIndex >= 0) {
             if ((pairIndex & 1) == 0) {
-                parenSP = (++parenSP) % ARRAY_SIZE(parenStack); // avoid out-of-bounds access
+                parenSP = (++parenSP) & STACK_MASK; // avoid out-of-bounds access
                 parenStack[parenSP].pairIndex = pairIndex;
                 parenStack[parenSP].scriptCode  = scriptCode;
             } else if (parenSP >= 0) {
