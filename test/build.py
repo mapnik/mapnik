@@ -20,13 +20,16 @@ else:
         test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(CXXFLAGS='-g')
     test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
+    test_env['CPPFLAGS'] = '-fsanitize=bounds'
     test_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
+
     if test_env['HAS_CAIRO']:
         test_env.PrependUnique(CPPPATH=test_env['CAIRO_CPPPATHS'])
         test_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
     test_env.PrependUnique(CPPPATH=['./'])
     if test_env['PLATFORM'] == 'Linux':
         test_env['LINKFLAGS'].append('-pthread')
+    test_env['LINKFLAGS'].append('-fsanitize=bounds')
     test_env.AppendUnique(LIBS='boost_program_options%s' % env['BOOST_APPEND'])
     test_env_local = test_env.Clone()
 
@@ -34,6 +37,7 @@ else:
     # unit tests
     sources = glob.glob('./unit/*/*.cpp')
     sources.extend(glob.glob('./unit/*.cpp'))
+    sources.append('../src/text/scrptrun.cpp')
     test_program = test_env_local.Program("./unit/run", source=sources)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
     Depends(test_program, env.subst('../src/json/libmapnik-json${LIBSUFFIX}'))
