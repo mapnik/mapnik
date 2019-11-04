@@ -21,7 +21,6 @@
 #pragma GCC diagnostic pop
 
 #include <mapnik/text/scrptrun.hpp>
-#include <cstddef>
 
 template <class T, std::size_t N>
 constexpr std::size_t ARRAY_SIZE(const T (&array)[N]) noexcept
@@ -161,9 +160,8 @@ UBool ScriptRun::next()
         // characters above it on the stack will be poped.
         if (pairIndex >= 0) {
             if ((pairIndex & 1) == 0) {
-                parenSP = (parenSP + 1) & STACK_MASK; // avoid out-of-bounds access
-                parenStack[parenSP].pairIndex = pairIndex;
-                parenStack[parenSP].scriptCode  = scriptCode;
+                ++parenSP;
+                parenStack.emplace_back(pairIndex, scriptCode);
             } else if (parenSP >= 0) {
                 int32_t pi = pairIndex & ~1;
 
