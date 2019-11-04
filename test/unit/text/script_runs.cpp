@@ -1,7 +1,7 @@
 #include "catch.hpp"
+#include <unicode/unistr.h>
 #include <mapnik/unicode.hpp>
 #include <mapnik/text/scrptrun.hpp>
-#include <iostream>
 
 TEST_CASE("nested script runs")
 {
