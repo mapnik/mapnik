@@ -29,7 +29,6 @@ else:
     test_env.PrependUnique(CPPPATH=['./'])
     if test_env['PLATFORM'] == 'Linux':
         test_env['LINKFLAGS'].append('-pthread')
-    test_env['LINKFLAGS'].append('-fsanitize=bounds')
     test_env.AppendUnique(LIBS='boost_program_options%s' % env['BOOST_APPEND'])
     test_env_local = test_env.Clone()
 
