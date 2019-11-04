@@ -23,9 +23,9 @@
 #include <unicode/uobject.h>
 #include <unicode/uscript.h>
 #pragma GCC diagnostic pop
+#include <vector>
 
 const unsigned int STACK_SIZE = 1 << 7; // 2^n
-const unsigned int STACK_MASK = STACK_SIZE - 1;
 
 struct ScriptRecord
 {
@@ -36,6 +36,8 @@ struct ScriptRecord
 
 struct ParenStackEntry
 {
+    ParenStackEntry(int32_t pairIndex_, UScriptCode scriptCode_)
+        : pairIndex(pairIndex_), scriptCode(scriptCode_) {}
     int32_t pairIndex = 0;
     UScriptCode scriptCode = USCRIPT_INVALID_CODE;
 };
@@ -88,7 +90,7 @@ private:
     int32_t scriptEnd;
     UScriptCode scriptCode;
 
-    ParenStackEntry parenStack[STACK_SIZE];
+    std::vector<ParenStackEntry> parenStack;
     int32_t parenSP;
 
     static int8_t highBit(int32_t value);
@@ -108,16 +110,19 @@ private:
 
 inline ScriptRun::ScriptRun()
 {
+    parenStack.reserve(STACK_SIZE);
     reset(nullptr, 0, 0);
 }
 
 inline ScriptRun::ScriptRun(const UChar chars[], int32_t length)
 {
+    parenStack.reserve(STACK_SIZE);
     reset(chars, 0, length);
 }
 
 inline ScriptRun::ScriptRun(const UChar chars[], int32_t start, int32_t length)
 {
+    parenStack.reserve(STACK_SIZE);
     reset(chars, start, length);
 }
 
