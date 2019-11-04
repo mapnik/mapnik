@@ -20,7 +20,6 @@ else:
         test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(CXXFLAGS='-g')
     test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
-    test_env['CPPFLAGS'] = '-fsanitize=bounds'
     test_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
     if test_env['HAS_CAIRO']:
