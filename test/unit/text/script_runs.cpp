@@ -31,3 +31,18 @@ TEST_CASE("many punctuation chars")
         CHECK(runs.getScriptEnd() == text.length());
     }
 }
+
+TEST_CASE("empty runs")
+{
+    mapnik::value_unicode_string text("()text");
+    ScriptRun runs(text.getBuffer(), text.length());
+    std::size_t count = 0;
+    std::size_t size = 0;
+    while (runs.next())
+    {
+        size += runs.getScriptEnd() - runs.getScriptStart();
+        ++count;
+    }
+    REQUIRE(count == 1);
+    REQUIRE(size == text.length());
+}
