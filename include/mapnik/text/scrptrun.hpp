@@ -17,6 +17,7 @@
 #ifndef __SCRPTRUN_H
 #define __SCRPTRUN_H
 
+#include <mapnik/config.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/utypes.h>
@@ -42,7 +43,7 @@ struct ParenStackEntry
     UScriptCode scriptCode = USCRIPT_INVALID_CODE;
 };
 
-class ScriptRun : public icu::UObject {
+class MAPNIK_DECL ScriptRun : public icu::UObject {
 public:
     ScriptRun();
 
