@@ -35,7 +35,6 @@ else:
     # unit tests
     sources = glob.glob('./unit/*/*.cpp')
     sources.extend(glob.glob('./unit/*.cpp'))
-    sources.append('../src/text/scrptrun.cpp')
     test_program = test_env_local.Program("./unit/run", source=sources)
     Depends(test_program, env.subst('../src/%s' % env['MAPNIK_LIB_NAME']))
     Depends(test_program, env.subst('../src/json/libmapnik-json${LIBSUFFIX}'))
