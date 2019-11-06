@@ -21,6 +21,7 @@ else:
     test_env.AppendUnique(CXXFLAGS='-g')
     test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
     test_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
+
     if test_env['HAS_CAIRO']:
         test_env.PrependUnique(CPPPATH=test_env['CAIRO_CPPPATHS'])
         test_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
