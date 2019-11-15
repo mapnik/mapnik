@@ -21,6 +21,9 @@ jobs:
       # https://discuss.circleci.com/t/aug-13-14-unable-to-run-the-job-runner-issue/31958
     - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
       # command: /sbin/init
+    - image: circleci/postgres:9.6
+      environment:
+        POSTGRES_USER: ubuntu
     steps:
     - checkout
     # Prepare for artifact and test results  collection equivalent to how it was done on 1.0.
