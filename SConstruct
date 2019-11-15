@@ -1150,6 +1150,7 @@ int main()
     return ret
 
 def boost_regex_has_icu(context):
+    context.env.Append(LIBS='icui18n')
     if env['RUNTIME_LINK'] == 'static':
         # re-order icu libs to ensure linux linker is happy
         for lib_name in ['icui18n',env['ICU_LIB_NAME'],'icudata']:
