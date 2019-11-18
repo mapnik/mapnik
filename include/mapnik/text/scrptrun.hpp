@@ -26,8 +26,6 @@
 #pragma GCC diagnostic pop
 #include <vector>
 
-const unsigned int STACK_SIZE = 1 << 7; // 2^n
-
 struct ScriptRecord
 {
     UChar32 startChar = 0;
@@ -107,6 +105,8 @@ private:
      * for ICU "poor man's RTTI".
      */
     static const char fgClassID;
+    //initial stack size
+    const unsigned int STACK_SIZE = 1 << 4; // 2^n
 };
 
 inline ScriptRun::ScriptRun()
