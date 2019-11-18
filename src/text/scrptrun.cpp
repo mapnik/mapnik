@@ -161,7 +161,10 @@ UBool ScriptRun::next()
         if (pairIndex >= 0) {
             if ((pairIndex & 1) == 0) {
                 ++parenSP;
-                parenStack.emplace_back(pairIndex, scriptCode);
+                if (static_cast<std::size_t>(parenSP) < parenStack.size())
+                    parenStack[parenSP] = { pairIndex, scriptCode };
+                else
+                    parenStack.emplace_back(pairIndex, scriptCode);
                 startSP = parenSP;
             } else if (parenSP >= 0) {
                 int32_t pi = pairIndex & ~1;
