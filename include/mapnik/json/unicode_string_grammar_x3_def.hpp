@@ -40,7 +40,7 @@ auto append = [](auto const& ctx)
 
 namespace detail {
 
-static void push_utf8_impl(std::string & str, uchar code_point)
+static inline void push_utf8_impl(std::string & str, uchar code_point)
 {
     using insert_iterator = std::back_insert_iterator<std::string>;
     insert_iterator iter(str);
