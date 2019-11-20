@@ -21,7 +21,9 @@
  *****************************************************************************/
 
 #include <mapnik/css_color_grammar_x3_def.hpp>
+#if BOOST_VERSION < 107000
 #include <mapnik/image_filter_types.hpp>
+#endif
 namespace mapnik { namespace css_color_grammar {
 
 namespace x3 = boost::spirit::x3;
