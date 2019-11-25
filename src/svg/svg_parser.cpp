@@ -186,9 +186,9 @@ using color_lookup_type = std::vector<std::pair<double, agg::rgba8> >;
 using pairs_type = std::vector<std::pair<std::string, std::string> >;
 
 x3::rule<class key_value_sequence_ordered_tag, pairs_type> const key_value_sequence_ordered("key_value_sequence_ordered");
-x3::rule<class key_value_tag, std::pair<std::string, std::string> > key_value("key_value");
-x3::rule<class key_tag, std::string> key("key");
-x3::rule<class value_tag, std::string> value("value");
+x3::rule<class key_value_tag, std::pair<std::string, std::string> > const key_value("key_value");
+x3::rule<class key_tag, std::string> const key("key");
+x3::rule<class value_tag, std::string> const value("value");
 
 auto const key_def = x3::char_("a-zA-Z_") > *x3::char_("a-zA-Z_0-9-");
 auto const value_def = +(x3::char_ - ';');
