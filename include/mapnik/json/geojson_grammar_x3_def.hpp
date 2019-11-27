@@ -91,7 +91,7 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 x3::rule<class json_object_tag, geojson_object> const object("JSON Object");
 x3::rule<class json_array_tag, geojson_array> const array("JSON Array");
 x3::rule<class json_number_tag, json::geojson_value> const number("JSON Number");
-x3::rule<class key_value_tag, geojson_object_element> key_value("JSON key/value");
+x3::rule<class key_value_tag, geojson_object_element> const key_value("JSON key/value");
 // GeoJSON
 x3::rule<class geojson_coordinates_tag, geojson_object_element> const coordinates("GeoJSON Coordinates");
 x3::rule<class geojson_geometry_type_tag, geojson_object_element> const geometry_type("GeoJSON Geometry Type");

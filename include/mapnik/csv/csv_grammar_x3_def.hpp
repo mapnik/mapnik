@@ -82,9 +82,9 @@ auto static const separator = literal<separator_tag>{};
 auto static const quote = literal<quote_tag>{};
 
 // rules
-x3::rule<class csv_column, csv_value> column("csv-column");
-x3::rule<class csv_text, csv_value> text("csv-text");
-x3::rule<class csc_quoted_text, csv_value> quoted_text("csv-quoted-text");
+x3::rule<class csv_column, csv_value> const column("csv-column");
+x3::rule<class csv_text, csv_value> const text("csv-text");
+x3::rule<class csc_quoted_text, csv_value> const quoted_text("csv-quoted-text");
 
 auto const line_def = -lit('\r') > -lit('\n') > lexeme[column] % separator
     ;
