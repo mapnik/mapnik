@@ -5,11 +5,14 @@
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 106900
 #include <boost/gil.hpp>
+#include <boost/gil/extension/toolbox/color_spaces/hsv.hpp>
+#include <boost/gil/extension/toolbox/color_spaces/hsl.hpp>
 #else
 #include <boost/gil/gil_all.hpp>
-#endif
 #include <boost/gil/extension/toolbox/hsv.hpp>
 #include <boost/gil/extension/toolbox/hsl.hpp>
+#endif
+
 #pragma GCC diagnostic pop
 
 namespace agg
