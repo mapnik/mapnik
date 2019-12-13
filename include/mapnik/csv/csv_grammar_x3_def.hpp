@@ -32,11 +32,11 @@
 namespace mapnik { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
+namespace standard = boost::spirit::x3::standard;
 
 using x3::lit;
 using x3::lexeme;
-using ascii::char_;
+using standard::char_;
 
 struct unesc_char_ : x3::symbols<char>
 {
