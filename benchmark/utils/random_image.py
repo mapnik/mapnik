@@ -3,8 +3,8 @@ import random
 
 im = mapnik.Image(256,256)
 
-for x in xrange(0,im.width()):
-    for y in xrange(0,im.height()):
+for x in range(im.width()):
+    for y in range(im.height()):
         r = int(random.random() * 255)
         g = random.random() * 255
         b = random.random() * 255

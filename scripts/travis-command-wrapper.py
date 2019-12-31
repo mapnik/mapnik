@@ -50,10 +50,10 @@ parser.add_option("-d", "--deadline",
 
 def check_deadline(now):
     if options.deadline > 0 and options.deadline < now:
-        print "\n\n*** travis-cmd-wrapper: deadline reached, shutting down ***\n\n"
+        print("\n\n*** travis-cmd-wrapper: deadline reached, shutting down ***\n\n")
         sys.exit(1)
     else:
-        print "deadline not reached: %s > %s" % (options.deadline,now)
+        print("deadline not reached: %s > %s" % (options.deadline,now))
 
 # Set up status alarm. When we have a deadline, we need to check more often
 # and/or sooner. Sending a SIGALRM manually will also trigger a status report
@@ -95,7 +95,7 @@ try:
             line = cmd.stdout.readline()
             sys.stdout.write(line)
             sys.stdout.flush()
-        except IOError, ex:
+        except IOError as ex:
             if ex.errno != errno.EINTR:
                 raise
 finally:
