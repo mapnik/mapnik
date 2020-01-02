@@ -143,10 +143,10 @@ TEST_CASE("expressions")
     // logical
     TRY_CHECK(eval(" [int] = 123 and [double] = 1.23456 && [bool] = true and [null] = null && [foo] = 'bar' ") == true);
     TRY_CHECK(eval(" [int] = 456 or [foo].match('foo') || length([foo]) = 3 ") == true);
-    TRY_CHECK(eval(" not true  and not true  ") == eval(" (not true ) and (not true ) "));
-    TRY_CHECK(eval(" not true  or  not true  ") == eval(" (not true ) or  (not true ) "));
-    TRY_CHECK(eval(" not false and not false ") == eval(" (not false) and (not false) "));
-    TRY_CHECK(eval(" not false or  not false ") == eval(" (not false) or  (not false) "));
+    TRY_CHECK(eval(" not true  and not true  ") == false); // (not true) and (not true)
+    TRY_CHECK(eval(" not false and not true  ") == false); // (not false) and (not true)
+    TRY_CHECK(eval(" not true  or  not false ") == true); // (not true) or (not false)
+    TRY_CHECK(eval(" not false or  not false ") == true); // (not false) or (not false)
 
     // test not/and/or precedence using combinations of "not EQ1 OP1 not EQ2 OP2 not EQ3"
     TRY_CHECK(eval(" not [grass] = 'grow' and not [wind] = 'blow' and not [sky] = 'is blue' ") == false);
