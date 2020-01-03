@@ -139,8 +139,7 @@ function export_variables() {
     do
         if [[ "$arg" =~ ^[[:alpha:]][_[:alnum:]]*= ]]
         then
-            local -n var="${arg%%=*}"
-            export var="${arg#*=}"
+            export "$arg"
         else
             printf >&2 "bootstrap.sh: invalid argument: %s\n" "$arg"
             ret=1
