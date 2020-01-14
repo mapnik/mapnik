@@ -54,7 +54,7 @@ bool parse_path(const char* wkt, PathType& p)
         if (!x3::phrase_parse(first, last, grammar, space_type())
             || first != last)
         {
-            throw;
+            throw std::runtime_error("Failed to parse svg-path");
         }
     }
     catch (...)
