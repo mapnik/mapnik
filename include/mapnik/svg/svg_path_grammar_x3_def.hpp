@@ -39,7 +39,7 @@ namespace x3 = boost::spirit::x3;
 
 using x3::lit;
 using x3::double_;
-using x3::int_;
+using x3::char_;
 using x3::no_case;
 
 using coord_type = std::tuple<double,double>;
@@ -121,10 +121,10 @@ auto const arc_to = [] (auto & ctx)
     auto const& attr = _attr(ctx);
     auto const& p = boost::fusion::at_c<0>(attr);
     double angle = boost::fusion::at_c<1>(attr);
-    int large_arc_flag = boost::fusion::at_c<2>(attr);
-    int sweep_flag = boost::fusion::at_c<3>(attr);
+    int large_arc_flag = (boost::fusion::at_c<2>(attr) == '1')? 1 : 0;
+    int sweep_flag = (boost::fusion::at_c<3>(attr) == '1')? 1 : 0;
     auto const& v = boost::fusion::at_c<4>(attr);
-    extract_path(ctx).arc_to(std::get<0>(p),std::get<1>(p),
+    extract_path(ctx).arc_to(std::get<0>(p), std::get<1>(p),
                         util::radians(angle),
                         large_arc_flag, sweep_flag,
                         std::get<0>(v),std::get<1>(v),
@@ -176,9 +176,11 @@ auto const Q = x3::rule<class Q_tag> {} = (lit('Q')[absolute] | lit('q')[relativ
 auto const T = x3::rule<class T_tag> {} = (lit('T')[absolute] | lit('t')[relative])
     > ((coord ) [curve3_smooth] % -lit(',')); // +curve3_smooth (smooth-quadratic-bezier-curveto)
 
+auto const flag = x3::rule<class Flag_tag, int> {} = char_('0') | char_('1'); // arc-flag/sweep-flag
+
 auto const A = x3::rule<class A_tag> {} = (lit('A')[absolute] | lit('a')[relative])
-    > ((coord > -lit(',') > double_ > -lit(',') > int_ > -lit(',') > int_ > -lit(',') > coord)
-        [arc_to] % -lit(',')); // arc_to;
+    > ((coord > -lit(',') > double_ > -lit(',') > flag > -lit(',') > flag > -lit(',') > coord)
+       [arc_to] % -lit(',')); // +arc_to;
 
 auto const Z = x3::rule<class Z_tag>{} = no_case[lit('z')] [close_path]; // close path
 
