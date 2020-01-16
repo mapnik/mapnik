@@ -121,8 +121,8 @@ auto const arc_to = [] (auto & ctx)
     auto const& attr = _attr(ctx);
     auto const& p = boost::fusion::at_c<0>(attr);
     double angle = boost::fusion::at_c<1>(attr);
-    int large_arc_flag = (boost::fusion::at_c<2>(attr) == '1')? 1 : 0;
-    int sweep_flag = (boost::fusion::at_c<3>(attr) == '1')? 1 : 0;
+    bool large_arc_flag = boost::fusion::at_c<2>(attr);
+    bool sweep_flag = boost::fusion::at_c<3>(attr);
     auto const& v = boost::fusion::at_c<4>(attr);
     extract_path(ctx).arc_to(std::get<0>(p), std::get<1>(p),
                         util::radians(angle),
@@ -146,6 +146,8 @@ auto const absolute = [] (auto const& ctx)
     extract_relative(ctx) = false;
 };
 
+// arc flags parser 0/1
+x3::uint_parser<std::uint8_t, 10, 1, 1> flag;
 // rules
 auto const coord = x3::rule<class coord_tag, coord_type>{} = double_ > -lit(',') > double_;
 
@@ -175,8 +177,6 @@ auto const Q = x3::rule<class Q_tag> {} = (lit('Q')[absolute] | lit('q')[relativ
 
 auto const T = x3::rule<class T_tag> {} = (lit('T')[absolute] | lit('t')[relative])
     > ((coord ) [curve3_smooth] % -lit(',')); // +curve3_smooth (smooth-quadratic-bezier-curveto)
-
-auto const flag = x3::rule<class Flag_tag, int> {} = char_('0') | char_('1'); // arc-flag/sweep-flag
 
 auto const A = x3::rule<class A_tag> {} = (lit('A')[absolute] | lit('a')[relative])
     > ((coord > -lit(',') > double_ > -lit(',') > flag > -lit(',') > flag > -lit(',') > coord)
