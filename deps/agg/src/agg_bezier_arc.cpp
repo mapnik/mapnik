@@ -144,7 +144,7 @@ void bezier_arc_svg::init(double x0, double y0,
     m_radii_ok = true;
 
     if(rx < 0.0) rx = -rx;
-    if(ry < 0.0) ry = -rx;
+    if(ry < 0.0) ry = -ry;
 
     // Calculate the middle point between
     // the current and the final points
@@ -178,7 +178,6 @@ void bezier_arc_svg::init(double x0, double y0,
         pry = ry * ry;
         if(radii_check > 10.0) m_radii_ok = false;
     }
-
     // Calculate (cx1, cy1)
     //------------------------
     double sign = (large_arc_flag == sweep_flag) ? -1.0 : 1.0;
