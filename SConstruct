@@ -1523,6 +1523,21 @@ if not preconfigured:
             if env.get('XML2_LIBS'):
                 lib_path = env['XML2_LIBS']
                 env.AppendUnique(LIBPATH = fix_path(lib_path))
+        elif CHECK_PKG_CONFIG and conf.CheckPKG('libxml-2.0'):
+            # libxml2 2.9.10+ doesn't use xml2-config and uses pkg-config instead
+            cmd = 'pkg-config libxml-2.0 --libs --cflags'
+
+            temp_env = Environment(ENV=os.environ)
+            try:
+                temp_env.ParseConfig(cmd)
+                for inc in temp_env['CPPPATH']:
+                    env.AppendUnique(CPPPATH = fix_path(inc))
+                    env['HAS_LIBXML2'] = True
+                for lib in temp_env['LIBS']:
+                    env.AppendUnique(LIBPATH = fix_path(lib))
+                    env['HAS_LIBXML2'] = True
+            except OSError as e:
+                pass
         elif conf.parse_config('XML2_CONFIG',checks='--cflags'):
             env['HAS_LIBXML2'] = True
         else:
