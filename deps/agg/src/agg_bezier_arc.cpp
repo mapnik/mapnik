@@ -22,7 +22,6 @@
 #include <math.h>
 #include "agg_bezier_arc.h"
 
-
 namespace agg
 {
 
@@ -221,15 +220,15 @@ void bezier_arc_svg::init(double x0, double y0,
     if(v < -1.0) v = -1.0;
     if(v >  1.0) v =  1.0;
     double sweep_angle = sign * std::acos(v);
+    if (std::fabs(sweep_angle) < pi * 1e-6) m_radii_ok = false;
     if(!sweep_flag && sweep_angle > 0)
     {
         sweep_angle -= pi * 2.0;
     }
-    else
-        if (sweep_flag && sweep_angle < 0)
-        {
-            sweep_angle += pi * 2.0;
-        }
+    else if (sweep_flag && sweep_angle < 0)
+    {
+        sweep_angle += pi * 2.0;
+    }
 
     // We can now build and transform the resulting arc
     //------------------------
