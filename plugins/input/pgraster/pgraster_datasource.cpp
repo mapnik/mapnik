@@ -24,6 +24,7 @@
  *
  *****************************************************************************/
 
+#include "../pgcommon/sql_utils.hpp"
 #include "../postgis/connection_manager.hpp"
 #include "../postgis/asyncresultset.hpp"
 #include "pgraster_datasource.hpp"
@@ -58,6 +59,8 @@ const std::string pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using std::shared_ptr;
 using mapnik::attribute_descriptor;
+using mapnik::pgcommon::sql_bbox;
+using mapnik::pgcommon::sql_float;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
 using mapnik::value_integer;
@@ -589,17 +592,6 @@ layer_descriptor pgraster_datasource::get_descriptor() const
     return desc_;
 }
 
-std::string pgraster_datasource::sql_bbox(box2d<double> const& env) const
-{
-    std::ostringstream b;
-    b.precision(16);
-    b << "ST_MakeEnvelope(";
-    b << env.minx() << "," << env.miny() << ",";
-    b << env.maxx() << "," << env.maxy() << ",";
-    b << std::max(srid_, 0) << ")";
-    return b.str();
-}
-
 std::string pgraster_datasource::populate_tokens(std::string const& sql) const
 {
     return populate_tokens(sql, FLT_MAX,
@@ -619,9 +611,6 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
     std::cmatch m;
     char const* start = sql.data();
     char const* end = start + sql.size();
-
-    populated_sql.precision(16);
-    populated_sql << std::showpoint;
 
     while (std::regex_search(start, end, m, re_tokens_))
     {
@@ -645,20 +634,20 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
         }
         else if (boost::algorithm::equals(m1, "bbox"))
         {
-            populated_sql << sql_bbox(env);
+            populated_sql << sql_bbox(env, srid_);
             intersect = false;
         }
         else if (boost::algorithm::equals(m1, "pixel_height"))
         {
-            populated_sql << pixel_height;
+            populated_sql << sql_float(pixel_height);
         }
         else if (boost::algorithm::equals(m1, "pixel_width"))
         {
-            populated_sql << pixel_width;
+            populated_sql << sql_float(pixel_width);
         }
         else if (boost::algorithm::equals(m1, "scale_denominator"))
         {
-            populated_sql << scale_denom;
+            populated_sql << sql_float(scale_denom);
         }
         else
         {
@@ -674,7 +663,7 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
         {
             populated_sql << " WHERE ST_Intersects("
                           << identifier(geometryColumn_) << ", "
-                          << sql_bbox(env) << ")";
+                          << sql_bbox(env, srid_) << ")";
         }
         else if (intersect_max_scale_ > 0 && (scale_denom >= intersect_max_scale_))
         {
@@ -684,7 +673,7 @@ std::string pgraster_datasource::populate_tokens(std::string const& sql,
         {
             populated_sql << " WHERE "
                           << identifier(geometryColumn_) << " && "
-                          << sql_bbox(env);
+                          << sql_bbox(env, srid_);
         }
     }
 
@@ -889,7 +878,7 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         s << identifier(col);
 
         if (clip_rasters_) {
-          s << ", ST_Expand(" << sql_bbox(box)
+          s << ", ST_Expand(" << sql_bbox(box, srid_)
             << ", greatest(abs(ST_ScaleX("
             << identifier(col) << ")), abs(ST_ScaleY("
             << identifier(col) << ")))))";
@@ -898,9 +887,9 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         if (prescale_rasters_) {
           const double scale = std::min(px_gw, px_gh);
           s << ", least(1.0, abs(ST_ScaleX(" << identifier(col)
-            << "))::float8/" << scale
+            << "))::float8/" << sql_float(scale)
             << "), least(1.0, abs(ST_ScaleY(" << identifier(col)
-            << "))::float8/" << scale << "))";
+            << "))::float8/" << sql_float(scale) << "))";
           // TODO: if band_ is given, we'll interpret as indexed so
           //       the rescaling must NOT ruin it (use algorithm mode!)
         }

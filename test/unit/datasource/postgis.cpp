@@ -178,6 +178,18 @@ TEST_CASE("postgis") {
             auto ds = mapnik::datasource_cache::instance().create(params);
         }
 
+        SECTION("Postgis select from empty table")
+        {
+            mapnik::parameters params(base_params);
+            params["table"] = "test_empty_table";
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(ds != nullptr);
+            mapnik::query qry(ds->envelope());
+            auto featureset = ds->features(qry);
+            auto feature = featureset->next();
+            CHECK(feature == nullptr);
+        }
+
         SECTION("Postgis dataset geometry type")
         {
             mapnik::parameters params(base_params);
@@ -304,9 +316,9 @@ TEST_CASE("postgis") {
             auto feature = featureset->next();
             CHECKED_IF(feature != nullptr)
             {
-                CHECK(feature->get("t_pixel_width").to_string() == "numeric");
-                CHECK(feature->get("t_pixel_height").to_string() == "numeric");
-                CHECK(feature->get("t_scale_denom").to_string() == "numeric");
+                CHECK(feature->get("t_pixel_width").to_string() == "double precision");
+                CHECK(feature->get("t_pixel_height").to_string() == "double precision");
+                CHECK(feature->get("t_scale_denom").to_string() == "double precision");
             }
         }
 

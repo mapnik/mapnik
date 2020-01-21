@@ -20,11 +20,11 @@
  *
  *****************************************************************************/
 
+#include "../pgcommon/sql_utils.hpp"
 #include "connection_manager.hpp"
 #include "postgis_datasource.hpp"
 #include "postgis_featureset.hpp"
 #include "asyncresultset.hpp"
-
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -55,6 +55,8 @@ const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using std::shared_ptr;
 using mapnik::attribute_descriptor;
+using mapnik::pgcommon::sql_bbox;
+using mapnik::pgcommon::sql_float;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
 
@@ -499,17 +501,6 @@ layer_descriptor postgis_datasource::get_descriptor() const
     return desc_;
 }
 
-std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
-{
-    std::ostringstream b;
-    b.precision(16);
-    b << "ST_MakeEnvelope(";
-    b << env.minx() << "," << env.miny() << ",";
-    b << env.maxx() << "," << env.maxy() << ",";
-    b << std::max(srid_, 0) << ")";
-    return b.str();
-}
-
 std::string postgis_datasource::populate_tokens(std::string const& sql) const
 {
     return populate_tokens(sql, FLT_MAX,
@@ -530,9 +521,6 @@ std::string postgis_datasource::populate_tokens(
     std::cmatch m;
     char const* start = sql.data();
     char const* end = start + sql.size();
-
-    populated_sql.precision(16);
-    populated_sql << std::showpoint;
 
     while (std::regex_search(start, end, m, re_tokens_))
     {
@@ -556,20 +544,20 @@ std::string postgis_datasource::populate_tokens(
         }
         else if (boost::algorithm::equals(m1, "bbox"))
         {
-            populated_sql << sql_bbox(env);
+            populated_sql << sql_bbox(env, srid_);
             intersect = false;
         }
         else if (boost::algorithm::equals(m1, "pixel_height"))
         {
-            populated_sql << pixel_height;
+            populated_sql << sql_float(pixel_height);
         }
         else if (boost::algorithm::equals(m1, "pixel_width"))
         {
-            populated_sql << pixel_width;
+            populated_sql << sql_float(pixel_width);
         }
         else if (boost::algorithm::equals(m1, "scale_denominator"))
         {
-            populated_sql << scale_denom;
+            populated_sql << sql_float(scale_denom);
         }
         else
         {
@@ -585,7 +573,7 @@ std::string postgis_datasource::populate_tokens(
         {
             populated_sql << " WHERE ST_Intersects("
                           << identifier(geometryColumn_) << ", "
-                          << sql_bbox(env) << ")";
+                          << sql_bbox(env, srid_) << ")";
         }
         else if (intersect_max_scale_ > 0 && (scale_denom >= intersect_max_scale_))
         {
@@ -595,7 +583,7 @@ std::string postgis_datasource::populate_tokens(
         {
             populated_sql << " WHERE "
                           << identifier(geometryColumn_) << " && "
-                          << sql_bbox(env);
+                          << sql_bbox(env, srid_);
         }
     }
 
@@ -785,13 +773,13 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             // ! ST_ClipByBox2D()
             if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
             {
-                s << "," << sql_bbox(box) << ")";
+                s << "," << sql_bbox(box, srid_) << ")";
             }
 
             // ! ST_RemoveRepeatedPoints()
-            s << "," << twkb_tolerance << ")";
+            s << "," << sql_float(twkb_tolerance) << ")";
             // ! ST_Simplify(), with parameter to keep collapsed geometries
-            s << "," << twkb_tolerance << ",true)";
+            s << "," << sql_float(twkb_tolerance) << ",true)";
             // ! ST_TWKB()
             s << "," << twkb_rounding << ") AS geom";
         }
@@ -818,20 +806,20 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             if (simplify_geometries_ && simplify_snap_ratio_ > 0.0)
             {
                 const double tolerance = px_sz * simplify_snap_ratio_;
-                s << "," << tolerance << ")";
+                s << "," << sql_float(tolerance) << ")";
             }
 
             // ! ST_ClipByBox2D()
             if (simplify_clip_resolution_ > 0.0 && simplify_clip_resolution_ > px_sz)
             {
-                s << "," << sql_bbox(box) << ")";
+                s << "," << sql_bbox(box, srid_) << ")";
             }
 
             // ! ST_Simplify()
             if (simplify_geometries_)
             {
                 const double tolerance = px_sz * simplify_dp_ratio_;
-                s << ", " << tolerance;
+                s << ", " << sql_float(tolerance);
                 // Add parameter to ST_Simplify to keep collapsed geometries
                 if (simplify_dp_preserve_)
                 {

@@ -90,7 +90,6 @@ public:
     layer_descriptor get_descriptor() const;
 
 private:
-    std::string sql_bbox(box2d<double> const& env) const;
     std::string populate_tokens(std::string const& sql, double scale_denom,
                                 box2d<double> const& env,
                                 double pixel_width, double pixel_height,
