@@ -54,9 +54,11 @@
 struct main_marker_visitor
 {
     main_marker_visitor(std::string const& svg_name,
+                        double scale_factor,
                         bool verbose,
                         bool auto_open)
         : svg_name_(svg_name),
+          scale_factor_(scale_factor),
           verbose_(verbose),
           auto_open_(auto_open) {}
 
@@ -71,17 +73,34 @@ struct main_marker_visitor
         double opacity = 1;
         double w, h;
         std::tie(w, h) = marker.dimensions();
+
+
+        double svg_width = w * scale_factor_ + 0.5;
+        double svg_height = h * scale_factor_ + 0.5;
+
+        int output_width = static_cast<int>(svg_width);
+        int output_height = static_cast<int>(svg_height);
         if (verbose_)
         {
-            std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
+            std::clog << "Found width of '" << w << "' and height of '" << h << "'\n";
+            auto b = marker.bounding_box();
+            std::clog << "SVG BBOX:" << b << std::endl;
+            std::clog << "Output image dimensions:[" << output_width << "," << output_height << "]" << std::endl;
         }
-        mapnik::image_rgba8 im(static_cast<int>(w + 0.5), static_cast<int>(h + 0.5));
+        mapnik::image_rgba8 im(output_width, output_height);
+        im.set(0xffffffff);
         agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
         pixfmt pixf(buf);
         renderer_base renb(pixf);
 
-        mapnik::box2d<double> const& bbox = {0, 0, w, h};
-        agg::trans_affine mtx = {};
+        mapnik::box2d<double> const& bbox = {0, 0, svg_width, svg_height};
+        // center the svg marker on '0,0'
+        agg::trans_affine mtx = agg::trans_affine_translation(-0.5 * w, -0.5 * h);
+        // Scale the image
+        mtx.scale(scale_factor_);
+        // render the marker at the center of the marker box
+        mtx.translate(0.5 * svg_width, 0.5 * svg_height);
+
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
         mapnik::svg::renderer_agg<
@@ -124,6 +143,7 @@ struct main_marker_visitor
 
   private:
     std::string svg_name_;
+    double scale_factor_ = 1.0;
     bool verbose_;
     bool auto_open_;
 };
@@ -138,7 +158,8 @@ int main (int argc,char** argv)
     int status = 0;
     std::vector<std::string> svg_files;
     mapnik::logger::instance().set_severity(mapnik::logger::error);
-
+    double scale_factor = 1.0;
+    std::string usage = "Usage: svg2png [options] <svg-file(s)>";
     try
     {
         po::options_description desc("svg2png utility");
@@ -148,6 +169,7 @@ int main (int argc,char** argv)
             ("verbose,v","verbose output")
             ("open,o","automatically open the file after rendering (os x only)")
             ("strict,s","enables strict SVG parsing")
+            ("scale-factor", po::value<double>(), "provide scaling factor (default: 1.0)")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
 
@@ -166,6 +188,7 @@ int main (int argc,char** argv)
         if (vm.count("help"))
         {
             std::clog << desc << std::endl;
+            std::clog << usage << std::endl;
             return 1;
         }
 
@@ -183,24 +206,26 @@ int main (int argc,char** argv)
         {
             strict = true;
         }
-
+        if (vm.count("scale-factor"))
+        {
+            scale_factor = vm["scale-factor"].as<double>();
+        }
         if (vm.count("svg"))
         {
             svg_files=vm["svg"].as< std::vector<std::string> >();
         }
         else
         {
-            std::clog << "please provide an svg file!" << std::endl;
+            std::clog << usage << std::endl;
             return -1;
         }
 
         std::vector<std::string>::const_iterator itr = svg_files.begin();
         if (itr == svg_files.end())
         {
-            std::clog << "no svg files to render" << std::endl;
+            std::clog << usage << std::endl;
             return 0;
         }
-
         while (itr != svg_files.end())
         {
             std::string svg_name (*itr++);
@@ -209,7 +234,7 @@ int main (int argc,char** argv)
                 std::clog << "found: " << svg_name << "\n";
             }
             std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false, strict);
-            main_marker_visitor visitor(svg_name, verbose, auto_open);
+            main_marker_visitor visitor(svg_name, scale_factor, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
     }
