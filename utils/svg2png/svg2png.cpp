@@ -88,7 +88,7 @@ struct main_marker_visitor
             std::clog << "Output image dimensions:[" << output_width << "," << output_height << "]" << std::endl;
         }
         mapnik::image_rgba8 im(output_width, output_height);
-        im.set(0xffffffff);
+        im.set(0x00ffffff);
         agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
         pixfmt pixf(buf);
         renderer_base renb(pixf);
