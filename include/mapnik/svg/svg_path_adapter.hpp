@@ -444,12 +444,13 @@ void path_adapter<VC>::curve3(double x_to, double y_to)
 {
     double x0;
     double y0;
-    if(is_vertex(vertices_.last_vertex(&x0, &y0)))
+    unsigned last_cmd = last_vertex(&x0, &y0);
+    if (is_vertex(last_cmd))
     {
         double x_ctrl;
         double y_ctrl;
-        unsigned cmd = vertices_.prev_vertex(&x_ctrl, &y_ctrl);
-        if(is_curve(cmd))
+        unsigned prev_cmd = prev_vertex(&x_ctrl, &y_ctrl);
+        if (is_curve(last_cmd) && is_curve(prev_cmd))
         {
             x_ctrl = x0 + x0 - x_ctrl;
             y_ctrl = y0 + y0 - y_ctrl;
@@ -503,12 +504,13 @@ void path_adapter<VC>::curve4(double x_ctrl2, double y_ctrl2,
 {
     double x0;
     double y0;
-    if(is_vertex(last_vertex(&x0, &y0)))
+    unsigned last_cmd = last_vertex(&x0, &y0);
+    if (is_vertex(last_cmd))
     {
         double x_ctrl1;
         double y_ctrl1;
-        unsigned cmd = prev_vertex(&x_ctrl1, &y_ctrl1);
-        if(is_curve(cmd))
+        unsigned prev_cmd = prev_vertex(&x_ctrl1, &y_ctrl1);
+        if (is_curve(last_cmd) && is_curve(prev_cmd))
         {
             x_ctrl1 = x0 + x0 - x_ctrl1;
             y_ctrl1 = y0 + y0 - y_ctrl1;
