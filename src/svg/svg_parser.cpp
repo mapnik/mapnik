@@ -602,7 +602,7 @@ void parse_fill(svg_parser& parser, char const* value)
             traverse_tree(parser, gradient_node);
             if (parser.gradient_map_.count(id) > 0)
             {
-                parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
+                parser.path_.add_fill_gradient(parser.gradient_map_[id]);
             }
             else
             {
@@ -1360,7 +1360,6 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
         }
     }
     parser.gradient_map_[id] = gr;
-    //MAPNIK_LOG_DEBUG(svg_parser) << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r;
 }
 
 void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* node)
