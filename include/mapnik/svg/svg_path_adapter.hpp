@@ -492,9 +492,7 @@ void path_adapter<VC>::curve4_rel(double dx_ctrl1, double dy_ctrl1,
     rel_to_abs(&dx_ctrl1, &dy_ctrl1);
     rel_to_abs(&dx_ctrl2, &dy_ctrl2);
     rel_to_abs(&dx_to,    &dy_to);
-    vertices_.add_vertex(dx_ctrl1, dy_ctrl1, path_cmd_curve4);
-    vertices_.add_vertex(dx_ctrl2, dy_ctrl2, path_cmd_curve4);
-    vertices_.add_vertex(dx_to,    dy_to,    path_cmd_curve4);
+    curve4(dx_ctrl1, dy_ctrl1, dx_ctrl2, dy_ctrl2, dx_to, dy_to);
 }
 
 //------------------------------------------------------------------------
