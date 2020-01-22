@@ -75,11 +75,11 @@ struct main_marker_visitor
         std::tie(w, h) = marker.dimensions();
 
 
-        double svg_width = w * scale_factor_ + 0.5;
-        double svg_height = h * scale_factor_ + 0.5;
+        double svg_width = w * scale_factor_;
+        double svg_height = h * scale_factor_;
 
-        int output_width = static_cast<int>(svg_width);
-        int output_height = static_cast<int>(svg_height);
+        int output_width = static_cast<int>(svg_width + 0.5);
+        int output_height = static_cast<int>(svg_height + 0.5);
         if (verbose_)
         {
             std::clog << "Found width of '" << w << "' and height of '" << h << "'\n";
