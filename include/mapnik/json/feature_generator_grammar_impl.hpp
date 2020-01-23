@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2015 Artem Pavlenko
+ * Copyright (C) 2017 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,11 +22,6 @@
 
 #include <mapnik/json/feature_generator_grammar.hpp>
 
-#include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/fusion/include/at.hpp>
-
 namespace mapnik { namespace json {
 
 template <typename OutputIterator, typename FeatureType>
@@ -40,7 +35,7 @@ feature_generator_grammar<OutputIterator, FeatureType>::feature_generator_gramma
 
     feature = lit("{\"type\":\"Feature\",\"id\":")
         << uint_[_1 = id_(_val)]
-        << lit(",\"geometry\":") << geometry
+        << lit(",\"geometry\":") << geometry[_1 = geom_(_val)]
         << lit(",\"properties\":") << properties
         << lit('}')
         ;

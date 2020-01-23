@@ -20,8 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry.hpp>
-
+#include <mapnik/geometry/boost_spirit_karma_adapter.hpp>
 #include <mapnik/json/geometry_generator_grammar_impl.hpp>
 #include <mapnik/json/properties_generator_grammar_impl.hpp>
 #include <mapnik/json/feature_generator_grammar_impl.hpp>

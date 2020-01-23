@@ -23,6 +23,12 @@
 
 #include <mapnik/json/properties_generator_grammar.hpp>
 
+#pragma GCC diagnostic push
+#include <mapnik/warning_ignore.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
+#pragma GCC diagnostic pop
+
 namespace mapnik { namespace json {
 
 namespace karma = boost::spirit::karma;
@@ -63,14 +69,13 @@ properties_generator_grammar<OutputIterator,KeyValueStore>::properties_generator
     boost::spirit::karma::string_type kstring;
     boost::spirit::karma::eps_type eps;
     using boost::phoenix::at_c;
-
     properties = lit('{')
         << -(pair % lit(','))
         << lit('}')
         ;
 
     pair = lit('"')
-        << kstring[_1 = boost::phoenix::at_c<0>(_val)] << lit('"')
+        << kstring[_1 = at_c<0>(_val)] << lit('"')
         << lit(':')
         << value[_1 = extract_string_(at_c<1>(_val))]
         ;
@@ -80,13 +85,6 @@ properties_generator_grammar<OutputIterator,KeyValueStore>::properties_generator
         kstring[_1 = at_c<0>(_val)]
         ;
 
-    // FIXME http://boost-spirit.com/home/articles/karma-examples/creating-your-own-generator-component-for-spirit-karma/
-    //value = (value_null_| bool_ | int__ | double_ | ustring)//[_1 = value_base_(_r1)]
-    //   ;
-    //value_null_ = kstring[_1 = "null"]
-    //    ;
-    //ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]
-    //    ;
 }
 
 }}

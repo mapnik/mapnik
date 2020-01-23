@@ -20,7 +20,8 @@
  *
  *****************************************************************************/
 
-#include <mapnik/geometry.hpp>
+
+#include <mapnik/geometry/boost_spirit_karma_adapter.hpp>
 #include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 #include <string>
 
