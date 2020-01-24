@@ -83,9 +83,9 @@ auto const curve4 = [] (auto const& ctx)
     auto const& p1 = boost::fusion::at_c<1>(attr);
     auto const& p2 = boost::fusion::at_c<2>(attr);
     extract_path(ctx).curve4(std::get<0>(p0),std::get<1>(p0),
-                                            std::get<0>(p1),std::get<1>(p1),
-                                            std::get<0>(p2),std::get<1>(p2),
-                                            x3::get<relative_tag>(ctx));
+                             std::get<0>(p1),std::get<1>(p1),
+                             std::get<0>(p2),std::get<1>(p2),
+                             x3::get<relative_tag>(ctx));
 };
 
 auto const curve4_smooth = [] (auto const& ctx)
@@ -94,8 +94,8 @@ auto const curve4_smooth = [] (auto const& ctx)
     auto const& p0 = boost::fusion::at_c<0>(attr);
     auto const& p1 = boost::fusion::at_c<1>(attr);
     extract_path(ctx).curve4(std::get<0>(p0),std::get<1>(p0),
-                                            std::get<0>(p1),std::get<1>(p1),
-                                            x3::get<relative_tag>(ctx));
+                             std::get<0>(p1),std::get<1>(p1),
+                             x3::get<relative_tag>(ctx));
 };
 
 auto const curve3 = [] (auto const& ctx)
@@ -104,15 +104,16 @@ auto const curve3 = [] (auto const& ctx)
     auto const& p0 = boost::fusion::at_c<0>(attr);
     auto const& p1 = boost::fusion::at_c<1>(attr);
     extract_path(ctx).curve3(std::get<0>(p0),std::get<1>(p0),
-                                            std::get<0>(p1),std::get<1>(p1),
-                                            x3::get<relative_tag>(ctx));
+                             std::get<0>(p1),std::get<1>(p1),
+                             x3::get<relative_tag>(ctx));
 };
 
 auto const curve3_smooth = [] (auto const& ctx)
 {
     auto const& attr = _attr(ctx);
-    extract_path(ctx).curve3(std::get<0>(attr),std::get<1>(attr),
-                                            x3::get<relative_tag>(ctx));
+    extract_path(ctx).curve3(std::get<0>(attr),
+                             std::get<1>(attr),
+                             x3::get<relative_tag>(ctx));
 };
 
 
@@ -125,10 +126,10 @@ auto const arc_to = [] (auto & ctx)
     bool sweep_flag = boost::fusion::at_c<3>(attr);
     auto const& v = boost::fusion::at_c<4>(attr);
     extract_path(ctx).arc_to(std::get<0>(p), std::get<1>(p),
-                        util::radians(angle),
-                        large_arc_flag, sweep_flag,
-                        std::get<0>(v),std::get<1>(v),
-                        x3::get<relative_tag>(ctx));
+                             util::radians(angle),
+                             large_arc_flag, sweep_flag,
+                             std::get<0>(v),std::get<1>(v),
+                             x3::get<relative_tag>(ctx));
 };
 
 auto const close_path = [] (auto const& ctx)
