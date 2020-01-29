@@ -63,6 +63,7 @@ def write_config(env, template_filename, config_filename):
             if val is None:
                 return matchobj.group(0)
             else:
+                print(key,":",val)
                 return 'CONFIG_%s=%s' % (key, escape(str(val)))
         config = re.sub(r'^CONFIG_(\w+)=.*', subst, template, flags=re.M)
         config_file.write(config)
