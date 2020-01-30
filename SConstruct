@@ -1423,14 +1423,16 @@ if not preconfigured:
     env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
 
     custom_ldflags = env.ParseFlags(env['CUSTOM_LDFLAGS'])
-    # ParseFlags puts everything it does not recognize into CCFLAGS,
-    # but let's assume the user knows better, put those in LINKFLAGS
-    env.Append(LINKFLAGS = custom_ldflags.pop('CCFLAGS'))
     env.Append(LINKFLAGS = custom_ldflags.pop('LINKFLAGS'),
                LIBS = custom_ldflags.pop('LIBS'))
     env.AppendUnique(FRAMEWORKS = custom_ldflags.pop('FRAMEWORKS'),
                      LIBPATH = custom_ldflags.pop('LIBPATH'),
                      RPATH = custom_ldflags.pop('RPATH'))
+    # ParseFlags puts everything it does not recognize into CCFLAGS,
+    # but let's assume the user knows better: add those to LINKFLAGS.
+    # In order to prevent duplication of flags which ParseFlags puts
+    # into both CCFLAGS and LINKFLAGS, call AppendUnique.
+    env.AppendUnique(LINKFLAGS = custom_ldflags.pop('CCFLAGS'))
 
     invalid_ldflags = {k:v for k,v in custom_ldflags.items() if v}
     if invalid_ldflags:
