@@ -33,7 +33,7 @@
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #ifdef USE_DENSE_HASH_MAP
-#include <sparsehash/dense_hash_map>
+#include <mapnik/sparsehash/dense_hash_map>
 using rgba_hash_table = google::dense_hash_map<unsigned int, unsigned char>;
 #else
 #include <unordered_map>

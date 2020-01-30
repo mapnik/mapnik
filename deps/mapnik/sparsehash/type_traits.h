@@ -57,10 +57,10 @@
 #ifndef BASE_TYPE_TRAITS_H_
 #define BASE_TYPE_TRAITS_H_
 
-#include <sparsehash/internal/sparseconfig.h>
+#include <mapnik/sparsehash/internal/sparseconfig.h>
 #include <utility>                  // For pair
 
-#include <sparsehash/template_util.h>     // For true_type and false_type
+#include <mapnik/sparsehash/template_util.h>     // For true_type and false_type
 
 _START_GOOGLE_NAMESPACE_
 
