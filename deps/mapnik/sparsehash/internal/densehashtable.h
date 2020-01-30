@@ -89,7 +89,7 @@
 #ifndef _DENSEHASHTABLE_H_
 #define _DENSEHASHTABLE_H_
 
-#include <sparsehash/internal/sparseconfig.h>
+#include <mapnik/sparsehash/internal/sparseconfig.h>
 #include <assert.h>
 #include <stdio.h>              // for FILE, fwrite, fread
 #include <algorithm>            // For swap(), eg
@@ -97,9 +97,9 @@
 #include <limits>               // for numeric_limits
 #include <memory>               // For uninitialized_fill
 #include <utility>              // for pair
-#include <sparsehash/internal/hashtable-common.h>
-#include <sparsehash/internal/libc_allocator_with_realloc.h>
-#include <sparsehash/type_traits.h>
+#include <mapnik/sparsehash/internal/hashtable-common.h>
+#include <mapnik/sparsehash/internal/libc_allocator_with_realloc.h>
+#include <mapnik/sparsehash/type_traits.h>
 #include <stdexcept>                 // For length_error
 
 _START_GOOGLE_NAMESPACE_

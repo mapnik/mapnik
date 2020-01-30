@@ -32,7 +32,7 @@
 #ifndef UTIL_GTL_LIBC_ALLOCATOR_WITH_REALLOC_H_
 #define UTIL_GTL_LIBC_ALLOCATOR_WITH_REALLOC_H_
 
-#include <sparsehash/internal/sparseconfig.h>
+#include <mapnik/sparsehash/internal/sparseconfig.h>
 #include <stdlib.h>           // for malloc/realloc/free
 #include <stddef.h>           // for ptrdiff_t
 #include <new>                // for placement new

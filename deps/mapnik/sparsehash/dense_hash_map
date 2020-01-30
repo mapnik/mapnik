@@ -96,13 +96,13 @@
 #ifndef _DENSE_HASH_MAP_H_
 #define _DENSE_HASH_MAP_H_
 
-#include <sparsehash/internal/sparseconfig.h>
+#include <mapnik/sparsehash/internal/sparseconfig.h>
 #include <algorithm>                        // needed by stl_alloc
 #include <functional>                       // for equal_to<>, select1st<>, etc
 #include <memory>                           // for alloc
 #include <utility>                          // for pair<>
-#include <sparsehash/internal/densehashtable.h>        // IWYU pragma: export
-#include <sparsehash/internal/libc_allocator_with_realloc.h>
+#include <mapnik/sparsehash/internal/densehashtable.h>        // IWYU pragma: export
+#include <mapnik/sparsehash/internal/libc_allocator_with_realloc.h>
 #include HASH_FUN_H                 // for hash<>
 _START_GOOGLE_NAMESPACE_
 
