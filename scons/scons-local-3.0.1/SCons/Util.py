@@ -1032,7 +1032,7 @@ class CLVar(UserList):
     def __coerce__(self, other):
         return (self, CLVar(other))
     def __str__(self):
-        return ' '.join([' '.join(f) if type(f) is tuple else f for f in self.data])
+        return ' '.join(self.data)
 
 # A dictionary that preserves the order in which items are added.
 # Submitted by David Benjamin to ActiveState's Python Cookbook web site:

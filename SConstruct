@@ -495,7 +495,6 @@ pickle_store = [# Scons internal variables
         'LIBPATH',
         'LIBS',
         'LINKFLAGS',
-        'RPATH',
         'CUSTOM_LDFLAGS', # user submitted
         'CUSTOM_DEFINES', # user submitted
         'CUSTOM_CXXFLAGS', # user submitted
@@ -1421,23 +1420,7 @@ if not preconfigured:
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
     env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
-
-    custom_ldflags = env.ParseFlags(env['CUSTOM_LDFLAGS'])
-    # ParseFlags puts everything it does not recognize into CCFLAGS,
-    # but let's assume the user knows better, put those in LINKFLAGS
-    env.Append(LINKFLAGS = custom_ldflags.pop('CCFLAGS'))
-    env.Append(LINKFLAGS = custom_ldflags.pop('LINKFLAGS'),
-               LIBS = custom_ldflags.pop('LIBS'))
-    env.AppendUnique(FRAMEWORKS = custom_ldflags.pop('FRAMEWORKS'),
-                     LIBPATH = custom_ldflags.pop('LIBPATH'),
-                     RPATH = custom_ldflags.pop('RPATH'))
-
-    invalid_ldflags = {k:v for k,v in custom_ldflags.items() if v}
-    if invalid_ldflags:
-        color_print(3, 'Warning: CUSTOM_LDFLAGS contained some flags that SCons recognized as not for linker.')
-        color_print(3, 'The following flags will be ignored:')
-        for key, value in invalid_ldflags.items():
-            color_print(3, '\t%s = %r' % (key, value))
+    env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
 
