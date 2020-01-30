@@ -59,11 +59,11 @@ def write_config(env, template_filename, config_filename):
         escape = env['ESCAPE']
         def subst(matchobj):
             key = matchobj.group(1)
-            val = env.get(key)
-            if val is None:
+            if key not in env:
                 return matchobj.group(0)
             else:
-                return 'CONFIG_%s=%s' % (key, escape(str(val)))
+                val = env.subst('$' + key)
+                return 'CONFIG_%s=%s' % (key, escape(val))
         config = re.sub(r'^CONFIG_(\w+)=.*', subst, template, flags=re.M)
         config_file.write(config)
     try:
