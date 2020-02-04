@@ -58,6 +58,25 @@
 
 namespace mapnik { namespace svg {
 
+namespace {
+void print_css(mapnik::css_data & data)
+{
+    for (auto const& kv : data)
+    {
+        std::cerr << std::get<0>(kv) << " {" << std::endl;
+        for (auto const& def : std::get<1>(kv))
+        {
+            std::cerr << "    " << std::get<0>(def) << ":";
+            mapnik::util::apply_visitor([](auto const& val){
+                                            std::cerr << val << std::endl;
+                                        }, std::get<1>(def));
+        }
+        std::cerr << "}" << std::endl;
+    }
+}
+
+}
+
 using util::name_to_int;
 using util::operator"" _case;
 
@@ -445,14 +464,25 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
         if ("style"_case == name)
         {
             // <style> element shouldn't have nested elements
-            // only CDATA
+            // we only interested in DATA or CDATA
             for (auto const* child = node->first_node();
                  child; child = child->next_sibling())
             {
-                if (child->type() == rapidxml::node_cdata)
+                if (child->type() == rapidxml::node_data ||
+                    child->type() == rapidxml::node_cdata)
                 {
                     std::cerr << "======================== STYLE " << std::endl;
-                    std::cerr << "CDATA:" << child->value() << std::endl;
+                    mapnik::css_data css;
+                    auto const grammar = mapnik::grammar();
+                    auto const skipper = mapnik::skipper();
+                    char const* first = child->value();
+                    char const* last = first + child->value_size();
+                    std::vector<std::string> classes;
+                    bool result = boost::spirit::x3::phrase_parse(first, last, grammar, skipper, css);
+                    if (result)
+                    {
+                        print_css(css);
+                    }
                 }
             }
         }
