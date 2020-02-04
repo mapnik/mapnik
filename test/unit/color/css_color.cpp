@@ -2,8 +2,8 @@
 
 #include <mapnik/safe_cast.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/css_color_grammar_x3.hpp>
-#include <mapnik/css_color_grammar_x3_def.hpp>
+#include <mapnik/css/css_color_grammar_x3.hpp>
+#include <mapnik/css/css_color_grammar_x3_def.hpp>
 
 #include <sstream>
 
