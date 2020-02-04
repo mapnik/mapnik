@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 #include <mapnik/debug.hpp>
+#include <mapnik/css/css_unit_value.hpp>
 #include <mapnik/color_factory.hpp>
-#include <mapnik/css/css_grammar_x3.hpp>
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/config_error.hpp>
@@ -279,17 +279,7 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
 {
     namespace x3 = boost::spirit::x3;
     double val = 0.0;
-    x3::symbols<double> units;
-    units.add
-        ("px", 1.0)
-        ("pt", DPI/72.0)
-        ("pc", DPI/6.0)
-        ("mm", DPI/25.4)
-        ("cm", DPI/2.54)
-        ("in", static_cast<double>(DPI))
-        //("em", 1.0/16.0) // default pixel size for body (usually 16px)
-        // ^^ this doesn't work currently as 'e' in 'em' interpreted as part of scientific notation.
-        ;
+    css_unit_value units;
     const char* cur = str; // phrase_parse mutates the first iterator
     const char* end = str + std::strlen(str);
 
@@ -463,25 +453,23 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
         if ("style"_case == name)
         {
-            // <style> element shouldn't have nested elements
-            // we only interested in DATA or CDATA
+            // <style> element is not expected to have nested elements
+            // we're only interested in DATA or CDATA
             for (auto const* child = node->first_node();
                  child; child = child->next_sibling())
             {
                 if (child->type() == rapidxml::node_data ||
                     child->type() == rapidxml::node_cdata)
                 {
-                    std::cerr << "======================== STYLE " << std::endl;
-                    mapnik::css_data css;
                     auto const grammar = mapnik::grammar();
                     auto const skipper = mapnik::skipper();
                     char const* first = child->value();
                     char const* last = first + child->value_size();
                     std::vector<std::string> classes;
-                    bool result = boost::spirit::x3::phrase_parse(first, last, grammar, skipper, css);
-                    if (result)
+                    bool result = boost::spirit::x3::phrase_parse(first, last, grammar, skipper, parser.css_data_);
+                    if (result && !parser.css_data_.empty())
                     {
-                        print_css(css);
+                        print_css(parser.css_data_);
                     }
                 }
             }
