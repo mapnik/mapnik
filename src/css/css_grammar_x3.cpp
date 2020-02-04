@@ -26,7 +26,7 @@
 namespace mapnik { namespace css_grammar {
 
 namespace x3 = boost::spirit::x3;
-using iterator_type = std::string::const_iterator;
+using iterator_type = char const*;
 using context_type = x3::phrase_parse_context<css_skipper_type>::type;
 
 BOOST_SPIRIT_INSTANTIATE(ident_grammar_type, iterator_type, context_type);
@@ -34,7 +34,6 @@ BOOST_SPIRIT_INSTANTIATE(css_classes_type, iterator_type, context_type);
 BOOST_SPIRIT_INSTANTIATE(css_grammar_type, iterator_type, context_type);
 BOOST_SPIRIT_INSTANTIATE(css_skipper_type, iterator_type, x3::unused_type);
 }
-
 
 css_grammar::ident_grammar_type const ident_grammar()
 {
