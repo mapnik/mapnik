@@ -22,6 +22,7 @@
 
 #include <mapnik/debug.hpp>
 #include <mapnik/color_factory.hpp>
+#include <mapnik/css/css_grammar_x3.hpp>
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/config_error.hpp>
@@ -373,12 +374,12 @@ bool parse_id_from_url (char const* str, std::string & id)
 void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     if (parser.ignore_) return;
-    auto const* name = node->name();
+    auto name = name_to_int(node->name());
     switch (node->type())
     {
     case rapidxml::node_element:
     {
-        switch(name_to_int(name))
+        switch(name)
         {
         case "defs"_case:
         {
@@ -407,7 +408,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
         if (!parser.is_defs_) // FIXME
         {
-            switch (name_to_int(name))
+            switch (name)
             {
             case "g"_case:
                 if (node->first_node() != nullptr)
@@ -430,7 +431,7 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 parse_attr(parser, node);
                 if (parser.path_.display())
                 {
-                    parse_element(parser, name, node);
+                    parse_element(parser, node->name(), node);
                 }
                 parser.path_.pop_attr();
             }
@@ -441,32 +442,32 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parse_id(parser, node);
         }
 
-        for (auto const* child = node->first_node();
-             child; child = child->next_sibling())
+        if ("style"_case == name)
         {
-            traverse_tree(parser, child);
+            // <style> element shouldn't have nested elements
+            // only CDATA
+            for (auto const* child = node->first_node();
+                 child; child = child->next_sibling())
+            {
+                if (child->type() == rapidxml::node_cdata)
+                {
+                    std::cerr << "======================== STYLE " << std::endl;
+                    std::cerr << "CDATA:" << child->value() << std::endl;
+                }
+            }
+        }
+        else
+        {
+            for (auto const* child = node->first_node();
+                 child; child = child->next_sibling())
+            {
+                traverse_tree(parser, child);
+            }
         }
 
         end_element(parser, node);
     }
     break;
-#if 0 //
-    // Data nodes
-    case rapidxml::node_data:
-    case rapidxml::node_cdata:
-    {
-
-        if (node->value_size() > 0) // Don't add empty text nodes
-        {
-            // parsed text values should have leading and trailing
-            // whitespace trimmed.
-            //std::string trimmed = node->value();
-            //mapnik::util::trim(trimmed);
-            //std::cerr << "CDATA:" << node->value() << std::endl;
-        }
-    }
-    break;
-#endif
     default:
         break;
     }
