@@ -25,7 +25,7 @@
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
 
-#include <mapnik/css_color_grammar_x3.hpp>
+#include <mapnik/css/css_color_grammar_x3.hpp>
 #include <mapnik/util/hsl.hpp>
 #include <mapnik/safe_cast.hpp>
 
