@@ -467,8 +467,9 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     char const* last = first + child->value_size();
                     std::vector<std::string> classes;
                     bool result = boost::spirit::x3::phrase_parse(first, last, grammar, skipper, parser.css_data_);
-                    if (result && !parser.css_data_.empty())
+                    if (result && first == last && !parser.css_data_.empty())
                     {
+                        parser.css_style_ = true;
                         print_css(parser.css_data_);
                     }
                 }
@@ -1445,6 +1446,7 @@ svg_parser::svg_parser(svg_converter_type & path, bool strict)
     : path_(path),
       is_defs_(false),
       ignore_(false),
+      css_style_(false),
       err_handler_(strict) {}
 
 svg_parser::~svg_parser() {}
