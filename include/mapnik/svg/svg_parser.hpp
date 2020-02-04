@@ -84,6 +84,7 @@ public:
     bool is_defs_;
     bool strict_;
     bool ignore_;
+    bool css_style_;
     std::map<std::string, gradient> gradient_map_;
     std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> node_cache_;
     mapnik::css_data css_data_;
