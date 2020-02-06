@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 #include <mapnik/css/css_grammar_x3_def.hpp>
-#include <mapnik/css/css_color_grammar_x3.hpp>
 
 namespace mapnik { namespace css_grammar {
 
