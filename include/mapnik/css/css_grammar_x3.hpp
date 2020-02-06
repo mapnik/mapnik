@@ -25,8 +25,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include <mapnik/color.hpp>
-#include <mapnik/util/variant.hpp>
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
@@ -34,7 +32,7 @@
 
 namespace mapnik
 {
-using property_value_type = mapnik::util::variant<double, mapnik::color, std::string>;
+using property_value_type = boost::iterator_range<char const*>;
 using css_key_value = std::pair<std::string, property_value_type>;
 using definition_type = std::vector<css_key_value>;
 using css_data = std::unordered_multimap<std::string, definition_type>;
@@ -72,4 +70,4 @@ css_grammar::css_grammar_type const grammar();
 css_grammar::css_skipper_type const skipper();
 }
 
-#endif // MAPNIK_CSS_COLOR_GRAMMAR_X3_HPP
+#endif // MAPNIK_CSS_GRAMMAR_X3_HPP

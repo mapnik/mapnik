@@ -66,10 +66,9 @@ void print_css(mapnik::css_data & data)
         std::cerr << std::get<0>(kv) << " {" << std::endl;
         for (auto const& def : std::get<1>(kv))
         {
-            std::cerr << "    " << std::get<0>(def) << ":";
-            mapnik::util::apply_visitor([](auto const& val){
-                                            std::cerr << val << std::endl;
-                                        }, std::get<1>(def));
+            auto const& r = std::get<1>(def);
+            std::cerr << "    " << std::get<0>(def) << ":"
+                      << std::string(r.begin(), r.end());
         }
         std::cerr << "}" << std::endl;
     }
@@ -464,12 +463,10 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
         std::ostringstream ss;
         for (auto const& def : style)
         {
-            std::ostringstream ss;
-            mapnik::util::apply_visitor([&](auto const& val) {
-                                            ss << val;
-                                        }, std::get<1>(def));
-            //std::cerr << "PARSE ATTR:" <<  std::get<0>(def) << ":" << ss.str() << std::endl;
-            parse_attr(parser, std::get<0>(def).c_str(), ss.str().c_str());
+            auto const& r = std::get<1>(def);
+            std::string val{r.begin(), r.end()};
+            //std::cerr << "PARSE ATTR:" <<  std::get<0>(def) << ":" << val << std::endl;
+            parse_attr(parser, std::get<0>(def).c_str(), val.c_str());
         }
     }
 }
@@ -565,7 +562,6 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     auto const skipper = mapnik::skipper();
                     char const* first = child->value();
                     char const* last = first + child->value_size();
-                    std::vector<std::string> classes;
                     bool result = boost::spirit::x3::phrase_parse(first, last, grammar, skipper, parser.css_data_);
                     if (result && first == last && !parser.css_data_.empty())
                     {

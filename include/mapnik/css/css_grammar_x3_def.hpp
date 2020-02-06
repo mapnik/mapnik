@@ -25,8 +25,6 @@
 #define MAPNIK_CSS_GRAMMAR_X3_DEF_HPP
 
 #include <mapnik/css/css_grammar_x3.hpp>
-#include <mapnik/css/css_unit_value.hpp>
-#include <mapnik/css/css_color_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 
 #pragma GCC diagnostic push
@@ -150,24 +148,18 @@ namespace x3 = boost::spirit::x3;
 namespace css_grammar {
 
 using x3::lit;
-using x3::int_;
-using x3::uint_parser;
-using x3::hex;
-using x3::symbols;
-using x3::omit;
 using x3::attr;
-using x3::double_;
 using x3::no_case;
 using x3::no_skip;
 using x3::lexeme;
 using x3::alpha;
 using x3::alnum;
 using x3::char_;
+using x3::raw;
 using x3::standard::space;
 
 // import unicode string rule
 namespace { auto const& css_string = mapnik::json::grammar::unicode_string; }
-namespace { auto const& css_color =  mapnik::css_color_grammar::css_color; }
 
 auto assign_def = [] (auto const& ctx)
 {
@@ -183,16 +175,11 @@ auto assign_key = [] (auto const& ctx)
 };
 
 auto assign_value = [] (auto const& ctx) {_val(ctx).second = std::move(_attr(ctx));};
-auto apply_value =   [](auto const& ctx) { _val(ctx) = _attr(ctx); };
-auto apply_units =   [](auto const& ctx) { _val(ctx) *= _attr(ctx);};
-// units
-const mapnik::css_unit_value unit_value;
 
 // rules
 x3::rule<class simple_selector_tag, std::string> const simple_selector {"Simple selector"};
 x3::rule<class selector_tag, std::vector<std::string>> const selector {"Selector"};
-x3::rule<class number_tag, double> const number{"number"};
-x3::rule<class value_tag, property_value_type> const value {"value"};
+x3::rule<class value_tag, property_value_type> const value {"Value"};
 x3::rule<class key_value_tag, css_key_value> const key_value {"CSS Key/Value"};
 x3::rule<class definition_tag, std::pair<std::vector<std::string>, definition_type>> const definition {"CSS Definition"};
 
@@ -202,8 +189,7 @@ auto const simple_selector_def = lexeme[ident >> -((char_('.') | char_('#') | ch
     | lexeme[char_('.') >> ident >> -(char_(':') >> ident)];
 
 auto const selector_def = simple_selector % lit(',');
-auto const number_def = lexeme[double_[apply_value] > -unit_value[apply_units]];
-auto const value_def = number | css_color | lexeme[+~char_(";}")];
+auto const value_def = raw[lexeme[+~char_(";}")]];
 auto const key_value_def = lexeme[ident][assign_key] >> lit(':') >> value[assign_value] >> -lit(';');
 auto const definition_def = selector >> lit('{') >> *key_value >> lit('}');
 
@@ -219,7 +205,6 @@ BOOST_SPIRIT_DEFINE(
     css_classes,
     simple_selector,
     selector,
-    number,
     value,
     key_value,
     definition,
