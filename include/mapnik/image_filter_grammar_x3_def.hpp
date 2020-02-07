@@ -26,7 +26,7 @@
 
 #include <mapnik/image_filter_grammar_x3.hpp>
 #include <mapnik/image_filter_types.hpp>
-#include <mapnik/css_color_grammar_x3.hpp>
+#include <mapnik/css/css_color_grammar_x3.hpp>
 
 #pragma GCC diagnostic push
 #include <mapnik/warning_ignore.hpp>

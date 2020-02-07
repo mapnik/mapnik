@@ -74,7 +74,16 @@ struct main_marker_visitor
         double opacity = 1;
         double w, h;
         std::tie(w, h) = marker.dimensions();
-
+        if (w == 0 || h == 0)
+        {
+            if (verbose_)
+            {
+                std::clog << "Invalid SVG dimensions: " << w << "," << h << " using svgBBOX()" << std::endl;
+            }
+            auto b = marker.bounding_box();
+            w = b.width();
+            h = b.height();
+        }
 
         double svg_width = w * scale_factor_;
         double svg_height = h * scale_factor_;
@@ -83,9 +92,7 @@ struct main_marker_visitor
         int output_height = static_cast<int>(std::round(svg_height));
         if (verbose_)
         {
-            std::clog << "Found width of '" << w << "' and height of '" << h << "'\n";
-            auto b = marker.bounding_box();
-            std::clog << "SVG BBOX:" << b << std::endl;
+            std::clog << "SVG width of '" << w << "' and height of '" << h << "'\n";
             std::clog << "Output image dimensions:[" << output_width << "," << output_height << "]" << std::endl;
         }
         mapnik::image_rgba8 im(output_width, output_height, true, true);

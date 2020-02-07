@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2017 Artem Pavlenko
+ * Copyright (C) 2020 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,32 +20,35 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/color_factory.hpp>
-#include <mapnik/config_error.hpp>
-#include <mapnik/css/css_color_grammar_x3.hpp>
+
+#ifndef MAPNIK_CSS_UNIT_VALUE_HPP
+#define MAPNIK_CSS_UNIT_VALUE_HPP
+
+#include <boost/spirit/home/x3.hpp>
 
 namespace mapnik {
 
-color parse_color(std::string const& str)
+namespace x3 = boost::spirit::x3;
+
+// units
+struct css_unit_value : x3::symbols<double>
 {
-    // TODO - early return for @color?
-    auto const& grammar = mapnik::css_color_grammar::css_color;
-    color c;
-    std::string::const_iterator first = str.begin();
-    std::string::const_iterator last =  str.end();
-    using namespace boost::spirit::x3::ascii;
-
-    bool result = boost::spirit::x3::phrase_parse(first, last, grammar, space, c);
-    if (result && (first == last))
+    const double DPI = 90;
+    css_unit_value()
     {
-        return c;
+        add
+            ("px", 1.0)
+            ("pt", DPI/72.0)
+            ("pc", DPI/6.0)
+            ("mm", DPI/25.4)
+            ("cm", DPI/2.54)
+            ("in", static_cast<double>(DPI))
+            //("em", 1.0/16.0) // default pixel size for body (usually 16px)
+            // ^^ this doesn't work currently as 'e' in 'em' interpreted as part of scientific notation.
+            ;
     }
-    else
-    {
-        throw config_error("Failed to parse color: \"" + str + "\"");
-    }
-}
+};
 
-}
+} //mapnik
+
+#endif //MAPNIK_CSS_GRAMMAR_X3_DEF_HPP

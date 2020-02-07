@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/css/css_grammar_x3.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -83,8 +84,10 @@ public:
     bool is_defs_;
     bool strict_;
     bool ignore_;
+    bool css_style_;
     std::map<std::string, gradient> gradient_map_;
     std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> node_cache_;
+    mapnik::css_data css_data_;
     agg::trans_affine viewbox_tr_{};
     error_handler err_handler_;
 };

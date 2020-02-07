@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2017 Artem Pavlenko
+ * Copyright (C) 2020 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,21 +20,37 @@
  *
  *****************************************************************************/
 
-#include <mapnik/css_color_grammar_x3_def.hpp>
-#if BOOST_VERSION < 107000
-#include <mapnik/image_filter_types.hpp>
-#endif
-namespace mapnik { namespace css_color_grammar {
+#include <mapnik/css/css_grammar_x3_def.hpp>
+
+namespace mapnik { namespace css_grammar {
 
 namespace x3 = boost::spirit::x3;
-using iterator_type = std::string::const_iterator;
-using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
+using iterator_type = char const*;
+using context_type = x3::phrase_parse_context<css_skipper_type>::type;
 
-BOOST_SPIRIT_INSTANTIATE(css_color_grammar_type, iterator_type, context_type);
+BOOST_SPIRIT_INSTANTIATE(ident_grammar_type, iterator_type, context_type);
+BOOST_SPIRIT_INSTANTIATE(css_classes_type, iterator_type, context_type);
+BOOST_SPIRIT_INSTANTIATE(css_grammar_type, iterator_type, context_type);
+BOOST_SPIRIT_INSTANTIATE(css_skipper_type, iterator_type, x3::unused_type);
+}
 
-#if BOOST_VERSION < 107000
-template bool parse_rule<iterator_type, context_type, mapnik::filter::color_to_alpha>
-(css_color_grammar_type, iterator_type&, iterator_type const&, context_type const&, mapnik::filter::color_to_alpha&);
-#endif
+css_grammar::ident_grammar_type const ident_grammar()
+{
+    return css_grammar::ident;
+}
 
-}}
+css_grammar::css_classes_type const classes()
+{
+    return css_grammar::css_classes;
+}
+
+css_grammar::css_grammar_type const grammar()
+{
+    return css_grammar::css_grammar;
+}
+
+css_grammar::css_skipper_type const skipper()
+{
+    return css_grammar::css_skipper;
+}
+}
