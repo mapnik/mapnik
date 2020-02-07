@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/debug.hpp>
+#include <mapnik/css/css_unit_value.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
@@ -56,6 +57,24 @@
 #include <array>
 
 namespace mapnik { namespace svg {
+
+namespace {
+void print_css(mapnik::css_data & data)
+{
+    for (auto const& kv : data)
+    {
+        std::cerr << std::get<0>(kv) << " {" << std::endl;
+        for (auto const& def : std::get<1>(kv))
+        {
+            auto const& r = std::get<1>(def);
+            std::cerr << "    " << std::get<0>(def) << ":"
+                      << std::string(r.begin(), r.end());
+        }
+        std::cerr << "}" << std::endl;
+    }
+}
+
+}
 
 using util::name_to_int;
 using util::operator"" _case;
@@ -259,17 +278,7 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
 {
     namespace x3 = boost::spirit::x3;
     double val = 0.0;
-    x3::symbols<double> units;
-    units.add
-        ("px", 1.0)
-        ("pt", DPI/72.0)
-        ("pc", DPI/6.0)
-        ("mm", DPI/25.4)
-        ("cm", DPI/2.54)
-        ("in", static_cast<double>(DPI))
-        //("em", 1.0/16.0) // default pixel size for body (usually 16px)
-        // ^^ this doesn't work currently as 'e' in 'em' interpreted as part of scientific notation.
-        ;
+    css_unit_value units;
     const char* cur = str; // phrase_parse mutates the first iterator
     const char* end = str + std::strlen(str);
 
@@ -370,15 +379,107 @@ bool parse_id_from_url (char const* str, std::string & id)
                             x3::space);
 }
 
+void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
+{
+    auto const& css = parser.css_data_;
+    std::unordered_map<std::string, mapnik::property_value_type> style;
+    std::string element_name = node->name();
+    auto itr = css.find(element_name);
+    if (itr != css.end())
+    {
+        //std::cerr << "-> element key:" << element_name << std::endl;
+        for (auto const& def : std::get<1>(*itr))
+        {
+            style[std::get<0>(def)] = std::get<1>(def);
+        }
+    }
+
+    auto const* class_attr = node->first_attribute("class");
+    if (class_attr != nullptr)
+    {
+        auto const* value = class_attr->value();
+        if (std::strlen(value) > 0)
+        {
+            char const* first = value;
+            char const* last = first + std::strlen(value);
+            std::vector<std::string> classes;
+            bool result = boost::spirit::x3::phrase_parse(first, last, mapnik::classes(), mapnik::skipper(), classes);
+            if (result)
+            {
+                for (auto const& class_name : classes)
+                {
+                    std::string solitary_class_key = std::string(".") + class_name;
+                    auto range = css.equal_range(solitary_class_key);
+                    for (auto itr = range.first; itr != range.second; ++itr)
+                    {
+                        //std::cerr << "<" << element_name << ">";
+                        //std::cerr << "--> solitary class key:" << solitary_class_key << std::endl;
+                        for (auto const& def : std::get<1>(*itr))
+                        {
+                            style[std::get<0>(def)] = std::get<1>(def);
+                        }
+                    }
+                    std::string class_key = element_name + solitary_class_key;
+                    range  = css.equal_range(class_key);
+                    for (auto itr = range.first; itr != range.second; ++itr)
+                    {
+                        //std::cerr << "<" << element_name << ">";
+                        //std::cerr << "---> class key:" << class_key << std::endl;
+                        for (auto const& def : std::get<1>(*itr))
+                        {
+                            style[std::get<0>(def)] = std::get<1>(def);
+                        }
+                    }
+                }
+            }
+            //else
+            //{
+            //    std::cerr << "Failed to parse styles..." << std::endl;
+            //}
+        }
+    }
+    auto const* id_attr = node->first_attribute("id");
+    if (id_attr != nullptr)
+    {
+        auto const* value = id_attr->value();
+        if (std::strlen(value) > 0)
+        {
+            std::string id_key = std::string("#") + value;
+            itr = css.find(id_key);
+            if (itr != css.end())
+            {
+                //std::cerr << "<" << element_name << ">";
+                //std::cerr << "----> ID key:" << id_key << std::endl;
+                for (auto const& def : std::get<1>(*itr))
+                {
+                    style[std::get<0>(def)] = std::get<1>(def);
+                }
+            }
+        }
+    }
+    // If style has properties, create or update style attribute
+    if (style.size() > 0)
+    {
+        std::ostringstream ss;
+        for (auto const& def : style)
+        {
+            auto const& r = std::get<1>(def);
+            std::string val{r.begin(), r.end()};
+            //std::cerr << "PARSE ATTR:" <<  std::get<0>(def) << ":" << val << std::endl;
+            parse_attr(parser, std::get<0>(def).c_str(), val.c_str());
+        }
+    }
+}
+
 void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     if (parser.ignore_) return;
-    auto const* name = node->name();
+    auto name = name_to_int(node->name());
     switch (node->type())
     {
     case rapidxml::node_element:
     {
-        switch(name_to_int(name))
+        switch(name)
         {
         case "defs"_case:
         {
@@ -407,19 +508,23 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
         if (!parser.is_defs_) // FIXME
         {
-            switch (name_to_int(name))
+            switch (name)
             {
             case "g"_case:
                 if (node->first_node() != nullptr)
                 {
                     parser.path_.push_attr();
                     parse_id(parser, node);
+                    if (parser.css_style_)
+                        process_css(parser, node);
                     parse_attr(parser, node);
                 }
                 break;
             case "use"_case:
                 parser.path_.push_attr();
                 parse_id(parser, node);
+                if (parser.css_style_)
+                    process_css(parser, node);
                 parse_attr(parser, node);
                 parse_use(parser, node);
                 parser.path_.pop_attr();
@@ -427,10 +532,12 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             default:
                 parser.path_.push_attr();
                 parse_id(parser, node);
+                if (parser.css_style_)
+                    process_css(parser, node);
                 parse_attr(parser, node);
                 if (parser.path_.display())
                 {
-                    parse_element(parser, name, node);
+                    parse_element(parser, node->name(), node);
                 }
                 parser.path_.pop_attr();
             }
@@ -441,32 +548,41 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
             parse_id(parser, node);
         }
 
-        for (auto const* child = node->first_node();
-             child; child = child->next_sibling())
+        if ("style"_case == name)
         {
-            traverse_tree(parser, child);
+            // <style> element is not expected to have nested elements
+            // we're only interested in DATA or CDATA
+            for (auto const* child = node->first_node();
+                 child; child = child->next_sibling())
+            {
+                if (child->type() == rapidxml::node_data ||
+                    child->type() == rapidxml::node_cdata)
+                {
+                    auto const grammar = mapnik::grammar();
+                    auto const skipper = mapnik::skipper();
+                    char const* first = child->value();
+                    char const* last = first + child->value_size();
+                    bool result = boost::spirit::x3::phrase_parse(first, last, grammar, skipper, parser.css_data_);
+                    if (result && first == last && !parser.css_data_.empty())
+                    {
+                        parser.css_style_ = true;
+                        //print_css(parser.css_data_);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (auto const* child = node->first_node();
+                 child; child = child->next_sibling())
+            {
+                traverse_tree(parser, child);
+            }
         }
 
         end_element(parser, node);
     }
     break;
-#if 0 //
-    // Data nodes
-    case rapidxml::node_data:
-    case rapidxml::node_cdata:
-    {
-
-        if (node->value_size() > 0) // Don't add empty text nodes
-        {
-            // parsed text values should have leading and trailing
-            // whitespace trimmed.
-            //std::string trimmed = node->value();
-            //mapnik::util::trim(trimmed);
-            //std::cerr << "CDATA:" << node->value() << std::endl;
-        }
-    }
-    break;
-#endif
     default:
         break;
     }
@@ -1426,6 +1542,7 @@ svg_parser::svg_parser(svg_converter_type & path, bool strict)
     : path_(path),
       is_defs_(false),
       ignore_(false),
+      css_style_(false),
       err_handler_(strict) {}
 
 svg_parser::~svg_parser() {}

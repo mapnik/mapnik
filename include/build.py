@@ -28,6 +28,7 @@ subdirglobs = [
     ('.',                    'mapnik/*.hpp'),
     ('agg',                  '../deps/agg/include/agg*'),
     ('cairo',                'mapnik/cairo/*.hpp'),
+    ('css',                  'mapnik/css/*.hpp'),
     ('csv',                  'mapnik/csv/*.hpp'),
     ('deps/mapbox',          '../deps/mapbox/variant/include/mapbox/*.hpp'),
     ('deps/mapbox',          '../deps/mapbox/geometry/include/mapbox/*.hpp'),

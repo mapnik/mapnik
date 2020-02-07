@@ -28,7 +28,8 @@ src/json/libmapnik-json.a:
 		src/renderer_common/render_thunk_extractor.os \
 		src/json/libmapnik-json.a \
 		src/wkt/libmapnik-wkt.a \
-		src/css_color_grammar_x3.os \
+		src/css/css_grammar_x3.os \
+		src/css/css_color_grammar_x3.os \
 		src/expression_grammar_x3.os \
 		src/transform_expression_grammar_x3.os \
 		src/image_filter_grammar_x3.os \

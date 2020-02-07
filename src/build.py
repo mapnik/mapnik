@@ -152,7 +152,6 @@ else: # unix, non-macos
 source = Split(
     """
     expression_grammar_x3.cpp
-    css_color_grammar_x3.cpp
     fs.cpp
     request.cpp
     well_known_srs.cpp
@@ -225,6 +224,8 @@ source = Split(
     raster_colorizer.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
+    css/css_color_grammar_x3.cpp
+    css/css_grammar_x3.cpp
     svg/svg_parser.cpp
     svg/svg_path_parser.cpp
     svg/svg_points_parser.cpp
