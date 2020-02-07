@@ -397,6 +397,25 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 feature->set_raster(raster);
                 break;
             }
+            case GDT_Int32:
+            {
+                mapnik::image_gray32s image(im_width, im_height);
+                image.set(std::numeric_limits<std::int32_t>::max());
+                raster_nodata = band->GetNoDataValue(&raster_has_nodata);
+                raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
+                                                 image.data(), image.width(), image.height(),
+                                                 GDT_Int32, 0, 0);
+                if (raster_io_error == CE_Failure)
+                {
+                    throw datasource_exception(CPLGetLastErrorMsg());
+                }
+                mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, image, filter_factor);
+                // set nodata value to be used in raster colorizer
+                if (nodata_value_) raster->set_nodata(*nodata_value_);
+                else raster->set_nodata(raster_nodata);
+                feature->set_raster(raster);
+                break;
+            }
             default:
             case GDT_Int16:
             {
