@@ -26,6 +26,7 @@
 //mapnik
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/image_scaling.hpp>
 
 // stl
 #include <set>
@@ -47,6 +48,7 @@ public:
           resolution_(_resolution),
           scale_denominator_(_scale_denominator),
           filter_factor_(1.0),
+          scaling_method_(SCALING_NEAR),
           unbuffered_bbox_(unbuffered_bbox),
           names_(),
           vars_()
@@ -59,6 +61,7 @@ public:
           resolution_(_resolution),
           scale_denominator_(_scale_denominator),
           filter_factor_(1.0),
+          scaling_method_(SCALING_NEAR),
           unbuffered_bbox_(bbox),
           names_(),
           vars_()
@@ -69,6 +72,7 @@ public:
           resolution_(resolution_type(1.0,1.0)),
           scale_denominator_(1.0),
           filter_factor_(1.0),
+          scaling_method_(SCALING_NEAR),
           unbuffered_bbox_(bbox),
           names_(),
           vars_()
@@ -79,6 +83,7 @@ public:
           resolution_(other.resolution_),
           scale_denominator_(other.scale_denominator_),
           filter_factor_(other.filter_factor_),
+          scaling_method_(other.scaling_method_),
           unbuffered_bbox_(other.unbuffered_bbox_),
           names_(other.names_),
           vars_(other.vars_)
@@ -91,6 +96,7 @@ public:
         resolution_=other.resolution_;
         scale_denominator_=other.scale_denominator_;
         filter_factor_=other.filter_factor_;
+        scaling_method_=other.scaling_method_;
         unbuffered_bbox_=other.unbuffered_bbox_;
         names_=other.names_;
         vars_=other.vars_;
@@ -137,6 +143,16 @@ public:
         filter_factor_ = factor;
     }
 
+    scaling_method_e get_scaling_method() const
+    {
+        return scaling_method_;
+    }
+
+    void set_scaling_method(scaling_method_e method)
+    {
+      scaling_method_ = method;
+    }
+
     void add_property_name(std::string const& name)
     {
         names_.insert(name);
@@ -162,6 +178,7 @@ private:
     resolution_type resolution_;
     double scale_denominator_;
     double filter_factor_;
+    scaling_method_e scaling_method_;
     box2d<double> unbuffered_bbox_;
     std::set<std::string> names_;
     attributes vars_;

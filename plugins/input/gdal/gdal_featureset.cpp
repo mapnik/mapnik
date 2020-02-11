@@ -22,6 +22,8 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <boost/optional/optional_io.hpp>
+#include <mapnik/image_scaling.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/image.hpp>
@@ -79,6 +81,7 @@ void get_overview_meta(GDALRasterBand* band)
 }
 } // anonymous ns
 #endif
+
 gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
                                  gdal_query q,
@@ -89,8 +92,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  double dx,
                                  double dy,
                                  boost::optional<double> const& nodata,
-                                 double nodata_tolerance,
-                                 int64_t max_image_area)
+                                 double nodata_tolerance)
     : dataset_(dataset),
       ctx_(std::make_shared<mapnik::context_type>()),
       band_(band),
@@ -103,7 +105,6 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       nbands_(nbands),
       nodata_value_(nodata),
       nodata_tolerance_(nodata_tolerance),
-      max_image_area_(max_image_area),
       first_(true)
 {
     ctx_->push("nodata");
@@ -111,6 +112,35 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
 
 gdal_featureset::~gdal_featureset()
 {
+}
+
+GDALRIOResampleAlg gdal_featureset::get_gdal_resample_alg(mapnik::scaling_method_e mapnik_scaling_method)
+{
+
+  switch (mapnik_scaling_method)
+    {
+    case mapnik::SCALING_NEAR: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Nearest Neighbor resampling"; return GRIORA_NearestNeighbour;
+    case mapnik::SCALING_BILINEAR: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Bilinear resampling"; return GRIORA_Bilinear;
+    case mapnik::SCALING_BICUBIC: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Cubic resampling"; return GRIORA_Cubic;
+    case mapnik::SCALING_SPLINE16: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL CubicSpline resampling"; return GRIORA_CubicSpline;
+    case mapnik::SCALING_SPLINE36: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL CubicSpline resampling"; return GRIORA_CubicSpline;
+    case mapnik::SCALING_HANNING: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Gauss resampling"; return GRIORA_Gauss;
+    case mapnik::SCALING_HAMMING: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Gauss resampling"; return GRIORA_Gauss;
+    case mapnik::SCALING_HERMITE: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Cubic resampling"; return GRIORA_Cubic;
+    case mapnik::SCALING_KAISER: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Lanczos resampling"; return GRIORA_Lanczos;
+    case mapnik::SCALING_QUADRIC: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Lanczos resampling"; return GRIORA_Lanczos;
+    case mapnik::SCALING_CATROM: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Cubic resampling"; return GRIORA_Cubic;
+    case mapnik::SCALING_GAUSSIAN: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Gauss resampling"; return GRIORA_Gauss;
+    case mapnik::SCALING_BESSEL: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Lanczos resampling"; return GRIORA_Lanczos;
+    case mapnik::SCALING_MITCHELL: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Cubic resampling"; return GRIORA_Cubic;
+    case mapnik::SCALING_SINC: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Lanczos resampling"; return GRIORA_Lanczos;
+    case mapnik::SCALING_LANCZOS: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Lanczos resampling"; return GRIORA_Lanczos;
+    case mapnik::SCALING_BLACKMAN: MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Using GDAL Lanczos resampling"; return GRIORA_Lanczos;
+    }
+
+  MAPNIK_LOG_WARN(gdal) << "No valid resampling method found using Nearest Neighbor";
+  return GRIORA_NearestNeighbour;
+
 }
 
 feature_ptr gdal_featureset::next()
@@ -122,33 +152,6 @@ feature_ptr gdal_featureset::next()
         return mapnik::util::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
-}
-
-void gdal_featureset::find_best_overview(int bandNumber,
-                                         int ideal_width,
-                                         int ideal_height,
-                                         int & current_width,
-                                         int & current_height) const
-{
-    GDALRasterBand * band = dataset_.GetRasterBand(bandNumber);
-    int band_overviews = band->GetOverviewCount();
-    if (band_overviews > 0)
-    {
-        for (int b = 0; b < band_overviews; b++)
-        {
-            GDALRasterBand * overview = band->GetOverview(b);
-            int overview_width = overview->GetXSize();
-            int overview_height = overview->GetYSize();
-            if ((overview_width < current_width ||
-                 overview_height < current_height) &&
-                ideal_width <= overview_width &&
-                ideal_height <= overview_height)
-            {
-                current_width = overview_width;
-                current_height = overview_height;
-            }
-        }
-    }
 }
 
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
@@ -225,94 +228,26 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     int width = end_x - x_off;
     int height = end_y - y_off;
 
-    // In many cases we want GDAL to simply return the exact image so we
-    // can handle resampling internally in mapnik. In other cases such as 
-    // when overviews exist or when the image allocated might be too large
-    // we want to utilize some resampling in GDAL instead.
-    int im_height = height;
-    int im_width = width;
     double im_offset_x = x_off;
     double im_offset_y = y_off;
-    int current_width = static_cast<int>(raster_width_);
-    int current_height = static_cast<int>(raster_height_);
 
-    // loop through overviews -- snap up in resolution to closest overview
-    // if necessary we find an image size that most resembles
-    // the resolution of our output image.
+    // resolution is 1 / requested pixel size
     const double width_res = std::get<0>(q.resolution());
     const double height_res = std::get<1>(q.resolution());
-    const int ideal_raster_width = static_cast<int>(
-        std::floor(raster_extent_.width() *
-            width_res * filter_factor) + .5);
-    const int ideal_raster_height = static_cast<int>(
-        std::floor(raster_extent_.height() *
-            height_res * filter_factor) + .5);
+    int im_width = int(width_res * intersect.width() + 0.5);
+    int im_height = int(height_res * intersect.height() + 0.5);
 
-    if (band_ > 0 && band_ < nbands_)
-    {
-        find_best_overview(band_,
-                           ideal_raster_width,
-                           ideal_raster_height,
-                           current_width,
-                           current_height);
-    }
-    else
-    {
-        for (int i = 0; i < nbands_; ++i)
-        {
-            find_best_overview(i + 1,
-                               ideal_raster_width,
-                               ideal_raster_height,
-                               current_width,
-                               current_height);
-        }
-    }
+    // no upsampling in gdal
+    if (im_width > width)
+      {im_width=width;}
+    if (im_height > height)
+      {im_height=height;}
 
-    if (current_width != (int)raster_width_ ||
-        current_height != (int)raster_height_)
-    {
-        if (current_width != (int)raster_width_)
-        {
-            double ratio = (double)current_width / (double)raster_width_;
-            im_offset_x = std::floor(ratio * im_offset_x);
-            im_width = static_cast<int>(std::ceil(ratio * im_width));
-        }
-        if (current_height != (int)raster_height_)
-        {
-            double ratio = (double)current_height / (double)raster_height_;
-            im_offset_y = std::floor(ratio * im_offset_y);
-            im_height = static_cast<int>(std::ceil(ratio * im_height));
-        }
-    }
-    
-    int64_t im_area = (int64_t)im_width * (int64_t)im_height;
-    if (im_area > max_image_area_)
-    {
-        int adjusted_width = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_width / (double)im_height))));
-        int adjusted_height = static_cast<int>(std::round(std::sqrt(max_image_area_ * ((double)im_height / (double)im_width))));
-        if (adjusted_width < 1)
-        {
-            adjusted_width = 1;
-        }
-        if (adjusted_height < 1)
-        {
-            adjusted_height = 1;
-        }
-        double ratio_x = (double)adjusted_width / (double)im_width;
-        double ratio_y = (double)adjusted_height / (double)im_height;
-        im_offset_x = ratio_x * im_offset_x;
-        im_offset_y = ratio_y * im_offset_y;
-        im_width = adjusted_width;
-        im_height = adjusted_height;
-        current_width = static_cast<int>(std::floor((ratio_x * current_width) + 0.5));
-        current_height = static_cast<int>(std::floor((ratio_y * current_height) + 0.5));
-    }
-    
     //calculate actual box2d of returned raster
-    view_transform t2(current_width, current_height, raster_extent_, 0, 0);
-    box2d<double> feature_raster_extent(im_offset_x, im_offset_y, im_offset_x + im_width, im_offset_y + im_height);
+    box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
+
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
-    feature_raster_extent = t2.backward(feature_raster_extent);
+    feature_raster_extent = t.backward(feature_raster_extent);
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Raster extent=" << raster_extent_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Feature Raster extent=" << feature_raster_extent;
@@ -324,9 +259,13 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     if (width > 0 && height > 0)
     {
 
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Requested Image Size=(" << width << "," << height << ")";
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Requested Size from gdal=(" << width << "," << height << ")";
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Internal Image Size=(" << im_width << "," << im_height << ")";
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: requested resampling method=" << scaling_method_to_string(q.get_scaling_method());
+        GDALRasterIOExtraArg psExtraArg;
+        INIT_RASTERIO_EXTRA_ARG(psExtraArg);
+        psExtraArg.eResampleAlg = get_gdal_resample_alg(q.get_scaling_method());
         if (band_ > 0) // we are querying a single band
         {
             GDALRasterBand * band = dataset_.GetRasterBand(band_);
@@ -346,7 +285,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
                                                  image.data(), image.width(), image.height(),
-                                                 GDT_Byte, 0, 0);
+                                                 GDT_Byte, 0, 0, &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
@@ -366,7 +305,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
                                                  image.data(), image.width(), image.height(),
-                                                 GDT_Float32, 0, 0);
+                                                 GDT_Float32, 0, 0, &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
@@ -385,7 +324,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
                                                  image.data(), image.width(), image.height(),
-                                                 GDT_UInt16, 0, 0);
+                                                 GDT_UInt16, 0, 0, &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
@@ -424,7 +363,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
                                                  image.data(), image.width(), image.height(),
-                                                 GDT_Int16, 0, 0);
+                                                 GDT_Int16, 0, 0, &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
@@ -533,7 +472,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     float* imageData = (float*)image.bytes();
                     raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height,
                                                     imageData, image.width(), image.height(),
-                                                    GDT_Float32, 0, 0);
+                                                    GDT_Float32, 0, 0, &psExtraArg);
                     if (raster_io_error == CE_Failure) {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
@@ -564,7 +503,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                                         image.bytes(),
                                                         image.width(), image.height(), GDT_Byte,
                                                         nBandsToRead, nullptr,
-                                                        4, 4 * image.width(), 1);
+                                                        4, 4 * image.width(), 1, &psExtraArg);
                     if (raster_io_error == CE_Failure) {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
@@ -572,17 +511,20 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 else
                 {
                     raster_io_error = red->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 0,
-                                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                    &psExtraArg);
                     if (raster_io_error == CE_Failure) {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
                     raster_io_error = green->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 1,
-                                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                      &psExtraArg);
                     if (raster_io_error == CE_Failure) {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
                     raster_io_error = blue->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 2,
-                                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                     &psExtraArg);
                     if (raster_io_error == CE_Failure) {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
@@ -622,7 +564,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     float* imageData = (float*)image.bytes();
                     raster_io_error = grey->RasterIO(GF_Read, x_off, y_off, width, height,
                                                      imageData, image.width(), image.height(),
-                                                     GDT_Float32, 0, 0);
+                                                     GDT_Float32, 0, 0, &psExtraArg);
                     if (raster_io_error == CE_Failure)
                     {
                         throw datasource_exception(CPLGetLastErrorMsg());
@@ -642,21 +584,24 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 }
 
                 raster_io_error = grey->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 0,
-                                                 image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                 image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                 &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
 
                 raster_io_error = grey->RasterIO(GF_Read,x_off, y_off, width, height, image.bytes() + 1,
-                                                 image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                 image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                 &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
                 }
 
                 raster_io_error = grey->RasterIO(GF_Read,x_off, y_off, width, height, image.bytes() + 2,
-                                                 image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                 image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                 &psExtraArg);
 
                 if (raster_io_error == CE_Failure)
                 {
@@ -693,7 +638,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 if (!raster_has_nodata || (red && green && blue))
                 {
                     raster_io_error = alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 3,
-                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                      image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                      &psExtraArg);
                     if (raster_io_error == CE_Failure) {
                         throw datasource_exception(CPLGetLastErrorMsg());
                     }
@@ -718,7 +664,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     if (!raster_has_nodata)
                     {
                         raster_io_error = mask->RasterIO(GF_Read, x_off, y_off, width, height, image.bytes() + 3,
-                                                          image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
+                                                         image.width(), image.height(), GDT_Byte, 4, 4 * image.width(),
+                                                         &psExtraArg);
                         if (raster_io_error == CE_Failure) {
                             throw datasource_exception(CPLGetLastErrorMsg());
                         }
