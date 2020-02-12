@@ -343,7 +343,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 raster_io_error = band->RasterIO(GF_Read, x_off, y_off, width, height,
                                                  image.data(), image.width(), image.height(),
-                                                 GDT_Int32, 0, 0);
+                                                 GDT_Int32, 0, 0, &psExtraArg);
                 if (raster_io_error == CE_Failure)
                 {
                     throw datasource_exception(CPLGetLastErrorMsg());
