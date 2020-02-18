@@ -6,6 +6,17 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.23
+
+Released: February 18, 2020
+
+(Packaged from )
+
+- Complete build system migration to Py3 syntax (4b0bdd8630f6999e5db346fd767a06b8ceba8fb9)
+- Add support for `BOOST_VERSION >= 1_72`
+- gdal.input - add support for int32 pixel types (efc65126db5d51977d6374f9b983fc441f334eb6)
+
+
 ## 3.0.22
 
 Released: January 22, 2019
