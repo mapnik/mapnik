@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released: February 18, 2020
 
-(Packaged from )
+(Packaged from bdb30f47a)
 
 - Complete build system migration to Py3 syntax (4b0bdd8630f6999e5db346fd767a06b8ceba8fb9)
 - Add support for `BOOST_VERSION >= 1_72`
