@@ -42,6 +42,7 @@ struct markers_placement_params
     box2d<double> size;
     agg::trans_affine tr;
     double spacing;
+    double spacing_offset;
     double max_error;
     bool allow_overlap;
     bool avoid_edges;
