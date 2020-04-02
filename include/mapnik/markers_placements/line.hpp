@@ -43,10 +43,12 @@ public:
         : point_placement(locator, detector, params),
             first_point_(true),
             spacing_(0.0),
+            spacing_offset_(NAN),
             marker_width_((params.size * params.tr).width()),
             path_(locator)
     {
         spacing_ = params.spacing < 1 ? 100 : params.spacing;
+        spacing_offset_ = params.spacing_offset;
     }
 
     void rewind()
@@ -77,7 +79,7 @@ public:
                 return false;
             }
             first_point_ = false;
-            move = spacing_ / 2.0;
+            move = std::isnan(spacing_offset_) ? spacing_ / 2.0 : spacing_offset_;
         }
 
         while (path_.forward(move))
@@ -113,6 +115,7 @@ public:
 private:
     bool first_point_;
     double spacing_;
+    double spacing_offset_;
     double marker_width_;
     vertex_cache path_;
 };

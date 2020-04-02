@@ -80,6 +80,7 @@ static const property_meta_type key_meta[const_max_key] =
                         property_types::target_double },
     property_meta_type{ "transform", nullptr, property_types::target_transform },
     property_meta_type{ "spacing", nullptr, property_types::target_double },
+    property_meta_type{ "spacing-offset", nullptr, property_types::target_double },
     property_meta_type{ "max-error", nullptr, property_types::target_double },
     property_meta_type{ "allow-overlap", nullptr, property_types::target_bool },
     property_meta_type{ "ignore-placement",  nullptr, property_types::target_bool },

@@ -1124,6 +1124,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base,double>(sym, keys::opacity, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::fill_opacity, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::spacing, node);
+        set_symbolizer_property<symbolizer_base,double>(sym, keys::spacing_offset, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::max_error, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::offset, node);
         set_symbolizer_property<symbolizer_base,double>(sym, keys::width, node);

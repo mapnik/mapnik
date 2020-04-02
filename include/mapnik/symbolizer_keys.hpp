@@ -52,6 +52,7 @@ enum class keys : std::uint8_t
     line_rasterizer,
     image_transform,
     spacing,
+    spacing_offset,
     max_error,
     allow_overlap,
     ignore_placement,
