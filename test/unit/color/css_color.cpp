@@ -269,6 +269,7 @@ TEST_CASE("CSS color") {
             CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
         }
     }
+
     SECTION("operator<< / to_string()")
     {
         mapnik::color c("salmon");
@@ -279,6 +280,19 @@ TEST_CASE("CSS color") {
         ss.seekp(0);
         ss << c ;
         CHECK(ss.str() == "rgba(250,128,114,0.498)");
+    }
+    SECTION("operator= operator==")
+    {
+        mapnik::color c1("cornflowerblue", true);
+        mapnik::color c2 = c1; // make copy
+        CHECK(c1.red() == c2.red());
+        CHECK(c1.green() == c2.green());
+        CHECK(c1.blue() == c2.blue());
+        CHECK(c1.get_premultiplied() == c2.get_premultiplied());
+        CHECK(c1 == c2);
+        c1.demultiply();
+        CHECK(c1 != c2);
+        CHECK(c1.get_premultiplied() != c2.get_premultiplied());
     }
     SECTION("premultiply/demultiply")
     {
