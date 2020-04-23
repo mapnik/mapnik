@@ -103,10 +103,11 @@ public:
 
     inline bool operator==(color const& rhs) const
     {
-        return (red_== rhs.red()) &&
-               (green_ == rhs.green()) &&
-               (blue_  == rhs.blue()) &&
-               (alpha_ == rhs.alpha());
+        return (red_== rhs.red_) &&
+            (green_ == rhs.green_) &&
+            (blue_  == rhs.blue_) &&
+            (alpha_ == rhs.alpha_) &&
+            (premultiplied_ == rhs.premultiplied_);
     }
 
     inline std::uint8_t red() const
@@ -151,9 +152,9 @@ public:
     {
         return premultiplied_;
     }
-    inline void set_premultiplied(bool status)
+    inline void set_premultiplied(bool val)
     {
-        premultiplied_ = status;
+        premultiplied_ = val;
     }
 
     inline unsigned rgba() const
