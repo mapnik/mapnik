@@ -167,6 +167,7 @@ private:
         std::swap(green_,rhs.green_);
         std::swap(blue_,rhs.blue_);
         std::swap(alpha_,rhs.alpha_);
+        std::swap(premultiplied_, rhs.premultiplied_);
     }
 };
 
