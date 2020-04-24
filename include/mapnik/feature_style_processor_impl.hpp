@@ -432,6 +432,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         }
     }
     q.set_filter_factor(collector.get_filter_factor());
+    q.set_scaling_method(collector.get_scaling_method());
 
     // Also query the group by attribute
     std::string const& group_by = lay.group_by();
