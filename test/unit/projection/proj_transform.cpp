@@ -172,8 +172,13 @@ SECTION("Test proj antimeridian bbox")
     //        274000 7173000 # top-most
     //  END
     //
+#if PJ_VERSION >= 600
+    const mapnik::box2d<double> normal(148.7639922894, -60.1221489798,
+                                       159.9548476477, -24.9771194497);
+#else
     const mapnik::box2d<double> normal(148.7667597489, -60.1222810241,
                                        159.9548489296, -24.9771195155);
+#endif
 
     {
         // checks for not being snapped (ie. not antimeridian)
