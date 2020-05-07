@@ -143,9 +143,7 @@ auto const coordinates_rule_def = lit("\"coordinates\"") >> lit(':') >> position
 
 auto const bounding_box_def = raw[lit('{')[open_bracket]
                                   >> *(eps[check_brackets] >>
-                                       ((lit("\"FeatureCollection\"") > eps(false))
-                                        |
-                                        lit('{')[open_bracket]
+                                       (lit('{')[open_bracket]
                                         |
                                         lit('}')[close_bracket]
                                         |
