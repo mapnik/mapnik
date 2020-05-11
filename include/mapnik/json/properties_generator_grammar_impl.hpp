@@ -69,6 +69,7 @@ properties_generator_grammar<OutputIterator, KeyValueStore>::properties_generato
     boost::spirit::karma::string_type kstring;
     boost::spirit::karma::eps_type eps;
     using boost::phoenix::at_c;
+
     properties = lit('{')
         << -(pair % lit(','))
         << lit('}')
@@ -84,7 +85,6 @@ properties_generator_grammar<OutputIterator, KeyValueStore>::properties_generato
         |
         kstring[_1 = at_c<0>(_val)]
         ;
-
 }
 
 }}
