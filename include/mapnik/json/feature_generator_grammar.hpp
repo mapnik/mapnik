@@ -96,10 +96,10 @@ namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator, typename FeatureType>
 struct feature_generator_grammar :
-        karma::grammar<OutputIterator, FeatureType()>
+        karma::grammar<OutputIterator, FeatureType const&()>
 {
     feature_generator_grammar();
-    karma::rule<OutputIterator, FeatureType()> feature;
+    karma::rule<OutputIterator, FeatureType const&()> feature;
     geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry<double>> geometry;
     properties_generator_grammar<OutputIterator, mapnik::kv_store> properties;
 };
