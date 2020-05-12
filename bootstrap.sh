@@ -44,7 +44,7 @@ function install() {
 }
 
 ICU_VERSION="57.1"
-BOOST_VERSION="1.65.1"
+BOOST_VERSION="1.72.0"
 
 function install_mason_deps() {
     install ccache 3.3.1
