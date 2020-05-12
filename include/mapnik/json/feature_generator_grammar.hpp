@@ -91,15 +91,23 @@ BOOST_FUSION_ADAPT_ADT(
     (mapnik::kv_store const, mapnik::kv_store const, mapnik::kv_store(obj), /**/))
 
 namespace mapnik { namespace json {
+namespace detail {
+template <typename T>
+#if BOOST_VERSION >= 107000
+struct attribute_type { using type = T();};
+#else
+struct attribute_type { using type = T const&();};
+#endif
+}
 
 namespace karma = boost::spirit::karma;
 
 template <typename OutputIterator, typename FeatureType>
 struct feature_generator_grammar :
-        karma::grammar<OutputIterator, FeatureType const&()>
+        karma::grammar<OutputIterator, typename detail::attribute_type<FeatureType>::type>
 {
     feature_generator_grammar();
-    karma::rule<OutputIterator, FeatureType const&()> feature;
+    karma::rule<OutputIterator, typename detail::attribute_type<FeatureType>::type> feature;
     geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry<double>> geometry;
     properties_generator_grammar<OutputIterator, mapnik::kv_store> properties;
 };
