@@ -8,7 +8,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="e4c1746"
+MASON_VERSION="250ac4b"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
