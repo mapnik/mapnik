@@ -16,6 +16,8 @@
 
 FROM debian:stretch-slim
 
+ENV MAPNIK_VERSION v3.0.x
+
 ENV BUILD_DEPENDENCIES="build-essential \
     ca-certificates \
     git \
@@ -68,6 +70,7 @@ RUN apt-get update \
         $BUILD_DEPENDENCIES $DEPENDENCIES \
     && git clone https://github.com/mapnik/mapnik.git \
     && cd mapnik \
+    && git checkout $MAPNIK_VERSION \
     && git submodule update --init \
     && python scons/scons.py INPUT_PLUGINS='all' \
     && make \
