@@ -479,6 +479,7 @@ opts.AddVariables(
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
     BoolVariable('QUIET', 'Reduce build verbosity', 'False'),
+    EnumVariable('USE_SSE', 'Enable support for SSE vector instructions','yes',['yes','no','platform_default'])
     )
 
 # variables to pickle after successful configure step
@@ -1870,6 +1871,7 @@ if not preconfigured:
     env.Prepend(CPPPATH = '#deps/mapbox/geometry/include')
     env.Prepend(CPPPATH = '#deps/mapbox/protozero/include')
     env.Prepend(CPPPATH = '#deps/mapbox/polylabel/include')
+    env.Prepend(CPPPATH = '#deps/pngquant')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 

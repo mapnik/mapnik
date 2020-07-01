@@ -83,8 +83,23 @@ void handle_png_options(std::string const& type,
         }
         else if (key == "m" && val)
         {
-            if (*val == "o") opts.use_hextree = false;
-            else if (*val == "h") opts.use_hextree = true;
+            if (*val == "o") opts.quantization = png_options::OCTTREE;
+            else if (*val == "h") opts.quantization = png_options::HEXTREE;
+            else if (*val == "iq") opts.quantization = png_options::IMGQUANT;
+        }
+        else if (key == "iqs")
+        {
+            if (!val || !mapnik::util::string2int(*val, opts.iq_speed) || opts.iq_speed < 1 || opts.iq_speed > 10)
+            {
+                throw image_writer_exception("invalid iq speed parameter: " + to_string(val));
+            }
+        }
+        else if (key == "iqd")
+        {
+            if (!val || !mapnik::util::string2double(*val, opts.iq_dither) || opts.iq_dither < 0 || opts.iq_dither > 1)
+            {
+                throw image_writer_exception("invalid iq dithering parameter: " + to_string(val));
+            }
         }
         else if (key == "e" && val && *val == "miniz")
         {
@@ -236,13 +251,17 @@ void process_rgba8_png_pal(T const& image,
     }
     else if (opts.paletted)
     {
-        if (opts.use_hextree)
+        if (opts.quantization == png_options::HEXTREE)
         {
             save_as_png8_hex(stream, image, opts);
         }
-        else
+        else if (opts.quantization == png_options::OCTTREE)
         {
             save_as_png8_oct(stream, image, opts);
+        }
+        else
+        {
+            save_as_png8_libimagequant(stream, image, opts);
         }
     }
     else
@@ -264,13 +283,17 @@ void process_rgba8_png(T const& image,
     handle_png_options(t, opts);
     if (opts.paletted)
     {
-        if (opts.use_hextree)
+        if (opts.quantization == png_options::HEXTREE)
         {
             save_as_png8_hex(stream, image, opts);
         }
-        else
+        else if (opts.quantization == png_options::OCTTREE)
         {
             save_as_png8_oct(stream, image, opts);
+        }
+        else
+        {
+            save_as_png8_libimagequant(stream, image, opts);
         }
     }
     else

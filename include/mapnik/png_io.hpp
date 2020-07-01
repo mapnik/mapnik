@@ -47,14 +47,20 @@ extern "C"
 namespace mapnik {
 
 struct png_options {
+
+    enum quantization_enum { HEXTREE, OCTTREE, IMGQUANT };
+
     int colors;
     int filters;
     int compression;
     int strategy;
     int trans_mode;
+    int iq_speed;
+    double iq_dither;
     double gamma;
     bool paletted;
-    bool use_hextree;
+    quantization_enum quantization;
+    bool use_miniz;
 
     png_options() :
         colors(256),
@@ -62,9 +68,12 @@ struct png_options {
         compression(Z_DEFAULT_COMPRESSION),
         strategy(Z_DEFAULT_STRATEGY),
         trans_mode(-1),
+        iq_speed(3),
+        iq_dither(-1),
         gamma(-1),
         paletted(true),
-        use_hextree(true) {}
+        quantization(HEXTREE),
+        use_miniz(false) {}
 };
 
 template <typename T>
@@ -700,6 +709,11 @@ void save_as_png8_pal(T1 & file,
 {
     save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alpha_table(), opts);
 }
+
+template <typename T1, typename T2>
+void save_as_png8_libimagequant(T1 & file,
+                                T2 const& image,
+                                png_options const& opts);
 
 }
 
