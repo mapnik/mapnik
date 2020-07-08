@@ -58,24 +58,6 @@
 
 namespace mapnik { namespace svg {
 
-namespace {
-void print_css(mapnik::css_data & data)
-{
-    for (auto const& kv : data)
-    {
-        std::cerr << std::get<0>(kv) << " {" << std::endl;
-        for (auto const& def : std::get<1>(kv))
-        {
-            auto const& r = std::get<1>(def);
-            std::cerr << "    " << std::get<0>(def) << ":"
-                      << std::string(r.begin(), r.end());
-        }
-        std::cerr << "}" << std::endl;
-    }
-}
-
-}
-
 using util::name_to_int;
 using util::operator"" _case;
 
@@ -566,7 +548,6 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     if (result && first == last && !parser.css_data_.empty())
                     {
                         parser.css_style_ = true;
-                        //print_css(parser.css_data_);
                     }
                 }
             }
