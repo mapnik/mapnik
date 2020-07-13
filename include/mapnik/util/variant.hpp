@@ -34,33 +34,21 @@ using recursive_wrapper = typename mapbox::util::recursive_wrapper<T>;
 template<typename... Types>
 using variant = typename  mapbox::util::variant<Types...>;
 
+
 // unary visitor interface
-// const
 template <typename F, typename V>
-auto VARIANT_INLINE static apply_visitor(F && f, V const& v) -> decltype(V::visit(v, std::forward<F>(f)))
+auto VARIANT_INLINE apply_visitor(F&& f, V&& v)
+    -> decltype(v.visit(std::forward<V>(v), std::forward<F>(f)))
 {
-    return V::visit(v, std::forward<F>(f));
-}
-// non-const
-template <typename F, typename V>
-auto VARIANT_INLINE static apply_visitor(F && f, V & v) -> decltype(V::visit(v, std::forward<F>(f)))
-{
-    return V::visit(v, std::forward<F>(f));
+    return v.visit(std::forward<V>(v), std::forward<F>(f));
 }
 
 // binary visitor interface
-// const
 template <typename F, typename V>
-auto VARIANT_INLINE static apply_visitor(F && f, V const& v0, V const& v1) -> decltype(V::binary_visit(v0, v1, std::forward<F>(f)))
+auto VARIANT_INLINE apply_visitor(F&& f, V&& v0, V&& v1)
+    -> decltype(v0.binary_visit(std::forward<V>(v0), std::forward<V>(v1), std::forward<F>(f)))
 {
-    return V::binary_visit(v0, v1, std::forward<F>(f));
-}
-
-// non-const
-template <typename F, typename V>
-auto VARIANT_INLINE static apply_visitor(F && f, V & v0, V & v1) -> decltype(V::binary_visit(v0, v1, std::forward<F>(f)))
-{
-    return V::binary_visit(v0, v1, std::forward<F>(f));
+    return v0.binary_visit(std::forward<V>(v0), std::forward<V>(v1), std::forward<F>(f));
 }
 
 // getter interface
