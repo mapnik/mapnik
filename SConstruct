@@ -141,7 +141,6 @@ PLUGINS = { # plugins with external dependencies
 
 def init_environment(env):
     env.Decider('MD5-timestamp')
-    env.SourceCode(".", None)
     env['ORIGIN'] = Literal('$ORIGIN')
     env['ENV']['ORIGIN'] = '$ORIGIN'
     if os.environ.get('RANLIB'):
