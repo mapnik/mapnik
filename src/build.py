@@ -38,6 +38,11 @@ def call(cmd, silent=True):
 
 def ldconfig(*args,**kwargs):
     call('ldconfig')
+    if env['PLATFORM'] == 'OpenBSD':
+        # For OBSD call ldconfig as done by rc -- refer to rc.conf(8)
+        call('ldconfig /usr/X11R6/lib /usr/local/lib')
+    else:
+        call('ldconfig')
 
 if env['LINKING'] == 'static':
     lib_env.Append(CXXFLAGS="-fPIC")
@@ -117,7 +122,7 @@ if env['RUNTIME_LINK'] != 'static':
 
 lib_env['LIBS'].append('z')
 
-if env['PLATFORM'] == 'FreeBSD':
+if env['PLATFORM'] == 'FreeBSD' or env['PLATFORM'] == 'OpenBSD':
     lib_env['LIBS'].append('pthread')
 
 if env['PLATFORM'] == 'Darwin':
@@ -139,7 +144,7 @@ else: # unix, non-macos
         else:
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
     else: # Linux and others
-        if env['PLATFORM'] != 'FreeBSD':
+        if env['PLATFORM'] != 'FreeBSD' or env['PLATFORM'] != 'OpenBSD':
             lib_env['LIBS'].append('dl')
         mapnik_lib_link_flag += ' -Wl,-rpath-link,.'
         if env['ENABLE_SONAME']:
