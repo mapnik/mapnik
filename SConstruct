@@ -615,7 +615,7 @@ def parse_config(context, config, checks='--libs --cflags'):
                 # and thus breaks knowledge below that gdal worked
                 # TODO - upgrade our scons logic to support Framework linking
                 if env['PLATFORM'] == 'Darwin':
-                    value = call(cmd,silent=True)
+                    value = call(cmd,silent=True).decode("utf-8")
                     if value and '-framework GDAL' in value:
                         env['LIBS'].append('gdal')
                         if os.path.exists('/Library/Frameworks/GDAL.framework/unix/lib'):
