@@ -52,7 +52,10 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+
+#if __cplusplus >= 201703L
 #include <execution>
+#endif
 
 namespace mapnik
 {
