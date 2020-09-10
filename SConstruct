@@ -56,8 +56,8 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX14_CXXFLAGS = " -std=c++14 -DU_USING_ICU_NAMESPACE=0"
-DEFAULT_CXX14_LINKFLAGS = ""
+DEFAULT_CXX17_CXXFLAGS = " -std=c++17 -DU_USING_ICU_NAMESPACE=0"
+DEFAULT_CXX17_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
     ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
@@ -1227,14 +1227,14 @@ int main()
     context.Result(ret)
     return ret
 
-def supports_cxx14(context,silent=False):
+def supports_cxx17(context,silent=False):
     if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
+        context.Message('Checking if compiler (%s) supports -std=c++17 flag... ' % context.env.get('CXX','CXX'))
     ret, out = context.TryRun("""
 
 int main()
 {
-#if __cplusplus >= 201402L
+#if __cplusplus >= 201703L
     return 0;
 #else
     return -1;
@@ -1270,7 +1270,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
-               'supports_cxx14'        : supports_cxx14,
+               'supports_cxx17'        : supports_cxx17,
                'CheckBoostScopedEnum'  : CheckBoostScopedEnum,
                }
 
@@ -1414,13 +1414,13 @@ if not preconfigured:
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
-        DEFAULT_CXX14_CXXFLAGS += ' -stdlib=libc++'
-        DEFAULT_CXX14_LINKFLAGS = ' -stdlib=libc++'
+        DEFAULT_CXX17_CXXFLAGS += ' -stdlib=libc++'
+        DEFAULT_CXX17_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
-    env.Append(CXXFLAGS = DEFAULT_CXX14_CXXFLAGS)
+    env.Append(CXXFLAGS = DEFAULT_CXX17_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
-    env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
+    env.Append(LINKFLAGS = DEFAULT_CXX17_LINKFLAGS)
 
     custom_ldflags = env.ParseFlags(env['CUSTOM_LDFLAGS'])
     env.Append(LINKFLAGS = custom_ldflags.pop('LINKFLAGS'),
@@ -1600,9 +1600,9 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
 
-    # test for C++14 support, which is required
-    if not env['HOST'] and not conf.supports_cxx14():
-        color_print(1,"C++ compiler does not support C++14 standard (-std=c++14), which is required. Please upgrade your compiler")
+    # test for C++17 support, which is required
+    if not env['HOST'] and not conf.supports_cxx17():
+        color_print(1,"C++ compiler does not support C++17 standard (-std=c++17), which is required. Please upgrade your compiler")
         Exit(1)
 
     if not env['HOST']:
