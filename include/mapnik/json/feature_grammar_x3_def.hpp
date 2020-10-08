@@ -272,7 +272,7 @@ auto const feature_part_def = feature_type
     |
     (lit("\"geometry\"") > lit(':') >  geometry_rule[assign_geometry])
     |
-    (lit("\"properties\"") > lit(':') > lit('{') > -properties > lit('}'))
+    (lit("\"properties\"") > lit(':') > ((lit('{') > -properties > lit('}')) | lit("null")))
     |
     (omit[geojson_string] > lit(':') > omit[value])
     ;
