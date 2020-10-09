@@ -67,6 +67,16 @@ std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::s
     return std::make_pair(ds,feature);
 }
 
+
+void iterate_over_features(mapnik::featureset_ptr features)
+{
+    auto feature = features->next();
+    while (feature != nullptr)
+    {
+        feature = features->next();
+    }
+}
+
 }
 
 TEST_CASE("geojson") {
@@ -673,12 +683,7 @@ TEST_CASE("geojson") {
                 auto fields = ds->get_descriptor().get_descriptors();
                 mapnik::query query(ds->envelope());
                 auto features = ds->features(query);
-                REQUIRE_THROWS(
-                    auto feature = features->next();
-                    while (feature != nullptr)
-                    {
-                        feature = features->next();
-                    });
+                REQUIRE_THROWS(iterate_over_features(features));
             }
 
             // cleanup

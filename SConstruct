@@ -56,8 +56,9 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX14_CXXFLAGS = " -std=c++14 -DU_USING_ICU_NAMESPACE=0"
-DEFAULT_CXX14_LINKFLAGS = ""
+DEFAULT_CXX_STD = "14"
+DEFAULT_CXX_CXXFLAGS = " -DU_USING_ICU_NAMESPACE=0"
+DEFAULT_CXX_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
     ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
@@ -355,6 +356,7 @@ opts = Variables()
 opts.AddVariables(
     # Compiler options
     ('CXX', 'The C++ compiler to use to compile mapnik', DEFAULT_CXX),
+    ('CXX_STD', 'The C++ compiler standard (string).', DEFAULT_CXX_STD),
     ('CC', 'The C compiler used for configure checks of C libs.', DEFAULT_CC),
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
     ('CUSTOM_DEFINES', 'Custom Compiler DEFINES, e.g. -DENABLE_THIS', ''),
@@ -487,6 +489,7 @@ opts.AddVariables(
 pickle_store = [# Scons internal variables
         'CC', # compiler user to check if c deps compile during configure
         'CXX', # C++ compiler to compile mapnik
+        'CXX_STD', # C++ standard e.g 17 (as in -std=c++17)
         'CFLAGS',
         'CPPDEFINES',
         'CPPFLAGS', # c preprocessor flags
@@ -1227,27 +1230,28 @@ int main()
     context.Result(ret)
     return ret
 
-def supports_cxx14(context,silent=False):
+__cplusplus = {'14':'201402L', '17':'201703L'}
+
+def supports_cxx_std (context, silent=False):
+    cplusplus_string = __cplusplus[env['CXX_STD']]
     if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
+        context.Message('Checking if compiler (%s) supports -std=c++%s flag... ' % (context.env.get('CXX','CXX'), env['CXX_STD']))
     ret, out = context.TryRun("""
 
 int main()
 {
-#if __cplusplus >= 201402L
+#if __cplusplus >= %s
     return 0;
 #else
     return -1;
 #endif
 }
 
-""", '.cpp')
+""" % cplusplus_string ,'.cpp')
     if silent:
         context.did_show_result=1
     context.Result(ret)
     return ret
-
-
 
 conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGConfig'        : CheckPKGConfig,
@@ -1270,7 +1274,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
-               'supports_cxx14'        : supports_cxx14,
+               'supports_cxx_std'      : supports_cxx_std,
                'CheckBoostScopedEnum'  : CheckBoostScopedEnum,
                }
 
@@ -1414,13 +1418,13 @@ if not preconfigured:
 
     # set any custom cxxflags and ldflags to come first
     if sys.platform == 'darwin' and not env['HOST']:
-        DEFAULT_CXX14_CXXFLAGS += ' -stdlib=libc++'
-        DEFAULT_CXX14_LINKFLAGS = ' -stdlib=libc++'
+        DEFAULT_CXX_CXXFLAGS += ' -stdlib=libc++'
+        DEFAULT_CXX_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
-    env.Append(CXXFLAGS = DEFAULT_CXX14_CXXFLAGS)
+    env.Append(CXXFLAGS = "-std=c++%s %s" % (env['CXX_STD'], DEFAULT_CXX_CXXFLAGS))
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
-    env.Append(LINKFLAGS = DEFAULT_CXX14_LINKFLAGS)
+    env.Append(LINKFLAGS = DEFAULT_CXX_LINKFLAGS)
 
     custom_ldflags = env.ParseFlags(env['CUSTOM_LDFLAGS'])
     env.Append(LINKFLAGS = custom_ldflags.pop('LINKFLAGS'),
@@ -1600,9 +1604,10 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
 
-    # test for C++14 support, which is required
-    if not env['HOST'] and not conf.supports_cxx14():
-        color_print(1,"C++ compiler does not support C++14 standard (-std=c++14), which is required. Please upgrade your compiler")
+    # test for CXX_STD support, which is required
+    if not env['HOST'] and not conf.supports_cxx_std():
+        color_print(1,"C++ compiler does not support C++%s standard (-std=c++%s), which is required."
+                      " Please upgrade your compiler" % (env['CXX_STD'], env['CXX_STD']))
         Exit(1)
 
     if not env['HOST']:

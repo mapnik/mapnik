@@ -8,33 +8,22 @@
 
 #include "cleanup.hpp" // run_cleanup()
 
-std::string plugin_path;
 
-inline void set_plugin_path(Catch::ConfigData&, std::string const& _plugin_path ) {
-    plugin_path = _plugin_path;
-}
-
-std::string working_dir;
-
-inline void set_working_dir(Catch::ConfigData&, std::string const& _working_dir ) {
-    working_dir = _working_dir;
-}
-
-
-int main (int argc, char* const argv[])
+int main (int argc, char** argv)
 {
     Catch::Session session;
+    std::string plugin_path;
+    std::string working_dir;
+    auto cli = session.cli()
+        |
+        Catch::clara::Opt(plugin_path, "plugins")
+        ["-p"]["--plugins"] ("path to mapnik plugins")
+        |
+        Catch::clara::Opt(working_dir, "working directory")
+        ["-C"]["--working-directory"] ("change working directory")
+        ;
 
-    auto & cli = session.cli();
-
-    cli["-p"]["--plugins"]
-        .describe("path to mapnik plugins")
-        .bind(&set_plugin_path, "plugins");
-
-    cli["-C"]["--working-directory"]
-        .describe("change working directory")
-        .bind(&set_working_dir, "working directory");
-
+    session.cli(cli);
     int result = session.applyCommandLine(argc, argv);
 
     if (!plugin_path.empty())
