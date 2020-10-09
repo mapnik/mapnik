@@ -442,6 +442,54 @@ TEST_CASE("geojson") {
             }
         }
 
+        SECTION("GeoJSON ensure empty and null properties are handled")
+        {
+            mapnik::parameters params;
+            params["type"] = "geojson";
+
+            for (auto const& c_str : {"./test/data/json/feature-null-properties.json",
+                        "./test/data/json/feature-empty-properties.json"})
+            {
+                std::string filename(c_str);
+                params["file"] = filename;
+
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(filename + ".index"))
+                {
+                    mapnik::util::remove(filename + ".index");
+                }
+
+                for (auto create_index : { true, false })
+                {
+                    if (create_index)
+                    {
+                        CHECK(!mapnik::util::exists(filename + ".index"));
+                        int ret = create_disk_index(filename);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        CHECK(!mapnik::util::exists(filename + ".index"));
+                    }
+
+                    for (auto cache_features : {true, false})
+                    {
+                        params["cache_features"] = cache_features;
+                        auto ds = mapnik::datasource_cache::instance().create(params);
+                        REQUIRE(bool(ds));
+                        CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+                        auto fields = ds->get_descriptor().get_descriptors();
+                        CHECK(fields.size() == 0);
+                    }
+
+                    // cleanup
+                    if (create_index && mapnik::util::exists(filename + ".index"))
+                    {
+                        mapnik::util::remove(filename + ".index");
+                    }
+                }
+            }
+        }
+
         SECTION("GeoJSON FeatureCollection")
         {
             std::string filename("./test/data/json/featurecollection.json");
