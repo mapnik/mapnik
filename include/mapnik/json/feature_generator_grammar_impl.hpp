@@ -29,10 +29,10 @@ feature_generator_grammar<OutputIterator, FeatureType>::feature_generator_gramma
   : feature_generator_grammar::base_type(feature)
 {
     boost::spirit::karma::lit_type lit;
-    boost::spirit::karma::int_type int_;
+    boost::spirit::karma::long_long_type id;
 
     feature  = lit("{\"type\":\"Feature\"")
-        << lit(",\"id\":") << int_
+        << lit(",\"id\":") << id
         << lit(",\"geometry\":") << geometry
         << lit(",\"properties\":") << properties
         << lit('}')
