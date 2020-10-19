@@ -86,7 +86,7 @@ struct end_container<mapnik::kv_store const>
 
 BOOST_FUSION_ADAPT_ADT(
     mapnik::feature_impl,
-    (int, int, obj.id(), /**/)
+    (mapnik::value_integer, mapnik::value_integer, obj.id(), /**/)
     (mapnik::geometry::geometry<double>const&, mapnik::geometry::geometry<double> const&, obj.get_geometry(),/**/)
     (mapnik::kv_store const, mapnik::kv_store const, mapnik::kv_store(obj), /**/))
 
