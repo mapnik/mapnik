@@ -56,7 +56,7 @@ function install_mason_deps() {
     install sqlite 3.17.0 libsqlite3
     install expat 2.2.0 libexpat
     install icu ${ICU_VERSION}
-    install proj 6.0.1 libproj
+    install proj 6.1.0 libproj
     install pixman 0.34.0 libpixman-1
     install cairo 1.14.8 libcairo
     install webp 0.6.0 libwebp
