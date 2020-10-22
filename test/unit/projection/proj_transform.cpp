@@ -178,7 +178,7 @@ SECTION("Test proj antimeridian bbox")
     //        274000 7173000 # top-most
     //  END
     //
-    const mapnik::box2d<double> normal(148.7667597489, -60.1222810241,
+    const mapnik::box2d<double> normal(148.7639922894, -60.1222810241,
                                        159.9548489296, -24.9771195155);
 
     {
