@@ -117,8 +117,8 @@ mapnik::feature_ptr csv_index_featureset::next()
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        char const* start = (char const*)mapped_region_->get_address() + pos.off;
-        char const*  end = start + pos.size;
+        char const* start = static_cast<char const*>(mapped_region_->get_address()) + pos.off;
+        char const* end = start + pos.size;
 #else
         std::fseek(file_.get(), pos.off, SEEK_SET);
         std::vector<char> record;
