@@ -35,11 +35,12 @@
 // boost
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <mapnik/mapped_memory_cache.hpp>
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 #endif
 
 // ogr

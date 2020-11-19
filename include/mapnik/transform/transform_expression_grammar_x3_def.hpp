@@ -27,11 +27,12 @@
 #include <mapnik/transform/transform_expression_grammar_x3.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // skewX
 BOOST_FUSION_ADAPT_STRUCT(mapnik::skewX_node,

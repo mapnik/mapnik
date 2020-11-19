@@ -26,10 +26,11 @@
 #include <mapnik/util/conversions.hpp>
 #include "shape_utils.hpp"
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 void setup_attributes(mapnik::context_ptr const& ctx,
                       std::set<std::string> const& names,

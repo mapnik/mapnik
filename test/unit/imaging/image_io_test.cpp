@@ -12,12 +12,13 @@
 #include <mapnik/cairo/cairo_image_util.hpp>
 #endif
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/format.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/optional/optional_io.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 inline void make_directory(std::string const& dir) {
     boost::filesystem::create_directories(dir);

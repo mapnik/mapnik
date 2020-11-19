@@ -28,12 +28,13 @@
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/safe_cast.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_math.h"
 #include "agg_array.h"
 #include "agg_bezier_arc.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <cmath>

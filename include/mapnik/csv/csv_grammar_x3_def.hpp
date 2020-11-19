@@ -23,10 +23,11 @@
 #ifndef MAPNIK_CSV_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_CSV_GRAMMAR_X3_DEF_HPP
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <mapnik/csv/csv_grammar_x3.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 
 namespace mapnik { namespace grammar {

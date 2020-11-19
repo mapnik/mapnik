@@ -134,7 +134,8 @@ static auto const escaped_def = lit('\\') >
     ;
 static auto const double_quoted_def = lit('"') > no_skip[*(escaped[append] | (~char_('"'))[append])] > lit('"');
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 BOOST_SPIRIT_DEFINE(
@@ -145,7 +146,7 @@ BOOST_SPIRIT_DEFINE(
     utf16_string
     );
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 }}}
 

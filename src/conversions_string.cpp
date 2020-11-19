@@ -30,12 +30,13 @@
 // karma is used by default
 #define MAPNIK_KARMA_TO_STRING
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #ifdef MAPNIK_KARMA_TO_STRING
 #include <boost/spirit/include/karma.hpp>
 #endif
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #if _MSC_VER
 #define snprintf _snprintf

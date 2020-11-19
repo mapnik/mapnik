@@ -36,13 +36,14 @@
 #include <list>
 #include <type_traits>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
 #include <unicode/uvernum.h>
 #include <unicode/uscript.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik { namespace detail {
 

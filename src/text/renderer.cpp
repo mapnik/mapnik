@@ -32,7 +32,8 @@
 #include <mapnik/image_any.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -45,7 +46,7 @@
 #include "agg_span_image_filter_rgba.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik
 {
