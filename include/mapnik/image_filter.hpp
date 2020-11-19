@@ -28,16 +28,18 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/util/hsl.hpp>
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #if BOOST_VERSION >= 106900
 #include <boost/gil.hpp>
 #else
 #include <boost/gil/gil_all.hpp>
 #endif
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -46,7 +48,7 @@
 #include "agg_scanline_u.h"
 #include "agg_blur.h"
 #include "agg_gradient_lut.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <cmath>

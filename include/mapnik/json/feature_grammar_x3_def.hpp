@@ -283,7 +283,8 @@ auto const feature_rule_def = lit('{') > feature_part % lit(',') > lit('}');
 
 auto const geometry_rule_def =  (lit('{') > geometry_tuple[create_geometry] > lit('}')) | lit("null");
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 BOOST_SPIRIT_DEFINE(
@@ -298,7 +299,7 @@ BOOST_SPIRIT_DEFINE(
     geometry_rule,
     geometry_collection
     );
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 }}}
 

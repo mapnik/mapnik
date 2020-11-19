@@ -39,7 +39,8 @@
 #include <mapnik/extend_converter.hpp>
 #include <mapnik/adaptive_smooth.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_math_stroke.h"
 #include "agg_trans_affine.h"
@@ -49,7 +50,7 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <type_traits>

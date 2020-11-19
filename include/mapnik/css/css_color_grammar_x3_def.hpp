@@ -29,12 +29,13 @@
 #include <mapnik/util/hsl.hpp>
 #include <mapnik/safe_cast.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 BOOST_FUSION_ADAPT_STRUCT (
     mapnik::color,
@@ -429,7 +430,8 @@ auto const css_color_def =
     hsla_color
     ;
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
     css_color,
@@ -440,7 +442,7 @@ BOOST_SPIRIT_DEFINE(
     rgb_color_percent,
     rgba_color_percent
     );
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 } // ns
 } //ns mapnik

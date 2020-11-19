@@ -24,11 +24,12 @@
 #include <mapnik/text/font_feature_settings.hpp>
 #include <mapnik/config_error.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/version.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <algorithm>

@@ -27,11 +27,12 @@
 #include <mapnik/json/generic_json_grammar_x3.hpp>
 #include <mapnik/json/topojson_grammar_x3.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/adapted/struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::coordinate,

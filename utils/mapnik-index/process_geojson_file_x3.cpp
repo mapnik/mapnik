@@ -23,12 +23,13 @@
 #include "process_geojson_file_x3.hpp"
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/mapped_memory_cache.hpp>
 #else
 #include <mapnik/util/file_io.hpp>

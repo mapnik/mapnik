@@ -25,14 +25,15 @@
 
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/bimap.hpp>
 #include <boost/bimap/set_of.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 #include <boost/assign/list_of.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/boost_spirit_instantiate.hpp>
 
 namespace mapnik { namespace json {

@@ -28,10 +28,11 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/positions_x3.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <vector>
 

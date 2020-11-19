@@ -37,10 +37,11 @@
 #include <boost/format.hpp>
 #include <boost/optional/optional_io.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <iostream>
 
@@ -997,8 +998,9 @@ TEST_CASE("csv") {
             }
         } // END SECTION
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wlong-long"
+
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_LONG_LONG
         SECTION("64bit int fields work") {
             auto ds = get_csv_ds("test/data/csv/64bit_int.csv");
             auto fields = ds->get_descriptor().get_descriptors();
@@ -1016,7 +1018,7 @@ TEST_CASE("csv") {
             REQUIRE_ATTRIBUTES(feature, {
                     attr{"x", 0}, attr{"y", 0}, attr{"bigint", 0x7FFFFFFFFFFFFFFFll} });
         } // END SECTION
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
         SECTION("various number types") {
             auto ds = get_csv_ds("test/data/csv/number_types.csv");
