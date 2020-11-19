@@ -14,11 +14,12 @@
  * http://source.icu-project.org/repos/icu/icu/trunk/license.html
  */
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/utypes.h>
 #include <unicode/uscript.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <mapnik/text/scrptrun.hpp>
 

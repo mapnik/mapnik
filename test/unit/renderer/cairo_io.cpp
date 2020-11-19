@@ -3,10 +3,11 @@
 #include <mapnik/cairo_io.hpp>
 #include <mapnik/util/fs.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/filesystem/convenience.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <fstream>
 

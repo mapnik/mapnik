@@ -30,7 +30,8 @@
 
 #define USE_DENSE_HASH_MAP
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #ifdef USE_DENSE_HASH_MAP
 #include <mapnik/sparsehash/dense_hash_map>
@@ -39,7 +40,7 @@ using rgba_hash_table = google::dense_hash_map<unsigned int, unsigned char>;
 #include <unordered_map>
 using rgba_hash_table = std::unordered_map<unsigned int, unsigned char>;
 #endif
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <vector>
