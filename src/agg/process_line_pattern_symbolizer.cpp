@@ -39,7 +39,8 @@
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
@@ -54,7 +55,7 @@
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
 #include "agg_image_accessors.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 

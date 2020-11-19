@@ -32,6 +32,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include <mapnik/warning.hpp>
+
 namespace mapnik {
 
 class illegal_enum_value : public std::exception
@@ -188,12 +190,13 @@ public:
         }
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wpragmas" // gcc
-#pragma GCC diagnostic ignored "-Wundefined-var-template"
+
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
+MAPNIK_DISABLE_WARNING_PRAGMAS
+MAPNIK_DISABLE_LONG_LONG
             if (str_copy == our_strings_[i])
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
             {
                 value_ = static_cast<ENUM>(i);
                 if (deprecated)
@@ -203,24 +206,24 @@ public:
                 return;
             }
         }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wpragmas" // gcc
-#pragma GCC diagnostic ignored "-Wundefined-var-template"
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
+MAPNIK_DISABLE_WARNING_PRAGMAS
+MAPNIK_DISABLE_LONG_LONG
         throw illegal_enum_value(std::string("Illegal enumeration value '") +
                                  str + "' for enum " + our_name_);
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
     }
 
     /** Returns the current value as a string identifier. */
     std::string as_string() const
     {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wpragmas" // gcc
-#pragma GCC diagnostic ignored "-Wundefined-var-template"
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
+MAPNIK_DISABLE_WARNING_PRAGMAS
+MAPNIK_DISABLE_LONG_LONG
         return our_strings_[value_];
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
     }
 
     /** Static helper function to iterate over valid identifiers. */

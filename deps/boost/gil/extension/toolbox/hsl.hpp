@@ -14,7 +14,8 @@
 /// \author Christian Henning \n
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #if BOOST_VERSION >= 106900
 #include <boost/gil.hpp>
@@ -22,7 +23,7 @@
 #include <boost/gil/gil_all.hpp>
 #endif
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace boost { namespace gil {
 

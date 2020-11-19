@@ -27,7 +27,8 @@
 #include <mapnik/config.hpp>
 
 // undef B0 to workaround https://svn.boost.org/trac/boost/ticket/10467
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #undef B0
 #if BOOST_VERSION == 106400
@@ -37,7 +38,7 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/geometries/register/ring.hpp>
 #include <boost/geometry/geometries/register/linestring.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/coord.hpp>

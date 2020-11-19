@@ -27,13 +27,14 @@
 #include <mapnik/image.hpp>
 #include <mapnik/util/conversions.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 extern "C"
 {
 #include <webp/encode.h>
 }
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <algorithm>

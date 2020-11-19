@@ -28,7 +28,8 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
@@ -36,7 +37,7 @@
 #include "agg_color_rgba.h"
 #include "agg_color_gray.h"
 #include "agg_scanline_u.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 

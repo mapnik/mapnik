@@ -28,7 +28,7 @@
 #include <mapnik/value/types.hpp>
 #include <mapnik/value/hash.hpp>
 #include <mapnik/util/variant.hpp>
-
+#include <mapnik/warning.hpp>
 
 namespace mapnik {
 
@@ -138,9 +138,10 @@ struct is_null_visitor
 namespace std
 {
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wmismatched-tags"
+
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_PRAGMAS
+MAPNIK_DISABLE_MISMATCHED_TAGS
 
 template <>
 struct hash<mapnik::value>
@@ -151,7 +152,7 @@ struct hash<mapnik::value>
     }
 };
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 }
 

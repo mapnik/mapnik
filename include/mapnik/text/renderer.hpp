@@ -31,14 +31,16 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/color_font_renderer.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_pixfmt_rgba.h"
 #include <agg_trans_affine.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // freetype2
 extern "C"
@@ -48,7 +50,7 @@ extern "C"
 #include FT_STROKER_H
 }
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik
 {

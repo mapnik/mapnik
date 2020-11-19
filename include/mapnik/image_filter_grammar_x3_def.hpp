@@ -28,13 +28,14 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/css/css_color_grammar_x3.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp> // spirit support
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -220,7 +221,8 @@ auto const colorize_alpha_filter_def = lit("colorize-alpha")
 auto const color_to_alpha_filter_def = lit("color-to-alpha") > lit('(')
     > -css_color > lit(')');
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 BOOST_SPIRIT_DEFINE(
@@ -245,7 +247,7 @@ BOOST_SPIRIT_DEFINE(
     offset,
     color_to_alpha_filter
     );
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 } // image_filter
 } //ns mapnik

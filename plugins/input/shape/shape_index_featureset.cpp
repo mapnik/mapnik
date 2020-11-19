@@ -27,13 +27,14 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/feature_factory.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
 #include <boost/interprocess/streams/bufferstream.hpp>
 #endif
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include "shape_index_featureset.hpp"
 #include "shape_utils.hpp"
