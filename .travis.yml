@@ -30,7 +30,7 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
+          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: linux
       name: Linux clang-3.9
       env: >-
@@ -43,7 +43,7 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'clang-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
+          packages: [ 'clang-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: linux
       name: Linux clang-3.9 + coverage
       env: >-
@@ -58,7 +58,7 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'clang-3.9', 'llvm-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
+          packages: [ 'clang-3.9', 'llvm-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: osx
       name: OSX clang
       osx_image: xcode11
