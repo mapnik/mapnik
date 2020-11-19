@@ -2,7 +2,7 @@
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001 - 2017 The SCons Foundation
+# Copyright (c) 2001 - 2020 The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,163 +23,58 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from __future__ import print_function
+__revision__ = "scripts/scons.py c289977f8b34786ab6c334311e232886da7e8df1 2020-07-17 01:50:03 bdbaddog"
 
-__revision__ = "src/script/scons.py 74b2c53bc42290e911b334a6b44f187da698a668 2017/11/14 13:16:53 bdbaddog"
+__version__ = "4.0.1"
 
-__version__ = "3.0.1"
+__build__ = "c289977f8b34786ab6c334311e232886da7e8df1"
 
-__build__ = "74b2c53bc42290e911b334a6b44f187da698a668"
+__buildsys__ = "ProDog2020"
 
-__buildsys__ = "hpmicrodog"
-
-__date__ = "2017/11/14 13:16:53"
+__date__ = "2020-07-17 01:50:03"
 
 __developer__ = "bdbaddog"
+
 
 import os
 import sys
 
 
-##############################################################################
-# BEGIN STANDARD SCons SCRIPT HEADER
-#
-# This is the cut-and-paste logic so that a self-contained script can
-# interoperate correctly with different SCons versions and installation
-# locations for the engine.  If you modify anything in this section, you
-# should also change other scripts that use this same header.
-##############################################################################
-
-# Strip the script directory from sys.path() so on case-insensitive
-# (WIN32) systems Python doesn't think that the "scons" script is the
-# "SCons" package.  Replace it with our own library directories
-# (version-specific first, in case they installed by hand there,
-# followed by generic) so we pick up the right version of the build
-# engine modules if they're in either directory.
-
-
-if (3,0,0) < sys.version_info < (3,5,0) or sys.version_info < (2,7,0):
+# Python compatibility check
+if sys.version_info < (3, 5, 0):
     msg = "scons: *** SCons version %s does not run under Python version %s.\n\
-Python < 3.5 is not yet supported.\n"
+Python >= 3.5 is required.\n"
     sys.stderr.write(msg % (__version__, sys.version.split()[0]))
     sys.exit(1)
 
-
+# Strip the script directory from sys.path so on case-insensitive
+# (WIN32) systems Python doesn't think that the "scons" script is the
+# "SCons" package.
 script_dir = os.path.dirname(os.path.realpath(__file__))
-
-if script_dir in sys.path:
-    sys.path.remove(script_dir)
+script_path = os.path.realpath(os.path.dirname(__file__))
+if script_path in sys.path:
+    sys.path.remove(script_path)
 
 libs = []
 
 if "SCONS_LIB_DIR" in os.environ:
     libs.append(os.environ["SCONS_LIB_DIR"])
 
-# - running from source takes priority (since 2.3.2), excluding SCONS_LIB_DIR settings
-script_path = os.path.abspath(os.path.dirname(__file__))
-source_path = os.path.join(script_path, '..', 'engine')
-libs.append(source_path)
+# running from source takes 2nd priority (since 2.3.2), following SCONS_LIB_DIR
+source_path = os.path.join(script_path, os.pardir)
+if os.path.isdir(source_path):
+    libs.append(source_path)
 
+# add local-install locations
 local_version = 'scons-local-' + __version__
 local = 'scons-local'
 if script_dir:
     local_version = os.path.join(script_dir, local_version)
     local = os.path.join(script_dir, local)
-libs.append(os.path.abspath(local_version))
-libs.append(os.path.abspath(local))
-
-scons_version = 'scons-%s' % __version__
-
-# preferred order of scons lookup paths
-prefs = []
-
-
-# - running from egg check
-try:
-    import pkg_resources
-except ImportError:
-    pass
-else:
-    # when running from an egg add the egg's directory
-    try:
-        d = pkg_resources.get_distribution('scons')
-    except pkg_resources.DistributionNotFound:
-        pass
-    else:
-        prefs.append(d.location)
-
-if sys.platform == 'win32':
-    # sys.prefix is (likely) C:\Python*;
-    # check only C:\Python*.
-    prefs.append(sys.prefix)
-    prefs.append(os.path.join(sys.prefix, 'Lib', 'site-packages'))
-else:
-    # On other (POSIX) platforms, things are more complicated due to
-    # the variety of path names and library locations.  Try to be smart
-    # about it.
-    if script_dir == 'bin':
-        # script_dir is `pwd`/bin;
-        # check `pwd`/lib/scons*.
-        prefs.append(os.getcwd())
-    else:
-        if script_dir == '.' or script_dir == '':
-            script_dir = os.getcwd()
-        head, tail = os.path.split(script_dir)
-        if tail == "bin":
-            # script_dir is /foo/bin;
-            # check /foo/lib/scons*.
-            prefs.append(head)
-
-    head, tail = os.path.split(sys.prefix)
-    if tail == "usr":
-        # sys.prefix is /foo/usr;
-        # check /foo/usr/lib/scons* first,
-        # then /foo/usr/local/lib/scons*.
-        prefs.append(sys.prefix)
-        prefs.append(os.path.join(sys.prefix, "local"))
-    elif tail == "local":
-        h, t = os.path.split(head)
-        if t == "usr":
-            # sys.prefix is /foo/usr/local;
-            # check /foo/usr/local/lib/scons* first,
-            # then /foo/usr/lib/scons*.
-            prefs.append(sys.prefix)
-            prefs.append(head)
-        else:
-            # sys.prefix is /foo/local;
-            # check only /foo/local/lib/scons*.
-            prefs.append(sys.prefix)
-    else:
-        # sys.prefix is /foo (ends in neither /usr or /local);
-        # check only /foo/lib/scons*.
-        prefs.append(sys.prefix)
-
-    temp = [os.path.join(x, 'lib') for x in prefs]
-    temp.extend([os.path.join(x,
-                                           'lib',
-                                           'python' + sys.version[:3],
-                                           'site-packages') for x in prefs])
-    prefs = temp
-
-    # Add the parent directory of the current python's library to the
-    # preferences.  On SuSE-91/AMD64, for example, this is /usr/lib64,
-    # not /usr/lib.
-    try:
-        libpath = os.__file__
-    except AttributeError:
-        pass
-    else:
-        # Split /usr/libfoo/python*/os.py to /usr/libfoo/python*.
-        libpath, tail = os.path.split(libpath)
-        # Split /usr/libfoo/python* to /usr/libfoo
-        libpath, tail = os.path.split(libpath)
-        # Check /usr/libfoo/scons*.
-        prefs.append(libpath)
-
-# Look first for 'scons-__version__' in all of our preference libs,
-# then for 'scons'.
-libs.extend([os.path.join(x, scons_version) for x in prefs])
-libs.extend([os.path.join(x, 'scons') for x in prefs])
+if os.path.isdir(local_version):
+    libs.append(os.path.abspath(local_version))
+if os.path.isdir(local):
+    libs.append(os.path.abspath(local))
 
 sys.path = libs + sys.path
 
@@ -191,9 +86,9 @@ if __name__ == "__main__":
     try:
         import SCons.Script
     except ImportError:
-        print("SCons import failed. Unable to find engine files in:")
+        sys.stderr.write("SCons import failed. Unable to find engine files in:\n")
         for path in libs:
-            print("  {}".format(path))
+            sys.stderr.write("  {}\n".format(path))
         raise
 
     # this does all the work, and calls sys.exit

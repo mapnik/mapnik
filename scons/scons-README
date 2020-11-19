@@ -1,4 +1,4 @@
-# Copyright (c) 2001 - 2017 The SCons Foundation
+# Copyright (c) 2001 - 2020 The SCons Foundation
 
                  SCons - a software construction tool
 
@@ -38,19 +38,20 @@ LATEST VERSION
 Before going further, you can check for the latest version of the
 scons-local package, or any SCons package, at the SCons download page:
 
-        http://www.scons.org/download.html
+        https://scons.org/pages/download.html
 
 
 EXECUTION REQUIREMENTS
 ======================
 
-Running SCons requires Python version 2.4 or later.  There should be
-no other dependencies or requirements to run SCons.
+Running SCons requires Python 3.5 or higher.
+There should be no other dependencies or requirements to run SCons.
 
 The default SCons configuration assumes use of the Microsoft Visual C++
-compiler suite on WIN32 systems, and assumes a C compiler named 'cc',
-a C++ compiler named 'c++', and a Fortran compiler named 'g77' (such
-as found in the GNU C compiler suite) on any other type of system.
+compiler suite on WIN32 systems (either through the Visual Studio
+product, or through the separate Build Tools), and assumes a C compiler
+named 'cc', a C++ compiler named 'c++', and a Fortran compiler named 'g77'
+(such as found in the GNU Compiler Collection) on any other type of system.
 You may, of course, override these default values by appropriate
 configuration of Environment construction variables.
 
@@ -157,14 +158,23 @@ available at:
 REPORTING BUGS
 ==============
 
-You can report bugs either by following the "Tracker - Bugs" link
-on the SCons project page:
+The SCons project welcomes bug reports and feature requests.
 
-        http://sourceforge.net/projects/scons/
+Please make sure you send email with the problem or feature request to
+the SCons users mailing list, which you can join via the link below:
 
-or by sending mail to the SCons developers mailing list:
+        http://two.pairlist.net/mailman/listinfo/scons-users
 
-        scons-devel@lists.sourceforge.net
+Once you have discussed your issue on the users mailing list and the
+community has confirmed that it is either a new bug or a duplicate of an
+existing bug, then please follow the instructions the community provides
+to file a new bug or to add yourself to the CC list for an existing bug
+
+You can explore the list of existing bugs, which may include workarounds
+for the problem you've run into, on GitHub:
+
+        https://github.com/SCons/scons/issues
+
 
 
 MAILING LISTS
@@ -173,11 +183,29 @@ MAILING LISTS
 A mailing list for users of SCons is available.  You may send questions
 or comments to the list at:
 
-        scons-users@lists.sourceforge.net
+        scons-users@scons.org
 
 You may subscribe to the scons-users mailing list at:
 
-        http://lists.sourceforge.net/lists/listinfo/scons-users
+        http://two.pairlist.net/mailman/listinfo/scons-users
+
+An active mailing list for developers of SCons is available.  You may
+send questions or comments to the list at:
+
+        scons-dev@scons.org
+
+You may subscribe to the developer's mailing list using form on this page:
+
+        http://two.pairlist.net/mailman/listinfo/scons-dev
+
+Subscription to the developer's mailing list is by approval.  In practice, no
+one is refused list membership, but we reserve the right to limit membership
+in the future and/or weed out lurkers.
+
+There are other mailing lists available for SCons users, for notification of
+SCons code changes, and for notification of updated bug reports and project
+documents.  Please see our mailing lists page for details.
+
 
 
 FOR MORE INFORMATION
@@ -188,18 +216,29 @@ Check the SCons web site at:
         http://www.scons.org/
 
 
-AUTHOR INFO
+Author Info
 ===========
 
-Steven Knight
-knight at baldmt dot com
-http://www.baldmt.com/~knight/
+SCons was originally written by Steven Knight, knight at baldmt dot com.
+Since around 2010 it has been maintained by the SCons
+development team, co-managed by Bill Deegan and Gary Oberbrunner, with
+many contributors, including but not at all limited to:
 
-With plenty of help from the SCons Development team:
-        Chad Austin
-        Charles Crain
-        Steve Leblanc
-        Anthony Roach
-        Terrel Shumway
+- Chad Austin
+- Dirk Baechle
+- Charles Crain
+- William Deegan
+- Steve Leblanc
+- Rob Managan
+- Greg Noel
+- Gary Oberbrunner
+- Anthony Roach
+- Greg Spencer
+- Tom Tanner
+- Anatoly Techtonik
+- Christoph Wiedemann
+- Mats Wichmann
+- Russel Winder
+- Mats Wichmann
 
-
+\... and many others.
