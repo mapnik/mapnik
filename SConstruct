@@ -25,7 +25,6 @@ import platform
 from glob import glob
 from copy import copy
 from subprocess import Popen, PIPE
-from SCons.SConf import SetCacheMode
 import pickle
 
 try:
@@ -142,7 +141,6 @@ PLUGINS = { # plugins with external dependencies
 
 def init_environment(env):
     env.Decider('MD5-timestamp')
-    env.SourceCode(".", None)
     env['ORIGIN'] = Literal('$ORIGIN')
     env['ENV']['ORIGIN'] = '$ORIGIN'
     if os.environ.get('RANLIB'):
@@ -380,7 +378,6 @@ opts.AddVariables(
     BoolVariable('ENABLE_GLIBC_WORKAROUND', "Workaround known GLIBC symbol exports to allow building against libstdc++-4.8 without binaries needing throw_out_of_range_fmt", 'False'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
-    BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
     BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferential compiling and linking (useful when duplicate libs)', 'True'),
     ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),
 
@@ -1291,12 +1288,7 @@ def GetMapnikLibVersion():
     return version_string
 
 if not preconfigured:
-
     color_print(4,'Configuring build environment...')
-
-    if not env['FAST']:
-        SetCacheMode('force')
-
     if env['USE_CONFIG']:
         if not env['CONFIG'].endswith('.py'):
             color_print(1,'SCons CONFIG file specified is not a python file, will not be read...')
@@ -2171,13 +2163,6 @@ if not HELP_REQUESTED:
         plugin_base.Append(CXXFLAGS='--coverage')
 
     Export('plugin_base')
-
-    if env['FAST']:
-        # caching is 'auto' by default in SCons
-        # But let's also cache implicit deps...
-        EnsureSConsVersion(0,98)
-        SetOption('implicit_cache', 1)
-        SetOption('max_drift', 1)
 
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared':
