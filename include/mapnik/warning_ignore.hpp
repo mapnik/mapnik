@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#include "warning.h"
+#include <mapnik/warning.hpp>
 
 MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS // clang+gcc         
 MAPNIK_DISABLE_WARNING_PRAGMAS // gcc              
