@@ -6,7 +6,9 @@ project(mapnik
     LANGUAGES CXX 
 )
 
-option(BUILD_SHARED_LIBS ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+set(BUILD_SHARED_LIBS ON)
 option(USE_EXTERNAL_MAPBOX_GEOMETRY OFF)
 option(USE_EXTERNAL_MAPBOX_POLYLABEL OFF)
 option(USE_EXTERNAL_MAPBOX_PROTOZERO OFF)
@@ -16,6 +18,13 @@ set(CXX_STANDARD 17)
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex program_options)
 find_package(ICU REQUIRED COMPONENTS uc)
+find_package(Freetype REQUIRED)
+find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(TIFF REQUIRED)
+find_package(WebP CONFIG REQUIRED)
+find_package(LibXml2 REQUIRED)
+find_package(Cairo)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
     find_path(MAPBOX_GEOMETRY_INCLUDE_DIRS "mapbox/geometry.hpp")
@@ -53,6 +62,41 @@ if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
     message(FATAL_ERROR "Set MAPBOX_VARIANT_INCLUDE_DIRS to the mapbox/variant include dir") 
 endif()
 
+set(MAPNIK_COMPILE_DEFS "")
+set(MAPNIK_OPTIONAL_LIBS "")
+
+if(LibXml2_FOUND)
+    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_LIBXML2)
+    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} LibXml2::LibXml2)
+    message(STATUS "Using LibXml2")
+endif()
+
+if(PNG_FOUND)
+    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_PNG)
+    message(STATUS "Using PNG")
+endif()
+
+if(JPEG_FOUND)
+    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_JPEG)
+    message(STATUS "Using JPEG")
+endif()
+
+if(TIFF_FOUND)
+    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_TIFF)
+    message(STATUS "Using TIFF")
+endif()
+
+if(WebP_FOUND)
+    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_WEBP)
+    message(STATUS "Using WEBP")
+endif()
+
+if(Cairo_FOUND)
+    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_CAIRO)
+    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} Cairo::Cairo)
+    message(STATUS "Using Cairo")
+endif()
+
 add_library(mapnik-headers INTERFACE)
 add_library(mapnik::headers ALIAS mapnik-headers)
 
@@ -67,7 +111,14 @@ target_include_directories(mapnik-headers INTERFACE
 )
 target_link_libraries(mapnik-headers INTERFACE 
     Boost::boost
+    Boost::regex
+    Boost::filesystem
     ICU::uc
+    Freetype::Freetype
+    PNG::PNG
+    TIFF::TIFF
+    JPEG::JPEG
+    ${MAPNIK_OPTIONAL_LIBS}
 )
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(mapnik-headers INTERFACE MAPNIK_EXPORTS)
@@ -81,7 +132,9 @@ install(TARGETS mapnik-headers
     INCLUDES DESTINATION include/
     PUBLIC_HEADER DESTINATION include/
 )
+
 add_subdirectory(deps)
 add_subdirectory(src)
+add_subdirectory(utils)
 #add_subdirectory(utils)
 #add_subdirectory(plugins)
