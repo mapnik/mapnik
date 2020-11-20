@@ -23,6 +23,7 @@
 #ifndef MAPNIK_JSON_GEOJSON_GRAMMAR_X3_HPP
 #define MAPNIK_JSON_GEOJSON_GRAMMAR_X3_HPP
 
+#include <mapnik/config.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
@@ -54,7 +55,7 @@ using geojson_value_base = mapnik::util::variant<value_null,
                                               geojson_object>;
 struct geojson_value : geojson_value_base
 {
-#if __cpp_inheriting_constructors >= 200802
+#if MAPNIK_USE_INHERITING_CONSTRUCTORS
 
     using geojson_value_base::geojson_value_base;
 

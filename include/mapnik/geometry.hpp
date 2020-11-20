@@ -24,6 +24,7 @@
 #define MAPNIK_GEOMETRY_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/geometry/point.hpp>
 #include <mapnik/geometry/line_string.hpp>
 #include <mapnik/geometry/polygon.hpp>
@@ -59,7 +60,7 @@ struct geometry : geometry_base<T>
 {
     using coordinate_type = T;
 
-#if __cpp_inheriting_constructors >= 200802
+#if MAPNIK_USE_INHERITING_CONSTRUCTORS
 
     using geometry_base<T>::geometry_base;
 
