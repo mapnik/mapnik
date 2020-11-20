@@ -1,7 +1,8 @@
 #ifndef TEST_MEMORY_CLEANUP
 #define TEST_MEMORY_CLEANUP
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 #if defined(HAVE_LIBXML2)
@@ -19,7 +20,7 @@
 #include <proj_api.h>
 #endif
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace testing {
 

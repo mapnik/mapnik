@@ -33,14 +33,15 @@
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/geometry/geometry_type.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <string>

@@ -25,10 +25,11 @@
 // boost
 #include <memory>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <sqlite3.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 //stl
 #ifdef MAPNIK_DEBUG

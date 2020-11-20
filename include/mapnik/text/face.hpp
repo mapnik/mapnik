@@ -27,7 +27,8 @@
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 extern "C"
@@ -37,7 +38,7 @@ extern "C"
 #include FT_STROKER_H
 }
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 //stl
 #include <memory>
