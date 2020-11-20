@@ -31,11 +31,12 @@
 #include "shapefile.hpp"
 #include "shape_io.hpp"
 #include "shape_index_featureset.hpp"
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;

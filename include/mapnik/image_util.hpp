@@ -28,11 +28,12 @@
 #include <mapnik/pixel_types.hpp>
 #include <mapnik/image_compositing.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <string>

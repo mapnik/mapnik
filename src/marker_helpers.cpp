@@ -25,11 +25,12 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/label_collision_detector.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_ellipse.h"
 #include "agg_color_rgba.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 

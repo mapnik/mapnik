@@ -19,14 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#include "warning.hpp"
 
-
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wpragmas" // gcc
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wpadded"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wshadow"
+MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS // clang+gcc
+MAPNIK_DISABLE_WARNING_PRAGMAS // gcc
+MAPNIK_DISABLE_WARNING_SIGN_CONVERSION
+MAPNIK_DISABLE_WARNING_SIGN_COMPARE
+MAPNIK_DISABLE_WARNING_CONVERSION
+MAPNIK_DISABLE_WARNING_PADDED
+MAPNIK_DISABLE_WARNING_OLD_STYLE_CAST
+MAPNIK_DISABLE_WARNING_SHADOW
 

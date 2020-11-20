@@ -29,13 +29,14 @@
 #include <mapnik/function_call.hpp>
 #include <mapnik/unicode.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::unary_function_call,
                           (mapnik::unary_function_impl, fun)

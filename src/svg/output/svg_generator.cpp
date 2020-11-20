@@ -27,10 +27,11 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/svg/output/svg_output_grammars.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik { namespace svg {
 

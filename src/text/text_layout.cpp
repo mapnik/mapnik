@@ -30,10 +30,11 @@
 #include <mapnik/util/math.hpp>
 #include <mapnik/make_unique.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/brkiter.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <algorithm>
 #include <memory>

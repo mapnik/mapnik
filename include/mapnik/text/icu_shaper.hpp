@@ -36,12 +36,13 @@
 // stl
 #include <list>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
 #include <unicode/ushape.h>
 #include <unicode/schriter.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik
 {

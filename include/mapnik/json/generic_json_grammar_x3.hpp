@@ -24,10 +24,11 @@
 #define MAPNIK_JSON_GENERIC_JSON_GRAMMAR_X3_HPP
 
 #include <mapnik/json/json_value.hpp>
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <vector>
 
