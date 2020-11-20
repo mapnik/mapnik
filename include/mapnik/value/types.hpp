@@ -29,10 +29,11 @@
 #include <mapnik/pixel_types.hpp>
 
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/uversion.h> // for U_NAMESPACE_QUALIFIER
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <iosfwd>

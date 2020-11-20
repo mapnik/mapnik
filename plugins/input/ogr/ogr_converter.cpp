@@ -25,12 +25,13 @@
 #include <mapnik/geometry.hpp>
 
 // ogr
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include "ogr_converter.hpp"
 #include <ogr_core.h>
 #include <ogr_geometry.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 mapnik::geometry::geometry<double> ogr_converter::convert_geometry(OGRGeometry* ogr_geom)
 {

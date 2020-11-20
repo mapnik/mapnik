@@ -38,10 +38,11 @@
 #include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/geometry/envelope.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // sqlite
 extern "C" {

@@ -18,12 +18,13 @@
 #define __SCRPTRUN_H
 
 #include <mapnik/config.hpp>
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/utypes.h>
 #include <unicode/uobject.h>
 #include <unicode/uscript.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 
 struct ScriptRecord

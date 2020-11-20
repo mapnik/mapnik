@@ -27,10 +27,11 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/math.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 namespace svg {

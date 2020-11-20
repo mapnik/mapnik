@@ -33,7 +33,8 @@
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 #include <mapnik/renderer_common/clipping_extent.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -42,7 +43,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 

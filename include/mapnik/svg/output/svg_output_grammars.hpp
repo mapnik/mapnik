@@ -36,11 +36,12 @@ namespace mapnik { namespace svg {
     struct root_output_attributes;
 }}
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma_nonterminal.hpp>
 #include <boost/spirit/include/karma_rule.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik { namespace svg {
 

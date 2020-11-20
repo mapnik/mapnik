@@ -32,7 +32,8 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/safe_cast.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_image_filters.h"
 #include "agg_trans_bilinear.h"
@@ -47,7 +48,7 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_renderer_scanline.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 

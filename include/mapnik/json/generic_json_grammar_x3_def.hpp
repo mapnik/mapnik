@@ -103,7 +103,8 @@ auto const number_def = json_double[assign]
     | lit("null")[make_null]
     ;
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 BOOST_SPIRIT_DEFINE(
@@ -114,7 +115,7 @@ BOOST_SPIRIT_DEFINE(
     number
     );
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 }}}
 

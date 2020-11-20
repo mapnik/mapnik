@@ -24,11 +24,12 @@
 #include "shape_featureset.hpp"
 #include "shape_index_featureset.hpp"
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // mapnik
 #include <mapnik/debug.hpp>
