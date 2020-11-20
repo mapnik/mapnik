@@ -11,7 +11,7 @@ endif
 all: mapnik
 
 install:
-	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
+	$(PYTHON) scons/scons.py -j$(JOBS) --config=auto --implicit-cache --max-drift=1 install
 
 release:
 	./scripts/publish_release.sh
@@ -22,7 +22,7 @@ test-release:
 src/json/libmapnik-json.a:
 	# we first build memory intensive files with -j$(HEAVY_JOBS)
 	$(PYTHON) scons/scons.py -j$(HEAVY_JOBS) \
-		--config=cache --implicit-cache --max-drift=1 \
+		--config=auto --implicit-cache --max-drift=1 \
 		src/renderer_common/render_group_symbolizer.os \
 		src/renderer_common/render_markers_symbolizer.os \
 		src/renderer_common/render_thunk_extractor.os \
@@ -45,10 +45,10 @@ src/json/libmapnik-json.a:
 
 mapnik: src/json/libmapnik-json.a
 	# then install the rest with -j$(JOBS)
-	$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
+	$(PYTHON) scons/scons.py -j$(JOBS) --config=auto --implicit-cache --max-drift=1
 
 clean:
-	@$(PYTHON) scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
+	@$(PYTHON) scons/scons.py -j$(JOBS) -c --config=auto --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	@if test -e "config.log"; then rm "config.log"; fi
 	@if test -e "config.cache"; then rm "config.cache"; fi
@@ -71,7 +71,7 @@ rebuild:
 	make uninstall && make clean && time make && make install
 
 uninstall:
-	@$(PYTHON) scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
+	@$(PYTHON) scons/scons.py -j$(JOBS) --config=auto --implicit-cache --max-drift=1 uninstall
 
 test/data-visual:
 	./scripts/ensure_test_data.sh
