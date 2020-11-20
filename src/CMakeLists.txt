@@ -49,7 +49,6 @@ set(MAPNIK_SOURCES
     image.cpp
     jpeg_reader.cpp
     layer.cpp
-    libxml2_loader.cpp
     load_map.cpp
     map.cpp
     mapped_memory_cache.cpp
@@ -66,7 +65,6 @@ set(MAPNIK_SOURCES
     png_reader.cpp
     proj_transform.cpp
     projection.cpp
-    rapidxml_loader.cpp
     raster_colorizer.cpp
     renderer_common.cpp
     request.cpp
@@ -137,23 +135,24 @@ set(AGG_SRC
     ${AGG_COMPILE_SRC}
 )
 
-
-set(CAIRO_SRC
-    cairo/cairo_context.cpp
-    cairo/cairo_render_vector.cpp
-    cairo/cairo_renderer.cpp
-    cairo/process_building_symbolizer.cpp
-    cairo/process_debug_symbolizer.cpp
-    cairo/process_group_symbolizer.cpp
-    cairo/process_line_pattern_symbolizer.cpp
-    cairo/process_line_symbolizer.cpp
-    cairo/process_markers_symbolizer.cpp
-    cairo/process_point_symbolizer.cpp
-    cairo/process_polygon_pattern_symbolizer.cpp
-    cairo/process_polygon_symbolizer.cpp
-    cairo/process_raster_symbolizer.cpp
-    cairo/process_text_symbolizer.cpp
-)
+if(Cairo_FOUND)
+    set(CAIRO_SRC
+        cairo/cairo_context.cpp
+        cairo/cairo_render_vector.cpp
+        cairo/cairo_renderer.cpp
+        cairo/process_building_symbolizer.cpp
+        cairo/process_debug_symbolizer.cpp
+        cairo/process_group_symbolizer.cpp
+        cairo/process_line_pattern_symbolizer.cpp
+        cairo/process_line_symbolizer.cpp
+        cairo/process_markers_symbolizer.cpp
+        cairo/process_point_symbolizer.cpp
+        cairo/process_polygon_pattern_symbolizer.cpp
+        cairo/process_polygon_symbolizer.cpp
+        cairo/process_raster_symbolizer.cpp
+        cairo/process_text_symbolizer.cpp
+    )
+endif()
 
 set(CSS_SRC     
     css/css_color_grammar_x3.cpp
@@ -250,6 +249,14 @@ set(UTIL_SRC
     util/utf_conv_win.cpp
 )
 
+if(LibXml2_FOUND)
+    set(COMPILE_SRC ${COMPILE_SRC} libxml2_loader.cpp)
+else()
+    set(COMPILE_SRC ${COMPILE_SRC} rapidxml_loader.cpp)
+endif()
+
+
+
 set(COMPILE_SRC
     ${MAPNIK_SOURCES}
     ${AGG_SRC}
@@ -264,11 +271,11 @@ set(COMPILE_SRC
     ${UTIL_SRC}
 )
 
-add_library(mapnik 
-    ${COMPILE_SRC}
-)
+add_library(mapnik ${COMPILE_SRC})
+add_library(mapnik::mapnik ALIAS mapnik)
 
-target_compile_definitions(mapnik PRIVATE MAPNIK_EXPORTS)
+
+target_compile_definitions(mapnik PRIVATE ${MAPNIK_EXPORTS} ${MAPNIK_COMPILE_DEFS})
 target_link_libraries(mapnik PRIVATE 
     mapnik::headers
     mapnik::agg
