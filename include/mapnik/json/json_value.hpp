@@ -46,7 +46,7 @@ using json_value_base = mapnik::util::variant<value_null,
                                               json_object>;
 struct json_value : json_value_base
 {
-#if __cpp_inheriting_constructors >= 200802
+#if __cpp_inheriting_constructors >= 200802  && !defined (_MSC_VER)
 
     using json_value_base::json_value_base;
 
