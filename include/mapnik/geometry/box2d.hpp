@@ -33,6 +33,9 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/operators.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
+// stl
+#include <string>
+
 // agg
 // forward declare so that apps using mapnik do not need agg headers
 namespace agg {
