@@ -24,7 +24,6 @@
 #define MAPNIK_JSON_JSON_VALUE_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/variant.hpp>
 // stl
@@ -47,7 +46,7 @@ using json_value_base = mapnik::util::variant<value_null,
                                               json_object>;
 struct json_value : json_value_base
 {
-#if MAPNIK_USE_INHERITING_CONSTRUCTORS
+#if __cpp_inheriting_constructors >= 200802
 
     using json_value_base::json_value_base;
 
