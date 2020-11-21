@@ -20,6 +20,18 @@ option(USE_WEBP "Adds webp support" ON)
 option(USE_LIBXML2 "Adds libxml2 support" ON)
 option(USE_CAIRO "Adds the cairo renderer" ON)
 
+option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
+option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
+option(USE_PLUGIN_INPUT_GEOBUF "adds plugin input geobuf" ON)
+option(USE_PLUGIN_INPUT_GEOJSON "adds plugin input geojson" ON)
+option(USE_PLUGIN_INPUT_OGR "adds plugin input ogr" ON)
+option(USE_PLUGIN_INPUT_PGRASTER "adds plugin input pgraster" ON)
+option(USE_PLUGIN_INPUT_POSTGIS "adds plugin input postgis" ON)
+option(USE_PLUGIN_INPUT_RASTER "adds plugin input raster" ON)
+option(USE_PLUGIN_INPUT_SHAPE "adds plugin input shape" ON)
+option(USE_PLUGIN_INPUT_SQLITE "adds plugin input sqlite" ON)
+option(USE_PLUGIN_INPUT_TOPOJSON "adds plugin input topojson" ON)
+
 set(CXX_STANDARD 17)
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex program_options)
@@ -28,36 +40,61 @@ find_package(Freetype REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
-    find_path(MAPBOX_GEOMETRY_INCLUDE_DIRS "mapbox/geometry.hpp")
+    # provide a way to specify the include dirs with the CACHE VARIABLES
+    if(NOT MAPBOX_GEOMETRY_INCLUDE_DIRS)
+        message(STATUS "Searching for the include dir of mapbox/geometry.hpp")
+        find_path(MAPBOX_GEOMETRY_INCLUDE_DIRS "mapbox/geometry.hpp" REQUIRED)
+    endif()
 else()
-    set(MAPBOX_GEOMETRY_INCLUDE_DIRS deps/mapbox/geometry/include)
+    set(MAPBOX_GEOMETRY_INCLUDE_DIRS 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include>
+        $<INSTALL_INTERFACE:deps/mapbox/geometry/include>
+    )
 endif()
 if(NOT MAPBOX_GEOMETRY_INCLUDE_DIRS)
-    message(FATAL_ERROR "Set MAPBOX_GEOMETRY_INCLUDE_DIRS to the mapbox/geometry.hpp include dir") 
+    message(FATAL_ERROR "Set -DMAPBOX_GEOMETRY_INCLUDE_DIRS to the mapbox/geometry.hpp include dir") 
 endif()
 
 if(USE_EXTERNAL_MAPBOX_POLYLABEL)
-    find_path(MAPBOX_POLYLABEL_INCLUDE_DIRS "mapbox/polylabel.hpp")
+    if(NOT MAPBOX_POLYLABEL_INCLUDE_DIRS)
+        message(STATUS "Searching for the include dir of mapbox/polylabel")
+        find_path(MAPBOX_POLYLABEL_INCLUDE_DIRS "mapbox/polylabel.hpp")
+    endif()
 else()
-    set(MAPBOX_POLYLABEL_INCLUDE_DIRS deps/mapbox/polylabel/include)
+    set(MAPBOX_POLYLABEL_INCLUDE_DIRS 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include>
+        $<INSTALL_INTERFACE:deps/mapbox/polylabel/include>
+    )
 endif()
 if(NOT MAPBOX_POLYLABEL_INCLUDE_DIRS)
     message(FATAL_ERROR "Set MAPBOX_POLYLABEL_INCLUDE_DIRS to the mapbox/geometry include dir") 
 endif()
 
 if(USE_EXTERNAL_MAPBOX_PROTOZERO)
-    find_path(MAPBOX_PROTOZERO_INCLUDE_DIRS "protozero/pbf_message.hpp")
+    if(NOT MAPBOX_PROTOZERO_INCLUDE_DIRS)
+        message(STATUS "Searching for the include dir of mapbox/protozero")
+        find_path(MAPBOX_PROTOZERO_INCLUDE_DIRS "protozero/pbf_message.hpp")
+    endif()
 else()
-    set(MAPBOX_PROTOZERO_INCLUDE_DIRS deps/mapbox/protozero/include)
+    set(MAPBOX_PROTOZERO_INCLUDE_DIRS 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include>
+        $<INSTALL_INTERFACE:deps/mapbox/protozero/include>
+    )
 endif()
 if(NOT MAPBOX_PROTOZERO_INCLUDE_DIRS)
     message(FATAL_ERROR "Set MAPBOX_PROTOZERO_INCLUDE_DIRS to the mapbox/protozero include dir") 
 endif()
 
 if(USE_EXTERNAL_MAPBOX_VARIANT)
-    find_path(MAPBOX_VARIANT_INCLUDE_DIRS "mapbox/variant.hpp")
+    if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
+        message(STATUS "Searching for the include dir of mapbox/variant")
+        find_path(MAPBOX_VARIANT_INCLUDE_DIRS "mapbox/variant.hpp")
+    endif()
 else()
-    set(MAPBOX_VARIANT_INCLUDE_DIRS deps/mapbox/variant/include)
+    set(MAPBOX_VARIANT_INCLUDE_DIRS 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include>
+        $<INSTALL_INTERFACE:deps/mapbox/variant/include>
+    )
 endif()
 if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
     message(FATAL_ERROR "Set MAPBOX_VARIANT_INCLUDE_DIRS to the mapbox/variant include dir") 
@@ -69,47 +106,48 @@ set(MAPNIK_OPTIONAL_LIBS "")
 if(USE_LIBXML2)
     message(STATUS "Using LibXml2")
     find_package(LibXml2 REQUIRED)
-    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_LIBXML2)
-    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} LibXml2::LibXml2)
+    list(APPEND MAPNIK_COMPILE_DEFS HAVE_LIBXML2)
+    list(APPEND MAPNIK_OPTIONAL_LIBS LibXml2::LibXml2)
 endif()
 if(USE_PNG)
     message(STATUS "Using PNG")
     find_package(PNG REQUIRED)
-    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_PNG)
-    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} PNG::PNG)
+    list(APPEND MAPNIK_COMPILE_DEFS HAVE_PNG)
+    list(APPEND MAPNIK_OPTIONAL_LIBS PNG::PNG)
 endif()
 
 if(USE_JPEG)
     message(STATUS "Using JPEG")
     find_package(JPEG REQUIRED)
-    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_JPEG)
-    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} JPEG::JPEG)
+    list(APPEND MAPNIK_COMPILE_DEFS HAVE_JPEG)
+    list(APPEND MAPNIK_OPTIONAL_LIBS JPEG::JPEG)
 endif()
 
 if(USE_TIFF)
     find_package(TIFF REQUIRED)
     message(STATUS "Using TIFF")
-    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_TIFF)
-    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} TIFF::TIFF)
+    list(APPEND MAPNIK_COMPILE_DEFS HAVE_TIFF)
+    list(APPEND MAPNIK_OPTIONAL_LIBS TIFF::TIFF)
 endif()
 
 if(USE_WEBP)
     message(STATUS "Using WEBP")
     find_package(WebP CONFIG REQUIRED)
-    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_WEBP)
-    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} WebP::webp)
+    list(APPEND MAPNIK_COMPILE_DEFS HAVE_WEBP)
+    list(APPEND MAPNIK_OPTIONAL_LIBS WebP::webp)
 endif()
 
 if(USE_CAIRO)
     message(STATUS "Using Cairo renderer")
     find_package(Cairo REQUIRED)
-    set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_CAIRO)
-    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} Cairo::Cairo)
+    list(APPEND MAPNIK_COMPILE_DEFS HAVE_CAIRO)
+    list(APPEND MAPNIK_OPTIONAL_LIBS Cairo::Cairo)
 endif()
 
 add_library(mapnik-headers INTERFACE)
 add_library(mapnik::headers ALIAS mapnik-headers)
 
+# todo: mapbox includes need to included private.
 target_include_directories(mapnik-headers INTERFACE  
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
     $<INSTALL_INTERFACE:include>
@@ -117,7 +155,8 @@ target_include_directories(mapnik-headers INTERFACE
     ${MAPBOX_POLYLABEL_INCLUDE_DIRS}
     ${MAPBOX_VARIANT_INCLUDE_DIRS}
     ${MAPBOX_PROTOZERO_INCLUDE_DIRS}
-    deps
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>  
+    $<INSTALL_INTERFACE:deps>
 )
 target_link_libraries(mapnik-headers INTERFACE 
     Boost::boost
@@ -128,9 +167,7 @@ target_link_libraries(mapnik-headers INTERFACE
     harfbuzz::harfbuzz
     ${MAPNIK_OPTIONAL_LIBS}
 )
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(mapnik-headers INTERFACE MAPNIK_EXPORTS)
-endif()
+target_compile_definitions(mapnik-headers INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 install(TARGETS mapnik-headers 
     EXPORT MapnikTargets
@@ -143,6 +180,31 @@ install(TARGETS mapnik-headers
 
 add_subdirectory(deps)
 add_subdirectory(src)
-add_subdirectory(utils)
+add_subdirectory(plugins)
+#add_subdirectory(utils)
 #add_subdirectory(utils)
 #add_subdirectory(plugins)
+
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MapnikConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfig.cmake"
+  INSTALL_DESTINATION lib/cmake/mapnik
+)
+
+install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfigVersion.cmake"
+        DESTINATION lib/cmake/mapnik
+)
+install(EXPORT MapnikTargets
+        FILE MapnikTargets.cmake
+        NAMESPACE mapnik::
+        DESTINATION lib/cmake/mapnik
+)

@@ -3,7 +3,7 @@ add_executable(pgsql2sqlite
     sqlite.cpp
 )
 
-target_link_libraries(pgsql2sqlite PRIVATE mapnik::mapnik)
+target_link_libraries(pgsql2sqlite PRIVATE mapnik::headers mapnik::mapnik)
 install(TARGETS pgsql2sqlite
     EXPORT MapnikTargets
     RUNTIME DESTINATION bin
