@@ -225,7 +225,7 @@ set(SVG_SRC
 )
 if(USE_SVG_RENDERER)
     message(STATUS "adding svg renderer to compilation")
-    set(SVG_RENDERER_SRC)
+    set(SVG_RENDERER_SRC
         svg/output/process_line_symbolizer.cpp
         svg/output/process_polygon_symbolizer.cpp
         svg/output/process_symbolizers.cpp
