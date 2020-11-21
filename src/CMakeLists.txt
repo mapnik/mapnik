@@ -88,6 +88,7 @@ set(MAPNIK_SOURCES
     wkb.cpp
     xml_tree.cpp
 )
+set(COMPILE_SRC ${MAPNIK_SOURCES})
 
 set(AGG_COMPILE_SRC 
     ../deps/agg/src/agg_arc.cpp
@@ -116,7 +117,6 @@ set(AGG_COMPILE_SRC
     ../deps/agg/src/agg_vpgen_clip_polyline.cpp
     ../deps/agg/src/agg_vpgen_segmentator.cpp
 )
-
 set(AGG_SRC
     agg/agg_renderer.cpp
     agg/process_building_symbolizer.cpp
@@ -134,8 +134,10 @@ set(AGG_SRC
     agg/process_text_symbolizer.cpp
     ${AGG_COMPILE_SRC}
 )
+list(APPEND COMPILE_SRC ${AGG_SRC})
 
-if(Cairo_FOUND)
+if(USE_CAIRO)
+    message(STATUS "adding cairo renderer to compilation")
     set(CAIRO_SRC
         cairo/cairo_context.cpp
         cairo/cairo_render_vector.cpp
@@ -152,12 +154,14 @@ if(Cairo_FOUND)
         cairo/process_raster_symbolizer.cpp
         cairo/process_text_symbolizer.cpp
     )
+    list(APPEND COMPILE_SRC ${CAIRO_SRC})
 endif()
 
 set(CSS_SRC     
     css/css_color_grammar_x3.cpp
     css/css_grammar_x3.cpp
 )
+list(APPEND COMPILE_SRC ${CSS_SRC})
 
 set(GEOMETRY_SRC
     geometry/box2d.cpp
@@ -167,6 +171,7 @@ set(GEOMETRY_SRC
     geometry/polylabel.cpp
     geometry/reprojection.cpp
 )
+list(APPEND COMPILE_SRC ${GEOMETRY_SRC})
 
 set(GRID_SRC
     grid/grid_renderer.cpp
@@ -183,12 +188,14 @@ set(GRID_SRC
     grid/process_shield_symbolizer.cpp
     grid/process_text_symbolizer.cpp
 )
+list(APPEND COMPILE_SRC ${GRID_SRC})
 
 set(GROUP_SRC
     group/group_layout_manager.cpp
     group/group_rule.cpp
     group/group_symbolizer_helper.cpp
 )
+list(APPEND COMPILE_SRC ${GROUP_SRC})
 
 set(RENDERER_COMMON_SRC
     renderer_common/pattern_alignment.cpp
@@ -197,6 +204,7 @@ set(RENDERER_COMMON_SRC
     renderer_common/render_pattern.cpp
     renderer_common/render_thunk_extractor.cpp
 )
+list(APPEND COMPILE_SRC ${RENDERER_COMMON_SRC})
 
 set(SVG_SRC
     svg/svg_parser.cpp
@@ -213,6 +221,7 @@ set(SVG_SRC
     svg/output/svg_output_grammars.cpp
     svg/output/svg_renderer.cpp
 )
+list(APPEND COMPILE_SRC ${SVG_SRC})
 
 set(TEXT_SRC
     text/color_font_renderer.cpp
@@ -243,33 +252,21 @@ set(TEXT_SRC
     text/placements/registry.cpp
     text/placements/simple.cpp    
 )
+list(APPEND COMPILE_SRC ${TEXT_SRC})
 
 set(UTIL_SRC 
     util/math.cpp
     util/utf_conv_win.cpp
 )
+list(APPEND COMPILE_SRC ${UTIL_SRC})
 
-if(LibXml2_FOUND)
-    set(COMPILE_SRC ${COMPILE_SRC} libxml2_loader.cpp)
+if(USE_LIBXML2)
+    message(STATUS "adding libxml2_loader to compilation")
+    list(APPEND COMPILE_SRC libxml2_loader.cpp)
 else()
-    set(COMPILE_SRC ${COMPILE_SRC} rapidxml_loader.cpp)
+    message(STATUS "adding rapidxml_loader to compilation")
+    list(APPEND COMPILE_SRC rapidxml_loader.cpp)
 endif()
-
-
-
-set(COMPILE_SRC
-    ${MAPNIK_SOURCES}
-    ${AGG_SRC}
-    ${CAIRO_SRC}
-    ${CSS_SRC}
-    ${GEOMETRY_SRC}
-    ${GRID_SRC}
-    ${GROUP_SRC}
-    ${RENDERER_COMMON_SRC}
-    ${SVG_SRC}
-    ${TEXT_SRC}
-    ${UTIL_SRC}
-)
 
 add_library(mapnik ${COMPILE_SRC})
 add_library(mapnik::mapnik ALIAS mapnik)
