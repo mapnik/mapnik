@@ -278,8 +278,12 @@ endif()
 add_library(mapnik ${COMPILE_SRC})
 add_library(mapnik::mapnik ALIAS mapnik)
 
+set(COMPILE_DEFS "")
+if(BUILD_SHARED_LIBS)
+    list(APPEND COMPILE_DEFS MAPNIK_EXPORTS)
+endif()
 
-target_compile_definitions(mapnik PRIVATE MAPNIK_EXPORTS)
+target_compile_definitions(mapnik PRIVATE ${COMPILE_DEFS})
 target_link_libraries(mapnik PRIVATE 
     mapnik::headers
     mapnik::agg
