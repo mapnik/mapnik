@@ -144,7 +144,7 @@ TEST_CASE("map xml I/O") {
         add_xml_files(bfs::path("test") / "data" / "good_maps", good_maps);
 
         for (auto const &path : good_maps) {
-            CAPTURE(path.native());
+            CAPTURE(path.generic_string());
 
             // check that it can load
             mapnik::Map m(256, 256);
