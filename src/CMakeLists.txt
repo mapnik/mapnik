@@ -272,7 +272,7 @@ add_library(mapnik ${COMPILE_SRC})
 add_library(mapnik::mapnik ALIAS mapnik)
 
 
-target_compile_definitions(mapnik PRIVATE ${MAPNIK_EXPORTS} ${MAPNIK_COMPILE_DEFS})
+target_compile_definitions(mapnik PRIVATE MAPNIK_EXPORTS)
 target_link_libraries(mapnik PRIVATE 
     mapnik::headers
     mapnik::agg
