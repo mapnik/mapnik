@@ -18,10 +18,7 @@ set_target_properties(input-raster PROPERTIES OUTPUT_NAME "raster")
 set_target_properties(input-raster PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-raster 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )

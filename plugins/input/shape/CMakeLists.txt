@@ -21,10 +21,7 @@ set_target_properties(input-shape PROPERTIES OUTPUT_NAME "shape")
 set_target_properties(input-shape PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-shape 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )
