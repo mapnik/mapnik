@@ -2,7 +2,12 @@ add_executable(svg2png
     svg2png.cpp
 )
 
-target_link_libraries(svg2png PRIVATE mapnik::headers mapnik::mapnik)
+target_link_libraries(svg2png PRIVATE 
+    Boost::program_options      
+    mapnik::headers 
+    mapnik::mapnik
+    mapnik::agg
+)
 install(TARGETS svg2png
     EXPORT MapnikTargets
     RUNTIME DESTINATION bin

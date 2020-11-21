@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15.0)
 add_subdirectory(geometry_to_wkb)
 add_subdirectory(mapnik-index)
 add_subdirectory(mapnik-render)
-add_subdirectory(ogrindex)
+# add_subdirectory(ogrindex) # missing include file shapeindex/quadtree.hpp
 add_subdirectory(pgsql2sqlite)
 add_subdirectory(shapeindex)
 add_subdirectory(svg2png)

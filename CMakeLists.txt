@@ -32,6 +32,11 @@ option(USE_PLUGIN_INPUT_SHAPE "adds plugin input shape" ON)
 option(USE_PLUGIN_INPUT_SQLITE "adds plugin input sqlite" ON)
 option(USE_PLUGIN_INPUT_TOPOJSON "adds plugin input topojson" ON)
 
+option(BUILD_DEMO_VIEWER "builds the demo viewer" ON)
+option(BUILD_DEMO_CPP "builds the demo c++ application" ON)
+
+
+
 set(CXX_STANDARD 17)
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex program_options)
@@ -181,9 +186,8 @@ install(TARGETS headers
 add_subdirectory(deps)
 add_subdirectory(src)
 add_subdirectory(plugins)
-#add_subdirectory(utils)
-#add_subdirectory(utils)
-#add_subdirectory(plugins)
+add_subdirectory(utils)
+add_subdirectory(demo)
 
 
 include(CMakePackageConfigHelpers)
@@ -209,5 +213,6 @@ install(EXPORT MapnikTargets
         DESTINATION lib/cmake/mapnik
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY deps/agg/include/ DESTINATION include)
+install(DIRECTORY include/ TYPE INCLUDE)
+install(DIRECTORY deps/agg/include/ TYPE INCLUDE)
+install(DIRECTORY fonts/ DESTINATION bin/fonts FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
