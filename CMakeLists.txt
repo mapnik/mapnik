@@ -35,7 +35,13 @@ option(USE_PLUGIN_INPUT_TOPOJSON "adds plugin input topojson" ON)
 option(BUILD_DEMO_VIEWER "builds the demo viewer" ON)
 option(BUILD_DEMO_CPP "builds the demo c++ application" ON)
 
-
+option(BUILD_UTILITY_GEOMETRY_TO_WKB "builds the utility program geometry_to_wkb" ON)
+option(BUILD_UTILITY_MAPNIK_INDEX "builds the utility program mapnik_index" ON)
+option(BUILD_UTILITY_MAPNIK_RENDER "builds the utility program mapnik_render" ON)
+option(BUILD_UTILITY_OGRINDEX "builds the utility program ogrindex" OFF)
+option(BUILD_UTILITY_PGSQL2SQLITE "builds the utility program pgsql2sqlite" ON)
+option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
+option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
 set(CXX_STANDARD 17)
 
