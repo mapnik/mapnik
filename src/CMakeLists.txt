@@ -87,13 +87,13 @@ set(MAPNIK_SOURCES
 )
 set(COMPILE_SRC ${MAPNIK_SOURCES})
 
-if(NOT USE_JPEG)
+if(USE_JPEG)
     list(APPEND COMPILE_SRC jpeg_reader.cpp)
 endif()
-if(NOT USE_PNG)
+if(USE_PNG)
     list(APPEND COMPILE_SRC png_reader.cpp)
 endif()
-if(NOT USE_TIFF)
+if(USE_TIFF)
     list(APPEND COMPILE_SRC tiff_reader.cpp)
 endif()
 
