@@ -180,22 +180,25 @@ set(GEOMETRY_SRC
 )
 list(APPEND COMPILE_SRC ${GEOMETRY_SRC})
 
-set(GRID_SRC
-    grid/grid_renderer.cpp
-    grid/grid.cpp   
-    grid/process_building_symbolizer.cpp
-    grid/process_group_symbolizer.cpp
-    grid/process_line_pattern_symbolizer.cpp
-    grid/process_line_symbolizer.cpp
-    grid/process_markers_symbolizer.cpp
-    grid/process_point_symbolizer.cpp
-    grid/process_polygon_pattern_symbolizer.cpp
-    grid/process_polygon_symbolizer.cpp
-    grid/process_raster_symbolizer.cpp
-    grid/process_shield_symbolizer.cpp
-    grid/process_text_symbolizer.cpp
-)
-list(APPEND COMPILE_SRC ${GRID_SRC})
+if(USE_GRID_RENDERER)
+    message(STATUS "adding grid renderer to compilation")
+    set(GRID_SRC
+        grid/grid_renderer.cpp
+        grid/grid.cpp   
+        grid/process_building_symbolizer.cpp
+        grid/process_group_symbolizer.cpp
+        grid/process_line_pattern_symbolizer.cpp
+        grid/process_line_symbolizer.cpp
+        grid/process_markers_symbolizer.cpp
+        grid/process_point_symbolizer.cpp
+        grid/process_polygon_pattern_symbolizer.cpp
+        grid/process_polygon_symbolizer.cpp
+        grid/process_raster_symbolizer.cpp
+        grid/process_shield_symbolizer.cpp
+        grid/process_text_symbolizer.cpp
+    )
+    list(APPEND COMPILE_SRC ${GRID_SRC})
+endif()
 
 set(GROUP_SRC
     group/group_layout_manager.cpp
@@ -213,22 +216,25 @@ set(RENDERER_COMMON_SRC
 )
 list(APPEND COMPILE_SRC ${RENDERER_COMMON_SRC})
 
-set(SVG_SRC
-    svg/svg_parser.cpp
-    svg/svg_path_grammar_x3.cpp
-    svg/svg_path_parser.cpp
-    svg/svg_points_parser.cpp
-    svg/svg_transform_parser.cpp
+if(USE_SVG_RENDERER)
+    message(STATUS "adding svg renderer to compilation")
+    set(SVG_SRC
+        svg/svg_parser.cpp
+        svg/svg_path_grammar_x3.cpp
+        svg/svg_path_parser.cpp
+        svg/svg_points_parser.cpp
+        svg/svg_transform_parser.cpp
 
-    svg/output/process_line_symbolizer.cpp
-    svg/output/process_polygon_symbolizer.cpp
-    svg/output/process_symbolizers.cpp
-    svg/output/svg_generator.cpp
-    svg/output/svg_output_attributes.cpp
-    svg/output/svg_output_grammars.cpp
-    svg/output/svg_renderer.cpp
-)
-list(APPEND COMPILE_SRC ${SVG_SRC})
+        svg/output/process_line_symbolizer.cpp
+        svg/output/process_polygon_symbolizer.cpp
+        svg/output/process_symbolizers.cpp
+        svg/output/svg_generator.cpp
+        svg/output/svg_output_attributes.cpp
+        svg/output/svg_output_grammars.cpp
+        svg/output/svg_renderer.cpp
+    )
+    list(APPEND COMPILE_SRC ${SVG_SRC})
+endif()
 
 set(TEXT_SRC
     text/color_font_renderer.cpp
