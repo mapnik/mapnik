@@ -46,8 +46,6 @@ option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex program_options)
 find_package(ICU REQUIRED COMPONENTS uc)
