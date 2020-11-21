@@ -216,15 +216,16 @@ set(RENDERER_COMMON_SRC
 )
 list(APPEND COMPILE_SRC ${RENDERER_COMMON_SRC})
 
+set(SVG_SRC
+    svg/svg_parser.cpp
+    svg/svg_path_grammar_x3.cpp
+    svg/svg_path_parser.cpp
+    svg/svg_points_parser.cpp
+    svg/svg_transform_parser.cpp
+)
 if(USE_SVG_RENDERER)
     message(STATUS "adding svg renderer to compilation")
-    set(SVG_SRC
-        svg/svg_parser.cpp
-        svg/svg_path_grammar_x3.cpp
-        svg/svg_path_parser.cpp
-        svg/svg_points_parser.cpp
-        svg/svg_transform_parser.cpp
-
+    set(SVG_RENDERER_SRC)
         svg/output/process_line_symbolizer.cpp
         svg/output/process_polygon_symbolizer.cpp
         svg/output/process_symbolizers.cpp
@@ -233,8 +234,9 @@ if(USE_SVG_RENDERER)
         svg/output/svg_output_grammars.cpp
         svg/output/svg_renderer.cpp
     )
-    list(APPEND COMPILE_SRC ${SVG_SRC})
+    list(APPEND SVG_SRC ${SVG_RENDERER_SRC})
 endif()
+list(APPEND COMPILE_SRC ${SVG_SRC})
 
 set(TEXT_SRC
     text/color_font_renderer.cpp
