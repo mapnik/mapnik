@@ -47,7 +47,6 @@ set(MAPNIK_SOURCES
     image_view_any.cpp
     image_view.cpp
     image.cpp
-    jpeg_reader.cpp
     layer.cpp
     load_map.cpp
     map.cpp
@@ -62,7 +61,6 @@ set(MAPNIK_SOURCES
     parse_transform.cpp
     path_expression_grammar_x3.cpp
     plugin.cpp
-    png_reader.cpp
     proj_transform.cpp
     projection.cpp
     raster_colorizer.cpp
@@ -74,8 +72,7 @@ set(MAPNIK_SOURCES
     simplify.cpp
     symbolizer_enumerations.cpp
     symbolizer_keys.cpp
-    symbolizer.cpp
-    tiff_reader.cpp    
+    symbolizer.cpp   
     transform_expression_grammar_x3.cpp
     transform_expression.cpp
     twkb.cpp
@@ -89,6 +86,16 @@ set(MAPNIK_SOURCES
     xml_tree.cpp
 )
 set(COMPILE_SRC ${MAPNIK_SOURCES})
+
+if(NOT USE_JPEG)
+    list(APPEND COMPILE_SRC jpeg_reader.cpp)
+endif()
+if(NOT USE_PNG)
+    list(APPEND COMPILE_SRC png_reader.cpp)
+endif()
+if(NOT USE_TIFF)
+    list(APPEND COMPILE_SRC tiff_reader.cpp)
+endif()
 
 set(AGG_COMPILE_SRC 
     ../deps/agg/src/agg_arc.cpp
