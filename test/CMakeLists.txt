@@ -1,6 +1,7 @@
 project(mapnik-test)
 
-Include(FetchContent)
+include(FetchContent)
+include(CopyDllsForDebug)
 
 FetchContent_Declare(
   Catch2
@@ -12,6 +13,8 @@ FetchContent_MakeAvailable(Catch2)
 set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
+
+
 
 add_executable(mapnik-test-unit 
     unit/run.cpp
@@ -131,15 +134,15 @@ target_link_libraries(font_registration_test PUBLIC
     mapnik::json
 )
 
-# not workable since boost::filesystem native returns a wstring and the function taskes a std::string
-#add_executable(map_xml_test standalone/map_xml_test.cpp)
-#target_link_libraries(map_xml_test PUBLIC
-#    Catch 
-#    mapnik::headers 
-#    mapnik::mapnik 
-#    mapnik::agg
-#    mapnik::json
-#)
+#not workable since boost::filesystem native returns a wstring and the function taskes a std::string
+add_executable(map_xml_test standalone/map_xml_test.cpp)
+target_link_libraries(map_xml_test PUBLIC
+    Catch 
+    mapnik::headers 
+    mapnik::mapnik 
+    mapnik::agg
+    mapnik::json
+)
 
 add_executable(mapnik-test-visual 
     visual/parse_map_sizes.cpp
@@ -160,9 +163,15 @@ target_link_libraries(
 include(CTest)
 include(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
 include(${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
+set(APPS mapnik-test-unit mapnik-test-visual mapnik::mapnik)  # paths to executables
+set(DIRS ${CMAKE_BINARY_DIR}/src/RelWithDebInfo)   # directories to search for prerequisites
+copy_dlls_for_debug(${APPS} \"\" ${DIRS})
+
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
+file(COPY data-visual DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
 
 ParseAndAddCatchTests(mapnik-test-unit)
 catch_discover_tests(agg_rasterizer_integer_overflow_test)
 catch_discover_tests(datasource_registration_test)
 catch_discover_tests(font_registration_test)
-#catch_discover_tests(map_xml_test)
+catch_discover_tests(map_xml_test)
