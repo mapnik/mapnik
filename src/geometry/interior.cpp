@@ -232,7 +232,7 @@ bool interior(polygon<T> const& polygon, double scale_factor, point<T> & pt)
     return true;
 }
 
-template
+template MAPNIK_DECL 
 bool interior(polygon<double> const& polygon, double scale_factor, point<double> & pt);
 
 } }
