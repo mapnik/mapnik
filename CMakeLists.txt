@@ -8,7 +8,8 @@ project(mapnik
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(BUILD_SHARED_LIBS ON)
+option(BUILD_SHARED_LIBS "build mapnik dynamic" ON)
+option(BUILD_TEST "builds the tests" ON)
 option(USE_EXTERNAL_MAPBOX_GEOMETRY "Use a external mapnik/geometry.hpp. If off, use the submodule" OFF)
 option(USE_EXTERNAL_MAPBOX_POLYLABEL "Use a external mapnik/polylabel. If off, use the submodule" OFF)
 option(USE_EXTERNAL_MAPBOX_PROTOZERO "Use a external mapnik/protozero. If off, use the submodule" OFF)
@@ -202,6 +203,10 @@ add_subdirectory(src)
 add_subdirectory(plugins)
 add_subdirectory(utils)
 add_subdirectory(demo)
+if(BUILD_TEST)
+    enable_testing()
+    add_subdirectory(test)
+endif()
 
 
 include(CMakePackageConfigHelpers)
