@@ -2,7 +2,12 @@ add_executable(shapeindex
     shapeindex.cpp
 )
 
-target_link_libraries(shapeindex PRIVATE mapnik::headers mapnik::mapnik)
+target_include_directories(shapeindex PRIVATE ../../plugins/input/shape)
+target_link_libraries(shapeindex PRIVATE
+    Boost::program_options
+    mapnik::headers 
+    mapnik::mapnik
+)
 install(TARGETS shapeindex
     EXPORT MapnikTargets
     RUNTIME DESTINATION bin
