@@ -19,11 +19,12 @@ set(CXX_STANDARD 17)
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex program_options)
 find_package(ICU REQUIRED COMPONENTS uc)
 find_package(Freetype REQUIRED)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(TIFF REQUIRED)
-find_package(WebP CONFIG REQUIRED)
-find_package(LibXml2 REQUIRED)
+find_package(harfbuzz CONFIG REQUIRED)
+find_package(PNG)
+find_package(JPEG)
+find_package(TIFF)
+find_package(WebP CONFIG)
+find_package(LibXml2)
 find_package(Cairo)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
@@ -73,21 +74,25 @@ endif()
 
 if(PNG_FOUND)
     set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_PNG)
+    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} PNG::PNG)
     message(STATUS "Using PNG")
 endif()
 
 if(JPEG_FOUND)
     set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_JPEG)
+    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} JPEG::JPEG)
     message(STATUS "Using JPEG")
 endif()
 
 if(TIFF_FOUND)
     set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_TIFF)
+    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} TIFF::TIFF)
     message(STATUS "Using TIFF")
 endif()
 
 if(WebP_FOUND)
     set(MAPNIK_COMPILE_DEFS ${MAPNIK_COMPILE_DEFS} HAVE_WEBP)
+    set(MAPNIK_OPTIONAL_LIBS ${MAPNIK_OPTIONAL_LIBS} WebP::webp)
     message(STATUS "Using WEBP")
 endif()
 
@@ -115,9 +120,7 @@ target_link_libraries(mapnik-headers INTERFACE
     Boost::filesystem
     ICU::uc
     Freetype::Freetype
-    PNG::PNG
-    TIFF::TIFF
-    JPEG::JPEG
+    harfbuzz::harfbuzz
     ${MAPNIK_OPTIONAL_LIBS}
 )
 if(BUILD_SHARED_LIBS)
