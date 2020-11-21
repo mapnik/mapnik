@@ -22,10 +22,7 @@ set_target_properties(input-csv PROPERTIES SUFFIX ".input")
 #install(TARGETS input-csv DESTINATION bin/plugins/input)
 
 install(TARGETS input-csv 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )

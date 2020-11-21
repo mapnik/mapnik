@@ -22,10 +22,7 @@ set_target_properties(input-ogr PROPERTIES OUTPUT_NAME "ogr")
 set_target_properties(input-ogr PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-ogr 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )

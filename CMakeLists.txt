@@ -144,11 +144,11 @@ if(USE_CAIRO)
     list(APPEND MAPNIK_OPTIONAL_LIBS Cairo::Cairo)
 endif()
 
-add_library(mapnik-headers INTERFACE)
-add_library(mapnik::headers ALIAS mapnik-headers)
+add_library(headers INTERFACE)
+add_library(mapnik::headers ALIAS headers)
 
 # todo: mapbox includes need to included private.
-target_include_directories(mapnik-headers INTERFACE  
+target_include_directories(headers INTERFACE  
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
     $<INSTALL_INTERFACE:include>
     ${MAPBOX_GEOMETRY_INCLUDE_DIRS}
@@ -158,7 +158,7 @@ target_include_directories(mapnik-headers INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>  
     $<INSTALL_INTERFACE:deps>
 )
-target_link_libraries(mapnik-headers INTERFACE 
+target_link_libraries(headers INTERFACE 
     Boost::boost
     Boost::regex
     Boost::filesystem
@@ -167,9 +167,9 @@ target_link_libraries(mapnik-headers INTERFACE
     harfbuzz::harfbuzz
     ${MAPNIK_OPTIONAL_LIBS}
 )
-target_compile_definitions(mapnik-headers INTERFACE ${MAPNIK_COMPILE_DEFS})
+target_compile_definitions(headers INTERFACE ${MAPNIK_COMPILE_DEFS})
 
-install(TARGETS mapnik-headers 
+install(TARGETS headers 
     EXPORT MapnikTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
@@ -208,3 +208,6 @@ install(EXPORT MapnikTargets
         NAMESPACE mapnik::
         DESTINATION lib/cmake/mapnik
 )
+
+install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY deps/agg/include/ DESTINATION include)

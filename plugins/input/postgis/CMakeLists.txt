@@ -20,10 +20,7 @@ set_target_properties(input-postgis PROPERTIES OUTPUT_NAME "postgis")
 set_target_properties(input-postgis PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-postgis 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )

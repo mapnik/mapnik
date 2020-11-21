@@ -21,10 +21,7 @@ set_target_properties(input-pgraster PROPERTIES OUTPUT_NAME "pgraster")
 set_target_properties(input-pgraster PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-pgraster 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )

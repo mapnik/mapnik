@@ -16,10 +16,7 @@ set_target_properties(input-geobuf PROPERTIES OUTPUT_NAME "geobuf")
 set_target_properties(input-geobuf PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-geobuf 
-    EXPORT MapnikTargets
     LIBRARY DESTINATION lib/plugins/input
     ARCHIVE DESTINATION lib/plugins/input
     RUNTIME DESTINATION bin/plugins/input
-    INCLUDES DESTINATION .
-    PUBLIC_HEADER DESTINATION .
 )
