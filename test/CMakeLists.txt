@@ -101,27 +101,43 @@ target_link_libraries(mapnik-test-unit PUBLIC
     mapnik::headers
     mapnik::agg
     mapnik::mapnik
+    mapnik::json
+    mapnik::wkt
 )
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
 target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
     Catch 
-    
+    mapnik::headers 
+    mapnik::mapnik 
+    mapnik::agg
+    mapnik::json
 )
 
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
 target_link_libraries(datasource_registration_test PUBLIC
     Catch 
+    mapnik::headers 
+    mapnik::mapnik 
+    mapnik::agg
 )
 
 add_executable(font_registration_test standalone/font_registration_test.cpp)
 target_link_libraries(font_registration_test PUBLIC
     Catch 
+    mapnik::headers 
+    mapnik::mapnik 
+    mapnik::agg
+    mapnik::json
 )
 
 add_executable(map_xml_test standalone/map_xml_test.cpp)
 target_link_libraries(map_xml_test PUBLIC
     Catch 
+    mapnik::headers 
+    mapnik::mapnik 
+    mapnik::agg
+    mapnik::json
 )
 
 add_executable(mapnik-test-visual 
@@ -133,8 +149,10 @@ add_executable(mapnik-test-visual
 target_link_libraries(
     mapnik-test-visual PRIVATE
     Boost::program_options
+    Boost::filesystem
     mapnik::headers
     mapnik::mapnik
+    mapnik::agg
 )
 
 include(CTest)
