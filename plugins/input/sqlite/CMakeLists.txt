@@ -20,7 +20,5 @@ set_target_properties(input-sqlite PROPERTIES OUTPUT_NAME "sqlite")
 set_target_properties(input-sqlite PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-sqlite
-    LIBRARY DESTINATION lib/plugins/input
-    ARCHIVE DESTINATION lib/plugins/input
-    RUNTIME DESTINATION bin/plugins/input
+    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )

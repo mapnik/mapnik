@@ -20,7 +20,5 @@ set_target_properties(input-gdal PROPERTIES OUTPUT_NAME "gdal")
 set_target_properties(input-gdal PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-gdal 
-    LIBRARY DESTINATION lib/plugins/input
-    ARCHIVE DESTINATION lib/plugins/input
-    RUNTIME DESTINATION bin/plugins/input
+    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )

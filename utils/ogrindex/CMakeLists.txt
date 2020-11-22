@@ -1,3 +1,5 @@
+project(ogrindex)
+
 add_executable(ogrindex ogrindex.cpp)
 
 
