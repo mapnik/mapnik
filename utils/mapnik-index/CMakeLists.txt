@@ -1,3 +1,7 @@
+project(mapnik-index)
+
+find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+
 add_executable(mapnik-index
     mapnik-index.cpp
     process_csv_file.cpp

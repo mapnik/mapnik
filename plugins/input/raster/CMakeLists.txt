@@ -18,7 +18,5 @@ set_target_properties(input-raster PROPERTIES OUTPUT_NAME "raster")
 set_target_properties(input-raster PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-raster 
-    LIBRARY DESTINATION lib/plugins/input
-    ARCHIVE DESTINATION lib/plugins/input
-    RUNTIME DESTINATION bin/plugins/input
+    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )

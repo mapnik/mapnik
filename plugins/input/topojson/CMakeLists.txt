@@ -18,7 +18,5 @@ set_target_properties(input-topojson PROPERTIES OUTPUT_NAME "topojson")
 set_target_properties(input-topojson PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-topojson 
-    LIBRARY DESTINATION lib/plugins/input
-    ARCHIVE DESTINATION lib/plugins/input
-    RUNTIME DESTINATION bin/plugins/input
+    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )

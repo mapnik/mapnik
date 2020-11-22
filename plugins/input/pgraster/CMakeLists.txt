@@ -21,7 +21,5 @@ set_target_properties(input-pgraster PROPERTIES OUTPUT_NAME "pgraster")
 set_target_properties(input-pgraster PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-pgraster 
-    LIBRARY DESTINATION lib/plugins/input
-    ARCHIVE DESTINATION lib/plugins/input
-    RUNTIME DESTINATION bin/plugins/input
+    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )

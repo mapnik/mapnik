@@ -35,8 +35,8 @@ target_link_libraries(mapnik-viewer PRIVATE
 )
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini 
 "[mapnik]
-plugins_dir=plugins/input
-fonts/1/dir=fonts"
+plugins_dir=${ABSOLUTE_PLUGINS_INSTALL_DIR}
+fonts/1/dir=${ABSOLUTE_FONTS_INSTALL_DIR}"
 )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini DESTINATION bin)
 install(TARGETS mapnik-viewer 

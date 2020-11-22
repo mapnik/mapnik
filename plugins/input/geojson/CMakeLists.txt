@@ -20,7 +20,5 @@ set_target_properties(input-geojson PROPERTIES OUTPUT_NAME "geojson")
 set_target_properties(input-geojson PROPERTIES SUFFIX ".input")
 
 install(TARGETS input-geojson 
-    LIBRARY DESTINATION lib/plugins/input
-    ARCHIVE DESTINATION lib/plugins/input
-    RUNTIME DESTINATION bin/plugins/input
+    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )

@@ -47,15 +47,23 @@ option(BUILD_UTILITY_PGSQL2SQLITE "builds the utility program pgsql2sqlite" ON)
 option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
+set(PLUGINS_INSTALL_DIR bin/plugins/input CACHE STRING "installs the plugins in the specified directory")
+get_filename_component(ABSOLUTE_PLUGINS_INSTALL_DIR ${PLUGINS_INSTALL_DIR} ABSOLUTE)
+message("Installing plugins to ${ABSOLUTE_PLUGINS_INSTALL_DIR}")
+set(FONTS_INSTALL_DIR bin/fonts CACHE STRING "installs the fonts in the specified directory")
+get_filename_component(ABSOLUTE_FONTS_INSTALL_DIR ${FONTS_INSTALL_DIR} ABSOLUTE)
+message("Installing fonts to ${FONTS_INSTALL_DIR}")
+
+
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex program_options)
+find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 find_package(ICU REQUIRED COMPONENTS uc)
 find_package(Freetype REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
-    # provide a way to specify the include dirs with the CACHE VARIABLES
+    # this is used to provide a way to specify include dirs with CACHE VARIABLES
     if(NOT MAPBOX_GEOMETRY_INCLUDE_DIRS)
         message(STATUS "Searching for the include dir of mapbox/geometry.hpp")
         find_path(MAPBOX_GEOMETRY_INCLUDE_DIRS "mapbox/geometry.hpp" REQUIRED)
@@ -179,16 +187,14 @@ endif()
 add_library(headers INTERFACE)
 add_library(mapnik::headers ALIAS headers)
 
-# todo: mapbox includes need to included private.
 target_include_directories(headers INTERFACE  
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<BUILD_INTERFACE:${MAPBOX_GEOMETRY_INCLUDE_DIRS}>
+    $<BUILD_INTERFACE:${MAPBOX_POLYLABEL_INCLUDE_DIRS}>
+    $<BUILD_INTERFACE:${MAPBOX_VARIANT_INCLUDE_DIRS}>
+    $<BUILD_INTERFACE:${MAPBOX_PROTOZERO_INCLUDE_DIRS}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>
     $<INSTALL_INTERFACE:include>
-    ${MAPBOX_GEOMETRY_INCLUDE_DIRS}
-    ${MAPBOX_POLYLABEL_INCLUDE_DIRS}
-    ${MAPBOX_VARIANT_INCLUDE_DIRS}
-    ${MAPBOX_PROTOZERO_INCLUDE_DIRS}
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>  
-    $<INSTALL_INTERFACE:deps>
 )
 target_link_libraries(headers INTERFACE 
     Boost::boost
@@ -220,8 +226,12 @@ if(BUILD_TEST)
     add_subdirectory(test)
 endif()
 
-
+# start package mapnik
 include(CMakePackageConfigHelpers)
+
+# set the cmake targets install location
+set(INSTALL_CMAKE_DIR lib/cmake)
+set(INCLUDE_INSTALL_DIR include/)
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfigVersion.cmake"
   VERSION ${PROJECT_VERSION}
@@ -230,20 +240,21 @@ write_basic_package_version_file(
 
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MapnikConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfig.cmake"
-  INSTALL_DESTINATION lib/cmake/mapnik
+  INSTALL_DESTINATION ${INSTALL_CMAKE_DIR}
+  PATH_VARS INCLUDE_INSTALL_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR
 )
 
 install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfig.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfigVersion.cmake"
-        DESTINATION lib/cmake/mapnik
+        DESTINATION ${INSTALL_CMAKE_DIR}
 )
 install(EXPORT MapnikTargets
         FILE MapnikTargets.cmake
         NAMESPACE mapnik::
-        DESTINATION lib/cmake/mapnik
+        DESTINATION ${INSTALL_CMAKE_DIR}
 )
 
 install(DIRECTORY include/ TYPE INCLUDE)
 install(DIRECTORY deps/agg/include/ TYPE INCLUDE)
-install(DIRECTORY fonts/ DESTINATION bin/fonts FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
+install(DIRECTORY fonts/ DESTINATION ${FONTS_INSTALL_DIR} FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")

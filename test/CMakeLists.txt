@@ -1,5 +1,7 @@
 project(mapnik-test)
 
+find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+
 include(FetchContent)
 include(CopyDllsForDebug)
 
@@ -13,8 +15,6 @@ FetchContent_MakeAvailable(Catch2)
 set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
-
-
 
 add_executable(mapnik-test-unit 
     unit/run.cpp
