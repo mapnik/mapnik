@@ -71,7 +71,6 @@ if(USE_EXTERNAL_MAPBOX_GEOMETRY)
 else()
     set(MAPBOX_GEOMETRY_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include>
-        $<INSTALL_INTERFACE:deps/mapbox/geometry/include>
     )
 endif()
 if(NOT MAPBOX_GEOMETRY_INCLUDE_DIRS)
@@ -86,7 +85,6 @@ if(USE_EXTERNAL_MAPBOX_POLYLABEL)
 else()
     set(MAPBOX_POLYLABEL_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include>
-        $<INSTALL_INTERFACE:deps/mapbox/polylabel/include>
     )
 endif()
 if(NOT MAPBOX_POLYLABEL_INCLUDE_DIRS)
@@ -101,7 +99,6 @@ if(USE_EXTERNAL_MAPBOX_PROTOZERO)
 else()
     set(MAPBOX_PROTOZERO_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include>
-        $<INSTALL_INTERFACE:deps/mapbox/protozero/include>
     )
 endif()
 if(NOT MAPBOX_PROTOZERO_INCLUDE_DIRS)
@@ -116,7 +113,6 @@ if(USE_EXTERNAL_MAPBOX_VARIANT)
 else()
     set(MAPBOX_VARIANT_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include>
-        $<INSTALL_INTERFACE:deps/mapbox/variant/include>
     )
 endif()
 if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
