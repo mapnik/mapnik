@@ -52,10 +52,10 @@ get_filename_component(ABSOLUTE_PLUGINS_INSTALL_DIR ${PLUGINS_INSTALL_DIR} ABSOL
 message("Installing plugins to ${ABSOLUTE_PLUGINS_INSTALL_DIR}")
 set(FONTS_INSTALL_DIR bin/fonts CACHE STRING "installs the fonts in the specified directory")
 get_filename_component(ABSOLUTE_FONTS_INSTALL_DIR ${FONTS_INSTALL_DIR} ABSOLUTE)
-message("Installing fonts to ${FONTS_INSTALL_DIR}")
+message("Installing fonts to ${ABSOLUTE_FONTS_INSTALL_DIR}")
 
-
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++11 is minimum.")
+message("Using c++${CMAKE_CXX_STANDARD}")
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 find_package(ICU REQUIRED COMPONENTS uc)
