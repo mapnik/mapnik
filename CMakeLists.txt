@@ -48,7 +48,7 @@ option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++11 is minimum.")
-message("Using c++${CMAKE_CXX_STANDARD}")
+message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
 
 if(WIN32)
     set(DEFAULT_BIN_DIR bin)
@@ -75,10 +75,10 @@ else()
     set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_LIB_DIR}/mapnik/input)
 endif()
 set(PLUGINS_INSTALL_DIR ${DEFAULT_PLUGINS_INSTALL_DIR} CACHE STRING "installs the plugins in the specified directory")
-message("Installing plugins to ${PLUGINS_INSTALL_DIR}")
+message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 
 set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
-message("Installing fonts to ${FONTS_INSTALL_DIR}")
+message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 find_package(ICU REQUIRED COMPONENTS uc)
