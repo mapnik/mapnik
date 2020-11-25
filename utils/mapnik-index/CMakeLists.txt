@@ -17,5 +17,7 @@ target_link_libraries(mapnik-index PRIVATE
 )
 install(TARGETS mapnik-index
     EXPORT MapnikTargets
-    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
 )

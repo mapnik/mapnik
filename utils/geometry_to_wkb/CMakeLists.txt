@@ -9,5 +9,7 @@ target_link_libraries(geometry_to_wkb PRIVATE
 
 install(TARGETS geometry_to_wkb
     EXPORT MapnikTargets
-    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
 )

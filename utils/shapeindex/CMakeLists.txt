@@ -14,5 +14,7 @@ target_link_libraries(shapeindex PRIVATE
 )
 install(TARGETS shapeindex
     EXPORT MapnikTargets
-    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
 )
