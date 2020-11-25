@@ -91,8 +91,8 @@
     #define MAPNIK_DISABLE_UNUSED_VARIABLE                 MAPNIK_DISABLE_WARNING(-Wunused-variable)
     #define MAPNIK_DISABLE_MISMATCHED_TAGS                 MAPNIK_DISABLE_WARNING(-Wmismatched-tags)
 #else
-    #define MAPNIK_MAPNIK_DISABLE_WARNING_PUSH
-    #define MAPNIK_MAPNIK_DISABLE_WARNING_POP
+    #define MAPNIK_DISABLE_WARNING_PUSH
+    #define MAPNIK_DISABLE_WARNING_POP
     // add all of the above warnings here (will be used if unknown compiler)
     #define MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS         
     #define MAPNIK_DISABLE_WARNING_PRAGMAS                 
