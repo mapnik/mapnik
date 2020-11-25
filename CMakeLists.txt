@@ -47,19 +47,6 @@ option(BUILD_UTILITY_PGSQL2SQLITE "builds the utility program pgsql2sqlite" ON)
 option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
-if(WIN32)
-    set(DEFAULT_PLUGINS_INSTALL_DIR bin/mapnik/input)
-else()
-    set(DEFAULT_PLUGINS_INSTALL_DIR lib/mapnik/input)
-endif()
-set(PLUGINS_INSTALL_DIR ${DEFAULT_PLUGINS_INSTALL_DIR} CACHE STRING "installs the plugins in the specified directory")
-get_filename_component(ABSOLUTE_PLUGINS_INSTALL_DIR ${PLUGINS_INSTALL_DIR} ABSOLUTE)
-message("Installing plugins to ${ABSOLUTE_PLUGINS_INSTALL_DIR}")
-
-set(FONTS_INSTALL_DIR bin/fonts CACHE STRING "installs the fonts in the specified directory")
-get_filename_component(ABSOLUTE_FONTS_INSTALL_DIR ${FONTS_INSTALL_DIR} ABSOLUTE)
-message("Installing fonts to ${ABSOLUTE_FONTS_INSTALL_DIR}")
-
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++11 is minimum.")
 message("Using c++${CMAKE_CXX_STANDARD}")
 
@@ -79,6 +66,19 @@ set(MAPNIK_BIN_DIR ${DEFAULT_BIN_DIR} CACHE STRING "Install directory for binari
 set(MAPNIK_LIB_DIR ${DEFAULT_LIB_DIR} CACHE STRING "Install directory for libraries")
 # https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#archive-output-artifacts
 set(MAPNIK_ARCHIVE_DIR ${DEFAULT_ARCHIVE_DIR} CACHE STRING "Install directory for archives")
+
+set(INSTALL_CMAKE_DIR ${MAPNIK_LIB_DIR}/mapnik/cmake CACHE STRING "Install directory of the cmake targets")
+
+if(WIN32)
+    set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_BIN_DIR}/mapnik/input)
+else()
+    set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_LIB_DIR}/mapnik/input)
+endif()
+set(PLUGINS_INSTALL_DIR ${DEFAULT_PLUGINS_INSTALL_DIR} CACHE STRING "installs the plugins in the specified directory")
+message("Installing plugins to ${PLUGINS_INSTALL_DIR}")
+
+set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
+message("Installing fonts to ${FONTS_INSTALL_DIR}")
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 find_package(ICU REQUIRED COMPONENTS uc)
@@ -228,9 +228,9 @@ target_compile_definitions(headers INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 install(TARGETS headers 
     EXPORT MapnikTargets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
     INCLUDES DESTINATION include/
     PUBLIC_HEADER DESTINATION include/
 )
@@ -249,7 +249,6 @@ endif()
 include(CMakePackageConfigHelpers)
 
 # set the cmake targets install location
-set(INSTALL_CMAKE_DIR lib/cmake)
 set(INCLUDE_INSTALL_DIR include/)
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfigVersion.cmake"
