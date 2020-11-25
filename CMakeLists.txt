@@ -8,7 +8,7 @@ project(mapnik
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-option(BUILD_SHARED_LIBS "build mapnik dynamic" ON)
+option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
 option(BUILD_TEST "builds the tests" ON)
 option(USE_EXTERNAL_MAPBOX_GEOMETRY "Use a external mapnik/geometry.hpp. If off, use the submodule" OFF)
 option(USE_EXTERNAL_MAPBOX_POLYLABEL "Use a external mapnik/polylabel. If off, use the submodule" OFF)
@@ -62,6 +62,23 @@ message("Installing fonts to ${ABSOLUTE_FONTS_INSTALL_DIR}")
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++11 is minimum.")
 message("Using c++${CMAKE_CXX_STANDARD}")
+
+if(WIN32)
+    set(DEFAULT_BIN_DIR bin)
+    set(DEFAULT_LIB_DIR lib)
+    set(DEFAULT_ARCHIVE_DIR lib)
+else()
+    include(GNUInstallDirs)
+    set(DEFAULT_BIN_DIR ${CMAKE_INSTALL_BINDIR})
+    set(DEFAULT_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
+    set(DEFAULT_ARCHIVE_DIR ${CMAKE_INSTALL_LIBDIR})
+endif()
+# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#runtime-output-artifacts
+set(MAPNIK_BIN_DIR ${DEFAULT_BIN_DIR} CACHE STRING "Install directory for binaries")
+# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#library-output-artifacts
+set(MAPNIK_LIB_DIR ${DEFAULT_LIB_DIR} CACHE STRING "Install directory for libraries")
+# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#archive-output-artifacts
+set(MAPNIK_ARCHIVE_DIR ${DEFAULT_ARCHIVE_DIR} CACHE STRING "Install directory for archives")
 
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 find_package(ICU REQUIRED COMPONENTS uc)
