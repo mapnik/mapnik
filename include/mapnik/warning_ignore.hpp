@@ -19,38 +19,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#include <mapnik/warning.hpp>
 
-
-#pragma GCC diagnostic ignored "-Wunknown-pragmas" // clang+gcc
-#pragma GCC diagnostic ignored "-Wpragmas" // gcc
-#pragma GCC diagnostic ignored "-W#pragma-messages"
-#pragma GCC diagnostic ignored "-Wunsequenced"
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wredeclared-class-member"
-#pragma GCC diagnostic ignored "-Wunused-local-typedef"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs" // gcc5
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wc++11-narrowing"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
-#pragma GCC diagnostic ignored "-Wdisabled-macro-expansion"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#pragma GCC diagnostic ignored "-Wdocumentation"
-#pragma GCC diagnostic ignored "-Wdocumentation-unknown-command"
-#pragma GCC diagnostic ignored "-Wundef"
-#pragma GCC diagnostic ignored "-Wdeprecated"
-#pragma GCC diagnostic ignored "-Wpadded"
-#pragma GCC diagnostic ignored "-Wc++98-compat"
-#pragma GCC diagnostic ignored "-Wreserved-id-macro"
-#pragma GCC diagnostic ignored "-Wweak-vtables"
-#pragma GCC diagnostic ignored "-Wextra-semi"
-#pragma GCC diagnostic ignored "-Wglobal-constructors"
-#pragma GCC diagnostic ignored "-Wheader-hygiene"
-#pragma GCC diagnostic ignored "-Wexit-time-destructors"
-#pragma GCC diagnostic ignored "-Wswitch-enum"
-#pragma GCC diagnostic ignored "-Wmissing-noreturn"
-#pragma GCC diagnostic ignored "-Wcovered-switch-default"
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS // clang+gcc         
+MAPNIK_DISABLE_WARNING_PRAGMAS // gcc              
+MAPNIK_DISABLE_WARNING_PRAGMA_MESSAGES         
+MAPNIK_DISABLE_WARNING_UNSEQUENCED             
+MAPNIK_DISABLE_WARNING_UNUSED_FUNCTION         
+MAPNIK_DISABLE_WARNING_UNUSED_PARAMETER        
+MAPNIK_DISABLE_WARNING_REDECLARED_CLASS_MEMBER 
+MAPNIK_DISABLE_WARNING_UNUSED_LOCAL_TYPEDEF    
+MAPNIK_DISABLE_WARNING_UNUSED_LOCAL_TYPEDEFS // gcc5
+MAPNIK_DISABLE_WARNING_SHADOW                  
+MAPNIK_DISABLE_WARNING_CPP11_NARROWING         
+MAPNIK_DISABLE_WARNING_SIGN_CONVERSION         
+MAPNIK_DISABLE_WARNING_SIGN_COMPARE            
+MAPNIK_DISABLE_WARNING_CONVERSION              
+MAPNIK_DISABLE_WARNING_CPP_98_COMPAT_PEDANTIC  
+MAPNIK_DISABLE_WARNING_DISABLE_MACRO_EXPANSION 
+MAPNIK_DISABLE_WARNING_OLD_STYLE_CAST          
+MAPNIK_DISABLE_WARNING_DOCUMENTATION           
+MAPNIK_DISABLE_WARNING_DOCUMENTATION_UNKNOWN_COMMAND
+MAPNIK_DISABLE_WARNING_UNDEF                  
+MAPNIK_DISABLE_WARNING_DEPRECATED             
+MAPNIK_DISABLE_WARNING_PADDED                 
+MAPNIK_DISABLE_WARNING_CPP_98_COMPAT          
+MAPNIK_DISABLE_WARNING_RESERVED_ID_MACRO      
+MAPNIK_DISABLE_WARNING_WEAK_VTABLE            
+MAPNIK_DISABLE_WARNING_EXTRA_SEMI             
+MAPNIK_DISABLE_WARNING_GLOBAL_CONSTRUCTORS    
+MAPNIK_DISABLE_WARNING_HEADER_HYGIENE         
+MAPNIK_DISABLE_WARNING_EXIT_TIME_DESTRUCTORS  
+MAPNIK_DISABLE_WARNING_SWITCH_ENUM            
+MAPNIK_DISABLE_WARNING_MISSING_NORETURN       
+MAPNIK_DISABLE_WARNING_COVERED_SWITCH_DEFAULT 
+MAPNIK_DISABLE_WARNING_FLOAT_EQUAL   

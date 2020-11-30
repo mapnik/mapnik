@@ -27,10 +27,11 @@
 #include <mapnik/css/css_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/adapted/std_pair.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 
 /*
@@ -198,7 +199,8 @@ auto const css_skipper_def = space | "/*" >> *(char_ - "*/") >> "*/";
 
 auto const css_classes_def = +lexeme[ident];
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
     ident,
@@ -212,7 +214,7 @@ BOOST_SPIRIT_DEFINE(
     css_skipper
     );
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 } //css_grammar
 } //mapnik

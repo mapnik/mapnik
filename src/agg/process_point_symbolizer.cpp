@@ -34,10 +34,11 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <string>

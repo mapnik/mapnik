@@ -88,12 +88,12 @@ mapnik::feature_ptr geojson_index_featureset::next()
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        char const* start = (char const*)mapped_region_->get_address() + pos.off;
+        char const* start = static_cast<char const*>(mapped_region_->get_address()) + pos.off;
         char const*  end = start + pos.size;
 #else
         std::fseek(file_.get(), pos.off, SEEK_SET);
         std::vector<char> record;
-        record.resize(pos.second);
+        record.resize(pos.size);
         auto count = std::fread(record.data(), pos.size, 1, file_.get());
         auto const* start = record.data();
         auto const*  end = (count == 1) ? start + record.size() : start;

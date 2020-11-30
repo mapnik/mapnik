@@ -29,7 +29,8 @@
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/make_unique.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
@@ -42,7 +43,7 @@ extern "C"
 #include FT_STROKER_H
 #include FT_MODULE_H
 }
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <algorithm>

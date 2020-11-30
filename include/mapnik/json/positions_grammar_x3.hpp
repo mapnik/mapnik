@@ -23,10 +23,11 @@
 #ifndef MAPNIK_JSON_POSITIONS_GRAMMAR_X3_HPP
 #define MAPNIK_JSON_POSITIONS_GRAMMAR_X3_HPP
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // mapnik
 #include <mapnik/geometry.hpp>

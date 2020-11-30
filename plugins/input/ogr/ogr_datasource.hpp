@@ -40,10 +40,11 @@
 #include <vector>
 #include <string>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <ogrsf_frmts.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 #include "ogr_layer_ptr.hpp"
 
 class ogr_datasource : public mapnik::datasource

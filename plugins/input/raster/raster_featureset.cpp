@@ -30,11 +30,12 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/variant.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/format.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include "raster_featureset.hpp"
 

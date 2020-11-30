@@ -28,10 +28,11 @@
 #include <mapnik/svg/svg_path_grammar_x3.hpp>
 #include <mapnik/util/math.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik { namespace svg { namespace grammar {
 
@@ -191,13 +192,14 @@ auto const cmd = x3::rule<class cmd_tag> {} = M > *drawto_cmd ;
 
 auto const svg_path_def = +cmd;
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
     svg_path,
     svg_points
     );
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 }}}
 

@@ -26,10 +26,11 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/geometry/box2d.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 //auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
 // [x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
