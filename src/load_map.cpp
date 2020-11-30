@@ -60,22 +60,24 @@
 #include <mapnik/evaluate_global_attributes.hpp>
 #include <mapnik/boolean.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <algorithm>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_trans_affine.h"
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 using boost::tokenizer;
 

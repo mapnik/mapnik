@@ -29,10 +29,11 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/geom_util.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <ogrsf_frmts.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 class ogr_featureset : public mapnik::Featureset
 {

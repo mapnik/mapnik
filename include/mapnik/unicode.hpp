@@ -33,10 +33,11 @@
 #include <string>
 // icu
 #if (U_ICU_VERSION_MAJOR_NUM >= 59)
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <unicode/unistr.h>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 #endif
 
 struct UConverter;

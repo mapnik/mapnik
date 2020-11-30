@@ -27,10 +27,11 @@
 #include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/util/variant.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/geometry/algorithms/correct.hpp>
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 #include <type_traits>
 

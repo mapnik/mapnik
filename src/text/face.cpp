@@ -23,7 +23,8 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/debug.hpp>
 
-#pragma GCC diagnostic push
+#include <mapnik/warning.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
 extern "C"
@@ -32,7 +33,7 @@ extern "C"
 #include FT_TRUETYPE_TABLES_H
 }
 
-#pragma GCC diagnostic pop
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik
 {
