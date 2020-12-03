@@ -16,7 +16,6 @@ cache:
   - $HOME/.ccache
 
 dist: trusty
-sudo: false
 
 matrix:
   include:
