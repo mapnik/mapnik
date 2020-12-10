@@ -184,7 +184,7 @@ If you need help or want to participate starting points include:
 ### Cartographers
 
 TileMill, which uses Mapnik internally, offers great step by step tutorials for
-learning advanced map styling: http://mapbox.com/tilemill/docs/crashcourse/introduction/
+learning advanced map styling: https://tilemill-project.github.io/tilemill/docs/crashcourse/introduction/
 
 ### Programmers
 
