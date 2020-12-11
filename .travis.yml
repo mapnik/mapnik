@@ -1,7 +1,5 @@
 language: generic
 
-dist: xenial
-
 git:
   depth: 10
   submodules: false
@@ -17,6 +15,8 @@ cache:
   directories:
   - $HOME/.ccache
 
+dist: xenial
+
 matrix:
   include:
     - os: linux
@@ -28,6 +28,7 @@ matrix:
       addons:
         postgresql: "9.5"
         apt:
+          sources: [ 'ubuntu-toolchain-r-test' ]
           packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: linux
       name: Linux clang + coverage
@@ -40,6 +41,8 @@ matrix:
         - export LLVM_COV="llvm-cov"
       addons:
         postgresql: "9.5"
+        apt:
+          sources: [ 'ubuntu-toolchain-r-test' ]
           packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
     - os: osx
       name: OSX clang
