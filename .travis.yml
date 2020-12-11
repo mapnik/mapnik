@@ -24,7 +24,7 @@ matrix:
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
           CC="clang"
-          ENABLE_GLIBC_WORKAROUND=false
+          ENABLE_GLIBC_WORKAROUND=true
       addons:
         postgresql: "9.5"
         apt:
