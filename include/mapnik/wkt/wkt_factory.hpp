@@ -23,6 +23,8 @@
 #ifndef MAPNIK_WKT_FACTORY_HPP
 #define MAPNIK_WKT_FACTORY_HPP
 
+#include <boost/phoenix/phoenix.hpp>
+
 // mapnik
 #include <mapnik/geometry.hpp>
 

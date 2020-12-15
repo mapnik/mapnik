@@ -30,88 +30,87 @@
 #include <mapnik/json/properties_generator_grammar.hpp>
 
 // boost
+#include <boost/spirit/home/support/attributes.hpp>
 #include <boost/spirit/include/karma.hpp>
+#include <boost/fusion/include/adapt_adt.hpp>
+#include <boost/spirit/include/support_adapt_adt_attributes.hpp>
+
+
+namespace mapnik {
+
+struct kv_store
+{
+    using value_type = mapnik::feature_impl::value_type;
+    using iterator_type = mapnik::feature_kv_iterator2;
+    kv_store(mapnik::feature_impl const& f)
+        : start_(mapnik::value_not_null(),f.begin(),f.end()),
+          end_(mapnik::value_not_null(),f.end(),f.end())
+    {}
+    iterator_type start_;
+    iterator_type end_;
+};
+
+}
 
 namespace boost { namespace spirit { namespace traits {
 
 template <>
-struct is_container<mapnik::feature_impl const> : mpl::false_ {} ;
+struct is_container<mapnik::kv_store const> : mpl::false_ {} ;
 
 template <>
-struct container_iterator<mapnik::feature_impl const>
+struct container_iterator<mapnik::kv_store const>
 {
-    using type = mapnik::feature_kv_iterator2;
+    using type = mapnik::kv_store::iterator_type;
 };
 
 template <>
-struct begin_container<mapnik::feature_impl const>
+struct begin_container<mapnik::kv_store const>
 {
-    static mapnik::feature_kv_iterator2
-    call (mapnik::feature_impl const& f)
+    static mapnik::kv_store::iterator_type
+    call (mapnik::kv_store const& kv)
     {
-        return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.begin(),f.end());
+        return kv.start_;
     }
 };
 
 template <>
-struct end_container<mapnik::feature_impl const>
+struct end_container<mapnik::kv_store const>
 {
-    static mapnik::feature_kv_iterator2
-    call (mapnik::feature_impl const& f)
+    static mapnik::kv_store::iterator_type
+    call (mapnik::kv_store const& kv)
     {
-        return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.end(),f.end());
+        return kv.end_;
     }
 };
 
-#if BOOST_VERSION >= 106900
-template <>
-struct transform_attribute<const mapnik::feature_impl, const mapnik::feature_impl &, boost::spirit::karma::domain, void>
-    : detail::transform_attribute_base<mapnik::feature_impl const, mapnik::feature_impl const&,  boost::spirit::karma::domain>
-{};
-
-template <>
-struct transform_attribute<const boost::fusion::cons<const mapnik::feature_impl &, boost::fusion::nil_>, const mapnik::feature_impl &,
-      boost::spirit::karma::domain, void>
-    : detail::transform_attribute_base<const boost::fusion::cons<const mapnik::feature_impl &, boost::fusion::nil_>, mapnik::feature_impl const&,  boost::spirit::karma::domain>
-{};
-#endif
 }}}
 
+BOOST_FUSION_ADAPT_ADT(
+    mapnik::feature_impl,
+    (int, int, obj.id(), /**/)
+    (mapnik::geometry::geometry<double>const&, mapnik::geometry::geometry<double> const&, obj.get_geometry(),/**/)
+    (mapnik::kv_store const, mapnik::kv_store const, mapnik::kv_store(obj), /**/))
+
 namespace mapnik { namespace json {
+namespace detail {
+template <typename T>
+#if BOOST_VERSION >= 107000
+struct attribute_type { using type = T();};
+#else
+struct attribute_type { using type = T const&();};
+#endif
+}
 
 namespace karma = boost::spirit::karma;
 
-template <typename T>
-struct get_id
-{
-    using feature_type = T;
-    using result_type = mapnik::value_integer;
-    result_type operator() (feature_type const& f) const
-    {
-        return f.id();
-    }
-};
-
-struct extract_geometry
-{
-    using result_type = mapnik::geometry::geometry<double> const&;
-    template <typename T>
-    result_type operator() (T const& f) const
-    {
-        return f.get_geometry();
-    }
-};
-
 template <typename OutputIterator, typename FeatureType>
 struct feature_generator_grammar :
-        karma::grammar<OutputIterator, FeatureType const&()>
+        karma::grammar<OutputIterator, typename detail::attribute_type<FeatureType>::type>
 {
     feature_generator_grammar();
-    karma::rule<OutputIterator, FeatureType const&()> feature;
-    geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry<double> > geometry;
-    properties_generator_grammar<OutputIterator, FeatureType> properties;
-    boost::phoenix::function<get_id<FeatureType> > id_;
-    boost::phoenix::function<extract_geometry> geom_;
+    karma::rule<OutputIterator, typename detail::attribute_type<FeatureType>::type> feature;
+    geometry_generator_grammar<OutputIterator, mapnik::geometry::geometry<double>> geometry;
+    properties_generator_grammar<OutputIterator, mapnik::kv_store> properties;
 };
 
 }}
