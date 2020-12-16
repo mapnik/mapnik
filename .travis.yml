@@ -21,16 +21,6 @@ sudo: false
 matrix:
   include:
     - os: linux
-      name: Linux gcc-6
-      env: >-
-          CXX="ccache g++-6"
-          CC="gcc-6"
-      addons:
-        postgresql: "9.4"
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.4-postgis-2.3' ]
-    - os: linux
       name: Linux clang-3.9
       env: >-
           CXX="ccache clang++-3.9 -Qunused-arguments"
