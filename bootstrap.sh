@@ -43,8 +43,8 @@ function install() {
     mason link $1 $2
 }
 
-ICU_VERSION="58.1"
-BOOST_VERSION="1.74.0"
+ICU_VERSION="57.1"
+BOOST_VERSION="1.73.0"
 
 function install_mason_deps() {
     install ccache 3.3.1
@@ -65,7 +65,7 @@ function install_mason_deps() {
     install boost_libsystem ${BOOST_VERSION}
     install boost_libfilesystem ${BOOST_VERSION}
     install boost_libprogram_options ${BOOST_VERSION}
-    install boost_libregex_icu58 ${BOOST_VERSION}
+    install boost_libregex_icu57 ${BOOST_VERSION}
     # technically boost thread and python are not a core dep, but installing
     # here by default helps make python-mapnik builds easier
     install boost_libthread ${BOOST_VERSION}
