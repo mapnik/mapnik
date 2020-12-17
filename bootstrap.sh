@@ -8,7 +8,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="cce4ebf4"
+MASON_VERSION="fde1d9f5"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -44,7 +44,7 @@ function install() {
 }
 
 ICU_VERSION="57.1"
-BOOST_VERSION="1.74.0"
+BOOST_VERSION="1.73.0"
 
 function install_mason_deps() {
     install ccache 3.3.1
