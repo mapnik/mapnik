@@ -6,6 +6,14 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.0.24
+
+Released: January xx, 2021
+
+(Packaged from xxxxxxxxx)
+
+- Backport support for `BOOST_VERSION >= 1_74`
+
 ## 3.0.23
 
 Released: February 18, 2020
