@@ -71,20 +71,19 @@ struct thunk_renderer : render_thunk_list_dispatch
     {
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
-        using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+        using marker_renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
 
         using namespace mapnik::svg;
-        using svg_attribute_type = agg::pod_bvector<path_attributes>;
         using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
                                                    svg_attribute_type,
-                                                   renderer_type,
+                                                   marker_renderer_type,
                                                    pixfmt_type>;
 
         buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
         ras_.reset();
         pixfmt_type pixf(render_buf);
         grid_renderer_base_type renb(pixf);
-        renderer_type ren(renb);
+        marker_renderer_type ren(renb);
         vertex_stl_adapter<svg_path_storage> stl_storage(thunk.src_->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_type svg_renderer(svg_path, thunk.attrs_);
@@ -100,12 +99,12 @@ struct thunk_renderer : render_thunk_list_dispatch
     {
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
-        using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
+        using marker_renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
         buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
         ras_.reset();
         pixfmt_type pixf(render_buf);
         grid_renderer_base_type renb(pixf);
-        renderer_type ren(renb);
+        marker_renderer_type ren(renb);
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
         render_raster_marker(ren, ras_, thunk.src_, feature_, offset_tr, thunk.opacity_);

@@ -55,11 +55,11 @@ struct thunk_renderer;
 template <>
 struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 {
-    using renderer_type = agg_renderer<image_rgba8>;
-    using buffer_type = renderer_type::buffer_type;
+    using agg_renderer_type = agg_renderer<image_rgba8>;
+    using buffer_type = agg_renderer_type::buffer_type;
     using text_renderer_type = agg_text_renderer<buffer_type>;
 
-    thunk_renderer(renderer_type &ren,
+    thunk_renderer(agg_renderer_type &ren,
                    std::unique_ptr<rasterizer> const& ras_ptr,
                    buffer_type *buf,
                    renderer_common &common)
@@ -75,7 +75,6 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-        using svg_attribute_type = agg::pod_bvector<svg::path_attributes>;
         using svg_renderer_type = svg::svg_renderer_agg<svg_path_adapter,
                                                         svg_attribute_type,
                                                         renderer_type,
@@ -134,7 +133,7 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
     }
 
 private:
-    renderer_type &ren_;
+    agg_renderer_type &ren_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
     buffer_type *buf_;
     renderer_common &common_;

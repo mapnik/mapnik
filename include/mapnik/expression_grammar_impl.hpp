@@ -233,11 +233,13 @@ expression_grammar<Iterator>::expression_grammar(std::string const& encoding)
             )
         ;
 
-    unary_function_expr = unary_func_type >> '(' > logical_expr > ')'
+    unary_function_expr = unary_func_type
+        > '(' > logical_expr > ')'
         ;
 
-    binary_function_expr = binary_func_type >> '(' > logical_expr > ','
-                                                   > logical_expr > ')'
+    binary_function_expr = binary_func_type
+        > '(' > logical_expr > ','
+        > logical_expr > ')'
         ;
 
     unary_expr = primary_expr [_val = _1]

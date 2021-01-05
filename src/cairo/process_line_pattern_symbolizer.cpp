@@ -212,8 +212,8 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         return;
     }
 
-    line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
-    switch (pattern)
+    line_pattern_enum pattern_e = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
+    switch (pattern_e)
     {
         case LINE_PATTERN_WARP:
         {

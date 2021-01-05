@@ -211,8 +211,8 @@ struct agg_renderer_process_visitor_l
 private:
     void render_by_pattern_type(image_rgba8 const& pattern_image) const
     {
-        line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym_, feature_, common_.vars_);
-        switch (pattern)
+        line_pattern_enum pattern_e = get<line_pattern_enum, keys::line_pattern>(sym_, feature_, common_.vars_);
+        switch (pattern_e)
         {
             case LINE_PATTERN_WARP:
             {

@@ -143,7 +143,6 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
 
     using namespace mapnik::svg;
-    using svg_attribute_type = agg::pod_bvector<path_attributes>;
     using svg_renderer_type = svg_renderer_agg<svg_path_adapter,
                                                svg_attribute_type,
                                                renderer_type,
@@ -153,12 +152,12 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     ras_ptr->reset();
     box2d<double> clip_box = common_.query_extent_;
 
-    using context_type = detail::grid_markers_renderer_context<svg_renderer_type,
-                                                               renderer_type,
-                                                               buf_type,
-                                                               grid_rasterizer,
-                                                               buffer_type>;
-    context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
+    using grid_context_type = detail::grid_markers_renderer_context<svg_renderer_type,
+                                                                    renderer_type,
+                                                                    buf_type,
+                                                                    grid_rasterizer,
+                                                                    buffer_type>;
+    grid_context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
 
     render_markers_symbolizer(
         sym, feature, prj_trans, common_, clip_box, renderer_context);
