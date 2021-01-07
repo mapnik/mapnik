@@ -1,6 +1,6 @@
 # Mapnik Installation
 
-Mapnik runs on Linux, OS X, Windows, and BSD systems.
+Mapnik runs on Linux, OS X, Windows, and BSD systems. It can also be used from a Docker image, see [DOCKER.md](the Docker usage instructions).
 
 First clone mapnik from github and initialize submodules
 
