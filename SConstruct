@@ -42,7 +42,7 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX11_CXXFLAGS = " -std=c++11 -DU_USING_ICU_NAMESPACE=0"
+DEFAULT_CXX11_CXXFLAGS = " -std=c++14 -DU_USING_ICU_NAMESPACE=0"
 DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
     # homebrew default
@@ -1168,12 +1168,12 @@ int main()
         return True
     return False
 
-def supports_cxx11(context,silent=False):
+def supports_cxx14(context,silent=False):
     ret = context.TryRun("""
 
 int main()
 {
-#if __cplusplus >= 201103
+#if __cplusplus >= 201402L
     return 0;
 #else
     return -1;
@@ -1182,7 +1182,7 @@ int main()
 
 """, '.cpp')
     if not silent:
-        context.Message('Checking if compiler (%s) supports -std=c++11 flag... ' % context.env.get('CXX','CXX'))
+        context.Message('Checking if compiler (%s) supports -std=c++14 flag... ' % context.env.get('CXX','CXX'))
     if silent:
         context.did_show_result=1
     context.Result(ret[0])
@@ -1214,7 +1214,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'harfbuzz_with_freetype_support': harfbuzz_with_freetype_support,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
-               'supports_cxx11'        : supports_cxx11,
+               'supports_cxx14'        : supports_cxx14,
                'CheckBoostScopedEnum'  : CheckBoostScopedEnum,
                }
 
@@ -1504,9 +1504,9 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
 
-    # test for C++11 support, which is required
-    if not env['HOST'] and not conf.supports_cxx11():
-        color_print(1,"C++ compiler does not support C++11 standard (-std=c++11), which is required. Please upgrade your compiler")
+    # test for C++14 support, which is required
+    if not env['HOST'] and not conf.supports_cxx14():
+        color_print(1,"C++ compiler does not support C++14 standard (-std=c++14), which is required. Please upgrade your compiler")
         Exit(1)
 
     if not env['HOST']:
