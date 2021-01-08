@@ -111,8 +111,9 @@ step "release notes: $RELEASE_NOTES"
 
 # create draft release
 curl --data "{\"tag_name\": \"${MAPNIK_VERSION}\",\"target_commitish\": \"master\",\"name\": \"${MAPNIK_VERSION}\",\"body\": \"${RELEASE_NOTES}\",\"draft\": ${IS_DRAFT},\"prerelease\": ${IS_PRERELEASE}}" \
-https://api.github.com/repos/mapnik/mapnik/releases?access_token=${GITHUB_TOKEN_MAPNIK_PUBLIC_REPO} \
-> create_response.json
+     -H "Authorization: token ${GITHUB_TOKEN_MAPNIK_PUBLIC_REPO}" \
+     https://api.github.com/repos/mapnik/mapnik/releases \
+     > create_response.json
 cat create_response.json
 # parse out upload url and form it up to post tarball
 UPLOAD_URL=$(python -c "import json;print json.load(open('create_response.json'))['upload_url'].replace('{?name,label}','?name=${TARBALL_COMPRESSED}')")
