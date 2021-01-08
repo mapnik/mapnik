@@ -6,6 +6,14 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## 3.1.0
+
+Released: January 8, 2021
+
+(Packaged from 445438e34)
+
+* Require c++14 compliant complier (Boost.Geometry `BOOST_VERSION >= 1_75`)
+
 ## 3.0.24
 
 Released: January 5, 2021
