@@ -15,49 +15,34 @@ cache:
   directories:
   - $HOME/.ccache
 
-dist: trusty
-sudo: false
+dist: xenial
 
 matrix:
   include:
     - os: linux
-      name: Linux gcc-6
+      name: Linux clang
       env: >-
-          CXX="ccache g++-6"
-          CC="gcc-6"
-      addons:
-        postgresql: "9.5"
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'libstdc++-6-dev', 'g++-6', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
-    - os: linux
-      name: Linux clang-3.9
-      env: >-
-          CXX="ccache clang++-3.9 -Qunused-arguments"
-          CC="clang-3.9"
-          ENABLE_GLIBC_WORKAROUND=true
-      before_install:
-        - export LINKFLAGS="-fuse-ld=gold-2.26"
+          CXX="ccache clang++ -Qunused-arguments"
+          CC="clang"
       addons:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'clang-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
+          packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: linux
-      name: Linux clang-3.9 + coverage
+      name: Linux clang + coverage
       env: >-
-          CXX="ccache clang++-3.9 -Qunused-arguments"
-          CC="clang-3.9"
+          CXX="ccache clang++ -Qunused-arguments"
+          CC="clang"
           COVERAGE=true
           QUIET=true
       before_install:
-        - export LINKFLAGS="-fuse-ld=gold-2.26"
-        - export LLVM_COV="llvm-cov-3.9"
+        - export LLVM_COV="llvm-cov"
       addons:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'clang-3.9', 'llvm-3.9', 'libstdc++-4.9-dev', 'xutils-dev', 'postgresql-9.5-postgis-2.3' ]
+          packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: osx
       name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
