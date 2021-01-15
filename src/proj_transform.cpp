@@ -32,9 +32,9 @@
 // boost
 #include <boost/geometry/algorithms/envelope.hpp>
 
-#ifdef MAPNIK_USE_PROJ4
-// proj4
-#include <proj_api.h>
+#ifdef MAPNIK_USE_PROJ
+// proj
+#include <proj.h>
 #endif
 
 // stl
@@ -126,14 +126,42 @@ proj_transform::proj_transform(projection const& source,
         }
         if (!known_trans)
         {
-#ifdef MAPNIK_USE_PROJ4
-            source_.init_proj4();
-            dest_.init_proj4();
+#ifdef MAPNIK_USE_PROJ
+            transform_ = proj_create_crs_to_crs(ctx_,
+                                                source_.params().c_str(),
+                                                dest_.params().c_str(), nullptr);
+            if (transform_ == nullptr)
+            {
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source_.params() + "'->'" + dest_.params() + "'");
+            }
+            PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
+            if (transform_gis == nullptr)
+            {
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source_.params() + "'->'" + dest_.params() + "'");
+            }
+            proj_destroy(transform_);
+            transform_ = transform_gis;
 #else
-            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ4): '") + source_.params() + "'->'" + dest_.params() + "'");
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source_.params() + "'->'" + dest_.params() + "'");
 #endif
         }
     }
+}
+
+proj_transform::~proj_transform()
+{
+#ifdef MAPNIK_USE_PROJ
+    if (transform_)
+    {
+        proj_destroy(transform_);
+        transform_ = nullptr;
+    }
+    if (ctx_)
+    {
+        proj_context_destroy(ctx_);
+        ctx_ = nullptr;
+    }
+#endif
 }
 
 bool proj_transform::equal() const
@@ -189,7 +217,6 @@ unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls)
 
 bool proj_transform::forward (double * x, double * y , double * z, int point_count, int offset) const
 {
-
     if (is_source_equal_dest_)
         return true;
 
@@ -202,37 +229,14 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         return merc2lonlat(x, y, point_count, offset);
     }
 
-#ifdef MAPNIK_USE_PROJ4
-    if (is_source_longlat_)
-    {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= DEG_TO_RAD;
-            y[i*offset] *= DEG_TO_RAD;
-        }
-    }
-
-    if (pj_transform( source_.proj_, dest_.proj_, point_count,
-                      offset, x,y,z) != 0)
-    {
+#ifdef MAPNIK_USE_PROJ
+    if (proj_trans_generic(transform_, PJ_FWD,
+                           x, offset * sizeof(double), point_count,
+                           y, offset * sizeof(double), point_count,
+                           z, offset * sizeof(double), point_count,
+                           0, 0, 0) != point_count)
         return false;
-    }
 
-    for(int j=0; j<point_count; j++) {
-        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
-        {
-            return false;
-        }
-    }
-
-    if (is_dest_longlat_)
-    {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= RAD_TO_DEG;
-            y[i*offset] *= RAD_TO_DEG;
-        }
-    }
 #endif
     return true;
 }
@@ -251,38 +255,13 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         return lonlat2merc(x, y, point_count, offset);
     }
 
-#ifdef MAPNIK_USE_PROJ4
-    if (is_dest_longlat_)
-    {
-        for (int i = 0; i < point_count; ++i)
-        {
-            x[i * offset] *= DEG_TO_RAD;
-            y[i * offset] *= DEG_TO_RAD;
-        }
-    }
-
-    if (pj_transform(dest_.proj_, source_.proj_, point_count,
-                     offset, x, y, z) != 0)
-    {
+#ifdef MAPNIK_USE_PROJ
+    if (proj_trans_generic(transform_, PJ_INV,
+                           x, offset * sizeof(double), point_count,
+                           y, offset * sizeof(double), point_count,
+                           z, offset * sizeof(double), point_count,
+                           0, 0, 0) != point_count)
         return false;
-    }
-
-    for (int j = 0; j < point_count; ++j)
-    {
-        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
-        {
-            return false;
-        }
-    }
-
-    if (is_source_longlat_)
-    {
-        for (int i = 0; i < point_count; ++i)
-        {
-            x[i * offset] *= RAD_TO_DEG;
-            y[i * offset] *= RAD_TO_DEG;
-        }
-    }
 #endif
     return true;
 }

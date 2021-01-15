@@ -37,6 +37,13 @@ MAPNIK_DISABLE_WARNING_POP
 #include <string>
 #include <stdexcept>
 
+
+// fwd decl
+struct projCtx_t;
+struct PJconsts;
+using PJ_CONTEXT = struct projCtx_t;
+using PJ = struct PJconsts;
+
 namespace mapnik {
 
 class proj_init_error : public std::runtime_error
@@ -66,7 +73,7 @@ public:
     void forward(double & x, double & y) const;
     void inverse(double & x,double & y) const;
     std::string expanded() const;
-    void init_proj4() const;
+    void init_proj() const;
 
 private:
     void swap (projection& rhs);
@@ -75,8 +82,8 @@ private:
     std::string params_;
     bool defer_proj_init_;
     mutable bool is_geographic_;
-    mutable void * proj_;
-    mutable void * proj_ctx_;
+    mutable PJ * proj_;
+    mutable PJ_CONTEXT * proj_ctx_;
 };
 
 template <typename charT, typename traits>

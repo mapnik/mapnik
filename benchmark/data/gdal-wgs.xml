@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map[]>
 <Map
-  srs="+init=epsg:4326"
+  srs="epsg:4326"
   background-color="#dfd8c9">
 
 <Style name="style">
@@ -10,7 +10,7 @@
   </Rule>
 </Style>
 <Layer name="layer"
-  srs="+init=epsg:4326">
+  srs="epsg:4326">
     <StyleName>style</StyleName>
     <Datasource>
        <Parameter name="file">./valid.geotiff.tif</Parameter>

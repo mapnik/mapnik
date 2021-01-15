@@ -1,6 +1,6 @@
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2017 Artem Pavlenko
+# Copyright (C) 2021 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -79,7 +79,7 @@ SCONF_TEMP_DIR = '.sconf_temp'
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
 BOOST_MIN_VERSION = '1.61'
 #CAIRO_MIN_VERSION = '1.8.0'
-
+PROJ_MIN_VERSION = (7, 2, 0)
 HARFBUZZ_MIN_VERSION = (0, 9, 34)
 HARFBUZZ_MIN_VERSION_STRING = "%s.%s.%s" % HARFBUZZ_MIN_VERSION
 
@@ -92,7 +92,7 @@ pretty_dep_names = {
     'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/GDAL',
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/OGR',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
+    'proj':'Proj C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
@@ -116,7 +116,7 @@ pretty_dep_names = {
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
     'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
-    'PROJ_LIB':'The directory where proj4 stores its data files. Must exist for proj4 to work correctly',
+    'PROJ_LIB':'The directory where proj stores its data files. Must exist for proj to work correctly',
     'GDAL_DATA':'The directory where GDAL stores its data files. Must exist for GDAL to work correctly',
     'ICU_DATA':'The directory where icu stores its data files. If ICU reports a path, it must exist. ICU can also be built without .dat files and in that case this path is empty'
     }
@@ -422,7 +422,7 @@ opts.AddVariables(
     BoolVariable('WEBP', 'Build Mapnik with WEBP read', 'True'),
     PathVariable('WEBP_INCLUDES', 'Search path for libwebp include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('WEBP_LIBS','Search path for libwebp library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
-    BoolVariable('PROJ', 'Build Mapnik with proj4 support to enable transformations between many different projections', 'True'),
+    BoolVariable('PROJ', 'Build Mapnik with proj support to enable transformations between many different projections', 'True'),
     PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('PG_INCLUDES', 'Search path for libpq (postgres client) include files', ''),
@@ -940,51 +940,40 @@ def CheckProjData(context, silent=False):
         context.Message('Checking for PROJ_LIB directory...')
     ret, out = context.TryRun("""
 
-// This is narly, could eventually be replaced using https://github.com/OSGeo/proj.4/pull/551]
-#include <proj_api.h>
+#include <proj.h>
 #include <iostream>
-#include <cstring>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <fstream>
 
-static void my_proj4_logger(void * user_data, int /*level*/, const char * msg)
+std::vector<std::string> split_searchpath(std::string const& paths)
 {
-    std::string* posMsg = static_cast<std::string*>(user_data);
-    *posMsg += msg;
+    std::vector<std::string> output;
+    std::stringstream ss(paths);
+    std::string path;
+
+    for( std::string path;std::getline(ss, path, ':');)
+    {
+        output.push_back(path);
+    }
+    return output;
 }
 
-// https://github.com/OSGeo/gdal/blob/ddbf6d39aa4b005a77ca4f27c2d61a3214f336f8/gdal/alg/gdalapplyverticalshiftgrid.cpp#L616-L633
-
-std::string find_proj_path(const char * pszFilename) {
-    std::string osMsg;
-    std::string osFilename;
-    projCtx ctx = pj_ctx_alloc();
-    pj_ctx_set_app_data(ctx, &osMsg);
-    pj_ctx_set_debug(ctx, PJ_LOG_DEBUG_MAJOR);
-    pj_ctx_set_logger(ctx, my_proj4_logger);
-    PAFile f = pj_open_lib(ctx, pszFilename, "rb");
-    if( f )
+int main()
+{
+    PJ_INFO info = proj_info();
+    std::string result = info.searchpath;
+    for (auto path : split_searchpath(result))
     {
-        pj_ctx_fclose(ctx, f);
+        std::ifstream file(path + "/proj.db");
+        if (file)
+        {
+            std::cout << path;
+            return 0;
+        }
     }
-    size_t nPos = osMsg.find("fopen(");
-    if( nPos != std::string::npos )
-    {
-        osFilename = osMsg.substr(nPos + strlen("fopen("));
-        nPos = osFilename.find(")");
-        if( nPos != std::string::npos )
-            osFilename = osFilename.substr(0, nPos);
-    }
-    pj_ctx_free(ctx);
-    return osFilename;
-}
-
-
-int main() {
-    std::string result = find_proj_path(" ");
-    std::cout << result;
-    if (result.empty()) {
-        return -1;
-    }
-    return 0;
+    return -1;
 }
 
 """, '.cpp')
@@ -992,7 +981,7 @@ int main() {
     if silent:
         context.did_show_result=1
     if ret:
-        context.Result('pj_open_lib returned %s' % value)
+        context.Result('proj_info.searchpath returned %s' % value)
     else:
         context.Result('Failed to detect (mapnik-config will have null value)')
     return value
@@ -1565,7 +1554,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].append('jpeg')
 
     if env['PROJ']:
-        OPTIONAL_LIBSHEADERS.append(['proj', 'proj_api.h', False,'C','-DMAPNIK_USE_PROJ4'])
+        OPTIONAL_LIBSHEADERS.append(['proj', 'proj.h', False,'C','-DMAPNIK_USE_PROJ'])
         inc_path = env['%s_INCLUDES' % 'PROJ']
         lib_path = env['%s_LIBS' % 'PROJ']
         env.AppendUnique(CPPPATH = fix_path(inc_path))

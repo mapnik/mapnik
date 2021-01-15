@@ -51,11 +51,11 @@ static const char * well_known_srs_strings[] = {
 
 boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {
-    if (srs == "+init=epsg:4326" || srs == MAPNIK_LONGLAT_PROJ)
+    if (srs == "epsg:4326" || srs == MAPNIK_LONGLAT_PROJ)
     {
         return boost::optional<well_known_srs_e>(mapnik::WGS_84);
     }
-    else if (srs == "+init=epsg:3857" || srs == MAPNIK_GMERC_PROJ)
+    else if (srs == "epsg:3857" || srs == MAPNIK_GMERC_PROJ)
     {
         return boost::optional<well_known_srs_e>(mapnik::G_MERC);
     }
@@ -65,11 +65,11 @@ boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 boost::optional<bool> is_known_geographic(std::string const& srs)
 {
     std::string trimmed = util::trim_copy(srs);
-    if (trimmed == "+init=epsg:3857")
+    if (trimmed == "epsg:3857")
     {
         return boost::optional<bool>(false);
     }
-    else if (trimmed == "+init=epsg:4326")
+    else if (trimmed == "epsg:4326")
     {
         return boost::optional<bool>(true);
     }

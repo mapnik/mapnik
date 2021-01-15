@@ -56,13 +56,13 @@ public:
     }
 };
 
-// echo -180 -60 | cs2cs -f "%.10f" +init=epsg:4326 +to +init=epsg:3857
+// echo -180 -60 | cs2cs -f "%.10f" epsg:4326 +to epsg:3857
 int main(int argc, char** argv)
 {
     mapnik::box2d<double> from(-180,-80,180,80);
     mapnik::box2d<double> to(-20037508.3427892476,-15538711.0963092316,20037508.3427892476,15538711.0963092316);
-    std::string from_str("+init=epsg:4326");
-    std::string to_str("+init=epsg:3857");
+    std::string from_str("epsg:4326");
+    std::string to_str("epsg:3857");
     std::string from_str2("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
     std::string to_str2("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over");
     return benchmark::sequencer(argc, argv)

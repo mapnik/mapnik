@@ -27,12 +27,12 @@
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/geometry/point.hpp>
+#include <mapnik/projection.hpp>
 // stl
 #include <vector>
 
 namespace mapnik {
 
-class projection;
 template <typename T> class box2d;
 
 class MAPNIK_DECL proj_transform : private util::noncopyable
@@ -40,7 +40,7 @@ class MAPNIK_DECL proj_transform : private util::noncopyable
 public:
     proj_transform(projection const& source,
                    projection const& dest);
-
+    ~proj_transform();
     bool equal() const;
     bool is_known() const;
     bool forward (double& x, double& y , double& z) const;
@@ -59,6 +59,8 @@ public:
     mapnik::projection const& dest() const;
 
 private:
+    PJ_CONTEXT* ctx_ = nullptr;
+    PJ* transform_ = nullptr;
     projection const& source_;
     projection const& dest_;
     bool is_source_longlat_;
