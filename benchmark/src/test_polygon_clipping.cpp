@@ -51,7 +51,7 @@ void render(mapnik::geometry::multi_polygon<double> const& geom,
     agg::pixfmt_rgba32_plain pixf(buf);
     ren_base renb(pixf);
     renderer ren(renb);
-    mapnik::proj_transform prj_trans(mapnik::projection("+init=epsg:4326"),mapnik::projection("+init=epsg:4326"));
+    mapnik::proj_transform prj_trans(mapnik::projection("epsg:4326"),mapnik::projection("epsg:4326"));
     ren.color(agg::rgba8(127,127,127,255));
     agg::rasterizer_scanline_aa<> ras;
     for (auto const& poly : geom)

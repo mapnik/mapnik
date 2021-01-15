@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 
 #include <iostream>
@@ -25,7 +24,7 @@ TEST_CASE("exceptions") {
 
 SECTION("handling") {
     try {
-        mapnik::projection srs("foo");
+        mapnik::projection srs("FAIL");
         // to avoid unused variable warning
         srs.params();
         REQUIRE(false);
@@ -38,7 +37,7 @@ SECTION("handling") {
         mapnik::projection srs("+proj=longlat foo",true);
         REQUIRE(srs.is_geographic());
         REQUIRE(true);
-        srs.init_proj4();
+        srs.init_proj();
         // oddly init_proj4 does not throw with old proj/ubuntu precise
         //REQUIRE(false);
     } catch (...) {

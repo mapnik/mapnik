@@ -26,8 +26,8 @@ SECTION("polygon closing - epsg 2330") {
     va_type va(g);
     mapnik::box2d<double> extent(16310607, 7704513, 16310621, 7704527);
     mapnik::view_transform tr(512, 512, extent);
-    mapnik::projection proj1("+init=epsg:2330");
-    mapnik::projection proj2("+init=epsg:4326");
+    mapnik::projection proj1("epsg:2330");
+    mapnik::projection proj2("epsg:4326");
     mapnik::proj_transform prj_trans(proj1, proj2);
     path_type path(tr, va, prj_trans);
 
@@ -78,8 +78,8 @@ SECTION("polygon closing - epsg 32633") {
     va_type va(g);
     mapnik::box2d<double> extent(166022, 0, 833978, 9329005);
     mapnik::view_transform tr(512, 512, extent);
-    mapnik::projection proj1("+init=epsg:32633");
-    mapnik::projection proj2("+init=epsg:4326");
+    mapnik::projection proj1("epsg:32633");
+    mapnik::projection proj2("epsg:4326");
     mapnik::proj_transform prj_trans(proj1, proj2);
     path_type path(tr, va, prj_trans);
 

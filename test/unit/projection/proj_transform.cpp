@@ -15,8 +15,8 @@ TEST_CASE("projection transform")
 
 SECTION("Test bounding box transforms - 4326 to 3857")
 {
-    mapnik::projection proj_4326("+init=epsg:4326");
-    mapnik::projection proj_3857("+init=epsg:3857");
+    mapnik::projection proj_4326("epsg:4326");
+    mapnik::projection proj_3857("epsg:3857");
     mapnik::proj_transform prj_trans(proj_4326, proj_3857);
 
     double minx = -45.0;
@@ -48,8 +48,8 @@ SECTION("Test bounding box transforms - 4326 to 3857")
 #if defined(MAPNIK_USE_PROJ4) && PJ_VERSION >= 480
 SECTION("test pj_transform failure behavior")
 {
-    mapnik::projection proj_4269("+init=epsg:4269");
-    mapnik::projection proj_3857("+init=epsg:3857");
+    mapnik::projection proj_4269("epsg:4269");
+    mapnik::projection proj_3857("epsg:3857");
     mapnik::proj_transform prj_trans(proj_4269, proj_3857);
     mapnik::proj_transform prj_trans2(proj_3857, proj_4269);
 
@@ -125,8 +125,8 @@ SECTION("test pj_transform failure behavior")
 // Github Issue https://github.com/mapnik/mapnik/issues/2648
 SECTION("Test proj antimeridian bbox")
 {
-    mapnik::projection prj_geog("+init=epsg:4326");
-    mapnik::projection prj_proj("+init=epsg:2193");
+    mapnik::projection prj_geog("epsg:4326");
+    mapnik::projection prj_proj("epsg:2193");
 
     mapnik::proj_transform prj_trans_fwd(prj_proj, prj_geog);
     mapnik::proj_transform prj_trans_rev(prj_geog, prj_proj);
@@ -134,7 +134,7 @@ SECTION("Test proj antimeridian bbox")
     // reference values taken from proj4 command line tool:
     // (non-corner points assume PROJ_ENVELOPE_POINTS == 20)
     //
-    //  cs2cs -Ef %.10f +init=epsg:2193 +to +init=epsg:4326 <<END
+    //  cs2cs -Ef %.10f epsg:2193 +to epsg:4326 <<END
     //        2105800 3087000 # left-most
     //        1495200 3087000 # bottom-most
     //        2105800 7173000 # right-most
@@ -171,7 +171,7 @@ SECTION("Test proj antimeridian bbox")
 
     // reference values taken from proj4 command line tool:
     //
-    //  cs2cs -Ef %.10f +init=epsg:2193 +to +init=epsg:4326 <<END
+    //  cs2cs -Ef %.10f epsg:2193 +to epsg:4326 <<END
     //        274000 3087000 # left-most
     //        276000 3087000 # bottom-most
     //        276000 7173000 # right-most
@@ -208,13 +208,13 @@ SECTION("Test proj antimeridian bbox")
 
 SECTION("proj_transform of coordinate arrays with stride > 1")
 {
-    mapnik::projection const proj_4326("+init=epsg:4326");
-    mapnik::projection const proj_3857("+init=epsg:3857");
-    mapnik::projection const proj_2193("+init=epsg:2193");
+    mapnik::projection const proj_4326("epsg:4326");
+    mapnik::projection const proj_3857("epsg:3857");
+    mapnik::projection const proj_2193("epsg:2193");
 
     SECTION("lonlat <-> Web Mercator")
     {
-        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:3857 <<END
+        //  cs2cs -Ef %.10f epsg:4326 +to epsg:3857 <<END
         //      170.142139 -43.595056
         //      175.566667 -39.283333
         //  END
@@ -245,7 +245,7 @@ SECTION("proj_transform of coordinate arrays with stride > 1")
     #ifdef MAPNIK_USE_PROJ4
     SECTION("lonlat <-> New Zealand Transverse Mercator 2000")
     {
-        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:2193 <<END
+        //  cs2cs -Ef %.10f epsg:4326 +to epsg:2193 <<END
         //      170.142139 -43.595056
         //      175.566667 -39.283333
         //  END
