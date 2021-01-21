@@ -78,6 +78,7 @@ if '-DHAVE_PNG' in env['CPPDEFINES']:
 
 if '-DMAPNIK_USE_PROJ' in env['CPPDEFINES']:
    lib_env['LIBS'].append('proj')
+   lib_env['LIBS'].append('sqlite3')
 
 if '-DHAVE_TIFF' in env['CPPDEFINES']:
    lib_env['LIBS'].append('tiff')
