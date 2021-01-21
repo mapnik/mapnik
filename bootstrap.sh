@@ -8,7 +8,7 @@ todo
 - shrink icu data
 '
 
-MASON_VERSION="fde1d9f5"
+MASON_VERSION="485514d8"
 
 function setup_mason() {
     if [[ ! -d ./.mason ]]; then
@@ -53,10 +53,10 @@ function install_mason_deps() {
     install libpng 1.6.28 libpng
     install libtiff 4.0.7 libtiff
     install libpq 9.6.2
-    install sqlite 3.21.0 libsqlite3
+    install sqlite 3.34.0 libsqlite3
     install expat 2.2.0 libexpat
     install icu ${ICU_VERSION}
-    install proj 6.1.0 libproj
+    install proj 7.2.1 libproj
     install pixman 0.34.0 libpixman-1
     install cairo 1.14.8 libcairo
     install webp 0.6.0 libwebp
