@@ -95,19 +95,17 @@ auto envelope_points(box2d<T> const& env, std::size_t num_points)
 
 proj_transform::proj_transform(projection const& source,
                                projection const& dest)
-    : source_(source),
-      dest_(dest),
-      is_source_longlat_(false),
+    : is_source_longlat_(false),
       is_dest_longlat_(false),
       is_source_equal_dest_(false),
       wgs84_to_merc_(false),
       merc_to_wgs84_(false)
 {
-    is_source_equal_dest_ = (source_ == dest_);
+    is_source_equal_dest_ = (source == dest);
     if (!is_source_equal_dest_)
     {
-        is_source_longlat_ = source_.is_geographic();
-        is_dest_longlat_ = dest_.is_geographic();
+        is_source_longlat_ = source.is_geographic();
+        is_dest_longlat_ = dest.is_geographic();
         boost::optional<well_known_srs_e> src_k = source.well_known();
         boost::optional<well_known_srs_e> dest_k = dest.well_known();
         bool known_trans = false;
@@ -127,22 +125,23 @@ proj_transform::proj_transform(projection const& source,
         if (!known_trans)
         {
 #ifdef MAPNIK_USE_PROJ
+            ctx_ = proj_context_create();
             transform_ = proj_create_crs_to_crs(ctx_,
-                                                source_.params().c_str(),
-                                                dest_.params().c_str(), nullptr);
+                                                source.params().c_str(),
+                                                dest.params().c_str(), nullptr);
             if (transform_ == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source_.params() + "'->'" + dest_.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
             }
             PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
             if (transform_gis == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source_.params() + "'->'" + dest_.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
             }
             proj_destroy(transform_);
             transform_ = transform_gis;
 #else
-            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source_.params() + "'->'" + dest_.params() + "'");
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
 #endif
         }
     }
@@ -450,15 +449,6 @@ bool proj_transform::forward(box2d<double>& env, int points) const
     env.width(result.width());
 
     return true;
-}
-
-mapnik::projection const& proj_transform::source() const
-{
-    return source_;
-}
-mapnik::projection const& proj_transform::dest() const
-{
-    return dest_;
 }
 
 }
