@@ -38,8 +38,7 @@ template <typename T> class box2d;
 class MAPNIK_DECL proj_transform : private util::noncopyable
 {
 public:
-    proj_transform(projection const& source,
-                   projection const& dest);
+    proj_transform(projection const& source, projection const& dest);
     ~proj_transform();
     bool equal() const;
     bool is_known() const;
@@ -55,14 +54,9 @@ public:
     bool backward (box2d<double> & box) const;
     bool forward (box2d<double> & box, int points) const;
     bool backward (box2d<double> & box, int points) const;
-    mapnik::projection const& source() const;
-    mapnik::projection const& dest() const;
-
 private:
     PJ_CONTEXT* ctx_ = nullptr;
     PJ* transform_ = nullptr;
-    projection const& source_;
-    projection const& dest_;
     bool is_source_longlat_;
     bool is_dest_longlat_;
     bool is_source_equal_dest_;
