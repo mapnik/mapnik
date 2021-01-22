@@ -326,10 +326,9 @@ void base_symbolizer_helper::initialize_points() const
             else if (type == geometry::geometry_types::Polygon)
             {
                 auto const& poly = util::get<geometry::polygon<double>>(geom);
-                proj_transform backwart_transform(prj_trans_.dest(), prj_trans_.source());
                 view_strategy vs(t_);
-                proj_strategy ps(backwart_transform);
-                using transform_group_type = geometry::strategy_group<proj_strategy, view_strategy>;
+                proj_backward_strategy ps(prj_trans_);
+                using transform_group_type = geometry::strategy_group<proj_backward_strategy, view_strategy>;
                 transform_group_type transform_group(ps, vs);
                 geometry::polygon<double> tranformed_poly(geometry::transform<double>(poly, transform_group));
                 if (how_placed == INTERIOR_PLACEMENT)
