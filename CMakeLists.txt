@@ -144,6 +144,7 @@ endif()
 
 set(MAPNIK_COMPILE_DEFS "")
 set(MAPNIK_OPTIONAL_LIBS "")
+set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 if(USE_LIBXML2)
     message(STATUS "Using LibXml2")
@@ -187,10 +188,12 @@ if(USE_CAIRO)
 endif()
 
 if(USE_PROJ4)
+    #https://proj.org/development/cmake.html
     message(STATUS "Using PROJ4")
     find_package(PROJ4 CONFIG REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ4 ACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1)
-    list(APPEND MAPNIK_OPTIONAL_LIBS proj)
+    list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ4_LIBRARIES})
+    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ4_INCLUDE_DIRS})
 endif()
 
 if(USE_GRID_RENDERER)
@@ -214,6 +217,7 @@ target_include_directories(headers INTERFACE
     $<BUILD_INTERFACE:${MAPBOX_PROTOZERO_INCLUDE_DIRS}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps>
     $<INSTALL_INTERFACE:include>
+    ${MAPNIK_OPTIONAL_LIBS_INCLUDE}
 )
 target_link_libraries(headers INTERFACE 
     Boost::boost
