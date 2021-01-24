@@ -17,6 +17,8 @@ add_library(json STATIC
 )
 add_library(mapnik::json ALIAS json)
 
+set_property(TARGET json PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 target_include_directories(json PRIVATE
     ${JPEG_INCLUDE_DIR}
     ${LIBXML2_INCLUDE_DIR}
