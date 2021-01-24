@@ -167,9 +167,6 @@ target_link_libraries(
 include(CTest)
 include(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
 include(${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
-set(APPS mapnik-test-unit mapnik-test-visual mapnik::mapnik)  # paths to executables
-set(DIRS ${CMAKE_BINARY_DIR}/src/RelWithDebInfo)   # directories to search for prerequisites
-copy_dlls_for_debug(${APPS} \"\" ${DIRS})
 
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
 file(COPY data-visual DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
