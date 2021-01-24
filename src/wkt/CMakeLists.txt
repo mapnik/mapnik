@@ -9,6 +9,8 @@ add_library(wkt STATIC
 )
 add_library(mapnik::wkt ALIAS wkt)
 
+set_property(TARGET wkt PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 target_include_directories(wkt PRIVATE
     ${MAPNIK_INCLUDE_PATH}
     ${JPEG_INCLUDE_DIR}
