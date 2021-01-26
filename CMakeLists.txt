@@ -8,6 +8,8 @@ project(mapnik
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+set(ADDITIONAL_LIBARIES_PATHS "" CACHE STRING "currently only used on windows. Pass directories containing the dlls that are missing. You can ignore this, if the build (verify_app step) runs successfully" "")
+
 option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
 option(BUILD_TEST "builds the tests" ON)
 option(USE_EXTERNAL_MAPBOX_GEOMETRY "Use a external mapnik/geometry.hpp. If off, use the submodule" OFF)
@@ -79,7 +81,6 @@ message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 
 set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
 message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
-
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 find_package(ICU REQUIRED COMPONENTS uc)
 find_package(Freetype REQUIRED)
