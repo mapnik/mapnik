@@ -63,8 +63,13 @@ find_path(Cairo_INCLUDE_DIR
     PATH_SUFFIXES cairo
 )
 
-find_library(Cairo_LIBRARY
+find_library(Cairo_LIBRARY_RELEASE
     NAMES ${Cairo_NAMES} cairo
+    HINTS ${PC_CAIRO_LIBDIR} ${PC_CAIRO_LIBRARY_DIRS}
+)
+
+find_library(Cairo_LIBRARY_DEBUG
+    NAMES ${Cairo_NAMES} cairod
     HINTS ${PC_CAIRO_LIBDIR} ${PC_CAIRO_LIBRARY_DIRS}
 )
 
@@ -86,22 +91,50 @@ if (Cairo_INCLUDE_DIR AND NOT Cairo_VERSION)
 endif ()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Cairo
+if(Cairo_LIBRARY_RELEASE AND Cairo_LIBRARY_DEBUG)
+  # set the libaries varible to use the release and debug versions
+  find_package_handle_standard_args(Cairo
     FOUND_VAR Cairo_FOUND
-    REQUIRED_VARS Cairo_LIBRARY Cairo_INCLUDE_DIR
+    REQUIRED_VARS Cairo_LIBRARY_RELEASE Cairo_LIBRARY_DEBUG Cairo_INCLUDE_DIR
     VERSION_VAR Cairo_VERSION
-)
+  )
+  set(Cairo_LIBRARIES optimized ${Cairo_LIBRARY_RELEASE} debug ${Cairo_LIBRARY_DEBUG})
+elseif(Cairo_LIBRARY_RELEASE)
+  # only the release library is available
+  find_package_handle_standard_args(Cairo
+    FOUND_VAR Cairo_FOUND
+    REQUIRED_VARS Cairo_LIBRARY_RELEASE Cairo_INCLUDE_DIR
+    VERSION_VAR Cairo_VERSION
+  )
+  set(Cairo_LIBRARIES optimized ${Cairo_LIBRARY_RELEASE})
+elseif(Cairo_LIBRARY_DEBUG)
+  # only the debug library is available
+  find_package_handle_standard_args(Cairo
+    FOUND_VAR Cairo_FOUND
+    REQUIRED_VARS Cairo_LIBRARY_DEBUG Cairo_INCLUDE_DIR
+    VERSION_VAR Cairo_VERSION
+  )
+  set(Cairo_LIBRARIES debug ${Cairo_LIBRARY_DEBUG})
+else()
+  # neither library is available - give standard error message
+  find_package_handle_standard_args(Cairo
+    FOUND_VAR Cairo_FOUND
+    REQUIRED_VARS Cairo_LIBRARY_RELEASE Cairo_LIBRARY_DEBUG Cairo_INCLUDE_DIR
+    VERSION_VAR Cairo_VERSION
+  )
+endif()
 
 if (Cairo_LIBRARY AND NOT TARGET Cairo::Cairo)
     add_library(Cairo::Cairo UNKNOWN IMPORTED GLOBAL)
     set_target_properties(Cairo::Cairo PROPERTIES
-        IMPORTED_LOCATION "${Cairo_LIBRARY}"
+        IMPORTED_LOCATION "${Cairo_LIBRARY_RELEASE}"
+        IMPORTED_LOCATION_DEBUG "${Cairo_LIBRARY_DEBUG}"
         INTERFACE_COMPILE_OPTIONS "${Cairo_COMPILE_OPTIONS}"
         INTERFACE_INCLUDE_DIRECTORIES "${Cairo_INCLUDE_DIR}"
     )
 endif ()
 
-mark_as_advanced(Cairo_INCLUDE_DIR Cairo_LIBRARIES)
+mark_as_advanced(Cairo_INCLUDE_DIR Cairo_LIBRARY_RELEASE Cairo_LIBRARY_DEBUG)
 
 if (Cairo_FOUND)
     set(Cairo_LIBRARIES ${Cairo_LIBRARY})
