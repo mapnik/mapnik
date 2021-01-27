@@ -131,17 +131,17 @@ proj_transform::proj_transform(projection const& source,
                                                 dest.params().c_str(), nullptr);
             if (transform_ == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") + source.params() + "'->'" + dest.params() + "'");
             }
             PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
             if (transform_gis == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") + source.params() + "'->'" + dest.params() + "'");
             }
             proj_destroy(transform_);
             transform_ = transform_gis;
 #else
-            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
 #endif
         }
     }

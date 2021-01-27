@@ -517,7 +517,6 @@ void Map::zoom_all()
         {
             return;
         }
-        projection proj0(srs_);
         box2d<double> ext;
         bool success = false;
         bool first = true;
@@ -526,10 +525,24 @@ void Map::zoom_all()
             if (layer.active())
             {
                 std::string const& layer_srs = layer.srs();
-                projection proj1(layer_srs);
-                proj_transform prj_trans(proj0,proj1);
+
+                std::string key = srs_ + layer_srs;
+                auto itr = proj_cache_.find(key);
+                proj_transform * proj_trans_ptr;
+                if (itr == proj_cache_.end())
+                {
+                    projection proj0(srs_, true);
+                    projection proj1(layer_srs, true);
+                    proj_trans_ptr = proj_cache_.emplace(key,
+                                                         std::make_unique<proj_transform>(proj0, proj1)).first->second.get();
+                }
+                else
+                {
+                    proj_trans_ptr = itr->second.get();
+                }
+
                 box2d<double> layer_ext = layer.envelope();
-                if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
+                if (proj_trans_ptr->backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
                     success = true;
                     MAPNIK_LOG_DEBUG(map) << "map: Layer " << layer.name() << " original ext=" << layer.envelope();
@@ -707,11 +720,23 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         mapnik::datasource_ptr ds = layer.datasource();
         if (ds)
         {
-            mapnik::projection dest(srs_);
-            mapnik::projection source(layer.srs());
-            proj_transform prj_trans(source,dest);
+            std::string key = srs_ + layer.srs();
+            auto itr = proj_cache_.find(key);
+            proj_transform * proj_trans_ptr;
+            if (itr == proj_cache_.end())
+            {
+                mapnik::projection dest(srs_, true);
+                mapnik::projection source(layer.srs(), true);
+                proj_trans_ptr = proj_cache_.emplace(key,
+                                                     std::make_unique<proj_transform>(source, dest)).first->second.get();
+            }
+            else
+            {
+                proj_trans_ptr = itr->second.get();
+            }
+
             double z = 0;
-            if (!prj_trans.equal() && !prj_trans.backward(x,y,z))
+            if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
             {
                 throw std::runtime_error("query_point: could not project x,y into layer srs");
             }
@@ -721,7 +746,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             {
                 map_ex.clip(*maximum_extent_);
             }
-            if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
+            if (!proj_trans_ptr->backward(map_ex,PROJ_ENVELOPE_POINTS))
             {
                 std::ostringstream s;
                 s << "query_point: could not project map extent '" << map_ex

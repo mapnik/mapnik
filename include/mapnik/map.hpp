@@ -33,7 +33,7 @@
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -104,7 +104,7 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-
+    mutable std::map<std::string, std::unique_ptr<proj_transform>> proj_cache_;
 public:
 
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
@@ -501,6 +501,10 @@ public:
     freetype_engine::font_memory_cache_type & get_font_memory_cache()
     {
         return font_memory_cache_;
+    }
+    std::map<std::string, std::unique_ptr<proj_transform>> & proj_cache() const
+    {
+        return proj_cache_;
     }
 
 private:
