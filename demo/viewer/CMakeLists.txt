@@ -46,7 +46,7 @@ install(TARGETS mapnik-viewer
 )
 
 
-if(WIN32)
+if(ADDITIONAL_LIBARIES_PATHS AND WIN32)
     include(CopyDllsForDebug)
     add_custom_command(TARGET mapnik-viewer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:mapnik::mapnik>" ${CMAKE_CURRENT_BINARY_DIR})
     copy_dlls_for_debug(mapnik-viewer \"\" \"${ADDITIONAL_LIBARIES_PATHS}\")
