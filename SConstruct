@@ -1728,29 +1728,28 @@ if not preconfigured:
     if env['HOST']:
         SQLITE_HAS_RTREE = True
 
-    if not env['HOST']:
-        env['QUERIED_PROJ_LIB'] = conf.CheckProjData()
-        if os.environ.get('PROJ_LIB'):
-            env['QUERIED_PROJ_LIB'] = os.environ['PROJ_LIB']
-            color_print(4,'Detected PROJ_LIB in environ, using env value instead: %s' % os.environ['PROJ_LIB'] )
-        env['QUERIED_ICU_DATA'] = conf.CheckIcuData()
-        if os.environ.get('ICU_DATA'):
-            env['QUERIED_ICU_DATA'] = os.environ['ICU_DATA']
-            color_print(4,'Detected ICU_DATA in environ, using env value instead: %s' % os.environ['ICU_DATA'] )
-        env['QUERIED_GDAL_DATA'] = conf.CheckGdalData()
-        if os.environ.get('GDAL_DATA'):
-            env['QUERIED_GDAL_DATA'] = os.environ['GDAL_DATA']
-            color_print(4,'Detected GDAL_DATA in environ, using env value instead: %s' % os.environ['GDAL_DATA'] )
-        # now validate the paths actually exist
-        if env['QUERIED_PROJ_LIB'] and not os.path.exists(env['QUERIED_PROJ_LIB']):
-            color_print(1,'%s not detected on your system' % env['QUERIED_PROJ_LIB'] )
-            env['MISSING_DEPS'].append('PROJ_LIB')
-        if env['QUERIED_GDAL_DATA'] and not os.path.exists(env['QUERIED_GDAL_DATA']):
-            color_print(1,'%s not detected on your system' % env['QUERIED_GDAL_DATA'] )
-            env['MISSING_DEPS'].append('GDAL_DATA')
-        if env['QUERIED_ICU_DATA'] and not os.path.exists(env['QUERIED_ICU_DATA']):
-            color_print(1,'%s not detected on your system' % env['QUERIED_ICU_DATA'] )
-            env['MISSING_DEPS'].append('ICU_DATA')
+    env['QUERIED_PROJ_LIB'] = conf.CheckProjData()
+    if os.environ.get('PROJ_LIB'):
+        env['QUERIED_PROJ_LIB'] = os.environ['PROJ_LIB']
+        color_print(4,'Detected PROJ_LIB in environ, using env value instead: %s' % os.environ['PROJ_LIB'] )
+    env['QUERIED_ICU_DATA'] = conf.CheckIcuData()
+    if os.environ.get('ICU_DATA'):
+        env['QUERIED_ICU_DATA'] = os.environ['ICU_DATA']
+        color_print(4,'Detected ICU_DATA in environ, using env value instead: %s' % os.environ['ICU_DATA'] )
+    env['QUERIED_GDAL_DATA'] = conf.CheckGdalData()
+    if os.environ.get('GDAL_DATA'):
+        env['QUERIED_GDAL_DATA'] = os.environ['GDAL_DATA']
+        color_print(4,'Detected GDAL_DATA in environ, using env value instead: %s' % os.environ['GDAL_DATA'] )
+    # now validate the paths actually exist
+    if env['QUERIED_PROJ_LIB'] and not os.path.exists(env['QUERIED_PROJ_LIB']):
+        color_print(1,'%s not detected on your system' % env['QUERIED_PROJ_LIB'] )
+        env['MISSING_DEPS'].append('PROJ_LIB')
+    if env['QUERIED_GDAL_DATA'] and not os.path.exists(env['QUERIED_GDAL_DATA']):
+        color_print(1,'%s not detected on your system' % env['QUERIED_GDAL_DATA'] )
+        env['MISSING_DEPS'].append('GDAL_DATA')
+    if env['QUERIED_ICU_DATA'] and not os.path.exists(env['QUERIED_ICU_DATA']):
+        color_print(1,'%s not detected on your system' % env['QUERIED_ICU_DATA'] )
+        env['MISSING_DEPS'].append('ICU_DATA')
 
     if len(env['REQUESTED_PLUGINS']):
         if env['HOST']:
