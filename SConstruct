@@ -1698,7 +1698,7 @@ if not preconfigured:
                 elif boost_version < [1, 57]:
                     env.Append(CXXFLAGS = '-DBOOST_NO_CXX11_SCOPED_ENUMS')
 
-    if not env['HOST'] and env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
         # we need libicui18n if using static boost libraries, so it is
         # important to try this check with the library linked
@@ -1709,16 +1709,13 @@ if not preconfigured:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
 
         for libname, headers, required, lang, define in OPTIONAL_LIBSHEADERS:
-            if not env['HOST']:
-                if not conf.CheckLibWithHeader(libname, headers, lang):
-                    if required:
-                        color_print(1, 'Could not find required header or shared library for %s' % libname)
-                        env['MISSING_DEPS'].append(libname)
-                    else:
-                        color_print(4, 'Could not find optional header or shared library for %s' % libname)
-                        env['SKIPPED_DEPS'].append(libname)
+            if not conf.CheckLibWithHeader(libname, headers, lang):
+                if required:
+                    color_print(1, 'Could not find required header or shared library for %s' % libname)
+                    env['MISSING_DEPS'].append(libname)
                 else:
-                    env.Append(CPPDEFINES = define)
+                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                    env['SKIPPED_DEPS'].append(libname)
             else:
                 env.Append(CPPDEFINES = define)
 
