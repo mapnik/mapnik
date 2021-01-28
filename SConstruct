@@ -1549,11 +1549,10 @@ if not preconfigured:
         else:
             env['MISSING_DEPS'].append('libxml2')
 
-    if not env['HOST']:
-        if conf.CheckHasDlfcn():
-            env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
-        else:
-            env['SKIPPED_DEPS'].append('dlfcn')
+    if conf.CheckHasDlfcn():
+        env.Append(CPPDEFINES = '-DMAPNIK_HAS_DLCFN')
+    else:
+        env['SKIPPED_DEPS'].append('dlfcn')
 
     if env['JPEG']:
         OPTIONAL_LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C','-DHAVE_JPEG'])
