@@ -127,6 +127,7 @@ private:
     std::vector<pgraster_overview> overviews_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
+    bool preunion_rasters_;
     bool prescale_rasters_;
     bool use_overviews_;
     bool clip_rasters_;
