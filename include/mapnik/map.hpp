@@ -41,7 +41,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <vector>
 #include <string>
@@ -57,6 +57,7 @@ class layer;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
+    using proj_cache_type = std::unordered_map<std::string, std::unique_ptr<proj_transform>>;
 public:
 
     enum aspect_fix_mode
@@ -104,7 +105,7 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-    mutable std::map<std::string, std::unique_ptr<proj_transform>> proj_cache_;
+    mutable proj_cache_type proj_cache_;
 public:
 
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
@@ -502,7 +503,7 @@ public:
     {
         return font_memory_cache_;
     }
-    std::map<std::string, std::unique_ptr<proj_transform>> & proj_cache() const
+    proj_cache_type& proj_cache() const
     {
         return proj_cache_;
     }
