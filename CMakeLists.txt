@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 3.15.0)
+
+include(cmake/GetVersion.cmake)
+get_mapnik_version()
+
 project(mapnik 
-    VERSION 3.0.24 
+    VERSION ${MAPNIK_MAJOR_VERSION}.${MAPNIK_MINOR_VERSION}.${MAPNIK_PATCH_VERSION}
     HOMEPAGE_URL "https://mapnik.org/" 
     DESCRIPTION "Mapnik is an open source toolkit for developing mapping applications" 
     LANGUAGES CXX 
 )
+
+message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
