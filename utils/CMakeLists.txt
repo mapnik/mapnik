@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
 if(BUILD_UTILITY_GEOMETRY_TO_WKB)
     message(STATUS "building utility geometry_to_wkb")
     add_subdirectory(geometry_to_wkb)

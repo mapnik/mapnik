@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
-
 add_library(json STATIC
     extract_bounding_boxes_x3.cpp
     feature_from_geojson.cpp

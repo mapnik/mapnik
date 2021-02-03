@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
-
 if(BUILD_DEMO_VIEWER)
     message(STATUS "Building demo viewer")
     add_subdirectory(viewer)

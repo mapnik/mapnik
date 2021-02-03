@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
-
-
 add_library(wkt STATIC
     geometry_to_wkt.cpp
     mapnik_wkt_generator_grammar.cpp

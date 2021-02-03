@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
 project(input-ogr)
 
 find_package(GDAL REQUIRED)
