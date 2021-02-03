@@ -215,7 +215,7 @@ if(USE_SVG_RENDERER)
 endif()
 
 if(NOT WIN32) 
-    message(STATUS "Compiling with -DMAPNIK_COMPILE_DEFS")
+    message(STATUS "Compiling with -DMAPNIK_HAS_DLCFN")
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_HAS_DLCFN)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
 endif()
