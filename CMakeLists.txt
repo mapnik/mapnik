@@ -214,6 +214,12 @@ if(USE_SVG_RENDERER)
     list(APPEND MAPNIK_COMPILE_DEFS SVG_RENDERER)
 endif()
 
+if(NOT WIN32) 
+    message(STATUS "Compiling with -DMAPNIK_COMPILE_DEFS")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_HAS_DLCFN)
+    list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
+endif()
+
 add_library(headers INTERFACE)
 add_library(mapnik::headers ALIAS headers)
 
