@@ -23,7 +23,7 @@ option(USE_TIFF "adds tiff support" ON)
 option(USE_WEBP "adds webp support" ON)
 option(USE_LIBXML2 "adds libxml2 support" ON)
 option(USE_CAIRO "adds the cairo renderer" ON)
-option(USE_PROJ4 "adds proj4 support" ON)
+option(USE_PROJ "adds proj support" ON)
 option(USE_GRID_RENDERER "adds grid renderer" ON)
 option(USE_SVG_RENDERER "adds grid renderer" ON)
 
@@ -83,7 +83,7 @@ message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
 message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
-find_package(ICU REQUIRED COMPONENTS uc)
+find_package(ICU REQUIRED COMPONENTS uc i18n data)
 find_package(Freetype REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
 
@@ -189,7 +189,7 @@ if(USE_CAIRO)
     list(APPEND MAPNIK_OPTIONAL_LIBS Cairo::Cairo)
 endif()
 
-if(USE_PROJ4)
+if(USE_PROJ)
     #https://proj.org/development/cmake.html
     message(STATUS "Using PROJ4")
     find_package(PROJ4 CONFIG REQUIRED)
@@ -222,10 +222,12 @@ target_include_directories(headers INTERFACE
     ${MAPNIK_OPTIONAL_LIBS_INCLUDE}
 )
 target_link_libraries(headers INTERFACE 
-    Boost::boost
+    Boost::headers
     Boost::regex
     Boost::filesystem
     ICU::uc
+    ICU::data
+    ICU::i18n
     Freetype::Freetype
     harfbuzz::harfbuzz
     ${MAPNIK_OPTIONAL_LIBS}
