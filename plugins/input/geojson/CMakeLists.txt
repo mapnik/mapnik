@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
 project(input-geojson)
 
 add_library(input-geojson SHARED 

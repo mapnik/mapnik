@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.15.0)
 if(USE_PLUGIN_INPUT_CSV)
     message(STATUS "using input plugin csv")
     add_subdirectory(csv)
