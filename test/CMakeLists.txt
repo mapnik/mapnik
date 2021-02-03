@@ -16,9 +16,12 @@ set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
 
-# for cmake 3.19+ https://cmake.org/cmake/help/git-stage/policy/CMP0110.html
-# might not be needed if catch updates its cmakes
-cmake_policy(SET CMP0110 OLD)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19.0") 
+    # for cmake 3.19+ https://cmake.org/cmake/help/git-stage/policy/CMP0110.html
+    # might not be needed if catch updates its cmakes
+    cmake_policy(SET CMP0110 OLD)
+endif()
+
 
 add_executable(mapnik-test-unit 
     unit/run.cpp
