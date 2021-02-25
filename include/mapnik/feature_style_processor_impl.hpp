@@ -257,16 +257,11 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     processor_context_ptr current_ctx = ds->get_context(ctx_map);
     std::string key = mat.proj0_.params() + mat.proj1_.params();
     auto itr = m_.proj_cache().find(key);
-    proj_transform * proj_trans_ptr;
     if (itr == m_.proj_cache().end())
     {
-        proj_trans_ptr = m_.proj_cache().emplace(key,
-                                                 std::make_unique<proj_transform>(mat.proj0_, mat.proj1_)).first->second.get();
+        throw std::runtime_error("Failed to initialise projection transform");
     }
-    else
-    {
-        proj_trans_ptr = itr->second.get();
-    }
+    proj_transform * proj_trans_ptr = itr->second.get();
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
@@ -508,17 +503,11 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
 
     std::string key = mat.proj0_.params() + mat.proj1_.params();
     auto itr = m_.proj_cache().find(key);
-    proj_transform * proj_trans_ptr;
     if (itr == m_.proj_cache().end())
     {
-        proj_trans_ptr = m_.proj_cache().emplace(key,
-                                                 std::make_unique<proj_transform>(mat.proj0_, mat.proj1_)).first->second.get();
+        throw std::runtime_error("Failed to initialize projection transform");
     }
-    else
-    {
-        proj_trans_ptr = itr->second.get();
-    }
-
+    proj_transform* proj_trans_ptr = itr->second.get();
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
 
     datasource_ptr ds = lay.datasource();

@@ -110,8 +110,9 @@ Map::Map(Map const& rhs)
       extra_params_(rhs.extra_params_),
       font_directory_(rhs.font_directory_),
       font_file_mapping_(rhs.font_file_mapping_),
-      // on copy discard memory cache
-      font_memory_cache_() {}
+      // on copy discard memory caches
+      font_memory_cache_(),
+      proj_cache_() {}
 
 
 Map::Map(Map && rhs)
@@ -133,7 +134,8 @@ Map::Map(Map && rhs)
       extra_params_(std::move(rhs.extra_params_)),
       font_directory_(std::move(rhs.font_directory_)),
       font_file_mapping_(std::move(rhs.font_file_mapping_)),
-      font_memory_cache_(std::move(rhs.font_memory_cache_)) {}
+      font_memory_cache_(std::move(rhs.font_memory_cache_)),
+      proj_cache_(std::move(rhs.proj_cache_)) {}
 
 Map::~Map() {}
 
@@ -164,7 +166,7 @@ void swap (Map & lhs, Map & rhs)
     std::swap(lhs.extra_params_, rhs.extra_params_);
     std::swap(lhs.font_directory_,rhs.font_directory_);
     std::swap(lhs.font_file_mapping_,rhs.font_file_mapping_);
-    // on assignment discard memory cache
+    // on assignment discard memory caches
     //std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
 }
 
@@ -323,11 +325,29 @@ size_t Map::layer_count() const
 
 void Map::add_layer(layer const& l)
 {
+    std::string key = srs_ + l.srs();
+    auto itr = proj_cache_.find(key);
+    if (itr == proj_cache_.end())
+    {
+        mapnik::projection source(srs_, true);
+        mapnik::projection dest(l.srs(), true);
+        proj_cache_.emplace(key,
+                            std::make_unique<proj_transform>(source, dest));
+    }
     layers_.emplace_back(l);
 }
 
 void Map::add_layer(layer && l)
 {
+    std::string key = srs_ + l.srs();
+    auto itr = proj_cache_.find(key);
+    if (itr == proj_cache_.end())
+    {
+        mapnik::projection source(srs_, true);
+        mapnik::projection dest(l.srs(), true);
+        proj_cache_.emplace(key,
+                            std::make_unique<proj_transform>(source, dest));
+    }
     layers_.push_back(std::move(l));
 }
 
@@ -350,17 +370,7 @@ layer const& Map::get_layer(size_t index) const
     return layers_[index];
 }
 
-layer& Map::get_layer(size_t index)
-{
-    return layers_[index];
-}
-
 std::vector<layer> const& Map::layers() const
-{
-    return layers_;
-}
-
-std::vector<layer> & Map::layers()
 {
     return layers_;
 }
@@ -528,19 +538,12 @@ void Map::zoom_all()
 
                 std::string key = srs_ + layer_srs;
                 auto itr = proj_cache_.find(key);
-                proj_transform * proj_trans_ptr;
+
                 if (itr == proj_cache_.end())
                 {
-                    projection proj0(srs_, true);
-                    projection proj1(layer_srs, true);
-                    proj_trans_ptr = proj_cache_.emplace(key,
-                                                         std::make_unique<proj_transform>(proj0, proj1)).first->second.get();
+                    throw std::runtime_error("Failed to initialise projection transform");
                 }
-                else
-                {
-                    proj_trans_ptr = itr->second.get();
-                }
-
+                proj_transform* proj_trans_ptr = itr->second.get();
                 box2d<double> layer_ext = layer.envelope();
                 if (proj_trans_ptr->backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
@@ -722,18 +725,12 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         {
             std::string key = srs_ + layer.srs();
             auto itr = proj_cache_.find(key);
-            proj_transform * proj_trans_ptr;
+
             if (itr == proj_cache_.end())
             {
-                mapnik::projection dest(srs_, true);
-                mapnik::projection source(layer.srs(), true);
-                proj_trans_ptr = proj_cache_.emplace(key,
-                                                     std::make_unique<proj_transform>(source, dest)).first->second.get();
+                throw std::runtime_error("Failed to initialise projection transform");
             }
-            else
-            {
-                proj_trans_ptr = itr->second.get();
-            }
+            proj_transform * proj_trans_ptr = itr->second.get();
 
             double z = 0;
             if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
