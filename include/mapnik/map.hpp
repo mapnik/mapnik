@@ -105,7 +105,7 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-    mutable proj_cache_type proj_cache_;
+    proj_cache_type proj_cache_;
 public:
 
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
@@ -261,12 +261,6 @@ public:
      */
     layer const& get_layer(size_t index) const;
 
-    /*! \brief Get a layer.
-     *  @param index layer number.
-     *  @return Non-constant layer.
-     */
-    layer& get_layer(size_t index);
-
     /*! \brief Remove a layer.
      *  @param index layer number.
      */
@@ -276,11 +270,6 @@ public:
      *  @return Constant layers.
      */
     std::vector<layer> const& layers() const;
-
-    /*! \brief Get all layers.
-     *  @return Non-constant layers.
-     */
-    std::vector<layer> & layers();
 
     /*! \brief Remove all layers and styles from the map.
      */
@@ -503,7 +492,7 @@ public:
     {
         return font_memory_cache_;
     }
-    proj_cache_type& proj_cache() const
+    proj_cache_type const& proj_cache() const
     {
         return proj_cache_;
     }
