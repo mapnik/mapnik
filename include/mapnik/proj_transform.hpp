@@ -44,16 +44,16 @@ public:
     bool is_known() const;
     bool forward (double& x, double& y , double& z) const;
     bool backward (double& x, double& y , double& z) const;
-    bool forward (double *x, double *y , double *z, int point_count, int offset = 1) const;
-    bool backward (double *x, double *y , double *z, int point_count, int offset = 1) const;
+    bool forward (double *x, double *y , double *z, std::size_t point_count, std::size_t offset = 1) const;
+    bool backward (double *x, double *y , double *z, std::size_t point_count, std::size_t offset = 1) const;
     bool forward (geometry::point<double> & p) const;
     bool backward (geometry::point<double> & p) const;
     unsigned int forward (std::vector<geometry::point<double>> & ls) const;
     unsigned int backward (std::vector<geometry::point<double>> & ls) const;
     bool forward (box2d<double> & box) const;
     bool backward (box2d<double> & box) const;
-    bool forward (box2d<double> & box, int points) const;
-    bool backward (box2d<double> & box, int points) const;
+    bool forward (box2d<double> & box, std::size_t points) const;
+    bool backward (box2d<double> & box, std::size_t points) const;
 private:
     PJ_CONTEXT* ctx_ = nullptr;
     PJ* transform_ = nullptr;

@@ -214,7 +214,7 @@ unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls)
     return 0;
 }
 
-bool proj_transform::forward (double * x, double * y , double * z, int point_count, int offset) const
+bool proj_transform::forward (double * x, double * y , double * z, std::size_t point_count, std::size_t offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -240,7 +240,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     return true;
 }
 
-bool proj_transform::backward (double * x, double * y , double * z, int point_count, int offset) const
+bool proj_transform::backward (double * x, double * y , double * z, std::size_t point_count, std::size_t offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -372,7 +372,7 @@ bool proj_transform::backward (box2d<double> & box) const
 // Alternative is to provide proper clipping box
 // in the target srs by setting map 'maximum-extent'
 
-bool proj_transform::backward(box2d<double>& env, int points) const
+bool proj_transform::backward(box2d<double>& env, std::size_t points) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -411,7 +411,7 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     return true;
 }
 
-bool proj_transform::forward(box2d<double>& env, int points) const
+bool proj_transform::forward(box2d<double>& env, std::size_t points) const
 {
     if (is_source_equal_dest_)
         return true;
