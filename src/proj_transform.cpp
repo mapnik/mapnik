@@ -28,7 +28,7 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/util/is_clockwise.hpp>
-
+#include <mapnik/util/trim.hpp>
 // boost
 #include <boost/geometry/algorithms/envelope.hpp>
 
@@ -450,5 +450,26 @@ bool proj_transform::forward(box2d<double>& env, std::size_t points) const
 
     return true;
 }
+
+std::string proj_transform::definition() const
+{
+#ifdef MAPNIK_USE_PROJ
+    if (transform_)
+    {
+        PJ_PROJ_INFO info = proj_pj_info(transform_);
+        return mapnik::util::trim_copy(info.definition);
+    }
+    else
+#endif
+        if (wgs84_to_merc_)
+        {
+            return "wgs84 => merc";
+        }
+        else if (merc_to_wgs84_)
+        {
+            return "merc => wgs84";
+        }
+    return "unknown";
+ }
 
 }

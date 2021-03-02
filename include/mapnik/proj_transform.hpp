@@ -54,6 +54,7 @@ public:
     bool backward (box2d<double> & box) const;
     bool forward (box2d<double> & box, std::size_t points) const;
     bool backward (box2d<double> & box, std::size_t points) const;
+    std::string definition() const;
 private:
     PJ_CONTEXT* ctx_ = nullptr;
     PJ* transform_ = nullptr;
