@@ -323,15 +323,27 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
+proj_transform * Map::get_proj_transform(std::string const& source, std::string const& dest) const
+{
+    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
+    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
+    if (itr == proj_cache_.end())
+    {
+        throw std::runtime_error("Failed to initialise projection transform:" +
+                                 key.first.to_string() + " -> " + key.second.to_string());
+    }
+    return itr->second.get();
+}
+
 void Map::add_layer(layer const& l)
 {
-    std::string key = srs_ + l.srs();
-    auto itr = proj_cache_.find(key);
+    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(srs_, l.srs());
+    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == proj_cache_.end())
     {
         mapnik::projection source(srs_, true);
         mapnik::projection dest(l.srs(), true);
-        proj_cache_.emplace(key,
+        proj_cache_.emplace(std::make_pair(srs_, l.srs()),
                             std::make_unique<proj_transform>(source, dest));
     }
     layers_.emplace_back(l);
@@ -339,13 +351,13 @@ void Map::add_layer(layer const& l)
 
 void Map::add_layer(layer && l)
 {
-    std::string key = srs_ + l.srs();
-    auto itr = proj_cache_.find(key);
+    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(srs_, l.srs());
+    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == proj_cache_.end())
     {
         mapnik::projection source(srs_, true);
         mapnik::projection dest(l.srs(), true);
-        proj_cache_.emplace(key,
+        proj_cache_.emplace(make_pair(srs_, l.srs()),
                             std::make_unique<proj_transform>(source, dest));
     }
     layers_.push_back(std::move(l));
@@ -535,15 +547,7 @@ void Map::zoom_all()
             if (layer.active())
             {
                 std::string const& layer_srs = layer.srs();
-
-                std::string key = srs_ + layer_srs;
-                auto itr = proj_cache_.find(key);
-
-                if (itr == proj_cache_.end())
-                {
-                    throw std::runtime_error("Failed to initialise projection transform");
-                }
-                proj_transform* proj_trans_ptr = itr->second.get();
+                proj_transform * proj_trans_ptr = get_proj_transform(srs_, layer_srs);;
                 box2d<double> layer_ext = layer.envelope();
                 if (proj_trans_ptr->backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
@@ -723,15 +727,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         mapnik::datasource_ptr ds = layer.datasource();
         if (ds)
         {
-            std::string key = srs_ + layer.srs();
-            auto itr = proj_cache_.find(key);
-
-            if (itr == proj_cache_.end())
-            {
-                throw std::runtime_error("Failed to initialise projection transform");
-            }
-            proj_transform * proj_trans_ptr = itr->second.get();
-
+            proj_transform * proj_trans_ptr = get_proj_transform(srs_ ,layer.srs());
             double z = 0;
             if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
             {

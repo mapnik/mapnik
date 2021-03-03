@@ -38,10 +38,12 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/optional.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/utility/string_view.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
-#include <unordered_map>
 #include <memory>
 #include <vector>
 #include <string>
@@ -57,8 +59,32 @@ class layer;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
-    using proj_cache_type = std::unordered_map<std::string, std::unique_ptr<proj_transform>>;
 public:
+    using key_type = std::pair<std::string, std::string>;
+    using compatible_key_type = std::pair<boost::string_view, boost::string_view>;
+
+    struct compatible_hash
+    {
+        template <typename KeyType>
+        std::size_t operator() (KeyType const& key) const
+        {
+            using hash_type = boost::hash<typename KeyType::first_type>;
+            std::size_t seed = hash_type{}(key.first);
+            seed ^= hash_type{}(key.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            return seed;
+        }
+    };
+
+    struct compatible_predicate
+    {
+        bool operator()(compatible_key_type const& k1,
+                        compatible_key_type const& k2) const
+        {
+            return k1 == k2;
+        }
+    };
+
+    using proj_cache_type = boost::unordered_map<key_type, std::unique_ptr<proj_transform>, compatible_hash>;
 
     enum aspect_fix_mode
     {
@@ -492,11 +518,8 @@ public:
     {
         return font_memory_cache_;
     }
-    proj_cache_type const& proj_cache() const
-    {
-        return proj_cache_;
-    }
 
+    proj_transform * get_proj_transform(std::string const& source, std::string const& dest) const;
 private:
     friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
