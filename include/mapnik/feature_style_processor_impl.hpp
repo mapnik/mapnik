@@ -66,10 +66,9 @@ struct layer_rendering_material
     std::vector<layer_rendering_material> materials_;
 
     layer_rendering_material(layer const& lay, projection const& dest)
-        :
-        lay_(lay),
-        proj0_(dest),
-        proj1_(lay.srs(),true) {}
+        : lay_(lay),
+          proj0_(dest),
+          proj1_(lay.srs(), true) {}
 
     layer_rendering_material(layer_rendering_material && rhs) = default;
 };
@@ -255,13 +254,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     processor_context_ptr current_ctx = ds->get_context(ctx_map);
-    std::string key = mat.proj0_.params() + mat.proj1_.params();
-    auto itr = m_.proj_cache().find(key);
-    if (itr == m_.proj_cache().end())
-    {
-        throw std::runtime_error("Failed to initialise projection transform");
-    }
-    proj_transform * proj_trans_ptr = itr->second.get();
+    proj_transform * proj_trans_ptr = m_.get_proj_transform(mat.proj0_.params(), mat.proj1_.params());
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
@@ -500,14 +493,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     layer const& lay = mat.lay_;
 
     std::vector<rule_cache> const & rule_caches = mat.rule_caches_;
-
-    std::string key = mat.proj0_.params() + mat.proj1_.params();
-    auto itr = m_.proj_cache().find(key);
-    if (itr == m_.proj_cache().end())
-    {
-        throw std::runtime_error("Failed to initialize projection transform");
-    }
-    proj_transform* proj_trans_ptr = itr->second.get();
+    proj_transform * proj_trans_ptr = m_.get_proj_transform(mat.proj0_.params(), mat.proj1_.params());
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
 
     datasource_ptr ds = lay.datasource();
