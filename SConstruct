@@ -1219,7 +1219,7 @@ int main()
     context.Result(ret)
     return ret
 
-__cplusplus = {'14':'201402L', '17':'201703L'}
+__cplusplus = {'14':'201402L', '17':'201703L', '20':'202002L'}
 
 def supports_cxx_std (context, silent=False):
     cplusplus_string = __cplusplus[env['CXX_STD']]
