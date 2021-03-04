@@ -523,6 +523,7 @@ public:
 private:
     friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
+    void init_proj_transforms();
 };
 
 DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);
