@@ -39,9 +39,14 @@ MAPNIK_DISABLE_WARNING_POP
 
 
 // fwd decl
+#if PROJ_VERSION_MAJOR >= 8
+struct pj_ctx;
+using PJ_CONTEXT = struct pj_ctx;
+#else
 struct projCtx_t;
-struct PJconsts;
 using PJ_CONTEXT = struct projCtx_t;
+#endif
+struct PJconsts;
 using PJ = struct PJconsts;
 
 namespace mapnik {
@@ -59,7 +64,7 @@ class MAPNIK_DECL projection
 public:
 
     projection(std::string const& params,
-                        bool defer_proj_init = false);
+               bool defer_proj_init = false);
     projection(projection const& rhs);
     ~projection();
 
