@@ -112,7 +112,10 @@ Map::Map(Map const& rhs)
       font_file_mapping_(rhs.font_file_mapping_),
       // on copy discard memory caches
       font_memory_cache_(),
-      proj_cache_() {}
+      proj_cache_()
+{
+    init_proj_transforms();
+}
 
 
 Map::Map(Map && rhs)
@@ -142,6 +145,7 @@ Map::~Map() {}
 Map& Map::operator=(Map rhs)
 {
     swap(*this, rhs);
+    init_proj_transforms();
     return *this;
 }
 
@@ -375,6 +379,7 @@ void Map::remove_all()
     fontsets_.clear();
     font_file_mapping_.clear();
     font_memory_cache_.clear();
+    proj_cache_.clear();
 }
 
 layer const& Map::get_layer(size_t index) const
@@ -442,6 +447,7 @@ std::string const&  Map::srs() const
 void Map::set_srs(std::string const& _srs)
 {
     srs_ = _srs;
+    init_proj_transforms();
 }
 
 void Map::set_buffer_size(int _buffer_size)
@@ -788,6 +794,22 @@ parameters& Map::get_extra_parameters()
 void Map::set_extra_parameters(parameters& params)
 {
     extra_params_ = params;
+}
+
+void Map::init_proj_transforms()
+{
+    for (auto const& l : layers_)
+    {
+        compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(srs_, l.srs());
+        auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
+        if (itr == proj_cache_.end())
+        {
+            mapnik::projection source(srs_, true);
+            mapnik::projection dest(l.srs(), true);
+            proj_cache_.emplace(std::make_pair(srs_, l.srs()),
+                                std::make_unique<proj_transform>(source, dest));
+        }
+    }
 }
 
 }
