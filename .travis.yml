@@ -1,5 +1,4 @@
 language: cpp
-python: 3.5
 
 git:
   depth: 10
