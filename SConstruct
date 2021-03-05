@@ -16,8 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from __future__ import print_function # support python2
-
 import os
 import sys
 import re
@@ -34,19 +32,8 @@ try:
 except:
     HAS_DISTUTILS = False
 
-try:
-    # Python 3.3+
-    from shlex import quote as shquote
-except:
-    # Python 2.7
-    from pipes import quote as shquote
-
-try:
-    # Python 3.3+
-    from subprocess import DEVNULL
-except:
-    # Python 2.7
-    DEVNULL = open(os.devnull, 'w')
+from shlex import quote as shquote
+from subprocess import DEVNULL
 
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
