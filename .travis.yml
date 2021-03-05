@@ -1,4 +1,4 @@
-language: generic
+language: cpp
 
 git:
   depth: 10
@@ -29,7 +29,7 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
+          packages: [ 'xutils-dev', 'libstdc++-6-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: linux
       name: Linux clang + coverage
       env: >-
@@ -43,7 +43,7 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
+          packages: [ 'xutils-dev', 'libstdc++-6-dev','postgresql-9.5-postgis-2.4' ]
     - os: osx
       name: OSX clang
       # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
