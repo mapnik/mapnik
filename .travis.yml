@@ -1,4 +1,4 @@
-language: generic
+language: cpp
 
 git:
   depth: 10
