@@ -77,11 +77,11 @@ config_override () {
 
 configure () {
     if enabled ${COVERAGE}; then
-        PYTHON=python3 ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@" \
+        ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@" \
                     COVERAGE=True DEBUG=True \
                     PGSQL2SQLITE=False SVG2PNG=False SVG_RENDERER=False
     else
-        PYTHON=python3 ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@"
+        ./configure "PREFIX=$PREFIX" "CUSTOM_LDFLAGS=$LINKFLAGS" "$@"
     fi
     # print final config values, sorted and indented
     sort -sk1,1 ./config.py | sed -e 's/^/	/'
