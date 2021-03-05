@@ -44,7 +44,7 @@ function install() {
 }
 
 ICU_VERSION="57.1"
-BOOST_VERSION="1.73.0"
+BOOST_VERSION="1.74.0"
 
 function install_mason_deps() {
     install ccache 3.3.1
@@ -54,7 +54,6 @@ function install_mason_deps() {
     install libtiff 4.0.7 libtiff
     install libpq 9.6.2
     install sqlite 3.17.0 libsqlite3
-    install expat 2.2.0 libexpat
     install icu ${ICU_VERSION}
     install proj 4.9.3 libproj
     install pixman 0.34.0 libpixman-1
