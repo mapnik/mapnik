@@ -29,11 +29,8 @@
 #include <qscrollbar.h>
 #include <qrubberband.h>
 #include <qdebug.h>
-#include <iostream>
 #include "layerlistmodel.hpp"
 #include "layer_info_dialog.hpp"
-
-using namespace std;
 
 LayerTab::LayerTab(QWidget* parent)
     : QListView(parent) {}
@@ -45,11 +42,11 @@ void LayerTab::paintEvent(QPaintEvent *e)
 }
 
 void LayerTab::dataChanged(const QModelIndex &topLeft,
-                           const QModelIndex &bottomRight)
+                           const QModelIndex &bottomRight,
+                           const QVector<int> &roles)
 {
-   QListView::dataChanged(topLeft, bottomRight);
-   qDebug("FIXME : update map view!");
-   emit update_mapwidget();
+    emit update_mapwidget();
+    QListView::dataChanged(topLeft, bottomRight, roles);
 }
 
 void LayerTab::selectionChanged(const QItemSelection & selected, const QItemSelection &)
@@ -57,7 +54,7 @@ void LayerTab::selectionChanged(const QItemSelection & selected, const QItemSele
    QModelIndexList list = selected.indexes();
    if (list.size() != 0)
    {
-      std::cout << "SELECTED LAYER ->" << list[0].row() << "\n";
+      qDebug("SELECTED LAYER -> %d",list[0].row());
       emit layerSelected(list[0].row());
    }
 }
