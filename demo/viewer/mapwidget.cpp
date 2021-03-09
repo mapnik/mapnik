@@ -598,6 +598,7 @@ void MapWidget::updateMap()
 
           proj_tr.forward(x0, y0, z);
           proj_tr.forward(x1, y1, z);
+          std::cout << "MAP SIZE:" << map_->width() << "," << map_->height() << std::endl;
           std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
           update();
           // emit signal to interested widgets
