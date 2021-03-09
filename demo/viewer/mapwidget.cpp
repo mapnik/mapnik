@@ -23,7 +23,7 @@
 #include <boost/bind.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/transform_path_adapter.hpp>
@@ -592,8 +592,12 @@ void MapWidget::updateMap()
           double y0 = ext.miny();
           double x1 = ext.maxx();
           double y1 = ext.maxy();
-          prj.inverse(x0,y0);
-          prj.inverse(x1,y1);
+          double z = 0;
+          std::string dest_srs = {"epsg:4326"};
+          mapnik::proj_transform proj_tr(map_->srs(), dest_srs);
+
+          proj_tr.forward(x0, y0, z);
+          proj_tr.forward(x1, y1, z);
           std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
           update();
           // emit signal to interested widgets
