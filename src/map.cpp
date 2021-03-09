@@ -333,8 +333,10 @@ proj_transform * Map::get_proj_transform(std::string const& source, std::string 
     auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == proj_cache_.end())
     {
-        throw std::runtime_error("Failed to initialise projection transform:" +
-                                 key.first.to_string() + " -> " + key.second.to_string());
+        mapnik::projection srs1(source, true);
+        mapnik::projection srs2(dest, true);
+        return proj_cache_.emplace(std::make_pair(source, dest),
+                                   std::make_unique<proj_transform>(srs1, srs2)).first->second.get();
     }
     return itr->second.get();
 }
@@ -387,7 +389,17 @@ layer const& Map::get_layer(size_t index) const
     return layers_[index];
 }
 
+layer& Map::get_layer(size_t index)
+{
+    return layers_[index];
+}
+
 std::vector<layer> const& Map::layers() const
+{
+    return layers_;
+}
+
+std::vector<layer> & Map::layers()
 {
     return layers_;
 }
