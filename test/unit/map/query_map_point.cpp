@@ -27,6 +27,23 @@
 #include <mapnik/featureset.hpp>
 #include <mapnik/load_map.hpp>
 
+
+namespace {
+
+bool test_query_point(mapnik::Map const& map,
+                      double x, double y,
+                      std::string const& name, std::string const& expected_val)
+{
+    auto featureset = map.query_map_point(0u, x, y);
+    while (auto feature = featureset->next())
+    {
+        auto val = feature->get(name);
+        return (val.to_string() == expected_val);
+    }
+    return false;
+}
+}
+
 TEST_CASE("Query map point") {
 
 SECTION("Polygons") {
@@ -34,49 +51,10 @@ SECTION("Polygons") {
     mapnik::Map map(882,780);
     mapnik::load_map(map, "./test/data/good_maps/wgs842merc_reprojection.xml");
     map.zoom_all();
-
-    {
-        auto featureset = map.query_map_point(0u, 351, 94);
-        while (auto feature = featureset->next())
-        {
-            auto val = feature->get("ADMIN");
-            CHECK(val.to_string() == "Greenland");
-        }
-
-    }
-    {
-        auto featureset = map.query_map_point(0u, 402, 182);
-        while (auto feature = featureset->next())
-        {
-            auto val = feature->get("ADMIN");
-            CHECK(val.to_string() == "Iceland");
-        }
-    }
-    {
-        auto featureset = map.query_map_point(0u, 339, 687);
-        while (auto feature = featureset->next())
-        {
-            auto val = feature->get("ADMIN");
-            CHECK(val.to_string() == "Antarctica");
-        }
-
-    }
-
-    {
-        auto featureset = map.query_map_point(0u, 35, 141);
-        while (auto feature = featureset->next())
-        {
-            auto val = feature->get("ADMIN");
-            CHECK(val.to_string() == "Russia");
-        }
-    }
-    {
-        auto featureset = map.query_map_point(0u, 737, 297);
-        while (auto feature = featureset->next())
-        {
-            auto val = feature->get("ADMIN");
-            CHECK(val.to_string() == "Japan");
-        }
-    }
+    CHECK(test_query_point(map, 351, 94, "ADMIN", "Greenland"));
+    CHECK(test_query_point(map, 402, 182,"ADMIN", "Iceland"));
+    CHECK(test_query_point(map, 339, 687,"ADMIN", "Antarctica"));
+    CHECK(test_query_point(map, 35, 141, "ADMIN", "Russia"));
+    CHECK(test_query_point(map, 737, 297,"ADMIN", "Japan"));
 }
 }
