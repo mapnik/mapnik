@@ -745,7 +745,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         mapnik::datasource_ptr ds = layer.datasource();
         if (ds)
         {
-            proj_transform * proj_trans_ptr = get_proj_transform(srs_ ,layer.srs());
+            proj_transform * proj_trans_ptr = get_proj_transform(layer.srs(), srs_);
             double z = 0;
             if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
             {
