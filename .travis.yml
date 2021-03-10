@@ -51,6 +51,7 @@ matrix:
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
       before_install:
+        - echo $DYLD_LIBRARY_PATH
         - brew info boost
         - brew uninstall --ignore-dependencies boost@1.74
 
@@ -68,8 +69,8 @@ install:
  #- on 'osx' pg_ctl -w start -l postgres.log --pgdata ${DATA_PATH};
  #- on 'osx' cat postgres.log;
  #- on 'osx' createuser -s postgres
- #- psql -c 'create database template_postgis;' -U postgres
- #- psql -c 'create extension postgis;' -d template_postgis -U postgres
+ - on 'linux' psql -c 'create database template_postgis;' -U postgres
+ - on 'linux' psql -c 'create extension postgis;' -d template_postgis -U postgres
  - enabled ${COVERAGE} curl -S -f https://codecov.io/bash -o codecov
  - enabled ${COVERAGE} chmod +x codecov
 
