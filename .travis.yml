@@ -50,6 +50,9 @@ matrix:
       osx_image: xcode12.2
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
+      before_install:
+        - brew info boost
+        - brew remove boost@1.74
 
 install:
  - source scripts/travis-common.sh
