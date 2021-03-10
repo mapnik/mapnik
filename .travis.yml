@@ -46,8 +46,8 @@ matrix:
           packages: [ 'xutils-dev', 'libstdc++-6-dev','postgresql-9.5-postgis-2.4' ]
     - os: osx
       name: OSX clang
-      # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
-      osx_image: xcode11
+      #https://docs.travis-ci.com/user/reference/osx#macos-version
+      osx_image: xcode12.2
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
 
