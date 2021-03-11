@@ -120,8 +120,6 @@ SECTION("test pj_transform failure behavior")
     proj1 = nullptr;
 }
 
-#endif
-
 // Github Issue https://github.com/mapnik/mapnik/issues/2648
 SECTION("Test proj antimeridian bbox")
 {
@@ -205,12 +203,18 @@ SECTION("Test proj antimeridian bbox")
         }
     }
 }
+#endif
 
 SECTION("proj_transform of coordinate arrays with stride > 1")
 {
+<<<<<<< HEAD
     mapnik::projection const proj_4326("epsg:4326");
     mapnik::projection const proj_3857("epsg:3857");
     mapnik::projection const proj_2193("epsg:2193");
+=======
+    mapnik::projection const proj_4326("+init=epsg:4326");
+    mapnik::projection const proj_3857("+init=epsg:3857");
+>>>>>>> master
 
     SECTION("lonlat <-> Web Mercator")
     {
@@ -245,7 +249,12 @@ SECTION("proj_transform of coordinate arrays with stride > 1")
     #ifdef MAPNIK_USE_PROJ4
     SECTION("lonlat <-> New Zealand Transverse Mercator 2000")
     {
+<<<<<<< HEAD
         //  cs2cs -Ef %.10f epsg:4326 +to epsg:2193 <<END
+=======
+        mapnik::projection const proj_2193("+init=epsg:2193");
+        //  cs2cs -Ef %.10f +init=epsg:4326 +to +init=epsg:2193 <<END
+>>>>>>> master
         //      170.142139 -43.595056
         //      175.566667 -39.283333
         //  END
