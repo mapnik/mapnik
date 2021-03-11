@@ -51,11 +51,11 @@ matrix:
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
       before_install:
-        - brew info proj
-        - brew info boost
+        - brew list
         - brew unlink boost
         - brew unlink proj
-
+        - brew unlink jpeg
+        - brew unlink png
 install:
  - source scripts/travis-common.sh
  # workaround travis rvm bug
