@@ -84,7 +84,7 @@ before_script:
 script:
  - git_submodule_update --init deps/
  - on 'osx' brew unlink $(brew list --formula)
- - on 'osx' brew link git
+ - on 'osx' brew link git postgresql postgis
  - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false} QUIET=${QUIET:-false}
  #- cat config.log => comment out to reduce log size limit on travis-ci
  # we limit the `make` to 40 min
