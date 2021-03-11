@@ -51,9 +51,10 @@ matrix:
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
       before_install:
-        - echo $DYLD_LIBRARY_PATH
+        - brew info proj
         - brew info boost
-        - brew uninstall --ignore-dependencies boost@1.74
+        - brew unlink boost
+        - brew unlink proj
 
 install:
  - source scripts/travis-common.sh
