@@ -1,4 +1,4 @@
-language: generic
+language: cpp
 
 git:
   depth: 10
@@ -9,6 +9,7 @@ env:
    - CCACHE_TEMPDIR=/tmp/.ccache-temp
    - CCACHE_COMPRESS=1
    - PREFIX=/tmp/mapnik
+   - PYTHON=python3
    - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
 
 cache:
@@ -28,7 +29,7 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
+          packages: [ 'xutils-dev', 'libstdc++-6-dev', 'postgresql-9.5-postgis-2.4' ]
     - os: linux
       name: Linux clang + coverage
       env: >-
@@ -42,13 +43,14 @@ matrix:
         postgresql: "9.5"
         apt:
           sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'xutils-dev', 'postgresql-9.5-postgis-2.4' ]
+          packages: [ 'xutils-dev', 'libstdc++-6-dev','postgresql-9.5-postgis-2.4' ]
     - os: osx
       name: OSX clang
-      # https://docs.travis-ci.com/user/languages/objective-c/#Supported-OS-X-iOS-SDK-versions
-      osx_image: xcode7.3 # upgrades clang from 6 -> 7
+      #https://docs.travis-ci.com/user/reference/osx#macos-version
+      osx_image: xcode12.2
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
+      before_install:
 
 install:
  - source scripts/travis-common.sh
@@ -81,6 +83,8 @@ before_script:
 
 script:
  - git_submodule_update --init deps/
+ - on 'osx' brew unlink $(brew list --formula)
+ - on 'osx' brew link git postgresql postgis
  - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false} QUIET=${QUIET:-false}
  #- cat config.log => comment out to reduce log size limit on travis-ci
  # we limit the `make` to 40 min
