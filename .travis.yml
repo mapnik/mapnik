@@ -51,7 +51,7 @@ matrix:
       env: >-
           CXX="ccache clang++ -Qunused-arguments"
       before_install:
-        - brew unlink $(brew list)
+
 install:
  - source scripts/travis-common.sh
  # workaround travis rvm bug
@@ -60,14 +60,14 @@ install:
  - export PATH=${PREFIX}/bin:$(pwd)/mason_packages/.link/bin:${PATH}
  - export COVERAGE=${COVERAGE:-false}
  - export BENCH=${BENCH:-false}
- #- on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
- #- on 'osx' rm -rf ${DATA_PATH}
- #- on 'osx' initdb ${DATA_PATH} -E utf8
- #- on 'osx' pg_ctl -w start -l postgres.log --pgdata ${DATA_PATH};
- #- on 'osx' cat postgres.log;
- #- on 'osx' createuser -s postgres
- - on 'linux' psql -c 'create database template_postgis;' -U postgres
- - on 'linux' psql -c 'create extension postgis;' -d template_postgis -U postgres
+ - on 'osx' export DATA_PATH=$(brew --prefix)/var/postgres
+ - on 'osx' rm -rf ${DATA_PATH}
+ - on 'osx' initdb ${DATA_PATH} -E utf8
+ - on 'osx' pg_ctl -w start -l postgres.log --pgdata ${DATA_PATH};
+ - on 'osx' cat postgres.log;
+ - on 'osx' createuser -s postgres
+ - psql -c 'create database template_postgis;' -U postgres
+ - psql -c 'create extension postgis;' -d template_postgis -U postgres
  - enabled ${COVERAGE} curl -S -f https://codecov.io/bash -o codecov
  - enabled ${COVERAGE} chmod +x codecov
 
@@ -83,6 +83,7 @@ before_script:
 
 script:
  - git_submodule_update --init deps/
+ - on 'osx' - brew unlink $(brew list)
  - configure BENCHMARK=${BENCH} ENABLE_GLIBC_WORKAROUND=${ENABLE_GLIBC_WORKAROUND:-false} QUIET=${QUIET:-false}
  #- cat config.log => comment out to reduce log size limit on travis-ci
  # we limit the `make` to 40 min
