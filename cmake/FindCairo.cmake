@@ -124,7 +124,7 @@ else()
   )
 endif()
 
-if (Cairo_LIBRARY AND NOT TARGET Cairo::Cairo)
+if (NOT TARGET Cairo::Cairo)
     add_library(Cairo::Cairo UNKNOWN IMPORTED GLOBAL)
     set_target_properties(Cairo::Cairo PROPERTIES
         IMPORTED_LOCATION "${Cairo_LIBRARY_RELEASE}"
