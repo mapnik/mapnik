@@ -110,8 +110,8 @@ public:
     };
 
 private:
-    static const unsigned MIN_MAPSIZE=16;
-    static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
+    static const unsigned MIN_MAPSIZE = 16;
+    static const unsigned MAX_MAPSIZE = MIN_MAPSIZE << 10;
     unsigned width_;
     unsigned height_;
     std::string srs_;
@@ -153,7 +153,7 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs = MAPNIK_LONGLAT_PROJ);
+    Map(int width, int height, std::string const& srs = MAPNIK_GEOGRAPHIC_PROJ);
 
     /*! \brief Copy Constructor.
      *

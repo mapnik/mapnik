@@ -94,7 +94,6 @@ void projection::init_proj() const
     if (!proj_)
     {
         proj_ctx_ = proj_context_create();
-        //proj_ = proj_create_crs_to_crs(proj_ctx_, "epsg:4326", params_.c_str(), nullptr);
         proj_ = proj_create(proj_ctx_, params_.c_str());
         if (!proj_ || !proj_ctx_)
         {
@@ -108,18 +107,10 @@ void projection::init_proj() const
             }
             throw proj_init_error(params_);
         }
-        // determine the type of CRS
-        //PJ* crs = proj_create(proj_ctx_, params_.c_str());
-        //if (crs)
-        //if (proj_)
-        //{
-            //PJ_TYPE type = proj_get_type(crs);
         PJ_TYPE type = proj_get_type(proj_);
         is_geographic_ = (type == PJ_TYPE_GEOGRAPHIC_2D_CRS
                           ||
                           type == PJ_TYPE_GEOGRAPHIC_3D_CRS) ? true : false;
-        //}
-        //proj_destroy(crs);
     }
 #endif
 }

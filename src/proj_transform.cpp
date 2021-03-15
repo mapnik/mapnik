@@ -111,12 +111,12 @@ proj_transform::proj_transform(projection const& source,
         bool known_trans = false;
         if (src_k && dest_k)
         {
-            if (*src_k == WGS_84 && *dest_k == G_MERC)
+            if (*src_k == WGS_84 && *dest_k == WEB_MERC)
             {
                 wgs84_to_merc_ = true;
                 known_trans = true;
             }
-            else if (*src_k == G_MERC && *dest_k == WGS_84)
+            else if (*src_k == WEB_MERC && *dest_k == WGS_84)
             {
                 merc_to_wgs84_ = true;
                 known_trans = true;
