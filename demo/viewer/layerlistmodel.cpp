@@ -1,6 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2017 Artem Pavlenko
+ * Copyright (C) 2021 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,13 +21,12 @@
 
 #include "layerlistmodel.hpp"
 #include <QIcon>
-
-#include <iostream>
+#include <QBrush>
 #include <mapnik/layer.hpp>
 
 using mapnik::Map;
 
-LayerListModel::LayerListModel(std::shared_ptr<Map> map,QObject *parent)
+LayerListModel::LayerListModel(std::shared_ptr<Map> map, QObject *parent)
     : QAbstractListModel(parent),
       map_(map) {}
 
@@ -37,7 +36,7 @@ int LayerListModel::rowCount(QModelIndex const&) const
    return 0;
 }
 
-QVariant LayerListModel::data(QModelIndex const& index,int role) const
+QVariant LayerListModel::data(QModelIndex const& index, int role) const
 {
     if (!index.isValid() || !map_)
         return QVariant();
@@ -63,6 +62,13 @@ QVariant LayerListModel::data(QModelIndex const& index,int role) const
            return QVariant(Qt::Checked);
         else
            return QVariant(Qt::Unchecked);
+    }
+    else if (role == Qt::ForegroundRole)
+    {
+        if (map_->layers().at(index.row()).active())
+            return QBrush(QColor("black"));
+        else
+            return QBrush(QColor("lightgrey"));
     }
     else
     {
@@ -101,7 +107,6 @@ bool LayerListModel::setData(const QModelIndex &index,
 Qt::ItemFlags LayerListModel::flags(QModelIndex const& index) const
 {
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
-
     if (index.isValid())
        flags |= Qt::ItemIsUserCheckable;
     return flags;

@@ -16,8 +16,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from __future__ import print_function # support python2
-
 import os
 import sys
 import re
@@ -34,19 +32,8 @@ try:
 except:
     HAS_DISTUTILS = False
 
-try:
-    # Python 3.3+
-    from shlex import quote as shquote
-except:
-    # Python 2.7
-    from pipes import quote as shquote
-
-try:
-    # Python 3.3+
-    from subprocess import DEVNULL
-except:
-    # Python 2.7
-    DEVNULL = open(os.devnull, 'w')
+from shlex import quote as shquote
+from subprocess import DEVNULL
 
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
@@ -92,7 +79,7 @@ pretty_dep_names = {
     'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/GDAL',
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/OGR',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
+    'proj':'Proj C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
@@ -142,7 +129,6 @@ PLUGINS = { # plugins with external dependencies
 
 def init_environment(env):
     env.Decider('MD5-timestamp')
-    env.SourceCode(".", None)
     env['ORIGIN'] = Literal('$ORIGIN')
     env['ENV']['ORIGIN'] = '$ORIGIN'
     if os.environ.get('RANLIB'):
@@ -380,7 +366,6 @@ opts.AddVariables(
     BoolVariable('ENABLE_GLIBC_WORKAROUND', "Workaround known GLIBC symbol exports to allow building against libstdc++-4.8 without binaries needing throw_out_of_range_fmt", 'False'),
     # http://www.scons.org/wiki/GoFastButton
     # http://stackoverflow.com/questions/1318863/how-to-optimize-an-scons-script
-    BoolVariable('FAST', "Make SCons faster at the cost of less precise dependency tracking", 'False'),
     BoolVariable('PRIORITIZE_LINKING', 'Sort list of lib and inc directories to ensure preferential compiling and linking (useful when duplicate libs)', 'True'),
     ('LINK_PRIORITY','Priority list in which to sort library and include paths (default order is internal, other, frameworks, user, then system - see source of `sort_paths` function for more detail)',','.join(DEFAULT_LINK_PRIORITY)),
 
@@ -694,7 +679,7 @@ def parse_config(context, config, checks='--libs --cflags'):
                 # and thus breaks knowledge below that gdal worked
                 # TODO - upgrade our scons logic to support Framework linking
                 if env['PLATFORM'] == 'Darwin':
-                    if value and b'-framework GDAL' in value:
+                    if value and '-framework GDAL' in value:
                         env['LIBS'].append('gdal')
                         if os.path.exists('/Library/Frameworks/GDAL.framework/unix/lib'):
                             env['LIBPATH'].insert(0,'/Library/Frameworks/GDAL.framework/unix/lib')
@@ -1291,12 +1276,7 @@ def GetMapnikLibVersion():
     return version_string
 
 if not preconfigured:
-
     color_print(4,'Configuring build environment...')
-
-    if not env['FAST']:
-        SetCacheMode('force')
-
     if env['USE_CONFIG']:
         if not env['CONFIG'].endswith('.py'):
             color_print(1,'SCons CONFIG file specified is not a python file, will not be read...')
@@ -2171,13 +2151,6 @@ if not HELP_REQUESTED:
         plugin_base.Append(CXXFLAGS='--coverage')
 
     Export('plugin_base')
-
-    if env['FAST']:
-        # caching is 'auto' by default in SCons
-        # But let's also cache implicit deps...
-        EnsureSConsVersion(0,98)
-        SetOption('implicit_cache', 1)
-        SetOption('max_drift', 1)
 
     # Build agg first, doesn't need anything special
     if env['RUNTIME_LINK'] == 'shared':

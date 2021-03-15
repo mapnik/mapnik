@@ -1,6 +1,6 @@
 /* This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2017 Artem Pavlenko
+ * Copyright (C) 2021 Artem Pavlenko
  *
  * Mapnik is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,19 +27,19 @@
 
 class LayerTab : public QListView
 {
-   Q_OBJECT
-   public:
-      LayerTab(QWidget* parent=0);
-      void paintEvent(QPaintEvent *e);
-   signals:
-      void update_mapwidget();
-      void layerSelected(int) const;
-   public slots:
-      void layerInfo();
-      void layerInfo2(QModelIndex const&);
-   protected slots:
-      void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
-      void selectionChanged(const QItemSelection & selected, const QItemSelection &);
+    Q_OBJECT
+public:
+    LayerTab(QWidget* parent=0);
+    void paintEvent(QPaintEvent *e);
+signals:
+    void update_mapwidget();
+    void layerSelected(int) const;
+public slots:
+    void layerInfo();
+    void layerInfo2(QModelIndex const&);
+protected slots:
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+    void selectionChanged(const QItemSelection & selected, const QItemSelection &);
 };
 
 class StyleTab : public QTreeView
@@ -48,7 +48,7 @@ class StyleTab : public QTreeView
 public:
     StyleTab(QWidget* parent=0);
 protected:
-      void contextMenuEvent(QContextMenuEvent * event );
+    void contextMenuEvent(QContextMenuEvent * event );
 };
 
 #endif
