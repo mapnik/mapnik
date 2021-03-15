@@ -34,11 +34,11 @@ SECTION("handling") {
 
     // https://github.com/mapnik/mapnik/issues/2170
     try {
-        mapnik::projection srs("+proj=longlat foo",true);
+        mapnik::projection srs("epsg:4326 foo",true);
         REQUIRE(srs.is_geographic());
         REQUIRE(true);
         srs.init_proj();
-        // oddly init_proj4 does not throw with old proj/ubuntu precise
+        // oddly init_proj does not throw with old proj/ubuntu precise
         //REQUIRE(false);
     } catch (...) {
         REQUIRE(true);
