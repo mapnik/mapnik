@@ -36,28 +36,27 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-extern std::string const MAPNIK_LONGLAT_PROJ =
-    "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+extern std::string const MAPNIK_GEOGRAPHIC_PROJ =
+    "epsg:4326";  //wgs84
 
-extern std::string const MAPNIK_GMERC_PROJ =
-    "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0"
-    " +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over";
+extern std::string const MAPNIK_WEBMERCATOR_PROJ =
+    "epsg:3857"; // webmercator
 
 static const char * well_known_srs_strings[] = {
-    "mapnik-longlat",
-    "mapnik-gmerc",
+    MAPNIK_GEOGRAPHIC_PROJ.c_str(),
+    MAPNIK_WEBMERCATOR_PROJ.c_str(),
     ""
 };
 
 boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {
-    if (srs == "epsg:4326" || srs == MAPNIK_LONGLAT_PROJ)
+    if (srs == MAPNIK_GEOGRAPHIC_PROJ)
     {
         return boost::optional<well_known_srs_e>(mapnik::WGS_84);
     }
-    else if (srs == "epsg:3857" || srs == MAPNIK_GMERC_PROJ)
+    else if (srs == MAPNIK_WEBMERCATOR_PROJ)
     {
-        return boost::optional<well_known_srs_e>(mapnik::G_MERC);
+        return boost::optional<well_known_srs_e>(mapnik::WEB_MERC);
     }
     return boost::optional<well_known_srs_e>();
 }
@@ -65,28 +64,13 @@ boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 boost::optional<bool> is_known_geographic(std::string const& srs)
 {
     std::string trimmed = util::trim_copy(srs);
-    if (trimmed == "epsg:3857")
-    {
-        return boost::optional<bool>(false);
-    }
-    else if (trimmed == "epsg:4326")
+    if (trimmed == MAPNIK_GEOGRAPHIC_PROJ)
     {
         return boost::optional<bool>(true);
     }
-    else if (srs.find("+proj=") != std::string::npos)
+    else if (trimmed ==  MAPNIK_WEBMERCATOR_PROJ)
     {
-        if ((srs.find("+proj=longlat") != std::string::npos) ||
-                          (srs.find("+proj=latlong") != std::string::npos) ||
-                          (srs.find("+proj=lonlat") != std::string::npos) ||
-                          (srs.find("+proj=latlon") != std::string::npos)
-                         )
-        {
-            return boost::optional<bool>(true);
-        }
-        else
-        {
-            return boost::optional<bool>(false);
-        }
+        return boost::optional<bool>(true);
     }
     return boost::optional<bool>();
 }
@@ -99,7 +83,7 @@ bool lonlat2merc(double & x, double & y)
     auto dx = clamp(x, -180.0, 180.0);
     auto dy = clamp(y, -MERC_MAX_LATITUDE, MERC_MAX_LATITUDE);
     x = EARTH_RADIUS * radians(dx);
-    y = EARTH_RADIUS * std::log(std::tan(radians(90 + dy) / 2));
+    y = EARTH_RADIUS * std::log(std::tan(radians(90.0 + dy) / 2.0));
     return true;
 }
 
@@ -127,7 +111,7 @@ bool merc2lonlat(double & x, double & y)
     auto rx = clamp(x / EARTH_RADIUS, -pi, pi);
     auto ry = clamp(y / EARTH_RADIUS, -pi, pi);
     x = degrees(rx);
-    y = degrees(2 * std::atan(std::exp(ry)) - pi / 2);
+    y = degrees(2.0 * std::atan(std::exp(ry)) - pi / 2.0);
     return true;
 }
 

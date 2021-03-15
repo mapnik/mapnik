@@ -50,7 +50,7 @@ class MAPNIK_DECL layer
 {
 public:
     layer(std::string const& name,
-          std::string const& srs=MAPNIK_LONGLAT_PROJ);
+          std::string const& srs = MAPNIK_GEOGRAPHIC_PROJ);
     // copy
     layer(layer const& l);
     // move

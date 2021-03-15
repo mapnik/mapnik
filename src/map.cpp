@@ -66,7 +66,7 @@ IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings )
 Map::Map()
 : width_(400),
     height_(400),
-    srs_(MAPNIK_LONGLAT_PROJ),
+    srs_(MAPNIK_GEOGRAPHIC_PROJ),
     buffer_size_(0),
     background_image_comp_op_(src_over),
     background_image_opacity_(1.0),
