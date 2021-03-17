@@ -1,142 +1,98 @@
-# Copyright (C) 2020 Sony Interactive Entertainment Inc.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1.  Redistributions of source code must retain the above copyright
-#     notice, this list of conditions and the following disclaimer.
-# 2.  Redistributions in binary form must reproduce the above copyright
-#     notice, this list of conditions and the following disclaimer in the
-#     documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND ITS CONTRIBUTORS ``AS
-# IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR ITS
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindCairo
---------------
+-----------
 
-Find Cairo headers and libraries.
+Find Cairo 2D graphics library.
+
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
+This module defines :prop_tgt:`IMPORTED` target ``Cairo::Cairo``, if
+cairo has been found.
 
-``Cairo::Cairo``
-  The Cairo library, if found.
-
-Result Variables
+Result variables
 ^^^^^^^^^^^^^^^^
 
-This will define the following variables in your project:
+This module will set the following variables in your project:
 
-``Cairo_FOUND``
-  true if (the requested version of) Cairo is available.
-``Cairo_VERSION``
-  the version of Cairo.
-``Cairo_LIBRARIES``
-  the libraries to link against to use Cairo.
-``Cairo_INCLUDE_DIRS``
-  where to find the Cairo headers.
-``Cairo_COMPILE_OPTIONS``
-  this should be passed to target_compile_options(), if the
-  target is not used for linking
-
+``CAIRO_FOUND``
+  True if cairo headers and library were found.
+``CAIRO_INCLUDE_DIRS``
+  Directory where cairo headers are located.
+``CAIRO_LIBRARIES``
+  cairo libraries to link against.
+``CAIRO_VERSION_MAJOR``
+  The major version of cairo
+``CAIRO_VERSION_MINOR``
+  The minor version of cairo
+``CAIRO_VERSION_PATCH``
+  The patch version of cairo
+``CAIRO_VERSION_STRING``
+  version number as a string (ex: "1.16.0")
 #]=======================================================================]
 
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_CAIRO QUIET cairo)
-set(Cairo_COMPILE_OPTIONS ${PC_CAIRO_CFLAGS_OTHER})
-set(Cairo_VERSION ${PC_CAIRO_VERSION})
-
-find_path(Cairo_INCLUDE_DIR
-    NAMES cairo.h
-    HINTS ${PC_CAIRO_INCLUDEDIR} ${PC_CAIRO_INCLUDE_DIR}
-    PATH_SUFFIXES cairo
-)
-
-find_library(Cairo_LIBRARY_RELEASE
-    NAMES ${Cairo_NAMES} cairo
-    HINTS ${PC_CAIRO_LIBDIR} ${PC_CAIRO_LIBRARY_DIRS}
-)
-
-find_library(Cairo_LIBRARY_DEBUG
-    NAMES ${Cairo_NAMES} cairod
-    HINTS ${PC_CAIRO_LIBDIR} ${PC_CAIRO_LIBRARY_DIRS}
-)
-
-if (Cairo_INCLUDE_DIR AND NOT Cairo_VERSION)
-    if (EXISTS "${Cairo_INCLUDE_DIR}/cairo-version.h")
-        file(READ "${Cairo_INCLUDE_DIR}/cairo-version.h" Cairo_VERSION_CONTENT)
-
-        string(REGEX MATCH "#define +CAIRO_VERSION_MAJOR +([0-9]+)" _dummy "${Cairo_VERSION_CONTENT}")
-        set(Cairo_VERSION_MAJOR "${CMAKE_MATCH_1}")
-
-        string(REGEX MATCH "#define +CAIRO_VERSION_MINOR +([0-9]+)" _dummy "${Cairo_VERSION_CONTENT}")
-        set(Cairo_VERSION_MINOR "${CMAKE_MATCH_1}")
-
-        string(REGEX MATCH "#define +CAIRO_VERSION_MICRO +([0-9]+)" _dummy "${Cairo_VERSION_CONTENT}")
-        set(Cairo_VERSION_PATCH "${CMAKE_MATCH_1}")
-
-        set(Cairo_VERSION "${Cairo_VERSION_MAJOR}.${Cairo_VERSION_MINOR}.${Cairo_VERSION_PATCH}")
-    endif ()
-endif ()
-
-include(FindPackageHandleStandardArgs)
-if(Cairo_LIBRARY_RELEASE AND Cairo_LIBRARY_DEBUG)
-  # set the libaries varible to use the release and debug versions
-  find_package_handle_standard_args(Cairo
-    FOUND_VAR Cairo_FOUND
-    REQUIRED_VARS Cairo_LIBRARY_RELEASE Cairo_LIBRARY_DEBUG Cairo_INCLUDE_DIR
-    VERSION_VAR Cairo_VERSION
-  )
-  set(Cairo_LIBRARIES optimized ${Cairo_LIBRARY_RELEASE} debug ${Cairo_LIBRARY_DEBUG})
-elseif(Cairo_LIBRARY_RELEASE)
-  # only the release library is available
-  find_package_handle_standard_args(Cairo
-    FOUND_VAR Cairo_FOUND
-    REQUIRED_VARS Cairo_LIBRARY_RELEASE Cairo_INCLUDE_DIR
-    VERSION_VAR Cairo_VERSION
-  )
-  set(Cairo_LIBRARIES optimized ${Cairo_LIBRARY_RELEASE})
-elseif(Cairo_LIBRARY_DEBUG)
-  # only the debug library is available
-  find_package_handle_standard_args(Cairo
-    FOUND_VAR Cairo_FOUND
-    REQUIRED_VARS Cairo_LIBRARY_DEBUG Cairo_INCLUDE_DIR
-    VERSION_VAR Cairo_VERSION
-  )
-  set(Cairo_LIBRARIES debug ${Cairo_LIBRARY_DEBUG})
+if(NOT CAIRO_LIBRARY)
+  find_path(CAIRO_INCLUDE_DIR NAMES cairo.h HINTS ${PC_CAIRO_INCLUDEDIR} ${PC_CAIRO_INCLUDE_DIR} PATH_SUFFIXES cairo)
+  find_library(CAIRO_LIBRARY_RELEASE NAMES ${Cairo_NAMES} cairo HINTS ${PC_CAIRO_LIBDIR} ${PC_CAIRO_LIBRARY_DIRS})
+  find_library(CAIRO_LIBRARY_DEBUG NAMES ${Cairo_NAMES} cairod HINTS ${PC_CAIRO_LIBDIR} ${PC_CAIRO_LIBRARY_DIRS})
+  include(SelectLibraryConfigurations)
+  select_library_configurations(CAIRO)
 else()
-  # neither library is available - give standard error message
-  find_package_handle_standard_args(Cairo
-    FOUND_VAR Cairo_FOUND
-    REQUIRED_VARS Cairo_LIBRARY_RELEASE Cairo_LIBRARY_DEBUG Cairo_INCLUDE_DIR
-    VERSION_VAR Cairo_VERSION
-  )
+  file(TO_CMAKE_PATH "${CAIRO_LIBRARY}" CAIRO_LIBRARY)
 endif()
 
-if (NOT TARGET Cairo::Cairo)
-    add_library(Cairo::Cairo UNKNOWN IMPORTED GLOBAL)
+if(CAIRO_INCLUDE_DIR AND NOT CAIRO_VERSION)
+  if(EXISTS "${CAIRO_INCLUDE_DIR}/cairo-version.h")
+      file(READ "${CAIRO_INCLUDE_DIR}/cairo-version.h" CAIRO_VERSION_CONTENT)
+
+      string(REGEX MATCH "#define +CAIRO_VERSION_MAJOR +([0-9]+)" _dummy "${CAIRO_VERSION_CONTENT}")
+      set(CAIRO_VERSION_MAJOR "${CMAKE_MATCH_1}")
+
+      string(REGEX MATCH "#define +CAIRO_VERSION_MINOR +([0-9]+)" _dummy "${CAIRO_VERSION_CONTENT}")
+      set(CAIRO_VERSION_MINOR "${CMAKE_MATCH_1}")
+
+      string(REGEX MATCH "#define +CAIRO_VERSION_MICRO +([0-9]+)" _dummy "${CAIRO_VERSION_CONTENT}")
+      set(CAIRO_VERSION_PATCH "${CMAKE_MATCH_1}")
+
+      set(CAIRO_VERSION "${CAIRO_VERSION_MAJOR}.${CAIRO_VERSION_MINOR}.${CAIRO_VERSION_PATCH}")
+      set(CAIRO_VERSION_STRING ${CAIRO_VERSION})
+  endif()
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Cairo 
+  REQUIRED_VARS 
+    CAIRO_LIBRARY
+    CAIRO_INCLUDE_DIR
+    VERSION_VAR   
+    CAIRO_VERSION_STRING
+)
+mark_as_advanced(CAIRO_INCLUDE_DIR CAIRO_LIBRARY)
+
+if (CAIRO_FOUND)
+  set(CAIRO_LIBRARIES ${CAIRO_LIBRARY})
+  set(CAIRO_INCLUDE_DIRS ${CAIRO_INCLUDE_DIR})
+  if(NOT TARGET Cairo::Cairo)
+    add_library(Cairo::Cairo UNKNOWN IMPORTED)
     set_target_properties(Cairo::Cairo PROPERTIES
-        IMPORTED_LOCATION "${Cairo_LIBRARY_RELEASE}"
-        IMPORTED_LOCATION_DEBUG "${Cairo_LIBRARY_DEBUG}"
-        INTERFACE_COMPILE_OPTIONS "${Cairo_COMPILE_OPTIONS}"
-        INTERFACE_INCLUDE_DIRECTORIES "${Cairo_INCLUDE_DIR}"
-    )
-endif ()
+                          INTERFACE_INCLUDE_DIRECTORIES ${CAIRO_INCLUDE_DIR}
+                          IMPORTED_LINK_INTERFACE_LANGUAGES C)
 
-mark_as_advanced(Cairo_INCLUDE_DIR Cairo_LIBRARY_RELEASE Cairo_LIBRARY_DEBUG)
+    if(CAIRO_LIBRARY_RELEASE)
+      set_property(TARGET Cairo::Cairo APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(Cairo::Cairo PROPERTIES IMPORTED_LOCATION_RELEASE "${CAIRO_LIBRARY_RELEASE}")
+    endif()
 
-if (Cairo_FOUND)
-    set(Cairo_LIBRARIES ${Cairo_LIBRARY})
-    set(Cairo_INCLUDE_DIRS ${Cairo_INCLUDE_DIR})
+    if(CAIRO_LIBRARY_DEBUG)
+      set_property(TARGET Cairo::Cairo APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(Cairo::Cairo PROPERTIES IMPORTED_LOCATION_DEBUG "${CAIRO_LIBRARY_DEBUG}")
+    endif()
+
+    if(NOT CAIRO_LIBRARY_RELEASE AND NOT CAIRO_LIBRARY_DEBUG)
+        set_target_properties(Cairo::Cairo PROPERTIES IMPORTED_LOCATION "${CAIRO_LIBRARY}")
+    endif()
+  endif()
 endif ()
