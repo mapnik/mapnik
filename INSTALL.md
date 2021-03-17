@@ -65,7 +65,7 @@ Build system dependencies are:
 
  * C++ compiler supporting `-std=c++11` (like >= g++ 4.8 or >= clang++ 3.4)
  * >= 2 GB RAM (> 5 GB for g++)
- * Python 2.4-2.7 
+ * Python
  * Scons (a copy is bundled)
 
 Mapnik Core depends on:
@@ -77,10 +77,10 @@ Mapnik Core depends on:
       - system
       - regex (optionally built with icu regex support)
       - program_options (optionally for mapnik command line programs)
+      - property_tree (for RapidXml parser, optionally libxml2 can be used)
  * libicuuc >= 4.0 (ideally >= 4.2) - International Components for Unicode
  * libz - Zlib compression
  * libfreetype - Freetype2 for font support (Install requires freetype-config)
- * libxml2 - XML parsing (Install requires xml2-config)
  * libharfbuzz - an OpenType text shaping engine (>=0.9.34 needed for CSS font-feature-settings support)
 
 Mapnik Core optionally depends on:
@@ -100,6 +100,7 @@ Additional optional dependencies:
     - pg_config - PostgreSQL installation capabilities
  * libgdal - GDAL/OGR input (For gdal and ogr plugin support) (>= GDAL 2.0.2 for thread safety - https://github.com/mapnik/mapnik/issues/3339)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
+ * libxml2 - Alternative XML parser (with entity support as used by the former OpenStreetMap 'standard' style)
 
 Instructions for installing many of these dependencies on
 various platforms can be found at the Mapnik Wiki:
