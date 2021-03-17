@@ -13,6 +13,7 @@ project(mapnik
 message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(MapnikFindPackage)
 
 set(ADDITIONAL_LIBARIES_PATHS "" CACHE STRING "currently only used on windows. Pass directories containing the dlls that are missing. You can ignore this, if the build (verify_app step) runs successfully" "")
 option(COPY_LIBRARIES_FOR_EXECUTABLES "copies required shared libaries (currently only windows) to the executable directory" ON)
@@ -88,10 +89,11 @@ message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 
 set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
 message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
-find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
-find_package(ICU REQUIRED COMPONENTS uc i18n data)
-find_package(Freetype REQUIRED)
-find_package(harfbuzz CONFIG REQUIRED)
+
+mapnik_find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
+mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
+mapnik_find_package(Freetype REQUIRED)
+mapnik_find_package(harfbuzz CONFIG REQUIRED)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
     # this is used to provide a way to specify include dirs with CACHE VARIABLES
@@ -156,49 +158,49 @@ set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 if(USE_LIBXML2)
     message(STATUS "Using LibXml2")
-    find_package(LibXml2 REQUIRED)
+    mapnik_find_package(LibXml2 REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_LIBXML2)
     list(APPEND MAPNIK_OPTIONAL_LIBS LibXml2::LibXml2)
 endif()
 if(USE_PNG)
     message(STATUS "Using PNG")
-    find_package(PNG REQUIRED)
+    mapnik_find_package(PNG REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_PNG)
     list(APPEND MAPNIK_OPTIONAL_LIBS PNG::PNG)
 endif()
 
 if(USE_JPEG)
     message(STATUS "Using JPEG")
-    find_package(JPEG REQUIRED)
+    mapnik_find_package(JPEG REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_JPEG)
     list(APPEND MAPNIK_OPTIONAL_LIBS JPEG::JPEG)
 endif()
 
 if(USE_TIFF)
-    find_package(TIFF REQUIRED)
     message(STATUS "Using TIFF")
+    mapnik_find_package(TIFF REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_TIFF)
     list(APPEND MAPNIK_OPTIONAL_LIBS TIFF::TIFF)
 endif()
 
 if(USE_WEBP)
     message(STATUS "Using WEBP")
-    find_package(WebP CONFIG REQUIRED)
+    mapnik_find_package(WebP CONFIG REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_WEBP)
     list(APPEND MAPNIK_OPTIONAL_LIBS WebP::webp)
 endif()
 
 if(USE_CAIRO)
     message(STATUS "Using Cairo renderer")
-    find_package(Cairo REQUIRED)
+    mapnik_find_package(Cairo REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_CAIRO)
     list(APPEND MAPNIK_OPTIONAL_LIBS Cairo::Cairo)
 endif()
 
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
-    message(STATUS "Using PROJ4")
-    find_package(PROJ4 CONFIG REQUIRED)
+    message(STATUS "Using PROJ")
+    mapnik_find_package(PROJ4 CONFIG REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ4 ACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ4_LIBRARIES})
     list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ4_INCLUDE_DIRS})
@@ -276,10 +278,11 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
 )
 
+list(JOIN MAPNIK_DEPENDENCIES "\n" MAPNIK_DEPENDENCIES)
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/MapnikConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfig.cmake"
   INSTALL_DESTINATION ${INSTALL_CMAKE_DIR}
-  PATH_VARS INCLUDE_INSTALL_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR
+  PATH_VARS INCLUDE_INSTALL_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR MAPNIK_DEPENDENCIES
 )
 
 install(FILES
@@ -287,6 +290,8 @@ install(FILES
           "${CMAKE_CURRENT_BINARY_DIR}/MapnikConfigVersion.cmake"
         DESTINATION ${INSTALL_CMAKE_DIR}
 )
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCairo.cmake" DESTINATION ${INSTALL_CMAKE_DIR}/Modules)
+
 install(EXPORT MapnikTargets
         FILE MapnikTargets.cmake
         NAMESPACE mapnik::

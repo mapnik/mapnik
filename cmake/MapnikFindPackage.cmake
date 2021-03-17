@@ -1,0 +1,6 @@
+macro(mapnik_find_package)
+    find_package(${ARGN})
+    set(MAPNIK_TMP_DEP ${ARGN})
+    list(JOIN MAPNIK_TMP_DEP " " MAPNIK_TMP_DEP)
+    list(APPEND MAPNIK_DEPENDENCIES "find_dependency(${MAPNIK_TMP_DEP})")
+endmacro()
