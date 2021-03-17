@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.15)
+# 3.15 is required since the Boost::XXXX targets was first added. https://cmake.org/cmake/help/latest/module/FindBoost.html#imported-targets
+# 3.14 is required since SQLite3 Module was first added. https://cmake.org/cmake/help/latest/module/FindSQLite3.html#findsqlite3
 
 include(cmake/GetVersion.cmake)
 get_mapnik_version()
