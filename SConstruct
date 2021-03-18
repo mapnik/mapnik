@@ -1437,7 +1437,7 @@ if not preconfigured:
 
     if env['XMLPARSER'] == 'libxml2':
         if env.get('XML2_LIBS') or env.get('XML2_INCLUDES'):
-            OPTIONAL_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C'])
+            OPTIONAL_LIBSHEADERS.insert(0,['libxml2','libxml/parser.h',True,'C',''])
             if env.get('XML2_INCLUDES'):
                 inc_path = env['XML2_INCLUDES']
                 env.AppendUnique(CPPPATH = fix_path(inc_path))
@@ -1618,6 +1618,8 @@ if not preconfigured:
                         env['SKIPPED_DEPS'].append(libname)
                 else:
                     env.Append(CPPDEFINES = define)
+                    if libname == 'libxml2':
+                        env['HAS_LIBXML2'] = True
             else:
                 env.Append(CPPDEFINES = define)
 
