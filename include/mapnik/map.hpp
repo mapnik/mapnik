@@ -131,7 +131,7 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-    mutable proj_cache_type proj_cache_;
+    thread_local static proj_cache_type proj_cache_;
 public:
 
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
@@ -534,6 +534,7 @@ public:
 private:
     friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
+    void init_proj_transform(std::string const& source, std::string const& dest);
     void init_proj_transforms();
 };
 

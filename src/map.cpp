@@ -111,8 +111,7 @@ Map::Map(Map const& rhs)
       font_directory_(rhs.font_directory_),
       font_file_mapping_(rhs.font_file_mapping_),
       // on copy discard memory caches
-      font_memory_cache_(),
-      proj_cache_()
+      font_memory_cache_()
 {
     init_proj_transforms();
 }
@@ -137,10 +136,11 @@ Map::Map(Map && rhs)
       extra_params_(std::move(rhs.extra_params_)),
       font_directory_(std::move(rhs.font_directory_)),
       font_file_mapping_(std::move(rhs.font_file_mapping_)),
-      font_memory_cache_(std::move(rhs.font_memory_cache_)),
-      proj_cache_(std::move(rhs.proj_cache_)) {}
+      font_memory_cache_(std::move(rhs.font_memory_cache_)) {}
 
 Map::~Map() {}
+
+thread_local Map::proj_cache_type Map::proj_cache_ = proj_cache_type();
 
 Map& Map::operator=(Map rhs)
 {
@@ -329,6 +329,7 @@ size_t Map::layer_count() const
 
 proj_transform * Map::get_proj_transform(std::string const& source, std::string const& dest) const
 {
+
     compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
     auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == proj_cache_.end())
@@ -343,29 +344,13 @@ proj_transform * Map::get_proj_transform(std::string const& source, std::string 
 
 void Map::add_layer(layer const& l)
 {
-    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(srs_, l.srs());
-    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
-    if (itr == proj_cache_.end())
-    {
-        mapnik::projection source(srs_, true);
-        mapnik::projection dest(l.srs(), true);
-        proj_cache_.emplace(std::make_pair(srs_, l.srs()),
-                            std::make_unique<proj_transform>(source, dest));
-    }
+    init_proj_transform(srs_, l.srs());
     layers_.emplace_back(l);
 }
 
 void Map::add_layer(layer && l)
 {
-    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(srs_, l.srs());
-    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
-    if (itr == proj_cache_.end())
-    {
-        mapnik::projection source(srs_, true);
-        mapnik::projection dest(l.srs(), true);
-        proj_cache_.emplace(make_pair(srs_, l.srs()),
-                            std::make_unique<proj_transform>(source, dest));
-    }
+    init_proj_transform(srs_, l.srs());
     layers_.push_back(std::move(l));
 }
 
@@ -458,8 +443,9 @@ std::string const&  Map::srs() const
 
 void Map::set_srs(std::string const& _srs)
 {
+    if (srs_ != _srs) init_proj_transforms();
     srs_ = _srs;
-    init_proj_transforms();
+
 }
 
 void Map::set_buffer_size(int _buffer_size)
@@ -808,20 +794,28 @@ void Map::set_extra_parameters(parameters& params)
     extra_params_ = params;
 }
 
+
+void Map::init_proj_transform(std::string const& source, std::string const& dest)
+{
+    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
+    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
+    if (itr == proj_cache_.end())
+    {
+        mapnik::projection p0(source, true);
+        mapnik::projection p1(dest, true);
+        proj_cache_.emplace(std::make_pair(source, dest),
+                            std::make_unique<proj_transform>(p0, p1));
+    }
+}
+
 void Map::init_proj_transforms()
 {
-    for (auto const& l : layers_)
-    {
-        compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(srs_, l.srs());
-        auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
-        if (itr == proj_cache_.end())
-        {
-            mapnik::projection source(srs_, true);
-            mapnik::projection dest(l.srs(), true);
-            proj_cache_.emplace(std::make_pair(srs_, l.srs()),
-                                std::make_unique<proj_transform>(source, dest));
-        }
-    }
+    std::for_each(layers_.begin(),
+                  layers_.end(),
+                  [this] (auto const& l)
+                  {
+                      init_proj_transform(srs_, l.srs());
+                  });
 }
 
 }
