@@ -7,7 +7,7 @@ add_library(input-topojson SHARED
 add_library(mapnik::plugin::input::topojson ALIAS input-topojson)
 
 target_link_libraries(input-topojson PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
     mapnik::json
 )

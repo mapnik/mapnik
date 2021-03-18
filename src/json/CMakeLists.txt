@@ -24,7 +24,7 @@ target_include_directories(json PRIVATE
     ${MAPBOX_GEOMETRY_INCLUDE_DIRS}
     ${MAPBOX_VARIANT_INCLUDE_DIRS}
 )
-target_link_libraries(json PRIVATE mapnik::headers ${ICUU_LIB})
+target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
 
 install(TARGETS json
     EXPORT MapnikTargets

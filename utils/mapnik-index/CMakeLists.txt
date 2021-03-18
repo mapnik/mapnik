@@ -9,7 +9,7 @@ add_executable(mapnik-index
     ../../plugins/input/csv/csv_utils.cpp # this project depends on this file
 )
 target_link_libraries(mapnik-index PRIVATE
-    mapnik::headers
+    mapnik::core
     mapnik::mapnik
     mapnik::json
     mapnik::wkt

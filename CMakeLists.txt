@@ -224,10 +224,10 @@ if(NOT WIN32)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
 endif()
 
-add_library(headers INTERFACE)
-add_library(mapnik::headers ALIAS headers)
+add_library(mapnik-core INTERFACE)
+add_library(mapnik::core ALIAS mapnik-core)
 
-target_include_directories(headers INTERFACE  
+target_include_directories(mapnik-core INTERFACE  
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
     $<BUILD_INTERFACE:${MAPBOX_GEOMETRY_INCLUDE_DIRS}>
     $<BUILD_INTERFACE:${MAPBOX_POLYLABEL_INCLUDE_DIRS}>
@@ -237,7 +237,7 @@ target_include_directories(headers INTERFACE
     $<INSTALL_INTERFACE:include>
     ${MAPNIK_OPTIONAL_LIBS_INCLUDE}
 )
-target_link_libraries(headers INTERFACE 
+target_link_libraries(mapnik-core INTERFACE 
     Boost::headers
     Boost::regex
     Boost::filesystem
@@ -248,9 +248,9 @@ target_link_libraries(headers INTERFACE
     harfbuzz::harfbuzz
     ${MAPNIK_OPTIONAL_LIBS}
 )
-target_compile_definitions(headers INTERFACE ${MAPNIK_COMPILE_DEFS})
+target_compile_definitions(mapnik-core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
-install(TARGETS headers 
+install(TARGETS mapnik-core 
     EXPORT MapnikTargets
     LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
     ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}

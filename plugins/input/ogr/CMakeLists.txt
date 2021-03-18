@@ -12,7 +12,7 @@ add_library(mapnik::plugin::input::ogr ALIAS input-ogr)
 
 target_include_directories(input-ogr PRIVATE ${GDAL_INCLUDE_DIR})
 target_link_libraries(input-ogr PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
     ${GDAL_LIBRARY}
 )

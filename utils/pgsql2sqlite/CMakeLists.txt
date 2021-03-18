@@ -13,7 +13,7 @@ target_link_libraries(pgsql2sqlite PRIVATE
     SQLite::SQLite3
     PostgreSQL::PostgreSQL
     Boost::program_options
-    mapnik::headers
+    mapnik::core
     mapnik::mapnik
 )
 

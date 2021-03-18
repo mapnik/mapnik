@@ -11,7 +11,7 @@ add_library(input-shape SHARED
 add_library(mapnik::plugin::input::shape ALIAS input-shape)
 
 target_link_libraries(input-shape PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
 )
 

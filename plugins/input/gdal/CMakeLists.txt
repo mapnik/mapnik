@@ -10,7 +10,7 @@ add_library(mapnik::plugin::input::gdal ALIAS input-gdal)
 
 target_include_directories(input-gdal PRIVATE ${GDAL_INCLUDE_DIR})
 target_link_libraries(input-gdal PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
     ${GDAL_LIBRARY}
 )
