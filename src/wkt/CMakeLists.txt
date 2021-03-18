@@ -16,7 +16,7 @@ target_include_directories(wkt PRIVATE
     ${MAPBOX_GEOMETRY_INCLUDE_DIRS}
     ${MAPBOX_VARIANT_INCLUDE_DIRS}
 )
-target_link_libraries(wkt PRIVATE mapnik::headers)
+target_link_libraries(wkt PRIVATE mapnik::core)
 
 install(TARGETS wkt 
     EXPORT MapnikTargets

@@ -290,7 +290,7 @@ endif()
 
 target_compile_definitions(mapnik PRIVATE ${COMPILE_DEFS})
 target_link_libraries(mapnik PRIVATE 
-    mapnik::headers
+    mapnik::core
     mapnik::agg
 )
 

@@ -7,7 +7,7 @@ add_library(input-geobuf SHARED
 add_library(mapnik::plugin::input::geobuf ALIAS input-geobuf)
 
 target_link_libraries(input-geobuf PRIVATE  
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
 )
 set_target_properties(input-geobuf PROPERTIES PREFIX "")

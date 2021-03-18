@@ -9,7 +9,7 @@ add_library(input-sqlite SHARED
 add_library(mapnik::plugin::input::sqlite ALIAS input-sqlite)
 
 target_link_libraries(input-sqlite PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik 
     SQLite::SQLite3
 )

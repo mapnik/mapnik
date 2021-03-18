@@ -7,7 +7,7 @@ target_include_directories(agg INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(agg INTERFACE mapnik::headers)
+target_link_libraries(agg INTERFACE mapnik::core)
 
 install(TARGETS agg
     EXPORT MapnikTargets

@@ -10,7 +10,7 @@ add_library(input-csv SHARED
 add_library(mapnik::plugin::input::csv ALIAS input-csv)
 
 target_link_libraries(input-csv PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik 
     mapnik::wkt 
     mapnik::json

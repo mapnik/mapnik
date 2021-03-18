@@ -9,7 +9,7 @@ add_library(input-geojson SHARED
 add_library(mapnik::plugin::input::geojson ALIAS input-geojson)
 
 target_link_libraries(input-geojson PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
     mapnik::json
 )

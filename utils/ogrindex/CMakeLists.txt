@@ -3,7 +3,7 @@ project(ogrindex)
 add_executable(ogrindex ogrindex.cpp)
 
 
-target_link_libraries(ogrindex PRIVATE mapnik::headers mapnik::mapnik)
+target_link_libraries(ogrindex PRIVATE mapnik::core mapnik::mapnik)
 
 install(TARGETS ogrindex
     EXPORT MapnikTargets

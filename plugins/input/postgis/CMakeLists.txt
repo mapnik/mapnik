@@ -9,7 +9,7 @@ add_library(input-postgis SHARED
 add_library(mapnik::plugin::input::postgis ALIAS input-postgis)
 
 target_link_libraries(input-postgis PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik  
     PostgreSQL::PostgreSQL
 )

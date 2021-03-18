@@ -9,7 +9,7 @@ add_executable(shapeindex
 target_include_directories(shapeindex PRIVATE ../../plugins/input/shape)
 target_link_libraries(shapeindex PRIVATE
     Boost::program_options
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
 )
 install(TARGETS shapeindex

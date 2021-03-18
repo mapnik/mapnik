@@ -8,7 +8,7 @@ add_library(input-raster SHARED
 add_library(mapnik::plugin::input::raster ALIAS input-raster)
 
 target_link_libraries(input-raster PRIVATE 
-    mapnik::headers 
+    mapnik::core 
     mapnik::mapnik
 )
 

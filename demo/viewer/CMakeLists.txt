@@ -29,7 +29,7 @@ set_target_properties(mapnik-viewer PROPERTIES
 
 target_link_libraries(mapnik-viewer PRIVATE 
     Qt5::Widgets
-    mapnik::headers
+    mapnik::core
     mapnik::agg
     mapnik::mapnik
 )
