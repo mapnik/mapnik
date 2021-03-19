@@ -923,20 +923,17 @@ def CheckGdalData(context, silent=False):
 def proj_version(context):
     context.Message('Checking for Proj version >=%s...' % PROJ_MIN_VERSION_STRING)
     ret, out = context.TryRun("""
-#include <proj.h>
-#include <iostream>
+#include "proj.h"
+#include <stdio.h>
 #define PROJ_VERSION_ATLEAST(major,minor,micro) \
         ((major)*10000+(minor)*100+(micro) <= \
          PROJ_VERSION_MAJOR*10000+PROJ_VERSION_MINOR*100+PROJ_VERSION_PATCH)
 int main()
 {
-    std::cout << PROJ_VERSION_ATLEAST(%s, %s, %s) << ";"
-    << PROJ_VERSION_MAJOR << "."
-    << PROJ_VERSION_MINOR << "."
-    << PROJ_VERSION_PATCH;
+    printf("%d;%d.%d.%d", PROJ_VERSION_ATLEAST{min-version}, PROJ_VERSION_MAJOR, PROJ_VERSION_MINOR, PROJ_VERSION_PATCH);
     return 0;
 }
-""" % PROJ_MIN_VERSION,'.cpp')
+""".replace("{min-version}", str(PROJ_MIN_VERSION)),'.c')
     if not ret:
         context.Result('error (could not get version from proj.h)')
     else:
