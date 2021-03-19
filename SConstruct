@@ -67,6 +67,7 @@ BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
 BOOST_MIN_VERSION = '1.61'
 #CAIRO_MIN_VERSION = '1.8.0'
 PROJ_MIN_VERSION = (7, 2, 0)
+PROJ_MIN_VERSION_STRING = "%s.%s.%s" % PROJ_MIN_VERSION
 HARFBUZZ_MIN_VERSION = (0, 9, 34)
 HARFBUZZ_MIN_VERSION_STRING = "%s.%s.%s" % HARFBUZZ_MIN_VERSION
 
@@ -80,6 +81,7 @@ pretty_dep_names = {
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/OGR',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
+    'proj-min-version':'libproj >=%s required' % PROJ_MIN_VERSION_STRING,
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program or configure with PG_LIBS & PG_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
@@ -918,6 +920,34 @@ def CheckGdalData(context, silent=False):
         context.Result('Failed to detect (mapnik-config will have null value)')
     return value
 
+def proj_version(context):
+    context.Message('Checking for Proj version >=%s...' % PROJ_MIN_VERSION_STRING)
+    ret, out = context.TryRun("""
+#include <proj.h>
+#include <iostream>
+#define PROJ_VERSION_ATLEAST(major,minor,micro) \
+        ((major)*10000+(minor)*100+(micro) <= \
+         PROJ_VERSION_MAJOR*10000+PROJ_VERSION_MINOR*100+PROJ_VERSION_PATCH)
+int main()
+{
+    std::cout << PROJ_VERSION_ATLEAST(%s, %s, %s) << ";"
+    << PROJ_VERSION_MAJOR << "."
+    << PROJ_VERSION_MINOR << "."
+    << PROJ_VERSION_PATCH;
+    return 0;
+}
+""" % PROJ_MIN_VERSION,'.cpp')
+    if not ret:
+        context.Result('error (could not get version from proj.h)')
+    else:
+        ok_str, found_version_str = out.strip().split(';', 1)
+        major,minor,patch = found_version_str.split('.')
+        ret = int(ok_str), int(major)*10000+int(minor)*100+int(patch)
+        if ret:
+            context.Result('yes (found Proj %s)' % found_version_str)
+        else:
+            context.Result('no (found Proj %s)' % found_version_str)
+    return ret
 
 def CheckProjData(context, silent=False):
 
@@ -1234,6 +1264,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
                'CheckIcuData'          : CheckIcuData,
+               'proj_version'          : proj_version,
                'CheckProjData'         : CheckProjData,
                'CheckGdalData'         : CheckGdalData,
                'CheckCairoHasFreetype' : CheckCairoHasFreetype,
@@ -1686,6 +1717,13 @@ if not preconfigured:
                     else:
                         color_print(4, 'Could not find optional header or shared library for %s' % libname)
                         env['SKIPPED_DEPS'].append(libname)
+                elif libname == 'proj':
+                    result, version = conf.proj_version()
+                    if not result:
+                        env['SKIPPED_DEPS'].append('proj-min-version')
+                    else:
+                        env.Append(CPPDEFINES = define)
+                        env.Append(CPPDEFINES = "-DPROJ_VERSION=%d" % version)
                 else:
                     env.Append(CPPDEFINES = define)
             else:
