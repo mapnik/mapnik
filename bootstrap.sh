@@ -49,9 +49,9 @@ BOOST_VERSION="1.75.0"
 function install_mason_deps() {
     install ccache 3.3.1
     install zlib 1.2.8
-    install jpeg_turbo 1.5.1 libjpeg
-    install libpng 1.6.28 libpng
-    install libtiff 4.0.7 libtiff
+    install jpeg_turbo 1.5.2 libjpeg
+    install libpng 1.6.32 libpng
+    install libtiff 4.0.8 libtiff
     install libpq 9.6.2
     install sqlite 3.34.0 libsqlite3
     install icu ${ICU_VERSION}
@@ -59,7 +59,7 @@ function install_mason_deps() {
     install pixman 0.34.0 libpixman-1
     install cairo 1.14.8 libcairo
     install webp 0.6.0 libwebp
-    install libgdal 2.1.3 libgdal
+    install libgdal 2.2.3 libgdal
     install boost ${BOOST_VERSION}
     install boost_libsystem ${BOOST_VERSION}
     install boost_libfilesystem ${BOOST_VERSION}
