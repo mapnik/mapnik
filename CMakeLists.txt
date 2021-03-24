@@ -79,7 +79,7 @@ set(MAPNIK_LIB_DIR ${DEFAULT_LIB_DIR} CACHE STRING "Install directory for librar
 # https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#archive-output-artifacts
 set(MAPNIK_ARCHIVE_DIR ${DEFAULT_ARCHIVE_DIR} CACHE STRING "Install directory for archives")
 
-set(INSTALL_CMAKE_DIR ${MAPNIK_LIB_DIR}/mapnik/cmake CACHE STRING "Install directory of the cmake targets")
+set(INSTALL_CMAKE_DIR ${MAPNIK_LIB_DIR}/cmake/mapnik CACHE STRING "Install directory of the cmake targets")
 
 if(WIN32)
     set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_BIN_DIR}/mapnik/input)
