@@ -59,7 +59,7 @@ option(BUILD_UTILITY_PGSQL2SQLITE "builds the utility program pgsql2sqlite" ON)
 option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++11 is minimum.")
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
 message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
 
 if(WIN32)
