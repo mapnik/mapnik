@@ -27,8 +27,8 @@
 
 namespace mapnik { namespace util {
 
-constexpr double pi = 3.1415926535897932384626433832795;
-constexpr double tau = 6.283185307179586476925286766559;
+constexpr double pi = 3.14159265358979323846;
+constexpr double tau = 2.0 * pi;
 
 template <typename T>
 constexpr T const& clamp(T const& v, T const& lo, T const& hi)
@@ -38,12 +38,12 @@ constexpr T const& clamp(T const& v, T const& lo, T const& hi)
 
 constexpr double degrees(double rad)
 {
-    return rad * (360 / tau);
+    return rad * (180.0 / pi);
 }
 
 constexpr double radians(double deg)
 {
-    return deg * (tau / 360);
+    return deg * (pi / 180);
 }
 
 MAPNIK_DECL double normalize_angle(double angle);
