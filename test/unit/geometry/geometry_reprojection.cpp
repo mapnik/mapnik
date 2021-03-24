@@ -1185,7 +1185,7 @@ SECTION("test_projection_4326_3857 - Geometry Collection Variant Object") {
     }
 } // END SECTION
 
-#ifdef MAPNIK_USE_PROJ4
+#ifdef MAPNIK_USE_PROJ
 SECTION("test_projection_4269_3857 - Line_String Geometry Object") {
     using namespace mapnik::geometry;
     mapnik::projection source("epsg:4269");
@@ -1305,6 +1305,6 @@ SECTION("test_projection_4269_3857 - Point Geometry Object") {
     }
 } // End Section
 
-#endif  // MAPNIK_USE_PROJ4
+#endif  // MAPNIK_USE_PROJ
 
 } // End Testcase
