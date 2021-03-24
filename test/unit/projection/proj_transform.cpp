@@ -3,6 +3,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/geometry/box2d.hpp>
+#include <cmath>
 #include <tuple>
 
 TEST_CASE("projection transform")
