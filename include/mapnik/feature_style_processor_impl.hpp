@@ -66,10 +66,9 @@ struct layer_rendering_material
     std::vector<layer_rendering_material> materials_;
 
     layer_rendering_material(layer const& lay, projection const& dest)
-        :
-        lay_(lay),
-        proj0_(dest),
-        proj1_(lay.srs(),true) {}
+        : lay_(lay),
+          proj0_(dest),
+          proj1_(lay.srs(), true) {}
 
     layer_rendering_material(layer_rendering_material && rhs) = default;
 };
@@ -255,8 +254,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     processor_context_ptr current_ctx = ds->get_context(ctx_map);
-    proj_transform prj_trans(mat.proj0_,mat.proj1_);
-
+    proj_transform * proj_trans_ptr = m_.get_proj_transform(mat.proj0_.params(), mat.proj1_.params());
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
@@ -286,22 +284,22 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     bool early_return = false;
 
     // first, try intersection of map extent forward projected into layer srs
-    if (prj_trans.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
+    if (proj_trans_ptr->forward(buffered_query_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
     {
         fw_success = true;
         layer_ext.clip(buffered_query_ext);
     }
     // if no intersection and projections are also equal, early return
-    else if (prj_trans.equal())
+    else if (proj_trans_ptr->equal())
     {
         early_return = true;
     }
     // next try intersection of layer extent back projected into map srs
-    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext_map_srs.intersects(layer_ext))
+    else if (proj_trans_ptr->backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext_map_srs.intersects(layer_ext))
     {
         layer_ext.clip(buffered_query_ext_map_srs);
         // forward project layer extent back into native projection
-        if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
+        if (! proj_trans_ptr->forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
             MAPNIK_LOG_ERROR(feature_style_processor)
                 << "feature_style_processor: Layer=" << lay.name()
@@ -353,17 +351,17 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     layer_ext2 = lay.envelope();
     if (fw_success)
     {
-        if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))
+        if (proj_trans_ptr->forward(query_ext, PROJ_ENVELOPE_POINTS))
         {
             layer_ext2.clip(query_ext);
         }
     }
     else
     {
-        if (prj_trans.backward(layer_ext2, PROJ_ENVELOPE_POINTS))
+        if (proj_trans_ptr->backward(layer_ext2, PROJ_ENVELOPE_POINTS))
         {
             layer_ext2.clip(query_ext);
-            prj_trans.forward(layer_ext2, PROJ_ENVELOPE_POINTS);
+            proj_trans_ptr->forward(layer_ext2, PROJ_ENVELOPE_POINTS);
         }
     }
 
@@ -495,9 +493,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     layer const& lay = mat.lay_;
 
     std::vector<rule_cache> const & rule_caches = mat.rule_caches_;
-
-    proj_transform prj_trans(mat.proj0_,mat.proj1_);
-
+    proj_transform * proj_trans_ptr = m_.get_proj_transform(mat.proj0_.params(), mat.proj1_.params());
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
 
     datasource_ptr ds = lay.datasource();
@@ -525,10 +521,9 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
 
                         cache->prepare();
                         render_style(p, style,
-                                     rule_caches[i],
+                                     rule_caches[i++],
                                      cache,
-                                     prj_trans);
-                        ++i;
+                                     *proj_trans_ptr);
                     }
                     cache->clear();
                 }
@@ -540,8 +535,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
             for (feature_type_style const* style : active_styles)
             {
                 cache->prepare();
-                render_style(p, style, rule_caches[i], cache, prj_trans);
-                ++i;
+                render_style(p, style, rule_caches[i++], cache, *proj_trans_ptr);
             }
             cache->clear();
         }
@@ -565,9 +559,8 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
         {
             cache->prepare();
             render_style(p, style,
-                         rule_caches[i],
-                         cache, prj_trans);
-            ++i;
+                         rule_caches[i++],
+                         cache, *proj_trans_ptr);
         }
     }
     // We only have a single style and no grouping.
@@ -579,10 +572,9 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
         {
             featureset_ptr features = *featuresets++;
             render_style(p, style,
-                         rule_caches[i],
+                         rule_caches[i++],
                          features,
-                         prj_trans);
-            ++i;
+                         *proj_trans_ptr);
         }
     }
 }

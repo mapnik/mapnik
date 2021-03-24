@@ -28,13 +28,13 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/util/is_clockwise.hpp>
-
+#include <mapnik/util/trim.hpp>
 // boost
 #include <boost/geometry/algorithms/envelope.hpp>
 
-#ifdef MAPNIK_USE_PROJ4
-// proj4
-#include <proj_api.h>
+#ifdef MAPNIK_USE_PROJ
+// proj
+#include <proj.h>
 #endif
 
 // stl
@@ -95,30 +95,28 @@ auto envelope_points(box2d<T> const& env, std::size_t num_points)
 
 proj_transform::proj_transform(projection const& source,
                                projection const& dest)
-    : source_(source),
-      dest_(dest),
-      is_source_longlat_(false),
+    : is_source_longlat_(false),
       is_dest_longlat_(false),
       is_source_equal_dest_(false),
       wgs84_to_merc_(false),
       merc_to_wgs84_(false)
 {
-    is_source_equal_dest_ = (source_ == dest_);
+    is_source_equal_dest_ = (source == dest);
     if (!is_source_equal_dest_)
     {
-        is_source_longlat_ = source_.is_geographic();
-        is_dest_longlat_ = dest_.is_geographic();
+        is_source_longlat_ = source.is_geographic();
+        is_dest_longlat_ = dest.is_geographic();
         boost::optional<well_known_srs_e> src_k = source.well_known();
         boost::optional<well_known_srs_e> dest_k = dest.well_known();
         bool known_trans = false;
         if (src_k && dest_k)
         {
-            if (*src_k == WGS_84 && *dest_k == G_MERC)
+            if (*src_k == WGS_84 && *dest_k == WEB_MERC)
             {
                 wgs84_to_merc_ = true;
                 known_trans = true;
             }
-            else if (*src_k == G_MERC && *dest_k == WGS_84)
+            else if (*src_k == WEB_MERC && *dest_k == WGS_84)
             {
                 merc_to_wgs84_ = true;
                 known_trans = true;
@@ -126,14 +124,43 @@ proj_transform::proj_transform(projection const& source,
         }
         if (!known_trans)
         {
-#ifdef MAPNIK_USE_PROJ4
-            source_.init_proj4();
-            dest_.init_proj4();
+#ifdef MAPNIK_USE_PROJ
+            ctx_ = proj_context_create();
+            transform_ = proj_create_crs_to_crs(ctx_,
+                                                source.params().c_str(),
+                                                dest.params().c_str(), nullptr);
+            if (transform_ == nullptr)
+            {
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") + source.params() + "'->'" + dest.params() + "'");
+            }
+            PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
+            if (transform_gis == nullptr)
+            {
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") + source.params() + "'->'" + dest.params() + "'");
+            }
+            proj_destroy(transform_);
+            transform_ = transform_gis;
 #else
-            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ4): '") + source_.params() + "'->'" + dest_.params() + "'");
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
 #endif
         }
     }
+}
+
+proj_transform::~proj_transform()
+{
+#ifdef MAPNIK_USE_PROJ
+    if (transform_)
+    {
+        proj_destroy(transform_);
+        transform_ = nullptr;
+    }
+    if (ctx_)
+    {
+        proj_context_destroy(ctx_);
+        ctx_ = nullptr;
+    }
+#endif
 }
 
 bool proj_transform::equal() const
@@ -187,9 +214,8 @@ unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls)
     return 0;
 }
 
-bool proj_transform::forward (double * x, double * y , double * z, int point_count, int offset) const
+bool proj_transform::forward (double * x, double * y , double * z, std::size_t point_count, std::size_t offset) const
 {
-
     if (is_source_equal_dest_)
         return true;
 
@@ -202,42 +228,19 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         return merc2lonlat(x, y, point_count, offset);
     }
 
-#ifdef MAPNIK_USE_PROJ4
-    if (is_source_longlat_)
-    {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= DEG_TO_RAD;
-            y[i*offset] *= DEG_TO_RAD;
-        }
-    }
-
-    if (pj_transform( source_.proj_, dest_.proj_, point_count,
-                      offset, x,y,z) != 0)
-    {
+#ifdef MAPNIK_USE_PROJ
+    if (proj_trans_generic(transform_, PJ_FWD,
+                           x, offset * sizeof(double), point_count,
+                           y, offset * sizeof(double), point_count,
+                           z, offset * sizeof(double), point_count,
+                           0, 0, 0) != point_count)
         return false;
-    }
 
-    for(int j=0; j<point_count; j++) {
-        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
-        {
-            return false;
-        }
-    }
-
-    if (is_dest_longlat_)
-    {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i*offset] *= RAD_TO_DEG;
-            y[i*offset] *= RAD_TO_DEG;
-        }
-    }
 #endif
     return true;
 }
 
-bool proj_transform::backward (double * x, double * y , double * z, int point_count, int offset) const
+bool proj_transform::backward (double * x, double * y , double * z, std::size_t point_count, std::size_t offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -251,38 +254,13 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         return lonlat2merc(x, y, point_count, offset);
     }
 
-#ifdef MAPNIK_USE_PROJ4
-    if (is_dest_longlat_)
-    {
-        for (int i = 0; i < point_count; ++i)
-        {
-            x[i * offset] *= DEG_TO_RAD;
-            y[i * offset] *= DEG_TO_RAD;
-        }
-    }
-
-    if (pj_transform(dest_.proj_, source_.proj_, point_count,
-                     offset, x, y, z) != 0)
-    {
+#ifdef MAPNIK_USE_PROJ
+    if (proj_trans_generic(transform_, PJ_INV,
+                           x, offset * sizeof(double), point_count,
+                           y, offset * sizeof(double), point_count,
+                           z, offset * sizeof(double), point_count,
+                           0, 0, 0) != point_count)
         return false;
-    }
-
-    for (int j = 0; j < point_count; ++j)
-    {
-        if (x[j] == HUGE_VAL || y[j] == HUGE_VAL)
-        {
-            return false;
-        }
-    }
-
-    if (is_source_longlat_)
-    {
-        for (int i = 0; i < point_count; ++i)
-        {
-            x[i * offset] *= RAD_TO_DEG;
-            y[i * offset] *= RAD_TO_DEG;
-        }
-    }
 #endif
     return true;
 }
@@ -394,7 +372,7 @@ bool proj_transform::backward (box2d<double> & box) const
 // Alternative is to provide proper clipping box
 // in the target srs by setting map 'maximum-extent'
 
-bool proj_transform::backward(box2d<double>& env, int points) const
+bool proj_transform::backward(box2d<double>& env, std::size_t points) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -433,7 +411,7 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     return true;
 }
 
-bool proj_transform::forward(box2d<double>& env, int points) const
+bool proj_transform::forward(box2d<double>& env, std::size_t points) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -473,13 +451,25 @@ bool proj_transform::forward(box2d<double>& env, int points) const
     return true;
 }
 
-mapnik::projection const& proj_transform::source() const
+std::string proj_transform::definition() const
 {
-    return source_;
-}
-mapnik::projection const& proj_transform::dest() const
-{
-    return dest_;
-}
+#ifdef MAPNIK_USE_PROJ
+    if (transform_)
+    {
+        PJ_PROJ_INFO info = proj_pj_info(transform_);
+        return mapnik::util::trim_copy(info.definition);
+    }
+    else
+#endif
+        if (wgs84_to_merc_)
+        {
+            return "wgs84 => merc";
+        }
+        else if (merc_to_wgs84_)
+        {
+            return "merc => wgs84";
+        }
+    return "unknown";
+ }
 
 }

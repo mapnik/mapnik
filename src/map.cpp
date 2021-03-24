@@ -66,7 +66,7 @@ IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings )
 Map::Map()
 : width_(400),
     height_(400),
-    srs_(MAPNIK_LONGLAT_PROJ),
+    srs_(MAPNIK_GEOGRAPHIC_PROJ),
     buffer_size_(0),
     background_image_comp_op_(src_over),
     background_image_opacity_(1.0),
@@ -110,8 +110,11 @@ Map::Map(Map const& rhs)
       extra_params_(rhs.extra_params_),
       font_directory_(rhs.font_directory_),
       font_file_mapping_(rhs.font_file_mapping_),
-      // on copy discard memory cache
-      font_memory_cache_() {}
+      // on copy discard memory caches
+      font_memory_cache_()
+{
+    init_proj_transforms();
+}
 
 
 Map::Map(Map && rhs)
@@ -137,9 +140,12 @@ Map::Map(Map && rhs)
 
 Map::~Map() {}
 
+thread_local Map::proj_cache_type Map::proj_cache_ = proj_cache_type();
+
 Map& Map::operator=(Map rhs)
 {
     swap(*this, rhs);
+    init_proj_transforms();
     return *this;
 }
 
@@ -164,7 +170,7 @@ void swap (Map & lhs, Map & rhs)
     std::swap(lhs.extra_params_, rhs.extra_params_);
     std::swap(lhs.font_directory_,rhs.font_directory_);
     std::swap(lhs.font_file_mapping_,rhs.font_file_mapping_);
-    // on assignment discard memory cache
+    // on assignment discard memory caches
     //std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
 }
 
@@ -321,13 +327,30 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
+proj_transform * Map::get_proj_transform(std::string const& source, std::string const& dest) const
+{
+
+    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
+    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
+    if (itr == proj_cache_.end())
+    {
+        mapnik::projection srs1(source, true);
+        mapnik::projection srs2(dest, true);
+        return proj_cache_.emplace(std::make_pair(source, dest),
+                                   std::make_unique<proj_transform>(srs1, srs2)).first->second.get();
+    }
+    return itr->second.get();
+}
+
 void Map::add_layer(layer const& l)
 {
+    init_proj_transform(srs_, l.srs());
     layers_.emplace_back(l);
 }
 
 void Map::add_layer(layer && l)
 {
+    init_proj_transform(srs_, l.srs());
     layers_.push_back(std::move(l));
 }
 
@@ -343,6 +366,7 @@ void Map::remove_all()
     fontsets_.clear();
     font_file_mapping_.clear();
     font_memory_cache_.clear();
+    proj_cache_.clear();
 }
 
 layer const& Map::get_layer(size_t index) const
@@ -419,7 +443,9 @@ std::string const&  Map::srs() const
 
 void Map::set_srs(std::string const& _srs)
 {
+    if (srs_ != _srs) init_proj_transforms();
     srs_ = _srs;
+
 }
 
 void Map::set_buffer_size(int _buffer_size)
@@ -517,7 +543,6 @@ void Map::zoom_all()
         {
             return;
         }
-        projection proj0(srs_);
         box2d<double> ext;
         bool success = false;
         bool first = true;
@@ -526,10 +551,9 @@ void Map::zoom_all()
             if (layer.active())
             {
                 std::string const& layer_srs = layer.srs();
-                projection proj1(layer_srs);
-                proj_transform prj_trans(proj0,proj1);
+                proj_transform * proj_trans_ptr = get_proj_transform(srs_, layer_srs);;
                 box2d<double> layer_ext = layer.envelope();
-                if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
+                if (proj_trans_ptr->backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
                     success = true;
                     MAPNIK_LOG_DEBUG(map) << "map: Layer " << layer.name() << " original ext=" << layer.envelope();
@@ -707,11 +731,9 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         mapnik::datasource_ptr ds = layer.datasource();
         if (ds)
         {
-            mapnik::projection dest(srs_);
-            mapnik::projection source(layer.srs());
-            proj_transform prj_trans(source,dest);
+            proj_transform * proj_trans_ptr = get_proj_transform(layer.srs(), srs_);
             double z = 0;
-            if (!prj_trans.equal() && !prj_trans.backward(x,y,z))
+            if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
             {
                 throw std::runtime_error("query_point: could not project x,y into layer srs");
             }
@@ -721,7 +743,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             {
                 map_ex.clip(*maximum_extent_);
             }
-            if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
+            if (!proj_trans_ptr->backward(map_ex,PROJ_ENVELOPE_POINTS))
             {
                 std::ostringstream s;
                 s << "query_point: could not project map extent '" << map_ex
@@ -770,6 +792,30 @@ parameters& Map::get_extra_parameters()
 void Map::set_extra_parameters(parameters& params)
 {
     extra_params_ = params;
+}
+
+
+void Map::init_proj_transform(std::string const& source, std::string const& dest)
+{
+    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
+    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
+    if (itr == proj_cache_.end())
+    {
+        mapnik::projection p0(source, true);
+        mapnik::projection p1(dest, true);
+        proj_cache_.emplace(std::make_pair(source, dest),
+                            std::make_unique<proj_transform>(p0, p1));
+    }
+}
+
+void Map::init_proj_transforms()
+{
+    std::for_each(layers_.begin(),
+                  layers_.end(),
+                  [this] (auto const& l)
+                  {
+                      init_proj_transform(srs_, l.srs());
+                  });
 }
 
 }
