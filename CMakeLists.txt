@@ -92,8 +92,8 @@ message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
 message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 
-mapnik_find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
+mapnik_find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
 mapnik_find_package(Freetype REQUIRED)
 mapnik_find_package(harfbuzz CONFIG REQUIRED)
 
@@ -238,12 +238,12 @@ target_include_directories(core INTERFACE
     ${MAPNIK_OPTIONAL_LIBS_INCLUDE}
 )
 target_link_libraries(core INTERFACE 
-    Boost::headers
-    Boost::regex
-    Boost::filesystem
     ICU::uc
     ICU::data
     ICU::i18n
+    Boost::headers
+    Boost::regex
+    Boost::filesystem
     Freetype::Freetype
     harfbuzz::harfbuzz
     ${MAPNIK_OPTIONAL_LIBS}
