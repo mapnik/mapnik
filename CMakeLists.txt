@@ -202,7 +202,7 @@ endif()
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
     message(STATUS "Using PROJ")
-    mapnik_find_package(PROJ4 CONFIG REQUIRED)
+    mapnik_find_package(PROJ4 REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ4 ACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ4_LIBRARIES})
     list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ4_INCLUDE_DIRS})
