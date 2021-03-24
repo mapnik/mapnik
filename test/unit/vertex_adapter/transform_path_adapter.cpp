@@ -11,7 +11,7 @@
 
 TEST_CASE("transform_path_adapter") {
 
-#ifdef MAPNIK_USE_PROJ4
+#ifdef MAPNIK_USE_PROJ
 SECTION("polygon closing - epsg 2330") {
     mapnik::geometry::polygon<double> g;
     g.emplace_back();
@@ -116,5 +116,5 @@ SECTION("polygon closing - epsg 32633") {
     CHECK( y == 0 );
 }
 
-#endif //MAPNIK_USE_PROJ4
+#endif //MAPNIK_USE_PROJ
 }
