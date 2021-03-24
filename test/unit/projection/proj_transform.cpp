@@ -100,9 +100,10 @@ SECTION("test forward/backward transformations")
     };
 
     std::initializer_list<std::tuple<double, double>> coords = {
-        {-4.0278869, 57.8796955}, // City of Dornoch
-        {-4.2488787, 55.8609825}, // City of Glasgow
-        {-1.4823897, 51.8726941}, // Charlbury
+        {-4.0278869, 57.8796955}, // Dórnach, Highland
+        {-4.2488787, 55.8609825}, // Glaschú, Alba
+        {-1.4823897, 51.8726941}, // Charlbury, England
+        {-3.9732612, 51.7077400}  // Felindre, Cymru
     };
 
     for (auto const& c : coords)
