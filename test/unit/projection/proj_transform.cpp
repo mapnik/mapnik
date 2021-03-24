@@ -3,12 +3,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/geometry/box2d.hpp>
-
-#ifdef MAPNIK_USE_PROJ4
-// proj4
-#include <proj_api.h>
-#endif
-
+#include <tuple>
 
 TEST_CASE("projection transform")
 {
@@ -17,6 +12,10 @@ SECTION("Test bounding box transforms - 4326 to 3857")
 {
     mapnik::projection proj_4326("epsg:4326");
     mapnik::projection proj_3857("epsg:3857");
+
+    CHECK(proj_4326.is_geographic());
+    CHECK(!proj_3857.is_geographic());
+
     mapnik::proj_transform prj_trans(proj_4326, proj_3857);
 
     double minx = -45.0;
@@ -45,36 +44,15 @@ SECTION("Test bounding box transforms - 4326 to 3857")
 }
 
 
-#if defined(MAPNIK_USE_PROJ4) && PJ_VERSION >= 480
-SECTION("test pj_transform failure behavior")
+#if defined(MAPNIK_USE_PROJ)
+SECTION("test proj_transform failure behavior")
 {
     mapnik::projection proj_4269("epsg:4269");
     mapnik::projection proj_3857("epsg:3857");
     mapnik::proj_transform prj_trans(proj_4269, proj_3857);
     mapnik::proj_transform prj_trans2(proj_3857, proj_4269);
 
-    auto proj_ctx0 = pj_ctx_alloc();
-    REQUIRE( proj_ctx0 != nullptr );
-    auto proj0 = pj_init_plus_ctx(proj_ctx0, proj_4269.params().c_str());
-    REQUIRE( proj0 != nullptr );
-
-    auto proj_ctx1 = pj_ctx_alloc();
-    REQUIRE( proj_ctx1 != nullptr );
-    auto proj1 = pj_init_plus_ctx(proj_ctx1, proj_3857.params().c_str());
-    REQUIRE( proj1 != nullptr );
-
-    // first test valid values directly against proj
-    double x = -180.0;
-    double y = -60.0;
-    x *= DEG_TO_RAD;
-    y *= DEG_TO_RAD;
-    CHECK( x == Approx(-3.1415926536) );
-    CHECK( y == Approx(-1.0471975512) );
-    CHECK( 0 == pj_transform(proj0, proj1, 1, 0, &x, &y, nullptr) );
-    CHECK( x == Approx(-20037508.3427892439) );
-    CHECK( y == Approx(-8399737.8896366451) );
-
-    // now test mapnik class
+    // test valid coordinate
     double x0 = -180.0;
     double y0 = -60.0;
     CHECK( prj_trans.forward(&x0,&y0,nullptr,1,1) );
@@ -86,38 +64,61 @@ SECTION("test pj_transform failure behavior")
     CHECK( x1 == Approx(-20037508.3427892439) );
     CHECK( y1 == Approx(-8399737.8896366451) );
 
-    // longitude value outside the value range for mercator
-    x = -181.0;
-    y = -91.0;
-    x *= DEG_TO_RAD;
-    y *= DEG_TO_RAD;
-    CHECK( x == Approx(-3.1590459461) );
-    CHECK( y == Approx(-1.5882496193) );
-    CHECK( 0 == pj_transform(proj0, proj1, 1, 0, &x, &y, nullptr) );
-    CHECK( std::isinf(x) );
-    CHECK( std::isinf(y) );
-
-    // now test mapnik class
+    // now test invalid coordinate
     double x2 = -181.0;
     double y2 = -91.0;
-    CHECK( false == prj_trans.forward(&x2,&y2,nullptr,1,1) );
+    prj_trans.forward(&x2,&y2,nullptr,1,1);
     CHECK( std::isinf(x2) );
     CHECK( std::isinf(y2) );
     double x3 = -181.0;
     double y3 = -91.0;
-    CHECK( false == prj_trans2.backward(&x3,&y3,nullptr,1,1) );
+    prj_trans2.backward(&x3,&y3,nullptr,1,1);
     CHECK( std::isinf(x3) );
     CHECK( std::isinf(y3) );
+}
 
-    // cleanup
-    pj_ctx_free(proj_ctx0);
-    proj_ctx0 = nullptr;
-    pj_free(proj0);
-    proj0 = nullptr;
-    pj_ctx_free(proj_ctx1);
-    proj_ctx1 = nullptr;
-    pj_free(proj1);
-    proj1 = nullptr;
+SECTION("test forward/backward transformations")
+{
+    //WGS 84 - World Geodetic System 1984, used in GPS
+    mapnik::projection proj_4236("epsg:4236");
+    //OSGB 1936 / British National Grid -- United Kingdom Ordnance Survey
+    mapnik::projection proj_27700("epsg:27700");
+    //WGS 84 / Equal Earth Greenwich
+    mapnik::projection proj_8857("epsg:8857");
+    //European Terrestrial Reference System 1989 (ETRS89)
+    mapnik::projection proj_4937("epsg:4937");
+    //"Webmercator" WGS 84 / Pseudo-Mercator -- Spherical Mercator, Google Maps, OpenStreetMap, Bing, ArcGIS, ESRI
+    mapnik::projection proj_3857("epsg:3857");
+
+    mapnik::proj_transform tr1(proj_4236, proj_27700);
+    mapnik::proj_transform tr2(proj_4236, proj_8857);
+    mapnik::proj_transform tr3(proj_4236, proj_4236);
+    mapnik::proj_transform tr4(proj_4236, proj_4937);
+    mapnik::proj_transform tr5(proj_4236, proj_3857);
+    std::initializer_list<std::reference_wrapper<mapnik::proj_transform>> transforms = {
+        tr1, tr2, tr3, tr4, tr5
+    };
+
+    std::initializer_list<std::tuple<double, double>> coords = {
+        {-4.0278869, 57.8796955}, // City of Dornoch
+        {-4.2488787, 55.8609825}, // City of Glasgow
+        {-1.4823897, 51.8726941}, // Charlbury
+    };
+
+    for (auto const& c : coords)
+    {
+        double x0, y0;
+        std::tie(x0, y0) = c;
+        for (mapnik::proj_transform const& tr : transforms)
+        {
+            double x1 = x0;
+            double y1 = y0;
+            tr.forward (&x1, &y1, nullptr, 1, 1);
+            tr.backward(&x1, &y1, nullptr, 1, 1);
+            CHECK (x0 == Approx(x1));
+            CHECK (y0 == Approx(y1));
+        }
+    }
 }
 
 // Github Issue https://github.com/mapnik/mapnik/issues/2648
@@ -242,11 +243,11 @@ SECTION("proj_transform of coordinate arrays with stride > 1")
         }
     }
 
-    #ifdef MAPNIK_USE_PROJ4
+#ifdef MAPNIK_USE_PROJ
     SECTION("lonlat <-> New Zealand Transverse Mercator 2000")
     {
 
-        mapnik::projection const proj_2193("+init=epsg:2193");
+        mapnik::projection const proj_2193("epsg:2193");
         //  cs2cs -Ef %.10f epsg:4326 +to epsg:2193 <<END
         //      170.142139 -43.595056
         //      175.566667 -39.283333
@@ -274,7 +275,7 @@ SECTION("proj_transform of coordinate arrays with stride > 1")
             CHECK(points[1].y == Approx(-39.283333));
         }
     }
-    #endif // MAPNIK_USE_PROJ4
+#endif // MAPNIK_USE_PROJ
 }
 
 }
