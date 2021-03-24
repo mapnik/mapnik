@@ -16,9 +16,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #endif
 
 #include <unicode/uclean.h>
-#ifdef MAPNIK_USE_PROJ4
-#include <proj_api.h>
-#endif
 
 MAPNIK_DISABLE_WARNING_POP
 
@@ -47,15 +44,6 @@ inline void run_cleanup()
 
     // http://icu-project.org/apiref/icu4c/uclean_8h.html#a93f27d0ddc7c196a1da864763f2d8920
     u_cleanup();
-
-#ifdef MAPNIK_USE_PROJ4
-    // http://trac.osgeo.org/proj/ticket/149
- #if PJ_VERSION >= 480
-    pj_clear_initcache();
- #endif
-    // https://trac.osgeo.org/proj/wiki/ProjAPI#EnvironmentFunctions
-    pj_deallocate_grids();
-#endif
 }
 
 }
