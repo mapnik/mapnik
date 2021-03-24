@@ -70,7 +70,7 @@ boost::optional<bool> is_known_geographic(std::string const& srs)
     }
     else if (trimmed ==  MAPNIK_WEBMERCATOR_PROJ)
     {
-        return boost::optional<bool>(true);
+        return boost::optional<bool>(false);
     }
     return boost::optional<bool>();
 }
