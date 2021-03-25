@@ -39,7 +39,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 
 // fwd decl
-#if PROJ_VERSION >= 80000
+#if MAPNIK_PROJ_VERSION >= 80000
 struct pj_ctx;
 using PJ_CONTEXT = struct pj_ctx;
 #else
