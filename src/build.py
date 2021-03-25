@@ -214,6 +214,7 @@ source = Split(
     twkb.cpp
     projection.cpp
     proj_transform.cpp
+    proj_transform_cache.cpp
     scale_denominator.cpp
     simplify.cpp
     parse_transform.cpp
