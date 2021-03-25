@@ -58,6 +58,7 @@ set(MAPNIK_SOURCES
     parse_transform.cpp
     path_expression_grammar_x3.cpp
     plugin.cpp
+    proj_transform_cache.cpp
     proj_transform.cpp
     projection.cpp
     raster_colorizer.cpp
