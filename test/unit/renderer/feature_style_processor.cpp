@@ -8,7 +8,6 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/feature_style_processor.hpp>
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/symbolizer.hpp>
