@@ -1,6 +1,7 @@
 project(mapnik-test)
 
 find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+find_package(PostgreSQL REQUIRED)
 
 include(FetchContent)
 include(CopyDllsForDebug)
@@ -113,6 +114,7 @@ target_link_libraries(mapnik-test-unit PUBLIC
     mapnik::mapnik
     mapnik::json
     mapnik::wkt
+    PostgreSQL::PostgreSQL
 )
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
