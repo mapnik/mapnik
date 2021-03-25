@@ -61,6 +61,8 @@ option(BUILD_UTILITY_PGSQL2SQLITE "builds the utility program pgsql2sqlite" ON)
 option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
+option(USE_BOOST_REGEX_ICU_WORKAROUND "if you don't use your system libraries and get double linked icu libraries set this to ON" OFF)
+
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
 message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
 
@@ -96,6 +98,9 @@ message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 mapnik_find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
+if(USE_BOOST_REGEX_ICU_WORKAROUND)
+    set_property(TARGET Boost::regex PROPERTY INTERFACE_LINK_LIBRARIES)
+endif()
 mapnik_find_package(Freetype REQUIRED)
 mapnik_find_package(harfbuzz CONFIG REQUIRED)
 
@@ -203,11 +208,12 @@ endif()
 
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
-    message(STATUS "Using PROJ")
-    mapnik_find_package(PROJ4 REQUIRED)
-    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ)
-    list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ4_LIBRARIES})
-    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ4_INCLUDE_DIRS})
+    mapnik_find_package(PROJ REQUIRED)
+    message(STATUS "Using PROJ version: ${PROJ_VERSION}")
+    math(EXPR MAPNIK_PROJ_VERSION "${PROJ_VERSION_MAJOR}*10000 + ${PROJ_VERSION_MINOR}*100 + ${PROJ_VERSION_PATCH}" OUTPUT_FORMAT DECIMAL)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ MAPNIK_PROJ_VERSION=${MAPNIK_PROJ_VERSION})
+    list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ_LIBRARIES})
+    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ_INCLUDE_DIRS})
 endif()
 
 if(USE_GRID_RENDERER)
