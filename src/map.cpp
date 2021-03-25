@@ -31,7 +31,7 @@
 #include <mapnik/map.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
-#include <mapnik/proj_transform.hpp>
+#include <mapnik/proj_transform_cache.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
@@ -63,8 +63,9 @@ static const char * aspect_fix_mode_strings[] = {
 
 IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings )
 
+
 Map::Map()
-: width_(400),
+:   width_(400),
     height_(400),
     srs_(MAPNIK_GEOGRAPHIC_PROJ),
     buffer_size_(0),
@@ -136,11 +137,11 @@ Map::Map(Map && rhs)
       extra_params_(std::move(rhs.extra_params_)),
       font_directory_(std::move(rhs.font_directory_)),
       font_file_mapping_(std::move(rhs.font_file_mapping_)),
-      font_memory_cache_(std::move(rhs.font_memory_cache_)) {}
+      font_memory_cache_(std::move(rhs.font_memory_cache_)),
+      proj_cache_(std::move(rhs.proj_cache_)) {}
 
 Map::~Map() {}
 
-thread_local Map::proj_cache_type Map::proj_cache_ = proj_cache_type();
 
 Map& Map::operator=(Map rhs)
 {
@@ -327,21 +328,6 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-proj_transform * Map::get_proj_transform(std::string const& source, std::string const& dest) const
-{
-
-    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
-    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
-    if (itr == proj_cache_.end())
-    {
-        mapnik::projection srs1(source, true);
-        mapnik::projection srs2(dest, true);
-        return proj_cache_.emplace(std::make_pair(source, dest),
-                                   std::make_unique<proj_transform>(srs1, srs2)).first->second.get();
-    }
-    return itr->second.get();
-}
-
 void Map::add_layer(layer const& l)
 {
     init_proj_transform(srs_, l.srs());
@@ -366,7 +352,6 @@ void Map::remove_all()
     fontsets_.clear();
     font_file_mapping_.clear();
     font_memory_cache_.clear();
-    proj_cache_.clear();
 }
 
 layer const& Map::get_layer(size_t index) const
@@ -551,7 +536,7 @@ void Map::zoom_all()
             if (layer.active())
             {
                 std::string const& layer_srs = layer.srs();
-                proj_transform * proj_trans_ptr = get_proj_transform(srs_, layer_srs);;
+                proj_transform const* proj_trans_ptr = proj_cache_->get(srs_, layer_srs);;
                 box2d<double> layer_ext = layer.envelope();
                 if (proj_trans_ptr->backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
@@ -731,7 +716,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         mapnik::datasource_ptr ds = layer.datasource();
         if (ds)
         {
-            proj_transform * proj_trans_ptr = get_proj_transform(layer.srs(), srs_);
+            proj_transform const* proj_trans_ptr = proj_cache_->get(layer.srs(), srs_);
             double z = 0;
             if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
             {
@@ -794,18 +779,14 @@ void Map::set_extra_parameters(parameters& params)
     extra_params_ = params;
 }
 
+mapnik::proj_transform const* Map::get_proj_transform(std::string const& source, std::string const& dest) const
+{
+    return proj_cache_->get(source, dest);
+}
 
 void Map::init_proj_transform(std::string const& source, std::string const& dest)
 {
-    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
-    auto itr = proj_cache_.find(key, compatible_hash{}, compatible_predicate{});
-    if (itr == proj_cache_.end())
-    {
-        mapnik::projection p0(source, true);
-        mapnik::projection p1(dest, true);
-        proj_cache_.emplace(std::make_pair(source, dest),
-                            std::make_unique<proj_transform>(p0, p1));
-    }
+    proj_cache_->init(source, dest);
 }
 
 void Map::init_proj_transforms()
