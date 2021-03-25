@@ -233,7 +233,7 @@ struct ignore_case_equal_pred
 bool ignore_case_equal(std::string const& s0, std::string const& s1)
 {
     return std::equal(s0.begin(), s0.end(),
-                      s1.begin(), ignore_case_equal_pred());
+                      s1.begin(), s1.end(), ignore_case_equal_pred());
 }
 
 void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const & )
