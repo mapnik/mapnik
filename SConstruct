@@ -1720,7 +1720,7 @@ if not preconfigured:
                         env['SKIPPED_DEPS'].append('proj-min-version')
                     else:
                         env.Append(CPPDEFINES = define)
-                        env.Append(CPPDEFINES = "-DPROJ_VERSION=%d" % version)
+                        env.Append(CPPDEFINES = "-DMAPNIK_PROJ_VERSION=%d" % version)
                 else:
                     env.Append(CPPDEFINES = define)
             else:
