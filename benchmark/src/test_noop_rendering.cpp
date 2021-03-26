@@ -11,7 +11,7 @@
 #include <mapnik/feature_type_style.hpp>
 
 #include <memory>
-    
+
 class test : public benchmark::test_case
 {
 public:
@@ -24,7 +24,7 @@ public:
     }
     bool operator()() const
     {
-        mapnik::Map m(256,256,"+init=epsg:3857");
+        mapnik::Map m(256,256,"epsg:3857");
 
         mapnik::parameters params;
         params["type"]="memory";

@@ -42,7 +42,7 @@ using datasource_ptr = std::shared_ptr<datasource>;
  * @brief A Mapnik map layer.
  *
  * Create a layer with a named string and, optionally, an srs string either
- * with a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal
+ * with a Proj.4 epsg code ('epsg:<code>') or with a Proj.4 literal
  * ('+proj=<literal>'). If no srs is specified it will default to
  * '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
  */
@@ -50,7 +50,7 @@ class MAPNIK_DECL layer
 {
 public:
     layer(std::string const& name,
-          std::string const& srs=MAPNIK_LONGLAT_PROJ);
+          std::string const& srs = MAPNIK_GEOGRAPHIC_PROJ);
     // copy
     layer(layer const& l);
     // move

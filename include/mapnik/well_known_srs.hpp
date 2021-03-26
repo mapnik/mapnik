@@ -41,7 +41,7 @@ namespace mapnik {
 
 enum well_known_srs_enum : std::uint8_t {
     WGS_84,
-    G_MERC,
+    WEB_MERC,
     well_known_srs_enum_MAX
 };
 
@@ -53,8 +53,8 @@ constexpr double MERC_MAX_EXTENT = EARTH_RADIUS * util::pi;
 constexpr double MERC_MAX_LATITUDE = 85.0511287798065923778;
               // MERC_MAX_LATITUDE = degrees(2 * atan(exp(pi)) - pi / 2)
 
-extern MAPNIK_DECL std::string const MAPNIK_LONGLAT_PROJ;
-extern MAPNIK_DECL std::string const MAPNIK_GMERC_PROJ;
+extern MAPNIK_DECL std::string const MAPNIK_GEOGRAPHIC_PROJ;
+extern MAPNIK_DECL std::string const MAPNIK_WEBMERCATOR_PROJ;
 
 MAPNIK_DECL boost::optional<bool> is_known_geographic(std::string const& srs);
 MAPNIK_DECL boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs);

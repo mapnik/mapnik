@@ -33,7 +33,7 @@
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -41,7 +41,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
-#include <map>
 #include <memory>
 #include <vector>
 #include <string>
@@ -54,11 +53,11 @@ using featureset_ptr = std::shared_ptr<Featureset>;
 class feature_type_style;
 class view_transform;
 class layer;
+struct proj_transform_cache;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
 public:
-
     enum aspect_fix_mode
     {
         // grow the width or height of the specified geo bbox to fill the map size. default behaviour.
@@ -83,8 +82,8 @@ public:
     };
 
 private:
-    static const unsigned MIN_MAPSIZE=16;
-    static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
+    static const unsigned MIN_MAPSIZE = 16;
+    static const unsigned MAX_MAPSIZE = MIN_MAPSIZE << 10;
     unsigned width_;
     unsigned height_;
     std::string srs_;
@@ -104,9 +103,8 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-
+    std::unique_ptr<proj_transform_cache> proj_cache_ = {};
 public:
-
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
     using style_iterator = std::map<std::string,feature_type_style>::iterator;
     using const_fontset_iterator = std::map<std::string,font_set>::const_iterator;
@@ -126,7 +124,7 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs = MAPNIK_LONGLAT_PROJ);
+    Map(int width, int height, std::string const& srs = MAPNIK_GEOGRAPHIC_PROJ);
 
     /*! \brief Copy Constructor.
      *
@@ -503,9 +501,13 @@ public:
         return font_memory_cache_;
     }
 
+    proj_transform const* get_proj_transform(std::string const& source, std::string const& dest) const;
+
 private:
     friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
+    void init_proj_transform(std::string const& source, std::string const& dest);
+    void init_proj_transforms();
 };
 
 DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);

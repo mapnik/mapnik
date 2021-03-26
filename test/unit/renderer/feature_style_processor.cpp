@@ -8,7 +8,6 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/feature_style_processor.hpp>
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -195,7 +194,7 @@ SECTION("test_renderer - apply() with single layer") {
     rendering_result result;
     test_renderer renderer(map, result);
     std::set<std::string> attributes;
-    mapnik::layer & layer = map.get_layer(0);
+    mapnik::layer const& layer = map.get_layer(0);
     renderer.apply(layer, attributes);
 
     REQUIRE(renderer.painted());
@@ -222,7 +221,7 @@ SECTION("test_renderer - apply_to_layer") {
     test_renderer renderer(map, result);
     std::set<std::string> attributes;
     mapnik::projection map_proj(map.srs(), true);
-    mapnik::layer & layer = map.get_layer(0);
+    mapnik::layer const& layer = map.get_layer(0);
     renderer.apply_to_layer(layer,
                             renderer,
                             map_proj,

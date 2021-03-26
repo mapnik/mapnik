@@ -28,22 +28,13 @@
 // stl
 #include <stdexcept>
 
-#ifdef MAPNIK_USE_PROJ4
-// proj4
-#include <proj_api.h>
- #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    #include <mutex>
-    static std::mutex mutex_;
-    #ifdef _MSC_VER
-     #pragma NOTE(mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8)
-    #else
-     #warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
-    #endif
- #endif
+#ifdef MAPNIK_USE_PROJ
+// proj
+#include <proj.h>
+#include <cmath> // HUGE_VAL
 #endif
 
 namespace mapnik {
-
 
 projection::projection(std::string const& params, bool defer_proj_init)
     : params_(params),
@@ -58,13 +49,13 @@ projection::projection(std::string const& params, bool defer_proj_init)
     }
     else
     {
-#ifdef MAPNIK_USE_PROJ4
-        init_proj4();
+#ifdef MAPNIK_USE_PROJ
+        init_proj();
 #else
-        throw std::runtime_error(std::string("Cannot initialize projection '") + params_ + " ' without proj4 support (-DMAPNIK_USE_PROJ4)");
+        throw std::runtime_error(std::string("Cannot initialize projection '") + params_ + " ' without proj support (-DMAPNIK_USE_PROJ)");
 #endif
     }
-    if (!defer_proj_init_) init_proj4();
+    if (!defer_proj_init_) init_proj();
 }
 
 projection::projection(projection const& rhs)
@@ -74,7 +65,7 @@ projection::projection(projection const& rhs)
       proj_(nullptr),
       proj_ctx_(nullptr)
 {
-    if (!defer_proj_init_) init_proj4();
+    if (!defer_proj_init_) init_proj();
 }
 
 projection& projection::operator=(projection const& rhs)
@@ -83,7 +74,7 @@ projection& projection::operator=(projection const& rhs)
     swap(tmp);
     proj_ctx_ = nullptr;
     proj_ = nullptr;
-    if (!defer_proj_init_) init_proj4();
+    if (!defer_proj_init_) init_proj();
     return *this;
 }
 
@@ -97,34 +88,29 @@ bool projection::operator!=(const projection& other) const
     return !(*this == other);
 }
 
-void projection::init_proj4() const
+void projection::init_proj() const
 {
-#ifdef MAPNIK_USE_PROJ4
+#ifdef MAPNIK_USE_PROJ
     if (!proj_)
     {
-#if PJ_VERSION >= 480
-        proj_ctx_ = pj_ctx_alloc();
-        proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
+        proj_ctx_ = proj_context_create();
+        proj_ = proj_create(proj_ctx_, params_.c_str());
         if (!proj_ || !proj_ctx_)
         {
             if (proj_ctx_) {
-                pj_ctx_free(proj_ctx_);
+                proj_context_destroy(proj_ctx_);
                 proj_ctx_ = nullptr;
             }
             if (proj_) {
-                pj_free(proj_);
+                proj_destroy(proj_);
                 proj_ = nullptr;
             }
             throw proj_init_error(params_);
         }
-#else
-        #if defined(MAPNIK_THREADSAFE)
-        std::lock_guard<std::mutex> lock(mutex_);
-        #endif
-        proj_ = pj_init_plus(params_.c_str());
-        if (!proj_) throw proj_init_error(params_);
-#endif
-        is_geographic_ = pj_is_latlong(proj_) ? true : false;
+        PJ_TYPE type = proj_get_type(proj_);
+        is_geographic_ = (type == PJ_TYPE_GEOGRAPHIC_2D_CRS
+                          ||
+                          type == PJ_TYPE_GEOGRAPHIC_3D_CRS) ? true : false;
     }
 #endif
 }
@@ -151,82 +137,68 @@ std::string const& projection::params() const
 
 void projection::forward(double & x, double &y ) const
 {
-#ifdef MAPNIK_USE_PROJ4
+#ifdef MAPNIK_USE_PROJ
     if (!proj_)
     {
-        throw std::runtime_error("projection::forward not supported unless proj4 is initialized");
+        throw std::runtime_error("projection::forward not supported unless proj is initialized");
     }
-    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    std::lock_guard<std::mutex> lock(mutex_);
-    #endif
-    projUV p;
-    p.u = x * DEG_TO_RAD;
-    p.v = y * DEG_TO_RAD;
-    p = pj_fwd(p,proj_);
-    x = p.u;
-    y = p.v;
-    if (is_geographic_)
-    {
-        x *=RAD_TO_DEG;
-        y *=RAD_TO_DEG;
-    }
+    PJ_COORD coord;
+    coord.lpzt.z = 0.0;
+    coord.lpzt.t = HUGE_VAL;
+    coord.lpzt.lam = x;
+    coord.lpzt.phi = y;
+    PJ_COORD coord_out = proj_trans(proj_, PJ_FWD, coord);
+    x = coord_out.xy.x;
+    y = coord_out.xy.y;
 #else
-    throw std::runtime_error("projection::forward not supported without proj4 support (-DMAPNIK_USE_PROJ4)");
+    throw std::runtime_error("projection::forward not supported without proj support (-DMAPNIK_USE_PROJ)");
 #endif
 }
 
 void projection::inverse(double & x,double & y) const
 {
-#ifdef MAPNIK_USE_PROJ4
+#ifdef MAPNIK_USE_PROJ
     if (!proj_)
     {
-        throw std::runtime_error("projection::inverse not supported unless proj4 is initialized");
+        throw std::runtime_error("projection::forward not supported unless proj is initialized");
     }
-
-    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    std::lock_guard<std::mutex> lock(mutex_);
-    #endif
-    if (is_geographic_)
-    {
-        x *=DEG_TO_RAD;
-        y *=DEG_TO_RAD;
-    }
-    projUV p;
-    p.u = x;
-    p.v = y;
-    p = pj_inv(p,proj_);
-    x = RAD_TO_DEG * p.u;
-    y = RAD_TO_DEG * p.v;
+    PJ_COORD coord;
+    coord.xyzt.z = 0.0;
+    coord.xyzt.t = HUGE_VAL;
+    coord.xyzt.x = x;
+    coord.xyzt.y = y;
+    PJ_COORD coord_out = proj_trans(proj_, PJ_INV, coord);
+    x = coord_out.xy.x;
+    y = coord_out.xy.y;
 #else
-    throw std::runtime_error("projection::inverse not supported without proj4 support (-DMAPNIK_USE_PROJ4)");
+    throw std::runtime_error("projection::inverse not supported without proj support (-DMAPNIK_USE_PROJ)");
 #endif
 }
 
 projection::~projection()
 {
-#ifdef MAPNIK_USE_PROJ4
- #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    std::lock_guard<std::mutex> lock(mutex_);
- #endif
+#ifdef MAPNIK_USE_PROJ
     if (proj_)
     {
-        pj_free(proj_);
+        proj_destroy(proj_);
         proj_ = nullptr;
     }
- #if PJ_VERSION >= 480
     if (proj_ctx_)
     {
-        pj_ctx_free(proj_ctx_);
+        proj_context_destroy(proj_ctx_);
         proj_ctx_ = nullptr;
     }
- #endif
 #endif
 }
 
 std::string projection::expanded() const
 {
-#ifdef MAPNIK_USE_PROJ4
-    if (proj_) return mapnik::util::trim_copy(pj_get_def( proj_, 0 ));
+#ifdef MAPNIK_USE_PROJ
+    if (proj_)
+    {
+        PJ_PROJ_INFO info = proj_pj_info(proj_);
+        return mapnik::util::trim_copy(info.definition);
+    }
 #endif
     return params_;
 }

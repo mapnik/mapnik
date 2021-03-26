@@ -18,8 +18,8 @@ SECTION("proj and view strategy") {
     mapnik::view_transform vt(256, 256, e);
     mapnik::view_strategy vs(vt);
     mapnik::unview_strategy uvs(vt);
-    mapnik::projection source("+init=epsg:4326");
-    mapnik::projection dest("+init=epsg:3857");
+    mapnik::projection source("epsg:4326");
+    mapnik::projection dest("epsg:3857");
     mapnik::proj_transform proj_trans(source, dest);
     mapnik::proj_transform proj_trans_rev(dest, source);
     mapnik::proj_strategy ps(proj_trans);
