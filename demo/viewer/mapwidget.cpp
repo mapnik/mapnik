@@ -23,7 +23,7 @@
 #include <boost/bind.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/view_transform.hpp>
 #include <mapnik/transform_path_adapter.hpp>
@@ -156,7 +156,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
          {
             QVector<QPair<QString,QString> > info;
 
-            projection map_proj(map_->srs()); // map projection
+            projection map_proj(map_->srs(), true); // map projection
             double scale_denom = scale_denominator(map_->scale(),map_proj.is_geographic());
             view_transform t(map_->width(),map_->height(),map_->get_current_extent());
 
@@ -170,7 +170,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                double x = e->x();
                double y = e->y();
                std::cout << "query at " << x << "," << y << "\n";
-               projection layer_proj(layer.srs());
+               projection layer_proj(layer.srs(), true);
                mapnik::proj_transform prj_trans(map_proj,layer_proj);
                //std::auto_ptr<mapnik::memory_datasource> data(new mapnik::memory_datasource);
                mapnik::featureset_ptr fs = map_->query_map_point(index,x,y);
@@ -586,38 +586,43 @@ void MapWidget::updateMap()
 
        try
        {
-          projection prj(map_->srs()); // map projection
-          box2d<double> ext = map_->get_current_extent();
-          double x0 = ext.minx();
-          double y0 = ext.miny();
-          double x1 = ext.maxx();
-          double y1 = ext.maxy();
-          prj.inverse(x0,y0);
-          prj.inverse(x1,y1);
-          std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
-          update();
-          // emit signal to interested widgets
-          emit mapViewChanged();
-      }
-      catch (...)
-      {
-          std::cerr << "Unknown exception caught!\n";
-      }
+           projection prj(map_->srs(), true); // map projection
+           box2d<double> ext = map_->get_current_extent();
+           double x0 = ext.minx();
+           double y0 = ext.miny();
+           double x1 = ext.maxx();
+           double y1 = ext.maxy();
+           double z = 0;
+           std::string dest_srs = {"epsg:4326"};
+           mapnik::proj_transform proj_tr(map_->srs(), dest_srs);
+
+           proj_tr.forward(x0, y0, z);
+           proj_tr.forward(x1, y1, z);
+           std::cout << "MAP SIZE:" << map_->width() << "," << map_->height() << std::endl;
+           std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
+           update();
+           // emit signal to interested widgets
+           emit mapViewChanged();
+       }
+       catch (...)
+       {
+           std::cerr << "Unknown exception caught!\n";
+       }
    }
 }
 
 std::shared_ptr<Map> MapWidget::getMap()
 {
-   return map_;
+    return map_;
 }
 
 void MapWidget::setMap(std::shared_ptr<Map> map)
 {
-   map_ = map;
+    map_ = map;
 }
 
 
 void MapWidget::layerSelected(int index)
 {
-   selectedLayer_ = index;
+    selectedLayer_ = index;
 }

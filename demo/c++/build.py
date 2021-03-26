@@ -41,7 +41,7 @@ if env['HAS_CAIRO']:
     demo_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
 libraries = [env['MAPNIK_NAME']]
-libraries.extend(copy(env['LIBMAPNIK_LIBS']))
+libraries.extend([copy(env['LIBMAPNIK_LIBS']), 'sqlite3', 'pthread'])
 rundemo = demo_env.Program('rundemo', source, LIBS=libraries)
 
 Depends(rundemo, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
