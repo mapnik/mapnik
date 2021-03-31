@@ -24,6 +24,7 @@
 #include <mapnik/cairo_io.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/proj_transform_cache.hpp>
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo/cairo_renderer.hpp>
