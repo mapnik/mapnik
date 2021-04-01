@@ -34,7 +34,7 @@ option(USE_LIBXML2 "adds libxml2 support" ON)
 option(USE_CAIRO "adds the cairo renderer" ON)
 option(USE_PROJ "adds proj support" ON)
 option(USE_GRID_RENDERER "adds grid renderer" ON)
-option(USE_SVG_RENDERER "adds grid renderer" ON)
+option(USE_SVG_RENDERER "adds svg renderer" ON)
 option(USE_BIGINT "uses 64 bit instead of 32" ON)
 option(USE_MEMORY_MAPPED_FILE "uses file cache" ON)
 
