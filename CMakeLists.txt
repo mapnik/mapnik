@@ -35,6 +35,8 @@ option(USE_CAIRO "adds the cairo renderer" ON)
 option(USE_PROJ "adds proj support" ON)
 option(USE_GRID_RENDERER "adds grid renderer" ON)
 option(USE_SVG_RENDERER "adds grid renderer" ON)
+option(USE_BIGINT "uses 64 bit instead of 32" ON)
+option(USE_MEMORY_MAPPED_FILE "uses file cache" ON)
 
 option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
@@ -65,6 +67,11 @@ option(USE_BOOST_REGEX_ICU_WORKAROUND "if you don't use your system libraries an
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
 message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
+# https://cmake.org/cmake/help/latest/prop_tgt/CXX_EXTENSIONS.html
+set(CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensions.") # Fallsback to -std=c++<ver> if off
+message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
+# https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD_REQUIRED.html#prop_tgt:CXX_STANDARD_REQUIRED
+set(CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
 
 if(WIN32)
     set(DEFAULT_BIN_DIR bin)
@@ -168,6 +175,15 @@ endif()
 set(MAPNIK_COMPILE_DEFS "")
 set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
+
+if(USE_BIGINT) 
+    message(STATUS "uses BIGINT")
+    list(APPEND MAPNIK_COMPILE_DEFS BIGINT)
+endif()
+if(USE_MEMORY_MAPPED_FILE)
+    message(STATUS "uses MAPNIK_MEMORY_MAPPED_FILE")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_MEMORY_MAPPED_FILE)
+endif()
 
 if(USE_LIBXML2)
     mapnik_find_package(LibXml2 REQUIRED)
