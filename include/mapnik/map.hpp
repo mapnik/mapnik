@@ -103,7 +103,7 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-    std::unique_ptr<proj_transform_cache> proj_cache_ = {};
+    std::unique_ptr<proj_transform_cache> proj_cache_;
 public:
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
     using style_iterator = std::map<std::string,feature_type_style>::iterator;
