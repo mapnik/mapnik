@@ -76,7 +76,8 @@ Map::Map()
     extra_params_(),
     font_directory_(),
     font_file_mapping_(),
-    font_memory_cache_() {}
+    font_memory_cache_(),
+    proj_cache_(std::make_unique<proj_transform_cache>()) {}
 
 Map::Map(int width,int height, std::string const& srs)
     : width_(width),
@@ -90,7 +91,8 @@ Map::Map(int width,int height, std::string const& srs)
       extra_params_(),
       font_directory_(),
       font_file_mapping_(),
-      font_memory_cache_() {}
+      font_memory_cache_(),
+      proj_cache_(std::make_unique<proj_transform_cache>()) {}
 
 Map::Map(Map const& rhs)
     : width_(rhs.width_),
@@ -112,7 +114,8 @@ Map::Map(Map const& rhs)
       font_directory_(rhs.font_directory_),
       font_file_mapping_(rhs.font_file_mapping_),
       // on copy discard memory caches
-      font_memory_cache_()
+      font_memory_cache_(),
+      proj_cache_(std::make_unique<proj_transform_cache>())
 {
     init_proj_transforms();
 }
