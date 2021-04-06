@@ -20,13 +20,49 @@
  *
  *****************************************************************************/
 
+
 #include <mapnik/proj_transform_cache.hpp>
+#include <mapnik/proj_transform.hpp>
+MAPNIK_DISABLE_WARNING_PUSH
+#include <mapnik/warning_ignore.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/utility/string_view.hpp>
+MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
+namespace proj_transform_cache {
+namespace {
+using key_type = std::pair<std::string, std::string>;
+using compatible_key_type = std::pair<boost::string_view, boost::string_view>;
 
-thread_local proj_transform_cache::cache_type proj_transform_cache::cache_ = cache_type();
+struct compatible_hash
+{
+    template <typename KeyType>
+    std::size_t operator() (KeyType const& key) const
+    {
+        using hash_type = boost::hash<typename KeyType::first_type>;
+        std::size_t seed = hash_type{}(key.first);
+        seed ^= hash_type{}(key.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
 
-void proj_transform_cache::init(std::string const& source, std::string const& dest) const
+struct compatible_predicate
+{
+    bool operator()(compatible_key_type const& k1,
+                    compatible_key_type const& k2) const
+    {
+        return k1 == k2;
+    }
+};
+
+using cache_type = boost::unordered_map<key_type, std::unique_ptr<proj_transform>, compatible_hash>;
+thread_local static cache_type cache_ = {};
+
+} // namespace
+
+void init(std::string const& source, std::string const& dest)
 {
     compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
     auto itr = cache_.find(key, compatible_hash{}, compatible_predicate{});
@@ -39,7 +75,7 @@ void proj_transform_cache::init(std::string const& source, std::string const& de
     }
 }
 
-proj_transform const* proj_transform_cache::get(std::string const& source, std::string const& dest) const
+proj_transform const* get(std::string const& source, std::string const& dest)
 {
 
     compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
@@ -54,5 +90,5 @@ proj_transform const* proj_transform_cache::get(std::string const& source, std::
     return itr->second.get();
 }
 
-
+} // namespace proj_transform_cache
 } // namespace mapnik
