@@ -254,7 +254,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     processor_context_ptr current_ctx = ds->get_context(ctx_map);
-    proj_transform const* proj_trans_ptr = m_.get_proj_transform(mat.proj0_.params(), mat.proj1_.params());
+    proj_transform const* proj_trans_ptr = proj_transform_cache::get(mat.proj0_.params(), mat.proj1_.params());
     box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
@@ -493,7 +493,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     layer const& lay = mat.lay_;
 
     std::vector<rule_cache> const & rule_caches = mat.rule_caches_;
-    proj_transform const* proj_trans_ptr = m_.get_proj_transform(mat.proj0_.params(), mat.proj1_.params());
+    proj_transform const* proj_trans_ptr = proj_transform_cache::get(mat.proj0_.params(), mat.proj1_.params());
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
 
     datasource_ptr ds = lay.datasource();
