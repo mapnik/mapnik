@@ -24,53 +24,17 @@
 #ifndef MAPNIK_PROJ_TRANSFORM_CACHE_HPP
 #define MAPNIK_PROJ_TRANSFORM_CACHE_HPP
 
-#include <mapnik/util/noncopyable.hpp>
-#include <mapnik/proj_transform.hpp>
-
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/utility/string_view.hpp>
-MAPNIK_DISABLE_WARNING_POP
+#include <mapnik/config.hpp>
+#include <string>
 
 namespace mapnik  {
+class proj_transform; // fwd decl
+namespace proj_transform_cache {
 
-struct proj_transform_cache : util::noncopyable
-{
-    using key_type = std::pair<std::string, std::string>;
-    using compatible_key_type = std::pair<boost::string_view, boost::string_view>;
+void MAPNIK_DECL init(std::string const& source, std::string const& dest);
+proj_transform const* MAPNIK_DECL get(std::string const& source, std::string const& dest);
 
-    struct compatible_hash
-    {
-        template <typename KeyType>
-        std::size_t operator() (KeyType const& key) const
-        {
-            using hash_type = boost::hash<typename KeyType::first_type>;
-            std::size_t seed = hash_type{}(key.first);
-            seed ^= hash_type{}(key.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            return seed;
-        }
-    };
-
-    struct compatible_predicate
-    {
-        bool operator()(compatible_key_type const& k1,
-                        compatible_key_type const& k2) const
-        {
-            return k1 == k2;
-        }
-    };
-
-    using cache_type = boost::unordered_map<key_type, std::unique_ptr<proj_transform>, compatible_hash>;
-
-    proj_transform_cache() = default;
-
-    thread_local static cache_type cache_;
-    void init(std::string const& source, std::string const& dest) const;
-    proj_transform const* get(std::string const& source, std::string const& dest) const;
-};
-
-}
+} // namespace proj_transform_cache
+} // mamespace mapnik
 
 #endif // MAPNIK_PROJ_TRANSFORM_CACHE_HPP
