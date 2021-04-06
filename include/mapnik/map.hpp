@@ -33,7 +33,6 @@
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/proj_transform.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -53,7 +52,6 @@ using featureset_ptr = std::shared_ptr<Featureset>;
 class feature_type_style;
 class view_transform;
 class layer;
-struct proj_transform_cache;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
@@ -103,7 +101,7 @@ private:
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
-    std::unique_ptr<proj_transform_cache> proj_cache_;
+
 public:
     using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
     using style_iterator = std::map<std::string,feature_type_style>::iterator;
@@ -501,12 +499,9 @@ public:
         return font_memory_cache_;
     }
 
-    proj_transform const* get_proj_transform(std::string const& source, std::string const& dest) const;
-
 private:
     friend void swap(Map & rhs, Map & lhs);
     void fixAspectRatio();
-    void init_proj_transform(std::string const& source, std::string const& dest);
     void init_proj_transforms();
 };
 
