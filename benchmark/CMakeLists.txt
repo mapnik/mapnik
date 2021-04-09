@@ -26,18 +26,26 @@ set(BENCHMARK_SRCS
     src/test_to_string2.cpp
     src/test_utf_encoding.cpp
 )
-macro(mapnik_create_benchmark)
+function(mapnik_create_benchmark)
     get_filename_component(BENCHNAME ${ARGV0} NAME_WE)
-    add_executable(mapnik-benchmark-${BENCHNAME} ${ARGV0})
-    target_include_directories(mapnik-benchmark-${BENCHNAME} PRIVATE include)
-    target_link_libraries(mapnik-benchmark-${BENCHNAME} PRIVATE mapnik::core mapnik::agg mapnik::mapnik)
+    set(TARGET_NAME "mapnik-benchmark-${BENCHNAME}")
+    add_executable(${TARGET_NAME} ${ARGV0})
+    target_include_directories(${TARGET_NAME} PRIVATE include)
+    target_link_libraries(${TARGET_NAME} PRIVATE mapnik::core mapnik::agg mapnik::mapnik)
+    
+    # it might be possible that some buildsystems generate different directories. So invoke the scripts for all benchmarks
+    mapnik_copy_plugins(TARGET ${TARGET_NAME}
+        DESTINATION plugins/input 
+        PLUGINS 
+            input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
+    )
+    mapnik_require_fonts(TARGET ${TARGET_NAME} mapnik-test-unit DESTINATION fonts)
 
-    if(COPY_LIBRARIES_FOR_EXECUTABLES AND WIN32)
-        include(CopyDllsForDebug)
-        add_custom_command(TARGET mapnik-benchmark-${BENCHNAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:mapnik::mapnik>" ${CMAKE_CURRENT_BINARY_DIR})
-        copy_dlls_for_debug(mapnik-benchmark-${BENCHNAME} \"\" \"${ADDITIONAL_LIBARIES_PATHS}\")
-    endif()
-endmacro()
+    mapnik_copy_dependencies(TARGETS ${TARGET_NAME}
+        PLUGINS 
+            input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
+    )
+endfunction()
 
 foreach(benchmark ${BENCHMARK_SRCS})
     mapnik_create_benchmark(${benchmark})
