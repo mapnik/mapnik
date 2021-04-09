@@ -173,12 +173,22 @@ include(CTest)
 include(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
 include(${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
 
-if(COPY_LIBRARIES_FOR_EXECUTABLES AND WIN32)
-    include(CopyDllsForDebug)
-    add_custom_command(TARGET mapnik-test-unit  POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:mapnik::mapnik>" ${CMAKE_CURRENT_BINARY_DIR})
-    set(APPS mapnik-test-unit agg_rasterizer_integer_overflow_test datasource_registration_test font_registration_test map_xml_test mapnik-test-visual)
-    copy_dlls_for_debug(${APPS} \"\" \"${ADDITIONAL_LIBARIES_PATHS}\")
-endif()
+# use only mapnik-test-unit since it has the same build path
+mapnik_copy_plugins(
+    TARGET mapnik-test-unit 
+    DESTINATION plugins/input 
+    PLUGINS 
+        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
+)
+mapnik_require_fonts(TARGET mapnik-test-unit DESTINATION fonts)
+
+mapnik_copy_dependencies(
+    TARGETS
+        mapnik-test-unit agg_rasterizer_integer_overflow_test datasource_registration_test font_registration_test map_xml_test mapnik-test-visual
+    PLUGINS 
+        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
+)
+
 
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
 file(COPY data-visual DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)

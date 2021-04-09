@@ -16,8 +16,9 @@ message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(MapnikFindPackage)
+include(MapnikCopyDependencies)
 
-set(ADDITIONAL_LIBARIES_PATHS "" CACHE STRING "currently only used on windows. Pass directories containing the dlls that are missing. You can ignore this, if the build (verify_app step) runs successfully" "")
+set(ADDITIONAL_LIBARIES_PATHS "" CACHE STRING "currently only used on windows. Pass directories containing the dlls that are missing. You can ignore this, if the build (verify_app step) runs successfully")
 option(COPY_LIBRARIES_FOR_EXECUTABLES "copies required shared libaries (currently only windows) to the executable directory" ON)
 
 option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
