@@ -28,31 +28,34 @@ function(mapnik_copy_dependencies)
 endfunction()
 
 function(mapnik_copy_plugins)
-  set(options)
-  set(oneValueArgs TARGET DESTINATION)
-  set(multiValueArgs PLUGINS)
-  cmake_parse_arguments(MAPNIK_CP_PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(COPY_FONTS_AND_PLUGINS_FOR_EXECUTABLES)
+    set(options)
+    set(oneValueArgs TARGET DESTINATION)
+    set(multiValueArgs PLUGINS)
+    cmake_parse_arguments(MAPNIK_CP_PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  # copy_if_different requires a existing directory.
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_CP_PLG_DESTINATION})
-  foreach(PLUGIN IN LISTS MAPNIK_CP_PLG_PLUGINS)
-    #message(STATUS "copying plugin ${PLUGIN} to path: ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_CP_PLG_DESTINATION}")
-    if(TARGET ${PLUGIN})
-      add_custom_command(TARGET ${MAPNIK_CP_PLG_TARGET} POST_BUILD COMMAND 
-        ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${PLUGIN}>" ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_CP_PLG_DESTINATION}/)
-    else()
-      message(NOTICE "${MAPNIK_CP_PLG_TARGET} requires plugin ${PLUGIN} but it isn't build. Check USE_PLUGIN_INPUT_ options to enable the plugin.")
-    endif()
-  endforeach()
-
+    # copy_if_different requires a existing directory.
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_CP_PLG_DESTINATION})
+    foreach(PLUGIN IN LISTS MAPNIK_CP_PLG_PLUGINS)
+      #message(STATUS "copying plugin ${PLUGIN} to path: ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_CP_PLG_DESTINATION}")
+      if(TARGET ${PLUGIN})
+        add_custom_command(TARGET ${MAPNIK_CP_PLG_TARGET} POST_BUILD COMMAND 
+          ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${PLUGIN}>" ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_CP_PLG_DESTINATION}/)
+      else()
+        message(NOTICE "${MAPNIK_CP_PLG_TARGET} requires plugin ${PLUGIN} but it isn't build. Check USE_PLUGIN_INPUT_ options to enable the plugin.")
+      endif()
+    endforeach()
+  endif()
 endfunction()
 
 function(mapnik_require_fonts)
-  set(options)
-  set(oneValueArgs TARGET DESTINATION)
-  set(multiValueArgs)
-  cmake_parse_arguments(MAPNIK_REQUIRE_FONTS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(COPY_FONTS_AND_PLUGINS_FOR_EXECUTABLES)
+    set(options)
+    set(oneValueArgs TARGET DESTINATION)
+    set(multiValueArgs)
+    cmake_parse_arguments(MAPNIK_REQUIRE_FONTS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  add_custom_command(TARGET ${MAPNIK_REQUIRE_FONTS_TARGET} POST_BUILD COMMAND 
-      ${CMAKE_COMMAND} -E copy_directory ${mapnik_SOURCE_DIR}/fonts ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_REQUIRE_FONTS_DESTINATION}/)
+    add_custom_command(TARGET ${MAPNIK_REQUIRE_FONTS_TARGET} POST_BUILD COMMAND 
+        ${CMAKE_COMMAND} -E copy_directory ${mapnik_SOURCE_DIR}/fonts ${CMAKE_CURRENT_BINARY_DIR}/${MAPNIK_REQUIRE_FONTS_DESTINATION}/)
+  endif()
 endfunction()
