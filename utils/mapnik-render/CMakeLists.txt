@@ -9,9 +9,5 @@ target_link_libraries(mapnik-render PRIVATE
     mapnik::mapnik
     Boost::program_options
 )
-install(TARGETS mapnik-render
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-)
+
+mapnik_install(TARGET mapnik-render)

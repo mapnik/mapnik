@@ -20,6 +20,4 @@ set_target_properties(input-ogr PROPERTIES PREFIX "")
 set_target_properties(input-ogr PROPERTIES OUTPUT_NAME "ogr")
 set_target_properties(input-ogr PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-ogr 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-ogr IS_PLUGIN)

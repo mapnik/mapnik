@@ -39,11 +39,7 @@ plugins_dir=${PLUGINS_INSTALL_DIR}
 fonts/1/dir=${FONTS_INSTALL_DIR}"
 )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini DESTINATION bin)
-install(TARGETS mapnik-viewer 
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-)
+mapnik_install(TARGET mapnik-viewer)
 
 mapnik_copy_dependencies(
     TARGETS 

@@ -18,6 +18,4 @@ set_target_properties(input-gdal PROPERTIES PREFIX "")
 set_target_properties(input-gdal PROPERTIES OUTPUT_NAME "gdal")
 set_target_properties(input-gdal PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-gdal 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-gdal IS_PLUGIN)

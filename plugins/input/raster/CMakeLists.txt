@@ -16,6 +16,4 @@ set_target_properties(input-raster PROPERTIES PREFIX "")
 set_target_properties(input-raster PROPERTIES OUTPUT_NAME "raster")
 set_target_properties(input-raster PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-raster 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-raster IS_PLUGIN)

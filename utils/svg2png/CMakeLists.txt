@@ -12,9 +12,5 @@ target_link_libraries(svg2png PRIVATE
     mapnik::mapnik
     mapnik::agg
 )
-install(TARGETS svg2png
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-)
+
+mapnik_install(TARGET svg2png)

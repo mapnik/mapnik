@@ -19,6 +19,4 @@ set_target_properties(input-pgraster PROPERTIES PREFIX "")
 set_target_properties(input-pgraster PROPERTIES OUTPUT_NAME "pgraster")
 set_target_properties(input-pgraster PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-pgraster 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-pgraster IS_PLUGIN)

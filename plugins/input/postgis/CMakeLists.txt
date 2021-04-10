@@ -18,6 +18,4 @@ set_target_properties(input-postgis PROPERTIES PREFIX "")
 set_target_properties(input-postgis PROPERTIES OUTPUT_NAME "postgis")
 set_target_properties(input-postgis PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-postgis 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-postgis IS_PLUGIN)
