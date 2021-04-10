@@ -11,3 +11,5 @@ install(TARGETS ogrindex
     ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
     RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
 )
+
+mapnik_install(TARGET mapnik-ogrindex)

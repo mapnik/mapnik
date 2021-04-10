@@ -19,6 +19,4 @@ set_target_properties(input-shape PROPERTIES PREFIX "")
 set_target_properties(input-shape PROPERTIES OUTPUT_NAME "shape")
 set_target_properties(input-shape PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-shape 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-shape IS_PLUGIN)

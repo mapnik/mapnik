@@ -303,3 +303,5 @@ install(TARGETS mapnik
     INCLUDES DESTINATION include/
     PUBLIC_HEADER DESTINATION include/
 )
+
+mapnik_install(TARGET mapnik ALREADY_INSTALLED)

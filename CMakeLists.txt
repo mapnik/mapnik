@@ -17,10 +17,12 @@ message(STATUS "mapnik version: ${PROJECT_VERSION}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(MapnikFindPackage)
 include(MapnikCopyDependencies)
+include(MapnikInstall)
 
 set(ADDITIONAL_LIBARIES_PATHS "" CACHE STRING "only used on windows. Pass directories containing the dlls that are missing. You can ignore this, if the build (verify_app step) runs successfully")
 option(COPY_LIBRARIES_FOR_EXECUTABLES "copies required shared libaries (only windows) to the executable build directory" ON)
 option(COPY_FONTS_AND_PLUGINS_FOR_EXECUTABLES "copies required plugins and fonts into the executable build directory" ON)
+option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) will be copied into CMAKE_INSTALL_PREFIX/MAPNIK_BIN_DIR." ON)
 
 option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
 option(BUILD_TEST "builds the tests" ON)
@@ -177,6 +179,9 @@ endif()
 set(MAPNIK_COMPILE_DEFS "")
 set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
+# (used by MapnikInstall.cmake. properties are needed since "set(...)" will be out of scope
+set_property(GLOBAL PROPERTY TARGETS "")
+set_property(GLOBAL PROPERTY PLUGINS "")
 
 if(USE_BIGINT) 
     message(STATUS "uses BIGINT")
@@ -331,3 +336,5 @@ install(EXPORT MapnikTargets
 install(DIRECTORY include/ TYPE INCLUDE)
 install(DIRECTORY deps/agg/include/ TYPE INCLUDE)
 install(DIRECTORY fonts/ DESTINATION ${FONTS_INSTALL_DIR} FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
+
+mapnik_install_targets()

@@ -14,6 +14,4 @@ set_target_properties(input-geobuf PROPERTIES PREFIX "")
 set_target_properties(input-geobuf PROPERTIES OUTPUT_NAME "geobuf")
 set_target_properties(input-geobuf PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-geobuf 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-geobuf IS_PLUGIN)

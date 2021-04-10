@@ -23,3 +23,5 @@ set_target_properties(input-csv PROPERTIES SUFFIX ".input")
 install(TARGETS input-csv 
     RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
 )
+
+mapnik_install(TARGET input-csv IS_PLUGIN)

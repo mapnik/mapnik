@@ -16,6 +16,4 @@ set_target_properties(input-topojson PROPERTIES PREFIX "")
 set_target_properties(input-topojson PROPERTIES OUTPUT_NAME "topojson")
 set_target_properties(input-topojson PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-topojson 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-topojson IS_PLUGIN)

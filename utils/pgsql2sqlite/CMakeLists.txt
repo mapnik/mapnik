@@ -17,9 +17,4 @@ target_link_libraries(pgsql2sqlite PRIVATE
     mapnik::mapnik
 )
 
-install(TARGETS pgsql2sqlite
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-)
+mapnik_install(TARGET pgsql2sqlite)

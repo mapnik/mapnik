@@ -18,6 +18,4 @@ set_target_properties(input-geojson PROPERTIES PREFIX "")
 set_target_properties(input-geojson PROPERTIES OUTPUT_NAME "geojson")
 set_target_properties(input-geojson PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-geojson 
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-geojson IS_PLUGIN)

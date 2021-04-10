@@ -4,12 +4,7 @@ add_executable(mapnik-demo rundemo.cpp)
 
 target_link_libraries(mapnik-demo PRIVATE mapnik::core mapnik::agg mapnik::mapnik)
 
-install(TARGETS mapnik-demo 
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-)
-
+mapnik_install(TARGET mapnik-demo)
 mapnik_copy_plugins(TARGET mapnik-demo DESTINATION plugins/input PLUGINS input-shape)
 mapnik_require_fonts(TARGET mapnik-demo DESTINATION fonts)
 mapnik_copy_dependencies(TARGETS mapnik-demo PLUGINS input-shape)

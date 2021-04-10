@@ -18,6 +18,4 @@ set_target_properties(input-sqlite PROPERTIES PREFIX "")
 set_target_properties(input-sqlite PROPERTIES OUTPUT_NAME "sqlite")
 set_target_properties(input-sqlite PROPERTIES SUFFIX ".input")
 
-install(TARGETS input-sqlite
-    RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-)
+mapnik_install(TARGET input-sqlite IS_PLUGIN)

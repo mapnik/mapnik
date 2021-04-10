@@ -15,9 +15,5 @@ target_link_libraries(mapnik-index PRIVATE
     mapnik::wkt
     Boost::program_options
 )
-install(TARGETS mapnik-index
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-)
+
+mapnik_install(TARGET mapnik-index)
