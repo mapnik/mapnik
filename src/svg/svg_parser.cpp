@@ -1168,8 +1168,7 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
         if (percent && parser.vbox_) r *= parser.normalized_diagonal_;
     }
 
-    parser.path_.begin_path();
-    if(r != 0.0)
+    if (r != 0.0)
     {
         if (r < 0.0)
         {
@@ -1179,11 +1178,12 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
         }
         else
         {
+            parser.path_.begin_path();
             agg::ellipse c(cx, cy, r, r);
             parser.path_.storage().concat_path(c);
+            parser.path_.end_path();
         }
     }
-    parser.path_.end_path();
 }
 
 void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
