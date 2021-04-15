@@ -149,6 +149,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/color_fail.svg");
         char const* expected_errors[] =
         {
+            "SVG parse error: can't infer valid image dimensions from width:\"100%\" height:\"100%\"",
             "SVG parse error: failed to parse <color> with value \"fail\"",
             "SVG parse error: failed to parse <number> with value \"fail\""
         };
@@ -180,6 +181,7 @@ TEST_CASE("SVG parser") {
         std::string svg_name("./test/data/svg/errors.svg");
         char const* expected_errors[] =
         {
+            "SVG parse error: can't infer valid image dimensions from width:\"100%\" height:\"100%\"",
             "SVG validation error: invalid <rect> width \"-100\"",
             "SVG parse error: failed to parse <number> with value \"FAIL\"",
             "SVG validation error: invalid <rect> height \"-100\"",

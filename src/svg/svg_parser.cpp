@@ -966,10 +966,10 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     else if (width == 0 || height == 0 || has_percent_width || has_percent_height)
     {
         std::stringstream ss;
-        ss << "SVG parse error: can't infer valid image dimensions from \" width:";
+        ss << "SVG parse error: can't infer valid image dimensions from width:\"";
         if (has_percent_width)  ss << width * 100 << "%";
         else ss << width;
-        ss << " height:";
+        ss << "\" height:\"";
         if (has_percent_height) ss << height * 100 <<  "%";
         else ss << height;
         ss << "\"";
