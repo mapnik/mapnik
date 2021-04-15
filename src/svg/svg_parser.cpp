@@ -304,7 +304,7 @@ double parse_font_size(T & parser, char const* str)
     {
         parser.err_handler().on_error("SVG parse error: failed to parse <font-size> with value \"" + std::string(str) + "\"");
     }
-    parser.font_sizes_.back() = val;
+    if (!parser.font_sizes_.empty()) parser.font_sizes_.back() = val;
     return val;
 }
 
@@ -837,7 +837,7 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         break;
     case "font-size"_case:
     {
-        double font_size = parse_font_size(parser, value);
+        parse_font_size(parser, value);
         break;
     }
     default:
@@ -872,9 +872,9 @@ void parse_attr(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
 void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    double width = 0;
-    double height = 0;
-    double aspect_ratio = 1;
+    // https://www.w3.org/TR/SVG11/struct.html#SVGElement
+    double width = 1;  // 100%
+    double height = 1; // 100%
     viewbox vbox = {0, 0, 0, 0};
     bool has_percent_height = true;
     bool has_percent_width = true;
@@ -896,84 +896,86 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
         agg::trans_affine t{};
         parser.vbox_ = vbox;
         parser.normalized_diagonal_ = std::sqrt(vbox.width * vbox.width + vbox.height * vbox.height)/std::sqrt(2.0);
-        if (!has_percent_width && !has_percent_height)
-        {
-            if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
-            {
-                std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true};
-                auto const* aspect_ratio_attr = node->first_attribute("preserveAspectRatio");
-                if (aspect_ratio_attr)
-                {
-                    preserve_aspect_ratio = parse_preserve_aspect_ratio(parser.err_handler(), aspect_ratio_attr->value());
-                }
 
-                double sx = width / vbox.width;
-                double sy = height / vbox.height;
-                double scale = preserve_aspect_ratio.second ? std::min(sx, sy) : std::max(sx, sy);
-                switch (preserve_aspect_ratio.first)
-                {
-                case none:
-                    t = agg::trans_affine_scaling(sx, sy) * t;
-                    break;
-                case xMinYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    break;
-                case xMinYMid:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMinYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMidYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0) * t;
-                    break;
-                case xMidYMid: // (the default)
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                      -0.5 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMidYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                      -1.0 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMaxYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0) * t;
-                    break;
-                case xMaxYMid:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                  -0.5 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMaxYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                      -1.0 * (vbox.height - height / scale)) * t;
-                break;
-                };
+        if (has_percent_width) width = vbox.width * width;
+        else if (!width_attr || width == 0) width = vbox.width;
+        if (has_percent_height) height = vbox.height * height;
+        else if (!height_attr || height == 0) height = vbox.height;
+
+        if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
+        {
+            std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true};
+            auto const* aspect_ratio_attr = node->first_attribute("preserveAspectRatio");
+            if (aspect_ratio_attr)
+            {
+                preserve_aspect_ratio = parse_preserve_aspect_ratio(parser.err_handler(), aspect_ratio_attr->value());
             }
-        }
-        if (has_percent_width && !has_percent_height)
-        {
-            aspect_ratio = vbox.width / vbox.height;
-            width = aspect_ratio * height;
-        }
-        else if (!has_percent_width && has_percent_height)
-        {
-            aspect_ratio = vbox.width/vbox.height;
-            height = height / aspect_ratio;
-        }
-        else if (has_percent_width && has_percent_height)
-        {
-            width = vbox.width;
-            height = vbox.height;
+
+            double sx = width / vbox.width;
+            double sy = height / vbox.height;
+            double scale = preserve_aspect_ratio.second ? std::min(sx, sy) : std::max(sx, sy);
+            switch (preserve_aspect_ratio.first)
+            {
+            case none:
+                t = agg::trans_affine_scaling(sx, sy) * t;
+                break;
+            case xMinYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                break;
+            case xMinYMid:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMinYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            case xMidYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0) * t;
+                break;
+            case xMidYMid: // (the default)
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                  -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMidYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                  -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            case xMaxYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0) * t;
+                break;
+            case xMaxYMid:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                  -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMaxYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                  -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            };
         }
         t = agg::trans_affine_translation(-vbox.x0, -vbox.y0) * t;
         parser.viewbox_tr_ = t;
+    }
+    else if (width == 0 || height == 0 || has_percent_width || has_percent_height)
+    {
+        std::stringstream ss;
+        ss << "SVG parse error: can't infer valid image dimensions from \" width:";
+        if (has_percent_width)  ss << width * 100 << "%";
+        else ss << width;
+        ss << " height:";
+        if (has_percent_height) ss << height * 100 <<  "%";
+        else ss << height;
+        ss << "\"";
+        parser.err_handler().on_error(ss.str());
+        parser.path_.set_dimensions(0, 0);
+        return;
     }
     parser.path_.set_dimensions(width, height);
 }
