@@ -90,8 +90,8 @@ struct main_marker_visitor
         double svg_width = w * scale_factor_;
         double svg_height = h * scale_factor_;
 
-        int output_width = static_cast<int>(std::round(svg_width));
-        int output_height = static_cast<int>(std::round(svg_height));
+        int output_width = std::max(1, static_cast<int>(std::round(svg_width)));
+        int output_height = std::max(1, static_cast<int>(std::round(svg_height)));
         if (verbose_)
         {
             std::clog << "SVG width of '" << w << "' and height of '" << h << "'\n";
