@@ -168,6 +168,7 @@ public:
         if (m_gradient_lut.build_lut())
         {
             agg::trans_affine transform = mtx;
+            double scale = mtx.scale();
             transform.invert();
             agg::trans_affine tr;
             tr = grad.get_transform();
@@ -185,9 +186,8 @@ public:
                 {
                     bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
                 }
-
-                transform.translate(-bx1,-by1);
-                transform.scale(1.0/(bx2-bx1),1.0/(by2-by1));
+                transform.translate(-bx1/scale,-by1/scale);
+                transform.scale(scale/(bx2-bx1),scale/(by2-by1));
             }
 
             if (grad.get_gradient_type() == RADIAL)

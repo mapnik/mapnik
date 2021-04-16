@@ -90,8 +90,8 @@ struct main_marker_visitor
         double svg_width = w * scale_factor_;
         double svg_height = h * scale_factor_;
 
-        int output_width = static_cast<int>(std::round(svg_width));
-        int output_height = static_cast<int>(std::round(svg_height));
+        int output_width = std::max(1, static_cast<int>(std::round(svg_width)));
+        int output_height = std::max(1, static_cast<int>(std::round(svg_height)));
         if (verbose_)
         {
             std::clog << "SVG width of '" << w << "' and height of '" << h << "'\n";
@@ -102,7 +102,7 @@ struct main_marker_visitor
         pixfmt pixf(buf);
         renderer_base renb(pixf);
 
-        mapnik::box2d<double> const& bbox = {0, 0, svg_width, svg_height};
+        mapnik::box2d<double> bbox = {0, 0, svg_width, svg_height};
         // center the svg marker on '0,0'
         agg::trans_affine mtx = agg::trans_affine_translation(-0.5 * w, -0.5 * h);
         // Scale the image
