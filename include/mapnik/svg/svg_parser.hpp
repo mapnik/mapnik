@@ -86,12 +86,14 @@ class MAPNIK_DECL svg_parser : private util::noncopyable
 {
     using error_handler = svg_parser_error_handler;
 public:
-    explicit svg_parser(svg_converter_type & path, bool strict = false);
+    explicit svg_parser(svg_converter_type & path, double width, double height, bool strict = false);
     ~svg_parser();
     error_handler & err_handler();
     void parse(std::string const& filename);
     void parse_from_string(std::string const& svg);
     svg_converter_type & path_;
+    double width_;
+    double height_;
     bool is_defs_;
     bool strict_;
     bool ignore_;

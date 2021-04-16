@@ -48,7 +48,7 @@ namespace // internal
             : stl_storage(path.source())
             , svg_path(stl_storage)
             , svg(svg_path, path.attributes())
-            , p(svg, strict)
+            , p(svg, 0, 0, strict)
         {}
 
         mapnik::svg::svg_parser* operator->()

@@ -878,16 +878,28 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     viewbox vbox = {0, 0, 0, 0};
     bool has_percent_height = true;
     bool has_percent_width = true;
-
+    bool overwrite_dimensions = false;
     auto const* width_attr = node->first_attribute("width");
-    if (width_attr)
-    {
-        width = parse_svg_value(parser, width_attr->value(), has_percent_width);
-    }
     auto const* height_attr = node->first_attribute("height");
-    if (height_attr)
+
+    if (parser.width_ > 0 && parser.height_ > 0) // overwrite SVG document dimensions
     {
-        height = parse_svg_value(parser, height_attr->value(), has_percent_height);
+        has_percent_height = false;
+        has_percent_width = false;
+        overwrite_dimensions = true;
+        width = parser.width_;
+        height = parser.height_;
+    }
+    else
+    {
+        if (width_attr)
+        {
+            width = parse_svg_value(parser, width_attr->value(), has_percent_width);
+        }
+        if (height_attr)
+        {
+            height = parse_svg_value(parser, height_attr->value(), has_percent_height);
+        }
     }
     parser.vbox_ = viewbox{0, 0, width, height} ;
     auto const* viewbox_attr = node->first_attribute("viewBox");
@@ -896,12 +908,13 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
         agg::trans_affine t{};
         parser.vbox_ = vbox;
         parser.normalized_diagonal_ = std::sqrt(vbox.width * vbox.width + vbox.height * vbox.height)/std::sqrt(2.0);
-
-        if (has_percent_width) width = vbox.width * width;
-        else if (!width_attr || width == 0) width = vbox.width;
-        if (has_percent_height) height = vbox.height * height;
-        else if (!height_attr || height == 0) height = vbox.height;
-
+        if (!overwrite_dimensions)
+        {
+            if (has_percent_width) width = vbox.width * width;
+            else if (!width_attr || width == 0) width = vbox.width;
+            if (has_percent_height) height = vbox.height * height;
+            else if (!height_attr || height == 0) height = vbox.height;
+        }
         if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
         {
             std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true};
@@ -1583,8 +1596,10 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
 }
 
 
-svg_parser::svg_parser(svg_converter_type & path, bool strict)
+svg_parser::svg_parser(svg_converter_type & path, double width, double height, bool strict)
     : path_(path),
+      width_(width),
+      height_(height),
       is_defs_(false),
       ignore_(false),
       css_style_(false),

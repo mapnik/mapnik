@@ -145,6 +145,12 @@ struct visitor_create_marker
 std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                                                          bool update_cache, bool strict)
 {
+    return find(uri, 0, 0, update_cache, strict);
+}
+
+std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri, double width, double height,
+                                                         bool update_cache, bool strict)
+{
     if (uri.empty())
     {
         return std::make_shared<mapnik::marker const>(mapnik::marker_null());
@@ -176,7 +182,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
             svg_path_adapter svg_path(stl_storage);
             svg_converter_type svg(svg_path, marker_path->attributes());
-            svg_parser p(svg, strict);
+            svg_parser p(svg, width, height, strict);
             p.parse_from_string(known_svg_string);
 
             if (!strict)
@@ -216,7 +222,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
-                svg_parser p(svg, strict);
+                svg_parser p(svg, width, height, strict);
                 p.parse(uri);
 
                 if (!strict)
