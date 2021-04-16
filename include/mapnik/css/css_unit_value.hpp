@@ -33,18 +33,45 @@ namespace x3 = boost::spirit::x3;
 // units
 struct css_unit_value : x3::symbols<double>
 {
-    const double DPI = 90;
+    constexpr static double DPI = 96;
     css_unit_value()
     {
         add
-            ("px", 1.0)
-            ("pt", DPI/72.0)
-            ("pc", DPI/6.0)
-            ("mm", DPI/25.4)
-            ("cm", DPI/2.54)
-            ("in", static_cast<double>(DPI))
-            //("em", 1.0/16.0) // default pixel size for body (usually 16px)
-            // ^^ this doesn't work currently as 'e' in 'em' interpreted as part of scientific notation.
+            ("px", 1.0)      // pixels
+            ("pt", DPI/72.0) // points
+            ("pc", DPI/6.0)  // picas
+            ("mm", DPI/25.4) // milimeters
+            ("Q" , DPI/101.6)// quarter-milimeters
+            ("cm", DPI/2.54) // centimeters
+            ("in", static_cast<double>(DPI)) // inches
+            ;
+    }
+};
+
+struct css_absolute_size : x3::symbols<double>
+{
+    constexpr static double EM = 10.0; // 1em == 10px
+    css_absolute_size()
+    {
+        add
+            ("xx-small", 0.6 * EM)
+            ("x-small", 0.75 * EM)
+            ("small",   0.88 * EM)
+            ("medium",   1.0 * EM)
+            ("large",    1.2 * EM)
+            ("x-large",  1.5 * EM)
+            ("xx-large", 2.0 * EM)
+            ;
+    }
+};
+
+struct css_relative_size : x3::symbols<double>
+{
+    css_relative_size()
+    {
+        add
+            ("larger",  1.2)
+            ("smaller", 0.8)
             ;
     }
 };

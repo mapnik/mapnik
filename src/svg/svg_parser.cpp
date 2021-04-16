@@ -39,10 +39,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
 #include "agg_color_rgba.h"
-MAPNIK_DISABLE_WARNING_POP
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/adapted/struct.hpp>
@@ -62,14 +58,6 @@ namespace mapnik { namespace svg {
 
 using util::name_to_int;
 using util::operator"" _case;
-
-struct viewbox
-{
-    double x0;
-    double y0;
-    double width;
-    double height;
-};
 }}
 
 BOOST_FUSION_ADAPT_STRUCT (
@@ -118,7 +106,7 @@ static std::array<unsigned, 9> const unsupported_elements
    "pattern"_case}
 };
 
-static std::array<unsigned, 43> const unsupported_attributes
+static std::array<unsigned, 42> const unsupported_attributes
 { {"alignment-baseline"_case,
    "baseline-shift"_case,
    "clip"_case,
@@ -136,7 +124,6 @@ static std::array<unsigned, 43> const unsupported_attributes
    "flood-color"_case,
    "flood-opacity"_case,
    "font-family"_case,
-   "font-size"_case,
    "font-size-adjust"_case,
    "font-stretch"_case,
    "font-style"_case,
@@ -257,28 +244,67 @@ double parse_double(T & err_handler, const char* str)
 }
 
 // https://www.w3.org/TR/SVG/coords.html#Units
-template <typename T, int DPI = 90>
-double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
+template <typename T>
+double parse_svg_value(T & parser, char const* str, bool & is_percent)
 {
     namespace x3 = boost::spirit::x3;
     double val = 0.0;
     css_unit_value units;
     const char* cur = str; // phrase_parse mutates the first iterator
     const char* end = str + std::strlen(str);
-
+    double font_size = parser.font_sizes_.back();
     auto apply_value =   [&](auto const& ctx) { val = _attr(ctx); is_percent = false; };
     auto apply_units =   [&](auto const& ctx) { val *= _attr(ctx); };
+    auto apply_em    =   [&](auto const& ctx) { val *= font_size;};
     auto apply_percent = [&](auto const& ctx) { val *= 0.01; is_percent = true; };
 
     if (!x3::phrase_parse(cur, end,
                           x3::double_[apply_value]
                           > - (units[apply_units]
                                |
+                               x3::lit("em")[apply_em]
+                               |
                                x3::lit('%')[apply_percent]),
                           x3::space) || (cur != end))
     {
-        err_handler.on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
+        parser.err_handler().on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
     }
+    return val;
+}
+
+template <typename T>
+double parse_font_size(T & parser, char const* str)
+{
+    namespace x3 = boost::spirit::x3;
+    double val;
+    css_unit_value units;
+    css_absolute_size absolute;
+    css_relative_size relative;
+
+    std::size_t size = parser.font_sizes_.size();
+    double parent_font_size = size > 1 ? parser.font_sizes_[size - 2] : 10.0 ;
+    const char* cur = str; // phrase_parse mutates the first iterator
+    const char* end = str + std::strlen(str);
+
+    auto apply_value =   [&](auto const& ctx) { val = _attr(ctx);};
+    auto apply_relative =[&](auto const& ctx) { val = parent_font_size * _attr(ctx);};
+    auto apply_units =   [&](auto const& ctx) { val *= _attr(ctx); };
+    auto apply_percent = [&](auto const& ctx) { val = val * parent_font_size / 100.0;};
+    auto apply_em      = [&](auto const& ctx) { val = val * parent_font_size;};
+    if (!x3::phrase_parse(cur, end,
+                          absolute[apply_value]
+                          |
+                          relative[apply_relative]
+                          |
+                          x3::double_[apply_value]
+                          > -(units[apply_units]
+                              | x3::lit("em")[apply_em]
+                              | x3::lit('%')[apply_percent]),
+                          x3::space) || (cur != end))
+    {
+        parser.err_handler().on_error("SVG parse error: failed to parse <font-size> with value \"" + std::string(str) + "\"");
+    }
+    if (!parser.font_sizes_.empty()) parser.font_sizes_.back() = val;
     return val;
 }
 
@@ -371,7 +397,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
     auto itr = css.find(element_name);
     if (itr != css.end())
     {
-        //std::cerr << "-> element key:" << element_name << std::endl;
         for (auto const& def : std::get<1>(*itr))
         {
             style[std::get<0>(def)] = std::get<1>(def);
@@ -396,8 +421,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     auto range = css.equal_range(solitary_class_key);
                     for (auto itr = range.first; itr != range.second; ++itr)
                     {
-                        //std::cerr << "<" << element_name << ">";
-                        //std::cerr << "--> solitary class key:" << solitary_class_key << std::endl;
                         for (auto const& def : std::get<1>(*itr))
                         {
                             style[std::get<0>(def)] = std::get<1>(def);
@@ -407,8 +430,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     range  = css.equal_range(class_key);
                     for (auto itr = range.first; itr != range.second; ++itr)
                     {
-                        //std::cerr << "<" << element_name << ">";
-                        //std::cerr << "---> class key:" << class_key << std::endl;
                         for (auto const& def : std::get<1>(*itr))
                         {
                             style[std::get<0>(def)] = std::get<1>(def);
@@ -416,10 +437,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     }
                 }
             }
-            //else
-            //{
-            //    std::cerr << "Failed to parse styles..." << std::endl;
-            //}
         }
     }
     auto const* id_attr = node->first_attribute("id");
@@ -432,8 +449,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
             itr = css.find(id_key);
             if (itr != css.end())
             {
-                //std::cerr << "<" << element_name << ">";
-                //std::cerr << "----> ID key:" << id_key << std::endl;
                 for (auto const& def : std::get<1>(*itr))
                 {
                     style[std::get<0>(def)] = std::get<1>(def);
@@ -449,7 +464,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             auto const& r = std::get<1>(def);
             std::string val{r.begin(), r.end()};
-            //std::cerr << "PARSE ATTR:" <<  std::get<0>(def) << ":" << val << std::endl;
             parse_attr(parser, std::get<0>(def).c_str(), val.c_str());
         }
     }
@@ -459,10 +473,12 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
     if (parser.ignore_) return;
     auto name = name_to_int(node->name());
+
     switch (node->type())
     {
     case rapidxml::node_element:
     {
+        parser.font_sizes_.push_back(parser.font_sizes_.back());
         switch(name)
         {
         case "defs"_case:
@@ -574,8 +590,16 @@ void traverse_tree(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
 void end_element(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
+    parser.font_sizes_.pop_back();
     auto name = name_to_int(node->name());
     if (!parser.is_defs_ && (name == "g"_case))
+    {
+        if (node->first_node() != nullptr)
+        {
+            parser.path_.pop_attr();
+        }
+    }
+    else if (name == "svg"_case)
     {
         if (node->first_node() != nullptr)
         {
@@ -629,7 +653,9 @@ void parse_element(svg_parser & parser, char const* name, rapidxml::xml_node<cha
         parse_ellipse(parser, node);
         break;
     case "svg"_case:
+        parser.path_.push_attr();
         parse_dimensions(parser, node);
+        parse_attr(parser, node);
         break;
     default:
         handle_unsupported(parser, unsupported_elements, name, "element");
@@ -762,9 +788,13 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
         parse_stroke(parser, value);
         break;
     case "stroke-width"_case:
-        bool percent;
-        parser.path_.stroke_width(parse_svg_value(parser.err_handler(), value, percent));
+    {
+        bool percent = false;
+        double stroke_width = parse_svg_value(parser, value, percent);
+        if (percent && parser.vbox_) stroke_width *= parser.normalized_diagonal_;
+        parser.path_.stroke_width(stroke_width);
         break;
+    }
     case "stroke-opacity"_case:
         parser.path_.stroke_opacity(parse_double(parser.err_handler(), value));
         break;
@@ -805,6 +835,11 @@ void parse_attr(svg_parser & parser, char const* name, char const* value )
             parser.path_.display(false);
         }
         break;
+    case "font-size"_case:
+    {
+        parse_font_size(parser, value);
+        break;
+    }
     default:
         handle_unsupported(parser, unsupported_attributes, name, "attribute");
         break;
@@ -837,9 +872,9 @@ void parse_attr(svg_parser & parser, rapidxml::xml_node<char> const* node)
 
 void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
 {
-    double width = 0;
-    double height = 0;
-    double aspect_ratio = 1;
+    // https://www.w3.org/TR/SVG11/struct.html#SVGElement
+    double width = 1;  // 100%
+    double height = 1; // 100%
     viewbox vbox = {0, 0, 0, 0};
     bool has_percent_height = true;
     bool has_percent_width = true;
@@ -847,97 +882,100 @@ void parse_dimensions(svg_parser & parser, rapidxml::xml_node<char> const* node)
     auto const* width_attr = node->first_attribute("width");
     if (width_attr)
     {
-        width = parse_svg_value(parser.err_handler(), width_attr->value(), has_percent_width);
+        width = parse_svg_value(parser, width_attr->value(), has_percent_width);
     }
     auto const* height_attr = node->first_attribute("height");
     if (height_attr)
     {
-        height = parse_svg_value(parser.err_handler(), height_attr->value(), has_percent_height);
+        height = parse_svg_value(parser, height_attr->value(), has_percent_height);
     }
-
+    parser.vbox_ = viewbox{0, 0, width, height} ;
     auto const* viewbox_attr = node->first_attribute("viewBox");
     if (viewbox_attr && parse_viewbox(parser.err_handler(), viewbox_attr->value(), vbox))
     {
-        if (!has_percent_width && !has_percent_height)
+        agg::trans_affine t{};
+        parser.vbox_ = vbox;
+        parser.normalized_diagonal_ = std::sqrt(vbox.width * vbox.width + vbox.height * vbox.height)/std::sqrt(2.0);
+
+        if (has_percent_width) width = vbox.width * width;
+        else if (!width_attr || width == 0) width = vbox.width;
+        if (has_percent_height) height = vbox.height * height;
+        else if (!height_attr || height == 0) height = vbox.height;
+
+        if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
         {
-            if (width > 0 && height > 0 && vbox.width > 0 && vbox.height > 0)
+            std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true};
+            auto const* aspect_ratio_attr = node->first_attribute("preserveAspectRatio");
+            if (aspect_ratio_attr)
             {
-                agg::trans_affine t{};
-                std::pair<unsigned,bool> preserve_aspect_ratio {xMidYMid, true};
-                auto const* aspect_ratio_attr = node->first_attribute("preserveAspectRatio");
-                if (aspect_ratio_attr)
-                {
-                    preserve_aspect_ratio = parse_preserve_aspect_ratio(parser.err_handler(), aspect_ratio_attr->value());
-                }
-
-                double sx = width / vbox.width;
-                double sy = height / vbox.height;
-                double scale = preserve_aspect_ratio.second ? std::min(sx, sy) : std::max(sx, sy);
-                switch (preserve_aspect_ratio.first)
-                {
-                case none:
-                    t = agg::trans_affine_scaling(sx, sy) * t;
-                    break;
-                case xMinYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    break;
-                case xMinYMid:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMinYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMidYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0) * t;
-                    break;
-                case xMidYMid: // (the default)
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                      -0.5 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMidYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                      -1.0 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMaxYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0) * t;
-                    break;
-                case xMaxYMid:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                  -0.5 * (vbox.height - height / scale)) * t;
-                    break;
-                case xMaxYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                      -1.0 * (vbox.height - height / scale)) * t;
-                break;
-                };
-
-                t = agg::trans_affine_translation(-vbox.x0, -vbox.y0) * t;
-                parser.viewbox_tr_ = t;
+                preserve_aspect_ratio = parse_preserve_aspect_ratio(parser.err_handler(), aspect_ratio_attr->value());
             }
+
+            double sx = width / vbox.width;
+            double sy = height / vbox.height;
+            double scale = preserve_aspect_ratio.second ? std::min(sx, sy) : std::max(sx, sy);
+            switch (preserve_aspect_ratio.first)
+            {
+            case none:
+                t = agg::trans_affine_scaling(sx, sy) * t;
+                break;
+            case xMinYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                break;
+            case xMinYMid:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMinYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            case xMidYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0) * t;
+                break;
+            case xMidYMid: // (the default)
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                  -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMidYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                  -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            case xMaxYMin:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0) * t;
+                break;
+            case xMaxYMid:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                  -0.5 * (vbox.height - height / scale)) * t;
+                break;
+            case xMaxYMax:
+                t = agg::trans_affine_scaling(scale, scale) * t;
+                t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                  -1.0 * (vbox.height - height / scale)) * t;
+                break;
+            };
         }
-        if (has_percent_width && !has_percent_height)
-        {
-            aspect_ratio = vbox.width / vbox.height;
-            width = aspect_ratio * height;
-        }
-        else if (!has_percent_width && has_percent_height)
-        {
-            aspect_ratio = vbox.width/vbox.height;
-            height = height / aspect_ratio;
-        }
-        else if (has_percent_width && has_percent_height)
-        {
-            width = vbox.width;
-            height = vbox.height;
-        }
+        t = agg::trans_affine_translation(-vbox.x0, -vbox.y0) * t;
+        parser.viewbox_tr_ = t;
+    }
+    else if (width == 0 || height == 0 || has_percent_width || has_percent_height)
+    {
+        std::stringstream ss;
+        ss << "SVG parse error: can't infer valid image dimensions from width:\"";
+        if (has_percent_width)  ss << width * 100 << "%";
+        else ss << width;
+        ss << "\" height:\"";
+        if (has_percent_height) ss << height * 100 <<  "%";
+        else ss << height;
+        ss << "\"";
+        parser.err_handler().on_error(ss.str());
+        parser.path_.set_dimensions(0, 0);
+        return;
     }
     parser.path_.set_dimensions(width, height);
 }
@@ -990,25 +1028,25 @@ void parse_use(svg_parser & parser, rapidxml::xml_node<char> const* node)
                 attr = node->first_attribute("x");
                 if (attr != nullptr)
                 {
-                    x = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                    x = parse_svg_value(parser, attr->value(), percent);
                 }
 
                 attr = node->first_attribute("y");
                 if (attr != nullptr)
                 {
-                    y = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                    y = parse_svg_value(parser, attr->value(), percent);
                 }
 
                 attr = node->first_attribute("width");
                 if (attr != nullptr)
                 {
-                    w = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                    w = parse_svg_value(parser, attr->value(), percent);
                     if (percent) w *= parser.path_.width();
                 }
                 attr = node->first_attribute("height");
                 if (attr)
                 {
-                    h = parse_svg_value(parser.err_handler(), attr->value(), percent);
+                    h = parse_svg_value(parser, attr->value(), percent);
                     if (percent) h *= parser.path_.height();
                 }
                 if (w < 0.0)
@@ -1073,19 +1111,32 @@ void parse_line(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double y1 = 0.0;
     double x2 = 0.0;
     double y2 = 0.0;
-    bool percent;
+    bool percent = false;
     auto const* x1_attr = node->first_attribute("x1");
-    if (x1_attr) x1 = parse_svg_value(parser.err_handler(), x1_attr->value(), percent);
-
+    if (x1_attr)
+    {
+        x1 = parse_svg_value(parser, x1_attr->value(), percent);
+        if (percent && parser.vbox_) x1 *= parser.vbox_->width;
+    }
     auto const* y1_attr = node->first_attribute("y1");
-    if (y1_attr) y1 = parse_svg_value(parser.err_handler(), y1_attr->value(), percent);
+    if (y1_attr)
+    {
+        y1 = parse_svg_value(parser, y1_attr->value(), percent);
+        if (percent && parser.vbox_) y1 *= parser.vbox_->height;
+    }
 
     auto const* x2_attr = node->first_attribute("x2");
-    if (x2_attr) x2 = parse_svg_value(parser.err_handler(), x2_attr->value(), percent);
-
+    if (x2_attr)
+    {
+        x2 = parse_svg_value(parser, x2_attr->value(), percent);
+        if (percent && parser.vbox_) x2 *= parser.vbox_->width;
+    }
     auto const* y2_attr = node->first_attribute("y2");
-    if (y2_attr) y2 = parse_svg_value(parser.err_handler(), y2_attr->value(), percent);
-
+    if (y2_attr)
+    {
+        y2 = parse_svg_value(parser, y2_attr->value(), percent);
+        if (percent && parser.vbox_) y2 *= parser.vbox_->height;
+    }
     parser.path_.begin_path();
     parser.path_.move_to(x1, y1);
     parser.path_.line_to(x2, y2);
@@ -1097,27 +1148,29 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double cx = 0.0;
     double cy = 0.0;
     double r = 0.0;
-    bool percent;
+    bool percent = false;
     auto * attr = node->first_attribute("cx");
     if (attr != nullptr)
     {
-        cx = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        cx = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) cx *= parser.vbox_->width;
     }
 
     attr = node->first_attribute("cy");
     if (attr != nullptr)
     {
-        cy = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        cy = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) cy *= parser.vbox_->height;
     }
 
     attr = node->first_attribute("r");
     if (attr != nullptr)
     {
-        r = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        r = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) r *= parser.normalized_diagonal_;
     }
 
-    parser.path_.begin_path();
-    if(r != 0.0)
+    if (r != 0.0)
     {
         if (r < 0.0)
         {
@@ -1127,11 +1180,12 @@ void parse_circle(svg_parser & parser, rapidxml::xml_node<char> const* node)
         }
         else
         {
+            parser.path_.begin_path();
             agg::ellipse c(cx, cy, r, r);
             parser.path_.storage().concat_path(c);
+            parser.path_.end_path();
         }
     }
-    parser.path_.end_path();
 }
 
 void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
@@ -1140,29 +1194,33 @@ void parse_ellipse(svg_parser & parser, rapidxml::xml_node<char> const  * node)
     double cy = 0.0;
     double rx = 0.0;
     double ry = 0.0;
-    bool percent;
+    bool percent = false;
     auto * attr = node->first_attribute("cx");
     if (attr != nullptr)
     {
-        cx = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        cx = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) cx *= parser.vbox_->width;
     }
 
     attr = node->first_attribute("cy");
     if (attr)
     {
-        cy = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        cy = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) cy *= parser.vbox_->height;
     }
 
     attr = node->first_attribute("rx");
     if (attr != nullptr)
     {
-        rx = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        rx = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) rx *= parser.normalized_diagonal_;
     }
 
     attr = node->first_attribute("ry");
     if (attr != nullptr)
     {
-        ry = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        ry = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) ry *= parser.normalized_diagonal_;
     }
 
     if (rx != 0.0 && ry != 0.0)
@@ -1198,35 +1256,40 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
     double h = 0.0;
     double rx = 0.0;
     double ry = 0.0;
-    bool percent;
+    bool percent = false;
     auto * attr = node->first_attribute("x");
     if (attr != nullptr)
     {
-        x = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        x = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) x *= parser.vbox_->width;
     }
 
     attr = node->first_attribute("y");
     if (attr != nullptr)
     {
-        y = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        y = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) y *= parser.vbox_->height;
     }
 
     attr = node->first_attribute("width");
     if (attr != nullptr)
     {
-        w = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        w = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) w *= parser.vbox_->width;
     }
     attr = node->first_attribute("height");
     if (attr)
     {
-        h = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        h = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) h *= parser.vbox_->height;
     }
 
     bool rounded = true;
     attr = node->first_attribute("rx");
     if (attr != nullptr)
     {
-        rx = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        rx = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) rx *= parser.vbox_->width;
         if ( rx > 0.5 * w ) rx = 0.5 * w;
     }
     else rounded = false;
@@ -1234,7 +1297,8 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
     attr = node->first_attribute("ry");
     if (attr != nullptr)
     {
-        ry = parse_svg_value(parser.err_handler(), attr->value(), percent);
+        ry = parse_svg_value(parser, attr->value(), percent);
+        if (percent && parser.vbox_) ry *= parser.vbox_->height;
         if ( ry > 0.5 * h ) ry = 0.5 * h;
         if (!rounded)
         {
@@ -1300,14 +1364,14 @@ void parse_rect(svg_parser & parser, rapidxml::xml_node<char> const* node)
 void parse_gradient_stop(svg_parser & parser, mapnik::gradient& gr, rapidxml::xml_node<char> const* node)
 {
     double offset = 0.0;
-    mapnik::color stop_color;
+    mapnik::color stop_color{0,0,0,255};
     double opacity = 1.0;
 
     auto * attr = node->first_attribute("offset");
     if (attr != nullptr)
     {
         bool percent = false;
-        offset = parse_svg_value(parser.err_handler(),attr->value(), percent);
+        offset = parse_svg_value(parser,attr->value(), percent);
     }
 
     attr = node->first_attribute("style");
@@ -1406,39 +1470,38 @@ void parse_radial_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     double fx = 0.0;
     double fy = 0.0;
     double r = 0.5;
-    bool has_percent=true;
+    bool has_percent = false;
 
     attr = node->first_attribute("cx");
     if (attr != nullptr)
     {
-        cx = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        cx = parse_svg_value(parser, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("cy");
     if (attr != nullptr)
     {
-        cy = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        cy = parse_svg_value(parser, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("fx");
     if (attr != nullptr)
     {
-        fx = parse_svg_value(parser.err_handler(),attr->value(), has_percent);
+        fx = parse_svg_value(parser,attr->value(), has_percent);
     }
-    else
-        fx = cx;
+    else fx = cx;
 
     attr = node->first_attribute("fy");
     if (attr != nullptr)
     {
-        fy = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        fy = parse_svg_value(parser, attr->value(), has_percent);
     }
     else fy = cy;
 
     attr = node->first_attribute("r");
     if (attr != nullptr)
     {
-        r = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        r = parse_svg_value(parser, attr->value(), has_percent);
     }
     // this logic for detecting %'s will not support mixed coordinates.
     if (has_percent && gr.get_units() == USER_SPACE_ON_USE)
@@ -1471,40 +1534,39 @@ void parse_linear_gradient(svg_parser & parser, rapidxml::xml_node<char> const* 
     if (!parse_common_gradient(parser, id, gr, node)) return;
 
     double x1 = 0.0;
-    double x2 = 1.0;
     double y1 = 0.0;
+    double x2 = 1.0;
     double y2 = 0.0;
 
-    bool has_percent=true;
+    bool has_percent = true;
     attr = node->first_attribute("x1");
     if (attr != nullptr)
     {
-        x1 = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
-    }
-
-    attr = node->first_attribute("x2");
-    if (attr != nullptr)
-    {
-        x2 = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        x1 = parse_svg_value(parser, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("y1");
     if (attr != nullptr)
     {
-        y1 = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        y1 = parse_svg_value(parser, attr->value(), has_percent);
+    }
+
+    attr = node->first_attribute("x2");
+    if (attr != nullptr)
+    {
+        x2 = parse_svg_value(parser, attr->value(), has_percent);
     }
 
     attr = node->first_attribute("y2");
     if (attr != nullptr)
     {
-        y2 = parse_svg_value(parser.err_handler(), attr->value(), has_percent);
+        y2 = parse_svg_value(parser, attr->value(), has_percent);
     }
     // this logic for detecting %'s will not support mixed coordinates.
     if (has_percent && gr.get_units() == USER_SPACE_ON_USE)
     {
         gr.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
     }
-
     gr.set_gradient_type(LINEAR);
     gr.set_control_points(x1, y1, x2, y2);
 
@@ -1526,7 +1588,10 @@ svg_parser::svg_parser(svg_converter_type & path, bool strict)
       is_defs_(false),
       ignore_(false),
       css_style_(false),
-      err_handler_(strict) {}
+      err_handler_(strict)
+{
+    font_sizes_.push_back(10.0);
+}
 
 svg_parser::~svg_parser() {}
 
