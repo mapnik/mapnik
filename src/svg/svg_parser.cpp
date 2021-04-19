@@ -369,7 +369,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
     auto itr = css.find(element_name);
     if (itr != css.end())
     {
-        //std::cerr << "-> element key:" << element_name << std::endl;
         for (auto const& def : std::get<1>(*itr))
         {
             style[std::get<0>(def)] = std::get<1>(def);
@@ -394,8 +393,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     auto range = css.equal_range(solitary_class_key);
                     for (auto itr = range.first; itr != range.second; ++itr)
                     {
-                        //std::cerr << "<" << element_name << ">";
-                        //std::cerr << "--> solitary class key:" << solitary_class_key << std::endl;
                         for (auto const& def : std::get<1>(*itr))
                         {
                             style[std::get<0>(def)] = std::get<1>(def);
@@ -405,8 +402,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     range  = css.equal_range(class_key);
                     for (auto itr = range.first; itr != range.second; ++itr)
                     {
-                        //std::cerr << "<" << element_name << ">";
-                        //std::cerr << "---> class key:" << class_key << std::endl;
                         for (auto const& def : std::get<1>(*itr))
                         {
                             style[std::get<0>(def)] = std::get<1>(def);
@@ -414,10 +409,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
                     }
                 }
             }
-            //else
-            //{
-            //    std::cerr << "Failed to parse styles..." << std::endl;
-            //}
         }
     }
     auto const* id_attr = node->first_attribute("id");
@@ -430,8 +421,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
             itr = css.find(id_key);
             if (itr != css.end())
             {
-                //std::cerr << "<" << element_name << ">";
-                //std::cerr << "----> ID key:" << id_key << std::endl;
                 for (auto const& def : std::get<1>(*itr))
                 {
                     style[std::get<0>(def)] = std::get<1>(def);
@@ -447,7 +436,6 @@ void process_css(svg_parser & parser, rapidxml::xml_node<char> const* node)
         {
             auto const& r = std::get<1>(def);
             std::string val{r.begin(), r.end()};
-            //std::cerr << "PARSE ATTR:" <<  std::get<0>(def) << ":" << val << std::endl;
             parse_attr(parser, std::get<0>(def).c_str(), val.c_str());
         }
     }
