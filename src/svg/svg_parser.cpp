@@ -275,6 +275,7 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
                                x3::lit('%')[apply_percent]),
                           x3::space) || (cur != end))
     {
+        val = 0.0;
         err_handler.on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
     }
     return val;
