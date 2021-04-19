@@ -268,15 +268,16 @@ double parse_svg_value(T & parser, char const* str, bool & is_percent)
                           x3::space) || (cur != end))
     {
         parser.err_handler().on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
+        val = 0.0; // re-initialise to default value
     }
     return val;
 }
 
 template <typename T>
-double parse_font_size(T & parser, char const* str)
+bool parse_font_size(T & parser, char const* str)
 {
     namespace x3 = boost::spirit::x3;
-    double val;
+    double val = 0.0;
     css_unit_value units;
     css_absolute_size absolute;
     css_relative_size relative;
@@ -292,20 +293,21 @@ double parse_font_size(T & parser, char const* str)
     auto apply_percent = [&](auto const& ctx) { val = val * parent_font_size / 100.0;};
     auto apply_em      = [&](auto const& ctx) { val = val * parent_font_size;};
     if (!x3::phrase_parse(cur, end,
-                          absolute[apply_value]
-                          |
-                          relative[apply_relative]
-                          |
-                          x3::double_[apply_value]
-                          > -(units[apply_units]
-                              | x3::lit("em")[apply_em]
-                              | x3::lit('%')[apply_percent]),
-                          x3::space) || (cur != end))
+                         absolute[apply_value]
+                         |
+                         relative[apply_relative]
+                         |
+                         x3::double_[apply_value]
+                         > -(units[apply_units]
+                             | x3::lit("em")[apply_em]
+                             | x3::lit('%')[apply_percent]),
+                         x3::space) || (cur != end))
     {
         parser.err_handler().on_error("SVG parse error: failed to parse <font-size> with value \"" + std::string(str) + "\"");
+        return false;
     }
     if (!parser.font_sizes_.empty()) parser.font_sizes_.back() = val;
-    return val;
+    return true;
 }
 
 template <typename T, typename V>
