@@ -265,10 +265,10 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
     css_unit_value units;
     const char* cur = str; // phrase_parse mutates the first iterator
     const char* end = str + std::strlen(str);
-
-    auto apply_value =   [&](auto const& ctx) { val = _attr(ctx); is_percent = false; };
+    bool is_percent_;
+    auto apply_value =   [&](auto const& ctx) { val = _attr(ctx); is_percent_ = false; };
     auto apply_units =   [&](auto const& ctx) { val *= _attr(ctx); };
-    auto apply_percent = [&](auto const& ctx) { val *= 0.01; is_percent = true; };
+    auto apply_percent = [&](auto const& ctx) { val *= 0.01; is_percent_ = true; };
 
     if (!x3::phrase_parse(cur, end,
                           x3::double_[apply_value]
@@ -277,7 +277,12 @@ double parse_svg_value(T & err_handler, const char* str, bool & is_percent)
                                x3::lit('%')[apply_percent]),
                           x3::space) || (cur != end))
     {
+        val = 0.0; // restore to default on parsing failure
         err_handler.on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
+    }
+    else
+    {
+        is_percent = is_percent_; // update only on success
     }
     return val;
 }
