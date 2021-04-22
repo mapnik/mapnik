@@ -12,6 +12,8 @@ function(mapnik_install)
         )
     elseif(NOT ${MAPNIK_INSTALL_ALREADY_INSTALLED} AND ${MAPNIK_INSTALL_IS_PLUGIN})
         install(TARGETS ${MAPNIK_INSTALL_TARGET}
+            LIBRARY DESTINATION ${PLUGINS_INSTALL_DIR}
+            ARCHIVE DESTINATION ${PLUGINS_INSTALL_DIR}
             RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
         )
     endif()
@@ -32,7 +34,7 @@ endfunction()
 
 
 function(mapnik_install_targets)
-    if(INSTALL_DEPENDENCIES)
+    if(INSTALL_DEPENDENCIES AND WIN32)
         # https://cmake.org/cmake/help/latest/policy/CMP0087.html
         cmake_policy(SET CMP0087 NEW)
         get_property(MAPNIK_INSTALLED_TARGETS GLOBAL PROPERTY TARGETS)
