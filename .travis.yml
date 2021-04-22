@@ -10,8 +10,6 @@ env:
    - CCACHE_COMPRESS=1
    - PREFIX=/tmp/mapnik
    - PYTHON=python3
-   - secure: "F6ivqDNMBQQnrDGA9+7IX+GDswuIqQQd7YPJdQqa2Ked9jddAQDeJClb05ig3JlwfOlYLGZOd43ZX0pKuMtI2Gbkwz211agGP9S3YunwlRg8iWtJlO5kYFUdKCmJNhjg4icfkGELCgwXn+zuEWFSLpkPcjqAFKFlQrIJeAJJgKM="
-
 cache:
   directories:
   - $HOME/.ccache
