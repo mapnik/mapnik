@@ -271,7 +271,10 @@ double parse_svg_value(T & parser, char const* str, bool & is_percent)
         val = 0.0; // restore to default on parsing failure
         parser.err_handler().on_error("SVG parse error: failed to parse <number> with value \"" + std::string(str) + "\"");
     }
-    is_percent = is_percent_; // update only on success
+    else
+    {
+        is_percent = is_percent_; // update only on success
+    }
     return val;
 }
 
