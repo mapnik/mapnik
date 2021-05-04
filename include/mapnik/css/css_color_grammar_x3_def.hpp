@@ -52,6 +52,7 @@ namespace x3 = boost::spirit::x3;
 namespace css_color_grammar {
 
 using x3::lit;
+using x3::float_;
 using x3::uint_parser;
 using x3::hex;
 using x3::symbols;
@@ -223,6 +224,7 @@ x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
 x3::uint_parser<std::uint16_t, 10, 1, 3> dec3;
 
+
 // rules
 x3::rule<class hex2_color, color> const hex2_color("hex2_color");
 x3::rule<class hex1_color, color> const hex1_color("hex1_color");
@@ -367,32 +369,32 @@ auto const hex1_color_def = no_skip[lit('#')
                                     >> hex1[hex1_blue]
                                     >> (hex1[hex1_opacity] | attr(15)[hex1_opacity])];
 
-auto const rgb_color_def = lit("rgb")
+auto const rgb_color_def = no_case["rgb"]
     >> lit('(') >> dec3[dec_red]
     >> lit(',') >> dec3[dec_green]
     >> lit(',') >> dec3[dec_blue]
     >> attr(255) >> lit(')');
 
-auto const rgb_color_percent_def = lit("rgb")
-    >> lit('(') >> dec3[percent_red] >> lit('%')
-    >> lit(',') >> dec3[percent_green] >> lit('%')
-    >> lit(',') >> dec3[percent_blue] >> lit('%')
+auto const rgb_color_percent_def = no_case["rgb"]
+    >> lit('(') >> float_[percent_red] >> lit('%')
+    >> lit(',') >> float_[percent_green] >> lit('%')
+    >> lit(',') >> float_[percent_blue] >> lit('%')
     >> attr(255) >> lit(')');
 
-auto const rgba_color_def = lit("rgba")
+auto const rgba_color_def = no_case["rgba"]
     >> lit('(') >> dec3[dec_red]
     >> lit(',') >> dec3[dec_green]
     >> lit(',') >> dec3[dec_blue]
     >> lit(',') >> double_[opacity] >> lit(')');
 
-auto const rgba_color_percent_def = lit("rgba")
-    >> lit('(') >> dec3[percent_red] >> lit('%')
-    >> lit(',') >> dec3[percent_green] >> lit('%')
-    >> lit(',') >> dec3[percent_blue] >> lit('%')
+auto const rgba_color_percent_def = no_case["rgba"]
+    >> lit('(') >> float_[percent_red] >> lit('%')
+    >> lit(',') >> float_[percent_green] >> lit('%')
+    >> lit(',') >> float_[percent_blue] >> lit('%')
     >> lit(',') >> double_[opacity] >> lit(')');
 
 auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint16_t,std::uint8_t,std::uint8_t, double >> {} =
-    lit("hsl")
+    no_case["hsl"]
     >> lit('(') >> dec3
     >> lit(',') >> dec3 >> lit('%')
     >> lit(',') >> dec3 >> lit('%')
@@ -400,7 +402,7 @@ auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint16_t,std:
     ;
 
 auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint16_t,std::uint8_t,std::uint8_t, double >> {} =
-    lit("hsla")
+    no_case["hsla"]
     >> lit('(') >> dec3
     >> lit(',') >> dec3 >> lit('%')
     >> lit(',') >> dec3 >> lit('%')
