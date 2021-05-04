@@ -163,6 +163,7 @@ public:
             unsigned g = stop_color.green();
             unsigned b = stop_color.blue();
             unsigned a = stop_color.alpha();
+            std::cerr << "stop offset:" << st.first << std::endl;
             m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
         }
         if (m_gradient_lut.build_lut())
@@ -227,6 +228,8 @@ public:
                                                               interpolator_type,
                                                               gradient_adaptor_type,
                                                               color_func_type>;
+
+                std::cerr << x1 <<"," <<  y1 << "," << x2 << "," << y2 << std::endl;
                 // scale everything up since agg turns things into integers a bit too soon
                 int scaleup=255;
                 x1 *= scaleup;
@@ -300,8 +303,25 @@ public:
 
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform,
-                                    attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    std::size_t size = attr.fill_gradient.get_stop_array().size();
+                    if (size == 1)
+                    {
+                        auto const& stop = attr.fill_gradient.get_stop_array()[0];
+                        mapnik::color const& stop_color = stop.second;
+                        unsigned r = stop_color.red();
+                        unsigned g = stop_color.green();
+                        unsigned b = stop_color.blue();
+                        unsigned a = stop_color.alpha();
+                        color = agg::rgba8_pre(r, g, b, a);
+                        ScanlineRenderer ren_s(ren);
+                        ren_s.color(color);
+                        render_scanlines(ras, sl, ren_s);
+                    }
+                    else
+                    {
+                        render_gradient(ras, sl, ren, attr.fill_gradient, transform,
+                                        attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    }
                 }
                 else
                 {
@@ -343,8 +363,26 @@ public:
                     ras.add_path(curved_dashed_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {
-                        render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
-                                        attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                        std::size_t size = attr.stroke_gradient.get_stop_array().size();
+                        if (size == 1)
+                        {
+                            auto const& stop = attr.stroke_gradient.get_stop_array()[0];
+                            mapnik::color const& stop_color = stop.second;
+                            unsigned r = stop_color.red();
+                            unsigned g = stop_color.green();
+                            unsigned b = stop_color.blue();
+                            unsigned a = stop_color.alpha();
+                            color = agg::rgba8_pre(r, g, b, a);
+                            ScanlineRenderer ren_s(ren);
+                            ren_s.color(color);
+                            render_scanlines(ras, sl, ren_s);
+                        }
+                        else
+                        {
+
+                            render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
+                                            attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                        }
                     }
                     else
                     {
@@ -377,8 +415,25 @@ public:
                     ras.add_path(curved_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {
-                        render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
-                                        attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                        std::size_t size = attr.stroke_gradient.get_stop_array().size();
+                        if (size == 1)
+                        {
+                            auto const& stop = attr.stroke_gradient.get_stop_array()[0];
+                            mapnik::color const& stop_color = stop.second;
+                            unsigned r = stop_color.red();
+                            unsigned g = stop_color.green();
+                            unsigned b = stop_color.blue();
+                            unsigned a = stop_color.alpha();
+                            color = agg::rgba8_pre(r, g, b, a);
+                            ScanlineRenderer ren_s(ren);
+                            ren_s.color(color);
+                            render_scanlines(ras, sl, ren_s);
+                        }
+                        else
+                        {
+                            render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
+                                            attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                        }
                     }
                     else
                     {
