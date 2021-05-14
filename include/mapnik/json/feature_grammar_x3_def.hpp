@@ -231,8 +231,15 @@ auto assign_property = [](auto const& ctx)
                                                 std::get<1>(_attr(ctx))));
 };
 
+auto assign_id = [](auto const& ctx)
+{
+    mapnik::feature_impl & feature = x3::get<grammar::feature_tag>(ctx);
+    feature.set_id(std::move(_attr(ctx)));
+};
+
 
 // rules
+x3::rule<struct feature_id_tag> const feature_id = "Feature Id";
 x3::rule<struct feature_type_tag> const feature_type = "Feature Type";
 x3::rule<struct geometry_type_tag, mapnik::geometry::geometry_types> const geometry_type = "Geometry Type";
 x3::rule<struct coordinates_tag, mapnik::json::positions> const coordinates = "Coordinates";
@@ -243,6 +250,10 @@ x3::rule<struct property, std::tuple<std::string, json_value>> const property = 
 x3::rule<struct properties_tag> const properties = "Properties";
 x3::rule<struct feature_part_rule_tag> const feature_part = "Feature part";
 x3::rule<struct geometry_collection, mapnik::geometry::geometry_collection<double>> const geometry_collection = "GeometryCollection";
+
+auto const id_integer = x3::int_parser<mapnik::value_integer, 10, 1, -1>();
+
+auto const feature_id_def = lit("\"id\"") > lit(':') > id_integer[assign_id];
 
 auto const feature_type_def = lit("\"type\"") > lit(':') > lit("\"Feature\"");
 
@@ -280,6 +291,7 @@ auto const feature_part_def = feature_type
 
 auto const feature_rule_def = lit('{') > feature_part % lit(',') > lit('}');
 
+auto const feature_with_id_rule_def = lit('{') > (feature_id | feature_part) % lit(',') > lit('}');
 
 auto const geometry_rule_def =  (lit('{') > geometry_tuple[create_geometry] > lit('}')) | lit("null");
 
@@ -296,6 +308,8 @@ BOOST_SPIRIT_DEFINE(
     properties,
     feature_part,
     feature_rule,
+    feature_id,
+    feature_with_id_rule,
     geometry_rule,
     geometry_collection
     );

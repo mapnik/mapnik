@@ -26,12 +26,15 @@
 namespace mapnik { namespace json { namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(feature_grammar_type, iterator_type, feature_context_type);
+BOOST_SPIRIT_INSTANTIATE(feature_with_id_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE(geometry_grammar_type, iterator_type, phrase_parse_context_type);
 
 #if BOOST_VERSION >= 107000
 BOOST_SPIRIT_INSTANTIATE(feature_grammar_type, iterator_type, feature_context_const_type);
+BOOST_SPIRIT_INSTANTIATE(feature_with_id_grammar_type, iterator_type, feature_context_const_type);
 #else
 BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_grammar_type, iterator_type, feature_context_const_type);
+BOOST_SPIRIT_INSTANTIATE_UNUSED(feature_with_id_grammar_type, iterator_type, feature_context_const_type);
 #endif
 
 }}}

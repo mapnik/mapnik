@@ -35,12 +35,27 @@ void parse_feature(Iterator start, Iterator end, feature_impl& feature, mapnik::
     auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(tr)
         [x3::with<mapnik::json::grammar::feature_tag>(feature)
          [ mapnik::json::grammar::feature_rule ]];
+    auto grammar_with_id = x3::with<mapnik::json::grammar::transcoder_tag>(tr)
+        [x3::with<mapnik::json::grammar::feature_tag>(feature)
+         [ mapnik::json::grammar::feature_with_id_rule ]];
 #else
     auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(std::ref(tr))
         [x3::with<mapnik::json::grammar::feature_tag>(std::ref(feature))
          [ mapnik::json::grammar::feature_rule ]];
+    auto grammar_with_id = x3::with<mapnik::json::grammar::transcoder_tag>(std::ref(tr))
+        [x3::with<mapnik::json::grammar::feature_tag>(std::ref(feature))
+         [ mapnik::json::grammar::feature_with_id_rule ]];
 #endif
-    if (!x3::phrase_parse(start, end, grammar, space_type()))
+    bool parse_success = true;
+    if (feature.use_id_from_source())
+    {
+        parse_success = x3::phrase_parse(start, end, grammar_with_id, space_type());
+    }
+    else
+    {
+        parse_success = x3::phrase_parse(start, end, grammar, space_type());
+    }
+    if (!parse_success)
     {
         throw std::runtime_error("Can't parser GeoJSON Feature");
     }
