@@ -25,24 +25,72 @@
 
 // stl
 #include <string>
+#include <utility>
 
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1423r2.html
 // Explicit conversion functions can be used, in a C++17 compatible manner, to cope with the change of return type to// the std::filesystem::path member functions when a UTF-8 encoded path is desired in an object of type std::string.
 
 namespace mapnik { namespace util {
 
-std::string from_u8string(const std::string &s) {
+inline std::string from_u8string(std::string const& s) {
   return s;
 }
-std::string from_u8string(std::string &&s) {
+
+inline std::string from_u8string(std::string &&s) {
   return std::move(s);
 }
 #if defined(__cpp_lib_char8_t)
-std::string from_u8string(const std::u8string &s) {
+inline std::string from_u8string(std::u8string const&s) {
   return std::string(s.begin(), s.end());
 }
 #endif
+/*
+template<std::size_t N>
+struct char_array {
+    template<std::size_t P, std::size_t... I>
+    constexpr char_array(
+        const char (&r)[P],
+        std::index_sequence<I...>)
+        :
+        data{(I<P?r[I]:'\0')...}
+    {}
+    template<std::size_t P, typename = std::enable_if_t<(P<=N)>>
+    constexpr char_array(const char(&r)[P])
+        : char_array(r, std::make_index_sequence<N>())
+    {}
 
+#if defined(__cpp_char8_t)
+    template<std::size_t P, std::size_t... I>
+    constexpr char_array(
+        const char8_t (&r)[P],
+        std::index_sequence<I...>)
+        :
+        data{(I<P?static_cast<char>(r[I]):'\0')...}
+    {}
+    template<std::size_t P, typename = std::enable_if_t<(P<=N)>>
+    constexpr char_array(const char8_t(&r)[P])
+        : char_array(r, std::make_index_sequence<N>())
+    {}
+#endif
+
+    constexpr (&operator const char() const)[N] {
+        return data;
+    }
+    constexpr (&operator char())[N] {
+        return data;
+    }
+
+    char data[N];
+};
+
+template<std::size_t N>
+char_array(const char(&)[N]) -> char_array<N>;
+
+#if defined(__cpp_char8_t)
+template<std::size_t N>
+char_array(const char8_t(&)[N]) -> char_array<N>;
+#endif
+*/
 }} // end of namespace mapnik
 
 #endif // FROM_U8STRING_HPP
