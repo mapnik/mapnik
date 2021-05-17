@@ -33,6 +33,7 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/util/from_u8string.hpp>
 #include <mapnik/util/fs.hpp>
 #include <boost/format.hpp>
 #include <boost/optional/optional_io.hpp>
@@ -84,7 +85,7 @@ mapnik::datasource_ptr get_csv_ds(std::string const& file_name, bool strict = tr
 } // anonymous namespace
 
 TEST_CASE("csv") {
-
+    using mapnik::util::from_u8string;
     std::string csv_plugin("./plugins/input/csv.input");
     if (mapnik::util::exists(csv_plugin))
     {
@@ -862,7 +863,7 @@ TEST_CASE("csv") {
         {
             using ustring = mapnik::value_unicode_string;
 
-            for (auto const &name : {std::string("Winthrop, WA"), std::string(u8"Qu\u00e9bec")}) {
+            for (auto const &name : {std::string("Winthrop, WA"), from_u8string(u8"Qu\u00e9bec")}) {
                 std::string csv_string =
                     (boost::format(
                         "wkt,Name\n"

@@ -1,17 +1,22 @@
 #include "bench_framework.hpp"
 #include <mapnik/unicode.hpp>
+#include <mapnik/util/from_u8string.hpp>
 #include <mapnik/value.hpp>
 #include <boost/locale.hpp>
 #ifndef __linux__
 #include <codecvt>
+#endif
 
+using mapnik::util::from_u8string;
+
+#ifndef __linux__
 class test : public benchmark::test_case
 {
     std::string utf8_;
 public:
     test(mapnik::parameters const& params)
      : test_case(params),
-       utf8_(u8"שלום") {}
+       utf8_(from_u8string(u8"שלום")) {}
     bool validate() const
     {
         std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> utf32conv;
@@ -42,7 +47,7 @@ class test2 : public benchmark::test_case
 public:
     test2(mapnik::parameters const& params)
      : test_case(params),
-       utf8_(u8"שלום") {}
+       utf8_(from_u8string(u8"שלום")) {}
     bool validate() const
     {
         std::u32string utf32 = boost::locale::conv::utf_to_utf<char32_t>(utf8_);
@@ -69,7 +74,7 @@ class test3 : public benchmark::test_case
 public:
     test3(mapnik::parameters const& params)
      : test_case(params),
-       utf8_(u8"שלום") {}
+       utf8_(from_u8string(u8"שלום")) {}
     bool validate() const
     {
         mapnik::transcoder tr_("utf-8");
