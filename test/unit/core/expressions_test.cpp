@@ -7,6 +7,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/util/from_u8string.hpp>
 
 #include <functional>
 #include <map>
@@ -57,6 +58,7 @@ std::string parse_and_dump(std::string const& str)
 TEST_CASE("expressions")
 {
     using namespace std::placeholders;
+    using namespace mapnik::util;
     using properties_type = std::map<std::string, mapnik::value>;
     mapnik::transcoder tr("utf8");
 
@@ -102,11 +104,11 @@ TEST_CASE("expressions")
 
     // unicode attribute name
     TRY_CHECK(eval("[τ]") == prop.at("τ"));
-    TRY_CHECK(eval("[τ]") == eval(u8"[\u03C4]"));
+    TRY_CHECK(eval("[τ]") == eval(from_u8string(u8"[\u03C4]")));
 
     // change to TRY_CHECK once \u1234 escape sequence in attribute name
     // is implemented in expression grammar
-    CHECK_NOFAIL(eval("[τ]") == eval("[\\u03C3]"));
+    CHECK_NOFAIL(eval("[τ]") == eval(from_u8string(u8"[\\u03C3]")));
 
     // unary functions
     // sin / cos
@@ -190,7 +192,7 @@ TEST_CASE("expressions")
     // https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
     //'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C' - black chess figures
     // replace black knights with white knights
-    auto val0 = eval(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')");
+    auto val0 = eval(from_u8string(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')"));
     auto val1 = eval("'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
     TRY_CHECK(val0 == val1);
     TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
