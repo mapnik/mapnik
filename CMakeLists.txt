@@ -11,8 +11,10 @@ project(mapnik
     DESCRIPTION "Mapnik is an open source toolkit for developing mapping applications" 
     LANGUAGES CXX 
 )
-
 message(STATUS "mapnik version: ${PROJECT_VERSION}")
+
+# https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(MapnikFindPackage)
