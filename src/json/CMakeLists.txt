@@ -33,6 +33,7 @@ install(TARGETS json
     RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
     INCLUDES DESTINATION include/
     PUBLIC_HEADER DESTINATION include/
+    COMPONENT mapnik
 )
 
 mapnik_install(TARGET json)
