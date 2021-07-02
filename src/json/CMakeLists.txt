@@ -26,4 +26,13 @@ target_include_directories(json PRIVATE
 )
 target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
 
+install(TARGETS json 
+    EXPORT MapnikTargets
+    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
+    INCLUDES DESTINATION include/
+    PUBLIC_HEADER DESTINATION include/
+)
+
 mapnik_install(TARGET json)
