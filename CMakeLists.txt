@@ -337,6 +337,7 @@ install(EXPORT MapnikTargets
 
 install(DIRECTORY include/ TYPE INCLUDE)
 install(DIRECTORY deps/agg/include/ TYPE INCLUDE)
+install(DIRECTORY deps/mapnik TYPE INCLUDE)
 install(DIRECTORY fonts/ DESTINATION ${FONTS_INSTALL_DIR} FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
 
 mapnik_install_targets()
