@@ -18,4 +18,13 @@ target_include_directories(wkt PRIVATE
 )
 target_link_libraries(wkt PRIVATE mapnik::core)
 
+install(TARGETS wkt 
+    EXPORT MapnikTargets
+    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
+    INCLUDES DESTINATION include/
+    PUBLIC_HEADER DESTINATION include/
+)
+
 mapnik_install(TARGET wkt)
