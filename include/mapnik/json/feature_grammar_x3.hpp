@@ -35,12 +35,15 @@ namespace mapnik { namespace json { namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 using feature_grammar_type = x3::rule<class feature_rule_tag>;
+using feature_with_id_grammar_type = x3::rule<class feature_with_id_rule_tag>;
 using geometry_grammar_type = x3::rule<struct geomerty_rule_tag, mapnik::geometry::geometry<double> >;
 
 feature_grammar_type const feature_rule = "Feature Rule";
+feature_with_id_grammar_type const feature_with_id_rule = "Feature With Id Rule";
 geometry_grammar_type const geometry_rule = "Geometry Rule";
 
 BOOST_SPIRIT_DECLARE(feature_grammar_type);
+BOOST_SPIRIT_DECLARE(feature_with_id_grammar_type);
 BOOST_SPIRIT_DECLARE(geometry_grammar_type);
 
 }}}

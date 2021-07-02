@@ -118,7 +118,8 @@ geojson_datasource::geojson_datasource(parameters const& params)
       extent_(),
       features_(),
       tree_(nullptr),
-      num_features_to_query_(std::max(mapnik::value_integer(1), *params.get<mapnik::value_integer>("num_features_to_query", 5)))
+      num_features_to_query_(std::max(mapnik::value_integer(1), *params.get<mapnik::value_integer>("num_features_to_query", 5))),
+      use_id_from_source_(*params.get<mapnik::boolean_type>("use_id_from_source", false))
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (!inline_string)
@@ -233,7 +234,7 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
         auto count = std::fread(record.data(), pos.size, 1, file.get());
         auto const* start = record.data();
         auto const*  end = (count == 1) ? start + record.size() : start;
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1));
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1, use_id_from_source_));
         try
         {
             mapnik::json::parse_feature(start, end, *feature, geojson_datasource_static_tr);
@@ -292,7 +293,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
             {
                 // parse first N features to extract attributes schema.
                 // NOTE: this doesn't yield correct answer for geoJSON in general, just an indication
-                mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,-1)); // temp feature
+                mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,-1,use_id_from_source_)); // temp feature
                 Iterator itr2 = start + geometry_index.first;
                 Iterator end2 = itr2 + geometry_index.second;
                 try
@@ -313,7 +314,7 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
         cache_features_ = true; // force caching single feature
         itr = start; // reset iteraror
         std::size_t start_id = 1;
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, start_id)); // single feature
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, start_id, use_id_from_source_)); // single feature
         try
         {
             mapnik::json::parse_geometry_or_feature(itr, end, *feature, geojson_datasource_static_tr);
@@ -374,7 +375,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
             auto const& geometry_index = std::get<1>(item);
             Iterator itr2 = start + geometry_index.first;
             Iterator end2 = itr2 + geometry_index.second;
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, start_id++));
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, start_id++, use_id_from_source_));
             mapnik::json::parse_feature(itr2, end2, *feature, geojson_datasource_static_tr);
             features_.push_back(std::move(feature));
         }
@@ -383,7 +384,7 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
     {
         itr = start;
         // try parsing as single Feature or single Geometry JSON
-        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, start_id)); // single feature
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, start_id, use_id_from_source_)); // single feature
         try
         {
             mapnik::json::parse_geometry_or_feature(itr, end, *feature, geojson_datasource_static_tr);
@@ -476,7 +477,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             auto count = std::fread(record.data(), pos.size, 1, file.get());
             auto const* start = record.data();
             auto const*  end = (count == 1) ? start + record.size() : start;
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp feature
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1, use_id_from_source_)); // temp feature
             try
             {
                 mapnik::json::parse_feature(start, end, *feature, geojson_datasource_static_tr);
@@ -540,7 +541,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             chr_iterator_type start2 = json.data();
             chr_iterator_type end2 = (count_objects == 1) ? start2 + json.size() : start2;
 
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1)); // temp feature
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, -1, use_id_from_source_)); // temp feature
             try
             {
                 mapnik::json::parse_feature(start2, end2, *feature, geojson_datasource_static_tr);

@@ -218,7 +218,7 @@ private:
     template <typename T>
     void read_feature (T & reader)
     {
-        auto feature = feature_factory::create(ctx_,1);
+        auto feature = feature_factory::create(ctx_,1,true);
         while (reader.next())
         {
             switch (reader.tag())

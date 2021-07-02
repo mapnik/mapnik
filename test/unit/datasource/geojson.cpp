@@ -956,5 +956,54 @@ TEST_CASE("geojson") {
                 }
             }
         }
+
+        SECTION("GeoJSON reads id from source file when 'use_id_from_source=true'")
+        {
+            // Create datasource
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            std::string base("./test/data/json/");
+            std::string file("feature-with-id.json");
+            params["base"] = base;
+            params["file"] = file;
+            params["use_id_from_source"] = true;
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            REQUIRE(bool(ds));
+            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+            auto features = all_features(ds);
+            auto feature = features->next();
+            REQUIRE(feature != nullptr);
+            CHECK(feature->id() == 12345);
+        }
+
+        SECTION("GeoJSON throws on invalid Feature.id when 'use_id_from_source=true'")
+        {
+            // Create datasource
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            std::string base("./test/data/json/");
+            std::string file("feature-with-invalid-id.json");
+            params["base"] = base;
+            params["file"] = file;
+            params["use_id_from_source"] = true;
+            REQUIRE_THROWS(mapnik::datasource_cache::instance().create(params));
+        }
+
+        SECTION("GeoJSON ignores invalid Feature.id when 'use_id_from_source=false' or not set")
+        {
+            // Create datasource
+            mapnik::parameters params;
+            params["type"] = "geojson";
+            std::string base("./test/data/json/");
+            std::string file("feature-with-invalid-id.json");
+            params["base"] = base;
+            params["file"] = file;
+            auto ds = mapnik::datasource_cache::instance().create(params);
+            CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
+            auto features = all_features(ds);
+            auto feature = features->next();
+            REQUIRE(feature != nullptr);
+            CHECK(feature->id() == 1);
+        }
     }
 }

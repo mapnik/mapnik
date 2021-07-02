@@ -101,15 +101,17 @@ public:
     using cont_type = std::vector<value_type>;
     using iterator = feature_kv_iterator;
 
-    feature_impl(context_ptr const& ctx, mapnik::value_integer _id)
+    feature_impl(context_ptr const& ctx, mapnik::value_integer _id, bool _use_id_from_source = false)
         : id_(_id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
         geom_(geometry::geometry_empty()),
-        raster_() {}
+        raster_(),
+        use_id_from_source_(_use_id_from_source) {}
 
     inline mapnik::value_integer id() const { return id_;}
     inline void set_id(mapnik::value_integer _id) { id_ = _id;}
+    inline bool use_id_from_source() { return use_id_from_source_; }
     template <typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {
@@ -267,6 +269,7 @@ private:
     cont_type data_;
     geometry::geometry<double> geom_;
     raster_ptr raster_;
+    bool use_id_from_source_;
 };
 
 
