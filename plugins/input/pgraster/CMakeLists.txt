@@ -2,7 +2,7 @@ project(input-pgraster)
 
 find_package(PostgreSQL REQUIRED)
 
-add_library(input-pgraster SHARED 
+add_library(input-pgraster MODULE 
     pgraster_datasource.cpp 
     pgraster_featureset.cpp 
     pgraster_wkb_reader.cpp

@@ -2,7 +2,7 @@ project(input-sqlite)
 
 find_package(SQLite3 REQUIRED)
 
-add_library(input-sqlite SHARED
+add_library(input-sqlite MODULE
     sqlite_datasource.cpp
     sqlite_featureset.cpp
 )
