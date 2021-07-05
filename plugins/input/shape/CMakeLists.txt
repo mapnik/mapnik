@@ -1,6 +1,6 @@
 project(input-shape)
 
-add_library(input-shape SHARED 
+add_library(input-shape MODULE 
     dbfile.cpp 
     dbf_test.cpp
     shape_datasource.cpp

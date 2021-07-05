@@ -2,7 +2,7 @@ project(input-gdal)
 
 find_package(GDAL REQUIRED)
 
-add_library(input-gdal SHARED
+add_library(input-gdal MODULE
     gdal_datasource.cpp
     gdal_featureset.cpp
 )

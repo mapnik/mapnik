@@ -2,7 +2,7 @@ project(input-postgis)
 
 find_package(PostgreSQL REQUIRED)
 
-add_library(input-postgis SHARED 
+add_library(input-postgis MODULE 
     postgis_datasource.cpp 
     postgis_featureset.cpp 
 )

@@ -1,6 +1,6 @@
 project(input-geobuf)
 
-add_library(input-geobuf SHARED
+add_library(input-geobuf MODULE
     geobuf_datasource.cpp
     geobuf_featureset.cpp
 )
