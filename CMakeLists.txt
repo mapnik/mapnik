@@ -113,13 +113,14 @@ message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 # Begin project configuration
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
-mapnik_find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system regex)
+mapnik_find_package(Boost 1.61 REQUIRED COMPONENTS filesystem system regex)
 if(USE_BOOST_REGEX_ICU_WORKAROUND)
     set_property(TARGET Boost::regex PROPERTY INTERFACE_LINK_LIBRARIES)
 endif()
 
 mapnik_find_package(Freetype REQUIRED)
-mapnik_find_package(harfbuzz CONFIG REQUIRED)
+# we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
+mapnik_find_package(HarfBuzz REQUIRED)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
     # this is used to provide a way to specify include dirs with CACHE VARIABLES
@@ -231,12 +232,12 @@ endif()
 
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
-    mapnik_find_package(PROJ REQUIRED)
-    math(EXPR MAPNIK_PROJ_VERSION "${PROJ_VERSION_MAJOR}*10000 + ${PROJ_VERSION_MINOR}*100 + ${PROJ_VERSION_PATCH}" OUTPUT_FORMAT DECIMAL)
+    mapnik_find_package(PROJ4 REQUIRED)
+    math(EXPR MAPNIK_PROJ_VERSION "${PROJ4_VERSION_MAJOR}*10000 + ${PROJ4_VERSION_MINOR}*100 + ${PROJ4_VERSION_PATCH}" OUTPUT_FORMAT DECIMAL)
     message(STATUS "Using mapnik PROJ version: ${MAPNIK_PROJ_VERSION}")
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ MAPNIK_PROJ_VERSION=${MAPNIK_PROJ_VERSION})
-    list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ_LIBRARIES})
-    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ_INCLUDE_DIRS})
+    list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ4_LIBRARIES})
+    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ4_INCLUDE_DIRS})
 endif()
 
 if(USE_GRID_RENDERER)
@@ -277,7 +278,7 @@ target_link_libraries(core INTERFACE
     Boost::regex
     Boost::filesystem
     Freetype::Freetype
-    harfbuzz::harfbuzz
+    HarfBuzz::HarfBuzz
     ${MAPNIK_OPTIONAL_LIBS}
 )
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
