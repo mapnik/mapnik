@@ -109,6 +109,9 @@ message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
 message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 
+set(MAPNIK_COMPILE_DEFS "")
+set(MAPNIK_OPTIONAL_LIBS "")
+set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 # Begin project configuration
 mapnik_find_threads()
@@ -119,8 +122,19 @@ if(USE_BOOST_REGEX_ICU_WORKAROUND)
 endif()
 
 mapnik_find_package(Freetype REQUIRED)
-# we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
-mapnik_find_package(HarfBuzz 0.9.34 REQUIRED COMPONENTS ICU)
+
+# try to find harfbuzz with the native configuration and fallback to our "own" FindHarfBuzz
+set(HARFBUZZ_MINIMUM_VERSION 0.9.34)
+mapnik_find_package(harfbuzz CONFIG QUIET)
+if(harfbuzz_FOUND)
+    message(STATUS "Found harfbuzz native cmake")
+    list(APPEND MAPNIK_OPTIONAL_LIBS harfbuzz::harfbuzz)
+else()
+    # we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
+    message(STATUS "Fallback to FindHarfBuzz")
+    mapnik_find_package(HarfBuzz ${HARFBUZZ_MINIMUM_VERSION} REQUIRED COMPONENTS ICU)
+    list(APPEND MAPNIK_OPTIONAL_LIBS HarfBuzz::HarfBuzz HarfBuzz::ICU)
+endif()
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
     # this is used to provide a way to specify include dirs with CACHE VARIABLES
@@ -179,9 +193,6 @@ if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
     message(FATAL_ERROR "Set MAPBOX_VARIANT_INCLUDE_DIRS to the mapbox/variant include dir") 
 endif()
 
-set(MAPNIK_COMPILE_DEFS "")
-set(MAPNIK_OPTIONAL_LIBS "")
-set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 # (used by MapnikInstall.cmake. properties are needed since "set(...)" will be out of scope
 set_property(GLOBAL PROPERTY TARGETS "")
 set_property(GLOBAL PROPERTY PLUGINS "")
@@ -278,8 +289,6 @@ target_link_libraries(core INTERFACE
     Boost::regex
     Boost::filesystem
     Freetype::Freetype
-    HarfBuzz::HarfBuzz
-    HarfBuzz::ICU
     ${MAPNIK_OPTIONAL_LIBS}
 )
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
