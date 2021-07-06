@@ -1,6 +1,6 @@
 project(shapeindex)
 
-find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 add_executable(shapeindex 
     shapeindex.cpp
