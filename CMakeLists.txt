@@ -120,7 +120,7 @@ endif()
 
 mapnik_find_package(Freetype REQUIRED)
 # we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
-mapnik_find_package(HarfBuzz REQUIRED)
+mapnik_find_package(HarfBuzz 0.9.34 REQUIRED COMPONENTS ICU)
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
     # this is used to provide a way to specify include dirs with CACHE VARIABLES
@@ -279,6 +279,7 @@ target_link_libraries(core INTERFACE
     Boost::filesystem
     Freetype::Freetype
     HarfBuzz::HarfBuzz
+    HarfBuzz::ICU
     ${MAPNIK_OPTIONAL_LIBS}
 )
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
