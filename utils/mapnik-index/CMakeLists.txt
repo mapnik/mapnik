@@ -1,6 +1,6 @@
 project(mapnik-index)
 
-find_package(Boost 1.74 REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 add_executable(mapnik-index
     mapnik-index.cpp
