@@ -131,12 +131,22 @@ void gdal_featureset::find_best_overview(int bandNumber,
                                          int & current_height) const
 {
     GDALRasterBand * band = dataset_.GetRasterBand(bandNumber);
+    find_best_overview(band, ideal_width, ideal_height, current_width, current_height);
+}
+
+void gdal_featureset::find_best_overview(GDALRasterBand * band,
+                                         int ideal_width,
+                                         int ideal_height,
+                                         int & current_width,
+                                         int & current_height) const
+{
     int band_overviews = band->GetOverviewCount();
     if (band_overviews > 0)
     {
         for (int b = 0; b < band_overviews; b++)
         {
             GDALRasterBand * overview = band->GetOverview(b);
+            find_best_overview(overview, ideal_width, ideal_height, current_width, current_height);
             int overview_width = overview->GetXSize();
             int overview_height = overview->GetYSize();
             if ((overview_width < current_width ||
