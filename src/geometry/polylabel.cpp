@@ -46,14 +46,14 @@ bool polylabel(polygon<T> const& polygon, T precision, point<T> & pt)
     return true;
 }
 
-template
-bool polylabel(polygon<double> const& polygon,
-               double precision,
-               point<double> & pt);
+template MAPNIK_DECL 
+bool polylabel(polygon<double> const& polygon, 
+            double precision, 
+            point<double> & pt);
 
-template
-double polylabel_precision(polygon<double> const& polygon,
-                           double scale_factor);
+template MAPNIK_DECL 
+double polylabel_precision(polygon<double> const& polygon, 
+double scale_factor);
 
 } }
 

@@ -52,7 +52,7 @@ enum eAttributeCollectionPolicy
 };
 
 template <typename Processor>
-class MAPNIK_DECL feature_style_processor
+class feature_style_processor
 {
 public:
     explicit feature_style_processor(Map const& m,

@@ -2,6 +2,13 @@
 
 Mapnik runs on Linux, OS X, Windows, and BSD systems.
 
+## Package managers
+### vcpkg 
+To install mapnik with vcpkg type `vcpkg install mapnik`. It will install a minimal version of mapnik and all the needed dependencies. 
+To install more features, type `vcpkg search mapnik` to see all available features.
+
+## Source build
+
 First clone mapnik from github and initialize submodules
 
 ```bash

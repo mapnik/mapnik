@@ -76,17 +76,17 @@ void compare_map(bfs::path xml) {
     // is a normalisation step to ensure that the file is in
     // whatever the current version of mapnik uses as the
     // standard indentation, quote style, etc...
-    REQUIRE_NOTHROW(mapnik::load_map(m, xml.native(), false, abs_base.native()));
+    REQUIRE_NOTHROW(mapnik::load_map(m, xml.generic_string(), false, abs_base.generic_string()));
     bfs::path test_map1 = dir.path() / "mapnik-temp-map1.xml";
-    REQUIRE_NOTHROW(mapnik::save_map(m, test_map1.native()));
+    REQUIRE_NOTHROW(mapnik::save_map(m, test_map1.generic_string()));
 
     // create a new map, load the one saved in the previous
     // step, and write it out again.
     mapnik::Map new_map(256, 256);
     REQUIRE(new_map.register_fonts("fonts", true));
-    REQUIRE_NOTHROW(mapnik::load_map(new_map, test_map1.native(), false, abs_base.native()));
+    REQUIRE_NOTHROW(mapnik::load_map(new_map, test_map1.generic_string(), false, abs_base.generic_string()));
     bfs::path test_map2 = dir.path() / "mapnik-temp-map2.xml";
-    REQUIRE_NOTHROW(mapnik::save_map(new_map, test_map2.native()));
+    REQUIRE_NOTHROW(mapnik::save_map(new_map, test_map2.generic_string()));
 
     // if all the information survived the load/save round-trip
     // then the two files ought to be identical.
@@ -102,7 +102,7 @@ void add_xml_files(bfs::path dir, std::vector<bfs::path> &xml_files) {
     for (auto const &entry : boost::make_iterator_range(
              bfs::directory_iterator(dir), bfs::directory_iterator())) {
         auto path = entry.path();
-        if (path.extension().native() == ".xml") {
+        if (path.extension().generic_string() == ".xml") {
             xml_files.emplace_back(path);
         }
     }
@@ -112,7 +112,7 @@ void load_map(mapnik::Map &m, bfs::path const &path) {
 
     try
     {
-        mapnik::load_map(m, path.native());
+        mapnik::load_map(m, path.generic_string());
     }
     catch (std::exception const &ex)
     {
@@ -129,7 +129,7 @@ void load_map(mapnik::Map &m, bfs::path const &path) {
 
 } // anonymous namespace
 
-const bool registered = mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
+const bool registered = mapnik::datasource_cache::instance().register_datasources((bfs::path("plugins") / "input").generic_string());
 
 TEST_CASE("map xml I/O") {
     // make sure plugins are loaded
@@ -141,10 +141,10 @@ TEST_CASE("map xml I/O") {
 
     SECTION("good maps") {
         std::vector<bfs::path> good_maps;
-        add_xml_files("test/data/good_maps", good_maps);
+        add_xml_files(bfs::path("test") / "data" / "good_maps", good_maps);
 
         for (auto const &path : good_maps) {
-            CAPTURE(path.native());
+            CAPTURE(path.generic_string());
 
             // check that it can load
             mapnik::Map m(256, 256);
@@ -157,7 +157,7 @@ TEST_CASE("map xml I/O") {
     } // END SECTION
 
     SECTION("duplicate styles only throw in strict mode") {
-        std::string duplicate_stylename("test/data/broken_maps/duplicate_stylename.xml");
+        std::string duplicate_stylename((bfs::path("test") / "data" / "broken_maps" / "duplicate_stylename.xml").generic_string());
         CAPTURE(duplicate_stylename);
         mapnik::Map m(256, 256);
         REQUIRE(m.register_fonts("fonts", true));
@@ -169,15 +169,15 @@ TEST_CASE("map xml I/O") {
 
     SECTION("broken maps") {
         std::vector<bfs::path> broken_maps;
-        add_xml_files("test/data/broken_maps", broken_maps);
-        broken_maps.emplace_back("test/data/broken_maps/does_not_exist.xml");
+        add_xml_files(bfs::path("test") / "data" / "broken_maps", broken_maps);
+        broken_maps.emplace_back(bfs::path("test") / "data" / "broken_maps" / "does_not_exist.xml");
 
         for (auto const &path : broken_maps) {
-            CAPTURE(path.native());
+            CAPTURE(path.generic_string());
 
             mapnik::Map m(256, 256);
             REQUIRE(m.register_fonts("fonts", true));
-            REQUIRE_THROWS(mapnik::load_map(m, path.native(), true));
+            REQUIRE_THROWS(mapnik::load_map(m, path.generic_string(), true));
         }
     } // END SECTION
 

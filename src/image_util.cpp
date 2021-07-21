@@ -54,7 +54,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 #include <algorithm>
 
-#if __cplusplus >= 201703L
+#if __cpp_lib_execution >= 201603
 #include <execution>
 #endif
 

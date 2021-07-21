@@ -54,7 +54,7 @@ using geojson_value_base = mapnik::util::variant<value_null,
                                               geojson_object>;
 struct geojson_value : geojson_value_base
 {
-#if __cpp_inheriting_constructors >= 200802
+#if __cpp_inheriting_constructors >= 200802 && !defined (_MSC_VER)
 
     using geojson_value_base::geojson_value_base;
 

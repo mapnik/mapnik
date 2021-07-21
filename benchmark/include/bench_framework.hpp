@@ -17,6 +17,7 @@
 #include <set>
 #include <sstream>
 #include <thread>
+#include <mutex>
 #include <vector>
 
 namespace benchmark {
