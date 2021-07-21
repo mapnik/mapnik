@@ -150,6 +150,7 @@ if(USE_EXTERNAL_MAPBOX_GEOMETRY)
 else()
     set(MAPBOX_GEOMETRY_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include>
+        $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_GEOMETRY_INCLUDE_DIRS)
@@ -164,6 +165,7 @@ if(USE_EXTERNAL_MAPBOX_POLYLABEL)
 else()
     set(MAPBOX_POLYLABEL_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include>
+        $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_POLYLABEL_INCLUDE_DIRS)
@@ -178,6 +180,7 @@ if(USE_EXTERNAL_MAPBOX_PROTOZERO)
 else()
     set(MAPBOX_PROTOZERO_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include>
+        $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_PROTOZERO_INCLUDE_DIRS)
@@ -192,6 +195,7 @@ if(USE_EXTERNAL_MAPBOX_VARIANT)
 else()
     set(MAPBOX_VARIANT_INCLUDE_DIRS 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include>
+        $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
@@ -379,7 +383,19 @@ install(DIRECTORY deps/agg/include/ TYPE INCLUDE)
 install(DIRECTORY deps/mapnik TYPE INCLUDE)
 install(DIRECTORY fonts/ DESTINATION ${FONTS_INSTALL_DIR} FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
 
-mapnik_install_targets()
+if(NOT USE_EXTERNAL_MAPBOX_GEOMETRY)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/ TYPE INCLUDE)
+endif()
+if(NOT USE_EXTERNAL_MAPBOX_POLYLABEL)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/ TYPE INCLUDE)
+endif()
+if(NOT USE_EXTERNAL_MAPBOX_PROTOZERO)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/ TYPE INCLUDE)
+endif()
+if(NOT USE_EXTERNAL_MAPBOX_VARIANT)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/ TYPE INCLUDE)
+endif()
 
+mapnik_install_targets()
 
 include(pack)
