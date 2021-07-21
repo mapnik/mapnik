@@ -33,7 +33,7 @@ option(USE_EXTERNAL_MAPBOX_POLYLABEL "Use a external mapnik/polylabel. If off, u
 option(USE_EXTERNAL_MAPBOX_PROTOZERO "Use a external mapnik/protozero. If off, use the submodule" OFF)
 option(USE_EXTERNAL_MAPBOX_VARIANT "Use a external mapnik/variant. If off, use the submodule" OFF)
 option(USE_JPEG "adds jpeg support" ON)
-option(USE_OPENJPEG "adds openjpeg support" ON)
+option(USE_OPENJPEG "adds openjpeg support" OFF)
 if(USE_JPEG AND USE_OPENJPEG)
     message(FATAL_ERROR "Choose either USE_JPEG OR USE_OPENJPEG")
 endif()
