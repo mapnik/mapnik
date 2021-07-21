@@ -28,7 +28,7 @@ find_package(mapnik CONFIG REQUIRED)
 target_link_libraries(mytarget ... mapnik::core mapnik::mapnik)
 ```
 
-All mapnik executables and targets are exported within `MapnikTargets.cmake`. 
+All mapnik executables and targets are exported within `mapnikTargets.cmake`. 
 
 The plugin dir is available in the variable `MAPNIK_PLUGINS_DIR`. 
 The font path is is available in the variable `MAPNIK_FONTS_DIR`. 

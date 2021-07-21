@@ -10,6 +10,6 @@ include(CMakeFindDependencyMacro)
 @MAPNIK_DEPENDENCIES@
 
 
-include("${CMAKE_CURRENT_LIST_DIR}/MapnikTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/mapnikTargets.cmake")
 
 check_required_components(mapnik)
