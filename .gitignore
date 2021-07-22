@@ -60,3 +60,5 @@ test/visual/run
 # cmake 
 build
 .vs
+
+CMakeUserPresets.json
