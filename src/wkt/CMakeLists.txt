@@ -6,8 +6,6 @@ add_library(wkt STATIC
 )
 add_library(mapnik::wkt ALIAS wkt)
 
-set_property(TARGET wkt PROPERTY POSITION_INDEPENDENT_CODE ON)
-
 target_include_directories(wkt PRIVATE
     ${MAPNIK_INCLUDE_PATH}
     ${JPEG_INCLUDE_DIR}
@@ -17,6 +15,11 @@ target_include_directories(wkt PRIVATE
     ${MAPBOX_VARIANT_INCLUDE_DIRS}
 )
 target_link_libraries(wkt PRIVATE mapnik::core)
+
+set_target_properties(wkt PROPERTIES 
+    DEBUG_POSTFIX ${MAPNIK_DEBUG_POSTFIX}
+    POSITION_INDEPENDENT_CODE ON
+)
 
 install(TARGETS wkt 
     EXPORT MapnikTargets
