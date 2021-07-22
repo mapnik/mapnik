@@ -54,16 +54,18 @@ This could look like this:
     "configurePresets": [
         {
             "name": "vcpkg-x64-win-debug",
-            "inherits": "windows-default",
+            "inherits": "windows-default-debug",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "ADDITIONAL_LIBARIES_PATHS":"D:/dev/vcpkg/x64-windows/debug/bin"
             }
         },
         {
             "name": "vcpkg-x64-win-release",
             "inherits": "windows-default-release",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "ADDITIONAL_LIBARIES_PATHS":"D:/dev/vcpkg/x64-windows/bin"
             }
         }
     ]
