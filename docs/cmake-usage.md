@@ -32,3 +32,8 @@ All mapnik executables and targets are exported within `mapnikTargets.cmake`.
 
 The plugin dir is available in the variable `MAPNIK_PLUGINS_DIR`. 
 The font path is is available in the variable `MAPNIK_FONTS_DIR`. 
+
+## Recommendations
+
+If you target a specific platform, it is recommended to create a toolchain file and set all the options and library path that you would normally set via cmd line options.
+If you are using a recent cmake version (>=3.19?), it is recommended to use a CMakePreset instead. https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
