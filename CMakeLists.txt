@@ -118,7 +118,7 @@ set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 # Begin project configuration
-mapnik_find_package(PkgConfig REQUIRED)
+mapnik_find_package(PkgConfig)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 mapnik_find_package(Boost 1.61 REQUIRED COMPONENTS filesystem system regex)
