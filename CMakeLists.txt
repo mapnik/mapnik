@@ -43,6 +43,7 @@ option(USE_GRID_RENDERER "adds grid renderer" ON)
 option(USE_SVG_RENDERER "adds svg renderer" ON)
 option(USE_BIGINT "uses 64 bit instead of 32" ON)
 option(USE_MEMORY_MAPPED_FILE "uses file cache" ON)
+option(USE_MULTITHREADED "enables the multithreaded features (threadsafe)" ON)
 
 option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
@@ -81,7 +82,7 @@ set(CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
 
 # add debug postfix to the libraries
 set(MAPNIK_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
-message(STATUS "added postfix for debug libraries: ${MAPNIK_DEBUG_POSTFIX}")
+message(STATUS "postfix for debug libraries: ${MAPNIK_DEBUG_POSTFIX}")
 
 if(WIN32)
     set(DEFAULT_BIN_DIR bin)
@@ -118,7 +119,18 @@ set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 # Begin project configuration
-mapnik_find_package(PkgConfig)
+
+# needs to be before the first call of find_boost.
+if(USE_MULTITHREADED)
+    message(STATUS "multithreaded enabled")
+    set(Boost_USE_MULTITHREADED ON)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_THREADSAFE)
+else()
+    set(Boost_USE_MULTITHREADED OFF)
+    message(STATUS "multithreaded disabled")
+endif()
+
+find_package(PkgConfig)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 mapnik_find_package(Boost 1.61 REQUIRED COMPONENTS filesystem system regex)
