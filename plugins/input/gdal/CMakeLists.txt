@@ -12,7 +12,7 @@ target_include_directories(input-gdal PRIVATE ${GDAL_INCLUDE_DIR})
 target_link_libraries(input-gdal PRIVATE 
     mapnik::core 
     mapnik::mapnik
-    ${GDAL_LIBRARY}
+    ${GDAL_LIBRARIES}
 )
 set_target_properties(input-gdal PROPERTIES PREFIX "")
 set_target_properties(input-gdal PROPERTIES OUTPUT_NAME "gdal")

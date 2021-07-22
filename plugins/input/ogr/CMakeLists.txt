@@ -14,7 +14,7 @@ target_include_directories(input-ogr PRIVATE ${GDAL_INCLUDE_DIR})
 target_link_libraries(input-ogr PRIVATE 
     mapnik::core 
     mapnik::mapnik
-    ${GDAL_LIBRARY}
+    ${GDAL_LIBRARIES}
 )
 set_target_properties(input-ogr PROPERTIES PREFIX "")
 set_target_properties(input-ogr PROPERTIES OUTPUT_NAME "ogr")
