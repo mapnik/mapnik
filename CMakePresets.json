@@ -79,8 +79,7 @@
             },
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl",
-                "MAPNIK_DEBUG": "ON"
+                "CMAKE_CXX_COMPILER": "cl"
             },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -95,7 +94,8 @@
             "displayName": "Windows x64 Debug",
             "inherits": "windows-default",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "MAPNIK_DEBUG": "ON"
             }
         },
         {
