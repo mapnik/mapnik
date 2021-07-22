@@ -295,6 +295,8 @@ target_link_libraries(mapnik PRIVATE
     mapnik::agg
 )
 
+set_target_properties(mapnik PROPERTIES DEBUG_POSTFIX ${MAPNIK_DEBUG_POSTFIX})
+
 install(TARGETS mapnik 
     EXPORT MapnikTargets
     LIBRARY DESTINATION ${MAPNIK_LIB_DIR}

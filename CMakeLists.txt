@@ -83,6 +83,10 @@ message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
 # https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD_REQUIRED.html#prop_tgt:CXX_STANDARD_REQUIRED
 set(CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
 
+# add debug postfix to the libraries
+set(MAPNIK_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
+message(STATUS "added postfix for debug libraries: ${MAPNIK_DEBUG_POSTFIX}")
+
 if(WIN32)
     set(DEFAULT_BIN_DIR bin)
     set(DEFAULT_LIB_DIR lib)

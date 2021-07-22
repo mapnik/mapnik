@@ -15,8 +15,6 @@ add_library(json STATIC
 )
 add_library(mapnik::json ALIAS json)
 
-set_property(TARGET json PROPERTY POSITION_INDEPENDENT_CODE ON)
-
 target_include_directories(json PRIVATE
     ${JPEG_INCLUDE_DIR}
     ${LIBXML2_INCLUDE_DIR}
@@ -25,6 +23,11 @@ target_include_directories(json PRIVATE
     ${MAPBOX_VARIANT_INCLUDE_DIRS}
 )
 target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
+
+set_target_properties(json PROPERTIES 
+    DEBUG_POSTFIX ${MAPNIK_DEBUG_POSTFIX}
+    POSITION_INDEPENDENT_CODE ON
+)
 
 install(TARGETS json 
     EXPORT MapnikTargets
