@@ -24,7 +24,8 @@
             "displayName": "Linux clang debug",
             "inherits": "linux-clang",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "MAPNIK_DEBUG": "ON"
             }
         },
         {
@@ -50,7 +51,8 @@
             "displayName": "Linux gcc debug",
             "inherits": "linux-gcc",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "MAPNIK_DEBUG": "ON"
             }
         },
         {
@@ -64,6 +66,7 @@
         {
             "name": "windows-default",
             "displayName": "Windows x64 Debug",
+            "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "architecture": {
@@ -75,9 +78,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
+                "CMAKE_CXX_COMPILER": "cl",
+                "MAPNIK_DEBUG": "ON"
             },
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
@@ -85,6 +88,14 @@
                         "Windows"
                     ]
                 }
+            }
+        },
+        {
+            "name": "windows-default-debug",
+            "displayName": "Windows x64 Debug",
+            "inherits": "windows-default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
