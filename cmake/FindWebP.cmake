@@ -1,166 +1,87 @@
-# Copyright (C) 2020 Sony Interactive Entertainment Inc.
-# Copyright (C) 2012 Raphael Kubo da Costa <rakuco@webkit.org>
-# Copyright (C) 2013 Igalia S.L.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1.  Redistributions of source code must retain the above copyright
-#     notice, this list of conditions and the following disclaimer.
-# 2.  Redistributions in binary form must reproduce the above copyright
-#     notice, this list of conditions and the following disclaimer in the
-#     documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND ITS CONTRIBUTORS ``AS
-# IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR ITS
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindWebP
---------------
+-------
 
-Find WebP headers and libraries.
+Finds the WebP library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-``WebP::libwebp``
-  The WebP library, if found.
+This module provides the following imported targets, if found:
 
-``WebP::demux``
-  The WebP demux library, if found.
+``WebP::WebP``
+  The WebP library
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This will define the following variables in your project:
+This will define the following variables:
 
 ``WebP_FOUND``
-  true if (the requested version of) WebP is available.
+  True if the system has the WebP library.
 ``WebP_VERSION``
-  the version of WebP.
-``WebP_LIBRARIES``
-  the libraries to link against to use WebP.
+  The version of the WebP library which was found.
 ``WebP_INCLUDE_DIRS``
-  where to find the WebP headers.
-``WebP_COMPILE_OPTIONS``
-  this should be passed to target_compile_options(), if the
-  target is not used for linking
+  Include directories needed to use WebP.
+``WebP_LIBRARIES``
+  Libraries needed to link to WebP.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``WebP_INCLUDE_DIR``
+  The directory containing ``decode.h``.
+``WebP_LIBRARY``
+  The path to the Foo library.
 
 #]=======================================================================]
 
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_WEBP QUIET libwebp)
-set(WebP_COMPILE_OPTIONS ${PC_WEBP_CFLAGS_OTHER})
-set(WebP_VERSION ${PC_WEBP_CFLAGS_VERSION})
-
-find_path(WebP_INCLUDE_DIR
-    NAMES webp/decode.h
-    HINTS ${PC_WEBP_INCLUDEDIR} ${PC_WEBP_INCLUDE_DIRS}
-)
-
-find_library(WebP_LIBRARY
-    NAMES ${WebP_NAMES} webp
-    HINTS ${PC_WEBP_LIBDIR} ${PC_WEBP_LIBRARY_DIRS}
-)
-
-# There's nothing in the WebP headers that could be used to detect the exact
-# WebP version being used so don't attempt to do so. A version can only be found
-# through pkg-config
-if ("${WebP_FIND_VERSION}" VERSION_GREATER "${WebP_VERSION}")
-    if (WebP_VERSION)
-        message(FATAL_ERROR "Required version (" ${WebP_FIND_VERSION} ") is higher than found version (" ${WebP_VERSION} ")")
-    else ()
-        message(WARNING "Cannot determine WebP version without pkg-config")
-    endif ()
-endif ()
-
-# Find components
-if (WebP_INCLUDE_DIR AND WebP_LIBRARY)
-    set(_WebP_REQUIRED_LIBS_FOUND ON)
-    set(WebP_LIBS_FOUND "WebP (required): ${WebP_LIBRARY}")
-else ()
-    set(_WebP_REQUIRED_LIBS_FOUND OFF)
-    set(WebP_LIBS_NOT_FOUND "WebP (required)")
-endif ()
-
-if ("demux" IN_LIST WebP_FIND_COMPONENTS)
-    find_library(WebP_DEMUX_LIBRARY
-        NAMES ${WebP_DEMUX_NAMES} webpdemux
-        HINTS ${PC_WEBP_LIBDIR} ${PC_WEBP_LIBRARY_DIRS}
-    )
-
-    if (WebP_DEMUX_LIBRARY)
-        if (WebP_FIND_REQUIRED_demux)
-            list(APPEND WebP_LIBS_FOUND "demux (required): ${WebP_DEMUX_LIBRARY}")
-        else ()
-           list(APPEND WebP_LIBS_FOUND "demux (optional): ${WebP_DEMUX_LIBRARY}")
-        endif ()
-    else ()
-        if (WebP_FIND_REQUIRED_demux)
-           set(_WebP_REQUIRED_LIBS_FOUND OFF)
-           list(APPEND WebP_LIBS_NOT_FOUND "demux (required)")
-        else ()
-           list(APPEND WebP_LIBS_NOT_FOUND "demux (optional)")
-        endif ()
-    endif ()
-endif ()
-
-if (NOT WebP_FIND_QUIETLY)
-    if (WebP_LIBS_FOUND)
-        message(STATUS "Found the following WebP libraries:")
-        foreach (found ${WebP_LIBS_FOUND})
-            message(STATUS " ${found}")
-        endforeach ()
-    endif ()
-    if (WebP_LIBS_NOT_FOUND)
-        message(STATUS "The following WebP libraries were not found:")
-        foreach (found ${WebP_LIBS_NOT_FOUND})
-            message(STATUS " ${found}")
-        endforeach ()
-    endif ()
-endif ()
+if(NOT WebP_LIBRARY)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(PC_WebP QUIET libwebp)
+    find_path(WebP_INCLUDE_DIR NAMES decode.h HINTS ${PC_WebP_INCLUDEDIR} ${PC_WebP_INCLUDE_DIR} PATH_SUFFIXES webp)
+    find_library(WebP_LIBRARY_RELEASE NAMES ${WebP_NAMES} webp HINTS ${PC_WebP_LIBDIR} ${PC_WebP_LIBRARY_DIRS})
+    find_library(WebP_LIBRARY_DEBUG NAMES ${WebP_NAMES} webpd HINTS ${PC_WebP_LIBDIR} ${PC_WebP_LIBRARY_DIRS})
+    include(SelectLibraryConfigurations)
+    select_library_configurations(WebP)
+else()
+  file(TO_CMAKE_PATH "${WebP_LIBRARY}" WebP_LIBRARY)
+endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(WebP
-    FOUND_VAR WebP_FOUND
-    REQUIRED_VARS WebP_INCLUDE_DIR WebP_LIBRARY _WebP_REQUIRED_LIBS_FOUND
-    VERSION_VAR WebP_VERSION
-)
-
-if (WebP_LIBRARY AND NOT TARGET WebP::libwebp)
-    add_library(WebP::libwebp UNKNOWN IMPORTED GLOBAL)
-    set_target_properties(WebP::libwebp PROPERTIES
-        IMPORTED_LOCATION "${WebP_LIBRARY}"
-        INTERFACE_COMPILE_OPTIONS "${WebP_COMPILE_OPTIONS}"
-        INTERFACE_INCLUDE_DIRECTORIES "${WebP_INCLUDE_DIR}"
-    )
-endif ()
-
-if (WebP_DEMUX_LIBRARY AND NOT TARGET WebP::demux)
-    add_library(WebP::demux UNKNOWN IMPORTED GLOBAL)
-    set_target_properties(WebP::demux PROPERTIES
-        IMPORTED_LOCATION "${WebP_DEMUX_LIBRARY}"
-        INTERFACE_COMPILE_OPTIONS "${WebP_COMPILE_OPTIONS}"
-        INTERFACE_INCLUDE_DIRECTORIES "${WebP_INCLUDE_DIR}"
-    )
-endif ()
-
-mark_as_advanced(
-    WebP_INCLUDE_DIR
+find_package_handle_standard_args(WebP 
+  REQUIRED_VARS 
     WebP_LIBRARY
-    WebP_DEMUX_LIBRARY
+    WebP_INCLUDE_DIR
 )
+mark_as_advanced(WebP_INCLUDE_DIR WebP_LIBRARY)
 
 if (WebP_FOUND)
-    set(WebP_LIBRARIES ${WebP_LIBRARY} ${WebP_DEMUX_LIBRARY})
-    set(WebP_INCLUDE_DIRS ${WebP_INCLUDE_DIR})
+  set(WebP_LIBRARIES ${WebP_LIBRARY})
+  set(WebP_INCLUDE_DIRS ${WebP_INCLUDE_DIR})
+  if(NOT TARGET WebP::WebP)
+    add_library(WebP::WebP UNKNOWN IMPORTED)
+    set_target_properties(WebP::WebP PROPERTIES
+                          INTERFACE_INCLUDE_DIRECTORIES ${WebP_INCLUDE_DIR}
+                          IMPORTED_LINK_INTERFACE_LANGUAGES C)
+
+    if(WebP_LIBRARY_RELEASE)
+      set_property(TARGET WebP::WebP APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+      set_target_properties(WebP::WebP PROPERTIES IMPORTED_LOCATION_RELEASE "${WebP_LIBRARY_RELEASE}")
+    endif()
+
+    if(WebP_LIBRARY_DEBUG)
+      set_property(TARGET WebP::WebP APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(WebP::WebP PROPERTIES IMPORTED_LOCATION_DEBUG "${WebP_LIBRARY_DEBUG}")
+    endif()
+
+    if(NOT WebP_LIBRARY_RELEASE AND NOT WebP_LIBRARY_DEBUG)
+        set_target_properties(WebP::WebP PROPERTIES IMPORTED_LOCATION "${WebP_LIBRARY}")
+    endif()
+  endif()
 endif ()
