@@ -64,10 +64,11 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(WebP 
+  FOUND_VAR WebP_FOUND
   REQUIRED_VARS 
     WebP_LIBRARY
     WebP_INCLUDE_DIR
-    WebP_VERSION
+  VERSION_VAR WebP_VERSION
 )
 mark_as_advanced(WebP_INCLUDE_DIR WebP_LIBRARY)
 
