@@ -44,6 +44,7 @@ The following cache variables may also be set:
 if(NOT WebP_LIBRARY)
     find_package(PkgConfig QUIET)
     pkg_check_modules(PC_WebP QUIET libwebp)
+    set(WebP_VERSION ${PC_WebP_VERSION})
     find_path(WebP_INCLUDE_DIR NAMES decode.h HINTS ${PC_WebP_INCLUDEDIR} ${PC_WebP_INCLUDE_DIR} PATH_SUFFIXES webp)
     find_library(WebP_LIBRARY_RELEASE NAMES ${WebP_NAMES} webp HINTS ${PC_WebP_LIBDIR} ${PC_WebP_LIBRARY_DIRS})
     find_library(WebP_LIBRARY_DEBUG NAMES ${WebP_NAMES} webpd HINTS ${PC_WebP_LIBDIR} ${PC_WebP_LIBRARY_DIRS})
@@ -53,11 +54,20 @@ else()
   file(TO_CMAKE_PATH "${WebP_LIBRARY}" WebP_LIBRARY)
 endif()
 
+if ("${WebP_FIND_VERSION}" VERSION_GREATER "${WebP_VERSION}")
+    if (WebP_VERSION)
+        message(FATAL_ERROR "Required version (" ${WebP_FIND_VERSION} ") is higher than found version (" ${PC_WebP_VERSION} ")")
+    else ()
+        message(WARNING "Cannot determine WebP version without pkg-config")
+    endif ()
+endif ()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(WebP 
   REQUIRED_VARS 
     WebP_LIBRARY
     WebP_INCLUDE_DIR
+    WebP_VERSION
 )
 mark_as_advanced(WebP_INCLUDE_DIR WebP_LIBRARY)
 
