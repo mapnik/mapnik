@@ -44,6 +44,15 @@ option(USE_SVG_RENDERER "adds svg renderer" ON)
 option(USE_BIGINT "uses 64 bit instead of 32" ON)
 option(USE_MEMORY_MAPPED_FILE "uses file cache" ON)
 option(USE_MULTITHREADED "enables the multithreaded features (threadsafe)" ON)
+option(USE_NO_ATEXIT "disable atexit" OFF)
+option(USE_NO_DLCLOSE "disable dlclose" OFF)
+option(USE_DEBUG_OUTPUT "enables some debug messages for development" OFF)
+option(USE_LOG "enables logging output. See log severity level." OFF)
+# 0 = debug
+# 1 = warn
+# 2 = error
+# 3 = none
+set(USE_LOG_SEVERITY "1" CACHE STRING "sets the logging severity (only applies when USE_LOG is ON")
 
 option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
@@ -71,6 +80,7 @@ option(BUILD_UTILITY_SHAPEINDEX "builds the utility program shapeindex" ON)
 option(BUILD_UTILITY_SVG2PNG "builds the utility program svg2png" ON)
 
 option(USE_BOOST_REGEX_ICU_WORKAROUND "if you don't use your system libraries and get double linked icu libraries set this to ON" OFF)
+option(USE_GLIBC_WORKAROUND "see https://github.com/mapnik/mapnik/pull/3792 if you building with libstdc++-4.9" OFF)
 
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
 message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
@@ -135,6 +145,7 @@ mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 mapnik_find_package(Boost 1.61 REQUIRED COMPONENTS filesystem system regex)
 if(USE_BOOST_REGEX_ICU_WORKAROUND)
+    message(STATUS "using boost regex workaround")
     set_property(TARGET Boost::regex PROPERTY INTERFACE_LINK_LIBRARIES)
 endif()
 
@@ -218,6 +229,11 @@ endif()
 set_property(GLOBAL PROPERTY TARGETS "")
 set_property(GLOBAL PROPERTY PLUGINS "")
 
+if(USE_GLIBC_WORKAROUND)
+    message("using glibc workaround")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_ENABLE_GLIBC_WORKAROUND)
+endif()
+
 if(USE_BIGINT) 
     message(STATUS "uses BIGINT")
     list(APPEND MAPNIK_COMPILE_DEFS BIGINT)
@@ -226,6 +242,27 @@ endif()
 if(USE_MEMORY_MAPPED_FILE)
     message(STATUS "uses MAPNIK_MEMORY_MAPPED_FILE")
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_MEMORY_MAPPED_FILE)
+endif()
+
+if(USE_NO_ATEXIT)
+    message(STATUS "uses MAPNIK_NO_ATEXIT")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_NO_ATEXIT)
+endif()
+
+if(USE_NO_DLCLOSE)
+    message(STATUS "uses MAPNIK_NO_DLCLOSE")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_NO_DLCLOSE)
+endif()
+
+if(USE_DEBUG_OUTPUT)
+    message(STATUS "enabled debug outputs")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DEBUG)
+endif()
+
+if(USE_LOG)
+    message(STATUS "logging enabled with level ${USE_LOG_SEVERITY}")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_LOG)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DEFAULT_LOG_SEVERITY=${USE_LOG_SEVERITY})
 endif()
 
 if(USE_LIBXML2)
