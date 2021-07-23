@@ -53,6 +53,7 @@ option(USE_LOG "enables logging output. See log severity level." OFF)
 # 2 = error
 # 3 = none
 set(USE_LOG_SEVERITY "1" CACHE STRING "sets the logging severity (only applies when USE_LOG is ON")
+option(USE_STATS "Enable statistics reporting" OFF)
 
 option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
@@ -261,8 +262,12 @@ endif()
 
 if(USE_LOG)
     message(STATUS "logging enabled with level ${USE_LOG_SEVERITY}")
-    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_LOG)
-    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DEFAULT_LOG_SEVERITY=${USE_LOG_SEVERITY})
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_LOG MAPNIK_DEFAULT_LOG_SEVERITY=${USE_LOG_SEVERITY})
+endif()
+
+if(USE_STATS)
+    message(STATUS "adding statistics")
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATS)
 endif()
 
 if(USE_LIBXML2)
