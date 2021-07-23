@@ -64,7 +64,6 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(WebP 
-  FOUND_VAR WebP_FOUND
   REQUIRED_VARS 
     WebP_LIBRARY
     WebP_INCLUDE_DIR
