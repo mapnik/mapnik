@@ -25,7 +25,9 @@
             "inherits": "linux-clang",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "MAPNIK_DEBUG": "ON"
+                "USE_DEBUG_OUTPUT": "ON",
+                "USE_LOG": "ON",
+                "USE_LOG_SEVERITY": "0"
             }
         },
         {
@@ -52,7 +54,9 @@
             "inherits": "linux-gcc",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "MAPNIK_DEBUG": "ON"
+                "USE_DEBUG_OUTPUT": "ON",
+                "USE_LOG": "ON",
+                "USE_LOG_SEVERITY": "0"
             }
         },
         {
@@ -95,7 +99,9 @@
             "inherits": "windows-default",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "MAPNIK_DEBUG": "ON"
+                "USE_DEBUG_OUTPUT": "ON",
+                "USE_LOG": "ON",
+                "USE_LOG_SEVERITY": "0"
             }
         },
         {
