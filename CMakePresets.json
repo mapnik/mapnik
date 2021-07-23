@@ -11,6 +11,7 @@
             "displayName": "Linux clang",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
@@ -43,6 +44,7 @@
             "displayName": "Linux gcc",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "gcc",
                 "CMAKE_CXX_COMPILER": "g++"
@@ -115,8 +117,12 @@
     ],
     "buildPresets": [
         {
-            "name": "default",
-            "configurePreset": "default"
+            "name": "windows-default",
+            "configurePreset": "windows-default-debug"
+        },
+        {
+            "name": "linux-default",
+            "configurePreset": "linux-clang-debug"
         }
     ]
 }
