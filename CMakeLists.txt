@@ -292,7 +292,7 @@ endif()
 if(USE_WEBP)
     mapnik_find_package(WebP REQUIRED)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_WEBP)
-    list(APPEND MAPNIK_OPTIONAL_LIBS WebP::libwebp)
+    list(APPEND MAPNIK_OPTIONAL_LIBS WebP::WebP)
 endif()
 
 if(USE_CAIRO)
