@@ -430,7 +430,6 @@ auto const css_color_def =
     hsla_color
     ;
 
-#include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 BOOST_SPIRIT_DEFINE(
