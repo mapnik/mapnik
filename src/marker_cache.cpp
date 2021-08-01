@@ -187,9 +187,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
             }
             //svg.arrange_orientations();
-            double lox,loy,hix,hiy;
-            svg.bounding_rect(&lox, &loy, &hix, &hiy);
-            marker_path->set_bounding_box(lox,loy,hix,hiy);
+            marker_path->set_bounding_box(0,0,svg.width(),svg.height());
             marker_path->set_dimensions(svg.width(),svg.height());
             if (update_cache)
             {
@@ -227,9 +225,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     }
                 }
                 //svg.arrange_orientations();
-                double lox,loy,hix,hiy;
-                svg.bounding_rect(&lox, &loy, &hix, &hiy);
-                marker_path->set_bounding_box(lox,loy,hix,hiy);
+                marker_path->set_bounding_box(0,0,svg.width(),svg.height());
                 marker_path->set_dimensions(svg.width(),svg.height());
                 if (update_cache)
                 {
