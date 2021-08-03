@@ -65,14 +65,14 @@ For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationT
 Build system dependencies are:
 
  * C++ compiler supporting `-std=c++14` (like >= g++ 5 or >= clang++ 3.4)
- * >= 2 GB RAM (> 5 GB for g++)
+ * \>= 2 GB RAM (> 5 GB for g++)
  * Python 2.4-2.7 
  * Scons (a copy is bundled)
 
 Mapnik Core depends on:
 
  * Boost
-    - >= 1.47 is required and >= 1.56 recommended
+    - \>= 1.47 is required and >= 1.56 recommended
     - These libraries are used:
       - filesystem
       - system
