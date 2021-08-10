@@ -187,8 +187,20 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
             }
             //svg.arrange_orientations();
-            marker_path->set_bounding_box(0,0,svg.width(),svg.height());
-            marker_path->set_dimensions(svg.width(),svg.height());
+            double width, height;
+            width = svg.width();
+            height = svg.height();
+            marker_path->set_dimensions(width,height);
+            if (width != 0 && height != 0) {
+                marker_path->set_bounding_box(0,0,width,height);
+            } else {
+                // falback in case the SVG has a zero width, height, or has
+                // those as percentages: determine the smallest rectangle
+                // in which all objects fit.
+                double lox,loy,hix,hiy;
+                svg.bounding_rect(&lox, &loy, &hix, &hiy);
+                marker_path->set_bounding_box(lox,loy,hix,hiy);
+            }
             if (update_cache)
             {
                 auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
@@ -225,8 +237,20 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     }
                 }
                 //svg.arrange_orientations();
-                marker_path->set_bounding_box(0,0,svg.width(),svg.height());
-                marker_path->set_dimensions(svg.width(),svg.height());
+                double width, height;
+                width = svg.width();
+                height = svg.height();
+                marker_path->set_dimensions(width,height);
+                if (width != 0 && height != 0) {
+                    marker_path->set_bounding_box(0,0,width,height);
+                } else {
+                    // falback in case the SVG has a zero width, height, or has
+                    // those as percentages: determine the smallest rectangle
+                    // in which all objects fit.
+                    double lox,loy,hix,hiy;
+                    svg.bounding_rect(&lox, &loy, &hix, &hiy);
+                    marker_path->set_bounding_box(lox,loy,hix,hiy);
+                }
                 if (update_cache)
                 {
                     auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
