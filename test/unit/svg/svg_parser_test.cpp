@@ -847,4 +847,15 @@ TEST_CASE("SVG parser") {
         CHECK(bbox.width() == Approx(100));
         CHECK(bbox.height() == Approx(100));
     }
+
+    SECTION("SVG contents outside <viewBox>")
+    {
+        std::string svg_name("./test/data/svg/shape_outside_viewbox.svg");
+        std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
+        REQUIRE(marker);
+        REQUIRE(marker->is<mapnik::marker_svg>());
+        mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+        auto bbox = svg.bounding_box();
+        REQUIRE(bbox == mapnik::box2d<double>(0, 0, 10, 10));
+    }
 }
