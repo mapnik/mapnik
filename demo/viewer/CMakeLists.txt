@@ -70,3 +70,10 @@ mapnik_copy_dependencies(
     PLUGINS 
         input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
 )
+
+mapnik_copy_plugins(TARGET mapnik-viewer 
+    DESTINATION 
+        ${PLUGINS_INSTALL_DIR}
+    PLUGINS 
+        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
+)
