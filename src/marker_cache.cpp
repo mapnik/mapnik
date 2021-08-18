@@ -187,9 +187,8 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
             }
             //svg.arrange_orientations();
-            double width, height;
-            width = svg.width();
-            height = svg.height();
+            const double width = svg.width();
+            const double height = svg.height();
             marker_path->set_dimensions(width,height);
             if (width != 0 && height != 0) {
                 marker_path->set_bounding_box(0,0,width,height);
@@ -237,9 +236,8 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     }
                 }
                 //svg.arrange_orientations();
-                double width, height;
-                width = svg.width();
-                height = svg.height();
+                const double width = svg.width();
+                const double height = svg.height();
                 marker_path->set_dimensions(width,height);
                 if (width != 0 && height != 0) {
                     marker_path->set_bounding_box(0,0,width,height);
