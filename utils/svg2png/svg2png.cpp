@@ -74,8 +74,10 @@ struct main_marker_visitor
         agg::scanline_u8 sl;
 
         double opacity = 1;
-        double w, h;
+        double w, h, x, y;
         std::tie(w, h) = marker.dimensions();
+        x = 0;
+        y = 0;
         if (w == 0 || h == 0)
         {
             if (verbose_)
@@ -83,6 +85,8 @@ struct main_marker_visitor
                 std::clog << "Invalid SVG dimensions: " << w << "," << h << " using svgBBOX()" << std::endl;
             }
             auto b = marker.bounding_box();
+            x = b.minx();
+            y = b.miny();
             w = b.width();
             h = b.height();
         }
@@ -104,7 +108,7 @@ struct main_marker_visitor
 
         mapnik::box2d<double> bbox = {0, 0, svg_width, svg_height};
         // center the svg marker on '0,0'
-        agg::trans_affine mtx = agg::trans_affine_translation(-0.5 * w, -0.5 * h);
+        agg::trans_affine mtx = agg::trans_affine_translation(-0.5 * w - x, -0.5 * h - y);
         // Scale the image
         mtx.scale(scale_factor_);
         // render the marker at the center of the marker box
