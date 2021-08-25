@@ -9,7 +9,7 @@ include(CopyDllsForDebug)
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG        v2.13.3)
+  GIT_TAG        v2.13.7)
 FetchContent_MakeAvailable(Catch2)
 
 # Prepare "Catch" library for other executables
@@ -193,7 +193,7 @@ mapnik_copy_dependencies(
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
 file(COPY data-visual DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
 
-ParseAndAddCatchTests(mapnik-test-unit)
+catch_discover_tests(mapnik-test-unit)
 catch_discover_tests(agg_rasterizer_integer_overflow_test)
 catch_discover_tests(datasource_registration_test)
 catch_discover_tests(font_registration_test)
