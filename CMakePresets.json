@@ -7,11 +7,41 @@
     },
     "configurePresets": [
         {
-            "name": "linux-clang",
-            "displayName": "Linux clang",
+            "name": "use-ninja",
             "hidden": true,
-            "binaryDir": "${sourceDir}/build/${presetName}",
-            "generator": "Ninja",
+            "generator": "Ninja"
+        },
+        {
+            "name": "default-build-dir",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        },
+        {
+            "name": "debug-build",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "USE_DEBUG_OUTPUT": "ON",
+                "USE_LOG": "ON",
+                "USE_LOG_SEVERITY": "0"
+            }
+        },
+        {
+            "name": "release-build",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "USE_DEBUG_OUTPUT": "OFF",
+                "USE_LOG": "OFF"
+            }
+        },
+        {
+            "name": "use-clang",
+            "hidden": true,
+            "inherits": [
+                "default-build-dir",
+                "use-ninja"
+            ],
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
@@ -21,60 +51,76 @@
             }
         },
         {
-            "name": "linux-clang-debug",
-            "displayName": "Linux clang debug",
-            "inherits": "linux-clang",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "USE_DEBUG_OUTPUT": "ON",
-                "USE_LOG": "ON",
-                "USE_LOG_SEVERITY": "0"
-            }
-        },
-        {
-            "name": "linux-clang-release",
-            "displayName": "Linux clang release",
-            "inherits": "linux-clang",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "linux-gcc",
-            "displayName": "Linux gcc",
+            "name": "use-gcc",
             "hidden": true,
-            "binaryDir": "${sourceDir}/build/${presetName}",
-            "generator": "Ninja",
+            "inherits": [
+                "default-build-dir",
+                "use-ninja"
+            ],
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "gcc",
                 "CMAKE_CXX_COMPILER": "g++"
             }
         },
         {
+            "name": "use-msvc-cl",
+            "hidden": true,
+            "inherits": [
+                "default-build-dir",
+                "use-ninja"
+            ],
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
+            "name": "use-msvc-clang-cl",
+            "hidden": true,
+            "inherits": [
+                "default-build-dir",
+                "use-ninja"
+            ],
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-cl",
+                "CMAKE_CXX_COMPILER": "clang-cl"
+            }
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux clang debug",
+            "inherits": [
+                "use-clang",
+                "debug-build"
+            ]
+        },
+        {
+            "name": "linux-clang-release",
+            "displayName": "Linux clang release",
+            "inherits": [
+                "use-clang",
+                "release-build"
+            ]
+        },
+        {
             "name": "linux-gcc-debug",
             "displayName": "Linux gcc debug",
-            "inherits": "linux-gcc",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "USE_DEBUG_OUTPUT": "ON",
-                "USE_LOG": "ON",
-                "USE_LOG_SEVERITY": "0"
-            }
+            "inherits": [
+                "use-gcc",
+                "debug-build"
+            ]
         },
         {
             "name": "linux-gcc-release",
             "displayName": "Linux gcc release",
-            "inherits": "linux-gcc",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+            "inherits": [
+                "use-gcc",
+                "release-build"
+            ]
         },
         {
-            "name": "windows-default",
-            "displayName": "Windows x64 Debug",
+            "name": "windows-arch-x64",
             "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}",
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
@@ -82,11 +128,16 @@
             "toolset": {
                 "value": "host=x64",
                 "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl",
-                "CMAKE_CXX_COMPILER": "cl"
-            },
+            }
+        },
+        {
+            "name": "windows-default",
+            "displayName": "Windows x64 Debug",
+            "hidden": true,
+            "inherits": [
+                "use-msvc-cl",
+                "windows-arch-x64"
+            ],
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
                     "hostOS": [
@@ -98,21 +149,18 @@
         {
             "name": "windows-default-debug",
             "displayName": "Windows x64 Debug",
-            "inherits": "windows-default",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "USE_DEBUG_OUTPUT": "ON",
-                "USE_LOG": "ON",
-                "USE_LOG_SEVERITY": "0"
-            }
+            "inherits": [
+                "windows-default",
+                "debug-build"
+            ]
         },
         {
             "name": "windows-default-release",
             "displayName": "Windows x64 Release",
-            "inherits": "windows-default",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+            "inherits": [
+                "windows-default",
+                "release-build"
+            ]
         }
     ],
     "buildPresets": [

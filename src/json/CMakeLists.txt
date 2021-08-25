@@ -25,8 +25,9 @@ target_include_directories(json PRIVATE
 target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
 
 set_target_properties(json PROPERTIES 
-    DEBUG_POSTFIX ${MAPNIK_DEBUG_POSTFIX}
     POSITION_INDEPENDENT_CODE ON
+    DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
+    OUTPUT_NAME "json"
     PREFIX "libmapnik-"
 )
 

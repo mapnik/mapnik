@@ -1,10 +1,6 @@
 add_subdirectory(json)
 add_subdirectory(wkt)
 
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-endif()
-
 set(MAPNIK_SOURCES
     cairo_io.cpp
     color_factory.cpp
@@ -296,9 +292,18 @@ target_link_libraries(mapnik PRIVATE
 )
 
 set_target_properties(mapnik PROPERTIES 
-    DEBUG_POSTFIX ${MAPNIK_DEBUG_POSTFIX}
+    DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
+    OUTPUT_NAME "mapnik"
     PREFIX "lib"
 )
+
+if(MSVC)
+    # disable some msvc warnings and enable bigobj
+    # 4068 will warn about unknown definitions. Would not be needed if https://github.com/mapbox/geometry.hpp/pull/69 is merged.
+    # 4661 warns about enum definitions. should be investigated at some point
+    # 4910 warns about extern and dllexport at the same time. should be investigated at some point
+    target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
+endif()
 
 install(TARGETS mapnik 
     EXPORT MapnikTargets

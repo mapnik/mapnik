@@ -17,8 +17,9 @@ target_include_directories(wkt PRIVATE
 target_link_libraries(wkt PRIVATE mapnik::core)
 
 set_target_properties(wkt PROPERTIES 
-    DEBUG_POSTFIX ${MAPNIK_DEBUG_POSTFIX}
     POSITION_INDEPENDENT_CODE ON
+    DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
+    OUTPUT_NAME "wkt"
     PREFIX "libmapnik-"
 )
 
