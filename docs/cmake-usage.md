@@ -96,3 +96,9 @@ If your libraries are not in the global search paths, you could add a own `CMake
     ]
 }
 ```
+
+Build with: 
+```
+$ cmake --preset <configure_preset_name>
+$ cmake --build --preset <build_preset_name>
+```

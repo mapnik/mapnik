@@ -22,7 +22,7 @@ include(MapnikCopyDependencies)
 include(MapnikInstall)
 
 set(ADDITIONAL_LIBARIES_PATHS "" CACHE STRING "only used on windows. Pass directories containing the dlls that are missing. You can ignore this, if the build (verify_app step) runs successfully")
-option(COPY_LIBRARIES_FOR_EXECUTABLES "copies required shared libaries (only windows) to the executable build directory" ON)
+option(COPY_LIBRARIES_FOR_EXECUTABLES "copies required shared libaries (only windows) to the executable build directory" OFF)
 option(COPY_FONTS_AND_PLUGINS_FOR_EXECUTABLES "copies required plugins and fonts into the executable build directory" ON)
 option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) will be copied into CMAKE_INSTALL_PREFIX/MAPNIK_BIN_DIR." ON)
 
