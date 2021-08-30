@@ -59,7 +59,7 @@ struct geometry : geometry_base<T>
 {
     using coordinate_type = T;
 
-#if __cpp_inheriting_constructors >= 200802
+#if __cpp_inheriting_constructors >= 200802  && !defined (_MSC_VER)
 
     using geometry_base<T>::geometry_base;
 
