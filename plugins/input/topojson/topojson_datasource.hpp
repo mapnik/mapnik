@@ -41,6 +41,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
 #include <boost/version.hpp>
+#include <boost/geometry/strategies/cartesian/disjoint_box_box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
