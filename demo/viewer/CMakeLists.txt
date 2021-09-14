@@ -46,7 +46,6 @@ set_target_properties(mapnik-viewer PROPERTIES
 
 target_link_libraries(mapnik-viewer PRIVATE 
     Qt${QT_VERSION_MAJOR}::Widgets
-    mapnik::core
     mapnik::agg
     mapnik::mapnik
 )

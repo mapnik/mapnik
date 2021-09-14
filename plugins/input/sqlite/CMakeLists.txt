@@ -8,8 +8,7 @@ add_library(input-sqlite MODULE
 )
 add_library(mapnik::plugin::input::sqlite ALIAS input-sqlite)
 
-target_link_libraries(input-sqlite PRIVATE 
-    mapnik::core 
+target_link_libraries(input-sqlite PRIVATE
     mapnik::mapnik 
     SQLite::SQLite3
 )

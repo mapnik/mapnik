@@ -286,10 +286,8 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 target_compile_definitions(mapnik PRIVATE ${COMPILE_DEFS})
-target_link_libraries(mapnik PRIVATE 
-    mapnik::core
-    mapnik::agg
-)
+target_link_libraries(mapnik PUBLIC mapnik::core)
+target_link_libraries(mapnik PRIVATE mapnik::agg)
 
 set_target_properties(mapnik PROPERTIES 
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"

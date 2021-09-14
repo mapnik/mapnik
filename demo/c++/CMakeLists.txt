@@ -2,7 +2,7 @@ project(mapnik-demo)
 
 add_executable(mapnik-demo rundemo.cpp)
 
-target_link_libraries(mapnik-demo PRIVATE mapnik::core mapnik::agg mapnik::mapnik)
+target_link_libraries(mapnik-demo PRIVATE mapnik::agg mapnik::mapnik)
 
 mapnik_install(TARGET mapnik-demo)
 mapnik_copy_plugins(TARGET mapnik-demo DESTINATION plugins/input PLUGINS input-shape)

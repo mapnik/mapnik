@@ -16,4 +16,4 @@ install(TARGETS agg
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include
 )
-# todo install headers
+# agg headers would be installed in the top level CMakeLists.txt
