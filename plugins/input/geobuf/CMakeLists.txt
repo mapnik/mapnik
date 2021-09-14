@@ -6,10 +6,8 @@ add_library(input-geobuf MODULE
 )
 add_library(mapnik::plugin::input::geobuf ALIAS input-geobuf)
 
-target_link_libraries(input-geobuf PRIVATE  
-    mapnik::core 
-    mapnik::mapnik
-)
+target_link_libraries(input-geobuf PRIVATE mapnik::mapnik)
+
 set_target_properties(input-geobuf PROPERTIES PREFIX "")
 set_target_properties(input-geobuf PROPERTIES OUTPUT_NAME "geobuf")
 set_target_properties(input-geobuf PROPERTIES SUFFIX ".input")

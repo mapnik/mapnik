@@ -9,8 +9,7 @@ add_library(input-csv MODULE
 )
 add_library(mapnik::plugin::input::csv ALIAS input-csv)
 
-target_link_libraries(input-csv PRIVATE 
-    mapnik::core 
+target_link_libraries(input-csv PRIVATE
     mapnik::mapnik 
     mapnik::wkt 
     mapnik::json

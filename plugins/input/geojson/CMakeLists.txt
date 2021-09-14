@@ -8,8 +8,7 @@ add_library(input-geojson MODULE
 )
 add_library(mapnik::plugin::input::geojson ALIAS input-geojson)
 
-target_link_libraries(input-geojson PRIVATE 
-    mapnik::core 
+target_link_libraries(input-geojson PRIVATE
     mapnik::mapnik
     mapnik::json
 )

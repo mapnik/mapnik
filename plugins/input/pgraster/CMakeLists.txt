@@ -10,8 +10,7 @@ add_library(input-pgraster MODULE
 add_library(mapnik::plugin::input::pgraster ALIAS input-pgraster)
 
 
-target_link_libraries(input-pgraster PRIVATE 
-    mapnik::core 
+target_link_libraries(input-pgraster PRIVATE
     mapnik::mapnik  
     PostgreSQL::PostgreSQL
 )

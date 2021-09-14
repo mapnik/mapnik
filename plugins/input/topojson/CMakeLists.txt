@@ -6,8 +6,7 @@ add_library(input-topojson MODULE
 )
 add_library(mapnik::plugin::input::topojson ALIAS input-topojson)
 
-target_link_libraries(input-topojson PRIVATE 
-    mapnik::core 
+target_link_libraries(input-topojson PRIVATE
     mapnik::mapnik
     mapnik::json
 )

@@ -10,10 +10,7 @@ add_library(input-shape MODULE
 )
 add_library(mapnik::plugin::input::shape ALIAS input-shape)
 
-target_link_libraries(input-shape PRIVATE 
-    mapnik::core 
-    mapnik::mapnik
-)
+target_link_libraries(input-shape PRIVATE mapnik::mapnik)
 
 set_target_properties(input-shape PROPERTIES PREFIX "")
 set_target_properties(input-shape PROPERTIES OUTPUT_NAME "shape")

@@ -7,10 +7,7 @@ add_library(input-raster MODULE
 )
 add_library(mapnik::plugin::input::raster ALIAS input-raster)
 
-target_link_libraries(input-raster PRIVATE 
-    mapnik::core 
-    mapnik::mapnik
-)
+target_link_libraries(input-raster PRIVATE mapnik::mapnik)
 
 set_target_properties(input-raster PROPERTIES PREFIX "")
 set_target_properties(input-raster PROPERTIES OUTPUT_NAME "raster")

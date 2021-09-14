@@ -25,8 +25,13 @@ To use Mapnik in your project add the following lines to your CMakeLists.tzt.
 ```
 find_package(mapnik CONFIG REQUIRED)
 [...]
-target_link_libraries(mytarget ... mapnik::core mapnik::mapnik)
+target_link_libraries(mytarget ... mapnik::mapnik)
 ```
+All targets: 
+* `mapnik::core`: All compile definitions and headers.
+* `mapnik::mapnik`: libmapnik. Has a public dependency on mapnik::core
+* `mapnik::json`: json support for libmapnik.
+* `mapnik::wkt`: wkt support for libmapnik.
 
 All mapnik executables and targets are exported within `mapnikTargets.cmake`. 
 
