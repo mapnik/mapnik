@@ -8,7 +8,6 @@ add_executable(svg2png
 
 target_link_libraries(svg2png PRIVATE 
     Boost::program_options      
-    mapnik::core 
     mapnik::mapnik
     mapnik::agg
 )

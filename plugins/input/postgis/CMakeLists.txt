@@ -8,8 +8,7 @@ add_library(input-postgis MODULE
 )
 add_library(mapnik::plugin::input::postgis ALIAS input-postgis)
 
-target_link_libraries(input-postgis PRIVATE 
-    mapnik::core 
+target_link_libraries(input-postgis PRIVATE
     mapnik::mapnik  
     PostgreSQL::PostgreSQL
 )

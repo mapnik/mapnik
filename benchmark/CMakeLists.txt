@@ -31,7 +31,7 @@ function(mapnik_create_benchmark)
     set(TARGET_NAME "mapnik-benchmark-${BENCHNAME}")
     add_executable(${TARGET_NAME} ${ARGV0})
     target_include_directories(${TARGET_NAME} PRIVATE include)
-    target_link_libraries(${TARGET_NAME} PRIVATE mapnik::core mapnik::agg mapnik::mapnik)
+    target_link_libraries(${TARGET_NAME} PRIVATE mapnik::agg mapnik::mapnik)
 
     mapnik_copy_dependencies(TARGETS ${TARGET_NAME})
 endfunction()
