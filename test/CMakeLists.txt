@@ -109,7 +109,6 @@ add_executable(mapnik-test-unit
 )
 target_link_libraries(mapnik-test-unit PUBLIC
     Catch 
-    mapnik::core
     mapnik::agg
     mapnik::mapnik
     mapnik::json
@@ -120,7 +119,6 @@ target_link_libraries(mapnik-test-unit PUBLIC
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
 target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
     Catch 
-    mapnik::core 
     mapnik::mapnik 
     mapnik::agg
     mapnik::json
@@ -129,7 +127,6 @@ target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
 target_link_libraries(datasource_registration_test PUBLIC
     Catch 
-    mapnik::core 
     mapnik::mapnik 
     mapnik::agg
 )
@@ -137,7 +134,6 @@ target_link_libraries(datasource_registration_test PUBLIC
 add_executable(font_registration_test standalone/font_registration_test.cpp)
 target_link_libraries(font_registration_test PUBLIC
     Catch 
-    mapnik::core 
     mapnik::mapnik 
     mapnik::agg
     mapnik::json
@@ -147,7 +143,6 @@ target_link_libraries(font_registration_test PUBLIC
 add_executable(map_xml_test standalone/map_xml_test.cpp)
 target_link_libraries(map_xml_test PUBLIC
     Catch 
-    mapnik::core 
     mapnik::mapnik 
     mapnik::agg
     mapnik::json
@@ -164,7 +159,6 @@ target_link_libraries(
     Catch
     Boost::program_options
     Boost::filesystem
-    mapnik::core
     mapnik::mapnik
     mapnik::agg
 )
