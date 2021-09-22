@@ -101,7 +101,7 @@ include(GNUInstallDirs)
 set(MAPNIK_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE STRING "Install directory for binaries")
 set(MAPNIK_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory for libraries")
 set(MAPNIK_ARCHIVE_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory for archives")
-set(MAPNIK_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE STRING "Install directory for archives")
+set(MAPNIK_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE STRING "Install directory for the headers")
 set(MAPNIK_CMAKE_DIR ${MAPNIK_LIB_DIR}/cmake/mapnik CACHE STRING "Install directory of the cmake targets")
 
 if(WIN32)
