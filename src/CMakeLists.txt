@@ -303,14 +303,4 @@ if(MSVC)
     target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
 endif()
 
-install(TARGETS mapnik 
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-    INCLUDES DESTINATION include/
-    PUBLIC_HEADER DESTINATION include/
-    COMPONENT mapnik
-)
-
-mapnik_install(TARGET mapnik ALREADY_INSTALLED)
+mapnik_install(TARGET mapnik)

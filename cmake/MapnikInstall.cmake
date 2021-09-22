@@ -6,15 +6,25 @@ function(mapnik_install)
 
     if(NOT MAPNIK_INSTALL_ALREADY_INSTALLED AND NOT MAPNIK_INSTALL_IS_PLUGIN)
         install(TARGETS ${MAPNIK_INSTALL_TARGET}
-            LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-            ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+            EXPORT MapnikTargets
+            INCLUDES DESTINATION ${MAPNIK_INCLUDE_DIR}
             RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
+                COMPONENT MapnikRuntime
+            LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+                COMPONENT MapnikRuntime
+                NAMELINK_COMPONENT MapnikDevelopment
+            ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+                COMPONENT MapnikDevelopment
         )
     elseif(NOT MAPNIK_INSTALL_ALREADY_INSTALLED AND MAPNIK_INSTALL_IS_PLUGIN)
         install(TARGETS ${MAPNIK_INSTALL_TARGET}
-            LIBRARY DESTINATION ${PLUGINS_INSTALL_DIR}
-            ARCHIVE DESTINATION ${PLUGINS_INSTALL_DIR}
             RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
+                COMPONENT MapnikPluginRuntime
+            LIBRARY DESTINATION ${PLUGINS_INSTALL_DIR}
+                COMPONENT MapnikPluginRuntime
+                NAMELINK_COMPONENT MapnikPluginDevelopment
+            ARCHIVE DESTINATION ${PLUGINS_INSTALL_DIR}
+                COMPONENT MapnikPluginDevelopment
         )
     endif()
     if(NOT MAPNIK_INSTALL_IS_PLUGIN)
@@ -56,7 +66,7 @@ function(mapnik_install_targets)
             
             include(BundleUtilities)
             fixup_bundle(\"${INTERNAL_TARGETS}\" \"${INTERNAL_PLUGINS}\" \"${ADDITIONAL_LIBARIES_PATHS}\")
-        " COMPONENT Runtime)
+        " COMPONENT MapnikRuntime)
     endif()
 
 endfunction()
