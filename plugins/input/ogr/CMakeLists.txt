@@ -8,15 +8,15 @@ add_library(input-ogr MODULE
     ogr_featureset.cpp
     ogr_index_featureset.cpp
 )
-add_library(mapnik::plugin::input::ogr ALIAS input-ogr)
-
 target_include_directories(input-ogr PRIVATE ${GDAL_INCLUDE_DIRS})
 target_link_libraries(input-ogr PRIVATE
     mapnik::mapnik
     ${GDAL_LIBRARIES}
 )
-set_target_properties(input-ogr PROPERTIES PREFIX "")
-set_target_properties(input-ogr PROPERTIES OUTPUT_NAME "ogr")
-set_target_properties(input-ogr PROPERTIES SUFFIX ".input")
+set_target_properties(input-ogr PROPERTIES 
+    OUTPUT_NAME "ogr"
+    PREFIX "${_plugin_prefix}"
+    SUFFIX "${_plugin_suffix}"
+)
 
-mapnik_install(TARGET input-ogr IS_PLUGIN)
+mapnik_install_plugin(input-ogr)

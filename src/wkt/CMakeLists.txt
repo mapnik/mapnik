@@ -23,4 +23,4 @@ set_target_properties(wkt PROPERTIES
     PREFIX "libmapnik-"
 )
 
-mapnik_install(TARGET wkt)
+mapnik_install(wkt)

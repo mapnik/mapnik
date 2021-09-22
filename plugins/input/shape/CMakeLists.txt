@@ -8,12 +8,11 @@ add_library(input-shape MODULE
     shape_index_featureset.cpp
     shape_io.cpp shape_utils.cpp
 )
-add_library(mapnik::plugin::input::shape ALIAS input-shape)
-
 target_link_libraries(input-shape PRIVATE mapnik::mapnik)
+set_target_properties(input-shape PROPERTIES 
+    OUTPUT_NAME "shape"
+    PREFIX "${_plugin_prefix}"
+    SUFFIX "${_plugin_suffix}"
+)
 
-set_target_properties(input-shape PROPERTIES PREFIX "")
-set_target_properties(input-shape PROPERTIES OUTPUT_NAME "shape")
-set_target_properties(input-shape PROPERTIES SUFFIX ".input")
-
-mapnik_install(TARGET input-shape IS_PLUGIN)
+mapnik_install_plugin(input-shape)

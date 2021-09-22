@@ -1,44 +1,36 @@
-function(mapnik_install)
-    set(options ALREADY_INSTALLED IS_PLUGIN)
-    set(oneValueArgs TARGET)
-    set(multiValueArgs)
-    cmake_parse_arguments(MAPNIK_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+function(mapnik_install _target)
+    install(TARGETS ${_target}
+        EXPORT MapnikTargets
+        INCLUDES DESTINATION ${MAPNIK_INCLUDE_DIR}
+        RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
+            COMPONENT MapnikRuntime
+        LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
+            COMPONENT MapnikRuntime
+            NAMELINK_COMPONENT MapnikDevelopment
+        ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
+            COMPONENT MapnikDevelopment
+    )
+    get_target_property(TARGET_TYPE "${_target}" TYPE)
+    if (TARGET_TYPE STREQUAL "EXECUTABLE")
+        get_property(MAPNIK_INSTALLED_TARGETS GLOBAL PROPERTY TARGETS)
+        list(APPEND MAPNIK_INSTALLED_TARGETS ${_target})
+        set_property(GLOBAL PROPERTY TARGETS ${MAPNIK_INSTALLED_TARGETS})
+    endif()
+endfunction()
 
-    if(NOT MAPNIK_INSTALL_ALREADY_INSTALLED AND NOT MAPNIK_INSTALL_IS_PLUGIN)
-        install(TARGETS ${MAPNIK_INSTALL_TARGET}
-            EXPORT MapnikTargets
-            INCLUDES DESTINATION ${MAPNIK_INCLUDE_DIR}
-            RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-                COMPONENT MapnikRuntime
-            LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-                COMPONENT MapnikRuntime
-                NAMELINK_COMPONENT MapnikDevelopment
-            ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-                COMPONENT MapnikDevelopment
-        )
-    elseif(NOT MAPNIK_INSTALL_ALREADY_INSTALLED AND MAPNIK_INSTALL_IS_PLUGIN)
-        install(TARGETS ${MAPNIK_INSTALL_TARGET}
-            RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
-                COMPONENT MapnikPluginRuntime
-            LIBRARY DESTINATION ${PLUGINS_INSTALL_DIR}
-                COMPONENT MapnikPluginRuntime
-                NAMELINK_COMPONENT MapnikPluginDevelopment
-            ARCHIVE DESTINATION ${PLUGINS_INSTALL_DIR}
-                COMPONENT MapnikPluginDevelopment
-        )
-    endif()
-    if(NOT MAPNIK_INSTALL_IS_PLUGIN)
-        get_target_property(TARGET_TYPE "${MAPNIK_INSTALL_TARGET}" TYPE)
-        if (TARGET_TYPE STREQUAL "EXECUTABLE")
-            get_property(MAPNIK_INSTALLED_TARGETS GLOBAL PROPERTY TARGETS)
-            list(APPEND MAPNIK_INSTALLED_TARGETS ${MAPNIK_INSTALL_TARGET})
-            set_property(GLOBAL PROPERTY TARGETS ${MAPNIK_INSTALLED_TARGETS})
-        endif()
-    else()
-        get_property(MAPNIK_INSTALLED_PLUGINS GLOBAL PROPERTY PLUGINS)
-        list(APPEND MAPNIK_INSTALLED_PLUGINS ${MAPNIK_INSTALL_TARGET})
-        set_property(GLOBAL PROPERTY PLUGINS ${MAPNIK_INSTALLED_PLUGINS})
-    endif()
+function(mapnik_install_plugin _target)
+    install(TARGETS ${_target}
+        RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
+            COMPONENT MapnikPluginRuntime
+        LIBRARY DESTINATION ${PLUGINS_INSTALL_DIR}
+            COMPONENT MapnikPluginRuntime
+            NAMELINK_COMPONENT MapnikPluginDevelopment
+        ARCHIVE DESTINATION ${PLUGINS_INSTALL_DIR}
+            COMPONENT MapnikPluginDevelopment
+    )
+    get_property(MAPNIK_INSTALLED_PLUGINS GLOBAL PROPERTY PLUGINS)
+    list(APPEND MAPNIK_INSTALLED_PLUGINS ${_target})
+    set_property(GLOBAL PROPERTY PLUGINS ${MAPNIK_INSTALLED_PLUGINS})
 endfunction()
 
 

@@ -31,4 +31,4 @@ set_target_properties(json PROPERTIES
     PREFIX "libmapnik-"
 )
 
-mapnik_install(TARGET json)
+mapnik_install(json)
