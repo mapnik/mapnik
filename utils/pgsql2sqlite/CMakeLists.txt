@@ -16,4 +16,4 @@ target_link_libraries(pgsql2sqlite PRIVATE
     mapnik::mapnik
 )
 
-mapnik_install(pgsql2sqlite)
+mapnik_install_utility(pgsql2sqlite)

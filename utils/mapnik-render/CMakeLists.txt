@@ -9,4 +9,4 @@ target_link_libraries(mapnik-render PRIVATE
     Boost::program_options
 )
 
-mapnik_install(mapnik-render)
+mapnik_install_utility(mapnik-render)
