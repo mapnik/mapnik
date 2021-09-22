@@ -31,14 +31,4 @@ set_target_properties(json PROPERTIES
     PREFIX "libmapnik-"
 )
 
-install(TARGETS json 
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-    INCLUDES DESTINATION include/
-    PUBLIC_HEADER DESTINATION include/
-    COMPONENT mapnik
-)
-
 mapnik_install(TARGET json)
