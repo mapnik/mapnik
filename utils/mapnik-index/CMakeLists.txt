@@ -15,4 +15,4 @@ target_link_libraries(mapnik-index PRIVATE
     Boost::program_options
 )
 
-mapnik_install(mapnik-index)
+mapnik_install_utility(mapnik-index)

@@ -12,4 +12,4 @@ target_link_libraries(shapeindex PRIVATE
     mapnik::mapnik
 )
 
-mapnik_install(shapeindex)
+mapnik_install_utility(shapeindex)

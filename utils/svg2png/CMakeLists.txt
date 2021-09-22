@@ -12,4 +12,4 @@ target_link_libraries(svg2png PRIVATE
     mapnik::agg
 )
 
-mapnik_install(svg2png)
+mapnik_install_utility(svg2png)

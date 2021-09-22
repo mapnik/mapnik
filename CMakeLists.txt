@@ -218,6 +218,7 @@ endif()
 # (used by MapnikInstall.cmake. properties are needed since "set(...)" will be out of scope
 set_property(GLOBAL PROPERTY TARGETS "")
 set_property(GLOBAL PROPERTY PLUGINS "")
+set_property(GLOBAL PROPERTY MAPNIK_UTILITIES "")
 
 if(USE_GLIBC_WORKAROUND)
     message("using glibc workaround")
@@ -372,43 +373,7 @@ if(BUILD_TEST)
 endif()
 
 # start package mapnik
-include(CMakePackageConfigHelpers)
-
-# set the cmake targets install location
-set(INCLUDE_INSTALL_DIR include/)
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY SameMajorVersion
-)
-
-list(JOIN MAPNIK_DEPENDENCIES "\n" MAPNIK_DEPENDENCIES)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mapnikConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfig.cmake"
-  INSTALL_DESTINATION ${MAPNIK_CMAKE_DIR}
-  PATH_VARS INCLUDE_INSTALL_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR MAPNIK_DEPENDENCIES
-)
-
-install(
-    FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfigVersion.cmake"
-    DESTINATION ${MAPNIK_CMAKE_DIR}
-)
-
-install(
-    FILES 
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCairo.cmake" 
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindWebP.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHarfBuzz.cmake"
-    DESTINATION ${MAPNIK_CMAKE_DIR}/Modules
-)
-
-install(EXPORT MapnikTargets
-    DESTINATION ${MAPNIK_CMAKE_DIR}
-    FILE mapnikTargets.cmake
-    NAMESPACE mapnik::
-)
+include(MapnikExport)
 
 install(DIRECTORY include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
 install(DIRECTORY deps/agg/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
