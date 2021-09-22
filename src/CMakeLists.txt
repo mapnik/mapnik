@@ -303,4 +303,4 @@ if(MSVC)
     target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
 endif()
 
-mapnik_install(TARGET mapnik)
+mapnik_install(mapnik)

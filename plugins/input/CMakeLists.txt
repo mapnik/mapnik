@@ -1,3 +1,6 @@
+set(_plugin_prefix "")
+set(_plugin_suffix ".input")
+
 if(USE_PLUGIN_INPUT_CSV)
     message(STATUS "using input plugin csv")
     add_subdirectory(csv)

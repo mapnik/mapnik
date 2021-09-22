@@ -356,7 +356,7 @@ target_link_libraries(core INTERFACE
 )
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
-mapnik_install(TARGET core)
+mapnik_install(core)
 
 add_subdirectory(deps)
 add_subdirectory(src)
