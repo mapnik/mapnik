@@ -42,15 +42,16 @@ install(EXPORT MapnikTargets
 # some package managers are using different paths per configuration.
 string(TOLOWER "${CMAKE_BUILD_TYPE}" _build_type)
 string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type_l)
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mapnikPlugins-${_build_type}.cmake.in "set(MAPNIK_PLUGINS_DIR_${_build_type_l} \"@PACKAGE_PLUGINS_INSTALL_DIR@\" CACHE STRING \"\")\n")
+set(_mapnik_plugin_file_name "mapnikPlugins-${_build_type}")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${_mapnik_plugin_file_name}.cmake.in "set(MAPNIK_PLUGINS_DIR_${_build_type_l} \"@PACKAGE_PLUGINS_INSTALL_DIR@\" CACHE STRING \"\")\n")
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/mapnikPlugins-${_build_type}.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/mapnikPlugins-${_build_type}.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/${_mapnik_plugin_file_name}.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${_mapnik_plugin_file_name}.cmake
   PATH_VARS PLUGINS_INSTALL_DIR
   INSTALL_DESTINATION ${MAPNIK_CMAKE_DIR}
 )
 install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/MapnikPlugins-${_build_type}.cmake
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/${_mapnik_plugin_file_name}.cmake
   DESTINATION ${MAPNIK_CMAKE_DIR}
 )
