@@ -293,6 +293,9 @@ set_target_properties(mapnik PROPERTIES
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnik"
     PREFIX "lib"
+    VERSION ${MAPNIK_VERSION}
+    # see https://github.com/mapnik/mapnik/pull/4248#issuecomment-925596509 => ABI compability only with the full version
+    SOVERSION ${MAPNIK_VERSION}
 )
 
 if(MSVC)

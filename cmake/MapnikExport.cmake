@@ -3,8 +3,8 @@ include(CMakePackageConfigHelpers)
 # export mapnik configuration
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
+    VERSION ${MAPNIK_VERSION}
+    COMPATIBILITY ExactVersion
 )
 get_property(MAPNIK_UTILITIES GLOBAL PROPERTY MAPNIK_UTILITIES)
 list(JOIN MAPNIK_DEPENDENCIES "\n" MAPNIK_DEPENDENCIES)
