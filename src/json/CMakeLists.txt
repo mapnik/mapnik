@@ -28,7 +28,7 @@ set_target_properties(json PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "json"
-    PREFIX "libmapnik-"
+    PREFIX "libmapnik"
     VERSION ${MAPNIK_VERSION} 
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}

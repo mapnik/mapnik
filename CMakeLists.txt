@@ -103,6 +103,7 @@ set(MAPNIK_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory for l
 set(MAPNIK_ARCHIVE_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory for archives")
 set(MAPNIK_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE STRING "Install directory for the headers")
 set(MAPNIK_CMAKE_DIR ${MAPNIK_LIB_DIR}/cmake/mapnik CACHE STRING "Install directory of the cmake targets")
+set(MAPNIK_PKGCONF_DIR ${MAPNIK_LIB_DIR}/pkgconfig CACHE STRING "Install directory for the .pc files for pkg-config")
 
 if(WIN32)
     set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_BIN_DIR}/mapnik/input)
@@ -374,6 +375,7 @@ endif()
 
 # start package mapnik
 include(MapnikExport)
+include(MapnikExportPkgConfig)
 
 install(DIRECTORY include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
 install(DIRECTORY deps/agg/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
