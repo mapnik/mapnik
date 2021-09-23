@@ -20,7 +20,7 @@ set_target_properties(wkt PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "wkt"
-    PREFIX "libmapnik-"
+    PREFIX "libmapnik"
     VERSION ${MAPNIK_VERSION} 
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}
