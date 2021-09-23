@@ -39,7 +39,7 @@ endfunction()
 # Install executables. These are available via COMPONENTS in find_package
 #
 function(mapnik_install_utility _target)
-    set(_target_name "MapnikUtility_${_target}_Targets")
+    set(_target_name "mapnikUtilityTargets_${_target}")
     install(TARGETS ${_target}
         EXPORT ${_target_name}
         INCLUDES DESTINATION ${MAPNIK_INCLUDE_DIR}
