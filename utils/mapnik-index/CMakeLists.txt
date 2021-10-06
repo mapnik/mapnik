@@ -1,6 +1,6 @@
 project(mapnik-index)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
 
 add_executable(mapnik-index
     mapnik-index.cpp
@@ -15,4 +15,4 @@ target_link_libraries(mapnik-index PRIVATE
     Boost::program_options
 )
 
-mapnik_install(TARGET mapnik-index)
+mapnik_install_utility(mapnik-index)

@@ -17,6 +17,7 @@ message(STATUS "mapnik version: ${PROJECT_VERSION}")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(MapnikMinimumVersions)
 include(MapnikFindPackage)
 include(MapnikCopyDependencies)
 include(MapnikInstall)
@@ -95,24 +96,14 @@ set(CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
 set(MAPNIK_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
 message(STATUS "postfix for debug libraries: ${MAPNIK_DEBUG_POSTFIX}")
 
-if(WIN32)
-    set(DEFAULT_BIN_DIR bin)
-    set(DEFAULT_LIB_DIR lib)
-    set(DEFAULT_ARCHIVE_DIR lib)
-else()
-    include(GNUInstallDirs)
-    set(DEFAULT_BIN_DIR ${CMAKE_INSTALL_BINDIR})
-    set(DEFAULT_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
-    set(DEFAULT_ARCHIVE_DIR ${CMAKE_INSTALL_LIBDIR})
-endif()
-# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#runtime-output-artifacts
-set(MAPNIK_BIN_DIR ${DEFAULT_BIN_DIR} CACHE STRING "Install directory for binaries")
-# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#library-output-artifacts
-set(MAPNIK_LIB_DIR ${DEFAULT_LIB_DIR} CACHE STRING "Install directory for libraries")
-# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#archive-output-artifacts
-set(MAPNIK_ARCHIVE_DIR ${DEFAULT_ARCHIVE_DIR} CACHE STRING "Install directory for archives")
-
-set(INSTALL_CMAKE_DIR ${MAPNIK_LIB_DIR}/cmake/mapnik CACHE STRING "Install directory of the cmake targets")
+include(GNUInstallDirs)
+# See for more details: https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html
+set(MAPNIK_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE STRING "Install directory for binaries")
+set(MAPNIK_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory for libraries")
+set(MAPNIK_ARCHIVE_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory for archives")
+set(MAPNIK_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE STRING "Install directory for the headers")
+set(MAPNIK_CMAKE_DIR ${MAPNIK_LIB_DIR}/cmake/mapnik CACHE STRING "Install directory of the cmake targets")
+set(MAPNIK_PKGCONF_DIR ${MAPNIK_LIB_DIR}/pkgconfig CACHE STRING "Install directory for the .pc files for pkg-config")
 
 if(WIN32)
     set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_BIN_DIR}/mapnik/input)
@@ -144,7 +135,7 @@ endif()
 find_package(PkgConfig)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
-mapnik_find_package(Boost 1.61 REQUIRED COMPONENTS filesystem system regex)
+mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem system regex)
 if(USE_BOOST_REGEX_ICU_WORKAROUND)
     message(STATUS "using boost regex workaround")
     set_property(TARGET Boost::regex PROPERTY INTERFACE_LINK_LIBRARIES)
@@ -153,15 +144,14 @@ endif()
 mapnik_find_package(Freetype REQUIRED)
 
 # try to find harfbuzz with the native configuration and fallback to our "own" FindHarfBuzz
-set(HARFBUZZ_MINIMUM_VERSION 0.9.34)
-mapnik_find_package(harfbuzz CONFIG QUIET)
+mapnik_find_package(harfbuzz ${HARFBUZZ_MIN_VERSION} CONFIG QUIET)
 if(harfbuzz_FOUND)
     message(STATUS "Found harfbuzz native cmake")
     list(APPEND MAPNIK_OPTIONAL_LIBS harfbuzz::harfbuzz)
 else()
     # we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
     message(STATUS "Fallback to FindHarfBuzz")
-    mapnik_find_package(HarfBuzz ${HARFBUZZ_MINIMUM_VERSION} REQUIRED COMPONENTS ICU)
+    mapnik_find_package(HarfBuzz ${HARFBUZZ_MIN_VERSION} REQUIRED COMPONENTS ICU)
     list(APPEND MAPNIK_OPTIONAL_LIBS HarfBuzz::HarfBuzz HarfBuzz::ICU)
 endif()
 
@@ -229,6 +219,7 @@ endif()
 # (used by MapnikInstall.cmake. properties are needed since "set(...)" will be out of scope
 set_property(GLOBAL PROPERTY TARGETS "")
 set_property(GLOBAL PROPERTY PLUGINS "")
+set_property(GLOBAL PROPERTY MAPNIK_UTILITIES "")
 
 if(USE_GLIBC_WORKAROUND)
     message("using glibc workaround")
@@ -308,11 +299,11 @@ endif()
 
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
-    mapnik_find_package(PROJ QUIET)
+    mapnik_find_package(PROJ ${PROJ_MIN_VERSION} QUIET)
     # currently the cmake files are not installed, when installing proj via apt-get. So search via pkg-config
     if(NOT PROJ_FOUND)
         message(STATUS "PROJ not found via FindPROJ. Searching via pkg-config...")
-        pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj)
+        pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION})
         string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" _dummy "${PROJ_VERSION}")
         set(PROJ_VERSION_MAJOR "${CMAKE_MATCH_1}")
         set(PROJ_VERSION_MINOR "${CMAKE_MATCH_2}")
@@ -322,7 +313,7 @@ if(USE_PROJ)
     message(STATUS "Using mapnik PROJ version: ${MAPNIK_PROJ_VERSION}")
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_USE_PROJ MAPNIK_PROJ_VERSION=${MAPNIK_PROJ_VERSION})
     list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ_LIBRARIES})
-    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE ${PROJ_INCLUDE_DIRS})
+    list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE $<BUILD_INTERFACE:${PROJ_INCLUDE_DIRS}>)
 endif()
 
 if(USE_GRID_RENDERER)
@@ -367,15 +358,7 @@ target_link_libraries(core INTERFACE
 )
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
-install(TARGETS core 
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-    INCLUDES DESTINATION include/
-    PUBLIC_HEADER DESTINATION include/
-    COMPONENT mapnik
-)
+mapnik_install(core)
 
 add_subdirectory(deps)
 add_subdirectory(src)
@@ -391,60 +374,25 @@ if(BUILD_TEST)
 endif()
 
 # start package mapnik
-include(CMakePackageConfigHelpers)
+include(MapnikExport)
+include(MapnikExportPkgConfig)
 
-# set the cmake targets install location
-set(INCLUDE_INSTALL_DIR include/)
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY SameMajorVersion
-)
-
-list(JOIN MAPNIK_DEPENDENCIES "\n" MAPNIK_DEPENDENCIES)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/mapnikConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfig.cmake"
-  INSTALL_DESTINATION ${INSTALL_CMAKE_DIR}
-  PATH_VARS INCLUDE_INSTALL_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR MAPNIK_DEPENDENCIES
-)
-
-install(
-    FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfigVersion.cmake"
-    DESTINATION ${INSTALL_CMAKE_DIR}
-)
-
-install(
-    FILES 
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCairo.cmake" 
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindWebP.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHarfBuzz.cmake"
-    DESTINATION ${INSTALL_CMAKE_DIR}/Modules
-)
-
-install(EXPORT MapnikTargets
-        FILE mapnikTargets.cmake
-        NAMESPACE mapnik::
-        DESTINATION ${INSTALL_CMAKE_DIR}
-)
-
-install(DIRECTORY include/ TYPE INCLUDE)
-install(DIRECTORY deps/agg/include/ TYPE INCLUDE)
-install(DIRECTORY deps/mapnik TYPE INCLUDE)
+install(DIRECTORY include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+install(DIRECTORY deps/agg/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+install(DIRECTORY deps/mapnik DESTINATION ${MAPNIK_INCLUDE_DIR})
 install(DIRECTORY fonts/ DESTINATION ${FONTS_INSTALL_DIR} FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
 
 if(NOT USE_EXTERNAL_MAPBOX_GEOMETRY)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/ TYPE INCLUDE)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_POLYLABEL)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/ TYPE INCLUDE)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_PROTOZERO)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/ TYPE INCLUDE)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_VARIANT)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/ TYPE INCLUDE)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
 endif()
 
 mapnik_install_targets()

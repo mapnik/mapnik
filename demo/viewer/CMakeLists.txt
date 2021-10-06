@@ -61,7 +61,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
 endif()
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini DESTINATION bin)
-mapnik_install(TARGET mapnik-viewer)
+mapnik_install_utility(mapnik-viewer)
 
 mapnik_copy_dependencies(
     TARGETS 

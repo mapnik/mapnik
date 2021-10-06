@@ -7,15 +7,13 @@ add_library(input-pgraster MODULE
     pgraster_featureset.cpp 
     pgraster_wkb_reader.cpp
 )
-add_library(mapnik::plugin::input::pgraster ALIAS input-pgraster)
-
-
 target_link_libraries(input-pgraster PRIVATE
     mapnik::mapnik  
     PostgreSQL::PostgreSQL
 )
-set_target_properties(input-pgraster PROPERTIES PREFIX "")
-set_target_properties(input-pgraster PROPERTIES OUTPUT_NAME "pgraster")
-set_target_properties(input-pgraster PROPERTIES SUFFIX ".input")
-
-mapnik_install(TARGET input-pgraster IS_PLUGIN)
+set_target_properties(input-pgraster PROPERTIES 
+    OUTPUT_NAME "pgraster"
+    PREFIX "${_plugin_prefix}"
+    SUFFIX "${_plugin_suffix}"
+)
+mapnik_install_plugin(input-pgraster)

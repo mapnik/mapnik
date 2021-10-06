@@ -34,9 +34,15 @@ All targets:
 * `mapnik::wkt`: wkt support for libmapnik.
 
 All mapnik executables and targets are exported within `mapnikTargets.cmake`. 
-
-The plugin dir is available in the variable `MAPNIK_PLUGINS_DIR`. 
 The font path is is available in the variable `MAPNIK_FONTS_DIR`. 
+
+The install location of the plugins might be configuration dependent. 
+For each configuration there exists a variable `MAPNIK_PLUGINS_DIR_<CONFIGURATION>` where `<CONFIGURATION>` is one of `CMAKE_BUILD_TYPE` as upper case.
+There is a function exported which you can use to query the plugin dir for known typical configurations:
+```
+mapnik_find_plugin_dir(MAPNIK_PLUGINS_DIR)
+```
+`MAPNIK_PLUGINS_DIR` will contain then the plugin dir. If a path could not be found, a warning is printed.
 
 ## Recommendations
 

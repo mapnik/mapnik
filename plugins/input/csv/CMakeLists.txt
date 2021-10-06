@@ -7,15 +7,15 @@ add_library(input-csv MODULE
     csv_inline_featureset.cpp
     csv_utils.cpp
 )
-add_library(mapnik::plugin::input::csv ALIAS input-csv)
-
 target_link_libraries(input-csv PRIVATE
     mapnik::mapnik 
     mapnik::wkt 
     mapnik::json
 )
-set_target_properties(input-csv PROPERTIES PREFIX "")
-set_target_properties(input-csv PROPERTIES OUTPUT_NAME "csv")
-set_target_properties(input-csv PROPERTIES SUFFIX ".input")
+set_target_properties(input-csv PROPERTIES 
+    OUTPUT_NAME "csv"
+    PREFIX "${_plugin_prefix}"
+    SUFFIX "${_plugin_suffix}"
+)
 
-mapnik_install(TARGET input-csv IS_PLUGIN)
+mapnik_install_plugin(input-csv)
