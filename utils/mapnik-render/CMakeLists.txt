@@ -1,6 +1,6 @@
 project(mapnik-render)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
 
 add_executable(mapnik-render mapnik-render.cpp)
 
@@ -9,4 +9,4 @@ target_link_libraries(mapnik-render PRIVATE
     Boost::program_options
 )
 
-mapnik_install(TARGET mapnik-render)
+mapnik_install_utility(mapnik-render)

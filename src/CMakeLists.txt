@@ -293,6 +293,10 @@ set_target_properties(mapnik PROPERTIES
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnik"
     PREFIX "lib"
+    IMPORT_PREFIX "lib" # for the archive on dll platforms
+    VERSION ${MAPNIK_VERSION}
+    # see https://github.com/mapnik/mapnik/pull/4248#issuecomment-925596509 => ABI compability only with the full version
+    SOVERSION ${MAPNIK_VERSION}
 )
 
 if(MSVC)
@@ -303,14 +307,4 @@ if(MSVC)
     target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
 endif()
 
-install(TARGETS mapnik 
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-    INCLUDES DESTINATION include/
-    PUBLIC_HEADER DESTINATION include/
-    COMPONENT mapnik
-)
-
-mapnik_install(TARGET mapnik ALREADY_INSTALLED)
+mapnik_install(mapnik)

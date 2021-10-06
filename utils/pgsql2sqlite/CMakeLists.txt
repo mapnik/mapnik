@@ -1,5 +1,5 @@
 project(pgsql2sqlite)
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
 find_package(SQLite3 REQUIRED)
 find_package(PostgreSQL REQUIRED)
 
@@ -16,4 +16,4 @@ target_link_libraries(pgsql2sqlite PRIVATE
     mapnik::mapnik
 )
 
-mapnik_install(TARGET pgsql2sqlite)
+mapnik_install_utility(pgsql2sqlite)

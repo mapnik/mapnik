@@ -20,17 +20,10 @@ set_target_properties(wkt PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "wkt"
-    PREFIX "libmapnik-"
+    PREFIX "libmapnik"
+    VERSION ${MAPNIK_VERSION} 
+    # see mapnik target for explanation
+    SOVERSION ${MAPNIK_VERSION}
 )
 
-install(TARGETS wkt 
-    EXPORT MapnikTargets
-    LIBRARY DESTINATION ${MAPNIK_LIB_DIR}
-    ARCHIVE DESTINATION ${MAPNIK_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${MAPNIK_BIN_DIR}
-    INCLUDES DESTINATION include/
-    PUBLIC_HEADER DESTINATION include/
-    COMPONENT mapnik
-)
-
-mapnik_install(TARGET wkt)
+mapnik_install(wkt)
