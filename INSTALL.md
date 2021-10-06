@@ -71,15 +71,15 @@ For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationT
 
 Build system dependencies are:
 
- * C++ compiler supporting `-std=c++11` (like >= g++ 4.8 or >= clang++ 3.4)
+ * C++ compiler supporting `-std=c++14` (like >= g++ 4.8 or >= clang++ 3.4)
  * >= 2 GB RAM (> 5 GB for g++)
  * Python 2.4-2.7 
- * Scons (a copy is bundled)
+ * Scons (a copy is bundled) or CMake >= 3.15 see [docs/cmake-usage.md](./docs/cmake-usage.md)
 
 Mapnik Core depends on:
 
  * Boost
-    - >= 1.47 is required and >= 1.56 recommended
+    - >= 1.73 is required
     - These libraries are used:
       - filesystem
       - system
@@ -97,7 +97,7 @@ Mapnik Core optionally depends on:
  * libjpeg - JPEG graphics (Default enabled, if found)
  * libtiff - TIFF graphics (Default enabled, if found)
  * libwebp - WEBP graphics  (Default enabled, if found)
- * libproj - PROJ.4 projection library (Default enabled, if found)
+ * libproj >= 7.2.0 - PROJ projection library (Default enabled, if found)
 
 Additional optional dependencies:
 
