@@ -144,7 +144,7 @@ endif()
 mapnik_find_package(Freetype REQUIRED)
 
 # try to find harfbuzz with the native configuration and fallback to our "own" FindHarfBuzz
-mapnik_find_package(harfbuzz ${HARFBUZZ_MIN_VERSION} CONFIG QUIET)
+mapnik_find_package(harfbuzz CONFIG QUIET)
 if(harfbuzz_FOUND)
     message(STATUS "Found harfbuzz native cmake")
     list(APPEND MAPNIK_OPTIONAL_LIBS harfbuzz::harfbuzz)
