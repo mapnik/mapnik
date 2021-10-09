@@ -90,6 +90,9 @@ endif()
 if(USE_TIFF)
     list(APPEND COMPILE_SRC tiff_reader.cpp)
 endif()
+if(USE_WEBP)
+    list(APPEND COMPILE_SRC webp_reader.cpp)
+endif()
 
 set(AGG_COMPILE_SRC 
     ../deps/agg/src/agg_arc.cpp
