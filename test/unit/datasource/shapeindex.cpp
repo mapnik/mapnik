@@ -75,9 +75,9 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
         cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
     cmd += "shapeindex";
-    #ifdef _WINDOWS
-        cmd += ".exe";
-    #endif
+#ifdef _WINDOWS
+    cmd += ".exe";
+#endif
     cmd += " ";
     if (index_parts) cmd+= "--index-parts ";
     cmd += filename;
