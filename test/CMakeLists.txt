@@ -187,11 +187,12 @@ mapnik_copy_dependencies(
 
 file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test")
 file(COPY data-visual DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test")
+file(COPY unit/data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/unit")
 file(COPY "${mapnik_SOURCE_DIR}/demo/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/demo")
 add_dependencies(mapnik-test-unit mapnik-index shapeindex)
 if(WIN32)
-    catch_discover_tests(mapnik-test-unit 
-        PROPERTIES ENVIRONMENT "PATH=\$<JOIN:\$<SHELL_PATH:$<TARGET_FILE_DIR:mapnik-index>;$<TARGET_FILE_DIR:shapeindex>;$ENV{PATH}>,\\\\\\\\\;>"
+    catch_discover_tests(mapnik-test-unit PROPERTIES
+        ENVIRONMENT "PATH=\$<JOIN:\$<SHELL_PATH:$<TARGET_FILE_DIR:mapnik-index>;$<TARGET_FILE_DIR:shapeindex>;$ENV{PATH}>,\\\\\\\\\;>"
     )
 else()
     catch_discover_tests(mapnik-test-unit PROPERTIES 
