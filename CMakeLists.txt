@@ -303,7 +303,7 @@ if(USE_PROJ)
     # currently the cmake files are not installed, when installing proj via apt-get. So search via pkg-config
     if(NOT PROJ_FOUND)
         message(STATUS "PROJ not found via FindPROJ. Searching via pkg-config...")
-        pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION} GLOBAL)
+        pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION})
         string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" _dummy "${PROJ_VERSION}")
         set(PROJ_VERSION_MAJOR "${CMAKE_MATCH_1}")
         set(PROJ_VERSION_MINOR "${CMAKE_MATCH_2}")
