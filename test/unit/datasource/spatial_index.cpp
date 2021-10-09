@@ -22,6 +22,8 @@
 
 #include "catch.hpp"
 
+#include <sstream>
+
 #include <mapnik/quad_tree.hpp>
 #include <mapnik/util/spatial_index.hpp>
 

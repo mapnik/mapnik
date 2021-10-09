@@ -3,6 +3,8 @@
 
 #include "catch.hpp"
 
+#include <sstream>
+
 #include <mapnik/image_view.hpp>
 #include <mapnik/webp_io.hpp>
 
