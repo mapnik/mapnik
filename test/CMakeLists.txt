@@ -196,7 +196,7 @@ if(WIN32)
     )
 else()
     catch_discover_tests(mapnik-test-unit PROPERTIES 
-        ENVIRONMENT "DYLD_LIBRARY_PATH=$<SHELL_PATH:$<TARGET_FILE_DIR:shapeindex>;$<TARGET_FILE_DIR:mapnik-index>;$ENV{DYLD_LIBRARY_PATH}>"
+        ENVIRONMENT "PATH=$<SHELL_PATH:$<TARGET_FILE_DIR:shapeindex>;$<TARGET_FILE_DIR:mapnik-index>;$ENV{PATH}>"
     )
 endif()
 
