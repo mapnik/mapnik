@@ -20,5 +20,3 @@ endif()
 if(BUILD_UTILITY_SVG2PNG)
     add_subdirectory(svg2png)
 endif()
-
-add_subdirectory(mapnik-config)
