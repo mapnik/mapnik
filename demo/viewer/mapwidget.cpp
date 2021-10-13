@@ -293,7 +293,23 @@ void MapWidget::wheelEvent(QWheelEvent* e)
    {
       return;
    }
-
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)        
+   QPointF corner(map_->width(), map_->height());
+   QPointF zoomCoords;
+   double zoom;
+   if (e->angleDelta().y() > 0)
+   {
+      zoom = 0.5;
+      QPointF center = corner / 2;
+      QPointF delta = e->position() - center;
+      zoomCoords = zoom * delta + center;
+   }
+   else
+   {
+      zoom = 2.0;
+      zoomCoords = corner - e->position();
+   }
+#else
    QPoint corner(map_->width(), map_->height());
    QPoint zoomCoords;
    double zoom;
@@ -309,6 +325,7 @@ void MapWidget::wheelEvent(QWheelEvent* e)
       zoom = 2.0;
       zoomCoords = corner - e->pos();
    }
+#endif
 
    map_->pan_and_zoom(zoomCoords.x(), zoomCoords.y(), zoom);
    updateMap();
