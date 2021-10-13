@@ -1,7 +1,35 @@
 add_subdirectory(json)
 add_subdirectory(wkt)
 
-set(MAPNIK_SOURCES
+add_library(mapnik "")
+add_library(mapnik::mapnik ALIAS mapnik)
+
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(mapnik PRIVATE MAPNIK_EXPORTS)
+endif()
+
+target_link_libraries(mapnik PUBLIC mapnik::core)
+target_link_libraries(mapnik PRIVATE mapnik::agg)
+
+set_target_properties(mapnik PROPERTIES 
+    DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
+    OUTPUT_NAME "mapnik"
+    PREFIX "lib"
+    IMPORT_PREFIX "lib" # for the archive on dll platforms
+    VERSION ${MAPNIK_VERSION}
+    # see https://github.com/mapnik/mapnik/pull/4248#issuecomment-925596509 => ABI compability only with the full version
+    SOVERSION ${MAPNIK_VERSION}
+)
+
+if(MSVC)
+    # disable some msvc warnings and enable bigobj
+    # 4068 will warn about unknown definitions. Would not be needed if https://github.com/mapbox/geometry.hpp/pull/69 is merged.
+    # 4661 warns about enum definitions. should be investigated at some point
+    # 4910 warns about extern and dllexport at the same time. should be investigated at some point
+    target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
+endif()
+
+target_sources(mapnik PRIVATE
     cairo_io.cpp
     color_factory.cpp
     color.cpp
@@ -79,19 +107,7 @@ set(MAPNIK_SOURCES
     wkb.cpp
     xml_tree.cpp
 )
-set(COMPILE_SRC ${MAPNIK_SOURCES})
-
-if(USE_JPEG)
-    list(APPEND COMPILE_SRC jpeg_reader.cpp)
-endif()
-if(USE_PNG)
-    list(APPEND COMPILE_SRC png_reader.cpp)
-endif()
-if(USE_TIFF)
-    list(APPEND COMPILE_SRC tiff_reader.cpp)
-endif()
-
-set(AGG_COMPILE_SRC 
+target_sources(mapnik PRIVATE 
     ../deps/agg/src/agg_arc.cpp
     ../deps/agg/src/agg_arrowhead.cpp
     ../deps/agg/src/agg_bezier_arc.cpp
@@ -118,7 +134,7 @@ set(AGG_COMPILE_SRC
     ../deps/agg/src/agg_vpgen_clip_polyline.cpp
     ../deps/agg/src/agg_vpgen_segmentator.cpp
 )
-set(AGG_SRC
+target_sources(mapnik PRIVATE
     agg/agg_renderer.cpp
     agg/process_building_symbolizer.cpp
     agg/process_debug_symbolizer.cpp
@@ -133,38 +149,14 @@ set(AGG_SRC
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_text_symbolizer.cpp
-    ${AGG_COMPILE_SRC}
 )
-list(APPEND COMPILE_SRC ${AGG_SRC})
 
-if(USE_CAIRO)
-    message(STATUS "adding cairo renderer to compilation")
-    set(CAIRO_SRC
-        cairo/cairo_context.cpp
-        cairo/cairo_render_vector.cpp
-        cairo/cairo_renderer.cpp
-        cairo/process_building_symbolizer.cpp
-        cairo/process_debug_symbolizer.cpp
-        cairo/process_group_symbolizer.cpp
-        cairo/process_line_pattern_symbolizer.cpp
-        cairo/process_line_symbolizer.cpp
-        cairo/process_markers_symbolizer.cpp
-        cairo/process_point_symbolizer.cpp
-        cairo/process_polygon_pattern_symbolizer.cpp
-        cairo/process_polygon_symbolizer.cpp
-        cairo/process_raster_symbolizer.cpp
-        cairo/process_text_symbolizer.cpp
-    )
-    list(APPEND COMPILE_SRC ${CAIRO_SRC})
-endif()
-
-set(CSS_SRC     
+target_sources(mapnik PRIVATE     
     css/css_color_grammar_x3.cpp
     css/css_grammar_x3.cpp
 )
-list(APPEND COMPILE_SRC ${CSS_SRC})
 
-set(GEOMETRY_SRC
+target_sources(mapnik PRIVATE
     geometry/box2d.cpp
     geometry/closest_point.cpp
     geometry/envelope.cpp
@@ -172,67 +164,30 @@ set(GEOMETRY_SRC
     geometry/polylabel.cpp
     geometry/reprojection.cpp
 )
-list(APPEND COMPILE_SRC ${GEOMETRY_SRC})
 
-if(USE_GRID_RENDERER)
-    message(STATUS "adding grid renderer to compilation")
-    set(GRID_SRC
-        grid/grid_renderer.cpp
-        grid/grid.cpp   
-        grid/process_building_symbolizer.cpp
-        grid/process_group_symbolizer.cpp
-        grid/process_line_pattern_symbolizer.cpp
-        grid/process_line_symbolizer.cpp
-        grid/process_markers_symbolizer.cpp
-        grid/process_point_symbolizer.cpp
-        grid/process_polygon_pattern_symbolizer.cpp
-        grid/process_polygon_symbolizer.cpp
-        grid/process_raster_symbolizer.cpp
-        grid/process_shield_symbolizer.cpp
-        grid/process_text_symbolizer.cpp
-    )
-    list(APPEND COMPILE_SRC ${GRID_SRC})
-endif()
-
-set(GROUP_SRC
-    group/group_layout_manager.cpp
-    group/group_rule.cpp
-    group/group_symbolizer_helper.cpp
-)
-list(APPEND COMPILE_SRC ${GROUP_SRC})
-
-set(RENDERER_COMMON_SRC
+target_sources(mapnik PRIVATE
     renderer_common/pattern_alignment.cpp
     renderer_common/render_group_symbolizer.cpp
     renderer_common/render_markers_symbolizer.cpp
     renderer_common/render_pattern.cpp
     renderer_common/render_thunk_extractor.cpp
 )
-list(APPEND COMPILE_SRC ${RENDERER_COMMON_SRC})
 
-set(SVG_SRC
+target_sources(mapnik PRIVATE
     svg/svg_parser.cpp
     svg/svg_path_grammar_x3.cpp
     svg/svg_path_parser.cpp
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
 )
-if(USE_SVG_RENDERER)
-    message(STATUS "adding svg renderer to compilation")
-    set(SVG_RENDERER_SRC
-        svg/output/process_line_symbolizer.cpp
-        svg/output/process_polygon_symbolizer.cpp
-        svg/output/process_symbolizers.cpp
-        svg/output/svg_generator.cpp
-        svg/output/svg_output_attributes.cpp
-        svg/output/svg_output_grammars.cpp
-        svg/output/svg_renderer.cpp
-    )
-    list(APPEND SVG_SRC ${SVG_RENDERER_SRC})
-endif()
-list(APPEND COMPILE_SRC ${SVG_SRC})
 
-set(TEXT_SRC
+target_sources(mapnik PRIVATE
+    group/group_layout_manager.cpp
+    group/group_rule.cpp
+    group/group_symbolizer_helper.cpp
+)
+
+target_sources(mapnik PRIVATE
     text/color_font_renderer.cpp
     text/face.cpp
     text/font_feature_settings.cpp
@@ -261,50 +216,83 @@ set(TEXT_SRC
     text/placements/registry.cpp
     text/placements/simple.cpp    
 )
-list(APPEND COMPILE_SRC ${TEXT_SRC})
 
-set(UTIL_SRC 
+target_sources(mapnik PRIVATE
     util/math.cpp
     util/utf_conv_win.cpp
 )
-list(APPEND COMPILE_SRC ${UTIL_SRC})
+
+if(USE_CAIRO)
+    target_sources(mapnik PRIVATE
+        cairo/cairo_context.cpp
+        cairo/cairo_render_vector.cpp
+        cairo/cairo_renderer.cpp
+        cairo/process_building_symbolizer.cpp
+        cairo/process_debug_symbolizer.cpp
+        cairo/process_group_symbolizer.cpp
+        cairo/process_line_pattern_symbolizer.cpp
+        cairo/process_line_symbolizer.cpp
+        cairo/process_markers_symbolizer.cpp
+        cairo/process_point_symbolizer.cpp
+        cairo/process_polygon_pattern_symbolizer.cpp
+        cairo/process_polygon_symbolizer.cpp
+        cairo/process_raster_symbolizer.cpp
+        cairo/process_text_symbolizer.cpp
+    )
+endif()
+
+if(USE_JPEG)
+    target_sources(mapnik PRIVATE jpeg_reader.cpp)
+endif()
+
+if(USE_PNG)
+    target_sources(mapnik PRIVATE png_reader.cpp)
+endif()
+
+if(USE_TIFF)
+    target_sources(mapnik PRIVATE tiff_reader.cpp)
+endif()
+
+if(USE_WEBP)
+    target_sources(mapnik PRIVATE webp_reader.cpp)
+endif()
+
+if(USE_GRID_RENDERER)
+    target_sources(mapnik PRIVATE
+        grid/grid_renderer.cpp
+        grid/grid.cpp   
+        grid/process_building_symbolizer.cpp
+        grid/process_group_symbolizer.cpp
+        grid/process_line_pattern_symbolizer.cpp
+        grid/process_line_symbolizer.cpp
+        grid/process_markers_symbolizer.cpp
+        grid/process_point_symbolizer.cpp
+        grid/process_polygon_pattern_symbolizer.cpp
+        grid/process_polygon_symbolizer.cpp
+        grid/process_raster_symbolizer.cpp
+        grid/process_shield_symbolizer.cpp
+        grid/process_text_symbolizer.cpp
+    )
+endif()
+
+if(USE_SVG_RENDERER)
+    target_sources(mapnik PRIVATE
+        svg/output/process_line_symbolizer.cpp
+        svg/output/process_polygon_symbolizer.cpp
+        svg/output/process_symbolizers.cpp
+        svg/output/svg_generator.cpp
+        svg/output/svg_output_attributes.cpp
+        svg/output/svg_output_grammars.cpp
+        svg/output/svg_renderer.cpp
+    )
+endif()
 
 if(USE_LIBXML2)
     message(STATUS "adding libxml2_loader to compilation")
-    list(APPEND COMPILE_SRC libxml2_loader.cpp)
+    target_sources(mapnik PRIVATE libxml2_loader.cpp)
 else()
     message(STATUS "adding rapidxml_loader to compilation")
-    list(APPEND COMPILE_SRC rapidxml_loader.cpp)
-endif()
-
-add_library(mapnik ${COMPILE_SRC})
-add_library(mapnik::mapnik ALIAS mapnik)
-
-set(COMPILE_DEFS "")
-if(BUILD_SHARED_LIBS)
-    list(APPEND COMPILE_DEFS MAPNIK_EXPORTS)
-endif()
-
-target_compile_definitions(mapnik PRIVATE ${COMPILE_DEFS})
-target_link_libraries(mapnik PUBLIC mapnik::core)
-target_link_libraries(mapnik PRIVATE mapnik::agg)
-
-set_target_properties(mapnik PROPERTIES 
-    DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
-    OUTPUT_NAME "mapnik"
-    PREFIX "lib"
-    IMPORT_PREFIX "lib" # for the archive on dll platforms
-    VERSION ${MAPNIK_VERSION}
-    # see https://github.com/mapnik/mapnik/pull/4248#issuecomment-925596509 => ABI compability only with the full version
-    SOVERSION ${MAPNIK_VERSION}
-)
-
-if(MSVC)
-    # disable some msvc warnings and enable bigobj
-    # 4068 will warn about unknown definitions. Would not be needed if https://github.com/mapbox/geometry.hpp/pull/69 is merged.
-    # 4661 warns about enum definitions. should be investigated at some point
-    # 4910 warns about extern and dllexport at the same time. should be investigated at some point
-    target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
+    target_sources(mapnik PRIVATE rapidxml_loader.cpp)
 endif()
 
 mapnik_install(mapnik)

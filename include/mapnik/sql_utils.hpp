@@ -37,6 +37,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <iosfwd>
 #include <regex>
 #include <string>
+#include <sstream>
 
 namespace mapnik { namespace sql_utils {
 

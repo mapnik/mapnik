@@ -4,7 +4,6 @@ find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
 find_package(PostgreSQL REQUIRED)
 
 include(FetchContent)
-include(CopyDllsForDebug)
 
 FetchContent_Declare(
   Catch2
@@ -12,17 +11,11 @@ FetchContent_Declare(
   GIT_TAG        v2.13.7)
 FetchContent_MakeAvailable(Catch2)
 
-# Prepare "Catch" library for other executables
-set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
-
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19.0") 
     # for cmake 3.19+ https://cmake.org/cmake/help/git-stage/policy/CMP0110.html
     # might not be needed if catch updates its cmakes
     cmake_policy(SET CMP0110 OLD)
 endif()
-
 
 add_executable(mapnik-test-unit 
     unit/run.cpp
@@ -108,45 +101,53 @@ add_executable(mapnik-test-unit
     unit/vertex_adapter/vertex_adapter.cpp
 )
 target_link_libraries(mapnik-test-unit PUBLIC
-    Catch 
+    Catch2::Catch2 
     mapnik::agg
     mapnik::mapnik
     mapnik::json
     mapnik::wkt
     PostgreSQL::PostgreSQL
 )
+# workaround since the "offical" include dir would be <catch2/catch.hpp>
+file(COPY catch_ext.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY cleanup.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(mapnik-test-unit PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
 target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
-    Catch 
+    Catch2::Catch2 
     mapnik::mapnik 
     mapnik::agg
     mapnik::json
 )
+target_include_directories(agg_rasterizer_integer_overflow_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
 target_link_libraries(datasource_registration_test PUBLIC
-    Catch 
+    Catch2::Catch2
     mapnik::mapnik 
     mapnik::agg
 )
+target_include_directories(datasource_registration_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(font_registration_test standalone/font_registration_test.cpp)
 target_link_libraries(font_registration_test PUBLIC
-    Catch 
+    Catch2::Catch2 
     mapnik::mapnik 
     mapnik::agg
     mapnik::json
 )
+target_include_directories(font_registration_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 #not workable since boost::filesystem native returns a wstring and the function taskes a std::string
 add_executable(map_xml_test standalone/map_xml_test.cpp)
 target_link_libraries(map_xml_test PUBLIC
-    Catch 
+    Catch2::Catch2 
     mapnik::mapnik 
     mapnik::agg
     mapnik::json
 )
+target_include_directories(map_xml_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(mapnik-test-visual 
     visual/parse_map_sizes.cpp
@@ -154,18 +155,18 @@ add_executable(mapnik-test-visual
     visual/runner.cpp
     visual/run.cpp
 )
-target_link_libraries(
-    mapnik-test-visual PRIVATE
-    Catch
+target_link_libraries(mapnik-test-visual PRIVATE
+    Catch2::Catch2
     Boost::program_options
     Boost::filesystem
     mapnik::mapnik
     mapnik::agg
 )
+target_include_directories(mapnik-test-visual PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 include(CTest)
-include(${catch2_SOURCE_DIR}/contrib/Catch.cmake)
-include(${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake)
+include("${catch2_SOURCE_DIR}/contrib/Catch.cmake")
+include("${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake")
 
 # use only mapnik-test-unit since it has the same build path
 mapnik_copy_plugins(
@@ -184,10 +185,22 @@ mapnik_copy_dependencies(
 )
 
 
-file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
-file(COPY data-visual DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test)
+file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test")
+file(COPY data-visual DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test")
+file(COPY unit/data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/unit")
+file(COPY "${mapnik_SOURCE_DIR}/demo/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/demo")
+add_dependencies(mapnik-test-unit mapnik-index shapeindex)
+if(WIN32)
+    catch_discover_tests(mapnik-test-unit PROPERTIES
+        ENVIRONMENT "PATH=\$<JOIN:\$<SHELL_PATH:$<TARGET_FILE_DIR:mapnik-index>;$<TARGET_FILE_DIR:shapeindex>;$ENV{PATH}>,\\\\\\\\\;>"
+    )
+else()
+    catch_discover_tests(mapnik-test-unit PROPERTIES 
+        ENVIRONMENT "PATH=$<SHELL_PATH:$<TARGET_FILE_DIR:shapeindex>;$<TARGET_FILE_DIR:mapnik-index>;$ENV{PATH}>"
+    )
+endif()
 
-catch_discover_tests(mapnik-test-unit)
+
 catch_discover_tests(agg_rasterizer_integer_overflow_test)
 catch_discover_tests(datasource_registration_test)
 catch_discover_tests(font_registration_test)
