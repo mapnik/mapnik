@@ -109,8 +109,8 @@ target_link_libraries(mapnik-test-unit PUBLIC
     PostgreSQL::PostgreSQL
 )
 # workaround since the "offical" include dir would be <catch2/catch.hpp>
-file(COPY_FILE catch_ext.hpp "${CMAKE_CURRENT_BINARY_DIR}/catch_ext.hpp")
-file(COPY_FILE cleanup.hpp "${CMAKE_CURRENT_BINARY_DIR}/cleanup.hpp")
+file(COPY catch_ext.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY cleanup.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(mapnik-test-unit PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
