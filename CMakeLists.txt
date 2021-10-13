@@ -129,21 +129,28 @@ set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 # needs to be before the first call of find_boost.
 if(USE_MULTITHREADED)
-    message(STATUS "multithreaded enabled")
     set(Boost_USE_MULTITHREADED ON)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_THREADSAFE)
 else()
     set(Boost_USE_MULTITHREADED OFF)
-    message(STATUS "multithreaded disabled")
 endif()
+
 
 find_package(PkgConfig)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
+
 mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem system regex)
+list(APPEND MAPNIK_COMPILE_DEFS BOOST_REGEX_HAS_ICU)
 if(USE_BOOST_REGEX_ICU_WORKAROUND)
     message(STATUS "using boost regex workaround")
     set_property(TARGET Boost::regex PROPERTY INTERFACE_LINK_LIBRARIES)
+endif()
+include(CheckBoostRegexIcu)
+check_boost_regex()
+if(BOOST_REGEX_HAS_ICU)
+    message(STATUS "boost regex has icu support")
+    list(APPEND MAPNIK_COMPILE_DEFS BOOST_REGEX_HAS_ICU)
 endif()
 
 mapnik_find_package(Freetype REQUIRED)
