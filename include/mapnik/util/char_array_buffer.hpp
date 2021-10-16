@@ -24,6 +24,7 @@
 #define MAPNIK_UTIL_CHAR_ARRAY_BUFFER_HPP
 
 #include <streambuf>
+#include <algorithm>
 
 namespace mapnik { namespace util {
 
@@ -71,16 +72,16 @@ private:
     pos_type seekpos(pos_type off,
                      std::ios_base::openmode /*which*/)
     {
-        current_ = std::min(begin_ + off, end_);
+        current_ = (std::min)(begin_ + off, end_);
         return pos_type(off_type(current_ - begin_));
     }
 
     pos_type seekoff(off_type off, std::ios_base::seekdir dir,
                      std::ios_base::openmode which = std::ios_base::in | std::ios_base::out )
     {
-        if (dir == std::ios_base::beg) current_ = std::min(begin_ + off, end_);
-        else if (dir == std::ios_base::cur) current_ = std::min(current_ + off, end_);
-        else current_ = std::max(end_ - off, begin_); // dir == std::ios_base::end
+        if (dir == std::ios_base::beg) current_ = (std::min)(begin_ + off, end_);
+        else if (dir == std::ios_base::cur) current_ = (std::min)(current_ + off, end_);
+        else current_ = (std::max)(end_ - off, begin_); // dir == std::ios_base::end
         return pos_type(off_type(current_ - begin_));
     }
     char const * const begin_;
