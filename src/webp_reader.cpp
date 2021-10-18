@@ -39,6 +39,7 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <fstream>
 #include <memory>
+#include <algorithm>
 
 namespace mapnik
 {
