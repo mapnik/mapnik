@@ -1,4 +1,4 @@
-macro(mapnik_option _name)
-    option(${ARGN})
-    add_feature_info("${ARGV0}" ${ARGV0} "${ARGV1}")
+macro(mapnik_option option_name option_description option_default_value)
+    option(${option_name} "${option_description}" ${option_default_value})
+    add_feature_info(${option_name} ${option_name} "${option_description}")
 endmacro()
