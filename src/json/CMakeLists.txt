@@ -27,8 +27,9 @@ target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
 set_target_properties(json PROPERTIES 
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
-    OUTPUT_NAME "json"
-    PREFIX "libmapnik"
+    OUTPUT_NAME "mapnikjson"
+    PREFIX "lib"
+    IMPORT_PREFIX "lib"
     VERSION ${MAPNIK_VERSION} 
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}
