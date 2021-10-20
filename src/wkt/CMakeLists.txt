@@ -19,8 +19,9 @@ target_link_libraries(wkt PRIVATE mapnik::core)
 set_target_properties(wkt PROPERTIES 
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
-    OUTPUT_NAME "wkt"
-    PREFIX "libmapnik"
+    OUTPUT_NAME "mapnikwkt"
+    PREFIX "lib"
+    IMPORT_PREFIX "lib"
     VERSION ${MAPNIK_VERSION} 
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}
