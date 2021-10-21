@@ -70,7 +70,7 @@ std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, s
         return std::make_pair(false, box_type(p.extent_));
     }
 #else
- #if defined(_WINDOWS)
+ #if defined(_WIN32)
     std::ifstream csv_file(mapnik::utf8_to_utf16(filename),std::ios_base::in | std::ios_base::binary);
  #else
     std::ifstream csv_file(filename.c_str(),std::ios_base::in | std::ios_base::binary);

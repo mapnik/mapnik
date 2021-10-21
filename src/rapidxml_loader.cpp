@@ -62,7 +62,7 @@ public:
             throw config_error(std::string("Could not load map file: File does not exist"), 0, filename);
         }
         filename_ = filename;
-#ifdef _WINDOWS
+#ifdef _WIN32
         std::basic_ifstream<char> stream(mapnik::utf8_to_utf16(filename));
 #else
         std::basic_ifstream<char> stream(filename.c_str());

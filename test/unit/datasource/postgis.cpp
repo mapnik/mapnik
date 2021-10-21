@@ -50,7 +50,7 @@ bool run(std::string const& command, bool okay_to_fail = false)
     // silence output unless MAPNIK_TEST_DEBUG is defined
     if (std::getenv("MAPNIK_TEST_DEBUG") == nullptr)
     {
-#ifndef _WINDOWS
+#ifndef _WIN32
         cmd += " 2>/dev/null";
 #else
         cmd += " 2> nul";
