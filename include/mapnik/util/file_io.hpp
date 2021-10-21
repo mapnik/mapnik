@@ -42,7 +42,7 @@ public:
     using data_type = std::unique_ptr<char[]>;
 
     explicit file(std::string const& filename)
-#ifdef _WINDOWS
+#ifdef _WIN32
      : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
 #else
      : file_(std::fopen(filename.c_str(),"rb"), std::fclose),

@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 // windows specific methods for UTF8 from/to UTF16
 #include <mapnik/util/utf_conv_win.hpp>
 #include <string>
@@ -58,4 +58,4 @@ std::wstring utf8_to_utf16 (std::string const& str)
 
 } // namespace mapnik
 
-#endif // _WINDOWS
+#endif // _WIN32

@@ -41,7 +41,7 @@ namespace util {
 
     bool exists(std::string const& filepath)
     {
-#ifdef _WINDOWS
+#ifdef _WIN32
         return boost::filesystem::exists(mapnik::utf8_to_utf16(filepath));
 #else
         return boost::filesystem::exists(filepath);
@@ -50,7 +50,7 @@ namespace util {
 
     bool is_directory(std::string const& filepath)
     {
-#ifdef _WINDOWS
+#ifdef _WIN32
         return boost::filesystem::is_directory(mapnik::utf8_to_utf16(filepath));
 #else
         return boost::filesystem::is_directory(filepath);
@@ -59,7 +59,7 @@ namespace util {
 
     bool is_regular_file(std::string const& filepath)
     {
-#ifdef _WINDOWS
+#ifdef _WIN32
         return boost::filesystem::is_regular_file(mapnik::utf8_to_utf16(filepath));
 #else
         return boost::filesystem::is_regular_file(filepath);
@@ -68,7 +68,7 @@ namespace util {
 
     bool remove(std::string const& filepath)
     {
-#ifdef _WINDOWS
+#ifdef _WIN32
         return boost::filesystem::remove(mapnik::utf8_to_utf16(filepath));
 #else
         return boost::filesystem::remove(filepath);
@@ -78,7 +78,7 @@ namespace util {
     bool is_relative(std::string const& filepath)
     {
 
-#ifdef _WINDOWS
+#ifdef _WIN32
         boost::filesystem::path child_path(mapnik::utf8_to_utf16(filepath));
 #else
         boost::filesystem::path child_path(filepath);
@@ -88,7 +88,7 @@ namespace util {
 
     std::string make_relative(std::string const& filepath, std::string const& base)
     {
-#ifdef _WINDOWS
+#ifdef _WIN32
         boost::filesystem::path absolute_path(mapnik::utf8_to_utf16(base));
 #else
         boost::filesystem::path absolute_path(base);
@@ -123,7 +123,7 @@ namespace util {
     {
         std::vector<std::string> listing;
         boost::filesystem::directory_iterator end_itr;
-#ifdef _WINDOWS
+#ifdef _WIN32
         std::wstring wide_dir(mapnik::utf8_to_utf16(dir));
         for (boost::filesystem::directory_iterator itr(wide_dir); itr != end_itr; ++itr)
         {

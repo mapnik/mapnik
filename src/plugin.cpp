@@ -23,7 +23,7 @@
 #include <mapnik/plugin.hpp>
 #include <stdexcept>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
   #define NOMINMAX
   #include <windows.h>
   #define handle HMODULE
@@ -54,7 +54,7 @@ PluginInfo::PluginInfo(std::string const& filename,
       name_(),
       module_(new mapnik_lib_t)
       {
-#ifdef _WINDOWS
+#ifdef _WIN32
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
           if (module_ && module_->dl)
           {
