@@ -9,15 +9,15 @@
         {
             "name": "use-ninja",
             "hidden": true,
-            "generator": "Ninja"
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
         },
         {
             "name": "default-build-dir",
             "hidden": true,
-            "binaryDir": "${sourceDir}/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-            }
+            "binaryDir": "${sourceDir}/build/${presetName}"
         },
         {
             "name": "debug-build",
@@ -164,6 +164,44 @@
                 "windows-default",
                 "release-build"
             ]
+        },
+        {
+            "name": "ci-options",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_TESTING": "ON",
+                "BUILD_DEMO_VIEWER": "OFF"
+            }
+        },
+        {
+            "name": "windows-ci",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "windows-default-release",
+                "ci-options"
+            ],
+            "cacheVariables": {
+                "INSTALL_DEPENDENCIES": "ON",
+                "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin"
+            }
+        },
+        {
+            "name": "linux-ci",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "linux-gcc-release",
+                "ci-options"
+            ]
+        },
+        {
+            "name": "macos-ci",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "use-ninja",
+                "release-build",
+                "default-build-dir",
+                "ci-options"
+            ]
         }
     ],
     "buildPresets": [
@@ -174,6 +212,52 @@
         {
             "name": "linux-default",
             "configurePreset": "linux-clang-debug"
+        },
+        {
+            "name": "windows-ci",
+            "configurePreset": "windows-ci"
+        },
+        {
+            "name": "linux-ci",
+            "configurePreset": "linux-ci"
+        },
+        {
+            "name": "macos-ci",
+            "configurePreset": "macos-ci"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-default",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": true
+            }
+        },
+        {
+            "name": "windows-ci",
+            "configurePreset": "windows-ci",
+            "inherits": [
+                "test-default"
+            ]
+        },
+        {
+            "name": "linux-ci",
+            "configurePreset": "linux-ci",
+            "inherits": [
+                "test-default"
+            ]
+        },
+        {
+            "name": "macos-ci",
+            "configurePreset": "macos-ci",
+            "inherits": [
+                "test-default"
+            ]
         }
     ]
 }

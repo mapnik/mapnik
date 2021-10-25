@@ -164,7 +164,6 @@ target_link_libraries(mapnik-test-visual PRIVATE
 )
 target_include_directories(mapnik-test-visual PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
-include(CTest)
 include("${catch2_SOURCE_DIR}/contrib/Catch.cmake")
 include("${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake")
 
