@@ -79,7 +79,7 @@ static std::string numeric2string(const char* buf)
             // All digits after the first must be padded to make the field 4 characters long
             if (d != 0)
             {
-#ifdef _WINDOWS
+#ifdef _WIN32
                 int dig = digits[d];
                 if (dig < 10)
                 {

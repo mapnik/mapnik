@@ -136,7 +136,7 @@ csv_datasource::csv_datasource(parameters const& params)
         {
             throw std::runtime_error("could not create file mapping for " + filename_);
         }
-#elif defined (_WINDOWS)
+#elif defined (_WIN32)
         std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
         if (!in.is_open())
         {
@@ -368,7 +368,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
 {
     if (inline_string_.empty())
     {
-#if defined (_WINDOWS)
+#if defined (_WIN32)
         std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
 #else
         std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);

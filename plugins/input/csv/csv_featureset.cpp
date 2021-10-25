@@ -36,7 +36,7 @@ csv_featureset::csv_featureset(std::string const& filename, locator_type const& 
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     //
-#elif defined( _WINDOWS)
+#elif defined( _WIN32)
     file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
 #else
     file_(std::fopen(filename.c_str(),"rb"), std::fclose),
