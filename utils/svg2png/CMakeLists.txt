@@ -12,4 +12,8 @@ target_link_libraries(svg2png PRIVATE
     mapnik::agg
 )
 
+set_target_properties(svg2png PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+)
+
 mapnik_install_utility(svg2png)
