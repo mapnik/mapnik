@@ -12,4 +12,8 @@ target_link_libraries(shapeindex PRIVATE
     mapnik::mapnik
 )
 
+set_target_properties(shapeindex PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+)
+
 mapnik_install_utility(shapeindex)

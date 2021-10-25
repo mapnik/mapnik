@@ -16,4 +16,8 @@ target_link_libraries(pgsql2sqlite PRIVATE
     mapnik::mapnik
 )
 
+set_target_properties(pgsql2sqlite PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+)
+
 mapnik_install_utility(pgsql2sqlite)
