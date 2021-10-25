@@ -33,6 +33,9 @@ set_target_properties(json PROPERTIES
     VERSION ${MAPNIK_VERSION} 
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 
 mapnik_install(json)

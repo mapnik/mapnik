@@ -15,4 +15,8 @@ target_link_libraries(mapnik-index PRIVATE
     Boost::program_options
 )
 
+set_target_properties(mapnik-index PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+)
+
 mapnik_install_utility(mapnik-index)

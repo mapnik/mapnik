@@ -21,7 +21,6 @@ include(FeatureSummary)
 include(MapnikOption)
 include(MapnikMinimumVersions)
 include(MapnikFindPackage)
-include(MapnikCopyDependencies)
 include(MapnikInstall)
 include(CTest)
 
@@ -110,7 +109,7 @@ set(MAPNIK_ARCHIVE_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Install directory f
 set(MAPNIK_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE STRING "Install directory for the headers")
 set(MAPNIK_CMAKE_DIR ${MAPNIK_LIB_DIR}/cmake/mapnik CACHE STRING "Install directory of the cmake targets")
 set(MAPNIK_PKGCONF_DIR ${MAPNIK_LIB_DIR}/pkgconfig CACHE STRING "Install directory for the .pc files for pkg-config")
-
+set(MAPNIK_OUTPUT_DIR "${CMAKE_BINARY_DIR}/out")
 if(WIN32)
     set(DEFAULT_PLUGINS_INSTALL_DIR ${MAPNIK_BIN_DIR}/mapnik/input)
 else()
@@ -382,6 +381,7 @@ if(BUILD_TESTING)
     enable_testing()
     add_subdirectory(test)
 endif()
+file(COPY fonts DESTINATION "${MAPNIK_OUTPUT_DIR}")
 
 feature_summary(FILENAME "${CMAKE_CURRENT_BINARY_DIR}/packages.log" WHAT PACKAGES_FOUND PACKAGES_NOT_FOUND INCLUDE_QUIET_PACKAGES)
 

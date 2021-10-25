@@ -100,6 +100,11 @@ add_executable(mapnik-test-unit
     unit/vertex_adapter/transform_path_adapter.cpp
     unit/vertex_adapter/vertex_adapter.cpp
 )
+set_target_properties(mapnik-test-unit PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+)
 target_link_libraries(mapnik-test-unit PUBLIC
     Catch2::Catch2 
     mapnik::agg
@@ -114,6 +119,11 @@ file(COPY cleanup.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(mapnik-test-unit PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
+set_target_properties(agg_rasterizer_integer_overflow_test PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+)
 target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
     Catch2::Catch2 
     mapnik::mapnik 
@@ -123,6 +133,11 @@ target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
 target_include_directories(agg_rasterizer_integer_overflow_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
+set_target_properties(datasource_registration_test PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+)
 target_link_libraries(datasource_registration_test PUBLIC
     Catch2::Catch2
     mapnik::mapnik 
@@ -131,6 +146,11 @@ target_link_libraries(datasource_registration_test PUBLIC
 target_include_directories(datasource_registration_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(font_registration_test standalone/font_registration_test.cpp)
+set_target_properties(font_registration_test PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+)
 target_link_libraries(font_registration_test PUBLIC
     Catch2::Catch2 
     mapnik::mapnik 
@@ -141,6 +161,11 @@ target_include_directories(font_registration_test PRIVATE "${catch2_SOURCE_DIR}/
 
 #not workable since boost::filesystem native returns a wstring and the function taskes a std::string
 add_executable(map_xml_test standalone/map_xml_test.cpp)
+set_target_properties(map_xml_test PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+)
 target_link_libraries(map_xml_test PUBLIC
     Catch2::Catch2 
     mapnik::mapnik 
@@ -155,6 +180,11 @@ add_executable(mapnik-test-visual
     visual/runner.cpp
     visual/run.cpp
 )
+set_target_properties(mapnik-test-visual PROPERTIES 
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+)
 target_link_libraries(mapnik-test-visual PRIVATE
     Catch2::Catch2
     Boost::program_options
@@ -167,40 +197,34 @@ target_include_directories(mapnik-test-visual PRIVATE "${catch2_SOURCE_DIR}/sing
 include("${catch2_SOURCE_DIR}/contrib/Catch.cmake")
 include("${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake")
 
-# use only mapnik-test-unit since it has the same build path
-mapnik_copy_plugins(
-    TARGET mapnik-test-unit 
-    DESTINATION plugins/input 
-    PLUGINS 
-        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
-)
-mapnik_require_fonts(TARGET mapnik-test-unit DESTINATION fonts)
-
-mapnik_copy_dependencies(
-    TARGETS
-        mapnik-test-unit agg_rasterizer_integer_overflow_test datasource_registration_test font_registration_test map_xml_test mapnik-test-visual
-    PLUGINS 
-        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
-)
-
-
-file(COPY data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test")
-file(COPY data-visual DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test")
-file(COPY unit/data DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/unit")
-file(COPY "${mapnik_SOURCE_DIR}/demo/data" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/demo")
+file(COPY data DESTINATION "${MAPNIK_OUTPUT_DIR}/test")
+file(COPY data-visual DESTINATION "${MAPNIK_OUTPUT_DIR}/test")
+file(COPY unit/data DESTINATION "${MAPNIK_OUTPUT_DIR}/test/unit")
+file(COPY "${mapnik_SOURCE_DIR}/demo/data" DESTINATION "${MAPNIK_OUTPUT_DIR}/demo")
 add_dependencies(mapnik-test-unit mapnik-index shapeindex)
+
+set(m_proj_test_env "")
+if(DEFINED PROJ_LIB)
+    set(m_proj_test_env "PROJ_LIB=${PROJ_LIB}")
+elseif(DEFINED ENV{PROJ_LIB})
+    set(m_proj_test_env "PROJ_LIB=$ENV{PROJ_LIB}")
+endif()
+message(STATUS "using proj lib for unit tests: ${m_proj_test_env}")
+
 if(WIN32)
-    catch_discover_tests(mapnik-test-unit PROPERTIES
-        ENVIRONMENT "PATH=\$<JOIN:\$<SHELL_PATH:$<TARGET_FILE_DIR:mapnik-index>;$<TARGET_FILE_DIR:shapeindex>;$ENV{PATH}>,\\\\\\\\\;>"
-    )
+    set(m_test_path "\$<JOIN:\$<SHELL_PATH:$<TARGET_FILE_DIR:mapnik-index>;$<TARGET_FILE_DIR:shapeindex>;$ENV{PATH}>,\\\\\\\\\;>")
 else()
-    catch_discover_tests(mapnik-test-unit PROPERTIES 
-        ENVIRONMENT "PATH=$<SHELL_PATH:$<TARGET_FILE_DIR:shapeindex>;$<TARGET_FILE_DIR:mapnik-index>;$ENV{PATH}>"
-    )
+    set(m_test_path "$<SHELL_PATH:$<TARGET_FILE_DIR:shapeindex>;$<TARGET_FILE_DIR:mapnik-index>;$ENV{PATH}>")
 endif()
 
-
-catch_discover_tests(agg_rasterizer_integer_overflow_test)
-catch_discover_tests(datasource_registration_test)
-catch_discover_tests(font_registration_test)
-catch_discover_tests(map_xml_test)
+catch_discover_tests(mapnik-test-unit
+    WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    PROPERTIES 
+        ENVIRONMENT 
+            "PATH=${m_test_path}"
+            ${m_proj_test_env}
+)
+catch_discover_tests(agg_rasterizer_integer_overflow_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+catch_discover_tests(datasource_registration_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+catch_discover_tests(font_registration_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+catch_discover_tests(map_xml_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
