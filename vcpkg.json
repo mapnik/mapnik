@@ -1,69 +1,69 @@
 {
-    "name": "mapnik",
-    "version-string": "master",
-    "description": "Mapnik is an open source toolkit for developing mapping applications.",
-    "homepage": "https://github.com/mapnik/mapnik",
-    "dependencies": [
-        "boost-assign",
-        "boost-bimap",
-        "boost-filesystem",
-        "boost-geometry",
-        "boost-gil",
-        "boost-interprocess",
-        {
-            "name": "boost-locale",
-            "features": [
-                "icu"
-            ]
-        },
-        "boost-msm",
-        "boost-property-tree",
-        {
-            "name": "boost-regex",
-            "features": [
-                "icu"
-            ]
-        },
-        "boost-spirit",
-        "boost-system",
-        {
-            "name": "freetype",
-            "features": [
-                "bzip2",
-                "png"
-            ]
-        },
-        {
-            "name": "harfbuzz",
-            "features": [
-                "icu"
-            ]
-        },
-        {
-            "name": "harfbuzz",
-            "features": [
-                "coretext"
-            ],
-            "platform": "osx"
-        },
-        "icu",
-        "mapbox-geometry",
-        "mapbox-polylabel",
-        "mapbox-variant",
-        "protozero",
-        "zlib",
-        "boost-program-options",
-        "cairo",
-        "cairomm",
-        "gdal",
-        "libodb-pgsql",
-        "libpq",
-        "sqlite3",
-        "libwebp",
-        "tiff",
-        "proj4",
-        "libjpeg-turbo",
-        "libpng",
-        "libxml2"
-    ]
+  "name": "mapnik",
+  "version-string": "master",
+  "description": "Mapnik is an open source toolkit for developing mapping applications.",
+  "homepage": "https://github.com/mapnik/mapnik",
+  "dependencies": [
+    "boost-assign",
+    "boost-bimap",
+    "boost-filesystem",
+    "boost-geometry",
+    "boost-gil",
+    "boost-interprocess",
+    {
+      "name": "boost-locale",
+      "features": [
+        "icu"
+      ]
+    },
+    "boost-msm",
+    "boost-program-options",
+    "boost-property-tree",
+    {
+      "name": "boost-regex",
+      "features": [
+        "icu"
+      ]
+    },
+    "boost-spirit",
+    "boost-system",
+    "cairo",
+    "cairomm",
+    {
+      "name": "freetype",
+      "features": [
+        "bzip2",
+        "png"
+      ]
+    },
+    "gdal",
+    {
+      "name": "harfbuzz",
+      "features": [
+        "icu"
+      ]
+    },
+    {
+      "name": "harfbuzz",
+      "features": [
+        "coretext"
+      ],
+      "platform": "osx"
+    },
+    "icu",
+    "libjpeg-turbo",
+    "libodb-pgsql",
+    "libpng",
+    "libpq",
+    "libwebp",
+    "libxml2",
+    "mapbox-geometry",
+    "mapbox-polylabel",
+    "mapbox-variant",
+    "proj4",
+    "protozero",
+    "sqlite3",
+    "tiff",
+    "zlib"
+  ]
 }
