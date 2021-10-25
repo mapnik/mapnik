@@ -200,13 +200,13 @@ inline int create_disk_index(std::string const& filename, bool silent = true)
         cmd += std::string("DYLD_LIBRARY_PATH=") + std::getenv("DYLD_LIBRARY_PATH") + " ";
     }
     cmd += "mapnik-index";
-#ifdef _WINDOWS
+#ifdef _WIN32
     cmd += ".exe";
 #endif
     cmd += " " + filename;
     if (silent)
     {
-#ifndef _WINDOWS
+#ifndef _WIN32
         cmd += " 2>/dev/null";
 #else
         cmd += " 2> nul";

@@ -41,7 +41,8 @@ MAPNIK_DISABLE_WARNING_POP
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 int main ()
 #else
@@ -73,7 +74,7 @@ int main (int argc,char** argv)
         po::positional_options_description p;
         p.add("shape_files",-1);
         po::variables_map vm;
-#ifdef _WINDOWS
+#ifdef _WIN32
         std::vector<std::string> args;
         const auto wargs = po::split_winmain(GetCommandLineW());
         for( auto it = wargs.begin() + 1; it != wargs.end(); ++it )
@@ -292,7 +293,7 @@ int main (int argc,char** argv)
         if (count > 0)
         {
             std::clog << " number shapes=" << count << std::endl;
-#ifdef _WINDOWS
+#ifdef _WIN32
             std::ofstream file(mapnik::utf8_to_utf16(shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
 #else
             std::ofstream file((shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
