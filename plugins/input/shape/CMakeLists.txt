@@ -1,5 +1,3 @@
-project(input-shape)
-
 add_library(input-shape MODULE 
     dbfile.cpp 
     dbf_test.cpp

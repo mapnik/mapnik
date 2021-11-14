@@ -1,5 +1,3 @@
-project(input-topojson)
-
 add_library(input-topojson MODULE
     topojson_datasource.cpp
     topojson_featureset.cpp

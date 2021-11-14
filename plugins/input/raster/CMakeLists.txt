@@ -1,5 +1,3 @@
-project(input-raster)
-
 add_library(input-raster MODULE
     raster_datasource.cpp
     raster_featureset.cpp

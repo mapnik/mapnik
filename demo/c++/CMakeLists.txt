@@ -1,5 +1,3 @@
-project(mapnik-demo)
-
 add_executable(mapnik-demo rundemo.cpp)
 set_target_properties(mapnik-demo PROPERTIES 
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
