@@ -52,20 +52,23 @@ endif()
 # Copy all plugin dlls, so that these are in the main output dir, since cmake copies those into ${MAPNIK_OUTPUT_DIR}/plugins/input, too.
 #
 if(WIN32)
-    string(CONFIGURE
-        [[
-            file(GLOB m_deps "./*.dll")
-            message(STATUS "plugin deps: ${m_deps}")
-            file(COPY ${m_deps} DESTINATION "@MAPNIK_OUTPUT_DIR@")
-        ]] m_copy_dlls_str @ONLY
-    )
-    file (GENERATE OUTPUT "copy_dlls_$<CONFIG>.cmake" 
-        CONTENT "${m_copy_dlls_str}"
-    )
-    add_custom_target(copy_plugin_dependencies ALL
-        COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/copy_dlls_$<CONFIG>.cmake"
-        WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}/plugins/input"
-        COMMENT "copying plugin dlls into build dir"
-    )
-    add_dependencies(copy_plugin_dependencies ${m_build_plugins})
+    list(LENGTH m_build_plugins m_number_plugins)
+    if(m_number_plugins GREATER 0)
+        string(CONFIGURE
+            [[
+                file(GLOB m_deps "./*.dll")
+                message(STATUS "plugin deps: ${m_deps}")
+                file(COPY ${m_deps} DESTINATION "@MAPNIK_OUTPUT_DIR@")
+            ]] m_copy_dlls_str @ONLY
+        )
+        file (GENERATE OUTPUT "copy_dlls_$<CONFIG>.cmake" 
+            CONTENT "${m_copy_dlls_str}"
+        )
+        add_custom_target(copy_plugin_dependencies ALL
+            COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/copy_dlls_$<CONFIG>.cmake"
+            WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}/plugins/input"
+            COMMENT "copying plugin dlls into build dir"
+        )
+        add_dependencies(copy_plugin_dependencies ${m_build_plugins})
+    endif()
 endif()
