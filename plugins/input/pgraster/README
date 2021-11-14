@@ -14,6 +14,8 @@ with the following differences:
 
  - "clip_rasters" boolean introduced, defaults to false
 
+ - "preunion_rasters" boolean introduced, defaults to false
+
  - "band" introduced, with same semantic of the GDAL driver
 
 Credits

@@ -75,6 +75,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
       srid_(*params.get<value_integer>("srid", 0)),
       band_(*params.get<value_integer>("band", 0)),
       extent_initialized_(false),
+      preunion_rasters_(*params.get<mapnik::boolean_type>("preunion_rasters", false)),
       prescale_rasters_(*params.get<mapnik::boolean_type>("prescale_rasters", false)),
       use_overviews_(*params.get<mapnik::boolean_type>("use_overviews", false)),
       clip_rasters_(*params.get<mapnik::boolean_type>("clip_rasters", false)),
@@ -881,6 +882,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
 
         s << "SELECT ST_AsBinary(";
 
+        if (preunion_rasters_) s << "ST_Union(";
+
         if (band_) s << "ST_Band(";
 
         if (prescale_rasters_) s << "ST_Resize(";
@@ -907,6 +910,8 @@ featureset_ptr pgraster_datasource::features_with_context(query const& q,process
         }
 
         if (band_) s << ", " << band_ << ")";
+
+        if (preunion_rasters_) s << ")";
 
         s << ") AS geom";
 
