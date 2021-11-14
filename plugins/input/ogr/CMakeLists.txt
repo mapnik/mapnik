@@ -1,5 +1,3 @@
-project(input-ogr)
-
 find_package(GDAL REQUIRED)
 
 add_library(input-ogr MODULE 

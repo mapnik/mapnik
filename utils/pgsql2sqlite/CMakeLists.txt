@@ -1,4 +1,3 @@
-project(pgsql2sqlite)
 find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
 find_package(SQLite3 REQUIRED)
 find_package(PostgreSQL REQUIRED)

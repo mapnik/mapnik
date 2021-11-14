@@ -1,5 +1,3 @@
-project(input-sqlite)
-
 find_package(SQLite3 REQUIRED)
 
 add_library(input-sqlite MODULE

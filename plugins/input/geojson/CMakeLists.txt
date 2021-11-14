@@ -1,5 +1,3 @@
-project(input-geojson)
-
 add_library(input-geojson MODULE 
     geojson_datasource.cpp 
     geojson_featureset.cpp 

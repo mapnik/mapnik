@@ -1,5 +1,3 @@
-project(mapnik-test)
-
 find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
 find_package(PostgreSQL REQUIRED)
 
@@ -194,7 +192,6 @@ target_link_libraries(mapnik-test-visual PRIVATE
 )
 target_include_directories(mapnik-test-visual PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
-include(CTest)
 include("${catch2_SOURCE_DIR}/contrib/Catch.cmake")
 include("${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake")
 
@@ -203,14 +200,6 @@ file(COPY data-visual DESTINATION "${MAPNIK_OUTPUT_DIR}/test")
 file(COPY unit/data DESTINATION "${MAPNIK_OUTPUT_DIR}/test/unit")
 file(COPY "${mapnik_SOURCE_DIR}/demo/data" DESTINATION "${MAPNIK_OUTPUT_DIR}/demo")
 add_dependencies(mapnik-test-unit mapnik-index shapeindex)
-
-set(m_proj_test_env "")
-if(DEFINED PROJ_LIB)
-    set(m_proj_test_env "PROJ_LIB=${PROJ_LIB}")
-elseif(DEFINED ENV{PROJ_LIB})
-    set(m_proj_test_env "PROJ_LIB=$ENV{PROJ_LIB}")
-endif()
-message(STATUS "using proj lib for unit tests: ${m_proj_test_env}")
 
 if(WIN32)
     set(m_test_path "\$<JOIN:\$<SHELL_PATH:$<TARGET_FILE_DIR:mapnik-index>;$<TARGET_FILE_DIR:shapeindex>;$ENV{PATH}>,\\\\\\\\\;>")
@@ -223,7 +212,6 @@ catch_discover_tests(mapnik-test-unit
     PROPERTIES 
         ENVIRONMENT 
             "PATH=${m_test_path}"
-            ${m_proj_test_env}
 )
 catch_discover_tests(agg_rasterizer_integer_overflow_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
 catch_discover_tests(datasource_registration_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
