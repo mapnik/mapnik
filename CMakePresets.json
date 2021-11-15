@@ -177,7 +177,7 @@
             "name": "windows-ci",
             "description": "used by the ci pipeline",
             "inherits": [
-                "windows-default-release",
+                "windows-release",
                 "ci-options"
             ],
             "cacheVariables": {
