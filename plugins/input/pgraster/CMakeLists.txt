@@ -1,5 +1,3 @@
-project(input-pgraster)
-
 find_package(PostgreSQL REQUIRED)
 
 add_library(input-pgraster MODULE 

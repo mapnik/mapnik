@@ -1,5 +1,3 @@
-project(input-gdal)
-
 find_package(GDAL REQUIRED)
 
 add_library(input-gdal MODULE

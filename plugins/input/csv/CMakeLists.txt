@@ -1,5 +1,3 @@
-project(input-csv)
-
 add_library(input-csv MODULE
     csv_datasource.cpp
     csv_featureset.cpp
