@@ -22,8 +22,8 @@ include(MapnikOption)
 include(MapnikMinimumVersions)
 include(MapnikFindPackage)
 include(MapnikInstall)
-include(CTest)
 
+include(CTest)
 add_feature_info(BUILD_TESTING BUILD_TESTING "Adds tests")
 
 mapnik_option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) will be copied into CMAKE_INSTALL_PREFIX/MAPNIK_BIN_DIR." ON)
