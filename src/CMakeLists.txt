@@ -19,6 +19,9 @@ set_target_properties(mapnik PROPERTIES
     VERSION ${MAPNIK_VERSION}
     # see https://github.com/mapnik/mapnik/pull/4248#issuecomment-925596509 => ABI compability only with the full version
     SOVERSION ${MAPNIK_VERSION}
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 
 if(MSVC)

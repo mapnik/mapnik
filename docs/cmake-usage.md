@@ -13,9 +13,9 @@ Make sure that all dependencies are installed.
 All available cmake options are listed at the top of [CMakeLists.txt](../CMakeLists.txt). 
 Pass your options while configuring e.g.: `cmake -DBUILD_DEMO_VIEWER=OFF ..` to disable the build of the demo viewer application.
 
-To quickstart open a console in the root mapnik dir and execute the following commands: (Pass all options and dependency dirs after `-DBUILD_TEST=OFF`)
+To quickstart open a console in the root mapnik dir and execute the following commands: (Pass all options and dependency dirs after `-DBUILD_TESTING=OFF`)
 ```
-> cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TEST=OFF
+> cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
 > cmake --build build --target install
 ```
 
@@ -64,20 +64,19 @@ This could look like this:
     },
     "configurePresets": [
         {
-            "name": "vcpkg-x64-win-debug",
-            "inherits": "windows-default-debug",
+            "name": "vcpkg",
+            "hidden": true,
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake",
-                "ADDITIONAL_LIBARIES_PATHS":"<path-to-vcpkg>/installed/x64-windows/debug/bin"
+                "CMAKE_TOOLCHAIN_FILE": "<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake"
             }
+        }
+        {
+            "name": "vcpkg-x64-win-debug",
+            "inherits": ["vcpkg", "windows-default-debug"]
         },
         {
             "name": "vcpkg-x64-win-release",
-            "inherits": "windows-default-release",
-            "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "<path-to-vcpkg>/scripts/buildsystems/vcpkg.cmake",
-                "ADDITIONAL_LIBARIES_PATHS":"<path-to-vcpkg>/installed/x64-windows/bin"
-            }
+            "inherits": ["vcpkg", "windows-default-release"]
         }
     ]
 }
