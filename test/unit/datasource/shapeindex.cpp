@@ -106,6 +106,7 @@ TEST_CASE("invalid shapeindex")
             {
                 std::string path = "test/data/shp/boundaries.shp";
                 std::string index_path = path.substr(0, path.rfind(".")) + ".index";
+                std::this_thread::sleep_for(std::chrono::seconds(1));
                 // remove *.index if present
                 if (mapnik::util::exists(index_path))
                 {
