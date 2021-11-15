@@ -1,5 +1,3 @@
-project(mapnik-viewer)
-
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
@@ -42,6 +40,9 @@ set_target_properties(mapnik-viewer PROPERTIES
     AUTORCC ON    
     AUTOUIC ON
     AUTOMOC ON
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 
 target_link_libraries(mapnik-viewer PRIVATE 
@@ -62,17 +63,3 @@ endif()
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini DESTINATION bin)
 mapnik_install_utility(mapnik-viewer)
-
-mapnik_copy_dependencies(
-    TARGETS 
-        mapnik-viewer 
-    PLUGINS 
-        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
-)
-
-mapnik_copy_plugins(TARGET mapnik-viewer 
-    DESTINATION 
-        ${PLUGINS_INSTALL_DIR}
-    PLUGINS 
-        input-csv input-gdal input-geobuf input-geojson input-ogr input-pgraster input-postgis input-raster input-shape input-sqlite input-topojson
-)

@@ -1,5 +1,3 @@
-project(input-sqlite)
-
 find_package(SQLite3 REQUIRED)
 
 add_library(input-sqlite MODULE
@@ -15,6 +13,8 @@ set_target_properties(input-sqlite PROPERTIES
     OUTPUT_NAME "sqlite"
     PREFIX "${_plugin_prefix}"
     SUFFIX "${_plugin_suffix}"
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/plugins/input"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
-
 mapnik_install_plugin(input-sqlite)

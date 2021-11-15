@@ -59,8 +59,6 @@ function(mapnik_install_utility _target)
     set_property(GLOBAL APPEND PROPERTY MAPNIK_UTILITIES ${_target})
 endfunction()
 
-
-
 function(mapnik_install_targets)
     if(INSTALL_DEPENDENCIES AND WIN32)
         # https://cmake.org/cmake/help/latest/policy/CMP0087.html
@@ -93,5 +91,4 @@ function(mapnik_install_targets)
             fixup_bundle(\"${_internal_executables}\" \"${_internal_libraries}\" \"${ADDITIONAL_LIBARIES_PATHS}\")
         " COMPONENT MapnikRuntime)
     endif()
-
 endfunction()
