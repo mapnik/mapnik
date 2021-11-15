@@ -33,6 +33,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 MAPNIK_DISABLE_WARNING_POP
+#include <thread>
 
 namespace {
 
