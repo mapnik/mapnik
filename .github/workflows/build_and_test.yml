@@ -25,17 +25,14 @@ jobs:
             mono: "mono"
             vcpkgroot: $VCPKG_INSTALLATION_ROOT
             preset: linux-ci
-            cpack: cpack
           - os: "macos-latest"
             triplet: "x64-linux"
             mono: "mono"
             vcpkgroot: $VCPKG_INSTALLATION_ROOT
             preset: macos-ci
-            cpack: cpack
           - os: "windows-latest"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
-            cpack: "C:\\Program Files\\CMake\\bin\\cpack.exe"
 
     steps:
       - name: Install required system packages
@@ -67,11 +64,13 @@ jobs:
           -name "GitHub"
           -username "mathisloge"
           -password "${{ secrets.VCPKG_NUGET_CI }}"
+
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
           ${{ matrix.mono }} `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
+
       - name: Configure CMake
         run: cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{matrix.preset}}
 
