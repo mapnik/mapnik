@@ -28,12 +28,12 @@
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 MAPNIK_DISABLE_WARNING_POP
-#include <thread>
 
 namespace {
 
@@ -90,6 +90,7 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
         cmd += " 2> nul";
 #endif
     }
+    std::cout.flush();
     return std::system(cmd.c_str());
 }
 
@@ -107,7 +108,6 @@ TEST_CASE("invalid shapeindex")
             {
                 std::string path = "test/data/shp/boundaries.shp";
                 std::string index_path = path.substr(0, path.rfind(".")) + ".index";
-                std::this_thread::sleep_for(std::chrono::seconds(1));
                 // remove *.index if present
                 if (mapnik::util::exists(index_path))
                 {
