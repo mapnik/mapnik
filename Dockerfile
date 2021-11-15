@@ -37,4 +37,5 @@ RUN cmake --preset linux-gcc-release -DBUILD_DEMO_VIEWER=OFF -DBUILD_TESTING=OFF
 RUN cmake --build --preset linux-gcc-release
 RUN cmake --build --preset linux-gcc-release --target install
 
-RUN rm -rf build
+WORKDIR /
+RUN rm -rf /app
