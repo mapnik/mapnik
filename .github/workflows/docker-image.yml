@@ -22,7 +22,6 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            mathisloge/mapnik
             ghcr.io/mathisloge/mapnik
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -35,6 +34,7 @@ jobs:
             type=sha
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 

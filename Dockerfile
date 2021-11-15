@@ -32,23 +32,9 @@ ENV BUILD_DEPENDENCIES="libicu-dev \
     libboost-regex-dev \
     "
 
-ENV RUNTIME_DEPENDENCIES="libfreetype6 \
-    libharfbuzz-bin \
-    libxml2 \
-    libjpeg8 \
-    libtiff5 \
-    libwebp6 \
-    libcairo2 \
-    libproj19 \
-    libgdal28 \
-    libboost-filesystem1.74-dev \
-    libboost-program-options1.74.0 \
-    libboost-regex1.74.0 \
-    "
-
-RUN apt install -y $BUILD_DEPENDENCIES $RUNTIME_DEPENDENCIES
+RUN apt install -y $BUILD_DEPENDENCIES
 RUN cmake --preset linux-gcc-release -DBUILD_DEMO_VIEWER=OFF -DBUILD_TESTING=OFF -DBUILD_DEMO_CPP=OFF -DBUILD_BENCHMARK=OFF
 RUN cmake --build --preset linux-gcc-release
 RUN cmake --build --preset linux-gcc-release --target install
 
-RUN apt autoremove -y --purge $BUILD_DEPENDENCIES
+RUN rm -rf build
