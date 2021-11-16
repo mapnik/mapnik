@@ -28,7 +28,6 @@
 #include <mapnik/util/fs.hpp>
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -90,7 +89,6 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
         cmd += " 2> nul";
 #endif
     }
-    std::cout.flush();
     return std::system(cmd.c_str());
 }
 
