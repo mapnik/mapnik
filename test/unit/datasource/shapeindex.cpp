@@ -117,9 +117,10 @@ TEST_CASE("invalid shapeindex")
                 std::size_t feature_count = count_shapefile_features(path);
 
                 // create index
-                std::ofstream index(index_path.c_str(), std::ios::binary);
-                index.write(std::get<1>(val).c_str(), std::get<1>(val).size());
-                index.close();
+                {
+                    std::ofstream index{index_path, std::ios::binary};
+                    index.write(std::get<1>(val).c_str(), std::get<1>(val).size());
+                }
 
                 // count features
                 std::size_t feature_count_indexed = count_shapefile_features(path);
