@@ -124,15 +124,9 @@ set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
 # Begin project configuration
-
-# needs to be before the first call of find_boost.
 if(USE_MULTITHREADED)
-    set(Boost_USE_MULTITHREADED ON)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_THREADSAFE)
-else()
-    set(Boost_USE_MULTITHREADED OFF)
 endif()
-
 
 find_package(PkgConfig)
 mapnik_find_threads()
