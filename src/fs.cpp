@@ -32,7 +32,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-#include <filesystem>
 // stl
 #include <stdexcept>
 
@@ -72,10 +71,7 @@ namespace mapnik
                 bool remove(std::string const &filepath)
                 {
 #ifdef _WIN32
-                        // std::cout::flush();
-                        std::system((std::string{"attrib "} + filepath).c_str());
                         std::system((std::string{"handle "} + filepath).c_str());
-                        boost::filesystem::permissions(mapnik::utf8_to_utf16(filepath), boost::filesystem::perms::owner_write | boost::filesystem::perms::group_write | boost::filesystem::perms::add_perms);
                         return boost::filesystem::remove(mapnik::utf8_to_utf16(filepath));
 #else
                         return boost::filesystem::remove(filepath);
