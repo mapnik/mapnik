@@ -33,11 +33,5 @@
       "name": "vcpkg-cmake",
       "host": true
     }
-  ],
-  "overrides": [
-    {
-      "name": "boost-filesystem",
-      "version": "1.77.0#1"
-    }
   ]
 }

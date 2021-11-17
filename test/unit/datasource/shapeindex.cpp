@@ -105,7 +105,8 @@ TEST_CASE("invalid shapeindex")
                            std::make_tuple(false, std::string("mapnik-index................."))})       // valid header + invalid index
             {
                 std::string path = "test/data/shp/boundaries.shp";
-                std::string index_path = path.substr(0, path.rfind(".")) + ".index";
+                //std::string index_path = path.substr(0, path.rfind(".")) + ".index";
+                std::string index_path = std::tmpnam(nullptr);
                 // remove *.index if present
                 if (mapnik::util::exists(index_path))
                 {
