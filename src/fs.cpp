@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
+#include <iostream>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -70,6 +71,8 @@ namespace mapnik
 
                 bool remove(std::string const &filepath)
                 {
+                        //std::cout::flush();
+                        std::system((std::string{"attrib "} + filepath).c_str());
                         boost::filesystem::permissions(mapnik::utf8_to_utf16(filepath), boost::filesystem::perms::owner_write | boost::filesystem::perms::group_write | boost::filesystem::perms::add_perms);
 #ifdef _WIN32
                         
