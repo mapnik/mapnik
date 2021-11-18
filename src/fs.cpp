@@ -34,6 +34,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <stdexcept>
+#include <filesystem>
 
 namespace mapnik
 {
@@ -72,7 +73,8 @@ namespace mapnik
                 {
 #ifdef _WIN32
                         std::system((std::string{"handle "} + filepath).c_str());
-                        return boost::filesystem::remove(mapnik::utf8_to_utf16(filepath));
+                        return std::filesystem::remove(mapnik::utf8_to_utf16(filepath));
+                        //return boost::filesystem::remove(mapnik::utf8_to_utf16(filepath));
 #else
                         return boost::filesystem::remove(filepath);
 #endif
