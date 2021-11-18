@@ -184,9 +184,6 @@
                 "INSTALL_DEPENDENCIES": "ON",
                 "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin",
                 "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-test/boost-filesystem",
-                "CMAKE_CXX_STANDARD": "20",
-                "USE_PLUGIN_INPUT_POSTGIS": "OFF",
-                "USE_PLUGIN_INPUT_PGRASTER": "OFF",
                 "USE_MEMORY_MAPPED_FILE": "OFF"
             }
         },

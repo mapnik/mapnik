@@ -18,8 +18,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2022]
+        os: [ubuntu-latest, windows-2022]
         include:
+          - os: "ubuntu-latest"
+            triplet: "x64-linux"
+            mono: "mono"
+            vcpkgroot: $VCPKG_INSTALLATION_ROOT
+            preset: linux-ci
           - os: "windows-2022"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
@@ -31,7 +36,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install -y gperf libxxf86vm-dev ninja-build
           elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install ninja handle --ignore-checksums
+            choco install ninja
           elif [ "$RUNNER_OS" == "macOS" ]; then
             brew install automake ninja
           else
@@ -61,16 +66,8 @@ jobs:
           ${{ matrix.mono }} `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
-      - name: Take test data ownership
-        if: matrix.os == 'windows-2022'
-        run: TAKEOWN /F test\data
-
       - name: Configure CMake
         run: cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{matrix.preset}}
-
-      - name: Take test data ownership (cmake)
-        if: matrix.os == 'windows-2022'
-        run: TAKEOWN /F build\windows-ci\out\test
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}}
