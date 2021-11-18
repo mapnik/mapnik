@@ -18,18 +18,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022, macos-latest]
+        os: [windows-2022]
         include:
-          - os: "ubuntu-latest"
-            triplet: "x64-linux"
-            mono: "mono"
-            vcpkgroot: $VCPKG_INSTALLATION_ROOT
-            preset: linux-ci
-          - os: "macos-latest"
-            triplet: "x64-linux"
-            mono: "mono"
-            vcpkgroot: $VCPKG_INSTALLATION_ROOT
-            preset: macos-ci
           - os: "windows-2022"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
