@@ -1,7 +1,7 @@
 {
   "name": "boost-filesystem",
   "version": "1.77.0",
-  "port-version": 1,
+  "port-version": 2,
   "description": "Boost filesystem module",
   "homepage": "https://github.com/boostorg/filesystem",
   "supports": "!uwp",
