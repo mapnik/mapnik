@@ -186,7 +186,8 @@
                 "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-test/boost-filesystem",
                 "CMAKE_CXX_STANDARD": "20",
                 "USE_PLUGIN_INPUT_POSTGIS": "OFF",
-                "USE_PLUGIN_INPUT_PGRASTER": "OFF"
+                "USE_PLUGIN_INPUT_PGRASTER": "OFF",
+                "USE_MEMORY_MAPPED_FILE": "OFF"
             }
         },
         {

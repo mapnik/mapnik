@@ -73,8 +73,8 @@ namespace mapnik
                 {
 #ifdef _WIN32
                         std::system((std::string{"handle "} + filepath).c_str());
-                        return std::filesystem::remove(mapnik::utf8_to_utf16(filepath));
-                        //return boost::filesystem::remove(mapnik::utf8_to_utf16(filepath));
+                        //return std::filesystem::remove(mapnik::utf8_to_utf16(filepath));
+                        return boost::filesystem::remove(mapnik::utf8_to_utf16(filepath));
 #else
                         return boost::filesystem::remove(filepath);
 #endif
