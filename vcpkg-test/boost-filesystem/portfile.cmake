@@ -2,7 +2,7 @@ vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO boostorg/filesystem
     REF feature/windows_remove_read_only
-    SHA512 a3ae9f592974825ec09a010f29fc804722535cc0df7aa1f8834564e679c0d66fa587ad059532ac469b012297f87aa12126bd467c3380e4aa28cf1703ac47d7f9
+    SHA512 0ab482663aba5896d9bb971bb0a1ce3fcfbdf8510248dc8c5bcb1907ce586e91f516201232ea49106cffa2ff0701a87c7f5b16bb3b2670a78612cdce779f0ee0 
     HEAD_REF master
 )
 
