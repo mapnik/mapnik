@@ -18,16 +18,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2022]
+        os: [ubuntu-latest, windows-2022, macos-latest]
         include:
           - os: "ubuntu-latest"
             triplet: "x64-linux"
-            mono: "mono"
             vcpkgroot: $VCPKG_INSTALLATION_ROOT
             preset: linux-ci
-          - os: "windows-2022"
+          - os: "windows-latest"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
+          - os: "macos-latest"
+            triplet: "x64-linux"
+            preset: macos-ci
 
     steps:
       - name: Install required system packages
@@ -38,7 +40,7 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
             choco install ninja
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            brew install automake ninja
+            brew install automake ninja gdal proj cairo
           else
             echo "$RUNNER_OS not supported"
           fi
@@ -67,7 +69,12 @@ jobs:
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{matrix.preset}}
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            cmake --preset=${{matrix.preset}}
+          else
+            cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{matrix.preset}}
+          fi
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}}
@@ -84,10 +91,10 @@ jobs:
           path: build/*-ci/mapnik-*.tar.gz
           retention-days: 2
 
-      - name: upload failure logs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{matrix.preset}}-artifact
-          path: build/
-          retention-days: 2
+      #- name: upload failure logs
+      #  if: ${{ failure() }}
+      #  uses: actions/upload-artifact@v2
+      #  with:
+      #    name: ${{matrix.preset}}-artifact
+      #    path: build/
+      #    retention-days: 2
