@@ -24,12 +24,14 @@ jobs:
             triplet: "x64-linux"
             vcpkgroot: $VCPKG_INSTALLATION_ROOT
             preset: linux-ci
+            mono: "mono"
           - os: "windows-latest"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
           - os: "macos-latest"
             triplet: "x64-linux"
             preset: macos-ci
+            mono: "mono"
 
     steps:
       - name: Install required system packages
