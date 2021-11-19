@@ -183,7 +183,6 @@
             "cacheVariables": {
                 "INSTALL_DEPENDENCIES": "ON",
                 "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin",
-                "VCPKG_OVERLAY_PORTS": "${sourceDir}/vcpkg-test/boost-filesystem",
                 "USE_MEMORY_MAPPED_FILE": "OFF"
             }
         },
