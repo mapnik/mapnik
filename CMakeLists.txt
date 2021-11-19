@@ -300,7 +300,7 @@ endif()
 
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
-    mapnik_find_package(PROJ ${PROJ_MIN_VERSION} QUIET)
+    mapnik_find_package(PROJ QUIET)
     # currently the cmake files are not installed, when installing proj via apt-get. So search via pkg-config
     if(NOT PROJ_FOUND)
         message(STATUS "PROJ not found via FindPROJ. Searching via pkg-config...")
@@ -311,6 +311,9 @@ if(USE_PROJ)
         set(PROJ_VERSION_PATCH "${CMAKE_MATCH_3}")
         list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::PROJ)
     else()
+        if(PROJ_VERSION VERSION_LESS PROJ_MIN_VERSION)
+            message(FATAL_ERROR "Proj needs to be at least version ${PROJ_MIN_VERSION}")
+        endif()
         list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ_LIBRARIES})
         list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE $<BUILD_INTERFACE:${PROJ_INCLUDE_DIRS}>)
     endif()
