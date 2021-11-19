@@ -18,7 +18,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: "ubuntu-latest"
             triplet: "x64-linux"
@@ -28,11 +27,11 @@ jobs:
           - os: "windows-latest"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
-          - os: "macos-latest"
-            triplet: "x64-linux"
-            vcpkgroot: $VCPKG_INSTALLATION_ROOT
-            preset: macos-ci
-            mono: "mono"
+          #- os: "macos-latest"
+          #  triplet: "x64-linux"
+          #  vcpkgroot: $VCPKG_INSTALLATION_ROOT
+          #  preset: macos-ci
+          #  mono: "mono"
 
     steps:
       - name: Install required system packages
