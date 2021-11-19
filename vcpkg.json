@@ -64,10 +64,6 @@
     "protozero",
     "sqlite3",
     "tiff",
-    "zlib",
-    {
-      "name": "lz4", 
-      "platform": "osx"
-    }
+    "zlib"
   ]
 }
