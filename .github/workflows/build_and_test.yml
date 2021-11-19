@@ -30,6 +30,7 @@ jobs:
             preset: windows-ci
           - os: "macos-latest"
             triplet: "x64-linux"
+            vcpkgroot: $VCPKG_INSTALLATION_ROOT
             preset: macos-ci
             mono: "mono"
 
@@ -42,7 +43,7 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
             choco install ninja
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            brew install automake ninja gdal proj cairo
+            brew install automake ninja
           else
             echo "$RUNNER_OS not supported"
           fi
@@ -71,12 +72,7 @@ jobs:
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
-        run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            cmake --preset=${{matrix.preset}}
-          else
-            cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{matrix.preset}}
-          fi
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{matrix.preset}}
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}}
