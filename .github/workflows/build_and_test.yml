@@ -18,6 +18,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: 
+          - ubuntu-latest
+          - windows-latest
+          # - macos-latest
         include:
           - os: "ubuntu-latest"
             triplet: "x64-linux"
