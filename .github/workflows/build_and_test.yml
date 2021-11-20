@@ -16,12 +16,21 @@ env:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    services:
+      postgres:
+        image: postgis/postgis
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mapnik-tmp-postgis-test-db
+        ports:
+          - 5432:5432
+          
     strategy:
       matrix:
-        os: 
+        os:
           - ubuntu-latest
           - windows-latest
-          - macos-latest
+          #- macos-latest
         include:
           - os: "ubuntu-latest"
             triplet: "x64-linux"
@@ -31,20 +40,20 @@ jobs:
           - os: "windows-latest"
             vcpkgroot: C:/vcpkg
             preset: windows-ci
-          - os: "macos-latest"
-            triplet: "x64-linux"
-            vcpkgroot: $VCPKG_INSTALLATION_ROOT
-            preset: macos-ci
-            mono: "mono"
+          #- os: "macos-latest"
+          #  triplet: "x64-linux"
+          #  vcpkgroot: $VCPKG_INSTALLATION_ROOT
+          #  preset: macos-ci
+          #  mono: "mono"
 
     steps:
       - name: Install required system packages
         shell: "bash"
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install -y gperf libxxf86vm-dev ninja-build
+            sudo apt-get install -y gperf libxxf86vm-dev ninja-build postgresql-client
           elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install ninja
+            choco install ninja postgresql
           elif [ "$RUNNER_OS" == "macOS" ]; then
             brew install automake ninja
           else
