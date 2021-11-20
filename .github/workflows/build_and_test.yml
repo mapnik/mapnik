@@ -11,6 +11,8 @@ on:
 jobs:
   build:
       uses: mathisloge/mapnik/.github/workflows/build.yml@gh_ci
+      secrets:
+        VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
   test:
     runs-on: ${{ matrix.os }}          
     strategy:
