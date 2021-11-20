@@ -80,11 +80,11 @@ bool ping_postmaster()
 
 TEST_CASE("postgis") {
 
-    SECTION("Ping Postmaster (check if server is runnging and accessible")
+    SECTION("Ping Postmaster (check if server is runnging and accessible", "[!mayfail]")
     {
         if (!ping_postmaster())
         {
-            WARN("Can't run postgis.input tests - check postmaster is running and accessible");
+            FAIL("Can't run postgis.input tests - check postmaster is running and accessible");
             return;
         }
         else
