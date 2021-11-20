@@ -15,6 +15,8 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19.0")
     cmake_policy(SET CMP0110 OLD)
 endif()
 
+add_subdirectory(visual)
+
 add_executable(mapnik-test-unit 
     unit/run.cpp
     unit/color/css_color.cpp
@@ -171,26 +173,6 @@ target_link_libraries(map_xml_test PUBLIC
     mapnik::json
 )
 target_include_directories(map_xml_test PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
-
-add_executable(mapnik-test-visual 
-    visual/parse_map_sizes.cpp
-    visual/report.cpp
-    visual/runner.cpp
-    visual/run.cpp
-)
-set_target_properties(mapnik-test-visual PROPERTIES 
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
-target_link_libraries(mapnik-test-visual PRIVATE
-    Catch2::Catch2
-    Boost::program_options
-    Boost::filesystem
-    mapnik::mapnik
-    mapnik::agg
-)
-target_include_directories(mapnik-test-visual PRIVATE "${catch2_SOURCE_DIR}/single_include/catch2" ${CMAKE_CURRENT_BINARY_DIR})
 
 include("${catch2_SOURCE_DIR}/contrib/Catch.cmake")
 include("${catch2_SOURCE_DIR}/contrib/ParseAndAddCatchTests.cmake")
