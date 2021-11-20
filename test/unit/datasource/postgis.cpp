@@ -78,9 +78,9 @@ bool ping_postmaster()
 
 }
 
-TEST_CASE("postgis") {
+TEST_CASE("postgis", "[!mayfail]") {
 
-    SECTION("Ping Postmaster (check if server is runnging and accessible", "[!mayfail]")
+    SECTION("Ping Postmaster (check if server is runnging and accessible")
     {
         if (!ping_postmaster())
         {
