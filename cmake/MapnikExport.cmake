@@ -27,7 +27,6 @@ install(
     FILES 
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCairo.cmake" 
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindWebP.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHarfBuzz.cmake"
     DESTINATION ${MAPNIK_CMAKE_DIR}/Modules
 )
 
