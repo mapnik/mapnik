@@ -159,10 +159,12 @@ if(harfbuzz_FOUND)
     message(STATUS "Found harfbuzz native cmake")
     list(APPEND MAPNIK_OPTIONAL_LIBS harfbuzz::harfbuzz)
 else()
-    # we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
-    message(STATUS "Fallback to FindHarfBuzz")
-    mapnik_find_package(HarfBuzz ${HARFBUZZ_MIN_VERSION} REQUIRED COMPONENTS ICU)
-    list(APPEND MAPNIK_OPTIONAL_LIBS HarfBuzz::HarfBuzz HarfBuzz::ICU)
+    # Use pkg-config when harfbuzz is not found. 
+    # It might be possible that in future version harfbuzz could only be found via pkg-config.
+    # harfbuzz related discussion: https://github.com/harfbuzz/harfbuzz/issues/2653
+    message(STATUS "harfbuzz not found via cmake. Searching via pkg-config...")
+    pkg_check_modules(harfbuzz REQUIRED IMPORTED_TARGET harfbuzz>=${HARFBUZZ_MIN_VERSION})
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::harfbuzz)
 endif()
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
@@ -306,7 +308,7 @@ endif()
 
 if(USE_PROJ)
     #https://proj.org/development/cmake.html
-    mapnik_find_package(PROJ ${PROJ_MIN_VERSION} QUIET)
+    mapnik_find_package(PROJ QUIET)
     # currently the cmake files are not installed, when installing proj via apt-get. So search via pkg-config
     if(NOT PROJ_FOUND)
         message(STATUS "PROJ not found via FindPROJ. Searching via pkg-config...")
@@ -317,6 +319,9 @@ if(USE_PROJ)
         set(PROJ_VERSION_PATCH "${CMAKE_MATCH_3}")
         list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::PROJ)
     else()
+        if(PROJ_VERSION VERSION_LESS PROJ_MIN_VERSION)
+            message(FATAL_ERROR "Proj needs to be at least version ${PROJ_MIN_VERSION}")
+        endif()
         list(APPEND MAPNIK_OPTIONAL_LIBS ${PROJ_LIBRARIES})
         list(APPEND MAPNIK_OPTIONAL_LIBS_INCLUDE $<BUILD_INTERFACE:${PROJ_INCLUDE_DIRS}>)
     endif()
