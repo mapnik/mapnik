@@ -20,36 +20,36 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          #- windows-latest
-          #- macos-latest
+          - windows-latest
+          - macos-latest
         include:
           - os: "ubuntu-latest"
             triplet: "x64-linux"
             vcpkgroot: $VCPKG_INSTALLATION_ROOT
             preset: linux-ci
             mono: "mono"
-          #- os: "windows-latest"
-          #  vcpkgroot: C:/vcpkg
-          #  preset: windows-ci
-          ##- os: "macos-latest"
-          #  triplet: "x64-linux"
-          #  vcpkgroot: $VCPKG_INSTALLATION_ROOT
-          #  preset: macos-ci
-          #  mono: "mono"
+          - os: "windows-latest"
+            vcpkgroot: C:/vcpkg
+            preset: windows-ci
+          - os: "macos-latest"
+            triplet: "x64-linux"
+            vcpkgroot: $VCPKG_INSTALLATION_ROOT
+            preset: macos-ci
+            mono: "mono"
 
-    services:
-      postgres:
-        image: postgis/postgis
-        env:
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: mapnik-tmp-postgis-test-db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    #services:
+    #  postgres:
+    #    image: postgis/postgis
+    #    env:
+    #      POSTGRES_PASSWORD: password
+    #      POSTGRES_DB: mapnik-tmp-postgis-test-db
+    #    ports:
+    #      - 5432:5432
+    #    options: >-
+    #      --health-cmd pg_isready
+    #      --health-interval 10s
+    #      --health-timeout 5s
+    #      --health-retries 5
 
     steps:
       - name: Install required system packages
