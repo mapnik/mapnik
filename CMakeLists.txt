@@ -153,10 +153,12 @@ if(harfbuzz_FOUND)
     message(STATUS "Found harfbuzz native cmake")
     list(APPEND MAPNIK_OPTIONAL_LIBS harfbuzz::harfbuzz)
 else()
-    # we use our "own" FindHarfBuzz. See https://github.com/mapnik/mapnik/pull/4191#issuecomment-874728157 for more details
-    message(STATUS "Fallback to FindHarfBuzz")
-    mapnik_find_package(HarfBuzz ${HARFBUZZ_MIN_VERSION} REQUIRED COMPONENTS ICU)
-    list(APPEND MAPNIK_OPTIONAL_LIBS HarfBuzz::HarfBuzz HarfBuzz::ICU)
+    # Use pkg-config when harfbuzz is not found. 
+    # It might be possible that in future version harfbuzz could only be found via pkg-config.
+    # harfbuzz related discussion: https://github.com/harfbuzz/harfbuzz/issues/2653
+    message(STATUS "harfbuzz not found via cmake. Searching via pkg-config...")
+    pkg_check_modules(harfbuzz REQUIRED IMPORTED_TARGET harfbuzz>=${HARFBUZZ_MIN_VERSION})
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::harfbuzz)
 endif()
 
 if(USE_EXTERNAL_MAPBOX_GEOMETRY)
