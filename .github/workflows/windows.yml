@@ -47,7 +47,7 @@ jobs:
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{matrix.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset=${{env.preset}}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{env.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset ${{env.preset}}
 
       - name: Build
         run: cmake --build --preset ${{env.preset}}
