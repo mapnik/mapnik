@@ -7,11 +7,13 @@ on:
   pull_request:
     branches:
       - "**"
+
 env:
   VCPKG_NUGET_REPOSITORY: https://github.com/mathisloge/vcpkg-nuget.git
   NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
   NUGET_USERNAME: mathisloge
   VCPKG_SHA: 431d3810aa9241aed49b14367be417f225d2af5e
+
 jobs:
   windows:
     uses: mathisloge/mapnik/.github/workflows/windows.yml@gh_ci
