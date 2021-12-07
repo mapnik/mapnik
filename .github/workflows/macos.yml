@@ -13,7 +13,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install required system packages
-        run: brew install automake ninja icu4c
+        run: |
+          brew install automake ninja icu4c 
+          brew link icu4c --force
 
       - uses: actions/checkout@v2
         with:
