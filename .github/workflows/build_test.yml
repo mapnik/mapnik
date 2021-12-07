@@ -23,7 +23,6 @@ jobs:
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
     with:
       VCPKG_SHA: 431d3810aa9241aed49b14367be417f225d2af5e
-      VCPKG_NUGET_REPOSITORY: https://github.com/mathisloge/vcpkg-nuget.git
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
     secrets:
