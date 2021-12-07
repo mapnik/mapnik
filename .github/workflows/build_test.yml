@@ -10,8 +10,8 @@ on:
 
 jobs:
   windows:
-    uses: mathisloge/mapnik/.github/workflows/windows.yml@master
+    uses: mathisloge/mapnik/.github/workflows/windows.yml@gh_ci
   ubuntu:
-    uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@master
+    uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@gh_ci
   macos:
-    uses: mathisloge/mapnik/.github/workflows/macos.yml@master
+    uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci

@@ -29,7 +29,7 @@ jobs:
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          mono `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          mono.exe `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
           sources add
           -source "https://nuget.pkg.github.com/mathisloge/index.json"
           -storepasswordincleartext
@@ -40,7 +40,7 @@ jobs:
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          mono `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          mono.exe `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
