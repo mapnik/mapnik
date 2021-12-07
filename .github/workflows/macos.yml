@@ -15,6 +15,9 @@ jobs:
       - name: Install required system packages
         run: |
           brew install automake ninja icu4c boost freetype harfbuzz libxml2 libpng jpeg libtiff webp cairo proj libpq gdal
+      
+      - name: Setup enviroment
+        run: export CMAKE_PREFIX_PATH=/usr/local/opt/icu4c:/usr/local/opt/libxml2
 
       - uses: actions/checkout@v2
         with:
