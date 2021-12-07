@@ -24,7 +24,7 @@ jobs:
           submodules: "recursive"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_PREFIX_PATH=/usr/local/opt/icu4c:/usr/local/opt/libxml2 --preset=${{ env.preset }}
+        run: cmake --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
