@@ -15,14 +15,16 @@ jobs:
       - name: Install required system packages
         run: |
           brew install automake ninja icu4c 
-          export CMAKE_PREFIX_PATH=/usr/local/opt/icu4c
+      
+      - name: Setup enviroment
+        run: export CMAKE_PREFIX_PATH=/usr/local/opt/icu4c
 
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
 
       - name: Configure CMake
-        run: cmake --preset=${{ env.preset }}
+        run: cmake -DCMAKE_PREFIX_PATH=/usr/local/opt/icu4c --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
