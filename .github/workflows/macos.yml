@@ -35,7 +35,6 @@ jobs:
         with:
           repository: "microsoft/vcpkg"
           ref: ${{ inputs.vcpkg_sha }}
-          path: vcpkg
 
       - name: "Setup NuGet Credentials"
         shell: "bash"
