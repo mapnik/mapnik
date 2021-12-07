@@ -29,7 +29,7 @@ jobs:
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          mono.exe `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
           sources add
           -source "https://nuget.pkg.github.com/mathisloge/index.json"
           -storepasswordincleartext
@@ -40,7 +40,7 @@ jobs:
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          mono.exe `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
@@ -60,11 +60,3 @@ jobs:
           name: windows-mapnik-artifact
           path: build/*-ci/mapnik-*.tar.gz
           retention-days: 2
-
-      #- name: upload failure logs
-      #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@v2
-      #  with:
-      #    name: ${{matrix.preset}}-artifact
-      #    path: build/
-      #    retention-days: 2
