@@ -55,7 +55,7 @@ jobs:
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          ${{ env.mono }} `${{ github.workspace }}/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
