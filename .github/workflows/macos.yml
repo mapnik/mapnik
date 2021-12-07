@@ -40,7 +40,7 @@ jobs:
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          ${{ env.mono }} `$GITHUB_WORKSPACE/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg fetch nuget | tail -n 1`
           sources add
           -source "https://nuget.pkg.github.com/mathisloge/index.json"
           -storepasswordincleartext
@@ -51,11 +51,11 @@ jobs:
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          ${{ env.mono }} `$GITHUB_WORKSPACE/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
