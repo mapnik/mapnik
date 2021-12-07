@@ -2,6 +2,10 @@ name: MacOS
 
 on:
   workflow_call:
+    inputs:
+      vcpkg_sha:
+        required: true
+        type: string
     secrets:
       VCPKG_NUGET_CI:
         required: true
@@ -21,20 +25,22 @@ jobs:
         run: |
           brew install automake ninja
 
-      - uses: actions/checkout@v2
+      - name: checkout mapnik
+        uses: actions/checkout@v2
         with:
           submodules: "recursive"
 
-      - uses: actions/checkout@v2
+      - name: checkout vcpkg
+        uses: actions/checkout@v2
         with:
           repository: "microsoft/vcpkg"
-          ref: 431d3810aa9241aed49b14367be417f225d2af5e
+          ref: ${{ inputs.vcpkg_sha }}
           path: vcpkg
 
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          ${{ env.mono }} `vcpkg/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           sources add
           -source "https://nuget.pkg.github.com/mathisloge/index.json"
           -storepasswordincleartext
@@ -45,11 +51,11 @@ jobs:
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          ${{ env.mono }} `vcpkg/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
