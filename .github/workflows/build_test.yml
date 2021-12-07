@@ -19,3 +19,5 @@ jobs:
       VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
   macos:
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
+    secrets:
+      VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
