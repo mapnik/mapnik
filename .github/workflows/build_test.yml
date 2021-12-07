@@ -28,9 +28,9 @@ jobs:
   macos:
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
     with:
-      VCPKG_SHA: ${{ env.VCPKG_SHA }}
-      VCPKG_NUGET_REPOSITORY: ${{ env.VCPKG_NUGET_REPOSITORY }}
-      NUGET_REGISTRY: ${{ env.NUGET_REGISTRY }}
-      NUGET_USERNAME: ${{ env.NUGET_USERNAME }}
+      VCPKG_SHA: "${{ env.VCPKG_SHA }}"
+      VCPKG_NUGET_REPOSITORY: "${{ env.VCPKG_NUGET_REPOSITORY }}"
+      NUGET_REGISTRY: "${{ env.NUGET_REGISTRY }}"
+      NUGET_USERNAME: "${{ env.NUGET_USERNAME }}"
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
