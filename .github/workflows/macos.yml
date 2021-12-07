@@ -1,12 +1,7 @@
-name: BuildAndTestMacOS
+name: MacOS
 
 on:
-  push:
-    branches-ignore:
-      - "no-ci-*"
-  pull_request:
-    branches:
-      - "**"
+  workflow_call:
 
 env:
   UPDATE: 1

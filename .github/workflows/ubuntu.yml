@@ -1,12 +1,7 @@
-name: BuildAndTestUbuntu
+name: Ubuntu
 
 on:
-  push:
-    branches-ignore:
-      - "no-ci-*"
-  pull_request:
-    branches:
-      - "**"
+  workflow_call:
 
 env:
   VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"

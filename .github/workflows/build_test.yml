@@ -1,0 +1,17 @@
+name: Call a reusable workflow and use its outputs
+
+on:
+  push:
+    branches-ignore:
+      - "no-ci-*"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  windows:
+    uses: mathisloge/mapnik/.github/workflows/windows.yml@master
+  ubuntu:
+    uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@master
+  macos:
+    uses: mathisloge/mapnik/.github/workflows/macos.yml@master
