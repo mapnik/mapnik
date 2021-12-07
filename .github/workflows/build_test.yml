@@ -11,7 +11,11 @@ on:
 jobs:
   windows:
     uses: mathisloge/mapnik/.github/workflows/windows.yml@gh_ci
+    secrets:
+      VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
   ubuntu:
     uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@gh_ci
+    secrets:
+      VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
   macos:
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
