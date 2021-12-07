@@ -7,19 +7,28 @@ on:
   pull_request:
     branches:
       - "**"
-
+env:
+  VCPKG_NUGET_REPOSITORY: https://github.com/mathisloge/vcpkg-nuget.git
+  NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
+  NUGET_USERNAME: mathisloge
+  VCPKG_SHA: 431d3810aa9241aed49b14367be417f225d2af5e
 jobs:
   windows:
     uses: mathisloge/mapnik/.github/workflows/windows.yml@gh_ci
     secrets:
       VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
+
   ubuntu:
     uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@gh_ci
     secrets:
       VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
+
   macos:
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
     with:
-      vcpkg_sha: 431d3810aa9241aed49b14367be417f225d2af5e
+      VCPKG_SHA: ${{ env.VCPKG_SHA }}
+      VCPKG_NUGET_REPOSITORY: ${{ env.VCPKG_NUGET_REPOSITORY }}
+      NUGET_REGISTRY: ${{ env.NUGET_REGISTRY }}
+      NUGET_USERNAME: ${{ env.NUGET_USERNAME }}
     secrets:
-      VCPKG_NUGET_CI: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
