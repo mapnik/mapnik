@@ -1,0 +1,45 @@
+name: BuildAndTestMacOS
+
+on:
+  push:
+    branches-ignore:
+      - "no-ci-*"
+  pull_request:
+    branches:
+      - "**"
+
+env:
+  UPDATE: 1
+  preset: macos-ci
+  mono: mono
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Install required system packages
+        shell: "bash"
+        run: |
+          brew install automake ninja
+
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: Configure CMake
+        run: cmake --preset=${{ env.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ env.preset }}
+
+      - name: Test
+        run: ctest --preset ${{ env.preset }}
+
+      - name: Package
+        run: cmake --build --preset ${{ env.preset }} --target package
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: macos-mapnik-artifact
+          path: build/*-ci/mapnik-*.tar.gz
+          retention-days: 2
