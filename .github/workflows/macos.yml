@@ -2,6 +2,9 @@ name: MacOS
 
 on:
   workflow_call:
+    secrets:
+      VCPKG_NUGET_CI:
+        required: true
 
 env:
   UPDATE: 1
@@ -14,17 +17,31 @@ jobs:
     steps:
       - name: Install required system packages
         run: |
-          brew install automake ninja icu4c boost freetype harfbuzz libxml2 libpng jpeg libtiff webp cairo proj libpq gdal
-      
-      - name: Setup enviroment
-        run: export CMAKE_PREFIX_PATH=/usr/local/opt/icu4c:/usr/local/opt/libxml2
+          brew install automake ninja
 
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
 
+      - name: "Setup NuGet Credentials"
+        shell: "bash"
+        run: >
+          `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "https://nuget.pkg.github.com/mathisloge/index.json"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "mathisloge"
+          -password "${{ secrets.VCPKG_NUGET_CI }}"
+
+      - name: "Setup NuGet apikey"
+        shell: "bash"
+        run: >
+          ${{ env.mono }} `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
+
       - name: Configure CMake
-        run: cmake --preset=${{ env.preset }}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
