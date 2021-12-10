@@ -19,9 +19,9 @@ jobs:
 
     steps:
       - name: Install required system packages
-        shell: "bash"
         run: |
-          choco install ninja
+          choco install ninja OpenCppCoverage
+          echo "C:\Program Files\OpenCppCoverage" >> $env:GITHUB_PATH
 
       - uses: ilammy/msvc-dev-cmd@v1
 
@@ -54,6 +54,18 @@ jobs:
 
       - name: Test
         run: ctest --preset ${{env.preset}}
+
+      - name: Generate Report
+        id: generate_test_report
+        shell: cmd
+        run: OpenCppCoverage.exe --sources src --export_type mapnik:coverage.xml -- "vstest.console.exe" Debug\HelloTest.dll
+
+      - name: Upload Report to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./HelloCov.xml
+          fail_ci_if_error: true
+          functionalities: fix
 
       - name: Package
         run: cmake --build --preset ${{env.preset}} --target package
