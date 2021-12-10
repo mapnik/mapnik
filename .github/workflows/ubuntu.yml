@@ -61,12 +61,12 @@ jobs:
 
       - name: "Setup vcpkg"
         shell: bash
-        run: ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
+        run: ./vcpkg/bootstrap-vcpkg.sh
 
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           sources add
           -source "${{ inputs.NUGET_REGISTRY }}"
           -storepasswordincleartext
@@ -77,11 +77,11 @@ jobs:
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.NUGET_REGISTRY_PAT }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
