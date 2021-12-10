@@ -195,6 +195,9 @@
             ],
             "cacheVariables": {
                 "CMAKE_CXX_FLAGS": "--coverage"
+            },
+            "environment": {
+                "PROJ_LIB": "${sourceDir}/build/linux-ci/vcpkg_installed/x64-linux/share/proj4"
             }
         },
         {
