@@ -76,9 +76,9 @@ jobs:
         id: generate_test_report
         shell: cmd
         run: |
-          OpenCppCoverage.exe --sources . --export_type cobertura:unitCov.xml -- build/${{env.preset}}/out/mapnik-test-unit.exe
-          OpenCppCoverage.exe --sources . --export_type cobertura:aggRasterCov.xml -- build/${{env.preset}}/out/agg_rasterizer_integer_overflow_test.exe
-          OpenCppCoverage.exe --sources . --export_type cobertura:DatasourceCov.xml -- build/${{env.preset}}/out/datasource_registration_test.exe
+          OpenCppCoverage.exe --sources . --export_type binary:unitCov.xml -- build/${{env.preset}}/out/mapnik-test-unit.exe
+          OpenCppCoverage.exe --sources . --export_type binary:aggRasterCov.xml -- build/${{env.preset}}/out/agg_rasterizer_integer_overflow_test.exe
+          OpenCppCoverage.exe --sources . --export_type binary:DatasourceCov.xml -- build/${{env.preset}}/out/datasource_registration_test.exe
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
