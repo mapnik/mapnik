@@ -72,21 +72,14 @@ jobs:
       - name: Build
         run: cmake --build --preset ${{env.preset}}
 
-      - name: Generate Report
-        id: generate_test_report
+      - name: Test
         shell: cmd
-        run: |
-          OpenCppCoverage.exe --sources mapnik --export_type binary:unitCov.xml -- build/${{env.preset}}/out/mapnik-test-unit.exe
-          OpenCppCoverage.exe --sources mapnik --export_type binary:aggRasterCov.xml -- build/${{env.preset}}/out/agg_rasterizer_integer_overflow_test.exe
-          OpenCppCoverage.exe --sources mapnik --export_type binary:DatasourceCov.xml -- build/${{env.preset}}/out/datasource_registration_test.exe
+        run: OpenCppCoverage.exe --export_type binary:testCoverage.xml --cover_children --modules *libmapnik*.dll --modules *.input -- ctest --preset ${{env.preset}}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: unitCov.xml aggRasterCov.xml DatasourceCov.xml
-
-      - name: Test
-        run: ctest --preset ${{env.preset}}
+          files: testCoverage.xml
 
       - name: Package
         run: cmake --build --preset ${{env.preset}} --target package
