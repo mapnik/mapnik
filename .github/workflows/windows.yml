@@ -67,7 +67,7 @@ jobs:
           setapikey "${{ secrets.NUGET_REGISTRY_PAT }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake --preset ${{env.preset}}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake --preset ${{env.preset}}
 
       - name: Build
         run: cmake --build --preset ${{env.preset}}
