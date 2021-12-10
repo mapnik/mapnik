@@ -2,15 +2,24 @@ name: Windows
 
 on:
   workflow_call:
+    inputs:
+      VCPKG_SHA:
+        required: true
+        type: string
+      NUGET_REGISTRY:
+        required: true
+        type: string
+      NUGET_USERNAME:
+        required: true
+        type: string
     secrets:
-      VCPKG_NUGET_CI:
+      NUGET_REGISTRY_PAT:
         required: true
 
 env:
   VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
   VCPKG_NUGET_REPOSITORY: https://github.com/mathisloge/vcpkg-nuget.git
   UPDATE: 1
-  vcpkgroot: C:/vcpkg
   preset: windows-ci
 
 jobs:
@@ -25,29 +34,40 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
 
-      - uses: actions/checkout@v2
+      - name: checkout mapnik
+        uses: actions/checkout@v2
         with:
           submodules: "recursive"
+
+      - name: checkout vcpkg
+        uses: actions/checkout@v2
+        with:
+          repository: "microsoft/vcpkg"
+          ref: ${{ inputs.VCPKG_SHA }}
+          path: vcpkg
+
+      - name: "Setup vcpkg"
+        run: ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat
 
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
           sources add
-          -source "https://nuget.pkg.github.com/mathisloge/index.json"
+          -source "${{ inputs.NUGET_REGISTRY }}"
           -storepasswordincleartext
           -name "GitHub"
-          -username "mathisloge"
-          -password "${{ secrets.VCPKG_NUGET_CI }}"
+          -username "${{ inputs.NUGET_USERNAME }}"
+          -password "${{ secrets.NUGET_REGISTRY_PAT }}"
 
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
-          setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.NUGET_REGISTRY_PAT }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{env.vcpkgroot}}/scripts/buildsystems/vcpkg.cmake --preset ${{env.preset}}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake --preset ${{env.preset}}
 
       - name: Build
         run: cmake --build --preset ${{env.preset}}

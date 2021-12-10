@@ -2,8 +2,18 @@ name: Ubuntu
 
 on:
   workflow_call:
+    inputs:
+      VCPKG_SHA:
+        required: true
+        type: string
+      NUGET_REGISTRY:
+        required: true
+        type: string
+      NUGET_USERNAME:
+        required: true
+        type: string
     secrets:
-      VCPKG_NUGET_CI:
+      NUGET_REGISTRY_PAT:
         required: true
 
 env:
@@ -37,29 +47,41 @@ jobs:
         run: |
           sudo apt-get install -y gperf libxxf86vm-dev ninja-build postgresql-client
 
-      - uses: actions/checkout@v2
+      - name: checkout mapnik
+        uses: actions/checkout@v2
         with:
           submodules: "recursive"
+
+      - name: checkout vcpkg
+        uses: actions/checkout@v2
+        with:
+          repository: "microsoft/vcpkg"
+          ref: ${{ inputs.VCPKG_SHA }}
+          path: vcpkg
+
+      - name: "Setup vcpkg"
+        shell: bash
+        run: ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
 
       - name: "Setup NuGet Credentials"
         shell: "bash"
         run: >
-          ${{ env.mono }} `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
           sources add
-          -source "https://nuget.pkg.github.com/mathisloge/index.json"
+          -source "${{ inputs.NUGET_REGISTRY }}"
           -storepasswordincleartext
           -name "GitHub"
-          -username "mathisloge"
-          -password "${{ secrets.VCPKG_NUGET_CI }}"
+          -username "${{ inputs.NUGET_USERNAME }}"
+          -password "${{ secrets.NUGET_REGISTRY_PAT }}"
 
       - name: "Setup NuGet apikey"
         shell: "bash"
         run: >
-          ${{ env.mono }} `$VCPKG_INSTALLATION_ROOT/vcpkg fetch nuget | tail -n 1`
-          setapikey "${{ secrets.VCPKG_NUGET_CI }}" -Source "https://nuget.pkg.github.com/mathisloge/index.json"
+          ${{ env.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.NUGET_REGISTRY_PAT }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
