@@ -239,7 +239,7 @@
         },
         {
             "name": "linux-ci",
-            "configurePreset": "linux-ci",
+            "configurePreset": "linux-ci"
         },
         {
             "name": "macos-ci",
