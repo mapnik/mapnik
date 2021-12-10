@@ -22,6 +22,7 @@ env:
   UPDATE: 1
   preset: linux-ci
   mono: mono
+  CODECOV_TOKEN: "cb366608-247e-4fe0-aa02-e4db9b2eb274"
 
 jobs:
   build:
@@ -95,7 +96,6 @@ jobs:
           lcov --directory . --capture --output-file coverage.info
           lcov --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
           lcov --list coverage.info
-          bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
