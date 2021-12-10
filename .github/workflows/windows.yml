@@ -72,20 +72,21 @@ jobs:
       - name: Build
         run: cmake --build --preset ${{env.preset}}
 
-      - name: Test
-        run: ctest --preset ${{env.preset}}
-
       - name: Generate Report
         id: generate_test_report
         shell: cmd
-        run: OpenCppCoverage.exe --sources src --export_type mapnik:coverage.xml -- "vstest.console.exe" Debug\HelloTest.dll
+        run: |
+          OpenCppCoverage.exe --sources . --export_type cobertura:unitCov.xml -- build/${{env.preset}}/out/mapnik-test-unit.exe
+          OpenCppCoverage.exe --sources . --export_type cobertura:aggRasterCov.xml -- build/${{env.preset}}/out/agg_rasterizer_integer_overflow_test.exe
+          OpenCppCoverage.exe --sources . --export_type cobertura:DatasourceCov.xml -- build/${{env.preset}}/out/datasource_registration_test.exe
 
-      - name: Upload Report to Codecov
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: ./HelloCov.xml
-          fail_ci_if_error: true
-          functionalities: fix
+          files: unitCov.xml aggRasterCov.xml DatasourceCov.xml
+
+      - name: Test
+        run: ctest --preset ${{env.preset}}
 
       - name: Package
         run: cmake --build --preset ${{env.preset}} --target package
