@@ -205,10 +205,13 @@
             "description": "used by the ci pipeline",
             "inherits": [
                 "use-ninja",
-                "release-build",
+                "debug-build",
                 "default-build-dir",
                 "ci-options"
-            ]
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "--coverage"
+            }
         }
     ],
     "buildPresets": [

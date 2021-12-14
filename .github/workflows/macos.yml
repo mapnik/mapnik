@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Install required system packages
         run: |
-          brew install automake ninja
+          brew install automake ninja lcov
 
       - name: checkout mapnik
         uses: actions/checkout@v2
@@ -72,6 +72,18 @@ jobs:
 
       - name: Test
         run: ctest --preset ${{ env.preset }}
+
+      - name: Coverage
+        run: |
+          cd build/${{ env.preset }}
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
+          lcov --list coverage.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: build/${{ env.preset }}/coverage.info
 
       - name: Package
         run: cmake --build --preset ${{ env.preset }} --target package
