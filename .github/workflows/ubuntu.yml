@@ -91,19 +91,22 @@ jobs:
         run: ctest --preset ${{ env.preset }}
 
       - name: Test visuals
-        run: |
-          cd build/${{ env.preset }}/out
-          ./mapnik-test-visual -j $(nproc) --output-dir ./visual-test-result
-          tar cfvz visual-test-result.tar.gz ./visual-test-result
+        continue-on-error: true
+        working-directory: build/${{ env.preset }}/out
+        run: ./mapnik-test-visual -j $(nproc) --output-dir ./visual-test-result
+      
+      - name: Pack visual test results
+        working-directory: build/${{ env.preset }}/out
+        run: tar cfvz visual-test-result.tar.gz ./visual-test-result
       
       - name: Run Benchmark 
+        working-directory: build/${{ env.preset }}/out
         run: |
-          cd build/${{ env.preset }}/out
           ./mapnik-benchmark-test_rendering --name "gdal tiff rendering" --map benchmark/data/gdal-wgs.xml --extent -180.0,-120.0,180.0,120.0 --width 600 --height 600 --iterations 20 --threads 10
       
       - name: Coverage
+        working-directory: build/${{ env.preset }}
         run: |
-          cd build/${{ env.preset }}
           lcov --directory . --capture --output-file coverage.info
           lcov --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
           lcov --list coverage.info
