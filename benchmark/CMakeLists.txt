@@ -42,3 +42,5 @@ endfunction()
 foreach(benchmark ${BENCHMARK_SRCS})
     mapnik_create_benchmark(${benchmark})
 endforeach()
+
+file(COPY data DESTINATION "${MAPNIK_OUTPUT_DIR}/benchmark")
