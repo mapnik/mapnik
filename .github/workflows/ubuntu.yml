@@ -89,6 +89,12 @@ jobs:
 
       - name: Test
         run: ctest --preset ${{ env.preset }}
+
+      - name: Test visuals
+        run: |
+          cd build/${{ env.preset }}/out
+          ./mapnik-test-visual -j $(nproc) --output-dir ./visual-test-result
+          tar cfvz visual-test-result.tar.gz ./visual-test-result
       
       - name: Coverage
         run: |
@@ -101,12 +107,6 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           files: build/${{ env.preset }}/coverage.info
-      
-      - name: Run visual tests
-        run: |
-          cd build/${{ env.preset }}/out
-          ./mapnik-test-visual -j $(nproc) --output-dir ./visual-test-result
-          tar cfvz visual-test-result.tar.gz ./visual-test-result
 
       - name: Package
         run: cmake --build --preset ${{ env.preset }} --target package
