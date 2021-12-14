@@ -30,6 +30,15 @@
             }
         },
         {
+            "name": "release-with-debug-build",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "USE_DEBUG_OUTPUT": "OFF",
+                "USE_LOG": "OFF"
+            }
+        },
+        {
             "name": "release-build",
             "hidden": true,
             "cacheVariables": {
@@ -190,7 +199,8 @@
             "name": "linux-ci",
             "description": "used by the ci pipeline",
             "inherits": [
-                "linux-gcc-debug",
+                "release-with-debug-build",
+                "use-gcc",
                 "ci-options"
             ],
             "cacheVariables": {
