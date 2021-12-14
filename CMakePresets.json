@@ -207,7 +207,7 @@
                 "CMAKE_CXX_FLAGS": "--coverage"
             },
             "environment": {
-                "PROJ_LIB": "${sourceDir}/build/${presetName}/x64-linux/share/proj4"
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-linux/share/proj4"
             }
         },
         {
@@ -223,7 +223,7 @@
                 "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage"
             },
             "environment": {
-                "PROJ_LIB": "${sourceDir}/build/${presetName}/x64-osx/share/proj4"
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-osx/share/proj4"
             }
         }
     ],
