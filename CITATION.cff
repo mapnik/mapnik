@@ -1,0 +1,34 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: mapnik
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Artem
+    family-names: Pavlenko
+identifiers:
+  - type: url
+    value: 'https://github.com/mapnik/mapnik'
+    description: GitHub Repository
+  - type: swh
+    value: >-
+      swh:1:dir:3f5758e17e9d54016ca694268da68cf6856fab58
+    description: Software Archive
+repository-code: 'https://github.com/mapnik/mapnik'
+url: 'https://mapnik.org/'
+abstract: >-
+  Mapnik is an open source toolkit for developing
+  mapping applications. At the core is a C++ shared
+  library providing algorithms and patterns for
+  spatial data access and visualization.
+keywords:
+  - mapping
+  - gis
+  - cartography
+  - beautiful-maps
+  - rendering
+license: LGPL-2.1
