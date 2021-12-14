@@ -215,7 +215,7 @@
             "description": "used by the ci pipeline",
             "inherits": [
                 "use-ninja",
-                "debug-build",
+                "release-with-debug-build",
                 "default-build-dir",
                 "ci-options"
             ],
