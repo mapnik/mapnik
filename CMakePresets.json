@@ -197,7 +197,7 @@
                 "CMAKE_CXX_FLAGS": "--coverage"
             },
             "environment": {
-                "PROJ_LIB": "${sourceDir}/build/linux-ci/vcpkg_installed/x64-linux/share/proj4"
+                "PROJ_LIB": "${sourceDir}/build/linux-ci/${presetName}/x64-linux/share/proj4"
             }
         },
         {
@@ -210,7 +210,10 @@
                 "ci-options"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "--coverage"
+                "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage"
+            },
+            "environment": {
+                "PROJ_LIB": "${sourceDir}/build/linux-ci/${presetName}/x64-osx/share/proj4"
             }
         }
     ],
