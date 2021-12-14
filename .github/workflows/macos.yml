@@ -73,9 +73,23 @@ jobs:
       - name: Test
         run: ctest --preset ${{ env.preset }}
 
-      - name: Coverage
+      - name: Test visuals
+        continue-on-error: true
+        working-directory: build/${{ env.preset }}/out
+        run: ./mapnik-test-visual -j $(sysctl -n hw.logicalcpu) --output-dir ./visual-test-result
+      
+      - name: Pack visual test results
+        working-directory: build/${{ env.preset }}/out
+        run: tar cfvz visual-test-results.tar.gz ./visual-test-result
+      
+      - name: Run Benchmark 
+        working-directory: build/${{ env.preset }}/out
         run: |
-          cd build/${{ env.preset }}
+          ./mapnik-benchmark-test_rendering --name "gdal tiff rendering" --map benchmark/data/gdal-wgs.xml --extent -180.0,-120.0,180.0,120.0 --width 600 --height 600 --iterations 20 --threads 10
+      
+      - name: Coverage
+        working-directory: build/${{ env.preset }}
+        run: |
           lcov --directory . --capture --output-file coverage.info
           lcov --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
           lcov --list coverage.info
@@ -88,8 +102,16 @@ jobs:
       - name: Package
         run: cmake --build --preset ${{ env.preset }} --target package
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload mapnik build artifact
+        uses: actions/upload-artifact@v2
         with:
           name: macos-mapnik-artifact
-          path: build/*-ci/mapnik-*.tar.gz
+          path: build/${{ env.preset }}/mapnik-*.tar.gz
+          retention-days: 2
+
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-mapnik-visual-tests
+          path: build/${{ env.preset }}/out/visual-test-results.tar.gz
           retention-days: 2
