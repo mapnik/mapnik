@@ -84,8 +84,16 @@ jobs:
       - name: Configure CMake
         run: cmake -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake --preset=${{ env.preset }}
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: cpp
+
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
 
       - name: Test
         run: ctest --preset ${{ env.preset }}
