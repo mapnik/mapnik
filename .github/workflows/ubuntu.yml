@@ -97,7 +97,7 @@ jobs:
       
       - name: Pack visual test results
         working-directory: build/${{ env.preset }}/out
-        run: tar cfvz visual-test-result.tar.gz ./visual-test-result
+        run: tar cfvz visual-test-results.tar.gz ./visual-test-result
       
       - name: Run Benchmark 
         working-directory: build/${{ env.preset }}/out
@@ -130,5 +130,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ubuntu-mapnik-visual-tests
-          path: build/${{ env.preset }}/visual-test-result.tar.gz
+          path: build/${{ env.preset }}/out/visual-test-results.tar.gz
           retention-days: 2
