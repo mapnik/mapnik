@@ -96,6 +96,11 @@ jobs:
           ./mapnik-test-visual -j $(nproc) --output-dir ./visual-test-result
           tar cfvz visual-test-result.tar.gz ./visual-test-result
       
+      - name: Run Benchmark 
+        run: |
+          cd build/${{ env.preset }}/out
+          ./mapnik-benchmark-test_rendering --name "gdal tiff rendering" --map benchmark/data/gdal-wgs.xml --extent -180.0,-120.0,180.0,120.0 --width 600 --height 600 --iterations 20 --threads 10
+      
       - name: Coverage
         run: |
           cd build/${{ env.preset }}
