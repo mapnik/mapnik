@@ -84,8 +84,7 @@ jobs:
       
       - name: Run Benchmark 
         working-directory: build/${{ env.preset }}/out
-        run: |
-          ./mapnik-benchmark-test_rendering --name "gdal tiff rendering" --map benchmark/data/gdal-wgs.xml --extent -180.0,-120.0,180.0,120.0 --width 600 --height 600 --iterations 20 --threads 10
+        run: ./run_benchmarks
       
       - name: Coverage
         working-directory: build/${{ env.preset }}

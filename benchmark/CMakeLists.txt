@@ -44,3 +44,4 @@ foreach(benchmark ${BENCHMARK_SRCS})
 endforeach()
 
 file(COPY data DESTINATION "${MAPNIK_OUTPUT_DIR}/benchmark")
+file(COPY run_benchmarks DESTINATION "${MAPNIK_OUTPUT_DIR}")
