@@ -74,7 +74,7 @@ jobs:
 
       - name: Test
         shell: cmd
-        run: OpenCppCoverage.exe --export_type binary:testCoverage.xml --cover_children --modules *libmapnik*.dll --modules *.input -- ctest --preset ${{env.preset}}
+        run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- ctest --preset ${{env.preset}}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
