@@ -36,6 +36,7 @@ function(mapnik_create_benchmark)
         LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
         RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
         ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+        OUTPUT_NAME "${BENCHNAME}"
     )
 endfunction()
 
