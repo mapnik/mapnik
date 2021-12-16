@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE=./
+BASE=.
 function run {
     local runner="$BASE/$1 --log=none"
     local threads="$2"
