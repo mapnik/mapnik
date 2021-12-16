@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE=./benchmark/out
+BASE=./
 function run {
     local runner="$BASE/$1 --log=none"
     local threads="$2"
@@ -28,7 +28,7 @@ run test_offset_converter 10 1000
 
 # commented since this is really slow on travis
 : '
-./benchmark/out/test_rendering \
+$BASE/test_rendering \
   --name "text rendering" \
   --map benchmark/data/roads.xml \
   --extent 1477001.12245,6890242.37746,1480004.49012,6892244.62256 \
@@ -38,7 +38,7 @@ run test_offset_converter 10 1000
   --threads 10
 '
 
-./benchmark/out/test_rendering \
+$BASE/test_rendering \
   --name "gdal tiff rendering" \
   --map benchmark/data/gdal-wgs.xml  \
   --extent -180.0,-120.0,180.0,120.0 \
@@ -47,7 +47,7 @@ run test_offset_converter 10 1000
   --iterations 20 \
   --threads 10
 
-./benchmark/out/test_rendering \
+$BASE/test_rendering \
   --name "raster tiff rendering" \
   --map benchmark/data/raster-wgs.xml  \
   --extent -180.0,-120.0,180.0,120.0 \
@@ -56,10 +56,10 @@ run test_offset_converter 10 1000
   --iterations 20 \
   --threads 10
 
-./benchmark/out/test_quad_tree \
+$BASE/test_quad_tree \
   --iterations 10000 \
   --threads 1
 
-./benchmark/out/test_quad_tree \
+$BASE/test_quad_tree \
   --iterations 1000 \
   --threads 10
