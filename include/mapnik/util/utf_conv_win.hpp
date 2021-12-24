@@ -23,7 +23,7 @@
 #ifndef MAPNIK_UTIL_UTF_CONV_WIN_HPP
 #define MAPNIK_UTIL_UTF_CONV_WIN_HPP
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 // mapnik
 #include <mapnik/config.hpp>
 // stl
@@ -38,6 +38,6 @@ namespace mapnik
     MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
 
 }
-#endif  // _WINDOWS
+#endif  // _WIN32
 
 #endif // MAPNIK_UTIL_UTF_CONV_WIN_HPP

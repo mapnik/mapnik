@@ -56,7 +56,7 @@ dbf_file::dbf_file(std::string const& file_name)
      record_length_(0),
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
      file_(),
-#elif defined(_WINDOWS)
+#elif defined(_WIN32)
      file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary),
 #else
      file_(file_name.c_str() ,std::ios::in | std::ios::binary),

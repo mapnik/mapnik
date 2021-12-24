@@ -38,7 +38,7 @@ void LayerDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         painter->setBrush(QBrush(QColor(255, 0, 0, 64)));
 
 
-    painter->drawRoundRect(option.rect,4,4);
+    painter->drawRoundedRect(option.rect,4,4);
 
     if (option.state & QStyle::State_Selected)
         painter->setBrush(option.palette.highlightedText());

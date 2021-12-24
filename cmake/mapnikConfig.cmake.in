@@ -1,0 +1,52 @@
+@PACKAGE_INIT@
+
+set_and_check(MAPNIK_INCLUDE_DIR "@PACKAGE_MAPNIK_INCLUDE_DIR@" CACHE STRING "")
+set_and_check(MAPNIK_FONTS_DIR "@PACKAGE_FONTS_INSTALL_DIR@" CACHE STRING "")
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/Modules/")
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Threads REQUIRED)
+@MAPNIK_DEPENDENCIES@
+
+include("${CMAKE_CURRENT_LIST_DIR}/mapnikTargets.cmake")
+
+set(_supported_components @MAPNIK_UTILITIES@)
+foreach(_comp ${mapnik_FIND_COMPONENTS})
+  if (NOT _comp IN_LIST _supported_components)
+    set(mapnik_FOUND False)
+    set(mapnik_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
+  endif()
+  include("${CMAKE_CURRENT_LIST_DIR}/mapnikUtilityTargets_${_comp}.cmake")
+endforeach()
+
+
+get_filename_component(_plugin_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
+file(GLOB CONFIG_FILES "${_plugin_dir}/mapnikPlugins-*.cmake")
+foreach(f ${CONFIG_FILES})
+  include(${f})
+endforeach()
+
+function(mapnik_find_plugin_dir PLUGIN_DIR)
+    string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type_l)
+    set(_plugin_dir "${MAPNIK_PLUGINS_DIR_${_build_type_l}}")
+    # only release has more then one configuration
+    if(NOT _plugin_dir) 
+        set(_all_rel_cfgs RELEASE RELWITHDEBINFO MINSIZEREL)
+        list(FIND _all_rel_cfgs ${_build_type_l} _is_rel_cfg)
+        # check if the current configuration is a known release configuration
+        if(${_is_rel_cfg} GREATER_EQUAL 0)
+            foreach(_rel_cfg IN LISTS _all_rel_cfgs)
+                set(_plugin_dir "${MAPNIK_PLUGINS_DIR_${_rel_cfg}}")
+                if(_plugin_dir) 
+                    break()
+                endif()
+            endforeach()
+        endif()
+    endif()
+    if(NOT _plugin_dir)
+        message(WARNING "Could not find a plugin install dir for configuration ${_build_type_l}")
+    endif()
+    set(${PLUGIN_DIR} ${_plugin_dir} PARENT_SCOPE)
+endfunction()  

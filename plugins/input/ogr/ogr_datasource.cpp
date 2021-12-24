@@ -301,7 +301,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     index_name_ = dataset_name_.substr(0, breakpoint) + ".ogrindex";
 
-#if defined (_WINDOWS)
+#if defined (_WIN32)
     std::ifstream index_file(mapnik::utf8_to_utf16(index_name_), std::ios::in | std::ios::binary);
 #else
     std::ifstream index_file(index_name_.c_str(), std::ios::in | std::ios::binary);

@@ -2,6 +2,13 @@
 
 Mapnik runs on Linux, OS X, Windows, and BSD systems.
 
+## Package managers
+### vcpkg 
+To install mapnik with vcpkg type `vcpkg install mapnik`. It will install a minimal version of mapnik and all the needed dependencies. 
+To install more features, type `vcpkg search mapnik` to see all available features.
+
+## Source build
+
 First clone mapnik from github and initialize submodules
 
 ```bash
@@ -65,14 +72,14 @@ For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationT
 Build system dependencies are:
 
  * C++ compiler supporting `-std=c++14` (like >= g++ 5 or >= clang++ 3.4)
- * \>= 2 GB RAM (> 5 GB for g++)
+ * >= 2 GB RAM (> 5 GB for g++)
  * Python 2.4-2.7 
- * Scons (a copy is bundled)
+ * Scons (a copy is bundled) or CMake >= 3.15 see [docs/cmake-usage.md](./docs/cmake-usage.md)
 
 Mapnik Core depends on:
 
  * Boost
-    - \>= 1.47 is required and >= 1.56 recommended
+    - \>= 1.73 is required
     - These libraries are used:
       - filesystem
       - system
@@ -90,7 +97,7 @@ Mapnik Core optionally depends on:
  * libjpeg - JPEG graphics (Default enabled, if found)
  * libtiff - TIFF graphics (Default enabled, if found)
  * libwebp - WEBP graphics  (Default enabled, if found)
- * libproj - PROJ.4 projection library (Default enabled, if found)
+ * libproj >= 7.2.0 - PROJ projection library (Default enabled, if found)
 
 Additional optional dependencies:
 

@@ -24,6 +24,7 @@
 #define MAPNIK_UTIL_CHAR_ARRAY_BUFFER_HPP
 
 #include <streambuf>
+#include <algorithm>
 
 namespace mapnik { namespace util {
 

@@ -30,7 +30,7 @@
 #include <iomanip>
 #include <ctime>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
 #else
@@ -45,7 +45,7 @@ namespace mapnik {
 // Try to return the time now
 inline double time_now()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
     LARGE_INTEGER t, f;
     QueryPerformanceCounter(&t);
     QueryPerformanceFrequency(&f);
