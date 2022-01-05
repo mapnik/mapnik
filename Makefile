@@ -1,7 +1,7 @@
 
 OS := $(shell uname -s)
 
-PYTHON = python
+PYTHON = python3
 
 ifeq ($(JOBS),)
 	JOBS:=1
