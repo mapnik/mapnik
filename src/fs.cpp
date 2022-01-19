@@ -24,13 +24,8 @@
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/fs.hpp>
 
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
 #include <boost/filesystem/operations.hpp>  // for absolute, exists, etc
 #include <boost/filesystem/path.hpp>    // for path, operator/
-MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <stdexcept>
