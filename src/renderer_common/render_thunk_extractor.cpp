@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 #include <mapnik/renderer_common/render_thunk_extractor.hpp>
 
