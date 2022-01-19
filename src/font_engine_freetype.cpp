@@ -27,7 +27,6 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/file_io.hpp>
-#include <mapnik/make_unique.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH

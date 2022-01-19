@@ -33,7 +33,6 @@ MAPNIK_DISABLE_WARNING_POP
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
