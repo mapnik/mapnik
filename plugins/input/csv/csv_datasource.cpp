@@ -42,7 +42,6 @@
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geom_util.hpp>
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
