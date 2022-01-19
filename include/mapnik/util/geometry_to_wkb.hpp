@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/geometry_type.hpp>

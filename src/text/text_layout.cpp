@@ -28,7 +28,6 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text/harfbuzz_shaper.hpp>
 #include <mapnik/util/math.hpp>
-#include <mapnik/make_unique.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH

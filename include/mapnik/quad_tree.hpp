@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
-#include <mapnik/make_unique.hpp>
 
 // stl
 #include <memory>

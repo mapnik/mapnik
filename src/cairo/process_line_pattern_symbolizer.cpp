@@ -23,7 +23,6 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
-#include <mapnik/make_unique.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/cairo/cairo_renderer.hpp>
