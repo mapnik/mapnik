@@ -223,6 +223,7 @@ target_sources(mapnik PRIVATE
 target_sources(mapnik PRIVATE
     util/math.cpp
     util/utf_conv_win.cpp
+    util/mapped_memory_file.cpp
 )
 
 if(USE_CAIRO)
