@@ -56,6 +56,14 @@ bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
     return cache_.emplace(uri,mem).second;
 }
 
+bool mapped_memory_cache::remove(std::string const& key)
+{
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::mutex> lock(mutex_);
+#endif
+    return cache_.erase(key) > 0;
+}
+
 boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& uri, bool update_cache)
 {
 #ifdef MAPNIK_THREADSAFE

@@ -35,15 +35,11 @@
 #include <mapnik/geometry/box2d.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
 #include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
-MAPNIK_DISABLE_WARNING_POP
-#include <mapnik/mapped_memory_cache.hpp>
 #endif
 #include <mapnik/util/noncopyable.hpp>
+
+#include <mapnik/util/mapped_memory_file.hpp>
 
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
@@ -143,63 +139,23 @@ struct shape_record
     std::size_t length() {return size;}
 };
 
-class shape_file : mapnik::util::noncopyable
+class shape_file : public mapnik::util::mapped_memory_file
 {
 public:
-
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    using file_source_type = boost::interprocess::ibufferstream;
     using record_type = shape_record<MappedRecordTag>;
-    mapnik::mapped_region_ptr mapped_region_;
 #else
-    using file_source_type = std::ifstream;
     using record_type = shape_record<RecordTag>;
 #endif
 
-    file_source_type file_;
-
     shape_file() {}
 
-    shape_file(std::string  const& file_name) :
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        file_()
-#elif defined(_WIN32)
-        file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
-#else
-        file_(file_name.c_str(), std::ios::in | std::ios::binary)
-#endif
+    shape_file(std::string  const& file_name)
+      : mapped_memory_file(file_name)
     {
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(file_name,true);
-
-        if (memory)
-        {
-            mapped_region_ = *memory;
-            file_.buffer(static_cast<char*>(mapped_region_->get_address()),mapped_region_->get_size());
-        }
-        else
-        {
-            throw std::runtime_error("could not create file mapping for "+file_name);
-        }
-#endif
     }
 
     ~shape_file() {}
-
-    inline file_source_type& file()
-    {
-        return file_;
-    }
-
-    inline bool is_open() const
-    {
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-        return (file_.buffer().second > 0);
-#else
-        return file_.is_open();
-#endif
-    }
 
     inline void read_record(record_type& rec)
     {
@@ -239,11 +195,6 @@ public:
     inline void read_envelope(box2d<double>& envelope)
     {
         file_.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
-    }
-
-    inline void skip(std::streampos bytes)
-    {
-        file_.seekg(bytes, std::ios::cur);
     }
 
     inline void rewind()

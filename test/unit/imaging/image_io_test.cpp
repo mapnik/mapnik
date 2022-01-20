@@ -19,6 +19,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/filesystem/convenience.hpp>
 #include <boost/optional/optional_io.hpp>
 MAPNIK_DISABLE_WARNING_POP
+#include <mapnik/util/mapped_memory_file.hpp>
 
 inline void make_directory(std::string const& dir) {
     boost::filesystem::create_directories(dir);
@@ -205,10 +206,7 @@ SECTION("image_util : save_to_file/save_to_stream/save_to_string")
                 CHECK(0 == std::memcmp(im2.bytes(), im.bytes(), im.width() * im.height()));
             }
         }
-        if (mapnik::util::exists(filename))
-        {
-            mapnik::util::remove(filename);
-        }
+        mapnik::util::mapped_memory_file::deleteFile(filename);
     }
 }
 
