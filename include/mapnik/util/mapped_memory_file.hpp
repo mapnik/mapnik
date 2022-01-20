@@ -30,6 +30,8 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#else
+#include <fstream>
 #endif
 
 #include <string>
