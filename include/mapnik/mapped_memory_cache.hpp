@@ -54,6 +54,14 @@ class MAPNIK_DECL mapped_memory_cache :
     std::unordered_map<std::string,mapped_region_ptr> cache_;
 public:
     bool insert(std::string const& key, mapped_region_ptr);
+    /**
+     * @brief removes the resource identified by key from the cache, if exists
+     * 
+     * @param key unique identifier for the resource
+     * @return true if the resource was removed
+     * @return false if the resource was not removed or wasn't in the cache
+     */
+    bool remove(std::string const& key);
     boost::optional<mapped_region_ptr> find(std::string const& key, bool update_cache = false);
     void clear();
 };
