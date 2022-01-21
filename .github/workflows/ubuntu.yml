@@ -123,14 +123,15 @@ jobs:
 
       - name: Upload mapnik build artifact
         uses: actions/upload-artifact@v2
+        if: failure()
         with:
-          name: ubuntu-mapnik-artifact
+          name: ubuntu-mapnik-artifact-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/${{ env.preset }}/mapnik-*.tar.gz
           retention-days: 2
 
       - name: Upload visual test results
         uses: actions/upload-artifact@v2
         with:
-          name: ubuntu-mapnik-visual-tests
+          name: ubuntu-mapnik-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/${{ env.preset }}/out/visual-test-results.tar.gz
           retention-days: 2

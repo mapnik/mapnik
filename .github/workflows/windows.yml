@@ -88,7 +88,8 @@ jobs:
         run: cmake --build --preset ${{env.preset}} --target package
 
       - uses: actions/upload-artifact@v2
+        if: failure()
         with:
-          name: windows-mapnik-artifact
+          name: windows-mapnik-artifact-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/*-ci/mapnik-*.tar.gz
           retention-days: 2
