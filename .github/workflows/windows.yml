@@ -85,6 +85,7 @@ jobs:
           files: testCoverage.xml
 
       - name: Package
+        if: failure()
         run: cmake --build --preset ${{env.preset}} --target package
 
       - uses: actions/upload-artifact@v2

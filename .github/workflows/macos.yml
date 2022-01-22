@@ -102,6 +102,7 @@ jobs:
           files: build/${{ env.preset }}/coverage.info
 
       - name: Package
+        if: failure()
         run: cmake --build --preset ${{ env.preset }} --target package
 
       - name: Upload mapnik build artifact
