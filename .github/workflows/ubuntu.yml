@@ -59,8 +59,8 @@ jobs:
       - name: checkout vcpkg
         uses: actions/checkout@v2
         with:
-          repository: "microsoft/vcpkg"
-          ref: ${{ inputs.VCPKG_SHA }}
+          repository: "dg0yt/vcpkg"
+          ref: gdal-paths
           path: vcpkg
 
       - name: "Setup vcpkg"
