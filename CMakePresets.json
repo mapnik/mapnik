@@ -9,15 +9,15 @@
         {
             "name": "use-ninja",
             "hidden": true,
-            "generator": "Ninja"
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
         },
         {
             "name": "default-build-dir",
             "hidden": true,
-            "binaryDir": "${sourceDir}/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-            }
+            "binaryDir": "${sourceDir}/build/${presetName}"
         },
         {
             "name": "debug-build",
@@ -27,6 +27,15 @@
                 "USE_DEBUG_OUTPUT": "ON",
                 "USE_LOG": "ON",
                 "USE_LOG_SEVERITY": "0"
+            }
+        },
+        {
+            "name": "release-with-debug-build",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "USE_DEBUG_OUTPUT": "OFF",
+                "USE_LOG": "OFF"
             }
         },
         {
@@ -190,6 +199,19 @@
         {
             "name": "linux-gcc-release",
             "configurePreset": "linux-gcc-release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-default",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
         }
     ]
 }
