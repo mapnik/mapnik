@@ -33,6 +33,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 MAPNIK_DISABLE_WARNING_POP
+#include <mapnik/util/mapped_memory_file.hpp>
 
 namespace {
 
@@ -107,10 +108,7 @@ TEST_CASE("invalid shapeindex")
                 std::string path = "test/data/shp/boundaries.shp";
                 std::string index_path = path.substr(0, path.rfind(".")) + ".index";
                 // remove *.index if present
-                if (mapnik::util::exists(index_path))
-                {
-                    mapnik::util::remove(index_path);
-                }
+                mapnik::util::mapped_memory_file::deleteFile(index_path);
                 // count features
 
                 std::size_t feature_count = count_shapefile_features(path);
@@ -132,10 +130,7 @@ TEST_CASE("invalid shapeindex")
                     CHECK(feature_count_indexed == 0);
                 }
                 // remove *.index if present
-                if (mapnik::util::exists(index_path))
-                {
-                    mapnik::util::remove(index_path);
-                }
+                mapnik::util::mapped_memory_file::deleteFile(index_path);
             }
         }
     }
@@ -159,10 +154,7 @@ TEST_CASE("shapeindex")
 
                         std::string index_path = path.substr(0, path.rfind(".")) + ".index";
                         // remove *.index if present
-                        if (mapnik::util::exists(index_path))
-                        {
-                            mapnik::util::remove(index_path);
-                        }
+                        mapnik::util::mapped_memory_file::deleteFile(index_path);
                         // count features
                         std::size_t feature_count = count_shapefile_features(path);
                         // create *.index
@@ -180,10 +172,7 @@ TEST_CASE("shapeindex")
                         // ensure number of features are the same
                         REQUIRE(feature_count == feature_count_indexed);
                         // remove *.index if present
-                        if (mapnik::util::exists(index_path))
-                        {
-                            mapnik::util::remove(index_path);
-                        }
+                        mapnik::util::mapped_memory_file::deleteFile(index_path);
                     }
                 }
             }

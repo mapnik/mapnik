@@ -75,7 +75,7 @@ public:
         typename ContType::iterator itr=pool_.begin();
         while ( itr!=pool_.end())
         {
-            if (!itr->unique())
+            if (itr->use_count() > 1)
             {
                 ++itr;
             }

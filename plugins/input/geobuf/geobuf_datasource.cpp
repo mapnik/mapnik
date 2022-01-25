@@ -43,7 +43,6 @@
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 
 using mapnik::datasource;

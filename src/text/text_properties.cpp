@@ -33,7 +33,6 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/text/properties_util.hpp>
 #include <mapnik/boolean.hpp>
-#include <mapnik/make_unique.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
