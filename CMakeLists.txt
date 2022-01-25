@@ -338,6 +338,10 @@ if(NOT WIN32)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
 endif()
 
+# force utf-8 source code processing
+# see https://docs.microsoft.com/de-de/cpp/build/reference/utf-8-set-source-and-executable-character-sets-to-utf-8?view=msvc-170
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_library(core INTERFACE)
 add_library(mapnik::core ALIAS core)
 
