@@ -48,7 +48,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/util/spatial_index.hpp>

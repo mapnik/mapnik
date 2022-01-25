@@ -28,15 +28,9 @@
 #include <mapnik/util/utf_conv_win.hpp>
 
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
-MAPNIK_DISABLE_WARNING_POP
-#include <mapnik/mapped_memory_cache.hpp>
 #endif
+#include <mapnik/util/mapped_memory_file.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -53,37 +47,11 @@ std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, s
     p.separator_ = separator;
     p.quote_ = quote;
 
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    using file_source_type = boost::interprocess::ibufferstream;
-    file_source_type csv_file;
-    mapnik::mapped_region_ptr mapped_region;
-    boost::optional<mapnik::mapped_region_ptr> memory =
-        mapnik::mapped_memory_cache::instance().find(filename, true);
-    if (memory)
-    {
-        mapped_region = *memory;
-        csv_file.buffer(static_cast<char*>(mapped_region->get_address()),mapped_region->get_size());
-    }
-    else
-    {
-        std::clog << "Error : cannot mmap " << filename << std::endl;
-        return std::make_pair(false, box_type(p.extent_));
-    }
-#else
- #if defined(_WIN32)
-    std::ifstream csv_file(mapnik::utf8_to_utf16(filename),std::ios_base::in | std::ios_base::binary);
- #else
-    std::ifstream csv_file(filename.c_str(),std::ios_base::in | std::ios_base::binary);
- #endif
-    if (!csv_file.is_open())
-    {
-        std::clog << "Error : cannot open " << filename << std::endl;
-        return std::make_pair(false, box_type(p.extent_));
-    }
-#endif
+
+    util::mapped_memory_file csv_file{filename};
     try
     {
-        p.parse_csv_and_boxes(csv_file, boxes);
+        p.parse_csv_and_boxes(csv_file.file(), boxes);
         return std::make_pair(true, box_type(p.extent_));
     }
     catch (std::exception const& ex)

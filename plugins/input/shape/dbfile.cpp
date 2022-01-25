@@ -51,31 +51,12 @@ dbf_file::dbf_file()
       record_(0) {}
 
 dbf_file::dbf_file(std::string const& file_name)
-    :num_records_(0),
+    :mapped_memory_file{file_name},
+     num_records_(0),
      num_fields_(0),
      record_length_(0),
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-     file_(),
-#elif defined(_WIN32)
-     file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary),
-#else
-     file_(file_name.c_str() ,std::ios::in | std::ios::binary),
-#endif
      record_(0)
 {
-
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(file_name,true);
-    if (memory)
-    {
-        mapped_region_ = *memory;
-        file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
-    }
-    else
-    {
-        throw std::runtime_error("could not create file mapping for "+file_name);
-    }
-#endif
     if (file_)
     {
         read_header();
@@ -86,16 +67,6 @@ dbf_file::dbf_file(std::string const& file_name)
 dbf_file::~dbf_file()
 {
     ::operator delete(record_);
-}
-
-
-bool dbf_file::is_open()
-{
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    return (file_.buffer().second > 0);
-#else
-    return file_.is_open();
-#endif
 }
 
 int dbf_file::num_records() const
@@ -273,9 +244,4 @@ int dbf_file::read_int()
     std::int32_t val;
     mapnik::read_int32_ndr(b,val);
     return val;
-}
-
-void dbf_file::skip(int bytes)
-{
-    file_.seekg(bytes,std::ios::cur);
 }

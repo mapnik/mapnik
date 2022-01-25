@@ -38,7 +38,6 @@
 #include <mapnik/json/topojson_utils.hpp>
 #include <mapnik/util/variant.hpp>
 #include <mapnik/util/file_io.hpp>
-#include <mapnik/make_unique.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;

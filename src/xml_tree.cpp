@@ -22,7 +22,6 @@
 
 //mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/make_unique.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/xml_attribute_cast.hpp>
 #include <mapnik/util/conversions.hpp>
