@@ -53,6 +53,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
+#include <mapnik/util/mapped_memory_file.hpp>
 
 // stl
 #include <sstream>
@@ -120,35 +121,8 @@ csv_datasource::csv_datasource(parameters const& params)
     }
     else
     {
-#if defined (MAPNIK_MEMORY_MAPPED_FILE)
-        using file_source_type = boost::interprocess::ibufferstream;
-        file_source_type in;
-        mapnik::mapped_region_ptr mapped_region;
-        boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(filename_, true);
-        if (memory)
-        {
-            mapped_region = *memory;
-            in.buffer(static_cast<char*>(mapped_region->get_address()),mapped_region->get_size());
-        }
-        else
-        {
-            throw std::runtime_error("could not create file mapping for " + filename_);
-        }
-#elif defined (_WIN32)
-        std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
-        if (!in.is_open())
-        {
-            throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
-        }
-#else
-        std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
-        if (!in.is_open())
-        {
-            throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
-        }
-#endif
-        parse_csv(in);
+        mapnik::util::mapped_memory_file in_file{filename_};
+        parse_csv(in_file.file());
 
         if (has_disk_index_ && !extent_initialized_)
         {
