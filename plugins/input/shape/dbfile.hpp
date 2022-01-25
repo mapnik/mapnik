@@ -28,14 +28,7 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/unicode.hpp>
 
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-#include <mapnik/mapped_memory_cache.hpp>
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
-MAPNIK_DISABLE_WARNING_POP
-#endif
+#include <mapnik/util/mapped_memory_file.hpp>
 
 // stl
 #include <vector>
@@ -54,25 +47,18 @@ struct field_descriptor
 };
 
 
-class dbf_file : private mapnik::util::noncopyable
+class dbf_file : public mapnik::util::mapped_memory_file
 {
 private:
     int num_records_;
     int num_fields_;
     std::size_t record_length_;
     std::vector<field_descriptor> fields_;
-#if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::interprocess::ibufferstream file_;
-    mapnik::mapped_region_ptr mapped_region_;
-#else
-    std::ifstream file_;
-#endif
     char* record_;
 public:
     dbf_file();
     dbf_file(std::string const& file_name);
     ~dbf_file();
-    bool is_open();
     int num_records() const;
     int num_fields() const;
     field_descriptor const& descriptor(int col) const;
@@ -83,7 +69,6 @@ private:
     void read_header();
     int read_short();
     int read_int();
-    void skip(int bytes);
 };
 
 #endif //DBFFILE_HPP

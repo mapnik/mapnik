@@ -274,6 +274,7 @@ source = Split(
     renderer_common/render_thunk_extractor.cpp
     renderer_common/pattern_alignment.cpp
     util/math.cpp
+    util/mapped_memory_file.cpp
     value.cpp
     """
     )
