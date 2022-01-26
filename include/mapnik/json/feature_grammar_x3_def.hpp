@@ -261,6 +261,10 @@ auto const feature_part_def = feature_type
     |
     (omit[geojson_string] > lit(':') > omit[value])
     ;
+
+auto const feature_rule_def = lit('{') > feature_part % lit(',') > lit('}');
+
+auto const geometry_rule_def = (lit('{') > geometry_tuple[create_geometry] > lit('}')) | lit("null");
 // clang-format on
 
 #include <mapnik/warning.hpp>

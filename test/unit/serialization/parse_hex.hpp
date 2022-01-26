@@ -29,19 +29,20 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-template <typename Out>
-bool parse_hex(std::string const& input, Out & output)
+template<typename Out>
+bool parse_hex(std::string const& input, Out& output)
 {
     using boost::spirit::x3::lit;
     auto itr = input.begin();
     auto end = input.end();
-    using hex2 = boost::spirit::x3::uint_parser< unsigned, 16, 2, 2 >;
+    using hex2 = boost::spirit::x3::uint_parser<unsigned, 16, 2, 2>;
     return boost::spirit::x3::parse(itr, end, -(lit("\\x") | lit("0x")) > *hex2(), output);
 }
 
-}}
-
+} // namespace util
+} // namespace mapnik
 
 #endif // MAPNIK_PARSE_HEX_HPP

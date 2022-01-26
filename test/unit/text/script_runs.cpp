@@ -5,14 +5,16 @@
 
 TEST_CASE("nested script runs")
 {
-    mapnik::value_unicode_string text("Nested text runs(первый(second(третий)))"); //mixed scripts
+    mapnik::value_unicode_string text("Nested text runs(первый(second(третий)))"); // mixed scripts
     ScriptRun runs(text.getBuffer(), text.length());
     std::size_t count = 0;
     std::size_t size = 0;
     while (runs.next())
     {
-        if (count & 1) CHECK(runs.getScriptCode() == USCRIPT_CYRILLIC);
-        else CHECK(runs.getScriptCode() == USCRIPT_LATIN);
+        if (count & 1)
+            CHECK(runs.getScriptCode() == USCRIPT_CYRILLIC);
+        else
+            CHECK(runs.getScriptCode() == USCRIPT_LATIN);
         size += runs.getScriptEnd() - runs.getScriptStart();
         ++count;
     }

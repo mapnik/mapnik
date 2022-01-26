@@ -7,9 +7,9 @@ TEST_CASE("mapnik::value")
 {
     SECTION("add/sub/mult/div")
     {
-        mapnik::value v0 = 1; // mapnik::value_integer
+        mapnik::value v0 = 1;     // mapnik::value_integer
         mapnik::value v1 = 1.001; // mapnik::value_double
-        mapnik::value v2 = true; // mapnik::value_boolean
+        mapnik::value v2 = true;  // mapnik::value_boolean
 
         CHECK(v0.is<mapnik::value_integer>());
         CHECK(v1.is<mapnik::value_double>());
@@ -101,9 +101,9 @@ TEST_CASE("mapnik::value")
         CHECK(div5.is<mapnik::value_integer>());
         CHECK(div6.is<mapnik::value_integer>());
 
-        CHECK(div0 == 1.0/div1);
-        CHECK(div2 == 1.0/div3);
-        CHECK(div4 == 1.0/div5);
-        CHECK(div6 == v0/v0);
+        CHECK(div0 == 1.0 / div1);
+        CHECK(div2 == 1.0 / div3);
+        CHECK(div4 == 1.0 / div5);
+        CHECK(div6 == v0 / v0);
     }
 }

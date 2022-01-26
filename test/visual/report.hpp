@@ -30,99 +30,97 @@
 
 #include "config.hpp"
 
-namespace visual_tests
-{
+namespace visual_tests {
 
 class console_report
 {
-public:
-    console_report(bool _show_duration) : s(std::clog), show_duration(_show_duration)
-    {
-    }
+  public:
+    console_report(bool _show_duration)
+        : s(std::clog)
+        , show_duration(_show_duration)
+    {}
 
-    console_report(std::ostream & _s) : s(_s)
-    {
-    }
+    console_report(std::ostream& _s)
+        : s(_s)
+    {}
 
-    void report(result const & r);
-    unsigned summary(result_list const & results);
+    void report(result const& r);
+    unsigned summary(result_list const& results);
 
-protected:
-    void report_state(result const & r);
-    void report_failures(result_list const & results);
+  protected:
+    void report_state(result const& r);
+    void report_failures(result_list const& results);
 
-    std::ostream & s;
+    std::ostream& s;
     bool show_duration;
 };
 
 class console_short_report : public console_report
 {
-public:
-    console_short_report(bool _show_duration) : console_report(_show_duration)
-    {
-    }
+  public:
+    console_short_report(bool _show_duration)
+        : console_report(_show_duration)
+    {}
 
-    console_short_report(std::ostream & _s) : console_report(_s)
-    {
-    }
+    console_short_report(std::ostream& _s)
+        : console_report(_s)
+    {}
 
-    void report(result const & r);
+    void report(result const& r);
 };
 
 class html_report
 {
-public:
-    html_report(std::ostream & _s) : s(_s)
-    {
-    }
+  public:
+    html_report(std::ostream& _s)
+        : s(_s)
+    {}
 
-    void report(result const & r, boost::filesystem::path const & output_dir);
-    void summary(result_list const & results, boost::filesystem::path const & output_dir);
+    void report(result const& r, boost::filesystem::path const& output_dir);
+    void summary(result_list const& results, boost::filesystem::path const& output_dir);
 
-protected:
-    std::ostream & s;
+  protected:
+    std::ostream& s;
 };
 
 using report_type = mapnik::util::variant<console_report, console_short_report>;
 
 class report_visitor
 {
-public:
-    report_visitor(result const & r)
+  public:
+    report_visitor(result const& r)
         : result_(r)
-    {
-    }
+    {}
 
-    template <typename T>
-    void operator()(T & report) const
+    template<typename T>
+    void operator()(T& report) const
     {
         return report.report(result_);
     }
 
-private:
-    result const & result_;
+  private:
+    result const& result_;
 };
 
 class summary_visitor
 {
-public:
-    summary_visitor(result_list const & r)
+  public:
+    summary_visitor(result_list const& r)
         : result_(r)
-    {
-    }
+    {}
 
-    template <typename T>
-    unsigned operator()(T & report) const
+    template<typename T>
+    unsigned operator()(T& report) const
     {
         return report.summary(result_);
     }
 
-private:
-    result_list const & result_;
+  private:
+    result_list const& result_;
 };
 
-void html_summary(result_list const & results, boost::filesystem::path output_dir);
+void html_summary(result_list const& results, boost::filesystem::path output_dir);
 
-}
+} // namespace visual_tests
 
 #endif
