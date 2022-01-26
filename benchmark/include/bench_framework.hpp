@@ -10,7 +10,7 @@
 
 // stl
 #include <chrono>
-#include <cmath> // log10, round
+#include <cmath>  // log10, round
 #include <cstdio> // snprintf
 #include <iomanip>
 #include <iostream>
@@ -22,36 +22,28 @@
 
 namespace benchmark {
 
-template <typename T>
+template<typename T>
 using milliseconds = std::chrono::duration<T, std::milli>;
 
-template <typename T>
+template<typename T>
 using seconds = std::chrono::duration<T>;
 
 class test_case
 {
-protected:
+  protected:
     mapnik::parameters params_;
     std::size_t threads_;
     std::size_t iterations_;
-public:
+
+  public:
     test_case(mapnik::parameters const& params)
-       : params_(params),
-         threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads", 0))),
-         iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations", 0)))
-         {}
-    std::size_t threads() const
-    {
-        return threads_;
-    }
-    std::size_t iterations() const
-    {
-        return iterations_;
-    }
-    mapnik::parameters const& params() const
-    {
-        return params_;
-    }
+        : params_(params)
+        , threads_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("threads", 0)))
+        , iterations_(mapnik::safe_cast<std::size_t>(*params.get<mapnik::value_integer>("iterations", 0)))
+    {}
+    std::size_t threads() const { return threads_; }
+    std::size_t iterations() const { return iterations_; }
+    mapnik::parameters const& params() const { return params_; }
     virtual bool validate() const = 0;
     virtual bool operator()() const = 0;
 };
@@ -59,21 +51,25 @@ public:
 // gathers --long-option values in 'params';
 // returns the index of the first non-option argument,
 // or negated index of an ill-formed option argument
-inline int parse_args(int argc, char** argv, mapnik::parameters & params)
+inline int parse_args(int argc, char** argv, mapnik::parameters& params)
 {
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         const char* opt = argv[i];
-        if (opt[0] != '-') {
+        if (opt[0] != '-')
+        {
             // non-option argument, return its index
             return i;
         }
-        if (opt[1] != '-') {
+        if (opt[1] != '-')
+        {
             // we only accept --long-options, but instead of throwing,
             // just issue a warning and let the caller decide what to do
             std::clog << argv[0] << ": invalid option '" << opt << "'\n";
             return -i; // negative means ill-formed option #i
         }
-        if (opt[2] == '\0') {
+        if (opt[2] == '\0')
+        {
             // option-list terminator '--'
             return i + 1;
         }
@@ -81,15 +77,18 @@ inline int parse_args(int argc, char** argv, mapnik::parameters & params)
         // take option name without the leading '--'
         std::string key(opt + 2);
         size_t eq = key.find('=');
-        if (eq != std::string::npos) {
+        if (eq != std::string::npos)
+        {
             // one-argument form '--foo=bar'
             params[key.substr(0, eq)] = key.substr(eq + 1);
         }
-        else if (i + 1 < argc) {
+        else if (i + 1 < argc)
+        {
             // two-argument form '--foo' 'bar'
             params[key] = std::string(argv[++i]);
         }
-        else {
+        else
+        {
             // missing second argument
             std::clog << argv[0] << ": missing option '" << opt << "' value\n";
             return -i; // negative means ill-formed option #i
@@ -100,7 +99,8 @@ inline int parse_args(int argc, char** argv, mapnik::parameters & params)
 
 inline void handle_common_args(mapnik::parameters const& params)
 {
-    if (auto severity = params.get<std::string>("log")) {
+    if (auto severity = params.get<std::string>("log"))
+    {
         if (*severity == "debug")
             mapnik::logger::set_severity(mapnik::logger::debug);
         else if (*severity == "warn")
@@ -110,37 +110,35 @@ inline void handle_common_args(mapnik::parameters const& params)
         else if (*severity == "none")
             mapnik::logger::set_severity(mapnik::logger::none);
         else
-            std::clog << "ignoring option --log='" << *severity
-                      << "' (allowed values are: debug, warn, error, none)\n";
+            std::clog << "ignoring option --log='" << *severity << "' (allowed values are: debug, warn, error, none)\n";
     }
 }
 
-inline int handle_args(int argc, char** argv, mapnik::parameters & params)
+inline int handle_args(int argc, char** argv, mapnik::parameters& params)
 {
     int res = parse_args(argc, argv, params);
     handle_common_args(params);
     return res;
 }
 
-#define BENCHMARK(test_class,name)                      \
-    int main(int argc, char** argv)                     \
-    {                                                   \
-        try                                             \
-        {                                               \
-            mapnik::parameters params;                  \
-            benchmark::handle_args(argc,argv,params);   \
-            test_class test_runner(params);             \
-            auto result = run(test_runner,name);        \
-            testing::run_cleanup();                     \
-            return result;                              \
-        }                                               \
-        catch (std::exception const& ex)                \
-        {                                               \
-            std::clog << ex.what() << "\n";             \
-            testing::run_cleanup();                     \
-            return -1;                                  \
-        }                                               \
-    }                                                   \
+#define BENCHMARK(test_class, name)                                                                                    \
+    int main(int argc, char** argv)                                                                                    \
+    {                                                                                                                  \
+        try                                                                                                            \
+        {                                                                                                              \
+            mapnik::parameters params;                                                                                 \
+            benchmark::handle_args(argc, argv, params);                                                                \
+            test_class test_runner(params);                                                                            \
+            auto result = run(test_runner, name);                                                                      \
+            testing::run_cleanup();                                                                                    \
+            return result;                                                                                             \
+        } catch (std::exception const& ex)                                                                             \
+        {                                                                                                              \
+            std::clog << ex.what() << "\n";                                                                            \
+            testing::run_cleanup();                                                                                    \
+            return -1;                                                                                                 \
+        }                                                                                                              \
+    }
 
 struct big_number_fmt
 {
@@ -149,7 +147,9 @@ struct big_number_fmt
     const char* u;
 
     big_number_fmt(int width, double value, int base = 1000)
-        : w(width), v(value), u("")
+        : w(width)
+        , v(value)
+        , u("")
     {
         static const char* suffixes = "\0\0k\0M\0G\0T\0P\0E\0Z\0Y\0\0";
         u = suffixes;
@@ -165,7 +165,7 @@ struct big_number_fmt
     }
 };
 
-template <typename T>
+template<typename T>
 int run(T const& test_runner, std::string const& name)
 {
     try
@@ -196,8 +196,7 @@ int run(T const& test_runner, std::string const& name)
             std::mutex mtx_ready;
             std::unique_lock<std::mutex> lock_ready(mtx_ready);
 
-            auto stub = [&](T const& test_copy)
-            {
+            auto stub = [&](T const& test_copy) {
                 // workers will wait on this mutex until the main thread
                 // constructs all of them and starts measuring time
                 std::unique_lock<std::mutex> my_lock(mtx_ready);
@@ -207,14 +206,14 @@ int run(T const& test_runner, std::string const& name)
 
             std::vector<std::thread> tg;
             tg.reserve(num_threads);
-            for (auto i = num_threads; i-- > 0; )
+            for (auto i = num_threads; i-- > 0;)
             {
                 tg.emplace_back(stub, test_runner);
             }
             start = std::chrono::high_resolution_clock::now();
             lock_ready.unlock();
             // wait for all workers to finish
-            for (auto & t : tg)
+            for (auto& t : tg)
             {
                 if (t.joinable())
                     t.join();
@@ -228,7 +227,8 @@ int run(T const& test_runner, std::string const& name)
         else
         {
             start = std::chrono::high_resolution_clock::now();
-            do {
+            do
+            {
                 test_runner();
                 elapsed = std::chrono::high_resolution_clock::now() - start;
                 total_iters += num_iters;
@@ -243,21 +243,27 @@ int run(T const& test_runner, std::string const& name)
 
         std::clog << std::left << std::setw(43) << name;
         std::clog << std::resetiosflags(std::ios::adjustfield);
-        if (num_threads > 0) {
-            std::clog << ' ' << std::setw(3) << num_threads
-                << " worker" << (num_threads > 1 ? "s" : " ");
+        if (num_threads > 0)
+        {
+            std::clog << ' ' << std::setw(3) << num_threads << " worker" << (num_threads > 1 ? "s" : " ");
         }
-        else {
+        else
+        {
             std::clog << " main thread";
         }
-        std::snprintf(msg, sizeof(msg),
-                " %*.0f%s iters %6.0f milliseconds %*.0f%s i/t/s\n",
-                itersf.w, itersf.v, itersf.u, dur_total,
-                ips.w, ips.v, ips.u);
+        std::snprintf(msg,
+                      sizeof(msg),
+                      " %*.0f%s iters %6.0f milliseconds %*.0f%s i/t/s\n",
+                      itersf.w,
+                      itersf.v,
+                      itersf.u,
+                      dur_total,
+                      ips.w,
+                      ips.v,
+                      ips.u);
         std::clog << msg;
         return 0;
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::clog << "test runner did not complete: " << ex.what() << "\n";
         return 4;
@@ -267,18 +273,15 @@ int run(T const& test_runner, std::string const& name)
 struct sequencer
 {
     sequencer(int argc, char** argv)
-      : exit_code_(0)
+        : exit_code_(0)
     {
         benchmark::handle_args(argc, argv, params_);
     }
 
-    int done() const
-    {
-        return exit_code_;
-    }
+    int done() const { return exit_code_; }
 
-    template <typename Test, typename... Args>
-    sequencer & run(std::string const& name, Args && ...args)
+    template<typename Test, typename... Args>
+    sequencer& run(std::string const& name, Args&&... args)
     {
         // Test instance lifetime is confined to this function
         Test test_runner(params_, std::forward<Args>(args)...);
@@ -287,11 +290,11 @@ struct sequencer
         return *this; // allow chaining calls
     }
 
-protected:
+  protected:
     mapnik::parameters params_;
     int exit_code_;
 };
 
-}
+} // namespace benchmark
 
 #endif // MAPNIK_BENCH_FRAMEWORK_HPP

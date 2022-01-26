@@ -4,9 +4,10 @@
 
 class test : public benchmark::test_case
 {
-public:
+  public:
     test(mapnik::parameters const& params)
-     : test_case(params) {}
+        : test_case(params)
+    {}
     bool validate() const
     {
         std::size_t count = 0;
@@ -22,14 +23,15 @@ public:
                                                                       font_cache,
                                                                       mapnik::freetype_engine::get_mapping(),
                                                                       mapnik::freetype_engine::get_cache());
-            if (f) ++count;
+            if (f)
+                ++count;
         }
         return count == expected_count;
     }
     bool operator()() const
     {
         std::size_t expected_count = mapnik::freetype_engine::face_names().size();
-        for (unsigned i=0;i<iterations_;++i)
+        for (unsigned i = 0; i < iterations_; ++i)
         {
             std::size_t count = 0;
             mapnik::freetype_engine::font_file_mapping_type font_file_mapping;
@@ -43,9 +45,11 @@ public:
                                                                           font_cache,
                                                                           mapnik::freetype_engine::get_mapping(),
                                                                           mapnik::freetype_engine::get_cache());
-                if (f) ++count;
+                if (f)
+                    ++count;
             }
-            if (count != expected_count) {
+            if (count != expected_count)
+            {
                 std::clog << "warning: face creation not working as expected\n";
             }
         }
@@ -56,14 +60,14 @@ public:
 int main(int argc, char** argv)
 {
     mapnik::parameters params;
-    benchmark::handle_args(argc,argv,params);
+    benchmark::handle_args(argc, argv, params);
     bool success = mapnik::freetype_engine::register_fonts("./fonts", true);
-    if (!success) {
-       std::clog << "warning, did not register any new fonts!\n";
-       return -1;
-    } 
+    if (!success)
+    {
+        std::clog << "warning, did not register any new fonts!\n";
+        return -1;
+    }
     std::size_t face_count = mapnik::freetype_engine::face_names().size();
     test test_runner(params);
-    return run(test_runner,(boost::format("font_engine: creating %ld faces") % (face_count)).str());
+    return run(test_runner, (boost::format("font_engine: creating %ld faces") % (face_count)).str());
 }
-
