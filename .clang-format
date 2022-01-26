@@ -1,0 +1,94 @@
+Language: Cpp
+AccessModifierOffset: -2
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: None
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Right
+AlignOperands: Align
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Inline
+# AlwaysBreakAfterReturnType:
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BitFieldColonSpacing: After
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: false # see AllowShortEnumsOnASingleLine
+  AfterFunction: true # see AllowShortFunctionsOnASingleLine
+  AfterNamespace: false
+  AfterStruct: true
+  AfterExternBlock: true
+  BeforeCatch: false
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBinaryOperators: None
+BreakBeforeConceptDeclarations: false
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: AfterComma
+BreakStringLiterals: true
+ColumnLimit: 120
+CompactNamespaces: false
+ContinuationIndentWidth: 2
+Cpp11BracedListStyle: true
+DeriveLineEnding: true
+EmptyLineAfterAccessModifier: Leave
+EmptyLineBeforeAccessModifier: LogicalBlock
+FixNamespaceComments: true
+IncludeBlocks: Preserve
+IndentCaseBlocks: false
+IndentCaseLabels: true
+IndentExternBlock: NoIndent
+IndentPPDirectives: None
+IndentRequires: true
+IndentWidth: 4
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+LambdaBodyIndentation: Signature
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+# PackConstructorInitializers: CurrentLine # only clang-format > 14
+PointerAlignment: Left
+#QualifierAlignment: Left # only clang-format > 14
+ReferenceAlignment: Left
+ReflowComments: true
+SortIncludes: Never
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeInheritanceColon: true
+Standard: c++14
+BinPackParameters: false
+BreakBeforeInheritanceComma: false
+IncludeCategories:
+  # Headers in <> without extension.
+  - Regex: '<([A-Za-z0-9\Q/-_\E])+>'
+    Priority: 1
+  # Headers in <> from specific external libraries.
+  - Regex: '<(boost)\/'
+    Priority: 2
+  # Headers in <> from specific external libraries.
+  - Regex: '<(mapnik)\/'
+    Priority: 3
+  # Headers in <> with extension.
+  - Regex: '<([A-Za-z0-9.\Q/-_\E])+>'
+    Priority: 4
+  # Headers in "" with extension.
+  - Regex: '"([A-Za-z0-9.\Q/-_\E])+"'
+    Priority: 5
