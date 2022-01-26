@@ -24,7 +24,6 @@
 #define MAPNIK_FILE_IO_HPP
 
 // mapnik
-#include <mapnik/make_unique.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 

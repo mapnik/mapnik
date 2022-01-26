@@ -300,5 +300,18 @@
                 "test-default"
             ]
         }
+    ],
+    "testPresets": [
+        {
+            "name": "test-default",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
+        }
     ]
 }

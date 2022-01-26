@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/make_unique.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 
