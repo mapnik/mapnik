@@ -41,7 +41,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/algorithm/string.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-//st
+// st
 #include <cstdint>
 #include <iostream>
 #include <fstream>
@@ -50,21 +50,22 @@ MAPNIK_DISABLE_WARNING_POP
 static std::string numeric2string(const char* buf)
 {
     std::int16_t ndigits = int2net(buf);
-    std::int16_t weight  = int2net(buf+2);
-    std::int16_t sign    = int2net(buf+4);
-    std::int16_t dscale  = int2net(buf+6);
+    std::int16_t weight = int2net(buf + 2);
+    std::int16_t sign = int2net(buf + 4);
+    std::int16_t dscale = int2net(buf + 6);
 
     const std::unique_ptr<std::int16_t[]> digits(new std::int16_t[ndigits]);
-    for (int n=0; n < ndigits ;++n)
+    for (int n = 0; n < ndigits; ++n)
     {
-        digits[n] = int2net(buf+8+n*2);
+        digits[n] = int2net(buf + 8 + n * 2);
     }
 
     std::ostringstream ss;
 
-    if (sign == 0x4000) ss << "-";
+    if (sign == 0x4000)
+        ss << "-";
 
-    int i = std::max(weight,std::int16_t(0));
+    int i = std::max(weight, std::int16_t(0));
     int d = 0;
 
     // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.
@@ -72,7 +73,7 @@ static std::string numeric2string(const char* buf)
     // Note that the last two digits show that the leading 0's are lost when the number is split.
     // We must be careful to re-insert these 0's when building the string.
 
-    while ( i >= 0)
+    while (i >= 0)
     {
         if (i <= weight && d < ndigits)
         {
@@ -87,24 +88,24 @@ static std::string numeric2string(const char* buf)
                 }
                 else if (dig < 100)
                 {
-                    ss << "00";  // 0010 - 0099
+                    ss << "00"; // 0010 - 0099
                 }
                 else
                 {
-                    ss << "0";   // 0100 - 0999;
+                    ss << "0"; // 0100 - 0999;
                 }
 #else
-                switch(digits[d])
+                switch (digits[d])
                 {
-                case 0 ... 9:
-                    ss << "000"; // 0000 - 0009
-                    break;
-                case 10 ... 99:
-                    ss << "00";  // 0010 - 0099
-                    break;
-                case 100 ... 999:
-                    ss << "0";   // 0100 - 0999
-                    break;
+                    case 0 ... 9:
+                        ss << "000"; // 0000 - 0009
+                        break;
+                    case 10 ... 99:
+                        ss << "00"; // 0010 - 0099
+                        break;
+                    case 100 ... 999:
+                        ss << "0"; // 0100 - 0999
+                        break;
                 }
 #endif
             }
@@ -113,9 +114,9 @@ static std::string numeric2string(const char* buf)
         else
         {
             if (d == 0)
-                ss <<  "0";
+                ss << "0";
             else
-                ss <<  "0000";
+                ss << "0000";
         }
 
         i--;
@@ -133,22 +134,26 @@ static std::string numeric2string(const char* buf)
                 value = 0;
 
             // Output up to 4 decimal digits for this value
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << (value / 1000);
                 value %= 1000;
                 dscale--;
             }
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << (value / 100);
                 value %= 100;
                 dscale--;
             }
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << (value / 10);
                 value %= 10;
                 dscale--;
             }
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << value;
                 dscale--;
             }
@@ -159,10 +164,9 @@ static std::string numeric2string(const char* buf)
     return ss.str();
 }
 
-
 namespace mapnik {
 
-template <typename Connection>
+template<typename Connection>
 void pgsql2sqlite(Connection conn,
                   std::string const& query,
                   std::string const& output_table_name,
@@ -178,26 +182,27 @@ void pgsql2sqlite(Connection conn,
 
     select_sql << "select ";
 
-    for (int i=0; i<count; ++i)
+    for (int i = 0; i < count; ++i)
     {
-        if (i!=0) select_sql << ",";
-        select_sql << "\"" <<  rs->getFieldName(i) << "\"";
+        if (i != 0)
+            select_sql << ",";
+        select_sql << "\"" << rs->getFieldName(i) << "\"";
     }
 
     select_sql << " from (" << query << ") as query";
 
     std::string table_name = mapnik::sql_utils::table_from_sql(query);
 
-    std::string schema_name="";
-    std::string::size_type idx=table_name.find_last_of('.');
-    if (idx!=std::string::npos)
+    std::string schema_name = "";
+    std::string::size_type idx = table_name.find_last_of('.');
+    if (idx != std::string::npos)
     {
-        schema_name=table_name.substr(0,idx);
-        table_name=table_name.substr(idx+1);
+        schema_name = table_name.substr(0, idx);
+        table_name = table_name.substr(idx + 1);
     }
     else
     {
-        table_name=table_name.substr(0);
+        table_name = table_name.substr(0);
     }
 
     std::ostringstream geom_col_sql;
@@ -205,7 +210,7 @@ void pgsql2sqlite(Connection conn,
     geom_col_sql << "where f_table_name='" << table_name << "'";
     if (schema_name.length() > 0)
     {
-        geom_col_sql <<" and f_table_schema='"<< schema_name <<"'";
+        geom_col_sql << " and f_table_schema='" << schema_name << "'";
     }
 
     rs = conn->executeQuery(geom_col_sql.str());
@@ -214,9 +219,9 @@ void pgsql2sqlite(Connection conn,
     std::string geom_col = "UNKNOWN";
     std::string geom_type = "UNKNOWN";
 
-    if ( rs->next())
+    if (rs->next())
     {
-        if (!mapnik::util::string2int(rs->getValue("srid"),srid))
+        if (!mapnik::util::string2int(rs->getValue("srid"), srid))
         {
             std::clog << "could not convert srid to integer\n";
         }
@@ -226,7 +231,9 @@ void pgsql2sqlite(Connection conn,
 
     // add AsBinary(<geometry_column>) modifier
     std::string select_sql_str = select_sql.str();
-    boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","ST_AsBinary(" + geom_col+") as " + geom_col);
+    boost::algorithm::replace_all(select_sql_str,
+                                  "\"" + geom_col + "\"",
+                                  "ST_AsBinary(" + geom_col + ") as " + geom_col);
 
 #ifdef MAPNIK_DEBUG
     std::cout << select_sql_str << "\n";
@@ -235,19 +242,22 @@ void pgsql2sqlite(Connection conn,
     std::ostringstream cursor_sql;
     std::string cursor_name("my_cursor");
 
-    cursor_sql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << select_sql_str << " FOR READ ONLY";
+    cursor_sql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << select_sql_str
+               << " FOR READ ONLY";
     conn->execute(cursor_sql.str());
 
-    std::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
+    std::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn, cursor_name, 10000));
 
     unsigned num_fields = cursor->getNumFields();
 
-    if (num_fields == 0) return;
+    if (num_fields == 0)
+        return;
 
-    std::string feature_id =  "fid";
+    std::string feature_id = "fid";
 
     std::ostringstream create_sql;
-    create_sql << "create table if not exists " << output_table_name << " (" << feature_id << " INTEGER PRIMARY KEY AUTOINCREMENT,";
+    create_sql << "create table if not exists " << output_table_name << " (" << feature_id
+               << " INTEGER PRIMARY KEY AUTOINCREMENT,";
 
     int geometry_oid = -1;
 
@@ -255,7 +265,7 @@ void pgsql2sqlite(Connection conn,
 
     context_ptr ctx = std::make_shared<context_type>();
 
-    for ( unsigned pos = 0; pos < num_fields ; ++pos)
+    for (unsigned pos = 0; pos < num_fields; ++pos)
     {
         const char* field_name = cursor->getFieldName(pos);
         ctx->push(field_name);
@@ -264,7 +274,7 @@ void pgsql2sqlite(Connection conn,
         {
             create_sql << ",";
         }
-        output_table_insert_sql +=",?";
+        output_table_insert_sql += ",?";
         int oid = cursor->getTypeOID(pos);
         if (geom_col == cursor->getFieldName(pos))
         {
@@ -276,54 +286,52 @@ void pgsql2sqlite(Connection conn,
             create_sql << "'" << cursor->getFieldName(pos);
             switch (oid)
             {
-            case 20:
-            case 21:
-            case 23:
-                create_sql << "' INTEGER";
-                break;
-            case 700:
-            case 701:
-                create_sql << "' REAL";
-                break;
-            default:
-                create_sql << "' TEXT";
-                break;
+                case 20:
+                case 21:
+                case 23:
+                    create_sql << "' INTEGER";
+                    break;
+                case 700:
+                case 701:
+                    create_sql << "' REAL";
+                    break;
+                default:
+                    create_sql << "' TEXT";
+                    break;
             }
-
         }
     }
 
     create_sql << ");";
-    output_table_insert_sql +=")";
+    output_table_insert_sql += ")";
 
     std::cout << "client_encoding=" << conn->client_encoding() << "\n";
-    std::cout << "geometry_column=" << geom_col << "(" << geom_type
-              <<  ") srid=" << srid << " oid=" << geometry_oid << "\n";
-
+    std::cout << "geometry_column=" << geom_col << "(" << geom_type << ") srid=" << srid << " oid=" << geometry_oid
+              << "\n";
 
     db.execute("begin;");
     // output table sql
     db.execute(create_sql.str());
 
     // spatial index sql
-    std::string spatial_index_sql = "create virtual table idx_" + output_table_name
-        + "_" + geom_col + " using rtree(pkid, xmin, xmax, ymin, ymax)";
+    std::string spatial_index_sql =
+      "create virtual table idx_" + output_table_name + "_" + geom_col + " using rtree(pkid, xmin, xmax, ymin, ymax)";
 
     db.execute(spatial_index_sql);
 
-    //blob_to_hex hex;
+    // blob_to_hex hex;
     int pkid = 0;
 
-    std::string spatial_index_insert_sql = "insert into idx_" + output_table_name +  "_"
-        +  geom_col + " values (?,?,?,?,?)" ;
+    std::string spatial_index_insert_sql =
+      "insert into idx_" + output_table_name + "_" + geom_col + " values (?,?,?,?,?)";
 
-    sqlite::prepared_statement spatial_index(db,spatial_index_insert_sql);
+    sqlite::prepared_statement spatial_index(db, spatial_index_insert_sql);
 
 #ifdef MAPNIK_DEBUG
     std::cout << output_table_insert_sql << "\n";
 #endif
 
-    sqlite::prepared_statement output_table(db,output_table_insert_sql);
+    sqlite::prepared_statement output_table(db, output_table_insert_sql);
 
     while (cursor->next())
     {
@@ -332,86 +340,81 @@ void pgsql2sqlite(Connection conn,
         sqlite::record_type output_rec;
         output_rec.push_back(sqlite::value_type(pkid));
         bool empty_geom = true;
-        const char * buf = 0;
-        for (unsigned pos=0 ; pos < num_fields; ++pos)
+        const char* buf = 0;
+        for (unsigned pos = 0; pos < num_fields; ++pos)
         {
-            if (! cursor->isNull(pos))
+            if (!cursor->isNull(pos))
             {
-                int size=cursor->getFieldLength(pos);
+                int size = cursor->getFieldLength(pos);
                 int oid = cursor->getTypeOID(pos);
-                buf=cursor->getValue(pos);
+                buf = cursor->getValue(pos);
 
                 switch (oid)
                 {
-                case 25:
-                case 1042:
-                case 1043:
-                {
-                    std::string text(buf);
-                    boost::algorithm::replace_all(text,"'","''");
-                    output_rec.push_back(sqlite::value_type(text));
-                    break;
-                }
-                case 23:
-                    output_rec.emplace_back(int4net(buf));
-                    break;
-                case 21:
-                    output_rec.emplace_back(int(int2net(buf)));
-                    break;
-                case 700:
-                {
-                    float val;
-                    float4net(val,buf);
-                    output_rec.emplace_back(double(val));
-                    break;
-                }
-                case 701:
-                {
-                    double val;
-                    float8net(val,buf);
-                    output_rec.emplace_back(val);
-                    break;
-                }
-                case 1700:
-                {
-                    std::string str = numeric2string(buf);
-                    double val;
-                    if (mapnik::util::string2double(str,val))
-                    {
+                    case 25:
+                    case 1042:
+                    case 1043: {
+                        std::string text(buf);
+                        boost::algorithm::replace_all(text, "'", "''");
+                        output_rec.push_back(sqlite::value_type(text));
+                        break;
+                    }
+                    case 23:
+                        output_rec.emplace_back(int4net(buf));
+                        break;
+                    case 21:
+                        output_rec.emplace_back(int(int2net(buf)));
+                        break;
+                    case 700: {
+                        float val;
+                        float4net(val, buf);
+                        output_rec.emplace_back(double(val));
+                        break;
+                    }
+                    case 701: {
+                        double val;
+                        float8net(val, buf);
                         output_rec.emplace_back(val);
+                        break;
                     }
-                    break;
-                }
-
-                default:
-                {
-                    if (oid == geometry_oid)
-                    {
-                        mapnik::feature_impl feat(ctx,pkid);
-                        mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
-                        if (!mapnik::geometry::is_empty(geom))
+                    case 1700: {
+                        std::string str = numeric2string(buf);
+                        double val;
+                        if (mapnik::util::string2double(str, val))
                         {
-                            box2d<double> bbox = mapnik::geometry::envelope(geom);
-                            if (bbox.valid())
-                            {
-                                sqlite::record_type rec;
-                                rec.push_back(sqlite::value_type(pkid));
-                                rec.push_back(sqlite::value_type(bbox.minx()));
-                                rec.push_back(sqlite::value_type(bbox.maxx()));
-                                rec.push_back(sqlite::value_type(bbox.miny()));
-                                rec.push_back(sqlite::value_type(bbox.maxy()));
-                                spatial_index.insert_record(rec);
-                                empty_geom = false;
-                            }
+                            output_rec.emplace_back(val);
                         }
-                        output_rec.push_back(sqlite::blob(buf,size));
+                        break;
                     }
-                    else
-                    {
-                        output_rec.push_back(sqlite::null_type());
+
+                    default: {
+                        if (oid == geometry_oid)
+                        {
+                            mapnik::feature_impl feat(ctx, pkid);
+                            mapnik::geometry::geometry<double> geom = geometry_utils::from_wkb(buf, size, wkbGeneric);
+                            if (!mapnik::geometry::is_empty(geom))
+                            {
+                                box2d<double> bbox = mapnik::geometry::envelope(geom);
+                                if (bbox.valid())
+                                {
+                                    sqlite::record_type rec;
+                                    rec.push_back(sqlite::value_type(pkid));
+                                    rec.push_back(sqlite::value_type(bbox.minx()));
+                                    rec.push_back(sqlite::value_type(bbox.maxx()));
+                                    rec.push_back(sqlite::value_type(bbox.miny()));
+                                    rec.push_back(sqlite::value_type(bbox.maxy()));
+                                    spatial_index.insert_record(rec);
+                                    empty_geom = false;
+                                }
+                            }
+                            output_rec.push_back(sqlite::blob(buf, size));
+                        }
+                        else
+                        {
+                            output_rec.push_back(sqlite::null_type());
+                        }
+                        break;
                     }
-                    break;
-                }
                 }
             }
             else
@@ -420,7 +423,8 @@ void pgsql2sqlite(Connection conn,
             }
         }
 
-        if (!empty_geom) output_table.insert_record(output_rec);
+        if (!empty_geom)
+            output_table.insert_record(output_rec);
 
         if (pkid % 1000 == 0)
         {
@@ -440,4 +444,4 @@ void pgsql2sqlite(Connection conn,
     std::cout << "\r vacumming";
     std::cout << "\n Done!" << std::endl;
 }
-}
+} // namespace mapnik

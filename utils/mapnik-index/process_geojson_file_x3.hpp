@@ -26,11 +26,14 @@
 #include <utility>
 #include <string>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename T>
-std::pair<bool, typename T::value_type::first_type> process_geojson_file_x3(T & boxes, std::string const& filename, bool validate_features, bool verbose);
+template<typename T>
+std::pair<bool, typename T::value_type::first_type>
+  process_geojson_file_x3(T& boxes, std::string const& filename, bool validate_features, bool verbose);
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_UTILS_PROCESS_GEOJSON_FILE_X3_HPP
