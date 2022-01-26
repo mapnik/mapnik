@@ -85,7 +85,7 @@ jobs:
         env:
           PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj
         run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- .\mapnik-test-visual.exe -j 4 --output-dir ./visual-test-result
-      
+
       - name: Pack visual test results
         working-directory: build/${{ env.preset }}/out
         run: tar cfvz visual-test-results.tar.gz ./visual-test-result
@@ -105,7 +105,7 @@ jobs:
           name: windows-mapnik-artifact-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/*-ci/mapnik-*.tar.gz
           retention-days: 2
-      
+
       - name: Upload visual test results
         uses: actions/upload-artifact@v2
         with:
