@@ -44,23 +44,17 @@ std::string color::to_string() const
     namespace karma = boost::spirit::karma;
     boost::spirit::karma::eps_type eps;
     boost::spirit::karma::double_type double_;
-    boost::spirit::karma::uint_generator<uint8_t,10> color_;
+    boost::spirit::karma::uint_generator<uint8_t, 10> color_;
     std::string str;
     std::back_insert_iterator<std::string> sink(str);
-    karma::generate(sink, eps(alpha() < 255)
-                    // begin grammar
-                    << "rgba("
-                    << color_(red()) << ','
-                    << color_(green()) << ','
-                    << color_(blue()) << ','
-                    << double_(alpha()/255.0) << ')'
-                    |
-                    "rgb("
-                    << color_(red()) << ','
-                    << color_(green()) << ','
-                    << color_(blue()) << ')'
+    karma::generate(sink,
+                    eps(alpha() < 255)
+                        // begin grammar
+                        << "rgba(" << color_(red()) << ',' << color_(green()) << ',' << color_(blue()) << ','
+                        << double_(alpha() / 255.0) << ')' |
+                      "rgb(" << color_(red()) << ',' << color_(green()) << ',' << color_(blue()) << ')'
                     // end grammar
-        );
+    );
     return str;
 }
 
@@ -74,17 +68,14 @@ std::string color::to_hex_string() const
     std::back_insert_iterator<std::string> sink(str);
     karma::generate(sink,
                     // begin grammar
-                    '#'
-                    << right_align(2,'0')[hex(red())]
-                    << right_align(2,'0')[hex(green())]
-                    << right_align(2,'0')[hex(blue())]
-                    << eps(alpha() < 255) << right_align(2,'0')[hex(alpha())]
+                    '#' << right_align(2, '0')[hex(red())] << right_align(2, '0')[hex(green())]
+                        << right_align(2, '0')[hex(blue())] << eps(alpha() < 255) << right_align(2, '0')[hex(alpha())]
                     // end grammar
-        );
+    );
     return str;
 }
 
-namespace  {
+namespace {
 
 static std::uint8_t multiply(std::uint8_t c, std::uint8_t a)
 {
@@ -92,11 +83,12 @@ static std::uint8_t multiply(std::uint8_t c, std::uint8_t a)
     return std::uint8_t(((t >> 8) + t) >> 8);
 }
 
-}
+} // namespace
 
 bool color::premultiply()
 {
-    if (premultiplied_) return false;
+    if (premultiplied_)
+        return false;
     if (alpha_ != 255)
     {
         red_ = multiply(red_, alpha_);
@@ -109,7 +101,8 @@ bool color::premultiply()
 
 bool color::demultiply()
 {
-    if (!premultiplied_) return false;
+    if (!premultiplied_)
+        return false;
     if (alpha_ < 255)
     {
         if (alpha_ == 0)
@@ -129,4 +122,4 @@ bool color::demultiply()
     premultiplied_ = false;
     return true;
 }
-}
+} // namespace mapnik

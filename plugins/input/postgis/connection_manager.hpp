@@ -37,34 +37,27 @@
 #include <string>
 #include <memory>
 
+using mapnik::CreateStatic;
 using mapnik::Pool;
 using mapnik::singleton;
-using mapnik::CreateStatic;
 
-template <typename T>
+template<typename T>
 class ConnectionCreator
 {
-
-public:
+  public:
     ConnectionCreator(mapnik::parameters const& params)
-        : host_{params.get<std::string>("host")},
-          port_{params.get<std::string>("port")},
-          dbname_{params.get<std::string>("dbname")},
-          user_{params.get<std::string>("user")},
-          password_{params.get<std::string>("password")},
-          connect_timeout_{params.get<std::string>("connect_timeout", "4")},
-          application_name_{params.get<std::string>("application_name")}
-      {}
+        : host_{params.get<std::string>("host")}
+        , port_{params.get<std::string>("port")}
+        , dbname_{params.get<std::string>("dbname")}
+        , user_{params.get<std::string>("user")}
+        , password_{params.get<std::string>("password")}
+        , connect_timeout_{params.get<std::string>("connect_timeout", "4")}
+        , application_name_{params.get<std::string>("application_name")}
+    {}
 
-    T* operator()() const
-    {
-        return new T(connection_string_safe(), password_);
-    }
+    T* operator()() const { return new T(connection_string_safe(), password_); }
 
-    inline std::string id() const
-    {
-        return connection_string_safe();
-    }
+    inline std::string id() const { return connection_string_safe(); }
 
     inline std::string connection_string() const
     {
@@ -90,20 +83,20 @@ public:
         return connect_str;
     }
 
-private:
+  private:
 
-    static bool append_param(std::string & dest, char const* key,
-                             std::string const& val)
+    static bool append_param(std::string& dest, char const* key, std::string const& val)
     {
-        if (val.empty()) return false;
-        if (!dest.empty()) dest += ' ';
+        if (val.empty())
+            return false;
+        if (!dest.empty())
+            dest += ' ';
         dest += key;
         dest += val;
         return true;
     }
 
-    static bool append_param(std::string & dest, char const* key,
-                             boost::optional<std::string> const& opt)
+    static bool append_param(std::string& dest, char const* key, boost::optional<std::string> const& opt)
     {
         return opt && append_param(dest, key, *opt);
     }
@@ -117,22 +110,21 @@ private:
     boost::optional<std::string> application_name_;
 };
 
-class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
+class ConnectionManager : public singleton<ConnectionManager, CreateStatic>
 {
+  public:
+    using PoolType = Pool<Connection, ConnectionCreator>;
 
-public:
-    using PoolType = Pool<Connection,ConnectionCreator>;
-
-private:
+  private:
     friend class CreateStatic<ConnectionManager>;
 
-    using ContType = std::map<std::string,std::shared_ptr<PoolType> >;
+    using ContType = std::map<std::string, std::shared_ptr<PoolType>>;
     using HolderType = std::shared_ptr<Connection>;
     ContType pools_;
 
-public:
+  public:
 
-    bool registerPool(ConnectionCreator<Connection> const& creator,unsigned initialSize,unsigned maxSize)
+    bool registerPool(ConnectionCreator<Connection> const& creator, unsigned initialSize, unsigned maxSize)
     {
 #ifdef MAPNIK_THREADSAFE
         std::lock_guard<std::mutex> lock(mutex_);
@@ -146,12 +138,11 @@ public:
         }
         else
         {
-            return pools_.insert(
-                std::make_pair(creator.id(),
-                               std::make_shared<PoolType>(creator,initialSize,maxSize))).second;
+            return pools_
+              .insert(std::make_pair(creator.id(), std::make_shared<PoolType>(creator, initialSize, maxSize)))
+              .second;
         }
         return false;
-
     }
 
     std::shared_ptr<PoolType> getPool(std::string const& key)
@@ -159,8 +150,8 @@ public:
 #ifdef MAPNIK_THREADSAFE
         std::lock_guard<std::mutex> lock(mutex_);
 #endif
-        ContType::const_iterator itr=pools_.find(key);
-        if (itr!=pools_.end())
+        ContType::const_iterator itr = pools_.find(key);
+        if (itr != pools_.end())
         {
             return itr->second;
         }
@@ -169,7 +160,8 @@ public:
     }
 
     ConnectionManager() {}
-private:
+
+  private:
     ConnectionManager(const ConnectionManager&);
     ConnectionManager& operator=(const ConnectionManager);
 };

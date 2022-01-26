@@ -57,12 +57,10 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 // symbolizer properties target types
-enum class property_types : std::uint8_t
-{
+enum class property_types : std::uint8_t {
     target_bool = 1,
     target_double,
     target_integer,
@@ -101,23 +99,22 @@ enum class property_types : std::uint8_t
     target_scaling_method
 };
 
-template <typename T>
+template<typename T>
 struct evaluate_path_wrapper
 {
     using result_type = T;
-    template <typename T1, typename T2>
-    result_type operator() (T1 const&, T2 const&) const
+    template<typename T1, typename T2>
+    result_type operator()(T1 const&, T2 const&) const
     {
         return result_type();
     }
-
 };
 
-template <>
+template<>
 struct evaluate_path_wrapper<std::string>
 {
-    template <typename T1, typename T2>
-    std::string operator() (T1 const& expr, T2 const& feature) const
+    template<typename T1, typename T2>
+    std::string operator()(T1 const& expr, T2 const& feature) const
     {
         return mapnik::path_processor_type::evaluate(expr, feature);
     }
@@ -125,127 +122,114 @@ struct evaluate_path_wrapper<std::string>
 
 namespace detail {
 
-template <typename T>
-struct enum_traits {};
+template<typename T>
+struct enum_traits
+{};
 
-template <>
+template<>
 struct enum_traits<composite_mode_e>
 {
     using result_type = boost::optional<composite_mode_e>;
-    static result_type from_string(std::string const& str)
-    {
-        return comp_op_from_string(str);
-    }
+    static result_type from_string(std::string const& str) { return comp_op_from_string(str); }
 };
 
-template <>
+template<>
 struct enum_traits<scaling_method_e>
 {
     using result_type = boost::optional<scaling_method_e>;
-    static result_type from_string(std::string const& str)
-    {
-        return scaling_method_from_string(str);
-    }
+    static result_type from_string(std::string const& str) { return scaling_method_from_string(str); }
 };
 
-template <>
+template<>
 struct enum_traits<simplify_algorithm_e>
 {
     using result_type = boost::optional<simplify_algorithm_e>;
-    static result_type from_string(std::string const& str)
-    {
-        return simplify_algorithm_from_string(str);
-    }
+    static result_type from_string(std::string const& str) { return simplify_algorithm_from_string(str); }
 };
 
-#define ENUM_FROM_STRING( e ) \
-template <> struct enum_traits<e> { \
-    using result_type = boost::optional<e>; \
-    static result_type from_string(std::string const& str) \
-    { \
-        enumeration<e, e ## _MAX> enum_; \
-        try \
-        { \
-            enum_.from_string(str); \
-            return result_type(e(enum_)); \
-        } \
-        catch (...) \
-        { \
-            return result_type(); \
-        } \
-    } \
-};\
+#define ENUM_FROM_STRING(e)                                                                                            \
+    template<>                                                                                                         \
+    struct enum_traits<e>                                                                                              \
+    {                                                                                                                  \
+        using result_type = boost::optional<e>;                                                                        \
+        static result_type from_string(std::string const& str)                                                         \
+        {                                                                                                              \
+            enumeration<e, e##_MAX> enum_;                                                                             \
+            try                                                                                                        \
+            {                                                                                                          \
+                enum_.from_string(str);                                                                                \
+                return result_type(e(enum_));                                                                          \
+            } catch (...)                                                                                              \
+            {                                                                                                          \
+                return result_type();                                                                                  \
+            }                                                                                                          \
+        }                                                                                                              \
+    };
 
-ENUM_FROM_STRING( line_cap_enum )
-ENUM_FROM_STRING( line_join_enum )
-ENUM_FROM_STRING( point_placement_enum )
-ENUM_FROM_STRING( line_rasterizer_enum )
-ENUM_FROM_STRING( marker_placement_enum )
-ENUM_FROM_STRING( marker_multi_policy_enum )
-ENUM_FROM_STRING( debug_symbolizer_mode_enum )
-ENUM_FROM_STRING( pattern_alignment_enum )
-ENUM_FROM_STRING( halo_rasterizer_enum )
-ENUM_FROM_STRING( label_placement_enum )
-ENUM_FROM_STRING( vertical_alignment_enum )
-ENUM_FROM_STRING( horizontal_alignment_enum )
-ENUM_FROM_STRING( justify_alignment_enum )
-ENUM_FROM_STRING( text_transform_enum )
-ENUM_FROM_STRING( text_upright_enum )
-ENUM_FROM_STRING( direction_enum )
-ENUM_FROM_STRING( gamma_method_enum )
-ENUM_FROM_STRING( line_pattern_enum )
-ENUM_FROM_STRING( smooth_algorithm_enum )
+ENUM_FROM_STRING(line_cap_enum)
+ENUM_FROM_STRING(line_join_enum)
+ENUM_FROM_STRING(point_placement_enum)
+ENUM_FROM_STRING(line_rasterizer_enum)
+ENUM_FROM_STRING(marker_placement_enum)
+ENUM_FROM_STRING(marker_multi_policy_enum)
+ENUM_FROM_STRING(debug_symbolizer_mode_enum)
+ENUM_FROM_STRING(pattern_alignment_enum)
+ENUM_FROM_STRING(halo_rasterizer_enum)
+ENUM_FROM_STRING(label_placement_enum)
+ENUM_FROM_STRING(vertical_alignment_enum)
+ENUM_FROM_STRING(horizontal_alignment_enum)
+ENUM_FROM_STRING(justify_alignment_enum)
+ENUM_FROM_STRING(text_transform_enum)
+ENUM_FROM_STRING(text_upright_enum)
+ENUM_FROM_STRING(direction_enum)
+ENUM_FROM_STRING(gamma_method_enum)
+ENUM_FROM_STRING(line_pattern_enum)
+ENUM_FROM_STRING(smooth_algorithm_enum)
 
 // enum
-template <typename T, bool is_enum = true>
+template<typename T, bool is_enum = true>
 struct expression_result
 {
     using result_type = T;
     static result_type convert(value_type const& val)
     {
         auto result = enum_traits<T>::from_string(val.to_string());
-        if (result) return static_cast<result_type>(*result);
+        if (result)
+            return static_cast<result_type>(*result);
         return result_type(0);
     }
 };
 
-template <typename T>
-struct expression_result<T,false>
+template<typename T>
+struct expression_result<T, false>
 {
     using result_type = T;
-    static result_type convert(value_type const& val)
-    {
-        return val.convert<T>();
-    }
+    static result_type convert(value_type const& val) { return val.convert<T>(); }
 };
 
-
 // enum
-template <typename T, bool is_enum = true>
+template<typename T, bool is_enum = true>
 struct enumeration_result
 {
     using result_type = T;
-    static result_type convert(enumeration_wrapper const& e)
-    {
-        return static_cast<result_type>(e.value);
-    }
+    static result_type convert(enumeration_wrapper const& e) { return static_cast<result_type>(e.value); }
 };
 
-template <typename T>
-struct enumeration_result<T,false>
+template<typename T>
+struct enumeration_result<T, false>
 {
     using result_type = T;
     static result_type convert(enumeration_wrapper const&)
     {
-        return result_type();// FAIL
+        return result_type(); // FAIL
     }
 };
 
 // enum
-template <typename T, bool is_enum = true >
+template<typename T, bool is_enum = true>
 struct put_impl
 {
-    static void apply(symbolizer_base & sym, keys key, T const& val)
+    static void apply(symbolizer_base& sym, keys key, T const& val)
     {
         auto itr = sym.properties.find(key);
         if (itr != sym.properties.end())
@@ -259,10 +243,10 @@ struct put_impl
     }
 };
 
-template <typename T>
+template<typename T>
 struct put_impl<T, false>
 {
-    static void apply(symbolizer_base & sym, keys key, T const& val)
+    static void apply(symbolizer_base& sym, keys key, T const& val)
     {
         auto itr = sym.properties.find(key);
         if (itr != sym.properties.end())
@@ -276,106 +260,107 @@ struct put_impl<T, false>
     }
 };
 
-}
+} // namespace detail
 
-template <typename T>
+template<typename T>
 struct evaluate_expression_wrapper
 {
     using result_type = T;
 
-    template <typename T1, typename T2, typename T3>
-    result_type operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    template<typename T1, typename T2, typename T3>
+    result_type operator()(T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type result = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type result =
+          util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
         return detail::expression_result<result_type, std::is_enum<result_type>::value>::convert(result);
     }
 };
 
 // mapnik::color
-template <>
+template<>
 struct evaluate_expression_wrapper<mapnik::color>
 {
-    template <typename T1, typename T2, typename T3>
-    mapnik::color operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    template<typename T1, typename T2, typename T3>
+    mapnik::color operator()(T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        if (val.is_null()) return mapnik::color(0,0,0,0); // transparent
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
+        if (val.is_null())
+            return mapnik::color(0, 0, 0, 0); // transparent
         return mapnik::color(val.to_string());
     }
 };
 
 // enumeration wrapper
-template <>
+template<>
 struct evaluate_expression_wrapper<mapnik::enumeration_wrapper>
 {
-    template <typename T1, typename T2, typename T3>
-    mapnik::enumeration_wrapper operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    template<typename T1, typename T2, typename T3>
+    mapnik::enumeration_wrapper operator()(T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
         return mapnik::enumeration_wrapper(val.to_int());
     }
 };
 
-template <>
+template<>
 struct evaluate_expression_wrapper<mapnik::dash_array>
 {
-    template <typename T1, typename T2, typename T3>
-    mapnik::dash_array operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    template<typename T1, typename T2, typename T3>
+    mapnik::dash_array operator()(T1 const& expr, T2 const& feature, T3 const& vars) const
     {
-        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2,mapnik::value_type,T3>(feature,vars), expr);
-        if (val.is_null()) return dash_array();
+        mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
+        if (val.is_null())
+            return dash_array();
         dash_array dash;
         std::string str = val.to_string();
-        util::parse_dasharray(str,dash);
+        util::parse_dasharray(str, dash);
         return dash;
     }
 };
 
 // mapnik::font_feature_settings
-template <>
+template<>
 struct evaluate_expression_wrapper<mapnik::font_feature_settings>
 {
-    template <typename T1, typename T2, typename T3>
-    mapnik::font_feature_settings operator() (T1 const& expr, T2 const& feature, T3 const& vars) const
+    template<typename T1, typename T2, typename T3>
+    mapnik::font_feature_settings operator()(T1 const& expr, T2 const& feature, T3 const& vars) const
     {
         mapnik::value_type val = util::apply_visitor(mapnik::evaluate<T2, mapnik::value_type, T3>(feature, vars), expr);
-        if (val.is_null()) return mapnik::font_feature_settings();
+        if (val.is_null())
+            return mapnik::font_feature_settings();
         return mapnik::font_feature_settings(val.to_string());
     }
 };
 
-template <typename T>
+template<typename T>
 struct extract_value
 {
     using result_type = T;
 
-    extract_value(mapnik::feature_impl const& feature,
-                  mapnik::attributes const& v)
-        : feature_(feature),
-          vars_(v) {}
+    extract_value(mapnik::feature_impl const& feature, mapnik::attributes const& v)
+        : feature_(feature)
+        , vars_(v)
+    {}
 
-    auto operator() (mapnik::expression_ptr const& expr) const -> result_type
+    auto operator()(mapnik::expression_ptr const& expr) const -> result_type
     {
-        return evaluate_expression_wrapper<result_type>()(*expr,feature_,vars_);
+        return evaluate_expression_wrapper<result_type>()(*expr, feature_, vars_);
     }
 
-    auto operator() (mapnik::path_expression_ptr const& expr) const -> result_type
+    auto operator()(mapnik::path_expression_ptr const& expr) const -> result_type
     {
         return evaluate_path_wrapper<result_type>()(*expr, feature_);
     }
 
-    auto operator() (result_type const& val) const -> result_type
-    {
-        return val;
-    }
+    auto operator()(result_type const& val) const -> result_type { return val; }
 
-    auto operator() (mapnik::enumeration_wrapper const& e) const -> result_type
+    auto operator()(mapnik::enumeration_wrapper const& e) const -> result_type
     {
         return detail::enumeration_result<result_type, std::is_enum<result_type>::value>::convert(e);
     }
 
-    template <typename T1>
-    auto operator() (T1 const&) const -> result_type
+    template<typename T1>
+    auto operator()(T1 const&) const -> result_type
     {
         return result_type();
     }
@@ -384,23 +369,20 @@ struct extract_value
     mapnik::attributes const& vars_;
 };
 
-template <typename T1>
+template<typename T1>
 struct extract_raw_value
 {
     using result_type = T1;
 
-    auto operator() (result_type const& val) const -> result_type const&
-    {
-        return val;
-    }
+    auto operator()(result_type const& val) const -> result_type const& { return val; }
 
-    auto operator() (mapnik::enumeration_wrapper const& e) const -> result_type
+    auto operator()(mapnik::enumeration_wrapper const& e) const -> result_type
     {
         return detail::enumeration_result<result_type, std::is_enum<result_type>::value>::convert(e);
     }
 
-    template <typename T2>
-    auto operator() (T2 const&) const -> result_type
+    template<typename T2>
+    auto operator()(T2 const&) const -> result_type
     {
         return result_type();
     }
@@ -410,11 +392,11 @@ using property_meta_type = std::tuple<const char*, std::function<std::string(enu
 MAPNIK_DECL property_meta_type const& get_meta(mapnik::keys key);
 MAPNIK_DECL mapnik::keys get_key(std::string const& name);
 
-template <typename T>
-void put(symbolizer_base & sym, keys key, T const& val)
+template<typename T>
+void put(symbolizer_base& sym, keys key, T const& val)
 {
     constexpr bool enum_ = std::is_enum<T>::value;
-    detail::put_impl<T, enum_ >::apply(sym, key, val);
+    detail::put_impl<T, enum_>::apply(sym, key, val);
 }
 
 inline bool has_key(symbolizer_base const& sym, keys key)
@@ -422,44 +404,48 @@ inline bool has_key(symbolizer_base const& sym, keys key)
     return (sym.properties.count(key) == 1);
 }
 
-template <typename T, keys key>
+template<typename T, keys key>
 T get(symbolizer_base const& sym, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature, vars), itr->second);
     }
-    return mapnik::symbolizer_default<T,key>::value();
+    return mapnik::symbolizer_default<T, key>::value();
 }
 
-template <typename T>
-T get(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars, T const& default_value)
+template<typename T>
+T get(symbolizer_base const& sym,
+      keys key,
+      mapnik::feature_impl const& feature,
+      attributes const& vars,
+      T const& default_value)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature, vars), itr->second);
     }
     return default_value;
 }
 
-
-template <typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
+template<typename T>
+boost::optional<T>
+  get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
     if (itr != sym.properties.end())
     {
-        return util::apply_visitor(extract_value<T>(feature,vars), itr->second);
+        return util::apply_visitor(extract_value<T>(feature, vars), itr->second);
     }
     return boost::optional<T>();
 }
 
-template <typename T>
+template<typename T>
 T get(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
@@ -471,8 +457,7 @@ T get(symbolizer_base const& sym, keys key)
     return T{};
 }
 
-
-template <typename T>
+template<typename T>
 T get(symbolizer_base const& sym, keys key, T const& default_value)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
@@ -484,7 +469,7 @@ T get(symbolizer_base const& sym, keys key, T const& default_value)
     return default_value;
 }
 
-template <typename T>
+template<typename T>
 boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
@@ -496,6 +481,6 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     return boost::optional<T>{};
 }
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_SYMBOLIZER_HPP

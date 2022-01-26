@@ -28,13 +28,13 @@
 namespace mapnik {
 namespace detail {
 
-template <bool B, typename T, typename F>
+template<bool B, typename T, typename F>
 using conditional_t = typename std::conditional<B, T, F>::type;
 
-template <typename T>
+template<typename T>
 using decay_t = typename std::decay<T>::type;
 
-template <bool B, typename T = void>
+template<bool B, typename T = void>
 using enable_if_t = typename std::enable_if<B, T>::type;
 
 } // namespace detail

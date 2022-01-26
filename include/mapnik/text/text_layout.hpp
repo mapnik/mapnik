@@ -22,7 +22,7 @@
 #ifndef MAPNIK_TEXT_LAYOUT_HPP
 #define MAPNIK_TEXT_LAYOUT_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/value/types.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/geometry/box2d.hpp>
@@ -35,15 +35,14 @@
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/text/rotation.hpp>
 
-//stl
+// stl
 #include <vector>
 #include <deque>
 #include <memory>
 #include <map>
 #include <utility>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class feature_impl;
 class text_layout;
@@ -59,12 +58,12 @@ using child_format_ptrs = std::deque<evaluated_format_properties_ptr>;
 
 class text_layout
 {
-public:
+  public:
     using line_vector = std::vector<text_line>;
     using const_iterator = line_vector::const_iterator;
     using child_iterator = text_layout_vector::const_iterator;
 
-    text_layout(face_manager_freetype & font_manager,
+    text_layout(face_manager_freetype& font_manager,
                 feature_impl const& feature,
                 attributes const& attrs,
                 double scale_factor,
@@ -87,7 +86,7 @@ public:
     // Height of all lines together (in pixels).
     inline double height() const { return height_; }
     // Width of the longest line (in pixels).
-    inline double width() const { return width_ ; }
+    inline double width() const { return width_; }
 
     // Line iterator.
     inline const_iterator begin() const { return lines_.begin(); }
@@ -100,17 +99,18 @@ public:
     inline double cluster_width(unsigned cluster) const
     {
         std::map<unsigned, double>::const_iterator width_itr = width_map_.find(cluster);
-        if (width_itr != width_map_.end()) return width_itr->second;
+        if (width_itr != width_map_.end())
+            return width_itr->second;
         return 0;
     }
 
     // Returns the number of glyphs so memory can be preallocated.
-    inline unsigned glyphs_count() const { return glyphs_count_;}
+    inline unsigned glyphs_count() const { return glyphs_count_; }
 
     void add_child(text_layout_ptr const& child_layout);
 
     inline text_layout_vector const& get_child_layouts() const { return child_layout_list_; }
-    inline face_manager_freetype & get_font_manager() const { return font_manager_; }
+    inline face_manager_freetype& get_font_manager() const { return font_manager_; }
     inline double get_scale_factor() const { return scale_factor_; }
     inline text_symbolizer_properties const& get_default_text_properties() const { return properties_; }
     inline text_layout_properties const& get_layout_properties() const { return layout_properties_; }
@@ -121,20 +121,20 @@ public:
     inline horizontal_alignment_e horizontal_alignment() const { return halign_; }
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
-    evaluated_format_properties_ptr & new_child_format_ptr(evaluated_format_properties_ptr const& p);
+    evaluated_format_properties_ptr& new_child_format_ptr(evaluated_format_properties_ptr const& p);
 
     const_iterator longest_line() const;
 
-private:
-    void break_line(std::pair<unsigned, unsigned> && line_limits);
-    void break_line_icu(std::pair<unsigned, unsigned> && line_limits);
-    void shape_text(text_line & line);
-    void add_line(text_line && line);
+  private:
+    void break_line(std::pair<unsigned, unsigned>&& line_limits);
+    void break_line_icu(std::pair<unsigned, unsigned>&& line_limits);
+    void shape_text(text_line& line);
+    void add_line(text_line&& line);
     void clear_cluster_widths(unsigned first, unsigned last);
     void init_auto_alignment();
 
     // input
-    face_manager_freetype & font_manager_;
+    face_manager_freetype& font_manager_;
     double scale_factor_;
 
     // processing
@@ -153,7 +153,8 @@ private:
     // layout properties (owned by text_layout)
     text_layout_properties layout_properties_;
 
-    // text symbolizer properties (owned by placement_finder's 'text_placement_info' (info_) which is owned by symbolizer_helper
+    // text symbolizer properties (owned by placement_finder's 'text_placement_info' (info_) which is owned by
+    // symbolizer_helper
     text_symbolizer_properties const& properties_;
 
     // format properties (owned by text_layout)
@@ -165,14 +166,14 @@ private:
     justify_alignment_e jalign_;
 
     // Precalculated values for maximum performance
-    rotation orientation_ = {0,1.0};
+    rotation orientation_ = {0, 1.0};
     char wrap_char_ = ' ';
     double wrap_width_ = 0.0;
     bool wrap_before_ = false;
     bool repeat_wrap_char_ = false;
     bool rotate_displacement_ = false;
     double text_ratio_ = 0.0;
-    pixel_position displacement_ = {0,0};
+    pixel_position displacement_ = {0, 0};
     box2d<double> bounds_ = {0, 0, 0, 0};
 
     // children
@@ -186,9 +187,11 @@ private:
 
 class layout_container
 {
-public:
+  public:
     layout_container()
-        : glyphs_count_(0), line_count_(0) {}
+        : glyphs_count_(0)
+        , line_count_(0)
+    {}
 
     void add(text_layout_ptr layout);
     void clear();
@@ -211,7 +214,7 @@ public:
     inline double width() const { return bounds_.width(); }
     inline double height() const { return bounds_.height(); }
 
-private:
+  private:
     text_layout_vector layouts_;
 
     mapnik::value_unicode_string text_;
@@ -222,6 +225,6 @@ private:
     box2d<double> bounds_;
 };
 
-}
+} // namespace mapnik
 
 #endif // TEXT_LAYOUT_HPP

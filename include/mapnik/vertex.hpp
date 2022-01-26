@@ -26,24 +26,18 @@
 #include <utility>
 #include <cstdint>
 
-namespace mapnik
+namespace mapnik {
+
+enum CommandType : std::uint8_t { SEG_END = 0, SEG_MOVETO = 1, SEG_LINETO = 2, SEG_CLOSE = (0x40 | 0x0f) };
+
+template<typename T, int dim>
+struct vertex
 {
-
-enum CommandType : std::uint8_t {
-    SEG_END    = 0,
-    SEG_MOVETO = 1,
-    SEG_LINETO = 2,
-    SEG_CLOSE = (0x40 | 0x0f)
-};
-
-
-template <typename T,int dim>
-struct vertex {
     using coordinate_type = T;
 };
 
-template <typename T>
-struct vertex<T,2>
+template<typename T>
+struct vertex<T, 2>
 {
     enum no_init_t : std::uint8_t { no_init };
 
@@ -53,40 +47,46 @@ struct vertex<T,2>
     unsigned cmd;
 
     vertex()
-        : x(0),y(0),cmd(SEG_END) {}
+        : x(0)
+        , y(0)
+        , cmd(SEG_END)
+    {}
 
-    explicit vertex(no_init_t)
-        {}
+    explicit vertex(no_init_t) {}
 
-    vertex(coordinate_type x_,coordinate_type y_,unsigned cmd_)
-        : x(x_),y(y_),cmd(cmd_) {}
+    vertex(coordinate_type x_, coordinate_type y_, unsigned cmd_)
+        : x(x_)
+        , y(y_)
+        , cmd(cmd_)
+    {}
 
-    template <typename T2>
-    vertex(vertex<T2,2> const& rhs)
-        : x(coordinate_type(rhs.x)),
-          y(coordinate_type(rhs.y)),
-          cmd(rhs.cmd) {}
+    template<typename T2>
+    vertex(vertex<T2, 2> const& rhs)
+        : x(coordinate_type(rhs.x))
+        , y(coordinate_type(rhs.y))
+        , cmd(rhs.cmd)
+    {}
 
-    template <typename T2>
-    vertex<T,2>& operator=(vertex<T2,2> const& rhs)
+    template<typename T2>
+    vertex<T, 2>& operator=(vertex<T2, 2> const& rhs)
     {
-        vertex<T,2> tmp(rhs);
+        vertex<T, 2> tmp(rhs);
         swap(tmp);
         return *this;
     }
 
-private:
-    void swap(vertex<T,2> & rhs)
+  private:
+    void swap(vertex<T, 2>& rhs)
     {
-        std::swap(this->x,rhs.x);
-        std::swap(this->y,rhs.y);
-        std::swap(this->cmd,rhs.cmd);
+        std::swap(this->x, rhs.x);
+        std::swap(this->y, rhs.y);
+        std::swap(this->cmd, rhs.cmd);
     }
 };
 
-using vertex2d = vertex<double,2>;
-using vertex2i = vertex<int,2>;
+using vertex2d = vertex<double, 2>;
+using vertex2i = vertex<int, 2>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_VERTEX_HPP

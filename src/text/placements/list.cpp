@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-//mapnik
+// mapnik
 #include <mapnik/text/placements/list.hpp>
 #include <mapnik/xml_node.hpp>
 
@@ -30,8 +30,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/property_tree/ptree.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 bool text_placement_info_list::next() const
 {
@@ -41,19 +40,20 @@ bool text_placement_info_list::next() const
     }
     else
     {
-        if (state  > parent_->list_.size()) return false;
-        properties = parent_->list_[state-1];
+        if (state > parent_->list_.size())
+            return false;
+        properties = parent_->list_[state - 1];
     }
     ++state;
     return true;
 }
 
-text_symbolizer_properties & text_placements_list::add()
+text_symbolizer_properties& text_placements_list::add()
 {
     if (list_.size())
     {
-        text_symbolizer_properties & last = list_.back();
-        list_.push_back(last); //Preinitialize with old values FIXME
+        text_symbolizer_properties& last = list_.back();
+        list_.push_back(last); // Preinitialize with old values FIXME
     }
     else
     {
@@ -62,25 +62,26 @@ text_symbolizer_properties & text_placements_list::add()
     return list_.back();
 }
 
-text_symbolizer_properties & text_placements_list::get(unsigned i)
+text_symbolizer_properties& text_placements_list::get(unsigned i)
 {
     return list_[i];
 }
 
-
-text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor, feature_impl const&, attributes const&) const
+text_placement_info_ptr
+  text_placements_list::get_placement_info(double scale_factor, feature_impl const&, attributes const&) const
 {
     return std::make_shared<text_placement_info_list>(this, scale_factor);
 }
 
 text_placements_list::text_placements_list()
-    : text_placements(),
-      list_(0) {}
+    : text_placements()
+    , list_(0)
+{}
 
-void text_placements_list::add_expressions(expression_set & output) const
+void text_placements_list::add_expressions(expression_set& output) const
 {
     defaults.add_expressions(output);
-    for (auto & prop : list_)
+    for (auto& prop : list_)
     {
         prop.add_expressions(output);
     }
@@ -91,20 +92,20 @@ std::size_t text_placements_list::size() const
     return list_.size();
 }
 
-
 text_placements_ptr text_placements_list::from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield)
 {
     auto list = std::make_shared<text_placements_list>();
     list->defaults.from_xml(node, fontsets, is_shield);
-    for( auto const& child : node)
+    for (auto const& child : node)
     {
-        if (child.is_text() || !child.is("Placement")) continue;
-        text_symbolizer_properties & p = list->add();
+        if (child.is_text() || !child.is("Placement"))
+            continue;
+        text_symbolizer_properties& p = list->add();
         p.from_xml(child, fontsets, is_shield);
-        //if (strict_ && !p.format.fontset.size())
-        //    ensure_font_face(p.format.face_name);
+        // if (strict_ && !p.format.fontset.size())
+        //     ensure_font_face(p.format.face_name);
     }
     return list;
 }
 
-} //ns mapnik
+} // namespace mapnik

@@ -34,7 +34,7 @@ std::string utf16_to_utf8(std::wstring const& wstr)
 {
     std::string str;
     int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
-    if(size > 0)
+    if (size > 0)
     {
         std::vector<char> buffer(size);
         WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], size, 0, 0);
@@ -43,7 +43,7 @@ std::string utf16_to_utf8(std::wstring const& wstr)
     return str;
 }
 
-std::wstring utf8_to_utf16 (std::string const& str)
+std::wstring utf8_to_utf16(std::string const& str)
 {
     std::wstring wstr;
     int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);

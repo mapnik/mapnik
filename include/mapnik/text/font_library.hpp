@@ -37,15 +37,16 @@ namespace mapnik {
 
 class MAPNIK_DECL font_library : public util::noncopyable
 {
-public:
+  public:
     explicit font_library();
     ~font_library();
-    FT_LibraryRec_ * get();
-private:
-    FT_LibraryRec_ * library_;
+    FT_LibraryRec_* get();
+
+  private:
+    FT_LibraryRec_* library_;
     std::unique_ptr<FT_MemoryRec_> memory_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FONT_LIBRARY_HPP

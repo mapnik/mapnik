@@ -22,21 +22,23 @@
 
 #include <mapnik/json/feature_generator_grammar.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-template <typename OutputIterator, typename FeatureType>
+template<typename OutputIterator, typename FeatureType>
 feature_generator_grammar<OutputIterator, FeatureType>::feature_generator_grammar()
-  : feature_generator_grammar::base_type(feature)
+    : feature_generator_grammar::base_type(feature)
 {
     boost::spirit::karma::lit_type lit;
     boost::spirit::karma::long_long_type id;
 
-    feature  = lit("{\"type\":\"Feature\"")
-        << lit(",\"id\":") << id
-        << lit(",\"geometry\":") << geometry
-        << lit(",\"properties\":") << properties
-        << lit('}')
-        ;
+    feature = lit("{\"type\":\"Feature\"")             //
+              << lit(",\"id\":") << id                 //
+              << lit(",\"geometry\":") << geometry     //
+              << lit(",\"properties\":") << properties //
+              << lit('}')                              //
+      ;
 }
 
-}}
+} // namespace json
+} // namespace mapnik

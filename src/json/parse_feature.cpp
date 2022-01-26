@@ -24,21 +24,20 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/feature_grammar_x3.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-template <typename Iterator>
+template<typename Iterator>
 void parse_feature(Iterator start, Iterator end, feature_impl& feature, mapnik::transcoder const& tr)
 {
     namespace x3 = boost::spirit::x3;
     using space_type = mapnik::json::grammar::space_type;
 #if BOOST_VERSION >= 106700
-    auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(tr)
-        [x3::with<mapnik::json::grammar::feature_tag>(feature)
-         [ mapnik::json::grammar::feature_rule ]];
+    auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(
+      tr)[x3::with<mapnik::json::grammar::feature_tag>(feature)[mapnik::json::grammar::feature_rule]];
 #else
-    auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(std::ref(tr))
-        [x3::with<mapnik::json::grammar::feature_tag>(std::ref(feature))
-         [ mapnik::json::grammar::feature_rule ]];
+    auto grammar = x3::with<mapnik::json::grammar::transcoder_tag>(std::ref(
+      tr))[x3::with<mapnik::json::grammar::feature_tag>(std::ref(feature))[mapnik::json::grammar::feature_rule]];
 #endif
     if (!x3::phrase_parse(start, end, grammar, space_type()))
     {
@@ -46,7 +45,7 @@ void parse_feature(Iterator start, Iterator end, feature_impl& feature, mapnik::
     }
 }
 
-template <typename Iterator>
+template<typename Iterator>
 void parse_geometry(Iterator start, Iterator end, feature_impl& feature)
 {
     namespace x3 = boost::spirit::x3;
@@ -59,7 +58,9 @@ void parse_geometry(Iterator start, Iterator end, feature_impl& feature)
 }
 
 using iterator_type = mapnik::json::grammar::iterator_type;
-template void parse_feature<iterator_type>(iterator_type,iterator_type, feature_impl& feature, mapnik::transcoder const& tr);
-template void parse_geometry<iterator_type>(iterator_type,iterator_type, feature_impl& feature);
+template void
+  parse_feature<iterator_type>(iterator_type, iterator_type, feature_impl& feature, mapnik::transcoder const& tr);
+template void parse_geometry<iterator_type>(iterator_type, iterator_type, feature_impl& feature);
 
-}}
+} // namespace json
+} // namespace mapnik

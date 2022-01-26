@@ -41,69 +41,68 @@ MAPNIK_DISABLE_WARNING_POP
 // agg
 #include "agg_trans_affine.h"
 
-BOOST_FUSION_ADAPT_TPL_STRUCT(
-    (T),
-    (mapnik::box2d)(T),
-    (T, minx_),
-    (T, miny_),
-    (T, maxx_),
-    (T, maxy_))
+BOOST_FUSION_ADAPT_TPL_STRUCT((T), (mapnik::box2d)(T), (T, minx_), (T, miny_), (T, maxx_), (T, maxy_))
 
-namespace mapnik { namespace detail { namespace {
+namespace mapnik {
+namespace detail {
+namespace {
 
-template <typename T>
+template<typename T>
 struct assign
 {
-    template <typename Context>
-    void operator() (Context & ctx) const
+    template<typename Context>
+    void operator()(Context& ctx) const
     {
         _val(ctx) = safe_cast<T>(_attr(ctx));
     }
 };
-} // anonymous
-} // detail
+} // namespace
+} // namespace detail
 
-template <typename T>
+template<typename T>
 box2d<T>::box2d()
-    :minx_( std::numeric_limits<T>::max()),
-     miny_( std::numeric_limits<T>::max()),
-     maxx_(-std::numeric_limits<T>::max()),
-     maxy_(-std::numeric_limits<T>::max()) {}
+    : minx_(std::numeric_limits<T>::max())
+    , miny_(std::numeric_limits<T>::max())
+    , maxx_(-std::numeric_limits<T>::max())
+    , maxy_(-std::numeric_limits<T>::max())
+{}
 
-template <typename T>
-box2d<T>::box2d(T minx,T miny,T maxx,T maxy)
+template<typename T>
+box2d<T>::box2d(T minx, T miny, T maxx, T maxy)
 {
     init(minx, miny, maxx, maxy);
 }
 
-template <typename T>
-box2d<T>::box2d(coord<T,2> const& c0, coord<T,2> const& c1)
+template<typename T>
+box2d<T>::box2d(coord<T, 2> const& c0, coord<T, 2> const& c1)
 {
     init(c0.x, c0.y, c1.x, c1.y);
 }
 
-template <typename T>
+template<typename T>
 box2d<T>::box2d(box2d_type const& rhs)
-    : minx_(rhs.minx_),
-      miny_(rhs.miny_),
-      maxx_(rhs.maxx_),
-      maxy_(rhs.maxy_) {}
+    : minx_(rhs.minx_)
+    , miny_(rhs.miny_)
+    , maxx_(rhs.maxx_)
+    , maxy_(rhs.maxy_)
+{}
 
-template <typename T>
-box2d<T>::box2d(box2d_type && rhs)
-    : minx_(std::move(rhs.minx_)),
-      miny_(std::move(rhs.miny_)),
-      maxx_(std::move(rhs.maxx_)),
-      maxy_(std::move(rhs.maxy_)) {}
+template<typename T>
+box2d<T>::box2d(box2d_type&& rhs)
+    : minx_(std::move(rhs.minx_))
+    , miny_(std::move(rhs.miny_))
+    , maxx_(std::move(rhs.maxx_))
+    , maxy_(std::move(rhs.maxy_))
+{}
 
-template <typename T>
+template<typename T>
 box2d<T>& box2d<T>::operator=(box2d_type other)
 {
     swap(*this, other);
     return *this;
 }
 
-template <typename T>
+template<typename T>
 box2d<T>::box2d(box2d_type const& rhs, agg::trans_affine const& tr)
 {
     double x0 = rhs.minx_, y0 = rhs.miny_;
@@ -114,40 +113,36 @@ box2d<T>::box2d(box2d_type const& rhs, agg::trans_affine const& tr)
     tr.transform(&x1, &y1);
     tr.transform(&x2, &y2);
     tr.transform(&x3, &y3);
-    init(static_cast<T>(x0), static_cast<T>(y0),
-         static_cast<T>(x2), static_cast<T>(y2));
+    init(static_cast<T>(x0), static_cast<T>(y0), static_cast<T>(x2), static_cast<T>(y2));
     expand_to_include(static_cast<T>(x1), static_cast<T>(y1));
     expand_to_include(static_cast<T>(x3), static_cast<T>(y3));
 }
 
-template <typename T>
+template<typename T>
 bool box2d<T>::operator==(box2d<T> const& other) const
 {
-    return minx_==other.minx_ &&
-        miny_==other.miny_ &&
-        maxx_==other.maxx_ &&
-        maxy_==other.maxy_;
+    return minx_ == other.minx_ && miny_ == other.miny_ && maxx_ == other.maxx_ && maxy_ == other.maxy_;
 }
 
-template <typename T>
+template<typename T>
 T box2d<T>::minx() const
 {
     return minx_;
 }
 
-template <typename T>
+template<typename T>
 T box2d<T>::maxx() const
 {
     return maxx_;
 }
 
-template <typename T>
+template<typename T>
 T box2d<T>::miny() const
 {
     return miny_;
 }
 
-template <typename T>
+template<typename T>
 T box2d<T>::maxy() const
 {
     return maxy_;
@@ -177,115 +172,118 @@ void box2d<T>::set_maxy(T v)
     maxy_ = v;
 }
 
-template <typename T>
+template<typename T>
 T box2d<T>::width() const
 {
-    return maxx_-minx_;
+    return maxx_ - minx_;
 }
 
-template <typename T>
+template<typename T>
 T box2d<T>::height() const
 {
-    return maxy_-miny_;
+    return maxy_ - miny_;
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::width(T w)
 {
-    T cx=center().x;
-    minx_=static_cast<T>(cx-w*0.5);
-    maxx_=static_cast<T>(cx+w*0.5);
+    T cx = center().x;
+    minx_ = static_cast<T>(cx - w * 0.5);
+    maxx_ = static_cast<T>(cx + w * 0.5);
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::height(T h)
 {
-    T cy=center().y;
-    miny_=static_cast<T>(cy-h*0.5);
-    maxy_=static_cast<T>(cy+h*0.5);
+    T cy = center().y;
+    miny_ = static_cast<T>(cy - h * 0.5);
+    maxy_ = static_cast<T>(cy + h * 0.5);
 }
 
-template <typename T>
-coord<T,2> box2d<T>::center() const
+template<typename T>
+coord<T, 2> box2d<T>::center() const
 {
-    return coord<T,2>(static_cast<T>(0.5*(minx_+maxx_)),
-                      static_cast<T>(0.5*(miny_+maxy_)));
+    return coord<T, 2>(static_cast<T>(0.5 * (minx_ + maxx_)), static_cast<T>(0.5 * (miny_ + maxy_)));
 }
 
-template <typename T>
-void box2d<T>::expand_to_include(coord<T,2> const& c)
+template<typename T>
+void box2d<T>::expand_to_include(coord<T, 2> const& c)
 {
-    expand_to_include(c.x,c.y);
+    expand_to_include(c.x, c.y);
 }
 
-template <typename T>
-void box2d<T>::expand_to_include(T x,T y)
+template<typename T>
+void box2d<T>::expand_to_include(T x, T y)
 {
-    if (x<minx_) minx_=x;
-    if (x>maxx_) maxx_=x;
-    if (y<miny_) miny_=y;
-    if (y>maxy_) maxy_=y;
+    if (x < minx_)
+        minx_ = x;
+    if (x > maxx_)
+        maxx_ = x;
+    if (y < miny_)
+        miny_ = y;
+    if (y > maxy_)
+        maxy_ = y;
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::expand_to_include(box2d<T> const& other)
 {
-    if (other.minx_<minx_) minx_=other.minx_;
-    if (other.maxx_>maxx_) maxx_=other.maxx_;
-    if (other.miny_<miny_) miny_=other.miny_;
-    if (other.maxy_>maxy_) maxy_=other.maxy_;
+    if (other.minx_ < minx_)
+        minx_ = other.minx_;
+    if (other.maxx_ > maxx_)
+        maxx_ = other.maxx_;
+    if (other.miny_ < miny_)
+        miny_ = other.miny_;
+    if (other.maxy_ > maxy_)
+        maxy_ = other.maxy_;
 }
 
-template <typename T>
-bool box2d<T>::contains(coord<T,2> const& c) const
+template<typename T>
+bool box2d<T>::contains(coord<T, 2> const& c) const
 {
-    return contains(c.x,c.y);
+    return contains(c.x, c.y);
 }
 
-template <typename T>
-bool box2d<T>::contains(T x,T y) const
+template<typename T>
+bool box2d<T>::contains(T x, T y) const
 {
-    return x>=minx_ && x<=maxx_ && y>=miny_ && y<=maxy_;
+    return x >= minx_ && x <= maxx_ && y >= miny_ && y <= maxy_;
 }
 
-template <typename T>
+template<typename T>
 bool box2d<T>::contains(box2d<T> const& other) const
 {
-    return other.minx_>=minx_ &&
-        other.maxx_<=maxx_ &&
-        other.miny_>=miny_ &&
-        other.maxy_<=maxy_;
+    return other.minx_ >= minx_ && other.maxx_ <= maxx_ && other.miny_ >= miny_ && other.maxy_ <= maxy_;
 }
 
-template <typename T>
-bool box2d<T>::intersects(coord<T,2> const& c) const
+template<typename T>
+bool box2d<T>::intersects(coord<T, 2> const& c) const
 {
-    return intersects(c.x,c.y);
+    return intersects(c.x, c.y);
 }
 
-template <typename T>
-bool box2d<T>::intersects(T x,T y) const
+template<typename T>
+bool box2d<T>::intersects(T x, T y) const
 {
-    return !(x>maxx_ || x<minx_ || y>maxy_ || y<miny_);
+    return !(x > maxx_ || x < minx_ || y > maxy_ || y < miny_);
 }
 
-template <typename T>
+template<typename T>
 bool box2d<T>::intersects(box2d<T> const& other) const
 {
-    return !(other.minx_>maxx_ || other.maxx_<minx_ ||
-             other.miny_>maxy_ || other.maxy_<miny_);
+    return !(other.minx_ > maxx_ || other.maxx_ < minx_ || other.miny_ > maxy_ || other.maxy_ < miny_);
 }
 
-template <typename T>
+template<typename T>
 box2d<T> box2d<T>::intersect(box2d_type const& other) const
 {
     if (intersects(other))
     {
-        T x0=std::max(minx_,other.minx_);
-        T y0=std::max(miny_,other.miny_);
-        T x1=std::min(maxx_,other.maxx_);
-        T y1=std::min(maxy_,other.maxy_);
-        return box2d<T>(x0,y0,x1,y1);
+        T x0 = std::max(minx_, other.minx_);
+        T y0 = std::max(miny_, other.miny_);
+        T x1 = std::min(maxx_, other.maxx_);
+        T y1 = std::min(maxy_, other.maxy_);
+        return box2d<T>(x0, y0, x1, y1);
     }
     else
     {
@@ -293,24 +291,24 @@ box2d<T> box2d<T>::intersect(box2d_type const& other) const
     }
 }
 
-template <typename T>
-void box2d<T>::re_center(T cx,T cy)
+template<typename T>
+void box2d<T>::re_center(T cx, T cy)
 {
-    T dx=cx-center().x;
-    T dy=cy-center().y;
-    minx_+=dx;
-    miny_+=dy;
-    maxx_+=dx;
-    maxy_+=dy;
+    T dx = cx - center().x;
+    T dy = cy - center().y;
+    minx_ += dx;
+    miny_ += dy;
+    maxx_ += dx;
+    maxy_ += dy;
 }
 
-template <typename T>
-void box2d<T>::re_center(coord<T,2> const& c)
+template<typename T>
+void box2d<T>::re_center(coord<T, 2> const& c)
 {
-    re_center(c.x,c.y);
+    re_center(c.x, c.y);
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::init(T x0, T y0, T x1, T y1)
 {
     if (x0 < x1)
@@ -335,13 +333,13 @@ void box2d<T>::init(T x0, T y0, T x1, T y1)
     }
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::init(T x, T y)
 {
     init(x, y, x, y);
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::clip(box2d_type const& other)
 {
     minx_ = std::max(minx_, other.minx());
@@ -350,7 +348,7 @@ void box2d<T>::clip(box2d_type const& other)
     maxy_ = std::min(maxy_, other.maxy());
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::pad(T padding)
 {
     minx_ -= padding;
@@ -359,30 +357,29 @@ void box2d<T>::pad(T padding)
     maxy_ += padding;
 }
 
-template <typename T>
+template<typename T>
 bool box2d<T>::from_string(std::string const& str)
 {
     using boost::spirit::x3::lit;
     boost::spirit::x3::double_type double_;
     boost::spirit::x3::ascii::space_type space;
-    bool r = boost::spirit::x3::phrase_parse(str.begin(),
-                                             str.end(),
-                                             double_[detail::assign<T>()] >> -lit(',') >>
-                                             double_[detail::assign<T>()] >> -lit(',') >>
-                                             double_[detail::assign<T>()] >> -lit(',') >>
-                                             double_[detail::assign<T>()],
-                                             space,
-                                             *this);
+    bool r = boost::spirit::x3::phrase_parse(
+      str.begin(),
+      str.end(),
+      double_[detail::assign<T>()] >> -lit(',') >> double_[detail::assign<T>()] >> -lit(',') >>
+        double_[detail::assign<T>()] >> -lit(',') >> double_[detail::assign<T>()],
+      space,
+      *this);
     return r;
 }
 
-template <typename T>
+template<typename T>
 bool box2d<T>::valid() const
 {
-    return (minx_ <= maxx_ && miny_ <= maxy_) ;
+    return (minx_ <= maxx_ && miny_ <= maxy_);
 }
 
-template <typename T>
+template<typename T>
 void box2d<T>::move(T x, T y)
 {
     minx_ += x;
@@ -391,15 +388,14 @@ void box2d<T>::move(T x, T y)
     maxy_ += y;
 }
 
-template <typename T>
+template<typename T>
 std::string box2d<T>::to_string() const
 {
     std::ostringstream s;
     if (valid())
     {
-        s << "box2d(" << std::fixed << std::setprecision(16)
-          << minx_ << ',' << miny_ << ','
-          << maxx_ << ',' << maxy_ << ')';
+        s << "box2d(" << std::fixed << std::setprecision(16) << minx_ << ',' << miny_ << ',' << maxx_ << ',' << maxy_
+          << ')';
     }
     else
     {
@@ -408,27 +404,27 @@ std::string box2d<T>::to_string() const
     return s.str();
 }
 
-template <typename T>
-T  box2d<T>::area() const
+template<typename T>
+T box2d<T>::area() const
 {
     return width() * height();
 }
 
-template <typename T>
-box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
+template<typename T>
+box2d<T>& box2d<T>::operator+=(box2d<T> const& other)
 {
     expand_to_include(other);
     return *this;
 }
 
-template <typename T>
-box2d<T> box2d<T>::operator+ (T other) const
+template<typename T>
+box2d<T> box2d<T>::operator+(T other) const
 {
     return box2d<T>(minx_ - other, miny_ - other, maxx_ + other, maxy_ + other);
 }
 
-template <typename T>
-box2d<T>& box2d<T>::operator+= (T other)
+template<typename T>
+box2d<T>& box2d<T>::operator+=(T other)
 {
     minx_ -= other;
     miny_ -= other;
@@ -437,12 +433,11 @@ box2d<T>& box2d<T>::operator+= (T other)
     return *this;
 }
 
-
-template <typename T>
+template<typename T>
 box2d<T>& box2d<T>::operator*=(T t)
 {
-    coord<T,2> c = center();
-    T sx = static_cast<T>(0.5 * width()  * t);
+    coord<T, 2> c = center();
+    T sx = static_cast<T>(0.5 * width() * t);
     T sy = static_cast<T>(0.5 * height() * t);
     minx_ = c.x - sx;
     maxx_ = c.x + sx;
@@ -451,10 +446,10 @@ box2d<T>& box2d<T>::operator*=(T t)
     return *this;
 }
 
-template <typename T>
+template<typename T>
 box2d<T>& box2d<T>::operator/=(T t)
 {
-    coord<T,2> c = center();
+    coord<T, 2> c = center();
     T sx = static_cast<T>(0.5 * width() / t);
     T sy = static_cast<T>(0.5 * height() / t);
     minx_ = c.x - sx;
@@ -464,39 +459,39 @@ box2d<T>& box2d<T>::operator/=(T t)
     return *this;
 }
 
-template <typename T>
-T box2d<T>::operator[] (int index) const
+template<typename T>
+T box2d<T>::operator[](int index) const
 {
-    switch(index)
+    switch (index)
     {
-    case 0:
-        return minx_;
-    case 1:
-        return miny_;
-    case 2:
-        return maxx_;
-    case 3:
-        return maxy_;
-    case -4:
-        return minx_;
-    case -3:
-        return miny_;
-    case -2:
-        return maxx_;
-    case -1:
-        return maxy_;
-    default:
-        throw std::out_of_range("index out of range, max value is 3, min value is -4 ");
+        case 0:
+            return minx_;
+        case 1:
+            return miny_;
+        case 2:
+            return maxx_;
+        case 3:
+            return maxy_;
+        case -4:
+            return minx_;
+        case -3:
+            return miny_;
+        case -2:
+            return maxx_;
+        case -1:
+            return maxy_;
+        default:
+            throw std::out_of_range("index out of range, max value is 3, min value is -4 ");
     }
 }
 
-template <typename T>
+template<typename T>
 box2d<T> box2d<T>::operator*(agg::trans_affine const& tr) const
 {
     return box2d<T>(*this, tr);
 }
 
-template <typename T>
+template<typename T>
 box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
 {
     double x0 = minx_, y0 = miny_;
@@ -507,10 +502,9 @@ box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
     tr.transform(&x1, &y1);
     tr.transform(&x2, &y2);
     tr.transform(&x3, &y3);
-    init(static_cast<T>(x0), static_cast<T>(y0),
-         static_cast<T>(x2), static_cast<T>(y2));
+    init(static_cast<T>(x0), static_cast<T>(y0), static_cast<T>(x2), static_cast<T>(y2));
     expand_to_include(static_cast<T>(x1), static_cast<T>(y1));
     expand_to_include(static_cast<T>(x3), static_cast<T>(y3));
     return *this;
 }
-}
+} // namespace mapnik

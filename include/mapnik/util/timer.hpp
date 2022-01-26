@@ -30,25 +30,27 @@ namespace mapnik {
 
 class auto_cpu_timer
 {
-public:
-    auto_cpu_timer(std::ostream & os, std::string const& message)
-        : start_(std::chrono::system_clock::now()),
-          os_(os),
-          message_(message) {}
+  public:
+    auto_cpu_timer(std::ostream& os, std::string const& message)
+        : start_(std::chrono::system_clock::now())
+        , os_(os)
+        , message_(message)
+    {}
 
     ~auto_cpu_timer()
     {
-        std::chrono::duration<double,std::milli> elapsed = std::chrono::system_clock::now() - start_;
+        std::chrono::duration<double, std::milli> elapsed = std::chrono::system_clock::now() - start_;
         os_ << message_ << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " ms" << std::endl;
     }
-private:
+
+  private:
     std::chrono::time_point<std::chrono::system_clock> start_;
-    std::ostream & os_;
+    std::ostream& os_;
     std::string message_;
 };
 
 // NOTE : add more timers here
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_UTIL_TIMER_HPP

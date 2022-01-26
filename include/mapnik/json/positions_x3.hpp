@@ -27,15 +27,18 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/geometry.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-struct empty {};
+struct empty
+{};
 using point = mapnik::geometry::point<double>;
 using ring = std::vector<point>;
 using rings = std::vector<ring>;
 using rings_array = std::vector<rings>;
 using positions = util::variant<point, ring, rings, rings_array>;
 
-}}
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_POSITIONS_HPP

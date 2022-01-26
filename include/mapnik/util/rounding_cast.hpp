@@ -23,26 +23,24 @@
 #ifndef MAPNIK_UTIL_ROUNDING_CAST_HPP
 #define MAPNIK_UTIL_ROUNDING_CAST_HPP
 
-#include <boost/numeric/conversion/converter.hpp> 
+#include <boost/numeric/conversion/converter.hpp>
 
-namespace mapnik { 
+namespace mapnik {
 namespace util {
 
-template<typename Target, typename Source> 
-inline 
-Target rounding_cast ( Source arg ) 
-{ 
-  typedef boost::numeric::conversion_traits<Target,Source> Traits ; 
+template<typename Target, typename Source>
+inline Target rounding_cast(Source arg)
+{
+    typedef boost::numeric::conversion_traits<Target, Source> Traits;
 
-  typedef 
-boost::numeric::converter<Target,Source,Traits,boost::numeric::def_overflow_handler,boost::numeric::RoundEven<Source> 
- > Converter ; 
+    typedef boost::numeric::
+      converter<Target, Source, Traits, boost::numeric::def_overflow_handler, boost::numeric::RoundEven<Source>>
+        Converter;
 
-  return Converter::convert(arg); 
-} 
+    return Converter::convert(arg);
+}
 
-} // end util ns
-} // end mapnik ns
+} // namespace util
+} // namespace mapnik
 
-#endif //MAPNIK_UTIL_ROUNDING_CAST_HPP
-
+#endif // MAPNIK_UTIL_ROUNDING_CAST_HPP

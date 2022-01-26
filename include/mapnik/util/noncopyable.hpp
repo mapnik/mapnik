@@ -23,34 +23,35 @@
 #ifndef MAPNIK_UTIL_NONCOPYABLE_HPP
 #define MAPNIK_UTIL_NONCOPYABLE_HPP
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-namespace non_copyable_
-{
+namespace non_copyable_ {
 
 class movable
 {
-protected:
+  protected:
     constexpr movable() = default;
     ~movable() = default;
-    movable( movable && ) = default;
-    movable& operator=(movable && ) = default;
+    movable(movable&&) = default;
+    movable& operator=(movable&&) = default;
 };
 
 class noncopyable
 {
-protected:
+  protected:
     constexpr noncopyable() = default;
     ~noncopyable() = default;
-    noncopyable( noncopyable const& ) = delete;
-    noncopyable& operator=(noncopyable const& ) = delete;
+    noncopyable(noncopyable const&) = delete;
+    noncopyable& operator=(noncopyable const&) = delete;
 };
 
-}
+} // namespace non_copyable_
 
 using movable = non_copyable_::movable;
 using noncopyable = non_copyable_::noncopyable;
 
-}}
+} // namespace util
+} // namespace mapnik
 
-#endif  // MAPNIK_UTIL_NONCOPYABLE_HPP
+#endif // MAPNIK_UTIL_NONCOPYABLE_HPP

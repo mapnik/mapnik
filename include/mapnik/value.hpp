@@ -32,19 +32,19 @@
 
 namespace mapnik {
 
-using value_base = util::variant<value_null, value_bool, value_integer,value_double, value_unicode_string>;
+using value_base = util::variant<value_null, value_bool, value_integer, value_double, value_unicode_string>;
 
 namespace value_adl_barrier {
 
 class MAPNIK_DECL value : public value_base
 {
-    friend MAPNIK_DECL value operator+(value const&,value const&);
-    friend MAPNIK_DECL value operator-(value const&,value const&);
-    friend MAPNIK_DECL value operator*(value const&,value const&);
-    friend MAPNIK_DECL value operator/(value const&,value const&);
-    friend MAPNIK_DECL value operator%(value const&,value const&);
+    friend MAPNIK_DECL value operator+(value const&, value const&);
+    friend MAPNIK_DECL value operator-(value const&, value const&);
+    friend MAPNIK_DECL value operator*(value const&, value const&);
+    friend MAPNIK_DECL value operator/(value const&, value const&);
+    friend MAPNIK_DECL value operator%(value const&, value const&);
 
-public:
+  public:
     value() = default;
 
     // Conversion from type T is done via a temporary value or reference
@@ -53,14 +53,13 @@ public:
     // CAVEAT: We don't check `noexcept(conversion from T to U)`.
     //         But since the type U is either value_bool, value_integer,
     //         value_double or T &&, this conversion SHOULD NEVER throw.
-    template <typename T, typename U = detail::mapnik_value_type_t<T>>
-    value(T && val)
-        noexcept(std::is_nothrow_constructible<value_base, U>::value)
-        : value_base(U(std::forward<T>(val))) {}
+    template<typename T, typename U = detail::mapnik_value_type_t<T>>
+    value(T&& val) noexcept(std::is_nothrow_constructible<value_base, U>::value)
+        : value_base(U(std::forward<T>(val)))
+    {}
 
-    template <typename T, typename U = detail::mapnik_value_type_t<T>>
-    value& operator=(T && val)
-        noexcept(std::is_nothrow_assignable<value_base, U>::value)
+    template<typename T, typename U = detail::mapnik_value_type_t<T>>
+    value& operator=(T&& val) noexcept(std::is_nothrow_assignable<value_base, U>::value)
     {
         value_base::operator=(U(std::forward<T>(val)));
         return *this;
@@ -77,7 +76,8 @@ public:
 
     bool is_null() const;
 
-    template <typename T> T convert() const;
+    template<typename T>
+    T convert() const;
 
     value_bool to_bool() const;
     std::string to_expression_string(char quote = '\'') const;
@@ -87,16 +87,14 @@ public:
     value_integer to_int() const;
 };
 
-MAPNIK_DECL value operator+(value const& p1,value const& p2);
-MAPNIK_DECL value operator-(value const& p1,value const& p2);
-MAPNIK_DECL value operator*(value const& p1,value const& p2);
-MAPNIK_DECL value operator/(value const& p1,value const& p2);
-MAPNIK_DECL value operator%(value const& p1,value const& p2);
+MAPNIK_DECL value operator+(value const& p1, value const& p2);
+MAPNIK_DECL value operator-(value const& p1, value const& p2);
+MAPNIK_DECL value operator*(value const& p1, value const& p2);
+MAPNIK_DECL value operator/(value const& p1, value const& p2);
+MAPNIK_DECL value operator%(value const& p1, value const& p2);
 
-template <typename charT, typename traits>
-inline std::basic_ostream<charT,traits>&
-operator << (std::basic_ostream<charT,traits>& out,
-             value const& v)
+template<typename charT, typename traits>
+inline std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& out, value const& v)
 {
     out << v.to_string();
     return out;
@@ -115,17 +113,11 @@ using value = value_adl_barrier::value;
 namespace detail {
 struct is_null_visitor
 {
-    bool operator()(value const& val) const
-    {
-        return val.is_null();
-    }
+    bool operator()(value const& val) const { return val.is_null(); }
 
-    bool operator()(value_null const&) const
-    {
-        return true;
-    }
+    bool operator()(value_null const&) const { return true; }
 
-    template <typename T>
+    template<typename T>
     bool operator()(T const&) const
     {
         return false;
@@ -135,25 +127,20 @@ struct is_null_visitor
 } // namespace mapnik
 
 // support for std::unordered_xxx
-namespace std
-{
-
+namespace std {
 
 MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_PRAGMAS
 MAPNIK_DISABLE_MISMATCHED_TAGS
 
-template <>
+template<>
 struct hash<mapnik::value>
 {
-    size_t operator()(mapnik::value const& val) const
-    {
-        return mapnik::value_hash(val);
-    }
+    size_t operator()(mapnik::value const& val) const { return mapnik::value_hash(val); }
 };
 
 MAPNIK_DISABLE_WARNING_POP
 
-}
+} // namespace std
 
 #endif // MAPNIK_VALUE_HPP

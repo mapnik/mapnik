@@ -26,10 +26,8 @@
 #include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/config_error.hpp>
 
-namespace mapnik
-{
-namespace placements
-{
+namespace mapnik {
+namespace placements {
 
 registry::registry()
 {
@@ -40,18 +38,23 @@ registry::registry()
 
 void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
 {
-    if (overwrite) {
+    if (overwrite)
+    {
         map_[name] = ptr;
-    } else {
+    }
+    else
+    {
         map_.emplace(name, ptr);
     }
 }
 
-text_placements_ptr registry::from_xml(std::string name, xml_node const& xml, fontset_map const& fontsets, bool is_shield)
+text_placements_ptr
+  registry::from_xml(std::string name, xml_node const& xml, fontset_map const& fontsets, bool is_shield)
 {
     std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(name);
-    if (itr == map_.end())  throw config_error("Unknown placement-type '" + name + "'", xml);
+    if (itr == map_.end())
+        throw config_error("Unknown placement-type '" + name + "'", xml);
     return itr->second(xml, fontsets, is_shield);
 }
-} //ns formatting
-} //ns mapnik
+} // namespace placements
+} // namespace mapnik

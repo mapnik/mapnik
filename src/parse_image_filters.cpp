@@ -30,7 +30,7 @@ namespace mapnik {
 
 namespace filter {
 
-bool parse_image_filters(std::string const& str, std::vector<filter_type> & image_filters)
+bool parse_image_filters(std::string const& str, std::vector<filter_type>& image_filters)
 {
     auto const& grammar = mapnik::image_filter::start;
     auto itr = str.begin();
@@ -41,13 +41,13 @@ bool parse_image_filters(std::string const& str, std::vector<filter_type> & imag
     try
     {
         r = boost::spirit::x3::phrase_parse(itr, end, grammar, space, image_filters);
-    }
-    catch (...)
+    } catch (...)
     {
         image_filters.clear();
         r = false;
     }
-    return r && itr==end;
+    return r && itr == end;
 }
 
-}}
+} // namespace filter
+} // namespace mapnik

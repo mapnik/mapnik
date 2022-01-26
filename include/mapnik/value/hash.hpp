@@ -42,17 +42,11 @@ namespace detail {
 
 struct value_hasher
 {
-    std::size_t operator() (value_null val) const
-    {
-        return hash_value(val);
-    }
+    std::size_t operator()(value_null val) const { return hash_value(val); }
 
-    std::size_t operator() (value_unicode_string const& val) const
-    {
-        return static_cast<std::size_t>(val.hashCode());
-    }
+    std::size_t operator()(value_unicode_string const& val) const { return static_cast<std::size_t>(val.hashCode()); }
 
-    template <class T>
+    template<class T>
     std::size_t operator()(T const& val) const
     {
         std::hash<T> hasher;
@@ -62,7 +56,7 @@ struct value_hasher
 
 } // namespace  detail
 
-template <typename T>
+template<typename T>
 std::size_t value_hash(T const& val)
 {
     return util::apply_visitor(detail::value_hasher(), val);

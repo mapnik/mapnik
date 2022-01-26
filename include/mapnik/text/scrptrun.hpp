@@ -37,13 +37,16 @@ struct ScriptRecord
 struct ParenStackEntry
 {
     ParenStackEntry(int32_t pairIndex_, UScriptCode scriptCode_)
-        : pairIndex(pairIndex_), scriptCode(scriptCode_) {}
+        : pairIndex(pairIndex_)
+        , scriptCode(scriptCode_)
+    {}
     int32_t pairIndex = 0;
     UScriptCode scriptCode = USCRIPT_INVALID_CODE;
 };
 
-class MAPNIK_DECL ScriptRun : public icu::UObject {
-public:
+class MAPNIK_DECL ScriptRun : public icu::UObject
+{
+  public:
     ScriptRun();
 
     ScriptRun(const UChar chars[], int32_t length);
@@ -78,13 +81,13 @@ public:
      */
     static inline UClassID getStaticClassID() { return (UClassID)&fgClassID; }
 
-private:
+  private:
 
     static UBool sameScript(int32_t scriptOne, int32_t scriptTwo);
 
     int32_t charStart;
     int32_t charLimit;
-    const UChar *charArray;
+    const UChar* charArray;
 
     int32_t scriptStart;
     int32_t scriptEnd;
@@ -106,7 +109,7 @@ private:
      * for ICU "poor man's RTTI".
      */
     static const char fgClassID;
-    //initial stack size
+    // initial stack size
     const unsigned int STACK_SIZE = 1 << 4; // 2^n
 };
 
@@ -146,9 +149,9 @@ inline UScriptCode ScriptRun::getScriptCode()
 inline void ScriptRun::reset()
 {
     scriptStart = charStart;
-    scriptEnd   = charStart;
-    scriptCode  = USCRIPT_INVALID_CODE;
-    parenSP     = -1;
+    scriptEnd = charStart;
+    scriptCode = USCRIPT_INVALID_CODE;
+    parenSP = -1;
 }
 
 inline void ScriptRun::reset(int32_t start, int32_t length)
@@ -165,6 +168,5 @@ inline void ScriptRun::reset(const UChar chars[], int32_t start, int32_t length)
 
     reset(start, length);
 }
-
 
 #endif

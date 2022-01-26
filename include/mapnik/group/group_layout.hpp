@@ -28,67 +28,46 @@
 // std
 #include <memory>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct simple_row_layout
 {
-public:
-   simple_row_layout(double item_margin = 0.0)
-      : item_margin_(item_margin)
-   {
-   }
+  public:
+    simple_row_layout(double item_margin = 0.0)
+        : item_margin_(item_margin)
+    {}
 
-   double get_item_margin() const
-   {
-      return item_margin_;
-   }
+    double get_item_margin() const { return item_margin_; }
 
-   void set_item_margin(double item_margin)
-   {
-      item_margin_ = item_margin;
-   }
+    void set_item_margin(double item_margin) { item_margin_ = item_margin; }
 
-private:
-   double item_margin_;
+  private:
+    double item_margin_;
 };
 
 struct pair_layout
 {
-public:
-   pair_layout(double item_margin = 1.0, double max_difference = - 1.0)
-      : item_margin_(item_margin),
-        max_difference_(max_difference)
-   {
-   }
+  public:
+    pair_layout(double item_margin = 1.0, double max_difference = -1.0)
+        : item_margin_(item_margin)
+        , max_difference_(max_difference)
+    {}
 
-   double get_item_margin() const
-   {
-      return item_margin_;
-   }
+    double get_item_margin() const { return item_margin_; }
 
-   void set_item_margin(double item_margin)
-   {
-      item_margin_ = item_margin;
-   }
+    void set_item_margin(double item_margin) { item_margin_ = item_margin; }
 
-   double get_max_difference() const
-   {
-      return max_difference_;
-   }
+    double get_max_difference() const { return max_difference_; }
 
-   void set_max_difference(double max_difference)
-   {
-      max_difference_ = max_difference;
-   }
+    void set_max_difference(double max_difference) { max_difference_ = max_difference; }
 
-private:
-   double item_margin_;
-   double max_difference_;
+  private:
+    double item_margin_;
+    double max_difference_;
 };
 
-using group_layout = util::variant<simple_row_layout,pair_layout>;
+using group_layout = util::variant<simple_row_layout, pair_layout>;
 using group_layout_ptr = std::shared_ptr<group_layout>;
-}
+} // namespace mapnik
 
 #endif // MAPNIK_GROUP_LAYOUT_HPP

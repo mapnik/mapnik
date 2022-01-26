@@ -33,10 +33,11 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <cstdint>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 // non-mutable rendering_buffer implementation
-template <typename T>
+template<typename T>
 struct rendering_buffer
 {
     using image_type = T;
@@ -44,19 +45,23 @@ struct rendering_buffer
     using row_data = agg::const_row_info<uint8_t>;
 
     rendering_buffer(T const& data)
-        : data_(data) {}
+        : data_(data)
+    {}
 
     uint8_t const* buf() const { return data_.bytes(); }
-    std::size_t width() const { return data_.width();}
-    std::size_t height() const { return data_.height();}
-    int stride() const { return data_.row_size();}
-    uint8_t const* row_ptr(int, int y, unsigned) {return row_ptr(y);}
-    uint8_t const* row_ptr(int y) const { return reinterpret_cast<std::uint8_t const*>(data_.get_row(static_cast<std::size_t>(y))); }
-    row_data row (int y) const { return row_data(0, safe_cast<int>(data_.width() - 1), row_ptr(y)); }
+    std::size_t width() const { return data_.width(); }
+    std::size_t height() const { return data_.height(); }
+    int stride() const { return data_.row_size(); }
+    uint8_t const* row_ptr(int, int y, unsigned) { return row_ptr(y); }
+    uint8_t const* row_ptr(int y) const
+    {
+        return reinterpret_cast<std::uint8_t const*>(data_.get_row(static_cast<std::size_t>(y)));
+    }
+    row_data row(int y) const { return row_data(0, safe_cast<int>(data_.width() - 1), row_ptr(y)); }
     image_type const& data_;
 };
 
-
-}}
+} // namespace util
+} // namespace mapnik
 
 #endif // MAPNIK_CONST_RENDERING_BUFFER_HPP

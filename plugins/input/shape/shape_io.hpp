@@ -38,9 +38,8 @@
 
 struct shape_io : mapnik::util::noncopyable
 {
-public:
-    enum shapeType
-    {
+  public:
+    enum shapeType {
         shape_null = 0,
         shape_point = 1,
         shape_polyline = 3,
@@ -57,7 +56,7 @@ public:
         shape_multipatch = 31
     };
 
-    shape_io(std::string const& shape_name, bool open_index=true);
+    shape_io(std::string const& shape_name, bool open_index = true);
     ~shape_io();
 
     shape_file& shp();
@@ -66,7 +65,8 @@ public:
 
     inline boost::optional<shape_file&> index()
     {
-        if (index_) return boost::optional<shape_file&>(*index_);
+        if (index_)
+            return boost::optional<shape_file&>(*index_);
         return boost::optional<shape_file&>();
     }
 
@@ -75,24 +75,26 @@ public:
         if (index_ && index_->is_open())
         {
             bool status = mapnik::util::check_spatial_index(index_->file());
-            index_->seek(0);// rewind
+            index_->seek(0); // rewind
             return status;
         }
         return false;
     }
 
-    inline int id() const { return id_;}
+    inline int id() const { return id_; }
     void move_to(std::streampos pos);
-    static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
-    static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type & record);
-    static mapnik::geometry::geometry<double> read_polygon(shape_file::record_type & record);
-    static mapnik::geometry::geometry<double> read_polyline_parts(shape_file::record_type & record,std::vector<std::pair<int,int>> const& parts);
-    static mapnik::geometry::geometry<double> read_polygon_parts(shape_file::record_type & record, std::vector<std::pair<int,int>> const& parts);
+    static void read_bbox(shape_file::record_type& record, mapnik::box2d<double>& bbox);
+    static mapnik::geometry::geometry<double> read_polyline(shape_file::record_type& record);
+    static mapnik::geometry::geometry<double> read_polygon(shape_file::record_type& record);
+    static mapnik::geometry::geometry<double> read_polyline_parts(shape_file::record_type& record,
+                                                                  std::vector<std::pair<int, int>> const& parts);
+    static mapnik::geometry::geometry<double> read_polygon_parts(shape_file::record_type& record,
+                                                                 std::vector<std::pair<int, int>> const& parts);
 
     shapeType type_;
     shape_file shp_;
     shape_file shx_;
-    dbf_file   dbf_;
+    dbf_file dbf_;
     std::unique_ptr<shape_file> index_;
     int reclength_;
     int id_;
@@ -104,4 +106,4 @@ public:
     static const std::string INDEX;
 };
 
-#endif //SHAPE_IO_HPP
+#endif // SHAPE_IO_HPP

@@ -26,10 +26,12 @@
 // mapnik
 #include <mapbox/geometry/line_string.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 using line_string = mapbox::geometry::line_string<T>;
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_LINE_STRING_HPP

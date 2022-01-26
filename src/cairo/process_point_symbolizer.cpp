@@ -31,18 +31,19 @@
 #include <mapnik/renderer_common.hpp>
 #include <mapnik/renderer_common/process_point_symbolizer.hpp>
 
-namespace agg { struct trans_affine; }
+namespace agg {
+struct trans_affine;
+}
 
-namespace mapnik
-{
+namespace mapnik {
 
 class feature_impl;
 class proj_transform;
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(point_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
 
@@ -50,17 +51,17 @@ void cairo_renderer<T>::process(point_symbolizer const& sym,
     context_.set_operator(comp_op);
 
     render_point_symbolizer(
-        sym, feature, prj_trans, common_,
-        [this](pixel_position const& pos, marker const& marker,
-            agg::trans_affine const& tr, double opacity) {
-            render_marker(pos, marker, tr, opacity);
-        });
+      sym,
+      feature,
+      prj_trans,
+      common_,
+      [this](pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity) {
+          render_marker(pos, marker, tr, opacity);
+      });
 }
 
-template void cairo_renderer<cairo_ptr>::process(point_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void cairo_renderer<cairo_ptr>::process(point_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

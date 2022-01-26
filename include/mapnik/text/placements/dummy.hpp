@@ -26,33 +26,35 @@
 #include <mapnik/config.hpp>
 #include <mapnik/text/placements/base.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class text_placement_info_dummy;
 class feature_impl;
 struct attribute;
 
 // Dummy placement algorithm. Always takes the default value.
-class MAPNIK_DECL text_placements_dummy: public text_placements
+class MAPNIK_DECL text_placements_dummy : public text_placements
 {
-public:
-    text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
+  public:
+    text_placement_info_ptr
+      get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
     friend class text_placement_info_dummy;
 };
 
 // Placement info object for dummy placement algorithm. Always takes the default value.
 class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
 {
-public:
+  public:
     text_placement_info_dummy(text_placements_dummy const* parent, double _scale_factor)
-        : text_placement_info(parent, _scale_factor),
-        state(0) {}
+        : text_placement_info(parent, _scale_factor)
+        , state(0)
+    {}
     bool next() const;
-private:
+
+  private:
     mutable unsigned state;
 };
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // PLACEMENTS_DUMMY_HPP

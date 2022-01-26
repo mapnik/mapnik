@@ -37,12 +37,12 @@
 #include "sqlite_featureset.hpp"
 #include "sqlite_utils.hpp"
 
-using mapnik::query;
 using mapnik::box2d;
+using mapnik::feature_factory;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
+using mapnik::query;
 using mapnik::transcoder;
-using mapnik::feature_factory;
 
 sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                                      mapnik::context_ptr const& ctx,
@@ -52,24 +52,24 @@ sqlite_featureset::sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                                      bool twkb_encoding,
                                      bool spatial_index,
                                      bool using_subquery)
-    : rs_(rs),
-      ctx_(ctx),
-      tr_(new transcoder(encoding)),
-      bbox_(bbox),
-      format_(format),
-      twkb_encoding_(twkb_encoding),
-      spatial_index_(spatial_index),
-      using_subquery_(using_subquery)
+    : rs_(rs)
+    , ctx_(ctx)
+    , tr_(new transcoder(encoding))
+    , bbox_(bbox)
+    , format_(format)
+    , twkb_encoding_(twkb_encoding)
+    , spatial_index_(spatial_index)
+    , using_subquery_(using_subquery)
 {}
 
 sqlite_featureset::~sqlite_featureset() {}
 
 feature_ptr sqlite_featureset::next()
 {
-    while (rs_->is_valid () && rs_->step_next ())
+    while (rs_->is_valid() && rs_->step_next())
     {
         int size;
-        const char* data = (const char*) rs_->column_blob(0, size);
+        const char* data = (const char*)rs_->column_blob(0, size);
         if (data == 0)
         {
             return feature_ptr();
@@ -82,10 +82,12 @@ feature_ptr sqlite_featureset::next()
             continue;
         }
 
-        feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
+        feature_ptr feature = feature_factory::create(ctx_, rs_->column_integer64(1));
         mapnik::geometry::geometry<double> geom;
-        if (twkb_encoding_) geom = geometry_utils::from_twkb(data, size);
-        else geom = geometry_utils::from_wkb(data, size, format_);
+        if (twkb_encoding_)
+            geom = geometry_utils::from_twkb(data, size);
+        else
+            geom = geometry_utils::from_wkb(data, size, format_);
         if (mapnik::geometry::is_empty(geom))
         {
             continue;
@@ -105,7 +107,7 @@ feature_ptr sqlite_featureset::next()
             const int type_oid = rs_->column_type(i);
             const char* fld_name = rs_->column_name(i);
 
-            if (! fld_name)
+            if (!fld_name)
                 continue;
 
             std::string fld_name_str(fld_name);
@@ -118,39 +120,36 @@ feature_ptr sqlite_featureset::next()
 
             switch (type_oid)
             {
-            case SQLITE_INTEGER:
-            {
-                feature->put<mapnik::value_integer>(fld_name_str, rs_->column_integer64(i));
-                break;
-            }
+                case SQLITE_INTEGER: {
+                    feature->put<mapnik::value_integer>(fld_name_str, rs_->column_integer64(i));
+                    break;
+                }
 
-            case SQLITE_FLOAT:
-            {
-                feature->put(fld_name_str, rs_->column_double(i));
-                break;
-            }
+                case SQLITE_FLOAT: {
+                    feature->put(fld_name_str, rs_->column_double(i));
+                    break;
+                }
 
-            case SQLITE_TEXT:
-            {
-                int text_col_size;
-                const char * text_data = rs_->column_text(i, text_col_size);
-                feature->put(fld_name_str, tr_->transcode(text_data, text_col_size));
-                break;
-            }
+                case SQLITE_TEXT: {
+                    int text_col_size;
+                    const char* text_data = rs_->column_text(i, text_col_size);
+                    feature->put(fld_name_str, tr_->transcode(text_data, text_col_size));
+                    break;
+                }
 
-            case SQLITE_NULL:
-            {
-                // NOTE: we intentionally do not store null here
-                // since it is equivalent to the attribute not existing
-                break;
-            }
+                case SQLITE_NULL: {
+                    // NOTE: we intentionally do not store null here
+                    // since it is equivalent to the attribute not existing
+                    break;
+                }
 
-            case SQLITE_BLOB:
-                break;
+                case SQLITE_BLOB:
+                    break;
 
-            default:
-                MAPNIK_LOG_WARN(sqlite) << "sqlite_featureset: Field=" << fld_name_str << " unhandled type_oid=" << type_oid;
-                break;
+                default:
+                    MAPNIK_LOG_WARN(sqlite)
+                      << "sqlite_featureset: Field=" << fld_name_str << " unhandled type_oid=" << type_oid;
+                    break;
             }
         }
 

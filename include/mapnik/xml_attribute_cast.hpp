@@ -23,7 +23,7 @@
 #ifndef MAPNIK_XML_ATTRIBUTE_CAST_HPP
 #define MAPNIK_XML_ATTRIBUTE_CAST_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/xml_tree.hpp>
@@ -49,9 +49,10 @@ MAPNIK_DISABLE_WARNING_POP
 #include <utility>
 #include <stdexcept>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename T>
+template<typename T>
 struct do_xml_attribute_cast
 {
     static inline boost::optional<T> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& /*source*/)
@@ -63,10 +64,11 @@ struct do_xml_attribute_cast
 };
 
 // specialization for mapnik::boolean_type
-template <>
+template<>
 struct do_xml_attribute_cast<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean_type> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::boolean_type> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                                std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
@@ -76,10 +78,11 @@ struct do_xml_attribute_cast<mapnik::boolean_type>
 };
 
 // specialization for mapnik::value_bool
-template <>
+template<>
 struct do_xml_attribute_cast<mapnik::value_bool>
 {
-    static inline boost::optional<mapnik::value_bool> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::value_bool> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                              std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
@@ -89,7 +92,7 @@ struct do_xml_attribute_cast<mapnik::value_bool>
 };
 
 // specialization for int
-template <>
+template<>
 struct do_xml_attribute_cast<int>
 {
     static inline boost::optional<int> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
@@ -103,10 +106,11 @@ struct do_xml_attribute_cast<int>
 
 #ifdef BIGINT
 // specialization for long long
-template <>
+template<>
 struct do_xml_attribute_cast<mapnik::value_integer>
 {
-    static inline boost::optional<mapnik::value_integer> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::value_integer> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                                 std::string const& source)
     {
         int result;
         if (mapnik::util::string2int(source, result))
@@ -119,7 +123,7 @@ struct do_xml_attribute_cast<mapnik::value_integer>
 
 // specialization for unsigned
 
-template <>
+template<>
 struct do_xml_attribute_cast<unsigned>
 {
     static inline boost::optional<unsigned> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
@@ -132,7 +136,7 @@ struct do_xml_attribute_cast<unsigned>
 };
 
 // specialization for float
-template <>
+template<>
 struct do_xml_attribute_cast<float>
 {
     static inline boost::optional<float> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
@@ -145,7 +149,7 @@ struct do_xml_attribute_cast<float>
 };
 
 // specialization for double
-template <>
+template<>
 struct do_xml_attribute_cast<double>
 {
     static inline boost::optional<double> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
@@ -158,19 +162,19 @@ struct do_xml_attribute_cast<double>
 };
 
 // specialization for mapnik::enumeration<T,int>
-template <typename T, int MAX>
-struct do_xml_attribute_cast<mapnik::enumeration<T,MAX> >
+template<typename T, int MAX>
+struct do_xml_attribute_cast<mapnik::enumeration<T, MAX>>
 {
-    static inline boost::optional<mapnik::enumeration<T,MAX> > xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline boost::optional<mapnik::enumeration<T, MAX>> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                                       std::string const& source)
     {
-        using result_type = typename boost::optional<mapnik::enumeration<T,MAX> >;
+        using result_type = typename boost::optional<mapnik::enumeration<T, MAX>>;
         try
         {
-            mapnik::enumeration<T,MAX> e;
+            mapnik::enumeration<T, MAX> e;
             e.from_string(source);
             return result_type(e);
-        }
-        catch (illegal_enum_value const& ex)
+        } catch (illegal_enum_value const& ex)
         {
             MAPNIK_LOG_ERROR(do_xml_attribute_cast) << ex.what();
             return result_type();
@@ -179,7 +183,7 @@ struct do_xml_attribute_cast<mapnik::enumeration<T,MAX> >
 };
 
 // specialization for mapnik::color
-template <>
+template<>
 struct do_xml_attribute_cast<mapnik::color>
 {
     static inline boost::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
@@ -189,7 +193,7 @@ struct do_xml_attribute_cast<mapnik::color>
 };
 
 // specialization for std::string
-template <>
+template<>
 struct do_xml_attribute_cast<std::string>
 {
     static inline boost::optional<std::string> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
@@ -199,12 +203,13 @@ struct do_xml_attribute_cast<std::string>
 };
 
 // specialization for mapnik::expression_ptr
-template <>
+template<>
 struct do_xml_attribute_cast<mapnik::expression_ptr>
 {
-    static inline boost::optional<mapnik::expression_ptr> xml_attribute_cast_impl(xml_tree const& tree, std::string const& source)
+    static inline boost::optional<mapnik::expression_ptr> xml_attribute_cast_impl(xml_tree const& tree,
+                                                                                  std::string const& source)
     {
-        std::map<std::string,mapnik::expression_ptr>::const_iterator itr = tree.expr_cache_.find(source);
+        std::map<std::string, mapnik::expression_ptr>::const_iterator itr = tree.expr_cache_.find(source);
         if (itr != tree.expr_cache_.end())
         {
             return itr->second;
@@ -212,17 +217,18 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
         else
         {
             mapnik::expression_ptr expr = parse_expression(source);
-            tree.expr_cache_.emplace(source,expr);
+            tree.expr_cache_.emplace(source, expr);
             return expr;
         }
     }
 };
 
 // specialization for mapnik::font_feature_settings
-template <>
+template<>
 struct do_xml_attribute_cast<mapnik::font_feature_settings>
 {
-    static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
+    static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const&,
+                                                                                         std::string const& source)
     {
         return mapnik::font_feature_settings(source);
     }
@@ -230,7 +236,7 @@ struct do_xml_attribute_cast<mapnik::font_feature_settings>
 
 } // end namespace detail
 
-template <typename T>
+template<typename T>
 boost::optional<T> xml_attribute_cast(xml_tree const& tree, std::string const& source)
 {
     return detail::do_xml_attribute_cast<T>::xml_attribute_cast_impl(tree, source);

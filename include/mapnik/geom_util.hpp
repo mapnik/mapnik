@@ -42,52 +42,57 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
-template <typename T>
-bool clip_test(T p,T q,double& tmin,double& tmax)
+namespace mapnik {
+template<typename T>
+bool clip_test(T p, T q, double& tmin, double& tmax)
 {
     double r = 0;
-    bool result=true;
-    if (p<0.0)
+    bool result = true;
+    if (p < 0.0)
     {
-        r=q/p;
-        if (r>tmax) result=false;
-        else if (r>tmin) tmin=r;
+        r = q / p;
+        if (r > tmax)
+            result = false;
+        else if (r > tmin)
+            tmin = r;
     }
-    else if (p>0.0)
+    else if (p > 0.0)
     {
-        r=q/p;
-        if (r<tmin) result=false;
-        else if (r<tmax) tmax=r;
-    } else if (q<0.0) result=false;
+        r = q / p;
+        if (r < tmin)
+            result = false;
+        else if (r < tmax)
+            tmax = r;
+    }
+    else if (q < 0.0)
+        result = false;
     return result;
 }
 
-template <typename T,typename Image>
-bool clip_line(T& x0,T& y0,T& x1,T& y1,box2d<T> const& box)
+template<typename T, typename Image>
+bool clip_line(T& x0, T& y0, T& x1, T& y1, box2d<T> const& box)
 {
-    double tmin=0.0;
-    double tmax=1.0;
-    double dx=x1-x0;
-    if (clip_test<double>(-dx,x0,tmin,tmax))
+    double tmin = 0.0;
+    double tmax = 1.0;
+    double dx = x1 - x0;
+    if (clip_test<double>(-dx, x0, tmin, tmax))
     {
-        if (clip_test<double>(dx,box.width()-x0,tmin,tmax))
+        if (clip_test<double>(dx, box.width() - x0, tmin, tmax))
         {
-            double dy=y1-y0;
-            if (clip_test<double>(-dy,y0,tmin,tmax))
+            double dy = y1 - y0;
+            if (clip_test<double>(-dy, y0, tmin, tmax))
             {
-                if (clip_test<double>(dy,box.height()-y0,tmin,tmax))
+                if (clip_test<double>(dy, box.height() - y0, tmin, tmax))
                 {
-                    if (tmax<1.0)
+                    if (tmax < 1.0)
                     {
-                        x1=static_cast<T>(x0+tmax*dx);
-                        y1=static_cast<T>(y0+tmax*dy);
+                        x1 = static_cast<T>(x0 + tmax * dx);
+                        y1 = static_cast<T>(y0 + tmax * dy);
                     }
-                    if (tmin>0.0)
+                    if (tmin > 0.0)
                     {
-                        x0+=static_cast<T>(tmin*dx);
-                        y0+=static_cast<T>(tmin*dy);
+                        x0 += static_cast<T>(tmin * dx);
+                        y0 += static_cast<T>(tmin * dy);
                     }
                     return true;
                 }
@@ -97,37 +102,35 @@ bool clip_line(T& x0,T& y0,T& x1,T& y1,box2d<T> const& box)
     return false;
 }
 
-template <typename Iter>
-inline bool point_inside_path(double x,double y,Iter start,Iter end)
+template<typename Iter>
+inline bool point_inside_path(double x, double y, Iter start, Iter end)
 {
-    bool inside=false;
-    double x0=std::get<0>(*start);
-    double y0=std::get<1>(*start);
+    bool inside = false;
+    double x0 = std::get<0>(*start);
+    double y0 = std::get<1>(*start);
 
     double x1 = 0;
     double y1 = 0;
-    while (++start!=end)
+    while (++start != end)
     {
-        if ( std::get<2>(*start) == SEG_MOVETO)
+        if (std::get<2>(*start) == SEG_MOVETO)
         {
             x0 = std::get<0>(*start);
             y0 = std::get<1>(*start);
             continue;
         }
-        x1=std::get<0>(*start);
-        y1=std::get<1>(*start);
+        x1 = std::get<0>(*start);
+        y1 = std::get<1>(*start);
 
-        if ((((y1 <= y) && (y < y0)) ||
-             ((y0 <= y) && (y < y1))) &&
-            ( x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
-            inside=!inside;
-        x0=x1;
-        y0=y1;
+        if ((((y1 <= y) && (y < y0)) || ((y0 <= y) && (y < y1))) && (x < (x0 - x1) * (y - y1) / (y0 - y1) + x1))
+            inside = !inside;
+        x0 = x1;
+        y0 = y1;
     }
     return inside;
 }
 
-inline bool point_in_circle(double x,double y,double cx,double cy,double r)
+inline bool point_in_circle(double x, double y, double cx, double cy, double r)
 {
     double dx = x - cx;
     double dy = y - cy;
@@ -135,7 +138,7 @@ inline bool point_in_circle(double x,double y,double cx,double cy,double r)
     return (d2 <= r * r);
 }
 
-template <typename T>
+template<typename T>
 inline T sqr(T x)
 {
     return x * x;
@@ -153,9 +156,7 @@ inline double distance(double x0, double y0, double x1, double y1)
     return std::sqrt(distance2(x0, y0, x1, y1));
 }
 
-inline double point_to_segment_distance(double x, double y,
-                                        double ax, double ay,
-                                        double bx, double by)
+inline double point_to_segment_distance(double x, double y, double ax, double ay, double bx, double by)
 {
     double len2 = distance2(ax, ay, bx, by);
 
@@ -177,7 +178,7 @@ inline double point_to_segment_distance(double x, double y,
     return std::fabs(s) * std::sqrt(len2);
 }
 
-template <typename Iter>
+template<typename Iter>
 inline bool point_on_path(double x, double y, Iter start, Iter end, double tol)
 {
     double x0 = std::get<0>(*start);
@@ -205,23 +206,21 @@ inline bool point_on_path(double x, double y, Iter start, Iter end, double tol)
 }
 
 // filters
-template <typename T>
+template<typename T>
 struct bounding_box_filter
 {
     using value_type = T;
     box2d<value_type> box_;
     explicit bounding_box_filter(box2d<value_type> const& box)
-        : box_(box) {}
+        : box_(box)
+    {}
 
-    bool pass(box2d<value_type> const& extent) const
-    {
-        return extent.intersects(box_);
-    }
+    bool pass(box2d<value_type> const& extent) const { return extent.intersects(box_); }
 };
 
 using filter_in_box = bounding_box_filter<double>;
 
-template <typename T>
+template<typename T>
 struct at_point_filter
 {
     using value_type = T;
@@ -232,40 +231,39 @@ struct at_point_filter
         box_.pad(tol);
     }
 
-    bool pass(box2d<value_type> const& extent) const
-    {
-        return extent.intersects(box_);
-    }
+    bool pass(box2d<value_type> const& extent) const { return extent.intersects(box_); }
 };
 
 using filter_at_point = at_point_filter<double>;
 
 ////////////////////////////////////////////////////////////////////////////
-template <typename PathType>
-double path_length(PathType & path)
+template<typename PathType>
+double path_length(PathType& path)
 {
     double x0 = 0;
     double y0 = 0;
     double x1 = 0;
     double y1 = 0;
     path.rewind(0);
-    unsigned command = path.vertex(&x0,&y0);
-    if (command == SEG_END) return 0;
+    unsigned command = path.vertex(&x0, &y0);
+    if (command == SEG_END)
+        return 0;
     double length = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
-        if (command == SEG_CLOSE) continue;
-        length += distance(x0,y0,x1,y1);
+        if (command == SEG_CLOSE)
+            continue;
+        length += distance(x0, y0, x1, y1);
         x0 = x1;
         y0 = y1;
     }
     return length;
 }
 
-template <typename PathType>
-bool hit_test_first(PathType & path, double x, double y)
+template<typename PathType>
+bool hit_test_first(PathType& path, double x, double y)
 {
-    bool inside=false;
+    bool inside = false;
     double x0 = 0;
     double y0 = 0;
     double x1 = 0;
@@ -291,10 +289,8 @@ bool hit_test_first(PathType & path, double x, double y)
             continue;
         }
 
-        if ((((y1 <= y) && (y < y0)) ||
-             ((y0 <= y) && (y < y1))) &&
-            (x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
-            inside=!inside;
+        if ((((y1 <= y) && (y < y0)) || ((y0 <= y) && (y < y1))) && (x < (x0 - x1) * (y - y1) / (y0 - y1) + x1))
+            inside = !inside;
 
         x0 = x1;
         y0 = y1;
@@ -304,8 +300,8 @@ bool hit_test_first(PathType & path, double x, double y)
 
 namespace label {
 
-template <typename PathType>
-bool middle_point(PathType & path, double & x, double & y, boost::optional<double&> angle = boost::none)
+template<typename PathType>
+bool middle_point(PathType& path, double& x, double& y, boost::optional<double&> angle = boost::none)
 {
     double x0 = 0;
     double y0 = 0;
@@ -313,8 +309,9 @@ bool middle_point(PathType & path, double & x, double & y, boost::optional<doubl
     double y1 = 0;
     double mid_length = 0.5 * path_length(path);
     path.rewind(0);
-    unsigned command = path.vertex(&x0,&y0);
-    if (command == SEG_END) return false;
+    unsigned command = path.vertex(&x0, &y0);
+    if (command == SEG_END)
+        return false;
     if (std::abs(mid_length) < std::numeric_limits<double>::epsilon())
     {
         x = x0;
@@ -324,12 +321,13 @@ bool middle_point(PathType & path, double & x, double & y, boost::optional<doubl
     double dist = 0.0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
-        if (command == SEG_CLOSE) continue;
+        if (command == SEG_CLOSE)
+            continue;
         double seg_length = distance(x0, y0, x1, y1);
 
-        if ( dist + seg_length >= mid_length)
+        if (dist + seg_length >= mid_length)
         {
-            double r = (mid_length - dist)/seg_length;
+            double r = (mid_length - dist) / seg_length;
             x = x0 + (x1 - x0) * r;
             y = y0 + (y1 - y0) * r;
             if (angle)
@@ -345,14 +343,15 @@ bool middle_point(PathType & path, double & x, double & y, boost::optional<doubl
     return true;
 }
 
-template <typename PathType>
-bool centroid(PathType & path, double & x, double & y)
+template<typename PathType>
+bool centroid(PathType& path, double& x, double& y)
 {
     geometry::point<double> p0, p1, move_to, start;
 
     path.rewind(0);
     unsigned command = path.vertex(&p0.x, &p0.y);
-    if (command == SEG_END) return false;
+    if (command == SEG_END)
+        return false;
 
     start = move_to = p0;
 
@@ -380,7 +379,6 @@ bool centroid(PathType & path, double & x, double & y)
                 xtmp += (dx1 + dx0) * ai;
                 ytmp += (dy1 + dy0) * ai;
                 break;
-
         }
         p0 = p1;
         ++count;
@@ -478,10 +476,10 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
 
 #endif
 
-template <typename PathType>
-bool hit_test(PathType & path, double x, double y, double tol)
+template<typename PathType>
+bool hit_test(PathType& path, double x, double y, double tol)
 {
-    bool inside=false;
+    bool inside = false;
     double x0 = 0;
     double y0 = 0;
     double x1 = 0;
@@ -512,25 +510,21 @@ bool hit_test(PathType & path, double x, double y, double tol)
             x1 = start_x;
             y1 = start_y;
         }
-        switch(geom_type)
+        switch (geom_type)
         {
-        case mapnik::geometry::geometry_types::Polygon:
-        {
-            if ((((y1 <= y) && (y < y0)) ||
-                 ((y0 <= y) && (y < y1))) &&
-                (x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
-                inside=!inside;
-            break;
-        }
-        case mapnik::geometry::geometry_types::LineString:
-        {
-            double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
-            if (distance < tol)
-                return true;
-            break;
-        }
-        default:
-            break;
+            case mapnik::geometry::geometry_types::Polygon: {
+                if ((((y1 <= y) && (y < y0)) || ((y0 <= y) && (y < y1))) && (x < (x0 - x1) * (y - y1) / (y0 - y1) + x1))
+                    inside = !inside;
+                break;
+            }
+            case mapnik::geometry::geometry_types::LineString: {
+                double distance = point_to_segment_distance(x, y, x0, y0, x1, y1);
+                if (distance < tol)
+                    return true;
+                break;
+            }
+            default:
+                break;
         }
         x0 = x1;
         y0 = y1;
@@ -544,6 +538,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
     return inside;
 }
 
-}}
+} // namespace label
+} // namespace mapnik
 
 #endif // MAPNIK_GEOM_UTIL_HPP

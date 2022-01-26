@@ -39,28 +39,31 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 class projection;
-template <typename T> class box2d;
+template<typename T>
+class box2d;
 
 struct proj_strategy
 {
     proj_strategy(proj_transform const& prj_trans)
-        : prj_trans_(prj_trans) {}
+        : prj_trans_(prj_trans)
+    {}
 
-    template <typename P1, typename P2>
-    inline bool apply(P1 const& p1, P2 & p2) const
+    template<typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2& p2) const
     {
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = boost::geometry::get<0>(p1);
         double y = boost::geometry::get<1>(p1);
         double z = 0.0;
-        if (!prj_trans_.forward(x, y, z)) return false;
+        if (!prj_trans_.forward(x, y, z))
+            return false;
         boost::geometry::set<0>(p2, static_cast<p2_type>(x));
         boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
 
-    template <typename P1, typename P2>
-    inline P2 execute(P1 const& p1, bool & status) const
+    template<typename P1, typename P2>
+    inline P2 execute(P1 const& p1, bool& status) const
     {
         P2 p2;
         status = apply(p1, p2);
@@ -73,23 +76,25 @@ struct proj_strategy
 struct proj_backward_strategy
 {
     proj_backward_strategy(proj_transform const& prj_trans)
-        : prj_trans_(prj_trans) {}
+        : prj_trans_(prj_trans)
+    {}
 
-    template <typename P1, typename P2>
-    inline bool apply(P1 const& p1, P2 & p2) const
+    template<typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2& p2) const
     {
         using p2_type = typename boost::geometry::coordinate_type<P2>::type;
         double x = boost::geometry::get<0>(p1);
         double y = boost::geometry::get<1>(p1);
         double z = 0.0;
-        if (!prj_trans_.backward(x, y, z)) return false;
+        if (!prj_trans_.backward(x, y, z))
+            return false;
         boost::geometry::set<0>(p2, static_cast<p2_type>(x));
         boost::geometry::set<1>(p2, static_cast<p2_type>(y));
         return true;
     }
 
-    template <typename P1, typename P2>
-    inline P2 execute(P1 const& p1, bool & status) const
+    template<typename P1, typename P2>
+    inline P2 execute(P1 const& p1, bool& status) const
     {
         P2 p2;
         status = apply(p1, p2);
@@ -99,6 +104,6 @@ struct proj_backward_strategy
     proj_transform const& prj_trans_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_PROJ_STRATEGY_HPP

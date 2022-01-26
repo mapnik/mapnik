@@ -42,34 +42,27 @@
 #include <mapnik/util/mapped_memory_file.hpp>
 
 using mapnik::box2d;
-using mapnik::read_int32_ndr;
-using mapnik::read_int32_xdr;
 using mapnik::read_double_ndr;
 using mapnik::read_double_xdr;
-
+using mapnik::read_int32_ndr;
+using mapnik::read_int32_xdr;
 
 struct RecordTag
 {
     using data_type = char*;
-    static data_type alloc(unsigned size)
-    {
-        return static_cast<data_type>(::operator new(sizeof(char)*size));
-    }
+    static data_type alloc(unsigned size) { return static_cast<data_type>(::operator new(sizeof(char) * size)); }
 
-    static void dealloc(data_type data)
-    {
-        ::operator delete(data);
-    }
+    static void dealloc(data_type data) { ::operator delete(data); }
 };
 
 struct MappedRecordTag
 {
     using data_type = const char*;
     static data_type alloc(unsigned) { return 0; }
-    static void dealloc(data_type ) {}
+    static void dealloc(data_type) {}
 };
 
-template <typename Tag>
+template<typename Tag>
 struct shape_record
 {
     typename Tag::data_type data;
@@ -77,35 +70,20 @@ struct shape_record
     mutable std::size_t pos;
 
     explicit shape_record(size_t size_)
-        : data(Tag::alloc(size_)),
-          size(size_),
-          pos(0)
+        : data(Tag::alloc(size_))
+        , size(size_)
+        , pos(0)
     {}
 
-    ~shape_record()
-    {
-        Tag::dealloc(data);
-    }
+    ~shape_record() { Tag::dealloc(data); }
 
-    void set_data(typename Tag::data_type data_)
-    {
-        data = data_;
-    }
+    void set_data(typename Tag::data_type data_) { data = data_; }
 
-    typename Tag::data_type get_data()
-    {
-        return data;
-    }
+    typename Tag::data_type get_data() { return data; }
 
-    void skip(unsigned n)
-    {
-        pos += n;
-    }
+    void skip(unsigned n) { pos += n; }
 
-    void set_pos(unsigned pos_)
-    {
-        pos = pos_;
-    }
+    void set_pos(unsigned pos_) { pos = pos_; }
 
     int read_ndr_integer()
     {
@@ -131,17 +109,14 @@ struct shape_record
         return val;
     }
 
-    long remains()
-    {
-        return (size - pos);
-    }
+    long remains() { return (size - pos); }
 
-    std::size_t length() {return size;}
+    std::size_t length() { return size; }
 };
 
 class shape_file : public mapnik::util::mapped_memory_file
 {
-public:
+  public:
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     using record_type = shape_record<MappedRecordTag>;
 #else
@@ -150,10 +125,9 @@ public:
 
     shape_file() {}
 
-    shape_file(std::string  const& file_name)
-      : mapped_memory_file(file_name)
-    {
-    }
+    shape_file(std::string const& file_name)
+        : mapped_memory_file(file_name)
+    {}
 
     ~shape_file() {}
 
@@ -197,30 +171,15 @@ public:
         file_.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
     }
 
-    inline void rewind()
-    {
-        seek(100);
-    }
+    inline void rewind() { seek(100); }
 
-    inline void seek(std::streampos pos)
-    {
-        file_.seekg(pos, std::ios::beg);
-    }
+    inline void seek(std::streampos pos) { file_.seekg(pos, std::ios::beg); }
 
-    inline std::streampos pos()
-    {
-        return file_.tellg();
-    }
+    inline std::streampos pos() { return file_.tellg(); }
 
-    inline bool is_eof()
-    {
-        return file_.eof();
-    }
+    inline bool is_eof() { return file_.eof(); }
 
-    inline bool is_good()
-    {
-        return file_.good();
-    }
+    inline bool is_good() { return file_.good(); }
 };
 
 #endif // SHAPEFILE_HPP

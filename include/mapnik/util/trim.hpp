@@ -27,7 +27,8 @@
 #include <string>
 #include <algorithm>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 /*
    https://github.com/mapnik/mapnik/issues/1633
@@ -39,26 +40,27 @@ namespace mapnik { namespace util {
 
 static inline bool not_whitespace(int ch)
 {
-    if (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t') return false;
+    if (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t')
+        return false;
     return true;
 }
 
 // trim from start
-static inline std::string & ltrim(std::string & s)
+static inline std::string& ltrim(std::string& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_whitespace));
     return s;
 }
 
 // trim from end
-static inline std::string & rtrim(std::string & s)
+static inline std::string& rtrim(std::string& s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), not_whitespace).base(), s.end());
     return s;
 }
 
 // trim from both ends
-static inline void trim(std::string & s)
+static inline void trim(std::string& s)
 {
     ltrim(rtrim(s));
 }
@@ -70,11 +72,12 @@ static inline std::string trim_copy(std::string s)
 
 static inline bool not_double_quote(int ch)
 {
-   if (ch == '"') return false;
-   return true;
+    if (ch == '"')
+        return false;
+    return true;
 }
 
-static inline void unquote_double(std::string & s)
+static inline void unquote_double(std::string& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_double_quote));
     s.erase(std::find_if(s.rbegin(), s.rend(), not_double_quote).base(), s.end());
@@ -82,16 +85,18 @@ static inline void unquote_double(std::string & s)
 
 static inline bool not_quoted(int ch)
 {
-   if (ch == '"' || ch == '\'') return false;
-   return true;
+    if (ch == '"' || ch == '\'')
+        return false;
+    return true;
 }
 
-static inline void unquote(std::string & s)
+static inline void unquote(std::string& s)
 {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_quoted));
     s.erase(std::find_if(s.rbegin(), s.rend(), not_quoted).base(), s.end());
 }
 
-}} // end of namespace mapnik
+} // namespace util
+} // end of namespace mapnik
 
 #endif // MAPNIK_TRIM_HPP

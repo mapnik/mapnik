@@ -43,19 +43,19 @@
 namespace csv_utils {
 namespace detail {
 
-std::size_t file_length(std::istream & stream)
+std::size_t file_length(std::istream& stream)
 {
     stream.seekg(0, std::ios::end);
     return stream.tellg();
 }
 
-std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream, std::size_t file_length)
+std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream& stream, std::size_t file_length)
 {
     // autodetect newlines/quotes/separators
     char newline = '\n'; // default
     bool has_newline = false;
     bool has_single_quote = false;
-    char quote = '"'; // default
+    char quote = '"';     // default
     char separator = ','; // default
     // local counters
     int num_commas = 0;
@@ -72,32 +72,36 @@ std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream,
     {
         switch (c)
         {
-        case '\r':
-            newline = '\r';
-            has_newline = true;
-            break;
-        case '\n':
-            has_newline = true;
-            break;
-        case '\'':
-            if (!has_single_quote)
-            {
-                quote = c;
-                has_single_quote = true;
-            }
-            break;
-        case ',':
-            if (!has_newline) ++num_commas;
-            break;
-        case '\t':
-            if (!has_newline) ++num_tabs;
-            break;
-        case '|':
-            if (!has_newline) ++num_pipes;
-            break;
-        case ';':
-           if (!has_newline) ++num_semicolons;
-            break;
+            case '\r':
+                newline = '\r';
+                has_newline = true;
+                break;
+            case '\n':
+                has_newline = true;
+                break;
+            case '\'':
+                if (!has_single_quote)
+                {
+                    quote = c;
+                    has_single_quote = true;
+                }
+                break;
+            case ',':
+                if (!has_newline)
+                    ++num_commas;
+                break;
+            case '\t':
+                if (!has_newline)
+                    ++num_tabs;
+                break;
+            case '|':
+                if (!has_newline)
+                    ++num_pipes;
+                break;
+            case ';':
+                if (!has_newline)
+                    ++num_semicolons;
+                break;
         }
     }
     // detect separator
@@ -113,7 +117,7 @@ std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream,
             separator = '|';
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
         }
-        else  if (num_semicolons > num_commas)
+        else if (num_semicolons > num_commas)
         {
             separator = ';';
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
@@ -124,7 +128,7 @@ std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream,
     {
         std::istringstream ss(std::string(buffer.begin(), buffer.end()));
         std::size_t num_columns = 0;
-        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote); )
+        for (std::string line; csv_utils::getline_csv(ss, line, newline, quote);)
         {
             if (size < file_length && ss.eof())
             {
@@ -132,7 +136,8 @@ std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream,
                 // is not truncated so skip it
                 break;
             }
-            if (line.size() == 0 || (line.size() == 1 && line[0] == char(0xa))) continue; // empty lines are not interesting
+            if (line.size() == 0 || (line.size() == 1 && line[0] == char(0xa)))
+                continue; // empty lines are not interesting
             auto num_quotes = std::count(line.begin(), line.end(), quote);
             if (num_quotes % 2 != 0)
             {
@@ -151,7 +156,7 @@ std::tuple<char, bool, char, char> autodetect_csv_flavour(std::istream & stream,
     return std::make_tuple(newline, has_newline, separator, quote);
 }
 
-void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator & locator)
+void locate_geometry_column(std::string const& header, std::size_t index, geometry_column_locator& locator)
 {
     std::string lower_val(header);
     std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
@@ -165,17 +170,14 @@ void locate_geometry_column(std::string const& header, std::size_t index, geomet
         locator.type = geometry_column_locator::GEOJSON;
         locator.index = index;
     }
-    else if (lower_val == "x" || lower_val == "lon"
-             || lower_val == "lng" || lower_val == "long"
-             || (lower_val.find("longitude") != std::string::npos))
+    else if (lower_val == "x" || lower_val == "lon" || lower_val == "lng" || lower_val == "long" ||
+             (lower_val.find("longitude") != std::string::npos))
     {
         locator.index = index;
         locator.type = geometry_column_locator::LON_LAT;
     }
 
-    else if (lower_val == "y"
-             || lower_val == "lat"
-             || (lower_val.find("latitude") != std::string::npos))
+    else if (lower_val == "y" || lower_val == "lat" || (lower_val.find("latitude") != std::string::npos))
     {
         locator.index2 = index;
         locator.type = geometry_column_locator::LON_LAT;
@@ -184,9 +186,12 @@ void locate_geometry_column(std::string const& header, std::size_t index, geomet
 
 bool valid(geometry_column_locator const& locator, std::size_t max_size)
 {
-    if (locator.type == geometry_column_locator::UNKNOWN) return false;
-    if (locator.index >= max_size) return false;
-    if (locator.type == geometry_column_locator::LON_LAT && locator.index2 >= max_size) return false;
+    if (locator.type == geometry_column_locator::UNKNOWN)
+        return false;
+    if (locator.index >= max_size)
+        return false;
+    if (locator.type == geometry_column_locator::LON_LAT && locator.index2 >= max_size)
+        return false;
     return true;
 }
 
@@ -195,13 +200,12 @@ bool valid(geometry_column_locator const& locator, std::size_t max_size)
 mapnik::csv_line parse_line(char const* start, char const* end, char separator, char quote, std::size_t num_columns)
 {
     namespace x3 = boost::spirit::x3;
-    auto parser = x3::with<mapnik::grammar::quote_tag>(quote)
-        [ x3::with<mapnik::grammar::separator_tag>(separator)
-          [ mapnik::grammar::line ]
-            ];
+    auto parser = x3::with<mapnik::grammar::quote_tag>(
+      quote)[x3::with<mapnik::grammar::separator_tag>(separator)[mapnik::grammar::line]];
 
     mapnik::csv_line values;
-    if (num_columns > 0) values.reserve(num_columns);
+    if (num_columns > 0)
+        values.reserve(num_columns);
     if (!x3::phrase_parse(start, end, parser, mapnik::csv_white_space, values))
     {
         throw mapnik::datasource_exception("Failed to parse CSV line:\n" + std::string(start, end));
@@ -212,37 +216,32 @@ mapnik::csv_line parse_line(char const* start, char const* end, char separator, 
 mapnik::csv_line parse_line(std::string const& line_str, char separator, char quote)
 {
     auto start = line_str.c_str();
-    auto end   = start + line_str.length();
+    auto end = start + line_str.length();
     return parse_line(start, end, separator, quote, 0);
 }
 
-
 bool is_likely_number(std::string const& value)
 {
-    return (std::strspn( value.c_str(), "e-.+0123456789" ) == value.size());
+    return (std::strspn(value.c_str(), "e-.+0123456789") == value.size());
 }
 
 struct ignore_case_equal_pred
 {
-    bool operator () (unsigned char a, unsigned char b) const
-    {
-        return std::tolower(a) == std::tolower(b);
-    }
+    bool operator()(unsigned char a, unsigned char b) const { return std::tolower(a) == std::tolower(b); }
 };
 
 bool ignore_case_equal(std::string const& s0, std::string const& s1)
 {
-    return std::equal(s0.begin(), s0.end(),
-                      s1.begin(), s1.end(), ignore_case_equal_pred());
+    return std::equal(s0.begin(), s0.end(), s1.begin(), s1.end(), ignore_case_equal_pred());
 }
 
-void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const & )
+void csv_file_parser::add_feature(mapnik::value_integer, mapnik::csv_line const&)
 {
     // no-op by default
 }
 
-template <typename T>
-void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
+template<typename T>
+void csv_file_parser::parse_csv_and_boxes(std::istream& csv_file, T& boxes)
 {
     using boxes_type = T;
     using box_type = typename boxes_type::value_type::first_type;
@@ -254,13 +253,15 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
     bool has_newline;
     char detected_quote;
     char detected_separator;
-    std::tie(newline, has_newline, detected_separator, detected_quote) = detail::autodetect_csv_flavour(csv_file, file_length);
-    if (quote_ == 0) quote_ = detected_quote;
-    if (separator_ == 0) separator_ = detected_separator;
+    std::tie(newline, has_newline, detected_separator, detected_quote) =
+      detail::autodetect_csv_flavour(csv_file, file_length);
+    if (quote_ == 0)
+        quote_ = detected_quote;
+    if (separator_ == 0)
+        separator_ = detected_separator;
 
     // set back to start
-    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: separator: '" << separator_
-                          << "' quote: '" << quote_ << "'";
+    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: separator: '" << separator_ << "' quote: '" << quote_ << "'";
 
     // rewind stream
     csv_file.seekg(0, std::ios::beg);
@@ -296,7 +297,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
                 {
                     std::size_t index = 0;
                     headers_.reserve(headers.size());
-                    for (auto & header : headers)
+                    for (auto& header : headers)
                     {
                         mapnik::util::trim(header);
                         if (header.empty())
@@ -328,8 +329,7 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
                     ++line_number;
                     break;
                 }
-            }
-            catch (std::exception const& ex)
+            } catch (std::exception const& ex)
             {
                 std::string s("CSV Plugin: error parsing headers: ");
                 s += ex.what();
@@ -427,25 +427,23 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
             else
             {
                 std::ostringstream s;
-                s << "CSV Plugin: expected geometry column: could not parse row "
-                  << line_number << " "
+                s << "CSV Plugin: expected geometry column: could not parse row " << line_number << " "
                   << values.at(locator_.index) << "'";
                 throw mapnik::datasource_exception(s.str());
             }
-        }
-        catch (mapnik::datasource_exception const& ex )
+        } catch (mapnik::datasource_exception const& ex)
         {
-            if (strict_) throw ex;
+            if (strict_)
+                throw ex;
             else
             {
                 MAPNIK_LOG_ERROR(csv) << ex.what() << " at line: " << line_number;
             }
-        }
-        catch (std::exception const& ex)
+        } catch (std::exception const& ex)
         {
             std::ostringstream s;
-            s << "CSV Plugin: unexpected error parsing line: " << line_number
-              << " - found " << headers_.size() << " with values like: " << csv_line << "\n"
+            s << "CSV Plugin: unexpected error parsing line: " << line_number << " - found " << headers_.size()
+              << " with values like: " << csv_line << "\n"
               << " and got error like: " << ex.what();
             if (strict_)
             {
@@ -457,12 +455,13 @@ void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, T & boxes)
             }
         }
         // return early if *.index is present
-        if (has_disk_index_) return;
+        if (has_disk_index_)
+            return;
     }
 }
 
-
-mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator)
+mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row,
+                                                    geometry_column_locator const& locator)
 {
     mapnik::geometry::geometry<double> geom;
     if (locator.type == geometry_column_locator::WKT)
@@ -480,7 +479,6 @@ mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> con
     }
     else if (locator.type == geometry_column_locator::GEOJSON)
     {
-
         auto json_value = row.at(locator.index);
         if (!mapnik::json::from_geojson(json_value, geom))
         {
@@ -492,21 +490,25 @@ mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> con
         double x, y;
         auto long_value = row.at(locator.index);
         auto lat_value = row.at(locator.index2);
-        if (!mapnik::util::string2double(long_value,x))
+        if (!mapnik::util::string2double(long_value, x))
         {
             throw mapnik::datasource_exception("Failed to parse Longitude: '" + long_value + "'");
         }
-        if (!mapnik::util::string2double(lat_value,y))
+        if (!mapnik::util::string2double(lat_value, y))
         {
             throw mapnik::datasource_exception("Failed to parse Latitude: '" + lat_value + "'");
         }
-        geom = mapnik::geometry::point<double>(x,y);
+        geom = mapnik::geometry::point<double>(x, y);
     }
     return geom;
 }
 
-template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<double>, std::pair<std::uint64_t, std::uint64_t>>> & boxes);
+template void csv_file_parser::parse_csv_and_boxes(
+  std::istream& csv_file,
+  std::vector<std::pair<mapnik::box2d<double>, std::pair<std::uint64_t, std::uint64_t>>>& boxes);
 
-template void csv_file_parser::parse_csv_and_boxes(std::istream & csv_file, std::vector<std::pair<mapnik::box2d<float>, std::pair<std::uint64_t, std::uint64_t>>> & boxes);
+template void csv_file_parser::parse_csv_and_boxes(
+  std::istream& csv_file,
+  std::vector<std::pair<mapnik::box2d<float>, std::pair<std::uint64_t, std::uint64_t>>>& boxes);
 
 } // namespace csv_utils

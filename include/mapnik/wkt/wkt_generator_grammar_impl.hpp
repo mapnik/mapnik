@@ -24,13 +24,15 @@
 #include <mapnik/wkt/wkt_generator_grammar.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
 
-namespace mapnik { namespace wkt {
+namespace mapnik {
+namespace wkt {
 
-template <typename OutputIterator, typename Geometry>
+template<typename OutputIterator, typename Geometry>
 wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
     : wkt_generator_grammar::base_type(geometry)
 {
     boost::spirit::karma::lit_type lit;
+    // clang-format off
     geometry =
         point
         |
@@ -93,7 +95,8 @@ wkt_generator_grammar<OutputIterator, Geometry>::wkt_generator_grammar()
 
     geometries = geometry % lit(',')
         ;
-
+    // clang-format on
 }
 
-}}
+} // namespace wkt
+} // namespace mapnik

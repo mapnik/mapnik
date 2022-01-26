@@ -31,29 +31,35 @@
 #include <vector>
 #include <deque>
 
-csv_featureset::csv_featureset(std::string const& filename, locator_type const& locator, char separator, char quote,
-                               std::vector<std::string> const& headers, mapnik::context_ptr const& ctx, array_type && index_array)
+csv_featureset::csv_featureset(std::string const& filename,
+                               locator_type const& locator,
+                               char separator,
+                               char quote,
+                               std::vector<std::string> const& headers,
+                               mapnik::context_ptr const& ctx,
+                               array_type&& index_array)
     :
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    //
-#elif defined( _WIN32)
-    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
+//
+#elif defined(_WIN32)
+    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
+    ,
 #else
-    file_(std::fopen(filename.c_str(),"rb"), std::fclose),
+    file_(std::fopen(filename.c_str(), "rb"), std::fclose)
+    ,
 #endif
-    separator_(separator),
-    quote_(quote),
-    headers_(headers),
-    index_array_(std::move(index_array)),
-    index_itr_(index_array_.begin()),
-    index_end_(index_array_.end()),
-    ctx_(ctx),
-    locator_(locator),
-    tr_("utf8")
+    separator_(separator)
+    , quote_(quote)
+    , headers_(headers)
+    , index_array_(std::move(index_array))
+    , index_itr_(index_array_.begin())
+    , index_end_(index_array_.end())
+    , ctx_(ctx)
+    , locator_(locator)
+    , tr_("utf8")
 {
-#if defined (MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(filename, true);
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
     if (memory)
     {
         mapped_region_ = *memory;
@@ -63,7 +69,8 @@ csv_featureset::csv_featureset(std::string const& filename, locator_type const& 
         throw std::runtime_error("could not create file mapping for " + filename);
     }
 #else
-    if (!file_) throw std::runtime_error("Can't open " + filename);
+    if (!file_)
+        throw std::runtime_error("Can't open " + filename);
 #endif
 }
 
@@ -92,7 +99,7 @@ mapnik::feature_ptr csv_featureset::next()
         std::uint64_t size = item.second.second;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
         char const* start = (char const*)mapped_region_->get_address() + file_offset;
-        char const*  end = start + size;
+        char const* end = start + size;
 #else
         std::fseek(file_.get(), file_offset, SEEK_SET);
         std::vector<char> record;
@@ -102,7 +109,7 @@ mapnik::feature_ptr csv_featureset::next()
             return mapnik::feature_ptr();
         }
         auto const* start = record.data();
-        auto const*  end = start + record.size();
+        auto const* end = start + record.size();
 #endif
         return parse_feature(start, end);
     }

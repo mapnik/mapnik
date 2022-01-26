@@ -59,72 +59,84 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-struct transform_tag {};
-struct clip_line_tag {};
-struct clip_poly_tag {};
-struct smooth_tag {};
-struct simplify_tag {};
-struct stroke_tag {};
-struct dash_tag {};
-struct affine_transform_tag {};
-struct offset_transform_tag {};
-struct extend_tag {};
+struct transform_tag
+{};
+struct clip_line_tag
+{};
+struct clip_poly_tag
+{};
+struct smooth_tag
+{};
+struct simplify_tag
+{};
+struct stroke_tag
+{};
+struct dash_tag
+{};
+struct affine_transform_tag
+{};
+struct offset_transform_tag
+{};
+struct extend_tag
+{};
 
-namespace  detail {
+namespace detail {
 
-template <typename T0, typename T1>
-struct converter_traits {};
+template<typename T0, typename T1>
+struct converter_traits
+{};
 
-template <typename T>
+template<typename T>
 struct converter_traits<T, mapnik::smooth_tag>
 {
     using geometry_type = T;
     using conv_type = smooth_converter<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
-        geom.algorithm(get<smooth_algorithm_enum,keys::smooth_algorithm>(args.sym, args.feature, args.vars));
+        geom.algorithm(get<smooth_algorithm_enum, keys::smooth_algorithm>(args.sym, args.feature, args.vars));
         geom.smooth_value(get<value_double, keys::smooth>(args.sym, args.feature, args.vars));
     }
 };
 
-template <typename T>
-struct converter_traits<T,mapnik::simplify_tag>
+template<typename T>
+struct converter_traits<T, mapnik::simplify_tag>
 {
     using geometry_type = T;
     using conv_type = simplify_converter<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
-        geom.set_simplify_algorithm(get<simplify_algorithm_e,keys::simplify_algorithm>(args.sym, args.feature, args.vars));
-        geom.set_simplify_tolerance(get<value_double,keys::simplify_tolerance>(args.sym,args.feature, args.vars));
+        geom.set_simplify_algorithm(
+          get<simplify_algorithm_e, keys::simplify_algorithm>(args.sym, args.feature, args.vars));
+        geom.set_simplify_tolerance(get<value_double, keys::simplify_tolerance>(args.sym, args.feature, args.vars));
     }
 };
 
-template <typename T>
+template<typename T>
 struct converter_traits<T, mapnik::clip_line_tag>
 {
     using geometry_type = T;
     using conv_type = typename agg::conv_clip_polyline<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         auto const& box = args.bbox;
-        geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
+        geom.clip_box(box.minx(), box.miny(), box.maxx(), box.maxy());
     }
 };
 
-template <typename T>
+template<typename T>
 struct converter_traits<T, mapnik::dash_tag>
 {
     using geometry_type = T;
     using conv_type = typename agg::conv_dash<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         auto const& sym = args.sym;
         auto const& feat = args.feature;
@@ -135,121 +147,121 @@ struct converter_traits<T, mapnik::dash_tag>
         {
             for (auto const& d : *dash)
             {
-                geom.add_dash(d.first * scale_factor,
-                              d.second * scale_factor);
+                geom.add_dash(d.first * scale_factor, d.second * scale_factor);
             }
         }
     }
 };
 
-template <typename Symbolizer, typename PathType, typename Feature>
-void set_join_caps(Symbolizer const& sym, PathType & stroke, Feature const& feature, attributes const& vars)
+template<typename Symbolizer, typename PathType, typename Feature>
+void set_join_caps(Symbolizer const& sym, PathType& stroke, Feature const& feature, attributes const& vars)
 {
-    line_join_enum join = get<line_join_enum,keys::stroke_linejoin>(sym, feature, vars);
+    line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
-    case MITER_JOIN:
-        stroke.generator().line_join(agg::miter_join);
-        break;
-    case MITER_REVERT_JOIN:
-        stroke.generator().line_join(agg::miter_join);
-        break;
-    case ROUND_JOIN:
-        stroke.generator().line_join(agg::round_join);
-        break;
-    default:
-        stroke.generator().line_join(agg::bevel_join);
+        case MITER_JOIN:
+            stroke.generator().line_join(agg::miter_join);
+            break;
+        case MITER_REVERT_JOIN:
+            stroke.generator().line_join(agg::miter_join);
+            break;
+        case ROUND_JOIN:
+            stroke.generator().line_join(agg::round_join);
+            break;
+        default:
+            stroke.generator().line_join(agg::bevel_join);
     }
 
-    line_cap_enum cap = get<line_cap_enum,keys::stroke_linecap>(sym, feature, vars);
+    line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
 
     switch (cap)
     {
-    case BUTT_CAP:
-        stroke.generator().line_cap(agg::butt_cap);
-        break;
-    case SQUARE_CAP:
-        stroke.generator().line_cap(agg::square_cap);
-        break;
-    default:
-        stroke.generator().line_cap(agg::round_cap);
+        case BUTT_CAP:
+            stroke.generator().line_cap(agg::butt_cap);
+            break;
+        case SQUARE_CAP:
+            stroke.generator().line_cap(agg::square_cap);
+            break;
+        default:
+            stroke.generator().line_cap(agg::round_cap);
     }
 }
 
-template <typename T>
+template<typename T>
 struct converter_traits<T, mapnik::stroke_tag>
 {
     using geometry_type = T;
     using conv_type = typename agg::conv_stroke<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         auto const& sym = args.sym;
         auto const& feat = args.feature;
         auto const& vars = args.vars;
         set_join_caps(sym, geom, feat, vars);
-        double miterlimit = get<value_double,keys::stroke_miterlimit>(sym, feat, vars);
+        double miterlimit = get<value_double, keys::stroke_miterlimit>(sym, feat, vars);
         geom.generator().miter_limit(miterlimit);
         double scale_factor = args.scale_factor;
-        double width = get<value_double,keys::stroke_width>(sym, feat, vars);
+        double width = get<value_double, keys::stroke_width>(sym, feat, vars);
         geom.generator().width(width * scale_factor);
     }
 };
 
-template <typename T>
-struct converter_traits<T,mapnik::clip_poly_tag>
+template<typename T>
+struct converter_traits<T, mapnik::clip_poly_tag>
 {
     using geometry_type = T;
     using conv_type = typename agg::conv_clip_polygon<geometry_type>;
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         auto const& box = args.bbox;
-        geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
+        geom.clip_box(box.minx(), box.miny(), box.maxx(), box.maxy());
     }
 };
 
-template <typename T>
-struct converter_traits<T,mapnik::transform_tag>
+template<typename T>
+struct converter_traits<T, mapnik::transform_tag>
 {
     using geometry_type = T;
     using conv_type = transform_path_adapter<view_transform, geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         geom.set_proj_trans(args.prj_trans);
         geom.set_trans(args.tr);
     }
 };
 
-template <typename T>
-struct converter_traits<T,mapnik::affine_transform_tag>
+template<typename T>
+struct converter_traits<T, mapnik::affine_transform_tag>
 {
     using geometry_type = T;
-    using conv_base_type =  agg::conv_transform<geometry_type, agg::trans_affine const>;
+    using conv_base_type = agg::conv_transform<geometry_type, agg::trans_affine const>;
     struct conv_type : public conv_base_type
     {
         conv_type(geometry_type& geom)
-            : conv_base_type(geom, agg::trans_affine::identity) {}
+            : conv_base_type(geom, agg::trans_affine::identity)
+        {}
     };
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args& args)
     {
         geom.transformer(args.affine_trans);
     }
 };
 
-template <typename T>
-struct converter_traits<T,mapnik::offset_transform_tag>
+template<typename T>
+struct converter_traits<T, mapnik::offset_transform_tag>
 {
     using geometry_type = T;
     using conv_type = offset_converter<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         auto const& sym = args.sym;
         auto const& feat = args.feature;
@@ -259,14 +271,14 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     }
 };
 
-template <typename T>
+template<typename T>
 struct converter_traits<T, mapnik::extend_tag>
 {
     using geometry_type = T;
     using conv_type = extend_converter<geometry_type>;
 
-    template <typename Args>
-    static void setup(geometry_type & geom, Args const& args)
+    template<typename Args>
+    static void setup(geometry_type& geom, Args const& args)
     {
         auto const& sym = args.sym;
         auto const& feat = args.feature;
@@ -276,95 +288,104 @@ struct converter_traits<T, mapnik::extend_tag>
     }
 };
 
-
-template <typename T0, typename T1>
+template<typename T0, typename T1>
 struct is_switchable
 {
     static constexpr bool value = true;
 };
 
-template <typename T>
+template<typename T>
 struct is_switchable<T, transform_tag>
 {
     static constexpr bool value = false;
 };
 
-template <typename T>
+template<typename T>
 struct is_switchable<T, stroke_tag>
 {
     static constexpr bool value = false;
 };
 
-template <typename Dispatcher, typename... ConverterTypes>
+template<typename Dispatcher, typename... ConverterTypes>
 struct converters_helper;
 
-template <typename Dispatcher, typename Current, typename... ConverterTypes>
+template<typename Dispatcher, typename Current, typename... ConverterTypes>
 struct converters_helper<Dispatcher, Current, ConverterTypes...>
 {
-    template <typename Converter>
-    static void set(Dispatcher & disp, std::size_t state)
+    template<typename Converter>
+    static void set(Dispatcher& disp, std::size_t state)
     {
-        if (std::is_same<Converter,Current>::value)
+        if (std::is_same<Converter, Current>::value)
         {
-            constexpr std::size_t index = sizeof...(ConverterTypes) ;
+            constexpr std::size_t index = sizeof...(ConverterTypes);
             disp.vec_[index] = state;
         }
         else
         {
-            converters_helper<Dispatcher,ConverterTypes...>:: template set<Converter>(disp, state);
+            converters_helper<Dispatcher, ConverterTypes...>::template set<Converter>(disp, state);
         }
     }
 
-    template <typename Geometry, typename Processor>
-    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc,
-                        typename std::enable_if<detail::is_switchable<Geometry,Current>::value>::type* = 0)
+    template<typename Geometry, typename Processor>
+    static void forward(Dispatcher& disp,
+                        Geometry& geom,
+                        Processor& proc,
+                        typename std::enable_if<detail::is_switchable<Geometry, Current>::value>::type* = 0)
     {
         constexpr std::size_t index = sizeof...(ConverterTypes);
         if (disp.vec_[index] == 1)
         {
-            using conv_type = typename detail::converter_traits<Geometry,Current>::conv_type;
+            using conv_type = typename detail::converter_traits<Geometry, Current>::conv_type;
             conv_type conv(geom);
-            detail::converter_traits<conv_type,Current>::setup(conv,disp.args_);
+            detail::converter_traits<conv_type, Current>::setup(conv, disp.args_);
             converters_helper<Dispatcher, ConverterTypes...>::forward(disp, conv, proc);
         }
         else
         {
-            converters_helper<Dispatcher,ConverterTypes...>::forward(disp, geom, proc);
+            converters_helper<Dispatcher, ConverterTypes...>::forward(disp, geom, proc);
         }
     }
-    template <typename Geometry, typename Processor>
-    static void forward(Dispatcher & disp, Geometry & geom, Processor & proc,
-                        typename std::enable_if<!detail::is_switchable<Geometry,Current>::value>::type* = 0)
+    template<typename Geometry, typename Processor>
+    static void forward(Dispatcher& disp,
+                        Geometry& geom,
+                        Processor& proc,
+                        typename std::enable_if<!detail::is_switchable<Geometry, Current>::value>::type* = 0)
     {
-        using conv_type = typename detail::converter_traits<Geometry,Current>::conv_type;
+        using conv_type = typename detail::converter_traits<Geometry, Current>::conv_type;
         conv_type conv(geom);
-        detail::converter_traits<conv_type,Current>::setup(conv,disp.args_);
+        detail::converter_traits<conv_type, Current>::setup(conv, disp.args_);
         converters_helper<Dispatcher, ConverterTypes...>::forward(disp, conv, proc);
     }
 };
 
-template <typename Dispatcher>
+template<typename Dispatcher>
 struct converters_helper<Dispatcher>
 {
-    template <typename Converter>
-    static void set(Dispatcher &, std::size_t) {}
-    template <typename Geometry, typename Processor>
-    static void forward(Dispatcher &, Geometry & geom, Processor & proc)
+    template<typename Converter>
+    static void set(Dispatcher&, std::size_t)
+    {}
+    template<typename Geometry, typename Processor>
+    static void forward(Dispatcher&, Geometry& geom, Processor& proc)
     {
         proc.add_path(geom);
     }
 };
 
-template <typename Args, std::size_t NUM_CONV>
+template<typename Args, std::size_t NUM_CONV>
 struct dispatcher : util::noncopyable
 {
     using this_type = dispatcher;
     using args_type = Args;
 
-    dispatcher(box2d<double> const& bbox, symbolizer_base const& sym, view_transform const& tr,
-               proj_transform const& prj_trans, agg::trans_affine const& affine_trans, feature_impl const& feature,
-               attributes const& vars, double scale_factor)
-        : args_(bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor)
+    dispatcher(box2d<double> const& bbox,
+               symbolizer_base const& sym,
+               view_transform const& tr,
+               proj_transform const& prj_trans,
+               agg::trans_affine const& affine_trans,
+               feature_impl const& feature,
+               attributes const& vars,
+               double scale_factor)
+        : args_(bbox, sym, tr, prj_trans, affine_trans, feature, vars, scale_factor)
     {
         std::fill(vec_.begin(), vec_.end(), 0);
     }
@@ -375,17 +396,23 @@ struct dispatcher : util::noncopyable
 
 struct arguments : util::noncopyable
 {
-    arguments(box2d<double> const& _bbox, symbolizer_base const& _sym, view_transform const& _tr,
-              proj_transform const& _prj_trans, agg::trans_affine const& _affine_trans, feature_impl const& _feature,
-              attributes const& _vars, double _scale_factor)
-        : bbox(_bbox),
-          sym(_sym),
-          tr(_tr),
-          prj_trans(_prj_trans),
-          affine_trans(_affine_trans),
-          feature(_feature),
-          vars(_vars),
-          scale_factor(_scale_factor) {}
+    arguments(box2d<double> const& _bbox,
+              symbolizer_base const& _sym,
+              view_transform const& _tr,
+              proj_transform const& _prj_trans,
+              agg::trans_affine const& _affine_trans,
+              feature_impl const& _feature,
+              attributes const& _vars,
+              double _scale_factor)
+        : bbox(_bbox)
+        , sym(_sym)
+        , tr(_tr)
+        , prj_trans(_prj_trans)
+        , affine_trans(_affine_trans)
+        , feature(_feature)
+        , vars(_vars)
+        , scale_factor(_scale_factor)
+    {}
 
     box2d<double> const& bbox;
     symbolizer_base const& sym;
@@ -397,9 +424,9 @@ struct arguments : util::noncopyable
     double scale_factor;
 };
 
-}
+} // namespace detail
 
-template <typename... ConverterTypes >
+template<typename... ConverterTypes>
 struct vertex_converter : private util::noncopyable
 {
     using bbox_type = box2d<double>;
@@ -419,29 +446,32 @@ struct vertex_converter : private util::noncopyable
                      feature_type const& feature,
                      attributes const& vars,
                      double scale_factor)
-        : disp_(bbox,sym,tr,prj_trans,affine_trans,feature,vars,scale_factor) {}
+        : disp_(bbox, sym, tr, prj_trans, affine_trans, feature, vars, scale_factor)
+    {}
 
-    template <typename VertexAdapter, typename Processor>
-    void apply(VertexAdapter & geom, Processor & proc)
+    template<typename VertexAdapter, typename Processor>
+    void apply(VertexAdapter& geom, Processor& proc)
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template forward<VertexAdapter, Processor>(disp_, geom, proc);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>::template forward<VertexAdapter, Processor>(disp_,
+                                                                                                                  geom,
+                                                                                                                  proc);
     }
 
-    template <typename Converter>
+    template<typename Converter>
     void set()
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template set<Converter>(disp_, 1);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>::template set<Converter>(disp_, 1);
     }
 
-    template <typename Converter>
+    template<typename Converter>
     void unset()
     {
-        detail::converters_helper<dispatcher_type, ConverterTypes...>:: template set<Converter>(disp_, 0);
+        detail::converters_helper<dispatcher_type, ConverterTypes...>::template set<Converter>(disp_, 0);
     }
 
     dispatcher_type disp_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_VERTEX_CONVERTERS_HPP

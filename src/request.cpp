@@ -23,16 +23,14 @@
 // mapnik
 #include <mapnik/request.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
-request::request(unsigned width,
-                 unsigned height,
-                 box2d<double> const& extent)
-    : width_(width),
-      height_(height),
-      extent_(extent),
-      buffer_size_(0) {}
+request::request(unsigned width, unsigned height, box2d<double> const& extent)
+    : width_(width)
+    , height_(height)
+    , extent_(extent)
+    , buffer_size_(0)
+{}
 
 request::~request() {}
 
@@ -77,9 +75,9 @@ box2d<double> request::get_buffered_extent() const
 
 double request::scale() const
 {
-    if (width_>0)
-        return extent_.width()/width_;
+    if (width_ > 0)
+        return extent_.width() / width_;
     return extent_.width();
 }
 
-}
+} // namespace mapnik

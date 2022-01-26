@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
 #define MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
 
@@ -45,16 +44,20 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/geometry/box2d.hpp>
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
-BOOST_GEOMETRY_REGISTER_POINT_2D (mapnik::geometry::point<std::int64_t>, std::int64_t, boost::geometry::cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<std::int64_t>,
+                                 std::int64_t,
+                                 boost::geometry::cs::cartesian,
+                                 x,
+                                 y)
 BOOST_GEOMETRY_REGISTER_LINESTRING_TEMPLATED(mapnik::geometry::line_string)
 BOOST_GEOMETRY_REGISTER_RING_TEMPLATED(mapnik::geometry::linear_ring)
 // needed by box2d<T>
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2d, double, boost::geometry::cs::cartesian, x, y)
-BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2f, float,  boost::geometry::cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::coord2f, float, boost::geometry::cs::cartesian, x, y)
 
 namespace mapnik {
 
-template <typename CoordinateType>
+template<typename CoordinateType>
 struct const_interior_rings
 {
     using polygon_type = mapnik::geometry::polygon<CoordinateType> const;
@@ -63,7 +66,8 @@ struct const_interior_rings
     using value_type = typename polygon_type::value_type;
 
     const_interior_rings(polygon_type const& poly)
-        : poly_(poly) {}
+        : poly_(poly)
+    {}
 
     const_iterator begin() const
     {
@@ -72,19 +76,15 @@ struct const_interior_rings
         return itr;
     }
 
-    const_iterator end() const { return poly_.cend();}
+    const_iterator end() const { return poly_.cend(); }
 
-    std::size_t size() const
-    {
-        return poly_.empty() ? 0 : poly_.size() - 1;
-    }
+    std::size_t size() const { return poly_.empty() ? 0 : poly_.size() - 1; }
 
-    value_type const& back()  const { return poly_.back(); }
+    value_type const& back() const { return poly_.back(); }
     polygon_type const& poly_;
 };
 
-
-template <typename CoordinateType>
+template<typename CoordinateType>
 struct interior_rings
 {
     using polygon_type = mapnik::geometry::polygon<CoordinateType>;
@@ -92,8 +92,9 @@ struct interior_rings
     using const_iterator = typename polygon_type::const_iterator;
     using value_type = typename polygon_type::value_type;
 
-    interior_rings(polygon_type & poly)
-        : poly_(poly) {}
+    interior_rings(polygon_type& poly)
+        : poly_(poly)
+    {}
 
     iterator begin()
     {
@@ -102,7 +103,7 @@ struct interior_rings
         return itr;
     }
 
-    iterator end() { return poly_.end();}
+    iterator end() { return poly_.end(); }
     const_iterator begin() const
     {
         auto itr = poly_.cbegin();
@@ -110,153 +111,156 @@ struct interior_rings
         return itr;
     }
 
-    const_iterator end() const { return poly_.cend();}
+    const_iterator end() const { return poly_.cend(); }
 
-    void clear()
-    {
-        poly_.resize(1);
-    }
+    void clear() { poly_.resize(1); }
 
-    void resize(std::size_t size)
-    {
-        poly_.resize(size + 1);
-    }
+    void resize(std::size_t size) { poly_.resize(size + 1); }
 
-    std::size_t size() const
-    {
-        return poly_.empty() ? 0 : poly_.size() - 1;
-    }
+    std::size_t size() const { return poly_.empty() ? 0 : poly_.size() - 1; }
 
     void push_back(value_type const& val) { poly_.push_back(val); }
     value_type& back() { return poly_.back(); }
-    value_type const& back()  const { return poly_.back(); }
-    polygon_type & poly_;
+    value_type const& back() const { return poly_.back(); }
+    polygon_type& poly_;
 };
 
-} // ns mapnik
+} // namespace mapnik
 
-namespace boost { namespace geometry { namespace traits {
+namespace boost {
+namespace geometry {
+namespace traits {
 
-template <typename CoordinateType>
-struct tag<mapnik::box2d<CoordinateType> >
+template<typename CoordinateType>
+struct tag<mapnik::box2d<CoordinateType>>
 {
     using type = box_tag;
 };
 
-template<> struct point_type<mapnik::box2d<double> > { using type = mapnik::coord2d; };
-template<> struct point_type<mapnik::box2d<float> > { using type = mapnik::coord2f; };
-
-template <typename CoordinateType>
-struct indexed_access<mapnik::box2d<CoordinateType>, min_corner, 0>
+template<>
+struct point_type<mapnik::box2d<double>>
 {
-    using ct = CoordinateType;
-    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.minx();}
-    static inline void set(mapnik::box2d<CoordinateType> &b, ct const& value) { b.set_minx(value); }
+    using type = mapnik::coord2d;
 };
-
-template <typename CoordinateType>
-struct indexed_access<mapnik::box2d<CoordinateType>, min_corner, 1>
+template<>
+struct point_type<mapnik::box2d<float>>
 {
-    using ct = CoordinateType;
-    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.miny();}
-    static inline void set(mapnik::box2d<CoordinateType> &b, ct const& value) { b.set_miny(value); }
-};
-
-template <typename CoordinateType>
-struct indexed_access<mapnik::box2d<CoordinateType>, max_corner, 0>
-{
-    using ct = CoordinateType;
-    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.maxx();}
-    static inline void set(mapnik::box2d<CoordinateType> &b, ct const& value) { b.set_maxx(value); }
-};
-
-template <typename CoordinateType>
-struct indexed_access<mapnik::box2d<CoordinateType>, max_corner, 1>
-{
-    using ct = CoordinateType;
-    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.maxy();}
-    static inline void set(mapnik::box2d<CoordinateType> &b , ct const& value) { b.set_maxy(value); }
+    using type = mapnik::coord2f;
 };
 
 template<typename CoordinateType>
-struct tag<mapnik::geometry::polygon<CoordinateType> >
+struct indexed_access<mapnik::box2d<CoordinateType>, min_corner, 0>
+{
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.minx(); }
+    static inline void set(mapnik::box2d<CoordinateType>& b, ct const& value) { b.set_minx(value); }
+};
+
+template<typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, min_corner, 1>
+{
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.miny(); }
+    static inline void set(mapnik::box2d<CoordinateType>& b, ct const& value) { b.set_miny(value); }
+};
+
+template<typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, max_corner, 0>
+{
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.maxx(); }
+    static inline void set(mapnik::box2d<CoordinateType>& b, ct const& value) { b.set_maxx(value); }
+};
+
+template<typename CoordinateType>
+struct indexed_access<mapnik::box2d<CoordinateType>, max_corner, 1>
+{
+    using ct = CoordinateType;
+    static inline ct get(mapnik::box2d<CoordinateType> const& b) { return b.maxy(); }
+    static inline void set(mapnik::box2d<CoordinateType>& b, ct const& value) { b.set_maxy(value); }
+};
+
+template<typename CoordinateType>
+struct tag<mapnik::geometry::polygon<CoordinateType>>
 {
     using type = polygon_tag;
 };
 
-template <typename CoordinateType>
-struct point_order<mapnik::geometry::linear_ring<CoordinateType> >
+template<typename CoordinateType>
+struct point_order<mapnik::geometry::linear_ring<CoordinateType>>
 {
     static const order_selector value = counterclockwise;
 };
 
 template<typename CoordinateType>
-struct tag<mapnik::geometry::multi_point<CoordinateType> >
+struct tag<mapnik::geometry::multi_point<CoordinateType>>
 {
     using type = multi_point_tag;
 };
 
 template<typename CoordinateType>
-struct tag<mapnik::geometry::multi_line_string<CoordinateType> >
+struct tag<mapnik::geometry::multi_line_string<CoordinateType>>
 {
     using type = multi_linestring_tag;
 };
 
 template<typename CoordinateType>
-struct tag<mapnik::geometry::multi_polygon<CoordinateType> >
+struct tag<mapnik::geometry::multi_polygon<CoordinateType>>
 {
     using type = multi_polygon_tag;
 };
 
 // ring
-template <typename CoordinateType>
-struct ring_const_type<mapnik::geometry::polygon<CoordinateType> >
+template<typename CoordinateType>
+struct ring_const_type<mapnik::geometry::polygon<CoordinateType>>
 {
     using type = typename mapnik::geometry::linear_ring<CoordinateType> const&;
 };
 
-template <typename CoordinateType>
-struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >
+template<typename CoordinateType>
+struct ring_mutable_type<mapnik::geometry::polygon<CoordinateType>>
 {
     using type = typename mapnik::geometry::linear_ring<CoordinateType>&;
 };
 
 // interior
-template <typename CoordinateType>
+template<typename CoordinateType>
 struct interior_const_type<mapnik::geometry::polygon<CoordinateType>>
 {
     using type = typename mapnik::const_interior_rings<CoordinateType> const;
 };
 
-template <typename CoordinateType>
-struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >
+template<typename CoordinateType>
+struct interior_mutable_type<mapnik::geometry::polygon<CoordinateType>>
 {
-    using type = typename mapnik::interior_rings<CoordinateType> ;
+    using type = typename mapnik::interior_rings<CoordinateType>;
 };
 
-template <typename CoordinateType>
-struct exterior_ring<mapnik::geometry::polygon<CoordinateType> >
+template<typename CoordinateType>
+struct exterior_ring<mapnik::geometry::polygon<CoordinateType>>
 {
-    using ring_const_type   = typename ring_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
-    using ring_mutable_type = typename ring_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
-    static ring_mutable_type get(mapnik::geometry::polygon<CoordinateType> & p)
+    using ring_const_type = typename ring_const_type<mapnik::geometry::polygon<CoordinateType>>::type;
+    using ring_mutable_type = typename ring_mutable_type<mapnik::geometry::polygon<CoordinateType>>::type;
+    static ring_mutable_type get(mapnik::geometry::polygon<CoordinateType>& p)
     {
-        if (p.empty()) p.resize(1);
+        if (p.empty())
+            p.resize(1);
         return p[0];
     }
 
     static ring_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
-        if (p.empty()) throw std::runtime_error("Exterior ring must be initialized!");
+        if (p.empty())
+            throw std::runtime_error("Exterior ring must be initialized!");
         return p[0];
     }
 };
 
-template <typename CoordinateType>
-struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
+template<typename CoordinateType>
+struct interior_rings<mapnik::geometry::polygon<CoordinateType>>
 {
-    using interior_const_type = typename interior_const_type<mapnik::geometry::polygon<CoordinateType> >::type;
-    using interior_mutable_type = typename interior_mutable_type<mapnik::geometry::polygon<CoordinateType> >::type;
+    using interior_const_type = typename interior_const_type<mapnik::geometry::polygon<CoordinateType>>::type;
+    using interior_mutable_type = typename interior_mutable_type<mapnik::geometry::polygon<CoordinateType>>::type;
 
     static interior_const_type get(mapnik::geometry::polygon<CoordinateType> const& p)
     {
@@ -269,7 +273,7 @@ struct interior_rings<mapnik::geometry::polygon<CoordinateType> >
     }
 };
 
-template <typename CoordinateType>
+template<typename CoordinateType>
 struct resize<mapnik::interior_rings<CoordinateType>>
 {
     static inline void apply(mapnik::interior_rings<CoordinateType> interiors, std::size_t new_size)
@@ -278,25 +282,24 @@ struct resize<mapnik::interior_rings<CoordinateType>>
     }
 };
 
-template <typename CoordinateType>
+template<typename CoordinateType>
 struct clear<mapnik::interior_rings<CoordinateType>>
 {
-    static inline void apply(mapnik::interior_rings<CoordinateType> interiors)
-    {
-        interiors.clear();
-    }
+    static inline void apply(mapnik::interior_rings<CoordinateType> interiors) { interiors.clear(); }
 };
 
-template <typename CoordinateType>
+template<typename CoordinateType>
 struct push_back<mapnik::interior_rings<CoordinateType>>
 {
-    template <typename Ring>
+    template<typename Ring>
     static inline void apply(mapnik::interior_rings<CoordinateType> interiors, Ring const& ring)
     {
         interiors.push_back(ring);
     }
 };
 
-}}}
+} // namespace traits
+} // namespace geometry
+} // namespace boost
 
-#endif //MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP
+#endif // MAPNIK_BOOST_GEOMETRY_ADAPTERS_HPP

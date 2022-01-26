@@ -44,6 +44,7 @@ transform_expression_grammar_type const transform("transform");
 
 BOOST_SPIRIT_DECLARE(transform_expression_grammar_type);
 
-}}  // ns
+} // namespace grammar
+} // namespace mapnik
 
 #endif

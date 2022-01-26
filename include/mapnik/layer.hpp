@@ -32,8 +32,7 @@
 #include <vector>
 #include <memory>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class datasource;
 using datasource_ptr = std::shared_ptr<datasource>;
@@ -48,13 +47,12 @@ using datasource_ptr = std::shared_ptr<datasource>;
  */
 class MAPNIK_DECL layer
 {
-public:
-    layer(std::string const& name,
-          std::string const& srs = MAPNIK_GEOGRAPHIC_PROJ);
+  public:
+    layer(std::string const& name, std::string const& srs = MAPNIK_GEOGRAPHIC_PROJ);
     // copy
     layer(layer const& l);
     // move
-    layer(layer && l);
+    layer(layer&& l);
     layer& operator=(layer rhs);
     bool operator==(layer const& other) const;
 
@@ -105,7 +103,7 @@ public:
     /*! \brief Add a child layer by moving it.
      *  @param l The layer to add.
      */
-    void add_layer(layer && l);
+    void add_layer(layer&& l);
 
     std::vector<layer> const& layers() const;
 
@@ -217,13 +215,14 @@ public:
     double get_opacity() const;
 
     void set_maximum_extent(box2d<double> const& box);
-    boost::optional<box2d<double> > const&  maximum_extent() const;
+    boost::optional<box2d<double>> const& maximum_extent() const;
     void reset_maximum_extent();
     void set_buffer_size(int size);
     boost::optional<int> const& buffer_size() const;
     void reset_buffer_size();
     ~layer();
-private:
+
+  private:
     std::string name_;
     std::string srs_;
     double minimum_scale_denom_;
@@ -237,10 +236,10 @@ private:
     std::vector<layer> layers_;
     datasource_ptr ds_;
     boost::optional<int> buffer_size_;
-    boost::optional<box2d<double> > maximum_extent_;
+    boost::optional<box2d<double>> maximum_extent_;
     boost::optional<composite_mode_e> comp_op_;
     double opacity_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_LAYER_HPP

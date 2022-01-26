@@ -45,29 +45,37 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_renderer_base.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename Rasterizer, typename Renderer, typename Common, typename ProjTransform>
+template<typename Rasterizer, typename Renderer, typename Common, typename ProjTransform>
 struct render_dot_symbolizer : util::noncopyable
 {
-    render_dot_symbolizer(double rx, double ry, Rasterizer & ras, Renderer & ren, Common & common, ProjTransform const& prj_trans)
-        : ras_(ras),
-          ren_(ren),
-          common_(common),
-          prj_trans_(prj_trans),
-          rx_(rx),
-          ry_(ry),
-          el_(0, 0, rx, ry) {}
+    render_dot_symbolizer(double rx,
+                          double ry,
+                          Rasterizer& ras,
+                          Renderer& ren,
+                          Common& common,
+                          ProjTransform const& prj_trans)
+        : ras_(ras)
+        , ren_(ren)
+        , common_(common)
+        , prj_trans_(prj_trans)
+        , rx_(rx)
+        , ry_(ry)
+        , el_(0, 0, rx, ry)
+    {}
 
-    template <typename Adapter>
-    void operator() (Adapter const& va)
+    template<typename Adapter>
+    void operator()(Adapter const& va)
     {
-        double x,y,z = 0;
+        double x, y, z = 0;
         unsigned cmd = SEG_END;
         va.rewind(0);
         while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
         {
-            if (cmd == SEG_CLOSE) continue;
+            if (cmd == SEG_CLOSE)
+                continue;
             prj_trans_.backward(x, y, z);
             common_.t_.forward(&x, &y);
             el_.init(x, y, rx_, ry_, el_.num_steps());
@@ -75,9 +83,9 @@ struct render_dot_symbolizer : util::noncopyable
             agg::render_scanlines(ras_, sl_, ren_);
         }
     }
-    Rasterizer & ras_;
-    Renderer & ren_;
-    Common & common_;
+    Rasterizer& ras_;
+    Renderer& ren_;
+    Common& common_;
     ProjTransform const& prj_trans_;
     double rx_;
     double ry_;
@@ -85,17 +93,17 @@ struct render_dot_symbolizer : util::noncopyable
     agg::scanline_u8 sl_;
 };
 
-} // ns detail
+} // namespace detail
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+template<typename T0, typename T1>
+void agg_renderer<T0, T1>::process(dot_symbolizer const& sym,
+                                   mapnik::feature_impl& feature,
+                                   proj_transform const& prj_trans)
 {
     double width = 0.0;
     double height = 0.0;
-    bool has_width = has_key(sym,keys::width);
-    bool has_height = has_key(sym,keys::height);
+    bool has_width = has_key(sym, keys::width);
+    bool has_height = has_key(sym, keys::height);
     if (has_width && has_height)
     {
         width = get<double>(sym, keys::width, feature, common_.vars_, 0.0);
@@ -109,10 +117,10 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
     {
         width = height = get<double>(sym, keys::height, feature, common_.vars_, 0.0);
     }
-    double rx = width/2.0 * common_.scale_factor_;
-    double ry = height/2.0 * common_.scale_factor_;
+    double rx = width / 2.0 * common_.scale_factor_;
+    double ry = height / 2.0 * common_.scale_factor_;
     double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
-    color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128,128,128));
+    color const& fill = get<mapnik::color>(sym, keys::fill, feature, common_.vars_, mapnik::color(128, 128, 128));
     ras_ptr->reset();
     if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
     {
@@ -120,25 +128,28 @@ void agg_renderer<T0,T1>::process(dot_symbolizer const& sym,
         gamma_method_ = GAMMA_POWER;
         gamma_ = 1.0;
     }
-    buffer_type & current_buffer = buffers_.top().get();
-    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
+    buffer_type& current_buffer = buffers_.top().get();
+    agg::rendering_buffer buf(current_buffer.bytes(),
+                              current_buffer.width(),
+                              current_buffer.height(),
+                              current_buffer.row_size());
     using blender_type = agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba>;
     using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
+    pixf.comp_op(
+      static_cast<agg::comp_op_e>(get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over)));
     renderer_base renb(pixf);
     renderer_type ren(renb);
 
     ren.color(agg::rgba8_pre(fill.red(), fill.green(), fill.blue(), int(fill.alpha() * opacity)));
-    using render_dot_symbolizer_type = detail::render_dot_symbolizer<rasterizer, renderer_type, renderer_common, proj_transform>;
+    using render_dot_symbolizer_type =
+      detail::render_dot_symbolizer<rasterizer, renderer_type, renderer_common, proj_transform>;
     render_dot_symbolizer_type apply(rx, ry, *ras_ptr, ren, common_, prj_trans);
     mapnik::util::apply_visitor(geometry::vertex_processor<render_dot_symbolizer_type>(apply), feature.get_geometry());
 }
 
-template void agg_renderer<image_rgba8>::process(dot_symbolizer const&,
-                                              mapnik::feature_impl &,
-                                              proj_transform const&);
+template void agg_renderer<image_rgba8>::process(dot_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik

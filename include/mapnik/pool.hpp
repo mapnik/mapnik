@@ -36,9 +36,8 @@
 #include <algorithm> // std::max
 #include <deque>
 
-namespace mapnik
-{
-template <typename T,template <typename> class Creator>
+namespace mapnik {
+template<typename T, template<typename> class Creator>
 class Pool : private util::noncopyable
 {
     using HolderType = std::shared_ptr<T>;
@@ -51,14 +50,14 @@ class Pool : private util::noncopyable
 #ifdef MAPNIK_THREADSAFE
     mutable std::mutex mutex_;
 #endif
-public:
+  public:
 
-    Pool(const Creator<T>& creator,unsigned initialSize, unsigned maxSize)
-        :creator_(creator),
-         initialSize_(initialSize),
-         maxSize_(maxSize)
+    Pool(const Creator<T>& creator, unsigned initialSize, unsigned maxSize)
+        : creator_(creator)
+        , initialSize_(initialSize)
+        , maxSize_(maxSize)
     {
-        for (unsigned i=0; i < initialSize_; ++i)
+        for (unsigned i = 0; i < initialSize_; ++i)
         {
             HolderType conn(creator_());
             if (conn->isOK())
@@ -72,8 +71,8 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
 #endif
 
-        typename ContType::iterator itr=pool_.begin();
-        while ( itr!=pool_.end())
+        typename ContType::iterator itr = pool_.begin();
+        while (itr != pool_.end())
         {
             if (itr->use_count() > 1)
             {
@@ -85,7 +84,7 @@ public:
             }
             else
             {
-                itr=pool_.erase(itr);
+                itr = pool_.erase(itr);
             }
         }
         // all connection have been taken, check if we allowed to grow pool
@@ -122,7 +121,7 @@ public:
 #ifdef MAPNIK_THREADSAFE
         std::lock_guard<std::mutex> lock(mutex_);
 #endif
-        maxSize_ = std::max(maxSize_,size);
+        maxSize_ = std::max(maxSize_, size);
     }
 
     unsigned initial_size() const
@@ -145,9 +144,9 @@ public:
             // ensure we don't have ghost obj's in the pool.
             if (total_size < initialSize_)
             {
-                unsigned grow_size = initialSize_ - total_size ;
+                unsigned grow_size = initialSize_ - total_size;
 
-                for (unsigned i=0; i < grow_size; ++i)
+                for (unsigned i = 0; i < grow_size; ++i)
                 {
                     HolderType conn(creator_());
                     if (conn->isOK())
@@ -158,6 +157,6 @@ public:
     }
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_POOL_HPP

@@ -25,12 +25,13 @@
 
 #include <mapnik/config.hpp>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 constexpr double pi = 3.14159265358979323846;
 constexpr double tau = 2.0 * pi;
 
-template <typename T>
+template<typename T>
 constexpr T const& clamp(T const& v, T const& lo, T const& hi)
 {
     return v < lo ? lo : hi < v ? hi : v;
@@ -48,6 +49,7 @@ constexpr double radians(double deg)
 
 MAPNIK_DECL double normalize_angle(double angle);
 
-}}
+} // namespace util
+} // namespace mapnik
 
 #endif

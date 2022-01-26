@@ -42,75 +42,51 @@ char const* binary_function_name(binary_function_impl const& fun);
 // exp
 struct exp_impl
 {
-    //using type = T;
-    value_type operator() (value_type const& val) const
-    {
-        return std::exp(val.to_double());
-    }
+    // using type = T;
+    value_type operator()(value_type const& val) const { return std::exp(val.to_double()); }
 };
 
 // log
 struct log_impl
 {
-    //using type = T;
-    value_type operator() (value_type const& val) const
-    {
-        return std::log(val.to_double());
-    }
+    // using type = T;
+    value_type operator()(value_type const& val) const { return std::log(val.to_double()); }
 };
 
 // sin
 struct sin_impl
 {
-    value_type operator() (value_type const& val) const
-    {
-        return std::sin(val.to_double());
-    }
+    value_type operator()(value_type const& val) const { return std::sin(val.to_double()); }
 };
 
 // cos
 struct cos_impl
 {
-    value_type operator() (value_type const& val) const
-    {
-        return std::cos(val.to_double());
-    }
+    value_type operator()(value_type const& val) const { return std::cos(val.to_double()); }
 };
 
 // tan
 struct tan_impl
 {
-    value_type operator() (value_type const& val) const
-    {
-        return std::tan(val.to_double());
-    }
+    value_type operator()(value_type const& val) const { return std::tan(val.to_double()); }
 };
 
 // atan
 struct atan_impl
 {
-    value_type operator()(value_type const& val) const
-    {
-        return std::atan(val.to_double());
-    }
+    value_type operator()(value_type const& val) const { return std::atan(val.to_double()); }
 };
 
 // abs
 struct abs_impl
 {
-    value_type operator() (value_type const& val) const
-    {
-        return std::abs(val.to_double());
-    }
+    value_type operator()(value_type const& val) const { return std::abs(val.to_double()); }
 };
 
 // length
 struct length_impl
 {
-    value_type operator() (value_type const& val) const
-    {
-        return val.to_unicode().length();
-    }
+    value_type operator()(value_type const& val) const { return val.to_unicode().length(); }
 };
 
 // min

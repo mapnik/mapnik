@@ -32,21 +32,22 @@
 static inline std::string numeric2string(const char* buf)
 {
     std::int16_t ndigits = int2net(buf);
-    std::int16_t weight  = int2net(buf+2);
-    std::int16_t sign    = int2net(buf+4);
-    std::int16_t dscale  = int2net(buf+6);
+    std::int16_t weight = int2net(buf + 2);
+    std::int16_t sign = int2net(buf + 4);
+    std::int16_t dscale = int2net(buf + 6);
 
     std::unique_ptr<std::int16_t[]> digits(new std::int16_t[ndigits]);
-    for (int n=0; n < ndigits ;++n)
+    for (int n = 0; n < ndigits; ++n)
     {
-        digits[n] = int2net(buf+8+n*2);
+        digits[n] = int2net(buf + 8 + n * 2);
     }
 
     std::ostringstream ss;
 
-    if (sign == 0x4000) ss << "-";
+    if (sign == 0x4000)
+        ss << "-";
 
-    int i = std::max(weight,std::int16_t(0));
+    int i = std::max(weight, std::int16_t(0));
     int d = 0;
 
     // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.
@@ -54,7 +55,7 @@ static inline std::string numeric2string(const char* buf)
     // Note that the last two digits show that the leading 0's are lost when the number is split.
     // We must be careful to re-insert these 0's when building the string.
 
-    while ( i >= 0)
+    while (i >= 0)
     {
         if (i <= weight && d < ndigits)
         {
@@ -69,24 +70,24 @@ static inline std::string numeric2string(const char* buf)
                 }
                 else if (dig < 100)
                 {
-                    ss << "00";  // 0010 - 0099
+                    ss << "00"; // 0010 - 0099
                 }
                 else
                 {
-                    ss << "0";   // 0100 - 0999;
+                    ss << "0"; // 0100 - 0999;
                 }
 #else
-                switch(digits[d])
+                switch (digits[d])
                 {
-                case 0 ... 9:
-                    ss << "000"; // 0000 - 0009
-                    break;
-                case 10 ... 99:
-                    ss << "00";  // 0010 - 0099
-                    break;
-                case 100 ... 999:
-                    ss << "0";   // 0100 - 0999
-                    break;
+                    case 0 ... 9:
+                        ss << "000"; // 0000 - 0009
+                        break;
+                    case 10 ... 99:
+                        ss << "00"; // 0010 - 0099
+                        break;
+                    case 100 ... 999:
+                        ss << "0"; // 0100 - 0999
+                        break;
                 }
 #endif
             }
@@ -95,9 +96,9 @@ static inline std::string numeric2string(const char* buf)
         else
         {
             if (d == 0)
-                ss <<  "0";
+                ss << "0";
             else
-                ss <<  "0000";
+                ss << "0000";
         }
 
         i--;
@@ -115,22 +116,26 @@ static inline std::string numeric2string(const char* buf)
                 value = 0;
 
             // Output up to 4 decimal digits for this value
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << (value / 1000);
                 value %= 1000;
                 dscale--;
             }
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << (value / 100);
                 value %= 100;
                 dscale--;
             }
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << (value / 10);
                 value %= 10;
                 dscale--;
             }
-            if (dscale > 0) {
+            if (dscale > 0)
+            {
                 ss << value;
                 dscale--;
             }

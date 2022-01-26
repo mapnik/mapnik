@@ -41,15 +41,18 @@
 #include <iosfwd>
 #include <map>
 
-namespace agg { struct trans_affine; }
+namespace agg {
+struct trans_affine;
+}
 
-namespace mapnik
-{
+namespace mapnik {
 
 // fwd declares
 // TODO - move these transform declares to own header
-namespace detail { struct transform_node; }
-using transform_list =  std::vector<detail::transform_node>;
+namespace detail {
+struct transform_node;
+}
+using transform_list = std::vector<detail::transform_node>;
 using transform_list_ptr = std::shared_ptr<transform_list>;
 using transform_type = transform_list_ptr;
 class feature_impl;
@@ -64,18 +67,15 @@ struct enumeration_wrapper
 {
     int value;
     enumeration_wrapper() = delete;
-    template <typename T>
+    template<typename T>
     explicit enumeration_wrapper(T value_)
-        : value(value_) {}
+        : value(value_)
+    {}
 
-    inline bool operator==(enumeration_wrapper const& rhs) const
-    {
-        return value == rhs.value;
-    }
-
+    inline bool operator==(enumeration_wrapper const& rhs) const { return value == rhs.value; }
 };
 
-using dash_array = std::vector<std::pair<double,double> >;
+using dash_array = std::vector<std::pair<double, double>>;
 
 class text_placements;
 using text_placements_ptr = std::shared_ptr<text_placements>;
@@ -102,11 +102,11 @@ struct strict_value : value_base_type
     strict_value() = default;
 
     strict_value(const char* val) noexcept(false)
-        : value_base_type(std::string(val)) {}
+        : value_base_type(std::string(val))
+    {}
 
-    template <typename T, typename U = detail::mapnik_value_type_t<T>>
-    strict_value(T && obj)
-        noexcept(std::is_nothrow_constructible<value_base_type, U>::value)
+    template<typename T, typename U = detail::mapnik_value_type_t<T>>
+    strict_value(T&& obj) noexcept(std::is_nothrow_constructible<value_base_type, U>::value)
         : value_base_type(U(std::forward<T>(obj)))
     {}
 };
@@ -116,7 +116,7 @@ struct strict_value : value_base_type
 struct MAPNIK_DECL symbolizer_base
 {
     using value_type = detail::strict_value;
-    using key_type =  mapnik::keys;
+    using key_type = mapnik::keys;
     using cont_type = std::map<key_type, value_type>;
     cont_type properties;
 };
@@ -129,23 +129,36 @@ inline bool is_expression(symbolizer_base::value_type const& val)
 inline bool operator==(symbolizer_base const& lhs, symbolizer_base const& rhs)
 {
     return lhs.properties.size() == rhs.properties.size() &&
-        std::equal(lhs.properties.begin(), lhs.properties.end(), rhs.properties.begin());
+           std::equal(lhs.properties.begin(), lhs.properties.end(), rhs.properties.begin());
 }
 
 // concrete symbolizer types
-struct MAPNIK_DECL point_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL line_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL text_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL shield_symbolizer : public text_symbolizer {};
-struct MAPNIK_DECL line_pattern_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL polygon_pattern_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL markers_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL raster_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL building_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL group_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL debug_symbolizer : public symbolizer_base {};
-struct MAPNIK_DECL dot_symbolizer : public symbolizer_base {};
+struct MAPNIK_DECL point_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL line_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL text_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL shield_symbolizer : public text_symbolizer
+{};
+struct MAPNIK_DECL line_pattern_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL polygon_pattern_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL markers_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL building_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL group_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL debug_symbolizer : public symbolizer_base
+{};
+struct MAPNIK_DECL dot_symbolizer : public symbolizer_base
+{};
 
 // symbolizer
 using symbolizer = util::variant<point_symbolizer,
@@ -162,6 +175,6 @@ using symbolizer = util::variant<point_symbolizer,
                                  debug_symbolizer,
                                  dot_symbolizer>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_SYMBOLIZER_BASE_HPP

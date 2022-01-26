@@ -32,25 +32,24 @@
 #include <string>
 #include <map>
 
-namespace mapnik
-{
-namespace formatting
-{
+namespace mapnik {
+namespace formatting {
 
-using from_xml_function_ptr = node_ptr (*) (xml_node const&, fontset_map const&) ;
+using from_xml_function_ptr = node_ptr (*)(xml_node const&, fontset_map const&);
 
 class registry : public singleton<registry, CreateStatic>,
                  private util::noncopyable
 {
-public:
+  public:
     registry();
     ~registry() {}
-    void register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite=false);
-    node_ptr from_xml(xml_node const& xml, fontset_map const & fontsets);
-private:
+    void register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite = false);
+    node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
+
+  private:
     std::map<std::string, from_xml_function_ptr> map_;
 };
 
-} //ns formatting
-} //ns mapnik
+} // namespace formatting
+} // namespace mapnik
 #endif // FORMATTING_REGISTRY_HPP

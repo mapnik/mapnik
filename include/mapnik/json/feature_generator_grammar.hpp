@@ -42,69 +42,73 @@ struct kv_store
     using value_type = mapnik::feature_impl::value_type;
     using iterator_type = mapnik::feature_kv_iterator2;
     kv_store(mapnik::feature_impl const& f)
-        : start_(mapnik::value_not_null(),f.begin(),f.end()),
-          end_(mapnik::value_not_null(),f.end(),f.end())
+        : start_(mapnik::value_not_null(), f.begin(), f.end())
+        , end_(mapnik::value_not_null(), f.end(), f.end())
     {}
     iterator_type start_;
     iterator_type end_;
 };
 
-}
+} // namespace mapnik
 
-namespace boost { namespace spirit { namespace traits {
+namespace boost {
+namespace spirit {
+namespace traits {
 
-template <>
-struct is_container<mapnik::kv_store const> : mpl::false_ {} ;
+template<>
+struct is_container<mapnik::kv_store const> : mpl::false_
+{};
 
-template <>
+template<>
 struct container_iterator<mapnik::kv_store const>
 {
     using type = mapnik::kv_store::iterator_type;
 };
 
-template <>
+template<>
 struct begin_container<mapnik::kv_store const>
 {
-    static mapnik::kv_store::iterator_type
-    call (mapnik::kv_store const& kv)
-    {
-        return kv.start_;
-    }
+    static mapnik::kv_store::iterator_type call(mapnik::kv_store const& kv) { return kv.start_; }
 };
 
-template <>
+template<>
 struct end_container<mapnik::kv_store const>
 {
-    static mapnik::kv_store::iterator_type
-    call (mapnik::kv_store const& kv)
-    {
-        return kv.end_;
-    }
+    static mapnik::kv_store::iterator_type call(mapnik::kv_store const& kv) { return kv.end_; }
 };
 
-}}}
+} // namespace traits
+} // namespace spirit
+} // namespace boost
 
-BOOST_FUSION_ADAPT_ADT(
-    mapnik::feature_impl,
-    (mapnik::value_integer, mapnik::value_integer, obj.id(), /**/)
-    (mapnik::geometry::geometry<double>const&, mapnik::geometry::geometry<double> const&, obj.get_geometry(),/**/)
-    (mapnik::kv_store const, mapnik::kv_store const, mapnik::kv_store(obj), /**/))
+BOOST_FUSION_ADAPT_ADT(mapnik::feature_impl,
+                       (mapnik::value_integer, mapnik::value_integer, obj.id(),
+                        /**/)(mapnik::geometry::geometry<double> const&,
+                              mapnik::geometry::geometry<double> const&,
+                              obj.get_geometry(),
+                              /**/)(mapnik::kv_store const, mapnik::kv_store const, mapnik::kv_store(obj), /**/))
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 namespace detail {
-template <typename T>
+template<typename T>
 #if BOOST_VERSION >= 107000
-struct attribute_type { using type = T();};
+struct attribute_type
+{
+    using type = T();
+};
 #else
-struct attribute_type { using type = T const&();};
+struct attribute_type
+{
+    using type = T const&();
+};
 #endif
-}
+} // namespace detail
 
 namespace karma = boost::spirit::karma;
 
-template <typename OutputIterator, typename FeatureType>
-struct feature_generator_grammar :
-        karma::grammar<OutputIterator, typename detail::attribute_type<FeatureType>::type>
+template<typename OutputIterator, typename FeatureType>
+struct feature_generator_grammar : karma::grammar<OutputIterator, typename detail::attribute_type<FeatureType>::type>
 {
     feature_generator_grammar();
     karma::rule<OutputIterator, typename detail::attribute_type<FeatureType>::type> feature;
@@ -112,6 +116,7 @@ struct feature_generator_grammar :
     properties_generator_grammar<OutputIterator, mapnik::kv_store> properties;
 };
 
-}}
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_FEATURE_GENERATOR_GRAMMAR_HPP

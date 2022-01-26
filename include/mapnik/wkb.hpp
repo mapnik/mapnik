@@ -28,8 +28,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 /*!
  * From wikipedia.com:
@@ -43,30 +42,19 @@ namespace mapnik
  * Access and Coordinate Transformation Service specifications.
  */
 
-enum wkbFormat : std::uint8_t
-{
-    wkbAuto=1,
-    wkbGeneric=2,
-    wkbSpatiaLite=3
-};
+enum wkbFormat : std::uint8_t { wkbAuto = 1, wkbGeneric = 2, wkbSpatiaLite = 3 };
 
-enum wkbByteOrder : std::uint8_t
-{
-    wkbXDR=0,
-    wkbNDR=1
-};
+enum wkbByteOrder : std::uint8_t { wkbXDR = 0, wkbNDR = 1 };
 
 class MAPNIK_DECL geometry_utils : private util::noncopyable
 {
-public:
+  public:
 
-    static geometry::geometry<double> from_wkb(char const* wkb,
-                                               std::size_t size,
-                                               wkbFormat format = wkbGeneric);
+    static geometry::geometry<double> from_wkb(char const* wkb, std::size_t size, wkbFormat format = wkbGeneric);
 
     static geometry::geometry<double> from_twkb(char const* twkb, std::size_t size);
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_WKB_HPP

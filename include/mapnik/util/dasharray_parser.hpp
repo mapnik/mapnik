@@ -27,10 +27,12 @@
 #include <vector>
 #include <string>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-bool parse_dasharray(std::string const& value, dash_array & dash);
+bool parse_dasharray(std::string const& value, dash_array& dash);
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_UTIL_DASHARRAY_PARSER_HPP

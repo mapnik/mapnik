@@ -41,21 +41,22 @@ class datasource;
 class parameters;
 class PluginInfo;
 
-class MAPNIK_DECL datasource_cache
-    : public singleton<datasource_cache, CreateStatic>,
-      private util::noncopyable
+class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateStatic>,
+                                     private util::noncopyable
 {
     friend class CreateStatic<datasource_cache>;
-public:
+
+  public:
     std::vector<std::string> plugin_names();
     std::string plugin_directories();
     bool register_datasources(std::string const& path, bool recurse = false);
     bool register_datasource(std::string const& path);
     std::shared_ptr<datasource> create(parameters const& params);
-private:
+
+  private:
     datasource_cache();
     ~datasource_cache();
-    std::map<std::string,std::shared_ptr<PluginInfo> > plugins_;
+    std::map<std::string, std::shared_ptr<PluginInfo>> plugins_;
     std::set<std::string> plugin_directories_;
     // the singleton has a mutex protecting the instance pointer,
     // but the instance also needs its own mutex to protect the
@@ -66,6 +67,6 @@ private:
 
 extern template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_DATASOURCE_CACHE_HPP

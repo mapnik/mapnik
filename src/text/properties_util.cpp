@@ -26,70 +26,60 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
 struct property_serializer
 {
-    property_serializer(std::string const& name, boost::property_tree::ptree & node)
-        : name_(name),
-          node_(node) {}
+    property_serializer(std::string const& name, boost::property_tree::ptree& node)
+        : name_(name)
+        , node_(node)
+    {}
 
-    void operator() (expression_ptr const& expr) const
+    void operator()(expression_ptr const& expr) const
     {
-        if (expr) node_.put("<xmlattr>." + name_, to_expression_string(*expr));
+        if (expr)
+            node_.put("<xmlattr>." + name_, to_expression_string(*expr));
     }
 
-    void operator() (value_bool val) const
-    {
-        node_.put("<xmlattr>." + name_, val );
-    }
+    void operator()(value_bool val) const { node_.put("<xmlattr>." + name_, val); }
 
-    void operator() (value_integer val) const
-    {
-        node_.put("<xmlattr>." + name_, val );
-    }
+    void operator()(value_integer val) const { node_.put("<xmlattr>." + name_, val); }
 
-    void operator() (value_double val) const
-    {
-        node_.put("<xmlattr>." + name_, val );
-    }
+    void operator()(value_double val) const { node_.put("<xmlattr>." + name_, val); }
 
-    void operator() (std::string const& val) const
-    {
-        node_.put("<xmlattr>." + name_, val );
-    }
+    void operator()(std::string const& val) const { node_.put("<xmlattr>." + name_, val); }
 
-    void operator() (color const& val) const
-    {
-        node_.put("<xmlattr>." + name_, val );
-    }
+    void operator()(color const& val) const { node_.put("<xmlattr>." + name_, val); }
 
-    void operator() (enumeration_wrapper const& val) const
+    void operator()(enumeration_wrapper const& val) const
     {
         std::string str = std::get<1>(get_meta(get_key(name_)))(val);
         node_.put("<xmlattr>." + name_, str);
     }
 
-    void operator() (font_feature_settings const& val) const
+    void operator()(font_feature_settings const& val) const
     {
         std::string str = val.to_string();
         node_.put("<xmlattr>." + name_, str);
     }
 
-    template <typename T>
-    void operator() (T const& val) const
+    template<typename T>
+    void operator()(T const& val) const
     {
         std::cerr << "NOOP" << std::endl;
     }
 
     std::string const& name_;
-    boost::property_tree::ptree & node_;
+    boost::property_tree::ptree& node_;
 };
-}
+} // namespace detail
 
-void serialize_property(std::string const& name, symbolizer_base::value_type const& val, boost::property_tree::ptree & node)
+void serialize_property(std::string const& name,
+                        symbolizer_base::value_type const& val,
+                        boost::property_tree::ptree& node)
 {
-    util::apply_visitor(detail::property_serializer(name,node), val);
+    util::apply_visitor(detail::property_serializer(name, node), val);
 }
 
-}
+} // namespace mapnik

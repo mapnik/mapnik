@@ -37,20 +37,18 @@ MAPNIK_DISABLE_WARNING_POP
 
 class ogr_featureset : public mapnik::Featureset
 {
-public:
-    ogr_featureset(mapnik::context_ptr const& ctx,
-                   OGRLayer & layer,
-                   OGRGeometry & extent,
-                   std::string const& encoding);
+  public:
+    ogr_featureset(mapnik::context_ptr const& ctx, OGRLayer& layer, OGRGeometry& extent, std::string const& encoding);
 
     ogr_featureset(mapnik::context_ptr const& ctx,
-                   OGRLayer & layer,
+                   OGRLayer& layer,
                    mapnik::box2d<double> const& extent,
                    std::string const& encoding);
 
     virtual ~ogr_featureset();
     mapnik::feature_ptr next();
-private:
+
+  private:
     mapnik::context_ptr ctx_;
     OGRLayer& layer_;
     OGRFeatureDefn* layerdef_;

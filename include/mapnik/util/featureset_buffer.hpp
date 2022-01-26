@@ -32,11 +32,11 @@ namespace mapnik {
 
 class featureset_buffer : public Featureset
 {
-public:
+  public:
     featureset_buffer()
-      : features_(),
-        pos_(),
-        end_()
+        : features_()
+        , pos_()
+        , end_()
     {}
 
     virtual ~featureset_buffer() {}
@@ -50,10 +50,7 @@ public:
         return feature_ptr();
     }
 
-    void push(feature_ptr const& feature)
-    {
-        features_.push_back(feature);
-    }
+    void push(feature_ptr const& feature) { features_.push_back(feature); }
 
     void prepare()
     {
@@ -61,17 +58,14 @@ public:
         end_ = features_.end();
     }
 
-    void clear()
-    {
-        features_.clear();
-    }
+    void clear() { features_.clear(); }
 
-private:
+  private:
     std::vector<feature_ptr> features_;
     std::vector<feature_ptr>::iterator pos_;
     std::vector<feature_ptr>::iterator end_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FEATURESET_BUFFER_HPP

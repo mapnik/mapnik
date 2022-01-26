@@ -52,29 +52,19 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_image_filters.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 using scaling_method_lookup_type = boost::bimap<scaling_method_e, std::string>;
-static const scaling_method_lookup_type scaling_lookup = boost::assign::list_of<scaling_method_lookup_type::relation>
-    (SCALING_NEAR,"near")
-    (SCALING_BILINEAR,"bilinear")
-    (SCALING_BICUBIC,"bicubic")
-    (SCALING_SPLINE16,"spline16")
-    (SCALING_SPLINE36,"spline36")
-    (SCALING_HANNING,"hanning")
-    (SCALING_HAMMING,"hamming")
-    (SCALING_HERMITE,"hermite")
-    (SCALING_KAISER,"kaiser")
-    (SCALING_QUADRIC,"quadric")
-    (SCALING_CATROM,"catrom")
-    (SCALING_GAUSSIAN,"gaussian")
-    (SCALING_BESSEL,"bessel")
-    (SCALING_MITCHELL,"mitchell")
-    (SCALING_SINC,"sinc")
-    (SCALING_LANCZOS,"lanczos")
-    (SCALING_BLACKMAN,"blackman")
-    ;
+static const scaling_method_lookup_type scaling_lookup =
+  boost::assign::list_of<scaling_method_lookup_type::relation>(SCALING_NEAR, "near")(SCALING_BILINEAR, "bilinear")(
+    SCALING_BICUBIC,
+    "bicubic")(SCALING_SPLINE16, "spline16")(SCALING_SPLINE36, "spline36")(SCALING_HANNING, "hanning")(
+    SCALING_HAMMING,
+    "hamming")(SCALING_HERMITE, "hermite")(SCALING_KAISER, "kaiser")(SCALING_QUADRIC, "quadric")(
+    SCALING_CATROM,
+    "catrom")(SCALING_GAUSSIAN, "gaussian")(SCALING_BESSEL, "bessel")(SCALING_MITCHELL, "mitchell")(
+    SCALING_SINC,
+    "sinc")(SCALING_LANCZOS, "lanczos")(SCALING_BLACKMAN, "blackman");
 
 boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name)
 {
@@ -98,16 +88,21 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
     return mode;
 }
 
-
-template <typename T>
-void scale_image_agg(T & target, T const& source, scaling_method_e scaling_method,
-                     double image_ratio_x, double image_ratio_y, double x_off_f, double y_off_f,
-                     double filter_factor, boost::optional<double> const& nodata_value)
+template<typename T>
+void scale_image_agg(T& target,
+                     T const& source,
+                     scaling_method_e scaling_method,
+                     double image_ratio_x,
+                     double image_ratio_y,
+                     double x_off_f,
+                     double y_off_f,
+                     double filter_factor,
+                     boost::optional<double> const& nodata_value)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
-    // "Yes, you need to use premultiplied images only. Only in this case the simple weighted averaging works correctly in the image fitering."
-    // http://permalink.gmane.org/gmane.comp.graphics.agg/3443
+    // "Yes, you need to use premultiplied images only. Only in this case the simple weighted averaging works correctly
+    // in the image fitering." http://permalink.gmane.org/gmane.comp.graphics.agg/3443
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
     using pixfmt_pre = typename detail::agg_scaling_traits<image_type>::pixfmt_pre;
@@ -124,7 +119,9 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
 
     // initialize source AGG buffer
     agg::rendering_buffer rbuf_src(const_cast<unsigned char*>(source.bytes()),
-                                   source.width(), source.height(), source.width() * pixel_size);
+                                   source.width(),
+                                   source.height(),
+                                   source.width() * pixel_size);
     pixfmt_pre pixf_src(rbuf_src);
 
     img_src_type img_src(pixf_src);
@@ -170,36 +167,113 @@ void scale_image_agg(T & target, T const& source, scaling_method_e scaling_metho
     }
 }
 
-template MAPNIK_DECL void scale_image_agg(image_rgba8 &, image_rgba8 const&, scaling_method_e,
-                                          double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_rgba8&,
+                                          image_rgba8 const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray8 &, image_gray8 const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray8&,
+                                          image_gray8 const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray8s &, image_gray8s const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray8s&,
+                                          image_gray8s const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray16 &, image_gray16 const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray16&,
+                                          image_gray16 const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray16s &, image_gray16s const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray16s&,
+                                          image_gray16s const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray32 &, image_gray32 const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray32&,
+                                          image_gray32 const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray32s &, image_gray32s const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray32s&,
+                                          image_gray32s const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray32f &, image_gray32f const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray32f&,
+                                          image_gray32f const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray64 &, image_gray64 const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray64&,
+                                          image_gray64 const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray64s &, image_gray64s const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
+template MAPNIK_DECL void scale_image_agg(image_gray64s&,
+                                          image_gray64s const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
 
-template MAPNIK_DECL void scale_image_agg(image_gray64f &, image_gray64f const&, scaling_method_e,
-                              double, double , double, double , double, boost::optional<double> const &);
-}
+template MAPNIK_DECL void scale_image_agg(image_gray64f&,
+                                          image_gray64f const&,
+                                          scaling_method_e,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          double,
+                                          boost::optional<double> const&);
+} // namespace mapnik

@@ -33,14 +33,14 @@
 
 namespace mapnik {
 
-template <typename Locator, typename Detector>
+template<typename Locator, typename Detector>
 class markers_polylabel_placement : public markers_point_placement<Locator, Detector>
 {
-public:
+  public:
     using point_placement = markers_point_placement<Locator, Detector>;
     using point_placement::point_placement;
 
-    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
+    bool get_point(double& x, double& y, double& angle, bool ignore_placement)
     {
         if (this->done_)
         {
@@ -54,8 +54,7 @@ public:
 
         geometry::polygon_vertex_processor<double> vertex_processor;
         vertex_processor.add_path(this->locator_);
-        double precision = geometry::polylabel_precision(vertex_processor.polygon_,
-                                                         this->params_.scale_factor);
+        double precision = geometry::polylabel_precision(vertex_processor.polygon_, this->params_.scale_factor);
         geometry::point<double> placement;
         if (!geometry::polylabel(vertex_processor.polygon_, precision, placement))
         {
@@ -77,6 +76,6 @@ public:
     }
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MARKERS_PLACEMENTS_POLYLABEL_HPP

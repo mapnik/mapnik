@@ -23,43 +23,33 @@
 #ifndef MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP
 
-
+#include <mapnik/css/css_color_grammar_x3.hpp>
 #include <mapnik/image_filter_grammar_x3.hpp>
 #include <mapnik/image_filter_types.hpp>
-#include <mapnik/css/css_color_grammar_x3.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp> // spirit support
+#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp> // spirit support
+#include <mapnik/warning_ignore.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::filter::scale_hsla,
-    (double, h0)
-    (double, h1)
-    (double, s0)
-    (double, s1)
-    (double, l0)
-    (double, l1)
-    (double, a0)
-    (double, a1)
+BOOST_FUSION_ADAPT_STRUCT(mapnik::filter::scale_hsla,
+                          (double, h0) //
+                          (double, h1) //
+                          (double, s0) //
+                          (double, s1) //
+                          (double, l0) //
+                          (double, l1) //
+                          (double, a0) //
+                          (double, a1) //
 )
 
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::filter::color_stop,
-    (mapnik::color, color )
-    (double, offset)
-)
+BOOST_FUSION_ADAPT_STRUCT(mapnik::filter::color_stop, (mapnik::color, color)(double, offset))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    mapnik::filter::color_to_alpha,
-    (mapnik::color, color)
-)
+BOOST_FUSION_ADAPT_STRUCT(mapnik::filter::color_to_alpha, (mapnik::color, color))
 
 namespace mapnik {
 
@@ -67,52 +57,49 @@ namespace x3 = boost::spirit::x3;
 
 namespace image_filter {
 
-using x3::lit;
-using x3::uint_parser;
-using x3::hex;
-using x3::symbols;
-using x3::omit;
 using x3::attr;
+using x3::char_;
 using x3::double_;
+using x3::hex;
+using x3::lit;
 using x3::no_case;
 using x3::no_skip;
-using x3::char_;
+using x3::omit;
+using x3::symbols;
+using x3::uint_parser;
 
-auto push_back = [](auto& ctx)
-{
+auto push_back = [](auto& ctx) {
     _val(ctx).push_back(_attr(ctx));
-
 };
 
-auto set_rx_ry = [](auto & ctx)
-{
+auto set_rx_ry = [](auto& ctx) {
     _val(ctx).rx = _val(ctx).ry = _attr(ctx);
 };
 
-auto set_ry = [](auto & ctx)
-{
+auto set_ry = [](auto& ctx) {
     _val(ctx).ry = _attr(ctx);
 };
 
-auto offset_value = [](auto & ctx)
-{
+auto offset_value = [](auto& ctx) {
     _val(ctx) = _attr(ctx);
 };
 
-auto percent = [](auto & ctx)
-{
-    double val = std::abs(_val(ctx)/100.0);
-    if (val > 1.0) val = 1.0;
+auto percent = [](auto& ctx) {
+    double val = std::abs(_val(ctx) / 100.0);
+    if (val > 1.0)
+        val = 1.0;
     _val(ctx) = val;
 };
 
 x3::uint_parser<unsigned, 10, 1, 3> radius;
 
 // Import the expression rule
-namespace { using css_color_grammar::css_color; }
+namespace {
+using css_color_grammar::css_color;
+}
 
 // rules
-x3::rule<class filter_class, filter::filter_type > const filter("filter");
+x3::rule<class filter_class, filter::filter_type> const filter("filter");
 
 x3::rule<class emboss_class, filter::emboss> const emboss_filter("emboss");
 x3::rule<class blur_class, filter::blur> const blur_filter("blur");
@@ -123,9 +110,12 @@ x3::rule<class sharpen_class, filter::sharpen> const sharpen_filter("sharpen");
 x3::rule<class x_gradient_class, filter::x_gradient> const x_gradient_filter("x-gradient");
 x3::rule<class y_gradient_class, filter::y_gradient> const y_gradient_filter("y-gradient");
 x3::rule<class invert_class, filter::invert> const invert_filter("invert");
-x3::rule<class color_blind_protanope_class, filter::color_blind_protanope> const color_blind_protanope_filter("color-blind-protanope");
-x3::rule<class color_blind_deuteranope_class, filter::color_blind_deuteranope> const color_blind_deuteranope_filter("color-blind-deuteranope");
-x3::rule<class color_blind_tritanope_class, filter::color_blind_tritanope> const color_blind_tritanope_filter("color-blind-tritanope");
+x3::rule<class color_blind_protanope_class, filter::color_blind_protanope> const
+  color_blind_protanope_filter("color-blind-protanope");
+x3::rule<class color_blind_deuteranope_class, filter::color_blind_deuteranope> const
+  color_blind_deuteranope_filter("color-blind-deuteranope");
+x3::rule<class color_blind_tritanope_class, filter::color_blind_tritanope> const
+  color_blind_tritanope_filter("color-blind-tritanope");
 
 x3::rule<class agg_blur_class, filter::agg_stack_blur> const agg_blur_filter("agg blur filter");
 x3::rule<class scale_hsla_class, filter::scale_hsla> const scale_hsla_filter("scale-hsla");
@@ -134,6 +124,7 @@ x3::rule<class color_stop_class, filter::color_stop> const color_stop("color-sto
 x3::rule<class offset_class, double> const offset("color-stop-offset");
 x3::rule<class color_to_alpha_class, filter::color_to_alpha> const color_to_alpha_filter("color-to-alpha");
 
+// clang-format off
 auto const no_args = -(lit('(') > lit(')'));
 
 auto const start_def = -(filter[push_back] % *lit(','));
@@ -220,36 +211,34 @@ auto const colorize_alpha_filter_def = lit("colorize-alpha")
 
 auto const color_to_alpha_filter_def = lit("color-to-alpha") > lit('(')
     > -css_color > lit(')');
-
+// clang-format on
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-BOOST_SPIRIT_DEFINE(
-    start,
-    filter,
-    emboss_filter,
-    blur_filter,
-    gray_filter,
-    edge_detect_filter,
-    sobel_filter,
-    sharpen_filter,
-    x_gradient_filter,
-    y_gradient_filter,
-    invert_filter,
-    agg_blur_filter,
-    color_blind_protanope_filter,
-    color_blind_deuteranope_filter,
-    color_blind_tritanope_filter,
-    scale_hsla_filter,
-    colorize_alpha_filter,
-    color_stop,
-    offset,
-    color_to_alpha_filter
-    );
+BOOST_SPIRIT_DEFINE(start,
+                    filter,
+                    emboss_filter,
+                    blur_filter,
+                    gray_filter,
+                    edge_detect_filter,
+                    sobel_filter,
+                    sharpen_filter,
+                    x_gradient_filter,
+                    y_gradient_filter,
+                    invert_filter,
+                    agg_blur_filter,
+                    color_blind_protanope_filter,
+                    color_blind_deuteranope_filter,
+                    color_blind_tritanope_filter,
+                    scale_hsla_filter,
+                    colorize_alpha_filter,
+                    color_stop,
+                    offset,
+                    color_to_alpha_filter);
 MAPNIK_DISABLE_WARNING_POP
 
-} // image_filter
-} //ns mapnik
+} // namespace image_filter
+} // namespace mapnik
 
-#endif //MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP
+#endif // MAPNIK_IMAGE_FILTER_GRAMMAR_X3_DEF_HPP

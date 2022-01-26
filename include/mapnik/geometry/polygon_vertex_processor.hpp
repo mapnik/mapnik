@@ -27,13 +27,14 @@
 #include <mapnik/geometry/point.hpp>
 #include <mapnik/geometry/polygon.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 struct polygon_vertex_processor
 {
-    template <typename Path>
-    void add_path(Path & path)
+    template<typename Path>
+    void add_path(Path& path)
     {
         point<T> p;
         unsigned cmd;
@@ -61,6 +62,7 @@ struct polygon_vertex_processor
     polygon<T> polygon_;
 };
 
-} }
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_POLYGON_VERTEX_PROCESSOR_HPP

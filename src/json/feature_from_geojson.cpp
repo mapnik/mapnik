@@ -20,26 +20,26 @@
  *
  *****************************************************************************/
 
-
 // mapnik
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/json/parse_feature.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-bool from_geojson(std::string const& json, feature_impl & feature)
+bool from_geojson(std::string const& json, feature_impl& feature)
 {
     try
     {
         const char* start = json.c_str();
         const char* end = start + json.length();
         mapnik::json::parse_feature(start, end, feature);
-    }
-    catch (...)
+    } catch (...)
     {
         return false;
     }
     return true;
 }
 
-}}
+} // namespace json
+} // namespace mapnik
