@@ -110,6 +110,6 @@ jobs:
       - name: Upload visual test results
         uses: actions/upload-artifact@v2
         with:
-          name: ubuntu-mapnik-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
+          name: windows-mapnik-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/${{ env.preset }}/out/visual-test-results.tar.gz
           retention-days: 2
