@@ -43,6 +43,10 @@ log_levels_map log_levels
 };
 #endif
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 using namespace visual_tests;
 namespace po = boost::program_options;
 
@@ -105,6 +109,10 @@ runner::renderer_container create_renderers(po::variables_map const & args,
 
 int main(int argc, char** argv)
 {
+#ifdef _WIN32
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+#endif
     po::options_description desc("visual test runner");
     desc.add_options()
         ("help,h", "produce usage message")

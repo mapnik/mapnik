@@ -79,6 +79,11 @@ jobs:
         shell: cmd
         run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- ctest --preset ${{env.preset}}
 
+      - name: Test visuals
+        continue-on-error: true
+        working-directory: build/${{ env.preset }}/out
+        run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- .\mapnik-test-visual.exe -j 4 --output-dir ./visual-test-result
+      
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
