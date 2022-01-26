@@ -83,9 +83,9 @@ jobs:
         shell: pwsh
         continue-on-error: true
         working-directory: build/${{ env.preset }}/out
-        run: | 
-          $enc:PROJ_LIB="${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj"
-          OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
+        env:
+          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj4
+        run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
 
       - name: Pack visual test results
         working-directory: build/${{ env.preset }}/out
