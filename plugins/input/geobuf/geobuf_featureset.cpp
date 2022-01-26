@@ -30,12 +30,13 @@
 
 #include "geobuf_featureset.hpp"
 
-geobuf_featureset::geobuf_featureset(std::vector<mapnik::feature_ptr> const& features,array_type && index_array)
-    : features_(features),
-      index_array_(std::move(index_array)),
-      index_itr_(index_array_.begin()),
-      index_end_(index_array_.end()),
-      ctx_(std::make_shared<mapnik::context_type>()) {}
+geobuf_featureset::geobuf_featureset(std::vector<mapnik::feature_ptr> const& features, array_type&& index_array)
+    : features_(features)
+    , index_array_(std::move(index_array))
+    , index_itr_(index_array_.begin())
+    , index_end_(index_array_.end())
+    , ctx_(std::make_shared<mapnik::context_type>())
+{}
 
 geobuf_featureset::~geobuf_featureset() {}
 
@@ -49,7 +50,7 @@ mapnik::feature_ptr geobuf_featureset::next()
 #else
         std::size_t index = *index_itr_++;
 #endif
-        if ( index < features_.size())
+        if (index < features_.size())
         {
             return features_.at(index);
         }

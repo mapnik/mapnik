@@ -38,21 +38,16 @@ namespace mapnik {
 namespace detail {
 
 namespace {
-template <typename T, typename U>
-struct both_arithmetic : std::integral_constant<bool,
-                                                std::is_arithmetic<T>::value &&
-                                                std::is_arithmetic<U>::value> {};
+template<typename T, typename U>
+struct both_arithmetic : std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>
+{};
 
 struct equals
 {
-    static bool apply(value_null, value_unicode_string const& rhs)
-    {
-        return false;
-    }
+    static bool apply(value_null, value_unicode_string const& rhs) { return false; }
 
-    template <typename T>
-    static auto apply(T const& lhs, T const& rhs)
-        -> decltype(lhs == rhs)
+    template<typename T>
+    static auto apply(T const& lhs, T const& rhs) -> decltype(lhs == rhs)
     {
         return lhs == rhs;
     }
@@ -65,13 +60,13 @@ struct not_equal
     // TODO - consider removing entire specialization at Mapnik 3.1.x
     static bool apply(value_null, value_unicode_string const& rhs)
     {
-        if (rhs.isEmpty()) return false;
+        if (rhs.isEmpty())
+            return false;
         return true;
     }
 
-    template <typename T>
-    static auto apply(T const& lhs, T const& rhs)
-        -> decltype(lhs != rhs)
+    template<typename T>
+    static auto apply(T const& lhs, T const& rhs) -> decltype(lhs != rhs)
     {
         return lhs != rhs;
     }
@@ -79,14 +74,10 @@ struct not_equal
 
 struct greater_than
 {
-    static bool apply(value_null, value_unicode_string const& rhs)
-    {
-        return false;
-    }
+    static bool apply(value_null, value_unicode_string const& rhs) { return false; }
 
-    template <typename T>
-    static auto apply(T const& lhs, T const& rhs)
-        -> decltype(lhs > rhs)
+    template<typename T>
+    static auto apply(T const& lhs, T const& rhs) -> decltype(lhs > rhs)
     {
         return lhs > rhs;
     }
@@ -94,14 +85,10 @@ struct greater_than
 
 struct greater_or_equal
 {
-    static bool apply(value_null, value_unicode_string const& rhs)
-    {
-        return false;
-    }
+    static bool apply(value_null, value_unicode_string const& rhs) { return false; }
 
-    template <typename T>
-    static auto apply(T const& lhs, T const& rhs)
-        -> decltype(lhs >= rhs)
+    template<typename T>
+    static auto apply(T const& lhs, T const& rhs) -> decltype(lhs >= rhs)
     {
         return lhs >= rhs;
     }
@@ -109,14 +96,10 @@ struct greater_or_equal
 
 struct less_than
 {
-    static bool apply(value_null, value_unicode_string const& rhs)
-    {
-        return false;
-    }
+    static bool apply(value_null, value_unicode_string const& rhs) { return false; }
 
-    template <typename T>
-    static auto apply(T const& lhs, T const& rhs)
-        -> decltype(lhs < rhs)
+    template<typename T>
+    static auto apply(T const& lhs, T const& rhs) -> decltype(lhs < rhs)
     {
         return lhs < rhs;
     }
@@ -124,26 +107,21 @@ struct less_than
 
 struct less_or_equal
 {
-    static bool apply(value_null, value_unicode_string const& rhs)
-    {
-        return false;
-    }
+    static bool apply(value_null, value_unicode_string const& rhs) { return false; }
 
-    template <typename T>
-    static auto apply(T const& lhs, T const& rhs)
-        -> decltype(lhs <= rhs)
+    template<typename T>
+    static auto apply(T const& lhs, T const& rhs) -> decltype(lhs <= rhs)
     {
         return lhs <= rhs;
     }
 };
-}
+} // namespace
 
-template <typename Op, bool default_result>
+template<typename Op, bool default_result>
 struct comparison
 {
     // special case for unicode_strings (fixes MSVC C4800)
-    bool operator()(value_unicode_string const& lhs,
-                    value_unicode_string const& rhs) const
+    bool operator()(value_unicode_string const& lhs, value_unicode_string const& rhs) const
     {
         return Op::apply(lhs, rhs) ? true : false;
     }
@@ -152,21 +130,18 @@ struct comparison
     // special case for unicode_string and value_null
     //////////////////////////////////////////////////////////////////////////
 
-    bool operator()(value_null const& lhs, value_unicode_string const& rhs) const
-    {
-        return Op::apply(lhs, rhs);
-    }
+    bool operator()(value_null const& lhs, value_unicode_string const& rhs) const { return Op::apply(lhs, rhs); }
     //////////////////////////////////////////////////////////////////////////
 
     // same types
-    template <typename T>
+    template<typename T>
     bool operator()(T lhs, T rhs) const
     {
         return Op::apply(lhs, rhs);
     }
 
     // both types are arithmetic - promote to the common type
-    template <typename T, typename U, typename std::enable_if<both_arithmetic<T, U>::value, int>::type = 0>
+    template<typename T, typename U, typename std::enable_if<both_arithmetic<T, U>::value, int>::type = 0>
     bool operator()(T const& lhs, U const& rhs) const
     {
         using common_type = typename std::common_type<T, U>::type;
@@ -174,52 +149,38 @@ struct comparison
     }
 
     //
-    template <typename T, typename U, typename std::enable_if<!both_arithmetic<T, U>::value, int>::type = 0>
+    template<typename T, typename U, typename std::enable_if<!both_arithmetic<T, U>::value, int>::type = 0>
     bool operator()(T const& lhs, U const& rhs) const
     {
         return default_result;
     }
 };
 
-template <typename V>
+template<typename V>
 struct add
 {
     using value_type = V;
-    value_type operator()(value_unicode_string const& lhs,
-                          value_unicode_string const& rhs) const
-    {
-        return lhs + rhs;
-    }
+    value_type operator()(value_unicode_string const& lhs, value_unicode_string const& rhs) const { return lhs + rhs; }
 
-    value_type operator()(value_null const& lhs,
-                          value_null const& rhs) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_null const& lhs, value_null const& rhs) const { return lhs; }
 
-    value_type operator()(value_unicode_string const& lhs, value_null) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_unicode_string const& lhs, value_null) const { return lhs; }
 
-    value_type operator()(value_null, value_unicode_string const& rhs) const
-    {
-        return rhs;
-    }
+    value_type operator()(value_null, value_unicode_string const& rhs) const { return rhs; }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const& lhs, value_null const&) const
     {
         return lhs;
     }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_null const&, R const& rhs) const
     {
         return rhs;
     }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const& lhs, value_unicode_string const& rhs) const
     {
         std::string val;
@@ -228,7 +189,7 @@ struct add
         return rhs;
     }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_unicode_string const& lhs, R const& rhs) const
     {
         std::string val;
@@ -237,256 +198,200 @@ struct add
         return lhs;
     }
 
-    template <typename T1, typename T2>
+    template<typename T1, typename T2>
     value_type operator()(T1 const& lhs, T2 const& rhs) const
     {
         return typename std::common_type<T1, T2>::type{lhs + rhs};
     }
 
-    value_type operator()(value_bool lhs, value_bool rhs) const
-    {
-        return value_integer(lhs + rhs);
-    }
+    value_type operator()(value_bool lhs, value_bool rhs) const { return value_integer(lhs + rhs); }
 };
 
-template <typename V>
+template<typename V>
 struct sub
 {
     using value_type = V;
 
-    value_type operator()(value_null const& lhs,
-                          value_null const& rhs) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_null const& lhs, value_null const& rhs) const { return lhs; }
 
-    value_type operator()(value_null, value_unicode_string const& rhs) const
-    {
-        return rhs;
-    }
-    value_type operator()(value_unicode_string const& lhs, value_null) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_null, value_unicode_string const& rhs) const { return rhs; }
+    value_type operator()(value_unicode_string const& lhs, value_null) const { return lhs; }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_unicode_string const& lhs, R const&) const
     {
         return lhs;
     }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const&, value_unicode_string const& rhs) const
     {
         return rhs;
     }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const& lhs, value_null const&) const
     {
         return lhs;
     }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_null const&, R const& rhs) const
     {
         return rhs;
     }
 
-    template <typename T>
+    template<typename T>
     value_type operator()(T lhs, T rhs) const
     {
         return lhs - rhs;
     }
 
-    value_type operator()(value_unicode_string const&,
-                          value_unicode_string const&) const
-    {
-        return value_type();
-    }
+    value_type operator()(value_unicode_string const&, value_unicode_string const&) const { return value_type(); }
 
-    template <typename T1, typename T2>
+    template<typename T1, typename T2>
     value_type operator()(T1 const& lhs, T2 const& rhs) const
     {
         return typename std::common_type<T1, T2>::type{lhs - rhs};
     }
 
-    value_type operator()(value_bool lhs, value_bool rhs) const
-    {
-        return value_integer(lhs - rhs);
-    }
+    value_type operator()(value_bool lhs, value_bool rhs) const { return value_integer(lhs - rhs); }
 };
 
-template <typename V>
+template<typename V>
 struct mult
 {
     using value_type = V;
 
-    value_type operator()(value_null const& lhs,
-                          value_null const& rhs) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_null const& lhs, value_null const& rhs) const { return lhs; }
 
-    value_type operator()(value_unicode_string const& lhs, value_null) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_unicode_string const& lhs, value_null) const { return lhs; }
 
-    value_type operator()(value_null, value_unicode_string const& rhs) const
-    {
-        return rhs;
-    }
+    value_type operator()(value_null, value_unicode_string const& rhs) const { return rhs; }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const& lhs, value_null const&) const
     {
         return lhs;
     }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_null const&, R const& rhs) const
     {
         return rhs;
     }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_unicode_string const& lhs, R const&) const
     {
         return lhs;
     }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const&, value_unicode_string const& rhs) const
     {
         return rhs;
     }
 
-    template <typename T>
+    template<typename T>
     value_type operator()(T lhs, T rhs) const
     {
         return lhs * rhs;
     }
 
-    value_type operator()(value_unicode_string const&,
-                          value_unicode_string const&) const
-    {
-        return value_type();
-    }
+    value_type operator()(value_unicode_string const&, value_unicode_string const&) const { return value_type(); }
 
-    template <typename T1, typename T2>
+    template<typename T1, typename T2>
     value_type operator()(T1 const& lhs, T2 const& rhs) const
     {
         return typename std::common_type<T1, T2>::type{lhs * rhs};
     }
 
-    value_type operator()(value_bool lhs, value_bool rhs) const
-    {
-        return value_integer(lhs * rhs);
-    }
+    value_type operator()(value_bool lhs, value_bool rhs) const { return value_integer(lhs * rhs); }
 };
 
-template <typename V>
+template<typename V>
 struct div
 {
     using value_type = V;
 
-    value_type operator()(value_null const& lhs,
-                          value_null const& rhs) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_null const& lhs, value_null const& rhs) const { return lhs; }
 
-    value_type operator()(value_unicode_string const& lhs, value_null) const
-    {
-        return lhs;
-    }
+    value_type operator()(value_unicode_string const& lhs, value_null) const { return lhs; }
 
-    value_type operator()(value_null, value_unicode_string const& rhs) const
-    {
-        return rhs;
-    }
+    value_type operator()(value_null, value_unicode_string const& rhs) const { return rhs; }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const& lhs, value_null const&) const
     {
         return lhs;
     }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_null const&, R const& rhs) const
     {
         return rhs;
     }
 
-    template <typename T>
+    template<typename T>
     value_type operator()(T lhs, T rhs) const
     {
-        if (rhs == 0) return value_type();
+        if (rhs == 0)
+            return value_type();
         return lhs / rhs;
     }
 
     value_type operator()(value_bool lhs, value_bool rhs) const
     {
-        if (rhs == 0) return lhs;
+        if (rhs == 0)
+            return lhs;
         return value_integer(lhs) / value_integer(rhs);
     }
 
-    value_type operator()(value_unicode_string const&,
-                          value_unicode_string const&) const
-    {
-        return value_type();
-    }
+    value_type operator()(value_unicode_string const&, value_unicode_string const&) const { return value_type(); }
 
-    template <typename R>
+    template<typename R>
     value_type operator()(value_unicode_string const& lhs, R const&) const
     {
         return lhs;
     }
 
-    template <typename L>
+    template<typename L>
     value_type operator()(L const&, value_unicode_string const& rhs) const
     {
         return rhs;
     }
 
-    template <typename T1, typename T2>
+    template<typename T1, typename T2>
     value_type operator()(T1 const& lhs, T2 const& rhs) const
     {
-        if (rhs == 0) return value_type();
+        if (rhs == 0)
+            return value_type();
         using common_type = typename std::common_type<T1, T2>::type;
         return common_type(lhs) / common_type(rhs);
     }
 };
 
-template <typename V>
+template<typename V>
 struct mod
 {
     using value_type = V;
 
-    template <typename T1, typename T2>
+    template<typename T1, typename T2>
     value_type operator()(T1 const& lhs, T2 const&) const
     {
         return lhs;
     }
 
-    template <typename T>
+    template<typename T>
     value_type operator()(T lhs, T rhs) const
     {
         return lhs % rhs;
     }
 
-    value_type operator()(value_unicode_string const&,
-                          value_unicode_string const&) const
-    {
-        return value_type();
-    }
+    value_type operator()(value_unicode_string const&, value_unicode_string const&) const { return value_type(); }
 
-    value_type operator()(value_bool,
-                          value_bool) const
-    {
-        return false;
-    }
+    value_type operator()(value_bool, value_bool) const { return false; }
 
     value_type operator()(value_double lhs, value_integer rhs) const
     {
@@ -498,87 +403,56 @@ struct mod
         return std::fmod(static_cast<value_double>(lhs), rhs);
     }
 
-    value_type operator()(value_double lhs, value_double rhs) const
-    {
-        return std::fmod(lhs, rhs);
-    }
+    value_type operator()(value_double lhs, value_double rhs) const { return std::fmod(lhs, rhs); }
 };
 
-template <typename V>
+template<typename V>
 struct negate
 {
     using value_type = V;
 
-    template <typename T>
+    template<typename T>
     value_type operator()(T val) const
     {
         return -val;
     }
 
-    value_type operator()(value_null val) const
-    {
-        return val;
-    }
+    value_type operator()(value_null val) const { return val; }
 
-    value_type operator()(value_bool val) const
-    {
-        return val ? value_integer(-1) : value_integer(0);
-    }
+    value_type operator()(value_bool val) const { return val ? value_integer(-1) : value_integer(0); }
 
-    value_type operator()(value_unicode_string const&) const
-    {
-        return value_type();
-    }
+    value_type operator()(value_unicode_string const&) const { return value_type(); }
 };
 
 // converters
-template <typename T>
+template<typename T>
 struct convert
-{
-};
+{};
 
-template <>
+template<>
 struct convert<value_bool>
 {
-    value_bool operator()(value_bool val) const
-    {
-        return val;
-    }
+    value_bool operator()(value_bool val) const { return val; }
 
-    value_bool operator()(value_unicode_string const& ustr) const
-    {
-        return !ustr.isEmpty();
-    }
+    value_bool operator()(value_unicode_string const& ustr) const { return !ustr.isEmpty(); }
 
-    value_bool operator()(value_null const&) const
-    {
-        return false;
-    }
+    value_bool operator()(value_null const&) const { return false; }
 
-    template <typename T>
+    template<typename T>
     value_bool operator()(T val) const
     {
         return val > 0 ? true : false;
     }
 };
 
-template <>
+template<>
 struct convert<value_double>
 {
-    value_double operator()(value_double val) const
-    {
-        return val;
-    }
+    value_double operator()(value_double val) const { return val; }
 
-    value_double operator()(value_integer val) const
-    {
-        return static_cast<value_double>(val);
-    }
+    value_double operator()(value_integer val) const { return static_cast<value_double>(val); }
 
-    value_double operator()(value_bool val) const
-    {
-        return static_cast<value_double>(val);
-    }
+    value_double operator()(value_bool val) const { return static_cast<value_double>(val); }
 
     value_double operator()(std::string const& val) const
     {
@@ -595,29 +469,17 @@ struct convert<value_double>
         return operator()(utf8);
     }
 
-    value_double operator()(value_null const&) const
-    {
-        return 0.0;
-    }
+    value_double operator()(value_null const&) const { return 0.0; }
 };
 
-template <>
+template<>
 struct convert<value_integer>
 {
-    value_integer operator()(value_integer val) const
-    {
-        return val;
-    }
+    value_integer operator()(value_integer val) const { return val; }
 
-    value_integer operator()(value_double val) const
-    {
-        return static_cast<value_integer>(std::floor(val) + .5);
-    }
+    value_integer operator()(value_double val) const { return static_cast<value_integer>(std::floor(val) + .5); }
 
-    value_integer operator()(value_bool val) const
-    {
-        return static_cast<value_integer>(val);
-    }
+    value_integer operator()(value_bool val) const { return static_cast<value_integer>(val); }
 
     value_integer operator()(std::string const& val) const
     {
@@ -634,16 +496,13 @@ struct convert<value_integer>
         return operator()(utf8);
     }
 
-    value_integer operator()(value_null const&) const
-    {
-        return value_integer(0);
-    }
+    value_integer operator()(value_null const&) const { return value_integer(0); }
 };
 
-template <>
+template<>
 struct convert<std::string>
 {
-    template <typename T>
+    template<typename T>
     std::string operator()(T val) const
     {
         std::string str;
@@ -666,21 +525,14 @@ struct convert<std::string>
         return str;
     }
 
-    std::string operator()(value_bool val) const
-    {
-        return val ? "true" : "false";
-    }
+    std::string operator()(value_bool val) const { return val ? "true" : "false"; }
 
-    std::string operator()(value_null const&) const
-    {
-        return std::string("");
-    }
+    std::string operator()(value_null const&) const { return std::string(""); }
 };
 
 struct to_unicode_impl
 {
-
-    template <typename T>
+    template<typename T>
     value_unicode_string operator()(T val) const
     {
         std::string str;
@@ -689,10 +541,7 @@ struct to_unicode_impl
     }
 
     // specializations
-    value_unicode_string const& operator()(value_unicode_string const& val) const
-    {
-        return val;
-    }
+    value_unicode_string const& operator()(value_unicode_string const& val) const { return val; }
 
     value_unicode_string operator()(value_double val) const
     {
@@ -701,15 +550,9 @@ struct to_unicode_impl
         return value_unicode_string(str.c_str());
     }
 
-    value_unicode_string operator()(value_bool val) const
-    {
-        return value_unicode_string(val ? "true" : "false");
-    }
+    value_unicode_string operator()(value_bool val) const { return value_unicode_string(val ? "true" : "false"); }
 
-    value_unicode_string operator()(value_null const&) const
-    {
-        return value_unicode_string("");
-    }
+    value_unicode_string operator()(value_null const&) const { return value_unicode_string(""); }
 };
 
 struct to_expression_string_impl
@@ -721,8 +564,7 @@ struct to_expression_string_impl
 
         explicit EscapingByteSink(char quote)
             : quote_(quote)
-        {
-        }
+        {}
 
         virtual void Append(const char* data, int32_t n)
         {
@@ -757,7 +599,8 @@ struct to_expression_string_impl
     };
 
     explicit to_expression_string_impl(char quote = '\'')
-        : quote_(quote) {}
+        : quote_(quote)
+    {}
 
     std::string operator()(value_unicode_string const& val) const
     {
@@ -787,20 +630,14 @@ struct to_expression_string_impl
         return output;
     }
 
-    std::string operator()(value_bool val) const
-    {
-        return val ? "true" : "false";
-    }
+    std::string operator()(value_bool val) const { return val ? "true" : "false"; }
 
-    std::string operator()(value_null const&) const
-    {
-        return "null";
-    }
+    std::string operator()(value_null const&) const { return "null"; }
 
     const char quote_;
 };
 
-} // ns detail
+} // namespace detail
 
 namespace value_adl_barrier {
 
@@ -874,25 +711,25 @@ bool value::is_null() const
     return util::apply_visitor(mapnik::detail::is_null_visitor(), *this);
 }
 
-template <>
+template<>
 value_double value::convert() const
 {
     return util::apply_visitor(detail::convert<value_double>(), *this);
 }
 
-template <>
+template<>
 value_integer value::convert() const
 {
     return util::apply_visitor(detail::convert<value_integer>(), *this);
 }
 
-template <>
+template<>
 value_bool value::convert() const
 {
     return util::apply_visitor(detail::convert<value_bool>(), *this);
 }
 
-template <>
+template<>
 std::string value::convert() const
 {
     return util::apply_visitor(detail::convert<std::string>(), *this);

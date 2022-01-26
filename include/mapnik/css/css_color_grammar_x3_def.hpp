@@ -37,13 +37,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/fusion/adapted/std_tuple.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-BOOST_FUSION_ADAPT_STRUCT (
-    mapnik::color,
-    (std::uint8_t, red_)
-    (std::uint8_t, green_)
-    (std::uint8_t, blue_)
-    (std::uint8_t, alpha_)
-    )
+BOOST_FUSION_ADAPT_STRUCT(mapnik::color,
+                          (std::uint8_t, red_)(std::uint8_t, green_)(std::uint8_t, blue_)(std::uint8_t, alpha_))
 
 namespace mapnik {
 
@@ -51,20 +46,21 @@ namespace x3 = boost::spirit::x3;
 
 namespace css_color_grammar {
 
-using x3::lit;
-using x3::uint_parser;
-using x3::hex;
-using x3::symbols;
-using x3::omit;
 using x3::attr;
 using x3::double_;
+using x3::hex;
+using x3::lit;
 using x3::no_case;
 using x3::no_skip;
+using x3::omit;
+using x3::symbols;
+using x3::uint_parser;
 
 struct named_colors_ : x3::symbols<color>
 {
     named_colors_()
     {
+        // clang-format off
         add
             ("aliceblue", color(240, 248, 255))
             ("antiquewhite", color(250, 235, 215))
@@ -216,6 +212,7 @@ struct named_colors_ : x3::symbols<color>
             ("yellowgreen", color(154, 205, 50))
             ("transparent", color(0, 0, 0, 0))
             ;
+        // clang-format on
     }
 } named_colors;
 
@@ -226,7 +223,7 @@ x3::uint_parser<std::uint16_t, 10, 1, 3> dec3;
 // rules
 x3::rule<class hex2_color, color> const hex2_color("hex2_color");
 x3::rule<class hex1_color, color> const hex1_color("hex1_color");
-x3::rule<class rgb_color,  color> const rgb_color("rgb_color");
+x3::rule<class rgb_color, color> const rgb_color("rgb_color");
 x3::rule<class rgba_color, color> const rgba_color("rgba_color");
 x3::rule<class rgb_color_percent, color> const rgb_color_percent("rgb_color_percent");
 x3::rule<class rgba_color_percent, color> const rgba_color_percent("rgba_color_percent");
@@ -235,97 +232,80 @@ struct clip_opacity
 {
     static double call(double val)
     {
-        if (val > 1.0) return 1.0;
-        if (val < 0.0) return 0.0;
+        if (val > 1.0)
+            return 1.0;
+        if (val < 0.0)
+            return 0.0;
         return val;
     }
 };
 
 struct percent_converter
 {
-    static std::uint8_t call(double val)
-    {
-        return safe_cast<std::uint8_t>(std::lround((255.0 * val)/100.0));
-    }
+    static std::uint8_t call(double val) { return safe_cast<std::uint8_t>(std::lround((255.0 * val) / 100.0)); }
 };
 
-auto dec_red = [](auto& ctx)
-{
+auto dec_red = [](auto& ctx) {
     _val(ctx).red_ = _attr(ctx);
 };
 
-auto dec_green = [](auto& ctx)
-{
+auto dec_green = [](auto& ctx) {
     _val(ctx).green_ = _attr(ctx);
 };
 
-auto dec_blue = [](auto& ctx)
-{
+auto dec_blue = [](auto& ctx) {
     _val(ctx).blue_ = _attr(ctx);
 };
 
-auto opacity = [](auto& ctx)
-{
+auto opacity = [](auto& ctx) {
     _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
 };
 
-auto percent_red = [] (auto & ctx)
-{
+auto percent_red = [](auto& ctx) {
     _val(ctx).red_ = percent_converter::call(_attr(ctx));
 };
 
-auto percent_green = [] (auto & ctx)
-{
+auto percent_green = [](auto& ctx) {
     _val(ctx).green_ = percent_converter::call(_attr(ctx));
 };
 
-auto percent_blue = [] (auto & ctx)
-{
+auto percent_blue = [](auto& ctx) {
     _val(ctx).blue_ = percent_converter::call(_attr(ctx));
 };
 
-auto hex1_red = [](auto& ctx)
-{
+auto hex1_red = [](auto& ctx) {
     _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-auto hex1_green = [](auto& ctx)
-{
+auto hex1_green = [](auto& ctx) {
     _val(ctx).green_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-auto hex1_blue = [](auto& ctx)
-{
+auto hex1_blue = [](auto& ctx) {
     _val(ctx).blue_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-auto hex1_opacity = [](auto& ctx)
-{
+auto hex1_opacity = [](auto& ctx) {
     _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-auto hex2_red = [](auto& ctx)
-{
+auto hex2_red = [](auto& ctx) {
     _val(ctx).red_ = _attr(ctx);
 };
 
-auto hex2_green = [](auto& ctx)
-{
+auto hex2_green = [](auto& ctx) {
     _val(ctx).green_ = _attr(ctx);
 };
 
-auto hex2_blue = [](auto& ctx)
-{
+auto hex2_blue = [](auto& ctx) {
     _val(ctx).blue_ = _attr(ctx);
 };
 
-auto hex2_opacity = [](auto& ctx)
-{
+auto hex2_opacity = [](auto& ctx) {
     _val(ctx).alpha_ = _attr(ctx);
 };
 
-auto hsl_to_rgba = [] (auto& ctx)
-{
+auto hsl_to_rgba = [](auto& ctx) {
     double h = std::get<0>(_attr(ctx));
     double s = std::get<1>(_attr(ctx));
     double l = std::get<2>(_attr(ctx));
@@ -341,20 +321,20 @@ auto hsl_to_rgba = [] (auto& ctx)
     }
     else
     {
-        m2 = l + s - l*s;
+        m2 = l + s - l * s;
     }
     m1 = l * 2 - m2;
 
-    double r = hue_to_rgb(m1, m2, h + 1.0/3.0);
+    double r = hue_to_rgb(m1, m2, h + 1.0 / 3.0);
     double g = hue_to_rgb(m1, m2, h);
-    double b = hue_to_rgb(m1, m2, h - 1.0/3.0);
+    double b = hue_to_rgb(m1, m2, h - 1.0 / 3.0);
     uint8_t alpha = uint8_t((255.0 * clip_opacity::call(std::get<3>(_attr(ctx)))) + 0.5);
     _val(ctx) = color(safe_cast<uint8_t>(std::lround(255.0 * r)),
                       safe_cast<uint8_t>(std::lround(255.0 * g)),
                       safe_cast<uint8_t>(std::lround(255.0 * b)),
                       alpha);
 };
-
+// clang-format off
 auto const hex2_color_def = no_skip[lit('#')
                                     >> hex2[hex2_red]
                                     >> hex2[hex2_green]
@@ -429,21 +409,13 @@ auto const css_color_def =
     |
     hsla_color
     ;
-
+// clang-format on
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-BOOST_SPIRIT_DEFINE(
-    css_color,
-    hex2_color,
-    hex1_color,
-    rgb_color,
-    rgba_color,
-    rgb_color_percent,
-    rgba_color_percent
-    );
+BOOST_SPIRIT_DEFINE(css_color, hex2_color, hex1_color, rgb_color, rgba_color, rgb_color_percent, rgba_color_percent);
 MAPNIK_DISABLE_WARNING_POP
 
-} // ns
-} //ns mapnik
+} // namespace css_color_grammar
+} // namespace mapnik
 
-#endif //MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP
+#endif // MAPNIK_CSS_COLOR_GRAMMAR_X3_DEF_HPP

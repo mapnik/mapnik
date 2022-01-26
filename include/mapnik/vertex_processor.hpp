@@ -25,49 +25,51 @@
 
 #include <mapnik/vertex_adapters.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 struct vertex_processor
 {
     using processor_type = T;
     vertex_processor(processor_type& proc)
-        : proc_(proc) {}
+        : proc_(proc)
+    {}
 
-    template <typename Geometry>
-    void operator() (Geometry const& geom) const
+    template<typename Geometry>
+    void operator()(Geometry const& geom) const
     {
         util::apply_visitor(*this, geom);
     }
 
-    void operator() (geometry_empty const&) const
+    void operator()(geometry_empty const&) const
     {
         // no-op
     }
 
-    template <typename T1>
-    void operator() (point<T1> const& pt) const
+    template<typename T1>
+    void operator()(point<T1> const& pt) const
     {
         point_vertex_adapter<T1> va(pt);
         proc_(va);
     }
 
-    template <typename T1>
-    void operator() (line_string<T1> const& line) const
+    template<typename T1>
+    void operator()(line_string<T1> const& line) const
     {
         line_string_vertex_adapter<T1> va(line);
         proc_(va);
     }
 
-    template <typename T1>
-    void operator() (polygon<T1> const& poly) const
+    template<typename T1>
+    void operator()(polygon<T1> const& poly) const
     {
         polygon_vertex_adapter<T1> va(poly);
         proc_(va);
     }
 
-    template <typename T1>
-    void operator() (multi_point<T1> const& multi_pt) const
+    template<typename T1>
+    void operator()(multi_point<T1> const& multi_pt) const
     {
         for (auto const& pt : multi_pt)
         {
@@ -76,8 +78,8 @@ struct vertex_processor
         }
     }
 
-    template <typename T1>
-    void operator() (multi_line_string<T1> const& multi_line) const
+    template<typename T1>
+    void operator()(multi_line_string<T1> const& multi_line) const
     {
         for (auto const& line : multi_line)
         {
@@ -86,27 +88,28 @@ struct vertex_processor
         }
     }
 
-    template <typename T1>
-    void operator() (multi_polygon<T1> const& multi_poly) const
+    template<typename T1>
+    void operator()(multi_polygon<T1> const& multi_poly) const
     {
-        for ( auto const& poly : multi_poly)
+        for (auto const& poly : multi_poly)
         {
             polygon_vertex_adapter<T1> va(poly);
             proc_(va);
         }
     }
 
-    template <typename T1>
-    void operator() (geometry_collection<T1> const& collection) const
+    template<typename T1>
+    void operator()(geometry_collection<T1> const& collection) const
     {
         for (auto const& geom : collection)
         {
             operator()(geom);
         }
     }
-    processor_type & proc_;
+    processor_type& proc_;
 };
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_VERTEX_PROCESSOR_HPP

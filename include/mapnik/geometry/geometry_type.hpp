@@ -27,66 +27,68 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/geometry_types.hpp>
 
-namespace mapnik { namespace geometry { namespace detail {
+namespace mapnik {
+namespace geometry {
+namespace detail {
 
-template <typename T>
+template<typename T>
 struct geometry_type
 {
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry<T> const& geom) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::geometry<T> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    mapnik::geometry::geometry_types operator() (geometry_empty const& ) const
+    mapnik::geometry::geometry_types operator()(geometry_empty const&) const
     {
         return mapnik::geometry::geometry_types::Unknown;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::point<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::point<T> const&) const
     {
         return mapnik::geometry::geometry_types::Point;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::line_string<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::line_string<T> const&) const
     {
         return mapnik::geometry::geometry_types::LineString;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::polygon<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::polygon<T> const&) const
     {
         return mapnik::geometry::geometry_types::Polygon;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_point<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::multi_point<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPoint;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_line_string<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::multi_line_string<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiLineString;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::multi_polygon<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::multi_polygon<T> const&) const
     {
         return mapnik::geometry::geometry_types::MultiPolygon;
     }
 
-    mapnik::geometry::geometry_types operator () (mapnik::geometry::geometry_collection<T> const&) const
+    mapnik::geometry::geometry_types operator()(mapnik::geometry::geometry_collection<T> const&) const
     {
         return mapnik::geometry::geometry_types::GeometryCollection;
     }
 };
-} // detail
+} // namespace detail
 
-template <typename T>
+template<typename T>
 static inline mapnik::geometry::geometry_types geometry_type(T const& geom)
 {
     using coordinate_type = typename T::coordinate_type;
     return detail::geometry_type<coordinate_type>()(geom);
 }
 
-}}
-
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_TYPE_HPP

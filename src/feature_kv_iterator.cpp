@@ -31,11 +31,10 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-
-feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
-    : f_(f),
-      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
-
+feature_kv_iterator::feature_kv_iterator(feature_impl const& f, bool begin)
+    : f_(f)
+    , itr_(begin ? f_.ctx_->begin() : f_.ctx_->end())
+{}
 
 void feature_kv_iterator::increment()
 {
@@ -47,14 +46,14 @@ void feature_kv_iterator::decrement()
     // dummy //--itr_;
 }
 
-void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator>::type )
+void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator>::type)
 {
     // dummy
 }
 
-bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
+bool feature_kv_iterator::equal(feature_kv_iterator const& other) const
 {
-    return ( itr_ == other.itr_ );
+    return (itr_ == other.itr_);
 }
 
 feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
@@ -64,4 +63,4 @@ feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
     return kv_;
 }
 
-} // endof mapnik namespace
+} // namespace mapnik

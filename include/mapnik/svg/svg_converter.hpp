@@ -48,17 +48,18 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 namespace svg {
 
-template <typename VertexSource, typename AttributeSource>
+template<typename VertexSource, typename AttributeSource>
 class svg_converter : util::noncopyable
 {
-public:
+  public:
 
-    svg_converter(VertexSource & source, AttributeSource & attributes)
-        : source_(source),
-          attributes_(attributes),
-          attr_stack_(),
-          svg_width_(0.0),
-          svg_height_(0.0) {}
+    svg_converter(VertexSource& source, AttributeSource& attributes)
+        : source_(source)
+        , attributes_(attributes)
+        , attr_stack_()
+        , svg_width_(0.0)
+        , svg_height_(0.0)
+    {}
 
     void begin_path()
     {
@@ -78,107 +79,124 @@ public:
         attr.index = idx;
     }
 
-    void move_to(double x, double y, bool rel=false)  // M, m
+    void move_to(double x, double y, bool rel = false) // M, m
     {
-        if(rel) source_.rel_to_abs(&x, &y);
+        if (rel)
+            source_.rel_to_abs(&x, &y);
         source_.move_to(x, y);
     }
 
-    void line_to(double x,  double y, bool rel=false)  // L, l
+    void line_to(double x, double y, bool rel = false) // L, l
     {
-        if(rel) source_.rel_to_abs(&x, &y);
+        if (rel)
+            source_.rel_to_abs(&x, &y);
         source_.line_to(x, y);
     }
 
-    void hline_to(double x, bool rel=false)           // H, h
+    void hline_to(double x, bool rel = false) // H, h
     {
         double x2 = 0.0;
         double y2 = 0.0;
-        if(source_.total_vertices())
+        if (source_.total_vertices())
         {
             source_.vertex(safe_cast<unsigned>(source_.total_vertices() - 1), &x2, &y2);
-            if(rel) x += x2;
+            if (rel)
+                x += x2;
             source_.line_to(x, y2);
         }
     }
 
-    void vline_to(double y, bool rel=false)           // V, v
+    void vline_to(double y, bool rel = false) // V, v
     {
         double x2 = 0.0;
         double y2 = 0.0;
-        if(source_.total_vertices())
+        if (source_.total_vertices())
         {
             source_.vertex(safe_cast<unsigned>(source_.total_vertices() - 1), &x2, &y2);
-            if(rel) y += y2;
+            if (rel)
+                y += y2;
             source_.line_to(x2, y);
         }
     }
-    void curve3(double x1, double y1,                   // Q, q
-                double x,  double y, bool rel=false)
+    void curve3(double x1,
+                double y1, // Q, q
+                double x,
+                double y,
+                bool rel = false)
     {
-        if(rel)
+        if (rel)
         {
             source_.rel_to_abs(&x1, &y1);
-            source_.rel_to_abs(&x,  &y);
+            source_.rel_to_abs(&x, &y);
         }
         source_.curve3(x1, y1, x, y);
     }
 
-    void curve3(double x, double y, bool rel=false)   // T, t
+    void curve3(double x, double y, bool rel = false) // T, t
     {
-        if(rel)
+        if (rel)
         {
             source_.curve3_rel(x, y);
-        } else
+        }
+        else
         {
             source_.curve3(x, y);
         }
     }
 
-    void curve4(double x1, double y1,                   // C, c
-                double x2, double y2,
-                double x,  double y, bool rel=false)
+    void curve4(double x1,
+                double y1, // C, c
+                double x2,
+                double y2,
+                double x,
+                double y,
+                bool rel = false)
     {
-        if(rel)
+        if (rel)
         {
             source_.rel_to_abs(&x1, &y1);
             source_.rel_to_abs(&x2, &y2);
-            source_.rel_to_abs(&x,  &y);
+            source_.rel_to_abs(&x, &y);
         }
         source_.curve4(x1, y1, x2, y2, x, y);
     }
 
-    void curve4(double x2, double y2,                   // S, s
-                double x,  double y, bool rel=false)
+    void curve4(double x2,
+                double y2, // S, s
+                double x,
+                double y,
+                bool rel = false)
     {
-        if(rel)
+        if (rel)
         {
             source_.curve4_rel(x2, y2, x, y);
-        } else
+        }
+        else
         {
             source_.curve4(x2, y2, x, y);
         }
     }
 
-    void arc_to(double rx, double ry,                   // A, a
+    void arc_to(double rx,
+                double ry, // A, a
                 double angle,
                 bool large_arc_flag,
                 bool sweep_flag,
-                double x, double y,bool rel=false)
+                double x,
+                double y,
+                bool rel = false)
     {
-
-        if(rel)
+        if (rel)
         {
             source_.arc_rel(rx, ry, angle, large_arc_flag, sweep_flag, x, y);
         }
         else
         {
             source_.arc_to(rx, ry, angle, large_arc_flag, sweep_flag, x, y);
-
         }
     }
 
-    void close_subpath()                              // Z, z
+    void close_subpath() // Z, z
     {
         source_.end_poly(agg::path_flags_close);
     }
@@ -231,46 +249,25 @@ public:
         attr.stroke_flag = true;
     }
 
-    void dash_array(dash_array && dash)
+    void dash_array(dash_array&& dash)
     {
         path_attributes& attr = cur_attr();
         attr.dash = std::move(dash);
     }
 
-    void dash_offset(double offset)
-    {
-        cur_attr().dash_offset = offset;
-    }
+    void dash_offset(double offset) { cur_attr().dash_offset = offset; }
 
-    void even_odd(bool flag)
-    {
-        cur_attr().even_odd_flag = flag;
-    }
+    void even_odd(bool flag) { cur_attr().even_odd_flag = flag; }
 
-    void visibility(bool flag)
-    {
-        cur_attr().visibility_flag = flag;
-    }
+    void visibility(bool flag) { cur_attr().visibility_flag = flag; }
 
-    bool visibility()
-    {
-        return cur_attr().visibility_flag;
-    }
+    bool visibility() { return cur_attr().visibility_flag; }
 
-    void display(bool flag)
-    {
-        cur_attr().display_flag = flag;
-    }
+    void display(bool flag) { cur_attr().display_flag = flag; }
 
-    bool display()
-    {
-        return cur_attr().display_flag;
-    }
+    bool display() { return cur_attr().display_flag; }
 
-    void stroke_width(double w)
-    {
-        cur_attr().stroke_width = w;
-    }
+    void stroke_width(double w) { cur_attr().stroke_width = w; }
 
     void fill_none()
     {
@@ -284,43 +281,22 @@ public:
         cur_attr().stroke_flag = false;
     }
 
-    void fill_opacity(double op)
-    {
-        cur_attr().fill_opacity = op;
-    }
+    void fill_opacity(double op) { cur_attr().fill_opacity = op; }
 
-    void stroke_opacity(double op)
-    {
-        cur_attr().stroke_opacity = op;
-    }
+    void stroke_opacity(double op) { cur_attr().stroke_opacity = op; }
 
-    void opacity(double op)
-    {
-        cur_attr().opacity = op;
-    }
+    void opacity(double op) { cur_attr().opacity = op; }
 
-    void line_join(agg::line_join_e join)
-    {
-        cur_attr().line_join = join;
-    }
+    void line_join(agg::line_join_e join) { cur_attr().line_join = join; }
 
-    void line_cap(agg::line_cap_e cap)
-    {
-        cur_attr().line_cap = cap;
-    }
-    void miter_limit(double ml)
-    {
-        cur_attr().miter_limit = ml;
-    }
+    void line_cap(agg::line_cap_e cap) { cur_attr().line_cap = cap; }
+    void miter_limit(double ml) { cur_attr().miter_limit = ml; }
 
     // Make all polygons CCW-oriented
-    void arrange_orientations()
-    {
-        source_.arrange_orientations_all_paths(agg::path_flags_ccw);
-    }
+    void arrange_orientations() { source_.arrange_orientations_all_paths(agg::path_flags_ccw); }
 
     // FIXME!!!!
-    unsigned operator [](unsigned idx)
+    unsigned operator[](unsigned idx)
     {
         transform_ = attributes_[idx].transform;
         return attributes_[idx].index;
@@ -338,25 +314,13 @@ public:
         svg_height_ = h;
     }
 
-    double width() const
-    {
-        return svg_width_;
-    }
+    double width() const { return svg_width_; }
 
-    double height() const
-    {
-        return svg_height_;
-    }
+    double height() const { return svg_height_; }
 
-    VertexSource & storage()
-    {
-        return source_;
-    }
+    VertexSource& storage() { return source_; }
 
-    agg::trans_affine& transform()
-    {
-        return cur_attr().transform;
-    }
+    agg::trans_affine& transform() { return cur_attr().transform; }
 
     path_attributes& cur_attr()
     {
@@ -367,19 +331,19 @@ public:
         return attr_stack_.back();
     }
 
-private:
+  private:
 
-    VertexSource & source_;
-    AttributeSource & attributes_;
-    AttributeSource  attr_stack_;
+    VertexSource& source_;
+    AttributeSource& attributes_;
+    AttributeSource attr_stack_;
     agg::trans_affine transform_;
     double svg_width_;
     double svg_height_;
 };
 
+using svg_converter_type = svg_converter<svg_path_adapter, std::deque<path_attributes>>;
 
-using svg_converter_type = svg_converter<svg_path_adapter, std::deque<path_attributes> >;
-
-}}
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_CONVERTER_HPP

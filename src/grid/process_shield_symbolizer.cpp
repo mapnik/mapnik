@@ -42,29 +42,34 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
-void  grid_renderer<T>::process(shield_symbolizer const& sym,
-                                mapnik::feature_impl & feature,
-                                proj_transform const& prj_trans)
+template<typename T>
+void grid_renderer<T>::process(shield_symbolizer const& sym,
+                               mapnik::feature_impl& feature,
+                               proj_transform const& prj_trans)
 {
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
+    if (transform)
+        evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
-    text_symbolizer_helper helper(
-            sym, feature, common_.vars_, prj_trans,
-            common_.width_, common_.height_,
-            common_.scale_factor_,
-            common_.t_, common_.font_manager_, *common_.detector_,
-            common_.query_extent_, tr);
+    text_symbolizer_helper helper(sym,
+                                  feature,
+                                  common_.vars_,
+                                  prj_trans,
+                                  common_.width_,
+                                  common_.height_,
+                                  common_.scale_factor_,
+                                  common_.t_,
+                                  common_.font_manager_,
+                                  *common_.detector_,
+                                  common_.query_extent_,
+                                  tr);
     bool placement_found = false;
 
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
     double opacity = get<double>(sym, keys::opacity, feature, common_.vars_, 1.0);
 
-    grid_text_renderer<T> ren(pixmap_,
-                              comp_op,
-                              common_.scale_factor_);
+    grid_text_renderer<T> ren(pixmap_, comp_op, common_.scale_factor_);
 
     placements_list const& placements = helper.get();
     value_integer feature_id = feature.id();
@@ -74,11 +79,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
         marker_info_ptr mark = glyphs->get_marker();
         if (mark)
         {
-            render_marker(feature,
-                          glyphs->marker_pos(),
-                          *mark->marker_,
-                          mark->transform_,
-                          opacity, comp_op);
+            render_marker(feature, glyphs->marker_pos(), *mark->marker_, mark->transform_, opacity, comp_op);
         }
         ren.render(*glyphs, feature_id);
         placement_found = true;
@@ -89,10 +90,8 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
     }
 }
 
-template void grid_renderer<grid>::process(shield_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(shield_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif

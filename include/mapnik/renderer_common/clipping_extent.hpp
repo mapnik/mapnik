@@ -23,18 +23,17 @@
 #ifndef MAPNIK_CLIPPING_EXTENT_HPP
 #define MAPNIK_CLIPPING_EXTENT_HPP
 
-
 #include <mapnik/geometry/box2d.hpp>
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 box2d<double> clipping_extent(T const& common)
 {
     if (common.t_.offset() > 0)
     {
         box2d<double> box = common.query_extent_;
-        double scale = static_cast<double>(common.query_extent_.width())/static_cast<double>(common.width_);
+        double scale = static_cast<double>(common.query_extent_.width()) / static_cast<double>(common.width_);
         // 3 is used here because at least 3 was needed for the 'style-level-compositing-tiled-0,1' visual test to pass
         // TODO - add more tests to hone in on a more robust #
         scale *= common.t_.offset() * 3;

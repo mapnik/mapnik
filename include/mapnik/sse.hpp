@@ -28,8 +28,7 @@
 
 #define ROUND_DOWN(x, s) ((x) & ~((s)-1))
 
-typedef union
-{
+typedef union {
     __m128i v;
     int32_t i32[4];
     uint32_t u32[4];
@@ -37,99 +36,81 @@ typedef union
     uint8_t u8[16];
 } m128_int;
 
-static inline __m128i
-_mm_cmple_epu16 (__m128i x, __m128i y)
+static inline __m128i _mm_cmple_epu16(__m128i x, __m128i y)
 {
     // Returns 0xFFFF where x <= y:
     return _mm_cmpeq_epi16(_mm_subs_epu16(x, y), _mm_setzero_si128());
 }
 
-static inline __m128i
-_mm_cmple_epu8 (__m128i x, __m128i y)
+static inline __m128i _mm_cmple_epu8(__m128i x, __m128i y)
 {
     // Returns 0xFF where x <= y:
     return _mm_cmpeq_epi8(_mm_min_epu8(x, y), x);
 }
 
-static inline __m128i
-_mm_cmpgt_epu16 (__m128i x, __m128i y)
+static inline __m128i _mm_cmpgt_epu16(__m128i x, __m128i y)
 {
     // Returns 0xFFFF where x > y:
     return _mm_andnot_si128(_mm_cmpeq_epi16(x, y), _mm_cmple_epu16(y, x));
 }
 
-static inline __m128i
-_mm_cmpgt_epu8 (__m128i x, __m128i y)
+static inline __m128i _mm_cmpgt_epu8(__m128i x, __m128i y)
 {
     // Returns 0xFF where x > y:
-    return _mm_andnot_si128(
-        _mm_cmpeq_epi8(x, y),
-        _mm_cmpeq_epi8(_mm_max_epu8(x, y), x)
-    );
+    return _mm_andnot_si128(_mm_cmpeq_epi8(x, y), _mm_cmpeq_epi8(_mm_max_epu8(x, y), x));
 }
 
-static inline __m128i
-_mm_cmplt_epu16 (__m128i x, __m128i y)
+static inline __m128i _mm_cmplt_epu16(__m128i x, __m128i y)
 {
     // Returns 0xFFFF where x < y:
     return _mm_cmpgt_epu16(y, x);
 }
 
-static inline __m128i
-_mm_cmplt_epu8 (__m128i x, __m128i y)
+static inline __m128i _mm_cmplt_epu8(__m128i x, __m128i y)
 {
     // Returns 0xFF where x < y:
     return _mm_cmpgt_epu8(y, x);
 }
 
-static inline __m128i
-_mm_cmpge_epu16 (__m128i x, __m128i y)
+static inline __m128i _mm_cmpge_epu16(__m128i x, __m128i y)
 {
     // Returns 0xFFFF where x >= y:
     return _mm_cmple_epu16(y, x);
 }
 
-static inline __m128i
-_mm_cmpge_epu8 (__m128i x, __m128i y)
+static inline __m128i _mm_cmpge_epu8(__m128i x, __m128i y)
 {
     // Returns 0xFF where x >= y:
     return _mm_cmple_epu8(y, x);
 }
 
 // Its not often that you want to use this!
-static inline __m128i
-_mm_not_si128 (__m128i x)
+static inline __m128i _mm_not_si128(__m128i x)
 {
     // Returns ~x, the bitwise complement of x:
     return _mm_xor_si128(x, _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128()));
 }
 
-static inline __m128i
-_mm_absdiff_epu16 (__m128i x, __m128i y)
+static inline __m128i _mm_absdiff_epu16(__m128i x, __m128i y)
 {
     // Calculate absolute difference: abs(x - y):
     return _mm_or_si128(_mm_subs_epu16(x, y), _mm_subs_epu16(y, x));
 }
 
-static inline __m128i
-_mm_absdiff_epu8 (__m128i x, __m128i y)
+static inline __m128i _mm_absdiff_epu8(__m128i x, __m128i y)
 {
     // Calculate absolute difference: abs(x - y):
     return _mm_or_si128(_mm_subs_epu8(x, y), _mm_subs_epu8(y, x));
 }
 
-static inline __m128i
-_mm_div255_epu16 (__m128i x)
+static inline __m128i _mm_div255_epu16(__m128i x)
 {
     // Divide 8 16-bit uints by 255:
     // x := ((x + 1) + (x >> 8)) >> 8:
-    return _mm_srli_epi16(_mm_adds_epu16(
-        _mm_adds_epu16(x, _mm_set1_epi16(1)),
-        _mm_srli_epi16(x, 8)), 8);
+    return _mm_srli_epi16(_mm_adds_epu16(_mm_adds_epu16(x, _mm_set1_epi16(1)), _mm_srli_epi16(x, 8)), 8);
 }
 
-static __m128i
-_mm_scale_epu8 (__m128i x, __m128i y)
+static __m128i _mm_scale_epu8(__m128i x, __m128i y)
 {
     // Returns an "alpha blend" of x scaled by y/255;
     //   x := x * (y / 255)

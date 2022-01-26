@@ -20,16 +20,16 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_X3_HPP
 #define MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_X3_HPP
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-template <typename Iterator, typename Boxes>
-void extract_bounding_boxes(Iterator & start, Iterator const& end, Boxes & boxes);
+template<typename Iterator, typename Boxes>
+void extract_bounding_boxes(Iterator& start, Iterator const& end, Boxes& boxes);
 
-}}
-
+}
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_X3_HPP

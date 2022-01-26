@@ -35,14 +35,15 @@ MAPNIK_DECL int parse_jpeg_quality(std::string const& params);
 }
 struct jpeg_saver
 {
-    jpeg_saver(std::ostream &, std::string const&);
-    template <typename T>
-    void operator() (T const&) const;
+    jpeg_saver(std::ostream&, std::string const&);
+    template<typename T>
+    void operator()(T const&) const;
+
   private:
-    std::ostream & stream_;
+    std::ostream& stream_;
     std::string const& t_;
 };
 
-} // end ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_UTIL_JPEG_HPP

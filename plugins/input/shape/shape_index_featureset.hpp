@@ -40,34 +40,36 @@
 #include "shape_datasource.hpp"
 #include "shape_io.hpp"
 
-using mapnik::Featureset;
 using mapnik::box2d;
-using mapnik::feature_ptr;
 using mapnik::context_ptr;
+using mapnik::feature_ptr;
+using mapnik::Featureset;
 
-namespace mapnik { namespace detail
-{
+namespace mapnik {
+namespace detail {
 struct node
 {
     node() = default;
-    node(std::uint64_t offset_, std::int32_t start_, std::int32_t end_, box2d<float> && box_)
-        : offset(offset_),
-          start(start_),
-          end(end_),
-          box(std::move(box_)) {}
+    node(std::uint64_t offset_, std::int32_t start_, std::int32_t end_, box2d<float>&& box_)
+        : offset(offset_)
+        , start(start_)
+        , end(end_)
+        , box(std::move(box_))
+    {}
     std::uint64_t offset;
     std::int32_t start;
     std::int32_t end;
     mapnik::box2d<float> box;
 };
-}} // ns
+} // namespace detail
+} // namespace mapnik
 
-template <typename filterT>
+template<typename filterT>
 class shape_index_featureset : public Featureset
 {
-public:
+  public:
     shape_index_featureset(filterT const& filter,
-                           std::unique_ptr<shape_io> && shape_ptr,
+                           std::unique_ptr<shape_io>&& shape_ptr,
                            std::set<std::string> const& attribute_names,
                            std::string const& encoding,
                            std::string const& shape_name,
@@ -75,7 +77,7 @@ public:
     virtual ~shape_index_featureset();
     feature_ptr next();
 
-private:
+  private:
     filterT filter_;
     context_ptr ctx_;
     std::unique_ptr<shape_io> shape_ptr_;

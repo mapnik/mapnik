@@ -35,8 +35,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 
 // freetype2
-extern "C"
-{
+extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
@@ -48,32 +47,30 @@ MAPNIK_DISABLE_WARNING_POP
 #include <algorithm>
 #include <stdexcept>
 
-
-namespace mapnik
-{
+namespace mapnik {
 template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
-
 
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
     // only accept files that will be matched by freetype2's `figurefiletype()`
     std::string fn = file_name;
     std::transform(fn.begin(), fn.end(), fn.begin(), ::tolower);
-    return boost::algorithm::ends_with(fn,std::string(".ttf")) ||
-        boost::algorithm::ends_with(fn,std::string(".otf")) ||
-        boost::algorithm::ends_with(fn,std::string(".woff"))||
-        boost::algorithm::ends_with(fn,std::string(".ttc")) ||
-        boost::algorithm::ends_with(fn,std::string(".pfa")) ||
-        boost::algorithm::ends_with(fn,std::string(".pfb")) ||
-        // Plus OSX custom ext
-        boost::algorithm::ends_with(fn,std::string(".dfont"));
+    return boost::algorithm::ends_with(fn, std::string(".ttf")) ||
+           boost::algorithm::ends_with(fn, std::string(".otf")) ||
+           boost::algorithm::ends_with(fn, std::string(".woff")) ||
+           boost::algorithm::ends_with(fn, std::string(".ttc")) ||
+           boost::algorithm::ends_with(fn, std::string(".pfa")) ||
+           boost::algorithm::ends_with(fn, std::string(".pfb")) ||
+           // Plus OSX custom ext
+           boost::algorithm::ends_with(fn, std::string(".dfont"));
 }
 
-unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char *buffer, unsigned long count)
+unsigned long ft_read_cb(FT_Stream stream, unsigned long offset, unsigned char* buffer, unsigned long count)
 {
-    if (count <= 0) return 0;
-    FILE * file = static_cast<FILE *>(stream->descriptor.pointer);
-    std::fseek (file , offset , SEEK_SET);
+    if (count <= 0)
+        return 0;
+    FILE* file = static_cast<FILE*>(stream->descriptor.pointer);
+    std::fseek(file, offset, SEEK_SET);
     return std::fread(reinterpret_cast<unsigned char*>(buffer), 1, count, file);
 }
 
@@ -92,12 +89,13 @@ bool freetype_engine::register_font_impl(std::string const& file_name)
 }
 
 bool freetype_engine::register_font_impl(std::string const& file_name,
-                                         font_library & library,
-                                         freetype_engine::font_file_mapping_type & font_file_mapping)
+                                         font_library& library,
+                                         freetype_engine::font_file_mapping_type& font_file_mapping)
 {
     MAPNIK_LOG_DEBUG(font_engine_freetype) << "registering: " << file_name;
     mapnik::util::file file(file_name);
-    if (!file) return false;
+    if (!file)
+        return false;
 
     FT_Face face = 0;
     FT_Open_Args args;
@@ -108,7 +106,7 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
     streamRec.pos = 0;
     streamRec.size = file.size();
     streamRec.descriptor.pointer = file.get();
-    streamRec.read  = ft_read_cb;
+    streamRec.read = ft_read_cb;
     streamRec.close = nullptr;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
@@ -117,11 +115,12 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < num_faces; ++i )
+    for (int i = 0; face == 0 || i < num_faces; ++i)
     {
         // if face is null then this is the first face
         FT_Error error = FT_Open_Face(library.get(), &args, i, &face);
-        if (error) break;
+        if (error)
+            break;
         // store num_faces locally, after FT_Done_Face it can not be accessed any more
         if (num_faces == 0)
             num_faces = face->num_faces;
@@ -131,18 +130,18 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
         {
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
             // skip fonts with leading . in the name
-            if (!boost::algorithm::starts_with(name,"."))
+            if (!boost::algorithm::starts_with(name, "."))
             {
                 // http://stackoverflow.com/a/24795559/2333354
                 auto range = font_file_mapping.equal_range(name);
                 if (range.first == range.second) // the key was previously absent; insert a pair
                 {
-                    font_file_mapping.emplace_hint(range.first, name, std::make_pair(i,file_name));
+                    font_file_mapping.emplace_hint(range.first, name, std::make_pair(i, file_name));
                 }
                 else // the key was present, replace the associated value
-                { /* some action with value range.first->second about to be overwritten here */
+                {    /* some action with value range.first->second about to be overwritten here */
                     MAPNIK_LOG_WARN(font_engine_freetype) << "registering new " << name << " at '" << file_name << "'";
-                    range.first->second = std::make_pair(i,file_name); // replace value
+                    range.first->second = std::make_pair(i, file_name); // replace value
                 }
                 success = true;
             }
@@ -159,7 +158,8 @@ bool freetype_engine::register_font_impl(std::string const& file_name,
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
             MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
-        if (face) FT_Done_Face(face);
+        if (face)
+            FT_Done_Face(face);
     }
     return success;
 }
@@ -179,8 +179,8 @@ bool freetype_engine::register_fonts_impl(std::string const& dir, bool recurse)
 }
 
 bool freetype_engine::register_fonts_impl(std::string const& dir,
-                                          font_library & library,
-                                          freetype_engine::font_file_mapping_type & font_file_mapping,
+                                          font_library& library,
+                                          freetype_engine::font_file_mapping_type& font_file_mapping,
                                           bool recurse)
 {
     if (!mapnik::util::exists(dir))
@@ -206,8 +206,7 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
             else
             {
                 std::string base_name = mapnik::util::basename(file_name);
-                if (!boost::algorithm::starts_with(base_name,".") &&
-                    mapnik::util::is_regular_file(file_name) &&
+                if (!boost::algorithm::starts_with(base_name, ".") && mapnik::util::is_regular_file(file_name) &&
                     is_font_file(file_name))
                 {
                     if (register_font_impl(file_name, library, font_file_mapping))
@@ -217,8 +216,7 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
                 }
             }
         }
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(font_engine_freetype) << "register_fonts: " << ex.what();
     }
@@ -250,18 +248,18 @@ freetype_engine::font_file_mapping_type const& freetype_engine::get_mapping_impl
     return global_font_file_mapping_;
 }
 
-freetype_engine::font_memory_cache_type & freetype_engine::get_cache()
+freetype_engine::font_memory_cache_type& freetype_engine::get_cache()
 {
     return instance().get_cache_impl();
 }
 
-freetype_engine::font_memory_cache_type & freetype_engine::get_cache_impl()
+freetype_engine::font_memory_cache_type& freetype_engine::get_cache_impl()
 {
     return global_memory_fonts_;
 }
 
 bool freetype_engine::can_open(std::string const& face_name,
-                               font_library & library,
+                               font_library& library,
                                font_file_mapping_type const& font_file_mapping,
                                font_file_mapping_type const& global_font_file_mapping)
 {
@@ -269,9 +267,9 @@ bool freetype_engine::can_open(std::string const& face_name,
 }
 
 bool freetype_engine::can_open_impl(std::string const& face_name,
-                               font_library & library,
-                               font_file_mapping_type const& font_file_mapping,
-                               font_file_mapping_type const& global_font_file_mapping)
+                                    font_library& library,
+                                    font_file_mapping_type const& font_file_mapping,
+                                    font_file_mapping_type const& global_font_file_mapping)
 {
     bool found_font_file = false;
     font_file_mapping_type::const_iterator itr = font_file_mapping.find(face_name);
@@ -287,9 +285,11 @@ bool freetype_engine::can_open_impl(std::string const& face_name,
             found_font_file = true;
         }
     }
-    if (!found_font_file) return false;
+    if (!found_font_file)
+        return false;
     mapnik::util::file file(itr->second.second);
-    if (!file) return false;
+    if (!file)
+        return false;
     FT_Face face = 0;
     FT_Open_Args args;
     FT_StreamRec streamRec;
@@ -299,23 +299,25 @@ bool freetype_engine::can_open_impl(std::string const& face_name,
     streamRec.pos = 0;
     streamRec.size = file.size();
     streamRec.descriptor.pointer = file.get();
-    streamRec.read  = ft_read_cb;
+    streamRec.read = ft_read_cb;
     streamRec.close = nullptr;
     args.flags = FT_OPEN_STREAM;
     args.stream = &streamRec;
     // -1 is used to quickly check if the font file appears valid without iterating each face
     FT_Error error = FT_Open_Face(library.get(), &args, -1, &face);
-    if (face) FT_Done_Face(face);
-    if (error) return false;
+    if (face)
+        FT_Done_Face(face);
+    if (error)
+        return false;
     return true;
 }
 
 face_ptr freetype_engine::create_face_impl(std::string const& family_name,
-                                           font_library & library,
+                                           font_library& library,
                                            freetype_engine::font_file_mapping_type const& font_file_mapping,
                                            freetype_engine::font_memory_cache_type const& font_cache,
                                            freetype_engine::font_file_mapping_type const& global_font_file_mapping,
-                                           freetype_engine::font_memory_cache_type & global_memory_fonts)
+                                           freetype_engine::font_memory_cache_type& global_memory_fonts)
 {
     bool found_font_file = false;
     font_file_mapping_type::const_iterator itr = font_file_mapping.find(family_name);
@@ -327,12 +329,14 @@ face_ptr freetype_engine::create_face_impl(std::string const& family_name,
         if (mem_font_itr != font_cache.end())
         {
             FT_Face face;
-            FT_Error error = FT_New_Memory_Face(library.get(),
-                                                reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
-                                                static_cast<FT_Long>(mem_font_itr->second.second), // size
-                                                itr->second.first, // face index
-                                                &face);
-            if (!error) return std::make_shared<font_face>(face);
+            FT_Error error =
+              FT_New_Memory_Face(library.get(),
+                                 reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                 static_cast<FT_Long>(mem_font_itr->second.second),                  // size
+                                 itr->second.first,                                                  // face index
+                                 &face);
+            if (!error)
+                return std::make_shared<font_face>(face);
         }
         // we don't add to cache here because the map and its font_cache
         // must be immutable during rendering for predictable thread safety
@@ -349,12 +353,14 @@ face_ptr freetype_engine::create_face_impl(std::string const& family_name,
             if (mem_font_itr != global_memory_fonts.end())
             {
                 FT_Face face;
-                FT_Error error = FT_New_Memory_Face(library.get(),
-                                                    reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
-                                                    static_cast<FT_Long>(mem_font_itr->second.second), // size
-                                                    itr->second.first, // face index
-                                                    &face);
-                if (!error) return std::make_shared<font_face>(face);
+                FT_Error error =
+                  FT_New_Memory_Face(library.get(),
+                                     reinterpret_cast<FT_Byte const*>(mem_font_itr->second.first.get()), // data
+                                     static_cast<FT_Long>(mem_font_itr->second.second),                  // size
+                                     itr->second.first,                                                  // face index
+                                     &face);
+                if (!error)
+                    return std::make_shared<font_face>(face);
             }
             found_font_file = true;
         }
@@ -368,13 +374,14 @@ face_ptr freetype_engine::create_face_impl(std::string const& family_name,
 #ifdef MAPNIK_THREADSAFE
             std::lock_guard<std::mutex> lock(mutex_);
 #endif
-            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(file.data(),file.size()));
+            auto result = global_memory_fonts.emplace(itr->second.second, std::make_pair(file.data(), file.size()));
             FT_Face face;
-            FT_Error error = FT_New_Memory_Face(library.get(),
-                                                reinterpret_cast<FT_Byte const*>(result.first->second.first.get()), // data
-                                                static_cast<FT_Long>(result.first->second.second), // size
-                                                itr->second.first, // face index
-                                                &face);
+            FT_Error error =
+              FT_New_Memory_Face(library.get(),
+                                 reinterpret_cast<FT_Byte const*>(result.first->second.first.get()), // data
+                                 static_cast<FT_Long>(result.first->second.second),                  // size
+                                 itr->second.first,                                                  // face index
+                                 &face);
             if (error)
             {
                 // we can't load font, erase it.
@@ -388,11 +395,11 @@ face_ptr freetype_engine::create_face_impl(std::string const& family_name,
 }
 
 face_ptr freetype_engine::create_face(std::string const& family_name,
-                                      font_library & library,
+                                      font_library& library,
                                       freetype_engine::font_file_mapping_type const& font_file_mapping,
                                       freetype_engine::font_memory_cache_type const& font_cache,
                                       freetype_engine::font_file_mapping_type const& global_font_file_mapping,
-                                      freetype_engine::font_memory_cache_type & global_memory_fonts)
+                                      freetype_engine::font_memory_cache_type& global_memory_fonts)
 {
     return instance().create_face_impl(family_name,
                                        library,
@@ -402,21 +409,21 @@ face_ptr freetype_engine::create_face(std::string const& family_name,
                                        global_memory_fonts);
 }
 
-face_manager::face_manager(font_library & library,
+face_manager::face_manager(font_library& library,
                            freetype_engine::font_file_mapping_type const& font_file_mapping,
                            freetype_engine::font_memory_cache_type const& font_cache)
-    : face_cache_(new face_cache()),
-      library_(library),
-      font_file_mapping_(font_file_mapping),
-      font_memory_cache_(font_cache)
-      {
-            FT_Stroker s;
-            FT_Error error = FT_Stroker_New(library_.get(), &s);
-            if (!error)
-            {
-                stroker_ = std::make_shared<stroker>(s);
-            }
-      }
+    : face_cache_(new face_cache())
+    , library_(library)
+    , font_file_mapping_(font_file_mapping)
+    , font_memory_cache_(font_cache)
+{
+    FT_Stroker s;
+    FT_Error error = FT_Stroker_New(library_.get(), &s);
+    if (!error)
+    {
+        stroker_ = std::make_shared<stroker>(s);
+    }
+}
 
 face_ptr face_manager::get_face(std::string const& name)
 {
@@ -466,8 +473,7 @@ face_set_ptr face_manager::get_face_set(font_set const& fset)
         else
         {
             MAPNIK_LOG_DEBUG(font_engine_freetype)
-                << "Failed to find face '" << name
-                << "' in font set '" << fset.get_name() << "'\n";
+              << "Failed to find face '" << name << "' in font set '" << fset.get_name() << "'\n";
         }
 #endif
     }
@@ -486,4 +492,4 @@ face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional
     }
 }
 
-}
+} // namespace mapnik

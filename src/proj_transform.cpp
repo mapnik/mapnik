@@ -46,9 +46,8 @@ namespace mapnik {
 namespace { // (local)
 
 // Returns points in clockwise order. This allows us to do anti-meridian checks.
-template <typename T>
-auto envelope_points(box2d<T> const& env, std::size_t num_points)
-    -> geometry::multi_point<T>
+template<typename T>
+auto envelope_points(box2d<T> const& env, std::size_t num_points) -> geometry::multi_point<T>
 {
     auto width = env.width();
     auto height = env.height();
@@ -91,15 +90,14 @@ auto envelope_points(box2d<T> const& env, std::size_t num_points)
     return coords;
 }
 
-} // namespace mapnik::(local)
+} // namespace
 
-proj_transform::proj_transform(projection const& source,
-                               projection const& dest)
-    : is_source_longlat_(false),
-      is_dest_longlat_(false),
-      is_source_equal_dest_(false),
-      wgs84_to_merc_(false),
-      merc_to_wgs84_(false)
+proj_transform::proj_transform(projection const& source, projection const& dest)
+    : is_source_longlat_(false)
+    , is_dest_longlat_(false)
+    , is_source_equal_dest_(false)
+    , wgs84_to_merc_(false)
+    , merc_to_wgs84_(false)
 {
     is_source_equal_dest_ = (source == dest);
     if (!is_source_equal_dest_)
@@ -126,22 +124,25 @@ proj_transform::proj_transform(projection const& source,
         {
 #ifdef MAPNIK_USE_PROJ
             ctx_ = proj_context_create();
-            transform_ = proj_create_crs_to_crs(ctx_,
-                                                source.params().c_str(),
-                                                dest.params().c_str(), nullptr);
+            transform_ = proj_create_crs_to_crs(ctx_, source.params().c_str(), dest.params().c_str(), nullptr);
             if (transform_ == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") + source.params() + "'->'" + dest.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") +
+                                         source.params() + "'->'" + dest.params() + "'");
             }
             PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
             if (transform_gis == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") + source.params() + "'->'" + dest.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") +
+                                         source.params() + "'->'" + dest.params() + "'");
             }
             proj_destroy(transform_);
             transform_ = transform_gis;
 #else
-            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj support (-DMAPNIK_USE_PROJ): '") + source.params() + "'->'" + dest.params() + "'");
+            throw std::runtime_error(
+              std::string(
+                "Cannot initialize proj_transform for given projections without proj support (-DMAPNIK_USE_PROJ): '") +
+              source.params() + "'->'" + dest.params() + "'");
 #endif
         }
     }
@@ -173,21 +174,22 @@ bool proj_transform::is_known() const
     return merc_to_wgs84_ || wgs84_to_merc_;
 }
 
-bool proj_transform::forward (double & x, double & y , double & z) const
+bool proj_transform::forward(double& x, double& y, double& z) const
 {
     return forward(&x, &y, &z, 1);
 }
 
-bool proj_transform::forward (geometry::point<double> & p) const
+bool proj_transform::forward(geometry::point<double>& p) const
 {
     double z = 0;
     return forward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls) const
+unsigned int proj_transform::forward(std::vector<geometry::point<double>>& ls) const
 {
     std::size_t size = ls.size();
-    if (size == 0) return 0;
+    if (size == 0)
+        return 0;
 
     if (is_source_equal_dest_)
         return 0;
@@ -203,18 +205,18 @@ unsigned int proj_transform::forward (std::vector<geometry::point<double>> & ls)
         return 0;
     }
 
-    geometry::point<double> * ptr = ls.data();
-    double * x = reinterpret_cast<double*>(ptr);
-    double * y = x + 1;
-    double * z = nullptr;
-    if(!forward(x, y, z, size, 2))
+    geometry::point<double>* ptr = ls.data();
+    double* x = reinterpret_cast<double*>(ptr);
+    double* y = x + 1;
+    double* z = nullptr;
+    if (!forward(x, y, z, size, 2))
     {
         return size;
     }
     return 0;
 }
 
-bool proj_transform::forward (double * x, double * y , double * z, std::size_t point_count, std::size_t offset) const
+bool proj_transform::forward(double* x, double* y, double* z, std::size_t point_count, std::size_t offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -229,18 +231,27 @@ bool proj_transform::forward (double * x, double * y , double * z, std::size_t p
     }
 
 #ifdef MAPNIK_USE_PROJ
-    if (proj_trans_generic(transform_, PJ_FWD,
-                           x, offset * sizeof(double), point_count,
-                           y, offset * sizeof(double), point_count,
-                           z, offset * sizeof(double), point_count,
-                           0, 0, 0) != point_count)
+    if (proj_trans_generic(transform_,
+                           PJ_FWD,
+                           x,
+                           offset * sizeof(double),
+                           point_count,
+                           y,
+                           offset * sizeof(double),
+                           point_count,
+                           z,
+                           offset * sizeof(double),
+                           point_count,
+                           0,
+                           0,
+                           0) != point_count)
         return false;
 
 #endif
     return true;
 }
 
-bool proj_transform::backward (double * x, double * y , double * z, std::size_t point_count, std::size_t offset) const
+bool proj_transform::backward(double* x, double* y, double* z, std::size_t point_count, std::size_t offset) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -255,31 +266,41 @@ bool proj_transform::backward (double * x, double * y , double * z, std::size_t 
     }
 
 #ifdef MAPNIK_USE_PROJ
-    if (proj_trans_generic(transform_, PJ_INV,
-                           x, offset * sizeof(double), point_count,
-                           y, offset * sizeof(double), point_count,
-                           z, offset * sizeof(double), point_count,
-                           0, 0, 0) != point_count)
+    if (proj_trans_generic(transform_,
+                           PJ_INV,
+                           x,
+                           offset * sizeof(double),
+                           point_count,
+                           y,
+                           offset * sizeof(double),
+                           point_count,
+                           z,
+                           offset * sizeof(double),
+                           point_count,
+                           0,
+                           0,
+                           0) != point_count)
         return false;
 #endif
     return true;
 }
 
-bool proj_transform::backward (double & x, double & y , double & z) const
+bool proj_transform::backward(double& x, double& y, double& z) const
 {
     return backward(&x, &y, &z, 1);
 }
 
-bool proj_transform::backward (geometry::point<double> & p) const
+bool proj_transform::backward(geometry::point<double>& p) const
 {
     double z = 0;
     return backward(&(p.x), &(p.y), &z, 1);
 }
 
-unsigned int proj_transform::backward (std::vector<geometry::point<double>> & ls) const
+unsigned int proj_transform::backward(std::vector<geometry::point<double>>& ls) const
 {
     std::size_t size = ls.size();
-    if (size == 0) return 0;
+    if (size == 0)
+        return 0;
 
     if (is_source_equal_dest_)
         return 0;
@@ -295,10 +316,10 @@ unsigned int proj_transform::backward (std::vector<geometry::point<double>> & ls
         return 0;
     }
 
-    geometry::point<double> * ptr = ls.data();
-    double * x = reinterpret_cast<double*>(ptr);
-    double * y = x + 1;
-    double * z = nullptr;
+    geometry::point<double>* ptr = ls.data();
+    double* x = reinterpret_cast<double*>(ptr);
+    double* y = x + 1;
+    double* z = nullptr;
     if (!backward(x, y, z, size, 2))
     {
         return size;
@@ -306,7 +327,7 @@ unsigned int proj_transform::backward (std::vector<geometry::point<double>> & ls
     return 0;
 }
 
-bool proj_transform::forward (box2d<double> & box) const
+bool proj_transform::forward(box2d<double>& box) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -320,27 +341,24 @@ bool proj_transform::forward (box2d<double> & box) const
     double uly = box.maxy();
     double ury = box.maxy();
     double z = 0.0;
-    if (!forward(llx,lly,z))
+    if (!forward(llx, lly, z))
         return false;
-    if (!forward(lrx,lry,z))
+    if (!forward(lrx, lry, z))
         return false;
-    if (!forward(ulx,uly,z))
+    if (!forward(ulx, uly, z))
         return false;
-    if (!forward(urx,ury,z))
+    if (!forward(urx, ury, z))
         return false;
 
     double minx = std::min(ulx, llx);
     double miny = std::min(lly, lry);
     double maxx = std::max(urx, lrx);
     double maxy = std::max(ury, uly);
-    box.init(minx,
-             miny,
-             maxx,
-             maxy);
+    box.init(minx, miny, maxx, maxy);
     return true;
 }
 
-bool proj_transform::backward (box2d<double> & box) const
+bool proj_transform::backward(box2d<double>& box) const
 {
     if (is_source_equal_dest_)
         return true;
@@ -382,9 +400,9 @@ bool proj_transform::backward(box2d<double>& env, std::size_t points) const
         return backward(env);
     }
 
-    auto coords = envelope_points(env, points);  // this is always clockwise
+    auto coords = envelope_points(env, points); // this is always clockwise
 
-    for (auto & p : coords)
+    for (auto& p : coords)
     {
         double z = 0;
         if (!backward(p.x, p.y, z))
@@ -421,9 +439,9 @@ bool proj_transform::forward(box2d<double>& env, std::size_t points) const
         return forward(env);
     }
 
-    auto coords = envelope_points(env, points);  // this is always clockwise
+    auto coords = envelope_points(env, points); // this is always clockwise
 
-    for (auto & p : coords)
+    for (auto& p : coords)
     {
         double z = 0;
         if (!forward(p.x, p.y, z))
@@ -461,15 +479,15 @@ std::string proj_transform::definition() const
     }
     else
 #endif
-        if (wgs84_to_merc_)
-        {
-            return "wgs84 => merc";
-        }
-        else if (merc_to_wgs84_)
-        {
-            return "merc => wgs84";
-        }
+      if (wgs84_to_merc_)
+    {
+        return "wgs84 => merc";
+    }
+    else if (merc_to_wgs84_)
+    {
+        return "merc => wgs84";
+    }
     return "unknown";
- }
-
 }
+
+} // namespace mapnik

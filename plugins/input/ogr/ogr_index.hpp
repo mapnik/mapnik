@@ -34,12 +34,13 @@
 using mapnik::box2d;
 using mapnik::query;
 
-template <typename filterT, typename IStream = std::ifstream>
+template<typename filterT, typename IStream = std::ifstream>
 class ogr_index
 {
-public:
+  public:
     static void query(const filterT& filter, IStream& file, std::vector<int>& pos);
-private:
+
+  private:
     ogr_index();
     ~ogr_index();
     ogr_index(const ogr_index&);
@@ -49,15 +50,15 @@ private:
     static void query_node(const filterT& filter, IStream& in, std::vector<int>& pos);
 };
 
-template <typename filterT, typename IStream>
-void ogr_index<filterT, IStream>::query(const filterT& filter,IStream & file,std::vector<int>& pos)
+template<typename filterT, typename IStream>
+void ogr_index<filterT, IStream>::query(const filterT& filter, IStream& file, std::vector<int>& pos)
 {
-    file.seekg(16,std::ios::beg);
-    query_node(filter,file,pos);
+    file.seekg(16, std::ios::beg);
+    query_node(filter, file, pos);
 }
 
-template <typename filterT, typename IStream>
-void ogr_index<filterT,IStream>::query_node(const filterT& filter, IStream& file, std::vector<int>& ids)
+template<typename filterT, typename IStream>
+void ogr_index<filterT, IStream>::query_node(const filterT& filter, IStream& file, std::vector<int>& ids)
 {
     const int offset = read_ndr_integer(file);
 
@@ -66,7 +67,7 @@ void ogr_index<filterT,IStream>::query_node(const filterT& filter, IStream& file
 
     const int num_shapes = read_ndr_integer(file);
 
-    if (! filter.pass(node_ext))
+    if (!filter.pass(node_ext))
     {
         file.seekg(offset + num_shapes * 4 + 4, std::ios::cur);
         return;
@@ -86,17 +87,15 @@ void ogr_index<filterT,IStream>::query_node(const filterT& filter, IStream& file
     }
 }
 
-
-template <typename filterT, typename IStream>
-int ogr_index<filterT,IStream>::read_ndr_integer(IStream& file)
+template<typename filterT, typename IStream>
+int ogr_index<filterT, IStream>::read_ndr_integer(IStream& file)
 {
     char b[4];
     file.read(b, 4);
     return (b[0] & 0xff) | (b[1] & 0xff) << 8 | (b[2] & 0xff) << 16 | (b[3] & 0xff) << 24;
 }
 
-
-template <typename filterT, typename IStream>
+template<typename filterT, typename IStream>
 void ogr_index<filterT, IStream>::read_envelope(IStream& file, box2d<double>& envelope)
 {
     file.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));

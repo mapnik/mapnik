@@ -37,13 +37,10 @@
 #include <string>
 #include <iostream>
 
-namespace mapnik
-{
+namespace mapnik {
 
 #if defined(HAVE_WEBP)
-void handle_webp_options(std::string const& type,
-                        WebPConfig & config,
-                        bool & alpha)
+void handle_webp_options(std::string const& type, WebPConfig& config, bool& alpha)
 {
     if (type == "webp")
     {
@@ -56,13 +53,14 @@ void handle_webp_options(std::string const& type,
             auto const& key = kv.first;
             auto const& val = kv.second;
 
-            if (key == "webp") continue;
+            if (key == "webp")
+                continue;
             else if (key == "quality")
             {
                 if (val && !(*val).empty())
                 {
                     double quality = 90;
-                    if (!mapnik::util::string2double(*val,quality) || quality < 0.0 || quality > 100.0)
+                    if (!mapnik::util::string2double(*val, quality) || quality < 0.0 || quality > 100.0)
                     {
                         throw image_writer_exception("invalid webp quality: '" + *val + "'");
                     }
@@ -73,7 +71,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.method) || config.method < 0 || config.method > 6)
+                    if (!mapnik::util::string2int(*val, config.method) || config.method < 0 || config.method > 6)
                     {
                         throw image_writer_exception("invalid webp method: '" + *val + "'");
                     }
@@ -83,47 +81,47 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
-                    if (!mapnik::util::string2int(*val,config.lossless) || config.lossless < 0 || config.lossless > 1)
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    if (!mapnik::util::string2int(*val, config.lossless) || config.lossless < 0 || config.lossless > 1)
                     {
                         throw image_writer_exception("invalid webp lossless: '" + *val + "'");
                     }
-                    #else
-                        #ifdef _MSC_VER
-                          #pragma NOTE(compiling against webp that does not support the lossless flag)
-                        #else
-                          #warning "compiling against webp that does not support the lossless flag"
-                        #endif
+#else
+#ifdef _MSC_VER
+#pragma NOTE(compiling against webp that does not support the lossless flag)
+#else
+#warning "compiling against webp that does not support the lossless flag"
+#endif
                     throw image_writer_exception("your webp version does not support the lossless option");
-                    #endif
+#endif
                 }
             }
             else if (key == "image_hint")
             {
                 if (val && !(*val).empty())
                 {
-                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
                     int image_hint = 0;
-                    if (!mapnik::util::string2int(*val,image_hint) || image_hint < 0 || image_hint > 3)
+                    if (!mapnik::util::string2int(*val, image_hint) || image_hint < 0 || image_hint > 3)
                     {
                         throw image_writer_exception("invalid webp image_hint: '" + *val + "'");
                     }
                     config.image_hint = static_cast<WebPImageHint>(image_hint);
-                    #else
-                        #ifdef _MSC_VER
-                          #pragma NOTE(compiling against webp that does not support the image_hint flag)
-                        #else
-                          #warning "compiling against webp that does not support the image_hint flag"
-                        #endif
+#else
+#ifdef _MSC_VER
+#pragma NOTE(compiling against webp that does not support the image_hint flag)
+#else
+#warning "compiling against webp that does not support the image_hint flag"
+#endif
                     throw image_writer_exception("your webp version does not support the image_hint option");
-                    #endif
+#endif
                 }
             }
             else if (key == "alpha")
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2bool(*val,alpha))
+                    if (!mapnik::util::string2bool(*val, alpha))
                     {
                         throw image_writer_exception("invalid webp alpha: '" + *val + "'");
                     }
@@ -133,7 +131,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.target_size))
+                    if (!mapnik::util::string2int(*val, config.target_size))
                     {
                         throw image_writer_exception("invalid webp target_size: '" + *val + "'");
                     }
@@ -144,7 +142,7 @@ void handle_webp_options(std::string const& type,
                 if (val && !(*val).empty())
                 {
                     double psnr = 0;
-                    if (!mapnik::util::string2double(*val,psnr))
+                    if (!mapnik::util::string2double(*val, psnr))
                     {
                         throw image_writer_exception("invalid webp target_psnr: '" + *val + "'");
                     }
@@ -155,7 +153,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.segments))
+                    if (!mapnik::util::string2int(*val, config.segments))
                     {
                         throw image_writer_exception("invalid webp segments: '" + *val + "'");
                     }
@@ -165,7 +163,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.sns_strength))
+                    if (!mapnik::util::string2int(*val, config.sns_strength))
                     {
                         throw image_writer_exception("invalid webp sns_strength: '" + *val + "'");
                     }
@@ -175,7 +173,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.filter_strength))
+                    if (!mapnik::util::string2int(*val, config.filter_strength))
                     {
                         throw image_writer_exception("invalid webp filter_strength: '" + *val + "'");
                     }
@@ -185,7 +183,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.filter_sharpness))
+                    if (!mapnik::util::string2int(*val, config.filter_sharpness))
                     {
                         throw image_writer_exception("invalid webp filter_sharpness: '" + *val + "'");
                     }
@@ -195,7 +193,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.filter_type))
+                    if (!mapnik::util::string2int(*val, config.filter_type))
                     {
                         throw image_writer_exception("invalid webp filter_type: '" + *val + "'");
                     }
@@ -205,7 +203,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.autofilter))
+                    if (!mapnik::util::string2int(*val, config.autofilter))
                     {
                         throw image_writer_exception("invalid webp autofilter: '" + *val + "'");
                     }
@@ -215,7 +213,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.alpha_compression))
+                    if (!mapnik::util::string2int(*val, config.alpha_compression))
                     {
                         throw image_writer_exception("invalid webp alpha_compression: '" + *val + "'");
                     }
@@ -225,45 +223,45 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
-                    if (!mapnik::util::string2int(*val,config.alpha_filtering))
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    if (!mapnik::util::string2int(*val, config.alpha_filtering))
                     {
                         throw image_writer_exception("invalid webp alpha_filtering: '" + *val + "'");
                     }
-                    #else
-                        #ifdef _MSC_VER
-                          #pragma NOTE(compiling against webp that does not support the alpha_filtering flag)
-                        #else
-                          #warning "compiling against webp that does not support the alpha_filtering flag"
-                        #endif
+#else
+#ifdef _MSC_VER
+#pragma NOTE(compiling against webp that does not support the alpha_filtering flag)
+#else
+#warning "compiling against webp that does not support the alpha_filtering flag"
+#endif
                     throw image_writer_exception("your webp version does not support the alpha_filtering option");
-                    #endif
+#endif
                 }
             }
             else if (key == "alpha_quality")
             {
                 if (val && !(*val).empty())
                 {
-                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
-                    if (!mapnik::util::string2int(*val,config.alpha_quality))
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    if (!mapnik::util::string2int(*val, config.alpha_quality))
                     {
                         throw image_writer_exception("invalid webp alpha_quality: '" + *val + "'");
                     }
-                    #else
-                        #ifdef _MSC_VER
-                          #pragma NOTE(compiling against webp that does not support the alpha_quality flag)
-                        #else
-                          #warning "compiling against webp that does not support the alpha_quality flag"
-                        #endif
+#else
+#ifdef _MSC_VER
+#pragma NOTE(compiling against webp that does not support the alpha_quality flag)
+#else
+#warning "compiling against webp that does not support the alpha_quality flag"
+#endif
                     throw image_writer_exception("your webp version does not support the alpha_quality option");
-                    #endif
+#endif
                 }
             }
             else if (key == "pass")
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.pass))
+                    if (!mapnik::util::string2int(*val, config.pass))
                     {
                         throw image_writer_exception("invalid webp pass: '" + *val + "'");
                     }
@@ -273,7 +271,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.preprocessing))
+                    if (!mapnik::util::string2int(*val, config.preprocessing))
                     {
                         throw image_writer_exception("invalid webp preprocessing: '" + *val + "'");
                     }
@@ -283,7 +281,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.partitions))
+                    if (!mapnik::util::string2int(*val, config.partitions))
                     {
                         throw image_writer_exception("invalid webp partitions: '" + *val + "'");
                     }
@@ -293,7 +291,7 @@ void handle_webp_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.partition_limit))
+                    if (!mapnik::util::string2int(*val, config.partition_limit))
                     {
                         throw image_writer_exception("invalid webp partition_limit: '" + *val + "'");
                     }
@@ -308,23 +306,25 @@ void handle_webp_options(std::string const& type,
 }
 #endif
 
-webp_saver::webp_saver(std::ostream & stream, std::string const& t):
-    stream_(stream), t_(t) {}
+webp_saver::webp_saver(std::ostream& stream, std::string const& t)
+    : stream_(stream)
+    , t_(t)
+{}
 
 template<>
-void webp_saver::operator()<image_null> (image_null const& image) const
+void webp_saver::operator()<image_null>(image_null const& image) const
 {
     throw image_writer_exception("null images not supported");
 }
 
 template<>
-void webp_saver::operator()<image_view_null> (image_view_null const& image) const
+void webp_saver::operator()<image_view_null>(image_view_null const& image) const
 {
     throw image_writer_exception("null image views not supported");
 }
 
-template <typename T>
-void process_rgba8_webp(T const& image, std::string const& t, std::ostream & stream)
+template<typename T>
+void process_rgba8_webp(T const& image, std::string const& t, std::ostream& stream)
 {
 #if defined(HAVE_WEBP)
     WebPConfig config;
@@ -335,50 +335,50 @@ void process_rgba8_webp(T const& image, std::string const& t, std::ostream & str
     }
     // see for more details: https://github.com/mapnik/mapnik/wiki/Image-IO#webp-output-options
     bool alpha = true;
-    handle_webp_options(t,config,alpha);
-    save_as_webp(stream,image,config,alpha);
+    handle_webp_options(t, config, alpha);
+    save_as_webp(stream, image, config, alpha);
 #else
     throw image_writer_exception("webp output is not enabled in your build of Mapnik");
 #endif
 }
 
-template <>
-void webp_saver::operator()<image_rgba8> (image_rgba8 const& image) const
+template<>
+void webp_saver::operator()<image_rgba8>(image_rgba8 const& image) const
 {
     process_rgba8_webp(image, t_, stream_);
 }
 
-template <>
-void webp_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
+template<>
+void webp_saver::operator()<image_view_rgba8>(image_view_rgba8 const& image) const
 {
     process_rgba8_webp(image, t_, stream_);
 }
 
-template <typename T>
-void webp_saver::operator() (T const& image) const
+template<typename T>
+void webp_saver::operator()(T const& image) const
 {
     throw image_writer_exception("Mapnik does not support webp grayscale images");
 }
 
-template void webp_saver::operator()<image_gray8> (image_gray8 const& image) const;
-template void webp_saver::operator()<image_gray8s> (image_gray8s const& image) const;
-template void webp_saver::operator()<image_gray16> (image_gray16 const& image) const;
-template void webp_saver::operator()<image_gray16s> (image_gray16s const& image) const;
-template void webp_saver::operator()<image_gray32> (image_gray32 const& image) const;
-template void webp_saver::operator()<image_gray32s> (image_gray32s const& image) const;
-template void webp_saver::operator()<image_gray32f> (image_gray32f const& image) const;
-template void webp_saver::operator()<image_gray64> (image_gray64 const& image) const;
-template void webp_saver::operator()<image_gray64s> (image_gray64s const& image) const;
-template void webp_saver::operator()<image_gray64f> (image_gray64f const& image) const;
-template void webp_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
-template void webp_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
-template void webp_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;
-template void webp_saver::operator()<image_view_gray16s> (image_view_gray16s const& image) const;
-template void webp_saver::operator()<image_view_gray32> (image_view_gray32 const& image) const;
-template void webp_saver::operator()<image_view_gray32s> (image_view_gray32s const& image) const;
-template void webp_saver::operator()<image_view_gray32f> (image_view_gray32f const& image) const;
-template void webp_saver::operator()<image_view_gray64> (image_view_gray64 const& image) const;
-template void webp_saver::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
-template void webp_saver::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
+template void webp_saver::operator()<image_gray8>(image_gray8 const& image) const;
+template void webp_saver::operator()<image_gray8s>(image_gray8s const& image) const;
+template void webp_saver::operator()<image_gray16>(image_gray16 const& image) const;
+template void webp_saver::operator()<image_gray16s>(image_gray16s const& image) const;
+template void webp_saver::operator()<image_gray32>(image_gray32 const& image) const;
+template void webp_saver::operator()<image_gray32s>(image_gray32s const& image) const;
+template void webp_saver::operator()<image_gray32f>(image_gray32f const& image) const;
+template void webp_saver::operator()<image_gray64>(image_gray64 const& image) const;
+template void webp_saver::operator()<image_gray64s>(image_gray64s const& image) const;
+template void webp_saver::operator()<image_gray64f>(image_gray64f const& image) const;
+template void webp_saver::operator()<image_view_gray8>(image_view_gray8 const& image) const;
+template void webp_saver::operator()<image_view_gray8s>(image_view_gray8s const& image) const;
+template void webp_saver::operator()<image_view_gray16>(image_view_gray16 const& image) const;
+template void webp_saver::operator()<image_view_gray16s>(image_view_gray16s const& image) const;
+template void webp_saver::operator()<image_view_gray32>(image_view_gray32 const& image) const;
+template void webp_saver::operator()<image_view_gray32s>(image_view_gray32s const& image) const;
+template void webp_saver::operator()<image_view_gray32f>(image_view_gray32f const& image) const;
+template void webp_saver::operator()<image_view_gray64>(image_view_gray64 const& image) const;
+template void webp_saver::operator()<image_view_gray64s>(image_view_gray64s const& image) const;
+template void webp_saver::operator()<image_view_gray64f>(image_view_gray64f const& image) const;
 
-} // end ns
+} // namespace mapnik

@@ -28,10 +28,12 @@
 // stl
 #include <string>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-bool from_geojson(std::string const& json, mapnik::feature_impl & feature);
+bool from_geojson(std::string const& json, mapnik::feature_impl& feature);
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_FEATURE_PARSER_HPP

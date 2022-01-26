@@ -24,16 +24,17 @@
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/geometry/fusion_adapted.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace karma = boost::spirit::karma;
 
-template <typename OutputIterator, typename Geometry>
+template<typename OutputIterator, typename Geometry>
 geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar()
     : geometry_generator_grammar::base_type(geometry)
 {
     boost::spirit::karma::lit_type lit;
-
+    // clang-format off
     geometry =
         point
         |
@@ -96,6 +97,8 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
 
     geometries = geometry % lit(',')
         ;
+    // clang-format on
 }
 
-}}
+} // namespace json
+} // namespace mapnik

@@ -46,10 +46,10 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <tuple>
 
-#define U2RED(x) ((x)&0xff)
-#define U2GREEN(x) (((x)>>8)&0xff)
-#define U2BLUE(x) (((x)>>16)&0xff)
-#define U2ALPHA(x) (((x)>>24)&0xff)
+#define U2RED(x)   ((x)&0xff)
+#define U2GREEN(x) (((x) >> 8) & 0xff)
+#define U2BLUE(x)  (((x) >> 16) & 0xff)
+#define U2ALPHA(x) (((x) >> 24) & 0xff)
 
 namespace mapnik {
 
@@ -61,13 +61,14 @@ struct MAPNIK_DECL rgb
     std::uint8_t g;
     std::uint8_t b;
 
-    inline rgb(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_) : r(r_), g(g_), b(b_) {}
+    inline rgb(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_)
+        : r(r_)
+        , g(g_)
+        , b(b_)
+    {}
     rgb(rgba const& c);
 
-    inline bool operator==(const rgb& y) const
-    {
-        return r == y.r && g == y.g && b == y.b;
-    }
+    inline bool operator==(const rgb& y) const { return r == y.r && g == y.g && b == y.b; }
 };
 
 struct MAPNIK_DECL rgba
@@ -78,65 +79,60 @@ struct MAPNIK_DECL rgba
     std::uint8_t a;
 
     inline rgba(std::uint8_t r_, std::uint8_t g_, std::uint8_t b_, std::uint8_t a_)
-        : r(r_),
-          g(g_),
-          b(b_),
-          a(a_) {}
+        : r(r_)
+        , g(g_)
+        , b(b_)
+        , a(a_)
+    {}
 
     inline rgba(rgb const& c)
-        : r(c.r),
-          g(c.g),
-          b(c.b),
-          a(0xFF) {}
+        : r(c.r)
+        , g(c.g)
+        , b(c.b)
+        , a(0xFF)
+    {}
 
     inline rgba(unsigned const& c)
-        : r(U2RED(c)),
-          g(U2GREEN(c)),
-          b(U2BLUE(c)),
-          a(U2ALPHA(c)) {}
+        : r(U2RED(c))
+        , g(U2GREEN(c))
+        , b(U2BLUE(c))
+        , a(U2ALPHA(c))
+    {}
 
-    inline bool operator==(rgba const& y) const
-    {
-        return r == y.r && g == y.g && b == y.b && a == y.a;
-    }
+    inline bool operator==(rgba const& y) const { return r == y.r && g == y.g && b == y.b && a == y.a; }
 
     // ordering by mean(a,r,g,b), a, r, g, b
     struct MAPNIK_DECL mean_sort_cmp
     {
-        bool operator() (const rgba& x, const rgba& y) const;
+        bool operator()(const rgba& x, const rgba& y) const;
     };
 
-    inline bool operator<(rgba const& y) const
-    {
-        return std::tie(r, g, b, a) < std::tie(y.r, y.g, y.b, y.a);
-    }
-
+    inline bool operator<(rgba const& y) const { return std::tie(r, g, b, a) < std::tie(y.r, y.g, y.b, y.a); }
 };
-
 
 class MAPNIK_DECL rgba_palette : private util::noncopyable
 {
-public:
+  public:
     enum palette_type { PALETTE_RGBA = 0, PALETTE_RGB = 1, PALETTE_ACT = 2 };
 
     explicit rgba_palette(std::string const& pal, palette_type type = PALETTE_RGBA);
     rgba_palette();
 
-    inline std::vector<rgb> const& palette() const { return rgb_pal_;}
-    inline std::vector<unsigned> const& alpha_table() const { return alpha_pal_;}
+    inline std::vector<rgb> const& palette() const { return rgb_pal_; }
+    inline std::vector<unsigned> const& alpha_table() const { return alpha_pal_; }
 
-    inline std::vector<rgb>& palette() { return rgb_pal_;}
-    inline std::vector<unsigned>& alpha_table() { return alpha_pal_;}
+    inline std::vector<rgb>& palette() { return rgb_pal_; }
+    inline std::vector<unsigned>& alpha_table() { return alpha_pal_; }
 
     unsigned char quantize(unsigned c) const;
 
     bool valid() const;
     std::string to_string() const;
 
-private:
+  private:
     void parse(std::string const& pal, palette_type type);
 
-private:
+  private:
     std::vector<rgba> sorted_pal_;
     mutable rgba_hash_table color_hashmap_;
 

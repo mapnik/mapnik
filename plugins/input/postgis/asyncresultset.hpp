@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
-  * Copyright (C) 2021 Artem Pavlenko
+ * Copyright (C) 2021 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,31 +34,28 @@
 class postgis_processor_context;
 using postgis_processor_context_ptr = std::shared_ptr<postgis_processor_context>;
 
-class AsyncResultSet : public IResultSet, private mapnik::util::noncopyable
+class AsyncResultSet : public IResultSet,
+                       private mapnik::util::noncopyable
 {
-public:
+  public:
     AsyncResultSet(postgis_processor_context_ptr const& ctx,
-                     std::shared_ptr< Pool<Connection,ConnectionCreator> > const& pool,
-                     std::shared_ptr<Connection> const& conn, std::string const& sql )
-        : ctx_(ctx),
-          pool_(pool),
-          conn_(conn),
-          sql_(sql),
-          is_closed_(false)
-    {
-    }
+                   std::shared_ptr<Pool<Connection, ConnectionCreator>> const& pool,
+                   std::shared_ptr<Connection> const& conn,
+                   std::string const& sql)
+        : ctx_(ctx)
+        , pool_(pool)
+        , conn_(conn)
+        , sql_(sql)
+        , is_closed_(false)
+    {}
 
     virtual bool use_connection() { return true; }
 
-    virtual ~AsyncResultSet()
-    {
-        close();
-    }
-
+    virtual ~AsyncResultSet() { close(); }
 
     void abort()
     {
-        if(conn_ && conn_->isPending() )
+        if (conn_ && conn_->isPending())
         {
             MAPNIK_LOG_DEBUG(postgis) << "AsyncResultSet: aborting pending connection - " << conn_.get();
             // there is no easy way to abort a pending connection, so we close it : this will ensure that
@@ -75,7 +72,7 @@ public:
             is_closed_ = true;
             if (conn_)
             {
-                if(conn_->isPending())
+                if (conn_->isPending())
                 {
                     abort();
                 }
@@ -84,10 +81,7 @@ public:
         }
     }
 
-    virtual int getNumFields() const
-    {
-        return rs_->getNumFields();
-    }
+    virtual int getNumFields() const { return rs_->getNumFields(); }
 
     virtual bool next()
     {
@@ -120,49 +114,25 @@ public:
         return next_res;
     }
 
-    virtual const char* getFieldName(int index) const
-    {
-        return rs_->getFieldName(index);
-    }
+    virtual const char* getFieldName(int index) const { return rs_->getFieldName(index); }
 
-    virtual int getFieldLength(int index) const
-    {
-        return rs_->getFieldLength(index);
-    }
+    virtual int getFieldLength(int index) const { return rs_->getFieldLength(index); }
 
-    virtual int getFieldLength(const char* name) const
-    {
-        return rs_->getFieldLength(name);
-    }
+    virtual int getFieldLength(const char* name) const { return rs_->getFieldLength(name); }
 
-    virtual int getTypeOID(int index) const
-    {
-        return rs_->getTypeOID(index);
-    }
+    virtual int getTypeOID(int index) const { return rs_->getTypeOID(index); }
 
-    virtual int getTypeOID(const char* name) const
-    {
-        return rs_->getTypeOID(name);
-    }
+    virtual int getTypeOID(const char* name) const { return rs_->getTypeOID(name); }
 
-    virtual bool isNull(int index) const
-    {
-        return rs_->isNull(index);
-    }
+    virtual bool isNull(int index) const { return rs_->isNull(index); }
 
-    virtual const char* getValue(int index) const
-    {
-        return rs_->getValue(index);
-    }
+    virtual const char* getValue(int index) const { return rs_->getValue(index); }
 
-    virtual const char* getValue(const char* name) const
-    {
-        return rs_->getValue(name);
-    }
+    virtual const char* getValue(const char* name) const { return rs_->getValue(name); }
 
-private:
+  private:
     postgis_processor_context_ptr ctx_;
-    std::shared_ptr< Pool<Connection,ConnectionCreator> > pool_;
+    std::shared_ptr<Pool<Connection, ConnectionCreator>> pool_;
     std::shared_ptr<Connection> conn_;
     std::string sql_;
     std::shared_ptr<ResultSet> rs_;
@@ -182,21 +152,17 @@ private:
     }
 
     void prepare_next();
-
 };
-
 
 class postgis_processor_context : public mapnik::IProcessorContext
 {
-public:
+  public:
     postgis_processor_context()
-        : num_async_requests_(0) {}
+        : num_async_requests_(0)
+    {}
     ~postgis_processor_context() {}
 
-    void add_request(std::shared_ptr<AsyncResultSet> const& req)
-    {
-        q_.push(req);
-    }
+    void add_request(std::shared_ptr<AsyncResultSet> const& req) { q_.push(req); }
 
     std::shared_ptr<AsyncResultSet> pop_next_request()
     {
@@ -211,10 +177,9 @@ public:
 
     int num_async_requests_;
 
-private:
-    using async_queue = std::queue<std::shared_ptr<AsyncResultSet> >;
+  private:
+    using async_queue = std::queue<std::shared_ptr<AsyncResultSet>>;
     async_queue q_;
-
 };
 
 inline void AsyncResultSet::prepare_next()

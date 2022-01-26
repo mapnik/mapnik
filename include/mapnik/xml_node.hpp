@@ -23,7 +23,7 @@
 #ifndef MAPNIK_XML_NODE_HPP
 #define MAPNIK_XML_NODE_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/config.hpp> // for MAPNIK_DECL
 
 #include <mapnik/warning.hpp>
@@ -32,67 +32,72 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-//stl
+// stl
 #include <list>
 #include <string>
 #include <map>
 #include <exception>
 
-namespace mapnik
-{
+namespace mapnik {
 class MAPNIK_DECL xml_tree;
 
 class MAPNIK_DECL xml_attribute
 {
-public:
-    xml_attribute(const char * value_);
+  public:
+    xml_attribute(const char* value_);
     std::string value;
     mutable bool processed;
 };
 
-class MAPNIK_DECL node_not_found: public std::exception
+class MAPNIK_DECL node_not_found : public std::exception
 {
-public:
+  public:
     node_not_found(std::string const& node_name);
     virtual const char* what() const noexcept;
     ~node_not_found();
-private:
+
+  private:
     std::string node_name_;
-protected:
+
+  protected:
     mutable std::string msg_;
 };
 
-class MAPNIK_DECL attribute_not_found: public std::exception
+class MAPNIK_DECL attribute_not_found : public std::exception
 {
-public:
+  public:
     attribute_not_found(std::string const& node_name, std::string const& attribute_name);
     virtual const char* what() const noexcept;
     ~attribute_not_found();
-private:
+
+  private:
     std::string node_name_;
     std::string attribute_name_;
-protected:
+
+  protected:
     mutable std::string msg_;
 };
 
-class MAPNIK_DECL more_than_one_child: public std::exception
+class MAPNIK_DECL more_than_one_child : public std::exception
 {
-public:
+  public:
     more_than_one_child(std::string const& node_name);
     virtual const char* what() const noexcept;
     ~more_than_one_child();
-private:
+
+  private:
     std::string node_name_;
-protected:
+
+  protected:
     mutable std::string msg_;
 };
 
 class MAPNIK_DECL xml_node
 {
-public:
+  public:
     using const_iterator = std::list<xml_node>::const_iterator;
     using attribute_map = std::map<std::string, xml_attribute>;
-    xml_node(xml_tree &tree, std::string && name, unsigned line=0, bool is_text = false);
+    xml_node(xml_tree& tree, std::string&& name, unsigned line = 0, bool is_text = false);
 
     std::string const& name() const;
     std::string const& text() const;
@@ -100,8 +105,8 @@ public:
     bool is_text() const;
     bool is(std::string const& name) const;
 
-    xml_node & add_child(const char * name, unsigned line=0, bool is_text = false);
-    void add_attribute(const char * name, const char * value);
+    xml_node& add_child(const char* name, unsigned line = 0, bool is_text = false);
+    void add_attribute(const char* name, const char* value);
     attribute_map const& get_attributes() const;
 
     bool ignore() const;
@@ -117,28 +122,29 @@ public:
     const_iterator begin() const;
     const_iterator end() const;
 
-    xml_node & get_child(std::string const& name);
+    xml_node& get_child(std::string const& name);
     xml_node const& get_child(std::string const& name) const;
     xml_node const* get_opt_child(std::string const& name) const;
     bool has_child(std::string const& name) const;
     bool has_attribute(std::string const& name) const;
 
-    template <typename T>
+    template<typename T>
     boost::optional<T> get_opt_attr(std::string const& name) const;
 
-    template <typename T>
+    template<typename T>
     T get_attr(std::string const& name, T const& default_opt_value) const;
-    template <typename T>
+    template<typename T>
     T get_attr(std::string const& name) const;
 
     std::string const& get_text() const;
 
     inline xml_tree const& get_tree() const { return tree_; }
 
-    template <typename T>
+    template<typename T>
     T get_value() const;
-private:
-    xml_tree & tree_;
+
+  private:
+    xml_tree& tree_;
     std::string name_;
     std::list<xml_node> children_;
     attribute_map attributes_;
@@ -149,6 +155,6 @@ private:
     static std::string xml_text;
 };
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_XML_NODE_HPP

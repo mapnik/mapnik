@@ -31,10 +31,9 @@
 #include <mapnik/util/variant.hpp>
 #include <mapnik/feature.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T0, typename T1, typename T2>
+template<typename T0, typename T1, typename T2>
 struct evaluate
 {
     using feature_type = T0;
@@ -42,105 +41,85 @@ struct evaluate
     using variable_type = T2;
     using result_type = T1; //  we need this because automatic result_type deduction fails
     explicit evaluate(feature_type const& f, variable_type const& v)
-        : feature_(f),
-          vars_(v) {}
+        : feature_(f)
+        , vars_(v)
+    {}
 
-    value_type operator() (value_integer val) const
-    {
-        return val;
-    }
+    value_type operator()(value_integer val) const { return val; }
 
-    value_type operator() (value_double val) const
-    {
-        return val;
-    }
+    value_type operator()(value_double val) const { return val; }
 
-    value_type operator() (value_bool val) const
-    {
-        return val;
-    }
+    value_type operator()(value_bool val) const { return val; }
 
-    value_type operator() (value_null val) const
-    {
-        return val;
-    }
+    value_type operator()(value_null val) const { return val; }
 
-    value_type operator() (value_unicode_string const& str) const
-    {
-        return str;
-    }
+    value_type operator()(value_unicode_string const& str) const { return str; }
 
-    value_type operator() (attribute const& attr) const
-    {
-        return attr.value<value_type,feature_type>(feature_);
-    }
+    value_type operator()(attribute const& attr) const { return attr.value<value_type, feature_type>(feature_); }
 
-    value_type operator() (global_attribute const& attr) const
+    value_type operator()(global_attribute const& attr) const
     {
         auto itr = vars_.find(attr.name);
         if (itr != vars_.end())
         {
             return itr->second;
         }
-        return value_type();// throw?
+        return value_type(); // throw?
     }
 
-    value_type operator() (geometry_type_attribute const& geom) const
+    value_type operator()(geometry_type_attribute const& geom) const
     {
-        return geom.value<value_type,feature_type>(feature_);
+        return geom.value<value_type, feature_type>(feature_);
     }
 
-    value_type operator() (binary_node<tags::logical_and> const& x) const
+    value_type operator()(binary_node<tags::logical_and> const& x) const
     {
-        return (util::apply_visitor(*this, x.left).to_bool())
-            && (util::apply_visitor(*this, x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool()) && (util::apply_visitor(*this, x.right).to_bool());
     }
 
-    value_type operator() (binary_node<tags::logical_or> const& x) const
+    value_type operator()(binary_node<tags::logical_or> const& x) const
     {
-        return (util::apply_visitor(*this, x.left).to_bool())
-            || (util::apply_visitor(*this, x.right).to_bool());
+        return (util::apply_visitor(*this, x.left).to_bool()) || (util::apply_visitor(*this, x.right).to_bool());
     }
 
-    template <typename Tag>
-    value_type operator() (binary_node<Tag> const& x) const
+    template<typename Tag>
+    value_type operator()(binary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type operation;
-        return operation(util::apply_visitor(*this, x.left),
-                         util::apply_visitor(*this, x.right));
+        return operation(util::apply_visitor(*this, x.left), util::apply_visitor(*this, x.right));
     }
 
-    template <typename Tag>
-    value_type operator() (unary_node<Tag> const& x) const
+    template<typename Tag>
+    value_type operator()(unary_node<Tag> const& x) const
     {
         typename make_op<Tag>::type func;
         return func(util::apply_visitor(*this, x.expr));
     }
 
-    value_type operator() (unary_node<tags::logical_not> const& x) const
+    value_type operator()(unary_node<tags::logical_not> const& x) const
     {
-        return ! (util::apply_visitor(*this,x.expr).to_bool());
+        return !(util::apply_visitor(*this, x.expr).to_bool());
     }
 
-    value_type operator() (regex_match_node const& x) const
-    {
-        value_type v = util::apply_visitor(*this, x.expr);
-        return x.apply(v);
-    }
-
-    value_type operator() (regex_replace_node const& x) const
+    value_type operator()(regex_match_node const& x) const
     {
         value_type v = util::apply_visitor(*this, x.expr);
         return x.apply(v);
     }
 
-    value_type operator() (unary_function_call const& call) const
+    value_type operator()(regex_replace_node const& x) const
+    {
+        value_type v = util::apply_visitor(*this, x.expr);
+        return x.apply(v);
+    }
+
+    value_type operator()(unary_function_call const& call) const
     {
         value_type arg = util::apply_visitor(*this, call.arg);
         return call.fun(arg);
     }
 
-    value_type operator() (binary_function_call const& call) const
+    value_type operator()(binary_function_call const& call) const
     {
         value_type arg1 = util::apply_visitor(*this, call.arg1);
         value_type arg2 = util::apply_visitor(*this, call.arg2);
@@ -151,6 +130,6 @@ struct evaluate
     variable_type const& vars_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_EXPRESSION_EVALUATOR_HPP

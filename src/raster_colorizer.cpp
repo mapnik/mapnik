@@ -33,57 +33,34 @@
 #include <limits>
 #include <cmath>
 
-namespace mapnik
-{
+namespace mapnik {
 
 //! \brief Strings for the colorizer_mode enumeration
-static const char *colorizer_mode_strings[] = {
-    "inherit",
-    "linear",
-    "discrete",
-    "exact",
-    "linear-rgba",
-    "linear-bgra",
-    ""
-};
+static const char* colorizer_mode_strings[] =
+  {"inherit", "linear", "discrete", "exact", "linear-rgba", "linear-bgra", ""};
 
-IMPLEMENT_ENUM( colorizer_mode, colorizer_mode_strings )
+IMPLEMENT_ENUM(colorizer_mode, colorizer_mode_strings)
 
-
-colorizer_stop::colorizer_stop(float val, colorizer_mode mode,
-                               color const& _color,
-                               std::string const& label)
-: value_(val)
+colorizer_stop::colorizer_stop(float val, colorizer_mode mode, color const& _color, std::string const& label)
+    : value_(val)
     , mode_(mode)
     , color_(_color)
     , label_(label)
-{
-
-}
+{}
 
 colorizer_stop::colorizer_stop(colorizer_stop const& stop)
     : value_(stop.value_)
     , mode_(stop.mode_)
     , color_(stop.color_)
     , label_(stop.label_)
-{
-}
+{}
 
-
-colorizer_stop::~colorizer_stop()
-{
-
-}
-
+colorizer_stop::~colorizer_stop() {}
 
 bool colorizer_stop::operator==(colorizer_stop const& other) const
 {
-    return  (value_ == other.value_) &&
-        (color_ == other.color_) &&
-        (mode_ == other.mode_) &&
-        (label_ == other.label_);
+    return (value_ == other.value_) && (color_ == other.color_) && (mode_ == other.mode_) && (label_ == other.label_);
 }
-
 
 std::string colorizer_stop::to_string() const
 {
@@ -92,28 +69,20 @@ std::string colorizer_stop::to_string() const
     return ss.str();
 }
 
-
-
-
-
 raster_colorizer::raster_colorizer(colorizer_mode mode, color const& _color)
     : default_mode_(mode)
     , default_color_(_color)
     , epsilon_(std::numeric_limits<float>::epsilon())
-{
+{}
 
-}
-
-raster_colorizer::~raster_colorizer()
-{
-}
+raster_colorizer::~raster_colorizer() {}
 
 bool raster_colorizer::add_stop(colorizer_stop const& stop)
 {
-    //make sure stops are added in order of value
-    if(stops_.size())
+    // make sure stops are added in order of value
+    if (stops_.size())
     {
-        if(stop.get_value() <= stops_.back().get_value())
+        if (stop.get_value() <= stops_.back().get_value())
         {
             return false;
         }
@@ -124,8 +93,9 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
     return true;
 }
 
-template <typename T>
-void raster_colorizer::colorize(image_rgba8 & out, T const& in,
+template<typename T>
+void raster_colorizer::colorize(image_rgba8& out,
+                                T const& in,
                                 boost::optional<double> const& nodata,
                                 feature_impl const& f) const
 {
@@ -137,8 +107,8 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
 
     for (std::size_t y = 0; y < height; ++y)
     {
-        pixel_type const * in_row = in.get_row(y);
-        image_rgba8::pixel_type * out_row = out.get_row(y);
+        pixel_type const* in_row = in.get_row(y);
+        image_rgba8::pixel_type* out_row = out.get_row(y);
         for (std::size_t x = 0; x < width; ++x)
         {
             pixel_type val = in_row[x];
@@ -156,69 +126,70 @@ void raster_colorizer::colorize(image_rgba8 & out, T const& in,
 
 inline unsigned interpolate(unsigned start, unsigned end, float fraction)
 {
-    return static_cast<unsigned>(fraction * (static_cast<float>(end) - static_cast<float>(start)) + static_cast<float>(start));
+    return static_cast<unsigned>(fraction * (static_cast<float>(end) - static_cast<float>(start)) +
+                                 static_cast<float>(start));
 }
 
 unsigned raster_colorizer::get_color(float val) const
 {
     int stopCount = stops_.size();
 
-    //use default color if no stops
+    // use default color if no stops
     if (stopCount == 0)
     {
         return default_color_.rgba();
     }
 
-    //1 - Find the stop that the val is in
+    // 1 - Find the stop that the val is in
     int stopIdx = -1;
     bool foundStopIdx = false;
 
-    for(int i=0; i<stopCount; ++i)
+    for (int i = 0; i < stopCount; ++i)
     {
         if (val < stops_[i].get_value())
         {
-            stopIdx = i-1;
+            stopIdx = i - 1;
             foundStopIdx = true;
             break;
         }
     }
 
-    if(!foundStopIdx)
+    if (!foundStopIdx)
     {
-        stopIdx = stopCount-1;
+        stopIdx = stopCount - 1;
     }
 
-    //2 - Find the next stop
+    // 2 - Find the next stop
     int nextStopIdx = stopIdx + 1;
-    if(nextStopIdx >= stopCount)
+    if (nextStopIdx >= stopCount)
     {
-        //there is no next stop
+        // there is no next stop
         nextStopIdx = stopCount - 1;
     }
 
-    //3 - Work out the mode
+    // 3 - Work out the mode
     colorizer_mode stopMode;
-    if( stopIdx == -1 )
+    if (stopIdx == -1)
     {
-        //before the first stop
+        // before the first stop
         stopMode = default_mode_;
     }
     else
     {
         stopMode = stops_[stopIdx].get_mode();
-        if(stopMode == COLORIZER_INHERIT)
+        if (stopMode == COLORIZER_INHERIT)
         {
             stopMode = default_mode_;
         }
     }
 
-    //4 - Calculate the colour
+    // 4 - Calculate the colour
     color stopColor;
     color nextStopColor;
     float stopValue = 0;
     float nextStopValue = 0;
     color outputColor = get_default_color();
-    if(stopIdx == -1)
+    if (stopIdx == -1)
     {
         stopColor = default_color_;
         nextStopColor = stops_[nextStopIdx].get_color();
@@ -233,78 +204,73 @@ unsigned raster_colorizer::get_color(float val) const
         nextStopValue = stops_[nextStopIdx].get_value();
     }
 
-    switch(stopMode)
+    switch (stopMode)
     {
-    case COLORIZER_LINEAR:
-    {
-        //deal with this separately so we don't have to worry about div0
-        if(nextStopValue == stopValue)
-        {
-            outputColor = stopColor;
-        }
-        else
-        {
-            float fraction = (val - stopValue) / (nextStopValue - stopValue);
+        case COLORIZER_LINEAR: {
+            // deal with this separately so we don't have to worry about div0
+            if (nextStopValue == stopValue)
+            {
+                outputColor = stopColor;
+            }
+            else
+            {
+                float fraction = (val - stopValue) / (nextStopValue - stopValue);
 
-            unsigned r = interpolate(stopColor.red(), nextStopColor.red(),fraction);
-            unsigned g = interpolate(stopColor.green(), nextStopColor.green(),fraction);
-            unsigned b = interpolate(stopColor.blue(), nextStopColor.blue(),fraction);
-            unsigned a = interpolate(stopColor.alpha(), nextStopColor.alpha(),fraction);
+                unsigned r = interpolate(stopColor.red(), nextStopColor.red(), fraction);
+                unsigned g = interpolate(stopColor.green(), nextStopColor.green(), fraction);
+                unsigned b = interpolate(stopColor.blue(), nextStopColor.blue(), fraction);
+                unsigned a = interpolate(stopColor.alpha(), nextStopColor.alpha(), fraction);
 
-            outputColor.set_red(r);
-            outputColor.set_green(g);
-            outputColor.set_blue(b);
-            outputColor.set_alpha(a);
-        }
-
-    }
-    break;
-    case COLORIZER_LINEAR_RGBA:
-    {
-        if(nextStopValue == stopValue)
-        {
-            return stopColor.rgba();
-        }
-
-        double fraction = (val - stopValue) / (nextStopValue - stopValue);
-        double colorStart = static_cast<double>(stopColor.rgba());
-        double colorEnd = static_cast<double>(nextStopColor.rgba());
-        outputColor = color(colorStart + fraction * (colorEnd - colorStart));
-    }
-    break;
-    case COLORIZER_LINEAR_BGRA:
-    {
-        if(nextStopValue == stopValue)
-        {
-            return stopColor.rgba();
-        }
-
-        double fraction = (val - stopValue) / (nextStopValue - stopValue);
-        std::swap(stopColor.red_, stopColor.blue_);
-        std::swap(nextStopColor.red_, nextStopColor.blue_);
-        double colorStart = static_cast<double>(stopColor.rgba());
-        double colorEnd = static_cast<double>(nextStopColor.rgba());
-        outputColor = color(colorStart + fraction * (colorEnd - colorStart));
-        std::swap(outputColor.red_, outputColor.blue_);
-    }
-    break;
-    case COLORIZER_DISCRETE:
-        outputColor = stopColor;
-        break;
-    case COLORIZER_EXACT:
-    default:
-        //approximately equal (within epsilon)
-        if (std::fabs(val - stopValue) < epsilon_)
-        {
-            outputColor = stopColor;
-        }
-        else
-        {
-            outputColor = default_color_;
+                outputColor.set_red(r);
+                outputColor.set_green(g);
+                outputColor.set_blue(b);
+                outputColor.set_alpha(a);
+            }
         }
         break;
-    }
+        case COLORIZER_LINEAR_RGBA: {
+            if (nextStopValue == stopValue)
+            {
+                return stopColor.rgba();
+            }
 
+            double fraction = (val - stopValue) / (nextStopValue - stopValue);
+            double colorStart = static_cast<double>(stopColor.rgba());
+            double colorEnd = static_cast<double>(nextStopColor.rgba());
+            outputColor = color(colorStart + fraction * (colorEnd - colorStart));
+        }
+        break;
+        case COLORIZER_LINEAR_BGRA: {
+            if (nextStopValue == stopValue)
+            {
+                return stopColor.rgba();
+            }
+
+            double fraction = (val - stopValue) / (nextStopValue - stopValue);
+            std::swap(stopColor.red_, stopColor.blue_);
+            std::swap(nextStopColor.red_, nextStopColor.blue_);
+            double colorStart = static_cast<double>(stopColor.rgba());
+            double colorEnd = static_cast<double>(nextStopColor.rgba());
+            outputColor = color(colorStart + fraction * (colorEnd - colorStart));
+            std::swap(outputColor.red_, outputColor.blue_);
+        }
+        break;
+        case COLORIZER_DISCRETE:
+            outputColor = stopColor;
+            break;
+        case COLORIZER_EXACT:
+        default:
+            // approximately equal (within epsilon)
+            if (std::fabs(val - stopValue) < epsilon_)
+            {
+                outputColor = stopColor;
+            }
+            else
+            {
+                outputColor = default_color_;
+            }
+            break;
+    }
 
     /*
       MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << val;
@@ -321,36 +287,45 @@ unsigned raster_colorizer::get_color(float val) const
     return outputColor.rgba();
 }
 
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray8 const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray8s const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray16 const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray16s const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray32 const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray32s const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray32f const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray64 const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray64s const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
+template void raster_colorizer::colorize(image_rgba8& out,
+                                         image_gray64f const& in,
+                                         boost::optional<double> const& nodata,
+                                         feature_impl const& f) const;
 
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray8 const& in,
-                                boost::optional<double>const& nodata,
-                                feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray8s const& in,
-                                boost::optional<double>const& nodata,
-                                feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray16 const& in,
-                                boost::optional<double>const& nodata,
-                                feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray16s const& in,
-                                boost::optional<double>const& nodata,
-                                feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray32 const& in,
-                                         boost::optional<double>const& nodata,
-                                         feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray32s const& in,
-                                         boost::optional<double>const& nodata,
-                                         feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray32f const& in,
-                                         boost::optional<double>const& nodata,
-                                         feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray64 const& in,
-                                         boost::optional<double>const& nodata,
-                                         feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray64s const& in,
-                                         boost::optional<double>const& nodata,
-                                         feature_impl const& f) const;
-template void raster_colorizer::colorize(image_rgba8 & out, image_gray64f const& in,
-                                         boost::optional<double>const& nodata,
-                                         feature_impl const& f) const;
-
-}
+} // namespace mapnik

@@ -23,8 +23,12 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/topojson_grammar_x3_def.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(topojson_grammar_type, iterator_type, phrase_parse_context_type);
 
-}}}
+}
+} // namespace json
+} // namespace mapnik

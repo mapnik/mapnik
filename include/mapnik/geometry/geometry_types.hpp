@@ -25,13 +25,13 @@
 
 #include <cstdint>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 // OGC compatible types
-enum geometry_types : std::uint8_t
-{
+enum geometry_types : std::uint8_t {
     Unknown = 0,
-    Point =   1,
+    Point = 1,
     LineString = 2,
     Polygon = 3,
     MultiPoint = 4,
@@ -40,6 +40,7 @@ enum geometry_types : std::uint8_t
     GeometryCollection = 7,
 };
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_TYPES_HPP

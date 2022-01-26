@@ -42,88 +42,88 @@
 
 namespace mapnik {
 
-template <typename Symbolizer>
+template<typename Symbolizer>
 struct symbolizer_traits
 {
-    static char const* name() { return "Unknown";}
+    static char const* name() { return "Unknown"; }
 };
 
 template<>
 struct symbolizer_traits<point_symbolizer>
 {
-    static char const* name() { return "PointSymbolizer";}
+    static char const* name() { return "PointSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<line_symbolizer>
 {
-    static char const* name() { return "LineSymbolizer";}
+    static char const* name() { return "LineSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<polygon_symbolizer>
 {
-    static char const* name() { return "PolygonSymbolizer";}
+    static char const* name() { return "PolygonSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<text_symbolizer>
 {
-    static char const* name() { return "TextSymbolizer";}
+    static char const* name() { return "TextSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<line_pattern_symbolizer>
 {
-    static char const* name() { return "LinePatternSymbolizer";}
+    static char const* name() { return "LinePatternSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<polygon_pattern_symbolizer>
 {
-    static char const* name() { return "PolygonPatternSymbolizer";}
+    static char const* name() { return "PolygonPatternSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<markers_symbolizer>
 {
-    static char const* name() { return "MarkersSymbolizer";}
+    static char const* name() { return "MarkersSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<shield_symbolizer>
 {
-    static char const* name() { return "ShieldSymbolizer";}
+    static char const* name() { return "ShieldSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<raster_symbolizer>
 {
-    static char const* name() { return "RasterSymbolizer";}
+    static char const* name() { return "RasterSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<building_symbolizer>
 {
-    static char const* name() { return "BuildingSymbolizer";}
+    static char const* name() { return "BuildingSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<group_symbolizer>
 {
-    static char const* name() { return "GroupSymbolizer";}
+    static char const* name() { return "GroupSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<debug_symbolizer>
 {
-    static char const* name() { return "DebugSymbolizer";}
+    static char const* name() { return "DebugSymbolizer"; }
 };
 
 template<>
 struct symbolizer_traits<dot_symbolizer>
 {
-    static char const* name() { return "DotSymbolizer";}
+    static char const* name() { return "DotSymbolizer"; }
 };
 
 // symbolizer name impl
@@ -131,18 +131,18 @@ namespace detail {
 
 struct symbolizer_name_impl
 {
-public:
-    template <typename Symbolizer>
-    std::string operator () (Symbolizer const&) const
+  public:
+    template<typename Symbolizer>
+    std::string operator()(Symbolizer const&) const
     {
         return symbolizer_traits<Symbolizer>::name();
     }
 };
-}
+} // namespace detail
 
 inline std::string symbolizer_name(symbolizer const& sym)
 {
-    std::string type = util::apply_visitor( detail::symbolizer_name_impl(), sym);
+    std::string type = util::apply_visitor(detail::symbolizer_name_impl(), sym);
     return type;
 }
 
@@ -265,102 +265,105 @@ struct symbolizer_to_json
 
 namespace {
 
-template <typename Symbolizer, typename T>
+template<typename Symbolizer, typename T>
 struct set_property_impl
 {
-    static void apply(Symbolizer &, mapnik::keys, std::string const&)
-    {
-        std::cerr << "do nothing" << std::endl;
-    }
+    static void apply(Symbolizer&, mapnik::keys, std::string const&) { std::cerr << "do nothing" << std::endl; }
 };
 
-template <typename Symbolizer>
-struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_color> >
+template<typename Symbolizer>
+struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_color>>
 {
-    static void apply(Symbolizer & sym, mapnik::keys key, std::string const& val)
+    static void apply(Symbolizer& sym, mapnik::keys key, std::string const& val)
     {
         put(sym, key, mapnik::parse_color(val));
     }
 };
 
-template <typename Symbolizer>
-struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double> >
+template<typename Symbolizer>
+struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double>>
 {
-    static void apply(Symbolizer &, mapnik::keys, std::string const&)
-    {
-        std::cerr << " expects double" << std::endl;
-    }
+    static void apply(Symbolizer&, mapnik::keys, std::string const&) { std::cerr << " expects double" << std::endl; }
 };
 
-template <typename Symbolizer>
-struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >
+template<typename Symbolizer>
+struct set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool>>
 {
-    static void apply(Symbolizer &, mapnik::keys, std::string const&)
-    {
-        std::cerr << " expects bool" << std::endl;
-    }
+    static void apply(Symbolizer&, mapnik::keys, std::string const&) { std::cerr << " expects bool" << std::endl; }
 };
 
-}
+} // namespace
 
-template <typename Symbolizer, typename T>
-inline void set_property(Symbolizer & sym, mapnik::keys key, T const& val)
+template<typename Symbolizer, typename T>
+inline void set_property(Symbolizer& sym, mapnik::keys key, T const& val)
 {
     switch (std::get<2>(get_meta(key)))
     {
-    case property_types::target_bool:
-        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool> >::apply(sym,key,val);
-        break;
-    case property_types::target_integer:
-        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_integer> >::apply(sym,key,val);
-        break;
-    case property_types::target_double:
-        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double> >::apply(sym,key,val);
-        break;
-    case property_types::target_color:
-        set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_color> >::apply(sym,key,val);
-        break;
-    default:
-        break;
+        case property_types::target_bool:
+            set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_bool>>::apply(
+              sym,
+              key,
+              val);
+            break;
+        case property_types::target_integer:
+            set_property_impl<Symbolizer,
+                              std::integral_constant<property_types, property_types::target_integer>>::apply(sym,
+                                                                                                             key,
+                                                                                                             val);
+            break;
+        case property_types::target_double:
+            set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_double>>::apply(
+              sym,
+              key,
+              val);
+            break;
+        case property_types::target_color:
+            set_property_impl<Symbolizer, std::integral_constant<property_types, property_types::target_color>>::apply(
+              sym,
+              key,
+              val);
+            break;
+        default:
+            break;
     }
 }
 
-template <typename Symbolizer, typename T>
-inline void set_property_from_value(Symbolizer & sym, mapnik::keys key, T const& val)
+template<typename Symbolizer, typename T>
+inline void set_property_from_value(Symbolizer& sym, mapnik::keys key, T const& val)
 {
     switch (std::get<2>(get_meta(key)))
     {
-    case property_types::target_bool:
-        put(sym, key, val.to_bool());
-        break;
-    case property_types::target_integer:
-        put(sym, key, val.to_int());
-        break;
-    case property_types::target_double:
-        put(sym, key, val.to_double());
-        break;
-    case property_types::target_color:
-        put(sym, key, mapnik::parse_color(val.to_string()));
-        break;
-    default:
-        break;
+        case property_types::target_bool:
+            put(sym, key, val.to_bool());
+            break;
+        case property_types::target_integer:
+            put(sym, key, val.to_int());
+            break;
+        case property_types::target_double:
+            put(sym, key, val.to_double());
+            break;
+        case property_types::target_color:
+            put(sym, key, mapnik::parse_color(val.to_string()));
+            break;
+        default:
+            break;
     }
 }
 
 namespace detail {
 // helpers
-template <typename Symbolizer, typename T, bool is_enum = false>
+template<typename Symbolizer, typename T, bool is_enum = false>
 struct set_symbolizer_property_impl
 {
-    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const& node)
+    static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
         using value_type = T;
         try
         {
             boost::optional<value_type> val = node.get_opt_attr<value_type>(name);
-            if (val) put(sym, key, *val);
-        }
-        catch (config_error const& ex)
+            if (val)
+                put(sym, key, *val);
+        } catch (config_error const& ex)
         {
             // try parsing as an expression
             boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
@@ -370,7 +373,7 @@ struct set_symbolizer_property_impl
                 auto result = pre_evaluate_expression<mapnik::value>(*val);
                 if (std::get<1>(result))
                 {
-                    set_property_from_value(sym, key,std::get<0>(result));
+                    set_property_from_value(sym, key, std::get<0>(result));
                 }
                 else
                 {
@@ -386,28 +389,29 @@ struct set_symbolizer_property_impl
     }
 };
 
-template <typename Symbolizer>
-struct set_symbolizer_property_impl<Symbolizer,transform_type,false>
+template<typename Symbolizer>
+struct set_symbolizer_property_impl<Symbolizer, transform_type, false>
 {
-    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
+    static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
         boost::optional<std::string> transform = node.get_opt_attr<std::string>(name);
-        if (transform) put(sym, key, mapnik::parse_transform(*transform));
+        if (transform)
+            put(sym, key, mapnik::parse_transform(*transform));
     }
 };
 
-template <typename Symbolizer>
-struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
+template<typename Symbolizer>
+struct set_symbolizer_property_impl<Symbolizer, dash_array, false>
 {
-    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
+    static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
         boost::optional<std::string> str = node.get_opt_attr<std::string>(name);
         if (str)
         {
             dash_array dash;
-            if (util::parse_dasharray(*str,dash))
+            if (util::parse_dasharray(*str, dash))
             {
-                put(sym,key,dash);
+                put(sym, key, dash);
             }
             else
             {
@@ -418,7 +422,7 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
                     auto result = pre_evaluate_expression<mapnik::value>(*val);
                     if (std::get<1>(result))
                     {
-                        set_property_from_value(sym, key,std::get<0>(result));
+                        set_property_from_value(sym, key, std::get<0>(result));
                     }
                     else
                     {
@@ -428,8 +432,7 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
                 }
                 else
                 {
-                    throw config_error(std::string("Failed to parse dasharray ") +
-                                       "'. Expected a " +
+                    throw config_error(std::string("Failed to parse dasharray ") + "'. Expected a " +
                                        "list of floats or 'none' but got '" + (*str) + "'");
                 }
             }
@@ -437,10 +440,10 @@ struct set_symbolizer_property_impl<Symbolizer,dash_array,false>
     }
 };
 
-template <typename Symbolizer, typename T>
+template<typename Symbolizer, typename T>
 struct set_symbolizer_property_impl<Symbolizer, T, true>
 {
-    static void apply(Symbolizer & sym, keys key, std::string const& name, xml_node const & node)
+    static void apply(Symbolizer& sym, keys key, std::string const& name, xml_node const& node)
     {
         using value_type = T;
         boost::optional<std::string> enum_str = node.get_opt_attr<std::string>(name);
@@ -460,7 +463,8 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                     auto result = pre_evaluate_expression<value>(*val);
                     if (std::get<1>(result))
                     {
-                        boost::optional<value_type> enum_val2 = detail::enum_traits<value_type>::from_string(std::get<0>(result).to_string());
+                        boost::optional<value_type> enum_val2 =
+                          detail::enum_traits<value_type>::from_string(std::get<0>(result).to_string());
                         if (enum_val2)
                         {
                             put(sym, key, *enum_val);
@@ -488,16 +492,16 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
 
 } // namespace detail
 
-template <typename Symbolizer, typename T>
-void set_symbolizer_property(Symbolizer & sym, keys key, xml_node const& node)
+template<typename Symbolizer, typename T>
+void set_symbolizer_property(Symbolizer& sym, keys key, xml_node const& node)
 {
     std::string const& name = std::get<0>(get_meta(key));
-    if (node.has_attribute(name)) {
-        detail::set_symbolizer_property_impl<Symbolizer,T, std::is_enum<T>::value>::apply(sym,key,name,node);
+    if (node.has_attribute(name))
+    {
+        detail::set_symbolizer_property_impl<Symbolizer, T, std::is_enum<T>::value>::apply(sym, key, name, node);
     }
 }
 
-
-}
+} // namespace mapnik
 
 #endif // MAPNIK_SYMBOLIZER_UTILS_HPP

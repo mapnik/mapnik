@@ -35,12 +35,12 @@ const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
 shape_io::shape_io(std::string const& shape_name, bool open_index)
-    : type_(shape_null),
-      shp_(shape_name + SHP),
-      shx_(shape_name + SHX),
-      dbf_(shape_name + DBF),
-      reclength_(0),
-      id_(0)
+    : type_(shape_null)
+    , shp_(shape_name + SHP)
+    , shx_(shape_name + SHX)
+    , dbf_(shape_name + DBF)
+    , reclength_(0)
+    , id_(0)
 {
     bool ok = (shp_.is_open() && dbf_.is_open());
     if (!ok)
@@ -53,13 +53,12 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
         try
         {
             index_ = std::make_unique<shape_file>(shape_name + INDEX);
-        }
-        catch (...)
+        } catch (...)
         {
             MAPNIK_LOG_WARN(shape) << "shape_io: Could not open index=" << shape_name << INDEX;
         }
     }
-    if  (!index_ && !shx_.is_open())
+    if (!index_ && !shx_.is_open())
     {
         throw datasource_exception("Shape Plugin: cannot read shape index file '" + shape_name + ".shx'");
     }
@@ -89,7 +88,7 @@ dbf_file& shape_io::dbf()
     return dbf_;
 }
 
-void shape_io::read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox)
+void shape_io::read_bbox(shape_file::record_type& record, mapnik::box2d<double>& bbox)
 {
     double lox = record.read_double();
     double loy = record.read_double();
@@ -98,7 +97,7 @@ void shape_io::read_bbox(shape_file::record_type & record, mapnik::box2d<double>
     bbox.init(lox, loy, hix, hiy);
 }
 
-mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_type & record)
+mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_type& record)
 {
     mapnik::geometry::geometry<double> geom; // default empty
     int num_parts = record.read_ndr_integer();
@@ -121,7 +120,7 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
     {
         std::vector<int> parts;
         parts.resize(num_parts);
-        std::for_each(parts.begin(), parts.end(), [&](int & part) { part = record.read_ndr_integer();});
+        std::for_each(parts.begin(), parts.end(), [&](int& part) { part = record.read_ndr_integer(); });
         int start, end;
         mapnik::geometry::multi_line_string<double> multi_line;
         multi_line.reserve(num_parts);
@@ -152,7 +151,8 @@ mapnik::geometry::geometry<double> shape_io::read_polyline(shape_file::record_ty
     return geom;
 }
 
-mapnik::geometry::geometry<double> shape_io::read_polyline_parts(shape_file::record_type & record, std::vector<std::pair<int, int>> const& parts)
+mapnik::geometry::geometry<double> shape_io::read_polyline_parts(shape_file::record_type& record,
+                                                                 std::vector<std::pair<int, int>> const& parts)
 {
     mapnik::geometry::geometry<double> geom; // default empty
     int total_num_parts = record.read_ndr_integer();
@@ -180,8 +180,7 @@ mapnik::geometry::geometry<double> shape_io::read_polyline_parts(shape_file::rec
     return geom;
 }
 
-
-mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_type & record)
+mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_type& record)
 {
     mapnik::geometry::geometry<double> geom; // default empty
     int num_parts = record.read_ndr_integer();
@@ -189,15 +188,17 @@ mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_typ
 
     std::vector<int> parts;
     parts.resize(num_parts);
-    std::for_each(parts.begin(), parts.end(), [&](int & part) { part = record.read_ndr_integer();});
+    std::for_each(parts.begin(), parts.end(), [&](int& part) { part = record.read_ndr_integer(); });
     mapnik::geometry::polygon<double> poly;
     mapnik::geometry::multi_polygon<double> multi_poly;
     for (int k = 0; k < num_parts; ++k)
     {
         int start = parts[k];
         int end;
-        if (k == num_parts - 1) end = num_points;
-        else end = parts[k + 1];
+        if (k == num_parts - 1)
+            end = num_points;
+        else
+            end = parts[k + 1];
 
         mapnik::geometry::linear_ring<double> ring;
         ring.reserve(end - start);
@@ -236,7 +237,8 @@ mapnik::geometry::geometry<double> shape_io::read_polygon(shape_file::record_typ
     return geom;
 }
 
-mapnik::geometry::geometry<double> shape_io::read_polygon_parts(shape_file::record_type & record, std::vector<std::pair<int,int>> const& parts)
+mapnik::geometry::geometry<double> shape_io::read_polygon_parts(shape_file::record_type& record,
+                                                                std::vector<std::pair<int, int>> const& parts)
 {
     mapnik::geometry::geometry<double> geom; // default empty
     int total_num_parts = record.read_ndr_integer();

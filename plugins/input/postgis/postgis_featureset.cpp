@@ -23,7 +23,7 @@
 #include "postgis_featureset.hpp"
 #include "resultset.hpp"
 #include "cursorresultset.hpp"
- #include "numeric2string.hpp"
+#include "numeric2string.hpp"
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -41,9 +41,9 @@
 #include <string>
 #include <memory>
 
-using mapnik::geometry_utils;
-using mapnik::feature_factory;
 using mapnik::context_ptr;
+using mapnik::feature_factory;
+using mapnik::geometry_utils;
 
 postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
@@ -51,16 +51,15 @@ postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        bool key_field,
                                        bool key_field_as_attribute,
                                        bool twkb_encoding)
-    : rs_(rs),
-      ctx_(ctx),
-      tr_(new transcoder(encoding)),
-      totalGeomSize_(0),
-      feature_id_(1),
-      key_field_(key_field),
-      key_field_as_attribute_(key_field_as_attribute),
-      twkb_encoding_(twkb_encoding)
-{
-}
+    : rs_(rs)
+    , ctx_(ctx)
+    , tr_(new transcoder(encoding))
+    , totalGeomSize_(0)
+    , feature_id_(1)
+    , key_field_(key_field)
+    , key_field_as_attribute_(key_field_as_attribute)
+    , twkb_encoding_(twkb_encoding)
+{}
 
 feature_ptr postgis_featureset::next()
 {
@@ -103,7 +102,7 @@ feature_ptr postgis_featureset::next()
             feature = feature_factory::create(ctx_, val);
             if (key_field_as_attribute_)
             {
-                feature->put<mapnik::value_integer>(name,val);
+                feature->put<mapnik::value_integer>(name, val);
             }
             ++pos;
         }
@@ -123,9 +122,9 @@ feature_ptr postgis_featureset::next()
 
         // parse geometry
         int size = rs_->getFieldLength(0);
-        const char *data = rs_->getValue(0);
+        const char* data = rs_->getValue(0);
 
-        if (twkb_encoding_ )
+        if (twkb_encoding_)
         {
             feature->set_geometry(geometry_utils::from_twkb(data, size));
         }
@@ -152,31 +151,31 @@ feature_ptr postgis_featureset::next()
                 const int oid = rs_->getTypeOID(pos);
                 switch (oid)
                 {
-                    case 16: //bool
+                    case 16: // bool
                     {
                         feature->put(name, (buf[0] != 0));
                         break;
                     }
 
-                    case 23: //int4
+                    case 23: // int4
                     {
                         feature->put<mapnik::value_integer>(name, int4net(buf));
                         break;
                     }
 
-                    case 21: //int2
+                    case 21: // int2
                     {
                         feature->put<mapnik::value_integer>(name, int2net(buf));
                         break;
                     }
 
-                    case 20: //int8/BigInt
+                    case 20: // int8/BigInt
                     {
                         feature->put<mapnik::value_integer>(name, int8net(buf));
                         break;
                     }
 
-                    case 700: //float4
+                    case 700: // float4
                     {
                         float val;
                         float4net(val, buf);
@@ -184,7 +183,7 @@ feature_ptr postgis_featureset::next()
                         break;
                     }
 
-                    case 701: //float8
+                    case 701: // float8
                     {
                         double val;
                         float8net(val, buf);
@@ -192,22 +191,22 @@ feature_ptr postgis_featureset::next()
                         break;
                     }
 
-                    case 25:   //text
-                    case 1043: //varchar
-                    case 705:  //literal
+                    case 25:   // text
+                    case 1043: // varchar
+                    case 705:  // literal
                     {
                         feature->put(name, tr_->transcode(buf));
                         break;
                     }
 
-                    case 1042: //bpchar
+                    case 1042: // bpchar
                     {
                         std::string str = mapnik::util::trim_copy(buf);
                         feature->put(name, tr_->transcode(str.c_str()));
                         break;
                     }
 
-                    case 1700: //numeric
+                    case 1700: // numeric
                     {
                         double val;
                         std::string str = numeric2string(buf);
@@ -218,8 +217,7 @@ feature_ptr postgis_featureset::next()
                         break;
                     }
 
-                    default:
-                    {
+                    default: {
                         MAPNIK_LOG_WARN(postgis) << "postgis_featureset: Unknown type_oid=" << oid;
 
                         break;
@@ -231,7 +229,6 @@ feature_ptr postgis_featureset::next()
     }
     return feature_ptr();
 }
-
 
 postgis_featureset::~postgis_featureset()
 {

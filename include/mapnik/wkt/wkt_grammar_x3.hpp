@@ -31,7 +31,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <mapnik/geometry.hpp>
 
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 struct wkt_class; // top-most ID
@@ -41,7 +42,7 @@ wkt_grammar_type const wkt("wkt");
 
 BOOST_SPIRIT_DECLARE(wkt_grammar_type);
 
-}}
-
+} // namespace grammar
+} // namespace mapnik
 
 #endif // MAPNIK_WKT_GRAMMAR_X3_HPP

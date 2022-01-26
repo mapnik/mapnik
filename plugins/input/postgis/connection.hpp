@@ -41,11 +41,11 @@ extern "C" {
 
 class Connection
 {
-public:
-    Connection(std::string const& connection_str,boost::optional<std::string> const& password)
-        : cursorId(0),
-          closed_(false),
-          pending_(false)
+  public:
+    Connection(std::string const& connection_str, boost::optional<std::string> const& password)
+        : cursorId(0)
+        , closed_(false)
+        , pending_(false)
     {
         std::string connect_with_pass = connection_str;
         if (password && !password->empty())
@@ -65,10 +65,13 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
-        PGresult *result = PQexec(conn_, "SET DEFAULT_TRANSACTION_READ_ONLY = TRUE; SET CLIENT_MIN_MESSAGES = WARNING;");
+        PGresult* result =
+          PQexec(conn_, "SET DEFAULT_TRANSACTION_READ_ONLY = TRUE; SET CLIENT_MIN_MESSAGES = WARNING;");
         bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
-        if ( result ) PQclear(result);
-        if ( ! ok ) {
+        if (result)
+            PQclear(result);
+        if (!ok)
+        {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
             err_msg += "Connection string: '";
@@ -81,7 +84,7 @@ public:
 
     ~Connection()
     {
-        if (! closed_)
+        if (!closed_)
         {
             PQfinish(conn_);
             MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection closed - " << this;
@@ -95,16 +98,20 @@ public:
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute ") + sql);
 #endif
 
-        if ( ! executeAsyncQuery(sql) ) return false;
-        PGresult *result = 0;
+        if (!executeAsyncQuery(sql))
+            return false;
+        PGresult* result = 0;
         // fetch multiple times until NULL is returned,
         // to handle multi-statement queries
-        while ( PGresult *tmp = getResult() ) {
-          if ( result ) PQclear(result);
-          result = tmp;
+        while (PGresult* tmp = getResult())
+        {
+            if (result)
+                PQclear(result);
+            result = tmp;
         }
         bool ok = (result && (PQresultStatus(result) == PGRES_COMMAND_OK));
-        if ( result ) PQclear(result);
+        if (result)
+            PQclear(result);
         return ok;
     }
 
@@ -114,23 +121,27 @@ public:
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute_query ") + sql);
 #endif
         PGresult* result = 0;
-        if ( executeAsyncQuery(sql, type) ) {
-          // fetch multiple times until NULL is returned,
-          // to handle multi-statement queries
-          while ( PGresult *tmp = getResult() ) {
-            if ( result ) PQclear(result);
-            result = tmp;
-          }
+        if (executeAsyncQuery(sql, type))
+        {
+            // fetch multiple times until NULL is returned,
+            // to handle multi-statement queries
+            while (PGresult* tmp = getResult())
+            {
+                if (result)
+                    PQclear(result);
+                result = tmp;
+            }
         }
 
-        if (! result || (PQresultStatus(result) != PGRES_TUPLES_OK))
+        if (!result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
             err_msg += "in executeQuery Full sql was: '";
             err_msg += sql;
             err_msg += "'\n";
-            if ( result ) PQclear(result);
+            if (result)
+                PQclear(result);
             throw mapnik::datasource_exception(err_msg);
         }
 
@@ -142,7 +153,7 @@ public:
         std::string status;
         if (conn_)
         {
-            char * err_msg = PQerrorMessage(conn_);
+            char* err_msg = PQerrorMessage(conn_);
             if (err_msg == nullptr)
             {
                 status = "Bad connection\n";
@@ -164,7 +175,7 @@ public:
         int result = 0;
         if (type == 1)
         {
-            result = PQsendQueryParams(conn_,sql.c_str(), 0, 0, 0, 0, 0, 1);
+            result = PQsendQueryParams(conn_, sql.c_str(), 0, 0, 0, 0, 0, 1);
         }
         else
         {
@@ -187,14 +198,14 @@ public:
 
     PGresult* getResult()
     {
-        PGresult *result = PQgetResult(conn_);
+        PGresult* result = PQgetResult(conn_);
         return result;
     }
 
     std::shared_ptr<ResultSet> getNextAsyncResult()
     {
-        PGresult *result = getResult();
-        if( result && (PQresultStatus(result) != PGRES_TUPLES_OK))
+        PGresult* result = getResult();
+        if (result && (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
@@ -205,13 +216,13 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
-       return std::make_shared<ResultSet>(result);
+        return std::make_shared<ResultSet>(result);
     }
 
     std::shared_ptr<ResultSet> getAsyncResult()
     {
-        PGresult *result = getResult();
-        if ( !result || (PQresultStatus(result) != PGRES_TUPLES_OK))
+        PGresult* result = getResult();
+        if (!result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
@@ -225,24 +236,15 @@ public:
         return std::make_shared<ResultSet>(result);
     }
 
-    std::string client_encoding() const
-    {
-        return PQparameterStatus(conn_, "client_encoding");
-    }
+    std::string client_encoding() const { return PQparameterStatus(conn_, "client_encoding"); }
 
-    bool isOK() const
-    {
-        return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
-    }
+    bool isOK() const { return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD); }
 
-    bool isPending() const
-    {
-        return pending_;
-    }
+    bool isPending() const { return pending_; }
 
     void close()
     {
-        if (! closed_)
+        if (!closed_)
         {
             PQfinish(conn_);
             MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: closing connection (close)- " << this;
@@ -257,22 +259,22 @@ public:
         return s.str();
     }
 
-private:
-    PGconn *conn_;
+  private:
+    PGconn* conn_;
     int cursorId;
     bool closed_;
     bool pending_;
 
-    void clearAsyncResult(PGresult *result)
+    void clearAsyncResult(PGresult* result)
     {
         // Clear all pending results
-        while(result)
+        while (result)
         {
-           PQclear(result);
-           result = PQgetResult(conn_);
+            PQclear(result);
+            result = PQgetResult(conn_);
         }
         pending_ = false;
     }
 };
 
-#endif //CONNECTION_HPP
+#endif // CONNECTION_HPP

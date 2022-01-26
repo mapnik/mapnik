@@ -28,48 +28,41 @@
 #include <mapnik/renderer_common/render_markers_symbolizer.hpp>
 #include <mapnik/symbolizer.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 namespace detail {
 
 struct cairo_markers_renderer_context : markers_renderer_context
 {
-    explicit cairo_markers_renderer_context(cairo_context & ctx)
-      : ctx_(ctx)
+    explicit cairo_markers_renderer_context(cairo_context& ctx)
+        : ctx_(ctx)
     {}
 
     virtual void render_marker(svg_path_ptr const& src,
-                               svg_path_adapter & path,
+                               svg_path_adapter& path,
                                svg_attribute_type const& attrs,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr)
     {
-        render_vector_marker(ctx_,
-                             path,
-                             attrs,
-                             src->bounding_box(),
-                             marker_tr,
-                             params.opacity);
+        render_vector_marker(ctx_, path, attrs, src->bounding_box(), marker_tr, params.opacity);
     }
 
-    virtual void render_marker(image_rgba8 const& src,
-                               markers_dispatch_params const& params,
-                               agg::trans_affine const& marker_tr)
+    virtual void
+      render_marker(image_rgba8 const& src, markers_dispatch_params const& params, agg::trans_affine const& marker_tr)
     {
         ctx_.add_image(marker_tr, src, params.opacity);
     }
 
-private:
-    cairo_context & ctx_;
+  private:
+    cairo_context& ctx_;
 };
 
 } // namespace detail
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(markers_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
@@ -79,14 +72,11 @@ void cairo_renderer<T>::process(markers_symbolizer const& sym,
     using renderer_context_type = detail::cairo_markers_renderer_context;
     renderer_context_type renderer_context(context_);
 
-    render_markers_symbolizer(
-        sym, feature, prj_trans, common_, clip_box,
-        renderer_context);
+    render_markers_symbolizer(sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
-template void cairo_renderer<cairo_ptr>::process(markers_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void
+  cairo_renderer<cairo_ptr>::process(markers_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
 } // namespace mapnik
 

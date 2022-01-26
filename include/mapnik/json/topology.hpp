@@ -36,7 +36,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <list>
 
-namespace mapnik { namespace topojson {
+namespace mapnik {
+namespace topojson {
 
 using index_type = int;
 
@@ -46,7 +47,7 @@ struct coordinate
     double y;
 };
 
-using property = std::tuple<std::string, json::json_value >;
+using property = std::tuple<std::string, json::json_value>;
 using properties = std::vector<property>;
 
 struct point
@@ -63,39 +64,34 @@ struct multi_point
 
 struct linestring
 {
-    std::vector<index_type> rings ;
+    std::vector<index_type> rings;
     boost::optional<properties> props;
 };
 
 struct multi_linestring
 {
-    std::vector<std::vector<index_type> > lines;
+    std::vector<std::vector<index_type>> lines;
     boost::optional<properties> props;
 };
 
 struct polygon
 {
-    std::vector<std::vector<index_type> > rings;
+    std::vector<std::vector<index_type>> rings;
     boost::optional<properties> props;
 };
 
 struct multi_polygon
 {
-    std::vector<std::vector<std::vector<index_type> > > polygons;
+    std::vector<std::vector<std::vector<index_type>>> polygons;
     boost::optional<properties> props;
 };
 
-struct empty {};
+struct empty
+{};
 
-using geometry =  util::variant<empty,
-                                point,
-                                linestring,
-                                polygon,
-                                multi_point,
-                                multi_linestring,
-                                multi_polygon>;
+using geometry = util::variant<empty, point, linestring, polygon, multi_point, multi_linestring, multi_polygon>;
 
-using pair_type = std::tuple<double,double>;
+using pair_type = std::tuple<double, double>;
 
 struct arc
 {
@@ -126,6 +122,7 @@ struct topology
     boost::optional<bounding_box> bbox;
 };
 
-}}
+} // namespace topojson
+} // namespace mapnik
 
 #endif // MAPNIK_TOPOLOGY_HPP

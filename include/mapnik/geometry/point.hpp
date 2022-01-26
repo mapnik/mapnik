@@ -25,11 +25,13 @@
 
 #include <mapbox/geometry/point.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 using point = mapbox::geometry::point<T>;
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_POINT_HPP

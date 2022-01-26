@@ -23,7 +23,9 @@
 #include <mapnik/svg/svg_path_grammar_x3_def.hpp>
 #include <mapnik/boost_spirit_instantiate.hpp>
 
-namespace mapnik { namespace svg { namespace grammar {
+namespace mapnik {
+namespace svg {
+namespace grammar {
 
 #if BOOST_VERSION >= 107000
 BOOST_SPIRIT_INSTANTIATE(svg_path_grammar_type, iterator_type, svg_parse_context_type);
@@ -33,4 +35,6 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_path_grammar_type, iterator_type, svg_parse_
 BOOST_SPIRIT_INSTANTIATE_UNUSED(svg_points_grammar_type, iterator_type, svg_parse_context_type);
 #endif
 
-}}}
+} // namespace grammar
+} // namespace svg
+} // namespace mapnik

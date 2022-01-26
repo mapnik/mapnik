@@ -31,7 +31,7 @@
 namespace mapnik {
 namespace svg {
 
-template <typename PathType>
+template<typename PathType>
 bool parse_path(const char* wkt, PathType& p)
 {
     using namespace boost::spirit;
@@ -41,23 +41,19 @@ bool parse_path(const char* wkt, PathType& p)
     bool relative = false;
     using space_type = mapnik::svg::grammar::space_type;
 #if BOOST_VERSION >= 106700
-    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(p)
-        [ x3::with<mapnik::svg::grammar::relative_tag>(relative)
-          [mapnik::svg::grammar::svg_path]];
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(
+      p)[x3::with<mapnik::svg::grammar::relative_tag>(relative)[mapnik::svg::grammar::svg_path]];
 #else
-    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(std::ref(p))
-        [ x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))
-          [mapnik::svg::grammar::svg_path]];
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_path_tag>(
+      std::ref(p))[x3::with<mapnik::svg::grammar::relative_tag>(std::ref(relative))[mapnik::svg::grammar::svg_path]];
 #endif
     try
     {
-        if (!x3::phrase_parse(first, last, grammar, space_type())
-            || first != last)
+        if (!x3::phrase_parse(first, last, grammar, space_type()) || first != last)
         {
             throw std::runtime_error("Failed to parse svg-path");
         }
-    }
-    catch (...)
+    } catch (...)
     {
         return false;
     }

@@ -23,8 +23,10 @@
 #include <mapnik/expression_grammar_x3_def.hpp>
 #include <mapnik/expression_grammar_x3_config.hpp>
 
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(expression_grammar_type, iterator_type, context_type);
 
-}}
+}
+} // namespace mapnik

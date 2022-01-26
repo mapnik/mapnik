@@ -27,14 +27,14 @@
 
 namespace mapnik {
 
-template <typename Locator, typename Detector>
+template<typename Locator, typename Detector>
 class markers_vertex_first_placement : public markers_point_placement<Locator, Detector>
 {
-public:
+  public:
     using point_placement = markers_point_placement<Locator, Detector>;
     using point_placement::point_placement;
 
-    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
+    bool get_point(double& x, double& y, double& angle, bool ignore_placement)
     {
         if (this->done_)
         {
@@ -79,6 +79,6 @@ public:
     }
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MARKERS_PLACEMENTS_VERTEXT_FIRST_HPP

@@ -46,10 +46,10 @@ struct MAPNIK_DECL image_view_any : image_view_base
 {
     image_view_any() = default;
 
-    template <typename T>
-    image_view_any(T && _data)
-        noexcept(std::is_nothrow_constructible<image_view_base, T && >::value)
-        : image_view_base(std::forward<T>(_data)) {}
+    template<typename T>
+    image_view_any(T&& _data) noexcept(std::is_nothrow_constructible<image_view_base, T&&>::value)
+        : image_view_base(std::forward<T>(_data))
+    {}
 
     std::size_t width() const;
     std::size_t height() const;
@@ -61,6 +61,6 @@ struct MAPNIK_DECL image_view_any : image_view_base
     image_dtype get_dtype() const;
 };
 
-} // end mapnik ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_VIEW_ANY_HPP

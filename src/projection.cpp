@@ -37,14 +37,15 @@
 namespace mapnik {
 
 projection::projection(std::string const& params, bool defer_proj_init)
-    : params_(params),
-      defer_proj_init_(defer_proj_init),
-      is_geographic_(false),
-      proj_(nullptr),
-      proj_ctx_(nullptr)
+    : params_(params)
+    , defer_proj_init_(defer_proj_init)
+    , is_geographic_(false)
+    , proj_(nullptr)
+    , proj_ctx_(nullptr)
 {
     boost::optional<bool> is_known = is_known_geographic(params_);
-    if (is_known){
+    if (is_known)
+    {
         is_geographic_ = *is_known;
     }
     else
@@ -52,20 +53,23 @@ projection::projection(std::string const& params, bool defer_proj_init)
 #ifdef MAPNIK_USE_PROJ
         init_proj();
 #else
-        throw std::runtime_error(std::string("Cannot initialize projection '") + params_ + " ' without proj support (-DMAPNIK_USE_PROJ)");
+        throw std::runtime_error(std::string("Cannot initialize projection '") + params_ +
+                                 " ' without proj support (-DMAPNIK_USE_PROJ)");
 #endif
     }
-    if (!defer_proj_init_) init_proj();
+    if (!defer_proj_init_)
+        init_proj();
 }
 
 projection::projection(projection const& rhs)
-    : params_(rhs.params_),
-      defer_proj_init_(rhs.defer_proj_init_),
-      is_geographic_(rhs.is_geographic_),
-      proj_(nullptr),
-      proj_ctx_(nullptr)
+    : params_(rhs.params_)
+    , defer_proj_init_(rhs.defer_proj_init_)
+    , is_geographic_(rhs.is_geographic_)
+    , proj_(nullptr)
+    , proj_ctx_(nullptr)
 {
-    if (!defer_proj_init_) init_proj();
+    if (!defer_proj_init_)
+        init_proj();
 }
 
 projection& projection::operator=(projection const& rhs)
@@ -74,7 +78,8 @@ projection& projection::operator=(projection const& rhs)
     swap(tmp);
     proj_ctx_ = nullptr;
     proj_ = nullptr;
-    if (!defer_proj_init_) init_proj();
+    if (!defer_proj_init_)
+        init_proj();
     return *this;
 }
 
@@ -97,20 +102,20 @@ void projection::init_proj() const
         proj_ = proj_create(proj_ctx_, params_.c_str());
         if (!proj_ || !proj_ctx_)
         {
-            if (proj_ctx_) {
+            if (proj_ctx_)
+            {
                 proj_context_destroy(proj_ctx_);
                 proj_ctx_ = nullptr;
             }
-            if (proj_) {
+            if (proj_)
+            {
                 proj_destroy(proj_);
                 proj_ = nullptr;
             }
             throw proj_init_error(params_);
         }
         PJ_TYPE type = proj_get_type(proj_);
-        is_geographic_ = (type == PJ_TYPE_GEOGRAPHIC_2D_CRS
-                          ||
-                          type == PJ_TYPE_GEOGRAPHIC_3D_CRS) ? true : false;
+        is_geographic_ = (type == PJ_TYPE_GEOGRAPHIC_2D_CRS || type == PJ_TYPE_GEOGRAPHIC_3D_CRS) ? true : false;
     }
 #endif
 }
@@ -135,7 +140,7 @@ std::string const& projection::params() const
     return params_;
 }
 
-void projection::forward(double & x, double &y ) const
+void projection::forward(double& x, double& y) const
 {
 #ifdef MAPNIK_USE_PROJ
     if (!proj_)
@@ -155,7 +160,7 @@ void projection::forward(double & x, double &y ) const
 #endif
 }
 
-void projection::inverse(double & x,double & y) const
+void projection::inverse(double& x, double& y) const
 {
 #ifdef MAPNIK_USE_PROJ
     if (!proj_)
@@ -205,9 +210,9 @@ std::string projection::expanded() const
 
 void projection::swap(projection& rhs)
 {
-    std::swap(params_,rhs.params_);
-    std::swap(defer_proj_init_,rhs.defer_proj_init_);
-    std::swap(is_geographic_,rhs.is_geographic_);
+    std::swap(params_, rhs.params_);
+    std::swap(defer_proj_init_, rhs.defer_proj_init_);
+    std::swap(is_geographic_, rhs.is_geographic_);
 }
 
-}
+} // namespace mapnik

@@ -41,18 +41,14 @@ MAPNIK_DISABLE_WARNING_POP
 // EqualityComparable
 inline bool operator==(hb_feature_t const& lhs, hb_feature_t const& rhs)
 {
-    return (lhs.tag == rhs.tag
-            && lhs.value == rhs.value
-            && lhs.start == rhs.start
-            && lhs.end == rhs.end);
+    return (lhs.tag == rhs.tag && lhs.value == rhs.value && lhs.start == rhs.start && lhs.end == rhs.end);
 }
 
-namespace mapnik
-{
+namespace mapnik {
 
 class MAPNIK_DECL font_feature_settings
 {
-public:
+  public:
     using font_feature = hb_feature_t;
     using feature_vector = std::vector<font_feature>;
     using feature_iterator = feature_vector::iterator;
@@ -70,13 +66,13 @@ public:
     feature_vector::size_type count() const { return features_.size(); }
     feature_vector const& features() const { return features_; }
 
-private:
+  private:
     feature_vector features_;
 };
 
-template <typename charT, typename traits>
-std::basic_ostream<charT, traits> &
-operator<< ( std::basic_ostream<charT, traits> & s, mapnik::font_feature_settings const& f )
+template<typename charT, typename traits>
+std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& s,
+                                              mapnik::font_feature_settings const& f)
 {
     s << f.to_string();
     return s;
@@ -93,9 +89,12 @@ static const unsigned int font_feature_range_global_end = std::numeric_limits<un
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-constexpr hb_feature_t font_feature_liga_off = { HB_TAG('l', 'i', 'g', 'a'), 0, font_feature_range_global_start, font_feature_range_global_end };
+constexpr hb_feature_t font_feature_liga_off = {HB_TAG('l', 'i', 'g', 'a'),
+                                                0,
+                                                font_feature_range_global_start,
+                                                font_feature_range_global_end};
 MAPNIK_DISABLE_WARNING_POP
 
-} // mapnik namespace
+} // namespace mapnik
 
 #endif // MAPNIK_FONT_FEATURE_SETTINGS_HPP

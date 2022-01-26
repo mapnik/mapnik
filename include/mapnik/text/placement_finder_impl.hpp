@@ -30,13 +30,13 @@
 
 #include <memory>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
-bool placement_finder::find_line_placements(T & path, bool points)
+template<typename T>
+bool placement_finder::find_line_placements(T& path, bool points)
 {
-    if (!layouts_.line_count()) return true; //TODO
+    if (!layouts_.line_count())
+        return true; // TODO
     vertex_cache pp(path);
 
     bool success = false;
@@ -52,41 +52,42 @@ bool placement_finder::find_line_placements(T & path, bool points)
         }
         else
         {
-            if ((pp.length() < text_props_->minimum_path_length * scale_factor_)
-                ||
+            if ((pp.length() < text_props_->minimum_path_length * scale_factor_) ||
                 (pp.length() <= 0.001) // Clipping removed whole geometry
-                ||
-                (pp.length() < layouts_.width()))
-                {
-                    continue;
-                }
+                || (pp.length() < layouts_.width()))
+            {
+                continue;
+            }
         }
 
         double spacing = get_spacing(pp.length(), points ? 0. : layouts_.width());
 
-        //horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
+        // horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
 
         // halign == H_LEFT -> don't move
         if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO || horizontal_alignment_ == H_ADJUST)
         {
-            if (!pp.forward(spacing / 2.0)) continue;
+            if (!pp.forward(spacing / 2.0))
+                continue;
         }
         else if (horizontal_alignment_ == H_RIGHT)
         {
-            if (!pp.forward(pp.length())) continue;
+            if (!pp.forward(pp.length()))
+                continue;
         }
 
-        if (move_dx_ != 0.0) path_move_dx(pp, move_dx_);
+        if (move_dx_ != 0.0)
+            path_move_dx(pp, move_dx_);
 
         do
         {
-            tolerance_iterator tolerance_offset(text_props_->label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
+            tolerance_iterator tolerance_offset(text_props_->label_position_tolerance * scale_factor_,
+                                                spacing); // TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
-                if (pp.move(tolerance_offset.get())
-                    && ((points && find_point_placement(pp.current_position()))
-                        || (!points && single_line_placement(pp, text_props_->upright))))
+                if (pp.move(tolerance_offset.get()) && ((points && find_point_placement(pp.current_position())) ||
+                                                        (!points && single_line_placement(pp, text_props_->upright))))
                 {
                     success = true;
                     break;
@@ -97,4 +98,4 @@ bool placement_finder::find_line_placements(T & path, bool points)
     return success;
 }
 
-}// ns mapnik
+} // namespace mapnik

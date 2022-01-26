@@ -45,24 +45,24 @@ MAPNIK_DISABLE_WARNING_POP
 #include <stdexcept>
 
 dbf_file::dbf_file()
-    : num_records_(0),
-      num_fields_(0),
-      record_length_(0),
-      record_(0) {}
+    : num_records_(0)
+    , num_fields_(0)
+    , record_length_(0)
+    , record_(0)
+{}
 
 dbf_file::dbf_file(std::string const& file_name)
-    :mapped_memory_file{file_name},
-     num_records_(0),
-     num_fields_(0),
-     record_length_(0),
-     record_(0)
+    : mapped_memory_file{file_name}
+    , num_records_(0)
+    , num_fields_(0)
+    , record_length_(0)
+    , record_(0)
 {
     if (file_)
     {
         read_header();
     }
 }
-
 
 dbf_file::~dbf_file()
 {
@@ -74,174 +74,164 @@ int dbf_file::num_records() const
     return num_records_;
 }
 
-
 int dbf_file::num_fields() const
 {
     return num_fields_;
 }
 
-
 void dbf_file::move_to(int index)
 {
-    if (index>0 && index<=num_records_)
+    if (index > 0 && index <= num_records_)
     {
-        std::streampos pos=(num_fields_<<5)+34+(index-1)*(record_length_+1);
-        file_.seekg(pos,std::ios::beg);
-        file_.read(record_,record_length_);
+        std::streampos pos = (num_fields_ << 5) + 34 + (index - 1) * (record_length_ + 1);
+        file_.seekg(pos, std::ios::beg);
+        file_.read(record_, record_length_);
     }
 }
 
-
 std::string dbf_file::string_value(int col) const
 {
-    if (col>=0 && col<num_fields_)
+    if (col >= 0 && col < num_fields_)
     {
-        return std::string(record_+fields_[col].offset_,fields_[col].length_);
+        return std::string(record_ + fields_[col].offset_, fields_[col].length_);
     }
     return "";
 }
 
-
 const field_descriptor& dbf_file::descriptor(int col) const
 {
-    assert(col>=0 && col<num_fields_);
+    assert(col >= 0 && col < num_fields_);
     return fields_[col];
 }
 
-
-void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const
+void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl& f) const
 {
     using namespace boost::spirit;
 
-    if (col>=0 && col<num_fields_)
+    if (col >= 0 && col < num_fields_)
     {
-        std::string const& name=fields_[col].name_;
+        std::string const& name = fields_[col].name_;
 
         // NOTE: ensure types handled here are matched in shape_datasource.cpp
         switch (fields_[col].type_)
         {
-        case 'C':
-        case 'D':
-        {
-            // FIXME - avoid constructing std::string on stack
-            std::string str(record_+fields_[col].offset_,fields_[col].length_);
-            mapnik::util::trim(str);
-            f.put(name,tr.transcode(str.c_str()));
-            break;
-        }
-        case 'L':
-        {
-            char ch = record_[fields_[col].offset_];
-            if ( ch == '1' || ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y')
-            {
-                f.put(name,true);
-            }
-            else
-            {
-                // NOTE: null logical fields use '?'
-                f.put(name,false);
-            }
-            break;
-        }
-        case 'N': // numeric
-        case 'O': // double
-        case 'F': // float
-        {
-
-            if (record_[fields_[col].offset_] == '*')
-            {
-                // NOTE: we intentionally do not store null here
-                // since it is equivalent to the attribute not existing
+            case 'C':
+            case 'D': {
+                // FIXME - avoid constructing std::string on stack
+                std::string str(record_ + fields_[col].offset_, fields_[col].length_);
+                mapnik::util::trim(str);
+                f.put(name, tr.transcode(str.c_str()));
                 break;
             }
-            if ( fields_[col].dec_>0 )
-            {
-                double val = 0.0;
-                const char *itr = record_+fields_[col].offset_;
-                const char *end = itr + fields_[col].length_;
-                x3::ascii::space_type space;
-                static x3::double_type double_;
-                if (x3::phrase_parse(itr,end,double_,space,val))
+            case 'L': {
+                char ch = record_[fields_[col].offset_];
+                if (ch == '1' || ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y')
                 {
-                    f.put(name,val);
+                    f.put(name, true);
                 }
-            }
-            else
-            {
-                mapnik::value_integer val = 0;
-                const char *itr = record_+fields_[col].offset_;
-                const char *end = itr + fields_[col].length_;
-                x3::ascii::space_type space;
-                static x3::int_parser<mapnik::value_integer,10,1,-1> numeric_parser;
-                if (x3::phrase_parse(itr, end, numeric_parser, space, val))
+                else
                 {
-                    f.put(name,val);
+                    // NOTE: null logical fields use '?'
+                    f.put(name, false);
                 }
+                break;
             }
-            break;
-        }
+            case 'N': // numeric
+            case 'O': // double
+            case 'F': // float
+            {
+                if (record_[fields_[col].offset_] == '*')
+                {
+                    // NOTE: we intentionally do not store null here
+                    // since it is equivalent to the attribute not existing
+                    break;
+                }
+                if (fields_[col].dec_ > 0)
+                {
+                    double val = 0.0;
+                    const char* itr = record_ + fields_[col].offset_;
+                    const char* end = itr + fields_[col].length_;
+                    x3::ascii::space_type space;
+                    static x3::double_type double_;
+                    if (x3::phrase_parse(itr, end, double_, space, val))
+                    {
+                        f.put(name, val);
+                    }
+                }
+                else
+                {
+                    mapnik::value_integer val = 0;
+                    const char* itr = record_ + fields_[col].offset_;
+                    const char* end = itr + fields_[col].length_;
+                    x3::ascii::space_type space;
+                    static x3::int_parser<mapnik::value_integer, 10, 1, -1> numeric_parser;
+                    if (x3::phrase_parse(itr, end, numeric_parser, space, val))
+                    {
+                        f.put(name, val);
+                    }
+                }
+                break;
+            }
         }
     }
 }
 
 void dbf_file::read_header()
 {
-    char c=file_.get();
-    if (c=='\3' || c=='\131')
+    char c = file_.get();
+    if (c == '\3' || c == '\131')
     {
         skip(3);
-        num_records_=read_int();
-        assert(num_records_>=0);
-        num_fields_=read_short();
-        assert(num_fields_>0);
-        num_fields_=(num_fields_-33)/32;
+        num_records_ = read_int();
+        assert(num_records_ >= 0);
+        num_fields_ = read_short();
+        assert(num_fields_ > 0);
+        num_fields_ = (num_fields_ - 33) / 32;
         skip(22);
-        std::streampos offset=0;
+        std::streampos offset = 0;
         char name[11];
-        std::memset(&name,0,11);
+        std::memset(&name, 0, 11);
         fields_.reserve(num_fields_);
-        for (int i=0;i<num_fields_;++i)
+        for (int i = 0; i < num_fields_; ++i)
         {
             field_descriptor desc;
-            desc.index_=i;
-            file_.read(name,10);
-            desc.name_=name;
+            desc.index_ = i;
+            file_.read(name, 10);
+            desc.name_ = name;
             // TODO - when is this trim needed?
             mapnik::util::trim(desc.name_);
             skip(1);
-            desc.type_=file_.get();
+            desc.type_ = file_.get();
             skip(4);
-            desc.length_=file_.get();
-            desc.dec_=file_.get();
+            desc.length_ = file_.get();
+            desc.dec_ = file_.get();
             skip(14);
-            desc.offset_=offset;
-            offset+=desc.length_;
+            desc.offset_ = offset;
+            offset += desc.length_;
             fields_.push_back(desc);
         }
-        record_length_=offset;
-        if (record_length_>0)
+        record_length_ = offset;
+        if (record_length_ > 0)
         {
-            record_=static_cast<char*>(::operator new (sizeof(char)*record_length_));
+            record_ = static_cast<char*>(::operator new(sizeof(char) * record_length_));
         }
     }
 }
 
-
 int dbf_file::read_short()
 {
     char b[2];
-    file_.read(b,2);
+    file_.read(b, 2);
     std::int16_t val;
-    mapnik::read_int16_ndr(b,val);
+    mapnik::read_int16_ndr(b, val);
     return val;
 }
-
 
 int dbf_file::read_int()
 {
     char b[4];
-    file_.read(b,4);
+    file_.read(b, 4);
     std::int32_t val;
-    mapnik::read_int32_ndr(b,val);
+    mapnik::read_int32_ndr(b, val);
     return val;
 }

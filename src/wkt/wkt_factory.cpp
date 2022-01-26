@@ -26,22 +26,21 @@
 
 namespace mapnik {
 
-bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> & geom)
+bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double>& geom)
 {
     using namespace boost::spirit;
     x3::ascii::space_type space;
     std::string::const_iterator itr = wkt.begin();
-    std::string::const_iterator end =  wkt.end();
+    std::string::const_iterator end = wkt.end();
     bool result;
     try
     {
-        result  = x3::phrase_parse(itr, end, grammar::wkt, space, geom);
-    }
-    catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+        result = x3::phrase_parse(itr, end, grammar::wkt, space, geom);
+    } catch (x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         return false;
     }
-    return result && itr==end;
+    return result && itr == end;
 }
 
-}
+} // namespace mapnik

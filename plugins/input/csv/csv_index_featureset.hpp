@@ -44,7 +44,8 @@ class csv_index_featureset : public mapnik::Featureset
 {
     using value_type = mapnik::util::index_record;
     using locator_type = csv_utils::geometry_column_locator;
-public:
+
+  public:
 
     csv_index_featureset(std::string const& filename,
                          mapnik::bounding_box_filter<float> const& filter,
@@ -55,7 +56,8 @@ public:
                          mapnik::context_ptr const& ctx);
     ~csv_index_featureset();
     mapnik::feature_ptr next();
-private:
+
+  private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
     char separator_;
     char quote_;
@@ -64,16 +66,15 @@ private:
     mapnik::value_integer feature_id_ = 0;
     locator_type const& locator_;
     mapnik::transcoder tr_;
-#if defined (MAPNIK_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
 #else
-    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE*)>;
     file_ptr file_;
 #endif
     std::vector<value_type> positions_;
     std::vector<value_type>::iterator itr_;
 };
-
 
 #endif // CSV_INDEX_FEATURESET_HPP

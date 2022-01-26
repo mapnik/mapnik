@@ -33,88 +33,84 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/include/karma.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-    using namespace boost::spirit;
+using namespace boost::spirit;
 
-    template <typename OutputIterator>
-    svg_generator<OutputIterator>::svg_generator(OutputIterator& output_iterator)
-        : output_iterator_(output_iterator) {}
+template<typename OutputIterator>
+svg_generator<OutputIterator>::svg_generator(OutputIterator& output_iterator)
+    : output_iterator_(output_iterator)
+{}
 
-    template <typename OutputIterator>
-    svg_generator<OutputIterator>::~svg_generator() {}
+template<typename OutputIterator>
+svg_generator<OutputIterator>::~svg_generator()
+{}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_header()
-    {
-        karma::lit_type lit;
-        karma::generate(output_iterator_, lit("<?xml version=\"1.0\" standalone=\"no\"?>\n"));
-        karma::generate(output_iterator_, lit("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"));
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_header()
+{
+    karma::lit_type lit;
+    karma::generate(output_iterator_, lit("<?xml version=\"1.0\" standalone=\"no\"?>\n"));
+    karma::generate(
+      output_iterator_,
+      lit("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"));
+}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_opening_root(root_output_attributes const& root_attributes)
-    {
-        using root_attributes_grammar = svg::svg_root_attributes_grammar<OutputIterator>;
-        static const root_attributes_grammar attributes_grammar;
-        karma::lit_type lit;
-        karma::generate(output_iterator_, lit("<svg ") << attributes_grammar << lit(">\n"), root_attributes);
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_opening_root(root_output_attributes const& root_attributes)
+{
+    using root_attributes_grammar = svg::svg_root_attributes_grammar<OutputIterator>;
+    static const root_attributes_grammar attributes_grammar;
+    karma::lit_type lit;
+    karma::generate(output_iterator_, lit("<svg ") << attributes_grammar << lit(">\n"), root_attributes);
+}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_closing_root()
-    {
-        karma::lit_type lit;
-        karma::generate(output_iterator_, lit("</svg>"));
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_closing_root()
+{
+    karma::lit_type lit;
+    karma::generate(output_iterator_, lit("</svg>"));
+}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_rect(rect_output_attributes const& rect_attributes)
-    {
-        using rect_attributes_grammar = svg::svg_rect_attributes_grammar<OutputIterator>;
-        static const rect_attributes_grammar attributes_grammar;
-        karma::lit_type lit;
-        karma::generate(output_iterator_, lit("<rect ") << attributes_grammar << lit("/>\n"), rect_attributes);
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_rect(rect_output_attributes const& rect_attributes)
+{
+    using rect_attributes_grammar = svg::svg_rect_attributes_grammar<OutputIterator>;
+    static const rect_attributes_grammar attributes_grammar;
+    karma::lit_type lit;
+    karma::generate(output_iterator_, lit("<rect ") << attributes_grammar << lit("/>\n"), rect_attributes);
+}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_opening_group(mapnik::value_integer val)
-    {
-        std::string string_val;
-        karma::lit_type lit;
-        mapnik::util::to_string(string_val,val);
-        karma::generate(output_iterator_, lit("<g id=\"")
-                                            << lit(string_val)
-                                            << lit("\"")
-                                            << lit(" inkscape:groupmode=\"layer\"")
-                                            << lit(" inkscape:label=\"")
-                                            << lit(string_val)
-                                            << lit("\"")
-                                            << lit("\n"));
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_opening_group(mapnik::value_integer val)
+{
+    std::string string_val;
+    karma::lit_type lit;
+    mapnik::util::to_string(string_val, val);
+    karma::generate(output_iterator_,
+                    lit("<g id=\"") << lit(string_val) << lit("\"") << lit(" inkscape:groupmode=\"layer\"")
+                                    << lit(" inkscape:label=\"") << lit(string_val) << lit("\"") << lit("\n"));
+}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_opening_group(std::string const& val)
-    {
-        karma::lit_type lit;
-        karma::generate(output_iterator_, lit("<g id=\"")
-                                            << lit(val)
-                                            << lit("\"")
-                                            << lit(" inkscape:groupmode=\"layer\"")
-                                            << lit(" inkscape:label=\"")
-                                            << lit(val)
-                                            << lit("\"")
-                                            << lit(">\n"));
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_opening_group(std::string const& val)
+{
+    karma::lit_type lit;
+    karma::generate(output_iterator_,
+                    lit("<g id=\"") << lit(val) << lit("\"") << lit(" inkscape:groupmode=\"layer\"")
+                                    << lit(" inkscape:label=\"") << lit(val) << lit("\"") << lit(">\n"));
+}
 
-    template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_closing_group()
-    {
-        karma::lit_type lit;
-        karma::generate(output_iterator_, lit("</g>\n"));
-    }
+template<typename OutputIterator>
+void svg_generator<OutputIterator>::generate_closing_group()
+{
+    karma::lit_type lit;
+    karma::generate(output_iterator_, lit("</g>\n"));
+}
 
-    template class svg_generator<std::ostream_iterator<char> >;
-    }}
+template class svg_generator<std::ostream_iterator<char>>;
+} // namespace svg
+} // namespace mapnik
 
 #endif

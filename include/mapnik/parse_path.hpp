@@ -36,7 +36,7 @@ namespace mapnik {
 // fwd declare to reduce compile time
 class feature_impl;
 
-MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
+MAPNIK_DECL path_expression_ptr parse_path(std::string const& str);
 
 struct MAPNIK_DECL path_processor
 {
@@ -47,6 +47,6 @@ struct MAPNIK_DECL path_processor
 
 using path_processor_type = mapnik::path_processor;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_PARSE_PATH_HPP

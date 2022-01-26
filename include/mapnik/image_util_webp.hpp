@@ -31,14 +31,15 @@ namespace mapnik {
 
 struct webp_saver
 {
-    webp_saver(std::ostream &, std::string const&);
-    template <typename T>
-    void operator() (T const&) const;
+    webp_saver(std::ostream&, std::string const&);
+    template<typename T>
+    void operator()(T const&) const;
+
   private:
-    std::ostream & stream_;
+    std::ostream& stream_;
     std::string const& t_;
 };
 
-} // end ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_UTIL_WEBP_HPP

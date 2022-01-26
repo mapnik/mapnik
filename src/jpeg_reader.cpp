@@ -26,8 +26,7 @@
 #include <mapnik/color.hpp>
 
 // jpeg
-extern "C"
-{
+extern "C" {
 #include <jpeglib.h>
 }
 
@@ -36,52 +35,52 @@ extern "C"
 #include <memory>
 #include <fstream>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 class jpeg_reader : public image_reader
 {
-public:
+  public:
     using source_type = T;
     using input_stream = std::iostream;
     const static unsigned BUF_SIZE = 4096;
-private:
+
+  private:
     struct jpeg_stream_wrapper
     {
         jpeg_source_mgr manager;
-        input_stream * stream;
+        input_stream* stream;
         JOCTET buffer[BUF_SIZE];
     };
 
     struct jpeg_info_guard
     {
-        jpeg_info_guard(jpeg_decompress_struct * cinfo)
-            : i_(cinfo) {}
+        jpeg_info_guard(jpeg_decompress_struct* cinfo)
+            : i_(cinfo)
+        {}
 
-        ~jpeg_info_guard()
-        {
-            jpeg_destroy_decompress(i_);
-        }
-        jpeg_decompress_struct * i_;
+        ~jpeg_info_guard() { jpeg_destroy_decompress(i_); }
+        jpeg_decompress_struct* i_;
     };
 
-private:
+  private:
     source_type source_;
     input_stream stream_;
     unsigned width_;
     unsigned height_;
-public:
+
+  public:
     explicit jpeg_reader(std::string const& filename);
     explicit jpeg_reader(char const* data, size_t size);
     ~jpeg_reader();
     unsigned width() const final;
     unsigned height() const final;
-    boost::optional<box2d<double> > bounding_box() const final;
+    boost::optional<box2d<double>> bounding_box() const final;
     inline bool has_alpha() const final { return false; }
-    void read(unsigned x,unsigned y,image_rgba8& image) final;
+    void read(unsigned x, unsigned y, image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
-private:
+
+  private:
     void init();
     static void on_error(j_common_ptr cinfo);
     static void on_error_message(j_common_ptr cinfo);
@@ -92,8 +91,7 @@ private:
     static void attach_stream(j_decompress_ptr cinfo, input_stream* in);
 };
 
-namespace
-{
+namespace {
 image_reader* create_jpeg_reader(std::string const& filename)
 {
     return new jpeg_reader<std::filebuf>(filename);
@@ -104,61 +102,65 @@ image_reader* create_jpeg_reader2(char const* data, size_t size)
     return new jpeg_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
-const bool registered  = register_image_reader("jpeg",create_jpeg_reader);
-const bool registered2 = register_image_reader("jpeg",create_jpeg_reader2);
-}
+const bool registered = register_image_reader("jpeg", create_jpeg_reader);
+const bool registered2 = register_image_reader("jpeg", create_jpeg_reader2);
+} // namespace
 
 // ctors
-template <typename T>
+template<typename T>
 jpeg_reader<T>::jpeg_reader(std::string const& filename)
-    : source_(),
-      stream_(&source_),
-      width_(0),
-      height_(0)
+    : source_()
+    , stream_(&source_)
+    , width_(0)
+    , height_(0)
 {
     source_.open(filename, std::ios_base::in | std::ios_base::binary);
-    if (!stream_) throw image_reader_exception("cannot open image file "+ filename);
+    if (!stream_)
+        throw image_reader_exception("cannot open image file " + filename);
     init();
 }
 
-template <typename T>
+template<typename T>
 jpeg_reader<T>::jpeg_reader(char const* data, size_t size)
-    : source_(data, size),
-      stream_(&source_),
-      width_(0),
-      height_(0)
+    : source_(data, size)
+    , stream_(&source_)
+    , width_(0)
+    , height_(0)
 {
-    if (!stream_) throw image_reader_exception("cannot open image stream");
+    if (!stream_)
+        throw image_reader_exception("cannot open image stream");
     init();
 }
 
 // dtor
-template <typename T>
-jpeg_reader<T>::~jpeg_reader() {}
+template<typename T>
+jpeg_reader<T>::~jpeg_reader()
+{}
 
 // jpeg stream wrapper
-template <typename T>
-void jpeg_reader<T>::init_source (j_decompress_ptr cinfo)
+template<typename T>
+void jpeg_reader<T>::init_source(j_decompress_ptr cinfo)
 {
     jpeg_stream_wrapper* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
-    wrap->stream->seekg(0,std::ios_base::beg);
+    wrap->stream->seekg(0, std::ios_base::beg);
 }
 
-template <typename T>
-boolean jpeg_reader<T>::fill_input_buffer (j_decompress_ptr cinfo)
+template<typename T>
+boolean jpeg_reader<T>::fill_input_buffer(j_decompress_ptr cinfo)
 {
     jpeg_stream_wrapper* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
-    wrap->stream->read(reinterpret_cast<char*>(&wrap->buffer[0]),BUF_SIZE);
+    wrap->stream->read(reinterpret_cast<char*>(&wrap->buffer[0]), BUF_SIZE);
     std::streamsize size = wrap->stream->gcount();
     wrap->manager.next_input_byte = wrap->buffer;
     wrap->manager.bytes_in_buffer = BUF_SIZE;
     return (size > 0) ? TRUE : FALSE;
 }
 
-template <typename T>
+template<typename T>
 void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
 {
-    if (count <= 0) return; //A zero or negative skip count should be treated as a no-op.
+    if (count <= 0)
+        return; // A zero or negative skip count should be treated as a no-op.
     jpeg_stream_wrapper* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
 
     if (wrap->manager.bytes_in_buffer > 0 && count < static_cast<long>(wrap->manager.bytes_in_buffer))
@@ -171,25 +173,26 @@ void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
         wrap->stream->seekg(count - wrap->manager.bytes_in_buffer, std::ios_base::cur);
         // trigger buffer fill
         wrap->manager.next_input_byte = 0;
-        wrap->manager.bytes_in_buffer = 0; //bytes_in_buffer may be zero on return.
+        wrap->manager.bytes_in_buffer = 0; // bytes_in_buffer may be zero on return.
     }
 }
 
-template <typename T>
-void jpeg_reader<T>::term (j_decompress_ptr /*cinfo*/)
+template<typename T>
+void jpeg_reader<T>::term(j_decompress_ptr /*cinfo*/)
 {
-// no-op
+    // no-op
 }
 
-template <typename T>
-void jpeg_reader<T>::attach_stream (j_decompress_ptr cinfo, input_stream* in)
+template<typename T>
+void jpeg_reader<T>::attach_stream(j_decompress_ptr cinfo, input_stream* in)
 {
     if (cinfo->src == 0)
     {
-        cinfo->src = (struct jpeg_source_mgr *)
-            (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT, sizeof(jpeg_stream_wrapper));
+        cinfo->src = (struct jpeg_source_mgr*)(*cinfo->mem->alloc_small)((j_common_ptr)cinfo,
+                                                                         JPOOL_PERMANENT,
+                                                                         sizeof(jpeg_stream_wrapper));
     }
-    jpeg_reader::jpeg_stream_wrapper * src = reinterpret_cast<jpeg_reader::jpeg_stream_wrapper*> (cinfo->src);
+    jpeg_reader::jpeg_stream_wrapper* src = reinterpret_cast<jpeg_reader::jpeg_stream_wrapper*>(cinfo->src);
     src->manager.init_source = init_source;
     src->manager.fill_input_buffer = fill_input_buffer;
     src->manager.skip_input_data = skip;
@@ -200,7 +203,7 @@ void jpeg_reader<T>::attach_stream (j_decompress_ptr cinfo, input_stream* in)
     src->stream = in;
 }
 
-template <typename T>
+template<typename T>
 void jpeg_reader<T>::on_error(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
@@ -208,7 +211,7 @@ void jpeg_reader<T>::on_error(j_common_ptr cinfo)
     throw image_reader_exception(std::string("JPEG Reader: libjpeg could not read image: ") + buffer);
 }
 
-template <typename T>
+template<typename T>
 void jpeg_reader<T>::on_error_message(j_common_ptr cinfo)
 {
     char buffer[JMSG_LENGTH_MAX];
@@ -216,7 +219,7 @@ void jpeg_reader<T>::on_error_message(j_common_ptr cinfo)
     throw image_reader_exception(std::string("JPEG Reader: libjpeg could not read image: ") + buffer);
 }
 
-template <typename T>
+template<typename T>
 void jpeg_reader<T>::init()
 {
     jpeg_decompress_struct cinfo;
@@ -244,25 +247,25 @@ void jpeg_reader<T>::init()
     }
 }
 
-template <typename T>
+template<typename T>
 unsigned jpeg_reader<T>::width() const
 {
     return width_;
 }
 
-template <typename T>
+template<typename T>
 unsigned jpeg_reader<T>::height() const
 {
     return height_;
 }
 
-template <typename T>
-boost::optional<box2d<double> > jpeg_reader<T>::bounding_box() const
+template<typename T>
+boost::optional<box2d<double>> jpeg_reader<T>::bounding_box() const
 {
-    return boost::optional<box2d<double> >();
+    return boost::optional<box2d<double>>();
 }
 
-template <typename T>
+template<typename T>
 void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
 {
     stream_.clear();
@@ -277,16 +280,17 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
     jpeg_create_decompress(&cinfo);
     attach_stream(&cinfo, &stream_);
     int ret = jpeg_read_header(&cinfo, TRUE);
-    if (ret != JPEG_HEADER_OK) throw image_reader_exception("JPEG Reader read(): failed to read header");
+    if (ret != JPEG_HEADER_OK)
+        throw image_reader_exception("JPEG Reader read(): failed to read header");
     jpeg_start_decompress(&cinfo);
     JSAMPARRAY buffer;
     int row_stride;
-    unsigned char a,r,g,b;
+    unsigned char a, r, g, b;
     row_stride = cinfo.output_width * cinfo.output_components;
-    buffer = (*cinfo.mem->alloc_sarray) ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
+    buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
 
-    unsigned w = std::min(unsigned(image.width()),width_ - x0);
-    unsigned h = std::min(unsigned(image.height()),height_ - y0);
+    unsigned w = std::min(unsigned(image.width()), width_ - x0);
+    unsigned h = std::min(unsigned(image.height()), height_ - y0);
 
     const std::unique_ptr<unsigned int[]> out_row(new unsigned int[w]);
     unsigned row = 0;
@@ -304,7 +308,9 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
                 {
                     g = buffer[0][cinfo.output_components * col + 1];
                     b = buffer[0][cinfo.output_components * col + 2];
-                } else {
+                }
+                else
+                {
                     g = r;
                     b = r;
                 }
@@ -317,12 +323,12 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
     jpeg_finish_decompress(&cinfo);
 }
 
-template <typename T>
+template<typename T>
 image_any jpeg_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned height)
 {
-    image_rgba8 data(width,height, true, true);
+    image_rgba8 data(width, height, true, true);
     read(x, y, data);
     return image_any(std::move(data));
 }
 
-}
+} // namespace mapnik

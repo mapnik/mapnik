@@ -39,24 +39,19 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <cstddef>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class rule;
 
-enum filter_mode_enum {
-    FILTER_ALL,
-    FILTER_FIRST,
-    filter_mode_enum_MAX
-};
+enum filter_mode_enum { FILTER_ALL, FILTER_FIRST, filter_mode_enum_MAX };
 
-DEFINE_ENUM( filter_mode_e, filter_mode_enum );
+DEFINE_ENUM(filter_mode_e, filter_mode_enum);
 
 using rules = std::vector<rule>;
 
 class MAPNIK_DECL feature_type_style
 {
-private:
+  private:
     rules rules_;
     filter_mode_e filter_mode_;
     // image_filters
@@ -66,18 +61,19 @@ private:
     boost::optional<composite_mode_e> comp_op_;
     float opacity_;
     bool image_filters_inflate_;
-    friend void swap(feature_type_style& lhs, feature_type_style & rhs);
-public:
+    friend void swap(feature_type_style& lhs, feature_type_style& rhs);
+
+  public:
     // ctor
     feature_type_style();
     feature_type_style(feature_type_style const& rhs);
-    feature_type_style(feature_type_style && rhs);
+    feature_type_style(feature_type_style&& rhs);
     feature_type_style& operator=(feature_type_style rhs);
 
     // comparison
     bool operator==(feature_type_style const& rhs) const;
 
-    void add_rule(rule && rule);
+    void add_rule(rule&& rule);
     rules const& get_rules() const;
     rules& get_rules_nonconst();
 
@@ -88,9 +84,9 @@ public:
 
     // filters
     std::vector<filter::filter_type> const& image_filters() const;
-    std::vector<filter::filter_type> & image_filters();
+    std::vector<filter::filter_type>& image_filters();
     std::vector<filter::filter_type> const& direct_image_filters() const;
-    std::vector<filter::filter_type> & direct_image_filters();
+    std::vector<filter::filter_type>& direct_image_filters();
     // compositing
     void set_comp_op(composite_mode_e comp_op);
     boost::optional<composite_mode_e> comp_op() const;
@@ -98,14 +94,10 @@ public:
     float get_opacity() const;
     void set_image_filters_inflate(bool inflate);
     bool image_filters_inflate() const;
-    inline void reserve(std::size_t size)
-    {
-        rules_.reserve(size);
-    }
+    inline void reserve(std::size_t size) { rules_.reserve(size); }
 
     ~feature_type_style() {}
-
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FEATURE_TYPE_STYLE_HPP

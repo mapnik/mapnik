@@ -51,75 +51,66 @@ path_expression_ptr parse_path(std::string const& str)
     }
 }
 
-namespace path_processor_detail
+namespace path_processor_detail {
+struct path_visitor_
 {
-    struct path_visitor_
+    path_visitor_(std::string& filename, feature_impl const& f)
+        : filename_(filename)
+        , feature_(f)
+    {}
+
+    void operator()(std::string const& token) const { filename_ += token; }
+
+    void operator()(attribute const& attr) const
     {
-        path_visitor_ (std::string & filename, feature_impl const& f)
-            : filename_(filename),
-              feature_(f) {}
+        // convert mapnik::value to std::string
+        value const& val = feature_.get(attr.name());
+        filename_ += val.to_string();
+    }
 
-        void operator() (std::string const& token) const
-        {
-            filename_ += token;
-        }
+    std::string& filename_;
+    feature_impl const& feature_;
+};
 
-        void operator() (attribute const& attr) const
-        {
-            // convert mapnik::value to std::string
-            value const& val = feature_.get(attr.name());
-            filename_ += val.to_string();
-        }
+struct to_string_
+{
+    to_string_(std::string& str)
+        : str_(str)
+    {}
 
-        std::string & filename_;
-        feature_impl const& feature_;
-    };
+    void operator()(std::string const& token) const { str_ += token; }
 
-    struct to_string_
+    void operator()(attribute const& attr) const
     {
-        to_string_ (std::string & str)
-            : str_(str) {}
+        str_ += "[";
+        str_ += attr.name();
+        str_ += "]";
+    }
 
-        void operator() (std::string const& token) const
-        {
-            str_ += token;
-        }
+    std::string& str_;
+};
 
-        void operator() (attribute const& attr) const
-        {
-            str_ += "[";
-            str_ += attr.name();
-            str_ += "]";
-        }
+struct collect_
+{
+    collect_(std::set<std::string>& cont)
+        : cont_(cont)
+    {}
 
-        std::string & str_;
-    };
+    void operator()(std::string const&) const {}
 
-    struct collect_
-    {
-        collect_ (std::set<std::string> & cont)
-            : cont_(cont) {}
+    void operator()(attribute const& attr) const { cont_.insert(attr.name()); }
 
-        void operator() (std::string const&) const
-        {
-        }
+    std::set<std::string>& cont_;
+};
+} // namespace path_processor_detail
 
-        void operator() (attribute const& attr) const
-        {
-            cont_.insert(attr.name());
-        }
-
-        std::set<std::string> & cont_;
-    };
-}
-
-std::string path_processor::evaluate(path_expression const& path,feature_impl const& f)
+std::string path_processor::evaluate(path_expression const& path, feature_impl const& f)
 {
     std::string out;
-    path_processor_detail::path_visitor_ eval(out,f);
-    for ( mapnik::path_component const& token : path)
+    path_processor_detail::path_visitor_ eval(out, f);
+    for (mapnik::path_component const& token : path)
     {
-        util::apply_visitor(std::ref(eval),token);
+        util::apply_visitor(std::ref(eval), token);
     }
     return out;
 }
@@ -128,9 +119,9 @@ std::string path_processor::to_string(path_expression const& path)
 {
     std::string str;
     path_processor_detail::to_string_ visitor(str);
-    for ( mapnik::path_component const& token : path)
+    for (mapnik::path_component const& token : path)
     {
-        util::apply_visitor(std::ref(visitor),token);
+        util::apply_visitor(std::ref(visitor), token);
     }
     return str;
 }
@@ -138,11 +129,10 @@ std::string path_processor::to_string(path_expression const& path)
 void path_processor::collect_attributes(path_expression const& path, std::set<std::string>& names)
 {
     path_processor_detail::collect_ visitor(names);
-    for ( mapnik::path_component const& token : path)
+    for (mapnik::path_component const& token : path)
     {
-        util::apply_visitor(std::ref(visitor),token);
+        util::apply_visitor(std::ref(visitor), token);
     }
 }
 
-
-}
+} // namespace mapnik

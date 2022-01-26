@@ -28,20 +28,25 @@
 #include <utility>
 
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1423r2.html
-// Explicit conversion functions can be used, in a C++17 compatible manner, to cope with the change of return type to// the std::filesystem::path member functions when a UTF-8 encoded path is desired in an object of type std::string.
+// Explicit conversion functions can be used, in a C++17 compatible manner, to cope with the change of return type to//
+// the std::filesystem::path member functions when a UTF-8 encoded path is desired in an object of type std::string.
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-inline std::string from_u8string(std::string const& s) {
-  return s;
+inline std::string from_u8string(std::string const& s)
+{
+    return s;
 }
 
-inline std::string from_u8string(std::string &&s) {
-  return std::move(s);
+inline std::string from_u8string(std::string&& s)
+{
+    return std::move(s);
 }
 #if defined(__cpp_lib_char8_t)
-inline std::string from_u8string(std::u8string const&s) {
-  return std::string(s.begin(), s.end());
+inline std::string from_u8string(std::u8string const& s)
+{
+    return std::string(s.begin(), s.end());
 }
 #endif
 /*
@@ -91,6 +96,7 @@ template<std::size_t N>
 char_array(const char8_t(&)[N]) -> char_array<N>;
 #endif
 */
-}} // end of namespace mapnik
+} // namespace util
+} // end of namespace mapnik
 
 #endif // FROM_U8STRING_HPP

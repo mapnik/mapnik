@@ -29,17 +29,17 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
 
-using mapnik::Featureset;
 using mapnik::box2d;
-using mapnik::feature_ptr;
-using mapnik::transcoder;
 using mapnik::context_ptr;
+using mapnik::feature_ptr;
+using mapnik::Featureset;
+using mapnik::transcoder;
 
 class IResultSet;
 
 class postgis_featureset : public mapnik::Featureset
 {
-public:
+  public:
     postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                        context_ptr const& ctx,
                        std::string const& encoding,
@@ -49,7 +49,7 @@ public:
     feature_ptr next();
     ~postgis_featureset();
 
-private:
+  private:
     std::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
     const std::unique_ptr<mapnik::transcoder> tr_;

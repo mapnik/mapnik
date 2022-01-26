@@ -29,31 +29,30 @@
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 //  Opaque structure for handle
 using mapnik_lib_t = struct _mapnik_lib_t;
 
 class PluginInfo : util::noncopyable
 {
-public:
-    using callable_returning_string = const char* (*) ();
-    using callable_returning_void = void (*) ();
-    PluginInfo (std::string const& filename,
-                std::string const& library_name);
+  public:
+    using callable_returning_string = const char* (*)();
+    using callable_returning_void = void (*)();
+    PluginInfo(std::string const& filename, std::string const& library_name);
     ~PluginInfo();
     std::string const& name() const;
     bool valid() const;
     std::string get_error() const;
-    void * get_symbol(std::string const& sym_name) const;
+    void* get_symbol(std::string const& sym_name) const;
     static void init();
     static void exit();
-private:
+
+  private:
     std::string filename_;
     std::string name_;
-    mapnik_lib_t * module_;
+    mapnik_lib_t* module_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_PLUGIN_HPP

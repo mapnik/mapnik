@@ -8,16 +8,13 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/bimap.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 using simplify_algorithm_lookup_type = boost::bimap<simplify_algorithm_e, std::string>;
-static const simplify_algorithm_lookup_type simplify_lookup = boost::assign::list_of<simplify_algorithm_lookup_type::relation>
-    (radial_distance,"radial-distance")
-    (douglas_peucker,"douglas-peucker")
-    (visvalingam_whyatt,"visvalingam-whyatt")
-    (zhao_saalfeld,"zhao-saalfeld")
-    ;
+static const simplify_algorithm_lookup_type simplify_lookup =
+  boost::assign::list_of<simplify_algorithm_lookup_type::relation>(radial_distance, "radial-distance")(
+    douglas_peucker,
+    "douglas-peucker")(visvalingam_whyatt, "visvalingam-whyatt")(zhao_saalfeld, "zhao-saalfeld");
 
 boost::optional<simplify_algorithm_e> simplify_algorithm_from_string(std::string const& name)
 {
@@ -41,4 +38,4 @@ boost::optional<std::string> simplify_algorithm_to_string(simplify_algorithm_e v
     return algo;
 }
 
-}
+} // namespace mapnik

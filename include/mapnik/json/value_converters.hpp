@@ -23,20 +23,21 @@
 #ifndef MAPNIK_JSON_VALUE_CONVERTERS_HPP
 #define MAPNIK_JSON_VALUE_CONVERTERS_HPP
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename T>
+template<typename T>
 struct value_converter
 {
     using result_type = T;
-    template <typename T1>
-    result_type operator() (T1 const& val) const
+    template<typename T1>
+    result_type operator()(T1 const& val) const
     {
         return static_cast<result_type>(val);
     }
 };
 
-}}
-
+} // namespace detail
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_VALUE_CONVERTERS_HPP

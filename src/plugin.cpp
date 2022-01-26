@@ -24,64 +24,73 @@
 #include <stdexcept>
 
 #ifdef _WIN32
-  #define NOMINMAX
-  #include <windows.h>
-  #define handle HMODULE
-  #define dlsym GetProcAddress
-  #define dlclose FreeLibrary
-  #define dlerror GetLastError
-  #define MAPNIK_SUPPORTS_DLOPEN
+#define NOMINMAX
+#include <windows.h>
+#define handle  HMODULE
+#define dlsym   GetProcAddress
+#define dlclose FreeLibrary
+#define dlerror GetLastError
+#define MAPNIK_SUPPORTS_DLOPEN
 #else
-  #ifdef MAPNIK_HAS_DLCFN
-    #include <dlfcn.h>
-    #define MAPNIK_SUPPORTS_DLOPEN
-  #endif
-  #define handle void *
+#ifdef MAPNIK_HAS_DLCFN
+#include <dlfcn.h>
+#define MAPNIK_SUPPORTS_DLOPEN
+#endif
+#define handle void*
 #endif
 
 // TODO - handle/report dlerror
 
-namespace mapnik
-{
+namespace mapnik {
 
-struct _mapnik_lib_t {
+struct _mapnik_lib_t
+{
     handle dl;
 };
 
-PluginInfo::PluginInfo(std::string const& filename,
-                       std::string const& library_name)
-    : filename_(filename),
-      name_(),
-      module_(new mapnik_lib_t)
-      {
+PluginInfo::PluginInfo(std::string const& filename, std::string const& library_name)
+    : filename_(filename)
+    , name_()
+    , module_(new mapnik_lib_t)
+{
 #ifdef _WIN32
-          if (module_) module_->dl = LoadLibraryA(filename.c_str());
-          if (module_ && module_->dl)
-          {
-              callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-                if (name_call) name_ = name_call();
-                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
-                if (init_once) {
-                    init_once();
-                }
-          }
+    if (module_)
+        module_->dl = LoadLibraryA(filename.c_str());
+    if (module_ && module_->dl)
+    {
+        callable_returning_string name_call =
+          reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
+        if (name_call)
+            name_ = name_call();
+        callable_returning_void init_once =
+          reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
+        if (init_once)
+        {
+            init_once();
+        }
+    }
 #else
-  #ifdef MAPNIK_HAS_DLCFN
-          if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
-          if (module_ && module_->dl)
-          {
-                callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-                if (name_call) name_ = name_call();
-                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
-                if (init_once) {
-                    init_once();
-                }
-          }
-  #else
-          throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
-  #endif
+#ifdef MAPNIK_HAS_DLCFN
+    if (module_)
+        module_->dl = dlopen(filename.c_str(), RTLD_LAZY);
+    if (module_ && module_->dl)
+    {
+        callable_returning_string name_call =
+          reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
+        if (name_call)
+            name_ = name_call();
+        callable_returning_void init_once =
+          reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
+        if (init_once)
+        {
+            init_once();
+        }
+    }
+#else
+    throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
 #endif
-      }
+#endif
+}
 
 PluginInfo::~PluginInfo()
 {
@@ -102,7 +111,7 @@ PluginInfo::~PluginInfo()
         if (module_->dl && name_ != "gdal" && name_ != "ogr")
         {
 #ifndef MAPNIK_NO_DLCLOSE
-            dlclose(module_->dl),module_->dl=0;
+            dlclose(module_->dl), module_->dl = 0;
 #endif
         }
 #endif
@@ -110,11 +119,10 @@ PluginInfo::~PluginInfo()
     }
 }
 
-
-void * PluginInfo::get_symbol(std::string const& sym_name) const
+void* PluginInfo::get_symbol(std::string const& sym_name) const
 {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-    return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
+    return static_cast<void*>(dlsym(module_->dl, sym_name.c_str()));
 #else
     return nullptr;
 #endif
@@ -128,7 +136,8 @@ std::string const& PluginInfo::name() const
 bool PluginInfo::valid() const
 {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-    if (module_ && module_->dl && !name_.empty()) return true;
+    if (module_ && module_->dl && !name_.empty())
+        return true;
 #endif
     return false;
 }
@@ -148,5 +157,4 @@ void PluginInfo::exit()
     // do any shutdown needed
 }
 
-
-}
+} // namespace mapnik

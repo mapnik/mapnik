@@ -34,8 +34,7 @@
 
 #include <memory>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class feature_impl;
 class proj_transform;
@@ -47,17 +46,19 @@ namespace {
 // extract_bboxes. We should now have a new offset at which
 // to render it, and the boxes themselves should already be
 // in the detector from the placement_finder.
-template <typename T>
+template<typename T>
 struct thunk_renderer : render_thunk_list_dispatch
 {
     using renderer_type = cairo_renderer<T>;
 
-    thunk_renderer(renderer_type & ren,
-                   cairo_context & context,
-                   cairo_face_manager & face_manager,
-                   renderer_common & common)
-        : ren_(ren), context_(context), face_manager_(face_manager),
-          common_(common)
+    thunk_renderer(renderer_type& ren,
+                   cairo_context& context,
+                   cairo_face_manager& face_manager,
+                   renderer_common& common)
+        : ren_(ren)
+        , context_(context)
+        , face_manager_(face_manager)
+        , common_(common)
     {}
 
     virtual void operator()(vector_marker_render_thunk const& thunk)
@@ -102,37 +103,34 @@ struct thunk_renderer : render_thunk_list_dispatch
                 ren_.render_marker(glyphs->marker_pos(),
                                    *mark->marker_,
                                    mark->transform_,
-                                   thunk.opacity_, thunk.comp_op_);
+                                   thunk.opacity_,
+                                   thunk.comp_op_);
             }
             context_.add_text(*glyphs, face_manager_, src_over, src_over, common_.scale_factor_);
         }
     }
 
-private:
-    renderer_type & ren_;
-    cairo_context & context_;
-    cairo_face_manager & face_manager_;
-    renderer_common & common_;
+  private:
+    renderer_type& ren_;
+    cairo_context& context_;
+    cairo_face_manager& face_manager_;
+    renderer_common& common_;
 };
 
 } // anonymous namespace
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(group_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     thunk_renderer<T> ren(*this, context_, face_manager_, common_);
 
-    render_group_symbolizer(
-        sym, feature, common_.vars_, prj_trans, common_.query_extent_, common_,
-        ren);
+    render_group_symbolizer(sym, feature, common_.vars_, prj_trans, common_.query_extent_, common_, ren);
 }
 
-template void cairo_renderer<cairo_ptr>::process(group_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void cairo_renderer<cairo_ptr>::process(group_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

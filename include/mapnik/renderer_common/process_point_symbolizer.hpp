@@ -38,31 +38,33 @@
 
 namespace mapnik {
 
-template <typename F,typename RendererType>
-void render_point_symbolizer(point_symbolizer const &sym,
-                             mapnik::feature_impl &feature,
-                             proj_transform const &prj_trans,
-                             RendererType &common,
+template<typename F, typename RendererType>
+void render_point_symbolizer(point_symbolizer const& sym,
+                             mapnik::feature_impl& feature,
+                             proj_transform const& prj_trans,
+                             RendererType& common,
                              F render_marker)
 {
-    std::string filename = get<std::string,keys::file>(sym,feature, common.vars_);
+    std::string filename = get<std::string, keys::file>(sym, feature, common.vars_);
     std::shared_ptr<mapnik::marker const> mark = filename.empty()
-       ? std::make_shared<mapnik::marker const>(mapnik::marker_rgba8())
-       : marker_cache::instance().find(filename, true);
+                                                   ? std::make_shared<mapnik::marker const>(mapnik::marker_rgba8())
+                                                   : marker_cache::instance().find(filename, true);
 
     if (!mark->is<mapnik::marker_null>())
     {
-        value_double opacity = get<value_double,keys::opacity>(sym, feature, common.vars_);
+        value_double opacity = get<value_double, keys::opacity>(sym, feature, common.vars_);
         value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, common.vars_);
         value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym, feature, common.vars_);
-        point_placement_enum placement= get<point_placement_enum, keys::point_placement_type>(sym, feature, common.vars_);
+        point_placement_enum placement =
+          get<point_placement_enum, keys::point_placement_type>(sym, feature, common.vars_);
 
         box2d<double> const& bbox = mark->bounding_box();
         coord2d center = bbox.center();
 
         agg::trans_affine tr;
         auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
-        if (image_transform) evaluate_transform(tr, feature, common.vars_, *image_transform, common.scale_factor_);
+        if (image_transform)
+            evaluate_transform(tr, feature, common.vars_, *image_transform, common.scale_factor_);
 
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
@@ -71,16 +73,17 @@ void render_point_symbolizer(point_symbolizer const &sym,
         mapnik::geometry::geometry<double> const& geometry = feature.get_geometry();
         mapnik::geometry::point<double> pt;
         geometry::geometry_types type = geometry::geometry_type(geometry);
-        if (placement == CENTROID_POINT_PLACEMENT ||
-            type == geometry::geometry_types::Point ||
+        if (placement == CENTROID_POINT_PLACEMENT || type == geometry::geometry_types::Point ||
             type == geometry::geometry_types::MultiPoint)
         {
-            if (!geometry::centroid(geometry, pt)) return;
+            if (!geometry::centroid(geometry, pt))
+                return;
         }
         else if (type == mapnik::geometry::geometry_types::Polygon)
         {
-            auto const& poly = mapnik::util::get<geometry::polygon<double> >(geometry);
-            if (!geometry::interior(poly, common.scale_factor_, pt)) return;
+            auto const& poly = mapnik::util::get<geometry::polygon<double>>(geometry);
+            if (!geometry::interior(poly, common.scale_factor_, pt))
+                return;
         }
         else
         {
@@ -90,17 +93,12 @@ void render_point_symbolizer(point_symbolizer const &sym,
         double x = pt.x;
         double y = pt.y;
         double z = 0;
-        prj_trans.backward(x,y,z);
-        common.t_.forward(&x,&y);
-        label_ext.re_center(x,y);
-        if (allow_overlap ||
-            common.detector_->has_placement(label_ext))
+        prj_trans.backward(x, y, z);
+        common.t_.forward(&x, &y);
+        label_ext.re_center(x, y);
+        if (allow_overlap || common.detector_->has_placement(label_ext))
         {
-
-            render_marker(pixel_position(x, y),
-                          *mark,
-                          tr,
-                          opacity);
+            render_marker(pixel_position(x, y), *mark, tr, opacity);
 
             if (!ignore_placement)
                 common.detector_->insert(label_ext);

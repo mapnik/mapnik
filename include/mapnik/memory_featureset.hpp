@@ -39,21 +39,21 @@ namespace mapnik {
 
 class memory_featureset : public Featureset
 {
-public:
+  public:
     memory_featureset(box2d<double> const& bbox, memory_datasource const& ds, bool bbox_check = true)
-        : bbox_(bbox),
-          pos_(ds.features_.begin()),
-          end_(ds.features_.end()),
-          type_(ds.type()),
-          bbox_check_(bbox_check)
+        : bbox_(bbox)
+        , pos_(ds.features_.begin())
+        , end_(ds.features_.end())
+        , type_(ds.type())
+        , bbox_check_(bbox_check)
     {}
 
     memory_featureset(box2d<double> const& bbox, std::deque<feature_ptr> const& features, bool bbox_check = true)
-        : bbox_(bbox),
-          pos_(features.begin()),
-          end_(features.end()),
-          type_(datasource::Vector),
-          bbox_check_(bbox_check)
+        : bbox_(bbox)
+        , pos_(features.begin())
+        , end_(features.end())
+        , type_(datasource::Vector)
+        , bbox_check_(bbox_check)
     {}
 
     virtual ~memory_featureset() {}
@@ -90,13 +90,13 @@ public:
         return feature_ptr();
     }
 
-private:
+  private:
     box2d<double> bbox_;
     std::deque<feature_ptr>::const_iterator pos_;
     std::deque<feature_ptr>::const_iterator end_;
     datasource::datasource_t type_;
     bool bbox_check_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MEMORY_FEATURESET_HPP
