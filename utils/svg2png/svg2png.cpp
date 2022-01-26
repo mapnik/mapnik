@@ -53,19 +53,16 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_scanline_u.h"
 MAPNIK_DISABLE_WARNING_POP
 
-
 struct main_marker_visitor
 {
-    main_marker_visitor(std::string const& svg_name,
-                        double scale_factor,
-                        bool verbose,
-                        bool auto_open)
-        : svg_name_(svg_name),
-          scale_factor_(scale_factor),
-          verbose_(verbose),
-          auto_open_(auto_open) {}
+    main_marker_visitor(std::string const& svg_name, double scale_factor, bool verbose, bool auto_open)
+        : svg_name_(svg_name)
+        , scale_factor_(scale_factor)
+        , verbose_(verbose)
+        , auto_open_(auto_open)
+    {}
 
-    int operator() (mapnik::marker_svg const& marker) const
+    int operator()(mapnik::marker_svg const& marker) const
     {
         using pixfmt = agg::pixfmt_rgba32_pre;
         using renderer_base = agg::renderer_base<pixfmt>;
@@ -112,19 +109,16 @@ struct main_marker_visitor
 
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
-        mapnik::svg::renderer_agg<
-            mapnik::svg_path_adapter,
-            mapnik::svg_attribute_type,
-            renderer_solid,
-            agg::pixfmt_rgba32_pre > svg_renderer_this(svg_path,
-                                                       marker.get_data()->attributes());
+        mapnik::svg::
+          renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre>
+            svg_renderer_this(svg_path, marker.get_data()->attributes());
 
         svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 
         std::string png_name(svg_name_);
-        boost::algorithm::ireplace_last(png_name,".svg",".png");
+        boost::algorithm::ireplace_last(png_name, ".svg", ".png");
         demultiply_alpha(im);
-        mapnik::save_to_file<mapnik::image_rgba8>(im,png_name,"png");
+        mapnik::save_to_file<mapnik::image_rgba8>(im, png_name, "png");
         int status = 0;
         if (auto_open_)
         {
@@ -143,8 +137,8 @@ struct main_marker_visitor
     }
 
     // default
-    template <typename T>
-    int operator() (T const&) const
+    template<typename T>
+    int operator()(T const&) const
     {
         std::clog << "svg2png error: failed to process '" << svg_name_ << "'\n";
         return -1;
@@ -157,7 +151,7 @@ struct main_marker_visitor
     bool auto_open_;
 };
 
-int main (int argc,char** argv)
+int main(int argc, char** argv)
 {
     namespace po = boost::program_options;
 
@@ -172,6 +166,7 @@ int main (int argc,char** argv)
     try
     {
         po::options_description desc("svg2png utility");
+        // clang-format off
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
@@ -181,7 +176,7 @@ int main (int argc,char** argv)
             ("scale-factor", po::value<double>(), "provide scaling factor (default: 1.0)")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
-
+        // clang-format on
         po::positional_options_description p;
         p.add("svg", -1);
         po::variables_map vm;
@@ -221,7 +216,7 @@ int main (int argc,char** argv)
         }
         if (vm.count("svg"))
         {
-            svg_files=vm["svg"].as< std::vector<std::string> >();
+            svg_files = vm["svg"].as<std::vector<std::string>>();
         }
         else
         {
@@ -237,22 +232,21 @@ int main (int argc,char** argv)
         }
         while (itr != svg_files.end())
         {
-            std::string svg_name (*itr++);
+            std::string svg_name(*itr++);
             if (verbose)
             {
                 std::clog << "found: " << svg_name << "\n";
             }
-            std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false, strict);
+            std::shared_ptr<mapnik::marker const> marker =
+              mapnik::marker_cache::instance().find(svg_name, false, strict);
             main_marker_visitor visitor(svg_name, scale_factor, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::clog << "Exception caught:" << ex.what() << std::endl;
         return -1;
-    }
-    catch (...)
+    } catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
         return -1;
