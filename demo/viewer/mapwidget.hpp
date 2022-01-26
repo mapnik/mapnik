@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #ifndef MAP_WIDGET_HPP
 #define MAP_WIDGET_HPP
 
@@ -30,7 +29,6 @@
 #include <string>
 #include <memory>
 
-
 #ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
 #endif
@@ -39,22 +37,16 @@ class MapWidget : public QWidget
 {
     Q_OBJECT
 
-public:
-    enum eTool
-    {
+  public:
+    enum eTool {
         ZoomToBox = 1,
         Pan,
         Info,
     };
 
-    enum eRenderer
-    {
-        AGG,
-        Cairo,
-        Grid
-    };
+    enum eRenderer { AGG, Cairo, Grid };
 
-private:
+  private:
     std::shared_ptr<mapnik::Map> map_;
     int selected_;
     QPixmap pix_;
@@ -70,11 +62,12 @@ private:
     int selectedLayer_;
     double scaling_factor_;
     eRenderer cur_renderer_;
-public:
-    MapWidget(QWidget *parent=0);
+
+  public:
+    MapWidget(QWidget* parent = 0);
     void setTool(eTool tool);
     std::shared_ptr<mapnik::Map> getMap();
-    inline QPixmap const& pixmap() const { return pix_;}
+    inline QPixmap const& pixmap() const { return pix_; }
     void setMap(std::shared_ptr<mapnik::Map> map);
     void defaultView();
     void zoomToBox(mapnik::box2d<double> const& box);
@@ -85,26 +78,24 @@ public:
     void panUp();
     void panDown();
     void set_scaling_factor(double);
-public slots:
+  public slots:
     void zoomToLevel(int level);
     void updateMap();
     void layerSelected(int);
     void updateRenderer(QString const& txt);
     void updateScaleFactor(double scale_factor);
-signals:
+  signals:
     void mapViewChanged();
-protected:
+
+  protected:
     void paintEvent(QPaintEvent* ev);
     void resizeEvent(QResizeEvent* ev);
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void wheelEvent(QWheelEvent* e);
-    void keyPressEvent(QKeyEvent *e);
-    void export_to_file(unsigned width,
-                        unsigned height,
-                        std::string const& filename,
-                        std::string const& type);
+    void keyPressEvent(QKeyEvent* e);
+    void export_to_file(unsigned width, unsigned height, std::string const& filename, std::string const& type);
 };
 
 #endif // MAP_WIDGET_HPP

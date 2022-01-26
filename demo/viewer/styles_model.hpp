@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #ifndef STYLE_MODEL_HPP
 #define STYLE_MODEL_HPP
 
@@ -27,24 +26,23 @@
 #include <mapnik/map.hpp>
 #endif
 
-
-
 class node;
 class StyleModel : public QAbstractItemModel
 {
-      Q_OBJECT
+    Q_OBJECT
   public:
-      StyleModel(std::shared_ptr<mapnik::Map> map, QObject * parent=0);
-      ~StyleModel();
-      // interface
-      QModelIndex index  (int row, int col, QModelIndex const& parent = QModelIndex()) const;
-      QModelIndex parent (QModelIndex const& child) const;
-      int rowCount( QModelIndex const& parent = QModelIndex()) const;
-      int columnCount( QModelIndex const& parent = QModelIndex()) const;
-      QVariant  data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-   private:
-      //std::shared_ptr<mapnik::Map> map_;
-      const std::unique_ptr<node> root_;
+    StyleModel(std::shared_ptr<mapnik::Map> map, QObject* parent = 0);
+    ~StyleModel();
+    // interface
+    QModelIndex index(int row, int col, QModelIndex const& parent = QModelIndex()) const;
+    QModelIndex parent(QModelIndex const& child) const;
+    int rowCount(QModelIndex const& parent = QModelIndex()) const;
+    int columnCount(QModelIndex const& parent = QModelIndex()) const;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+
+  private:
+    // std::shared_ptr<mapnik::Map> map_;
+    const std::unique_ptr<node> root_;
 };
 
 #endif // STYLE_MODEL_HPP
