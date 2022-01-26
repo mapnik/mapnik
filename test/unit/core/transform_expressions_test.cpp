@@ -5,14 +5,13 @@
 
 namespace {
 
-
 bool test_transform_expressions(std::string const& in, std::string const& out)
 {
     auto tr_list = mapnik::parse_transform(in);
     return mapnik::to_expression_string(*tr_list) == out;
 }
 
-}
+} // namespace
 
 TEST_CASE("transform-expressions")
 {
@@ -56,5 +55,6 @@ TEST_CASE("transform-expressions")
 
     // compound
     CHECK(test_transform_expressions("translate([tx]) rotate([a])", "translate([tx]) rotate([a])"));
-    CHECK(test_transform_expressions("rotate(30+@global_value) scale(2*[sx],[sy])", "rotate((30+@global_value)) scale(2*[sx], [sy])"));
+    CHECK(test_transform_expressions("rotate(30+@global_value) scale(2*[sx],[sy])",
+                                     "rotate((30+@global_value)) scale(2*[sx], [sy])"));
 }
