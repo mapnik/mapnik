@@ -84,6 +84,10 @@ jobs:
         working-directory: build/${{ env.preset }}/out
         run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- .\mapnik-test-visual.exe -j 4 --output-dir ./visual-test-result
       
+      - name: Pack visual test results
+        working-directory: build/${{ env.preset }}/out
+        run: tar cfvz visual-test-results.tar.gz ./visual-test-result
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
@@ -98,4 +102,11 @@ jobs:
         with:
           name: windows-mapnik-artifact-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/*-ci/mapnik-*.tar.gz
+          retention-days: 2
+      
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-mapnik-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
+          path: build/${{ env.preset }}/out/visual-test-results.tar.gz
           retention-days: 2
