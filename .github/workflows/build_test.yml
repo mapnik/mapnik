@@ -13,7 +13,7 @@ jobs:
     name: Windows memory mapped
     uses: mathisloge/mapnik/.github/workflows/windows.yml@gh_ci
     with:
-      VCPKG_SHA: 5ef52b5b75887fb150711f5effb221dd98b99e6f
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -24,7 +24,7 @@ jobs:
     name: Windows file based
     uses: mathisloge/mapnik/.github/workflows/windows.yml@gh_ci
     with:
-      VCPKG_SHA: 5ef52b5b75887fb150711f5effb221dd98b99e6f
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -35,7 +35,7 @@ jobs:
     name: Linux memory mapped
     uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@gh_ci
     with:
-      VCPKG_SHA: 5ef52b5b75887fb150711f5effb221dd98b99e6f
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -46,7 +46,7 @@ jobs:
     name: Linux file based
     uses: mathisloge/mapnik/.github/workflows/ubuntu.yml@gh_ci
     with:
-      VCPKG_SHA: 5ef52b5b75887fb150711f5effb221dd98b99e6f
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -57,7 +57,7 @@ jobs:
     name: MacOS memory mapped
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
     with:
-      VCPKG_SHA: 5ef52b5b75887fb150711f5effb221dd98b99e6f
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -68,7 +68,7 @@ jobs:
     name: MacOS file based
     uses: mathisloge/mapnik/.github/workflows/macos.yml@gh_ci
     with:
-      VCPKG_SHA: 5ef52b5b75887fb150711f5effb221dd98b99e6f
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mathisloge/index.json
       NUGET_USERNAME: mathisloge
       USE_MEMORY_MAPPED_FILE: 'OFF'
