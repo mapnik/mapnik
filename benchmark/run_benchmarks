@@ -1,0 +1,65 @@
+#!/bin/bash
+
+BASE=.
+function run {
+    local runner="$BASE/$1 --log=none"
+    local threads="$2"
+    local iters="$3"
+    shift 3
+    $runner --threads 0 --iterations $iters "$@"
+    if test $threads -gt 0; then
+        $runner --threads $threads --iterations $((iters/threads)) "$@"
+    fi
+}
+run test_getline 30 10000000
+#run test_array_allocation 20 100000
+#run test_png_encoding1 10 1000
+#run test_png_encoding2 10 50
+#run test_to_string1 10 100000
+#run test_to_string2 10 100000
+#run test_polygon_clipping 10 1000
+#run test_polygon_clipping_rendering 10 100
+run test_proj_transform1 10 100
+run test_expression_parse 10 10000
+run test_face_ptr_creation 10 1000
+run test_font_registration 10 100
+run test_offset_converter 10 1000
+#run normalize_angle 0 1000000 --min-duration=0.2
+
+# commented since this is really slow on travis
+: '
+$BASE/test_rendering \
+  --name "text rendering" \
+  --map benchmark/data/roads.xml \
+  --extent 1477001.12245,6890242.37746,1480004.49012,6892244.62256 \
+  --width 600 \
+  --height 600 \
+  --iterations 20 \
+  --threads 10
+'
+
+$BASE/test_rendering \
+  --name "gdal tiff rendering" \
+  --map benchmark/data/gdal-wgs.xml  \
+  --extent -180.0,-120.0,180.0,120.0 \
+  --width 600 \
+  --height 600 \
+  --iterations 20 \
+  --threads 10
+
+$BASE/test_rendering \
+  --name "raster tiff rendering" \
+  --map benchmark/data/raster-wgs.xml  \
+  --extent -180.0,-120.0,180.0,120.0 \
+  --width 600 \
+  --height 600 \
+  --iterations 20 \
+  --threads 10
+
+$BASE/test_quad_tree \
+  --iterations 10000 \
+  --threads 1
+
+$BASE/test_quad_tree \
+  --iterations 1000 \
+  --threads 10
