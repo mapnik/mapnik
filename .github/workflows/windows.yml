@@ -76,8 +76,7 @@ jobs:
         run: cmake --build --preset ${{env.preset}}
 
       - name: Test
-        shell: cmd
-        run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- ctest --preset ${{env.preset}}
+        run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --cover_children -- ctest --preset ${{env.preset}}
 
       - name: Test visuals
         shell: pwsh
@@ -85,16 +84,16 @@ jobs:
         working-directory: build/${{ env.preset }}/out
         env:
           PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj4
-        run: OpenCppCoverage --modules *libmapnik* --modules *.input --sources ${{ github.workspace }}\include --sources ${{ github.workspace }}\src --sources ${{ github.workspace }}\utils --sources ${{ github.workspace }}\plugins --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
+        run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --input_coverage=${{ github.workspace }}/ctest.cov --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
 
       - name: Pack visual test results
         working-directory: build/${{ env.preset }}/out
         run: tar cfvz visual-test-results.tar.gz ./visual-test-result
-
+        
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
-          files: testCoverage.xml
+          files: build/${{ env.preset }}/out/mapnik-test-visual.cov
 
       - name: Package
         if: failure()
