@@ -39,26 +39,29 @@
 // boost
 #include <boost/spirit/include/karma.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename CalculationType>
+template<typename CalculationType>
 struct coord_transformer
 {
     using calc_type = CalculationType;
 
     coord_transformer(view_transform const& tr, proj_transform const& prj_trans)
-        : tr_(tr), prj_trans_(prj_trans) {}
+        : tr_(tr)
+        , prj_trans_(prj_trans)
+    {}
 
-
-    template <typename P1, typename P2>
-    inline bool apply(P1 const& p1, P2 & p2) const
+    template<typename P1, typename P2>
+    inline bool apply(P1 const& p1, P2& p2) const
     {
         using coordinate_type = typename boost::geometry::coordinate_type<P2>::type;
         calc_type x = boost::geometry::get<0>(p1);
         calc_type y = boost::geometry::get<1>(p1);
         calc_type z = 0.0;
-        if (!prj_trans_.backward(x, y, z)) return false;
-        tr_.forward(&x,&y);
+        if (!prj_trans_.backward(x, y, z))
+            return false;
+        tr_.forward(&x, &y);
         boost::geometry::set<0>(p2, safe_cast<coordinate_type>(x));
         boost::geometry::set<1>(p2, safe_cast<coordinate_type>(y));
         return true;
@@ -68,23 +71,17 @@ struct coord_transformer
     proj_transform const& prj_trans_;
 };
 
-} // ns geometry
+} // namespace geometry
 
 struct symbol_type_dispatch
 {
-    template <typename Symbolizer>
+    template<typename Symbolizer>
     bool operator()(Symbolizer const&) const
     {
         return false;
     }
-    bool operator()(line_symbolizer const&) const
-    {
-        return true;
-    }
-    bool operator()(polygon_symbolizer const&) const
-    {
-        return true;
-    }
+    bool operator()(line_symbolizer const&) const { return true; }
+    bool operator()(polygon_symbolizer const&) const { return true; }
 };
 
 bool is_path_based(symbolizer const& sym)
@@ -92,23 +89,25 @@ bool is_path_based(symbolizer const& sym)
     return util::apply_visitor(symbol_type_dispatch(), sym);
 }
 
-template <typename OutputIterator, typename PathType>
-void generate_path_impl(OutputIterator & output_iterator, PathType const& path, svg::path_output_attributes const& path_attributes)
+template<typename OutputIterator, typename PathType>
+void generate_path_impl(OutputIterator& output_iterator,
+                        PathType const& path,
+                        svg::path_output_attributes const& path_attributes)
 {
     using path_dash_array_grammar = svg::svg_path_dash_array_grammar<OutputIterator>;
     using path_attributes_grammar = svg::svg_path_attributes_grammar<OutputIterator>;
     static const path_attributes_grammar attributes_grammar;
     static const path_dash_array_grammar dash_array_grammar;
-    static const svg::svg_path_generator<OutputIterator,PathType> svg_path_grammer;
+    static const svg::svg_path_generator<OutputIterator, PathType> svg_path_grammer;
     boost::spirit::karma::lit_type lit;
     boost::spirit::karma::generate(output_iterator, lit("<path ") << svg_path_grammer, path);
     boost::spirit::karma::generate(output_iterator, lit(" ") << dash_array_grammar, path_attributes.stroke_dasharray());
     boost::spirit::karma::generate(output_iterator, lit(" ") << attributes_grammar << lit("/>\n"), path_attributes);
 }
 
-template <typename OutputIterator>
+template<typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
-                                           mapnik::feature_impl & feature,
+                                           mapnik::feature_impl& feature,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
@@ -144,10 +143,10 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     return true;
 }
 
-template bool svg_renderer<std::ostream_iterator<char> >::process(rule::symbolizers const& syms,
-                                                                  mapnik::feature_impl & feature,
-                                                                  proj_transform const& prj_trans);
+template bool svg_renderer<std::ostream_iterator<char>>::process(rule::symbolizers const& syms,
+                                                                 mapnik::feature_impl& feature,
+                                                                 proj_transform const& prj_trans);
 
-}
+} // namespace mapnik
 
 #endif

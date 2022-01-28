@@ -53,42 +53,35 @@ class request;
 struct pixel_position;
 struct cairo_save_restore
 {
-    cairo_save_restore(cairo_context & context)
+    cairo_save_restore(cairo_context& context)
         : context_(context)
     {
         context_.save();
     }
-    ~cairo_save_restore()
-    {
-        context_.restore();
-    }
-    cairo_context & context_;
+    ~cairo_save_restore() { context_.restore(); }
+    cairo_context& context_;
 };
 
-template <typename T>
-class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T> >,
+template<typename T>
+class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer<T>>,
                                    private util::noncopyable
 {
-public:
+  public:
     using processor_impl_type = cairo_renderer<T>;
-    cairo_renderer(Map const& m,
-                   T const& obj,
-                   double scale_factor=1.0,
-                   unsigned offset_x=0,
-                   unsigned offset_y=0);
+    cairo_renderer(Map const& m, T const& obj, double scale_factor = 1.0, unsigned offset_x = 0, unsigned offset_y = 0);
     cairo_renderer(Map const& m,
                    request const& req,
                    attributes const& vars,
                    T const& obj,
-                   double scale_factor=1.0,
-                   unsigned offset_x=0,
-                   unsigned offset_y=0);
+                   double scale_factor = 1.0,
+                   unsigned offset_x = 0,
+                   unsigned offset_y = 0);
     cairo_renderer(Map const& m,
                    T const& obj,
                    std::shared_ptr<label_collision_detector4> detector,
-                   double scale_factor=1.0,
-                   unsigned offset_x=0,
-                   unsigned offset_y=0);
+                   double scale_factor = 1.0,
+                   unsigned offset_x = 0,
+                   unsigned offset_y = 0);
 
     ~cairo_renderer();
     void start_map_processing(Map const& map);
@@ -97,93 +90,56 @@ public:
     void end_layer_processing(layer const& lay);
     void start_style_processing(feature_type_style const& st);
     void end_style_processing(feature_type_style const& st);
-    void process(point_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(line_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(line_pattern_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(polygon_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(polygon_pattern_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(raster_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(shield_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(text_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(building_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(markers_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(group_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    void process(debug_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans);
-    inline bool process(rule::symbolizers const& /*syms*/,
-                        mapnik::feature_impl & /*feature*/,
-                        proj_transform const& /*prj_trans*/)
+    void process(point_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(line_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(line_pattern_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(polygon_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(polygon_pattern_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(raster_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(shield_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(text_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(building_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(markers_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(group_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    void process(debug_symbolizer const& sym, mapnik::feature_impl& feature, proj_transform const& prj_trans);
+    inline bool
+      process(rule::symbolizers const& /*syms*/, mapnik::feature_impl& /*feature*/, proj_transform const& /*prj_trans*/)
     {
         // cairo renderer doesn't support processing of multiple symbolizers.
         return false;
     }
 
-    bool painted()
-    {
-        return true;
-    }
+    bool painted() { return true; }
 
     void painted(bool /*painted*/)
     {
         // nothing to do
     }
 
-    inline eAttributeCollectionPolicy attribute_collection_policy() const
-    {
-        return DEFAULT;
-    }
+    inline eAttributeCollectionPolicy attribute_collection_policy() const { return DEFAULT; }
 
-    inline double scale_factor() const
-    {
-        return common_.scale_factor_;
-    }
+    inline double scale_factor() const { return common_.scale_factor_; }
 
-    inline attributes const& variables() const
-    {
-        return common_.vars_;
-    }
+    inline attributes const& variables() const { return common_.vars_; }
 
     void render_marker(pixel_position const& pos,
                        marker const& marker,
                        agg::trans_affine const& mtx,
-                       double opacity=1.0,
-                       bool recenter=true);
-protected:
+                       double opacity = 1.0,
+                       bool recenter = true);
+
+  protected:
     Map const& m_;
     cairo_context context_;
     renderer_common common_;
     cairo_face_manager face_manager_;
     bool style_level_compositing_;
     void setup(Map const& m);
-
 };
 
 extern template class MAPNIK_DECL cairo_renderer<cairo_ptr>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_CAIRO_RENDERER_HPP
 

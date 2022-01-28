@@ -30,25 +30,16 @@
 // stl
 #include <string>
 
-
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 struct stringifier
 {
-    std::string operator()(std::string const& val) const
-    {
-        return "\"" + val + "\"";
-    }
+    std::string operator()(std::string const& val) const { return "\"" + val + "\""; }
 
-    std::string operator()(value_null) const
-    {
-        return "null";
-    }
+    std::string operator()(value_null) const { return "null"; }
 
-    std::string operator()(value_bool val) const
-    {
-        return val ? "true" : "false";
-    }
+    std::string operator()(value_bool val) const { return val ? "true" : "false"; }
 
     std::string operator()(value_integer val) const
     {
@@ -70,8 +61,10 @@ struct stringifier
         bool first = true;
         for (auto const& val : array)
         {
-            if (first) first = false;
-            else str += ",";
+            if (first)
+                first = false;
+            else
+                str += ",";
             str += mapnik::util::apply_visitor(*this, val);
         }
         str += "]";
@@ -84,9 +77,11 @@ struct stringifier
         bool first = true;
         for (auto const& kv : object)
         {
-            if (first) first = false;
-            else str += ",";
-            str +=  "\"" + kv.first + "\"";
+            if (first)
+                first = false;
+            else
+                str += ",";
+            str += "\"" + kv.first + "\"";
             str += ":";
             str += mapnik::util::apply_visitor(*this, kv.second);
         }
@@ -95,7 +90,7 @@ struct stringifier
     }
 };
 
-}}
-
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_STRINGIFIER_HPP

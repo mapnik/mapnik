@@ -45,16 +45,15 @@ extern "C" {
 
 #include "sqlite_resultset.hpp"
 
-
 //==============================================================================
 
 class sqlite_connection
 {
-public:
+  public:
 
-    sqlite_connection (std::string const& file)
-        : db_(0),
-          file_(file)
+    sqlite_connection(std::string const& file)
+        : db_(0)
+        , file_(file)
     {
 #if SQLITE_VERSION_NUMBER >= 3005000
         int mode = SQLITE_OPEN_READWRITE;
@@ -67,44 +66,44 @@ public:
             mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
         }
 #endif
-        const int rc = sqlite3_open_v2 (file_.c_str(), &db_, mode, 0);
+        const int rc = sqlite3_open_v2(file_.c_str(), &db_, mode, 0);
 #else
-        const int rc = sqlite3_open (file_.c_str(), &db_);
+        const int rc = sqlite3_open(file_.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
         {
             std::ostringstream s;
-            s << "Sqlite Plugin: " << sqlite3_errmsg (db_);
+            s << "Sqlite Plugin: " << sqlite3_errmsg(db_);
 
-            throw mapnik::datasource_exception (s.str());
+            throw mapnik::datasource_exception(s.str());
         }
 
-        sqlite3_busy_timeout(db_,5000);
+        sqlite3_busy_timeout(db_, 5000);
     }
 
-    sqlite_connection (std::string const& file, int flags)
-        : db_(0),
-          file_(file)
+    sqlite_connection(std::string const& file, int flags)
+        : db_(0)
+        , file_(file)
     {
 #if SQLITE_VERSION_NUMBER >= 3005000
-        const int rc = sqlite3_open_v2 (file_.c_str(), &db_, flags, 0);
+        const int rc = sqlite3_open_v2(file_.c_str(), &db_, flags, 0);
 #else
-        const int rc = sqlite3_open (file_.c_str(), &db_);
+        const int rc = sqlite3_open(file_.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
         {
             std::ostringstream s;
-            s << "Sqlite Plugin: " << sqlite3_errmsg (db_);
+            s << "Sqlite Plugin: " << sqlite3_errmsg(db_);
 
-            throw mapnik::datasource_exception (s.str());
+            throw mapnik::datasource_exception(s.str());
         }
     }
 
-    virtual ~sqlite_connection ()
+    virtual ~sqlite_connection()
     {
         if (db_)
         {
-            sqlite3_close (db_);
+            sqlite3_close(db_);
         }
     }
 
@@ -117,10 +116,9 @@ public:
         else
             s << "unknown error, lost connection";
         s << " (" << file_ << ")"
-          << "\nFull sql was: '"
-          <<  sql << "'";
+          << "\nFull sql was: '" << sql << "'";
 
-        throw mapnik::datasource_exception (s.str());
+        throw mapnik::datasource_exception(s.str());
     }
 
     std::shared_ptr<sqlite_resultset> execute_query(std::string const& sql)
@@ -130,7 +128,7 @@ public:
 #endif
         sqlite3_stmt* stmt = 0;
 
-        const int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
+        const int rc = sqlite3_prepare_v2(db_, sql.c_str(), -1, &stmt, 0);
         if (rc != SQLITE_OK)
         {
             throw_sqlite_error(sql);
@@ -162,19 +160,16 @@ public:
         return rc;
     }
 
-    sqlite3* operator*()
-    {
-        return db_;
-    }
+    sqlite3* operator*() { return db_; }
 
     bool load_extension(std::string const& ext_path)
     {
         sqlite3_enable_load_extension(db_, 1);
-        int result = sqlite3_load_extension(db_, ext_path.c_str(), 0 , 0);
-        return (result == SQLITE_OK)? true : false;
+        int result = sqlite3_load_extension(db_, ext_path.c_str(), 0, 0);
+        return (result == SQLITE_OK) ? true : false;
     }
 
-private:
+  private:
 
     sqlite3* db_;
     std::string file_;

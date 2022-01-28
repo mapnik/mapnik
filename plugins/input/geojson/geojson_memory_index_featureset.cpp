@@ -33,20 +33,22 @@
 #include <string>
 #include <vector>
 
-geojson_memory_index_featureset::geojson_memory_index_featureset(std::string const& filename,
-                                                   array_type && index_array)
-:
+geojson_memory_index_featureset::geojson_memory_index_featureset(std::string const& filename, array_type&& index_array)
+    :
 #ifdef _WIN32
-    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
+    file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
+    ,
 #else
-    file_(std::fopen(filename.c_str(),"rb"), std::fclose),
+    file_(std::fopen(filename.c_str(), "rb"), std::fclose)
+    ,
 #endif
-    index_array_(std::move(index_array)),
-    index_itr_(index_array_.begin()),
-    index_end_(index_array_.end()),
-    ctx_(std::make_shared<mapnik::context_type>())
+    index_array_(std::move(index_array))
+    , index_itr_(index_array_.begin())
+    , index_end_(index_array_.end())
+    , ctx_(std::make_shared<mapnik::context_type>())
 {
-    if (!file_) throw std::runtime_error("Can't open " + filename);
+    if (!file_)
+        throw std::runtime_error("Can't open " + filename);
 }
 
 geojson_memory_index_featureset::~geojson_memory_index_featureset() {}

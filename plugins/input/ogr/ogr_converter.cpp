@@ -38,39 +38,38 @@ mapnik::geometry::geometry<double> ogr_converter::convert_geometry(OGRGeometry* 
     // NOTE: wkbFlatten macro in ogr flattens 2.5d types into base 2d type
     switch (wkbFlatten(ogr_geom->getGeometryType()))
     {
-    case wkbPoint:
-        return convert_point(static_cast<OGRPoint*>(ogr_geom));
-        break;
-    case wkbMultiPoint:
-        return convert_multipoint(static_cast<OGRMultiPoint*>(ogr_geom));
-        break;
-    case wkbLinearRing:
-        return convert_linestring(static_cast<OGRLinearRing*>(ogr_geom));
-        break;
-    case wkbLineString:
-        return convert_linestring(static_cast<OGRLineString*>(ogr_geom));
-        break;
-    case wkbMultiLineString:
-        return convert_multilinestring(static_cast<OGRMultiLineString*>(ogr_geom));
-        break;
-    case wkbPolygon:
-        return convert_polygon(static_cast<OGRPolygon*>(ogr_geom));
-        break;
-    case wkbMultiPolygon:
-        return convert_multipolygon(static_cast<OGRMultiPolygon*>(ogr_geom));
-        break;
-    case wkbGeometryCollection:
-        return convert_collection(static_cast<OGRGeometryCollection*>(ogr_geom));
-        break;
-    case wkbNone:
-    case wkbUnknown:
-    default:
-        {
+        case wkbPoint:
+            return convert_point(static_cast<OGRPoint*>(ogr_geom));
+            break;
+        case wkbMultiPoint:
+            return convert_multipoint(static_cast<OGRMultiPoint*>(ogr_geom));
+            break;
+        case wkbLinearRing:
+            return convert_linestring(static_cast<OGRLinearRing*>(ogr_geom));
+            break;
+        case wkbLineString:
+            return convert_linestring(static_cast<OGRLineString*>(ogr_geom));
+            break;
+        case wkbMultiLineString:
+            return convert_multilinestring(static_cast<OGRMultiLineString*>(ogr_geom));
+            break;
+        case wkbPolygon:
+            return convert_polygon(static_cast<OGRPolygon*>(ogr_geom));
+            break;
+        case wkbMultiPolygon:
+            return convert_multipolygon(static_cast<OGRMultiPolygon*>(ogr_geom));
+            break;
+        case wkbGeometryCollection:
+            return convert_collection(static_cast<OGRGeometryCollection*>(ogr_geom));
+            break;
+        case wkbNone:
+        case wkbUnknown:
+        default: {
             MAPNIK_LOG_WARN(ogr) << "ogr_converter: unknown <ogr> geometry_type="
                                  << wkbFlatten(ogr_geom->getGeometryType());
         }
-        return mapnik::geometry::geometry<double>();
-        break;
+            return mapnik::geometry::geometry<double>();
+            break;
     }
 }
 
@@ -99,7 +98,7 @@ mapnik::geometry::line_string<double> ogr_converter::convert_linestring(OGRLineS
     geom.reserve(num_points);
     for (int i = 0; i < num_points; ++i)
     {
-       geom.emplace_back(ogr_geom->getX(i), ogr_geom->getY(i));
+        geom.emplace_back(ogr_geom->getX(i), ogr_geom->getY(i));
     }
     return geom;
 }
@@ -115,7 +114,6 @@ mapnik::geometry::multi_line_string<double> ogr_converter::convert_multilinestri
     }
     return geom;
 }
-
 
 mapnik::geometry::polygon<double> ogr_converter::convert_polygon(OGRPolygon* ogr_geom)
 {

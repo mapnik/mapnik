@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//mapnik
+// mapnik
 #include <mapnik/text/glyph_positions.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/rotation.hpp>
@@ -28,15 +28,15 @@
 // stl
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 glyph_positions::glyph_positions()
-    : data_(),
-      base_point_(),
-      marker_info_(),
-      marker_pos_(),
-      bbox_() {}
+    : data_()
+    , base_point_()
+    , marker_info_()
+    , marker_pos_()
+    , bbox_()
+{}
 
 glyph_positions::const_iterator glyph_positions::begin() const
 {
@@ -84,4 +84,4 @@ pixel_position const& glyph_positions::marker_pos() const
     return marker_pos_;
 }
 
-}// ns mapnik
+} // namespace mapnik

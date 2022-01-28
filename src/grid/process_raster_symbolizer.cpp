@@ -29,19 +29,14 @@
 
 namespace mapnik {
 
-
-template <typename T>
-void grid_renderer<T>::process(raster_symbolizer const&,
-                               mapnik::feature_impl &,
-                               proj_transform const&)
+template<typename T>
+void grid_renderer<T>::process(raster_symbolizer const&, mapnik::feature_impl&, proj_transform const&)
 {
     MAPNIK_LOG_WARN(grid_renderer) << "grid_renderer: raster_symbolizer is not yet supported";
 }
 
-template void grid_renderer<grid>::process(raster_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(raster_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif

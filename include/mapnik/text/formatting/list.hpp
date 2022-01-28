@@ -36,21 +36,29 @@ namespace mapnik {
 class feature_impl;
 
 namespace formatting {
-class MAPNIK_DECL list_node: public node {
-public:
-    list_node() : node(), children_() {}
-    virtual void to_xml(boost::property_tree::ptree &xml) const;
-    virtual void apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
-    virtual void add_expressions(expression_set &output) const;
+class MAPNIK_DECL list_node : public node
+{
+  public:
+    list_node()
+        : node()
+        , children_()
+    {}
+    virtual void to_xml(boost::property_tree::ptree& xml) const;
+    virtual void apply(evaluated_format_properties_ptr const& p,
+                       feature_impl const& feature,
+                       attributes const& vars,
+                       text_layout& output) const;
+    virtual void add_expressions(expression_set& output) const;
 
     void push_back(node_ptr n);
     void set_children(std::vector<node_ptr> const& children);
     std::vector<node_ptr> const& get_children() const;
     void clear();
-protected:
+
+  protected:
     std::vector<node_ptr> children_;
 };
-} //ns formatting
-} //ns mapnik
+} // namespace formatting
+} // namespace mapnik
 
 #endif // FORMATTING_LIST_HPP

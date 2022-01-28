@@ -29,17 +29,15 @@
 #include <vector>
 #include <deque>
 
-
 class geojson_featureset : public mapnik::Featureset
 {
-public:
+  public:
     typedef std::deque<geojson_datasource::item_type> array_type;
-    geojson_featureset(std::vector<mapnik::feature_ptr> const& features,
-                       array_type && index_array);
+    geojson_featureset(std::vector<mapnik::feature_ptr> const& features, array_type&& index_array);
     virtual ~geojson_featureset();
     mapnik::feature_ptr next();
 
-private:
+  private:
     std::vector<mapnik::feature_ptr> const& features_;
     const array_type index_array_;
     array_type::const_iterator index_itr_;

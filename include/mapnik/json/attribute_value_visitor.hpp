@@ -28,18 +28,17 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/stringifier.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 struct attribute_value_visitor
 {
-public:
+  public:
     attribute_value_visitor(mapnik::transcoder const& tr)
-        : tr_(tr) {}
+        : tr_(tr)
+    {}
 
-    mapnik::value operator()(std::string const& val) const
-    {
-        return mapnik::value(tr_.transcode(val.c_str()));
-    }
+    mapnik::value operator()(std::string const& val) const { return mapnik::value(tr_.transcode(val.c_str())); }
 
     mapnik::value operator()(std::vector<mapnik::json::json_value> const& array) const
     {
@@ -47,13 +46,13 @@ public:
         return mapnik::value(tr_.transcode(str.c_str()));
     }
 
-    mapnik::value operator()(std::vector<std::pair<std::string, mapnik::json::json_value> > const& object) const
+    mapnik::value operator()(std::vector<std::pair<std::string, mapnik::json::json_value>> const& object) const
     {
         std::string str = stringifier()(object);
         return mapnik::value(tr_.transcode(str.c_str()));
     }
 
-    template <typename T>
+    template<typename T>
     mapnik::value operator()(T const& val) const
     {
         return mapnik::value(val);
@@ -62,6 +61,7 @@ public:
     mapnik::transcoder const& tr_;
 };
 
-}}
+} // namespace json
+} // namespace mapnik
 
-#endif //MAPNIK_JSON_ATTRIBUTE_VALUE_VISITOR_HPP
+#endif // MAPNIK_JSON_ATTRIBUTE_VALUE_VISITOR_HPP

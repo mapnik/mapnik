@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_CAIRO_CONTEXT_HPP
 #define MAPNIK_CAIRO_CONTEXT_HPP
 
@@ -57,7 +56,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T> class box2d;
+template<typename T>
+class box2d;
 
 using ErrorStatus = cairo_status_t;
 
@@ -67,10 +67,10 @@ inline void throw_exception(ErrorStatus status)
     throw std::runtime_error(std::string("cairo: ") + cairo_status_to_string(status));
 }
 
-//We inline this because it is called so often.
+// We inline this because it is called so often.
 inline void check_status_and_throw_exception(ErrorStatus status)
 {
-    if(status != CAIRO_STATUS_SUCCESS)
+    if (status != CAIRO_STATUS_SUCCESS)
         throw_exception(status);
 }
 
@@ -82,60 +82,65 @@ void check_object_status_and_throw_exception(T const& object)
 
 class cairo_face : private util::noncopyable
 {
-public:
+  public:
     cairo_face(std::shared_ptr<font_library> const& library, face_ptr const& face);
     ~cairo_face();
-    cairo_font_face_t * face() const;
-private:
+    cairo_font_face_t* face() const;
+
+  private:
     class handle
     {
-    public:
+      public:
         handle(std::shared_ptr<font_library> const& library, face_ptr const& face)
-            : library_(library), face_(face) {}
+            : library_(library)
+            , face_(face)
+        {}
 
-    private:
+      private:
         std::shared_ptr<font_library> library_;
         face_ptr face_;
     };
 
-    static void destroy(void *data)
+    static void destroy(void* data)
     {
-        handle *h = static_cast<handle *>(data);
+        handle* h = static_cast<handle*>(data);
         delete h;
     }
 
-private:
+  private:
     face_ptr face_;
-    cairo_font_face_t *c_face_;
+    cairo_font_face_t* c_face_;
 };
 
 using cairo_face_ptr = std::shared_ptr<cairo_face>;
 
 class cairo_face_manager : private util::noncopyable
 {
-public:
+  public:
     cairo_face_manager(std::shared_ptr<font_library> library);
     cairo_face_ptr get_face(face_ptr face);
 
-private:
-    using cairo_face_cache = std::map<face_ptr,cairo_face_ptr>;
+  private:
+    using cairo_face_cache = std::map<face_ptr, cairo_face_ptr>;
     std::shared_ptr<font_library> font_library_;
     cairo_face_cache cache_;
 };
 
 struct cairo_closer
 {
-    void operator() (cairo_t * obj)
+    void operator()(cairo_t* obj)
     {
-        if (obj) cairo_destroy(obj);
+        if (obj)
+            cairo_destroy(obj);
     }
 };
 
 struct cairo_surface_closer
 {
-    void operator() (cairo_surface_t * surface)
+    void operator()(cairo_surface_t* surface)
     {
-        if (surface) cairo_surface_destroy(surface);
+        if (surface)
+            cairo_surface_destroy(surface);
     }
 };
 
@@ -144,28 +149,25 @@ using cairo_surface_ptr = std::shared_ptr<cairo_surface_t>;
 
 inline cairo_ptr create_context(cairo_surface_ptr const& surface)
 {
-    return cairo_ptr(cairo_create(&*surface),cairo_closer());
+    return cairo_ptr(cairo_create(&*surface), cairo_closer());
 }
 
 class cairo_pattern : private util::noncopyable
 {
-public:
+  public:
     explicit cairo_pattern(image_rgba8 const& data, double opacity = 1.0)
     {
         std::size_t pixels = data.width() * data.height();
-        const unsigned int *in_ptr = data.data();
-        const unsigned int *in_end = in_ptr + pixels;
-        unsigned int *out_ptr;
+        const unsigned int* in_ptr = data.data();
+        const unsigned int* in_end = in_ptr + pixels;
+        unsigned int* out_ptr;
 
-        surface_ = cairo_surface_ptr(
-            cairo_image_surface_create(
-                CAIRO_FORMAT_ARGB32,
-                static_cast<int>(data.width()),
-                static_cast<int>(data.height())),
-            cairo_surface_closer());
+        surface_ = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                                                                static_cast<int>(data.width()),
+                                                                static_cast<int>(data.height())),
+                                     cairo_surface_closer());
 
-        out_ptr = reinterpret_cast<unsigned int *>(
-            cairo_image_surface_get_data(surface_.get()));
+        out_ptr = reinterpret_cast<unsigned int*>(cairo_image_surface_get_data(surface_.get()));
 
         while (in_ptr < in_end)
         {
@@ -175,9 +177,9 @@ public:
             unsigned int b = static_cast<unsigned>(((in >> 16) & 0xff) * opacity);
             unsigned int a = static_cast<unsigned>(((in >> 24) & 0xff) * opacity);
 
-            //r = r * a / 255;
-            //g = g * a / 255;
-            //b = b * a / 255;
+            // r = r * a / 255;
+            // g = g * a / 255;
+            // b = b * a / 255;
 
             *out_ptr++ = (a << 24) | (r << 16) | (g << 8) | b;
         }
@@ -186,78 +188,65 @@ public:
         pattern_ = cairo_pattern_create_for_surface(surface_.get());
     }
 
-    cairo_pattern(cairo_surface_ptr const& surface) :
-        surface_(surface),
-        pattern_(cairo_pattern_create_for_surface(surface_.get()))
-    {
-    }
+    cairo_pattern(cairo_surface_ptr const& surface)
+        : surface_(surface)
+        , pattern_(cairo_pattern_create_for_surface(surface_.get()))
+    {}
 
     ~cairo_pattern()
     {
-        if (pattern_) cairo_pattern_destroy(pattern_);
+        if (pattern_)
+            cairo_pattern_destroy(pattern_);
     }
 
-    void set_matrix(cairo_matrix_t const& matrix)
-    {
-        cairo_pattern_set_matrix(pattern_, &matrix);
-    }
+    void set_matrix(cairo_matrix_t const& matrix) { cairo_pattern_set_matrix(pattern_, &matrix); }
 
     void set_origin(double x, double y)
     {
         cairo_matrix_t matrix;
-        cairo_pattern_get_matrix(pattern_,&matrix);
+        cairo_pattern_get_matrix(pattern_, &matrix);
         matrix.x0 = -x;
         matrix.y0 = -y;
-        cairo_pattern_set_matrix(pattern_,&matrix);
+        cairo_pattern_set_matrix(pattern_, &matrix);
     }
 
-    void set_extend(cairo_extend_t extend)
-    {
-        cairo_pattern_set_extend(pattern_, extend);
-    }
+    void set_extend(cairo_extend_t extend) { cairo_pattern_set_extend(pattern_, extend); }
 
-    void set_filter(cairo_filter_t filter)
-    {
-        cairo_pattern_set_filter(pattern_, filter);
-    }
+    void set_filter(cairo_filter_t filter) { cairo_pattern_set_filter(pattern_, filter); }
 
-    cairo_pattern_t * pattern() const
-    {
-        return pattern_;
-    }
+    cairo_pattern_t* pattern() const { return pattern_; }
 
-private:
+  private:
     cairo_surface_ptr surface_;
-    cairo_pattern_t *  pattern_;
+    cairo_pattern_t* pattern_;
 };
-
 
 class cairo_gradient : private util::noncopyable
 {
-public:
-    cairo_gradient(mapnik::gradient const& grad, double opacity=1.0)
+  public:
+    cairo_gradient(mapnik::gradient const& grad, double opacity = 1.0)
     {
-        double x1,x2,y1,y2,rad;
-        grad.get_control_points(x1,y1,x2,y2,rad);
+        double x1, x2, y1, y2, rad;
+        grad.get_control_points(x1, y1, x2, y2, rad);
         if (grad.get_gradient_type() == LINEAR)
         {
             pattern_ = cairo_pattern_create_linear(x1, y1, x2, y2);
         }
         else
         {
-            pattern_ = cairo_pattern_create_radial(x1, y1, 0,  x2, y2, rad);
+            pattern_ = cairo_pattern_create_radial(x1, y1, 0, x2, y2, rad);
         }
 
         units_ = grad.get_units();
 
-        for ( mapnik::stop_pair const& st : grad.get_stop_array() )
+        for (mapnik::stop_pair const& st : grad.get_stop_array())
         {
             mapnik::color const& stop_color = st.second;
-            double r= static_cast<double> (stop_color.red())/255.0;
-            double g= static_cast<double> (stop_color.green())/255.0;
-            double b= static_cast<double> (stop_color.blue())/255.0;
-            double a= static_cast<double> (stop_color.alpha())/255.0;
-            cairo_pattern_add_color_stop_rgba(pattern_,st.first, r, g, b, a*opacity);
+            double r = static_cast<double>(stop_color.red()) / 255.0;
+            double g = static_cast<double>(stop_color.green()) / 255.0;
+            double b = static_cast<double>(stop_color.blue()) / 255.0;
+            double a = static_cast<double>(stop_color.alpha()) / 255.0;
+            cairo_pattern_add_color_stop_rgba(pattern_, st.first, r, g, b, a * opacity);
         }
 
         double m[6];
@@ -265,7 +254,7 @@ public:
         tr.invert();
         tr.store_to(m);
         cairo_matrix_t matrix;
-        cairo_matrix_init(&matrix,m[0],m[1],m[2],m[3],m[4],m[5]);
+        cairo_matrix_init(&matrix, m[0], m[1], m[2], m[3], m[4], m[5]);
         cairo_pattern_set_matrix(pattern_, &matrix);
     }
 
@@ -275,43 +264,32 @@ public:
             cairo_pattern_destroy(pattern_);
     }
 
+    cairo_pattern_t* gradient() const { return pattern_; }
 
-    cairo_pattern_t * gradient() const
-    {
-        return pattern_;
-    }
+    gradient_unit_e units() const { return units_; }
 
-    gradient_unit_e units() const
-    {
-        return units_;
-    }
-
-private:
-    cairo_pattern_t * pattern_;
+  private:
+    cairo_pattern_t* pattern_;
     gradient_unit_e units_;
-
 };
 
 class cairo_context : private util::noncopyable
 {
-public:
+  public:
     cairo_context(cairo_ptr const& cairo);
 
-    inline ErrorStatus get_status() const
-    {
-        return cairo_status(cairo_.get());
-    }
+    inline ErrorStatus get_status() const { return cairo_status(cairo_.get()); }
 
     void clip();
     void show_page();
-    void set_color(color const &color, double opacity = 1.0);
+    void set_color(color const& color, double opacity = 1.0);
     void set_color(double r, double g, double b, double opacity = 1.0);
     void set_operator(composite_mode_e comp_op);
     void set_line_join(line_join_e join);
     void set_line_cap(line_cap_e cap);
     void set_miter_limit(double limit);
     void set_line_width(double width);
-    void set_dash(dash_array const &dashes, double scale_factor);
+    void set_dash(dash_array const& dashes, double scale_factor);
     void set_fill_rule(cairo_fill_rule_t fill_rule);
     void move_to(double x, double y);
     void curve_to(double ct1_x, double ct1_y, double ct2_x, double ct2_y, double end_x, double end_y);
@@ -326,7 +304,7 @@ public:
     void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_rgba8 const& data, double opacity = 1.0);
     void add_image(agg::trans_affine const& tr, image_rgba8 const& data, double opacity = 1.0);
-    void set_font_face(cairo_face_manager & manager, face_ptr face);
+    void set_font_face(cairo_face_manager& manager, face_ptr face);
     void set_font_matrix(cairo_matrix_t const& matrix);
     void set_matrix(cairo_matrix_t const& matrix);
     void transform(cairo_matrix_t const& matrix);
@@ -336,7 +314,7 @@ public:
     void show_glyph(unsigned long index, pixel_position const& pos);
     void glyph_path(unsigned long index, pixel_position const& pos);
     void add_text(glyph_positions const& pos,
-                  cairo_face_manager & manager,
+                  cairo_face_manager& manager,
                   composite_mode_e comp_op = src_over,
                   composite_mode_e halo_comp_op = src_over,
                   double scale_factor = 1.0);
@@ -344,7 +322,7 @@ public:
     void push_group();
     void pop_group();
 
-    template <typename T>
+    template<typename T>
     void add_path(T& path, unsigned start_index = 0)
     {
         double x, y;
@@ -366,11 +344,11 @@ public:
         }
     }
 
-    template <typename T>
+    template<typename T>
     void add_agg_path(T& path, unsigned start_index = 0)
     {
-        double x=0;
-        double y=0;
+        double x = 0;
+        double y = 0;
 
         path.rewind(start_index);
 
@@ -384,26 +362,26 @@ public:
             {
                 if (agg::is_curve3(cm))
                 {
-                    double end_x=0;
-                    double end_y=0;
+                    double end_x = 0;
+                    double end_y = 0;
 
                     MAPNIK_LOG_WARN(cairo_renderer) << "Curve 3 not implemented";
 
                     path.vertex(&end_x, &end_y);
 
-                    curve_to(x,y,x,y,end_x,end_y);
+                    curve_to(x, y, x, y, end_x, end_y);
                 }
                 else if (agg::is_curve4(cm))
                 {
-                    double ct2_x=0;
-                    double ct2_y=0;
-                    double end_x=0;
-                    double end_y=0;
+                    double ct2_x = 0;
+                    double ct2_y = 0;
+                    double end_x = 0;
+                    double end_y = 0;
 
                     path.vertex(&ct2_x, &ct2_y);
                     path.vertex(&end_x, &end_y);
 
-                    curve_to(x,y,ct2_x,ct2_y,end_x,end_y);
+                    curve_to(x, y, ct2_x, ct2_y, end_x, end_y);
                 }
                 else if (agg::is_line_to(cm))
                 {
@@ -426,21 +404,22 @@ public:
         }
     }
 
-private:
+  private:
     cairo_ptr cairo_;
 };
 
-template <typename Context>
+template<typename Context>
 struct line_pattern_rasterizer
 {
-    line_pattern_rasterizer(Context & context, cairo_pattern & pattern, unsigned width, unsigned height)
-        : context_(context),
-          pattern_(pattern),
-          width_(width),
-          height_(height) {}
+    line_pattern_rasterizer(Context& context, cairo_pattern& pattern, unsigned width, unsigned height)
+        : context_(context)
+        , pattern_(pattern)
+        , width_(width)
+        , height_(height)
+    {}
 
-    template <typename T>
-    void add_path(T & path, unsigned start_index = 0)
+    template<typename T>
+    void add_path(T& path, unsigned start_index = 0)
     {
         double length = 0.0;
         double x0 = 0.0;
@@ -479,13 +458,12 @@ struct line_pattern_rasterizer
         }
     }
 
-    Context & context_;
-    cairo_pattern & pattern_;
+    Context& context_;
+    cairo_pattern& pattern_;
     unsigned width_;
     unsigned height_;
 };
 
-}
-
+} // namespace mapnik
 
 #endif // MAPNIK_CAIRO_CONTEXT_HPP

@@ -42,7 +42,8 @@ MAPNIK_DISABLE_WARNING_POP
 class csv_featureset : public mapnik::Featureset
 {
     using locator_type = csv_utils::geometry_column_locator;
-public:
+
+  public:
     using array_type = std::deque<csv_datasource::item_type>;
     csv_featureset(std::string const& filename,
                    locator_type const& locator,
@@ -50,16 +51,17 @@ public:
                    char quote,
                    std::vector<std::string> const& headers,
                    mapnik::context_ptr const& ctx,
-                   array_type && index_array);
+                   array_type&& index_array);
     ~csv_featureset();
     mapnik::feature_ptr next();
-private:
+
+  private:
     mapnik::feature_ptr parse_feature(char const* beg, char const* end);
-#if defined (MAPNIK_MEMORY_MAPPED_FILE)
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
 #else
-    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE*)>;
     file_ptr file_;
 #endif
     char separator_;
@@ -73,6 +75,5 @@ private:
     locator_type const& locator_;
     mapnik::transcoder tr_;
 };
-
 
 #endif // CSV_FEATURESET_HPP

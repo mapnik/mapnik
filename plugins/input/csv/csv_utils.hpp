@@ -48,18 +48,25 @@ bool ignore_case_equal(std::string const& s0, std::string const& s1);
 struct geometry_column_locator
 {
     geometry_column_locator()
-        : type(UNKNOWN), index(-1), index2(-1) {}
+        : type(UNKNOWN)
+        , index(-1)
+        , index2(-1)
+    {}
 
     enum { UNKNOWN = 0, WKT, GEOJSON, LON_LAT } type;
     std::size_t index;
     std::size_t index2;
 };
 
+mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row,
+                                                    geometry_column_locator const& locator);
 
-mapnik::geometry::geometry<double> extract_geometry(std::vector<std::string> const& row, geometry_column_locator const& locator);
-
-template <typename Feature, typename Headers, typename Values, typename Locator, typename Transcoder>
-void process_properties(Feature & feature, Headers const& headers, Values const& values, Locator const& locator, Transcoder const& tr)
+template<typename Feature, typename Headers, typename Values, typename Locator, typename Transcoder>
+void process_properties(Feature& feature,
+                        Headers const& headers,
+                        Values const& values,
+                        Locator const& locator,
+                        Transcoder const& tr)
 {
     auto val_beg = values.begin();
     auto val_end = values.end();
@@ -69,24 +76,22 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
         std::string const& fld_name = headers.at(i);
         if (val_beg == val_end)
         {
-            feature.put(fld_name,tr.transcode(""));
+            feature.put(fld_name, tr.transcode(""));
             continue;
         }
         std::string value = mapnik::util::trim_copy(*val_beg++);
         int value_length = value.length();
 
-        if (locator.index == i && (locator.type == geometry_column_locator::WKT
-                                   || locator.type == geometry_column_locator::GEOJSON)  ) continue;
-
+        if (locator.index == i &&
+            (locator.type == geometry_column_locator::WKT || locator.type == geometry_column_locator::GEOJSON))
+            continue;
 
         bool matched = false;
         bool has_dot = value.find(".") != std::string::npos;
-        if (value.empty() ||
-            (value_length > 20) ||
-            (value_length > 1 && !has_dot && value[0] == '0'))
+        if (value.empty() || (value_length > 20) || (value_length > 1 && !has_dot && value[0] == '0'))
         {
             matched = true;
-            feature.put(fld_name,std::move(tr.transcode(value.c_str())));
+            feature.put(fld_name, std::move(tr.transcode(value.c_str())));
         }
         else if (csv_utils::is_likely_number(value))
         {
@@ -94,19 +99,19 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
             if (has_dot || has_e)
             {
                 double float_val = 0.0;
-                if (mapnik::util::string2double(value,float_val))
+                if (mapnik::util::string2double(value, float_val))
                 {
                     matched = true;
-                    feature.put(fld_name,float_val);
+                    feature.put(fld_name, float_val);
                 }
             }
             else
             {
                 mapnik::value_integer int_val = 0;
-                if (mapnik::util::string2int(value,int_val))
+                if (mapnik::util::string2int(value, int_val))
                 {
                     matched = true;
-                    feature.put(fld_name,int_val);
+                    feature.put(fld_name, int_val);
                 }
             }
         }
@@ -122,7 +127,7 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
             }
             else // fallback to string
             {
-                feature.put(fld_name,std::move(tr.transcode(value.c_str())));
+                feature.put(fld_name, std::move(tr.transcode(value.c_str())));
             }
         }
     }
@@ -130,10 +135,10 @@ void process_properties(Feature & feature, Headers const& headers, Values const&
 
 struct csv_file_parser
 {
-    template <typename T>
-    void parse_csv_and_boxes(std::istream & csv_file, T & boxes);
+    template<typename T>
+    void parse_csv_and_boxes(std::istream& csv_file, T& boxes);
 
-    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const & values);
+    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const& values);
 
     std::vector<std::string> headers_;
     std::string manual_headers_;

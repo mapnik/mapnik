@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 #include <mapnik/warning.hpp>
-
+// clang-format off
 MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS // clang+gcc         
 MAPNIK_DISABLE_WARNING_PRAGMAS // gcc              
 MAPNIK_DISABLE_WARNING_PRAGMA_MESSAGES         
@@ -53,4 +53,5 @@ MAPNIK_DISABLE_WARNING_EXIT_TIME_DESTRUCTORS
 MAPNIK_DISABLE_WARNING_SWITCH_ENUM            
 MAPNIK_DISABLE_WARNING_MISSING_NORETURN       
 MAPNIK_DISABLE_WARNING_COVERED_SWITCH_DEFAULT 
-MAPNIK_DISABLE_WARNING_FLOAT_EQUAL   
+MAPNIK_DISABLE_WARNING_FLOAT_EQUAL
+  // clang-format on

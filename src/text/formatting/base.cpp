@@ -27,7 +27,8 @@
 #include <mapnik/text/formatting/registry.hpp>
 #include <mapnik/xml_node.hpp>
 
-namespace mapnik { namespace formatting {
+namespace mapnik {
+namespace formatting {
 
 node_ptr node::from_xml(xml_node const& xml, fontset_map const& fontsets)
 {
@@ -36,8 +37,9 @@ node_ptr node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     {
         if (node.name() == "Placement")
             continue;
-        node_ptr n = registry::instance().from_xml(node,fontsets);
-        if (n) list->push_back(n);
+        node_ptr n = registry::instance().from_xml(node, fontsets);
+        if (n)
+            list->push_back(n);
     }
     if (list->get_children().size() == 1)
     {
@@ -53,5 +55,5 @@ node_ptr node::from_xml(xml_node const& xml, fontset_map const& fontsets)
     }
 }
 
-} //ns formatting
-} //ns mapnik
+} // namespace formatting
+} // namespace mapnik

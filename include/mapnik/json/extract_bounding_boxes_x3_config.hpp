@@ -32,26 +32,28 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-//auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
-// [x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
-//       [x3::with<mapnik::json::grammar::feature_callback_tag>(std::ref(callback))
-//        [mapnik::json::grammar::feature_collection]
-//           ]];
+// auto feature_collection_impl = x3::with<mapnik::json::grammar::bracket_tag>(std::ref(bracket_counter))
+//  [x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
+//        [x3::with<mapnik::json::grammar::feature_callback_tag>(std::ref(callback))
+//         [mapnik::json::grammar::feature_collection]
+//            ]];
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-template <typename Iterator, typename Boxes>
+template<typename Iterator, typename Boxes>
 struct extract_positions
 {
     using boxes_type = Boxes;
     using box_type = typename boxes_type::value_type::first_type;
 
-    extract_positions(Iterator start, Boxes & boxes)
-        : start_(start),
-          boxes_(boxes) {}
+    extract_positions(Iterator start, Boxes& boxes)
+        : start_(start)
+        , boxes_(boxes)
+    {}
 
-    template <typename T>
-    void operator() (T const& val) const
+    template<typename T>
+    void operator()(T const& val) const
     {
         auto const& r = std::get<0>(val);
         auto const& b = std::get<1>(val);
@@ -59,20 +61,19 @@ struct extract_positions
         {
             auto offset = std::distance(start_, r.begin());
             auto size = std::distance(r.begin(), r.end());
-            boxes_.emplace_back(std::make_pair(box_type(b.minx(), b.miny(), b.maxx(), b.maxy()), std::make_pair(offset, size)));
+            boxes_.emplace_back(
+              std::make_pair(box_type(b.minx(), b.miny(), b.maxx(), b.maxy()), std::make_pair(offset, size)));
         }
     }
     Iterator start_;
-    Boxes & boxes_;
+    Boxes& boxes_;
 };
 
 using box_type = mapnik::box2d<double>;
 using boxes_type = std::vector<std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>>;
 
-
 using box_type_f = mapnik::box2d<float>;
 using boxes_type_f = std::vector<std::pair<box_type_f, std::pair<std::uint64_t, std::uint64_t>>>;
-
 
 #if BOOST_VERSION >= 106700
 using size_type = std::size_t;
@@ -97,28 +98,23 @@ using space_type = x3::standard::space_type;
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
 
 using extract_bounding_boxes_context_type =
-    x3::context<bracket_tag, size_type,
-                x3::context<feature_callback_tag, callback_type,
-                            context_type>>;
+  x3::context<bracket_tag, size_type, x3::context<feature_callback_tag, callback_type, context_type>>;
 
-using extract_bounding_boxes_reverse_context_type =
-    x3::context<keys_tag, keys_map_type,
-                x3::context<feature_callback_tag, callback_type,
-                            x3::context<bracket_tag, size_type,
-                                        phrase_parse_context_type>>>;
-
+using extract_bounding_boxes_reverse_context_type = x3::context<
+  keys_tag,
+  keys_map_type,
+  x3::context<feature_callback_tag, callback_type, x3::context<bracket_tag, size_type, phrase_parse_context_type>>>;
 
 using extract_bounding_boxes_context_type_f =
-    x3::context<bracket_tag, size_type,
-                x3::context<feature_callback_tag, callback_type_f,
-                            context_type>>;
+  x3::context<bracket_tag, size_type, x3::context<feature_callback_tag, callback_type_f, context_type>>;
 
-using extract_bounding_boxes_reverse_context_type_f =
-    x3::context<keys_tag, keys_map_type,
-                x3::context<feature_callback_tag, callback_type_f,
-                            x3::context<bracket_tag, size_type,
-                                        phrase_parse_context_type>>>;
+using extract_bounding_boxes_reverse_context_type_f = x3::context<
+  keys_tag,
+  keys_map_type,
+  x3::context<feature_callback_tag, callback_type_f, x3::context<bracket_tag, size_type, phrase_parse_context_type>>>;
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_EXTRACT_BOUNDING_BOXES_CONFIG_HPP

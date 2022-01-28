@@ -27,17 +27,16 @@
 #include <mapnik/geometry/polygon.hpp>
 #include <mapnik/geometry/point.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <class T>
-MAPNIK_DECL bool polylabel(polygon<T> const& polygon,
-                           T precision,
-                           point<T> & pt);
+template<class T>
+MAPNIK_DECL bool polylabel(polygon<T> const& polygon, T precision, point<T>& pt);
 
-template <class T>
-MAPNIK_DECL T polylabel_precision(polygon<T> const& polygon,
-                                  double scale_factor);
+template<class T>
+MAPNIK_DECL T polylabel_precision(polygon<T> const& polygon, double scale_factor);
 
-} }
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_POLYLABEL_HPP

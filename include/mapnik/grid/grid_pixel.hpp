@@ -25,21 +25,15 @@
 
 #include "agg_basics.h"
 
-namespace mapnik
-{
+namespace mapnik {
 
 //==================================================================gray16
 struct gray16
 {
     using value_type = agg::int16u;
     using calc_type = agg::int32u;
-    using long_type = agg::int64 ;
-    enum base_scale_e
-    {
-        base_shift = 16,
-        base_scale = 1 << base_shift,
-        base_mask  = base_scale - 1
-    };
+    using long_type = agg::int64;
+    enum base_scale_e { base_shift = 16, base_scale = 1 << base_shift, base_mask = base_scale - 1 };
     using self_type = gray16;
 
     value_type v;
@@ -49,18 +43,19 @@ struct gray16
     gray16() {}
 
     //--------------------------------------------------------------------
-    gray16(unsigned v_, unsigned a_=base_mask) :
-        v(agg::int16u(v_)), a(agg::int16u(a_)) {}
+    gray16(unsigned v_, unsigned a_ = base_mask)
+        : v(agg::int16u(v_))
+        , a(agg::int16u(a_))
+    {}
 
     //--------------------------------------------------------------------
-    gray16(const self_type& c, unsigned a_) :
-        v(c.v), a(value_type(a_)) {}
+    gray16(const self_type& c, unsigned a_)
+        : v(c.v)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    void clear()
-    {
-        v = a = 0;
-    }
+    void clear() { v = a = 0; }
 
     //--------------------------------------------------------------------
     const self_type& transparent()
@@ -69,12 +64,12 @@ struct gray16
         return *this;
     }
 
-
     //--------------------------------------------------------------------
     const self_type& premultiply()
     {
-        if(a == base_mask) return *this;
-        if(a == 0)
+        if (a == base_mask)
+            return *this;
+        if (a == 0)
         {
             v = 0;
             return *this;
@@ -86,8 +81,9 @@ struct gray16
     //--------------------------------------------------------------------
     const self_type& premultiply(unsigned a_)
     {
-        if(a == base_mask && a_ >= base_mask) return *this;
-        if(a == 0 || a_ == 0)
+        if (a == base_mask && a_ >= base_mask)
+            return *this;
+        if (a == 0 || a_ == 0)
         {
             v = a = 0;
             return *this;
@@ -101,8 +97,9 @@ struct gray16
     //--------------------------------------------------------------------
     const self_type& demultiply()
     {
-        if(a == base_mask) return *this;
-        if(a == 0)
+        if (a == base_mask)
+            return *this;
+        if (a == 0)
         {
             v = 0;
             return *this;
@@ -126,29 +123,31 @@ struct gray16
     AGG_INLINE void add(const self_type& c, unsigned cover)
     {
         calc_type cv, ca;
-        if(cover == agg::cover_mask)
+        if (cover == agg::cover_mask)
         {
-            if(c.a == base_mask)
+            if (c.a == base_mask)
             {
                 *this = c;
             }
             else
             {
-                cv = v + c.v; v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
-                ca = a + c.a; a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
+                cv = v + c.v;
+                v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
+                ca = a + c.a;
+                a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
             }
         }
         else
         {
-            cv = v + ((c.v * cover + agg::cover_mask/2) >> agg::cover_shift);
-            ca = a + ((c.a * cover + agg::cover_mask/2) >> agg::cover_shift);
+            cv = v + ((c.v * cover + agg::cover_mask / 2) >> agg::cover_shift);
+            ca = a + ((c.a * cover + agg::cover_mask / 2) >> agg::cover_shift);
             v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
             a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
         }
     }
 
     //--------------------------------------------------------------------
-    static self_type no_color() { return self_type(0,0); }
+    static self_type no_color() { return self_type(0, 0); }
 };
 
 //==================================================================gray32
@@ -156,18 +155,13 @@ struct gray32
 {
     using value_type = agg::int32;
     using calc_type = agg::int64u;
-    using long_type = agg::int64 ;
+    using long_type = agg::int64;
     // NOTE: don't touch this enum since enums cannot be
     // 64 bit and we need to ensure that alpha = base_mask
     // in grid_pixfmt.hpp#blend_hiline#l256
     // otherwise code will get invoked that breaks
     // with 32 bit or 64 bit ints (blender_gray::blend_pix)
-    enum base_scale_e
-    {
-        base_shift = 16,
-        base_scale = 1 << base_shift,
-        base_mask  = base_scale - 1
-    };
+    enum base_scale_e { base_shift = 16, base_scale = 1 << base_shift, base_mask = base_scale - 1 };
     using self_type = gray32;
 
     value_type v;
@@ -177,18 +171,19 @@ struct gray32
     gray32() {}
 
     //--------------------------------------------------------------------
-    gray32(value_type v_, unsigned a_=base_mask) :
-        v(v_), a(value_type(a_)) {}
+    gray32(value_type v_, unsigned a_ = base_mask)
+        : v(v_)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    gray32(const self_type& c, unsigned a_) :
-        v(c.v), a(value_type(a_)) {}
+    gray32(const self_type& c, unsigned a_)
+        : v(c.v)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    void clear()
-    {
-        v = a = 0;
-    }
+    void clear() { v = a = 0; }
 
     //--------------------------------------------------------------------
     const self_type& transparent()
@@ -197,12 +192,12 @@ struct gray32
         return *this;
     }
 
-
     //--------------------------------------------------------------------
     const self_type& premultiply()
     {
-        if(a == base_mask) return *this;
-        if(a == 0)
+        if (a == base_mask)
+            return *this;
+        if (a == 0)
         {
             v = 0;
             return *this;
@@ -214,8 +209,9 @@ struct gray32
     //--------------------------------------------------------------------
     const self_type& premultiply(unsigned a_)
     {
-        if(a == base_mask && a_ >= base_mask) return *this;
-        if(a == 0 || a_ == 0)
+        if (a == base_mask && a_ >= base_mask)
+            return *this;
+        if (a == 0 || a_ == 0)
         {
             v = a = 0;
             return *this;
@@ -229,8 +225,9 @@ struct gray32
     //--------------------------------------------------------------------
     const self_type& demultiply()
     {
-        if(a == base_mask) return *this;
-        if(a == 0)
+        if (a == base_mask)
+            return *this;
+        if (a == 0)
         {
             v = 0;
             return *this;
@@ -254,29 +251,31 @@ struct gray32
     AGG_INLINE void add(const self_type& c, unsigned cover)
     {
         calc_type cv, ca;
-        if(cover == agg::cover_mask)
+        if (cover == agg::cover_mask)
         {
-            if(c.a == base_mask)
+            if (c.a == base_mask)
             {
                 *this = c;
             }
             else
             {
-                cv = v + c.v; v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
-                ca = a + c.a; a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
+                cv = v + c.v;
+                v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
+                ca = a + c.a;
+                a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
             }
         }
         else
         {
-            cv = v + ((c.v * cover + agg::cover_mask/2) >> agg::cover_shift);
-            ca = a + ((c.a * cover + agg::cover_mask/2) >> agg::cover_shift);
+            cv = v + ((c.v * cover + agg::cover_mask / 2) >> agg::cover_shift);
+            ca = a + ((c.a * cover + agg::cover_mask / 2) >> agg::cover_shift);
             v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
             a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
         }
     }
 
     //--------------------------------------------------------------------
-    static self_type no_color() { return self_type(0,0); }
+    static self_type no_color() { return self_type(0, 0); }
 };
 
 //==================================================================gray64
@@ -284,18 +283,13 @@ struct gray64
 {
     using value_type = agg::int64;
     using calc_type = agg::int64u;
-    using long_type = agg::int64 ;
+    using long_type = agg::int64;
     // NOTE: don't touch this enum since enums cannot be
     // 64 bit and we need to ensure that alpha = base_mask
     // in grid_pixfmt.hpp#blend_hiline#l256
     // otherwise code will get invoked that breaks
     // with 32 bit or 64 bit ints (blender_gray::blend_pix)
-    enum base_scale_e
-    {
-        base_shift = 16,
-        base_scale = 1 << base_shift,
-        base_mask  = base_scale - 1
-    };
+    enum base_scale_e { base_shift = 16, base_scale = 1 << base_shift, base_mask = base_scale - 1 };
     using self_type = gray64;
 
     value_type v;
@@ -305,18 +299,19 @@ struct gray64
     gray64() {}
 
     //--------------------------------------------------------------------
-    gray64(value_type v_, unsigned a_=base_mask) :
-        v(v_), a(value_type(a_)) {}
+    gray64(value_type v_, unsigned a_ = base_mask)
+        : v(v_)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    gray64(const self_type& c, unsigned a_) :
-        v(c.v), a(value_type(a_)) {}
+    gray64(const self_type& c, unsigned a_)
+        : v(c.v)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    void clear()
-    {
-        v = a = 0;
-    }
+    void clear() { v = a = 0; }
 
     //--------------------------------------------------------------------
     const self_type& transparent()
@@ -325,12 +320,12 @@ struct gray64
         return *this;
     }
 
-
     //--------------------------------------------------------------------
     const self_type& premultiply()
     {
-        if(a == base_mask) return *this;
-        if(a == 0)
+        if (a == base_mask)
+            return *this;
+        if (a == 0)
         {
             v = 0;
             return *this;
@@ -342,8 +337,9 @@ struct gray64
     //--------------------------------------------------------------------
     const self_type& premultiply(unsigned a_)
     {
-        if(a == base_mask && a_ >= base_mask) return *this;
-        if(a == 0 || a_ == 0)
+        if (a == base_mask && a_ >= base_mask)
+            return *this;
+        if (a == 0 || a_ == 0)
         {
             v = a = 0;
             return *this;
@@ -357,8 +353,9 @@ struct gray64
     //--------------------------------------------------------------------
     const self_type& demultiply()
     {
-        if(a == base_mask) return *this;
-        if(a == 0)
+        if (a == base_mask)
+            return *this;
+        if (a == 0)
         {
             v = 0;
             return *this;
@@ -382,31 +379,33 @@ struct gray64
     AGG_INLINE void add(const self_type& c, unsigned cover)
     {
         calc_type cv, ca;
-        if(cover == agg::cover_mask)
+        if (cover == agg::cover_mask)
         {
-            if(c.a == base_mask)
+            if (c.a == base_mask)
             {
                 *this = c;
             }
             else
             {
-                cv = v + c.v; v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
-                ca = a + c.a; a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
+                cv = v + c.v;
+                v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
+                ca = a + c.a;
+                a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
             }
         }
         else
         {
-            cv = v + ((c.v * cover + agg::cover_mask/2) >> agg::cover_shift);
-            ca = a + ((c.a * cover + agg::cover_mask/2) >> agg::cover_shift);
+            cv = v + ((c.v * cover + agg::cover_mask / 2) >> agg::cover_shift);
+            ca = a + ((c.a * cover + agg::cover_mask / 2) >> agg::cover_shift);
             v = (cv > calc_type(base_mask)) ? calc_type(base_mask) : cv;
             a = (ca > calc_type(base_mask)) ? calc_type(base_mask) : ca;
         }
     }
 
     //--------------------------------------------------------------------
-    static self_type no_color() { return self_type(0,0); }
+    static self_type no_color() { return self_type(0, 0); }
 };
 
-}
+} // namespace mapnik
 
 #endif

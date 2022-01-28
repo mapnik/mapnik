@@ -30,17 +30,19 @@ class feature_impl;
 struct attribute;
 
 // Tries a list of placements.
-class MAPNIK_DECL text_placements_list: public text_placements
+class MAPNIK_DECL text_placements_list : public text_placements
 {
-public:
+  public:
     text_placements_list();
-    text_placement_info_ptr get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const;
-    virtual void add_expressions(expression_set & output) const;
-    text_symbolizer_properties & add();
-    text_symbolizer_properties & get(unsigned i);
+    text_placement_info_ptr
+      get_placement_info(double scale_factor, feature_impl const& feature, attributes const& vars) const;
+    virtual void add_expressions(expression_set& output) const;
+    text_symbolizer_properties& add();
+    text_symbolizer_properties& get(unsigned i);
     std::size_t size() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
-private:
+
+  private:
     std::vector<text_symbolizer_properties> list_;
     friend class text_placement_info_list;
 };
@@ -49,16 +51,18 @@ private:
 // See parent class for documentation of each function.
 class MAPNIK_DECL text_placement_info_list : public text_placement_info
 {
-public:
-    text_placement_info_list(text_placements_list const* parent, double _scale_factor) :
-        text_placement_info(parent, _scale_factor),
-        state(0), parent_(parent) {}
+  public:
+    text_placement_info_list(text_placements_list const* parent, double _scale_factor)
+        : text_placement_info(parent, _scale_factor)
+        , state(0)
+        , parent_(parent)
+    {}
     bool next() const;
-private:
+
+  private:
     mutable unsigned state;
     text_placements_list const* parent_;
 };
 
-
-} //namespace
+} // namespace mapnik
 #endif

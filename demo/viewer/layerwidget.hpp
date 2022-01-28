@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #ifndef LAYERWIDGET_HPP
 #define LAYERWIDGET_HPP
 
@@ -28,27 +27,28 @@
 class LayerTab : public QListView
 {
     Q_OBJECT
-public:
-    LayerTab(QWidget* parent=0);
-    void paintEvent(QPaintEvent *e);
-signals:
+  public:
+    LayerTab(QWidget* parent = 0);
+    void paintEvent(QPaintEvent* e);
+  signals:
     void update_mapwidget();
     void layerSelected(int) const;
-public slots:
+  public slots:
     void layerInfo();
     void layerInfo2(QModelIndex const&);
-protected slots:
-    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
-    void selectionChanged(const QItemSelection & selected, const QItemSelection &);
+  protected slots:
+    void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
+    void selectionChanged(const QItemSelection& selected, const QItemSelection&);
 };
 
 class StyleTab : public QTreeView
 {
     Q_OBJECT
-public:
-    StyleTab(QWidget* parent=0);
-protected:
-    void contextMenuEvent(QContextMenuEvent * event );
+  public:
+    StyleTab(QWidget* parent = 0);
+
+  protected:
+    void contextMenuEvent(QContextMenuEvent* event);
 };
 
 #endif

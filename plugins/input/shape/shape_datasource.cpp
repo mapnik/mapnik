@@ -49,28 +49,29 @@ MAPNIK_DISABLE_WARNING_POP
 
 DATASOURCE_PLUGIN(shape_datasource)
 
-using mapnik::String;
-using mapnik::Double;
-using mapnik::Integer;
+using mapnik::attribute_descriptor;
 using mapnik::Boolean;
 using mapnik::datasource_exception;
-using mapnik::filter_in_box;
+using mapnik::Double;
 using mapnik::filter_at_point;
-using mapnik::attribute_descriptor;
+using mapnik::filter_in_box;
+using mapnik::Integer;
+using mapnik::String;
 
 shape_datasource::shape_datasource(parameters const& params)
-    : datasource (params),
-      type_(datasource::Vector),
-      file_length_(0),
-      indexed_(false),
-      row_limit_(*params.get<mapnik::value_integer>("row_limit",0)),
-      desc_(shape_datasource::name(), *params.get<std::string>("encoding","utf-8"))
+    : datasource(params)
+    , type_(datasource::Vector)
+    , file_length_(0)
+    , indexed_(false)
+    , row_limit_(*params.get<mapnik::value_integer>("row_limit", 0))
+    , desc_(shape_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
 #endif
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
+    if (!file)
+        throw datasource_exception("Shape Plugin: missing <file> parameter");
 
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
@@ -78,14 +79,15 @@ shape_datasource::shape_datasource(parameters const& params)
     else
         shape_name_ = *file;
 
-    boost::algorithm::ireplace_last(shape_name_,".shp","");
+    boost::algorithm::ireplace_last(shape_name_, ".shp", "");
     if (!mapnik::util::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
     }
     if (mapnik::util::is_directory(shape_name_ + ".shp"))
     {
-        throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
+        throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ +
+                                   ".shp' appears to be a directory not a file");
     }
     if (!mapnik::util::exists(shape_name_ + ".dbf"))
     {
@@ -103,59 +105,55 @@ shape_datasource::shape_datasource(parameters const& params)
         for (int i = 0; i < shape.dbf().num_fields(); ++i)
         {
             field_descriptor const& fd = shape.dbf().descriptor(i);
-            std::string fld_name=fd.name_;
+            std::string fld_name = fd.name_;
             switch (fd.type_)
             {
-            case 'C': // character
-            case 'D': // date
-                desc_.add_descriptor(attribute_descriptor(fld_name, String));
-                break;
-            case 'L': // logical
-                desc_.add_descriptor(attribute_descriptor(fld_name, Boolean));
-                break;
-            case 'N': // numeric
-            case 'O': // double
-            case 'F': // float
-            {
-                if (fd.dec_>0)
+                case 'C': // character
+                case 'D': // date
+                    desc_.add_descriptor(attribute_descriptor(fld_name, String));
+                    break;
+                case 'L': // logical
+                    desc_.add_descriptor(attribute_descriptor(fld_name, Boolean));
+                    break;
+                case 'N': // numeric
+                case 'O': // double
+                case 'F': // float
                 {
-                    desc_.add_descriptor(attribute_descriptor(fld_name,Double,false,8));
+                    if (fd.dec_ > 0)
+                    {
+                        desc_.add_descriptor(attribute_descriptor(fld_name, Double, false, 8));
+                    }
+                    else
+                    {
+                        desc_.add_descriptor(attribute_descriptor(fld_name, Integer, false, 4));
+                    }
+                    break;
                 }
-                else
-                {
-                    desc_.add_descriptor(attribute_descriptor(fld_name,Integer,false,4));
-                }
-                break;
-            }
-            default:
-                // I - long
-                // G - ole
-                // + - autoincrement
-                // @ - timestamp
-                // B - binary
-                // l - long
-                // M - memo
-                MAPNIK_LOG_ERROR(shape) << "shape_datasource: Unknown type=" << fd.type_;
-                break;
+                default:
+                    // I - long
+                    // G - ole
+                    // + - autoincrement
+                    // @ - timestamp
+                    // B - binary
+                    // l - long
+                    // M - memo
+                    MAPNIK_LOG_ERROR(shape) << "shape_datasource: Unknown type=" << fd.type_;
+                    break;
             }
         }
-    }
-    catch (datasource_exception const& ex)
+    } catch (datasource_exception const& ex)
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
-    }
-    catch (const std::exception& ex)
+    } catch (const std::exception& ex)
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
-    }
-    catch (...) // exception: pipe_select_interrupter: Too many open files
+    } catch (...) // exception: pipe_select_interrupter: Too many open files
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes";
         throw;
     }
-
 }
 
 void shape_datasource::init(shape_io& shape)
@@ -164,7 +162,7 @@ void shape_datasource::init(shape_io& shape)
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
 #endif
 
-    //first read header from *.shp
+    // first read header from *.shp
     shape_file::record_type header(100);
     shape.shp().read_record(header);
 
@@ -215,7 +213,7 @@ void shape_datasource::init(shape_io& shape)
 
 shape_datasource::~shape_datasource() {}
 
-const char * shape_datasource::name()
+const char* shape_datasource::name()
 {
     return "shape";
 }
@@ -241,23 +239,23 @@ featureset_ptr shape_datasource::features(query const& q) const
     if (indexed_)
     {
         std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
-        mapnik::bounding_box_filter<float> filter(mapnik::box2d<float>(query_box.minx(), query_box.miny(), query_box.maxx(), query_box.maxy()));
-        return featureset_ptr
-            (new shape_index_featureset<mapnik::bounding_box_filter<float>>(filter,
-                                                                            std::move(shape_ptr),
-                                                                            q.property_names(),
-                                                                            desc_.get_encoding(),
-                                                                            shape_name_,
-                                                                            row_limit_));
+        mapnik::bounding_box_filter<float> filter(
+          mapnik::box2d<float>(query_box.minx(), query_box.miny(), query_box.maxx(), query_box.maxy()));
+        return featureset_ptr(new shape_index_featureset<mapnik::bounding_box_filter<float>>(filter,
+                                                                                             std::move(shape_ptr),
+                                                                                             q.property_names(),
+                                                                                             desc_.get_encoding(),
+                                                                                             shape_name_,
+                                                                                             row_limit_));
     }
     else
     {
         mapnik::bounding_box_filter<double> filter(q.get_bbox());
-        return std::make_shared<shape_featureset< mapnik::bounding_box_filter<double>>>(filter,
-                                                                  shape_name_,
-                                                                  q.property_names(),
-                                                                  desc_.get_encoding(),
-                                                                  row_limit_);
+        return std::make_shared<shape_featureset<mapnik::bounding_box_filter<double>>>(filter,
+                                                                                       shape_name_,
+                                                                                       q.property_names(),
+                                                                                       desc_.get_encoding(),
+                                                                                       row_limit_);
     }
 }
 
@@ -266,7 +264,6 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");
 #endif
-
 
     // collect all attribute names
     auto const& desc = desc_.get_descriptors();
@@ -281,22 +278,21 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     {
         std::unique_ptr<shape_io> shape_ptr = std::make_unique<shape_io>(shape_name_);
         mapnik::at_point_filter<float> filter(mapnik::coord2f(pt.x, pt.y));
-        return featureset_ptr
-            (new shape_index_featureset<mapnik::at_point_filter<float>>(filter,
-                                                                        std::move(shape_ptr),
-                                                                        names,
-                                                                        desc_.get_encoding(),
-                                                                        shape_name_,
-                                                                        row_limit_));
+        return featureset_ptr(new shape_index_featureset<mapnik::at_point_filter<float>>(filter,
+                                                                                         std::move(shape_ptr),
+                                                                                         names,
+                                                                                         desc_.get_encoding(),
+                                                                                         shape_name_,
+                                                                                         row_limit_));
     }
     else
     {
-        filter_at_point filter(pt,tol);
-        return std::make_shared<shape_featureset<filter_at_point> >(filter,
-                                                                    shape_name_,
-                                                                    names,
-                                                                    desc_.get_encoding(),
-                                                                    row_limit_);
+        filter_at_point filter(pt, tol);
+        return std::make_shared<shape_featureset<filter_at_point>>(filter,
+                                                                   shape_name_,
+                                                                   names,
+                                                                   desc_.get_encoding(),
+                                                                   row_limit_);
     }
 }
 
@@ -314,32 +310,29 @@ boost::optional<mapnik::datasource_geometry_t> shape_datasource::get_geometry_ty
     boost::optional<mapnik::datasource_geometry_t> result;
     switch (shape_type_)
     {
-    case shape_io::shape_point:
-    case shape_io::shape_pointm:
-    case shape_io::shape_pointz:
-    case shape_io::shape_multipoint:
-    case shape_io::shape_multipointm:
-    case shape_io::shape_multipointz:
-    {
-        result.reset(mapnik::datasource_geometry_t::Point);
-        break;
-    }
-    case shape_io::shape_polyline:
-    case shape_io::shape_polylinem:
-    case shape_io::shape_polylinez:
-    {
-        result.reset(mapnik::datasource_geometry_t::LineString);
-        break;
-    }
-    case shape_io::shape_polygon:
-    case shape_io::shape_polygonm:
-    case shape_io::shape_polygonz:
-    {
-        result.reset(mapnik::datasource_geometry_t::Polygon);
-        break;
-    }
-    default:
-        break;
+        case shape_io::shape_point:
+        case shape_io::shape_pointm:
+        case shape_io::shape_pointz:
+        case shape_io::shape_multipoint:
+        case shape_io::shape_multipointm:
+        case shape_io::shape_multipointz: {
+            result.reset(mapnik::datasource_geometry_t::Point);
+            break;
+        }
+        case shape_io::shape_polyline:
+        case shape_io::shape_polylinem:
+        case shape_io::shape_polylinez: {
+            result.reset(mapnik::datasource_geometry_t::LineString);
+            break;
+        }
+        case shape_io::shape_polygon:
+        case shape_io::shape_polygonm:
+        case shape_io::shape_polygonz: {
+            result.reset(mapnik::datasource_geometry_t::Polygon);
+            break;
+        }
+        default:
+            break;
     }
     return result;
 }

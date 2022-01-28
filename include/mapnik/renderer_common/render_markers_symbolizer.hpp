@@ -57,7 +57,7 @@ struct markers_renderer_context : util::noncopyable
                                agg::trans_affine const& marker_tr) = 0;
 
     virtual void render_marker(svg_path_ptr const& src,
-                               svg_path_adapter & path,
+                               svg_path_adapter& path,
                                svg_attribute_type const& attrs,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr) = 0;
@@ -65,11 +65,11 @@ struct markers_renderer_context : util::noncopyable
 
 MAPNIK_DECL
 void render_markers_symbolizer(markers_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans,
                                renderer_common const& common,
                                box2d<double> const& clip_box,
-                               markers_renderer_context & renderer_context);
+                               markers_renderer_context& renderer_context);
 
 } // namespace mapnik
 

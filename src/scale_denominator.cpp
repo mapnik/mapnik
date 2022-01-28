@@ -39,7 +39,8 @@ double scale_denominator(double map_scale, bool geographic)
     constexpr double pixel_size = 0.00028;
 
     double denom = map_scale / pixel_size;
-    if (geographic) denom *= meters_per_degree;
+    if (geographic)
+        denom *= meters_per_degree;
     return denom;
 }
-}
+} // namespace mapnik

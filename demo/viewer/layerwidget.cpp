@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include "layerwidget.hpp"
 #include <qabstractitemdelegate.h>
 #include <qapplication.h>
@@ -33,65 +32,59 @@
 #include "layer_info_dialog.hpp"
 
 LayerTab::LayerTab(QWidget* parent)
-    : QListView(parent) {}
+    : QListView(parent)
+{}
 
-
-void LayerTab::paintEvent(QPaintEvent *e)
+void LayerTab::paintEvent(QPaintEvent* e)
 {
     QListView::paintEvent(e);
 }
 
-void LayerTab::dataChanged(const QModelIndex &topLeft,
-                           const QModelIndex &bottomRight,
-                           const QVector<int> &roles)
+void LayerTab::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles)
 {
     emit update_mapwidget();
     QListView::dataChanged(topLeft, bottomRight, roles);
 }
 
-void LayerTab::selectionChanged(const QItemSelection & selected, const QItemSelection &)
+void LayerTab::selectionChanged(const QItemSelection& selected, const QItemSelection&)
 {
-   QModelIndexList list = selected.indexes();
-   if (list.size() != 0)
-   {
-      qDebug("SELECTED LAYER -> %d",list[0].row());
-      emit layerSelected(list[0].row());
-   }
+    QModelIndexList list = selected.indexes();
+    if (list.size() != 0)
+    {
+        qDebug("SELECTED LAYER -> %d", list[0].row());
+        emit layerSelected(list[0].row());
+    }
 }
 
 void LayerTab::layerInfo()
 {
-   qDebug("Layer info");
-   QModelIndexList indexes = selectedIndexes();
-   if (indexes.size() > 0)
-   {
-      qDebug("id = %d",indexes[0].row());
-
-   }
+    qDebug("Layer info");
+    QModelIndexList indexes = selectedIndexes();
+    if (indexes.size() > 0)
+    {
+        qDebug("id = %d", indexes[0].row());
+    }
 }
 
 void LayerTab::layerInfo2(QModelIndex const& index)
 {
-   qDebug("LayerInfo id = %d",index.row());
-   QVector<QPair<QString,QString> > params;
-   QVector<QString> style_names;
-   unsigned i = index.row();
-   LayerListModel * model = static_cast<LayerListModel*>(this->model());
-   boost::optional<mapnik::layer&> layer = model->map_layer(i);
+    qDebug("LayerInfo id = %d", index.row());
+    QVector<QPair<QString, QString>> params;
+    QVector<QString> style_names;
+    unsigned i = index.row();
+    LayerListModel* model = static_cast<LayerListModel*>(this->model());
+    boost::optional<mapnik::layer&> layer = model->map_layer(i);
 
-   if (layer)
-   {
-       layer_info_dialog dlg(*layer,this);
-       dlg.exec();
-   }
+    if (layer)
+    {
+        layer_info_dialog dlg(*layer, this);
+        dlg.exec();
+    }
 }
 
-StyleTab::StyleTab(QWidget*)
-{
+StyleTab::StyleTab(QWidget*) {}
 
-}
-
-void StyleTab::contextMenuEvent(QContextMenuEvent * event )
+void StyleTab::contextMenuEvent(QContextMenuEvent* event)
 {
-   qDebug("test");
+    qDebug("test");
 }

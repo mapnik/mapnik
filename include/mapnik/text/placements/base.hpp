@@ -28,9 +28,8 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/formatting/base.hpp>
 
-namespace mapnik
-{
-using dimension_type = std::pair<double,double>;
+namespace mapnik {
+using dimension_type = std::pair<double, double>;
 
 class MAPNIK_DECL text_placements;
 class feature_impl;
@@ -42,7 +41,7 @@ struct attribute;
 
 class MAPNIK_DECL text_placement_info : util::noncopyable
 {
-public:
+  public:
     // Constructor. Takes the parent text_placements object as a parameter
     // to read defaults from it.
     text_placement_info(text_placements const* parent, double _scale_factor);
@@ -61,7 +60,6 @@ public:
 
     // Scale factor used by the renderer.
     double scale_factor;
-
 };
 
 using text_placement_info_ptr = std::shared_ptr<text_placement_info>;
@@ -73,7 +71,7 @@ using text_placement_info_ptr = std::shared_ptr<text_placement_info>;
 
 class MAPNIK_DECL text_placements
 {
-public:
+  public:
     text_placements();
     // Get a text_placement_info object to use in rendering.
     // The returned object creates a list of settings which is
@@ -87,11 +85,12 @@ public:
     //     return text_placement_info_ptr(new text_placement_info_XXX(this));
     // }
 
-    virtual text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const = 0;
+    virtual text_placement_info_ptr
+      get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const = 0;
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
 
-    virtual void add_expressions(expression_set & output) const;
+    virtual void add_expressions(expression_set& output) const;
 
     virtual ~text_placements() {}
 
@@ -102,6 +101,6 @@ public:
 // Pointer to object of class text_placements
 using text_placements_ptr = std::shared_ptr<text_placements>;
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // PLACEMENTS_BASE_HPP

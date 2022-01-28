@@ -35,11 +35,11 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-transcoder::transcoder (std::string const& encoding)
+transcoder::transcoder(std::string const& encoding)
     : conv_(0)
 {
     UErrorCode err = U_ZERO_ERROR;
-    conv_ = ucnv_open(encoding.c_str(),&err);
+    conv_ = ucnv_open(encoding.c_str(), &err);
     if (!U_SUCCESS(err))
     {
         // NOTE: conv_ should be null on error so no need to call ucnv_close
@@ -51,7 +51,7 @@ mapnik::value_unicode_string transcoder::transcode(const char* data, std::int32_
 {
     UErrorCode err = U_ZERO_ERROR;
 
-    mapnik::value_unicode_string ustr(data,length,conv_,err);
+    mapnik::value_unicode_string ustr(data, length, conv_, err);
     if (ustr.isBogus())
     {
         ustr.remove();
@@ -61,14 +61,14 @@ mapnik::value_unicode_string transcoder::transcode(const char* data, std::int32_
 
 transcoder::~transcoder()
 {
-    if (conv_) ucnv_close(conv_);
+    if (conv_)
+        ucnv_close(conv_);
 }
 
-
-void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
+void to_utf8(mapnik::value_unicode_string const& input, std::string& target)
 {
-    target.clear(); // mimic previous target.assign(...) semantics
+    target.clear();             // mimic previous target.assign(...) semantics
     input.toUTF8String(target); // this appends to target
 }
 
-}
+} // namespace mapnik

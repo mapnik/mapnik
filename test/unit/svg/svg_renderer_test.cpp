@@ -44,43 +44,40 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_scanline_u.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace
-{
+namespace {
 
 mapnik::image_rgba8 render_svg(std::string const& filename, double scale_factor)
 {
-     using pixfmt = agg::pixfmt_rgba32_pre;
-     using renderer_base = agg::renderer_base<pixfmt>;
-     using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
+    using pixfmt = agg::pixfmt_rgba32_pre;
+    using renderer_base = agg::renderer_base<pixfmt>;
+    using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
 
-     agg::rasterizer_scanline_aa<> ras_ptr;
-     agg::scanline_u8 sl;
-     std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename, false);
-     mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
-     double svg_width, svg_height ;
-     std::tie(svg_width, svg_height) = svg.dimensions();
-     int image_width = static_cast<int>(std::round(svg_width));
-     int image_height = static_cast<int>(std::round(svg_height));
+    agg::rasterizer_scanline_aa<> ras_ptr;
+    agg::scanline_u8 sl;
+    std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename, false);
+    mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
+    double svg_width, svg_height;
+    std::tie(svg_width, svg_height) = svg.dimensions();
+    int image_width = static_cast<int>(std::round(svg_width));
+    int image_height = static_cast<int>(std::round(svg_height));
 
-     mapnik::image_rgba8 im(image_width, image_height, true, true);
-     agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
-     pixfmt pixf(buf);
-     renderer_base renb(pixf);
+    mapnik::image_rgba8 im(image_width, image_height, true, true);
+    agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
+    pixfmt pixf(buf);
+    renderer_base renb(pixf);
 
-     agg::trans_affine mtx = agg::trans_affine_translation(-0.5 * svg_width, -0.5 * svg_height);
-     mtx.scale(scale_factor);
-     mtx.translate(0.5 * svg_width, 0.5 * svg_height);
+    agg::trans_affine mtx = agg::trans_affine_translation(-0.5 * svg_width, -0.5 * svg_height);
+    mtx.scale(scale_factor);
+    mtx.translate(0.5 * svg_width, 0.5 * svg_height);
 
-     mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(svg.get_data()->source());
-     mapnik::svg::svg_path_adapter svg_path(stl_storage);
-     mapnik::svg::renderer_agg<mapnik::svg_path_adapter,
-                               mapnik::svg_attribute_type,
-                               renderer_solid,
-                               agg::pixfmt_rgba32_pre > renderer(svg_path,
-                                                                 svg.get_data()->attributes());
-     double opacity = 1.0;
-     renderer.render(ras_ptr, sl, renb, mtx, opacity, {0, 0, svg_width, svg_height});
-     return im;
+    mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(svg.get_data()->source());
+    mapnik::svg::svg_path_adapter svg_path(stl_storage);
+    mapnik::svg::
+      renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre>
+        renderer(svg_path, svg.get_data()->attributes());
+    double opacity = 1.0;
+    renderer.render(ras_ptr, sl, renb, mtx, opacity, {0, 0, svg_width, svg_height});
+    return im;
 }
 
 bool equal(mapnik::image_rgba8 const& im1, mapnik::image_rgba8 const& im2)
@@ -88,16 +85,17 @@ bool equal(mapnik::image_rgba8 const& im1, mapnik::image_rgba8 const& im2)
     if (im1.width() != im2.width() || im1.height() != im2.height())
         return false;
 
-    for(auto tup : boost::combine(im1, im2))
+    for (auto tup : boost::combine(im1, im2))
     {
-        if (boost::get<0>(tup) != boost::get<1>(tup)) return false;
+        if (boost::get<0>(tup) != boost::get<1>(tup))
+            return false;
     }
     return true;
 }
-}
+} // namespace
 
-TEST_CASE("SVG renderer") {
-
+TEST_CASE("SVG renderer")
+{
     SECTION("SVG octocat inline/css")
     {
         double scale_factor = 1.0;

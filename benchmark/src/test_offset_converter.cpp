@@ -14,31 +14,36 @@ struct fake_path
     cont_type::iterator itr_;
 
     fake_path(std::initializer_list<double> l)
-        : fake_path(l.begin(), l.size()) {
-    }
+        : fake_path(l.begin(), l.size())
+    {}
 
-    fake_path(std::vector<double> const &v)
-        : fake_path(v.begin(), v.size()) {
-    }
+    fake_path(std::vector<double> const& v)
+        : fake_path(v.begin(), v.size())
+    {}
 
-    template <typename Itr>
-    fake_path(Itr itr, size_t sz) {
+    template<typename Itr>
+    fake_path(Itr itr, size_t sz)
+    {
         size_t num_coords = sz >> 1;
         vertices_.reserve(num_coords);
 
-        for (size_t i = 0; i < num_coords; ++i) {
+        for (size_t i = 0; i < num_coords; ++i)
+        {
             double x = *itr++;
             double y = *itr++;
             unsigned cmd = (i == 0) ? mapnik::SEG_MOVETO : mapnik::SEG_LINETO;
             vertices_.push_back(std::make_tuple(x, y, cmd));
-            if (i == num_coords - 1) cmd = mapnik::SEG_END;
+            if (i == num_coords - 1)
+                cmd = mapnik::SEG_END;
             vertices_.push_back(std::make_tuple(x, y, cmd));
         }
         itr_ = vertices_.begin();
     }
 
-    unsigned vertex(double *x, double *y) {
-        if (itr_ == vertices_.end()) {
+    unsigned vertex(double* x, double* y)
+    {
+        if (itr_ == vertices_.end())
+        {
             return mapnik::SEG_END;
         }
         *x = std::get<0>(*itr_);
@@ -48,33 +53,30 @@ struct fake_path
         return cmd;
     }
 
-    void rewind(unsigned) {
-        itr_ = vertices_.begin();
-    }
+    void rewind(unsigned) { itr_ = vertices_.begin(); }
 };
 
 class test_offset : public benchmark::test_case
 {
-public:
+  public:
     test_offset(mapnik::parameters const& params)
-     : test_case(params) {}
-    bool validate() const
-    {
-        return true;
-    }
+        : test_case(params)
+    {}
+    bool validate() const { return true; }
     bool operator()() const
     {
         std::vector<double> path;
         int mysize = 2500;
         int x1 = 0;
-        path.reserve(mysize*2);
-        for( int i = 0; i < mysize; i++ )
+        path.reserve(mysize * 2);
+        for (int i = 0; i < mysize; i++)
         {
-            path.push_back( i );
-            path.push_back( 0 );
+            path.push_back(i);
+            path.push_back(0);
         }
         fake_path fpath(path);
-        for (std::size_t i=0;i<iterations_;++i) {
+        for (std::size_t i = 0; i < iterations_; ++i)
+        {
             mapnik::offset_converter<fake_path> off_path(fpath);
             off_path.set_offset(10);
             unsigned cmd;
@@ -88,15 +90,14 @@ public:
     }
 };
 
-
 int main(int argc, char** argv)
 {
     mapnik::parameters params;
-    benchmark::handle_args(argc,argv,params);
+    benchmark::handle_args(argc, argv, params);
     int return_value = 0;
     {
         test_offset test_runner(params);
-        return_value = run(test_runner,"offset_test");
+        return_value = run(test_runner, "offset_test");
     }
     return return_value;
 }

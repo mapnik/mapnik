@@ -40,21 +40,20 @@
 #include <mapnik/svg/output/svg_renderer.hpp>
 #endif
 
-namespace mapnik
-{
+namespace mapnik {
 
 #if defined(HAVE_CAIRO)
-template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr> >;
+template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr>>;
 #endif
 
 #if defined(SVG_RENDERER)
-template class MAPNIK_DECL feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
+template class MAPNIK_DECL feature_style_processor<svg_renderer<std::ostream_iterator<char>>>;
 #endif
 
 #if defined(GRID_RENDERER)
-template class MAPNIK_DECL feature_style_processor<grid_renderer<grid> >;
+template class MAPNIK_DECL feature_style_processor<grid_renderer<grid>>;
 #endif
 
-template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8> >;
+template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8>>;
 
-}
+} // namespace mapnik

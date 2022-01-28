@@ -26,14 +26,16 @@
 // geometry
 #include <mapbox/geometry/polygon.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 using linear_ring = mapbox::geometry::linear_ring<T>;
 
-template <typename T>
+template<typename T>
 using polygon = mapbox::geometry::polygon<T>;
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_POLYGON_HPP

@@ -31,21 +31,20 @@
 
 namespace mapnik {
 
-template <typename Locator, typename Detector>
+template<typename Locator, typename Detector>
 class markers_line_placement : public markers_point_placement<Locator, Detector>
 {
-public:
+  public:
     using point_placement = markers_point_placement<Locator, Detector>;
     using point_placement::point_placement;
 
-    markers_line_placement(Locator & locator, Detector & detector,
-                           markers_placement_params const& params)
-        : point_placement(locator, detector, params),
-            first_point_(true),
-            spacing_(0.0),
-            spacing_offset_(NAN),
-            marker_width_((params.size * params.tr).width()),
-            path_(locator)
+    markers_line_placement(Locator& locator, Detector& detector, markers_placement_params const& params)
+        : point_placement(locator, detector, params)
+        , first_point_(true)
+        , spacing_(0.0)
+        , spacing_offset_(NAN)
+        , marker_width_((params.size * params.tr).width())
+        , path_(locator)
     {
         spacing_ = params.spacing < 1 ? 100 : params.spacing;
         spacing_offset_ = params.spacing_offset;
@@ -57,7 +56,7 @@ public:
         first_point_ = true;
     }
 
-    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
+    bool get_point(double& x, double& y, double& angle, bool ignore_placement)
     {
         if (this->done_)
         {
@@ -88,7 +87,8 @@ public:
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(path_);
-                if (path_.move(tolerance_offset.get()) && (path_.linear_position() + marker_width_ / 2.0) < path_.length())
+                if (path_.move(tolerance_offset.get()) &&
+                    (path_.linear_position() + marker_width_ / 2.0) < path_.length())
                 {
                     pixel_position pos = path_.current_position();
                     x = pos.x;
@@ -112,7 +112,7 @@ public:
         return false;
     }
 
-private:
+  private:
     bool first_point_;
     double spacing_;
     double spacing_offset_;
@@ -120,6 +120,6 @@ private:
     vertex_cache path_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MARKERS_PLACEMENTS_LINE_HPP

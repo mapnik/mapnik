@@ -11,13 +11,13 @@ TEST_CASE("text_placements_list")
     list.defaults.set_format_tree(std::make_shared<mapnik::formatting::text_node>("\"Default text\""));
 
     {
-        mapnik::text_symbolizer_properties & properties = list.add();
+        mapnik::text_symbolizer_properties& properties = list.add();
         properties.format_defaults.text_size = 10.0;
         properties.set_format_tree(std::make_shared<mapnik::formatting::text_node>("\"Alternative text 1\""));
     }
 
     {
-        mapnik::text_symbolizer_properties & properties = list.add();
+        mapnik::text_symbolizer_properties& properties = list.add();
         properties.format_defaults.text_size = 8.0;
         properties.set_format_tree(std::make_shared<mapnik::formatting::text_node>("\"Alternative text 2\""));
     }

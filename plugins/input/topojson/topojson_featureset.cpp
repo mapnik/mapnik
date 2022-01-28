@@ -38,14 +38,15 @@ MAPNIK_DISABLE_WARNING_POP
 
 topojson_featureset::topojson_featureset(mapnik::topojson::topology const& topo,
                                          mapnik::transcoder const& tr,
-                                         array_type && index_array)
-    : ctx_(std::make_shared<mapnik::context_type>()),
-      topo_(topo),
-      tr_(tr),
-      index_array_(std::move(index_array)),
-      index_itr_(index_array_.begin()),
-      index_end_(index_array_.end()),
-      feature_id_(1) {}
+                                         array_type&& index_array)
+    : ctx_(std::make_shared<mapnik::context_type>())
+    , topo_(topo)
+    , tr_(tr)
+    , index_array_(std::move(index_array))
+    , index_itr_(index_array_.begin())
+    , index_end_(index_array_.end())
+    , feature_id_(1)
+{}
 
 topojson_featureset::~topojson_featureset() {}
 
@@ -55,12 +56,12 @@ mapnik::feature_ptr topojson_featureset::next()
     {
         topojson_datasource::item_type const& item = *index_itr_++;
         std::size_t index = item.second;
-        if ( index < topo_.geometries.size())
+        if (index < topo_.geometries.size())
         {
             mapnik::topojson::geometry const& geom = topo_.geometries[index];
             mapnik::feature_ptr feature = mapnik::util::apply_visitor(
-                mapnik::topojson::feature_generator<mapnik::context_ptr>(ctx_, tr_, topo_, feature_id_++),
-                geom);
+              mapnik::topojson::feature_generator<mapnik::context_ptr>(ctx_, tr_, topo_, feature_id_++),
+              geom);
             return feature;
         }
     }

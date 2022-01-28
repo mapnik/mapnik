@@ -22,14 +22,13 @@
 #ifndef MAPNIK_TEXT_LINE_HPP
 #define MAPNIK_TEXT_LINE_HPP
 
-//stl
+// stl
 #include <vector>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/text/glyph_info.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 // This class stores all glyphs of a line in left to right order.
 // It can be used for rendering but no text processing (like line breaking)
@@ -37,16 +36,16 @@ namespace mapnik
 
 class MAPNIK_DECL text_line : util::noncopyable
 {
-public:
+  public:
     using glyph_vector = std::vector<glyph_info>;
     using const_iterator = glyph_vector::const_iterator;
 
     text_line(unsigned first_char, unsigned last_char);
 
-    text_line( text_line && rhs);
+    text_line(text_line&& rhs);
 
     // Append glyph.
-    void add_glyph(glyph_info && glyph, double scale_factor_);
+    void add_glyph(glyph_info&& glyph, double scale_factor_);
 
     // Preallocate memory.
     void reserve(glyph_vector::size_type length);
@@ -85,9 +84,9 @@ public:
 
     unsigned space_count() const { return space_count_; }
 
-private:
+  private:
     glyph_vector glyphs_;
-    double line_height_; // Includes line spacing (returned by freetype)
+    double line_height_;     // Includes line spacing (returned by freetype)
     double max_char_height_; // Max height of any glyphs in line - calculated by shaper
     double width_;
     double glyphs_width_;

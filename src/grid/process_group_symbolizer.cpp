@@ -51,21 +51,24 @@ namespace mapnik {
  * to render it, and the boxes themselves should already be
  * in the detector from the placement_finder.
  */
-template <typename T0>
+template<typename T0>
 struct thunk_renderer : render_thunk_list_dispatch
 {
     using renderer_type = grid_renderer<T0>;
     using buffer_type = typename renderer_type::buffer_type;
     using text_renderer_type = grid_text_renderer<buffer_type>;
 
-    thunk_renderer(renderer_type &ren,
-                   grid_rasterizer &ras,
-                   buffer_type &pixmap,
-                   renderer_common &common,
-                   feature_impl &feature)
-        : ren_(ren), ras_(ras), pixmap_(pixmap),
-          common_(common), feature_(feature),
-          tex_(pixmap, src_over, common.scale_factor_)
+    thunk_renderer(renderer_type& ren,
+                   grid_rasterizer& ras,
+                   buffer_type& pixmap,
+                   renderer_common& common,
+                   feature_impl& feature)
+        : ren_(ren)
+        , ras_(ras)
+        , pixmap_(pixmap)
+        , common_(common)
+        , feature_(feature)
+        , tex_(pixmap, src_over, common.scale_factor_)
     {}
 
     virtual void operator()(vector_marker_render_thunk const& thunk)
@@ -73,10 +76,7 @@ struct thunk_renderer : render_thunk_list_dispatch
         using buf_type = grid_rendering_buffer;
         using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
         using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-        using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
-                                                    svg_attribute_type,
-                                                    renderer_type,
-                                                    pixfmt_type>;
+        using svg_renderer_type = svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_type, pixfmt_type>;
         buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
         ras_.reset();
         pixfmt_type pixf(render_buf);
@@ -108,7 +108,7 @@ struct thunk_renderer : render_thunk_list_dispatch
         pixmap_.add_feature(feature_);
     }
 
-    virtual void operator()(text_render_thunk const &thunk)
+    virtual void operator()(text_render_thunk const& thunk)
     {
         tex_.set_comp_op(thunk.comp_op_);
 
@@ -124,7 +124,8 @@ struct thunk_renderer : render_thunk_list_dispatch
                                    glyphs->marker_pos(),
                                    *mark->marker_,
                                    mark->transform_,
-                                   thunk.opacity_, thunk.comp_op_);
+                                   thunk.opacity_,
+                                   thunk.comp_op_);
             }
             tex_.render(*glyphs, feature_id);
         }
@@ -132,31 +133,27 @@ struct thunk_renderer : render_thunk_list_dispatch
         pixmap_.add_feature(feature_);
     }
 
-private:
-    renderer_type &ren_;
-    grid_rasterizer & ras_;
-    buffer_type &pixmap_;
-    renderer_common &common_;
-    feature_impl &feature_;
+  private:
+    renderer_type& ren_;
+    grid_rasterizer& ras_;
+    buffer_type& pixmap_;
+    renderer_common& common_;
+    feature_impl& feature_;
     text_renderer_type tex_;
 };
 
-template <typename T>
-void  grid_renderer<T>::process(group_symbolizer const& sym,
-                                mapnik::feature_impl & feature,
-                                proj_transform const& prj_trans)
+template<typename T>
+void grid_renderer<T>::process(group_symbolizer const& sym,
+                               mapnik::feature_impl& feature,
+                               proj_transform const& prj_trans)
 {
     thunk_renderer<T> ren(*this, *ras_ptr, pixmap_, common_, feature);
 
-    render_group_symbolizer(
-        sym, feature, common_.vars_, prj_trans, common_.query_extent_, common_,
-        ren);
+    render_group_symbolizer(sym, feature, common_.vars_, prj_trans, common_.query_extent_, common_, ren);
 }
 
-template void grid_renderer<grid>::process(group_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(group_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif

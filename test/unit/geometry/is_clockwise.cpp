@@ -3,8 +3,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/is_clockwise.hpp>
 
-TEST_CASE("Ring is_clockwise") {
-
+TEST_CASE("Ring is_clockwise")
+{
     // Input is rather thin triangle to test precision issues aren't getting in the way.
     SECTION("Clockwise")
     {

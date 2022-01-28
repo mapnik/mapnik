@@ -27,32 +27,29 @@
 // stl
 #include <iostream>
 
-namespace mapnik
-{
+namespace mapnik {
 
-group_rule::group_rule(const expression_ptr& filter,
-                       const expression_ptr& repeat_key)
-   : filter_(filter),
-     repeat_key_(repeat_key)
+group_rule::group_rule(const expression_ptr& filter, const expression_ptr& repeat_key)
+    : filter_(filter)
+    , repeat_key_(repeat_key)
+{}
+
+group_rule& group_rule::operator=(const group_rule& rhs)
 {
+    group_rule tmp(rhs);
+    filter_.swap(tmp.filter_);
+    symbolizers_.swap(tmp.symbolizers_);
+    return *this;
 }
 
-group_rule &group_rule::operator=(const group_rule &rhs)
+bool group_rule::operator==(const group_rule& rhs) const
 {
-   group_rule tmp(rhs);
-   filter_.swap(tmp.filter_);
-   symbolizers_.swap(tmp.symbolizers_);
-   return *this;
+    return (this == &rhs);
 }
 
-bool group_rule::operator==(const group_rule &rhs) const
+void group_rule::append(const mapnik::symbolizer& sym)
 {
-   return (this == &rhs);
+    symbolizers_.push_back(sym);
 }
 
-void group_rule::append(const mapnik::symbolizer &sym)
-{
-   symbolizers_.push_back(sym);
-}
-
-}
+} // namespace mapnik

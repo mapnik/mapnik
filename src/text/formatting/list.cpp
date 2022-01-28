@@ -36,7 +36,7 @@ using boost::property_tree::ptree;
 
 namespace formatting {
 
-void list_node::to_xml(boost::property_tree::ptree & xml) const
+void list_node::to_xml(boost::property_tree::ptree& xml) const
 {
     for (node_ptr const& n : children_)
     {
@@ -44,8 +44,10 @@ void list_node::to_xml(boost::property_tree::ptree & xml) const
     }
 }
 
-
-void list_node::apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout & output) const
+void list_node::apply(evaluated_format_properties_ptr const& p,
+                      feature_impl const& feature,
+                      attributes const& vars,
+                      text_layout& output) const
 {
     for (node_ptr const& n : children_)
     {
@@ -53,8 +55,7 @@ void list_node::apply(evaluated_format_properties_ptr const& p, feature_impl con
     }
 }
 
-
-void list_node::add_expressions(expression_set &output) const
+void list_node::add_expressions(expression_set& output) const
 {
     for (node_ptr const& n : children_)
     {
@@ -81,5 +82,5 @@ std::vector<node_ptr> const& list_node::get_children() const
 {
     return children_;
 }
-} // ns mapnik
-} // ns formatting
+} // namespace formatting
+} // namespace mapnik

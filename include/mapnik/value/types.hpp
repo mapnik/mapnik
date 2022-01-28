@@ -39,18 +39,18 @@ MAPNIK_DISABLE_WARNING_POP
 #include <cstddef>
 
 namespace U_ICU_NAMESPACE {
-    class UnicodeString;
+class UnicodeString;
 }
 
-namespace mapnik  {
+namespace mapnik {
 
 #ifdef BIGINT
-//using value_integer = boost::long_long_type;
-//using value_integer = long long;
+// using value_integer = boost::long_long_type;
+// using value_integer = long long;
 using value_integer = std::int64_t;
 using value_integer_pixel = gray64s_t;
 #else
-//using value_integer = int;
+// using value_integer = int;
 using value_integer = std::int32_t;
 using value_integer_pixel = gray32s_t;
 #endif
@@ -61,74 +61,56 @@ using value_bool = bool;
 
 struct MAPNIK_DECL value_null
 {
-    bool operator==(value_null const&) const
-    {
-        return true;
-    }
+    bool operator==(value_null const&) const { return true; }
 
-    template <typename T>
+    template<typename T>
     bool operator==(T const&) const
     {
         return false;
     }
 
-    bool operator!=(value_null const&) const
-    {
-        return false;
-    }
+    bool operator!=(value_null const&) const { return false; }
 
-    template <typename T>
+    template<typename T>
     bool operator!=(T const&) const
     {
         return true;
     }
 
-    bool operator>(value_null) const
-    {
-        return false;
-    }
+    bool operator>(value_null) const { return false; }
 
-    bool operator>=(value_null) const
-    {
-        return true;
-    }
+    bool operator>=(value_null) const { return true; }
 
-    bool operator<(value_null) const
-    {
-        return false;
-    }
+    bool operator<(value_null) const { return false; }
 
-    bool operator<=(value_null) const
-    {
-        return true;
-    }
+    bool operator<=(value_null) const { return true; }
 
-    template <typename T>
-    value_null operator+ (T const&) const
+    template<typename T>
+    value_null operator+(T const&) const
     {
         return *this;
     }
 
-    template <typename T>
-    value_null operator- (T const&) const
+    template<typename T>
+    value_null operator-(T const&) const
     {
         return *this;
     }
 
-    template <typename T>
-    value_null operator* (T const&) const
+    template<typename T>
+    value_null operator*(T const&) const
     {
         return *this;
     }
 
-    template <typename T>
-    value_null operator/ (T const&) const
+    template<typename T>
+    value_null operator/(T const&) const
     {
         return *this;
     }
 
-    template <typename T>
-    value_null operator% (T const&) const
+    template<typename T>
+    value_null operator%(T const&) const
     {
         return *this;
     }
@@ -139,17 +121,16 @@ inline std::size_t hash_value(value_null const&)
     return 0;
 }
 
-template <typename TChar, typename TTraits>
+template<typename TChar, typename TTraits>
 inline std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, value_null const&)
 {
     return out;
 }
 
-inline std::istream& operator>> ( std::istream & s, value_null & )
+inline std::istream& operator>>(std::istream& s, value_null&)
 {
     return s;
 }
-
 
 namespace detail {
 
@@ -160,15 +141,13 @@ namespace detail {
 //  value_double    if T is a floating-point type
 //  T &&            otherwise
 
-template <typename T, typename dT = std::decay_t<T>>
+template<typename T, typename dT = std::decay_t<T>>
 using mapnik_value_type_t =
-    std::conditional_t<
-        std::is_same<dT, bool>::value, value_bool,
-        std::conditional_t<
-            std::is_integral<dT>::value, value_integer,
-            std::conditional_t<
-                std::is_floating_point<dT>::value, value_double,
-                T && >>>;
+  std::conditional_t<std::is_same<dT, bool>::value,
+                     value_bool,
+                     std::conditional_t<std::is_integral<dT>::value,
+                                        value_integer,
+                                        std::conditional_t<std::is_floating_point<dT>::value, value_double, T&&>>>;
 
 } // namespace detail
 

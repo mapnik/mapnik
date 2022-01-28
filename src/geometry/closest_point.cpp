@@ -28,50 +28,49 @@
 #include <boost/geometry/extensions/algorithms/closest_point.hpp>
 #include <boost/geometry/algorithms/within.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 namespace detail {
 
-template <typename T>
+template<typename T>
 struct closest_point
 {
     using coordinate_type = T;
     using info_type = boost::geometry::closest_point_result<mapnik::geometry::point<coordinate_type>>;
 
     closest_point(mapnik::geometry::point<coordinate_type> const& pt)
-        : pt_(pt) {}
+        : pt_(pt)
+    {}
 
-    result_type operator() (mapnik::geometry::geometry_empty const&) const
-    {
-        return result_type();
-    }
+    result_type operator()(mapnik::geometry::geometry_empty const&) const { return result_type(); }
 
-    result_type operator() (mapnik::geometry::point<coordinate_type> const& pt) const
+    result_type operator()(mapnik::geometry::point<coordinate_type> const& pt) const
     {
         info_type info;
         boost::geometry::closest_point(pt_, pt, info);
         return result_type{info.closest_point.x, info.closest_point.y, info.distance};
     }
 
-    result_type operator() (mapnik::geometry::line_string<coordinate_type> const& line) const
+    result_type operator()(mapnik::geometry::line_string<coordinate_type> const& line) const
     {
         info_type info;
-        boost::geometry::closest_point(pt_ ,line, info);
+        boost::geometry::closest_point(pt_, line, info);
         return result_type{info.closest_point.x, info.closest_point.y, info.distance};
     }
 
-    result_type operator() (mapnik::geometry::polygon<coordinate_type> const& poly) const
+    result_type operator()(mapnik::geometry::polygon<coordinate_type> const& poly) const
     {
         info_type info;
         if (boost::geometry::within(pt_, poly))
         {
-            return result_type { pt_.x, pt_.y, 0.0 };
+            return result_type{pt_.x, pt_.y, 0.0};
         }
         bool first = true;
         for (auto const& ring : poly)
         {
             info_type ring_info;
-            boost::geometry::closest_point(pt_ ,ring, ring_info);
+            boost::geometry::closest_point(pt_, ring, ring_info);
             if (first)
             {
                 first = false;
@@ -85,16 +84,14 @@ struct closest_point
         return result_type{info.closest_point.x, info.closest_point.y, info.distance};
     }
 
-
-
     // Multi* + GeometryCollection
-    result_type operator() (mapnik::geometry::geometry<coordinate_type> const& geom) const
+    result_type operator()(mapnik::geometry::geometry<coordinate_type> const& geom) const
     {
         return mapnik::util::apply_visitor(*this, geom);
     }
 
-    template <typename MultiGeometry>
-    result_type operator() (MultiGeometry const& multi_geom) const
+    template<typename MultiGeometry>
+    result_type operator()(MultiGeometry const& multi_geom) const
     {
         result_type result;
         bool first = true;
@@ -119,42 +116,33 @@ struct closest_point
     mapnik::geometry::point<coordinate_type> pt_;
 };
 
-}
+} // namespace detail
 
-template <typename T1, typename T2>
-MAPNIK_DECL result_type
-closest_point(T1 const& geom, mapnik::geometry::point<T2> const& pt)
+template<typename T1, typename T2>
+MAPNIK_DECL result_type closest_point(T1 const& geom, mapnik::geometry::point<T2> const& pt)
 {
     return detail::closest_point<T2>(pt)(geom);
 }
 
-template MAPNIK_DECL result_type
-closest_point(geometry<double> const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(geometry<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(point<double> const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(point<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(line_string<double> const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(line_string<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(polygon<double>const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(polygon<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(multi_point<double>const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(multi_point<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(multi_line_string<double>const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(multi_line_string<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(multi_polygon<double>const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(multi_polygon<double> const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(geometry_empty const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(geometry_empty const&, point<double> const&);
 
-template MAPNIK_DECL result_type
-closest_point(geometry_collection<double> const&, point<double> const&);
+template MAPNIK_DECL result_type closest_point(geometry_collection<double> const&, point<double> const&);
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif //

@@ -85,12 +85,11 @@ struct evaluated_text_properties : util::noncopyable
     double grid_cell_height;
 };
 
-}
+} // namespace detail
 
 using evaluated_text_properties_ptr = std::unique_ptr<detail::evaluated_text_properties>;
 
-enum directions_e : std::uint8_t
-{
+enum directions_e : std::uint8_t {
     NORTH,
     EAST,
     SOUTH,
@@ -109,17 +108,16 @@ struct MAPNIK_DECL format_properties
 {
     format_properties();
     void from_xml(xml_node const& sym, fontset_map const& fontsets, bool is_shield);
-    void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                format_properties const& dfl) const;
+    void to_xml(boost::property_tree::ptree& node, bool explicit_defaults, format_properties const& dfl) const;
     // collect expressions
-    void add_expressions(expression_set & output) const;
+    void add_expressions(expression_set& output) const;
 
     std::string face_name;
     boost::optional<font_set> fontset;
     // expressions
     symbolizer_base::value_type text_size;
     symbolizer_base::value_type character_spacing;
-    symbolizer_base::value_type line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
+    symbolizer_base::value_type line_spacing; // Largest total height (fontsize+line_spacing) per line is chosen
     symbolizer_base::value_type text_opacity;
     symbolizer_base::value_type halo_opacity;
     symbolizer_base::value_type fill;
@@ -129,21 +127,19 @@ struct MAPNIK_DECL format_properties
     symbolizer_base::value_type ff_settings;
 };
 
-
 // Properties for building the layout of a single text placement
 struct MAPNIK_DECL text_layout_properties
 {
     text_layout_properties();
 
     // Load all values from XML ptree.
-    void from_xml(xml_node const &sym, fontset_map const& fontsets);
+    void from_xml(xml_node const& sym, fontset_map const& fontsets);
     // Save all values to XML ptree (but does not create a new parent node!).
-    void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                text_layout_properties const& dfl) const;
+    void to_xml(boost::property_tree::ptree& node, bool explicit_defaults, text_layout_properties const& dfl) const;
 
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
-    void add_expressions(expression_set & output) const;
+    void add_expressions(expression_set& output) const;
 
     // per layout expressions
     symbolizer_base::value_type dx;
@@ -189,15 +185,14 @@ struct MAPNIK_DECL text_symbolizer_properties
     // Load all values from XML ptree.
     void from_xml(xml_node const& node, fontset_map const& fontsets, bool is_shield);
     // Save all values to XML ptree (but does not create a new parent node!).
-    void to_xml(boost::property_tree::ptree & node, bool explicit_defaults,
-                text_symbolizer_properties const& dfl) const;
+    void to_xml(boost::property_tree::ptree& node, bool explicit_defaults, text_symbolizer_properties const& dfl) const;
     // Sets new format tree.
     void set_format_tree(formatting::node_ptr tree);
     // Get format tree.
     formatting::node_ptr format_tree() const;
     // Get a list of all expressions used in any placement.
     // This function is used to collect attributes.
-    void add_expressions(expression_set & output) const;
+    void add_expressions(expression_set& output) const;
 
     // Per symbolizer options
     // Expressions
@@ -207,13 +202,15 @@ struct MAPNIK_DECL text_symbolizer_properties
     // Default values for format_properties.
     format_properties format_defaults;
 
-private:
+  private:
     // A tree of formatting::nodes which contain text and formatting information.
     formatting::node_ptr tree_;
 };
 
-evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_properties const& text_prop, feature_impl const& feature, attributes const& attrs);
+evaluated_text_properties_ptr evaluate_text_properties(text_symbolizer_properties const& text_prop,
+                                                       feature_impl const& feature,
+                                                       attributes const& attrs);
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_TEXT_PROPERTIES_HPP

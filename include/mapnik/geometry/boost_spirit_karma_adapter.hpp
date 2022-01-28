@@ -20,81 +20,78 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_BOOST_SPIRIT_KARMA_ADAPTER_HPP
 #define MAPNIK_BOOST_SPIRIT_KARMA_ADAPTER_HPP
 
 #include <mapnik/geometry.hpp>
 
-namespace boost { using mapbox::util::get; }
+namespace boost {
+using mapbox::util::get;
+}
 
 #include <boost/spirit/home/karma/domain.hpp>
 #include <boost/spirit/home/support/attributes.hpp>
 
-namespace boost { namespace spirit { namespace traits
-{
-template <>
-struct not_is_variant<mapnik::geometry::geometry<double>, karma::domain>
-    : mpl::false_
+namespace boost {
+namespace spirit {
+namespace traits {
+template<>
+struct not_is_variant<mapnik::geometry::geometry<double>, karma::domain> : mpl::false_
 {};
 
-template <>
-struct not_is_variant<mapnik::geometry::geometry<std::int64_t>, karma::domain>
-    : mpl::false_
+template<>
+struct not_is_variant<mapnik::geometry::geometry<std::int64_t>, karma::domain> : mpl::false_
 {};
 
-template <>
-struct variant_which< mapnik::geometry::geometry<double> >
+template<>
+struct variant_which<mapnik::geometry::geometry<double>>
 {
-    static int call(mapnik::geometry::geometry<double> const& v)
-    {
-        return v.which();
-    }
+    static int call(mapnik::geometry::geometry<double> const& v) { return v.which(); }
 };
 
-template <>
-struct variant_which< mapnik::geometry::geometry<std::int64_t> >
+template<>
+struct variant_which<mapnik::geometry::geometry<std::int64_t>>
 {
-    static int call(mapnik::geometry::geometry<std::int64_t> const& v)
-    {
-        return v.which();
-    }
+    static int call(mapnik::geometry::geometry<std::int64_t> const& v) { return v.which(); }
 };
 
 namespace detail {
 
-template <typename T, typename Tuple>
+template<typename T, typename Tuple>
 struct has_type;
 
-template <typename T>
-struct has_type<T, std::tuple<>> : std::false_type {};
+template<typename T>
+struct has_type<T, std::tuple<>> : std::false_type
+{};
 
-template <typename T, typename U, typename... Types>
-struct has_type<T, std::tuple<U, Types...>> : has_type<T, std::tuple<Types...>> {};
+template<typename T, typename U, typename... Types>
+struct has_type<T, std::tuple<U, Types...>> : has_type<T, std::tuple<Types...>>
+{};
 
-template <typename T, typename... Types>
-struct has_type<T, std::tuple<T, Types...>> : std::true_type {};
+template<typename T, typename... Types>
+struct has_type<T, std::tuple<T, Types...>> : std::true_type
+{};
 
-template <typename T, typename Tuple>
+template<typename T, typename Tuple>
 struct index;
 
-template <typename T, typename... Types>
+template<typename T, typename... Types>
 struct index<T, std::tuple<T, Types...>>
 {
     static const std::size_t value = 0;
 };
 
-template <typename T, typename U, typename... Types>
+template<typename T, typename U, typename... Types>
 struct index<T, std::tuple<U, Types...>>
 {
     static const std::size_t value = 1 + index<T, std::tuple<Types...>>::value;
 };
 
-}
+} // namespace detail
 
-template <typename Expected>
+template<typename Expected>
 struct compute_compatible_component_variant<mapnik::geometry::geometry<double>, Expected>
-    :  detail::has_type<Expected, mapnik::geometry::geometry<double>::types>
+    : detail::has_type<Expected, mapnik::geometry::geometry<double>::types>
 {
     using compatible_type = Expected;
     static bool is_compatible(int index)
@@ -103,9 +100,9 @@ struct compute_compatible_component_variant<mapnik::geometry::geometry<double>, 
     }
 };
 
-template <typename Expected>
+template<typename Expected>
 struct compute_compatible_component_variant<mapnik::geometry::geometry<std::int64_t>, Expected>
-    :  detail::has_type<Expected, mapnik::geometry::geometry<std::int64_t>::types>
+    : detail::has_type<Expected, mapnik::geometry::geometry<std::int64_t>::types>
 {
     using compatible_type = Expected;
     static bool is_compatible(int index)
@@ -114,8 +111,8 @@ struct compute_compatible_component_variant<mapnik::geometry::geometry<std::int6
     }
 };
 
-}}}
+} // namespace traits
+} // namespace spirit
+} // namespace boost
 
-
-
-#endif //MAPNIK_BOOST_SPIRIT_KARMA_ADAPTER_HPP
+#endif // MAPNIK_BOOST_SPIRIT_KARMA_ADAPTER_HPP

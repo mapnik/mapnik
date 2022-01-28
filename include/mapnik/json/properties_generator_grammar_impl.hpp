@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #include <mapnik/json/properties_generator_grammar.hpp>
 
 #include <mapnik/warning.hpp>
@@ -30,47 +29,47 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/fusion/adapted/std_tuple.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace karma = boost::spirit::karma;
 
-template <typename OutputIterator>
+template<typename OutputIterator>
 escaped_string<OutputIterator>::escaped_string()
-  : escaped_string::base_type(esc_str)
+    : escaped_string::base_type(esc_str)
 {
     karma::lit_type lit;
     karma::_r1_type _r1;
     karma::char_type char_;
-    esc_char.add
-        ('\a', "\\u0007")
-        ('\b', "\\b")
-        ('\f', "\\f")
-        ('\n', "\\n")
-        ('\r', "\\r")
-        ('\t', "\\t")
-        ('\v', "\\u000b")
-        ('"', "\\\"")
-        ('\\', "\\\\")
-        ;
-    esc_str = lit(_r1)
-        << *(esc_char | char_)
-        <<  lit(_r1)
-        ;
+    esc_char.add        //
+      ('\a', "\\u0007") //
+      ('\b', "\\b")     //
+      ('\f', "\\f")     //
+      ('\n', "\\n")     //
+      ('\r', "\\r")     //
+      ('\t', "\\t")     //
+      ('\v', "\\u000b") //
+      ('"', "\\\"")     //
+      ('\\', "\\\\")    //
+      ;
+    esc_str = lit(_r1)               //
+              << *(esc_char | char_) //
+              << lit(_r1)            //
+      ;
 }
 
-template <typename OutputIterator, typename KeyValueStore>
+template<typename OutputIterator, typename KeyValueStore>
 properties_generator_grammar<OutputIterator, KeyValueStore>::properties_generator_grammar()
-    : properties_generator_grammar::base_type(properties),
-      quote_("\"")
+    : properties_generator_grammar::base_type(properties)
+    , quote_("\"")
 {
-
     boost::spirit::karma::lit_type lit;
     boost::spirit::karma::_val_type _val;
     boost::spirit::karma::_1_type _1;
     boost::spirit::karma::string_type kstring;
     boost::spirit::karma::eps_type eps;
     using boost::phoenix::at_c;
-
+    // clang-format off
     properties = lit('{')
         << -(pair % lit(','))
         << lit('}')
@@ -86,6 +85,8 @@ properties_generator_grammar<OutputIterator, KeyValueStore>::properties_generato
         |
         kstring[_1 = at_c<0>(_val)]
         ;
+    // clang-format on
 }
 
-}}
+} // namespace json
+} // namespace mapnik

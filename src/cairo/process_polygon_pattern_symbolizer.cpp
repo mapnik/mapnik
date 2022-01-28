@@ -35,36 +35,33 @@
 #include <mapnik/renderer_common/apply_vertex_converter.hpp>
 #include <mapnik/renderer_common/pattern_alignment.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(polygon_pattern_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
-    std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename,true);
-    if (marker->is<mapnik::marker_null>()) return;
+    std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename, true);
+    if (marker->is<mapnik::marker_null>())
+        return;
 
-    using vertex_converter_type = vertex_converter<clip_poly_tag,
-                                                   transform_tag,
-                                                   affine_transform_tag,
-                                                   simplify_tag,
-                                                   smooth_tag>;
+    using vertex_converter_type =
+      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
     using pattern_type = cairo_polygon_pattern<vertex_converter_type>;
 
     pattern_type pattern(*marker, common_, sym, feature, prj_trans);
 
-    if (prj_trans.equal() && pattern.clip_) pattern.converter_.set<clip_poly_tag>();
+    if (prj_trans.equal() && pattern.clip_)
+        pattern.converter_.set<clip_poly_tag>();
 
     pattern.render(CAIRO_FILL_RULE_EVEN_ODD, context_);
 }
 
-template void cairo_renderer<cairo_ptr>::process(polygon_pattern_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void
+  cairo_renderer<cairo_ptr>::process(polygon_pattern_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

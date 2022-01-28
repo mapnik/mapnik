@@ -22,7 +22,7 @@
 #ifndef MAPNIK_FACE_HPP
 #define MAPNIK_FACE_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/util/noncopyable.hpp>
@@ -31,8 +31,7 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-extern "C"
-{
+extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
@@ -40,44 +39,34 @@ extern "C"
 
 MAPNIK_DISABLE_WARNING_POP
 
-//stl
+// stl
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class MAPNIK_DECL font_face : util::noncopyable
 {
-public:
+  public:
     font_face(FT_Face face);
 
-    std::string family_name() const
-    {
-        return std::string(face_->family_name);
-    }
+    std::string family_name() const { return std::string(face_->family_name); }
 
-    std::string style_name() const
-    {
-        return std::string(face_->style_name);
-    }
+    std::string style_name() const { return std::string(face_->style_name); }
 
-    FT_Face get_face() const
-    {
-        return face_;
-    }
+    FT_Face get_face() const { return face_; }
 
     bool set_character_sizes(double size);
     bool set_unscaled_character_sizes();
 
-    bool glyph_dimensions(glyph_info &glyph) const;
+    bool glyph_dimensions(glyph_info& glyph) const;
 
-    inline bool is_color() const { return color_font_;}
+    inline bool is_color() const { return color_font_; }
 
     ~font_face();
 
-private:
+  private:
     bool init_color_font();
 
     FT_Face face_;
@@ -85,12 +74,13 @@ private:
 };
 using face_ptr = std::shared_ptr<font_face>;
 
-
 class MAPNIK_DECL font_face_set : private util::noncopyable
 {
-public:
+  public:
     using iterator = std::vector<face_ptr>::iterator;
-    font_face_set(void) : faces_(){}
+    font_face_set(void)
+        : faces_()
+    {}
 
     void add(face_ptr face);
     void set_character_sizes(double size);
@@ -99,26 +89,28 @@ public:
     std::size_t size() const { return faces_.size(); }
     iterator begin() { return faces_.begin(); }
     iterator end() { return faces_.end(); }
-private:
+
+  private:
     std::vector<face_ptr> faces_;
 };
 using face_set_ptr = std::unique_ptr<font_face_set>;
 
-
 // FT_Stroker wrapper
 class stroker : util::noncopyable
 {
-public:
+  public:
     explicit stroker(FT_Stroker s)
-        : s_(s) {}
+        : s_(s)
+    {}
     ~stroker();
 
     void init(double radius);
     FT_Stroker const& get() const { return s_; }
-private:
+
+  private:
     FT_Stroker s_;
 };
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // FACE_HPP

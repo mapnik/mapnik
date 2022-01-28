@@ -48,28 +48,28 @@
 #include "resultset.hpp"
 #include "cursorresultset.hpp"
 
-using mapnik::transcoder;
-using mapnik::datasource;
-using mapnik::feature_style_context_map;
-using mapnik::processor_context_ptr;
 using mapnik::box2d;
-using mapnik::layer_descriptor;
-using mapnik::featureset_ptr;
-using mapnik::feature_ptr;
-using mapnik::query;
-using mapnik::parameters;
 using mapnik::coord2d;
+using mapnik::datasource;
+using mapnik::feature_ptr;
+using mapnik::feature_style_context_map;
+using mapnik::featureset_ptr;
+using mapnik::layer_descriptor;
+using mapnik::parameters;
+using mapnik::processor_context_ptr;
+using mapnik::query;
+using mapnik::transcoder;
 
-using CnxPool_ptr = std::shared_ptr< ConnectionManager::PoolType>;
+using CnxPool_ptr = std::shared_ptr<ConnectionManager::PoolType>;
 
 class postgis_datasource : public datasource
 {
-public:
-    postgis_datasource(const parameters &params);
+  public:
+    postgis_datasource(const parameters& params);
     ~postgis_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
-    processor_context_ptr get_context(feature_style_context_map &) const;
+    static const char* name();
+    processor_context_ptr get_context(feature_style_context_map&) const;
     featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const;
     featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
@@ -77,7 +77,7 @@ public:
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
 
-private:
+  private:
     std::string sql_bbox(box2d<double> const& env) const;
     std::string populate_tokens(std::string const& sql,
                                 double scale_denom,
@@ -87,8 +87,11 @@ private:
                                 mapnik::attributes const& vars,
                                 bool intersect = true) const;
     std::string populate_tokens(std::string const& sql) const;
-    void append_geometry_table(std::ostream & os) const;
-    std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
+    void append_geometry_table(std::ostream& os) const;
+    std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection>& conn,
+                                              std::string const& sql,
+                                              CnxPool_ptr const& pool,
+                                              processor_context_ptr ctx = processor_context_ptr()) const;
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
 

@@ -35,12 +35,12 @@ MAPNIK_DISABLE_WARNING_POP
 void setup_attributes(mapnik::context_ptr const& ctx,
                       std::set<std::string> const& names,
                       std::string const& shape_name,
-                      shape_io & shape,
-                      std::vector<int> & attr_ids)
+                      shape_io& shape,
+                      std::vector<int>& attr_ids)
 {
     std::set<std::string>::const_iterator pos = names.begin();
     std::set<std::string>::const_iterator end = names.end();
-    for ( ;pos !=end; ++pos)
+    for (; pos != end; ++pos)
     {
         bool found_name = false;
         for (int i = 0; i < shape.dbf().num_fields(); ++i)
@@ -54,7 +54,7 @@ void setup_attributes(mapnik::context_ptr const& ctx,
             }
         }
 
-        if (! found_name)
+        if (!found_name)
         {
             std::string s("no attribute '");
             std::string pos_string;

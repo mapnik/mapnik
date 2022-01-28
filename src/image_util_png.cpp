@@ -21,12 +21,11 @@
  *****************************************************************************/
 
 #if defined(HAVE_PNG)
-extern "C"
-{
+extern "C" {
 #include <png.h>
 }
 #ifndef PNG_FAST_FILTERS // libpng < 1.6
-#define PNG_FAST_FILTERS ( PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP )
+#define PNG_FAST_FILTERS (PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP)
 #endif
 #endif // HAVE_PNG
 
@@ -47,13 +46,11 @@ extern "C"
 #include <string>
 #include <iostream>
 
-namespace mapnik
-{
+namespace mapnik {
 
 #if defined(HAVE_PNG)
 
-void handle_png_options(std::string const& type,
-                        png_options & opts)
+void handle_png_options(std::string const& type, png_options& opts)
 {
     if (type == "png" || type == "png24" || type == "png32")
     {
@@ -83,8 +80,10 @@ void handle_png_options(std::string const& type,
         }
         else if (key == "m" && val)
         {
-            if (*val == "o") opts.use_hextree = false;
-            else if (*val == "h") opts.use_hextree = true;
+            if (*val == "o")
+                opts.use_hextree = false;
+            else if (*val == "h")
+                opts.use_hextree = true;
         }
         else if (key == "e" && val && *val == "miniz")
         {
@@ -93,14 +92,14 @@ void handle_png_options(std::string const& type,
         else if (key == "c")
         {
             set_colors = true;
-            if (!val || !mapnik::util::string2int(*val, opts.colors) || opts.colors < 1 ||  opts.colors > 256)
+            if (!val || !mapnik::util::string2int(*val, opts.colors) || opts.colors < 1 || opts.colors > 256)
             {
                 throw image_writer_exception("invalid color parameter: " + to_string(val));
             }
         }
         else if (key == "t")
         {
-            if (!val || !mapnik::util::string2int(*val,opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
+            if (!val || !mapnik::util::string2int(*val, opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
             {
                 throw image_writer_exception("invalid trans_mode parameter: " + to_string(val));
             }
@@ -121,16 +120,18 @@ void handle_png_options(std::string const& type,
               #define Z_BEST_COMPRESSION       9
               #define Z_DEFAULT_COMPRESSION  (-1)
             */
-            if (!val || !mapnik::util::string2int(*val, opts.compression)
-                || opts.compression < Z_DEFAULT_COMPRESSION
-                || opts.compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
+            if (!val || !mapnik::util::string2int(*val, opts.compression) || opts.compression < Z_DEFAULT_COMPRESSION ||
+                opts.compression >
+                  10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
             {
-                throw image_writer_exception("invalid compression parameter: " + to_string(val) + " (only -1 through 10 are valid)");
+                throw image_writer_exception("invalid compression parameter: " + to_string(val) +
+                                             " (only -1 through 10 are valid)");
             }
         }
         else if (key == "s")
         {
-            if (!val) throw image_writer_exception("invalid compression parameter: <uninitialised>");
+            if (!val)
+                throw image_writer_exception("invalid compression parameter: <uninitialised>");
 
             if (*val == "default")
             {
@@ -164,11 +165,16 @@ void handle_png_options(std::string const& type,
             // filters = PNG_FAST_FILTERS;
             // filters = PNG_FILTER_NONE | PNG_FILTER_SUB | PNG_FILTER_UP | PNG_FILTER_AVG | PNG_FILTER_PAETH;
 
-            if (!val) throw image_writer_exception("invalid filters parameter: <uninitialised>");
-            if (*val == "no") opts.filters = PNG_NO_FILTERS;
-            else if (*val == "all") opts.filters = PNG_ALL_FILTERS;
-            else if (*val == "fast") opts.filters = PNG_FAST_FILTERS;
-            else opts.filters = parse_png_filters(*val); // none | sub | up | avg | paeth
+            if (!val)
+                throw image_writer_exception("invalid filters parameter: <uninitialised>");
+            if (*val == "no")
+                opts.filters = PNG_NO_FILTERS;
+            else if (*val == "all")
+                opts.filters = PNG_ALL_FILTERS;
+            else if (*val == "fast")
+                opts.filters = PNG_FAST_FILTERS;
+            else
+                opts.filters = parse_png_filters(*val); // none | sub | up | avg | paeth
         }
         else
         {
@@ -191,41 +197,43 @@ void handle_png_options(std::string const& type,
 }
 #endif
 
-png_saver::png_saver(std::ostream & stream, std::string const& t):
-    stream_(stream), t_(t) {}
+png_saver::png_saver(std::ostream& stream, std::string const& t)
+    : stream_(stream)
+    , t_(t)
+{}
 
-png_saver_pal::png_saver_pal(std::ostream & stream, std::string const& t, rgba_palette const& pal):
-    stream_(stream), t_(t), pal_(pal) {}
+png_saver_pal::png_saver_pal(std::ostream& stream, std::string const& t, rgba_palette const& pal)
+    : stream_(stream)
+    , t_(t)
+    , pal_(pal)
+{}
 
 template<>
-void png_saver::operator()<image_null> (image_null const& image) const
+void png_saver::operator()<image_null>(image_null const& image) const
 {
     throw image_writer_exception("null images not supported for png");
 }
 
 template<>
-void png_saver_pal::operator()<image_null> (image_null const& image) const
+void png_saver_pal::operator()<image_null>(image_null const& image) const
 {
     throw image_writer_exception("null images not supported for png");
 }
 
 template<>
-void png_saver::operator()<image_view_null> (image_view_null const& image) const
+void png_saver::operator()<image_view_null>(image_view_null const& image) const
 {
     throw image_writer_exception("null image views not supported for png");
 }
 
 template<>
-void png_saver_pal::operator()<image_view_null> (image_view_null const& image) const
+void png_saver_pal::operator()<image_view_null>(image_view_null const& image) const
 {
     throw image_writer_exception("null image views not supported for png");
 }
 
-template <typename T>
-void process_rgba8_png_pal(T const& image,
-                          std::string const& t,
-                          std::ostream & stream,
-                          rgba_palette const& pal)
+template<typename T>
+void process_rgba8_png_pal(T const& image, std::string const& t, std::ostream& stream, rgba_palette const& pal)
 {
 #if defined(HAVE_PNG)
     png_options opts;
@@ -254,10 +262,8 @@ void process_rgba8_png_pal(T const& image,
 #endif
 }
 
-template <typename T>
-void process_rgba8_png(T const& image,
-                          std::string const& t,
-                          std::ostream & stream)
+template<typename T>
+void process_rgba8_png(T const& image, std::string const& t, std::ostream& stream)
 {
 #if defined(HAVE_PNG)
     png_options opts;
@@ -283,94 +289,94 @@ void process_rgba8_png(T const& image,
 }
 
 template<>
-void png_saver_pal::operator()<image_rgba8> (image_rgba8 const& image) const
+void png_saver_pal::operator()<image_rgba8>(image_rgba8 const& image) const
 {
     process_rgba8_png_pal(image, t_, stream_, pal_);
 }
 
 template<>
-void png_saver_pal::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
+void png_saver_pal::operator()<image_view_rgba8>(image_view_rgba8 const& image) const
 {
     process_rgba8_png_pal(image, t_, stream_, pal_);
 }
 
 template<>
-void png_saver::operator()<image_rgba8> (image_rgba8 const& image) const
+void png_saver::operator()<image_rgba8>(image_rgba8 const& image) const
 {
     process_rgba8_png(image, t_, stream_);
 }
 
 template<>
-void png_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
+void png_saver::operator()<image_view_rgba8>(image_view_rgba8 const& image) const
 {
     process_rgba8_png(image, t_, stream_);
 }
 
-template <typename T>
-void png_saver::operator() (T const& image) const
+template<typename T>
+void png_saver::operator()(T const& image) const
 {
 #if defined(HAVE_PNG)
     throw image_writer_exception("Mapnik does not support grayscale images for png");
-    //png_options opts;
-    //handle_png_options(t_, opts);
-    //save_as_png(stream_, image, opts);
+    // png_options opts;
+    // handle_png_options(t_, opts);
+    // save_as_png(stream_, image, opts);
 #else
     throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
-template <typename T>
-void png_saver_pal::operator() (T const& image) const
+template<typename T>
+void png_saver_pal::operator()(T const& image) const
 {
 #if defined(HAVE_PNG)
     throw image_writer_exception("Mapnik does not support grayscale images for png");
-    //png_options opts;
-    //handle_png_options(t_, opts);
-    //save_as_png(stream_, image, opts);
+    // png_options opts;
+    // handle_png_options(t_, opts);
+    // save_as_png(stream_, image, opts);
 #else
     throw image_writer_exception("png output is not enabled in your build of Mapnik");
 #endif
 }
 
-template void png_saver::operator()<image_gray8> (image_gray8 const& image) const;
-template void png_saver::operator()<image_gray8s> (image_gray8s const& image) const;
-template void png_saver::operator()<image_gray16> (image_gray16 const& image) const;
-template void png_saver::operator()<image_gray16s> (image_gray16s const& image) const;
-template void png_saver::operator()<image_gray32> (image_gray32 const& image) const;
-template void png_saver::operator()<image_gray32s> (image_gray32s const& image) const;
-template void png_saver::operator()<image_gray32f> (image_gray32f const& image) const;
-template void png_saver::operator()<image_gray64> (image_gray64 const& image) const;
-template void png_saver::operator()<image_gray64s> (image_gray64s const& image) const;
-template void png_saver::operator()<image_gray64f> (image_gray64f const& image) const;
-template void png_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
-template void png_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
-template void png_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;
-template void png_saver::operator()<image_view_gray16s> (image_view_gray16s const& image) const;
-template void png_saver::operator()<image_view_gray32> (image_view_gray32 const& image) const;
-template void png_saver::operator()<image_view_gray32s> (image_view_gray32s const& image) const;
-template void png_saver::operator()<image_view_gray32f> (image_view_gray32f const& image) const;
-template void png_saver::operator()<image_view_gray64> (image_view_gray64 const& image) const;
-template void png_saver::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
-template void png_saver::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
-template void png_saver_pal::operator()<image_gray8> (image_gray8 const& image) const;
-template void png_saver_pal::operator()<image_gray8s> (image_gray8s const& image) const;
-template void png_saver_pal::operator()<image_gray16> (image_gray16 const& image) const;
-template void png_saver_pal::operator()<image_gray16s> (image_gray16s const& image) const;
-template void png_saver_pal::operator()<image_gray32> (image_gray32 const& image) const;
-template void png_saver_pal::operator()<image_gray32s> (image_gray32s const& image) const;
-template void png_saver_pal::operator()<image_gray32f> (image_gray32f const& image) const;
-template void png_saver_pal::operator()<image_gray64> (image_gray64 const& image) const;
-template void png_saver_pal::operator()<image_gray64s> (image_gray64s const& image) const;
-template void png_saver_pal::operator()<image_gray64f> (image_gray64f const& image) const;
-template void png_saver_pal::operator()<image_view_gray8> (image_view_gray8 const& image) const;
-template void png_saver_pal::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
-template void png_saver_pal::operator()<image_view_gray16> (image_view_gray16 const& image) const;
-template void png_saver_pal::operator()<image_view_gray16s> (image_view_gray16s const& image) const;
-template void png_saver_pal::operator()<image_view_gray32> (image_view_gray32 const& image) const;
-template void png_saver_pal::operator()<image_view_gray32s> (image_view_gray32s const& image) const;
-template void png_saver_pal::operator()<image_view_gray32f> (image_view_gray32f const& image) const;
-template void png_saver_pal::operator()<image_view_gray64> (image_view_gray64 const& image) const;
-template void png_saver_pal::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
-template void png_saver_pal::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
+template void png_saver::operator()<image_gray8>(image_gray8 const& image) const;
+template void png_saver::operator()<image_gray8s>(image_gray8s const& image) const;
+template void png_saver::operator()<image_gray16>(image_gray16 const& image) const;
+template void png_saver::operator()<image_gray16s>(image_gray16s const& image) const;
+template void png_saver::operator()<image_gray32>(image_gray32 const& image) const;
+template void png_saver::operator()<image_gray32s>(image_gray32s const& image) const;
+template void png_saver::operator()<image_gray32f>(image_gray32f const& image) const;
+template void png_saver::operator()<image_gray64>(image_gray64 const& image) const;
+template void png_saver::operator()<image_gray64s>(image_gray64s const& image) const;
+template void png_saver::operator()<image_gray64f>(image_gray64f const& image) const;
+template void png_saver::operator()<image_view_gray8>(image_view_gray8 const& image) const;
+template void png_saver::operator()<image_view_gray8s>(image_view_gray8s const& image) const;
+template void png_saver::operator()<image_view_gray16>(image_view_gray16 const& image) const;
+template void png_saver::operator()<image_view_gray16s>(image_view_gray16s const& image) const;
+template void png_saver::operator()<image_view_gray32>(image_view_gray32 const& image) const;
+template void png_saver::operator()<image_view_gray32s>(image_view_gray32s const& image) const;
+template void png_saver::operator()<image_view_gray32f>(image_view_gray32f const& image) const;
+template void png_saver::operator()<image_view_gray64>(image_view_gray64 const& image) const;
+template void png_saver::operator()<image_view_gray64s>(image_view_gray64s const& image) const;
+template void png_saver::operator()<image_view_gray64f>(image_view_gray64f const& image) const;
+template void png_saver_pal::operator()<image_gray8>(image_gray8 const& image) const;
+template void png_saver_pal::operator()<image_gray8s>(image_gray8s const& image) const;
+template void png_saver_pal::operator()<image_gray16>(image_gray16 const& image) const;
+template void png_saver_pal::operator()<image_gray16s>(image_gray16s const& image) const;
+template void png_saver_pal::operator()<image_gray32>(image_gray32 const& image) const;
+template void png_saver_pal::operator()<image_gray32s>(image_gray32s const& image) const;
+template void png_saver_pal::operator()<image_gray32f>(image_gray32f const& image) const;
+template void png_saver_pal::operator()<image_gray64>(image_gray64 const& image) const;
+template void png_saver_pal::operator()<image_gray64s>(image_gray64s const& image) const;
+template void png_saver_pal::operator()<image_gray64f>(image_gray64f const& image) const;
+template void png_saver_pal::operator()<image_view_gray8>(image_view_gray8 const& image) const;
+template void png_saver_pal::operator()<image_view_gray8s>(image_view_gray8s const& image) const;
+template void png_saver_pal::operator()<image_view_gray16>(image_view_gray16 const& image) const;
+template void png_saver_pal::operator()<image_view_gray16s>(image_view_gray16s const& image) const;
+template void png_saver_pal::operator()<image_view_gray32>(image_view_gray32 const& image) const;
+template void png_saver_pal::operator()<image_view_gray32s>(image_view_gray32s const& image) const;
+template void png_saver_pal::operator()<image_view_gray32f>(image_view_gray32f const& image) const;
+template void png_saver_pal::operator()<image_view_gray64>(image_view_gray64 const& image) const;
+template void png_saver_pal::operator()<image_view_gray64s>(image_view_gray64s const& image) const;
+template void png_saver_pal::operator()<image_view_gray64f>(image_view_gray64f const& image) const;
 
-} // end ns
+} // namespace mapnik

@@ -22,7 +22,7 @@
 #ifndef MAPNIK_PLACEMENT_FINDER_HPP
 #define MAPNIK_PLACEMENT_FINDER_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/text_layout.hpp>
@@ -30,8 +30,7 @@
 #include <mapnik/text/rotation.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class label_collision_detector4;
 using DetectorType = label_collision_detector4;
@@ -43,53 +42,55 @@ struct glyph_info;
 
 class placement_finder : util::noncopyable
 {
-public:
+  public:
     placement_finder(feature_impl const& feature,
                      attributes const& attr,
-                     DetectorType & detector,
+                     DetectorType& detector,
                      box2d<double> const& extent,
                      text_placement_info const& placement_info,
-                     face_manager_freetype & font_manager,
+                     face_manager_freetype& font_manager,
                      double scale_factor);
 
     // Try to place a single label at the given point.
     bool find_point_placement(pixel_position const& pos);
     // Iterate over the given path, placing line-following labels or point labels with respect to label_spacing.
-    template <typename T>
-    bool find_line_placements(T & path, bool points);
+    template<typename T>
+    bool find_line_placements(T& path, bool points);
     // Try next position alternative from placement_info.
     bool next_position();
 
     placements_list const& placements() const { return placements_; }
 
-    void set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
-private:
-    bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
+    void
+      set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
+
+  private:
+    bool single_line_placement(vertex_cache& pp, text_upright_e orientation);
     // Moves dx pixels but makes sure not to fall of the end.
-    void path_move_dx(vertex_cache & pp, double dx);
+    void path_move_dx(vertex_cache& pp, double dx);
     // Adjusts user defined spacing to place an integer number of labels.
     double get_spacing(double path_length, double layout_width) const;
     // Checks for collision.
-    bool collision(box2d<double> const& box, const value_unicode_string &repeat_key, bool line_placement) const;
+    bool collision(box2d<double> const& box, const value_unicode_string& repeat_key, bool line_placement) const;
     // Adds marker to glyph_positions and to collision detector. Returns false if there is a collision.
-    bool add_marker(glyph_positions_ptr & glyphs, pixel_position const& pos, std::vector<box2d<double>> & bboxes) const;
+    bool add_marker(glyph_positions_ptr& glyphs, pixel_position const& pos, std::vector<box2d<double>>& bboxes) const;
     // Maps upright==auto, left-only and right-only to left,right to simplify processing.
     // angle = angle of at start of line (to estimate best option for upright==auto)
     text_upright_e simplify_upright(text_upright_e upright, double angle) const;
     feature_impl const& feature_;
     attributes const& attr_;
-    DetectorType & detector_;
+    DetectorType& detector_;
     box2d<double> const& extent_;
     text_placement_info const& info_;
     evaluated_text_properties_ptr text_props_;
     layout_container layouts_;
 
     double scale_factor_;
-    face_manager_freetype &font_manager_;
+    face_manager_freetype& font_manager_;
 
     placements_list placements_;
     std::vector<text_layout_ptr> processed_layouts_;
-    //ShieldSymbolizer
+    // ShieldSymbolizer
     bool has_marker_;
     marker_info_ptr marker_;
     box2d<double> marker_box_;
@@ -99,6 +100,6 @@ private:
     horizontal_alignment_e horizontal_alignment_;
 };
 
-}//ns mapnik
+} // namespace mapnik
 
 #endif // PLACEMENT_FINDER_HPP

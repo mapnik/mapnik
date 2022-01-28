@@ -33,36 +33,31 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_color_rgba.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 class pattern_source : private util::noncopyable
 {
-public:
+  public:
     pattern_source(image_rgba8 const& pattern, double opacity = 1.0)
-        : pattern_(pattern),
-          opacity_(opacity) {}
+        : pattern_(pattern)
+        , opacity_(opacity)
+    {}
 
-    unsigned int width() const
-    {
-        return pattern_.width();
-    }
-    unsigned int height() const
-    {
-        return pattern_.height();
-    }
+    unsigned int width() const { return pattern_.width(); }
+    unsigned int height() const { return pattern_.height(); }
     agg::rgba8 pixel(int x, int y) const
     {
-        unsigned c = pattern_(x,y);
+        unsigned c = pattern_(x, y);
         return agg::rgba8(static_cast<unsigned>((c & 0xff) * opacity_),
                           static_cast<unsigned>(((c >> 8) & 0xff) * opacity_),
                           static_cast<unsigned>(((c >> 16) & 0xff) * opacity_),
                           static_cast<unsigned>(((c >> 24) & 0xff) * opacity_));
     }
-private:
+
+  private:
     image_rgba8 const& pattern_;
     double opacity_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_AGG_PATTERN_SOURCE_HPP

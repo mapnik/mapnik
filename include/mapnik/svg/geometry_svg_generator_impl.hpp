@@ -24,46 +24,48 @@
 #include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/svg/geometry_svg_generator.hpp>
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-    namespace karma = boost::spirit::karma;
-    namespace phoenix = boost::phoenix;
+namespace karma = boost::spirit::karma;
+namespace phoenix = boost::phoenix;
 
-    template <typename OutputIterator, typename Path>
-    svg_path_generator<OutputIterator,Path>::svg_path_generator()
-        : svg_path_generator::base_type(svg)
-    {
-        boost::spirit::karma::uint_type uint_;
-        boost::spirit::karma::_val_type _val;
-        boost::spirit::karma::_1_type _1;
-        boost::spirit::karma::lit_type lit;
+template<typename OutputIterator, typename Path>
+svg_path_generator<OutputIterator, Path>::svg_path_generator()
+    : svg_path_generator::base_type(svg)
+{
+    boost::spirit::karma::uint_type uint_;
+    boost::spirit::karma::_val_type _val;
+    boost::spirit::karma::_1_type _1;
+    boost::spirit::karma::lit_type lit;
 
-        svg = point | linestring | polygon
-            ;
+    // clang-format off
+    svg = point | linestring | polygon;
+    
+    point = &uint_(mapnik::geometry::geometry_types::Point)[_1 = _type(_val)]
+        << svg_point [_1 = _first(_val)]
+        ;
 
-        point = &uint_(mapnik::geometry::geometry_types::Point)[_1 = _type(_val)]
-            << svg_point [_1 = _first(_val)]
-            ;
+    svg_point = &uint_
+        << lit("cx=\"") << coordinate
+        << lit("\" cy=\"") << coordinate
+        << lit('\"')
+        ;
 
-        svg_point = &uint_
-            << lit("cx=\"") << coordinate
-            << lit("\" cy=\"") << coordinate
-            << lit('\"')
-            ;
+    linestring = &uint_(mapnik::geometry::geometry_types::LineString)[_1 = _type(_val)]
+        << lit("d=\"") << svg_path << lit("\"")
+        ;
 
-        linestring = &uint_(mapnik::geometry::geometry_types::LineString)[_1 = _type(_val)]
-            << lit("d=\"") << svg_path << lit("\"")
-            ;
+    polygon = &uint_(mapnik::geometry::geometry_types::Polygon)[_1 = _type(_val)]
+        << lit("d=\"") << svg_path << lit("\"")
+        ;
 
-        polygon = &uint_(mapnik::geometry::geometry_types::Polygon)[_1 = _type(_val)]
-            << lit("d=\"") << svg_path << lit("\"")
-            ;
+    svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
+                    | &uint_(mapnik::SEG_LINETO) << lit('L'))
+                    << coordinate << lit(' ') << coordinate) % lit(' ')
+                    ;
+    // clang-format on
+}
 
-        svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
-                      | &uint_(mapnik::SEG_LINETO) << lit('L'))
-                     << coordinate << lit(' ') << coordinate) % lit(' ')
-                     ;
-
-    }
-
-}}
+} // namespace svg
+} // namespace mapnik

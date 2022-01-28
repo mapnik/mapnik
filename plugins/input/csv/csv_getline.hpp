@@ -27,13 +27,13 @@
 #include <istream>
 #include <streambuf>
 
-namespace csv_utils
-{
+namespace csv_utils {
 
-template <class CharT, class Traits, class Allocator>
-std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_string<CharT,Traits,Allocator>& s, CharT delim, CharT quote)
+template<class CharT, class Traits, class Allocator>
+std::basic_istream<CharT, Traits>&
+  getline_csv(std::istream& is, std::basic_string<CharT, Traits, Allocator>& s, CharT delim, CharT quote)
 {
-    typename std::basic_string<CharT,Traits,Allocator>::size_type nread = 0;
+    typename std::basic_string<CharT, Traits, Allocator>::size_type nread = 0;
     typename std::basic_istream<CharT, Traits>::sentry sentry(is, true);
     if (sentry)
     {
@@ -57,7 +57,7 @@ std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_stri
                 if (!Traits::eq(c, delim) || has_quote)
                     s.push_back(c);
                 else
-                    break;// Character is extracted but not appended.
+                    break; // Character is extracted but not appended.
             }
         }
     }
@@ -67,6 +67,6 @@ std::basic_istream<CharT, Traits>& getline_csv(std::istream& is, std::basic_stri
     return is;
 }
 
-}
+} // namespace csv_utils
 
 #endif // MAPNIK_CSV_GETLINE_HPP

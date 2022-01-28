@@ -48,14 +48,18 @@
 namespace mapnik {
 
 #if defined(HAVE_CAIRO)
-void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor, double scale_denominator)
+void save_to_cairo_file(mapnik::Map const& map,
+                        std::string const& filename,
+                        double scale_factor,
+                        double scale_denominator)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        save_to_cairo_file(map,filename,*type,scale_factor,scale_denominator);
+        save_to_cairo_file(map, filename, *type, scale_factor, scale_denominator);
     }
-    else throw image_writer_exception("Could not write file to " + filename );
+    else
+        throw image_writer_exception("Could not write file to " + filename);
 }
 
 void save_to_cairo_file(mapnik::Map const& map,
@@ -64,7 +68,7 @@ void save_to_cairo_file(mapnik::Map const& map,
                         double scale_factor,
                         double scale_denominator)
 {
-    std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
+    std::ofstream file(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
     if (file)
     {
         cairo_surface_ptr surface;
@@ -73,7 +77,8 @@ void save_to_cairo_file(mapnik::Map const& map,
         if (type == "pdf")
         {
 #ifdef CAIRO_HAS_PDF_SURFACE
-            surface = cairo_surface_ptr(cairo_pdf_surface_create(filename.c_str(),width,height),cairo_surface_closer());
+            surface =
+              cairo_surface_ptr(cairo_pdf_surface_create(filename.c_str(), width, height), cairo_surface_closer());
 #else
             throw image_writer_exception("PDFSurface not supported in the cairo backend");
 #endif
@@ -81,24 +86,28 @@ void save_to_cairo_file(mapnik::Map const& map,
 #ifdef CAIRO_HAS_SVG_SURFACE
         else if (type == "svg")
         {
-            surface = cairo_surface_ptr(cairo_svg_surface_create(filename.c_str(),width,height),cairo_surface_closer());
+            surface =
+              cairo_surface_ptr(cairo_svg_surface_create(filename.c_str(), width, height), cairo_surface_closer());
             cairo_svg_surface_restrict_to_version(surface.get(), CAIRO_SVG_VERSION_1_2);
         }
 #endif
 #ifdef CAIRO_HAS_PS_SURFACE
         else if (type == "ps")
         {
-            surface = cairo_surface_ptr(cairo_ps_surface_create(filename.c_str(),width,height),cairo_surface_closer());
+            surface =
+              cairo_surface_ptr(cairo_ps_surface_create(filename.c_str(), width, height), cairo_surface_closer());
         }
 #endif
 #ifdef CAIRO_HAS_IMAGE_SURFACE
         else if (type == "ARGB32")
         {
-            surface = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,width,height),cairo_surface_closer());
+            surface =
+              cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height), cairo_surface_closer());
         }
         else if (type == "RGB24")
         {
-            surface = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height),cairo_surface_closer());
+            surface =
+              cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height), cairo_surface_closer());
         }
 #endif
         else
@@ -106,7 +115,7 @@ void save_to_cairo_file(mapnik::Map const& map,
             throw image_writer_exception("unknown file type: " + type);
         }
 
-        //cairo_t * ctx = cairo_create(surface);
+        // cairo_t * ctx = cairo_create(surface);
 
         // TODO - expose as user option
         /*
@@ -129,4 +138,4 @@ void save_to_cairo_file(mapnik::Map const& map,
 
 #endif
 
-} // end ns
+} // namespace mapnik

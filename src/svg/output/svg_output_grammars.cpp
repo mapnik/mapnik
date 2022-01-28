@@ -25,7 +25,7 @@
 #include <mapnik/svg/output/svg_output_grammars_impl.hpp>
 #include <string>
 
-template struct mapnik::svg::svg_path_attributes_grammar<std::ostream_iterator<char> >;
-template struct mapnik::svg::svg_path_dash_array_grammar<std::ostream_iterator<char> >;
-template struct mapnik::svg::svg_rect_attributes_grammar<std::ostream_iterator<char> >;
-template struct mapnik::svg::svg_root_attributes_grammar<std::ostream_iterator<char> >;
+template struct mapnik::svg::svg_path_attributes_grammar<std::ostream_iterator<char>>;
+template struct mapnik::svg::svg_path_dash_array_grammar<std::ostream_iterator<char>>;
+template struct mapnik::svg::svg_rect_attributes_grammar<std::ostream_iterator<char>>;
+template struct mapnik::svg::svg_root_attributes_grammar<std::ostream_iterator<char>>;

@@ -27,13 +27,13 @@
 #include <mapnik/geometry/polygon.hpp>
 #include <mapnik/geometry/point.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <class T>
-MAPNIK_DECL bool interior(polygon<T> const& polygon,
-                          double scale_factor,
-                          point<T> & pt);
+template<class T>
+MAPNIK_DECL bool interior(polygon<T> const& polygon, double scale_factor, point<T>& pt);
 
-} }
+}
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_INTERIOR_HPP

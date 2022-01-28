@@ -43,10 +43,7 @@ struct MAPNIK_DECL Featureset : private util::noncopyable
 
 struct MAPNIK_DECL invalid_featureset final : Featureset
 {
-    feature_ptr next()
-    {
-        return feature_ptr();
-    }
+    feature_ptr next() { return feature_ptr(); }
     ~invalid_featureset() {}
 };
 
@@ -62,6 +59,6 @@ inline bool is_valid(featureset_ptr const& ptr)
     return (dynamic_cast<invalid_featureset*>(ptr.get()) == nullptr) ? true : false;
 }
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FEATURESET_HPP

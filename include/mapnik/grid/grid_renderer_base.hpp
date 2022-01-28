@@ -39,6 +39,6 @@ using grid_renderer_base_type = agg::renderer_base<mapnik::pixfmt_gray64>;
 using grid_renderer_base_type = agg::renderer_base<mapnik::pixfmt_gray32>;
 #endif
 
-}
+} // namespace mapnik
 
-#endif //MAPNIK_AGG_RASTERIZER_HPP
+#endif // MAPNIK_AGG_RASTERIZER_HPP

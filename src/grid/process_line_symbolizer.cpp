@@ -48,9 +48,9 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 void grid_renderer<T>::process(line_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
@@ -77,28 +77,33 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     box2d<double> clipping_extent = common_.query_extent_;
 
     bool clip = get<value_bool>(sym, keys::clip, feature, common_.vars_, false);
-    double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_,1.0);
-    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_,0.0);
-    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_,0.0);
-    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_,false);
+    double width = get<value_double>(sym, keys::stroke_width, feature, common_.vars_, 1.0);
+    double offset = get<value_double>(sym, keys::offset, feature, common_.vars_, 0.0);
+    double simplify_tolerance = get<value_double>(sym, keys::simplify_tolerance, feature, common_.vars_, 0.0);
+    double smooth = get<value_double>(sym, keys::smooth, feature, common_.vars_, false);
     bool has_dash = has_key(sym, keys::stroke_dasharray);
 
     if (clip)
     {
-        double pad_per_pixel = static_cast<double>(common_.query_extent_.width()/common_.width_);
-        double pixels = std::ceil(std::max(width / 2.0 + std::fabs(offset),
-                                          (std::fabs(offset) * offset_converter_default_threshold)));
+        double pad_per_pixel = static_cast<double>(common_.query_extent_.width() / common_.width_);
+        double pixels = std::ceil(
+          std::max(width / 2.0 + std::fabs(offset), (std::fabs(offset) * offset_converter_default_threshold)));
         double padding = pad_per_pixel * pixels * common_.scale_factor_;
 
         clipping_extent.pad(padding);
     }
-    using vertex_converter_type = vertex_converter<clip_line_tag, clip_poly_tag, transform_tag,
+    using vertex_converter_type = vertex_converter<clip_line_tag,
+                                                   clip_poly_tag,
+                                                   transform_tag,
                                                    affine_transform_tag,
-                                                   simplify_tag, smooth_tag,
+                                                   simplify_tag,
+                                                   smooth_tag,
                                                    offset_transform_tag,
-                                                   dash_tag, stroke_tag>;
+                                                   dash_tag,
+                                                   stroke_tag>;
 
-    vertex_converter_type converter(clipping_extent,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+    vertex_converter_type
+      converter(clipping_extent, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
     if (clip)
     {
         geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
@@ -108,17 +113,21 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
             converter.template set<clip_line_tag>();
     }
     converter.set<transform_tag>(); // always transform
-    if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
-    converter.set<affine_transform_tag>(); // optional affine transform
-    if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-    if (has_dash) converter.set<dash_tag>();
-    converter.set<stroke_tag>(); //always stroke
+    if (std::fabs(offset) > 0.0)
+        converter.set<offset_transform_tag>(); // parallel offset
+    converter.set<affine_transform_tag>();     // optional affine transform
+    if (simplify_tolerance > 0.0)
+        converter.set<simplify_tag>(); // optional simplify converter
+    if (smooth > 0.0)
+        converter.set<smooth_tag>(); // optional smooth converter
+    if (has_dash)
+        converter.set<dash_tag>();
+    converter.set<stroke_tag>(); // always stroke
 
     using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, grid_rasterizer>;
     using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
     apply_vertex_converter_type apply(converter, *ras_ptr);
-    mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
+    mapnik::util::apply_visitor(vertex_processor_type(apply), feature.get_geometry());
 
     // render id
     ren.color(color_type(feature.id()));
@@ -127,14 +136,10 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     // add feature properties to grid cache
     pixmap_.add_feature(feature);
-
 }
 
+template void grid_renderer<grid>::process(line_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-template void grid_renderer<grid>::process(line_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
-
-}
+} // namespace mapnik
 
 #endif

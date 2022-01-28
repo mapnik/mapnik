@@ -23,7 +23,7 @@
 #ifndef MAPNIK_TEXT_GLYPH_POSITIONS_HPP
 #define MAPNIK_TEXT_GLYPH_POSITIONS_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/rotation.hpp>
@@ -36,17 +36,19 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_trans_affine.h"
 MAPNIK_DISABLE_WARNING_POP
 
-//stl
+// stl
 #include <vector>
 #include <list>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct glyph_position
 {
     glyph_position(glyph_info const& _glyph, pixel_position const& _pos, rotation const& _rot)
-        : glyph(_glyph), pos(_pos), rot(_rot) { }
+        : glyph(_glyph)
+        , pos(_pos)
+        , rot(_rot)
+    {}
     glyph_info const& glyph;
     pixel_position pos;
     rotation rot;
@@ -54,9 +56,11 @@ struct glyph_position
 
 struct marker_info
 {
-    //marker_info() : marker(), transform() {}
-    marker_info(std::shared_ptr<marker const> _marker, agg::trans_affine const& _transform) :
-        marker_(_marker), transform_(_transform) {}
+    // marker_info() : marker(), transform() {}
+    marker_info(std::shared_ptr<marker const> _marker, agg::trans_affine const& _transform)
+        : marker_(_marker)
+        , transform_(_transform)
+    {}
     std::shared_ptr<marker const> marker_;
     agg::trans_affine transform_;
 };
@@ -70,7 +74,7 @@ using marker_info_ptr = std::shared_ptr<marker_info>;
 
 class glyph_positions
 {
-public:
+  public:
     using const_iterator = std::vector<glyph_position>::const_iterator;
     glyph_positions();
 
@@ -86,7 +90,8 @@ public:
     void set_marker(marker_info_ptr marker, pixel_position const& marker_pos);
     marker_info_ptr const& get_marker() const;
     pixel_position const& marker_pos() const;
-private:
+
+  private:
     std::vector<glyph_position> data_;
     pixel_position base_point_;
     marker_info_ptr marker_info_;
@@ -100,7 +105,7 @@ using placements_list = std::list<glyph_positions_ptr>;
 
 struct scoped_glyph_positions_offset
 {
-    scoped_glyph_positions_offset(glyph_positions & glyphs, pixel_position const& offset)
+    scoped_glyph_positions_offset(glyph_positions& glyphs, pixel_position const& offset)
         : glyphs_(glyphs)
         , base_point_(glyphs.get_base_point())
         , marker_pos_(glyphs.marker_pos())
@@ -127,8 +132,8 @@ struct scoped_glyph_positions_offset
         }
     }
 
-private:
-    glyph_positions & glyphs_;
+  private:
+    glyph_positions& glyphs_;
     pixel_position base_point_;
     pixel_position marker_pos_;
 };

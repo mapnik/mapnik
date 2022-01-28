@@ -51,15 +51,15 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(ogr_datasource)
 
+using mapnik::attribute_descriptor;
 using mapnik::box2d;
 using mapnik::coord2d;
-using mapnik::query;
-using mapnik::featureset_ptr;
-using mapnik::layer_descriptor;
-using mapnik::attribute_descriptor;
 using mapnik::datasource_exception;
-using mapnik::filter_in_box;
+using mapnik::featureset_ptr;
 using mapnik::filter_at_point;
+using mapnik::filter_in_box;
+using mapnik::layer_descriptor;
+using mapnik::query;
 
 static std::once_flag once_flag;
 
@@ -67,17 +67,15 @@ extern "C" MAPNIK_EXP void on_plugin_load()
 {
     // initialize ogr formats
     // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
-    std::call_once(once_flag,[](){
-        OGRRegisterAll();
-    });
+    std::call_once(once_flag, []() { OGRRegisterAll(); });
 }
 
 ogr_datasource::ogr_datasource(parameters const& params)
-    : datasource(params),
-      extent_(),
-      type_(datasource::Vector),
-      desc_(ogr_datasource::name(), *params.get<std::string>("encoding", "utf-8")),
-      indexed_(false)
+    : datasource(params)
+    , extent_()
+    , type_(datasource::Vector)
+    , desc_(ogr_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
+    , indexed_(false)
 {
     init(params);
 }
@@ -87,9 +85,9 @@ ogr_datasource::~ogr_datasource()
     // free layer before destroying the datasource
     layer_.free_layer();
 #if GDAL_VERSION_MAJOR >= 2
-    GDALClose(( GDALDatasetH) dataset_);
+    GDALClose((GDALDatasetH)dataset_);
 #else
-    OGRDataSource::DestroyDataSource (dataset_);
+    OGRDataSource::DestroyDataSource(dataset_);
 #endif
 }
 
@@ -101,8 +99,9 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
-    if (!string) string  = params.get<std::string>("inline");
-    if (! file && ! string)
+    if (!string)
+        string = params.get<std::string>("inline");
+    if (!file && !string)
     {
         throw datasource_exception("missing <file> or <string> parameter");
     }
@@ -124,16 +123,17 @@ void ogr_datasource::init(mapnik::parameters const& params)
         }
     }
 
-    std::string driver = *params.get<std::string>("driver","");
+    std::string driver = *params.get<std::string>("driver", "");
 
-    if (! driver.empty())
+    if (!driver.empty())
     {
 #if GDAL_VERSION_MAJOR >= 2
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
-        const char* papszAllowedDrivers[] = { driver.c_str(), nullptr };
-        dataset_ = reinterpret_cast<gdal_dataset_type>(GDALOpenEx(dataset_name_.c_str(),nOpenFlags,papszAllowedDrivers, nullptr, nullptr));
+        const char* papszAllowedDrivers[] = {driver.c_str(), nullptr};
+        dataset_ = reinterpret_cast<gdal_dataset_type>(
+          GDALOpenEx(dataset_name_.c_str(), nOpenFlags, papszAllowedDrivers, nullptr, nullptr));
 #else
-        OGRSFDriver * ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
+        OGRSFDriver* ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
         if (ogr_driver && ogr_driver != nullptr)
         {
             dataset_ = ogr_driver->Open((dataset_name_).c_str(), false);
@@ -150,12 +150,13 @@ void ogr_datasource::init(mapnik::parameters const& params)
 #endif
     }
 
-    if (! dataset_)
+    if (!dataset_)
     {
         const std::string err = CPLGetLastErrorMsg();
         if (err.size() == 0)
         {
-            throw datasource_exception("OGR Plugin: connection failed: " + dataset_name_ + " was not found or is not a supported format");
+            throw datasource_exception("OGR Plugin: connection failed: " + dataset_name_ +
+                                       " was not found or is not a supported format");
         }
         else
         {
@@ -178,7 +179,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
         throw datasource_exception("OGR Plugin: you can only select an ogr layer by name "
                                    "('layer' parameter), by number ('layer_by_index' parameter), "
                                    "or by sql ('layer_by_sql' parameter), "
-                                   "do not supply 2 or more of them at the same time" );
+                                   "do not supply 2 or more of them at the same time");
     }
 
     if (layer_by_name)
@@ -192,7 +193,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
         if (*layer_by_index >= num_layers)
         {
             std::ostringstream s;
-            s << "OGR Plugin: only " << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
+            s << "OGR Plugin: only " << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index
+              << "'";
             throw datasource_exception(s.str());
         }
 
@@ -210,12 +212,13 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     else
     {
-        std::string s("OGR Plugin: missing <layer> or <layer_by_index> or <layer_by_sql>  parameter, available layers are: ");
+        std::string s(
+          "OGR Plugin: missing <layer> or <layer_by_index> or <layer_by_sql>  parameter, available layers are: ");
 
         unsigned num_layers = dataset_->GetLayerCount();
         bool layer_found = false;
         std::vector<std::string> layer_names;
-        for (unsigned i = 0; i < num_layers; ++i )
+        for (unsigned i = 0; i < num_layers; ++i)
         {
             OGRLayer* ogr_layer = dataset_->GetLayer(i);
             OGRFeatureDefn* ogr_layer_def = ogr_layer->GetLayerDefn();
@@ -226,19 +229,19 @@ void ogr_datasource::init(mapnik::parameters const& params)
             }
         }
 
-        if (! layer_found)
+        if (!layer_found)
         {
             s += "None (no layers were found in dataset)";
         }
         else
         {
-            s += boost::algorithm::join(layer_names,", ");
+            s += boost::algorithm::join(layer_names, ", ");
         }
 
         throw datasource_exception(s);
     }
 
-    if (! layer_.is_valid())
+    if (!layer_.is_valid())
     {
         std::ostringstream s;
         s << "OGR Plugin: ";
@@ -278,12 +281,14 @@ void ogr_datasource::init(mapnik::parameters const& params)
         {
             if (layer->GetFeatureCount() == 0)
             {
-                MAPNIK_LOG_ERROR(ogr) << "could not determine extent, layer '" << layer->GetLayerDefn()->GetName() << "' appears to have no features";
+                MAPNIK_LOG_ERROR(ogr) << "could not determine extent, layer '" << layer->GetLayerDefn()->GetName()
+                                      << "' appears to have no features";
             }
             else
             {
                 std::ostringstream s;
-                s << "OGR Plugin: Cannot determine extent for layer '" << layer->GetLayerDefn()->GetName() << "'. Please provide a manual extent string (minx,miny,maxx,maxy).";
+                s << "OGR Plugin: Cannot determine extent for layer '" << layer->GetLayerDefn()->GetName()
+                  << "'. Please provide a manual extent string (minx,miny,maxx,maxy).";
                 throw datasource_exception(s.str());
             }
         }
@@ -301,7 +306,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     index_name_ = dataset_name_.substr(0, breakpoint) + ".ogrindex";
 
-#if defined (_WIN32)
+#if defined(_WIN32)
     std::ifstream index_file(mapnik::utf8_to_utf16(index_name_), std::ios::in | std::ios::binary);
 #else
     std::ifstream index_file(index_name_.c_str(), std::ios::in | std::ios::binary);
@@ -338,55 +343,56 @@ void ogr_datasource::init(mapnik::parameters const& params)
             const OGRFieldType type_oid = fld->GetType();
             switch (type_oid)
             {
-            case OFTInteger:
+                case OFTInteger:
 #if GDAL_VERSION_MAJOR >= 2
-            case OFTInteger64:
+                case OFTInteger64:
 #endif
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
-                break;
+                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
+                    break;
 
-            case OFTReal:
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
-                break;
+                case OFTReal:
+                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
+                    break;
 
-            case OFTString:
-            case OFTWideString: // deprecated
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
-                break;
+                case OFTString:
+                case OFTWideString: // deprecated
+                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
+                    break;
 
-            case OFTBinary:
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
-                break;
+                case OFTBinary:
+                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
+                    break;
 
-            case OFTIntegerList:
+                case OFTIntegerList:
 #if GDAL_VERSION_MAJOR >= 2
-            case OFTInteger64List:
+                case OFTInteger64List:
 #endif
-            case OFTRealList:
-            case OFTStringList:
-            case OFTWideStringList: // deprecated !
-                MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
-                break;
+                case OFTRealList:
+                case OFTStringList:
+                case OFTWideStringList: // deprecated !
+                    MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
+                    break;
 
-            case OFTDate:
-            case OFTTime:
-            case OFTDateTime: // unhandled !
-                desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
-                MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
-                break;
+                case OFTDate:
+                case OFTTime:
+                case OFTDateTime: // unhandled !
+                    desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
+                    MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
+                    break;
             }
         }
     }
-    mapnik::parameters & extra_params = desc_.get_extra_parameters();
-    OGRSpatialReference * srs_ref = layer->GetSpatialRef();
-    char * srs_output = nullptr;
-    if (srs_ref && srs_ref->exportToProj4( &srs_output ) == OGRERR_NONE ) {
+    mapnik::parameters& extra_params = desc_.get_extra_parameters();
+    OGRSpatialReference* srs_ref = layer->GetSpatialRef();
+    char* srs_output = nullptr;
+    if (srs_ref && srs_ref->exportToProj4(&srs_output) == OGRERR_NONE)
+    {
         extra_params["proj4"] = mapnik::util::trim_copy(srs_output);
     }
     CPLFree(srs_output);
 }
 
-const char * ogr_datasource::name()
+const char* ogr_datasource::name()
 {
     return "ogr";
 }
@@ -413,7 +419,7 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
 #else
         switch (wkbFlatten(layer->GetGeomType()))
 #endif
-            {
+        {
             case wkbPoint:
             case wkbMultiPoint:
                 result.reset(mapnik::datasource_geometry_t::Point);
@@ -431,45 +437,44 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
                 result.reset(mapnik::datasource_geometry_t::Collection);
                 break;
             case wkbNone:
-            case wkbUnknown:
-            {
+            case wkbUnknown: {
                 // fallback to inspecting first actual geometry
                 // TODO - csv and shapefile inspect first 4 features
                 if (dataset_ && layer_.is_valid())
                 {
                     layer = layer_.layer();
                     // only new either reset of setNext
-                    //layer->ResetReading();
+                    // layer->ResetReading();
                     layer->SetNextByIndex(0);
-                    OGRFeature *poFeature;
+                    OGRFeature* poFeature;
                     while ((poFeature = layer->GetNextFeature()) != nullptr)
                     {
                         OGRGeometry* geom = poFeature->GetGeometryRef();
-                        if (geom && ! geom->IsEmpty())
+                        if (geom && !geom->IsEmpty())
                         {
                             switch (wkbFlatten(geom->getGeometryType()))
                             {
-                            case wkbPoint:
-                            case wkbMultiPoint:
-                                result.reset(mapnik::datasource_geometry_t::Point);
-                                break;
-                            case wkbLinearRing:
-                            case wkbLineString:
-                            case wkbMultiLineString:
-                                result.reset(mapnik::datasource_geometry_t::LineString);
-                                break;
-                            case wkbPolygon:
-                            case wkbMultiPolygon:
-                                result.reset(mapnik::datasource_geometry_t::Polygon);
-                                break;
-                            case wkbGeometryCollection:
-                                result.reset(mapnik::datasource_geometry_t::Collection);
-                                break;
-                            default:
-                                break;
+                                case wkbPoint:
+                                case wkbMultiPoint:
+                                    result.reset(mapnik::datasource_geometry_t::Point);
+                                    break;
+                                case wkbLinearRing:
+                                case wkbLineString:
+                                case wkbMultiLineString:
+                                    result.reset(mapnik::datasource_geometry_t::LineString);
+                                    break;
+                                case wkbPolygon:
+                                case wkbMultiPolygon:
+                                    result.reset(mapnik::datasource_geometry_t::Polygon);
+                                    break;
+                                case wkbGeometryCollection:
+                                    result.reset(mapnik::datasource_geometry_t::Collection);
+                                    break;
+                                default:
+                                    break;
                             }
                         }
-                        OGRFeature::DestroyFeature( poFeature );
+                        OGRFeature::DestroyFeature(poFeature);
                         break;
                     }
                 }
@@ -477,7 +482,7 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
             }
             default:
                 break;
-            }
+        }
     }
 
     return result;
@@ -488,13 +493,13 @@ layer_descriptor ogr_datasource::get_descriptor() const
     return desc_;
 }
 
-void validate_attribute_names(query const& q, std::vector<attribute_descriptor> const& names )
+void validate_attribute_names(query const& q, std::vector<attribute_descriptor> const& names)
 {
     std::set<std::string> const& attribute_names = q.property_names();
     std::set<std::string>::const_iterator pos = attribute_names.begin();
     std::set<std::string>::const_iterator end_names = attribute_names.end();
 
-    for ( ;pos != end_names; ++pos)
+    for (; pos != end_names; ++pos)
     {
         bool found_name = false;
 
@@ -507,7 +512,7 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
             }
         }
 
-        if (! found_name)
+        if (!found_name)
         {
             std::ostringstream s;
             s << "OGR Plugin: no attribute named '" << *pos << "'. Valid attributes are: ";
@@ -547,18 +552,12 @@ featureset_ptr ogr_datasource::features(query const& q) const
         {
             filter_in_box filter(q.get_bbox());
 
-            return featureset_ptr(new ogr_index_featureset<filter_in_box>(ctx,
-                                                                          *layer,
-                                                                          filter,
-                                                                          index_name_,
-                                                                          desc_.get_encoding()));
+            return featureset_ptr(
+              new ogr_index_featureset<filter_in_box>(ctx, *layer, filter, index_name_, desc_.get_encoding()));
         }
         else
         {
-            return featureset_ptr(new ogr_featureset(ctx,
-                                                      *layer,
-                                                      q.get_bbox(),
-                                                      desc_.get_encoding()));
+            return featureset_ptr(new ogr_featureset(ctx, *layer, q.get_bbox(), desc_.get_encoding()));
         }
     }
 
@@ -588,20 +587,14 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
         {
             filter_at_point filter(pt, tol);
 
-            return featureset_ptr(new ogr_index_featureset<filter_at_point> (ctx,
-                                                                             *layer,
-                                                                             filter,
-                                                                             index_name_,
-                                                                             desc_.get_encoding()));
+            return featureset_ptr(
+              new ogr_index_featureset<filter_at_point>(ctx, *layer, filter, index_name_, desc_.get_encoding()));
         }
         else
         {
             mapnik::box2d<double> bbox(pt, pt);
             bbox.pad(tol);
-            return featureset_ptr(new ogr_featureset (ctx,
-                                                      *layer,
-                                                      bbox,
-                                                      desc_.get_encoding()));
+            return featureset_ptr(new ogr_featureset(ctx, *layer, bbox, desc_.get_encoding()));
         }
     }
 

@@ -17,7 +17,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <string>
 
-int main (int argc,char** argv)
+int main(int argc, char** argv)
 {
     namespace po = boost::program_options;
 
@@ -36,6 +36,7 @@ int main (int argc,char** argv)
     try
     {
         po::options_description desc("mapnik-render utility");
+        // clang-format off
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
@@ -48,17 +49,17 @@ int main (int argc,char** argv)
             ("map-height",po::value<int>(),"map height in pixels")
             ("variables","make map parameters available as render-time variables")
             ;
-
+        // clang-format on
         po::positional_options_description p;
-        p.add("xml",1);
-        p.add("img",1);
+        p.add("xml", 1);
+        p.add("img", 1);
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         po::notify(vm);
 
         if (vm.count("version"))
         {
-            std::clog <<"version " << MAPNIK_VERSION_STRING << std::endl;
+            std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
             return 1;
         }
 
@@ -80,7 +81,7 @@ int main (int argc,char** argv)
 
         if (vm.count("xml"))
         {
-            xml_file=vm["xml"].as<std::string>();
+            xml_file = vm["xml"].as<std::string>();
         }
         else
         {
@@ -90,7 +91,7 @@ int main (int argc,char** argv)
 
         if (vm.count("img"))
         {
-            img_file=vm["img"].as<std::string>();
+            img_file = vm["img"].as<std::string>();
         }
         else
         {
@@ -100,7 +101,7 @@ int main (int argc,char** argv)
 
         if (vm.count("scale-factor"))
         {
-            scale_factor=vm["scale-factor"].as<double>();
+            scale_factor = vm["scale-factor"].as<double>();
         }
 
         if (vm.count("variables"))
@@ -108,21 +109,23 @@ int main (int argc,char** argv)
             params_as_variables = true;
         }
 
-        if (vm.count("map-width")) {
-          map_width = vm["map-width"].as<int>();
+        if (vm.count("map-width"))
+        {
+            map_width = vm["map-width"].as<int>();
         }
 
-        if (vm.count("map-height")) {
-          map_height = vm["map-height"].as<int>();
+        if (vm.count("map-height"))
+        {
+            map_height = vm["map-height"].as<int>();
         }
 
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
-        mapnik::freetype_engine::register_fonts("./fonts",true);
-        mapnik::Map map(map_width,map_height);
-        mapnik::load_map(map,xml_file,true);
+        mapnik::freetype_engine::register_fonts("./fonts", true);
+        mapnik::Map map(map_width, map_height);
+        mapnik::load_map(map, xml_file, true);
         map.zoom_all();
-        mapnik::image_rgba8 im(map.width(),map.height());
-        mapnik::request req(map.width(),map.height(),map.get_current_extent());
+        mapnik::image_rgba8 im(map.width(), map.height());
+        mapnik::request req(map.width(), map.height(), map.get_current_extent());
         req.set_buffer_size(map.buffer_size());
         mapnik::attributes vars;
         if (params_as_variables)
@@ -148,9 +151,9 @@ int main (int argc,char** argv)
                 }
             }
         }
-        mapnik::agg_renderer<mapnik::image_rgba8> ren(map,req,vars,im,scale_factor,0,0);
+        mapnik::agg_renderer<mapnik::image_rgba8> ren(map, req, vars, im, scale_factor, 0, 0);
         ren.apply();
-        mapnik::save_to_file(im,img_file);
+        mapnik::save_to_file(im, img_file);
         if (auto_open)
         {
             std::ostringstream s;
@@ -170,8 +173,7 @@ int main (int argc,char** argv)
         {
             std::clog << "rendered to: " << img_file << "\n";
         }
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::clog << "Error " << ex.what() << std::endl;
         return -1;

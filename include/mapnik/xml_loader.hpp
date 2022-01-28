@@ -29,11 +29,10 @@
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 class MAPNIK_DECL xml_node;
-MAPNIK_DECL void read_xml(std::string const & filename, xml_node &node);
-MAPNIK_DECL void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path="");
-}
+MAPNIK_DECL void read_xml(std::string const& filename, xml_node& node);
+MAPNIK_DECL void read_xml_string(std::string const& str, xml_node& node, std::string const& base_path = "");
+} // namespace mapnik
 
 #endif // MAPNIK_LIBXML2_LOADER_HPP

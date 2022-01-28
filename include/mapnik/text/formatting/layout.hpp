@@ -32,15 +32,19 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace formatting {
+namespace mapnik {
+namespace formatting {
 
-class MAPNIK_DECL layout_node: public node
+class MAPNIK_DECL layout_node : public node
 {
-public:
-    void to_xml(boost::property_tree::ptree &xml) const;
+  public:
+    void to_xml(boost::property_tree::ptree& xml) const;
     static node_ptr from_xml(xml_node const& xml, fontset_map const& fontsets);
-    virtual void apply(evaluated_format_properties_ptr const& p, feature_impl const& feature, attributes const& vars, text_layout &output) const;
-    virtual void add_expressions(expression_set &output) const;
+    virtual void apply(evaluated_format_properties_ptr const& p,
+                       feature_impl const& feature,
+                       attributes const& vars,
+                       text_layout& output) const;
+    virtual void add_expressions(expression_set& output) const;
     void set_child(node_ptr child);
     node_ptr get_child() const;
     //
@@ -57,10 +61,10 @@ public:
     boost::optional<symbolizer_base::value_type> rotate_displacement;
     boost::optional<symbolizer_base::value_type> orientation;
 
-private:
+  private:
     node_ptr child_;
 };
-} //ns formatting
-} //ns mapnik
+} // namespace formatting
+} // namespace mapnik
 
 #endif // FORMATTING_OFFSET_HPP

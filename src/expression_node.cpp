@@ -35,79 +35,82 @@ MAPNIK_DISABLE_WARNING_PUSH
 #endif
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 #if defined(BOOST_REGEX_HAS_ICU)
-static void fromUTF32toUTF8(std::basic_string<UChar32> const& src, std::string & dst)
+static void fromUTF32toUTF8(std::basic_string<UChar32> const& src, std::string& dst)
 {
     int32_t len = safe_cast<int32_t>(src.length());
     value_unicode_string::fromUTF32(src.data(), len).toUTF8String(dst);
 }
 #endif
 
-struct _regex_match_impl : util::noncopyable {
+struct _regex_match_impl : util::noncopyable
+{
 #if defined(BOOST_REGEX_HAS_ICU)
-    _regex_match_impl(value_unicode_string const& ustr) :
-        pattern_(boost::make_u32regex(ustr)) {}
+    _regex_match_impl(value_unicode_string const& ustr)
+        : pattern_(boost::make_u32regex(ustr))
+    {}
     boost::u32regex pattern_;
 #else
-    _regex_match_impl(std::string const& ustr) :
-        pattern_(ustr) {}
+    _regex_match_impl(std::string const& ustr)
+        : pattern_(ustr)
+    {}
     boost::regex pattern_;
 #endif
 };
 
-struct _regex_replace_impl : util::noncopyable {
+struct _regex_replace_impl : util::noncopyable
+{
 #if defined(BOOST_REGEX_HAS_ICU)
-    _regex_replace_impl(value_unicode_string const& ustr, value_unicode_string const& f) :
-        pattern_(boost::make_u32regex(ustr)),
-        format_(f) {}
+    _regex_replace_impl(value_unicode_string const& ustr, value_unicode_string const& f)
+        : pattern_(boost::make_u32regex(ustr))
+        , format_(f)
+    {}
     boost::u32regex pattern_;
     value_unicode_string format_;
 #else
-    _regex_replace_impl(std::string const& ustr,std::string const& f) :
-        pattern_(ustr),
-        format_(f) {}
+    _regex_replace_impl(std::string const& ustr, std::string const& f)
+        : pattern_(ustr)
+        , format_(f)
+    {}
     boost::regex pattern_;
     std::string format_;
 #endif
 };
 
-
-regex_match_node::regex_match_node(transcoder const& tr,
-                                   expr_node const& a,
-                                   std::string const& ustr)
-    : expr(a),
-      impl_(new _regex_match_impl(
+regex_match_node::regex_match_node(transcoder const& tr, expr_node const& a, std::string const& ustr)
+    : expr(a)
+    , impl_(new _regex_match_impl(
 #if defined(BOOST_REGEX_HAS_ICU)
         tr.transcode(ustr.c_str())
 #else
         ustr
 #endif
-        )) {}
+          ))
+{}
 
 value regex_match_node::apply(value const& v) const
 {
     auto const& pattern = impl_.get()->pattern_;
 #if defined(BOOST_REGEX_HAS_ICU)
-    return boost::u32regex_match(v.to_unicode(),pattern);
+    return boost::u32regex_match(v.to_unicode(), pattern);
 #else
-    return boost::regex_match(v.to_string(),pattern);
+    return boost::regex_match(v.to_string(), pattern);
 #endif
 }
 
 std::string regex_match_node::to_string() const
 {
     std::string str_;
-    str_ +=".match('";
+    str_ += ".match('";
     auto const& pattern = impl_.get()->pattern_;
 #if defined(BOOST_REGEX_HAS_ICU)
     fromUTF32toUTF8(pattern.str(), str_);
 #else
     str_ += pattern.str();
 #endif
-    str_ +="')";
+    str_ += "')";
     return str_;
 }
 
@@ -115,16 +118,17 @@ regex_replace_node::regex_replace_node(transcoder const& tr,
                                        expr_node const& a,
                                        std::string const& ustr,
                                        std::string const& f)
-    : expr(a),
-      impl_(new _regex_replace_impl(
+    : expr(a)
+    , impl_(new _regex_replace_impl(
 #if defined(BOOST_REGEX_HAS_ICU)
-                     tr.transcode(ustr.c_str()),
-                     tr.transcode(f.c_str())
+        tr.transcode(ustr.c_str()),
+        tr.transcode(f.c_str())
 #else
-                     ustr,
-                     f
+        ustr,
+        f
 #endif
-                     )) {}
+          ))
+{}
 
 value regex_replace_node::apply(value const& v) const
 {
@@ -142,21 +146,21 @@ value regex_replace_node::apply(value const& v) const
 std::string regex_replace_node::to_string() const
 {
     std::string str_;
-    str_ +=".replace(";
+    str_ += ".replace(";
     str_ += "'";
     auto const& pattern = impl_.get()->pattern_;
     auto const& format = impl_.get()->format_;
 #if defined(BOOST_REGEX_HAS_ICU)
     fromUTF32toUTF8(pattern.str(), str_);
-    str_ +="','";
+    str_ += "','";
     format.toUTF8String(str_);
 #else
     str_ += pattern.str();
-    str_ +="','";
+    str_ += "','";
     str_ += format;
 #endif
-    str_ +="')";
+    str_ += "')";
     return str_;
 }
 
-}
+} // namespace mapnik
