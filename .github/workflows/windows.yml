@@ -1,0 +1,114 @@
+name: Windows
+
+on:
+  workflow_call:
+    inputs:
+      VCPKG_SHA:
+        required: true
+        type: string
+      NUGET_REGISTRY:
+        required: true
+        type: string
+      NUGET_USERNAME:
+        required: true
+        type: string
+      USE_MEMORY_MAPPED_FILE:
+        required: true
+        type: string
+    secrets:
+      NUGET_REGISTRY_PAT:
+        required: true
+
+env:
+  VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
+  VCPKG_NUGET_REPOSITORY: https://github.com/mapnik/vcpkg-nuget.git
+  UPDATE: 1
+  preset: windows-ci
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Install required system packages
+        run: |
+          choco install ninja OpenCppCoverage
+          echo "C:\Program Files\OpenCppCoverage" >> $env:GITHUB_PATH
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: checkout mapnik
+        uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+
+      - name: checkout vcpkg
+        uses: actions/checkout@v2
+        with:
+          repository: "microsoft/vcpkg"
+          ref: ${{ inputs.VCPKG_SHA }}
+          path: vcpkg
+
+      - name: "Setup vcpkg"
+        run: ./vcpkg/bootstrap-vcpkg.bat
+
+      - name: "Setup NuGet Credentials"
+        shell: "bash"
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "${{ inputs.NUGET_REGISTRY }}"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "${{ inputs.NUGET_USERNAME }}"
+          -password "${{ secrets.NUGET_REGISTRY_PAT }}"
+
+      - name: "Setup NuGet apikey"
+        shell: "bash"
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.NUGET_REGISTRY_PAT }}" -Source "${{ inputs.NUGET_REGISTRY }}"
+
+      - name: Configure CMake
+        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset ${{env.preset}}
+
+      - name: Build
+        run: cmake --build --preset ${{env.preset}}
+
+      - name: Test
+        run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --cover_children -- ctest --preset ${{env.preset}}
+
+      - name: Test visuals
+        shell: pwsh
+        continue-on-error: true
+        working-directory: build/${{ env.preset }}/out
+        env:
+          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj4
+        run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --input_coverage=${{ github.workspace }}/ctest.cov --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
+
+      - name: Pack visual test results
+        working-directory: build/${{ env.preset }}/out
+        run: tar cfvz visual-test-results.tar.gz ./visual-test-result
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          files: build/${{ env.preset }}/out/mapnik-test-visual.cov
+
+      - name: Package
+        if: failure()
+        run: cmake --build --preset ${{env.preset}} --target package
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: ${{ env.preset }}-artifact-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
+          path: build/*-ci/mapnik-*.tar.gz
+          retention-days: 2
+
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.preset }}-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
+          path: build/${{ env.preset }}/out/visual-test-results.tar.gz
+          retention-days: 2

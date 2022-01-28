@@ -173,6 +173,60 @@
                 "windows-default",
                 "release-build"
             ]
+        },
+        {
+            "name": "ci-options",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_TESTING": "ON",
+                "BUILD_DEMO_VIEWER": "OFF"
+            }
+        },
+        {
+            "name": "windows-ci",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "windows-release",
+                "ci-options"
+            ],
+            "cacheVariables": {
+                "INSTALL_DEPENDENCIES": "ON",
+                "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin"
+            },
+            "environment": {
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/share/proj4"
+            }
+        },
+        {
+            "name": "linux-ci",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "release-with-debug-build",
+                "use-gcc",
+                "ci-options"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "--coverage"
+            },
+            "environment": {
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-linux/share/proj4"
+            }
+        },
+        {
+            "name": "macos-ci",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "use-ninja",
+                "release-with-debug-build",
+                "default-build-dir",
+                "ci-options"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage"
+            },
+            "environment": {
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-osx/share/proj4"
+            }
         }
     ],
     "buildPresets": [
@@ -199,6 +253,18 @@
         {
             "name": "linux-gcc-release",
             "configurePreset": "linux-gcc-release"
+        },
+        {
+            "name": "windows-ci",
+            "configurePreset": "windows-ci"
+        },
+        {
+            "name": "linux-ci",
+            "configurePreset": "linux-ci"
+        },
+        {
+            "name": "macos-ci",
+            "configurePreset": "macos-ci"
         }
     ],
     "testPresets": [
@@ -212,6 +278,27 @@
                 "noTestsAction": "error",
                 "stopOnFailure": false
             }
+        },
+        {
+            "name": "windows-ci",
+            "configurePreset": "windows-ci",
+            "inherits": [
+                "test-default"
+            ]
+        },
+        {
+            "name": "linux-ci",
+            "configurePreset": "linux-ci",
+            "inherits": [
+                "test-default"
+            ]
+        },
+        {
+            "name": "macos-ci",
+            "configurePreset": "macos-ci",
+            "inherits": [
+                "test-default"
+            ]
         }
     ]
 }
