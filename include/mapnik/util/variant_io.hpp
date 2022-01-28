@@ -23,6 +23,9 @@
 #ifndef MAPNIK_UTIL_VARIANT_IO_HPP
 #define MAPNIK_UTIL_VARIANT_IO_HPP
 
+#include <ostream>
+#include <mapbox/variant.hpp>
+
 namespace mapbox {
 namespace util {
 
