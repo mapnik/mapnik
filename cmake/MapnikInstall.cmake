@@ -70,13 +70,13 @@ function(mapnik_install_targets)
         set(_internal_libraries "")
 
         foreach(_target IN LISTS _installed_utilities)
-            list(APPEND _internal_executables "${CMAKE_INSTALL_PREFIX}/${MAPNIK_BIN_DIR}/$<TARGET_FILE_NAME:${_target}>")
+            list(APPEND _internal_executables "\${CMAKE_INSTALL_PREFIX}/${MAPNIK_BIN_DIR}/$<TARGET_FILE_NAME:${_target}>")
         endforeach()
         foreach(_target IN LISTS _installed_targets)
-            list(APPEND _internal_libraries "${CMAKE_INSTALL_PREFIX}/${MAPNIK_BIN_DIR}/$<TARGET_FILE_NAME:${_target}>")
+            list(APPEND _internal_libraries "\${CMAKE_INSTALL_PREFIX}/${MAPNIK_BIN_DIR}/$<TARGET_FILE_NAME:${_target}>")
         endforeach()
         foreach(_target IN LISTS _installed_plugins)
-            list(APPEND _internal_libraries "${CMAKE_INSTALL_PREFIX}/${PLUGINS_INSTALL_DIR}/$<TARGET_FILE_NAME:${_target}>")
+            list(APPEND _internal_libraries "\${CMAKE_INSTALL_PREFIX}/${PLUGINS_INSTALL_DIR}/$<TARGET_FILE_NAME:${_target}>")
         endforeach()
         # all other executables get auto detected and fixed.
         if(_internal_executables)
@@ -84,8 +84,9 @@ function(mapnik_install_targets)
         endif()
 
         INSTALL(CODE "
-            message(STATUS \"${_internal_executables}\")
-            message(STATUS \"${_internal_libraries}\")
+            message(STATUS \"internal_executables: ${_internal_executables}\")
+            message(STATUS \"internal_libraries: ${_internal_libraries}\")
+            message(STATUS \"ADDITIONAL_LIBARIES_PATHS: ${ADDITIONAL_LIBARIES_PATHS}\")
             
             include(BundleUtilities)
             fixup_bundle(\"${_internal_executables}\" \"${_internal_libraries}\" \"${ADDITIONAL_LIBARIES_PATHS}\")

@@ -25,6 +25,7 @@
 
 #include <string>
 #include <chrono>
+#include <ostream>
 
 namespace mapnik {
 

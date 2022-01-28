@@ -31,6 +31,10 @@
 
 #include "cleanup.hpp" // run_cleanup()
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #ifdef MAPNIK_LOG
 using log_levels_map = std::map<std::string, mapnik::logger::severity_type>;
 
@@ -101,6 +105,11 @@ runner::renderer_container
 
 int main(int argc, char** argv)
 {
+#ifdef _WIN32
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
     po::options_description desc("visual test runner");
     // clang-format off
     desc.add_options()

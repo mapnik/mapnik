@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/cxx11_support.hpp>
 #include <mapnik/pixel_types.hpp>
+#include <type_traits>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -141,13 +141,13 @@ namespace detail {
 //  value_double    if T is a floating-point type
 //  T &&            otherwise
 
-template<typename T, typename dT = decay_t<T>>
+template<typename T, typename dT = std::decay_t<T>>
 using mapnik_value_type_t =
-  conditional_t<std::is_same<dT, bool>::value,
-                value_bool,
-                conditional_t<std::is_integral<dT>::value,
-                              value_integer,
-                              conditional_t<std::is_floating_point<dT>::value, value_double, T&&>>>;
+  std::conditional_t<std::is_same<dT, bool>::value,
+                     value_bool,
+                     std::conditional_t<std::is_integral<dT>::value,
+                                        value_integer,
+                                        std::conditional_t<std::is_floating_point<dT>::value, value_double, T&&>>>;
 
 } // namespace detail
 
