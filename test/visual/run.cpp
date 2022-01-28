@@ -44,10 +44,6 @@ log_levels_map log_levels{{"debug", mapnik::logger::severity_type::debug},
                           {"none", mapnik::logger::severity_type::none}};
 #endif
 
-#if defined(_WIN32)
-#include <windows.h>
-#endif
-
 using namespace visual_tests;
 namespace po = boost::program_options;
 
@@ -113,6 +109,7 @@ int main(int argc, char** argv)
     SetConsoleCP(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
 #endif
+
     po::options_description desc("visual test runner");
     // clang-format off
     desc.add_options()
