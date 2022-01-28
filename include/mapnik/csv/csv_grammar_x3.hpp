@@ -35,9 +35,8 @@ struct csv_white_space_skipper : x3::parser<csv_white_space_skipper>
     using attribute_type = x3::unused_type;
     static bool const has_attribute = false;
 
-    template <typename Iterator, typename Context, typename Attribute>
-    bool parse(Iterator& first, Iterator const& last,
-               Context const& context, x3::unused_type, Attribute& ) const
+    template<typename Iterator, typename Context, typename Attribute>
+    bool parse(Iterator& first, Iterator const& last, Context const& context, x3::unused_type, Attribute&) const
     {
         x3::skip_over(first, last, context);
         if (first != last && *first == ' ')
@@ -64,6 +63,7 @@ csv_line_grammar_type const line = "csv-line";
 
 BOOST_SPIRIT_DECLARE(csv_line_grammar_type);
 
-}}
+} // namespace grammar
+} // namespace mapnik
 
 #endif // MAPNIK_CSV_GRAMMAR_X3_HPP

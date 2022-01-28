@@ -35,33 +35,30 @@ namespace mapnik {
 
 struct property_value_hash_visitor
 {
-    std::size_t operator() (color const& val) const
+    std::size_t operator()(color const& val) const { return val.rgba(); }
+
+    std::size_t operator()(font_feature_settings const&) const
     {
-        return val.rgba();
+        return 0; // FIXME
     }
 
-    std::size_t operator() (font_feature_settings const&) const
+    std::size_t operator()(transform_type const&) const
     {
-        return 0; //FIXME
+        return 0; // FIXME
     }
 
-    std::size_t operator() (transform_type const&) const
+    std::size_t operator()(enumeration_wrapper const&) const
     {
-        return 0; //FIXME
+        return 0; // FIXME
     }
 
-    std::size_t operator() (enumeration_wrapper const&) const
+    std::size_t operator()(dash_array const&) const
     {
-        return 0; //FIXME
+        return 0; // FIXME
     }
 
-    std::size_t operator() (dash_array const&) const
-    {
-        return 0; //FIXME
-    }
-
-    template <typename T>
-    std::size_t operator() (T const& val) const
+    template<typename T>
+    std::size_t operator()(T const& val) const
     {
         return std::hash<T>()(val);
     }
@@ -69,7 +66,7 @@ struct property_value_hash_visitor
 
 struct symbolizer_hash
 {
-    template <typename T>
+    template<typename T>
     static std::size_t value(T const& sym)
     {
         std::size_t seed = std::hash<std::type_index>()(typeid(sym));
@@ -84,14 +81,13 @@ struct symbolizer_hash
 
 struct symbolizer_hash_visitor
 {
-    template <typename Symbolizer>
-    std::size_t operator() (Symbolizer const& sym) const
+    template<typename Symbolizer>
+    std::size_t operator()(Symbolizer const& sym) const
     {
         return symbolizer_hash::value(sym);
     }
 };
 
 } // namespace mapnik
-
 
 #endif // MAPNIK_SYMBOLIZER_HASH_HPP

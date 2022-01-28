@@ -4,10 +4,12 @@
 class test : public benchmark::test_case
 {
     double value_;
-public:
+
+  public:
     test(mapnik::parameters const& params)
-     : test_case(params),
-       value_(-0.1234) {}
+        : test_case(params)
+        , value_(-0.1234)
+    {}
     bool validate() const
     {
         std::ostringstream s;
@@ -17,7 +19,8 @@ public:
     bool operator()() const
     {
         std::string out;
-        for (std::size_t i=0;i<iterations_;++i) {
+        for (std::size_t i = 0; i < iterations_; ++i)
+        {
             std::ostringstream s;
             s << value_;
             out = s.str();
@@ -26,4 +29,4 @@ public:
     }
 };
 
-BENCHMARK(test,"ostringstream double->string")
+BENCHMARK(test, "ostringstream double->string")

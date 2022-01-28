@@ -27,22 +27,19 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-extern "C"
-{
+extern "C" {
 #include FT_GLYPH_H
 #include FT_TRUETYPE_TABLES_H
 }
 
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 font_face::font_face(FT_Face face)
-    : face_(face),
-      color_font_(init_color_font())
-{
-}
+    : face_(face)
+    , color_font_(init_color_font())
+{}
 
 bool font_face::init_color_font()
 {
@@ -63,19 +60,21 @@ bool font_face::set_unscaled_character_sizes()
     return (FT_Set_Char_Size(face_, 0, char_height, 0, 0) == 0);
 }
 
-bool font_face::glyph_dimensions(glyph_info & glyph) const
+bool font_face::glyph_dimensions(glyph_info& glyph) const
 {
     FT_Vector pen;
     pen.x = 0;
     pen.y = 0;
-    if (color_font_) FT_Select_Size(face_, 0);
+    if (color_font_)
+        FT_Select_Size(face_, 0);
     FT_Set_Transform(face_, 0, &pen);
     FT_Int32 load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
-    if (color_font_) load_flags |= FT_LOAD_COLOR ;
+    if (color_font_)
+        load_flags |= FT_LOAD_COLOR;
     if (FT_Load_Glyph(face_, glyph.glyph_index, load_flags))
     {
-        MAPNIK_LOG_ERROR(font_face) << "FT_Load_Glyph failed :( index=" << glyph.glyph_index << " " << load_flags
-                                    << " " << face_->family_name << " " << face_->style_name  ;
+        MAPNIK_LOG_ERROR(font_face) << "FT_Load_Glyph failed :( index=" << glyph.glyph_index << " " << load_flags << " "
+                                    << face_->family_name << " " << face_->style_name;
         return false;
     }
     FT_Glyph image;
@@ -105,9 +104,7 @@ bool font_face::glyph_dimensions(glyph_info & glyph) const
 
 font_face::~font_face()
 {
-    MAPNIK_LOG_DEBUG(font_face) <<
-        "font_face: Clean up face \"" << family_name() <<
-        " " << style_name() << "\"";
+    MAPNIK_LOG_DEBUG(font_face) << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
 
     FT_Done_Face(face_);
 }
@@ -139,7 +136,8 @@ void font_face_set::set_unscaled_character_sizes()
 
 void stroker::init(double radius)
 {
-    FT_Stroker_Set(s_, static_cast<FT_Fixed>(radius * (1<<6)),
+    FT_Stroker_Set(s_,
+                   static_cast<FT_Fixed>(radius * (1 << 6)),
                    FT_STROKER_LINECAP_ROUND,
                    FT_STROKER_LINEJOIN_ROUND,
                    0);
@@ -152,4 +150,4 @@ stroker::~stroker()
     FT_Stroker_Done(s_);
 }
 
-}//ns mapnik
+} // namespace mapnik

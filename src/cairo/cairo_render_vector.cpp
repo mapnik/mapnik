@@ -29,12 +29,13 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 
-namespace mapnik
-{
-void render_vector_marker(cairo_context & context, svg_path_adapter & svg_path,
+namespace mapnik {
+void render_vector_marker(cairo_context& context,
+                          svg_path_adapter& svg_path,
                           svg_attribute_type const& attributes,
 
-                          box2d<double> const& bbox, agg::trans_affine const& tr,
+                          box2d<double> const& bbox,
+                          agg::trans_affine const& tr,
                           double opacity)
 {
     agg::trans_affine transform;
@@ -50,19 +51,19 @@ void render_vector_marker(cairo_context & context, svg_path_adapter & svg_path,
         // TODO - this 'is_valid' check is not used in the AGG renderer and also
         // appears to lead to bogus results with
         // tests/data/good_maps/markers_symbolizer_lines_file.xml
-        //if (transform.is_valid() && !transform.is_identity())
+        // if (transform.is_valid() && !transform.is_identity())
         if (!transform.is_identity())
         {
             double m[6];
             transform.store_to(m);
             cairo_matrix_t matrix;
-            cairo_matrix_init(&matrix,m[0],m[1],m[2],m[3],m[4],m[5]);
+            cairo_matrix_init(&matrix, m[0], m[1], m[2], m[3], m[4], m[5]);
             context.transform(matrix);
         }
 
         if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
         {
-            context.add_agg_path(svg_path,attr.index);
+            context.add_agg_path(svg_path, attr.index);
             if (attr.even_odd_flag)
             {
                 context.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
@@ -71,40 +72,44 @@ void render_vector_marker(cairo_context & context, svg_path_adapter & svg_path,
             {
                 context.set_fill_rule(CAIRO_FILL_RULE_WINDING);
             }
-            if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
+            if (attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                cairo_gradient g(attr.fill_gradient,attr.fill_opacity * attr.opacity * opacity);
+                cairo_gradient g(attr.fill_gradient, attr.fill_opacity * attr.opacity * opacity);
 
-                context.set_gradient(g,bbox);
+                context.set_gradient(g, bbox);
                 context.fill();
             }
-            else if(attr.fill_flag)
+            else if (attr.fill_flag)
             {
                 double fill_opacity = attr.fill_opacity * attr.opacity * opacity * attr.fill_color.opacity();
-                context.set_color(attr.fill_color.r/255.0,attr.fill_color.g/255.0,
-                                  attr.fill_color.b/255.0, fill_opacity);
+                context.set_color(attr.fill_color.r / 255.0,
+                                  attr.fill_color.g / 255.0,
+                                  attr.fill_color.b / 255.0,
+                                  fill_opacity);
                 context.fill();
             }
         }
 
         if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT || attr.stroke_flag)
         {
-            context.add_agg_path(svg_path,attr.index);
-            if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
+            context.add_agg_path(svg_path, attr.index);
+            if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
             {
                 context.set_line_width(attr.stroke_width);
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
                 context.set_miter_limit(attr.miter_limit);
-                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity * attr.opacity * opacity);
-                context.set_gradient(g,bbox);
+                cairo_gradient g(attr.stroke_gradient, attr.fill_opacity * attr.opacity * opacity);
+                context.set_gradient(g, bbox);
                 context.stroke();
             }
             else if (attr.stroke_flag)
             {
                 double stroke_opacity = attr.stroke_opacity * attr.opacity * opacity * attr.stroke_color.opacity();
-                context.set_color(attr.stroke_color.r/255.0,attr.stroke_color.g/255.0,
-                                  attr.stroke_color.b/255.0, stroke_opacity);
+                context.set_color(attr.stroke_color.r / 255.0,
+                                  attr.stroke_color.g / 255.0,
+                                  attr.stroke_color.b / 255.0,
+                                  stroke_opacity);
                 context.set_line_width(attr.stroke_width);
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
@@ -115,6 +120,6 @@ void render_vector_marker(cairo_context & context, svg_path_adapter & svg_path,
     }
 }
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

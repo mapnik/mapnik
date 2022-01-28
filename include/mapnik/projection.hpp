@@ -37,7 +37,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <string>
 #include <stdexcept>
 
-
 // fwd decl
 #if MAPNIK_PROJ_VERSION >= 80000
 struct pj_ctx;
@@ -53,18 +52,19 @@ namespace mapnik {
 
 class proj_init_error : public std::runtime_error
 {
-public:
+  public:
     proj_init_error(std::string const& params)
-        : std::runtime_error("failed to initialize projection with: '" + params + "'") {}
+        : std::runtime_error("failed to initialize projection with: '" + params + "'")
+    {}
 };
 
 class MAPNIK_DECL projection
 {
     friend class proj_transform;
-public:
 
-    projection(std::string const& params,
-               bool defer_proj_init = false);
+  public:
+
+    projection(std::string const& params, bool defer_proj_init = false);
     projection(projection const& rhs);
     ~projection();
 
@@ -75,31 +75,29 @@ public:
     bool is_geographic() const;
     boost::optional<well_known_srs_e> well_known() const;
     std::string const& params() const;
-    void forward(double & x, double & y) const;
-    void inverse(double & x,double & y) const;
+    void forward(double& x, double& y) const;
+    void inverse(double& x, double& y) const;
     std::string expanded() const;
     void init_proj() const;
 
-private:
-    void swap (projection& rhs);
+  private:
+    void swap(projection& rhs);
 
-private:
+  private:
     std::string params_;
     bool defer_proj_init_;
     mutable bool is_geographic_;
-    mutable PJ * proj_;
-    mutable PJ_CONTEXT * proj_ctx_;
+    mutable PJ* proj_;
+    mutable PJ_CONTEXT* proj_ctx_;
 };
 
-template <typename charT, typename traits>
-std::basic_ostream<charT, traits> &
-operator << ( std::basic_ostream<charT, traits> & s, mapnik::projection const& p )
+template<typename charT, typename traits>
+std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& s, mapnik::projection const& p)
 {
     s << "projection(\"" << p.params() << "\")";
     return s;
 }
 
-
-}
+} // namespace mapnik
 
 #endif // MAPNIK_PROJECTION_HPP

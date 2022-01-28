@@ -29,15 +29,14 @@
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 // UTF8 <--> UTF16 conversion routines
 
-    MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
-    MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
+MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
+MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
 
-}
-#endif  // _WIN32
+} // namespace mapnik
+#endif // _WIN32
 
 #endif // MAPNIK_UTIL_UTF_CONV_WIN_HPP

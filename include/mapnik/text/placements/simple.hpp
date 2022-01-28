@@ -33,19 +33,21 @@ class feature_impl;
 struct attribute;
 
 // Automatically generates placement options from a user selected list of directions and text sizes.
-class MAPNIK_DECL text_placements_simple: public text_placements
+class MAPNIK_DECL text_placements_simple : public text_placements
 {
-public:
+  public:
     text_placements_simple(symbolizer_base::value_type const& positions);
     text_placements_simple(symbolizer_base::value_type const& positions,
-                           std::vector<directions_e> && direction,
-                           std::vector<int> && text_sizes);
-    text_placement_info_ptr get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
+                           std::vector<directions_e>&& direction,
+                           std::vector<int>&& text_sizes);
+    text_placement_info_ptr
+      get_placement_info(double _scale_factor, feature_impl const& feature, attributes const& vars) const;
     std::string get_positions() const;
     static text_placements_ptr from_xml(xml_node const& xml, fontset_map const& fontsets, bool is_shield);
     std::vector<directions_e> direction_;
     std::vector<int> text_sizes_;
-private:
+
+  private:
     symbolizer_base::value_type positions_;
     friend class text_placement_info_simple;
 };
@@ -54,12 +56,13 @@ private:
 // See parent class for documentation of each function.
 class MAPNIK_DECL text_placement_info_simple : public text_placement_info
 {
-public:
+  public:
     text_placement_info_simple(text_placements_simple const* parent,
                                std::string const& evaluated_positions,
                                double _scale_factor);
     bool next() const;
-protected:
+
+  protected:
     bool next_position_only() const;
     mutable unsigned state;
     mutable unsigned position_state;
@@ -68,6 +71,6 @@ protected:
     text_placements_simple const* parent_;
 };
 
-} //namespace
+} // namespace mapnik
 
 #endif // MAPNIK_TEXT_PLACEMENTS_SIMPLE_HPP

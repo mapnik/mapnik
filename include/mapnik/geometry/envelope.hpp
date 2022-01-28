@@ -29,10 +29,10 @@
 namespace mapnik {
 namespace geometry {
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL auto envelope(T const& geom) -> box2d<typename T::coordinate_type>;
 
-} // end ns geometry
-} // end ns mapnik
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_ENVELOPE_HPP

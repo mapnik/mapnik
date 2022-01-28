@@ -38,17 +38,18 @@ csv_inline_featureset::csv_inline_featureset(std::string const& inline_string,
                                              char quote,
                                              std::vector<std::string> const& headers,
                                              mapnik::context_ptr const& ctx,
-                                             array_type && index_array)
-    : inline_string_(inline_string),
-      separator_(separator),
-      quote_(quote),
-      headers_(headers),
-      index_array_(std::move(index_array)),
-      index_itr_(index_array_.begin()),
-      index_end_(index_array_.end()),
-      ctx_(ctx),
-      locator_(locator),
-      tr_("utf8") {}
+                                             array_type&& index_array)
+    : inline_string_(inline_string)
+    , separator_(separator)
+    , quote_(quote)
+    , headers_(headers)
+    , index_array_(std::move(index_array))
+    , index_itr_(index_array_.begin())
+    , index_end_(index_array_.end())
+    , ctx_(ctx)
+    , locator_(locator)
+    , tr_("utf8")
+{}
 
 csv_inline_featureset::~csv_inline_featureset() {}
 

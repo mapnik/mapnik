@@ -36,30 +36,30 @@
 // stl
 #include <memory>
 
-using mapnik::Featureset;
 using mapnik::box2d;
+using mapnik::context_ptr;
 using mapnik::feature_ptr;
+using mapnik::Featureset;
 using mapnik::raster_ptr;
 using mapnik::transcoder;
-using mapnik::context_ptr;
 
 class IResultSet;
 
 class pgraster_featureset : public mapnik::Featureset
 {
-public:
+  public:
     /// @param bandno band number (1-based). 0 (default) reads all bands.
     ///               Anything else forces interpretation of colors off
     ///               (values copied verbatim)
     pgraster_featureset(std::shared_ptr<IResultSet> const& rs,
-                       context_ptr const& ctx,
-                       std::string const& encoding,
-                       bool key_field = false,
-                       int bandno = 0);
+                        context_ptr const& ctx,
+                        std::string const& encoding,
+                        bool key_field = false,
+                        int bandno = 0);
     feature_ptr next();
     ~pgraster_featureset();
 
-private:
+  private:
     std::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
     const std::unique_ptr<mapnik::transcoder> tr_;

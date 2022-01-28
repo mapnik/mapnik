@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/util/noncopyable.hpp>
 
-
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
@@ -35,8 +34,10 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-struct rasterizer :  agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>, util::noncopyable {};
+struct rasterizer : agg::rasterizer_scanline_aa<agg::rasterizer_sl_clip_int_sat>,
+                    util::noncopyable
+{};
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_AGG_RASTERIZER_HPP

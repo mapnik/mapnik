@@ -35,8 +35,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace mapnik
-{
+namespace mapnik {
 MAPNIK_DECL std::string to_expression_string(expr_node const& node);
 
 /*
@@ -48,7 +47,7 @@ implicit pointer-to-bool conversion, thus any non-null pointer
 would yield "true".
 */
 
-template <typename T>
+template<typename T>
 std::string to_expression_string(T const* expr_node_ptr)
 {
     throw std::logic_error("to_expression_string() called with pointer argument");
@@ -56,13 +55,13 @@ std::string to_expression_string(T const* expr_node_ptr)
     return expr_node_ptr; // to_expression_string() called with pointer argument
 }
 
-template <typename T>
+template<typename T>
 std::string to_expression_string(std::shared_ptr<T> const& expr_node_ptr)
 {
     throw std::logic_error("to_expression_string() called with pointer argument");
     // compile error intended here; comment on the next line shows in clang output
     return expr_node_ptr; // to_expression_string() called with pointer argument
 }
-}
+} // namespace mapnik
 
 #endif // MAPNIK_EXPRESSION_STRING_HPP

@@ -14,40 +14,38 @@
 
 class test : public benchmark::test_case
 {
-public:
+  public:
     test(mapnik::parameters const& params)
-     : test_case(params) {}
+        : test_case(params)
+    {}
 
-    bool validate() const
-    {
-        return true;
-    }
+    bool validate() const { return true; }
     bool operator()() const
     {
-        mapnik::Map m(256,256,"epsg:3857");
+        mapnik::Map m(256, 256, "epsg:3857");
 
         mapnik::parameters params;
-        params["type"]="memory";
+        params["type"] = "memory";
         auto ds = std::make_shared<mapnik::memory_datasource>(params);
         // add whitespace to trigger phony "reprojection"
-        mapnik::layer lay("layer",m.srs() + " ");
+        mapnik::layer lay("layer", m.srs() + " ");
         lay.set_datasource(ds);
         lay.add_style("style");
         m.add_layer(lay);
         // dummy style to ensure that layer is processed
-        m.insert_style("style",mapnik::feature_type_style());
+        m.insert_style("style", mapnik::feature_type_style());
         // dummy bbox, but "valid" because minx and miny are less
         // with an invalid bbox then layer.visible() returns false
         // and the initial rendering setup is not run
-        m.zoom_to_box(mapnik::box2d<double>(-1,-1,0,0));
-        for (unsigned i=0;i<iterations_;++i)
+        m.zoom_to_box(mapnik::box2d<double>(-1, -1, 0, 0));
+        for (unsigned i = 0; i < iterations_; ++i)
         {
-            mapnik::image_rgba8 im(256,256);
-            mapnik::agg_renderer<mapnik::image_rgba8> ren(m,im);
+            mapnik::image_rgba8 im(256, 256);
+            mapnik::agg_renderer<mapnik::image_rgba8> ren(m, im);
             ren.apply();
         }
         return true;
     }
 };
 
-BENCHMARK(test,"rendering with reprojection")
+BENCHMARK(test, "rendering with reprojection")

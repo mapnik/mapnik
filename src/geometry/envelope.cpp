@@ -23,7 +23,8 @@
 #include <mapnik/geometry/envelope.hpp>
 #include <mapnik/geometry/envelope_impl.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 template MAPNIK_DECL mapnik::box2d<double> envelope(geometry<double> const& geom);
 // single
@@ -38,5 +39,5 @@ template MAPNIK_DECL mapnik::box2d<double> envelope(multi_polygon<double> const&
 // collection
 template MAPNIK_DECL mapnik::box2d<double> envelope(geometry_collection<double> const& geom);
 
-} // end ns geometry
-} // end ns mapnik
+} // namespace geometry
+} // namespace mapnik

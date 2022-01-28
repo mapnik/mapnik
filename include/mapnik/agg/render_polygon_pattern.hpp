@@ -69,7 +69,7 @@ struct agg_pattern_base
     }
 };
 
-template <typename VertexConverter>
+template<typename VertexConverter>
 struct agg_polygon_pattern : agg_pattern_base
 {
     using color_type = agg::rgba8;
@@ -78,41 +78,40 @@ struct agg_polygon_pattern : agg_pattern_base
     using pixfmt_type = agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer>;
     using wrap_x_type = agg::wrap_mode_repeat;
     using wrap_y_type = agg::wrap_mode_repeat;
-    using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
-                                                     wrap_x_type,
-                                                     wrap_y_type>;
+    using img_source_type = agg::image_accessor_wrap<agg::pixfmt_rgba32_pre, wrap_x_type, wrap_y_type>;
     using span_gen_type = agg::span_pattern_rgba<img_source_type>;
     using renderer_base = agg::renderer_base<pixfmt_type>;
-    using renderer_type = agg::renderer_scanline_aa_alpha<renderer_base,
-                                                          agg::span_allocator<agg::rgba8>,
-                                                          span_gen_type>;
+    using renderer_type =
+      agg::renderer_scanline_aa_alpha<renderer_base, agg::span_allocator<agg::rgba8>, span_gen_type>;
 
     agg_polygon_pattern(image_rgba8 const& pattern_img,
                         renderer_common const& common,
                         symbolizer_base const& sym,
                         mapnik::feature_impl const& feature,
                         proj_transform const& prj_trans)
-        : agg_pattern_base{pattern_img, common, sym, feature, prj_trans},
-          clip_(get<value_bool, keys::clip>(sym_, feature_, common_.vars_)),
-          clip_box_(clipping_extent(common)),
-          tr_(geom_transform()),
-          converter_(clip_box_, sym, common.t_, prj_trans, tr_,
-                     feature, common.vars_, common.scale_factor_)
+        : agg_pattern_base{pattern_img, common, sym, feature, prj_trans}
+        , clip_(get<value_bool, keys::clip>(sym_, feature_, common_.vars_))
+        , clip_box_(clipping_extent(common))
+        , tr_(geom_transform())
+        , converter_(clip_box_, sym, common.t_, prj_trans, tr_, feature, common.vars_, common.scale_factor_)
     {
         value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym_, feature_, common_.vars_);
         value_double smooth = get<value_double, keys::smooth>(sym_, feature_, common_.vars_);
 
-        if (simplify_tolerance > 0.0) converter_.template set<simplify_tag>();
+        if (simplify_tolerance > 0.0)
+            converter_.template set<simplify_tag>();
         converter_.template set<affine_transform_tag>();
-        if (smooth > 0.0) converter_.template set<smooth_tag>();
+        if (smooth > 0.0)
+            converter_.template set<smooth_tag>();
     }
 
-    void render(renderer_base & ren_base, rasterizer & ras)
+    void render(renderer_base& ren_base, rasterizer& ras)
     {
-        coord<double, 2> offset(pattern_offset(sym_, feature_, prj_trans_, common_,
-                                               pattern_img_.width(), pattern_img_.height()));
+        coord<double, 2> offset(
+          pattern_offset(sym_, feature_, prj_trans_, common_, pattern_img_.width(), pattern_img_.height()));
         agg::rendering_buffer pattern_rbuf((agg::int8u*)pattern_img_.bytes(),
-                                           pattern_img_.width(), pattern_img_.height(),
+                                           pattern_img_.width(),
+                                           pattern_img_.height(),
                                            pattern_img_.width() * 4);
         agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
         img_source_type img_src(pixf_pattern);
@@ -122,8 +121,7 @@ struct agg_polygon_pattern : agg_pattern_base
         value_double opacity = get<double, keys::opacity>(sym_, feature_, common_.vars_);
         renderer_type rp(ren_base, sa, sg, unsigned(opacity * 255));
 
-        using apply_vertex_converter_type = detail::apply_vertex_converter<
-            VertexConverter, rasterizer>;
+        using apply_vertex_converter_type = detail::apply_vertex_converter<VertexConverter, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter_, ras);
         mapnik::util::apply_visitor(vertex_processor_type(apply), feature_.get_geometry());
@@ -138,6 +136,5 @@ struct agg_polygon_pattern : agg_pattern_base
 };
 
 } // namespace mapnik
-
 
 #endif // MAPNIK_RENDER_POLYGON_PATTERN_HPP

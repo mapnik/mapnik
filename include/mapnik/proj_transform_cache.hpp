@@ -20,14 +20,13 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_PROJ_TRANSFORM_CACHE_HPP
 #define MAPNIK_PROJ_TRANSFORM_CACHE_HPP
 
 #include <mapnik/config.hpp>
 #include <string>
 
-namespace mapnik  {
+namespace mapnik {
 class proj_transform; // fwd decl
 namespace proj_transform_cache {
 
@@ -35,6 +34,6 @@ MAPNIK_DECL void init(std::string const& source, std::string const& dest);
 MAPNIK_DECL proj_transform const* get(std::string const& source, std::string const& dest);
 
 } // namespace proj_transform_cache
-} // mamespace mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_PROJ_TRANSFORM_CACHE_HPP

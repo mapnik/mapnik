@@ -38,25 +38,21 @@ namespace mapnik {
 
 class illegal_enum_value : public std::exception
 {
-public:
-    illegal_enum_value():
-        what_() {}
+  public:
+    illegal_enum_value()
+        : what_()
+    {}
 
-    illegal_enum_value( std::string const& _what ) :
-        what_( _what )
-    {
-    }
+    illegal_enum_value(std::string const& _what)
+        : what_(_what)
+    {}
     virtual ~illegal_enum_value() {}
 
-    virtual const char * what() const noexcept
-    {
-        return what_.c_str();
-    }
+    virtual const char* what() const noexcept { return what_.c_str(); }
 
-protected:
+  protected:
     std::string what_;
 };
-
 
 /** Slim wrapper for enumerations. It creates a new type from a native enum and
  * a char pointer array. It almost exactly behaves like a native enumeration
@@ -137,42 +133,34 @@ protected:
  * @endcode
  */
 
-template <typename ENUM, int THE_MAX>
-class MAPNIK_DECL enumeration {
-public:
+template<typename ENUM, int THE_MAX>
+class MAPNIK_DECL enumeration
+{
+  public:
     using native_type = ENUM;
 
     enumeration()
-        :  value_() {}
+        : value_()
+    {}
 
-    enumeration( ENUM v )
-        :  value_(v) {}
+    enumeration(ENUM v)
+        : value_(v)
+    {}
 
-    enumeration( enumeration const& other )
-        : value_(other.value_) {}
+    enumeration(enumeration const& other)
+        : value_(other.value_)
+    {}
 
     /** Assignment operator for native enum values. */
-    void operator=(ENUM v)
-    {
-        value_ = v;
-    }
+    void operator=(ENUM v) { value_ = v; }
 
     /** Assignment operator. */
-    void operator=(enumeration const& other)
-    {
-        value_ = other.value_;
-    }
+    void operator=(enumeration const& other) { value_ = other.value_; }
 
     /** Conversion operator for native enum values. */
-    operator ENUM() const
-    {
-        return value_;
-    }
+    operator ENUM() const { return value_; }
 
-    enum Max
-    {
-        MAX = THE_MAX
-    };
+    enum Max { MAX = THE_MAX };
 
     /** Converts @p str to an enum.
      * @throw illegal_enum_value @p str is not a legal identifier.
@@ -190,113 +178,114 @@ public:
         }
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
-
-MAPNIK_DISABLE_WARNING_PUSH
-MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
-MAPNIK_DISABLE_WARNING_PRAGMAS
-MAPNIK_DISABLE_LONG_LONG
+            MAPNIK_DISABLE_WARNING_PUSH
+            MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
+            MAPNIK_DISABLE_WARNING_PRAGMAS
+            MAPNIK_DISABLE_LONG_LONG
             if (str_copy == our_strings_[i])
-MAPNIK_DISABLE_WARNING_POP
-            {
-                value_ = static_cast<ENUM>(i);
-                if (deprecated)
+                MAPNIK_DISABLE_WARNING_POP
                 {
-                    MAPNIK_LOG_ERROR(enumerations) << "enumeration value (" << str << ") using \"_\" is deprecated and will be removed in Mapnik 4.x, use '" << str_copy << "' instead";
+                    value_ = static_cast<ENUM>(i);
+                    if (deprecated)
+                    {
+                        MAPNIK_LOG_ERROR(enumerations)
+                          << "enumeration value (" << str
+                          << ") using \"_\" is deprecated and will be removed in Mapnik 4.x, use '" << str_copy
+                          << "' instead";
+                    }
+                    return;
                 }
-                return;
-            }
         }
-MAPNIK_DISABLE_WARNING_PUSH
-MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
-MAPNIK_DISABLE_WARNING_PRAGMAS
-MAPNIK_DISABLE_LONG_LONG
-        throw illegal_enum_value(std::string("Illegal enumeration value '") +
-                                 str + "' for enum " + our_name_);
-MAPNIK_DISABLE_WARNING_POP
+        MAPNIK_DISABLE_WARNING_PUSH
+        MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
+        MAPNIK_DISABLE_WARNING_PRAGMAS
+        MAPNIK_DISABLE_LONG_LONG
+        throw illegal_enum_value(std::string("Illegal enumeration value '") + str + "' for enum " + our_name_);
+        MAPNIK_DISABLE_WARNING_POP
     }
 
     /** Returns the current value as a string identifier. */
     std::string as_string() const
     {
-MAPNIK_DISABLE_WARNING_PUSH
-MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
-MAPNIK_DISABLE_WARNING_PRAGMAS
-MAPNIK_DISABLE_LONG_LONG
+        MAPNIK_DISABLE_WARNING_PUSH
+        MAPNIK_DISABLE_WARNING_UNKNOWN_PRAGMAS
+        MAPNIK_DISABLE_WARNING_PRAGMAS
+        MAPNIK_DISABLE_LONG_LONG
         return our_strings_[value_];
-MAPNIK_DISABLE_WARNING_POP
+        MAPNIK_DISABLE_WARNING_POP
     }
 
     /** Static helper function to iterate over valid identifiers. */
-    static const char * get_string(unsigned i)
-    {
-        return our_strings_[i];
-    }
+    static const char* get_string(unsigned i) { return our_strings_[i]; }
 
     /** Performs some simple checks and quits the application if
      * any error is detected. Tries to print helpful error messages.
      */
-    static bool verify_mapnik_enum(const char * filename, unsigned line_no)
+    static bool verify_mapnik_enum(const char* filename, unsigned line_no)
     {
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
-            if (our_strings_[i] == 0 )
+            if (our_strings_[i] == 0)
             {
-                std::cerr << "### FATAL: Not enough strings for enum "
-                          << our_name_ << " defined in file '" << filename
+                std::cerr << "### FATAL: Not enough strings for enum " << our_name_ << " defined in file '" << filename
                           << "' at line " << line_no;
             }
         }
-        if ( std::string("") != our_strings_[THE_MAX])
+        if (std::string("") != our_strings_[THE_MAX])
         {
-            std::cerr << "### FATAL: The string array for enum " << our_name_
-                      << " defined in file '" << filename << "' at line " << line_no
-                      << " has too many items or is not terminated with an "
+            std::cerr << "### FATAL: The string array for enum " << our_name_ << " defined in file '" << filename
+                      << "' at line " << line_no << " has too many items or is not terminated with an "
                       << "empty string";
         }
         return true;
     }
 
-private:
+  private:
     ENUM value_;
-    static const char ** our_strings_ ;
-    static std::string our_name_ ;
-    static bool  our_verified_flag_;
+    static const char** our_strings_;
+    static std::string our_name_;
+    static bool our_verified_flag_;
 };
 
 /** ostream operator for enumeration
  * @relates mapnik::enumeration
  */
-template <class ENUM, int THE_MAX>
-std::ostream &
-operator<<(std::ostream & os, const mapnik::enumeration<ENUM, THE_MAX> & e)
+template<class ENUM, int THE_MAX>
+std::ostream& operator<<(std::ostream& os, const mapnik::enumeration<ENUM, THE_MAX>& e)
 {
     return os << e.as_string();
 }
 
-} // end of namespace
+} // namespace mapnik
 
 /** Helper macro.
  * @relates mapnik::enumeration
  */
 #ifdef _MSC_VER
-#define DEFINE_ENUM( name, e)                   \
-    template enumeration<e, e ## _MAX>;         \
-    using name = enumeration<e, e ## _MAX>;
+#define DEFINE_ENUM(name, e)                                                                                           \
+    template enumeration<e, e##_MAX>;                                                                                  \
+    using name = enumeration<e, e##_MAX>;
 #else
-#define DEFINE_ENUM( name, e)                   \
-    using name = enumeration<e, e ## _MAX>; \
-    template <> MAPNIK_DECL const char ** name ::our_strings_; \
-    template <> MAPNIK_DECL std::string name ::our_name_; \
-    template <> MAPNIK_DECL bool name ::our_verified_flag_;
+#define DEFINE_ENUM(name, e)                                                                                           \
+    using name = enumeration<e, e##_MAX>;                                                                              \
+    template<>                                                                                                         \
+    MAPNIK_DECL const char** name ::our_strings_;                                                                      \
+    template<>                                                                                                         \
+    MAPNIK_DECL std::string name ::our_name_;                                                                          \
+    template<>                                                                                                         \
+    MAPNIK_DECL bool name ::our_verified_flag_;
 #endif
 
 /** Helper macro. Runs the verify_mapnik_enum() method during static initialization.
  * @relates mapnik::enumeration
  */
 
-#define IMPLEMENT_ENUM( name, strings )                                 \
-    template <> MAPNIK_DECL const char ** name ::our_strings_ = strings;            \
-    template <> MAPNIK_DECL std::string name ::our_name_ = #name;                   \
-    template <> MAPNIK_DECL bool name ::our_verified_flag_( name ::verify_mapnik_enum(__FILE__, __LINE__));
+#define IMPLEMENT_ENUM(name, strings)                                                                                  \
+    template<>                                                                                                         \
+    MAPNIK_DECL const char** name ::our_strings_ = strings;                                                            \
+    template<>                                                                                                         \
+    MAPNIK_DECL std::string name ::our_name_ = #name;                                                                  \
+    template<>                                                                                                         \
+    MAPNIK_DECL bool name ::our_verified_flag_(name ::verify_mapnik_enum(__FILE__, __LINE__));
 
 #endif // MAPNIK_ENUMERATION_HPP

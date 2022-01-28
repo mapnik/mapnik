@@ -49,30 +49,25 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 void grid_renderer<T>::process(point_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
 
     render_point_symbolizer(
-        sym, feature, prj_trans, common_,
-        [&](pixel_position const &pos, marker const &marker,
-            agg::trans_affine const &tr, double opacity) {
-                render_marker(feature,
-                              pos,
-                              marker,
-                              tr,
-                              opacity,
-                              comp_op);
-        });
+      sym,
+      feature,
+      prj_trans,
+      common_,
+      [&](pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity) {
+          render_marker(feature, pos, marker, tr, opacity, comp_op);
+      });
 }
 
-template void grid_renderer<grid>::process(point_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(point_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif

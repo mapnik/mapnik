@@ -7,16 +7,16 @@
 
 #include <sstream>
 
-TEST_CASE("CSS color") {
-
+TEST_CASE("CSS color")
+{
     SECTION("conversions")
     {
         using namespace mapnik::css_color_grammar;
-        CHECK( percent_converter::call(1.0) == 3 );
-        CHECK( percent_converter::call(60.0) == 153 );
+        CHECK(percent_converter::call(1.0) == 3);
+        CHECK(percent_converter::call(60.0) == 153);
         // should not overflow on invalid input
-        CHECK( percent_converter::call(100000.0) == 255 );
-        CHECK( percent_converter::call(-100000.0) == 0 );
+        CHECK(percent_converter::call(100000.0) == 255);
+        CHECK(percent_converter::call(-100000.0) == 0);
     }
 
     SECTION("CSS colors")
@@ -27,61 +27,61 @@ TEST_CASE("CSS color") {
             // rgb
             std::string s("rgb(128,0,255)");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xff );
-            CHECK( c.red() == 0x80 );
-            CHECK( c.green() == 0x00 );
-            CHECK( c.blue() == 0xff );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0x80);
+            CHECK(c.green() == 0x00);
+            CHECK(c.blue() == 0xff);
         }
         {
             // rgb (percent)
             std::string s("rgb(50%,0%,100%)");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xff );
-            CHECK( c.red() == 0x80 );
-            CHECK( c.green() == 0x00 );
-            CHECK( c.blue() == 0xff );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0x80);
+            CHECK(c.green() == 0x00);
+            CHECK(c.blue() == 0xff);
         }
         {
             // rgba
             std::string s("rgba(128,0,255,0.5)");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0x80 );
-            CHECK( c.red() == 0x80 );
-            CHECK( c.green() == 0x00 );
-            CHECK( c.blue() == 0xff );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0x80);
+            CHECK(c.red() == 0x80);
+            CHECK(c.green() == 0x00);
+            CHECK(c.blue() == 0xff);
         }
         {
             // rgba (percent)
             std::string s("rgba(50%,0%,100%,0.5)");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0x80 );
-            CHECK( c.red() == 0x80 );
-            CHECK( c.green() == 0x00 );
-            CHECK( c.blue() == 0xff );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0x80);
+            CHECK(c.red() == 0x80);
+            CHECK(c.green() == 0x00);
+            CHECK(c.blue() == 0xff);
         }
         {
             // named colours
             std::string s("darksalmon");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 255 );
-            CHECK( c.red() == 233 );
-            CHECK( c.green() == 150 );
-            CHECK( c.blue() == 122 );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 255);
+            CHECK(c.red() == 233);
+            CHECK(c.green() == 150);
+            CHECK(c.blue() == 122);
         }
         // hsl
         {
             std::string s("hsl(240,50%,50%)");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 255 );
-            CHECK( c.red() == 64 );
-            CHECK( c.green() == 64 );
-            CHECK( c.blue() == 191 );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 255);
+            CHECK(c.red() == 64);
+            CHECK(c.green() == 64);
+            CHECK(c.blue() == 191);
         }
         // hsl (hue range 0..360)
         {
@@ -93,12 +93,12 @@ TEST_CASE("CSS color") {
             std::string s6("hsl(600, 100%, 50%)"); // normalised to fit into 0..360
 
             mapnik::color c1, c2, c3, c4, c5, c6;
-            CHECK( boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c1) );
-            CHECK( boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c2) );
-            CHECK( boost::spirit::x3::phrase_parse(s3.cbegin(), s3.cend(), color_grammar, space, c3) );
-            CHECK( boost::spirit::x3::phrase_parse(s4.cbegin(), s4.cend(), color_grammar, space, c4) );
-            CHECK( boost::spirit::x3::phrase_parse(s5.cbegin(), s5.cend(), color_grammar, space, c5) );
-            CHECK( boost::spirit::x3::phrase_parse(s6.cbegin(), s6.cend(), color_grammar, space, c6) );
+            CHECK(boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c1));
+            CHECK(boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c2));
+            CHECK(boost::spirit::x3::phrase_parse(s3.cbegin(), s3.cend(), color_grammar, space, c3));
+            CHECK(boost::spirit::x3::phrase_parse(s4.cbegin(), s4.cend(), color_grammar, space, c4));
+            CHECK(boost::spirit::x3::phrase_parse(s5.cbegin(), s5.cend(), color_grammar, space, c5));
+            CHECK(boost::spirit::x3::phrase_parse(s6.cbegin(), s6.cend(), color_grammar, space, c6));
             CHECK(c1 == mapnik::color("red"));
             CHECK(c2 == mapnik::color("lime"));
             CHECK(c3 == mapnik::color("blue"));
@@ -110,11 +110,11 @@ TEST_CASE("CSS color") {
         {
             std::string s("hsla(240,50%,50%,0.5)");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 128 );
-            CHECK( c.red() == 64 );
-            CHECK( c.green() == 64 );
-            CHECK( c.blue() == 191 );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 128);
+            CHECK(c.red() == 64);
+            CHECK(c.green() == 64);
+            CHECK(c.blue() == 191);
         }
         // hsla (hue range 0..360)
         {
@@ -126,12 +126,12 @@ TEST_CASE("CSS color") {
             std::string s6("hsla(600, 100%, 50%, 1)"); // normalised to fit into 0..360
 
             mapnik::color c1, c2, c3, c4, c5, c6;
-            CHECK( boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c1) );
-            CHECK( boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c2) );
-            CHECK( boost::spirit::x3::phrase_parse(s3.cbegin(), s3.cend(), color_grammar, space, c3) );
-            CHECK( boost::spirit::x3::phrase_parse(s4.cbegin(), s4.cend(), color_grammar, space, c4) );
-            CHECK( boost::spirit::x3::phrase_parse(s5.cbegin(), s5.cend(), color_grammar, space, c5) );
-            CHECK( boost::spirit::x3::phrase_parse(s6.cbegin(), s6.cend(), color_grammar, space, c6) );
+            CHECK(boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c1));
+            CHECK(boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c2));
+            CHECK(boost::spirit::x3::phrase_parse(s3.cbegin(), s3.cend(), color_grammar, space, c3));
+            CHECK(boost::spirit::x3::phrase_parse(s4.cbegin(), s4.cend(), color_grammar, space, c4));
+            CHECK(boost::spirit::x3::phrase_parse(s5.cbegin(), s5.cend(), color_grammar, space, c5));
+            CHECK(boost::spirit::x3::phrase_parse(s6.cbegin(), s6.cend(), color_grammar, space, c6));
             CHECK(c1 == mapnik::color("red"));
             CHECK(c2 == mapnik::color("lime"));
             CHECK(c3 == mapnik::color("blue"));
@@ -143,64 +143,64 @@ TEST_CASE("CSS color") {
         {
             std::string s("#abcdef");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xff );
-            CHECK( c.red() == 0xab );
-            CHECK( c.green() == 0xcd );
-            CHECK( c.blue() == 0xef );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0xab);
+            CHECK(c.green() == 0xcd);
+            CHECK(c.blue() == 0xef);
         }
         {
             std::string s("#abcdef12");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0x12 );
-            CHECK( c.red() == 0xab );
-            CHECK( c.green() == 0xcd );
-            CHECK( c.blue() == 0xef );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0x12);
+            CHECK(c.red() == 0xab);
+            CHECK(c.green() == 0xcd);
+            CHECK(c.blue() == 0xef);
         }
 
         {
             std::string s("  #abcdef");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xff );
-            CHECK( c.red() == 0xab );
-            CHECK( c.green() == 0xcd );
-            CHECK( c.blue() == 0xef );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0xab);
+            CHECK(c.green() == 0xcd);
+            CHECK(c.blue() == 0xef);
         }
 
         {
             std::string s("   #abcdef12");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0x12 );
-            CHECK( c.red() == 0xab );
-            CHECK( c.green() == 0xcd );
-            CHECK( c.blue() == 0xef );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0x12);
+            CHECK(c.red() == 0xab);
+            CHECK(c.green() == 0xcd);
+            CHECK(c.blue() == 0xef);
         }
 
         {
             std::string s("# abcdef");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         {
             std::string s("# abcdef12");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         {
             std::string s("#ab cdef");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         {
             std::string s("#ab cdef12");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         // hex_color_small
@@ -208,65 +208,65 @@ TEST_CASE("CSS color") {
         {
             std::string s("#abc");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xff );
-            CHECK( c.red() == 0xaa );
-            CHECK( c.green() == 0xbb );
-            CHECK( c.blue() == 0xcc );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0xaa);
+            CHECK(c.green() == 0xbb);
+            CHECK(c.blue() == 0xcc);
         }
 
         {
             std::string s("#abcd");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xdd );
-            CHECK( c.red() == 0xaa );
-            CHECK( c.green() == 0xbb );
-            CHECK( c.blue() == 0xcc );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xdd);
+            CHECK(c.red() == 0xaa);
+            CHECK(c.green() == 0xbb);
+            CHECK(c.blue() == 0xcc);
         }
 
         {
             std::string s("   #abc");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xff );
-            CHECK( c.red() == 0xaa );
-            CHECK( c.green() == 0xbb );
-            CHECK( c.blue() == 0xcc );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0xaa);
+            CHECK(c.green() == 0xbb);
+            CHECK(c.blue() == 0xcc);
         }
 
         {
             std::string s("   #abcd");
             mapnik::color c;
-            CHECK( boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
-            CHECK( c.alpha() == 0xdd );
-            CHECK( c.red() == 0xaa );
-            CHECK( c.green() == 0xbb );
-            CHECK( c.blue() == 0xcc );
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xdd);
+            CHECK(c.red() == 0xaa);
+            CHECK(c.green() == 0xbb);
+            CHECK(c.blue() == 0xcc);
         }
 
         {
             std::string s("# abc");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         {
             std::string s("# abcd");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         {
             std::string s("#a bc");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
 
         {
             std::string s("#a bcd");
             mapnik::color c;
-            CHECK( !boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c) );
+            CHECK(!boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
         }
     }
 
@@ -274,11 +274,11 @@ TEST_CASE("CSS color") {
     {
         mapnik::color c("salmon");
         std::ostringstream ss;
-        ss << c ;
+        ss << c;
         CHECK(ss.str() == "rgb(250,128,114)");
         c.set_alpha(127);
         ss.seekp(0);
-        ss << c ;
+        ss << c;
         CHECK(ss.str() == "rgba(250,128,114,0.498)");
     }
     SECTION("operator= operator==")

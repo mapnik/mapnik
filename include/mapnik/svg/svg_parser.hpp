@@ -38,11 +38,19 @@
 // boost
 #include <boost/optional.hpp>
 
-namespace boost { namespace property_tree { namespace detail { namespace rapidxml {
-template <typename T> class xml_node;
-}}}}
+namespace boost {
+namespace property_tree {
+namespace detail {
+namespace rapidxml {
+template<typename T>
+class xml_node;
+}
+} // namespace detail
+} // namespace property_tree
+} // namespace boost
 
-namespace  mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
 struct viewbox
 {
@@ -54,29 +62,30 @@ struct viewbox
 
 class svg_parser_error_handler
 {
-    using error_message_container = std::vector<std::string> ;
-public:
+    using error_message_container = std::vector<std::string>;
+
+  public:
     explicit svg_parser_error_handler(bool strict = false)
-        : strict_(strict) {}
+        : strict_(strict)
+    {}
 
     void on_error(std::string const& msg)
     {
-        if (strict_) throw std::runtime_error(msg);
+        if (strict_)
+            throw std::runtime_error(msg);
         else
         {
             // avoid duplicate messages
-            if (std::find(std::begin(error_messages_),std::end(error_messages_), msg) == std::end(error_messages_))
+            if (std::find(std::begin(error_messages_), std::end(error_messages_), msg) == std::end(error_messages_))
             {
                 error_messages_.push_back(msg);
             }
         }
     }
-    error_message_container const& error_messages() const
-    {
-        return error_messages_;
-    }
+    error_message_container const& error_messages() const { return error_messages_; }
     bool strict() const { return strict_; }
-private:
+
+  private:
 
     error_message_container error_messages_;
     bool strict_;
@@ -85,13 +94,14 @@ private:
 class MAPNIK_DECL svg_parser : private util::noncopyable
 {
     using error_handler = svg_parser_error_handler;
-public:
-    explicit svg_parser(svg_converter_type & path, bool strict = false);
+
+  public:
+    explicit svg_parser(svg_converter_type& path, bool strict = false);
     ~svg_parser();
-    error_handler & err_handler();
+    error_handler& err_handler();
     void parse(std::string const& filename);
     void parse_from_string(std::string const& svg);
-    svg_converter_type & path_;
+    svg_converter_type& path_;
     bool is_defs_;
     bool strict_;
     bool ignore_;
@@ -106,7 +116,7 @@ public:
     error_handler err_handler_;
 };
 
-}}
-
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_PARSER_HPP

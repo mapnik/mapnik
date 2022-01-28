@@ -30,47 +30,46 @@
 
 // boost
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 const typename hit_grid<T>::value_type hit_grid<T>::base_mask = std::numeric_limits<typename T::type>::min();
 
-template <typename T>
+template<typename T>
 hit_grid<T>::hit_grid(std::size_t width, std::size_t height, std::string const& key)
-    : width_(width),
-      height_(height),
-      key_(key),
-      data_(width,height),
-      id_name_("__id__"),
-      painted_(false),
-      names_(),
-      f_keys_(),
-      features_(),
-      ctx_(std::make_shared<mapnik::context_type>())
-      {
-          f_keys_[base_mask] = "";
-          data_.set(base_mask);
-      }
-
-template <typename T>
-hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
-    : width_(rhs.width_),
-      height_(rhs.height_),
-      key_(rhs.key_),
-      data_(rhs.data_),
-      id_name_("__id__"),
-      painted_(rhs.painted_),
-      names_(rhs.names_),
-      f_keys_(rhs.f_keys_),
-      features_(rhs.features_),
-      ctx_(rhs.ctx_)
+    : width_(width)
+    , height_(height)
+    , key_(key)
+    , data_(width, height)
+    , id_name_("__id__")
+    , painted_(false)
+    , names_()
+    , f_keys_()
+    , features_()
+    , ctx_(std::make_shared<mapnik::context_type>())
 {
     f_keys_[base_mask] = "";
     data_.set(base_mask);
 }
 
-template <typename T>
+template<typename T>
+hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
+    : width_(rhs.width_)
+    , height_(rhs.height_)
+    , key_(rhs.key_)
+    , data_(rhs.data_)
+    , id_name_("__id__")
+    , painted_(rhs.painted_)
+    , names_(rhs.names_)
+    , f_keys_(rhs.f_keys_)
+    , features_(rhs.features_)
+    , ctx_(rhs.ctx_)
+{
+    f_keys_[base_mask] = "";
+    data_.set(base_mask);
+}
+
+template<typename T>
 void hit_grid<T>::clear()
 {
     painted_ = false;
@@ -82,7 +81,7 @@ void hit_grid<T>::clear()
     ctx_ = std::make_shared<mapnik::context_type>();
 }
 
-template <typename T>
+template<typename T>
 void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
 {
     value_type feature_id = feature.id();
@@ -97,9 +96,9 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
     {
         context_type::map_type::const_iterator itr = feature.context()->begin();
         context_type::map_type::const_iterator end = feature.context()->end();
-        for ( ;itr!=end; ++itr)
+        for (; itr != end; ++itr)
         {
-            ctx_->add(itr->first,itr->second);
+            ctx_->add(itr->first, itr->second);
         }
     }
     // NOTE: currently lookup keys must be strings,
@@ -107,7 +106,7 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
     lookup_type lookup_value;
     if (key_ == id_name_)
     {
-        mapnik::util::to_string(lookup_value,feature_id);
+        mapnik::util::to_string(lookup_value, feature_id);
     }
     else
     {
@@ -117,7 +116,8 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
         }
         else
         {
-            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Should not get here: key '" << key_ << "' not found in feature properties";
+            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Should not get here: key '" << key_
+                                   << "' not found in feature properties";
         }
     }
 
@@ -125,16 +125,16 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
     {
         // TODO - consider shortcutting f_keys if feature_id == lookup_value
         // create a mapping between the pixel id and the feature key
-        f_keys_.emplace(feature_id,lookup_value);
+        f_keys_.emplace(feature_id, lookup_value);
         // if extra fields have been supplied, push them into grid memory
         if (!names_.empty())
         {
             // it is ~ 2x faster to copy feature attributes compared
             // to building up a in-memory cache of feature_ptrs
             // https://github.com/mapnik/mapnik/issues/1198
-            mapnik::feature_ptr feature2(mapnik::feature_factory::create(ctx_,feature_id));
+            mapnik::feature_ptr feature2(mapnik::feature_factory::create(ctx_, feature_id));
             feature2->set_data(feature.get_data());
-            features_.emplace(lookup_value,feature2);
+            features_.emplace(lookup_value, feature2);
         }
     }
     else
@@ -143,9 +143,8 @@ void hit_grid<T>::add_feature(mapnik::feature_impl const& feature)
     }
 }
 
-
 template class MAPNIK_DECL hit_grid<mapnik::value_integer_pixel>;
 
-}
+} // namespace mapnik
 
 #endif

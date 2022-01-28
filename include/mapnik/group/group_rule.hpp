@@ -32,8 +32,7 @@
 #include <memory>
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 /**
  * group rule contains a set of symbolizers which should
@@ -42,64 +41,43 @@ namespace mapnik
  */
 struct MAPNIK_DECL group_rule
 {
-   using symbolizers = std::vector<symbolizer>;
+    using symbolizers = std::vector<symbolizer>;
 
-   group_rule(const expression_ptr& filter = std::make_shared<mapnik::expr_node>(true),
-              const expression_ptr& repeat_key = expression_ptr());
+    group_rule(const expression_ptr& filter = std::make_shared<mapnik::expr_node>(true),
+               const expression_ptr& repeat_key = expression_ptr());
 
-   group_rule &operator=(const group_rule &rhs);
-   bool operator==(const group_rule &rhs) const;
+    group_rule& operator=(const group_rule& rhs);
+    bool operator==(const group_rule& rhs) const;
 
-   void append(const symbolizer &);
+    void append(const symbolizer&);
 
-   const symbolizers &get_symbolizers() const
-   {
-      return symbolizers_;
-   }
+    const symbolizers& get_symbolizers() const { return symbolizers_; }
 
-   inline symbolizers::const_iterator begin() const
-   {
-      return symbolizers_.begin();
-   }
+    inline symbolizers::const_iterator begin() const { return symbolizers_.begin(); }
 
-   inline symbolizers::const_iterator end() const
-   {
-      return symbolizers_.end();
-   }
+    inline symbolizers::const_iterator end() const { return symbolizers_.end(); }
 
-   inline void set_filter(const expression_ptr& filter)
-   {
-      filter_ = filter;
-   }
+    inline void set_filter(const expression_ptr& filter) { filter_ = filter; }
 
-   inline expression_ptr const& get_filter() const
-   {
-      return filter_;
-   }
+    inline expression_ptr const& get_filter() const { return filter_; }
 
-   inline void set_repeat_key(const expression_ptr& repeat_key)
-   {
-      repeat_key_ = repeat_key;
-   }
+    inline void set_repeat_key(const expression_ptr& repeat_key) { repeat_key_ = repeat_key; }
 
-   inline expression_ptr const& get_repeat_key() const
-   {
-      return repeat_key_;
-   }
+    inline expression_ptr const& get_repeat_key() const { return repeat_key_; }
 
-private:
+  private:
 
-   // expression filter - when data matches this then
-   // the symbolizers should be drawn.
-   expression_ptr filter_;
+    // expression filter - when data matches this then
+    // the symbolizers should be drawn.
+    expression_ptr filter_;
 
-   // expression repeat key - repeat key to be used with minimum distance
-   expression_ptr repeat_key_;
+    // expression repeat key - repeat key to be used with minimum distance
+    expression_ptr repeat_key_;
 
-   // the atomic set of symbolizers
-   symbolizers symbolizers_;
+    // the atomic set of symbolizers
+    symbolizers symbolizers_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_GROUP_RULE_HPP

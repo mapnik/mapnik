@@ -41,14 +41,16 @@ namespace mapnik {
 
 struct accumulate_extent
 {
-    accumulate_extent(box2d<double> & ext)
-        : ext_(ext),first_(true) {}
+    accumulate_extent(box2d<double>& ext)
+        : ext_(ext)
+        , first_(true)
+    {}
 
-    void operator() (feature_ptr const& feat)
+    void operator()(feature_ptr const& feat)
     {
         auto const& geom = feat->get_geometry();
         auto bbox = geometry::envelope(geom);
-        if ( first_ )
+        if (first_)
         {
             first_ = false;
             ext_ = bbox;
@@ -59,29 +61,29 @@ struct accumulate_extent
         }
     }
 
-    box2d<double> & ext_;
+    box2d<double>& ext_;
     bool first_;
 };
 
-const char * memory_datasource::name()
+const char* memory_datasource::name()
 {
     return "memory";
 }
 
 memory_datasource::memory_datasource(parameters const& _params)
-    : datasource(_params),
-      desc_(memory_datasource::name(),
-            *params_.get<std::string>("encoding","utf-8")),
-      type_(datasource::Vector),
-      bbox_check_(*params_.get<boolean_type>("bbox_check", true)),
-      type_set_(false) {}
+    : datasource(_params)
+    , desc_(memory_datasource::name(), *params_.get<std::string>("encoding", "utf-8"))
+    , type_(datasource::Vector)
+    , bbox_check_(*params_.get<boolean_type>("bbox_check", true))
+    , type_set_(false)
+{}
 
 memory_datasource::~memory_datasource() {}
 
 void memory_datasource::push(feature_ptr feature)
 {
     // TODO - collect attribute descriptors?
-    //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+    // desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
     if (feature->get_raster())
     {
         // if a feature has a raster_ptr set it must be of raster type.
@@ -121,9 +123,8 @@ featureset_ptr memory_datasource::features(const query& q) const
     {
         return mapnik::make_invalid_featureset();
     }
-    return std::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
+    return std::make_shared<memory_featureset>(q.get_bbox(), *this, bbox_check_);
 }
-
 
 featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double tol) const
 {
@@ -134,7 +135,7 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double to
     box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
     box.pad(tol);
     MAPNIK_LOG_DEBUG(memory_datasource) << "memory_datasource: Box=" << box << ", Point x=" << pt.x << ",y=" << pt.y;
-    return std::make_shared<memory_featureset>(box,*this);
+    return std::make_shared<memory_featureset>(box, *this);
 }
 
 void memory_datasource::set_envelope(box2d<double> const& box)
@@ -148,7 +149,7 @@ box2d<double> memory_datasource::envelope() const
     if (!extent_.valid() || dirty_extent_)
     {
         accumulate_extent func(extent_);
-        std::for_each(features_.begin(),features_.end(),func);
+        std::for_each(features_.begin(), features_.end(), func);
         dirty_extent_ = false;
     }
     return extent_;
@@ -175,4 +176,4 @@ void memory_datasource::clear()
     features_.clear();
 }
 
-}
+} // namespace mapnik

@@ -22,20 +22,20 @@
 
 #include <mapnik/text/placements/dummy.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 bool text_placement_info_dummy::next() const
 {
-    if (state) return false;
+    if (state)
+        return false;
     ++state;
     return true;
 }
 
-text_placement_info_ptr text_placements_dummy::get_placement_info(
-    double scale_factor, feature_impl const&, attributes const&) const
+text_placement_info_ptr
+  text_placements_dummy::get_placement_info(double scale_factor, feature_impl const&, attributes const&) const
 {
     return std::make_shared<text_placement_info_dummy>(this, scale_factor);
 }
 
-} //ns mapnik
+} // namespace mapnik

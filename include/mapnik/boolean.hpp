@@ -30,25 +30,24 @@
 #include <iosfwd>
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class MAPNIK_DECL boolean_type
 {
-public:
+  public:
     boolean_type()
-        : b_(false)  {}
+        : b_(false)
+    {}
     boolean_type(bool b)
-        : b_(b) {}
+        : b_(b)
+    {}
     boolean_type(boolean_type const& b)
-        : b_(b.b_) {}
+        : b_(b.b_)
+    {}
 
-    operator bool() const
-    {
-        return b_;
-    }
+    operator bool() const { return b_; }
 
-    boolean_type & operator =(boolean_type const& other)
+    boolean_type& operator=(boolean_type const& other)
     {
         if (this == &other)
             return *this;
@@ -56,33 +55,32 @@ public:
         return *this;
     }
 
-private:
+  private:
     bool b_;
 };
 
 // Special stream input operator for boolean_type values
-template <typename charT, typename traits>
-std::basic_istream<charT, traits> &
-operator >> ( std::basic_istream<charT, traits> & s, boolean_type & b )
+template<typename charT, typename traits>
+std::basic_istream<charT, traits>& operator>>(std::basic_istream<charT, traits>& s, boolean_type& b)
 {
-    if ( s )
+    if (s)
     {
         std::string word;
         s >> word;
         bool result;
-        if (util::string2bool(word,result)) b = result;
+        if (util::string2bool(word, result))
+            b = result;
     }
     return s;
 }
 
-template <typename charT, typename traits>
-std::basic_ostream<charT, traits> &
-operator << ( std::basic_ostream<charT, traits> & s, boolean_type const& b )
+template<typename charT, typename traits>
+std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& s, boolean_type const& b)
 {
-    s << ( b ? "true" : "false" );
+    s << (b ? "true" : "false");
     return s;
 }
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_BOOLEAN_HPP

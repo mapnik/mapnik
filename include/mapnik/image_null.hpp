@@ -28,26 +28,27 @@
 #include <mapnik/image.hpp>
 #include <mapnik/pixel_types.hpp>
 
-//stl
+// stl
 #include <stdexcept>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <>
+template<>
 class MAPNIK_DECL image<null_t>
 {
-public:
+  public:
     using pixel_type = null_t::type;
     static const image_dtype dtype = null_t::id;
-private:
-public:
+
+  private:
+  public:
     image() {}
     image(int /*width*/,
           int /*height*/,
           bool /*initialize*/ = true,
           bool /*premultiplied*/ = false,
-          bool /*painted*/ = false) {}
+          bool /*painted*/ = false)
+    {}
     bool operator==(image<null_t> const&) const { return true; }
     bool operator<(image<null_t> const&) const { return false; }
 
@@ -56,10 +57,16 @@ public:
     std::size_t size() const { return 0; }
     std::size_t row_size() const { return 0; }
     void set(pixel_type const&) { throw std::runtime_error("Can not set values for null image"); }
-    pixel_type& operator() (std::size_t, std::size_t) { throw std::runtime_error("Can not get or set values for null image"); }
-    pixel_type const& operator() (std::size_t, std::size_t) const { throw std::runtime_error("Can not get or set values for null image"); }
+    pixel_type& operator()(std::size_t, std::size_t)
+    {
+        throw std::runtime_error("Can not get or set values for null image");
+    }
+    pixel_type const& operator()(std::size_t, std::size_t) const
+    {
+        throw std::runtime_error("Can not get or set values for null image");
+    }
     unsigned const char* bytes() const { return nullptr; }
-    unsigned char* bytes() {return nullptr; }
+    unsigned char* bytes() { return nullptr; }
     double get_offset() const { return 0.0; }
     void set_offset(double) {}
     double get_scaling() const { return 1.0; }
@@ -71,6 +78,6 @@ public:
     image_dtype get_dtype() const { return dtype; }
 };
 
-} // end ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_NULL_HPP

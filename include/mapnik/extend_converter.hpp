@@ -38,108 +38,122 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <cmath>
 
-namespace mapnik
-{
+namespace mapnik {
 
-namespace detail
-{
+namespace detail {
 
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 using namespace msm::front;
 
-template <typename T>
-T extend(T const & v1, T const & v2, double length)
+template<typename T>
+T extend(T const& v1, T const& v2, double length)
 {
     double dx = v2.x - v1.x;
     double dy = v2.y - v1.y;
     double l12 = std::sqrt(dx * dx + dy * dy);
     double coef = 1.0 + length / l12;
-    return vertex2d(v1.x + dx * coef,
-                    v1.y + dy * coef, v2.cmd);
+    return vertex2d(v1.x + dx * coef, v1.y + dy * coef, v2.cmd);
 }
 
-namespace events
+namespace events {
+struct vertex_event
 {
-    struct vertex_event
-    {
-        vertex_event(vertex2d const & vertex) : vertex(vertex) { }
-        vertex2d const & vertex;
-    };
+    vertex_event(vertex2d const& vertex)
+        : vertex(vertex)
+    {}
+    vertex2d const& vertex;
+};
 
-    struct move_to : vertex_event { using vertex_event::vertex_event; };
-    struct line_to : vertex_event { using vertex_event::vertex_event; };
-    struct close : vertex_event { using vertex_event::vertex_event; };
-    struct end : vertex_event { using vertex_event::vertex_event; };
-}
-
-namespace actions
+struct move_to : vertex_event
 {
-    struct store
-    {
-        template <class FSM, class EVT, class SourceState, class TargetState>
-        void operator()(EVT const & e, FSM & m, SourceState&, TargetState&)
-        {
-            m.v2 = m.v1;
-            m.v1 = e.vertex;
-            m.output = boost::none;
-        }
-    };
+    using vertex_event::vertex_event;
+};
+struct line_to : vertex_event
+{
+    using vertex_event::vertex_event;
+};
+struct close : vertex_event
+{
+    using vertex_event::vertex_event;
+};
+struct end : vertex_event
+{
+    using vertex_event::vertex_event;
+};
+} // namespace events
 
-    struct output
+namespace actions {
+struct store
+{
+    template<class FSM, class EVT, class SourceState, class TargetState>
+    void operator()(EVT const& e, FSM& m, SourceState&, TargetState&)
     {
-        template <class FSM, class EVT, class SourceState, class TargetState>
-        void operator()(EVT const & e, FSM & m, SourceState&, TargetState&)
-        {
-            m.output = e.vertex;
-        }
-    };
+        m.v2 = m.v1;
+        m.v1 = e.vertex;
+        m.output = boost::none;
+    }
+};
 
-    struct store_and_output
+struct output
+{
+    template<class FSM, class EVT, class SourceState, class TargetState>
+    void operator()(EVT const& e, FSM& m, SourceState&, TargetState&)
     {
-        template <class FSM, class EVT, class SourceState, class TargetState>
-        void operator()(EVT const & e, FSM & m, SourceState&, TargetState&)
-        {
-            m.v2 = m.v1;
-            m.v1 = e.vertex;
-            m.output = m.v2;
-        }
-    };
+        m.output = e.vertex;
+    }
+};
 
-    struct output_begin
+struct store_and_output
+{
+    template<class FSM, class EVT, class SourceState, class TargetState>
+    void operator()(EVT const& e, FSM& m, SourceState&, TargetState&)
     {
-        template <class FSM, class EVT, class SourceState, class TargetState>
-        void operator()(EVT const & e, FSM & m, SourceState&, TargetState&)
-        {
-            m.v2 = m.v1;
-            m.v1 = e.vertex;
-            m.output = extend(m.v1, m.v2, m.extend_length);
-        }
-    };
+        m.v2 = m.v1;
+        m.v1 = e.vertex;
+        m.output = m.v2;
+    }
+};
 
-    struct output_end
+struct output_begin
+{
+    template<class FSM, class EVT, class SourceState, class TargetState>
+    void operator()(EVT const& e, FSM& m, SourceState&, TargetState&)
     {
-        template <class FSM, class EVT, class SourceState, class TargetState>
-        void operator()(EVT const & e, FSM & m, SourceState&, TargetState&)
-        {
-            m.output = extend(m.v2, m.v1, m.extend_length);
-            m.v1 = e.vertex;
-        }
-    };
-}
+        m.v2 = m.v1;
+        m.v1 = e.vertex;
+        m.output = extend(m.v1, m.v2, m.extend_length);
+    }
+};
+
+struct output_end
+{
+    template<class FSM, class EVT, class SourceState, class TargetState>
+    void operator()(EVT const& e, FSM& m, SourceState&, TargetState&)
+    {
+        m.output = extend(m.v2, m.v1, m.extend_length);
+        m.v1 = e.vertex;
+    }
+};
+} // namespace actions
 
 struct extender_def : public msm::front::state_machine_def<extender_def>
 {
     using no_exception_thrown = int;
     using no_message_queue = int;
 
-    struct initial : public msm::front::state<> { };
-    struct vertex_one : public msm::front::state<> { };
-    struct vertex_two : public msm::front::state<> { };
-    struct end : public msm::front::state<> { };
+    struct initial : public msm::front::state<>
+    {};
+    struct vertex_one : public msm::front::state<>
+    {};
+    struct vertex_two : public msm::front::state<>
+    {};
+    struct end : public msm::front::state<>
+    {};
 
     using initial_state = initial;
 
+    // clang-format off
     struct transition_table : mpl::vector<
         //  Start         Event                Next      Action                Guard
         //  +------------+-----------------+------------+--------------------+------+
@@ -157,11 +171,11 @@ struct extender_def : public msm::front::state_machine_def<extender_def>
         Row < vertex_two , events::end     , end        , actions::output_end       >,
         Row < end        , events::end     , end        , actions::output           >
     > {};
+    // clang-format on
 
     extender_def(double extend_length)
         : extend_length(extend_length)
-    {
-    }
+    {}
 
     boost::optional<vertex2d> output;
     vertex2d v1, v2;
@@ -170,25 +184,23 @@ struct extender_def : public msm::front::state_machine_def<extender_def>
 
 using extender = msm::back::state_machine<extender_def>;
 
-}
+} // namespace detail
 
-template <typename Geometry>
+template<typename Geometry>
 struct extend_converter
 {
-    extend_converter(Geometry & geom)
+    extend_converter(Geometry& geom)
         : extend_converter(geom, 0)
     {}
 
-    extend_converter(Geometry & geom, double extend)
-        : geom_(geom), extender_(extend)
+    extend_converter(Geometry& geom, double extend)
+        : geom_(geom)
+        , extender_(extend)
     {}
 
-    void set_extend(double extend)
-    {
-        extender_.extend_length = extend;
-    }
+    void set_extend(double extend) { extender_.extend_length = extend; }
 
-    unsigned vertex(double * x, double * y)
+    unsigned vertex(double* x, double* y)
     {
         using namespace detail;
         vertex2d v;
@@ -210,9 +222,9 @@ struct extend_converter
                     extender_.process_event(events::end(v));
                     break;
             }
-        } while(!extender_.output);
+        } while (!extender_.output);
 
-        vertex2d const & output = *extender_.output;
+        vertex2d const& output = *extender_.output;
         *x = output.x;
         *y = output.y;
         return output.cmd;
@@ -224,11 +236,11 @@ struct extend_converter
         extender_.start();
     }
 
-private:
-    Geometry & geom_;
+  private:
+    Geometry& geom_;
     detail::extender extender_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_EXTEND_CONVERTER_HPP

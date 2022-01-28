@@ -32,14 +32,13 @@
 
 class geobuf_featureset : public mapnik::Featureset
 {
-public:
+  public:
     typedef std::deque<geobuf_datasource::item_type> array_type;
-    geobuf_featureset(std::vector<mapnik::feature_ptr> const& features,
-                      array_type && index_array);
+    geobuf_featureset(std::vector<mapnik::feature_ptr> const& features, array_type&& index_array);
     virtual ~geobuf_featureset();
     mapnik::feature_ptr next();
 
-private:
+  private:
     std::vector<mapnik::feature_ptr> const& features_;
     const array_type index_array_;
     array_type::const_iterator index_itr_;

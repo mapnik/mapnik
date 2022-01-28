@@ -26,56 +26,47 @@
 #include <mapnik/image_any.hpp>
 #include <mapnik/safe_cast.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
-namespace detail
-{
+namespace detail {
 
-template <typename T0>
+template<typename T0>
 struct visitor_image_copy
 {
     using dst_type = typename T0::pixel_type;
 
-    T0 operator() (image_null const&) const
-    {
-        throw std::runtime_error("Can not cast a null image");
-    }
+    T0 operator()(image_null const&) const { throw std::runtime_error("Can not cast a null image"); }
 
-    T0 operator() (T0 const& src)
-    {
-        return T0(src);
-    }
+    T0 operator()(T0 const& src) { return T0(src); }
 
-    template <typename T1>
-    T0 operator() (T1 const& src) const
+    template<typename T1>
+    T0 operator()(T1 const& src) const
     {
         T0 dst(safe_cast<int>(src.width()), safe_cast<int>(src.height()), false);
         for (std::size_t y = 0; y < dst.height(); ++y)
         {
             for (std::size_t x = 0; x < dst.width(); ++x)
             {
-                dst(x,y) = safe_cast<dst_type>(src(x,y));
+                dst(x, y) = safe_cast<dst_type>(src(x, y));
             }
         }
         return T0(std::move(dst));
     }
 };
 
-template <typename T0>
+template<typename T0>
 struct visitor_image_copy_so
 {
     using dst_type = typename T0::pixel_type;
 
     visitor_image_copy_so(double offset, double scaling)
-        : offset_(offset), scaling_(scaling) {}
+        : offset_(offset)
+        , scaling_(scaling)
+    {}
 
-    T0 operator() (image_null const&)
-    {
-        throw std::runtime_error("Can not cast a null image");
-    }
+    T0 operator()(image_null const&) { throw std::runtime_error("Can not cast a null image"); }
 
-    T0 operator() (T0 const& src) const
+    T0 operator()(T0 const& src) const
     {
         if (offset_ == src.get_offset() && scaling_ == src.get_scaling())
         {
@@ -90,8 +81,8 @@ struct visitor_image_copy_so
         }
     }
 
-    template <typename T1>
-    T0 operator() (T1 const& src) const
+    template<typename T1>
+    T0 operator()(T1 const& src) const
     {
         double src_offset = src.get_offset();
         double src_scaling = src.get_scaling();
@@ -102,21 +93,22 @@ struct visitor_image_copy_so
         {
             for (std::size_t x = 0; x < dst.width(); ++x)
             {
-                double scaled_src_val = (safe_cast<double>(src(x,y)) * src_scaling) + src_offset;
+                double scaled_src_val = (safe_cast<double>(src(x, y)) * src_scaling) + src_offset;
                 double dst_val = (scaled_src_val - offset_) / scaling_;
-                dst(x,y) = safe_cast<dst_type>(dst_val);
+                dst(x, y) = safe_cast<dst_type>(dst_val);
             }
         }
         return T0(std::move(dst));
     }
+
   private:
     double offset_;
     double scaling_;
 };
 
-} // end detail ns
+} // namespace detail
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_any const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -129,7 +121,7 @@ MAPNIK_DECL T image_copy(image_any const& data, double offset, double scaling)
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_rgba8 const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -144,7 +136,7 @@ MAPNIK_DECL T image_copy(image_rgba8 const& data, double offset, double scaling)
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray8 const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -159,7 +151,7 @@ MAPNIK_DECL T image_copy(image_gray8 const& data, double offset, double scaling)
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray8s const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -174,7 +166,7 @@ MAPNIK_DECL T image_copy(image_gray8s const& data, double offset, double scaling
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray16 const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -189,7 +181,7 @@ MAPNIK_DECL T image_copy(image_gray16 const& data, double offset, double scaling
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray16s const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -204,7 +196,7 @@ MAPNIK_DECL T image_copy(image_gray16s const& data, double offset, double scalin
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray32 const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -219,7 +211,7 @@ MAPNIK_DECL T image_copy(image_gray32 const& data, double offset, double scaling
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray32s const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -234,7 +226,7 @@ MAPNIK_DECL T image_copy(image_gray32s const& data, double offset, double scalin
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray32f const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -249,7 +241,7 @@ MAPNIK_DECL T image_copy(image_gray32f const& data, double offset, double scalin
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray64 const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -264,7 +256,7 @@ MAPNIK_DECL T image_copy(image_gray64 const& data, double offset, double scaling
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray64s const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -279,7 +271,7 @@ MAPNIK_DECL T image_copy(image_gray64s const& data, double offset, double scalin
     }
 }
 
-template <typename T>
+template<typename T>
 MAPNIK_DECL T image_copy(image_gray64f const& data, double offset, double scaling)
 {
     if (offset == 0.0 && scaling == 1.0 && data.get_offset() == 0.0 && data.get_scaling() == 1.0)
@@ -325,9 +317,8 @@ MAPNIK_DECL image_any image_copy(image_any const& data, image_dtype type, double
         case IMAGE_DTYPE_MAX:
         default:
             throw std::runtime_error("Can not cast unknown type");
-
     }
     throw std::runtime_error("Unknown image type passed");
 }
 
-} // end mapnik ns
+} // namespace mapnik

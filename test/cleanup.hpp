@@ -46,6 +46,6 @@ inline void run_cleanup()
     u_cleanup();
 }
 
-}
+} // namespace testing
 
 #endif

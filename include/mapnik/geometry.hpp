@@ -38,14 +38,16 @@
 #include <type_traits>
 #include <cstddef>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T, template <typename...> class Cont = std::vector>
+template<typename T, template<typename...> class Cont = std::vector>
 struct geometry_collection;
 
-struct geometry_empty {};
+struct geometry_empty
+{};
 
-template <typename T>
+template<typename T>
 using geometry_base = mapnik::util::variant<geometry_empty,
                                             point<T>,
                                             line_string<T>,
@@ -53,13 +55,13 @@ using geometry_base = mapnik::util::variant<geometry_empty,
                                             multi_point<T>,
                                             multi_line_string<T>,
                                             multi_polygon<T>,
-                                            geometry_collection<T> >;
-template <typename T>
+                                            geometry_collection<T>>;
+template<typename T>
 struct geometry : geometry_base<T>
 {
     using coordinate_type = T;
 
-#if __cpp_inheriting_constructors >= 200802  && !defined (_MSC_VER)
+#if __cpp_inheriting_constructors >= 200802 && !defined(_MSC_VER)
 
     using geometry_base<T>::geometry_base;
 
@@ -67,20 +69,21 @@ struct geometry : geometry_base<T>
 
     geometry() = default;
 
-    template <typename G>
-    geometry(G && geom)
-        : geometry_base<T>(std::forward<G>(geom)) {}
+    template<typename G>
+    geometry(G&& geom)
+        : geometry_base<T>(std::forward<G>(geom))
+    {}
 
 #endif
 };
 
-
-template <typename T, template <typename...> class Cont>
+template<typename T, template<typename...> class Cont>
 struct geometry_collection : Cont<geometry<T>>
 {
     using coordinate_type = T;
 };
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
-#endif //MAPNIK_GEOMETRY_HPP
+#endif // MAPNIK_GEOMETRY_HPP

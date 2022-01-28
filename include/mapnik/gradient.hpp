@@ -35,24 +35,18 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 using stop_pair = std::pair<double, mapnik::color>;
-using stop_array = std::vector<stop_pair >;
+using stop_array = std::vector<stop_pair>;
 
-enum gradient_e
-{
-    NO_GRADIENT,
-    LINEAR,
-    RADIAL
-};
+enum gradient_e { NO_GRADIENT, LINEAR, RADIAL };
 
-enum gradient_unit_e
-{
+enum gradient_unit_e {
     USER_SPACE_ON_USE,
     USER_SPACE_ON_USE_BOUNDING_BOX, // used to indicate % age values were specified. This are % of the svg image extent.
-    OBJECT_BOUNDING_BOX //  (i.e., the abstract coordinate system where (0,0) is at the top/left of the object bounding box and (1,1) is at the bottom/right of the object bounding box)
+    OBJECT_BOUNDING_BOX //  (i.e., the abstract coordinate system where (0,0) is at the top/left of the object bounding
+                        //  box and (1,1) is at the bottom/right of the object bounding box)
 };
 
 class MAPNIK_DECL gradient
@@ -72,17 +66,17 @@ class MAPNIK_DECL gradient
     gradient_unit_e units_;
     gradient_e gradient_type_;
 
-public:
+  public:
     gradient();
     gradient(gradient const& other);
-    gradient(gradient && other);
+    gradient(gradient&& other);
     gradient& operator=(gradient rhs);
     bool operator==(gradient const& other) const;
     void set_gradient_type(gradient_e grad);
     gradient_e get_gradient_type() const;
 
     void set_transform(agg::trans_affine const& transform);
-    agg::trans_affine const&  get_transform() const;
+    agg::trans_affine const& get_transform() const;
 
     void set_units(gradient_unit_e units);
     gradient_unit_e get_units() const;
@@ -92,13 +86,13 @@ public:
 
     stop_array const& get_stop_array() const;
 
-    void set_control_points(double x1, double y1, double x2, double y2, double r=0);
-    void get_control_points(double &x1, double &y1, double &x2, double &y2, double &r) const;
-    void get_control_points(double &x1, double &y1, double &x2, double &y2) const;
+    void set_control_points(double x1, double y1, double x2, double y2, double r = 0);
+    void get_control_points(double& x1, double& y1, double& x2, double& y2, double& r) const;
+    void get_control_points(double& x1, double& y1, double& x2, double& y2) const;
 
-private:
+  private:
     void swap(gradient& other) noexcept;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_GRADIENT_HPP

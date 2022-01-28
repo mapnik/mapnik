@@ -22,7 +22,8 @@
 
 #include <mapnik/image_filter_grammar_x3_def.hpp>
 
-namespace mapnik { namespace image_filter {
+namespace mapnik {
+namespace image_filter {
 
 namespace x3 = boost::spirit::x3;
 using iterator_type = std::string::const_iterator;
@@ -30,4 +31,5 @@ using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
 
 BOOST_SPIRIT_INSTANTIATE(image_filter_grammar_type, iterator_type, context_type);
 
-}} // image_filter //mapnik
+} // namespace image_filter
+} // namespace mapnik

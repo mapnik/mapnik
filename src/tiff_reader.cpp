@@ -24,8 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/util/char_array_buffer.hpp>
-extern "C"
-{
+extern "C" {
 #include <tiffio.h>
 }
 
@@ -45,23 +44,24 @@ MAPNIK_DISABLE_WARNING_POP
 #include <fstream>
 #include <algorithm>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
 toff_t tiff_seek_proc(thandle_t handle, toff_t off, int whence)
 {
     std::istream* in = reinterpret_cast<std::istream*>(handle);
 
-    switch(whence)
+    switch (whence)
     {
-    case SEEK_SET:
-        in->seekg(off, std::ios_base::beg);
-        break;
-    case SEEK_CUR:
-        in->seekg(off, std::ios_base::cur);
-        break;
-    case SEEK_END:
-        in->seekg(off, std::ios_base::end);
-        break;
+        case SEEK_SET:
+            in->seekg(off, std::ios_base::beg);
+            break;
+        case SEEK_CUR:
+            in->seekg(off, std::ios_base::cur);
+            break;
+        case SEEK_END:
+            in->seekg(off, std::ios_base::end);
+            break;
     }
     return static_cast<toff_t>(in->tellg());
 }
@@ -83,7 +83,7 @@ toff_t tiff_size_proc(thandle_t handle)
 
 tsize_t tiff_read_proc(thandle_t handle, tdata_t buf, tsize_t size)
 {
-    std::istream * in = reinterpret_cast<std::istream*>(handle);
+    std::istream* in = reinterpret_cast<std::istream*>(handle);
     std::streamsize request_size = size;
     if (static_cast<tsize_t>(request_size) != size)
         return static_cast<tsize_t>(-1);
@@ -91,24 +91,21 @@ tsize_t tiff_read_proc(thandle_t handle, tdata_t buf, tsize_t size)
     return static_cast<tsize_t>(in->gcount());
 }
 
-tsize_t tiff_write_proc(thandle_t , tdata_t , tsize_t)
+tsize_t tiff_write_proc(thandle_t, tdata_t, tsize_t)
 {
     return 0;
 }
 
-void tiff_unmap_proc(thandle_t, tdata_t, toff_t)
-{
-}
+void tiff_unmap_proc(thandle_t, tdata_t, toff_t) {}
 
-int tiff_map_proc(thandle_t, tdata_t* , toff_t*)
+int tiff_map_proc(thandle_t, tdata_t*, toff_t*)
 {
     return 0;
 }
-}
+} // namespace detail
 
-namespace
-{
-    
+namespace {
+
 image_reader* create_tiff_reader(std::string const& filename)
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
@@ -118,16 +115,14 @@ image_reader* create_tiff_reader(std::string const& filename)
 #endif
 }
 
-image_reader* create_tiff_reader2(char const * data, std::size_t size)
+image_reader* create_tiff_reader2(char const* data, std::size_t size)
 {
     return new tiff_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
-const bool registered = register_image_reader("tiff",create_tiff_reader);
+const bool registered = register_image_reader("tiff", create_tiff_reader);
 const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
 
-}
-
-
+} // namespace
 
 } // namespace mapnik

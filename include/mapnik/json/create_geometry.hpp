@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
@@ -27,64 +27,68 @@
 #include <mapnik/geometry/correct.hpp>
 #include <mapnik/json/positions_x3.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace {
 // geometries
-template <typename Geometry>
+template<typename Geometry>
 struct create_point
 {
-    explicit create_point(Geometry & geom)
-        : geom_(geom) {}
+    explicit create_point(Geometry& geom)
+        : geom_(geom)
+    {}
 
-    void operator() (point const& pos) const
+    void operator()(point const& pos) const
     {
         mapnik::geometry::point<double> point(pos.x, pos.y);
         geom_ = std::move(point);
     }
 
-    template <typename T>
+    template<typename T>
     void operator()(T const&) const
     {
         throw std::runtime_error("Failed to parse geojson geometry");
     }
-    Geometry & geom_;
+    Geometry& geom_;
 };
 
-template <typename Geometry>
+template<typename Geometry>
 struct create_linestring
 {
-    explicit create_linestring(Geometry & geom)
-        : geom_(geom) {}
+    explicit create_linestring(Geometry& geom)
+        : geom_(geom)
+    {}
 
-    void operator() (ring const& points) const
+    void operator()(ring const& points) const
     {
         mapnik::geometry::line_string<double> line;
         std::size_t size = points.size();
         line.reserve(size);
-        for (auto && pt : points)
+        for (auto&& pt : points)
         {
             line.emplace_back(std::move(pt));
         }
         geom_ = std::move(line);
     }
 
-    template <typename T>
+    template<typename T>
     void operator()(T const&) const
     {
         throw std::runtime_error("Failed to parse geojson geometry");
     }
 
-    Geometry & geom_;
+    Geometry& geom_;
 };
 
-template <typename Geometry>
+template<typename Geometry>
 struct create_polygon
 {
-    explicit create_polygon(Geometry & geom)
-        : geom_(geom) {}
+    explicit create_polygon(Geometry& geom)
+        : geom_(geom)
+    {}
 
-    void operator() (rings const& rngs) const
+    void operator()(rings const& rngs) const
     {
         mapnik::geometry::polygon<double> poly;
         std::size_t num_rings = rngs.size();
@@ -94,7 +98,7 @@ struct create_polygon
             std::size_t size = r.size();
             mapnik::geometry::linear_ring<double> ring;
             ring.reserve(size);
-            for ( auto && pt : r)
+            for (auto&& pt : r)
             {
                 ring.emplace_back(std::move(pt));
             }
@@ -104,49 +108,51 @@ struct create_polygon
         mapnik::geometry::correct(geom_);
     }
 
-    template <typename T>
+    template<typename T>
     void operator()(T const&) const
     {
-       throw std::runtime_error("Failed to parse geojson geometry");
+        throw std::runtime_error("Failed to parse geojson geometry");
     }
 
-    Geometry & geom_;
+    Geometry& geom_;
 };
 
 // multi-geometries
-template <typename Geometry>
+template<typename Geometry>
 struct create_multipoint
 {
-    explicit create_multipoint(Geometry & geom)
-        : geom_(geom) {}
+    explicit create_multipoint(Geometry& geom)
+        : geom_(geom)
+    {}
 
-    void operator() (ring const& points) const
+    void operator()(ring const& points) const
     {
         mapnik::geometry::multi_point<double> multi_point;
         multi_point.reserve(points.size());
-        for (auto && pos : points)
+        for (auto&& pos : points)
         {
             multi_point.emplace_back(std::move(pos));
         }
         geom_ = std::move(multi_point);
     }
 
-    template <typename T>
+    template<typename T>
     void operator()(T const&) const
     {
         throw std::runtime_error("Failed to parse geojson geometry");
     }
 
-    Geometry & geom_;
+    Geometry& geom_;
 };
 
-template <typename Geometry>
+template<typename Geometry>
 struct create_multilinestring
 {
-    explicit create_multilinestring(Geometry & geom)
-        : geom_(geom) {}
+    explicit create_multilinestring(Geometry& geom)
+        : geom_(geom)
+    {}
 
-    void operator() (rings const& rngs) const
+    void operator()(rings const& rngs) const
     {
         mapnik::geometry::multi_line_string<double> multi_line;
         multi_line.reserve(rngs.size());
@@ -155,7 +161,7 @@ struct create_multilinestring
         {
             mapnik::geometry::line_string<double> line;
             line.reserve(ring.size());
-            for (auto && pt : ring)
+            for (auto&& pt : ring)
             {
                 line.emplace_back(std::move(pt));
             }
@@ -164,20 +170,21 @@ struct create_multilinestring
         geom_ = std::move(multi_line);
     }
 
-    template <typename T>
+    template<typename T>
     void operator()(T const&) const
     {
         throw std::runtime_error("Failed to parse geojson geometry");
     }
 
-    Geometry & geom_;
+    Geometry& geom_;
 };
 
-template <typename Geometry>
+template<typename Geometry>
 struct create_multipolygon
 {
-    explicit create_multipolygon(Geometry & geom)
-        : geom_(geom) {}
+    explicit create_multipolygon(Geometry& geom)
+        : geom_(geom)
+    {}
 
     void operator()(rings_array const& rngs_arr) const
     {
@@ -188,12 +195,12 @@ struct create_multipolygon
             mapnik::geometry::polygon<double> poly;
             std::size_t num_rings = rings.size();
             poly.reserve(num_rings);
-            for ( std::size_t i = 0; i < num_rings; ++i)
+            for (std::size_t i = 0; i < num_rings; ++i)
             {
                 std::size_t size = rings[i].size();
                 mapnik::geometry::linear_ring<double> ring;
                 ring.reserve(size);
-                for ( auto && pt : rings[i])
+                for (auto&& pt : rings[i])
                 {
                     ring.emplace_back(std::move(pt));
                 }
@@ -206,45 +213,46 @@ struct create_multipolygon
         mapnik::geometry::correct(geom_);
     }
 
-    template <typename T>
+    template<typename T>
     void operator()(T const&) const
     {
         throw std::runtime_error("Failed to parse geojson geometry");
     }
 
-    Geometry & geom_;
+    Geometry& geom_;
 };
-} // anonymous ns
+} // namespace
 
-template <typename Geometry>
-void create_geometry (Geometry & geom, int type, mapnik::json::positions const& coords)
+template<typename Geometry>
+void create_geometry(Geometry& geom, int type, mapnik::json::positions const& coords)
 {
     switch (type)
     {
-    case 1 ://Point
-        util::apply_visitor(create_point<Geometry>(geom), coords);
-        break;
-    case 2 ://LineString
-        util::apply_visitor(create_linestring<Geometry>(geom), coords);
-        break;
-    case 3 ://Polygon
-        util::apply_visitor(create_polygon<Geometry>(geom), coords);
-        break;
-    case 4 ://MultiPoint
-        util::apply_visitor(create_multipoint<Geometry>(geom), coords);
-        break;
-    case 5 ://MultiLineString
-        util::apply_visitor(create_multilinestring<Geometry>(geom), coords);
-        break;
-    case 6 ://MultiPolygon
-        util::apply_visitor(create_multipolygon<Geometry>(geom), coords);
-        break;
-    default:
-        throw std::runtime_error("Failed to parse geojson geometry");
-        break;
+        case 1: // Point
+            util::apply_visitor(create_point<Geometry>(geom), coords);
+            break;
+        case 2: // LineString
+            util::apply_visitor(create_linestring<Geometry>(geom), coords);
+            break;
+        case 3: // Polygon
+            util::apply_visitor(create_polygon<Geometry>(geom), coords);
+            break;
+        case 4: // MultiPoint
+            util::apply_visitor(create_multipoint<Geometry>(geom), coords);
+            break;
+        case 5: // MultiLineString
+            util::apply_visitor(create_multilinestring<Geometry>(geom), coords);
+            break;
+        case 6: // MultiPolygon
+            util::apply_visitor(create_multipolygon<Geometry>(geom), coords);
+            break;
+        default:
+            throw std::runtime_error("Failed to parse geojson geometry");
+            break;
     }
 }
 
-}}
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_CREATE_GEOMETRY_HPP

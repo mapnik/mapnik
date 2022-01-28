@@ -35,11 +35,12 @@
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
-jpeg_saver::jpeg_saver(std::ostream & stream, std::string const& t)
-    : stream_(stream), t_(t) {}
+jpeg_saver::jpeg_saver(std::ostream& stream, std::string const& t)
+    : stream_(stream)
+    , t_(t)
+{}
 
 namespace detail {
 
@@ -53,17 +54,18 @@ int parse_jpeg_quality(std::string const& params)
             auto const& key = kv.first;
             auto const& val = kv.second;
 
-            if ( key == "jpeg" ) continue;
-            else if ( key.size() > 4  && key.substr(0,4) == "jpeg")
+            if (key == "jpeg")
+                continue;
+            else if (key.size() > 4 && key.substr(0, 4) == "jpeg")
             {
                 if (!mapnik::util::string2int(key.substr(4), quality))
                 {
-                    throw image_writer_exception("invalid jpeg quality: '" + key.substr(4)  + "'");
+                    throw image_writer_exception("invalid jpeg quality: '" + key.substr(4) + "'");
                 }
             }
-            else if ( key == "quality")
+            else if (key == "quality")
             {
-                if (val && ! (*val).empty())
+                if (val && !(*val).empty())
                 {
                     if (!mapnik::util::string2int(*val, quality) || quality < 0 || quality > 100)
                     {
@@ -76,10 +78,10 @@ int parse_jpeg_quality(std::string const& params)
     return quality;
 }
 
-}
+} // namespace detail
 
-template <typename T>
-void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & stream)
+template<typename T>
+void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream& stream)
 {
 #if defined(HAVE_JPEG)
     int quality = detail::parse_jpeg_quality(type);
@@ -90,54 +92,54 @@ void process_rgba8_jpeg(T const& image, std::string const& type, std::ostream & 
 }
 
 template<>
-void jpeg_saver::operator()<image_rgba8> (image_rgba8 const& image) const
+void jpeg_saver::operator()<image_rgba8>(image_rgba8 const& image) const
 {
     process_rgba8_jpeg(image, t_, stream_);
 }
 
 template<>
-void jpeg_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const
+void jpeg_saver::operator()<image_view_rgba8>(image_view_rgba8 const& image) const
 {
     process_rgba8_jpeg(image, t_, stream_);
 }
 
 template<>
-void jpeg_saver::operator()<image_null> (image_null const& image) const
+void jpeg_saver::operator()<image_null>(image_null const& image) const
 {
     throw image_writer_exception("Can not save a null image to jpeg");
 }
 
 template<>
-void jpeg_saver::operator()<image_view_null> (image_view_null const& image) const
+void jpeg_saver::operator()<image_view_null>(image_view_null const& image) const
 {
     throw image_writer_exception("Can not save a null image to jpeg");
 }
 
-template <typename T>
-void jpeg_saver::operator() (T const& image) const
+template<typename T>
+void jpeg_saver::operator()(T const& image) const
 {
     throw image_writer_exception("Mapnik does not support jpeg grayscale images");
 }
 
-template void jpeg_saver::operator()<image_gray8> (image_gray8 const& image) const;
-template void jpeg_saver::operator()<image_gray8s> (image_gray8s const& image) const;
-template void jpeg_saver::operator()<image_gray16> (image_gray16 const& image) const;
-template void jpeg_saver::operator()<image_gray16s> (image_gray16s const& image) const;
-template void jpeg_saver::operator()<image_gray32> (image_gray32 const& image) const;
-template void jpeg_saver::operator()<image_gray32s> (image_gray32s const& image) const;
-template void jpeg_saver::operator()<image_gray32f> (image_gray32f const& image) const;
-template void jpeg_saver::operator()<image_gray64> (image_gray64 const& image) const;
-template void jpeg_saver::operator()<image_gray64s> (image_gray64s const& image) const;
-template void jpeg_saver::operator()<image_gray64f> (image_gray64f const& image) const;
-template void jpeg_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
-template void jpeg_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
-template void jpeg_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;
-template void jpeg_saver::operator()<image_view_gray16s> (image_view_gray16s const& image) const;
-template void jpeg_saver::operator()<image_view_gray32> (image_view_gray32 const& image) const;
-template void jpeg_saver::operator()<image_view_gray32s> (image_view_gray32s const& image) const;
-template void jpeg_saver::operator()<image_view_gray32f> (image_view_gray32f const& image) const;
-template void jpeg_saver::operator()<image_view_gray64> (image_view_gray64 const& image) const;
-template void jpeg_saver::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
-template void jpeg_saver::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
+template void jpeg_saver::operator()<image_gray8>(image_gray8 const& image) const;
+template void jpeg_saver::operator()<image_gray8s>(image_gray8s const& image) const;
+template void jpeg_saver::operator()<image_gray16>(image_gray16 const& image) const;
+template void jpeg_saver::operator()<image_gray16s>(image_gray16s const& image) const;
+template void jpeg_saver::operator()<image_gray32>(image_gray32 const& image) const;
+template void jpeg_saver::operator()<image_gray32s>(image_gray32s const& image) const;
+template void jpeg_saver::operator()<image_gray32f>(image_gray32f const& image) const;
+template void jpeg_saver::operator()<image_gray64>(image_gray64 const& image) const;
+template void jpeg_saver::operator()<image_gray64s>(image_gray64s const& image) const;
+template void jpeg_saver::operator()<image_gray64f>(image_gray64f const& image) const;
+template void jpeg_saver::operator()<image_view_gray8>(image_view_gray8 const& image) const;
+template void jpeg_saver::operator()<image_view_gray8s>(image_view_gray8s const& image) const;
+template void jpeg_saver::operator()<image_view_gray16>(image_view_gray16 const& image) const;
+template void jpeg_saver::operator()<image_view_gray16s>(image_view_gray16s const& image) const;
+template void jpeg_saver::operator()<image_view_gray32>(image_view_gray32 const& image) const;
+template void jpeg_saver::operator()<image_view_gray32s>(image_view_gray32s const& image) const;
+template void jpeg_saver::operator()<image_view_gray32f>(image_view_gray32f const& image) const;
+template void jpeg_saver::operator()<image_view_gray64>(image_view_gray64 const& image) const;
+template void jpeg_saver::operator()<image_view_gray64s>(image_view_gray64s const& image) const;
+template void jpeg_saver::operator()<image_view_gray64f>(image_view_gray64f const& image) const;
 
-} // end ns
+} // namespace mapnik

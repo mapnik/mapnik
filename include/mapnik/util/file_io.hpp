@@ -32,66 +32,60 @@
 #include <memory>
 #include <string>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 class file : public util::noncopyable
 {
-public:
-    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+  public:
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE*)>;
     using data_type = std::unique_ptr<char[]>;
 
     explicit file(std::string const& filename)
 #ifdef _WIN32
-     : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose),
+        : file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
+        ,
 #else
-     : file_(std::fopen(filename.c_str(),"rb"), std::fclose),
+        : file_(std::fopen(filename.c_str(), "rb"), std::fclose)
+        ,
 #endif
-       size_(0)
+        size_(0)
 
-     {
+    {
         if (file_)
         {
             std::fseek(file_.get(), 0, SEEK_END);
             size_ = std::ftell(file_.get());
             std::fseek(file_.get(), 0, SEEK_SET);
         }
-     }
-
-    inline bool is_open() const
-    {
-        return file_ ? true : false;
     }
 
-    explicit operator bool() const
-    {
-        return this->is_open();
-    }
+    inline bool is_open() const { return file_ ? true : false; }
 
-    inline std::FILE * get() const
-    {
-        return file_.get();
-    }
+    explicit operator bool() const { return this->is_open(); }
 
-    inline std::size_t size() const
-    {
-        return size_;
-    }
+    inline std::FILE* get() const { return file_.get(); }
+
+    inline std::size_t size() const { return size_; }
 
     inline data_type data() const
     {
-        if (!size_) return nullptr;
+        if (!size_)
+            return nullptr;
         std::fseek(file_.get(), 0, SEEK_SET);
         data_type buffer(new char[size_]);
         auto count = std::fread(buffer.get(), size_, 1, file_.get());
-        if (count != 1) return nullptr;
+        if (count != 1)
+            return nullptr;
         return buffer;
     }
-private:
+
+  private:
     file_ptr file_;
     std::size_t size_;
 };
 
-}}
-
+} // namespace util
+} // namespace mapnik
 
 #endif // FILE_IO

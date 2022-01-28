@@ -47,23 +47,22 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::process(raster_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+template<typename T0, typename T1>
+void agg_renderer<T0, T1>::process(raster_symbolizer const& sym,
+                                   mapnik::feature_impl& feature,
+                                   proj_transform const& prj_trans)
 {
     render_raster_symbolizer(
-        sym, feature, prj_trans, common_,
-        [&](image_rgba8 const & target, composite_mode_e comp_op, double opacity,
-            int start_x, int start_y) {
-            composite(buffers_.top().get(), target,
-                      comp_op, opacity, start_x, start_y);
-        }
-    );
+      sym,
+      feature,
+      prj_trans,
+      common_,
+      [&](image_rgba8 const& target, composite_mode_e comp_op, double opacity, int start_x, int start_y) {
+          composite(buffers_.top().get(), target, comp_op, opacity, start_x, start_y);
+      });
 }
 
-template void agg_renderer<image_rgba8>::process(raster_symbolizer const&,
-                                              mapnik::feature_impl &,
-                                              proj_transform const&);
+template void
+  agg_renderer<image_rgba8>::process(raster_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik

@@ -4,25 +4,28 @@
 class test : public benchmark::test_case
 {
     double value_;
-public:
+
+  public:
     test(mapnik::parameters const& params)
-     : test_case(params),
-       value_(-0.1234) {}
+        : test_case(params)
+        , value_(-0.1234)
+    {}
     bool validate() const
     {
         std::string s;
-        mapnik::util::to_string(s,value_);
+        mapnik::util::to_string(s, value_);
         return (s == "-0.1234");
     }
     bool operator()() const
     {
         std::string out;
-        for (std::size_t i=0;i<iterations_;++i) {
+        for (std::size_t i = 0; i < iterations_; ++i)
+        {
             out.clear();
-            mapnik::util::to_string(out,value_);
+            mapnik::util::to_string(out, value_);
         }
         return true;
     }
 };
 
-BENCHMARK(test,"to_string double->string")
+BENCHMARK(test, "to_string double->string")

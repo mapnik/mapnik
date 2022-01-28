@@ -37,4 +37,4 @@ using grid_rendering_buffer = agg::row_ptr_cache<mapnik::grid::value_type>;
 
 }
 
-#endif //MAPNIK_AGG_RASTERIZER_HPP
+#endif // MAPNIK_AGG_RASTERIZER_HPP

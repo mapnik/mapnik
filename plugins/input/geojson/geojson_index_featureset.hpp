@@ -44,17 +44,18 @@ MAPNIK_DISABLE_WARNING_POP
 class geojson_index_featureset : public mapnik::Featureset
 {
     using value_type = mapnik::util::index_record;
-public:
+
+  public:
     geojson_index_featureset(std::string const& filename, mapnik::bounding_box_filter<float> const& filter);
     virtual ~geojson_index_featureset();
     mapnik::feature_ptr next();
 
-private:
-#if defined (MAPNIK_MEMORY_MAPPED_FILE)
+  private:
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
     using file_source_type = boost::interprocess::ibufferstream;
     mapnik::mapped_region_ptr mapped_region_;
 #else
-    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE*)>;
     file_ptr file_;
 #endif
     mapnik::value_integer feature_id_ = 1;

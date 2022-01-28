@@ -52,13 +52,13 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 struct pixel_format
 {
     using type = typename detail::agg_scaling_traits<T>::pixfmt_pre;
 };
 
-template <>
+template<>
 struct pixel_format<image_rgba8>
 {
     struct src_blender
@@ -67,10 +67,8 @@ struct pixel_format<image_rgba8>
         using order_type = agg::order_rgba;
         using value_type = typename color_type::value_type;
 
-        static inline void blend_pix(unsigned /*op*/, value_type* p,
-                                     unsigned cr, unsigned cg, unsigned cb,
-                                     unsigned ca,
-                                     unsigned cover)
+        static inline void
+          blend_pix(unsigned /*op*/, value_type* p, unsigned cr, unsigned cg, unsigned cb, unsigned ca, unsigned cover)
         {
             agg::comp_op_rgba_src<color_type, order_type>::blend_pix(p, cr, cg, cb, ca, cover);
         }
@@ -80,11 +78,18 @@ struct pixel_format<image_rgba8>
     using type = agg::pixfmt_custom_blend_rgba<src_blender, agg::rendering_buffer>;
 };
 
-template <typename T>
-MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& prj_trans,
-                 box2d<double> const& target_ext, box2d<double> const& source_ext,
-                 double offset_x, double offset_y, unsigned mesh_size, scaling_method_e scaling_method, double filter_factor,
-                 boost::optional<double> const & nodata_value)
+template<typename T>
+MAPNIK_DECL void warp_image(T& target,
+                            T const& source,
+                            proj_transform const& prj_trans,
+                            box2d<double> const& target_ext,
+                            box2d<double> const& source_ext,
+                            double offset_x,
+                            double offset_y,
+                            unsigned mesh_size,
+                            scaling_method_e scaling_method,
+                            double filter_factor,
+                            boost::optional<double> const& nodata_value)
 {
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
@@ -96,43 +101,37 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
 
     constexpr std::size_t pixel_size = sizeof(pixel_type);
 
-    view_transform ts(source.width(), source.height(),
-                      source_ext);
-    view_transform tt(target.width(), target.height(),
-                      target_ext, offset_x, offset_y);
+    view_transform ts(source.width(), source.height(), source_ext);
+    view_transform tt(target.width(), target.height(), target_ext, offset_x, offset_y);
 
-    std::size_t mesh_nx = std::ceil(source.width()/double(mesh_size) + 1);
-    std::size_t mesh_ny = std::ceil(source.height()/double(mesh_size) + 1);
+    std::size_t mesh_nx = std::ceil(source.width() / double(mesh_size) + 1);
+    std::size_t mesh_ny = std::ceil(source.height() / double(mesh_size) + 1);
 
     image_gray64f xs(mesh_nx, mesh_ny, false);
     image_gray64f ys(mesh_nx, mesh_ny, false);
 
     // Precalculate reprojected mesh
-    for(std::size_t j = 0; j < mesh_ny; ++j)
+    for (std::size_t j = 0; j < mesh_ny; ++j)
     {
-        for (std::size_t i=0; i<mesh_nx; ++i)
+        for (std::size_t i = 0; i < mesh_nx; ++i)
         {
-            xs(i,j) = std::min(i*mesh_size,source.width());
-            ys(i,j) = std::min(j*mesh_size,source.height());
-            ts.backward(&xs(i,j), &ys(i,j));
+            xs(i, j) = std::min(i * mesh_size, source.width());
+            ys(i, j) = std::min(j * mesh_size, source.height());
+            ts.backward(&xs(i, j), &ys(i, j));
         }
     }
-    prj_trans.backward(xs.data(), ys.data(), nullptr, mesh_nx*mesh_ny);
+    prj_trans.backward(xs.data(), ys.data(), nullptr, mesh_nx * mesh_ny);
 
     agg::rasterizer_scanline_aa<> rasterizer;
     agg::scanline_bin scanline;
-    agg::rendering_buffer buf(target.bytes(),
-                              target.width(),
-                              target.height(),
-                              target.width() * pixel_size);
+    agg::rendering_buffer buf(target.bytes(), target.width(), target.height(), target.width() * pixel_size);
     output_pixfmt_type pixf(buf);
     renderer_base rb(pixf);
     rasterizer.clip_box(0, 0, target.width(), target.height());
-    agg::rendering_buffer buf_tile(
-        const_cast<unsigned char*>(source.bytes()),
-        source.width(),
-        source.height(),
-        source.width() * pixel_size);
+    agg::rendering_buffer buf_tile(const_cast<unsigned char*>(source.bytes()),
+                                   source.width(),
+                                   source.height(),
+                                   source.width() * pixel_size);
 
     pixfmt_pre pixf_tile(buf_tile);
 
@@ -145,14 +144,18 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
     {
         for (std::size_t i = 0; i < mesh_nx - 1; ++i)
         {
-            double polygon[8] = {xs(i,j), ys(i,j),
-                                 xs(i+1,j), ys(i+1,j),
-                                 xs(i+1,j+1), ys(i+1,j+1),
-                                 xs(i,j+1), ys(i,j+1)};
-            tt.forward(polygon+0, polygon+1);
-            tt.forward(polygon+2, polygon+3);
-            tt.forward(polygon+4, polygon+5);
-            tt.forward(polygon+6, polygon+7);
+            double polygon[8] = {xs(i, j),
+                                 ys(i, j),
+                                 xs(i + 1, j),
+                                 ys(i + 1, j),
+                                 xs(i + 1, j + 1),
+                                 ys(i + 1, j + 1),
+                                 xs(i, j + 1),
+                                 ys(i, j + 1)};
+            tt.forward(polygon + 0, polygon + 1);
+            tt.forward(polygon + 2, polygon + 3);
+            tt.forward(polygon + 4, polygon + 5);
+            tt.forward(polygon + 6, polygon + 7);
 
             rasterizer.reset();
             rasterizer.move_to_d(std::floor(polygon[0]), std::floor(polygon[1]));
@@ -162,8 +165,8 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
 
             std::size_t x0 = i * mesh_size;
             std::size_t y0 = j * mesh_size;
-            std::size_t x1 = (i+1) * mesh_size;
-            std::size_t y1 = (j+1) * mesh_size;
+            std::size_t x1 = (i + 1) * mesh_size;
+            std::size_t y1 = (j + 1) * mesh_size;
             x1 = std::min(x1, source.width());
             y1 = std::min(y1, source.height());
             agg::trans_affine tr(polygon, x0, y0, x1, y1);
@@ -190,7 +193,6 @@ MAPNIK_DECL void warp_image (T & target, T const& source, proj_transform const& 
                     agg::render_scanlines_bin(rasterizer, scanline, rb, sa, sg);
                 }
             }
-
         }
     }
 }
@@ -199,37 +201,51 @@ namespace detail {
 
 struct warp_image_visitor
 {
-    warp_image_visitor (raster & target_raster, proj_transform const& prj_trans, box2d<double> const& source_ext,
-                        double offset_x, double offset_y, unsigned mesh_size,
-                        scaling_method_e scaling_method, double filter_factor,
-                        boost::optional<double> const & nodata_value)
-        : target_raster_(target_raster),
-          prj_trans_(prj_trans),
-          source_ext_(source_ext),
-          offset_x_(offset_x),
-          offset_y_(offset_y),
-          mesh_size_(mesh_size),
-          scaling_method_(scaling_method),
-          filter_factor_(filter_factor),
-          nodata_value_(nodata_value)
+    warp_image_visitor(raster& target_raster,
+                       proj_transform const& prj_trans,
+                       box2d<double> const& source_ext,
+                       double offset_x,
+                       double offset_y,
+                       unsigned mesh_size,
+                       scaling_method_e scaling_method,
+                       double filter_factor,
+                       boost::optional<double> const& nodata_value)
+        : target_raster_(target_raster)
+        , prj_trans_(prj_trans)
+        , source_ext_(source_ext)
+        , offset_x_(offset_x)
+        , offset_y_(offset_y)
+        , mesh_size_(mesh_size)
+        , scaling_method_(scaling_method)
+        , filter_factor_(filter_factor)
+        , nodata_value_(nodata_value)
     {}
 
-    void operator() (image_null const&) const {}
+    void operator()(image_null const&) const {}
 
-    template <typename T>
-    void operator() (T const& source) const
+    template<typename T>
+    void operator()(T const& source) const
     {
         using image_type = T;
-        //source and target image data types must match
+        // source and target image data types must match
         if (target_raster_.data_.template is<image_type>())
         {
-            image_type & target = util::get<image_type>(target_raster_.data_);
-            warp_image (target, source, prj_trans_, target_raster_.ext_, source_ext_,
-                        offset_x_, offset_y_, mesh_size_, scaling_method_, filter_factor_, nodata_value_);
+            image_type& target = util::get<image_type>(target_raster_.data_);
+            warp_image(target,
+                       source,
+                       prj_trans_,
+                       target_raster_.ext_,
+                       source_ext_,
+                       offset_x_,
+                       offset_y_,
+                       mesh_size_,
+                       scaling_method_,
+                       filter_factor_,
+                       nodata_value_);
         }
     }
 
-    raster & target_raster_;
+    raster& target_raster_;
     proj_transform const& prj_trans_;
     box2d<double> const& source_ext_;
     double offset_x_;
@@ -237,48 +253,96 @@ struct warp_image_visitor
     unsigned mesh_size_;
     scaling_method_e scaling_method_;
     double filter_factor_;
-    boost::optional<double> const & nodata_value_;
+    boost::optional<double> const& nodata_value_;
 };
 
-}
+} // namespace detail
 
-void reproject_and_scale_raster(raster & target, raster const& source,
+void reproject_and_scale_raster(raster& target,
+                                raster const& source,
                                 proj_transform const& prj_trans,
-                                double offset_x, double offset_y,
+                                double offset_x,
+                                double offset_y,
                                 unsigned mesh_size,
                                 scaling_method_e scaling_method,
-                                boost::optional<double> const & nodata_value)
+                                boost::optional<double> const& nodata_value)
 {
-    detail::warp_image_visitor warper(target, prj_trans, source.ext_, offset_x, offset_y, mesh_size,
-                                      scaling_method, source.get_filter_factor(), nodata_value);
+    detail::warp_image_visitor warper(target,
+                                      prj_trans,
+                                      source.ext_,
+                                      offset_x,
+                                      offset_y,
+                                      mesh_size,
+                                      scaling_method,
+                                      source.get_filter_factor(),
+                                      nodata_value);
     util::apply_visitor(warper, source.data_);
 }
 
-void reproject_and_scale_raster(raster & target, raster const& source,
-                                            proj_transform const& prj_trans,
-                                            double offset_x, double offset_y,
-                                            unsigned mesh_size,
-                                            scaling_method_e scaling_method)
+void reproject_and_scale_raster(raster& target,
+                                raster const& source,
+                                proj_transform const& prj_trans,
+                                double offset_x,
+                                double offset_y,
+                                unsigned mesh_size,
+                                scaling_method_e scaling_method)
 {
-    reproject_and_scale_raster(target, source, prj_trans,
-                               offset_x, offset_y,
+    reproject_and_scale_raster(target,
+                               source,
+                               prj_trans,
+                               offset_x,
+                               offset_y,
                                mesh_size,
                                scaling_method,
                                boost::optional<double>());
 }
 
+template MAPNIK_DECL void warp_image(image_rgba8&,
+                                     image_rgba8 const&,
+                                     proj_transform const&,
+                                     box2d<double> const&,
+                                     box2d<double> const&,
+                                     double,
+                                     double,
+                                     unsigned,
+                                     scaling_method_e,
+                                     double,
+                                     boost::optional<double> const&);
 
-template MAPNIK_DECL void warp_image (image_rgba8&, image_rgba8 const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
+template MAPNIK_DECL void warp_image(image_gray8&,
+                                     image_gray8 const&,
+                                     proj_transform const&,
+                                     box2d<double> const&,
+                                     box2d<double> const&,
+                                     double,
+                                     double,
+                                     unsigned,
+                                     scaling_method_e,
+                                     double,
+                                     boost::optional<double> const&);
 
-template MAPNIK_DECL void warp_image (image_gray8&, image_gray8 const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
+template MAPNIK_DECL void warp_image(image_gray16&,
+                                     image_gray16 const&,
+                                     proj_transform const&,
+                                     box2d<double> const&,
+                                     box2d<double> const&,
+                                     double,
+                                     double,
+                                     unsigned,
+                                     scaling_method_e,
+                                     double,
+                                     boost::optional<double> const&);
 
-template MAPNIK_DECL void warp_image (image_gray16&, image_gray16 const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
+template MAPNIK_DECL void warp_image(image_gray32f&,
+                                     image_gray32f const&,
+                                     proj_transform const&,
+                                     box2d<double> const&,
+                                     box2d<double> const&,
+                                     double,
+                                     double,
+                                     unsigned,
+                                     scaling_method_e,
+                                     double,
+                                     boost::optional<double> const&);
 
-template MAPNIK_DECL void warp_image (image_gray32f&, image_gray32f const&, proj_transform const&,
-                                      box2d<double> const&, box2d<double> const&, double, double, unsigned, scaling_method_e, double, boost::optional<double> const &);
-
-
-}// namespace mapnik
+} // namespace mapnik

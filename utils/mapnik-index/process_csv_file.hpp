@@ -26,11 +26,17 @@
 #include <utility>
 #include <mapnik/geometry/box2d.hpp>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename T>
-std::pair<bool, typename T::value_type::first_type> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote);
+template<typename T>
+std::pair<bool, typename T::value_type::first_type> process_csv_file(T& boxes,
+                                                                     std::string const& filename,
+                                                                     std::string const& manual_headers,
+                                                                     char separator,
+                                                                     char quote);
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_UTILS_PROCESS_CSV_FILE_HPP

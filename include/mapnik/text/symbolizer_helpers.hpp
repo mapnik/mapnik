@@ -37,26 +37,26 @@ class proj_transform;
 class view_transform;
 struct symbolizer_base;
 
-template <typename T>
+template<typename T>
 struct placement_finder_adapter
 {
     using placement_finder_type = T;
-    placement_finder_adapter(T & finder, bool points_on_line)
-        : finder_(finder),
-          points_on_line_(points_on_line) {}
+    placement_finder_adapter(T& finder, bool points_on_line)
+        : finder_(finder)
+        , points_on_line_(points_on_line)
+    {}
 
-    template <typename PathT>
-    void add_path(PathT & path) const
+    template<typename PathT>
+    void add_path(PathT& path) const
     {
         status_ = finder_.find_line_placements(path, points_on_line_);
     }
 
-    bool status() const { return status_;}
+    bool status() const { return status_; }
     // Place text at points on a line instead of following the line (used for ShieldSymbolizer)
-    placement_finder_type & finder_;
+    placement_finder_type& finder_;
     bool points_on_line_;
     mutable bool status_ = false;
-
 };
 
 using vertex_converter_type = vertex_converter<clip_line_tag,
@@ -70,7 +70,7 @@ using vertex_converter_type = vertex_converter<clip_line_tag,
 
 class base_symbolizer_helper
 {
-public:
+  public:
 
     using point_cref = std::reference_wrapper<geometry::point<double> const>;
     using line_string_cref = std::reference_wrapper<geometry::line_string<double> const>;
@@ -89,11 +89,11 @@ public:
                            view_transform const& t,
                            box2d<double> const& query_extent);
 
-protected:
+  protected:
     void initialize_geometries() const;
     void initialize_points() const;
 
-    //Input
+    // Input
     symbolizer_base const& sym_;
     feature_impl const& feature_;
     attributes const& vars_;
@@ -103,8 +103,8 @@ protected:
     box2d<double> const& query_extent_;
     double scale_factor_;
 
-    //Processing
-    // Remaining geometries to be processed.
+    // Processing
+    //  Remaining geometries to be processed.
     mutable geometry_container_type geometries_to_process_;
     // Geometry currently being processed.
     mutable geometry_container_type::iterator geo_itr_;
@@ -127,8 +127,8 @@ MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geome
 
 class text_symbolizer_helper : public base_symbolizer_helper
 {
-public:
-    template <typename FaceManagerT, typename DetectorT>
+  public:
+    template<typename FaceManagerT, typename DetectorT>
     text_symbolizer_helper(text_symbolizer const& sym,
                            feature_impl const& feature,
                            attributes const& vars,
@@ -137,12 +137,12 @@ public:
                            unsigned height,
                            double scale_factor,
                            view_transform const& t,
-                           FaceManagerT & font_manager,
-                           DetectorT & detector,
+                           FaceManagerT& font_manager,
+                           DetectorT& detector,
                            box2d<double> const& query_extent,
                            agg::trans_affine const&);
 
-    template <typename FaceManagerT, typename DetectorT>
+    template<typename FaceManagerT, typename DetectorT>
     text_symbolizer_helper(shield_symbolizer const& sym,
                            feature_impl const& feature,
                            attributes const& vars,
@@ -151,17 +151,18 @@ public:
                            unsigned height,
                            double scale_factor,
                            view_transform const& t,
-                           FaceManagerT & font_manager,
-                           DetectorT & detector,
+                           FaceManagerT& font_manager,
+                           DetectorT& detector,
                            box2d<double> const& query_extent,
                            agg::trans_affine const&);
 
     // Return all placements.
     placements_list const& get() const;
-protected:
+
+  protected:
     void init_converters();
     void initialize_points() const;
-    template <template <typename, typename> class GridAdapter>
+    template<template<typename, typename> class GridAdapter>
     void initialize_grid_points() const;
     bool next_point_placement() const;
     bool next_line_placement() const;
@@ -170,7 +171,7 @@ protected:
 
     placement_finder_adapter<placement_finder> adapter_;
     mutable vertex_converter_type converter_;
-    //ShieldSymbolizer only
+    // ShieldSymbolizer only
     void init_marker() const;
 };
 
@@ -178,6 +179,6 @@ namespace geometry {
 MAPNIK_DECL mapnik::box2d<double> envelope(mapnik::base_symbolizer_helper::geometry_cref const& geom);
 }
 
-} //namespace mapnik
+} // namespace mapnik
 
 #endif // SYMBOLIZER_HELPERS_HPP

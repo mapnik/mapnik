@@ -42,12 +42,14 @@ struct render_building_symbolizer
     using transform_path_type = transform_path_adapter<view_transform, vertex_adapter_type>;
     using roof_type = agg::conv_transform<transform_path_type>;
 
-    template <typename F1, typename F2, typename F3>
+    template<typename F1, typename F2, typename F3>
     static void apply(feature_impl const& feature,
                       proj_transform const& prj_trans,
                       view_transform const& view_trans,
                       double height,
-                      F1 face_func, F2 frame_func, F3 roof_func)
+                      F1 face_func,
+                      F2 frame_func,
+                      F3 roof_func)
     {
         auto const& geom = feature.get_geometry();
         if (geom.is<geometry::polygon<double>>())
@@ -69,9 +71,10 @@ struct render_building_symbolizer
         }
     }
 
-private:
-    template <typename F>
-    static void render_face(double x0, double y0, double x, double y, double height, F const& face_func, path_type & frame)
+  private:
+    template<typename F>
+    static void
+      render_face(double x0, double y0, double x, double y, double height, F const& face_func, path_type& frame)
     {
         path_type faces(path_type::types::Polygon);
         faces.move_to(x0, y0);
@@ -86,8 +89,8 @@ private:
         frame.line_to(x0, y0 - height);
     }
 
-    template <typename Geom, typename F1, typename F2, typename F3>
-    static void make_building(Geom & poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
+    template<typename Geom, typename F1, typename F2, typename F3>
+    static void make_building(Geom& poly, double height, F1 const& face_func, F2 const& frame_func, F3 const& roof_func)
     {
         path_type frame(path_type::types::LineString);
         double ring_begin_x, ring_begin_y;

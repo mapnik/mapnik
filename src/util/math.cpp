@@ -30,31 +30,31 @@ namespace mapnik {
 
 namespace util {
 
-    double normalize_angle(double angle)
+double normalize_angle(double angle)
+{
+    if (angle > pi)
     {
-        if (angle > pi)
+        if (angle > 16 * tau)
         {
-            if (angle > 16 * tau)
-            {
-                // the angle is too large; better compute the remainder
-                // directly to avoid subtracting circles ad infinitum
-                return std::remainder(angle, tau);
-            }
-            // std::remainder would take longer than a few subtractions
-            while ((angle -= tau) > pi)
-                ;
+            // the angle is too large; better compute the remainder
+            // directly to avoid subtracting circles ad infinitum
+            return std::remainder(angle, tau);
         }
-        else if (angle < -pi)
-        {
-            if (angle < -16 * tau)
-            {
-                return std::remainder(angle, tau);
-            }
-            while ((angle += tau) < -pi)
-                ;
-        }
-        return angle;
+        // std::remainder would take longer than a few subtractions
+        while ((angle -= tau) > pi)
+            ;
     }
+    else if (angle < -pi)
+    {
+        if (angle < -16 * tau)
+        {
+            return std::remainder(angle, tau);
+        }
+        while ((angle += tau) < -pi)
+            ;
+    }
+    return angle;
+}
 
 } // end namespace util
 

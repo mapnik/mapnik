@@ -32,7 +32,8 @@
 class csv_inline_featureset : public mapnik::Featureset
 {
     using locator_type = csv_utils::geometry_column_locator;
-public:
+
+  public:
     using array_type = std::deque<csv_datasource::item_type>;
     csv_inline_featureset(std::string const& inline_string,
                           locator_type const& locator,
@@ -40,10 +41,11 @@ public:
                           char quote,
                           std::vector<std::string> const& headers,
                           mapnik::context_ptr const& ctx,
-                          array_type && index_array);
+                          array_type&& index_array);
     ~csv_inline_featureset();
     mapnik::feature_ptr next();
-private:
+
+  private:
     mapnik::feature_ptr parse_feature(std::string const& str);
     std::string const& inline_string_;
     char separator_;
@@ -57,6 +59,5 @@ private:
     locator_type const& locator_;
     mapnik::transcoder tr_;
 };
-
 
 #endif // CSV_INLINE_FEATURESET_HPP

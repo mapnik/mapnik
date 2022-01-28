@@ -31,11 +31,13 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 using feature_grammar_type = x3::rule<class feature_rule_tag>;
-using geometry_grammar_type = x3::rule<struct geomerty_rule_tag, mapnik::geometry::geometry<double> >;
+using geometry_grammar_type = x3::rule<struct geomerty_rule_tag, mapnik::geometry::geometry<double>>;
 
 feature_grammar_type const feature_rule = "Feature Rule";
 geometry_grammar_type const geometry_rule = "Geometry Rule";
@@ -43,6 +45,8 @@ geometry_grammar_type const geometry_rule = "Geometry Rule";
 BOOST_SPIRIT_DECLARE(feature_grammar_type);
 BOOST_SPIRIT_DECLARE(geometry_grammar_type);
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_FEATURE_GRAMMAR_X3_HPP

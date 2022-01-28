@@ -29,61 +29,57 @@
 
 #include <boost/fusion/include/std_pair.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
-auto make_null = [] (auto const& ctx)
-{
+auto make_null = [](auto const& ctx) {
     _val(ctx) = mapnik::value_null{};
 };
 
-auto make_true = [] (auto const& ctx)
-{
+auto make_true = [](auto const& ctx) {
     _val(ctx) = true;
 };
 
-auto make_false = [] (auto const& ctx)
-{
+auto make_false = [](auto const& ctx) {
     _val(ctx) = false;
 };
 
-auto assign = [](auto const& ctx)
-{
+auto assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-auto assign_key = [](auto const& ctx)
-{
+auto assign_key = [](auto const& ctx) {
     std::string const& name = _attr(ctx);
-    keys_map & keys = x3::get<keys_tag>(ctx);
+    keys_map& keys = x3::get<keys_tag>(ctx);
     auto result = keys.insert(keys_map::value_type(name, keys.size() + 1));
     std::get<0>(_val(ctx)) = result.first->right;
 };
 
-auto assign_value = [](auto const& ctx)
-{
+auto assign_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
+using x3::lexeme;
 using x3::lit;
 using x3::string;
-using x3::lexeme;
 
 struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
 {
     geometry_type_()
     {
-        add
-            ("\"Feature\"",mapnik::geometry::geometry_types(0xff)) // this is a temp hack FIXME
-            ("\"Point\"", mapnik::geometry::geometry_types::Point)
-            ("\"LineString\"", mapnik::geometry::geometry_types::LineString)
-            ("\"Polygon\"", mapnik::geometry::geometry_types::Polygon)
-            ("\"MultiPoint\"", mapnik::geometry::geometry_types::MultiPoint)
-            ("\"MultiLineString\"", mapnik::geometry::geometry_types::MultiLineString )
-            ("\"MultiPolygon\"",mapnik::geometry::geometry_types::MultiPolygon)
-            ("\"GeometryCollection\"",mapnik::geometry::geometry_types::GeometryCollection)
-            ;
+        add                                                                                //
+          ("\"Feature\"", mapnik::geometry::geometry_types(0xff))                          // this is a temp hack FIXME
+          ("\"Point\"", mapnik::geometry::geometry_types::Point)                           //
+          ("\"LineString\"", mapnik::geometry::geometry_types::LineString)                 //
+          ("\"Polygon\"", mapnik::geometry::geometry_types::Polygon)                       //
+          ("\"MultiPoint\"", mapnik::geometry::geometry_types::MultiPoint)                 //
+          ("\"MultiLineString\"", mapnik::geometry::geometry_types::MultiLineString)       //
+          ("\"MultiPolygon\"", mapnik::geometry::geometry_types::MultiPolygon)             //
+          ("\"GeometryCollection\"", mapnik::geometry::geometry_types::GeometryCollection) //
+          ;
     }
 } geometry_type_sym;
 
@@ -99,11 +95,16 @@ auto const geojson_double = x3::real_parser<value_double, x3::strict_real_polici
 auto const geojson_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
 // import unicode string rule
-namespace { auto const& geojson_string = unicode_string; }
+namespace {
+auto const& geojson_string = unicode_string;
+}
 // import positions rule
-namespace { auto const& positions_rule = positions; }
+namespace {
+auto const& positions_rule = positions;
+}
 
 // GeoJSON types
+// clang-format off
 auto const geojson_value_def =  object | array | geojson_string | number
     ;
 
@@ -142,24 +143,17 @@ auto const number_def = geojson_double[assign]
     | lit ("false") [make_false]
     | lit("null")[make_null]
     ;
-
+// clang-format on
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-BOOST_SPIRIT_DEFINE(
-    geojson_value,
-    geometry_type,
-    coordinates,
-    object,
-    key_value,
-    geojson_key_value,
-    array,
-    number
-    );
+BOOST_SPIRIT_DEFINE(geojson_value, geometry_type, coordinates, object, key_value, geojson_key_value, array, number);
 
 MAPNIK_DISABLE_WARNING_POP
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_GEOJSON_GRAMMAR_X3_DEF_HPP

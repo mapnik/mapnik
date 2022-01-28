@@ -29,34 +29,36 @@
 #include <mapnik/renderer_common/process_polygon_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
-
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(polygon_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
-    using vertex_converter_type = vertex_converter<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type =
+      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
     context_.set_operator(comp_op);
 
-    render_polygon_symbolizer<vertex_converter_type>(
-        sym, feature, prj_trans, common_, common_.query_extent_, context_,
-        [&](color const &fill, double opacity) {
-            context_.set_color(fill, opacity);
-            // fill polygon
-            context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
-            context_.fill();
-        });
+    render_polygon_symbolizer<vertex_converter_type>(sym,
+                                                     feature,
+                                                     prj_trans,
+                                                     common_,
+                                                     common_.query_extent_,
+                                                     context_,
+                                                     [&](color const& fill, double opacity) {
+                                                         context_.set_color(fill, opacity);
+                                                         // fill polygon
+                                                         context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
+                                                         context_.fill();
+                                                     });
 }
 
-template void cairo_renderer<cairo_ptr>::process(polygon_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void
+  cairo_renderer<cairo_ptr>::process(polygon_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

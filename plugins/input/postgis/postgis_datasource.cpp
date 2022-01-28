@@ -25,7 +25,6 @@
 #include "postgis_featureset.hpp"
 #include "asyncresultset.hpp"
 
-
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
@@ -54,46 +53,48 @@ DATASOURCE_PLUGIN(postgis_datasource)
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
-using std::shared_ptr;
 using mapnik::attribute_descriptor;
 using mapnik::sql_utils::identifier;
 using mapnik::sql_utils::literal;
+using std::shared_ptr;
 
 postgis_datasource::postgis_datasource(parameters const& params)
-    : datasource(params),
-      table_(*params.get<std::string>("table", "")),
-      geometry_table_(*params.get<std::string>("geometry_table", "")),
-      geometry_field_(*params.get<std::string>("geometry_field", "")),
-      key_field_(*params.get<std::string>("key_field", "")),
-      cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
-      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
-      type_(datasource::Vector),
-      srid_(*params.get<mapnik::value_integer>("srid", 0)),
-      extent_initialized_(false),
-      simplify_geometries_(false),
-      desc_(postgis_datasource::name(), "utf-8"),
-      creator_(params),
-      pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10)),
-      persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true)),
-      extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false)),
-      max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1)),
-      asynchronous_request_(false),
-      twkb_encoding_(false),
-      twkb_rounding_adjustment_(*params_.get<mapnik::value_double>("twkb_rounding_adjustment", 0.0)),
-      simplify_snap_ratio_(*params_.get<mapnik::value_double>("simplify_snap_ratio", 1.0/40.0)),
-      // 1/20 of pixel seems to be a good compromise to avoid
-      // drop of collapsed polygons.
-      // See https://github.com/mapnik/mapnik/issues/1639
-      // See http://trac.osgeo.org/postgis/ticket/2093
-      simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0/20.0)),
-      simplify_prefilter_(*params_.get<mapnik::value_double>("simplify_prefilter", 0.0)),
-      simplify_dp_preserve_(false),
-      simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0)),
-      re_tokens_("!(@?\\w+)!"), // matches  !mapnik_var!  or  !@user_var!
-      // params below are for testing purposes only and may be removed at any time
-      intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
-      intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0)),
-      key_field_as_attribute_(*params.get<mapnik::boolean_type>("key_field_as_attribute", true))
+    : datasource(params)
+    , table_(*params.get<std::string>("table", ""))
+    , geometry_table_(*params.get<std::string>("geometry_table", ""))
+    , geometry_field_(*params.get<std::string>("geometry_field", ""))
+    , key_field_(*params.get<std::string>("key_field", ""))
+    , cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0))
+    , row_limit_(*params.get<mapnik::value_integer>("row_limit", 0))
+    , type_(datasource::Vector)
+    , srid_(*params.get<mapnik::value_integer>("srid", 0))
+    , extent_initialized_(false)
+    , simplify_geometries_(false)
+    , desc_(postgis_datasource::name(), "utf-8")
+    , creator_(params)
+    , pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10))
+    , persist_connection_(*params.get<mapnik::boolean_type>("persist_connection", true))
+    , extent_from_subquery_(*params.get<mapnik::boolean_type>("extent_from_subquery", false))
+    , max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1))
+    , asynchronous_request_(false)
+    , twkb_encoding_(false)
+    , twkb_rounding_adjustment_(*params_.get<mapnik::value_double>("twkb_rounding_adjustment", 0.0))
+    , simplify_snap_ratio_(*params_.get<mapnik::value_double>("simplify_snap_ratio", 1.0 / 40.0))
+    ,
+    // 1/20 of pixel seems to be a good compromise to avoid
+    // drop of collapsed polygons.
+    // See https://github.com/mapnik/mapnik/issues/1639
+    // See http://trac.osgeo.org/postgis/ticket/2093
+    simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0 / 20.0))
+    , simplify_prefilter_(*params_.get<mapnik::value_double>("simplify_prefilter", 0.0))
+    , simplify_dp_preserve_(false)
+    , simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0))
+    , re_tokens_("!(@?\\w+)!")
+    , // matches  !mapnik_var!  or  !@user_var!
+    // params below are for testing purposes only and may be removed at any time
+    intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0))
+    , intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0))
+    , key_field_as_attribute_(*params.get<mapnik::boolean_type>("key_field_as_attribute", true))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");
@@ -111,20 +112,21 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
     // NOTE: In multithread environment, pool_max_size_ should be
     // max_async_connections_ * num_threads
-    if(max_async_connections_ > 1)
+    if (max_async_connections_ > 1)
     {
-        if(max_async_connections_ > pool_max_size_)
+        if (max_async_connections_ > pool_max_size_)
         {
             std::ostringstream err;
-            err << "PostGIS Plugin: Error: 'max_async_connections ("
-                << max_async_connections_ << ") must be <= max_size(" << pool_max_size_ << ")";
+            err << "PostGIS Plugin: Error: 'max_async_connections (" << max_async_connections_
+                << ") must be <= max_size(" << pool_max_size_ << ")";
             throw mapnik::datasource_exception(err.str());
         }
         asynchronous_request_ = true;
     }
 
     boost::optional<mapnik::value_integer> initial_size = params.get<mapnik::value_integer>("initial_size", 1);
-    boost::optional<mapnik::boolean_type> autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    boost::optional<mapnik::boolean_type> autodetect_key_field =
+      params.get<mapnik::boolean_type>("autodetect_key_field", false);
     boost::optional<mapnik::boolean_type> estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
     boost::optional<mapnik::boolean_type> simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
@@ -133,7 +135,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
     boost::optional<mapnik::boolean_type> twkb_opt = params.get<mapnik::boolean_type>("twkb_encoding", false);
     twkb_encoding_ = twkb_opt && *twkb_opt;
 
-    boost::optional<mapnik::boolean_type> simplify_preserve_opt = params.get<mapnik::boolean_type>("simplify_dp_preserve", false);
+    boost::optional<mapnik::boolean_type> simplify_preserve_opt =
+      params.get<mapnik::boolean_type>("simplify_dp_preserve", false);
     simplify_dp_preserve_ = simplify_preserve_opt && *simplify_preserve_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
@@ -141,16 +144,16 @@ postgis_datasource::postgis_datasource(parameters const& params)
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return;
+        if (!conn)
+            return;
 
         if (conn->isOK())
         {
-
             desc_.set_encoding(conn->client_encoding());
 
-            mapnik::sql_utils::table_from_sql(
-                    geometry_table_.empty() ? table_ : geometry_table_,
-                    parsed_schema_, parsed_table_);
+            mapnik::sql_utils::table_from_sql(geometry_table_.empty() ? table_ : geometry_table_,
+                                              parsed_schema_,
+                                              parsed_table_);
 
             // NOTE: parsed_table_ now should ideally be a table name, but
             // there are known edge cases where this will break down and
@@ -194,7 +197,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                             if (srid_c != nullptr)
                             {
                                 int result = 0;
-                                const char * end = srid_c + std::strlen(srid_c);
+                                const char* end = srid_c + std::strlen(srid_c);
                                 if (mapnik::util::string2int(srid_c, end, result))
                                 {
                                     srid_ = result;
@@ -203,8 +206,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         }
                     }
                     rs->close();
-                }
-                catch (mapnik::datasource_exception const& ex)
+                } catch (mapnik::datasource_exception const& ex)
                 {
                     // let this pass on query error and use the fallback below
                     MAPNIK_LOG_WARN(postgis) << "postgis_datasource: metadata query failed: " << ex.what();
@@ -218,8 +220,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             {
                 std::ostringstream s;
 
-                s << "SELECT ST_SRID(" << identifier(geometryColumn_)
-                  << ") AS srid FROM ";
+                s << "SELECT ST_SRID(" << identifier(geometryColumn_) << ") AS srid FROM ";
                 if (!parsed_table_.empty())
                 {
                     append_geometry_table(s);
@@ -228,8 +229,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 {
                     s << populate_tokens(table_);
                 }
-                s << " WHERE " << identifier(geometryColumn_)
-                  << " IS NOT NULL LIMIT 1";
+                s << " WHERE " << identifier(geometryColumn_) << " IS NOT NULL LIMIT 1";
 
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                 if (rs->next())
@@ -238,7 +238,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     if (srid_c != nullptr)
                     {
                         int result = 0;
-                        const char * end = srid_c + std::strlen(srid_c);
+                        const char* end = srid_c + std::strlen(srid_c);
                         if (mapnik::util::string2int(srid_c, end, result))
                         {
                             srid_ = result;
@@ -257,17 +257,18 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
                 std::ostringstream s;
                 s << "SELECT a.attname, a.attnum, t.typname, t.typname in ('int2','int4','int8') "
-                    "AS is_int FROM pg_class c, pg_attribute a, pg_type t, pg_namespace n, pg_index i "
-                    "WHERE a.attnum > 0 AND a.attrelid = c.oid "
-                    "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
-                    "AND c.oid = i.indrelid AND i.indisprimary = 't' "
-                    "AND t.typname !~ '^geom' AND c.relname = "
-                  << literal(parsed_table_) << " "
-                    //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
+                     "AS is_int FROM pg_class c, pg_attribute a, pg_type t, pg_namespace n, pg_index i "
+                     "WHERE a.attnum > 0 AND a.attrelid = c.oid "
+                     "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
+                     "AND c.oid = i.indrelid AND i.indisprimary = 't' "
+                     "AND t.typname !~ '^geom' AND c.relname = "
+                  << literal(parsed_table_)
+                  << " "
+                  //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
                   << "AND (i.indkey[0]=a.attnum OR i.indkey[1]=a.attnum OR i.indkey[2]=a.attnum "
-                    "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
-                    "OR i.indkey[6]=a.attnum OR i.indkey[7]=a.attnum OR i.indkey[8]=a.attnum "
-                    "OR i.indkey[9]=a.attnum) ";
+                     "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
+                     "OR i.indkey[6]=a.attnum OR i.indkey[7]=a.attnum OR i.indkey[8]=a.attnum "
+                     "OR i.indkey[9]=a.attnum) ";
                 if (!parsed_schema_.empty())
                 {
                     s << "AND n.nspname=" << literal(parsed_schema_) << ' ';
@@ -297,10 +298,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                             // throw for cases like a numeric primary key, which is invalid
                             // as it should be floating point (int numerics are useless)
                             std::ostringstream err;
-                            err << "PostGIS Plugin: Error: '"
-                                << rs_key->getValue(0)
-                                << "' on table '"
-                                << parsed_table_
+                            err << "PostGIS Plugin: Error: '" << rs_key->getValue(0) << "' on table '" << parsed_table_
                                 << "' is not a valid integer primary key field\n";
                             throw mapnik::datasource_exception(err.str());
                         }
@@ -320,11 +318,11 @@ postgis_datasource::postgis_datasource(parameters const& params)
             // but still not known at this point, then throw
             if (*autodetect_key_field && key_field_.empty())
             {
-                throw mapnik::datasource_exception(
-                        "PostGIS Plugin: Error: primary key required"
-                        " but could not be detected for table '"
-                        + parsed_table_ + "', please supply 'key_field'"
-                        " option to specify field to use for primary key");
+                throw mapnik::datasource_exception("PostGIS Plugin: Error: primary key required"
+                                                   " but could not be detected for table '" +
+                                                   parsed_table_ +
+                                                   "', please supply 'key_field'"
+                                                   " option to specify field to use for primary key");
             }
 
             if (srid_ == 0)
@@ -356,7 +354,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 int type_oid = rs->getTypeOID(i);
 
                 // validate type of key_field
-                if (! found_key_field && ! key_field_.empty() && fld_name == key_field_)
+                if (!found_key_field && !key_field_.empty() && fld_name == key_field_)
                 {
                     if (type_oid == 20 || type_oid == 21 || type_oid == 23)
                     {
@@ -377,8 +375,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         shared_ptr<ResultSet> rs_oid = conn->executeQuery(type_s.str());
                         if (rs_oid->next())
                         {
-                            error_s << rs_oid->getValue("typname")
-                                    << "' (oid:" << rs_oid->getValue("oid") << ")";
+                            error_s << rs_oid->getValue("typname") << "' (oid:" << rs_oid->getValue("oid") << ")";
                         }
                         else
                         {
@@ -397,60 +394,59 @@ postgis_datasource::postgis_datasource(parameters const& params)
                 {
                     switch (type_oid)
                     {
-                    case 16:    // bool
-                        desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Boolean));
-                        break;
-                    case 20:    // int8
-                    case 21:    // int2
-                    case 23:    // int4
-                        desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
-                        break;
-                    case 700:   // float4
-                    case 701:   // float8
-                    case 1700:  // numeric
-                        desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
-                        break;
-                    case 1042:  // bpchar
-                    case 1043:  // varchar
-                    case 25:    // text
-                    case 705:   // literal
-                        desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
-                        break;
-                    default: // should not get here
+                        case 16: // bool
+                            desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Boolean));
+                            break;
+                        case 20: // int8
+                        case 21: // int2
+                        case 23: // int4
+                            desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
+                            break;
+                        case 700:  // float4
+                        case 701:  // float8
+                        case 1700: // numeric
+                            desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
+                            break;
+                        case 1042: // bpchar
+                        case 1043: // varchar
+                        case 25:   // text
+                        case 705:  // literal
+                            desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
+                            break;
+                        default: // should not get here
 #ifdef MAPNIK_LOG
-                        s.str("");
-                        s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
+                            s.str("");
+                            s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
 
-                        shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
-                        if (rs_oid->next())
-                        {
-                            std::string typname(rs_oid->getValue("typname"));
-                            if (typname != "geometry")
+                            shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
+                            if (rs_oid->next())
                             {
-                                MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << typname
-                                                         << " (oid:" << rs_oid->getValue("oid") << ")";
+                                std::string typname(rs_oid->getValue("typname"));
+                                if (typname != "geometry")
+                                {
+                                    MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << typname
+                                                             << " (oid:" << rs_oid->getValue("oid") << ")";
+                                }
                             }
-                        }
-                        else
-                        {
-                            MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type_oid=" << type_oid;
-                        }
-                        rs_oid->close();
+                            else
+                            {
+                                MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type_oid=" << type_oid;
+                            }
+                            rs_oid->close();
 #endif
-                        break;
+                            break;
                     }
                 }
             }
 
             rs->close();
-
         }
 
         // Close explicitly the connection so we can 'fork()' without sharing open connections
         conn->close();
 
         // Finally, add unique metadata to layer descriptor
-        mapnik::parameters & extra_params = desc_.get_extra_parameters();
+        mapnik::parameters& extra_params = desc_.get_extra_parameters();
         // explicitly make copies of values due to https://github.com/mapnik/mapnik/issues/2651
         extra_params["srid"] = mapnik::value_integer(srid_);
         if (!key_field_.empty())
@@ -462,30 +458,32 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
 postgis_datasource::~postgis_datasource()
 {
-    if (! persist_connection_)
+    if (!persist_connection_)
     {
         CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
         if (pool)
         {
-            try {
-              shared_ptr<Connection> conn = pool->borrowObject();
-              if (conn)
-              {
-                  conn->close();
-              }
-            } catch (mapnik::datasource_exception const& ex) {
-              // happens when borrowObject tries to
-              // create a new connection and fails.
-              // In turn, new connection would be needed
-              // when our broke and was thus no good to
-              // be borrowed
-              // See https://github.com/mapnik/mapnik/issues/2191
+            try
+            {
+                shared_ptr<Connection> conn = pool->borrowObject();
+                if (conn)
+                {
+                    conn->close();
+                }
+            } catch (mapnik::datasource_exception const& ex)
+            {
+                // happens when borrowObject tries to
+                // create a new connection and fails.
+                // In turn, new connection would be needed
+                // when our broke and was thus no good to
+                // be borrowed
+                // See https://github.com/mapnik/mapnik/issues/2191
             }
         }
     }
 }
 
-const char * postgis_datasource::name()
+const char* postgis_datasource::name()
 {
     return "postgis";
 }
@@ -513,19 +511,22 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 
 std::string postgis_datasource::populate_tokens(std::string const& sql) const
 {
-    return populate_tokens(sql, FLT_MAX,
+    return populate_tokens(sql,
+                           FLT_MAX,
                            box2d<double>(-FLT_MAX, -FLT_MAX, FLT_MAX, FLT_MAX),
-                           0, 0, mapnik::attributes{}, false);
+                           0,
+                           0,
+                           mapnik::attributes{},
+                           false);
 }
 
-std::string postgis_datasource::populate_tokens(
-                                std::string const& sql,
-                                double scale_denom,
-                                box2d<double> const& env,
-                                double pixel_width,
-                                double pixel_height,
-                                mapnik::attributes const& vars,
-                                bool intersect) const
+std::string postgis_datasource::populate_tokens(std::string const& sql,
+                                                double scale_denom,
+                                                box2d<double> const& env,
+                                                double pixel_width,
+                                                double pixel_height,
+                                                mapnik::attributes const& vars,
+                                                bool intersect) const
 {
     std::ostringstream populated_sql;
     std::cmatch m;
@@ -584,9 +585,7 @@ std::string postgis_datasource::populate_tokens(
     {
         if (intersect_min_scale_ > 0 && (scale_denom <= intersect_min_scale_))
         {
-            populated_sql << " WHERE ST_Intersects("
-                          << identifier(geometryColumn_) << ", "
-                          << sql_bbox(env) << ")";
+            populated_sql << " WHERE ST_Intersects(" << identifier(geometryColumn_) << ", " << sql_bbox(env) << ")";
         }
         else if (intersect_max_scale_ > 0 && (scale_denom >= intersect_max_scale_))
         {
@@ -594,16 +593,14 @@ std::string postgis_datasource::populate_tokens(
         }
         else
         {
-            populated_sql << " WHERE "
-                          << identifier(geometryColumn_) << " && "
-                          << sql_bbox(env);
+            populated_sql << " WHERE " << identifier(geometryColumn_) << " && " << sql_bbox(env);
         }
     }
 
     return populated_sql.str();
 }
 
-void postgis_datasource::append_geometry_table(std::ostream & os) const
+void postgis_datasource::append_geometry_table(std::ostream& os) const
 {
     if (!geometry_table_.empty())
     {
@@ -623,9 +620,11 @@ void postgis_datasource::append_geometry_table(std::ostream & os) const
     }
 }
 
-std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
+std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Connection>& conn,
+                                                              std::string const& sql,
+                                                              CnxPool_ptr const& pool,
+                                                              processor_context_ptr ctx) const
 {
-
     if (!ctx)
     {
         // ! asynchronous_request_
@@ -635,16 +634,16 @@ std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Co
             std::ostringstream csql;
             std::string cursor_name = conn->new_cursor_name();
 
-            csql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << sql << " FOR READ ONLY";
+            csql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << sql
+                 << " FOR READ ONLY";
 
-            if (! conn->execute(csql.str()))
+            if (!conn->execute(csql.str()))
             {
                 // TODO - better error
-                throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
+                throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select.");
             }
 
             return std::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
-
         }
         else
         {
@@ -653,7 +652,7 @@ std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Co
         }
     }
     else
-    {   // asynchronous requests
+    { // asynchronous requests
 
         std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(ctx);
         if (conn)
@@ -665,14 +664,14 @@ std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Co
         else
         {
             // create asyncresult  with  null connection
-            std::shared_ptr<AsyncResultSet> res = std::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
+            std::shared_ptr<AsyncResultSet> res = std::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
             pgis_ctxt->add_request(res);
             return res;
         }
     }
 }
 
-processor_context_ptr postgis_datasource::get_context(feature_style_context_map & ctx) const
+processor_context_ptr postgis_datasource::get_context(feature_style_context_map& ctx) const
 {
     if (!asynchronous_request_)
     {
@@ -687,30 +686,28 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     }
     else
     {
-        return ctx.emplace(ds_name,std::make_shared<postgis_processor_context>()).first->second;
+        return ctx.emplace(ds_name, std::make_shared<postgis_processor_context>()).first->second;
     }
 }
 
 featureset_ptr postgis_datasource::features(query const& q) const
 {
     // if the driver is in asynchronous mode, return the appropriate fetaures
-    if (asynchronous_request_ )
+    if (asynchronous_request_)
     {
-        return features_with_context(q,std::make_shared<postgis_processor_context>());
+        return features_with_context(q, std::make_shared<postgis_processor_context>());
     }
     else
     {
-        return features_with_context(q,processor_context_ptr());
+        return features_with_context(q, processor_context_ptr());
     }
 }
 
-featureset_ptr postgis_datasource::features_with_context(query const& q,processor_context_ptr proc_ctx) const
+featureset_ptr postgis_datasource::features_with_context(query const& q, processor_context_ptr proc_ctx) const
 {
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_with_context");
 #endif
-
 
     box2d<double> const& box = q.get_bbox();
     double scale_denom = q.scale_denominator();
@@ -721,11 +718,12 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
     {
         shared_ptr<Connection> conn;
 
-        if ( asynchronous_request_ )
+        if (asynchronous_request_)
         {
             // limit use to num_async_request_ => if reached don't borrow the last connexion object
-            std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(proc_ctx);
-            if ( pgis_ctxt->num_async_requests_ < max_async_connections_ )
+            std::shared_ptr<postgis_processor_context> pgis_ctxt =
+              std::static_pointer_cast<postgis_processor_context>(proc_ctx);
+            if (pgis_ctxt->num_async_requests_ < max_async_connections_)
             {
                 conn = pool->borrowObject();
                 pgis_ctxt->num_async_requests_++;
@@ -735,12 +733,11 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         {
             // Always get a connection in synchronous mode
             conn = pool->borrowObject();
-            if(!conn )
+            if (!conn)
             {
                 throw mapnik::datasource_exception("Postgis Plugin: Null connection");
             }
         }
-
 
         if (geometryColumn_.empty())
         {
@@ -809,7 +806,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             }
             if (simplify_geometries_ && simplify_snap_ratio_ > 0.0)
             {
-                s<< "ST_SnapToGrid(";
+                s << "ST_SnapToGrid(";
             }
 
             // Geometry column!
@@ -849,7 +846,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
 
-        if (! key_field_.empty())
+        if (!key_field_.empty())
         {
             s << ',' << identifier(key_field_);
             if (key_field_as_attribute_)
@@ -885,14 +882,16 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         }
 
         std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(),
-                                                    key_field_as_attribute_, twkb_encoding_);
-
+        return std::make_shared<postgis_featureset>(rs,
+                                                    ctx,
+                                                    desc_.get_encoding(),
+                                                    !key_field_.empty(),
+                                                    key_field_as_attribute_,
+                                                    twkb_encoding_);
     }
 
     return mapnik::make_invalid_featureset();
 }
-
 
 featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double tol) const
 {
@@ -903,7 +902,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return mapnik::make_invalid_featureset();
+        if (!conn)
+            return mapnik::make_invalid_featureset();
 
         if (conn->isOK())
         {
@@ -921,8 +921,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             std::ostringstream s;
-            s << "SELECT ST_AsBinary(" << identifier(geometryColumn_)
-              << ") AS geom";
+            s << "SELECT ST_AsBinary(" << identifier(geometryColumn_) << ") AS geom";
 
             mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             auto const& desc = desc_.get_descriptors();
@@ -955,8 +954,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             box2d<double> box(pt.x - tol, pt.y - tol, pt.x + tol, pt.y + tol);
-            std::string table_with_bbox = populate_tokens(table_, FLT_MAX, box, 0, 0,
-                                                          mapnik::attributes{});
+            std::string table_with_bbox = populate_tokens(table_, FLT_MAX, box, 0, 0, mapnik::attributes{});
 
             s << " FROM " << table_with_bbox;
 
@@ -966,8 +964,12 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             }
 
             std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty(),
-                                                        key_field_as_attribute_, twkb_encoding_);
+            return std::make_shared<postgis_featureset>(rs,
+                                                        ctx,
+                                                        desc_.get_encoding(),
+                                                        !key_field_.empty(),
+                                                        key_field_as_attribute_,
+                                                        twkb_encoding_);
         }
     }
 
@@ -985,7 +987,8 @@ box2d<double> postgis_datasource::envelope() const
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return extent_;
+        if (!conn)
+            return extent_;
         if (conn->isOK())
         {
             std::ostringstream s;
@@ -1012,14 +1015,12 @@ box2d<double> postgis_datasource::envelope() const
                     s << literal(parsed_schema_) << ',';
                 }
 
-                s << literal(parsed_table_) << ','
-                  << literal(geometryColumn_) << ") as ext) as tmp";
+                s << literal(parsed_table_) << ',' << literal(geometryColumn_) << ") as ext) as tmp";
             }
             else
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent("
-                  << identifier(geometryColumn_) << ") as ext from ";
+                  << " FROM (SELECT ST_Extent(" << identifier(geometryColumn_) << ") as ext from ";
 
                 if (extent_from_subquery_)
                 {
@@ -1037,7 +1038,7 @@ box2d<double> postgis_datasource::envelope() const
             }
 
             shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
-            if (rs->next() && ! rs->isNull(0))
+            if (rs->next() && !rs->isNull(0))
             {
                 double lox, loy, hix, hiy;
                 if (mapnik::util::string2double(rs->getValue(0), lox) &&
@@ -1050,7 +1051,8 @@ box2d<double> postgis_datasource::envelope() const
                 }
                 else
                 {
-                    MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Could not determine extent from query: " << s.str();
+                    MAPNIK_LOG_DEBUG(postgis)
+                      << "postgis_datasource: Could not determine extent from query: " << s.str();
                 }
             }
             rs->close();
@@ -1068,7 +1070,8 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (!conn) return result;
+        if (!conn)
+            return result;
         if (conn->isOK())
         {
             std::ostringstream s;
@@ -1109,21 +1112,20 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
                         g_type = "";
                     }
                 }
-            }
-            catch (mapnik::datasource_exception const& ex) {
+            } catch (mapnik::datasource_exception const& ex)
+            {
                 // let this pass on query error and use the fallback below
                 MAPNIK_LOG_WARN(postgis) << "postgis_datasource: metadata query failed: " << ex.what();
             }
 
             // fallback to querying first several features
-            if (g_type.empty() && ! geometryColumn_.empty())
+            if (g_type.empty() && !geometryColumn_.empty())
             {
                 s.str("");
 
                 std::string prev_type("");
 
-                s << "SELECT ST_GeometryType("
-                  << identifier(geometryColumn_) << ") AS geom"
+                s << "SELECT ST_GeometryType(" << identifier(geometryColumn_) << ") AS geom"
                   << " FROM " << populate_tokens(table_);
 
                 if (row_limit_ > 0 && row_limit_ < 5)
@@ -1136,7 +1138,7 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
                 }
 
                 shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
-                while (rs->next() && ! rs->isNull(0))
+                while (rs->next() && !rs->isNull(0))
                 {
                     const char* data = rs->getValue(0);
                     if (boost::algorithm::icontains(data, "line"))
@@ -1159,7 +1161,7 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
                         result.reset(mapnik::datasource_geometry_t::Collection);
                         return result;
                     }
-                    if (! prev_type.empty() && g_type != prev_type)
+                    if (!prev_type.empty() && g_type != prev_type)
                     {
                         result.reset(mapnik::datasource_geometry_t::Collection);
                         return result;

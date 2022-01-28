@@ -23,10 +23,12 @@
 #include <mapnik/geometry/boost_spirit_karma_adapter.hpp>
 #include <mapnik/wkt/wkt_generator_grammar_impl.hpp>
 
-namespace mapnik { namespace wkt {
+namespace mapnik {
+namespace wkt {
 
 using sink_type = std::back_insert_iterator<std::string>;
 template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<double>>;
 template struct wkt_generator_grammar<sink_type, mapnik::geometry::geometry<std::int64_t>>;
 
-}}
+} // namespace wkt
+} // namespace mapnik

@@ -30,15 +30,15 @@
 
 namespace mapnik {
 
-
-class IProcessorContext {
-public:
+class IProcessorContext
+{
+  public:
     virtual ~IProcessorContext() {}
 };
 
 using processor_context_ptr = std::shared_ptr<IProcessorContext>;
-using feature_style_context_map = std::map<std::string, processor_context_ptr >;
+using feature_style_context_map = std::map<std::string, processor_context_ptr>;
 
-}
+} // namespace mapnik
 
 #endif // FEATURE_STYLE_PROCESSOR_CONTEXT_HPP

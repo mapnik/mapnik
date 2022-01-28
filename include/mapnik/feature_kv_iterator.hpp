@@ -45,32 +45,31 @@ namespace mapnik {
 
 class feature_impl;
 
-class MAPNIK_DECL feature_kv_iterator :
-        public boost::iterator_facade<feature_kv_iterator,
-                                      std::tuple<std::string, value> const,
-                                      boost::forward_traversal_tag>
+class MAPNIK_DECL feature_kv_iterator : public boost::iterator_facade<feature_kv_iterator,
+                                                                      std::tuple<std::string, value> const,
+                                                                      boost::forward_traversal_tag>
 {
-public:
-    using value_type = std::tuple<std::string,value>;
-    feature_kv_iterator (feature_impl const& f, bool begin = false);
-private:
+  public:
+    using value_type = std::tuple<std::string, value>;
+    feature_kv_iterator(feature_impl const& f, bool begin = false);
+
+  private:
     friend class boost::iterator_core_access;
     void increment();
     void decrement();
     void advance(boost::iterator_difference<feature_kv_iterator>::type);
-    bool equal( feature_kv_iterator const& other) const;
+    bool equal(feature_kv_iterator const& other) const;
 
     value_type const& dereference() const;
 
     feature_impl const& f_;
-    std::map<std::string,std::size_t>::const_iterator itr_;
+    std::map<std::string, std::size_t>::const_iterator itr_;
     mutable value_type kv_;
-
 };
 
 struct value_not_null
 {
-    bool operator() (feature_kv_iterator::value_type const& kv) const
+    bool operator()(feature_kv_iterator::value_type const& kv) const
     {
         return !util::apply_visitor(mapnik::detail::is_null_visitor(), std::get<1>(kv));
     }
@@ -78,6 +77,6 @@ struct value_not_null
 
 using feature_kv_iterator2 = boost::filter_iterator<value_not_null, feature_kv_iterator>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FEATURE_KV_ITERATOR_HPP

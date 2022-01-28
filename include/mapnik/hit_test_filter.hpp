@@ -32,12 +32,7 @@ namespace mapnik {
 
 namespace detail {
 
-inline bool pip(double x0,
-                double y0,
-                double x1,
-                double y1,
-                double x,
-                double y)
+inline bool pip(double x0, double y0, double x1, double y1, double x, double y)
 {
     return ((((y1 <= y) && (y < y0)) || ((y0 <= y) && (y < y1))) && (x < (x0 - x1) * (y - y1) / (y0 - y1) + x1));
 }
@@ -45,78 +40,78 @@ inline bool pip(double x0,
 struct hit_test_visitor
 {
     hit_test_visitor(double x, double y, double tol)
-     : x_(x),
-       y_(y),
-       tol_(tol) {}
+        : x_(x)
+        , y_(y)
+        , tol_(tol)
+    {}
 
-    bool operator() (geometry::geometry_empty const& ) const
-    {
-        return false;
-    }
+    bool operator()(geometry::geometry_empty const&) const { return false; }
 
-    bool operator() (geometry::point<double> const& geom) const
-    {
-        return distance(geom.x, geom.y, x_, y_) <= tol_;
-    }
-    bool operator() (geometry::multi_point<double> const& geom) const
+    bool operator()(geometry::point<double> const& geom) const { return distance(geom.x, geom.y, x_, y_) <= tol_; }
+    bool operator()(geometry::multi_point<double> const& geom) const
     {
         for (auto const& pt : geom)
         {
-            if (distance(pt.x, pt.y, x_, y_) <= tol_) return true;
+            if (distance(pt.x, pt.y, x_, y_) <= tol_)
+                return true;
         }
         return false;
     }
-    bool operator() (geometry::line_string<double> const& geom) const
+    bool operator()(geometry::line_string<double> const& geom) const
     {
         std::size_t num_points = geom.size();
         if (num_points > 1)
         {
             for (std::size_t i = 1; i < num_points; ++i)
             {
-                auto const& pt0 = geom[i-1];
+                auto const& pt0 = geom[i - 1];
                 auto const& pt1 = geom[i];
-                double distance = point_to_segment_distance(x_,y_,pt0.x,pt0.y,pt1.x,pt1.y);
-                if (distance < tol_) return true;
+                double distance = point_to_segment_distance(x_, y_, pt0.x, pt0.y, pt1.x, pt1.y);
+                if (distance < tol_)
+                    return true;
             }
         }
         return false;
     }
-    bool operator() (geometry::multi_line_string<double> const& geom) const
+    bool operator()(geometry::multi_line_string<double> const& geom) const
     {
-        for (auto const& line: geom)
+        for (auto const& line : geom)
         {
-            if (operator()(line)) return true;
+            if (operator()(line))
+                return true;
         }
         return false;
     }
-    bool operator() (geometry::polygon<double> const& poly) const
+    bool operator()(geometry::polygon<double> const& poly) const
     {
-        //auto const& exterior = geom.exterior_ring;
-        //std::size_t num_points = exterior.size();
-        //if (num_points < 4) return false;
+        // auto const& exterior = geom.exterior_ring;
+        // std::size_t num_points = exterior.size();
+        // if (num_points < 4) return false;
 
-        //for (std::size_t i = 1; i < num_points; ++i)
+        // for (std::size_t i = 1; i < num_points; ++i)
         //{
-        //   auto const& pt0 = exterior[i-1];
-        //   auto const& pt1 = exterior[i];
-            // todo - account for tolerance
+        //    auto const& pt0 = exterior[i-1];
+        //    auto const& pt1 = exterior[i];
+        //  todo - account for tolerance
         //   if (pip(pt0.x,pt0.y,pt1.x,pt1.y,x_,y_))
         //   {
         //       inside = !inside;
         //   }
         //}
-        //if (!inside) return false;
+        // if (!inside) return false;
 
         //// FIXME !!!
         bool inside = false;
         bool exterior = true;
-        for (auto const& ring :  poly)
+        for (auto const& ring : poly)
         {
             std::size_t num_points = ring.size();
             if (num_points < 4)
             {
-                if (exterior) return false;
-                else continue;
+                if (exterior)
+                    return false;
+                else
+                    continue;
             }
 
             for (std::size_t j = 1; j < num_points; ++j)
@@ -133,19 +128,21 @@ struct hit_test_visitor
         ////////////////////////////
         return inside;
     }
-    bool operator() (geometry::multi_polygon<double> const& geom) const
+    bool operator()(geometry::multi_polygon<double> const& geom) const
     {
-        for (auto const& poly: geom)
+        for (auto const& poly : geom)
         {
-            if (operator()(poly)) return true;
+            if (operator()(poly))
+                return true;
         }
         return false;
     }
-    bool operator() (geometry::geometry_collection<double> const& collection) const
+    bool operator()(geometry::geometry_collection<double> const& collection) const
     {
-        for (auto const& geom: collection)
+        for (auto const& geom : collection)
         {
-            if (mapnik::util::apply_visitor((*this),geom)) return true;
+            if (mapnik::util::apply_visitor((*this), geom))
+                return true;
         }
         return false;
     }
@@ -155,31 +152,29 @@ struct hit_test_visitor
     double tol_;
 };
 
-}
+} // namespace detail
 
 inline bool hit_test(mapnik::geometry::geometry<double> const& geom, double x, double y, double tol)
 {
-    return mapnik::util::apply_visitor(detail::hit_test_visitor(x,y,tol), geom);
+    return mapnik::util::apply_visitor(detail::hit_test_visitor(x, y, tol), geom);
 }
 
 class hit_test_filter
 {
-public:
+  public:
     hit_test_filter(double x, double y, double tol)
-        : x_(x),
-          y_(y),
-          tol_(tol) {}
+        : x_(x)
+        , y_(y)
+        , tol_(tol)
+    {}
 
-    bool pass(feature_impl const& feature)
-    {
-        return hit_test(feature.get_geometry(),x_,y_,tol_);
-    }
+    bool pass(feature_impl const& feature) { return hit_test(feature.get_geometry(), x_, y_, tol_); }
 
-private:
+  private:
     double x_;
     double y_;
     double tol_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_HIT_TEST_FILTER_HPP

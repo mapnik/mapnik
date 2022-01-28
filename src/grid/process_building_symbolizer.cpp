@@ -46,12 +46,11 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_conv_stroke.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 void grid_renderer<T>::process(building_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
@@ -70,39 +69,37 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     double height = get<value_double>(sym, keys::height, feature, common_.vars_, 0.0);
 
     render_building_symbolizer::apply(
-        feature, prj_trans, common_.t_, height,
-        [&](path_type const& faces)
-        {
-            vertex_adapter va(faces);
-            ras_ptr->add_path(va);
-            ren.color(color_type(feature.id()));
-            agg::render_scanlines(*ras_ptr, sl, ren);
-            ras_ptr->reset();
-        },
-        [&](path_type const& frame)
-        {
-            vertex_adapter va(frame);
-            agg::conv_stroke<vertex_adapter> stroke(va);
-            stroke.miter_limit(common_.scale_factor_ / 2.0);
-            ras_ptr->add_path(stroke);
-            ren.color(color_type(feature.id()));
-            agg::render_scanlines(*ras_ptr, sl, ren);
-            ras_ptr->reset();
-        },
-        [&](render_building_symbolizer::roof_type & roof)
-        {
-            ras_ptr->add_path(roof);
-            ren.color(color_type(feature.id()));
-            agg::render_scanlines(*ras_ptr, sl, ren);
-        });
+      feature,
+      prj_trans,
+      common_.t_,
+      height,
+      [&](path_type const& faces) {
+          vertex_adapter va(faces);
+          ras_ptr->add_path(va);
+          ren.color(color_type(feature.id()));
+          agg::render_scanlines(*ras_ptr, sl, ren);
+          ras_ptr->reset();
+      },
+      [&](path_type const& frame) {
+          vertex_adapter va(frame);
+          agg::conv_stroke<vertex_adapter> stroke(va);
+          stroke.miter_limit(common_.scale_factor_ / 2.0);
+          ras_ptr->add_path(stroke);
+          ren.color(color_type(feature.id()));
+          agg::render_scanlines(*ras_ptr, sl, ren);
+          ras_ptr->reset();
+      },
+      [&](render_building_symbolizer::roof_type& roof) {
+          ras_ptr->add_path(roof);
+          ren.color(color_type(feature.id()));
+          agg::render_scanlines(*ras_ptr, sl, ren);
+      });
 
     pixmap_.add_feature(feature);
 }
 
-template void grid_renderer<grid>::process(building_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(building_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif

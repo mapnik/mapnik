@@ -31,16 +31,14 @@
 
 class topojson_featureset : public mapnik::Featureset
 {
-public:
+  public:
     typedef std::deque<topojson_datasource::item_type> array_type;
-    topojson_featureset(mapnik::topojson::topology const& topo,
-                        mapnik::transcoder const& tr,
-                        array_type && index_array);
+    topojson_featureset(mapnik::topojson::topology const& topo, mapnik::transcoder const& tr, array_type&& index_array);
 
     virtual ~topojson_featureset();
     mapnik::feature_ptr next();
 
-private:
+  private:
     mapnik::context_ptr ctx_;
     mapnik::box2d<double> box_;
     mapnik::topojson::topology const& topo_;

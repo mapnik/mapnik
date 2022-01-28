@@ -43,8 +43,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // freetype2
-extern "C"
-{
+extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
@@ -52,8 +51,7 @@ extern "C"
 
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct glyph_t
 {
@@ -69,52 +67,38 @@ struct glyph_t
             rotation const& rot_,
             double size_,
             box2d<double> const& bbox_)
-        : image(image_),
-          properties(properties_),
-          pos(pos_),
-          rot(rot_),
-          size(size_),
-          bbox(bbox_) {}
+        : image(image_)
+        , properties(properties_)
+        , pos(pos_)
+        , rot(rot_)
+        , size(size_)
+        , bbox(bbox_)
+    {}
 };
 
 class text_renderer : private util::noncopyable
 {
-public:
-    text_renderer (halo_rasterizer_e rasterizer,
-                   composite_mode_e comp_op = src_over,
-                   composite_mode_e halo_comp_op = src_over,
-                   double scale_factor = 1.0,
-                   stroker_ptr stroker = stroker_ptr());
+  public:
+    text_renderer(halo_rasterizer_e rasterizer,
+                  composite_mode_e comp_op = src_over,
+                  composite_mode_e halo_comp_op = src_over,
+                  double scale_factor = 1.0,
+                  stroker_ptr stroker = stroker_ptr());
 
-    void set_comp_op(composite_mode_e comp_op)
-    {
-        comp_op_ = comp_op;
-    }
+    void set_comp_op(composite_mode_e comp_op) { comp_op_ = comp_op; }
 
-    void set_halo_comp_op(composite_mode_e halo_comp_op)
-    {
-        halo_comp_op_ = halo_comp_op;
-    }
+    void set_halo_comp_op(composite_mode_e halo_comp_op) { halo_comp_op_ = halo_comp_op; }
 
-    void set_halo_rasterizer(halo_rasterizer_e rasterizer)
-    {
-        rasterizer_ = rasterizer;
-    }
+    void set_halo_rasterizer(halo_rasterizer_e rasterizer) { rasterizer_ = rasterizer; }
 
-    void set_scale_factor(double scale_factor)
-    {
-        scale_factor_ = scale_factor;
-    }
+    void set_scale_factor(double scale_factor) { scale_factor_ = scale_factor; }
 
-    void set_stroker(stroker_ptr stroker)
-    {
-        stroker_ = stroker;
-    }
+    void set_stroker(stroker_ptr stroker) { stroker_ = stroker; }
 
     void set_transform(agg::trans_affine const& transform);
     void set_halo_transform(agg::trans_affine const& halo_transform);
 
-protected:
+  protected:
     using glyph_vector = std::vector<glyph_t>;
     void prepare_glyphs(glyph_positions const& positions);
     halo_rasterizer_e rasterizer_;
@@ -127,49 +111,54 @@ protected:
     agg::trans_affine halo_transform_;
 };
 
-template <typename T>
+template<typename T>
 class agg_text_renderer : public text_renderer
 {
-public:
+  public:
     using pixmap_type = T;
-    agg_text_renderer (pixmap_type & pixmap, halo_rasterizer_e rasterizer,
-                       composite_mode_e comp_op = src_over,
-                       composite_mode_e halo_comp_op = src_over,
-                       double scale_factor = 1.0,
-                       stroker_ptr stroker = stroker_ptr());
+    agg_text_renderer(pixmap_type& pixmap,
+                      halo_rasterizer_e rasterizer,
+                      composite_mode_e comp_op = src_over,
+                      composite_mode_e halo_comp_op = src_over,
+                      double scale_factor = 1.0,
+                      stroker_ptr stroker = stroker_ptr());
     void render(glyph_positions const& positions);
-private:
-    pixmap_type & pixmap_;
 
-    template <std::size_t PixelWidth>
-    void render_halo(unsigned char *buffer,
+  private:
+    pixmap_type& pixmap_;
+
+    template<std::size_t PixelWidth>
+    void render_halo(unsigned char* buffer,
                      unsigned width,
                      unsigned height,
-                     unsigned rgba, int x, int y,
-                     double halo_radius, double opacity,
+                     unsigned rgba,
+                     int x,
+                     int y,
+                     double halo_radius,
+                     double opacity,
                      composite_mode_e comp_op);
 };
 
-template <typename T>
+template<typename T>
 class grid_text_renderer : public text_renderer
 {
-public:
+  public:
     using pixmap_type = T;
-    grid_text_renderer (pixmap_type & pixmap,
-                        composite_mode_e comp_op = src_over,
-                        double scale_factor = 1.0);
+    grid_text_renderer(pixmap_type& pixmap, composite_mode_e comp_op = src_over, double scale_factor = 1.0);
     void render(glyph_positions const& positions, value_integer feature_id);
-private:
-    pixmap_type & pixmap_;
 
-    template <std::size_t PixelWidth>
-    void render_halo_id(unsigned char *buffer,
+  private:
+    pixmap_type& pixmap_;
+
+    template<std::size_t PixelWidth>
+    void render_halo_id(unsigned char* buffer,
                         unsigned width,
                         unsigned height,
                         mapnik::value_integer feature_id,
-                        int x, int y,
+                        int x,
+                        int y,
                         int halo_radius);
 };
 
-}
+} // namespace mapnik
 #endif // RENDERER_HPP

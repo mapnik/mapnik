@@ -26,11 +26,13 @@
 // geometry
 #include <mapbox/geometry/multi_line_string.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 using multi_line_string = mapbox::geometry::multi_line_string<T>;
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_MULTI_LINE_STRING_HPP

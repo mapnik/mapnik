@@ -40,13 +40,12 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <limits>
 
-namespace mapnik
-{
+namespace mapnik {
 
 template<class Source>
 class span_image_resample_gray_affine : public agg::span_image_resample_affine<Source>
 {
-public:
+  public:
     using source_type = Source;
     using color_type = typename source_type::color_type;
     using base_type = agg::span_image_resample_affine<source_type>;
@@ -54,34 +53,27 @@ public:
     using value_type = typename color_type::value_type;
     using long_type = typename color_type::long_type;
 
-    enum base_scale_e
-    {
-        downscale_shift = agg::image_filter_shift,
-        base_mask       = color_type::base_mask
-    };
+    enum base_scale_e { downscale_shift = agg::image_filter_shift, base_mask = color_type::base_mask };
 
-    span_image_resample_gray_affine(source_type & src,
-                                    interpolator_type & inter,
-                                    agg::image_filter_lut const & filter,
-                                    boost::optional<value_type> const & nodata_value) :
-        base_type(src, inter, filter),
-        nodata_value_(nodata_value)
-    { }
+    span_image_resample_gray_affine(source_type& src,
+                                    interpolator_type& inter,
+                                    agg::image_filter_lut const& filter,
+                                    boost::optional<value_type> const& nodata_value)
+        : base_type(src, inter, filter)
+        , nodata_value_(nodata_value)
+    {}
 
     void generate(color_type* span, int x, int y, unsigned len)
     {
-        base_type::interpolator().begin(x + base_type::filter_dx_dbl(),
-                                        y + base_type::filter_dy_dbl(), len);
+        base_type::interpolator().begin(x + base_type::filter_dx_dbl(), y + base_type::filter_dy_dbl(), len);
 
         long_type fg;
 
-        int diameter     = base_type::filter().diameter();
+        int diameter = base_type::filter().diameter();
         int filter_scale = diameter << agg::image_subpixel_shift;
-        int radius_x     = (diameter * base_type::m_rx) >> 1;
-        int radius_y     = (diameter * base_type::m_ry) >> 1;
-        int len_x_lr     =
-            (diameter * base_type::m_rx + agg::image_subpixel_mask) >>
-                agg::image_subpixel_shift;
+        int radius_x = (diameter * base_type::m_rx) >> 1;
+        int radius_y = (diameter * base_type::m_ry) >> 1;
+        int len_x_lr = (diameter * base_type::m_rx + agg::image_subpixel_mask) >> agg::image_subpixel_shift;
 
         const agg::int16* weight_array = base_type::filter().weight_array();
 
@@ -110,37 +102,36 @@ public:
             fg = 0;
 
             int y_lr = y >> agg::image_subpixel_shift;
-            int y_hr = ((agg::image_subpixel_mask - (y & agg::image_subpixel_mask)) *
-                            base_type::m_ry_inv) >>
-                                agg::image_subpixel_shift;
+            int y_hr = ((agg::image_subpixel_mask - (y & agg::image_subpixel_mask)) * base_type::m_ry_inv) >>
+                       agg::image_subpixel_shift;
             int total_weight = 0;
             int x_lr = x >> agg::image_subpixel_shift;
-            int x_hr = ((agg::image_subpixel_mask - (x & agg::image_subpixel_mask)) *
-                            base_type::m_rx_inv) >>
-                                agg::image_subpixel_shift;
+            int x_hr = ((agg::image_subpixel_mask - (x & agg::image_subpixel_mask)) * base_type::m_rx_inv) >>
+                       agg::image_subpixel_shift;
 
             int x_hr2 = x_hr;
-            const value_type* fg_ptr = reinterpret_cast<const value_type*>(base_type::source().span(x_lr, y_lr, len_x_lr));
-            for(;;)
+            const value_type* fg_ptr =
+              reinterpret_cast<const value_type*>(base_type::source().span(x_lr, y_lr, len_x_lr));
+            for (;;)
             {
                 int weight_y = weight_array[y_hr];
                 x_hr = x_hr2;
-                for(;;)
+                for (;;)
                 {
-                    int weight = (weight_y * weight_array[x_hr] +
-                                 agg::image_filter_scale) >>
-                                 downscale_shift;
+                    int weight = (weight_y * weight_array[x_hr] + agg::image_filter_scale) >> downscale_shift;
                     if (!nodata_value_ || *nodata_value_ != *fg_ptr)
                     {
                         fg += *fg_ptr * weight;
                         total_weight += weight;
                     }
-                    x_hr  += base_type::m_rx_inv;
-                    if (x_hr >= filter_scale) break;
+                    x_hr += base_type::m_rx_inv;
+                    if (x_hr >= filter_scale)
+                        break;
                     fg_ptr = reinterpret_cast<const value_type*>(base_type::source().next_x());
                 }
                 y_hr += base_type::m_ry_inv;
-                if (y_hr >= filter_scale) break;
+                if (y_hr >= filter_scale)
+                    break;
                 fg_ptr = reinterpret_cast<const value_type*>(base_type::source().next_y());
             }
 
@@ -157,17 +148,17 @@ public:
 
             ++span;
             ++base_type::interpolator();
-        } while(--len);
+        } while (--len);
     }
 
-private:
+  private:
     boost::optional<value_type> nodata_value_;
 };
 
 template<class Source>
 class span_image_resample_rgba_affine : public agg::span_image_resample_rgba_affine<Source>
 {
-public:
+  public:
     using source_type = Source;
     using color_type = typename source_type::color_type;
     using order_type = typename source_type::order_type;
@@ -176,14 +167,14 @@ public:
     using value_type = typename color_type::value_type;
     using long_type = typename color_type::long_type;
 
-    span_image_resample_rgba_affine(source_type & src,
-                                    interpolator_type & inter,
-                                    agg::image_filter_lut const & _filter,
-                                    boost::optional<value_type> const & nodata_value) :
-        agg::span_image_resample_rgba_affine<Source>(src, inter, _filter)
-    { }
+    span_image_resample_rgba_affine(source_type& src,
+                                    interpolator_type& inter,
+                                    agg::image_filter_lut const& _filter,
+                                    boost::optional<value_type> const& nodata_value)
+        : agg::span_image_resample_rgba_affine<Source>(src, inter, _filter)
+    {}
 };
 
-}
+} // namespace mapnik
 
 #endif

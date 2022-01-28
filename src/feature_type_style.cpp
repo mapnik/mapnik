@@ -26,46 +26,41 @@
 
 // boost
 
+namespace mapnik {
 
-namespace mapnik
-{
+static const char* filter_mode_strings[] = {"all", "first", ""};
 
-static const char * filter_mode_strings[] = {
-    "all",
-    "first",
-    ""
-};
-
-IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
-
+IMPLEMENT_ENUM(filter_mode_e, filter_mode_strings)
 
 feature_type_style::feature_type_style()
-    : rules_(),
-      filter_mode_(FILTER_ALL),
-      filters_(),
-      direct_filters_(),
-      comp_op_(),
-      opacity_(1.0f),
-      image_filters_inflate_(false)
+    : rules_()
+    , filter_mode_(FILTER_ALL)
+    , filters_()
+    , direct_filters_()
+    , comp_op_()
+    , opacity_(1.0f)
+    , image_filters_inflate_(false)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs)
-    : rules_(rhs.rules_),
-      filter_mode_(rhs.filter_mode_),
-      filters_(rhs.filters_),
-      direct_filters_(rhs.direct_filters_),
-      comp_op_(rhs.comp_op_),
-      opacity_(rhs.opacity_),
-      image_filters_inflate_(rhs.image_filters_inflate_) {}
+    : rules_(rhs.rules_)
+    , filter_mode_(rhs.filter_mode_)
+    , filters_(rhs.filters_)
+    , direct_filters_(rhs.direct_filters_)
+    , comp_op_(rhs.comp_op_)
+    , opacity_(rhs.opacity_)
+    , image_filters_inflate_(rhs.image_filters_inflate_)
+{}
 
-feature_type_style::feature_type_style(feature_type_style && rhs)
-    : rules_(std::move(rhs.rules_)),
-      filter_mode_(std::move(rhs.filter_mode_)),
-      filters_(std::move(rhs.filters_)),
-      direct_filters_(std::move(rhs.direct_filters_)),
-      comp_op_(std::move(rhs.comp_op_)),
-      opacity_(std::move(rhs.opacity_)),
-      image_filters_inflate_(std::move(rhs.image_filters_inflate_)) {}
+feature_type_style::feature_type_style(feature_type_style&& rhs)
+    : rules_(std::move(rhs.rules_))
+    , filter_mode_(std::move(rhs.filter_mode_))
+    , filters_(std::move(rhs.filters_))
+    , direct_filters_(std::move(rhs.direct_filters_))
+    , comp_op_(std::move(rhs.comp_op_))
+    , opacity_(std::move(rhs.opacity_))
+    , image_filters_inflate_(std::move(rhs.image_filters_inflate_))
+{}
 
 feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 {
@@ -82,16 +77,12 @@ feature_type_style& feature_type_style::operator=(feature_type_style rhs)
 
 bool feature_type_style::operator==(feature_type_style const& rhs) const
 {
-    return (rules_ == rhs.rules_) &&
-        (filter_mode_ == rhs.filter_mode_) &&
-        (filters_ == rhs.filters_) &&
-        (direct_filters_ == rhs.direct_filters_) &&
-        (comp_op_ == rhs.comp_op_) &&
-        (opacity_ == rhs.opacity_) &&
-        (image_filters_inflate_ == rhs.image_filters_inflate_);
+    return (rules_ == rhs.rules_) && (filter_mode_ == rhs.filter_mode_) && (filters_ == rhs.filters_) &&
+           (direct_filters_ == rhs.direct_filters_) && (comp_op_ == rhs.comp_op_) && (opacity_ == rhs.opacity_) &&
+           (image_filters_inflate_ == rhs.image_filters_inflate_);
 }
 
-void feature_type_style::add_rule(rule && rule)
+void feature_type_style::add_rule(rule&& rule)
 {
     rules_.push_back(std::move(rule));
 }
@@ -128,22 +119,22 @@ filter_mode_e feature_type_style::get_filter_mode() const
     return filter_mode_;
 }
 
-std::vector<filter::filter_type>&  feature_type_style::image_filters()
+std::vector<filter::filter_type>& feature_type_style::image_filters()
 {
     return filters_;
 }
 
-std::vector<filter::filter_type> const&  feature_type_style::image_filters() const
+std::vector<filter::filter_type> const& feature_type_style::image_filters() const
 {
     return filters_;
 }
 
-std::vector<filter::filter_type>&  feature_type_style::direct_image_filters()
+std::vector<filter::filter_type>& feature_type_style::direct_image_filters()
 {
     return direct_filters_;
 }
 
-std::vector<filter::filter_type> const&  feature_type_style::direct_image_filters() const
+std::vector<filter::filter_type> const& feature_type_style::direct_image_filters() const
 {
     return direct_filters_;
 }
@@ -178,4 +169,4 @@ bool feature_type_style::image_filters_inflate() const
     return image_filters_inflate_;
 }
 
-}
+} // namespace mapnik

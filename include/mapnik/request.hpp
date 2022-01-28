@@ -27,15 +27,12 @@
 #include <mapnik/config.hpp>
 #include <mapnik/geometry/box2d.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class MAPNIK_DECL request
 {
-public:
-    request(unsigned width,
-            unsigned height,
-            box2d<double> const& extent);
+  public:
+    request(unsigned width, unsigned height, box2d<double> const& extent);
     unsigned width() const;
     unsigned height() const;
     void set_buffer_size(int buffer_size);
@@ -45,13 +42,14 @@ public:
     box2d<double> get_buffered_extent() const;
     double scale() const;
     ~request();
-private:
+
+  private:
     unsigned width_;
     unsigned height_;
     box2d<double> extent_;
     int buffer_size_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_REQUEST_HPP

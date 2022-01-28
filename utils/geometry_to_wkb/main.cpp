@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #include <iostream>
 #include <string>
 
@@ -31,11 +30,9 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/geometry_to_wkb.hpp>
 
-
-int main (int argc, char ** argv )
+int main(int argc, char** argv)
 {
-
-    if ( argc !=2)
+    if (argc != 2)
     {
         std::cerr << "Usage: " << argv[0] << " <path-to-shapefile>\n";
         return EXIT_SUCCESS;
@@ -57,8 +54,7 @@ int main (int argc, char ** argv )
     try
     {
         ds = mapnik::datasource_cache::instance().create(p);
-    }
-    catch ( ... )
+    } catch (...)
     {
         std::cerr << "Can't create datasource!\n";
         return EXIT_FAILURE;
@@ -78,25 +74,23 @@ int main (int argc, char ** argv )
         mapnik::featureset_ptr fs = ds->features(q);
         mapnik::feature_ptr f = fs->next();
 
-        while(f)
+        while (f)
         {
             std::cerr << *f << std::endl;
             mapnik::geometry::geometry<double> const& geom = f->get_geometry();
             // NDR
             {
-                mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::wkbNDR);
-                std::cerr << mapnik::util::detail::to_hex(wkb->buffer(),wkb->size()) << std::endl;
+                mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom, mapnik::wkbNDR);
+                std::cerr << mapnik::util::detail::to_hex(wkb->buffer(), wkb->size()) << std::endl;
             }
             // XDR
             {
-                mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,mapnik::wkbXDR);
-                std::cerr << mapnik::util::detail::to_hex(wkb->buffer(),wkb->size()) << std::endl;
+                mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom, mapnik::wkbXDR);
+                std::cerr << mapnik::util::detail::to_hex(wkb->buffer(), wkb->size()) << std::endl;
             }
             f = fs->next();
         }
     }
-
-
 
     return EXIT_SUCCESS;
 }

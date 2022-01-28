@@ -25,18 +25,17 @@
 namespace mapnik {
 
 text_placements::text_placements()
-    : defaults() {}
+    : defaults()
+{}
 
-void text_placements::add_expressions(expression_set & output) const
+void text_placements::add_expressions(expression_set& output) const
 {
     defaults.add_expressions(output);
 }
 
+text_placement_info::text_placement_info(text_placements const* parent, double scale_factor_)
+    : properties(parent->defaults)
+    , scale_factor(scale_factor_)
+{}
 
-
-text_placement_info::text_placement_info(text_placements const* parent,
-                                         double scale_factor_)
-    : properties(parent->defaults),
-      scale_factor(scale_factor_) {}
-
-} //ns mapnik
+} // namespace mapnik

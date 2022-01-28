@@ -34,15 +34,14 @@ namespace {
 
 struct apply_local_alignment
 {
-    apply_local_alignment(view_transform const& t,
-                          proj_transform const& prj_trans,
-                          double & x, double & y)
-        : t_(t),
-          prj_trans_(prj_trans),
-          x_(x),
-          y_(y) {}
+    apply_local_alignment(view_transform const& t, proj_transform const& prj_trans, double& x, double& y)
+        : t_(t)
+        , prj_trans_(prj_trans)
+        , x_(x)
+        , y_(y)
+    {}
 
-    void operator() (geometry::polygon_vertex_adapter<double> & va)
+    void operator()(geometry::polygon_vertex_adapter<double>& va)
     {
         using path_type = transform_path_adapter<view_transform, decltype(va)>;
         path_type path(t_, va, prj_trans_);
@@ -50,27 +49,26 @@ struct apply_local_alignment
         path.vertex(&x_, &y_);
     }
 
-    template <typename Adapter>
-    void operator() (Adapter &)
+    template<typename Adapter>
+    void operator()(Adapter&)
     {
         // no-op
     }
 
     view_transform const& t_;
     proj_transform const& prj_trans_;
-    double & x_;
-    double & y_;
+    double& x_;
+    double& y_;
 };
 
-}
+} // namespace
 
-coord<double, 2> pattern_offset(
-    symbolizer_base const & sym,
-    mapnik::feature_impl const & feature,
-    proj_transform const & prj_trans,
-    renderer_common const & common,
-    unsigned pattern_width,
-    unsigned pattern_height)
+coord<double, 2> pattern_offset(symbolizer_base const& sym,
+                                mapnik::feature_impl const& feature,
+                                proj_transform const& prj_trans,
+                                renderer_common const& common,
+                                unsigned pattern_width,
+                                unsigned pattern_height)
 {
     coord<double, 2> reference_position(0, 0);
     pattern_alignment_enum alignment_type = get<pattern_alignment_enum, keys::alignment>(sym, feature, common.vars_);
@@ -85,9 +83,8 @@ coord<double, 2> pattern_offset(
         common.t_.forward(&reference_position.x, &reference_position.y);
     }
 
-    return coord<double, 2>(
-        std::fmod(-reference_position.x, pattern_width) + pattern_width,
-        std::fmod(-reference_position.y, pattern_height) + pattern_height);
+    return coord<double, 2>(std::fmod(-reference_position.x, pattern_width) + pattern_width,
+                            std::fmod(-reference_position.y, pattern_height) + pattern_height);
 }
 
-}
+} // namespace mapnik

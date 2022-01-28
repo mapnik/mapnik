@@ -44,17 +44,18 @@
 
 class gdal_datasource : public mapnik::datasource
 {
-public:
+  public:
     gdal_datasource(mapnik::parameters const& params);
     virtual ~gdal_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-private:
+
+  private:
     std::unique_ptr<GDALDataset, decltype(&GDALClose)> dataset_;
     mapnik::box2d<double> extent_;
     std::string dataset_name_;

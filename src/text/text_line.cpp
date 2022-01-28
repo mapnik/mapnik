@@ -27,29 +27,30 @@
 namespace mapnik {
 
 text_line::text_line(unsigned first_char, unsigned last_char)
-    : glyphs_(),
-      line_height_(0.0),
-      max_char_height_(0.0),
-      width_(0.0),
-      glyphs_width_(0.0),
-      first_char_(first_char),
-      last_char_(last_char),
-      first_line_(false),
-      space_count_(0)
+    : glyphs_()
+    , line_height_(0.0)
+    , max_char_height_(0.0)
+    , width_(0.0)
+    , glyphs_width_(0.0)
+    , first_char_(first_char)
+    , last_char_(last_char)
+    , first_line_(false)
+    , space_count_(0)
 {}
 
-text_line::text_line(text_line && rhs)
-    : glyphs_(std::move(rhs.glyphs_)),
-      line_height_(std::move(rhs.line_height_)),
-      max_char_height_(std::move(rhs.max_char_height_)),
-      width_(std::move(rhs.width_)),
-      glyphs_width_(std::move(rhs.glyphs_width_)),
-      first_char_(std::move(rhs.first_char_)),
-      last_char_(std::move(rhs.last_char_)),
-      first_line_(std::move(rhs.first_line_)),
-      space_count_(std::move(rhs.space_count_)) {}
+text_line::text_line(text_line&& rhs)
+    : glyphs_(std::move(rhs.glyphs_))
+    , line_height_(std::move(rhs.line_height_))
+    , max_char_height_(std::move(rhs.max_char_height_))
+    , width_(std::move(rhs.width_))
+    , glyphs_width_(std::move(rhs.glyphs_width_))
+    , first_char_(std::move(rhs.first_char_))
+    , last_char_(std::move(rhs.last_char_))
+    , first_line_(std::move(rhs.first_line_))
+    , space_count_(std::move(rhs.space_count_))
+{}
 
-void text_line::add_glyph(glyph_info && glyph, double scale_factor_)
+void text_line::add_glyph(glyph_info&& glyph, double scale_factor_)
 {
     line_height_ = std::max(line_height_, glyph.line_height() + glyph.format->line_spacing * scale_factor_);
     double advance = glyph.advance();
@@ -62,7 +63,7 @@ void text_line::add_glyph(glyph_info && glyph, double scale_factor_)
     else if (advance > 0)
     {
         // Only add character spacing if the character is not a zero-width part of a cluster.
-        width_ += advance + glyphs_.back().format->character_spacing  * scale_factor_;
+        width_ += advance + glyphs_.back().format->character_spacing * scale_factor_;
         glyphs_width_ += advance;
         ++space_count_;
     }
@@ -86,7 +87,8 @@ text_line::const_iterator text_line::end() const
 
 double text_line::height() const
 {
-    if (first_line_) return max_char_height_;
+    if (first_line_)
+        return max_char_height_;
     return line_height_;
 }
 

@@ -38,23 +38,17 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
     std::string::const_iterator end = str.end();
     mapnik::transcoder const tr(encoding);
 #if BOOST_VERSION >= 106700
-    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
-        [
-            mapnik::grammar::transform
-        ];
+    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)[mapnik::grammar::transform];
 #else
-    auto const parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
-        [
-            mapnik::grammar::transform
-        ];
+    auto const parser =
+      boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))[mapnik::grammar::transform];
 #endif
 
     bool status = false;
     try
     {
         status = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
-    }
-    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    } catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         throw config_error("Failed to parse transform expression: \"" + str + "\"");
     }
@@ -68,6 +62,5 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
         throw std::runtime_error("Failed to parse transform: \"" + str + "\"");
     }
 }
-
 
 } // namespace mapnik

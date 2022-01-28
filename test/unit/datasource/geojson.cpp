@@ -48,7 +48,8 @@ clang++ -o test-geojson -g -I./test/ test/unit/run.cpp test/unit/datasource/geoj
 
 namespace {
 
-std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::string const& filename, bool cache_features)
+std::pair<mapnik::datasource_ptr, mapnik::feature_ptr> fetch_first_feature(std::string const& filename,
+                                                                           bool cache_features)
 {
     mapnik::parameters params;
     params["type"] = "geojson";
@@ -64,9 +65,8 @@ std::pair<mapnik::datasource_ptr,mapnik::feature_ptr> fetch_first_feature(std::s
     }
     auto features = ds->features(query);
     auto feature = features->next();
-    return std::make_pair(ds,feature);
+    return std::make_pair(ds, feature);
 }
-
 
 void iterate_over_features(mapnik::featureset_ptr features)
 {
@@ -77,17 +77,17 @@ void iterate_over_features(mapnik::featureset_ptr features)
     }
 }
 
-}
+} // namespace
 
-TEST_CASE("geojson") {
-
+TEST_CASE("geojson")
+{
     std::string geojson_plugin("./plugins/input/geojson.input");
     if (mapnik::util::exists(geojson_plugin))
     {
         SECTION("GeoJSON I/O errors")
         {
             std::string filename = "does_not_exist.geojson";
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -124,17 +124,14 @@ TEST_CASE("geojson") {
 
         SECTION("GeoJSON empty Geometries handling")
         {
-            auto valid_empty_geometries =
-                {
-                    "null", // Point can't be empty
-                    "{ \"type\": \"LineString\", \"coordinates\": [] }",
-                    "{ \"type\": \"Polygon\", \"coordinates\": [ [ ] ] } ",
-                    "{ \"type\": \"MultiPoint\", \"coordinates\": [ ] }",
-                    "{ \"type\": \"MultiLineString\", \"coordinates\": [ [] ] }",
-                    "{ \"type\": \"MultiPolygon\", \"coordinates\": [[ []] ] }"
-                };
+            auto valid_empty_geometries = {"null", // Point can't be empty
+                                           "{ \"type\": \"LineString\", \"coordinates\": [] }",
+                                           "{ \"type\": \"Polygon\", \"coordinates\": [ [ ] ] } ",
+                                           "{ \"type\": \"MultiPoint\", \"coordinates\": [ ] }",
+                                           "{ \"type\": \"MultiLineString\", \"coordinates\": [ [] ] }",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\": [[ []] ] }"};
 
-            for (auto const& in  : valid_empty_geometries)
+            for (auto const& in : valid_empty_geometries)
             {
                 std::string json(in);
                 mapnik::geometry::geometry<double> geom;
@@ -142,24 +139,21 @@ TEST_CASE("geojson") {
                 // round trip
                 std::string json_out;
                 CHECK(mapnik::util::to_geojson(json_out, geom));
-                json.erase(std::remove_if(
-                               std::begin(json), std::end(json),
-                               [l = std::locale{}](auto ch) { return std::isspace(ch, l); }
-                               ), std::end(json));
+                json.erase(std::remove_if(std::begin(json),
+                                          std::end(json),
+                                          [l = std::locale{}](auto ch) { return std::isspace(ch, l); }),
+                           std::end(json));
                 REQUIRE(json == json_out);
             }
 
-            auto invalid_empty_geometries =
-                {
-                    "{ \"type\": \"Point\", \"coordinates\": [] }",
-                    "{ \"type\": \"LineString\", \"coordinates\": [[]] }"
-                    "{ \"type\": \"Polygon\", \"coordinates\": [[[]]] }",
-                    "{ \"type\": \"MultiPoint\", \"coordinates\": [[]] }",
-                    "{ \"type\": \"MultiLineString\", \"coordinates\": [[[]]] }",
-                    "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[[]]]] }"
-                };
+            auto invalid_empty_geometries = {"{ \"type\": \"Point\", \"coordinates\": [] }",
+                                             "{ \"type\": \"LineString\", \"coordinates\": [[]] }"
+                                             "{ \"type\": \"Polygon\", \"coordinates\": [[[]]] }",
+                                             "{ \"type\": \"MultiPoint\", \"coordinates\": [[]] }",
+                                             "{ \"type\": \"MultiLineString\", \"coordinates\": [[[]]] }",
+                                             "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[[]]]] }"};
 
-            for (auto const& json  : invalid_empty_geometries)
+            for (auto const& json : invalid_empty_geometries)
             {
                 mapnik::geometry::geometry<double> geom;
                 CHECK(!mapnik::json::from_geojson(json, geom));
@@ -169,14 +163,14 @@ TEST_CASE("geojson") {
         SECTION("GeoJSON num_features_to_query")
         {
             std::string filename = "./test/data/json/featurecollection-multipleprops.geojson";
-            for (mapnik::value_integer num_features_to_query : { mapnik::value_integer(-1),
-                        mapnik::value_integer(0),
-                        mapnik::value_integer(1),
-                        mapnik::value_integer(2),
-                        mapnik::value_integer(3),
-                        std::numeric_limits<mapnik::value_integer>::max()})
+            for (mapnik::value_integer num_features_to_query : {mapnik::value_integer(-1),
+                                                                mapnik::value_integer(0),
+                                                                mapnik::value_integer(1),
+                                                                mapnik::value_integer(2),
+                                                                mapnik::value_integer(3),
+                                                                std::numeric_limits<mapnik::value_integer>::max()})
             {
-                for (auto create_index : { true, false })
+                for (auto create_index : {true, false})
                 {
                     if (create_index)
                     {
@@ -260,7 +254,7 @@ TEST_CASE("geojson") {
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Point);
-                auto const& pt = mapnik::util::get<mapnik::geometry::point<double> >(geometry);
+                auto const& pt = mapnik::util::get<mapnik::geometry::point<double>>(geometry);
                 REQUIRE(pt.x == 100);
                 REQUIRE(pt.y == 0);
             }
@@ -276,10 +270,9 @@ TEST_CASE("geojson") {
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::LineString);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::LineString);
-                auto const& line = mapnik::util::get<mapnik::geometry::line_string<double> >(geometry);
+                auto const& line = mapnik::util::get<mapnik::geometry::line_string<double>>(geometry);
                 REQUIRE(line.size() == 2);
-                REQUIRE(mapnik::geometry::envelope(line) == mapnik::box2d<double>(100,0,101,1));
-
+                REQUIRE(mapnik::geometry::envelope(line) == mapnik::box2d<double>(100, 0, 101, 1));
             }
         }
 
@@ -293,12 +286,11 @@ TEST_CASE("geojson") {
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Polygon);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::Polygon);
-                auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geometry);
+                auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geometry);
                 REQUIRE(poly.size() == 2);
                 REQUIRE(poly[0].size() == 5);
                 REQUIRE(poly[1].size() == 5);
-                REQUIRE(mapnik::geometry::envelope(poly) == mapnik::box2d<double>(100,0,101,1));
-
+                REQUIRE(mapnik::geometry::envelope(poly) == mapnik::box2d<double>(100, 0, 101, 1));
             }
         }
 
@@ -312,9 +304,9 @@ TEST_CASE("geojson") {
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::Point);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPoint);
-                auto const& multi_pt = mapnik::util::get<mapnik::geometry::multi_point<double> >(geometry);
+                auto const& multi_pt = mapnik::util::get<mapnik::geometry::multi_point<double>>(geometry);
                 REQUIRE(multi_pt.size() == 2);
-                REQUIRE(mapnik::geometry::envelope(multi_pt) == mapnik::box2d<double>(100,0,101,1));
+                REQUIRE(mapnik::geometry::envelope(multi_pt) == mapnik::box2d<double>(100, 0, 101, 1));
             }
         }
 
@@ -328,12 +320,11 @@ TEST_CASE("geojson") {
                 CHECK(ds->get_geometry_type() == mapnik::datasource_geometry_t::LineString);
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiLineString);
-                auto const& multi_line = mapnik::util::get<mapnik::geometry::multi_line_string<double> >(geometry);
+                auto const& multi_line = mapnik::util::get<mapnik::geometry::multi_line_string<double>>(geometry);
                 REQUIRE(multi_line.size() == 2);
                 REQUIRE(multi_line[0].size() == 2);
                 REQUIRE(multi_line[1].size() == 2);
-                REQUIRE(mapnik::geometry::envelope(multi_line) == mapnik::box2d<double>(100,0,103,3));
-
+                REQUIRE(mapnik::geometry::envelope(multi_line) == mapnik::box2d<double>(100, 0, 103, 3));
             }
         }
 
@@ -348,19 +339,18 @@ TEST_CASE("geojson") {
                 // test
                 auto const& geometry = feature->get_geometry();
                 REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::MultiPolygon);
-                auto const& multi_poly = mapnik::util::get<mapnik::geometry::multi_polygon<double> >(geometry);
+                auto const& multi_poly = mapnik::util::get<mapnik::geometry::multi_polygon<double>>(geometry);
                 REQUIRE(multi_poly.size() == 2);
                 REQUIRE(multi_poly[0].size() == 1);
                 REQUIRE(multi_poly[1].size() == 2);
-                REQUIRE(mapnik::geometry::envelope(multi_poly) == mapnik::box2d<double>(100,0,103,3));
-
+                REQUIRE(mapnik::geometry::envelope(multi_poly) == mapnik::box2d<double>(100, 0, 103, 3));
             }
         }
 
         SECTION("GeoJSON GeometryCollection")
         {
             std::string filename("./test/data/json/geometrycollection.json");
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -381,11 +371,11 @@ TEST_CASE("geojson") {
                     // test
                     auto const& geometry = feature->get_geometry();
                     REQUIRE(mapnik::geometry::geometry_type(geometry) == mapnik::geometry::GeometryCollection);
-                    auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double> >(geometry);
+                    auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double>>(geometry);
                     REQUIRE(collection.size() == 2);
                     REQUIRE(mapnik::geometry::geometry_type(collection[0]) == mapnik::geometry::Point);
                     REQUIRE(mapnik::geometry::geometry_type(collection[1]) == mapnik::geometry::LineString);
-                    REQUIRE(mapnik::geometry::envelope(collection) == mapnik::box2d<double>(100,0,102,1));
+                    REQUIRE(mapnik::geometry::envelope(collection) == mapnik::box2d<double>(100, 0, 102, 1));
                 }
             }
         }
@@ -400,7 +390,7 @@ TEST_CASE("geojson") {
             params["base"] = base;
             params["file"] = file;
             std::string filename = base + file;
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -425,7 +415,7 @@ TEST_CASE("geojson") {
                         query.add_property_name(field.get_name());
                     }
                     auto features = ds->features(query);
-                    auto features2 = ds->features_at_point(ds->envelope().center(),0);
+                    auto features2 = ds->features_at_point(ds->envelope().center(), 0);
                     auto feature = features->next();
                     auto feature2 = features2->next();
                     REQUIRE(feature != nullptr);
@@ -447,8 +437,8 @@ TEST_CASE("geojson") {
             mapnik::parameters params;
             params["type"] = "geojson";
 
-            for (auto const& c_str : {"./test/data/json/feature-null-properties.json",
-                        "./test/data/json/feature-empty-properties.json"})
+            for (auto const& c_str :
+                 {"./test/data/json/feature-null-properties.json", "./test/data/json/feature-empty-properties.json"})
             {
                 std::string filename(c_str);
                 params["file"] = filename;
@@ -459,7 +449,7 @@ TEST_CASE("geojson") {
                     mapnik::util::remove(filename + ".index");
                 }
 
-                for (auto create_index : { true, false })
+                for (auto create_index : {true, false})
                 {
                     if (create_index)
                     {
@@ -500,7 +490,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -528,7 +518,7 @@ TEST_CASE("geojson") {
                         query.add_property_name(field.get_name());
                     }
                     auto features = ds->features(query);
-                    auto features2 = ds->features_at_point(ds->envelope().center(),10);
+                    auto features2 = ds->features_at_point(ds->envelope().center(), 10);
                     auto bounding_box = ds->envelope();
                     mapnik::box2d<double> bbox;
                     mapnik::value_integer count = 0;
@@ -536,9 +526,12 @@ TEST_CASE("geojson") {
                     {
                         auto feature = features->next();
                         auto feature2 = features2->next();
-                        if (!feature || !feature2) break;
-                        if (!bbox.valid()) bbox = feature->envelope();
-                        else bbox.expand_to_include(feature->envelope());
+                        if (!feature || !feature2)
+                            break;
+                        if (!bbox.valid())
+                            bbox = feature->envelope();
+                        else
+                            bbox.expand_to_include(feature->envelope());
                         ++count;
                         REQUIRE(feature->id() == count);
                         REQUIRE(feature2->id() == count);
@@ -567,7 +560,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -593,7 +586,7 @@ TEST_CASE("geojson") {
                     auto features = ds->features(query);
                     auto feature = features->next();
                     REQUIRE(feature != nullptr);
-                    REQUIRE(feature->envelope() == mapnik::box2d<double>(123,456,123,456));
+                    REQUIRE(feature->envelope() == mapnik::box2d<double>(123, 456, 123, 456));
                 }
 
                 // cleanup
@@ -618,7 +611,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -644,11 +637,11 @@ TEST_CASE("geojson") {
                     auto features = ds->features(query);
                     auto feature1 = features->next();
                     REQUIRE(feature1 != nullptr);
-                    REQUIRE(feature1->envelope() == mapnik::box2d<double>(-122.0,48.0,-122.0,48.0));
+                    REQUIRE(feature1->envelope() == mapnik::box2d<double>(-122.0, 48.0, -122.0, 48.0));
                     auto feature2 = features->next();
                     REQUIRE(feature2 != nullptr);
-                    REQUIRE(feature2->envelope() == mapnik::box2d<double>(0.0,51.0,0.0,51.0));
-                    REQUIRE(ds->envelope() == mapnik::box2d<double>(-122.0,48.0,0.0,51.0));
+                    REQUIRE(feature2->envelope() == mapnik::box2d<double>(0.0, 51.0, 0.0, 51.0));
+                    REQUIRE(ds->envelope() == mapnik::box2d<double>(-122.0, 48.0, 0.0, 51.0));
                 }
 
                 // cleanup
@@ -665,8 +658,8 @@ TEST_CASE("geojson") {
             params["type"] = "geojson";
 
             for (auto const& c_str : {"./test/data/json/feature-malformed-1.geojson",
-                        "./test/data/json/feature-malformed-2.geojson",
-                        "./test/data/json/feature-malformed-3.geojson"})
+                                      "./test/data/json/feature-malformed-2.geojson",
+                                      "./test/data/json/feature-malformed-3.geojson"})
             {
                 std::string filename(c_str);
                 params["file"] = filename;
@@ -677,7 +670,7 @@ TEST_CASE("geojson") {
                     mapnik::util::remove(filename + ".index");
                 }
 
-                for (auto create_index : { true, false })
+                for (auto create_index : {true, false})
                 {
                     if (create_index)
                     {
@@ -724,7 +717,7 @@ TEST_CASE("geojson") {
             INFO(ret_posix);
             CHECK(mapnik::util::exists(filename + ".index"));
 
-            for (auto cache_features : {true,false})
+            for (auto cache_features : {true, false})
             {
                 params["cache_features"] = cache_features;
                 auto ds = mapnik::datasource_cache::instance().create(params);
@@ -755,7 +748,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -806,7 +799,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -835,7 +828,7 @@ TEST_CASE("geojson") {
                     while (feature != nullptr)
                     {
                         // ids are in ascending order, starting from 1
-                        mapnik::value val= feature->get("id");
+                        mapnik::value val = feature->get("id");
                         REQUIRE(val.get<mapnik::value_integer>() == ++count);
                         feature = features->next();
                     }
@@ -862,7 +855,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -906,7 +899,7 @@ TEST_CASE("geojson") {
                 mapnik::util::remove(filename + ".index");
             }
 
-            for (auto create_index : { true, false })
+            for (auto create_index : {true, false})
             {
                 if (create_index)
                 {
@@ -924,26 +917,40 @@ TEST_CASE("geojson") {
                     auto ds = mapnik::datasource_cache::instance().create(params);
                     REQUIRE(bool(ds));
                     auto fields = ds->get_descriptor().get_descriptors();
-                    std::initializer_list<std::string> names = {"NOM_FR","array","boolean","description","double","empty_array", "empty_object","int","name","object","spaces"};
+                    std::initializer_list<std::string> names = {"NOM_FR",
+                                                                "array",
+                                                                "boolean",
+                                                                "description",
+                                                                "double",
+                                                                "empty_array",
+                                                                "empty_object",
+                                                                "int",
+                                                                "name",
+                                                                "object",
+                                                                "spaces"};
                     REQUIRE_FIELD_NAMES(fields, names);
 
                     auto fs = all_features(ds);
                     std::initializer_list<attr> attrs = {
-                        attr{"name", tr.transcode("Test")},
-                        attr{"NOM_FR", tr.transcode("Québec")},
-                        attr{"boolean", mapnik::value_bool(true)},
-                        attr{"description", tr.transcode("Test: \u005C")},
-                        attr{"double", mapnik::value_double(1.1)},
-                        attr{"int", mapnik::value_integer(1)},
-                        attr{"object", tr.transcode("{\"name\":\"waka\",\"spaces\":\"value with spaces\",\"int\":1,\"double\":1.1,\"boolean\":false"
-                                                    ",\"NOM_FR\":\"Québec\",\"array\":[\"string\",\"value with spaces\",3,1.1,null,true"
-                                                    ",\"Québec\"],\"another_object\":{\"name\":\"nested object\"}}")},
-                        attr{"spaces", tr.transcode("this has spaces")},
-                        attr{"array", tr.transcode("[\"string\",\"value with spaces\",3,1.1,null,true,"
-                                                   "\"Québec\",{\"name\":\"object within an array\"},"
-                                                   "[\"array\",\"within\",\"an\",\"array\"]]")},
-                        attr{"empty_array", tr.transcode("[]")},
-                        attr{"empty_object", tr.transcode("{}")},
+                      attr{"name", tr.transcode("Test")},
+                      attr{"NOM_FR", tr.transcode("Québec")},
+                      attr{"boolean", mapnik::value_bool(true)},
+                      attr{"description", tr.transcode("Test: \u005C")},
+                      attr{"double", mapnik::value_double(1.1)},
+                      attr{"int", mapnik::value_integer(1)},
+                      attr{"object",
+                           tr.transcode(
+                             "{\"name\":\"waka\",\"spaces\":\"value with "
+                             "spaces\",\"int\":1,\"double\":1.1,\"boolean\":false"
+                             ",\"NOM_FR\":\"Québec\",\"array\":[\"string\",\"value with spaces\",3,1.1,null,true"
+                             ",\"Québec\"],\"another_object\":{\"name\":\"nested object\"}}")},
+                      attr{"spaces", tr.transcode("this has spaces")},
+                      attr{"array",
+                           tr.transcode("[\"string\",\"value with spaces\",3,1.1,null,true,"
+                                        "\"Québec\",{\"name\":\"object within an array\"},"
+                                        "[\"array\",\"within\",\"an\",\"array\"]]")},
+                      attr{"empty_array", tr.transcode("[]")},
+                      attr{"empty_object", tr.transcode("{}")},
                     };
                     auto feature = fs->next();
                     REQUIRE(bool(feature));

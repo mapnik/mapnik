@@ -29,8 +29,7 @@
 
 namespace {
 
-mapnik::datasource_ptr get_gdal_ds(std::string const& file_name,
-                                   boost::optional<mapnik::value_integer> band)
+mapnik::datasource_ptr get_gdal_ds(std::string const& file_name, boost::optional<mapnik::value_integer> band)
 {
     std::string gdal_plugin("./plugins/input/gdal.input");
     if (!mapnik::util::exists(gdal_plugin))
@@ -54,8 +53,8 @@ mapnik::datasource_ptr get_gdal_ds(std::string const& file_name,
 
 } // anonymous namespace
 
-TEST_CASE("gdal") {
-
+TEST_CASE("gdal")
+{
     SECTION("upsampling")
     {
         std::string dataset = "test/data/tiff/ndvi_256x256_gray32f_tiled.tif";

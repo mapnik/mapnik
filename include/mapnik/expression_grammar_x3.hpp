@@ -31,14 +31,14 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 #if BOOST_VERSION >= 106700
 using transcoder_type = mapnik::transcoder;
 #else
 using transcoder_type = std::reference_wrapper<mapnik::transcoder const>;
 #endif
-
 
 namespace x3 = boost::spirit::x3;
 struct transcoder_tag;
@@ -49,6 +49,7 @@ expression_grammar_type const expression("expression");
 
 BOOST_SPIRIT_DECLARE(expression_grammar_type);
 
-}}
+} // namespace grammar
+} // namespace mapnik
 
 #endif // MAPNIK_EXPRESSIONS_GRAMMAR_X3_HPP

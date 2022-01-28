@@ -29,10 +29,10 @@
 #include <mapnik/feature.hpp>
 #include "ogr_featureset.hpp"
 
-template <typename filterT>
+template<typename filterT>
 class ogr_index_featureset : public mapnik::Featureset
 {
-public:
+  public:
     ogr_index_featureset(mapnik::context_ptr const& ctx,
                          OGRLayer& layer,
                          filterT const& filter,
@@ -41,7 +41,8 @@ public:
 
     virtual ~ogr_index_featureset();
     mapnik::feature_ptr next();
-private:
+
+  private:
     mapnik::context_ptr ctx_;
     OGRLayer& layer_;
     OGRFeatureDefn* layerdef_;

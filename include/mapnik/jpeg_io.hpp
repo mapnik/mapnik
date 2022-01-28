@@ -29,8 +29,7 @@
 #include <ostream>
 #include <cstdio>
 
-extern "C"
-{
+extern "C" {
 #include <jpeglib.h>
 }
 
@@ -41,33 +40,33 @@ namespace jpeg_detail {
 typedef struct
 {
     struct jpeg_destination_mgr pub;
-    std::ostream * out;
-    JOCTET * buffer;
+    std::ostream* out;
+    JOCTET* buffer;
 } dest_mgr;
 
-inline void init_destination( j_compress_ptr cinfo)
+inline void init_destination(j_compress_ptr cinfo)
 {
-    dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
-    dest->buffer = (JOCTET*) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-                                                         BUFFER_SIZE * sizeof(JOCTET));
+    dest_mgr* dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
+    dest->buffer = (JOCTET*)(*cinfo->mem->alloc_small)((j_common_ptr)cinfo, JPOOL_IMAGE, BUFFER_SIZE * sizeof(JOCTET));
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer = BUFFER_SIZE;
 }
 
-inline boolean empty_output_buffer (j_compress_ptr cinfo)
+inline boolean empty_output_buffer(j_compress_ptr cinfo)
 {
-    dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
+    dest_mgr* dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
     dest->out->write((char*)dest->buffer, BUFFER_SIZE);
-    if (!*(dest->out)) return boolean(0);
+    if (!*(dest->out))
+        return boolean(0);
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer = BUFFER_SIZE;
     return boolean(1);
 }
 
-inline void term_destination( j_compress_ptr cinfo)
+inline void term_destination(j_compress_ptr cinfo)
 {
-    dest_mgr * dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
-    size_t size  = BUFFER_SIZE - dest->pub.free_in_buffer;
+    dest_mgr* dest = reinterpret_cast<dest_mgr*>(cinfo->dest);
+    size_t size = BUFFER_SIZE - dest->pub.free_in_buffer;
     if (size > 0)
     {
         dest->out->write((char*)dest->buffer, size);
@@ -75,12 +74,12 @@ inline void term_destination( j_compress_ptr cinfo)
     dest->out->flush();
 }
 
-}
+} // namespace jpeg_detail
 
 namespace mapnik {
 
-template <typename T1, typename T2>
-void save_as_jpeg(T1 & file,int quality, T2 const& image)
+template<typename T1, typename T2>
+void save_as_jpeg(T1& file, int quality, T2 const& image)
 {
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -91,15 +90,16 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
 
-    cinfo.dest = (struct jpeg_destination_mgr *)(*cinfo.mem->alloc_small)
-        ((j_common_ptr) &cinfo, JPOOL_PERMANENT, sizeof(jpeg_detail::dest_mgr));
-    jpeg_detail::dest_mgr * dest = reinterpret_cast<jpeg_detail::dest_mgr*>(cinfo.dest);
+    cinfo.dest = (struct jpeg_destination_mgr*)(*cinfo.mem->alloc_small)((j_common_ptr)&cinfo,
+                                                                         JPOOL_PERMANENT,
+                                                                         sizeof(jpeg_detail::dest_mgr));
+    jpeg_detail::dest_mgr* dest = reinterpret_cast<jpeg_detail::dest_mgr*>(cinfo.dest);
     dest->pub.init_destination = jpeg_detail::init_destination;
     dest->pub.empty_output_buffer = jpeg_detail::empty_output_buffer;
     dest->pub.term_destination = jpeg_detail::term_destination;
     dest->out = &file;
 
-    //jpeg_stdio_dest(&cinfo, fp);
+    // jpeg_stdio_dest(&cinfo, fp);
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
@@ -108,26 +108,26 @@ void save_as_jpeg(T1 & file,int quality, T2 const& image)
     jpeg_set_quality(&cinfo, quality, boolean(1));
     jpeg_start_compress(&cinfo, boolean(1));
     JSAMPROW row_pointer[1];
-    JSAMPLE* row=reinterpret_cast<JSAMPLE*>( ::operator new (sizeof(JSAMPLE) * width*3));
+    JSAMPLE* row = reinterpret_cast<JSAMPLE*>(::operator new(sizeof(JSAMPLE) * width * 3));
     while (cinfo.next_scanline < cinfo.image_height)
     {
-        const unsigned* imageRow=image.get_row(cinfo.next_scanline);
-        int index=0;
-        for (int i=0;i<width;++i)
+        const unsigned* imageRow = image.get_row(cinfo.next_scanline);
+        int index = 0;
+        for (int i = 0; i < width; ++i)
         {
-            row[index++]=(imageRow[i])&0xff;
-            row[index++]=(imageRow[i]>>8)&0xff;
-            row[index++]=(imageRow[i]>>16)&0xff;
+            row[index++] = (imageRow[i]) & 0xff;
+            row[index++] = (imageRow[i] >> 8) & 0xff;
+            row[index++] = (imageRow[i] >> 16) & 0xff;
         }
         row_pointer[0] = &row[0];
-        (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+        (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
     ::operator delete(row);
 
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
 }
-}
+} // namespace mapnik
 
 #endif
 

@@ -48,19 +48,21 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_renderer_scanline.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
-text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op,
-                              composite_mode_e halo_comp_op, double scale_factor, stroker_ptr stroker)
-    : rasterizer_(rasterizer),
-      comp_op_(comp_op),
-      halo_comp_op_(halo_comp_op),
-      scale_factor_(scale_factor),
-      glyphs_(),
-      stroker_(stroker),
-      transform_(),
-      halo_transform_()
+text_renderer::text_renderer(halo_rasterizer_e rasterizer,
+                             composite_mode_e comp_op,
+                             composite_mode_e halo_comp_op,
+                             double scale_factor,
+                             stroker_ptr stroker)
+    : rasterizer_(rasterizer)
+    , comp_op_(comp_op)
+    , halo_comp_op_(halo_comp_op)
+    , scale_factor_(scale_factor)
+    , glyphs_()
+    , stroker_(stroker)
+    , transform_()
+    , halo_transform_()
 {}
 
 void text_renderer::set_transform(agg::trans_affine const& transform)
@@ -77,7 +79,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
 {
     FT_Matrix matrix;
     FT_Vector pen;
-    FT_Error  error;
+    FT_Error error;
 
     glyphs_.clear();
     glyphs_.reserve(positions.size());
@@ -90,7 +92,7 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
         FT_Face face = glyph.face->get_face();
         if (glyph.face->is_color())
         {
-            load_flags |= FT_LOAD_COLOR ;
+            load_flags |= FT_LOAD_COLOR;
             if (face->num_fixed_sizes > 0)
             {
                 int scaled_size = static_cast<int>(glyph.format->text_size * scale_factor_);
@@ -114,10 +116,10 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
         }
 
         double size = glyph.format->text_size * scale_factor_;
-        matrix.xx = static_cast<FT_Fixed>( glyph_pos.rot.cos * 0x10000L);
+        matrix.xx = static_cast<FT_Fixed>(glyph_pos.rot.cos * 0x10000L);
         matrix.xy = static_cast<FT_Fixed>(-glyph_pos.rot.sin * 0x10000L);
-        matrix.yx = static_cast<FT_Fixed>( glyph_pos.rot.sin * 0x10000L);
-        matrix.yy = static_cast<FT_Fixed>( glyph_pos.rot.cos * 0x10000L);
+        matrix.yx = static_cast<FT_Fixed>(glyph_pos.rot.sin * 0x10000L);
+        matrix.yy = static_cast<FT_Fixed>(glyph_pos.rot.cos * 0x10000L);
 
         pixel_position pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
         pen.x = static_cast<FT_Pos>(pos.x * 64);
@@ -125,17 +127,25 @@ void text_renderer::prepare_glyphs(glyph_positions const& positions)
 
         FT_Set_Transform(face, &matrix, &pen);
         error = FT_Load_Glyph(face, glyph.glyph_index, load_flags);
-        if (error) continue;
+        if (error)
+            continue;
         FT_Glyph image;
         error = FT_Get_Glyph(face->glyph, &image);
-        if (error) continue;
+        if (error)
+            continue;
         box2d<double> bbox(0, glyph_pos.glyph.ymin(), glyph_pos.glyph.advance(), glyph_pos.glyph.ymax());
         glyphs_.emplace_back(image, *glyph.format, pos, glyph_pos.rot, size, bbox);
     }
 }
 
-template <typename T>
-void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
+template<typename T>
+void composite_bitmap(T& pixmap,
+                      FT_Bitmap* bitmap,
+                      unsigned rgba,
+                      int x,
+                      int y,
+                      double opacity,
+                      composite_mode_e comp_op)
 {
     int x_max = x + bitmap->width;
     int y_max = y + bitmap->rows;
@@ -153,28 +163,29 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
     }
 }
 
-template <typename T>
-agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap,
-                                         halo_rasterizer_e rasterizer,
-                                         composite_mode_e comp_op,
-                                         composite_mode_e halo_comp_op,
-                                         double scale_factor,
-                                         stroker_ptr stroker)
-    : text_renderer(rasterizer, comp_op, halo_comp_op, scale_factor, stroker), pixmap_(pixmap)
+template<typename T>
+agg_text_renderer<T>::agg_text_renderer(pixmap_type& pixmap,
+                                        halo_rasterizer_e rasterizer,
+                                        composite_mode_e comp_op,
+                                        composite_mode_e halo_comp_op,
+                                        double scale_factor,
+                                        stroker_ptr stroker)
+    : text_renderer(rasterizer, comp_op, halo_comp_op, scale_factor, stroker)
+    , pixmap_(pixmap)
 {}
 
-template <typename T>
+template<typename T>
 void agg_text_renderer<T>::render(glyph_positions const& pos)
 {
     prepare_glyphs(pos);
-    FT_Error  error;
+    FT_Error error;
     FT_Vector start;
     FT_Vector start_halo;
     int height = pixmap_.height();
     pixel_position const& base_point = pos.get_base_point();
 
-    start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
+    start.x = static_cast<FT_Pos>(base_point.x * (1 << 6));
+    start.y = static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
     start_halo = start;
     start.x += transform_.tx * 64;
     start.y += transform_.ty * 64;
@@ -182,20 +193,20 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     start_halo.y += halo_transform_.ty * 64;
 
     FT_Matrix halo_matrix;
-    halo_matrix.xx = halo_transform_.sx  * 0x10000L;
+    halo_matrix.xx = halo_transform_.sx * 0x10000L;
     halo_matrix.xy = halo_transform_.shx * 0x10000L;
-    halo_matrix.yy = halo_transform_.sy  * 0x10000L;
+    halo_matrix.yy = halo_transform_.sy * 0x10000L;
     halo_matrix.yx = halo_transform_.shy * 0x10000L;
 
     FT_Matrix matrix;
-    matrix.xx = transform_.sx  * 0x10000L;
+    matrix.xx = transform_.sx * 0x10000L;
     matrix.xy = transform_.shx * 0x10000L;
-    matrix.yy = transform_.sy  * 0x10000L;
+    matrix.yy = transform_.sy * 0x10000L;
     matrix.yx = transform_.shy * 0x10000L;
 
     // default formatting
     double halo_radius = 0;
-    color black(0,0,0);
+    color black(0, 0, 0);
     unsigned fill = black.rgba();
     unsigned halo_fill = black.rgba();
     double text_opacity = 1.0;
@@ -207,7 +218,8 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         halo_opacity = glyph.properties.halo_opacity;
         halo_radius = glyph.properties.halo_radius * scale_factor_;
         // make sure we've got reasonable values.
-        if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
+        if (halo_radius <= 0.0 || halo_radius > 1024.0)
+            continue;
         FT_Glyph g;
         error = FT_Glyph_Copy(glyph.image, &g);
         if (!error)
@@ -244,16 +256,14 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
                 {
                     pixel_position render_pos(base_point);
-                    image_rgba8 glyph_image(render_glyph_image(glyph,
-                                                               bit->bitmap,
-                                                               transform_,
-                                                               render_pos));
+                    image_rgba8 glyph_image(render_glyph_image(glyph, bit->bitmap, transform_, render_pos));
                     const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
                     render_halo<pixel_size>(glyph_image.bytes(),
                                             glyph_image.width(),
                                             glyph_image.height(),
                                             halo_fill,
-                                            render_pos.x, render_pos.y,
+                                            render_pos.x,
+                                            render_pos.y,
                                             halo_radius,
                                             halo_opacity,
                                             halo_comp_op_);
@@ -276,16 +286,16 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
     }
 
     // render actual text
-    for (auto & glyph : glyphs_)
+    for (auto& glyph : glyphs_)
     {
         fill = glyph.properties.fill.rgba();
         text_opacity = glyph.properties.text_opacity;
 
         FT_Glyph_Transform(glyph.image, &matrix, &start);
         error = 0;
-        if ( glyph.image->format != FT_GLYPH_FORMAT_BITMAP )
+        if (glyph.image->format != FT_GLYPH_FORMAT_BITMAP)
         {
-            error = FT_Glyph_To_Bitmap(&glyph.image ,FT_RENDER_MODE_NORMAL, 0, 1);
+            error = FT_Glyph_To_Bitmap(&glyph.image, FT_RENDER_MODE_NORMAL, 0, 1);
         }
         if (error == 0)
         {
@@ -296,54 +306,39 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 int x = base_point.x + glyph.pos.x;
                 int y = base_point.y - glyph.pos.y;
                 agg::trans_affine transform(
-                    glyph_transform(transform_,
-                                    bit->bitmap.rows,
-                                    x, y,
-                                    -glyph.rot.angle(),
-                                    glyph.bbox));
-                composite_color_glyph(pixmap_,
-                                      bit->bitmap,
-                                      transform,
-                                      text_opacity,
-                                      comp_op_);
+                  glyph_transform(transform_, bit->bitmap.rows, x, y, -glyph.rot.angle(), glyph.bbox));
+                composite_color_glyph(pixmap_, bit->bitmap, transform, text_opacity, comp_op_);
             }
             else
             {
-                composite_bitmap(pixmap_,
-                                 &bit->bitmap,
-                                 fill,
-                                 bit->left,
-                                 height - bit->top,
-                                 text_opacity,
-                                 comp_op_);
+                composite_bitmap(pixmap_, &bit->bitmap, fill, bit->left, height - bit->top, text_opacity, comp_op_);
             }
         }
         FT_Done_Glyph(glyph.image);
     }
-
 }
 
-template <typename T>
+template<typename T>
 void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer feature_id)
 {
     prepare_glyphs(pos);
-    FT_Error  error;
+    FT_Error error;
     FT_Vector start;
     unsigned height = pixmap_.height();
     pixel_position const& base_point = pos.get_base_point();
-    start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
+    start.x = static_cast<FT_Pos>(base_point.x * (1 << 6));
+    start.y = static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
     start.x += transform_.tx * 64;
     start.y += transform_.ty * 64;
 
     // now render transformed glyphs
     double halo_radius = 0.0;
     FT_Matrix halo_matrix;
-    halo_matrix.xx = halo_transform_.sx  * 0x10000L;
+    halo_matrix.xx = halo_transform_.sx * 0x10000L;
     halo_matrix.xy = halo_transform_.shx * 0x10000L;
-    halo_matrix.yy = halo_transform_.sy  * 0x10000L;
+    halo_matrix.yy = halo_transform_.sy * 0x10000L;
     halo_matrix.yx = halo_transform_.shy * 0x10000L;
-    for (auto & glyph : glyphs_)
+    for (auto& glyph : glyphs_)
     {
         halo_radius = glyph.properties.halo_radius * scale_factor_;
         FT_Glyph_Transform(glyph.image, &halo_matrix, &start);
@@ -354,16 +349,14 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
             if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
             {
                 pixel_position render_pos(base_point);
-                image_rgba8 glyph_image(render_glyph_image(glyph,
-                                                           bit->bitmap,
-                                                           transform_,
-                                                           render_pos));
+                image_rgba8 glyph_image(render_glyph_image(glyph, bit->bitmap, transform_, render_pos));
                 const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
                 render_halo_id<pixel_size>(glyph_image.bytes(),
                                            glyph_image.width(),
                                            glyph_image.height(),
                                            feature_id,
-                                           render_pos.x, render_pos.y,
+                                           render_pos.x,
+                                           render_pos.y,
                                            static_cast<int>(halo_radius));
             }
             else
@@ -381,10 +374,9 @@ void grid_text_renderer<T>::render(glyph_positions const& pos, value_integer fea
     }
 }
 
-
-template <typename T>
-template <std::size_t PixelWidth>
-void agg_text_renderer<T>::render_halo(unsigned char *buffer,
+template<typename T>
+template<std::size_t PixelWidth>
+void agg_text_renderer<T>::render_halo(unsigned char* buffer,
                                        unsigned width,
                                        unsigned height,
                                        unsigned rgba,
@@ -403,17 +395,41 @@ void agg_text_renderer<T>::render_halo(unsigned char *buffer,
                 int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
                 if (gray)
                 {
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1,   y+y1-1, rgba, gray*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1+1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_,
+                                            comp_op,
+                                            x + x1 - 1,
+                                            y + y1 - 1,
+                                            rgba,
+                                            gray * halo_radius * halo_radius,
+                                            opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x + x1, y + y1 - 1, rgba, gray * halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_,
+                                            comp_op,
+                                            x + x1 + 1,
+                                            y + y1 - 1,
+                                            rgba,
+                                            gray * halo_radius * halo_radius,
+                                            opacity);
 
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1,   rgba, gray*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1,   y+y1,   rgba, gray, opacity);
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1+1, y+y1,   rgba, gray*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x + x1 - 1, y + y1, rgba, gray * halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x + x1, y + y1, rgba, gray, opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x + x1 + 1, y + y1, rgba, gray * halo_radius, opacity);
 
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1-1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1,   y+y1+1, rgba, gray*halo_radius, opacity);
-                    mapnik::composite_pixel(pixmap_, comp_op, x+x1+1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_,
+                                            comp_op,
+                                            x + x1 - 1,
+                                            y + y1 + 1,
+                                            rgba,
+                                            gray * halo_radius * halo_radius,
+                                            opacity);
+                    mapnik::composite_pixel(pixmap_, comp_op, x + x1, y + y1 + 1, rgba, gray * halo_radius, opacity);
+                    mapnik::composite_pixel(pixmap_,
+                                            comp_op,
+                                            x + x1 + 1,
+                                            y + y1 + 1,
+                                            rgba,
+                                            gray * halo_radius * halo_radius,
+                                            opacity);
                 }
             }
         }
@@ -427,18 +443,18 @@ void agg_text_renderer<T>::render_halo(unsigned char *buffer,
                 int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
                 if (gray)
                 {
-                    for (int n=-halo_radius; n <=halo_radius; ++n)
-                        for (int m=-halo_radius; m <= halo_radius; ++m)
-                            mapnik::composite_pixel(pixmap_, comp_op, x+x1+m, y+y1+n, rgba, gray, opacity);
+                    for (int n = -halo_radius; n <= halo_radius; ++n)
+                        for (int m = -halo_radius; m <= halo_radius; ++m)
+                            mapnik::composite_pixel(pixmap_, comp_op, x + x1 + m, y + y1 + n, rgba, gray, opacity);
                 }
             }
         }
     }
 }
 
-template <typename T>
-template <std::size_t PixelWidth>
-void grid_text_renderer<T>::render_halo_id(unsigned char *buffer,
+template<typename T>
+template<std::size_t PixelWidth>
+void grid_text_renderer<T>::render_halo_id(unsigned char* buffer,
                                            unsigned width,
                                            unsigned height,
                                            mapnik::value_integer feature_id,
@@ -453,20 +469,19 @@ void grid_text_renderer<T>::render_halo_id(unsigned char *buffer,
             int gray = buffer[(y * width + x) * PixelWidth + PixelWidth - 1];
             if (gray)
             {
-                for (int n = -halo_radius; n <=halo_radius; ++n)
+                for (int n = -halo_radius; n <= halo_radius; ++n)
                     for (int m = -halo_radius; m <= halo_radius; ++m)
-                        pixmap_.setPixel(x+x1+m,y+y1+n,feature_id);
+                        pixmap_.setPixel(x + x1 + m, y + y1 + n, feature_id);
             }
         }
     }
 }
 
-template <typename T>
-grid_text_renderer<T>::grid_text_renderer(pixmap_type &pixmap,
-                                          composite_mode_e comp_op,
-                                          double scale_factor)
-    : text_renderer(HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor),
-      pixmap_(pixmap) {}
+template<typename T>
+grid_text_renderer<T>::grid_text_renderer(pixmap_type& pixmap, composite_mode_e comp_op, double scale_factor)
+    : text_renderer(HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor)
+    , pixmap_(pixmap)
+{}
 
 template class agg_text_renderer<image_rgba8>;
 template class grid_text_renderer<grid>;

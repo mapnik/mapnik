@@ -27,37 +27,34 @@
 #include "report.hpp"
 #include "renderer.hpp"
 
-namespace visual_tests
-{
+namespace visual_tests {
 
 class runner
 {
     using path_type = boost::filesystem::path;
     using files_iterator = std::vector<path_type>::const_iterator;
 
-public:
+  public:
     using renderer_container = std::vector<renderer_type>;
 
-    runner(path_type const & styles_dir,
-           config const & cfg,
+    runner(path_type const& styles_dir,
+           config const& cfg,
            std::size_t iterations,
            std::size_t fail_limit,
            std::size_t jobs,
-           renderer_container const & renderers);
+           renderer_container const& renderers);
 
-    result_list test_all(report_type & report) const;
-    result_list test(std::vector<std::string> const & style_names, report_type & report) const;
+    result_list test_all(report_type& report) const;
+    result_list test(std::vector<std::string> const& style_names, report_type& report) const;
 
-private:
-    result_list test_parallel(std::vector<path_type> const & files, report_type & report, std::size_t jobs) const;
+  private:
+    result_list test_parallel(std::vector<path_type> const& files, report_type& report, std::size_t jobs) const;
     result_list test_range(files_iterator begin,
                            files_iterator end,
                            std::reference_wrapper<report_type> report,
                            std::reference_wrapper<std::atomic<std::size_t>> fail_limit) const;
-    result_list test_one(path_type const & style_path,
-                         report_type & report,
-                         std::atomic<std::size_t> & fail_limit) const;
-    void parse_params(mapnik::parameters const & params, config & cfg) const;
+    result_list test_one(path_type const& style_path, report_type& report, std::atomic<std::size_t>& fail_limit) const;
+    void parse_params(mapnik::parameters const& params, config& cfg) const;
 
     const path_type styles_dir_;
     const config defaults_;
@@ -67,6 +64,6 @@ private:
     const renderer_container renderers_;
 };
 
-}
+} // namespace visual_tests
 
-#endif //VISUAL_TEST_RUNNER_HPP
+#endif // VISUAL_TEST_RUNNER_HPP

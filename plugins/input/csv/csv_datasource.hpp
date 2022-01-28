@@ -48,13 +48,18 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <string>
 
-template <std::size_t Max, std::size_t Min>
-struct csv_linear : boost::geometry::index::linear<Max,Min> {};
+template<std::size_t Max, std::size_t Min>
+struct csv_linear : boost::geometry::index::linear<Max, Min>
+{};
 
-namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree {
+namespace boost {
+namespace geometry {
+namespace index {
+namespace detail {
+namespace rtree {
 
-template <std::size_t Max, std::size_t Min>
-struct options_type<csv_linear<Max,Min> >
+template<std::size_t Max, std::size_t Min>
+struct options_type<csv_linear<Max, Min>>
 {
     using type = options<csv_linear<Max, Min>,
                          insert_default_tag,
@@ -68,29 +73,34 @@ struct options_type<csv_linear<Max,Min> >
 
 #endif
 };
-}}}}}
+} // namespace rtree
+} // namespace detail
+} // namespace index
+} // namespace geometry
+} // namespace boost
 
 class csv_datasource : public mapnik::datasource,
                        private csv_utils::csv_file_parser
 {
-public:
+  public:
     using box_type = mapnik::box2d<double>;
     using item_type = std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>;
-    using spatial_index_type = boost::geometry::index::rtree<item_type,csv_linear<16,4>>;
+    using spatial_index_type = boost::geometry::index::rtree<item_type, csv_linear<16, 4>>;
 
     csv_datasource(mapnik::parameters const& params);
-    virtual ~csv_datasource ();
+    virtual ~csv_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-private:
-    void parse_csv(std::istream & );
-    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const & values);
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type_impl(std::istream & ) const;
+
+  private:
+    void parse_csv(std::istream&);
+    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const& values);
+    boost::optional<mapnik::datasource_geometry_t> get_geometry_type_impl(std::istream&) const;
 
     mapnik::layer_descriptor desc_;
     std::string filename_;

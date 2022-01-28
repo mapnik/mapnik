@@ -35,10 +35,9 @@
 // sqlite
 #include "sqlite_resultset.hpp"
 
-
 class sqlite_featureset : public mapnik::Featureset
 {
-public:
+  public:
     sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                       mapnik::context_ptr const& ctx,
                       std::string const& encoding,
@@ -50,7 +49,7 @@ public:
     virtual ~sqlite_featureset();
     mapnik::feature_ptr next();
 
-private:
+  private:
     std::shared_ptr<sqlite_resultset> rs_;
     mapnik::context_ptr ctx_;
     const std::unique_ptr<mapnik::transcoder> tr_;
@@ -59,7 +58,6 @@ private:
     bool twkb_encoding_;
     bool spatial_index_;
     bool using_subquery_;
-
 };
 
 #endif // MAPNIK_SQLITE_FEATURESET_HPP
