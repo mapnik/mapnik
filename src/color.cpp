@@ -47,14 +47,22 @@ std::string color::to_string() const
     boost::spirit::karma::uint_generator<uint8_t, 10> color_;
     std::string str;
     std::back_insert_iterator<std::string> sink(str);
-    karma::generate(sink,
-                    eps(alpha() < 255)
-                        // begin grammar
-                        << "rgba(" << color_(red()) << ',' << color_(green()) << ',' << color_(blue()) << ','
-                        << double_(alpha() / 255.0) << ')' |
-                      "rgb(" << color_(red()) << ',' << color_(green()) << ',' << color_(blue()) << ')'
+    // clang-format off
+    karma::generate(sink, eps(alpha() < 255)
+                    // begin grammar
+                    << "rgba("
+                    << color_(red()) << ','
+                    << color_(green()) << ','
+                    << color_(blue()) << ','
+                    << double_(alpha() / 255.0) << ')'
+                    |
+                    "rgb("
+                    << color_(red()) << ','
+                    << color_(green()) << ','
+                    << color_(blue()) << ')'
                     // end grammar
     );
+    // clang-format on
     return str;
 }
 
@@ -66,12 +74,17 @@ std::string color::to_hex_string() const
     boost::spirit::karma::right_align_type right_align;
     std::string str;
     std::back_insert_iterator<std::string> sink(str);
+    // clang-format off
     karma::generate(sink,
                     // begin grammar
-                    '#' << right_align(2, '0')[hex(red())] << right_align(2, '0')[hex(green())]
-                        << right_align(2, '0')[hex(blue())] << eps(alpha() < 255) << right_align(2, '0')[hex(alpha())]
+                    '#'
+                    << right_align(2,'0')[hex(red())]
+                    << right_align(2,'0')[hex(green())]
+                    << right_align(2,'0')[hex(blue())]
+                    << eps(alpha() < 255) << right_align(2,'0')[hex(alpha())]
                     // end grammar
     );
+    // clang-format on
     return str;
 }
 
