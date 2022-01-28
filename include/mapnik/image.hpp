@@ -35,72 +35,68 @@ struct MAPNIK_DECL buffer
 {
     explicit buffer(std::size_t size);
     explicit buffer(unsigned char* data, std::size_t size);
-    buffer(buffer && rhs) noexcept;
+    buffer(buffer&& rhs) noexcept;
     buffer(buffer const& rhs);
     ~buffer();
     buffer& operator=(buffer rhs);
-    inline bool operator!() const {return (data_ == nullptr)? true : false;}
-    inline unsigned char* data() {return data_;}
-    inline unsigned char const* data() const {return data_;}
-    inline std::size_t size() const {return size_;}
-private:
-    void swap(buffer & rhs);
+    inline bool operator!() const { return (data_ == nullptr) ? true : false; }
+    inline unsigned char* data() { return data_; }
+    inline unsigned char const* data() const { return data_; }
+    inline std::size_t size() const { return size_; }
+
+  private:
+    void swap(buffer& rhs);
     std::size_t size_;
     unsigned char* data_;
     bool owns_;
 };
 
-template <std::size_t max_size>
+template<std::size_t max_size>
 struct image_dimensions
 {
     image_dimensions(int width, int height);
     std::size_t width() const;
     std::size_t height() const;
-private:
+
+  private:
     std::size_t width_;
     std::size_t height_;
 };
 
-} // end ns detail
+} // namespace detail
 
-template <typename T>
+template<typename T>
 class image
 {
-public:
+  public:
     using pixel = T;
     using pixel_type = typename T::type;
     using iterator = pixel_type*;
     using const_iterator = pixel_type const*;
     static constexpr image_dtype dtype = T::id;
     static constexpr std::size_t pixel_size = sizeof(pixel_type);
-private:
+
+  private:
     detail::image_dimensions<4294836225> dimensions_;
     detail::buffer buffer_;
     double offset_;
     double scaling_;
     bool premultiplied_alpha_;
     bool painted_;
-public:
+
+  public:
     image();
-    image(int width,
-          int height,
-          bool initialize = true,
-          bool premultiplied = false,
-          bool painted = false);
-    image(int width,
-          int height,
-          unsigned char* data,
-          bool premultiplied = false,
-          bool painted = false);
+    image(int width, int height, bool initialize = true, bool premultiplied = false, bool painted = false);
+    image(int width, int height, unsigned char* data, bool premultiplied = false, bool painted = false);
     image(image<T> const& rhs);
-    image(image<T> && rhs) noexcept;
+    image(image<T>&& rhs) noexcept;
     image<T>& operator=(image<T> rhs);
     bool operator==(image<T> const& rhs) const;
     bool operator<(image<T> const& rhs) const;
 
-    void swap(image<T> & rhs);
-    pixel_type& operator() (std::size_t i, std::size_t j);
-    pixel_type const& operator() (std::size_t i, std::size_t j) const;
+    void swap(image<T>& rhs);
+    pixel_type& operator()(std::size_t i, std::size_t j);
+    pixel_type const& operator()(std::size_t i, std::size_t j) const;
     std::size_t width() const;
     std::size_t height() const;
     std::size_t size() const;
@@ -146,6 +142,6 @@ using image_gray64 = image<gray64_t>;
 using image_gray64s = image<gray64s_t>;
 using image_gray64f = image<gray64f_t>;
 
-} // end ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_HPP

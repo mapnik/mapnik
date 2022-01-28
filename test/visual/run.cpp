@@ -31,16 +31,17 @@
 
 #include "cleanup.hpp" // run_cleanup()
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #ifdef MAPNIK_LOG
 using log_levels_map = std::map<std::string, mapnik::logger::severity_type>;
 
-log_levels_map log_levels
-{
-    { "debug", mapnik::logger::severity_type::debug },
-    { "warn",  mapnik::logger::severity_type::warn },
-    { "error", mapnik::logger::severity_type::error },
-    { "none",  mapnik::logger::severity_type::none }
-};
+log_levels_map log_levels{{"debug", mapnik::logger::severity_type::debug},
+                          {"warn", mapnik::logger::severity_type::warn},
+                          {"error", mapnik::logger::severity_type::error},
+                          {"none", mapnik::logger::severity_type::none}};
 #endif
 
 #if defined(_WIN32)
@@ -50,9 +51,8 @@ log_levels_map log_levels
 using namespace visual_tests;
 namespace po = boost::program_options;
 
-runner::renderer_container create_renderers(po::variables_map const & args,
-                                            boost::filesystem::path const & output_dir,
-                                            bool force_append = false)
+runner::renderer_container
+  create_renderers(po::variables_map const& args, boost::filesystem::path const& output_dir, bool force_append = false)
 {
     boost::filesystem::path reference_dir(args["images-dir"].as<std::string>());
     bool overwrite = args.count("overwrite");
@@ -114,6 +114,7 @@ int main(int argc, char** argv)
     SetConsoleOutputCP(CP_UTF8);
 #endif
     po::options_description desc("visual test runner");
+    // clang-format off
     desc.add_options()
         ("help,h", "produce usage message")
         ("verbose,v", "verbose output")
@@ -155,7 +156,7 @@ int main(int argc, char** argv)
         (grid_renderer::name, "render with Grid renderer")
 #endif
         ;
-
+    // clang-format on
     po::positional_options_description p;
     p.add("styles", -1);
     po::variables_map vm;
@@ -202,7 +203,8 @@ int main(int argc, char** argv)
                vm["jobs"].as<std::size_t>(),
                create_renderers(vm, output_dir));
     bool show_duration = vm.count("duration");
-    report_type report(vm.count("verbose") ? report_type((console_report(show_duration))) : report_type((console_short_report(show_duration))));
+    report_type report(vm.count("verbose") ? report_type((console_report(show_duration)))
+                                           : report_type((console_short_report(show_duration))));
     result_list results;
 
     try
@@ -215,8 +217,7 @@ int main(int argc, char** argv)
         {
             results = run.test_all(report);
         }
-    }
-    catch (std::exception & e)
+    } catch (std::exception& e)
     {
         std::cerr << "Error running tests: " << e.what() << std::endl;
         return 1;

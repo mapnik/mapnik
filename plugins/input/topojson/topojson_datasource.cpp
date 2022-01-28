@@ -46,28 +46,16 @@ DATASOURCE_PLUGIN(topojson_datasource)
 
 struct attr_value_converter
 {
-    mapnik::eAttributeType operator() (mapnik::value_integer /*val*/) const
-    {
-        return mapnik::Integer;
-    }
+    mapnik::eAttributeType operator()(mapnik::value_integer /*val*/) const { return mapnik::Integer; }
 
-    mapnik::eAttributeType operator() (double /*val*/) const
-    {
-        return mapnik::Double;
-    }
+    mapnik::eAttributeType operator()(double /*val*/) const { return mapnik::Double; }
 
-    mapnik::eAttributeType operator() (float /*val*/) const
-    {
-        return mapnik::Double;
-    }
+    mapnik::eAttributeType operator()(float /*val*/) const { return mapnik::Double; }
 
-    mapnik::eAttributeType operator() (bool /*val*/) const
-    {
-        return mapnik::Boolean;
-    }
+    mapnik::eAttributeType operator()(bool /*val*/) const { return mapnik::Boolean; }
     // string, object, array
-    template <typename T>
-    mapnik::eAttributeType operator() (T const& /*val*/) const
+    template<typename T>
+    mapnik::eAttributeType operator()(T const& /*val*/) const
     {
         return mapnik::String;
     }
@@ -75,32 +63,32 @@ struct attr_value_converter
 
 struct geometry_type_visitor
 {
-    int operator() (mapnik::topojson::point const&) const
+    int operator()(mapnik::topojson::point const&) const
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Point);
     }
-    int operator() (mapnik::topojson::multi_point const&) const
+    int operator()(mapnik::topojson::multi_point const&) const
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Point);
     }
-    int operator() (mapnik::topojson::linestring const&) const
+    int operator()(mapnik::topojson::linestring const&) const
     {
         return static_cast<int>(mapnik::datasource_geometry_t::LineString);
     }
-    int operator() (mapnik::topojson::multi_linestring const&) const
+    int operator()(mapnik::topojson::multi_linestring const&) const
     {
         return static_cast<int>(mapnik::datasource_geometry_t::LineString);
     }
-    int operator() (mapnik::topojson::polygon const&) const
+    int operator()(mapnik::topojson::polygon const&) const
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
-    int operator() (mapnik::topojson::multi_polygon const&) const
+    int operator()(mapnik::topojson::multi_polygon const&) const
     {
         return static_cast<int>(mapnik::datasource_geometry_t::Polygon);
     }
-    template <typename T>
-    int operator() (T const& ) const
+    template<typename T>
+    int operator()(T const&) const
     {
         return 0;
     }
@@ -108,38 +96,38 @@ struct geometry_type_visitor
 
 struct collect_attributes_visitor
 {
-    mapnik::layer_descriptor & desc_;
-    collect_attributes_visitor(mapnik::layer_descriptor & desc):
-      desc_(desc) {}
+    mapnik::layer_descriptor& desc_;
+    collect_attributes_visitor(mapnik::layer_descriptor& desc)
+        : desc_(desc)
+    {}
 
     // no-op
-    void operator() (mapnik::topojson::empty) {}
+    void operator()(mapnik::topojson::empty) {}
     //
-    template <typename GeomType>
-    void operator() (GeomType const& g)
+    template<typename GeomType>
+    void operator()(GeomType const& g)
     {
         if (g.props)
         {
             for (auto const& p : *g.props)
             {
-                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(p),
-                                                                  mapnik::util::apply_visitor(attr_value_converter(),
-                                                                                              std::get<1>(p))));
+                desc_.add_descriptor(
+                  mapnik::attribute_descriptor(std::get<0>(p),
+                                               mapnik::util::apply_visitor(attr_value_converter(), std::get<1>(p))));
             }
         }
     }
 };
 
 topojson_datasource::topojson_datasource(parameters const& params)
-  : datasource(params),
-    type_(datasource::Vector),
-    desc_(topojson_datasource::name(),
-          *params.get<std::string>("encoding","utf-8")),
-    filename_(),
-    inline_string_(),
-    extent_(),
-    tr_(new mapnik::transcoder(*params.get<std::string>("encoding","utf-8"))),
-    tree_(nullptr)
+    : datasource(params)
+    , type_(datasource::Vector)
+    , desc_(topojson_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
+    , filename_()
+    , inline_string_()
+    , extent_()
+    , tr_(new mapnik::transcoder(*params.get<std::string>("encoding", "utf-8")))
+    , tree_(nullptr)
 {
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (inline_string)
@@ -149,7 +137,8 @@ topojson_datasource::topojson_datasource(parameters const& params)
     else
     {
         boost::optional<std::string> file = params.get<std::string>("file");
-        if (!file) throw mapnik::datasource_exception("TopoJSON Plugin: missing <file> parameter");
+        if (!file)
+            throw mapnik::datasource_exception("TopoJSON Plugin: missing <file> parameter");
 
         boost::optional<std::string> base = params.get<std::string>("base");
         if (base)
@@ -171,11 +160,12 @@ topojson_datasource::topojson_datasource(parameters const& params)
         std::string file_buffer;
         file_buffer.resize(file.size());
         auto count = std::fread(&file_buffer[0], file.size(), 1, file.get());
-        if (count == 1) parse_topojson(file_buffer.c_str());
+        if (count == 1)
+            parse_topojson(file_buffer.c_str());
     }
 }
 
-template <typename T>
+template<typename T>
 void topojson_datasource::parse_topojson(T const& buffer)
 {
     auto itr = buffer;
@@ -184,8 +174,7 @@ void topojson_datasource::parse_topojson(T const& buffer)
     try
     {
         boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type(), topo_);
-    }
-    catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
+    } catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
     {
         std::clog << "failed to parse TopoJSON..." << std::endl;
         std::clog << ex.what() << std::endl;
@@ -194,7 +183,7 @@ void topojson_datasource::parse_topojson(T const& buffer)
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + filename_ + "'");
     }
 
-    using values_container = std::vector< std::pair<box_type, std::size_t> >;
+    using values_container = std::vector<std::pair<box_type, std::size_t>>;
     values_container values;
     values.reserve(topo_.geometries.size());
 
@@ -210,7 +199,7 @@ void topojson_datasource::parse_topojson(T const& buffer)
                 first = false;
                 extent_ = box;
                 collect_attributes_visitor assessor(desc_);
-                mapnik::util::apply_visitor( std::ref(assessor), geom);
+                mapnik::util::apply_visitor(std::ref(assessor), geom);
             }
             else
             {
@@ -225,9 +214,9 @@ void topojson_datasource::parse_topojson(T const& buffer)
     tree_ = std::make_unique<spatial_index_type>(values);
 }
 
-topojson_datasource::~topojson_datasource() { }
+topojson_datasource::~topojson_datasource() {}
 
-const char * topojson_datasource::name()
+const char* topojson_datasource::name()
 {
     return "topojson";
 }
@@ -240,7 +229,7 @@ boost::optional<mapnik::datasource_geometry_t> topojson_datasource::get_geometry
     for (std::size_t i = 0; i < num_features && i < 5; ++i)
     {
         mapnik::topojson::geometry const& geom = topo_.geometries[i];
-        int type = mapnik::util::apply_visitor(geometry_type_visitor(),geom);
+        int type = mapnik::util::apply_visitor(geometry_type_visitor(), geom);
         if (type > 0)
         {
             if (multi_type > 0 && multi_type != type)
@@ -282,7 +271,7 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
         topojson_featureset::array_type index_array;
         if (tree_)
         {
-            tree_->query(boost::geometry::index::intersects(box),std::back_inserter(index_array));
+            tree_->query(boost::geometry::index::intersects(box), std::back_inserter(index_array));
             return std::make_shared<topojson_featureset>(topo_, *tr_, std::move(index_array));
         }
     }

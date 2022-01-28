@@ -45,25 +45,18 @@ extern "C" {
 
 class prepared_index_statement : mapnik::util::noncopyable
 {
-
-public:
+  public:
     prepared_index_statement(std::shared_ptr<sqlite_connection> ds, std::string const& sql)
-        : ds_(ds),
-          stmt_(0)
+        : ds_(ds)
+        , stmt_(0)
     {
-
-        const int rc = sqlite3_prepare_v2(*(*ds_),
-                                          sql.c_str(),
-                                          -1,
-                                          &stmt_,
-                                          0);
+        const int rc = sqlite3_prepare_v2(*(*ds_), sql.c_str(), -1, &stmt_, 0);
 
         if (rc != SQLITE_OK)
         {
             std::ostringstream index_error;
-            index_error << "Sqlite Plugin: auto-index table creation failed: '"
-                        << sqlite3_errmsg(*(*ds_)) << "' query was: "
-                        << sql;
+            index_error << "Sqlite Plugin: auto-index table creation failed: '" << sqlite3_errmsg(*(*ds_))
+                        << "' query was: " << sql;
 
             throw mapnik::datasource_exception(index_error.str());
         }
@@ -78,13 +71,11 @@ public:
             {
                 if (*(*ds_))
                 {
-                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:"
-                                             << sqlite3_errmsg(*(*ds_));
+                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:" << sqlite3_errmsg(*(*ds_));
                 }
                 else
                 {
-                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:"
-                                             << res;
+                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:" << res;
                 }
             }
         }
@@ -96,7 +87,6 @@ public:
         {
             throw mapnik::datasource_exception("SQLite Plugin: invalid value for for key field while generating index");
         }
-
     }
 
     void bind(mapnik::box2d<double> const& bbox)
@@ -110,7 +100,7 @@ public:
         }
     }
 
-    bool step_next ()
+    bool step_next()
     {
         const int status = sqlite3_step(stmt_);
         if (status != SQLITE_DONE)
@@ -132,9 +122,9 @@ public:
         return true;
     }
 
-private:
+  private:
     std::shared_ptr<sqlite_connection> ds_;
-    sqlite3_stmt * stmt_;
+    sqlite3_stmt* stmt_;
 };
 
 #endif // MAPNIK_SQLITE_PREPARED_HPP

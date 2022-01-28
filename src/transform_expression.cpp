@@ -35,82 +35,59 @@ struct transform_node_to_expression_string
     std::ostringstream& os_;
 
     transform_node_to_expression_string(std::ostringstream& os)
-        : os_(os) {}
+        : os_(os)
+    {}
 
-    void operator() (identity_node const&) const
+    void operator()(identity_node const&) const {}
+
+    void operator()(matrix_node const& node)
     {
+        os_ << "matrix(" << to_expression_string(node.a_) << ", " << to_expression_string(node.b_) << ", "
+            << to_expression_string(node.c_) << ", " << to_expression_string(node.d_) << ", "
+            << to_expression_string(node.e_) << ", " << to_expression_string(node.f_) << ")";
     }
 
-    void operator() (matrix_node const& node)
-    {
-        os_ << "matrix("
-            << to_expression_string(node.a_) << ", "
-            << to_expression_string(node.b_) << ", "
-            << to_expression_string(node.c_) << ", "
-            << to_expression_string(node.d_) << ", "
-            << to_expression_string(node.e_) << ", "
-            << to_expression_string(node.f_) << ")";
-    }
-
-    void operator() (translate_node const& node)
+    void operator()(translate_node const& node)
     {
         if (detail::is_null_node(node.ty_))
         {
-            os_ << "translate("
-                << to_expression_string(node.tx_) << ")";
+            os_ << "translate(" << to_expression_string(node.tx_) << ")";
         }
         else
         {
-            os_ << "translate("
-                << to_expression_string(node.tx_) << ", "
-                << to_expression_string(node.ty_) << ")";
+            os_ << "translate(" << to_expression_string(node.tx_) << ", " << to_expression_string(node.ty_) << ")";
         }
     }
 
-    void operator() (scale_node const& node)
+    void operator()(scale_node const& node)
     {
         if (detail::is_null_node(node.sy_))
         {
-            os_ << "scale("
-                << to_expression_string(node.sx_) << ")";
+            os_ << "scale(" << to_expression_string(node.sx_) << ")";
         }
         else
         {
-            os_ << "scale("
-                << to_expression_string(node.sx_) << ", "
-                << to_expression_string(node.sy_) << ")";
+            os_ << "scale(" << to_expression_string(node.sx_) << ", " << to_expression_string(node.sy_) << ")";
         }
     }
 
-    void operator() (rotate_node const& node)
+    void operator()(rotate_node const& node)
     {
         if (detail::is_null_node(node.cy_) || detail::is_null_node(node.cy_))
         {
-            os_ << "rotate("
-                << to_expression_string(node.angle_) << ")";
+            os_ << "rotate(" << to_expression_string(node.angle_) << ")";
         }
         else
         {
-            os_ << "rotate("
-                << to_expression_string(node.angle_) << ", "
-                << to_expression_string(node.cx_) << ", "
+            os_ << "rotate(" << to_expression_string(node.angle_) << ", " << to_expression_string(node.cx_) << ", "
                 << to_expression_string(node.cy_) << ")";
         }
     }
 
-    void operator() (skewX_node const& node)
-    {
-        os_ << "skewX("
-            << to_expression_string(node.angle_) << ")";
-    }
+    void operator()(skewX_node const& node) { os_ << "skewX(" << to_expression_string(node.angle_) << ")"; }
 
-    void operator() (skewY_node const& node)
-    {
-        os_ << "skewY("
-            << to_expression_string(node.angle_) << ")";
-    }
+    void operator()(skewY_node const& node) { os_ << "skewY(" << to_expression_string(node.angle_) << ")"; }
 };
-
 
 std::string to_expression_string(transform_node const& node)
 {
@@ -119,7 +96,6 @@ std::string to_expression_string(transform_node const& node)
     util::apply_visitor(to_string, *node);
     return os.str();
 }
-
 
 std::string to_expression_string(transform_list const& list)
 {
@@ -134,6 +110,5 @@ std::string to_expression_string(transform_list const& list)
     }
     return os.str();
 }
-
 
 } // namespace mapnik

@@ -27,24 +27,17 @@
 #include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_grammar_x3.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 expression_ptr parse_expression(std::string const& str)
 {
     auto node = std::make_shared<expr_node>();
     using boost::spirit::x3::ascii::space;
     mapnik::transcoder const tr("utf8");
-#if BOOST_VERSION >=106700
-    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)
-        [
-            mapnik::grammar::expression
-        ];
+#if BOOST_VERSION >= 106700
+    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(tr)[mapnik::grammar::expression];
 #else
-    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))
-        [
-            mapnik::grammar::expression
-        ];
+    auto parser = boost::spirit::x3::with<mapnik::grammar::transcoder_tag>(std::ref(tr))[mapnik::grammar::expression];
 #endif
     bool r = false;
     std::string::const_iterator itr = str.begin();
@@ -53,13 +46,11 @@ expression_ptr parse_expression(std::string const& str)
     try
     {
         r = boost::spirit::x3::phrase_parse(itr, end, parser, space, *node);
-    }
-    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    } catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         // no need to show "boost::spirit::x3::expectation_failure" which is a std::runtime_error
         throw config_error("Failed to parse expression: \"" + str + "\"");
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         // show "Could not initialize ICU resources" from boost::regex which is a std::runtime_error
         throw config_error(std::string(ex.what()) + " for expression: \"" + str + "\"");
@@ -74,5 +65,4 @@ expression_ptr parse_expression(std::string const& str)
     }
 }
 
-
-}
+} // namespace mapnik

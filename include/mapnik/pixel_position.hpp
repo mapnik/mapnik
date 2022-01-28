@@ -25,8 +25,7 @@
 // stl
 #include <cmath>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct rotation;
 struct pixel_position
@@ -34,25 +33,18 @@ struct pixel_position
     double x;
     double y;
     pixel_position(double x_, double y_)
-     : x(x_),
-       y(y_) {}
+        : x(x_)
+        , y(y_)
+    {}
     pixel_position()
-     : x(0),
-       y(0) {}
-    pixel_position operator+ (pixel_position const& other) const
-    {
-        return pixel_position(x + other.x, y + other.y);
-    }
+        : x(0)
+        , y(0)
+    {}
+    pixel_position operator+(pixel_position const& other) const { return pixel_position(x + other.x, y + other.y); }
 
-    pixel_position operator- (pixel_position const& other) const
-    {
-        return pixel_position(x - other.x, y - other.y);
-    }
+    pixel_position operator-(pixel_position const& other) const { return pixel_position(x - other.x, y - other.y); }
 
-    pixel_position operator* (double other) const
-    {
-        return pixel_position(x * other, y * other);
-    }
+    pixel_position operator*(double other) const { return pixel_position(x * other, y * other); }
 
     void set(double x_, double y_)
     {
@@ -67,23 +59,16 @@ struct pixel_position
     }
 
     pixel_position rotate(rotation const& rot) const;
-    pixel_position operator~() const
-    {
-        return pixel_position(x, -y);
-    }
+    pixel_position operator~() const { return pixel_position(x, -y); }
 
-    double length()
-    {
-        return std::sqrt(x * x + y * y);
-    }
+    double length() { return std::sqrt(x * x + y * y); }
 };
 
-inline pixel_position operator* (double factor, pixel_position const& pos)
+inline pixel_position operator*(double factor, pixel_position const& pos)
 {
     return pixel_position(factor * pos.x, factor * pos.y);
 }
 
-}
-
+} // namespace mapnik
 
 #endif // MAPNIK_PIXEL_POSITION_HPP

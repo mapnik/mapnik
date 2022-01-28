@@ -29,45 +29,44 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/csv/csv_grammar_x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 namespace standard = boost::spirit::x3::standard;
 
-using x3::lit;
-using x3::lexeme;
 using standard::char_;
+using x3::lexeme;
+using x3::lit;
 
 struct unesc_char_ : x3::symbols<char>
 {
     unesc_char_()
     {
-        add("\\a", '\a')
-            ("\\b", '\b')
-            ("\\f", '\f')
-            ("\\n", '\n')
-            ("\\r", '\r')
-            ("\\t", '\t')
-            ("\\v", '\v')
-            ("\\\\",'\\')
-            ("\\\'", '\'')
-            ("\\\"", '\"')
-            ("\"\"", '\"') // double quote
-            ;
+        add("\\a", '\a') //
+          ("\\b", '\b')  //
+          ("\\f", '\f')  //
+          ("\\n", '\n')  //
+          ("\\r", '\r')  //
+          ("\\t", '\t')  //
+          ("\\v", '\v')  //
+          ("\\\\", '\\') //
+          ("\\\'", '\'') //
+          ("\\\"", '\"') //
+          ("\"\"", '\"') // double quote
+          ;
     }
 } unesc_char;
 
-template <typename T>
+template<typename T>
 struct literal : x3::parser<literal<T>>
 {
     using attribute_type = x3::unused_type;
     using context_tag = T;
     static bool const has_attribute = false;
 
-    template <typename Iterator, typename Context, typename Attribute>
-    bool parse(Iterator& first, Iterator const& last,
-               Context const& context, x3::unused_type, Attribute& ) const
+    template<typename Iterator, typename Context, typename Attribute>
+    bool parse(Iterator& first, Iterator const& last, Context const& context, x3::unused_type, Attribute&) const
     {
         x3::skip_over(first, last, context);
         if (first != last && *first == x3::get<context_tag>(context))
@@ -87,27 +86,18 @@ x3::rule<class csv_column, csv_value> const column("csv-column");
 x3::rule<class csv_text, csv_value> const text("csv-text");
 x3::rule<class csc_quoted_text, csv_value> const quoted_text("csv-quoted-text");
 
-auto const line_def = -lit('\r') > -lit('\n') > lexeme[column] % separator
-    ;
+auto const line_def = -lit('\r') > -lit('\n') > lexeme[column] % separator;
 
-auto const column_def = quoted_text | *(char_ - separator)
-    ;
+auto const column_def = quoted_text | *(char_ - separator);
 
 auto const quoted_text_def = quote > text > quote // support unmatched quotes or not (??)
-    ;
+  ;
 
-auto const text_def = *(unesc_char | (char_ - quote))
-    ;
+auto const text_def = *(unesc_char | (char_ - quote));
 
-BOOST_SPIRIT_DEFINE (
-    line,
-    column,
-    quoted_text,
-    text
-    );
+BOOST_SPIRIT_DEFINE(line, column, quoted_text, text);
 
-} // grammar
+} // namespace grammar
 } // namespace mapnik
-
 
 #endif // MAPNIK_CSV_GRAMMAR_X3_DEF_HPP

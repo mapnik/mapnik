@@ -39,23 +39,18 @@ class gdal_featureset : public mapnik::Featureset
 {
     struct query_dispatch
     {
-        query_dispatch( gdal_featureset & featureset)
-            : featureset_(featureset) {}
+        query_dispatch(gdal_featureset& featureset)
+            : featureset_(featureset)
+        {}
 
-        mapnik::feature_ptr operator() (mapnik::query const& q) const
-        {
-            return featureset_.get_feature(q);
-        }
+        mapnik::feature_ptr operator()(mapnik::query const& q) const { return featureset_.get_feature(q); }
 
-        mapnik::feature_ptr operator() (mapnik::coord2d const& p) const
-        {
-            return featureset_.get_feature_at_point(p);
-        }
+        mapnik::feature_ptr operator()(mapnik::coord2d const& p) const { return featureset_.get_feature_at_point(p); }
 
-        gdal_featureset & featureset_;
+        gdal_featureset& featureset_;
     };
 
-public:
+  public:
     gdal_featureset(GDALDataset& dataset,
                     int band,
                     gdal_query q,
@@ -71,16 +66,16 @@ public:
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
 
-private:
+  private:
     void find_best_overview(int bandNumber,
                             int ideal_width,
                             int ideal_height,
-                            int & current_width,
-                            int & current_height) const;
+                            int& current_width,
+                            int& current_height) const;
 
     mapnik::feature_ptr get_feature(mapnik::query const& q);
     mapnik::feature_ptr get_feature_at_point(mapnik::coord2d const& p);
-    GDALDataset & dataset_;
+    GDALDataset& dataset_;
     mapnik::context_ptr ctx_;
     int band_;
     gdal_query gquery_;

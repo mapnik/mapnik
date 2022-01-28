@@ -51,31 +51,28 @@ MAPNIK_DISABLE_WARNING_POP
 #include <memory>
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class feature_impl;
 class raster;
 
-
 //! \brief Enumerates the modes of interpolation
-enum colorizer_mode_enum : std::uint8_t
-{
-    COLORIZER_INHERIT = 0,    //!< The stop inherits the mode from the colorizer
-    COLORIZER_LINEAR = 1,     //!< Linear interpolation between colors, each channel separately
-    COLORIZER_DISCRETE = 2,   //!< Single color for stop
-    COLORIZER_EXACT = 3,      //!< Only the exact value specified for the stop gets translated, others use the default
-    COLORIZER_LINEAR_RGBA = 4,//!< Linear interpolation between colors, all channels combined as RGBA value
-    COLORIZER_LINEAR_BGRA = 5,//!< Linear interpolation between colors, all channels combined as BGRA value
+enum colorizer_mode_enum : std::uint8_t {
+    COLORIZER_INHERIT = 0,     //!< The stop inherits the mode from the colorizer
+    COLORIZER_LINEAR = 1,      //!< Linear interpolation between colors, each channel separately
+    COLORIZER_DISCRETE = 2,    //!< Single color for stop
+    COLORIZER_EXACT = 3,       //!< Only the exact value specified for the stop gets translated, others use the default
+    COLORIZER_LINEAR_RGBA = 4, //!< Linear interpolation between colors, all channels combined as RGBA value
+    COLORIZER_LINEAR_BGRA = 5, //!< Linear interpolation between colors, all channels combined as BGRA value
     colorizer_mode_enum_MAX
 };
 
-DEFINE_ENUM( colorizer_mode, colorizer_mode_enum );
+DEFINE_ENUM(colorizer_mode, colorizer_mode_enum);
 
 //! \brief Structure to represent a stop position.
 class MAPNIK_DECL colorizer_stop
 {
-public:
+  public:
 
     //! \brief Constructor
     //!
@@ -84,15 +81,14 @@ public:
     //! \param[in] _color The stop color
     colorizer_stop(float value = 0,
                    colorizer_mode mode = COLORIZER_INHERIT,
-                   color const& _color = color(0,0,0,0),
-                   std::string const& label="");
+                   color const& _color = color(0, 0, 0, 0),
+                   std::string const& label = "");
 
     //! \brief Copy constructor
     colorizer_stop(colorizer_stop const& stop);
 
     //! \brief Destructor
     ~colorizer_stop();
-
 
     //! \brief Set the stop value
     //! \param[in] value The stop value
@@ -101,7 +97,6 @@ public:
     //! \brief Get the stop value
     //! \return The stop value
     inline float get_value() const { return value_; }
-
 
     //! \brief Set the stop mode
     //! \param[in] mode The stop mode
@@ -112,7 +107,6 @@ public:
     //! \return The stop mode
     inline colorizer_mode get_mode() const { return mode_; }
     inline colorizer_mode_enum get_mode_enum() const { return get_mode(); }
-
 
     //! \brief set the stop color
     //! \param[in] _color The stop color
@@ -130,7 +124,6 @@ public:
     //! \return The stop label
     inline std::string const& get_label() const { return label_; }
 
-
     //! \brief Equality operator
     //! \return True if equal, false otherwise
     bool operator==(colorizer_stop const& other) const;
@@ -139,27 +132,24 @@ public:
     //! \return A string representing this stop.
     std::string to_string() const;
 
-private:
-    float value_;   //!< The stop value
+  private:
+    float value_;         //!< The stop value
     colorizer_mode mode_; //!< The stop mode
-    color color_;   //!< The stop color
-    std::string label_; //!< The stop label for use in legends
+    color color_;         //!< The stop color
+    std::string label_;   //!< The stop label for use in legends
 };
 
-
 using colorizer_stops = std::vector<colorizer_stop>;
-
 
 //! \brief Class representing the raster colorizer
 class MAPNIK_DECL raster_colorizer
 {
-public:
+  public:
     //! \brief Constructor
-    raster_colorizer(colorizer_mode mode = COLORIZER_LINEAR, color const& _color = color(0,0,0,0));
+    raster_colorizer(colorizer_mode mode = COLORIZER_LINEAR, color const& _color = color(0, 0, 0, 0));
 
     //! \brief Destructor
     ~raster_colorizer();
-
 
     //! \brief Set the default mode
     //!
@@ -186,7 +176,6 @@ public:
     //! \return The default color
     color const& get_default_color() const { return default_color_; }
 
-
     //! \brief Add a stop
     //!
     //! \param[in] stop The stop to add
@@ -201,8 +190,8 @@ public:
     //! \return The list of stops
     colorizer_stops const& get_stops() const { return stops_; }
 
-    template <typename T>
-    void colorize(image_rgba8 & out, T const& in, boost::optional<double>const& nodata, feature_impl const& f) const;
+    template<typename T>
+    void colorize(image_rgba8& out, T const& in, boost::optional<double> const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!
@@ -210,27 +199,28 @@ public:
     //! \return color associated with the value
     unsigned get_color(float v) const;
 
-
     //! \brief Set the epsilon value for exact mode
     //! \param[in] e The epsilon value
-    inline void set_epsilon(const float e) { if(e > 0) epsilon_ = e; }
+    inline void set_epsilon(const float e)
+    {
+        if (e > 0)
+            epsilon_ = e;
+    }
 
     //! \brief Get the epsilon value for exact mode
     //! \return The epsilon value
     inline float get_epsilon() const { return epsilon_; }
 
-private:
-    colorizer_stops stops_;         //!< The vector of stops
+  private:
+    colorizer_stops stops_; //!< The vector of stops
 
-    colorizer_mode default_mode_;   //!< The default mode inherited by stops
-    color default_color_;           //!< The default color
-    float epsilon_;                 //!< The epsilon value for exact mode
+    colorizer_mode default_mode_; //!< The default mode inherited by stops
+    color default_color_;         //!< The default color
+    float epsilon_;               //!< The epsilon value for exact mode
 };
-
 
 using raster_colorizer_ptr = std::shared_ptr<raster_colorizer>;
 
-
-} // mapnik namespace
+} // namespace mapnik
 
 #endif // MAPNIK_RASTER_COLORIZER_HPP

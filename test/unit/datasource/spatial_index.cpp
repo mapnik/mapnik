@@ -34,14 +34,14 @@ TEST_CASE("spatial_index")
         // value_type must have standard layout (http://en.cppreference.com/w/cpp/types/is_standard_layout)
         using value_type = std::int32_t;
         using mapnik::filter_in_box;
-        mapnik::box2d<double> extent(0,0,100,100);
+        mapnik::box2d<double> extent(0, 0, 100, 100);
         mapnik::quad_tree<value_type> tree(extent);
         REQUIRE(tree.extent() == extent);
         // insert some items
-        tree.insert(1, mapnik::box2d<double>(10,10,20,20));
-        tree.insert(2, mapnik::box2d<double>(30,30,40,40));
-        tree.insert(3, mapnik::box2d<double>(30,10,40,20));
-        tree.insert(4, mapnik::box2d<double>(1,1,2,2));
+        tree.insert(1, mapnik::box2d<double>(10, 10, 20, 20));
+        tree.insert(2, mapnik::box2d<double>(30, 30, 40, 40));
+        tree.insert(3, mapnik::box2d<double>(30, 10, 40, 20));
+        tree.insert(4, mapnik::box2d<double>(1, 1, 2, 2));
         tree.trim();
 
         REQUIRE(tree.count() == 5);
@@ -73,13 +73,19 @@ TEST_CASE("spatial_index")
         // query first N elements interface
         results.clear();
         in.seekg(0, std::ios::beg);
-        mapnik::util::spatial_index<value_type, filter_in_box, std::istringstream>::query_first_n(filter, in, results, 2);
+        mapnik::util::spatial_index<value_type, filter_in_box, std::istringstream>::query_first_n(filter,
+                                                                                                  in,
+                                                                                                  results,
+                                                                                                  2);
         REQUIRE(results.size() == 2);
         REQUIRE(results[0] == 1);
         REQUIRE(results[1] == 4);
         results.clear();
         in.seekg(0, std::ios::beg);
-        mapnik::util::spatial_index<value_type, filter_in_box, std::istringstream>::query_first_n(filter, in, results, 5);
+        mapnik::util::spatial_index<value_type, filter_in_box, std::istringstream>::query_first_n(filter,
+                                                                                                  in,
+                                                                                                  results,
+                                                                                                  5);
         REQUIRE(results[0] == 1);
         REQUIRE(results[1] == 4);
         REQUIRE(results[2] == 3);

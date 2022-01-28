@@ -29,8 +29,8 @@
 // boost::fusion
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
 #include <boost/fusion/sequence.hpp>
+#include <mapnik/warning_ignore.hpp>
 MAPNIK_DISABLE_WARNING_POP
 // agg
 #include <mapnik/warning.hpp>
@@ -39,23 +39,24 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <agg_trans_affine.h>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace svg { namespace grammar {
+namespace mapnik {
+namespace svg {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
-using x3::lit;
 using x3::double_;
+using x3::lit;
 using x3::no_case;
 
-template <typename Context>
-agg::trans_affine & extract_transform(Context const& ctx)
+template<typename Context>
+agg::trans_affine& extract_transform(Context const& ctx)
 {
     return x3::get<svg_transform_tag>(ctx);
 }
 
-auto const matrix_action = [] (auto const& ctx)
-{
-    auto & tr = extract_transform(ctx);
+auto const matrix_action = [](auto const& ctx) {
+    auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
     auto a = boost::fusion::at_c<0>(attr);
     auto b = boost::fusion::at_c<1>(attr);
@@ -66,9 +67,8 @@ auto const matrix_action = [] (auto const& ctx)
     tr = agg::trans_affine(a, b, c, d, e, f) * tr;
 };
 
-auto const rotate_action = [] (auto const& ctx)
-{
-    auto & tr = extract_transform(ctx);
+auto const rotate_action = [](auto const& ctx) {
+    auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
     auto a = boost::fusion::at_c<0>(attr);
     auto cx = boost::fusion::at_c<1>(attr) ? *boost::fusion::at_c<1>(attr) : 0.0;
@@ -86,41 +86,42 @@ auto const rotate_action = [] (auto const& ctx)
     }
 };
 
-auto const translate_action = [] (auto const& ctx)
-{
-    auto & tr = extract_transform(ctx);
+auto const translate_action = [](auto const& ctx) {
+    auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
     auto tx = boost::fusion::at_c<0>(attr);
     auto ty = boost::fusion::at_c<1>(attr);
-    if (ty) tr = agg::trans_affine_translation(tx, *ty) * tr;
-    else tr = agg::trans_affine_translation(tx,0.0) * tr;
+    if (ty)
+        tr = agg::trans_affine_translation(tx, *ty) * tr;
+    else
+        tr = agg::trans_affine_translation(tx, 0.0) * tr;
 };
 
-auto const scale_action = [] (auto const& ctx)
-{
-    auto & tr = extract_transform(ctx);
+auto const scale_action = [](auto const& ctx) {
+    auto& tr = extract_transform(ctx);
     auto const& attr = _attr(ctx);
     auto sx = boost::fusion::at_c<0>(attr);
     auto sy = boost::fusion::at_c<1>(attr);
-    if (sy) tr = agg::trans_affine_scaling(sx, *sy) * tr;
-    else tr = agg::trans_affine_scaling(sx, sx) * tr;
+    if (sy)
+        tr = agg::trans_affine_scaling(sx, *sy) * tr;
+    else
+        tr = agg::trans_affine_scaling(sx, sx) * tr;
 };
 
-auto const skewX_action = [] (auto const& ctx)
-{
-    auto & tr = extract_transform(ctx);
+auto const skewX_action = [](auto const& ctx) {
+    auto& tr = extract_transform(ctx);
     auto skew_x = _attr(ctx);
     tr = agg::trans_affine_skewing(agg::deg2rad(skew_x), 0.0) * tr;
 };
 
-auto const skewY_action = [] (auto const& ctx)
-{
-    auto & tr = extract_transform(ctx);
-    auto skew_y= _attr(ctx);
+auto const skewY_action = [](auto const& ctx) {
+    auto& tr = extract_transform(ctx);
+    auto skew_y = _attr(ctx);
     tr = agg::trans_affine_skewing(0.0, agg::deg2rad(skew_y)) * tr;
 };
 
 // rules
+// clang-format off
 auto const matrix = x3::rule<class matrix_tag> {} = no_case[lit("matrix")]
     > lit('(') > (double_ > -lit(',')
                   > double_ > -lit(',')
@@ -145,19 +146,20 @@ auto const skewX = x3::rule<class skewX_tag> {} = no_case[lit("skewX")]
     > lit('(') > double_ [ skewX_action] > lit(')');
 auto const skewY = x3::rule<class skewY_tag> {} = no_case[lit("skewY")]
     > lit('(') > double_ [ skewY_action] > lit(')');
+// clang-format on
+auto const transform = x3::rule<class transform_tag>{} =
+  matrix | rotate | translate | scale /*| rotate*/ | skewX | skewY;
 
-auto const transform = x3::rule<class transform_tag> {} = matrix | rotate | translate | scale /*| rotate*/ | skewX | skewY ;
-
-auto const svg_transform_def = +transform ;
+auto const svg_transform_def = +transform;
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-BOOST_SPIRIT_DEFINE(
-    svg_transform
-    );
+BOOST_SPIRIT_DEFINE(svg_transform);
 MAPNIK_DISABLE_WARNING_POP
 
-}}}
+} // namespace grammar
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP

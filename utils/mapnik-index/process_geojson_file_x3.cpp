@@ -43,35 +43,34 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace {
 
-constexpr mapnik::json::well_known_names feature_properties[] = {
-    mapnik::json::well_known_names::type,
-    mapnik::json::well_known_names::geometry,
-    mapnik::json::well_known_names::properties}; // sorted
+constexpr mapnik::json::well_known_names feature_properties[] = {mapnik::json::well_known_names::type,
+                                                                 mapnik::json::well_known_names::geometry,
+                                                                 mapnik::json::well_known_names::properties}; // sorted
 
 constexpr mapnik::json::well_known_names geometry_properties[] = {
-    mapnik::json::well_known_names::type,
-    mapnik::json::well_known_names::coordinates}; // sorted
+  mapnik::json::well_known_names::type,
+  mapnik::json::well_known_names::coordinates}; // sorted
 
 constexpr mapnik::json::well_known_names geometry_collection_properties[] = {
-    mapnik::json::well_known_names::type,
-    mapnik::json::well_known_names::geometries}; // sorted
+  mapnik::json::well_known_names::type,
+  mapnik::json::well_known_names::geometries}; // sorted
 
-
-template <typename Keys>
+template<typename Keys>
 std::string join(Keys const& keys)
 {
     std::string result;
     bool first = true;
     for (auto const& key : keys)
     {
-        if (!first) result += ",";
+        if (!first)
+            result += ",";
         result += "\"" + std::string(mapnik::json::wkn_to_string(key)) + "\"";
         first = false;
     }
     return result;
 }
 
-template <typename Iterator, typename Keys>
+template<typename Iterator, typename Keys>
 bool has_keys(Iterator first1, Iterator last1, Keys const& keys)
 {
     auto first2 = std::begin(keys);
@@ -86,55 +85,57 @@ bool has_keys(Iterator first1, Iterator last1, Keys const& keys)
     return true;
 }
 
-template <typename Keys>
-bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& keys, bool verbose)
+template<typename Keys>
+bool validate_geojson_feature(mapnik::json::geojson_value& value, Keys const& keys, bool verbose)
 {
     if (!value.is<mapnik::json::geojson_object>())
     {
-        if (verbose) std::clog << "Expecting an GeoJSON object" << std::endl;
+        if (verbose)
+            std::clog << "Expecting an GeoJSON object" << std::endl;
         return false;
     }
-    mapnik::json::geojson_object & feature = mapnik::util::get<mapnik::json::geojson_object>(value);
-    std::sort(feature.begin(), feature.end(), [](auto const& e0, auto const& e1)
-              {
-                  return std::get<0>(e0) < std::get<0>(e1);
-              });
+    mapnik::json::geojson_object& feature = mapnik::util::get<mapnik::json::geojson_object>(value);
+    std::sort(feature.begin(), feature.end(), [](auto const& e0, auto const& e1) {
+        return std::get<0>(e0) < std::get<0>(e1);
+    });
 
     if (!has_keys(feature.begin(), feature.end(), feature_properties))
     {
-        if (verbose) std::clog << "Expecting one of " << join(feature_properties) << std::endl;
+        if (verbose)
+            std::clog << "Expecting one of " << join(feature_properties) << std::endl;
         return false;
     }
 
-    for (auto & elem : feature)
+    for (auto& elem : feature)
     {
         auto const key = std::get<0>(elem);
         if (key == mapnik::json::well_known_names::geometry)
         {
-            auto & geom_value = std::get<1>(elem);
+            auto& geom_value = std::get<1>(elem);
             if (!geom_value.is<mapnik::json::geojson_object>())
             {
-                if (verbose) std::clog << "\"geometry\": xxx <-- expecting an JSON object here" << std::endl;
+                if (verbose)
+                    std::clog << "\"geometry\": xxx <-- expecting an JSON object here" << std::endl;
                 return false;
             }
-            auto & geometry = mapnik::util::get<mapnik::json::geojson_object>(geom_value);
+            auto& geometry = mapnik::util::get<mapnik::json::geojson_object>(geom_value);
             // sort by property name
-            std::sort(geometry.begin(), geometry.end(), [](auto const& e0, auto const& e1)
-                      {
-                          return std::get<0>(e0) < std::get<0>(e1);
-                      });
+            std::sort(geometry.begin(), geometry.end(), [](auto const& e0, auto const& e1) {
+                return std::get<0>(e0) < std::get<0>(e1);
+            });
 
-            if (!has_keys(geometry.begin(), geometry.end(), geometry_properties)
-                && !has_keys(geometry.begin(), geometry.end(), geometry_collection_properties))
+            if (!has_keys(geometry.begin(), geometry.end(), geometry_properties) &&
+                !has_keys(geometry.begin(), geometry.end(), geometry_collection_properties))
             {
-                if (verbose) std::clog << "\"geometry\": xxx <-- expecting one of " << join(geometry_properties)
-                                       << " or " << join(geometry_collection_properties) << std::endl;
+                if (verbose)
+                    std::clog << "\"geometry\": xxx <-- expecting one of " << join(geometry_properties) << " or "
+                              << join(geometry_collection_properties) << std::endl;
                 return false;
             }
 
             mapnik::geometry::geometry_types geom_type;
             mapnik::json::positions const* coordinates = nullptr;
-            for (auto & elem2 : geometry)
+            for (auto& elem2 : geometry)
             {
                 auto const key2 = std::get<0>(elem2);
                 if (key2 == mapnik::json::well_known_names::type)
@@ -142,13 +143,16 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                     auto const& geom_type_value = std::get<1>(elem2);
                     if (!geom_type_value.is<mapnik::geometry::geometry_types>())
                     {
-                        if (verbose) std::clog << "\"type\": xxx <-- expecting an GeoJSON geometry type here" << std::endl;
+                        if (verbose)
+                            std::clog << "\"type\": xxx <-- expecting an GeoJSON geometry type here" << std::endl;
                         return false;
                     }
                     geom_type = mapnik::util::get<mapnik::geometry::geometry_types>(geom_type_value);
                     if (geom_type == mapnik::geometry::geometry_types::GeometryCollection)
                     {
-                        if (verbose) std::clog << "GeometryCollections are not allowed" << std::endl;;
+                        if (verbose)
+                            std::clog << "GeometryCollections are not allowed" << std::endl;
+                        ;
                         return false;
                     }
                 }
@@ -157,7 +161,8 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                     auto const& coordinates_value = std::get<1>(elem2);
                     if (!coordinates_value.is<mapnik::json::positions>())
                     {
-                        if (verbose) std::clog << "\"coordinates\": xxx <-- expecting an GeoJSON positions here" << std::endl;
+                        if (verbose)
+                            std::clog << "\"coordinates\": xxx <-- expecting an GeoJSON positions here" << std::endl;
                         return false;
                     }
                     coordinates = &mapnik::util::get<mapnik::json::positions>(coordinates_value);
@@ -168,7 +173,8 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                 // expecting single position
                 if (!coordinates->is<mapnik::json::point>())
                 {
-                    if (verbose) std::clog << "Expecting single position in Point" << std::endl;
+                    if (verbose)
+                        std::clog << "Expecting single position in Point" << std::endl;
                     return false;
                 }
             }
@@ -177,7 +183,8 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                 // expecting
                 if (!coordinates->is<mapnik::json::ring>())
                 {
-                    if (verbose) std::clog << "Expecting sequence of positions (ring) in LineString" << std::endl;
+                    if (verbose)
+                        std::clog << "Expecting sequence of positions (ring) in LineString" << std::endl;
                     return false;
                 }
                 else
@@ -185,7 +192,8 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                     auto const& ring = mapnik::util::get<mapnik::json::ring>(*coordinates);
                     if (ring.size() < 2)
                     {
-                        if (verbose) std::clog << "Expecting at least two coordinates in LineString" << std::endl;
+                        if (verbose)
+                            std::clog << "Expecting at least two coordinates in LineString" << std::endl;
                         return false;
                     }
                 }
@@ -195,7 +203,8 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                 // expecting
                 if (!coordinates->is<mapnik::json::rings>())
                 {
-                    if (verbose) std::clog << "Expecting an array of rings in Polygon" << std::endl;
+                    if (verbose)
+                        std::clog << "Expecting an array of rings in Polygon" << std::endl;
                     return false;
                 }
                 else
@@ -203,14 +212,16 @@ bool validate_geojson_feature(mapnik::json::geojson_value & value, Keys const& k
                     auto const& rings = mapnik::util::get<mapnik::json::rings>(*coordinates);
                     if (rings.size() < 1)
                     {
-                        if (verbose) std::clog << "Expecting at least one ring in Polygon" << std::endl;
+                        if (verbose)
+                            std::clog << "Expecting at least one ring in Polygon" << std::endl;
                         return false;
                     }
                     for (auto const& ring : rings)
                     {
                         if (ring.size() < 4)
                         {
-                            if (verbose) std::clog << "Expecting at least four coordinates in Polygon ring" << std::endl;
+                            if (verbose)
+                                std::clog << "Expecting at least four coordinates in Polygon ring" << std::endl;
                             return false;
                         }
                     }
@@ -227,20 +238,20 @@ using base_iterator_type = char const*;
 
 auto const& geojson_value = mapnik::json::grammar::geojson_value;
 
-}
+} // namespace
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-
-template <typename T>
-std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & boxes, std::string const& filename, bool validate_features, bool verbose)
+template<typename T>
+std::pair<bool, typename T::value_type::first_type>
+  process_geojson_file_x3(T& boxes, std::string const& filename, bool validate_features, bool verbose)
 {
     using box_type = typename T::value_type::first_type;
     box_type extent;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     mapnik::mapped_region_ptr mapped_region;
-    boost::optional<mapnik::mapped_region_ptr> memory =
-        mapnik::mapped_memory_cache::instance().find(filename, true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
     if (!memory)
     {
         std::clog << "Error : cannot memory map " << filename << std::endl;
@@ -269,17 +280,16 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     try
     {
         mapnik::json::extract_bounding_boxes(itr, end, boxes);
-    }
-    catch (boost::spirit::x3::expectation_failure<base_iterator_type> const& ex)
+    } catch (boost::spirit::x3::expectation_failure<base_iterator_type> const& ex)
     {
         std::clog << ex.what() << std::endl;
         std::clog << "Expected: " << ex.which();
         std::clog << " Got: \"" << std::string(ex.where(), ex.where() + 200) << '"' << std::endl;
         return std::make_pair(false, extent);
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
-        std::clog << "mapnik-index (GeoJSON) : could not extract bounding boxes from : '" <<  filename <<  "'" << std::endl;
+        std::clog << "mapnik-index (GeoJSON) : could not extract bounding boxes from : '" << filename << "'"
+                  << std::endl;
         return std::make_pair(false, extent);
     }
 
@@ -287,18 +297,18 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
     using space_type = mapnik::json::grammar::space_type;
     auto keys = mapnik::json::get_keys();
 #if BOOST_VERSION >= 106700
-    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(keys)
-        [ geojson_value ];
+    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(keys)[geojson_value];
 #else
-    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))
-        [ geojson_value ];
+    auto feature_grammar = x3::with<mapnik::json::grammar::keys_tag>(std::ref(keys))[geojson_value];
 #endif
     for (auto const& item : boxes)
     {
         if (item.first.valid())
         {
-            if (!extent.valid()) extent = item.first;
-            else extent.expand_to_include(item.first);
+            if (!extent.valid())
+                extent = item.first;
+            else
+                extent.expand_to_include(item.first);
             if (validate_features)
             {
                 base_iterator_type feat_itr = start + item.second.first;
@@ -309,36 +319,43 @@ std::pair<bool,typename T::value_type::first_type> process_geojson_file_x3(T & b
                     bool result = x3::phrase_parse(feat_itr, feat_end, feature_grammar, space_type(), feature_value);
                     if (!result || feat_itr != feat_end)
                     {
-                        if (verbose) std::clog << "Failed to parse: offset=" << item.second.first << " size=" << item.second.second << std::endl;
+                        if (verbose)
+                            std::clog << "Failed to parse: offset=" << item.second.first
+                                      << " size=" << item.second.second << std::endl;
                         return std::make_pair(false, extent);
                     }
-                }
-                catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+                } catch (x3::expectation_failure<std::string::const_iterator> const& ex)
                 {
-                    if (verbose) std::clog << ex.what() << std::endl;
+                    if (verbose)
+                        std::clog << ex.what() << std::endl;
                     return std::make_pair(false, extent);
-                }
-                catch (...)
+                } catch (...)
                 {
-                    if (verbose) std::clog << "Failed to parse: offset=" << item.second.first << " size=" << item.second.second << std::endl;
+                    if (verbose)
+                        std::clog << "Failed to parse: offset=" << item.second.first << " size=" << item.second.second
+                                  << std::endl;
                     return std::make_pair(false, extent);
                 }
                 if (!validate_geojson_feature(feature_value, keys, verbose))
                 {
-                    if (verbose) std::clog << "Failed to validate: [" << std::string(start + item.second.first, feat_end ) << "]" << std::endl;
+                    if (verbose)
+                        std::clog << "Failed to validate: [" << std::string(start + item.second.first, feat_end) << "]"
+                                  << std::endl;
                     return std::make_pair(false, extent);
                 }
             }
         }
         else if (validate_features)
         {
-            if (verbose) std::clog << "Invalid bbox encountered " << item.first << std::endl;
+            if (verbose)
+                std::clog << "Invalid bbox encountered " << item.first << std::endl;
             return std::make_pair(false, extent);
         }
     }
     return std::make_pair(true, extent);
 }
 
-template std::pair<bool,box_type> process_geojson_file_x3(boxes_type&, std::string const&, bool, bool);
+template std::pair<bool, box_type> process_geojson_file_x3(boxes_type&, std::string const&, bool, bool);
 
-}}
+} // namespace detail
+} // namespace mapnik

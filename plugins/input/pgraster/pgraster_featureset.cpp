@@ -47,21 +47,21 @@
 #include <sstream>
 #include <string>
 
-using mapnik::feature_factory;
 using mapnik::context_ptr;
+using mapnik::feature_factory;
 
 pgraster_featureset::pgraster_featureset(std::shared_ptr<IResultSet> const& rs,
-                                       context_ptr const& ctx,
-                                       std::string const& encoding,
-                                       bool key_field, int bandno)
-    : rs_(rs),
-      ctx_(ctx),
-      tr_(new transcoder(encoding)),
-      feature_id_(1),
-      key_field_(key_field),
-      band_(bandno)
-{
-}
+                                         context_ptr const& ctx,
+                                         std::string const& encoding,
+                                         bool key_field,
+                                         int bandno)
+    : rs_(rs)
+    , ctx_(ctx)
+    , tr_(new transcoder(encoding))
+    , feature_id_(1)
+    , key_field_(key_field)
+    , band_(bandno)
+{}
 
 feature_ptr pgraster_featureset::next()
 {
@@ -107,7 +107,7 @@ feature_ptr pgraster_featureset::next()
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
-            feature->put<mapnik::value_integer>(name,val);
+            feature->put<mapnik::value_integer>(name, val);
             ++pos;
         }
         else
@@ -128,7 +128,7 @@ feature_ptr pgraster_featureset::next()
 
         // parse geometry
         int size = rs_->getFieldLength(0);
-        const uint8_t *data = (const uint8_t*)rs_->getValue(0);
+        const uint8_t* data = (const uint8_t*)rs_->getValue(0);
 
         mapnik::raster_ptr raster = pgraster_wkb_reader::read(data, size, band_);
         if (!raster)
@@ -137,7 +137,8 @@ feature_ptr pgraster_featureset::next()
             // TODO: throw an exception ?
             continue;
         }
-        MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: raster of " << raster->data_.width() << "x" << raster->data_.height() << " pixels covering extent " << raster->ext_;
+        MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: raster of " << raster->data_.width() << "x"
+                                  << raster->data_.height() << " pixels covering extent " << raster->ext_;
         feature->set_raster(raster);
 
         unsigned num_attrs = ctx_->size() + 1;
@@ -153,31 +154,31 @@ feature_ptr pgraster_featureset::next()
                 const int oid = rs_->getTypeOID(pos);
                 switch (oid)
                 {
-                    case 16: //bool
+                    case 16: // bool
                     {
                         feature->put(name, (buf[0] != 0));
                         break;
                     }
 
-                    case 23: //int4
+                    case 23: // int4
                     {
                         feature->put<mapnik::value_integer>(name, int4net(buf));
                         break;
                     }
 
-                    case 21: //int2
+                    case 21: // int2
                     {
                         feature->put<mapnik::value_integer>(name, int2net(buf));
                         break;
                     }
 
-                    case 20: //int8/BigInt
+                    case 20: // int8/BigInt
                     {
                         feature->put<mapnik::value_integer>(name, int8net(buf));
                         break;
                     }
 
-                    case 700: //float4
+                    case 700: // float4
                     {
                         float val;
                         float4net(val, buf);
@@ -185,7 +186,7 @@ feature_ptr pgraster_featureset::next()
                         break;
                     }
 
-                    case 701: //float8
+                    case 701: // float8
                     {
                         double val;
                         float8net(val, buf);
@@ -193,22 +194,22 @@ feature_ptr pgraster_featureset::next()
                         break;
                     }
 
-                    case 25:   //text
-                    case 1043: //varchar
-                    case 705:  //literal
+                    case 25:   // text
+                    case 1043: // varchar
+                    case 705:  // literal
                     {
                         feature->put(name, tr_->transcode(buf));
                         break;
                     }
 
-                    case 1042: //bpchar
+                    case 1042: // bpchar
                     {
                         std::string str = mapnik::util::trim_copy(buf);
                         feature->put(name, tr_->transcode(str.c_str()));
                         break;
                     }
 
-                    case 1700: //numeric
+                    case 1700: // numeric
                     {
                         double val;
                         std::string str = numeric2string(buf);
@@ -219,8 +220,7 @@ feature_ptr pgraster_featureset::next()
                         break;
                     }
 
-                    default:
-                    {
+                    default: {
                         MAPNIK_LOG_WARN(pgraster) << "pgraster_featureset: Unknown type_oid=" << oid;
 
                         break;
@@ -232,7 +232,6 @@ feature_ptr pgraster_featureset::next()
     }
     return feature_ptr();
 }
-
 
 pgraster_featureset::~pgraster_featureset()
 {

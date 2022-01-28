@@ -28,8 +28,7 @@
 // std
 #include <cmath>
 
-namespace mapnik
-{
+namespace mapnik {
 
 // This visitor will process offsets for the given layout
 struct process_layout
@@ -40,7 +39,7 @@ struct process_layout
     std::vector<bound_box> const& member_boxes_;
 
     // The vector to populate with item offsets
-    std::vector<pixel_position> & member_offsets_;
+    std::vector<pixel_position>& member_offsets_;
 
     // The origin point of the member boxes
     // i.e. The member boxes are positioned around input_origin,
@@ -48,13 +47,12 @@ struct process_layout
     pixel_position const& input_origin_;
 
     process_layout(std::vector<bound_box> const& member_bboxes,
-                   std::vector<pixel_position> &member_offsets,
+                   std::vector<pixel_position>& member_offsets,
                    pixel_position const& input_origin)
-       : member_boxes_(member_bboxes),
-         member_offsets_(member_offsets),
-         input_origin_(input_origin)
-    {
-    }
+        : member_boxes_(member_bboxes)
+        , member_offsets_(member_offsets)
+        , input_origin_(input_origin)
+    {}
 
     // arrange group members in centered, horizontal row
     void operator()(simple_row_layout const& layout) const
@@ -106,13 +104,13 @@ struct process_layout
 
         y_shift -= 0.5 * layout_box.height();
 
-        for (auto & offset : member_offsets_)
+        for (auto& offset : member_offsets_)
         {
             offset.y += y_shift;
         }
     }
 
-private:
+  private:
 
     // Place member bound boxes at [ifirst] and [ifirst + 1] in a horizontal pairi, vertically
     //   align with pair_y, store corresponding offsets, and return bound box of combined pair
@@ -137,13 +135,12 @@ private:
         return box_offset_align(ifirst, 0, pair_y, 0, y_dir);
     }
 
-
     // Offsets member bound box at [i] and align with (x, y), in direction <x_dir, y_dir>
     // stores corresponding offset, and returns modified bounding box
     bound_box box_offset_align(size_t i, double x, double y, int x_dir, int y_dir) const
     {
         auto box = member_boxes_[i];
-        auto & offset = member_offsets_[i];
+        auto& offset = member_offsets_[i];
         offset.x = x - (x_dir == 0 ? input_origin_.x : (x_dir < 0 ? box.maxx() : box.minx()));
         offset.y = y - (y_dir == 0 ? input_origin_.y : (y_dir < 0 ? box.maxy() : box.miny()));
         box.move(offset.x, offset.y);
@@ -156,18 +153,17 @@ box2d<double> group_layout_manager::offset_box_at(size_t i)
     handle_update();
     pixel_position const& offset = member_offsets_.at(i);
     bound_box const& box = member_boxes_.at(i);
-    return box2d<double>(box.minx() + offset.x, box.miny() + offset.y,
-                         box.maxx() + offset.x, box.maxy() + offset.y);
+    return box2d<double>(box.minx() + offset.x, box.miny() + offset.y, box.maxx() + offset.x, box.maxy() + offset.y);
 }
 
 void group_layout_manager::handle_update()
 {
     if (update_layout_)
     {
-       member_offsets_.clear();
-       util::apply_visitor(process_layout(member_boxes_, member_offsets_, input_origin_), layout_);
-       update_layout_ = false;
+        member_offsets_.clear();
+        util::apply_visitor(process_layout(member_boxes_, member_offsets_, input_origin_), layout_);
+        update_layout_ = false;
     }
 }
 
-}
+} // namespace mapnik

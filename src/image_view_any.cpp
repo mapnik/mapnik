@@ -28,7 +28,7 @@ namespace detail {
 
 struct get_view_width_visitor
 {
-    template <typename T>
+    template<typename T>
     std::size_t operator()(T const& data) const
     {
         return data.width();
@@ -37,7 +37,7 @@ struct get_view_width_visitor
 
 struct get_view_height_visitor
 {
-    template <typename T>
+    template<typename T>
     std::size_t operator()(T const& data) const
     {
         return data.height();
@@ -46,7 +46,7 @@ struct get_view_height_visitor
 
 struct get_view_size_visitor
 {
-    template <typename T>
+    template<typename T>
     std::size_t operator()(T const& data) const
     {
         return data.size();
@@ -55,7 +55,7 @@ struct get_view_size_visitor
 
 struct get_view_dtype_visitor
 {
-    template <typename T>
+    template<typename T>
     image_dtype operator()(T const& data) const
     {
         return data.get_dtype();
@@ -64,7 +64,7 @@ struct get_view_dtype_visitor
 
 struct get_view_row_size_visitor
 {
-    template <typename T>
+    template<typename T>
     std::size_t operator()(T const& data) const
     {
         return data.row_size();
@@ -73,7 +73,7 @@ struct get_view_row_size_visitor
 
 struct get_view_premultiplied_visitor
 {
-    template <typename T>
+    template<typename T>
     bool operator()(T const& data) const
     {
         return data.get_premultiplied();
@@ -82,7 +82,7 @@ struct get_view_premultiplied_visitor
 
 struct get_view_offset_visitor
 {
-    template <typename T>
+    template<typename T>
     double operator()(T const& data) const
     {
         return data.get_offset();
@@ -91,7 +91,7 @@ struct get_view_offset_visitor
 
 struct get_view_scaling_visitor
 {
-    template <typename T>
+    template<typename T>
     double operator()(T const& data) const
     {
         return data.get_scaling();
@@ -102,42 +102,42 @@ struct get_view_scaling_visitor
 
 std::size_t image_view_any::width() const
 {
-    return util::apply_visitor(detail::get_view_width_visitor(),*this);
+    return util::apply_visitor(detail::get_view_width_visitor(), *this);
 }
 
 std::size_t image_view_any::height() const
 {
-    return util::apply_visitor(detail::get_view_height_visitor(),*this);
+    return util::apply_visitor(detail::get_view_height_visitor(), *this);
 }
 
 std::size_t image_view_any::size() const
 {
-    return util::apply_visitor(detail::get_view_size_visitor(),*this);
+    return util::apply_visitor(detail::get_view_size_visitor(), *this);
 }
 
 std::size_t image_view_any::row_size() const
 {
-    return util::apply_visitor(detail::get_view_row_size_visitor(),*this);
+    return util::apply_visitor(detail::get_view_row_size_visitor(), *this);
 }
 
 bool image_view_any::get_premultiplied() const
 {
-    return util::apply_visitor(detail::get_view_premultiplied_visitor(),*this);
+    return util::apply_visitor(detail::get_view_premultiplied_visitor(), *this);
 }
 
 double image_view_any::get_offset() const
 {
-    return util::apply_visitor(detail::get_view_offset_visitor(),*this);
+    return util::apply_visitor(detail::get_view_offset_visitor(), *this);
 }
 
 double image_view_any::get_scaling() const
 {
-    return util::apply_visitor(detail::get_view_scaling_visitor(),*this);
+    return util::apply_visitor(detail::get_view_scaling_visitor(), *this);
 }
 
 image_dtype image_view_any::get_dtype() const
 {
-    return util::apply_visitor(detail::get_view_dtype_visitor(),*this);
+    return util::apply_visitor(detail::get_view_dtype_visitor(), *this);
 }
 
-} // end mapnik ns
+} // namespace mapnik

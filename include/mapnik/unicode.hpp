@@ -23,7 +23,7 @@
 #ifndef MAPNIK_UNICODE_HPP
 #define MAPNIK_UNICODE_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value/types.hpp>
@@ -46,17 +46,18 @@ namespace mapnik {
 
 class MAPNIK_DECL transcoder : private util::noncopyable
 {
-public:
-    explicit transcoder (std::string const& encoding);
+  public:
+    explicit transcoder(std::string const& encoding);
     mapnik::value_unicode_string transcode(const char* data, std::int32_t length = -1) const;
     ~transcoder();
-private:
-    UConverter * conv_;
+
+  private:
+    UConverter* conv_;
 };
 
 // convinience method
-void MAPNIK_DECL to_utf8(mapnik::value_unicode_string const& input, std::string & target);
+void MAPNIK_DECL to_utf8(mapnik::value_unicode_string const& input, std::string& target);
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_UNICODE_HPP

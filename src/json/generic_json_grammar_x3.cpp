@@ -23,7 +23,9 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/generic_json_grammar_x3_def.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(generic_json_grammar_type, iterator_type, phrase_parse_context_type);
 BOOST_SPIRIT_INSTANTIATE(generic_json_grammar_type, iterator_type, context_type);
@@ -36,4 +38,6 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(generic_json_grammar_type, iterator_type, featur
 BOOST_SPIRIT_INSTANTIATE_UNUSED(generic_json_grammar_type, iterator_type, feature_context_const_type);
 #endif
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik

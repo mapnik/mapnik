@@ -30,11 +30,12 @@
 // boost
 #include <boost/spirit/include/karma.hpp>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 namespace karma = boost::spirit::karma;
 
-inline bool to_svg(std::string & svg, mapnik::geometry_type const& geom)
+inline bool to_svg(std::string& svg, mapnik::geometry_type const& geom)
 {
     using sink_type = std::back_insert_iterator<std::string>;
     sink_type sink(svg);
@@ -57,7 +58,7 @@ bool to_svg(std::string & svg, mapnik::geometry_container const& geom)
 }
 */
 
-}}
-
+} // namespace util
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_TO_SVG_HPP

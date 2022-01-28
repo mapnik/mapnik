@@ -33,15 +33,16 @@
 
 namespace {
 
-bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology & topo);
+bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology& topo);
 
-bool parse_topology(std::string const& filename, mapnik::topojson::topology & topo)
+bool parse_topology(std::string const& filename, mapnik::topojson::topology& topo)
 {
     mapnik::util::file file(filename);
     std::string buffer;
     buffer.resize(file.size());
     std::fread(&buffer[0], buffer.size(), 1, file.get());
-    if (!file) return false;
+    if (!file)
+        return false;
     return parse_topology_string(buffer, topo);
 }
 
@@ -51,16 +52,15 @@ bool parse_topology_string(std::string const& buffer)
     return parse_topology_string(buffer, topo);
 }
 
-bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology & topo)
+bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology& topo)
 {
     using space_type = boost::spirit::x3::standard::space_type;
     char const* itr = buffer.c_str();
     char const* end = itr + buffer.length();
     try
     {
-        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type() , topo);
-    }
-    catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
+        boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type(), topo);
+    } catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
     {
         std::cerr << "failed to parse TopoJSON..." << std::endl;
         std::cerr << ex.what() << std::endl;
@@ -81,7 +81,7 @@ bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology
     return (itr == end);
 }
 
-}
+} // namespace
 
 TEST_CASE("TopoJSON")
 {
@@ -89,36 +89,12 @@ TEST_CASE("TopoJSON")
     {
         // + A topology must have a member with the name “objects” whose value is another object.
         // + A topology must have a member with the name “arcs” whose value is an array of arcs.
-        CHECK(parse_topology_string(HEREDOC(
-              {
-                  "type": "Topology", "objects": {}, "arcs": []
-              }
-              )));
-        CHECK(parse_topology_string(HEREDOC(
-              {
-                  "type": "Topology", "arcs": [], "objects": {}
-              }
-              )));
-        CHECK(parse_topology_string(HEREDOC(
-              {
-                  "objects": {}, "type": "Topology", "arcs": []
-              }
-              )));
-        CHECK(parse_topology_string(HEREDOC(
-              {
-                  "objects": {}, "arcs": [], "type": "Topology"
-              }
-              )));
-        CHECK(parse_topology_string(HEREDOC(
-              {
-                  "arcs": [], "type": "Topology", "objects": {}
-              }
-              )));
-        CHECK(parse_topology_string(HEREDOC(
-              {
-                  "arcs": [], "objects": {}, "type": "Topology"
-              }
-              )));
+        CHECK(parse_topology_string(HEREDOC({"type" : "Topology", "objects" : {}, "arcs" : []})));
+        CHECK(parse_topology_string(HEREDOC({"type" : "Topology", "arcs" : [], "objects" : {}})));
+        CHECK(parse_topology_string(HEREDOC({"objects" : {}, "type" : "Topology", "arcs" : []})));
+        CHECK(parse_topology_string(HEREDOC({"objects" : {}, "arcs" : [], "type" : "Topology"})));
+        CHECK(parse_topology_string(HEREDOC({"arcs" : [], "type" : "Topology", "objects" : {}})));
+        CHECK(parse_topology_string(HEREDOC({"arcs" : [], "objects" : {}, "type" : "Topology"})));
     }
 
     SECTION("geometry parsing")
@@ -132,7 +108,8 @@ TEST_CASE("TopoJSON")
             REQUIRE(parse_topology(path, topo));
             for (auto const& geom : topo.geometries)
             {
-                mapnik::box2d<double> bbox = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
+                mapnik::box2d<double> bbox =
+                  mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
                 CHECK(bbox.valid());
                 mapnik::topojson::feature_generator<mapnik::context_ptr> visitor(ctx, tr, topo, feature_id++);
                 mapnik::feature_ptr feature = mapnik::util::apply_visitor(visitor, geom);
@@ -152,31 +129,34 @@ TEST_CASE("TopoJSON")
         mapnik::value_integer feature_id = 0;
         for (auto const& geom : topo.geometries)
         {
-            mapnik::box2d<double> bbox = mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
+            mapnik::box2d<double> bbox =
+              mapnik::util::apply_visitor(mapnik::topojson::bounding_box_visitor(topo), geom);
             CHECK(bbox.valid());
             mapnik::topojson::feature_generator<mapnik::context_ptr> visitor(ctx, tr, topo, feature_id);
             mapnik::feature_ptr feature = mapnik::util::apply_visitor(visitor, geom);
             CHECK(feature);
             CHECK(feature->envelope() == bbox);
             std::initializer_list<attr> attrs = {
-                attr{"name", tr.transcode("Test")},
-                attr{"NOM_FR", tr.transcode("Québec")},
-                attr{"boolean", mapnik::value_bool(true)},
-                attr{"description", tr.transcode("Test: \u005C")},
-                attr{"double", mapnik::value_double(1.1)},
-                attr{"int", mapnik::value_integer(1)},
-                attr{"object", tr.transcode("{\"name\":\"waka\",\"spaces\":\"value with spaces\",\"int\":1,\"double\":1.1,\"boolean\":false"
-                                                            ",\"NOM_FR\":\"Québec\",\"array\":[\"string\",\"value with spaces\",3,1.1,null,true"
-                                                            ",\"Québec\"],\"another_object\":{\"name\":\"nested object\"}}")},
-                attr{"spaces", tr.transcode("this has spaces")},
-                attr{"array", tr.transcode("[\"string\",\"value with spaces\",3,1.1,null,true,"
-                                                           "\"Québec\",{\"name\":\"object within an array\"},"
-                                                           "[\"array\",\"within\",\"an\",\"array\"]]")},
-                attr{"empty_array", tr.transcode("[]")},
-                attr{"empty_object", tr.transcode("{}")},
+              attr{"name", tr.transcode("Test")},
+              attr{"NOM_FR", tr.transcode("Québec")},
+              attr{"boolean", mapnik::value_bool(true)},
+              attr{"description", tr.transcode("Test: \u005C")},
+              attr{"double", mapnik::value_double(1.1)},
+              attr{"int", mapnik::value_integer(1)},
+              attr{"object",
+                   tr.transcode(
+                     "{\"name\":\"waka\",\"spaces\":\"value with spaces\",\"int\":1,\"double\":1.1,\"boolean\":false"
+                     ",\"NOM_FR\":\"Québec\",\"array\":[\"string\",\"value with spaces\",3,1.1,null,true"
+                     ",\"Québec\"],\"another_object\":{\"name\":\"nested object\"}}")},
+              attr{"spaces", tr.transcode("this has spaces")},
+              attr{"array",
+                   tr.transcode("[\"string\",\"value with spaces\",3,1.1,null,true,"
+                                "\"Québec\",{\"name\":\"object within an array\"},"
+                                "[\"array\",\"within\",\"an\",\"array\"]]")},
+              attr{"empty_array", tr.transcode("[]")},
+              attr{"empty_object", tr.transcode("{}")},
             };
             REQUIRE_ATTRIBUTES(feature, attrs);
         }
     }
-
 }

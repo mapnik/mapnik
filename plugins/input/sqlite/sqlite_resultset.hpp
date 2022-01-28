@@ -36,35 +36,29 @@ extern "C" {
 #include <sqlite3.h>
 }
 
-
-
 //==============================================================================
 
 class sqlite_resultset
 {
-public:
+  public:
 
-    sqlite_resultset (sqlite3_stmt* stmt)
+    sqlite_resultset(sqlite3_stmt* stmt)
         : stmt_(stmt)
-    {
-    }
+    {}
 
-    ~sqlite_resultset ()
+    ~sqlite_resultset()
     {
         if (stmt_)
         {
-            sqlite3_finalize (stmt_);
+            sqlite3_finalize(stmt_);
         }
     }
 
-    bool is_valid ()
-    {
-        return stmt_ != 0;
-    }
+    bool is_valid() { return stmt_ != 0; }
 
-    bool step_next ()
+    bool step_next()
     {
-        const int status = sqlite3_step (stmt_);
+        const int status = sqlite3_step(stmt_);
         if (status != SQLITE_ROW && status != SQLITE_DONE)
         {
             std::ostringstream s;
@@ -80,64 +74,37 @@ public:
         return status == SQLITE_ROW;
     }
 
-    int column_count ()
+    int column_count() { return sqlite3_column_count(stmt_); }
+
+    int column_type(int col) { return sqlite3_column_type(stmt_, col); }
+
+    const char* column_name(int col) { return sqlite3_column_name(stmt_, col); }
+
+    bool column_isnull(int col) { return sqlite3_column_type(stmt_, col) == SQLITE_NULL; }
+
+    int column_integer(int col) { return sqlite3_column_int(stmt_, col); }
+
+    sqlite_int64 column_integer64(int col) { return sqlite3_column_int64(stmt_, col); }
+
+    double column_double(int col) { return sqlite3_column_double(stmt_, col); }
+
+    const char* column_text(int col, int& len)
     {
-        return sqlite3_column_count (stmt_);
+        len = sqlite3_column_bytes(stmt_, col);
+        return (const char*)sqlite3_column_text(stmt_, col);
     }
 
-    int column_type (int col)
+    const char* column_text(int col) { return (const char*)sqlite3_column_text(stmt_, col); }
+
+    const char* column_blob(int col, int& bytes)
     {
-        return sqlite3_column_type (stmt_, col);
+        bytes = sqlite3_column_bytes(stmt_, col);
+        return (const char*)sqlite3_column_blob(stmt_, col);
     }
 
-    const char* column_name (int col)
-    {
-        return sqlite3_column_name (stmt_, col);
-    }
+    sqlite3_stmt* get_statement() { return stmt_; }
 
-    bool column_isnull (int col)
-    {
-        return sqlite3_column_type (stmt_, col) == SQLITE_NULL;
-    }
-
-    int column_integer (int col)
-    {
-        return sqlite3_column_int (stmt_, col);
-    }
-
-    sqlite_int64 column_integer64 (int col)
-    {
-        return sqlite3_column_int64 (stmt_, col);
-    }
-
-    double column_double (int col)
-    {
-        return sqlite3_column_double (stmt_, col);
-    }
-
-    const char* column_text (int col, int& len)
-    {
-        len = sqlite3_column_bytes (stmt_, col);
-        return (const char*) sqlite3_column_text (stmt_, col);
-    }
-
-    const char* column_text (int col)
-    {
-        return (const char*) sqlite3_column_text (stmt_, col);
-    }
-
-    const char* column_blob (int col, int& bytes)
-    {
-        bytes = sqlite3_column_bytes (stmt_, col);
-        return (const char*) sqlite3_column_blob (stmt_, col);
-    }
-
-    sqlite3_stmt* get_statement()
-    {
-        return stmt_;
-    }
-
-private:
+  private:
 
     sqlite3_stmt* stmt_;
 };

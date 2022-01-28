@@ -36,23 +36,21 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <tuple>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-template <typename T>
-class path_iterator
-    : public boost::iterator_facade< path_iterator<T>,
-                                     std::tuple<unsigned,double,double> const,
-                                     boost::forward_traversal_tag
-                                     >
+template<typename T>
+class path_iterator : public boost::iterator_facade<path_iterator<T>,
+                                                    std::tuple<unsigned, double, double> const,
+                                                    boost::forward_traversal_tag>
 {
-
-public:
+  public:
     using path_type = T;
     using value_type = typename std::tuple<unsigned, double, double>;
 
     path_iterator()
-        : v_(mapnik::SEG_END,0,0),
-          vertices_()
+        : v_(mapnik::SEG_END, 0, 0)
+        , vertices_()
     {}
 
     explicit path_iterator(path_type const& vertices)
@@ -62,79 +60,61 @@ public:
         increment();
     }
 
-private:
+  private:
     friend class boost::iterator_core_access;
 
-    void increment()
-    {
-        std::get<0>(v_) = vertices_->vertex( &std::get<1>(v_), &std::get<2>(v_));
-    }
+    void increment() { std::get<0>(v_) = vertices_->vertex(&std::get<1>(v_), &std::get<2>(v_)); }
 
-    bool equal( path_iterator const& other) const
-    {
-        return std::get<0>(v_) == std::get<0>(other.v_);
-    }
+    bool equal(path_iterator const& other) const { return std::get<0>(v_) == std::get<0>(other.v_); }
 
-    value_type const& dereference() const
-    {
-        return v_;
-    }
+    value_type const& dereference() const { return v_; }
 
     value_type v_;
-    const path_type *vertices_;
+    const path_type* vertices_;
 };
 
 // specialization for mapnik::path_type - vertex interface has been removed
-template <>
-class path_iterator<path_type>
-    : public boost::iterator_facade< path_iterator<path_type>,
-                                     std::tuple<unsigned,double,double> const,
-                                     boost::forward_traversal_tag
-                                     >
+template<>
+class path_iterator<path_type> : public boost::iterator_facade<path_iterator<path_type>,
+                                                               std::tuple<unsigned, double, double> const,
+                                                               boost::forward_traversal_tag>
 {
-
-public:
+  public:
     using path_type = mapnik::path_type;
     using value_type = std::tuple<unsigned, double, double>;
     using size_type = path_type::size_type;
     path_iterator()
-        : v_(mapnik::SEG_END,0,0),
-          vertices_(),
-          pos_(0)
+        : v_(mapnik::SEG_END, 0, 0)
+        , vertices_()
+        , pos_(0)
     {}
 
     explicit path_iterator(path_type const& vertices)
-        : vertices_(&vertices),
-          pos_(0)
+        : vertices_(&vertices)
+        , pos_(0)
     {
         increment();
     }
 
-private:
+  private:
     friend class boost::iterator_core_access;
 
     void increment()
     {
-        std::get<0>(v_) = vertices_->cont_.get_vertex(static_cast<unsigned>(pos_++), &std::get<1>(v_), &std::get<2>(v_));
+        std::get<0>(v_) =
+          vertices_->cont_.get_vertex(static_cast<unsigned>(pos_++), &std::get<1>(v_), &std::get<2>(v_));
     }
 
-    bool equal( path_iterator const& other) const
-    {
-        return std::get<0>(v_) == std::get<0>(other.v_);
-    }
+    bool equal(path_iterator const& other) const { return std::get<0>(v_) == std::get<0>(other.v_); }
 
-    value_type const& dereference() const
-    {
-        return v_;
-    }
+    value_type const& dereference() const { return v_; }
 
     value_type v_;
-    const path_type *vertices_;
+    const path_type* vertices_;
     size_type pos_;
 };
 
-
-}}
-
+} // namespace util
+} // namespace mapnik
 
 #endif // MAPNIK_VERTEX_ITERATOR_HPP

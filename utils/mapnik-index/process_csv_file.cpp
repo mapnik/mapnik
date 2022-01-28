@@ -36,10 +36,12 @@
 #include <iostream>
 #include <sstream>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename T>
-std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote)
+template<typename T>
+std::pair<bool, typename T::value_type::first_type>
+  process_csv_file(T& boxes, std::string const& filename, std::string const& manual_headers, char separator, char quote)
 {
     using box_type = typename T::value_type::first_type;
     csv_utils::csv_file_parser p;
@@ -47,14 +49,12 @@ std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, s
     p.separator_ = separator;
     p.quote_ = quote;
 
-
     util::mapped_memory_file csv_file{filename};
     try
     {
         p.parse_csv_and_boxes(csv_file.file(), boxes);
         return std::make_pair(true, box_type(p.extent_));
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::clog << ex.what() << std::endl;
         return std::make_pair(false, box_type(p.extent_));
@@ -64,6 +64,7 @@ std::pair<bool,typename T::value_type::first_type> process_csv_file(T & boxes, s
 using box_type = mapnik::box2d<float>;
 using item_type = std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>;
 using boxes_type = std::vector<item_type>;
-template std::pair<bool,box_type> process_csv_file(boxes_type&, std::string const&, std::string const&, char, char);
+template std::pair<bool, box_type> process_csv_file(boxes_type&, std::string const&, std::string const&, char, char);
 
-}}
+} // namespace detail
+} // namespace mapnik

@@ -43,26 +43,27 @@
 
 #include "shape_io.hpp"
 
+using mapnik::coord2d;
 using mapnik::datasource;
-using mapnik::parameters;
-using mapnik::query;
 using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
-using mapnik::coord2d;
+using mapnik::parameters;
+using mapnik::query;
 
 class shape_datasource : public datasource
 {
-public:
+  public:
     shape_datasource(parameters const& params);
     virtual ~shape_datasource();
     datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-private:
+
+  private:
     void init(shape_io& shape);
 
     datasource::datasource_t type_;
@@ -75,4 +76,4 @@ private:
     layer_descriptor desc_;
 };
 
-#endif //SHAPE_HPP
+#endif // SHAPE_HPP

@@ -33,29 +33,28 @@
 
 #include <memory>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(raster_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     cairo_save_restore guard(context_);
     render_raster_symbolizer(
-        sym, feature, prj_trans, common_,
-        [&](image_rgba8 const & target, composite_mode_e comp_op, double opacity,
-            int start_x, int start_y) {
-            context_.set_operator(comp_op);
-            context_.add_image(start_x, start_y, target, opacity);
-        }
-    );
+      sym,
+      feature,
+      prj_trans,
+      common_,
+      [&](image_rgba8 const& target, composite_mode_e comp_op, double opacity, int start_x, int start_y) {
+          context_.set_operator(comp_op);
+          context_.add_image(start_x, start_y, target, opacity);
+      });
 }
 
-template void cairo_renderer<cairo_ptr>::process(raster_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void
+  cairo_renderer<cairo_ptr>::process(raster_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

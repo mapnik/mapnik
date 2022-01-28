@@ -35,12 +35,10 @@
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 #if defined(HAVE_TIFF)
-void handle_tiff_options(std::string const& type,
-                        tiff_config & config)
+void handle_tiff_options(std::string const& type, tiff_config& config)
 {
     if (type == "tiff")
     {
@@ -48,12 +46,12 @@ void handle_tiff_options(std::string const& type,
     }
     if (type.length() > 4)
     {
-
         for (auto const& kv : parse_image_options(type))
         {
             auto const& key = kv.first;
             auto const& val = kv.second;
-            if (key == "tiff") continue;
+            if (key == "tiff")
+                continue;
             else if (key == "compression")
             {
                 if (val && !(*val).empty())
@@ -106,7 +104,7 @@ void handle_tiff_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
+                    if (!mapnik::util::string2int(*val, config.zlevel) || config.zlevel < 0 || config.zlevel > 9)
                     {
                         throw image_writer_exception("invalid tiff zlevel: '" + *val + "'");
                     }
@@ -116,7 +114,7 @@ void handle_tiff_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.tile_height) || config.tile_height < 0 )
+                    if (!mapnik::util::string2int(*val, config.tile_height) || config.tile_height < 0)
                     {
                         throw image_writer_exception("invalid tiff tile_height: '" + *val + "'");
                     }
@@ -126,7 +124,7 @@ void handle_tiff_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.tile_width) || config.tile_width < 0 )
+                    if (!mapnik::util::string2int(*val, config.tile_width) || config.tile_width < 0)
                     {
                         throw image_writer_exception("invalid tiff tile_width: '" + *val + "'");
                     }
@@ -136,7 +134,7 @@ void handle_tiff_options(std::string const& type,
             {
                 if (val && !(*val).empty())
                 {
-                    if (!mapnik::util::string2int(*val,config.rows_per_strip) || config.rows_per_strip < 0 )
+                    if (!mapnik::util::string2int(*val, config.rows_per_strip) || config.rows_per_strip < 0)
                     {
                         throw image_writer_exception("invalid tiff rows_per_strip: '" + *val + "'");
                     }
@@ -151,23 +149,25 @@ void handle_tiff_options(std::string const& type,
 }
 #endif
 
-tiff_saver::tiff_saver(std::ostream & stream, std::string const& t):
-    stream_(stream), t_(t) {}
+tiff_saver::tiff_saver(std::ostream& stream, std::string const& t)
+    : stream_(stream)
+    , t_(t)
+{}
 
 template<>
-void tiff_saver::operator()<image_null> (image_null const& image) const
+void tiff_saver::operator()<image_null>(image_null const& image) const
 {
     throw image_writer_exception("null images not supported");
 }
 
 template<>
-void tiff_saver::operator()<image_view_null> (image_view_null const& image) const
+void tiff_saver::operator()<image_view_null>(image_view_null const& image) const
 {
     throw image_writer_exception("null image views not supported");
 }
 
-template <typename T>
-void tiff_saver::operator() (T const& image) const
+template<typename T>
+void tiff_saver::operator()(T const& image) const
 {
 #if defined(HAVE_TIFF)
     tiff_config opts;
@@ -178,27 +178,27 @@ void tiff_saver::operator() (T const& image) const
 #endif
 }
 
-template void tiff_saver::operator()<image_rgba8> (image_rgba8 const& image) const;
-template void tiff_saver::operator()<image_gray8> (image_gray8 const& image) const;
-template void tiff_saver::operator()<image_gray8s> (image_gray8s const& image) const;
-template void tiff_saver::operator()<image_gray16> (image_gray16 const& image) const;
-template void tiff_saver::operator()<image_gray16s> (image_gray16s const& image) const;
-template void tiff_saver::operator()<image_gray32> (image_gray32 const& image) const;
-template void tiff_saver::operator()<image_gray32s> (image_gray32s const& image) const;
-template void tiff_saver::operator()<image_gray32f> (image_gray32f const& image) const;
-template void tiff_saver::operator()<image_gray64> (image_gray64 const& image) const;
-template void tiff_saver::operator()<image_gray64s> (image_gray64s const& image) const;
-template void tiff_saver::operator()<image_gray64f> (image_gray64f const& image) const;
-template void tiff_saver::operator()<image_view_rgba8> (image_view_rgba8 const& image) const;
-template void tiff_saver::operator()<image_view_gray8> (image_view_gray8 const& image) const;
-template void tiff_saver::operator()<image_view_gray8s> (image_view_gray8s const& image) const;
-template void tiff_saver::operator()<image_view_gray16> (image_view_gray16 const& image) const;
-template void tiff_saver::operator()<image_view_gray16s> (image_view_gray16s const& image) const;
-template void tiff_saver::operator()<image_view_gray32> (image_view_gray32 const& image) const;
-template void tiff_saver::operator()<image_view_gray32s> (image_view_gray32s const& image) const;
-template void tiff_saver::operator()<image_view_gray32f> (image_view_gray32f const& image) const;
-template void tiff_saver::operator()<image_view_gray64> (image_view_gray64 const& image) const;
-template void tiff_saver::operator()<image_view_gray64s> (image_view_gray64s const& image) const;
-template void tiff_saver::operator()<image_view_gray64f> (image_view_gray64f const& image) const;
+template void tiff_saver::operator()<image_rgba8>(image_rgba8 const& image) const;
+template void tiff_saver::operator()<image_gray8>(image_gray8 const& image) const;
+template void tiff_saver::operator()<image_gray8s>(image_gray8s const& image) const;
+template void tiff_saver::operator()<image_gray16>(image_gray16 const& image) const;
+template void tiff_saver::operator()<image_gray16s>(image_gray16s const& image) const;
+template void tiff_saver::operator()<image_gray32>(image_gray32 const& image) const;
+template void tiff_saver::operator()<image_gray32s>(image_gray32s const& image) const;
+template void tiff_saver::operator()<image_gray32f>(image_gray32f const& image) const;
+template void tiff_saver::operator()<image_gray64>(image_gray64 const& image) const;
+template void tiff_saver::operator()<image_gray64s>(image_gray64s const& image) const;
+template void tiff_saver::operator()<image_gray64f>(image_gray64f const& image) const;
+template void tiff_saver::operator()<image_view_rgba8>(image_view_rgba8 const& image) const;
+template void tiff_saver::operator()<image_view_gray8>(image_view_gray8 const& image) const;
+template void tiff_saver::operator()<image_view_gray8s>(image_view_gray8s const& image) const;
+template void tiff_saver::operator()<image_view_gray16>(image_view_gray16 const& image) const;
+template void tiff_saver::operator()<image_view_gray16s>(image_view_gray16s const& image) const;
+template void tiff_saver::operator()<image_view_gray32>(image_view_gray32 const& image) const;
+template void tiff_saver::operator()<image_view_gray32s>(image_view_gray32s const& image) const;
+template void tiff_saver::operator()<image_view_gray32f>(image_view_gray32f const& image) const;
+template void tiff_saver::operator()<image_view_gray64>(image_view_gray64 const& image) const;
+template void tiff_saver::operator()<image_view_gray64s>(image_view_gray64s const& image) const;
+template void tiff_saver::operator()<image_view_gray64f>(image_view_gray64f const& image) const;
 
-} // end ns
+} // namespace mapnik

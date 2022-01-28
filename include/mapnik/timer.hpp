@@ -38,9 +38,7 @@
 #include <sys/resource.h>
 #endif
 
-
 namespace mapnik {
-
 
 // Try to return the time now
 inline double time_now()
@@ -58,19 +56,13 @@ inline double time_now()
 #endif
 }
 
-
 // Measure times in both wall clock time and CPU times. Results are returned in milliseconds.
 class timer
 {
-public:
-    timer()
-    {
-        restart();
-    }
+  public:
+    timer() { restart(); }
 
-    virtual ~timer()
-    {
-    }
+    virtual ~timer() {}
 
     void restart()
     {
@@ -89,18 +81,18 @@ public:
     double cpu_elapsed() const
     {
         // return elapsed CPU time in ms
-        if (! stopped_)
+        if (!stopped_)
         {
             stop();
         }
 
-        return ((double) (cpu_end_ - cpu_start_)) / CLOCKS_PER_SEC * 1000.0;
+        return ((double)(cpu_end_ - cpu_start_)) / CLOCKS_PER_SEC * 1000.0;
     }
 
     double wall_clock_elapsed() const
     {
         // return elapsed wall clock time in ms
-        if (! stopped_)
+        if (!stopped_)
         {
             stop();
         }
@@ -108,7 +100,7 @@ public:
         return (wall_clock_end_ - wall_clock_start_) * 1000.0;
     }
 
-protected:
+  protected:
     mutable double wall_clock_start_, wall_clock_end_;
     mutable clock_t cpu_start_, cpu_end_;
     mutable bool stopped_;
@@ -118,15 +110,15 @@ protected:
 //  an elapsed time message at an appropriate place in an appropriate form.
 class progress_timer : public timer
 {
-public:
-    progress_timer(std::ostream & os, std::string const& base_message)
-        : os_(os),
-          base_message_(base_message)
+  public:
+    progress_timer(std::ostream& os, std::string const& base_message)
+        : os_(os)
+        , base_message_(base_message)
     {}
 
     ~progress_timer()
     {
-        if (! stopped_)
+        if (!stopped_)
         {
             stop();
         }
@@ -143,20 +135,17 @@ public:
             s << wall_clock_elapsed() << "ms (cpu " << cpu_elapsed() << "ms)";
             s << std::setw(30 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n";
             os_ << s.str();
-        }
-        catch (...) {} // eat any exceptions
+        } catch (...)
+        {} // eat any exceptions
     }
 
-    void discard()
-    {
-        stopped_ = true;
-    }
+    void discard() { stopped_ = true; }
 
-private:
-    std::ostream & os_;
+  private:
+    std::ostream& os_;
     std::string base_message_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_TIMER_HPP

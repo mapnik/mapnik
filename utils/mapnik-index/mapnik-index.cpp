@@ -42,25 +42,25 @@ MAPNIK_DISABLE_WARNING_POP
 const int DEFAULT_DEPTH = 8;
 const double DEFAULT_RATIO = 0.55;
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
 bool is_csv(std::string const& filename)
 {
-    return boost::iends_with(filename,".csv")
-        || boost::iends_with(filename,".tsv");
+    return boost::iends_with(filename, ".csv") || boost::iends_with(filename, ".tsv");
 }
 
 bool is_geojson(std::string const& filename)
 {
-    return boost::iends_with(filename,".geojson")
-        || boost::iends_with(filename,".json");
+    return boost::iends_with(filename, ".geojson") || boost::iends_with(filename, ".json");
 }
 
-}}
+} // namespace detail
+} // namespace mapnik
 
-int main (int argc, char** argv)
+int main(int argc, char** argv)
 {
-    //using namespace mapnik;
+    // using namespace mapnik;
     namespace po = boost::program_options;
     bool verbose = false;
     bool validate_features = false;
@@ -76,6 +76,7 @@ int main (int argc, char** argv)
     try
     {
         po::options_description desc("Mapnik CSV/GeoJSON index utility");
+        // clang-format off
         desc.add_options()
             ("help,h", "Produce usage message")
             ("version,V","Print version string")
@@ -89,14 +90,15 @@ int main (int argc, char** argv)
             ("validate-features", "Validate GeoJSON features")
             ("bbox,b", po::value<std::string>(), "Only index features within bounding box: --bbox=minx,miny,maxx,maxy")
             ;
-
+        // clang-format on
         po::positional_options_description p;
-        p.add("files",-1);
+        p.add("files", -1);
         po::store(po::command_line_parser(argc, argv)
-                  .options(desc)
-                  .style(po::command_line_style::unix_style | po::command_line_style::allow_long_disguise)
-                  .positional(p)
-                  .run(), vm);
+                    .options(desc)
+                    .style(po::command_line_style::unix_style | po::command_line_style::allow_long_disguise)
+                    .positional(p)
+                    .run(),
+                  vm);
         po::notify(vm);
 
         if (vm.count("version"))
@@ -139,14 +141,13 @@ int main (int argc, char** argv)
         }
         if (vm.count("files"))
         {
-            files=vm["files"].as<std::vector<std::string> >();
+            files = vm["files"].as<std::vector<std::string>>();
         }
         if (vm.count("bbox") && bbox.from_string(vm["bbox"].as<std::string>()))
         {
             use_bbox = true;
         }
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::clog << "Error: " << ex.what() << std::endl;
         return EXIT_FAILURE;
@@ -203,7 +204,7 @@ int main (int argc, char** argv)
         else if (mapnik::detail::is_geojson(filename))
         {
             std::clog << "processing '" << filename << "' as GeoJSON\n";
-            std::pair<bool,mapnik::box2d<float>> result;
+            std::pair<bool, mapnik::box2d<float>> result;
             result = mapnik::detail::process_geojson_file_x3(boxes, filename, validate_features, verbose);
             if (!result.first)
             {
@@ -221,9 +222,9 @@ int main (int argc, char** argv)
             for (auto const& item : boxes)
             {
                 auto ext_f = std::get<0>(item);
-                if (use_bbox && !bbox.intersects(ext_f)) continue;
-                mapnik::util::index_record rec =
-                    {std::get<1>(item).first, std::get<1>(item).second, ext_f};
+                if (use_bbox && !bbox.intersects(ext_f))
+                    continue;
+                mapnik::util::index_record rec = {std::get<1>(item).first, std::get<1>(item).second, ext_f};
                 tree.insert(rec, ext_f);
             }
 
@@ -231,8 +232,7 @@ int main (int argc, char** argv)
                               std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
             if (!file)
             {
-                std::clog << "cannot open index file for writing file \""
-                          << (filename + ".index") << "\"" << std::endl;
+                std::clog << "cannot open index file for writing file \"" << (filename + ".index") << "\"" << std::endl;
             }
             else
             {

@@ -31,14 +31,15 @@ namespace mapnik {
 
 struct tiff_saver
 {
-    tiff_saver(std::ostream &, std::string const&);
-    template <typename T>
-    void operator() (T const&) const;
+    tiff_saver(std::ostream&, std::string const&);
+    template<typename T>
+    void operator()(T const&) const;
+
   private:
-    std::ostream & stream_;
+    std::ostream& stream_;
     std::string const& t_;
 };
 
-} // end ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_UTIL_TIFF_HPP

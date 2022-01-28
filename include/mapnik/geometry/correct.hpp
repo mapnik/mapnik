@@ -35,7 +35,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <type_traits>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 namespace detail {
 
@@ -43,50 +44,52 @@ struct geometry_correct
 {
     using result_type = void;
 
-    template <typename T>
-    result_type operator() (geometry<T> & geom) const
+    template<typename T>
+    result_type operator()(geometry<T>& geom) const
     {
         mapnik::util::apply_visitor(*this, geom);
     }
 
-    template <typename T>
-    result_type operator() (geometry_collection<T> & collection) const
+    template<typename T>
+    result_type operator()(geometry_collection<T>& collection) const
     {
-        for (auto & geom : collection)
+        for (auto& geom : collection)
         {
             (*this)(geom);
         }
     }
 
-    template <typename T>
-    result_type operator() (polygon<T> & poly) const
+    template<typename T>
+    result_type operator()(polygon<T>& poly) const
     {
-        if (!poly.empty()) boost::geometry::correct(poly);
+        if (!poly.empty())
+            boost::geometry::correct(poly);
     }
 
-    template <typename T>
-    result_type operator() (multi_polygon<T> & multi_poly) const
+    template<typename T>
+    result_type operator()(multi_polygon<T>& multi_poly) const
     {
-        if (!multi_poly.empty()) boost::geometry::correct(multi_poly);
+        if (!multi_poly.empty())
+            boost::geometry::correct(multi_poly);
     }
 
-    template <typename T>
-    result_type operator() (T &) const
+    template<typename T>
+    result_type operator()(T&) const
     {
-        //no-op
+        // no-op
     }
-
 };
 
-}
+} // namespace detail
 
-template <typename GeomType>
-inline void correct(GeomType & geom)
+template<typename GeomType>
+inline void correct(GeomType& geom)
 {
-    static_assert(!std::is_const<GeomType>::value,"mapnik::geometry::correct on const& is invalid");
+    static_assert(!std::is_const<GeomType>::value, "mapnik::geometry::correct on const& is invalid");
     detail::geometry_correct()(geom);
 }
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_CORRECT_HPP

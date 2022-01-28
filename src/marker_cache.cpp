@@ -47,12 +47,11 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_pixfmt_rgba.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 marker_cache::marker_cache()
-    : known_svg_prefix_("shape://"),
-      known_image_prefix_("image://")
+    : known_svg_prefix_("shape://")
+    , known_image_prefix_("image://")
 {
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"
@@ -62,9 +61,10 @@ marker_cache::marker_cache()
     insert_svg("arrow",
                "<?xml version='1.0' standalone='no'?>"
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-               "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
+               "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 "
+               "0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
-    marker_cache_.emplace("image://square",std::make_shared<mapnik::marker const>(mapnik::marker_rgba8()));
+    marker_cache_.emplace("image://square", std::make_shared<mapnik::marker const>(mapnik::marker_rgba8()));
 }
 
 marker_cache::~marker_cache() {}
@@ -75,11 +75,11 @@ void marker_cache::clear()
     std::lock_guard<std::mutex> lock(mutex_);
 #endif
     auto itr = marker_cache_.begin();
-    while(itr != marker_cache_.end())
+    while (itr != marker_cache_.end())
     {
         if (!is_uri(itr->first))
         {
-           marker_cache_.erase(itr++);
+            marker_cache_.erase(itr++);
         }
         else
         {
@@ -90,12 +90,12 @@ void marker_cache::clear()
 
 bool marker_cache::is_svg_uri(std::string const& path)
 {
-    return boost::algorithm::starts_with(path,known_svg_prefix_);
+    return boost::algorithm::starts_with(path, known_svg_prefix_);
 }
 
 bool marker_cache::is_image_uri(std::string const& path)
 {
-    return boost::algorithm::starts_with(path,known_image_prefix_);
+    return boost::algorithm::starts_with(path, known_image_prefix_);
 }
 
 bool marker_cache::insert_svg(std::string const& name, std::string const& svg_string)
@@ -104,46 +104,41 @@ bool marker_cache::insert_svg(std::string const& name, std::string const& svg_st
     auto itr = svg_cache_.find(key);
     if (itr == svg_cache_.end())
     {
-        return svg_cache_.emplace(key,svg_string).second;
+        return svg_cache_.emplace(key, svg_string).second;
     }
     return false;
 }
 
-bool marker_cache::insert_marker(std::string const& uri, mapnik::marker && path)
+bool marker_cache::insert_marker(std::string const& uri, mapnik::marker&& path)
 {
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(mutex_);
 #endif
-    return marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(std::move(path))).second;
+    return marker_cache_.emplace(uri, std::make_shared<mapnik::marker const>(std::move(path))).second;
 }
 
-namespace detail
-{
+namespace detail {
 
 struct visitor_create_marker
 {
-    marker operator() (image_rgba8 & data) const
+    marker operator()(image_rgba8& data) const
     {
         mapnik::premultiply_alpha(data);
         return mapnik::marker(mapnik::marker_rgba8(data));
     }
 
-    marker operator() (image_null &) const
-    {
-        throw std::runtime_error("Can not make marker from null image data type");
-    }
+    marker operator()(image_null&) const { throw std::runtime_error("Can not make marker from null image data type"); }
 
-    template <typename T>
-    marker operator() (T &) const
+    template<typename T>
+    marker operator()(T&) const
     {
         throw std::runtime_error("Can not make marker from this data type");
     }
 };
 
-} // end detail ns
+} // namespace detail
 
-std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
-                                                         bool update_cache, bool strict)
+std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri, bool update_cache, bool strict)
 {
     if (uri.empty())
     {
@@ -186,14 +181,15 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     MAPNIK_LOG_ERROR(marker_cache) << msg;
                 }
             }
-            //svg.arrange_orientations();
-            double lox,loy,hix,hiy;
+            // svg.arrange_orientations();
+            double lox, loy, hix, hiy;
             svg.bounding_rect(&lox, &loy, &hix, &hiy);
-            marker_path->set_bounding_box(lox,loy,hix,hiy);
-            marker_path->set_dimensions(svg.width(),svg.height());
+            marker_path->set_bounding_box(lox, loy, hix, hiy);
+            marker_path->set_dimensions(svg.width(), svg.height());
             if (update_cache)
             {
-                auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
+                auto emplace_result =
+                  marker_cache_.emplace(uri, std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
                 return emplace_result.first->second;
             }
             else
@@ -226,14 +222,16 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                         MAPNIK_LOG_ERROR(marker_cache) << msg;
                     }
                 }
-                //svg.arrange_orientations();
-                double lox,loy,hix,hiy;
+                // svg.arrange_orientations();
+                double lox, loy, hix, hiy;
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);
-                marker_path->set_bounding_box(lox,loy,hix,hiy);
-                marker_path->set_dimensions(svg.width(),svg.height());
+                marker_path->set_bounding_box(lox, loy, hix, hiy);
+                marker_path->set_dimensions(svg.width(), svg.height());
                 if (update_cache)
                 {
-                    auto emplace_result = marker_cache_.emplace(uri,std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
+                    auto emplace_result =
+                      marker_cache_.emplace(uri,
+                                            std::make_shared<mapnik::marker const>(mapnik::marker_svg(marker_path)));
                     return emplace_result.first->second;
                 }
                 else
@@ -250,20 +248,19 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    image_any im = reader->read(0,0,width,height);
+                    image_any im = reader->read(0, 0, width, height);
                     if (update_cache)
                     {
-                        auto emplace_result = marker_cache_.emplace(uri,
-                                std::make_shared<mapnik::marker const>(
-                                    util::apply_visitor(detail::visitor_create_marker(), im)
-                                ));
+                        auto emplace_result =
+                          marker_cache_.emplace(uri,
+                                                std::make_shared<mapnik::marker const>(
+                                                  util::apply_visitor(detail::visitor_create_marker(), im)));
                         return emplace_result.first->second;
                     }
                     else
                     {
                         return std::make_shared<mapnik::marker const>(
-                            util::apply_visitor(detail::visitor_create_marker(), im)
-                        );
+                          util::apply_visitor(detail::visitor_create_marker(), im));
                     }
                 }
                 else
@@ -273,12 +270,11 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
             }
         }
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "' (" << ex.what() << ")";
     }
     return std::make_shared<mapnik::marker const>(mapnik::marker_null());
 }
 
-}
+} // namespace mapnik

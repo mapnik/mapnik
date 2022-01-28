@@ -57,49 +57,50 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename buffer_type>
+template<typename buffer_type>
 struct agg_renderer_process_visitor_p
 {
-    agg_renderer_process_visitor_p(renderer_common & common,
-                                   buffer_type & current_buffer,
+    agg_renderer_process_visitor_p(renderer_common& common,
+                                   buffer_type& current_buffer,
                                    std::unique_ptr<rasterizer> const& ras_ptr,
-                                   gamma_method_enum & gamma_method,
-                                   double & gamma,
+                                   gamma_method_enum& gamma_method,
+                                   double& gamma,
                                    polygon_pattern_symbolizer const& sym,
-                                   mapnik::feature_impl & feature,
+                                   mapnik::feature_impl& feature,
                                    proj_transform const& prj_trans)
-    : common_(common),
-        current_buffer_(current_buffer),
-        ras_ptr_(ras_ptr),
-        gamma_method_(gamma_method),
-        gamma_(gamma),
-        sym_(sym),
-        feature_(feature),
-        prj_trans_(prj_trans) {}
+        : common_(common)
+        , current_buffer_(current_buffer)
+        , ras_ptr_(ras_ptr)
+        , gamma_method_(gamma_method)
+        , gamma_(gamma)
+        , sym_(sym)
+        , feature_(feature)
+        , prj_trans_(prj_trans)
+    {}
 
-    void operator() (marker_null const&) const {}
+    void operator()(marker_null const&) const {}
 
-    void operator() (marker_svg const& marker) const
+    void operator()(marker_svg const& marker) const
     {
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
+        if (image_transform)
+            evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         mapnik::box2d<double> const& bbox_image = marker.get_data()->bounding_box() * image_tr;
         mapnik::image_rgba8 image(bbox_image.width(), bbox_image.height());
         render_pattern<buffer_type>(marker, image_tr, 1.0, image);
         render(image);
     }
 
-    void operator() (marker_rgba8 const& marker) const
-    {
-        render(marker.get_data());
-    }
+    void operator()(marker_rgba8 const& marker) const { render(marker.get_data()); }
 
-private:
+  private:
     void render(mapnik::image_rgba8 const& image) const
     {
-        agg::rendering_buffer buf(current_buffer_.bytes(), current_buffer_.width(),
-                                  current_buffer_.height(), current_buffer_.row_size());
+        agg::rendering_buffer buf(current_buffer_.bytes(),
+                                  current_buffer_.width(),
+                                  current_buffer_.height(),
+                                  current_buffer_.row_size());
         ras_ptr_->reset();
         value_double gamma = get<value_double, keys::gamma>(sym_, feature_, common_.vars_);
         gamma_method_enum gamma_method = get<gamma_method_enum, keys::gamma_method>(sym_, feature_, common_.vars_);
@@ -110,11 +111,8 @@ private:
             gamma_ = gamma;
         }
 
-        using vertex_converter_type = vertex_converter<clip_poly_tag,
-                                                       transform_tag,
-                                                       affine_transform_tag,
-                                                       simplify_tag,
-                                                       smooth_tag>;
+        using vertex_converter_type =
+          vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
         using pattern_type = agg_polygon_pattern<vertex_converter_type>;
 
         pattern_type pattern(image, common_, sym_, feature_, prj_trans_);
@@ -125,49 +123,43 @@ private:
 
         unsigned w = image.width();
         unsigned h = image.height();
-        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(),w,h,w*4);
+        agg::rendering_buffer pattern_rbuf((agg::int8u*)image.bytes(), w, h, w * 4);
         agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
         pattern_type::img_source_type img_src(pixf_pattern);
 
-        if (prj_trans_.equal() && pattern.clip_) pattern.converter_.set<clip_poly_tag>();
+        if (prj_trans_.equal() && pattern.clip_)
+            pattern.converter_.set<clip_poly_tag>();
 
         ras_ptr_->filling_rule(agg::fill_even_odd);
 
         pattern.render(renb, *ras_ptr_);
     }
 
-    renderer_common & common_;
-    buffer_type & current_buffer_;
+    renderer_common& common_;
+    buffer_type& current_buffer_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
-    gamma_method_enum & gamma_method_;
-    double & gamma_;
+    gamma_method_enum& gamma_method_;
+    double& gamma_;
     polygon_pattern_symbolizer const& sym_;
-    mapnik::feature_impl & feature_;
+    mapnik::feature_impl& feature_;
     proj_transform const& prj_trans_;
 };
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::process(polygon_pattern_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+template<typename T0, typename T1>
+void agg_renderer<T0, T1>::process(polygon_pattern_symbolizer const& sym,
+                                   mapnik::feature_impl& feature,
+                                   proj_transform const& prj_trans)
 {
     std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
-    if (filename.empty()) return;
+    if (filename.empty())
+        return;
     std::shared_ptr<mapnik::marker const> marker = marker_cache::instance().find(filename, true);
-    agg_renderer_process_visitor_p<buffer_type> visitor(common_,
-                                                        buffers_.top().get(),
-                                                        ras_ptr,
-                                                        gamma_method_,
-                                                        gamma_,
-                                                        sym,
-                                                        feature,
-                                                        prj_trans);
+    agg_renderer_process_visitor_p<buffer_type>
+      visitor(common_, buffers_.top().get(), ras_ptr, gamma_method_, gamma_, sym, feature, prj_trans);
     util::apply_visitor(visitor, *marker);
 }
 
+template void
+  agg_renderer<image_rgba8>::process(polygon_pattern_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-template void agg_renderer<image_rgba8>::process(polygon_pattern_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
-
-}
+} // namespace mapnik

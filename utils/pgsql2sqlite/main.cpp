@@ -35,20 +35,20 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <memory>
 
-//stl
+// stl
 #include <iostream>
 #include <fstream>
 #include <exception>
 
-int main ( int argc, char** argv)
+int main(int argc, char** argv)
 {
-
     namespace po = boost::program_options;
     po::options_description desc("Postgresql/PostGIS to SQLite3 converter\n Options");
-    std::string usage = "usage: pgsql2sqlite --dbname db --table planet_osm_line --file osm.sqlite --query \"select * from planet_osm_line\"";
+    std::string usage = "usage: pgsql2sqlite --dbname db --table planet_osm_line --file osm.sqlite --query \"select * "
+                        "from planet_osm_line\"";
     try
     {
-
+        // clang-format off
         desc.add_options()
             ("help,?","Display this help screen.")
             ("host,h",po::value<std::string>(),"Allows you to specify connection to a database on a machine other than the default.")
@@ -61,13 +61,13 @@ int main ( int argc, char** argv)
             ("file,f",po::value<std::string>(),"Use this option to specify the name of the file to create.")
 
             ;
-
-        //po::positional_options_description p;
-        //p.add("table",1);
+        // clang-format on
+        // po::positional_options_description p;
+        // p.add("table",1);
 
         po::variables_map vm;
-        //positional(p)
-        po::store(po::command_line_parser(argc,argv).options(desc).run(),vm);
+        // positional(p)
+        po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
         po::notify(vm);
 
         if (vm.count("help"))
@@ -76,7 +76,7 @@ int main ( int argc, char** argv)
             std::cout << usage << "\n";
             return EXIT_SUCCESS;
         }
-        else if ( !vm.count("dbname") || !vm.count("file") || !vm.count("query") )
+        else if (!vm.count("dbname") || !vm.count("file") || !vm.count("query"))
         {
             std::cout << desc << "\n";
             std::cout << usage << "\n";
@@ -98,20 +98,20 @@ int main ( int argc, char** argv)
             std::shared_ptr<Connection> conn(creator());
 
             std::string query = vm["query"].as<std::string>();
-            std::string output_table_name = vm.count("table") ? vm["table"].as<std::string>() : mapnik::sql_utils::table_from_sql(query);
+            std::string output_table_name =
+              vm.count("table") ? vm["table"].as<std::string>() : mapnik::sql_utils::table_from_sql(query);
             std::string output_file = vm["file"].as<std::string>();
 
             std::cout << "output_table : " << output_table_name << "\n";
 
-            mapnik::pgsql2sqlite(conn,query,output_table_name,output_file);
-        }
-        catch (mapnik::datasource_exception & ex)
+            mapnik::pgsql2sqlite(conn, query, output_table_name, output_file);
+        } catch (mapnik::datasource_exception& ex)
         {
             std::cerr << ex.what() << "\n";
             return EXIT_FAILURE;
         }
-    }
-    catch(std::exception& e) {
+    } catch (std::exception& e)
+    {
         std::cerr << desc << "\n";
         std::cout << usage << "\n";
         std::cerr << e.what() << "\n";

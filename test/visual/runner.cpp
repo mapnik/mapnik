@@ -25,18 +25,16 @@
 #include <future>
 #include <atomic>
 
-
 #include <mapnik/load_map.hpp>
 
 #include "runner.hpp"
 #include "parse_map_sizes.hpp"
 
-namespace visual_tests
-{
+namespace visual_tests {
 
 struct renderer_name_visitor
 {
-    template <typename Renderer>
+    template<typename Renderer>
     std::string operator()(Renderer const&) const
     {
         return Renderer::renderer_type::name;
@@ -45,36 +43,35 @@ struct renderer_name_visitor
 
 class renderer_visitor
 {
-public:
-    renderer_visitor(std::string const & name,
-                     mapnik::Map & map,
-                     map_size const & tiles,
+  public:
+    renderer_visitor(std::string const& name,
+                     mapnik::Map& map,
+                     map_size const& tiles,
                      double scale_factor,
-                     result_list & results,
-                     report_type & report,
+                     result_list& results,
+                     report_type& report,
                      std::size_t iterations,
                      bool is_fail_limit,
-                     std::atomic<std::size_t> & fail_count)
-        : name_(name),
-          map_(map),
-          tiles_(tiles),
-          scale_factor_(scale_factor),
-          results_(results),
-          report_(report),
-          iterations_(iterations),
-          is_fail_limit_(is_fail_limit),
-          fail_count_(fail_count)
-    {
-    }
+                     std::atomic<std::size_t>& fail_count)
+        : name_(name)
+        , map_(map)
+        , tiles_(tiles)
+        , scale_factor_(scale_factor)
+        , results_(results)
+        , report_(report)
+        , iterations_(iterations)
+        , is_fail_limit_(is_fail_limit)
+        , fail_count_(fail_count)
+    {}
 
-    template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
+    template<typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
     void operator()(T const& renderer) const
     {
         test(renderer);
     }
 
-    template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
-    void operator()(T const & renderer) const
+    template<typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
+    void operator()(T const& renderer) const
     {
         if (tiles_.width == 1 && tiles_.height == 1)
         {
@@ -82,13 +79,13 @@ public:
         }
     }
 
-private:
-    template <typename T>
-    void test(T const & renderer) const
+  private:
+    template<typename T>
+    void test(T const& renderer) const
     {
-        map_size size { map_.width(), map_.height() };
+        map_size size{map_.width(), map_.height()};
         std::chrono::high_resolution_clock::time_point start(std::chrono::high_resolution_clock::now());
-        for (std::size_t i = iterations_ ; i > 0; i--)
+        for (std::size_t i = iterations_; i > 0; i--)
         {
             typename T::image_type image(render(renderer));
             if (i == 1)
@@ -106,7 +103,7 @@ private:
         }
     }
 
-    template <typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
+    template<typename T, typename std::enable_if<T::renderer_type::support_tiles>::type* = nullptr>
     typename T::image_type render(T const& renderer) const
     {
         if (tiles_.width == 1 && tiles_.height == 1)
@@ -119,39 +116,38 @@ private:
         }
     }
 
-    template <typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
-    typename T::image_type render(T const & renderer) const
+    template<typename T, typename std::enable_if<!T::renderer_type::support_tiles>::type* = nullptr>
+    typename T::image_type render(T const& renderer) const
     {
         return renderer.render(map_, scale_factor_);
     }
 
-    std::string const & name_;
-    mapnik::Map & map_;
-    map_size const & tiles_;
+    std::string const& name_;
+    mapnik::Map& map_;
+    map_size const& tiles_;
     double scale_factor_;
-    result_list & results_;
-    report_type & report_;
+    result_list& results_;
+    report_type& report_;
     std::size_t iterations_;
     bool is_fail_limit_;
-    std::atomic<std::size_t> & fail_count_;
+    std::atomic<std::size_t>& fail_count_;
 };
 
-runner::runner(runner::path_type const & styles_dir,
-               config const & defaults,
+runner::runner(runner::path_type const& styles_dir,
+               config const& defaults,
                std::size_t iterations,
                std::size_t fail_limit,
                std::size_t jobs,
-               runner::renderer_container const & renderers)
-    : styles_dir_(styles_dir),
-      defaults_(defaults),
-      jobs_(jobs),
-      iterations_(iterations),
-      fail_limit_(fail_limit),
-      renderers_(renderers)
-{
-}
+               runner::renderer_container const& renderers)
+    : styles_dir_(styles_dir)
+    , defaults_(defaults)
+    , jobs_(jobs)
+    , iterations_(iterations)
+    , fail_limit_(fail_limit)
+    , renderers_(renderers)
+{}
 
-result_list runner::test_all(report_type & report) const
+result_list runner::test_all(report_type& report) const
 {
     boost::filesystem::directory_iterator begin(styles_dir_);
     boost::filesystem::directory_iterator end;
@@ -159,19 +155,21 @@ result_list runner::test_all(report_type & report) const
     return test_parallel(files, report, jobs_);
 }
 
-result_list runner::test(std::vector<std::string> const & style_names, report_type & report) const
+result_list runner::test(std::vector<std::string> const& style_names, report_type& report) const
 {
     std::vector<runner::path_type> files;
     files.reserve(style_names.size());
-    std::transform(style_names.begin(), style_names.end(), std::back_inserter(files),
-        [&](runner::path_type const & name)
-        {
-            return (name.extension() == ".xml") ? name : (styles_dir_ / (name.string() + ".xml"));
-        });
+    std::transform(style_names.begin(),
+                   style_names.end(),
+                   std::back_inserter(files),
+                   [&](runner::path_type const& name) {
+                       return (name.extension() == ".xml") ? name : (styles_dir_ / (name.string() + ".xml"));
+                   });
     return test_parallel(files, report, jobs_);
 }
 
-result_list runner::test_parallel(std::vector<runner::path_type> const & files, report_type & report, std::size_t jobs) const
+result_list
+  runner::test_parallel(std::vector<runner::path_type> const& files, report_type& report, std::size_t jobs) const
 {
     result_list results;
 
@@ -211,7 +209,7 @@ result_list runner::test_parallel(std::vector<runner::path_type> const & files, 
         futures[i] = std::async(launch, &runner::test_range, this, begin, end, std::ref(report), std::ref(fail_count));
     }
 
-    for (auto & f : futures)
+    for (auto& f : futures)
     {
         result_list r = f.get();
         std::move(r.begin(), r.end(), std::back_inserter(results));
@@ -229,15 +227,14 @@ result_list runner::test_range(files_iterator begin,
 
     for (runner::files_iterator i = begin; i != end; i++)
     {
-        runner::path_type const & file = *i;
+        runner::path_type const& file = *i;
         if (file.extension() == ".xml")
         {
             try
             {
                 result_list r = test_one(file, report, fail_count.get());
                 std::move(r.begin(), r.end(), std::back_inserter(results));
-            }
-            catch (std::exception const& ex)
+            } catch (std::exception const& ex)
             {
                 result r;
                 r.state = STATE_ERROR;
@@ -258,7 +255,7 @@ result_list runner::test_range(files_iterator begin,
     return results;
 }
 
-void runner::parse_params(mapnik::parameters const & params, config & cfg) const
+void runner::parse_params(mapnik::parameters const& params, config& cfg) const
 {
     cfg.status = *params.get<mapnik::value_bool>("status", cfg.status);
 
@@ -285,7 +282,7 @@ void runner::parse_params(mapnik::parameters const & params, config & cfg) const
         cfg.bbox.from_string(*bbox_string);
     }
 
-    for (auto const & renderer : renderers_)
+    for (auto const& renderer : renderers_)
     {
         std::string renderer_name = mapnik::util::apply_visitor(renderer_name_visitor(), renderer);
         boost::optional<mapnik::value_bool> enabled = params.get<mapnik::value_bool>(renderer_name);
@@ -296,9 +293,8 @@ void runner::parse_params(mapnik::parameters const & params, config & cfg) const
     }
 }
 
-result_list runner::test_one(runner::path_type const& style_path,
-                             report_type & report,
-                             std::atomic<std::size_t> & fail_count) const
+result_list
+  runner::test_one(runner::path_type const& style_path, report_type& report, std::atomic<std::size_t>& fail_count) const
 {
     config cfg(defaults_);
     mapnik::Map map(cfg.sizes.front().width, cfg.sizes.front().height);
@@ -307,8 +303,7 @@ result_list runner::test_one(runner::path_type const& style_path,
     try
     {
         mapnik::load_map(map, style_path.string(), true);
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::string what = ex.what();
         if (what.find("Could not create datasource") != std::string::npos ||
@@ -328,11 +323,11 @@ result_list runner::test_one(runner::path_type const& style_path,
 
     std::string name(style_path.stem().string());
 
-    for (auto const & size : cfg.sizes)
+    for (auto const& size : cfg.sizes)
     {
-        for (auto const & scale_factor : cfg.scales)
+        for (auto const& scale_factor : cfg.scales)
         {
-            for (auto const & tiles_count : cfg.tiles)
+            for (auto const& tiles_count : cfg.tiles)
             {
                 if (!tiles_count.width || !tiles_count.height)
                 {
@@ -343,7 +338,7 @@ result_list runner::test_one(runner::path_type const& style_path,
                     throw std::runtime_error("Tile size is not an integer.");
                 }
 
-                for (auto const & ren : renderers_)
+                for (auto const& ren : renderers_)
                 {
                     std::string renderer_name = mapnik::util::apply_visitor(renderer_name_visitor(), ren);
                     if (cfg.ignored_renderers.count(renderer_name))
@@ -368,7 +363,8 @@ result_list runner::test_one(runner::path_type const& style_path,
                                                                  report,
                                                                  iterations_,
                                                                  fail_limit_,
-                                                                 fail_count), ren);
+                                                                 fail_count),
+                                                ren);
                     if (fail_limit_ && fail_count >= fail_limit_)
                     {
                         return results;
@@ -380,4 +376,4 @@ result_list runner::test_one(runner::path_type const& style_path,
     return results;
 }
 
-}
+} // namespace visual_tests

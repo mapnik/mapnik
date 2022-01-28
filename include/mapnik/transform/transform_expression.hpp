@@ -45,7 +45,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-struct identity_node {};
+struct identity_node
+{};
 
 struct matrix_node
 {
@@ -58,13 +59,29 @@ struct matrix_node
 
     matrix_node() = default;
 
-    template <typename T>
+    template<typename T>
     explicit matrix_node(T const& m)
-        : a_(m.sx), b_(m.shy), c_(m.shx), d_(m.sy), e_(m.tx), f_(m.ty) {}
+        : a_(m.sx)
+        , b_(m.shy)
+        , c_(m.shx)
+        , d_(m.sy)
+        , e_(m.tx)
+        , f_(m.ty)
+    {}
 
-    matrix_node(expr_node const& a, expr_node const& b, expr_node const& c,
-                expr_node const& d, expr_node const& e, expr_node const& f)
-        : a_(a), b_(b), c_(c), d_(d), e_(e), f_(f) {}
+    matrix_node(expr_node const& a,
+                expr_node const& b,
+                expr_node const& c,
+                expr_node const& d,
+                expr_node const& e,
+                expr_node const& f)
+        : a_(a)
+        , b_(b)
+        , c_(c)
+        , d_(d)
+        , e_(e)
+        , f_(f)
+    {}
 };
 
 struct translate_node
@@ -74,10 +91,10 @@ struct translate_node
 
     translate_node() = default;
 
-    translate_node(expr_node const& tx,
-                   boost::optional<expr_node> const& ty)
+    translate_node(expr_node const& tx, boost::optional<expr_node> const& ty)
         : tx_(tx)
-        , ty_(ty ? expr_node(*ty) : value_null()) {}
+        , ty_(ty ? expr_node(*ty) : value_null())
+    {}
 };
 
 struct scale_node
@@ -87,10 +104,10 @@ struct scale_node
 
     scale_node() = default;
 
-    scale_node(expr_node const& sx,
-               boost::optional<expr_node> const& sy)
+    scale_node(expr_node const& sx, boost::optional<expr_node> const& sy)
         : sx_(sx)
-        , sy_(sy ? expr_node(*sy) : value_null()) {}
+        , sy_(sy ? expr_node(*sy) : value_null())
+    {}
 };
 
 struct rotate_node
@@ -104,22 +121,23 @@ struct rotate_node
     rotate_node() = default;
 
     explicit rotate_node(expr_node const& angle)
-        : angle_(angle) {}
+        : angle_(angle)
+    {}
 
-    rotate_node(expr_node const& angle,
-                expr_node const& cx, expr_node const& cy)
-        : angle_(angle), cx_(cx), cy_(cy) {}
+    rotate_node(expr_node const& angle, expr_node const& cx, expr_node const& cy)
+        : angle_(angle)
+        , cx_(cx)
+        , cy_(cy)
+    {}
 
-    rotate_node(expr_node const& angle,
-                boost::optional<expr_node> const& cx,
-                boost::optional<expr_node> const& cy)
+    rotate_node(expr_node const& angle, boost::optional<expr_node> const& cx, boost::optional<expr_node> const& cy)
         : angle_(angle)
         , cx_(cx ? expr_node(*cx) : value_null())
-        , cy_(cy ? expr_node(*cy) : value_null()) {}
+        , cy_(cy ? expr_node(*cy) : value_null())
+    {}
 
-    rotate_node(expr_node const& angle,
-                boost::optional<coords_type> const& center)
-      : angle_(angle)
+    rotate_node(expr_node const& angle, boost::optional<coords_type> const& center)
+        : angle_(angle)
     {
         if (center)
         {
@@ -134,7 +152,8 @@ struct skewX_node
     expr_node angle_;
     skewX_node() = default;
     skewX_node(expr_node const& angle)
-        : angle_(angle) {}
+        : angle_(angle)
+    {}
 };
 
 struct skewY_node
@@ -142,7 +161,8 @@ struct skewY_node
     expr_node angle_;
     skewY_node() = default;
     skewY_node(expr_node const& angle)
-        : angle_(angle) {}
+        : angle_(angle)
+    {}
 };
 
 namespace detail {
@@ -153,13 +173,8 @@ namespace detail {
 // default-constructible, but also makes little sense with our variant of
 // transform nodes...
 
-using transform_variant =  mapnik::util::variant< identity_node,
-                                                  matrix_node,
-                                                  translate_node,
-                                                  scale_node,
-                                                  rotate_node,
-                                                  skewX_node,
-                                                  skewY_node >;
+using transform_variant =
+  mapnik::util::variant<identity_node, matrix_node, translate_node, scale_node, rotate_node, skewX_node, skewY_node>;
 
 // ... thus we wrap the variant-type in a distinct type and provide
 // a custom clear overload, which resets the value to identity_node
@@ -169,28 +184,24 @@ struct transform_node
     transform_variant base_;
 
     transform_node()
-        : base_() {}
+        : base_()
+    {}
 
-    template <typename T>
+    template<typename T>
     explicit transform_node(T const& val)
-        : base_(val) {}
+        : base_(val)
+    {}
 
-    template <typename T>
-    transform_node& operator= (T const& val)
+    template<typename T>
+    transform_node& operator=(T const& val)
     {
         base_ = val;
         return *this;
     }
 
-    transform_variant const& operator* () const
-    {
-        return base_;
-    }
+    transform_variant const& operator*() const { return base_; }
 
-    transform_variant& operator* ()
-    {
-        return base_;
-    }
+    transform_variant& operator*() { return base_; }
 };
 
 inline void clear(transform_node& val)
@@ -198,36 +209,27 @@ inline void clear(transform_node& val)
     val.base_ = identity_node();
 }
 
-namespace  {
+namespace {
 
 struct is_null_transform_node
 {
-    bool operator() (value const& val) const
-    {
-        return val.is_null();
-    }
+    bool operator()(value const& val) const { return val.is_null(); }
 
-    bool operator() (value_null const&) const
-    {
-        return true;
-    }
+    bool operator()(value_null const&) const { return true; }
 
-    template <typename T>
-    bool operator() (T const&) const
+    template<typename T>
+    bool operator()(T const&) const
     {
         return false;
     }
 
-    bool operator() (detail::transform_variant const& var) const
-    {
-        return util::apply_visitor(*this, var);
-    }
+    bool operator()(detail::transform_variant const& var) const { return util::apply_visitor(*this, var); }
 };
 
-}
+} // namespace
 
-template <typename T>
-bool is_null_node (T const& node)
+template<typename T>
+bool is_null_node(T const& node)
 {
     return util::apply_visitor(is_null_transform_node(), node);
 }

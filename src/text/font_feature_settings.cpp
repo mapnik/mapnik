@@ -37,8 +37,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 #include <functional>
 
-namespace mapnik
-{
+namespace mapnik {
 
 font_feature_settings::font_feature_settings(std::string const& features)
     : features_()
@@ -47,18 +46,19 @@ font_feature_settings::font_feature_settings(std::string const& features)
 }
 
 font_feature_settings::font_feature_settings()
-    : features_() {}
+    : features_()
+{}
 
 void font_feature_settings::from_string(std::string const& features)
 {
     features_.clear();
-    if (std::all_of(features.begin(), features.end(), isspace)) return;
+    if (std::all_of(features.begin(), features.end(), isspace))
+        return;
 
     namespace x3 = boost::spirit::x3;
-    auto appender = [&](auto const& ctx)
-        {
-            this->append(_attr(ctx));
-        };
+    auto appender = [&](auto const& ctx) {
+        this->append(_attr(ctx));
+    };
     if (!x3::parse(features.begin(), features.end(), (+(x3::char_ - ','))[appender] % ','))
     {
         throw config_error("failed to parse font-feature-settings: '" + features + "'");
@@ -98,4 +98,4 @@ void font_feature_settings::append(std::string const& feature)
     }
 }
 
-}
+} // namespace mapnik

@@ -32,27 +32,20 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 struct stringifier
 {
     stringifier(keys_map const& keys)
-        : keys_(keys) {}
+        : keys_(keys)
+    {}
 
-    std::string operator()(std::string const& val) const
-    {
-        return "\"" + val + "\"";
-    }
+    std::string operator()(std::string const& val) const { return "\"" + val + "\""; }
 
-    std::string operator()(value_null) const
-    {
-        return "null";
-    }
+    std::string operator()(value_null) const { return "null"; }
 
-    std::string operator()(value_bool val) const
-    {
-        return val ? "true" : "false";
-    }
+    std::string operator()(value_bool val) const { return val ? "true" : "false"; }
 
     std::string operator()(value_integer val) const
     {
@@ -74,8 +67,10 @@ struct stringifier
         bool first = true;
         for (auto const& val : array)
         {
-            if (first) first = false;
-            else str += ",";
+            if (first)
+                first = false;
+            else
+                str += ",";
             str += mapnik::util::apply_visitor(*this, val);
         }
         str += "]";
@@ -91,9 +86,11 @@ struct stringifier
             auto itr = keys_.right.find(std::get<0>(kv));
             if (itr != keys_.right.end())
             {
-                if (first) first = false;
-                else str += ",";
-                str +=  "\"" + itr->second + "\"";
+                if (first)
+                    first = false;
+                else
+                    str += ",";
+                str += "\"" + itr->second + "\"";
                 str += ":";
                 str += mapnik::util::apply_visitor(*this, kv.second);
             }
@@ -101,7 +98,7 @@ struct stringifier
         str += "}";
         return str;
     }
-    template <typename T>
+    template<typename T>
     std::string operator()(T const&) const
     {
         return "";
@@ -112,15 +109,13 @@ struct stringifier
 
 struct attribute_value_visitor
 {
-public:
+  public:
     attribute_value_visitor(mapnik::transcoder const& tr, keys_map const& keys)
-        : tr_(tr),
-          keys_(keys) {}
+        : tr_(tr)
+        , keys_(keys)
+    {}
 
-    mapnik::value operator()(std::string const& val) const
-    {
-        return mapnik::value(tr_.transcode(val.c_str()));
-    }
+    mapnik::value operator()(std::string const& val) const { return mapnik::value(tr_.transcode(val.c_str())); }
 
     mapnik::value operator()(mapnik::json::geojson_array const& array) const
     {
@@ -134,22 +129,13 @@ public:
         return mapnik::value(tr_.transcode(str.c_str()));
     }
 
-    mapnik::value operator() (mapnik::value_bool val) const
-    {
-        return mapnik::value(val);
-    }
+    mapnik::value operator()(mapnik::value_bool val) const { return mapnik::value(val); }
 
-    mapnik::value operator() (mapnik::value_integer val) const
-    {
-        return mapnik::value(val);
-    }
+    mapnik::value operator()(mapnik::value_integer val) const { return mapnik::value(val); }
 
-    mapnik::value operator() (mapnik::value_double val) const
-    {
-        return mapnik::value(val);
-    }
+    mapnik::value operator()(mapnik::value_double val) const { return mapnik::value(val); }
 
-    template <typename T>
+    template<typename T>
     mapnik::value operator()(T const& val) const
     {
         return mapnik::value_null{};
@@ -159,12 +145,11 @@ public:
     mapnik::json::keys_map const& keys_;
 };
 
-void create_feature(feature_impl & feature,
+void create_feature(feature_impl& feature,
                     mapnik::json::geojson_value const& value,
                     mapnik::json::keys_map const& keys,
                     mapnik::transcoder const& tr)
 {
-
     if (!value.is<mapnik::json::geojson_object>())
     {
         throw std::runtime_error("Expecting an GeoJSON object");
@@ -228,15 +213,16 @@ void create_feature(feature_impl & feature,
                 auto itr = keys.right.find(std::get<0>(kv));
                 if (itr != end)
                 {
-                    feature.put_new(itr->second,
-                                    mapnik::util::apply_visitor(mapnik::json::attribute_value_visitor(tr, keys),
-                                                                std::get<1>(kv)));
+                    feature.put_new(
+                      itr->second,
+                      mapnik::util::apply_visitor(mapnik::json::attribute_value_visitor(tr, keys), std::get<1>(kv)));
                 }
             }
         }
     }
 }
 
-}}
+} // namespace json
+} // namespace mapnik
 
-#endif //MAPNIK_JSON_CREATE_FEATURE_HPP
+#endif // MAPNIK_JSON_CREATE_FEATURE_HPP

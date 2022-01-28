@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #include <mapnik/proj_transform_cache.hpp>
 #include <mapnik/proj_transform.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -38,8 +37,8 @@ using compatible_key_type = std::pair<boost::string_view, boost::string_view>;
 
 struct compatible_hash
 {
-    template <typename KeyType>
-    std::size_t operator() (KeyType const& key) const
+    template<typename KeyType>
+    std::size_t operator()(KeyType const& key) const
     {
         using hash_type = boost::hash<typename KeyType::first_type>;
         std::size_t seed = hash_type{}(key.first);
@@ -50,11 +49,7 @@ struct compatible_hash
 
 struct compatible_predicate
 {
-    bool operator()(compatible_key_type const& k1,
-                    compatible_key_type const& k2) const
-    {
-        return k1 == k2;
-    }
+    bool operator()(compatible_key_type const& k1, compatible_key_type const& k2) const { return k1 == k2; }
 };
 
 using cache_type = boost::unordered_map<key_type, std::unique_ptr<proj_transform>, compatible_hash>;
@@ -70,22 +65,20 @@ void init(std::string const& source, std::string const& dest)
     {
         mapnik::projection p0(source, true);
         mapnik::projection p1(dest, true);
-        cache_.emplace(std::make_pair(source, dest),
-                       std::make_unique<proj_transform>(p0, p1));
+        cache_.emplace(std::make_pair(source, dest), std::make_unique<proj_transform>(p0, p1));
     }
 }
 
 proj_transform const* get(std::string const& source, std::string const& dest)
 {
-
     compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
     auto itr = cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == cache_.end())
     {
         mapnik::projection srs1(source, true);
         mapnik::projection srs2(dest, true);
-        return cache_.emplace(std::make_pair(source, dest),
-                              std::make_unique<proj_transform>(srs1, srs2)).first->second.get();
+        return cache_.emplace(std::make_pair(source, dest), std::make_unique<proj_transform>(srs1, srs2))
+          .first->second.get();
     }
     return itr->second.get();
 }

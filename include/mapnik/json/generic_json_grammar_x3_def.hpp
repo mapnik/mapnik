@@ -27,49 +27,47 @@
 #include <mapnik/json/generic_json_grammar_x3.hpp>
 #include <mapnik/json/unicode_string_grammar_x3.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
 namespace {
 
-auto make_null = [] (auto const& ctx)
-{
+auto make_null = [](auto const& ctx) {
     _val(ctx) = mapnik::value_null{};
 };
 
-auto make_true = [] (auto const& ctx)
-{
+auto make_true = [](auto const& ctx) {
     _val(ctx) = true;
 };
 
-auto make_false = [] (auto const& ctx)
-{
+auto make_false = [](auto const& ctx) {
     _val(ctx) = false;
 };
 
-auto assign = [](auto const& ctx)
-{
+auto assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-auto assign_key = [](auto const& ctx)
-{
+auto assign_key = [](auto const& ctx) {
     std::get<0>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-auto assign_value = [](auto const& ctx)
-{
+auto assign_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-} // VS2017
+} // namespace
 
 using x3::lit;
 using x3::string;
 
 // import unicode string rule
-namespace { auto const& json_string = mapnik::json::grammar::unicode_string; }
+namespace {
+auto const& json_string = mapnik::json::grammar::unicode_string;
+}
 
 // rules
 x3::rule<class json_object_tag, json_object> const object("JSON Object");
@@ -80,44 +78,37 @@ auto const json_double = x3::real_parser<value_double, x3::strict_real_policies<
 auto const json_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
 // generic json types
-auto const value_def = object | array | json_string | number
-    ;
+auto const value_def = object | array | json_string | number;
 
-auto const key_value_def = json_string[assign_key] > lit(':') > value[assign_value]
-    ;
+auto const key_value_def = json_string[assign_key] > lit(':') > value[assign_value];
 
-auto const object_def = lit('{')
-    > -(key_value % lit(','))
-   > lit('}')
-   ;
+auto const object_def = lit('{')                  //
+                        > -(key_value % lit(',')) //
+                        > lit('}')                //
+  ;
 
-auto const array_def = lit('[')
-    > -(value % lit(','))
-    > lit(']')
-    ;
+auto const array_def = lit('[')              //
+                       > -(value % lit(',')) //
+                       > lit(']')            //
+  ;
 
-auto const number_def = json_double[assign]
-    | json_integer[assign]
-    | lit("true") [make_true]
-    | lit ("false") [make_false]
-    | lit("null")[make_null]
-    ;
+auto const number_def = json_double[assign]        //
+                        | json_integer[assign]     //
+                        | lit("true")[make_true]   //
+                        | lit("false")[make_false] //
+                        | lit("null")[make_null]   //
+  ;
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-BOOST_SPIRIT_DEFINE(
-    value,
-    object,
-    key_value,
-    array,
-    number
-    );
+BOOST_SPIRIT_DEFINE(value, object, key_value, array, number);
 
 MAPNIK_DISABLE_WARNING_POP
 
-}}}
-
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_GENERIC_JSON_GRAMMAR_X3_DEF_HPP

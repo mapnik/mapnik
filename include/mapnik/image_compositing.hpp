@@ -35,14 +35,12 @@ MAPNIK_DISABLE_WARNING_POP
 // stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 // Compositing modes
 // http://www.w3.org/TR/2009/WD-SVGCompositing-20090430/
 
-enum composite_mode_e
-{
+enum composite_mode_e {
     clear = 0,
     src,
     dst,
@@ -85,12 +83,8 @@ enum composite_mode_e
 MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op);
 
-template <typename T>
-MAPNIK_DECL void composite(T & dst, T const& src,
-                           composite_mode_e mode,
-                           float opacity=1,
-                           int dx=0,
-                           int dy=0);
+template<typename T>
+MAPNIK_DECL void composite(T& dst, T const& src, composite_mode_e mode, float opacity = 1, int dx = 0, int dy = 0);
 
-}
+} // namespace mapnik
 #endif // MAPNIK_IMAGE_COMPOSITING_HPP

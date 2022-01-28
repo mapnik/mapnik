@@ -62,7 +62,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_span_interpolator_linear.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik  {
+namespace mapnik {
 namespace svg {
 
 // Arbitrary linear gradient specified by two control points. Gradient
@@ -71,43 +71,43 @@ namespace svg {
 
 class linear_gradient_from_segment
 {
-public:
-    linear_gradient_from_segment(double x1, double y1, double x2, double y2) :
-        x1_(x1*agg::gradient_subpixel_scale),
-        y1_(y1*agg::gradient_subpixel_scale),
-        x2_(x2*agg::gradient_subpixel_scale),
-        y2_(y2*agg::gradient_subpixel_scale)
+  public:
+    linear_gradient_from_segment(double x1, double y1, double x2, double y2)
+        : x1_(x1 * agg::gradient_subpixel_scale)
+        , y1_(y1 * agg::gradient_subpixel_scale)
+        , x2_(x2 * agg::gradient_subpixel_scale)
+        , y2_(y2 * agg::gradient_subpixel_scale)
     {
-        double dx = x2_-x1_;
-        double dy = y2_-y1_;
-        length_sqr_ = dx*dx+dy*dy;
+        double dx = x2_ - x1_;
+        double dy = y2_ - y1_;
+        length_sqr_ = dx * dx + dy * dy;
     }
 
     int calculate(int x, int y, int d) const
     {
         if (length_sqr_ <= 0)
             return 0;
-        double u = ((x-x1_)*(x2_-x1_) + (y-y1_)*(y2_-y1_))/length_sqr_;
+        double u = ((x - x1_) * (x2_ - x1_) + (y - y1_) * (y2_ - y1_)) / length_sqr_;
         if (u < 0)
             u = 0;
         else if (u > 1)
             u = 1;
-        return static_cast<int>(u*d);
+        return static_cast<int>(u * d);
     }
-private:
+
+  private:
     double x1_;
     double y1_;
     double x2_;
     double y2_;
 
     double length_sqr_;
-
 };
 
-template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
+template<typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
 class renderer_agg : util::noncopyable
 {
-public:
+  public:
     using curved_type = agg::conv_curve<VertexSource>;
     // stroke
     using curved_stroked_type = agg::conv_stroke<curved_type>;
@@ -124,15 +124,16 @@ public:
     using vertex_source_type = VertexSource;
     using attribute_source_type = AttributeSource;
 
-    renderer_agg(VertexSource & source, AttributeSource const& attributes)
-        : source_(source),
-          curved_(source_),
-          curved_dashed_(curved_),
-          curved_stroked_(curved_),
-          curved_dashed_stroked_(curved_dashed_),
-          attributes_(attributes) {}
+    renderer_agg(VertexSource& source, AttributeSource const& attributes)
+        : source_(source)
+        , curved_(source_)
+        , curved_dashed_(curved_)
+        , curved_stroked_(curved_)
+        , curved_dashed_stroked_(curved_dashed_)
+        , attributes_(attributes)
+    {}
 
-    template <typename Rasterizer, typename Scanline, typename Renderer>
+    template<typename Rasterizer, typename Scanline, typename Renderer>
     void render_gradient(Rasterizer& ras,
                          Scanline& sl,
                          Renderer& ren,
@@ -140,7 +141,7 @@ public:
                          agg::trans_affine const& mtx,
                          double opacity,
                          box2d<double> const& symbol_bbox,
-                         curved_trans_type & curved_trans,
+                         curved_trans_type& curved_trans,
                          unsigned path_id)
     {
         using gamma_lut_type = agg::gamma_lut<agg::int8u, agg::int8u>;
@@ -148,15 +149,15 @@ public:
         using interpolator_type = agg::span_interpolator_linear<>;
         using span_allocator_type = agg::span_allocator<agg::rgba8>;
 
-        span_allocator_type             m_alloc;
-        color_func_type                 m_gradient_lut;
-        gamma_lut_type                  m_gamma_lut;
+        span_allocator_type m_alloc;
+        color_func_type m_gradient_lut;
+        gamma_lut_type m_gamma_lut;
 
-        double x1,x2,y1,y2,radius;
-        grad.get_control_points(x1,y1,x2,y2,radius);
+        double x1, x2, y1, y2, radius;
+        grad.get_control_points(x1, y1, x2, y2, radius);
 
         m_gradient_lut.remove_all();
-        for ( mapnik::stop_pair const& st : grad.get_stop_array() )
+        for (mapnik::stop_pair const& st : grad.get_stop_array())
         {
             mapnik::color const& stop_color = st.second;
             unsigned r = stop_color.red();
@@ -177,79 +178,69 @@ public:
 
             if (grad.get_units() != USER_SPACE_ON_USE)
             {
-                double bx1=symbol_bbox.minx();
-                double by1=symbol_bbox.miny();
-                double bx2=symbol_bbox.maxx();
-                double by2=symbol_bbox.maxy();
+                double bx1 = symbol_bbox.minx();
+                double by1 = symbol_bbox.miny();
+                double bx2 = symbol_bbox.maxx();
+                double by2 = symbol_bbox.maxy();
 
                 if (grad.get_units() == OBJECT_BOUNDING_BOX)
                 {
                     bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
                 }
-                transform.translate(-bx1/scale,-by1/scale);
-                transform.scale(scale/(bx2-bx1),scale/(by2-by1));
+                transform.translate(-bx1 / scale, -by1 / scale);
+                transform.scale(scale / (bx2 - bx1), scale / (by2 - by1));
             }
 
             if (grad.get_gradient_type() == RADIAL)
             {
                 using gradient_adaptor_type = agg::gradient_radial_focus;
-                using span_gradient_type = agg::span_gradient<agg::rgba8,
-                                                              interpolator_type,
-                                                              gradient_adaptor_type,
-                                                              color_func_type>;
+                using span_gradient_type =
+                  agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
 
                 // the agg radial gradient assumes it is centred on 0
-                transform.translate(-x2,-y2);
+                transform.translate(-x2, -y2);
 
                 // scale everything up since agg turns things into integers a bit too soon
-                int scaleup=255;
+                int scaleup = 255;
                 radius *= scaleup;
                 x1 *= scaleup;
                 y1 *= scaleup;
                 x2 *= scaleup;
                 y2 *= scaleup;
 
-                transform.scale(scaleup,scaleup);
-                interpolator_type     span_interpolator(transform);
-                gradient_adaptor_type gradient_adaptor(radius,(x1-x2),(y1-y2));
+                transform.scale(scaleup, scaleup);
+                interpolator_type span_interpolator(transform);
+                gradient_adaptor_type gradient_adaptor(radius, (x1 - x2), (y1 - y2));
 
-                span_gradient_type    span_gradient(span_interpolator,
-                                                    gradient_adaptor,
-                                                    m_gradient_lut,
-                                                    0, radius);
+                span_gradient_type span_gradient(span_interpolator, gradient_adaptor, m_gradient_lut, 0, radius);
 
                 render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
             }
             else
             {
                 using gradient_adaptor_type = linear_gradient_from_segment;
-                using span_gradient_type = agg::span_gradient<agg::rgba8,
-                                                              interpolator_type,
-                                                              gradient_adaptor_type,
-                                                              color_func_type>;
+                using span_gradient_type =
+                  agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
                 // scale everything up since agg turns things into integers a bit too soon
-                int scaleup=255;
+                int scaleup = 255;
                 x1 *= scaleup;
                 y1 *= scaleup;
                 x2 *= scaleup;
                 y2 *= scaleup;
 
-                transform.scale(scaleup,scaleup);
+                transform.scale(scaleup, scaleup);
 
-                interpolator_type     span_interpolator(transform);
-                gradient_adaptor_type gradient_adaptor(x1,y1,x2,y2);
+                interpolator_type span_interpolator(transform);
+                gradient_adaptor_type gradient_adaptor(x1, y1, x2, y2);
 
-                span_gradient_type    span_gradient(span_interpolator,
-                                                    gradient_adaptor,
-                                                    m_gradient_lut,
-                                                    0, scaleup);
+                span_gradient_type span_gradient(span_interpolator, gradient_adaptor, m_gradient_lut, 0, scaleup);
 
                 render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
             }
         }
     }
 
-    template <typename Rasterizer, typename Scanline, typename Renderer>
+    template<typename Rasterizer, typename Scanline, typename Renderer>
     void render(Rasterizer& ras,
                 Scanline& sl,
                 Renderer& ren,
@@ -261,14 +252,14 @@ public:
         using namespace agg;
         trans_affine transform;
 
-        curved_stroked_trans_type curved_stroked_trans(curved_stroked_,transform);
+        curved_stroked_trans_type curved_stroked_trans(curved_stroked_, transform);
         curved_dashed_stroked_trans_type curved_dashed_stroked_trans(curved_dashed_stroked_, transform);
-        curved_trans_type curved_trans(curved_,transform);
+        curved_trans_type curved_trans(curved_, transform);
         curved_trans_contour_type curved_trans_contour(curved_trans);
 
         curved_trans_contour.auto_detect_orientation(true);
 
-        for(unsigned i = 0; i < attributes_.size(); ++i)
+        for (unsigned i = 0; i < attributes_.size(); ++i)
         {
             mapnik::svg::path_attributes const& attr = attributes_[i];
             if (!attr.visibility_flag)
@@ -278,7 +269,7 @@ public:
 
             transform *= mtx;
             double scl = transform.scale();
-            //curved_.approximation_method(curve_inc);
+            // curved_.approximation_method(curve_inc);
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
@@ -288,7 +279,7 @@ public:
             {
                 ras.reset();
                 // https://github.com/mapnik/mapnik/issues/1129
-                if(std::fabs(curved_trans_contour.width()) <= 1)
+                if (std::fabs(curved_trans_contour.width()) <= 1)
                 {
                     ras.add_path(curved_trans, attr.index);
                 }
@@ -298,10 +289,17 @@ public:
                     ras.add_path(curved_trans_contour, attr.index);
                 }
 
-                if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
+                if (attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform,
-                                    attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                    render_gradient(ras,
+                                    sl,
+                                    ren,
+                                    attr.fill_gradient,
+                                    transform,
+                                    attr.fill_opacity * attr.opacity * opacity,
+                                    symbol_bbox,
+                                    curved_trans,
+                                    attr.index);
                 }
                 else
                 {
@@ -337,14 +335,21 @@ public:
                     curved_dashed_.remove_all_dashes();
                     for (auto d : attr.dash)
                     {
-                        curved_dashed_.add_dash(std::get<0>(d),std::get<1>(d));
+                        curved_dashed_.add_dash(std::get<0>(d), std::get<1>(d));
                     }
                     curved_dashed_.dash_start(attr.dash_offset);
                     ras.add_path(curved_dashed_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {
-                        render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
-                                        attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                        render_gradient(ras,
+                                        sl,
+                                        ren,
+                                        attr.stroke_gradient,
+                                        transform,
+                                        attr.stroke_opacity * attr.opacity * opacity,
+                                        symbol_bbox,
+                                        curved_trans,
+                                        attr.index);
                     }
                     else
                     {
@@ -377,8 +382,15 @@ public:
                     ras.add_path(curved_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {
-                        render_gradient(ras, sl, ren, attr.stroke_gradient, transform,
-                                        attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
+                        render_gradient(ras,
+                                        sl,
+                                        ren,
+                                        attr.stroke_gradient,
+                                        transform,
+                                        attr.stroke_opacity * attr.opacity * opacity,
+                                        symbol_bbox,
+                                        curved_trans,
+                                        attr.index);
                     }
                     else
                     {
@@ -396,7 +408,7 @@ public:
     }
 
 #if defined(GRID_RENDERER)
-    template <typename Rasterizer, typename Scanline, typename Renderer>
+    template<typename Rasterizer, typename Scanline, typename Renderer>
     void render_id(Rasterizer& ras,
                    Scanline& sl,
                    Renderer& ren,
@@ -409,13 +421,13 @@ public:
         using namespace agg;
 
         trans_affine transform;
-        curved_stroked_trans_type curved_stroked_trans(curved_stroked_,transform);
-        curved_trans_type         curved_trans(curved_,transform);
+        curved_stroked_trans_type curved_stroked_trans(curved_stroked_, transform);
+        curved_trans_type curved_trans(curved_, transform);
         curved_trans_contour_type curved_trans_contour(curved_trans);
 
         curved_trans_contour.auto_detect_orientation(true);
 
-        for(unsigned i = 0; i < attributes_.size(); ++i)
+        for (unsigned i = 0; i < attributes_.size(); ++i)
         {
             mapnik::svg::path_attributes const& attr = attributes_[i];
             if (!attr.visibility_flag)
@@ -425,7 +437,7 @@ public:
 
             transform *= mtx;
             double scl = transform.scale();
-            //curved_.approximation_method(curve_inc);
+            // curved_.approximation_method(curve_inc);
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
@@ -435,7 +447,7 @@ public:
             {
                 ras.reset();
 
-                if(std::fabs(curved_trans_contour.width()) <= 1)
+                if (std::fabs(curved_trans_contour.width()) <= 1)
                 {
                     ras.add_path(curved_trans, attr.index);
                 }
@@ -454,7 +466,7 @@ public:
             if (attr.stroke_flag || attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
             {
                 curved_stroked_.width(attr.stroke_width);
-                //m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
+                // m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
                 curved_stroked_.line_join(attr.line_join);
                 curved_stroked_.line_cap(attr.line_cap);
                 curved_stroked_.miter_limit(attr.miter_limit);
@@ -480,18 +492,20 @@ public:
     }
 #endif
 
-    inline VertexSource & source() const { return source_;}
-    inline AttributeSource const& attributes() const { return attributes_;}
-private:
+    inline VertexSource& source() const { return source_; }
+    inline AttributeSource const& attributes() const { return attributes_; }
 
-    VertexSource &         source_;
-    curved_type            curved_;
-    curved_dashed_type     curved_dashed_;
-    curved_stroked_type    curved_stroked_;
+  private:
+
+    VertexSource& source_;
+    curved_type curved_;
+    curved_dashed_type curved_dashed_;
+    curved_stroked_type curved_stroked_;
     curved_dashed_stroked_type curved_dashed_stroked_;
     AttributeSource const& attributes_;
 };
 
-}}
+} // namespace svg
+} // namespace mapnik
 
-#endif //MAPNIK_SVG_RENDERER_AGG_HPP
+#endif // MAPNIK_SVG_RENDERER_AGG_HPP

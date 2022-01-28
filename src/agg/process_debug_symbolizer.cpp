@@ -48,36 +48,37 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 namespace {
-template <typename T>
-void draw_rect(T &pixmap, box2d<double> const& box)
+template<typename T>
+void draw_rect(T& pixmap, box2d<double> const& box)
 {
     int x0 = static_cast<int>(box.minx());
     int x1 = static_cast<int>(box.maxx());
     int y0 = static_cast<int>(box.miny());
     int y1 = static_cast<int>(box.maxy());
     unsigned color1 = 0xff0000ff;
-    for (int x=x0; x<x1; x++)
+    for (int x = x0; x < x1; x++)
     {
         mapnik::set_pixel(pixmap, x, y0, color1);
         mapnik::set_pixel(pixmap, x, y1, color1);
     }
-    for (int y=y0; y<y1; y++)
+    for (int y = y0; y < y1; y++)
     {
         mapnik::set_pixel(pixmap, x0, y, color1);
         mapnik::set_pixel(pixmap, x1, y, color1);
     }
 }
 
-template <typename Pixmap>
+template<typename Pixmap>
 struct apply_vertex_mode
 {
-    apply_vertex_mode(Pixmap & pixmap, view_transform const& t, proj_transform const& prj_trans)
-        : pixmap_(pixmap),
-          t_(t),
-          prj_trans_(prj_trans) {}
+    apply_vertex_mode(Pixmap& pixmap, view_transform const& t, proj_transform const& prj_trans)
+        : pixmap_(pixmap)
+        , t_(t)
+        , prj_trans_(prj_trans)
+    {}
 
-    template <typename Adapter>
-    void operator() (Adapter const& va) const
+    template<typename Adapter>
+    void operator()(Adapter const& va) const
     {
         double x;
         double y;
@@ -86,26 +87,26 @@ struct apply_vertex_mode
         unsigned cmd = SEG_END;
         while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
         {
-            if (cmd == SEG_CLOSE) continue;
-            prj_trans_.backward(x,y,z);
-            t_.forward(&x,&y);
-            mapnik::set_pixel(pixmap_,x,y,0xff0000ff);
-            mapnik::set_pixel(pixmap_,x-1,y-1,0xff0000ff);
-            mapnik::set_pixel(pixmap_,x+1,y+1,0xff0000ff);
-            mapnik::set_pixel(pixmap_,x-1,y+1,0xff0000ff);
-            mapnik::set_pixel(pixmap_,x+1,y-1,0xff0000ff);
+            if (cmd == SEG_CLOSE)
+                continue;
+            prj_trans_.backward(x, y, z);
+            t_.forward(&x, &y);
+            mapnik::set_pixel(pixmap_, x, y, 0xff0000ff);
+            mapnik::set_pixel(pixmap_, x - 1, y - 1, 0xff0000ff);
+            mapnik::set_pixel(pixmap_, x + 1, y + 1, 0xff0000ff);
+            mapnik::set_pixel(pixmap_, x - 1, y + 1, 0xff0000ff);
+            mapnik::set_pixel(pixmap_, x + 1, y - 1, 0xff0000ff);
         }
     }
 
-    Pixmap & pixmap_;
+    Pixmap& pixmap_;
     view_transform const& t_;
     proj_transform const& prj_trans_;
 };
 
-
-template <typename BufferType>
-struct RingRenderer {
-
+template<typename BufferType>
+struct RingRenderer
+{
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;
     using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
@@ -113,45 +114,40 @@ struct RingRenderer {
     using renderer_base = agg::renderer_base<pixfmt_comp_type>;
     using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
 
-    using path_type = transform_path_adapter<view_transform, geometry::ring_vertex_adapter<double> >;
+    using path_type = transform_path_adapter<view_transform, geometry::ring_vertex_adapter<double>>;
 
-    RingRenderer(rasterizer & ras_ptr,
-                 BufferType & im,
-                 view_transform const& tr,
-                 proj_transform const& prj_trans) :
-       ras_ptr_(ras_ptr),
-       im_(im),
-       tr_(tr),
-       prj_trans_(prj_trans),
-       sl_() {}
+    RingRenderer(rasterizer& ras_ptr, BufferType& im, view_transform const& tr, proj_transform const& prj_trans)
+        : ras_ptr_(ras_ptr)
+        , im_(im)
+        , tr_(tr)
+        , prj_trans_(prj_trans)
+        , sl_()
+    {}
 
-    void draw_ring(geometry::linear_ring<double> const& ring,
-                   agg::rgba8 const& color)
+    void draw_ring(geometry::linear_ring<double> const& ring, agg::rgba8 const& color)
     {
         ras_ptr_.reset();
-        agg::rendering_buffer buf(im_.bytes(),im_.width(),im_.height(),im_.row_size());
+        agg::rendering_buffer buf(im_.bytes(), im_.width(), im_.height(), im_.row_size());
         pixfmt_comp_type pixf(buf);
         renderer_base renb(pixf);
         renderer_type ren(renb);
         geometry::ring_vertex_adapter<double> va(ring);
-        path_type path(tr_,va,prj_trans_);
+        path_type path(tr_, va, prj_trans_);
         ras_ptr_.add_path(path);
         ras_ptr_.filling_rule(agg::fill_non_zero);
         ren.color(color);
         agg::render_scanlines(ras_ptr_, sl_, ren);
     }
 
-    void draw_outline(geometry::linear_ring<double> const& ring,
-                   agg::rgba8 const& color,
-                   double stroke_width=3)
+    void draw_outline(geometry::linear_ring<double> const& ring, agg::rgba8 const& color, double stroke_width = 3)
     {
         ras_ptr_.reset();
-        agg::rendering_buffer buf(im_.bytes(),im_.width(),im_.height(),im_.row_size());
+        agg::rendering_buffer buf(im_.bytes(), im_.width(), im_.height(), im_.row_size());
         pixfmt_comp_type pixf(buf);
         renderer_base renb(pixf);
         renderer_type ren(renb);
         geometry::ring_vertex_adapter<double> va(ring);
-        path_type path(tr_,va,prj_trans_);
+        path_type path(tr_, va, prj_trans_);
         agg::conv_stroke<path_type> stroke(path);
         stroke.width(stroke_width);
         ras_ptr_.add_path(stroke);
@@ -160,18 +156,19 @@ struct RingRenderer {
         agg::render_scanlines(ras_ptr_, sl_, ren);
     }
 
-    rasterizer & ras_ptr_;
-    BufferType & im_;
+    rasterizer& ras_ptr_;
+    BufferType& im_;
     view_transform const& tr_;
     proj_transform const& prj_trans_;
     agg::scanline_u8 sl_;
 };
 
-template <typename BufferType>
+template<typename BufferType>
 struct render_ring_visitor
 {
-    render_ring_visitor(RingRenderer<BufferType> & renderer)
-     : renderer_(renderer) {}
+    render_ring_visitor(RingRenderer<BufferType>& renderer)
+        : renderer_(renderer)
+    {}
 
     void operator()(mapnik::geometry::multi_polygon<double> const& geom) const
     {
@@ -183,9 +180,9 @@ struct render_ring_visitor
 
     void operator()(mapnik::geometry::polygon<double> const& poly) const
     {
-        agg::rgba8 red(255,0,0,255);
-        agg::rgba8 green(0,255,255,255);
-        agg::rgba8 black(0,0,0,255);
+        agg::rgba8 red(255, 0, 0, 255);
+        agg::rgba8 green(0, 255, 255, 255);
+        agg::rgba8 black(0, 0, 0, 255);
         bool exterior = true;
         for (auto const& ring : poly)
         {
@@ -195,35 +192,36 @@ struct render_ring_visitor
                 renderer_.draw_ring(ring, red);
                 if (mapnik::util::is_clockwise(ring))
                 {
-                    renderer_.draw_outline(ring,black);
+                    renderer_.draw_outline(ring, black);
                 }
             }
             else
             {
-                renderer_.draw_ring(ring,green);
+                renderer_.draw_ring(ring, green);
                 if (!mapnik::util::is_clockwise(ring))
                 {
-                    renderer_.draw_outline(ring,black);
+                    renderer_.draw_outline(ring, black);
                 }
             }
         }
     }
 
     template<typename GeomType>
-    void operator()(GeomType const&) const {}
+    void operator()(GeomType const&) const
+    {}
 
-    RingRenderer<BufferType> & renderer_;
+    RingRenderer<BufferType>& renderer_;
 };
 
 } // anonymous namespace
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+template<typename T0, typename T1>
+void agg_renderer<T0, T1>::process(debug_symbolizer const& sym,
+                                   mapnik::feature_impl& feature,
+                                   proj_transform const& prj_trans)
 {
-
-    debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
+    debug_symbolizer_mode_enum mode =
+      get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
 
     ras_ptr->reset();
     if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
@@ -237,7 +235,7 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     {
         RingRenderer<buffer_type> renderer(*ras_ptr, buffers_.top().get(), common_.t_, prj_trans);
         render_ring_visitor<buffer_type> apply(renderer);
-        mapnik::util::apply_visitor(apply,feature.get_geometry());
+        mapnik::util::apply_visitor(apply, feature.get_geometry());
     }
     else if (mode == DEBUG_SYM_MODE_COLLISION)
     {
@@ -254,7 +252,5 @@ void agg_renderer<T0,T1>::process(debug_symbolizer const& sym,
     }
 }
 
-template void agg_renderer<image_rgba8>::process(debug_symbolizer const&,
-                                              mapnik::feature_impl &,
-                                              proj_transform const&);
-}
+template void agg_renderer<image_rgba8>::process(debug_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
+} // namespace mapnik

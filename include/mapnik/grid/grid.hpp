@@ -42,13 +42,12 @@
 #include <string>
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 class MAPNIK_DECL hit_grid
 {
-public:
+  public:
     using value_type = typename T::type;
     using data_type = mapnik::image<T>;
     using lookup_type = std::string;
@@ -57,7 +56,7 @@ public:
     using feature_type = std::map<lookup_type, mapnik::feature_ptr>;
     static const value_type base_mask;
 
-private:
+  private:
     std::size_t width_;
     std::size_t height_;
     std::string key_;
@@ -69,7 +68,7 @@ private:
     feature_type features_;
     mapnik::context_ptr ctx_;
 
-public:
+  public:
 
     hit_grid(std::size_t width, std::size_t height, std::string const& key);
 
@@ -79,94 +78,48 @@ public:
 
     void clear();
 
-    inline void painted(bool is_painted)
-    {
-        painted_ = is_painted;
-    }
+    inline void painted(bool is_painted) { painted_ = is_painted; }
 
-    inline bool painted() const
-    {
-        return painted_;
-    }
+    inline bool painted() const { return painted_; }
 
-    inline std::string const& key_name() const
-    {
-        return id_name_;
-    }
+    inline std::string const& key_name() const { return id_name_; }
 
     void add_feature(mapnik::feature_impl const& feature);
 
-    inline void add_field(std::string const& name)
-    {
-        names_.insert(name);
-    }
+    inline void add_field(std::string const& name) { names_.insert(name); }
 
-    inline std::set<std::string> const& get_fields() const
-    {
-        return names_;
-    }
+    inline std::set<std::string> const& get_fields() const { return names_; }
 
-    inline feature_type const& get_grid_features() const
-    {
-        return features_;
-    }
+    inline feature_type const& get_grid_features() const { return features_; }
 
-    inline feature_key_type const& get_feature_keys() const
-    {
-        return f_keys_;
-    }
+    inline feature_key_type const& get_feature_keys() const { return f_keys_; }
 
-    inline std::string const& get_key() const
-    {
-        return key_;
-    }
+    inline std::string const& get_key() const { return key_; }
 
-    inline void set_key(std::string const& key)
-    {
-        key_ = key;
-    }
+    inline void set_key(std::string const& key) { key_ = key; }
 
-    inline data_type const& data() const
-    {
-        return data_;
-    }
+    inline data_type const& data() const { return data_; }
 
-    inline data_type& data()
-    {
-        return data_;
-    }
+    inline data_type& data() { return data_; }
 
-    inline value_type const * raw_data() const
-    {
-        return data_.data();
-    }
+    inline value_type const* raw_data() const { return data_.data(); }
 
-    inline value_type* raw_data()
-    {
-        return data_.data();
-    }
+    inline value_type* raw_data() { return data_.data(); }
 
-    inline value_type const * get_row(std::size_t row) const
-    {
-        return data_.get_row(row);
-    }
+    inline value_type const* get_row(std::size_t row) const { return data_.get_row(row); }
 
     inline mapnik::grid_view get_view(std::size_t x, std::size_t y, std::size_t w, std::size_t h)
     {
-        return mapnik::grid_view(x, y, w, h,
-                                 data_, key_, id_name_, names_, f_keys_, features_);
+        return mapnik::grid_view(x, y, w, h, data_, key_, id_name_, names_, f_keys_, features_);
     }
 
-private:
+  private:
 
-    inline bool checkBounds(std::size_t x, std::size_t y) const
-    {
-        return (x < width_ && y < height_);
-    }
+    inline bool checkBounds(std::size_t x, std::size_t y) const { return (x < width_ && y < height_); }
 
     hit_grid& operator=(const hit_grid&);
 
-public:
+  public:
     inline void setPixel(std::size_t x, std::size_t y, value_type feature_id)
     {
         if (checkBounds(x, y))
@@ -174,15 +127,9 @@ public:
             data_(x, y) = feature_id;
         }
     }
-    inline std::size_t width() const
-    {
-        return width_;
-    }
+    inline std::size_t width() const { return width_; }
 
-    inline std::size_t height() const
-    {
-        return height_;
-    }
+    inline std::size_t height() const { return height_; }
 
     inline void set_rectangle(value_type id, image_rgba8 const& data, std::size_t x0, std::size_t y0)
     {
@@ -198,8 +145,8 @@ public:
             std::size_t maxx = safe_cast<std::size_t>(box.maxx());
             for (std::size_t y = miny; y < maxy; ++y)
             {
-                value_type* row_to =  data_.get_row(y);
-                image_rgba8::pixel_type const * row_from = data.get_row(y - y0);
+                value_type* row_to = data_.get_row(y);
+                image_rgba8::pixel_type const* row_from = data.get_row(y - y0);
 
                 for (std::size_t x = minx; x < maxx; ++x)
                 {
@@ -219,5 +166,5 @@ public:
 
 using grid = hit_grid<mapnik::value_integer_pixel>;
 
-}
-#endif //MAPNIK_GRID_HPP
+} // namespace mapnik
+#endif // MAPNIK_GRID_HPP

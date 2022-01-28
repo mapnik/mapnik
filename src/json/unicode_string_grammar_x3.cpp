@@ -24,7 +24,9 @@
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/extract_bounding_boxes_x3_config.hpp>
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, iterator_type, phrase_parse_context_type);
 BOOST_SPIRIT_INSTANTIATE(unicode_string_grammar_type, iterator_type, context_type);
@@ -40,9 +42,15 @@ BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, phra
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, feature_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, feature_context_const_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type);
-BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type);
+BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type,
+                                iterator_type,
+                                extract_bounding_boxes_reverse_context_type);
 BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_context_type_f);
-BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type, iterator_type, extract_bounding_boxes_reverse_context_type_f);
+BOOST_SPIRIT_INSTANTIATE_UNUSED(unicode_string_grammar_type,
+                                iterator_type,
+                                extract_bounding_boxes_reverse_context_type_f);
 #endif
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik

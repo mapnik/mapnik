@@ -25,12 +25,11 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/symbolizer_base.hpp>  // for transform_list_ptr
+#include <mapnik/symbolizer_base.hpp> // for transform_list_ptr
 
 namespace mapnik {
 
-MAPNIK_DECL transform_list_ptr parse_transform(std::string const& str,
-                                               std::string const& encoding="utf-8");
+MAPNIK_DECL transform_list_ptr parse_transform(std::string const& str, std::string const& encoding = "utf-8");
 
 } // namespace mapnik
 

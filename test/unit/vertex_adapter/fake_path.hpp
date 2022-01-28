@@ -27,10 +27,9 @@
 #include <vector>
 #include <tuple>
 
-namespace detail
-{
+namespace detail {
 
-template <typename T>
+template<typename T>
 struct fake_path
 {
     using coord_type = std::tuple<T, T, unsigned>;
@@ -40,22 +39,20 @@ struct fake_path
 
     fake_path(std::initializer_list<T> l)
         : fake_path(l.begin(), l.size())
-    {
-    }
+    {}
 
-    fake_path(std::vector<T> const &v, bool make_invalid = false)
+    fake_path(std::vector<T> const& v, bool make_invalid = false)
         : fake_path(v.begin(), v.size(), make_invalid)
-    {
-    }
+    {}
 
-    template <typename Itr>
+    template<typename Itr>
     fake_path(Itr itr, size_t sz, bool make_invalid = false)
     {
         size_t num_coords = sz >> 1;
         vertices_.reserve(num_coords + (make_invalid ? 1 : 0));
         if (make_invalid)
         {
-            vertices_.push_back(std::make_tuple(0,0,mapnik::SEG_END));
+            vertices_.push_back(std::make_tuple(0, 0, mapnik::SEG_END));
         }
 
         for (size_t i = 0; i < num_coords; ++i)
@@ -68,7 +65,7 @@ struct fake_path
         itr_ = vertices_.begin();
     }
 
-    unsigned vertex(T *x, T *y)
+    unsigned vertex(T* x, T* y)
     {
         if (itr_ == vertices_.end())
         {
@@ -81,13 +78,9 @@ struct fake_path
         return cmd;
     }
 
-    void rewind(unsigned)
-    {
-        itr_ = vertices_.begin();
-    }
+    void rewind(unsigned) { itr_ = vertices_.begin(); }
 };
 
-}
+} // namespace detail
 
 using fake_path = detail::fake_path<double>;
-

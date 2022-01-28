@@ -28,10 +28,9 @@
 
 #include "report.hpp"
 
-namespace visual_tests
-{
+namespace visual_tests {
 
-void console_report::report(result const & r)
+void console_report::report(result const& r)
 {
     s << '"' << r.name << '-' << r.size.width << '-' << r.size.height;
     if (r.tiles.width > 1 || r.tiles.height > 1)
@@ -49,7 +48,7 @@ void console_report::report(result const & r)
     s << std::endl;
 }
 
-unsigned console_report::summary(result_list const & results)
+unsigned console_report::summary(result_list const& results)
 {
     unsigned ok = 0;
     unsigned error = 0;
@@ -60,14 +59,22 @@ unsigned console_report::summary(result_list const & results)
     using duration_map_type = std::map<std::string, high_resolution_clock::duration>;
     duration_map_type durations;
 
-    for (auto const & r : results)
+    for (auto const& r : results)
     {
         switch (r.state)
         {
-            case STATE_OK: ok++; break;
-            case STATE_FAIL: fail++; break;
-            case STATE_ERROR: error++; break;
-            case STATE_OVERWRITE: overwrite++; break;
+            case STATE_OK:
+                ok++;
+                break;
+            case STATE_FAIL:
+                fail++;
+                break;
+            case STATE_ERROR:
+                error++;
+                break;
+            case STATE_OVERWRITE:
+                overwrite++;
+                break;
         }
 
         if (show_duration)
@@ -85,16 +92,16 @@ unsigned console_report::summary(result_list const & results)
     }
 
     s << std::endl;
-    s << "Visual rendering: " << fail << " failed / " << ok << " passed / "
-        << overwrite << " overwritten / " << error << " errors" << std::endl;
+    s << "Visual rendering: " << fail << " failed / " << ok << " passed / " << overwrite << " overwritten / " << error
+      << " errors" << std::endl;
 
     if (show_duration)
     {
         high_resolution_clock::duration total(0);
-        for (auto const & duration : durations)
+        for (auto const& duration : durations)
         {
-            s << duration.first << ": \t" << duration_cast<milliseconds>(duration.second).count()
-              << " milliseconds" << std::endl;
+            s << duration.first << ": \t" << duration_cast<milliseconds>(duration.second).count() << " milliseconds"
+              << std::endl;
             total += duration.second;
         }
         s << "total: \t" << duration_cast<milliseconds>(total).count() << " milliseconds" << std::endl;
@@ -107,7 +114,7 @@ unsigned console_report::summary(result_list const & results)
     return fail + error;
 }
 
-void console_report::report_state(result const & r)
+void console_report::report_state(result const& r)
 {
     switch (r.state)
     {
@@ -126,9 +133,9 @@ void console_report::report_state(result const & r)
     }
 }
 
-void console_report::report_failures(result_list const & results)
+void console_report::report_failures(result_list const& results)
 {
-    for (auto const & r : results)
+    for (auto const& r : results)
     {
         if (r.state == STATE_OK)
         {
@@ -146,7 +153,7 @@ void console_report::report_failures(result_list const & results)
     }
 }
 
-void console_short_report::report(result const & r)
+void console_short_report::report(result const& r)
 {
     switch (r.state)
     {
@@ -165,31 +172,31 @@ void console_short_report::report(result const & r)
     }
 }
 
-void html_report::report(result const & r, boost::filesystem::path const & output_dir)
+void html_report::report(result const& r, boost::filesystem::path const& output_dir)
 {
     if (r.state == STATE_ERROR)
     {
-       s << "<div class=\"text\">Failed to render: " << r.name << "<br><em>" << r.error_message << "</em></div>\n";
+        s << "<div class=\"text\">Failed to render: " << r.name << "<br><em>" << r.error_message << "</em></div>\n";
     }
     else if (r.state == STATE_FAIL)
     {
-      using namespace boost::filesystem;
+        using namespace boost::filesystem;
 
-      path reference = output_dir / r.reference_image_path.filename();
-      path actual = output_dir / r.actual_image_path.filename();
+        path reference = output_dir / r.reference_image_path.filename();
+        path actual = output_dir / r.actual_image_path.filename();
 
-      if (exists(reference))
-      {
-          remove(reference);
-      }
-      if (exists(actual))
-      {
-          remove(actual);
-      }
-      copy_file(r.reference_image_path, reference);
-      copy_file(r.actual_image_path, actual);
-
-       s << "<p>" << r.diff << "</p>\n"
+        if (exists(reference))
+        {
+            remove(reference);
+        }
+        if (exists(actual))
+        {
+            remove(actual);
+        }
+        copy_file(r.reference_image_path, reference);
+        copy_file(r.actual_image_path, actual);
+        // clang-format off
+        s << "<p>" << r.diff << "</p>\n"
             "<div class=\"r\">"
             "  <div class=\"i\">"
             "    <a href=" << reference.filename() << ">\n"
@@ -202,10 +209,11 @@ void html_report::report(result const & r, boost::filesystem::path const & outpu
             "    </a>\n"
             "  </div>\n"
             "</div>\n";
+        // clang-format on
     }
 }
 
-constexpr const char * html_header = R"template(<!DOCTYPE html>
+constexpr const char* html_header = R"template(<!DOCTYPE html>
 <html>
 <head>
   <style>
@@ -226,15 +234,15 @@ constexpr const char * html_header = R"template(<!DOCTYPE html>
 <body>
 )template";
 
-constexpr const char * html_footer = R"template(</div>
+constexpr const char* html_footer = R"template(</div>
 </body>
 </html>)template";
 
-void html_report::summary(result_list const & results, boost::filesystem::path const & output_dir)
+void html_report::summary(result_list const& results, boost::filesystem::path const& output_dir)
 {
     s << html_header;
 
-    for (auto const & r : results)
+    for (auto const& r : results)
     {
         if (r.state != STATE_OK)
         {
@@ -245,7 +253,7 @@ void html_report::summary(result_list const & results, boost::filesystem::path c
     s << html_footer;
 }
 
-void html_summary(result_list const & results, boost::filesystem::path output_dir)
+void html_summary(result_list const& results, boost::filesystem::path output_dir)
 {
     boost::filesystem::path html_root = output_dir / "visual-test-results";
     boost::filesystem::create_directories(html_root);
@@ -256,4 +264,4 @@ void html_summary(result_list const & results, boost::filesystem::path output_di
     report.summary(results, html_root);
 }
 
-}
+} // namespace visual_tests

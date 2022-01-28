@@ -67,8 +67,11 @@ namespace mapnik {
 
 namespace detail {
 
-template <typename SvgRenderer, typename ScanlineRenderer,
-          typename BufferType, typename RasterizerType, typename PixMapType>
+template<typename SvgRenderer,
+         typename ScanlineRenderer,
+         typename BufferType,
+         typename RasterizerType,
+         typename PixMapType>
 struct grid_markers_renderer_context : markers_renderer_context
 {
     using renderer_base = typename SvgRenderer::renderer_base;
@@ -76,40 +79,34 @@ struct grid_markers_renderer_context : markers_renderer_context
     using attribute_source_type = typename SvgRenderer::attribute_source_type;
     using pixfmt_type = typename renderer_base::pixfmt_type;
 
-    grid_markers_renderer_context(feature_impl const& feature,
-                                  BufferType & buf,
-                                  RasterizerType & ras,
-                                  PixMapType & pixmap)
-      : feature_(feature),
-        buf_(buf),
-        pixf_(buf_),
-        renb_(pixf_),
-        ras_(ras),
-        pixmap_(pixmap),
-        placed_(false)
+    grid_markers_renderer_context(feature_impl const& feature, BufferType& buf, RasterizerType& ras, PixMapType& pixmap)
+        : feature_(feature)
+        , buf_(buf)
+        , pixf_(buf_)
+        , renb_(pixf_)
+        , ras_(ras)
+        , pixmap_(pixmap)
+        , placed_(false)
     {}
 
     virtual void render_marker(svg_path_ptr const& src,
-                               svg_path_adapter & path,
+                               svg_path_adapter& path,
                                svg_attribute_type const& attrs,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr)
     {
         SvgRenderer svg_renderer_(path, attrs);
         agg::scanline_bin sl_;
-        svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), marker_tr,
-                                params.opacity, src->bounding_box());
+        svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), marker_tr, params.opacity, src->bounding_box());
         place_feature();
     }
 
-    virtual void render_marker(image_rgba8 const& src,
-                               markers_dispatch_params const& params,
-                               agg::trans_affine const& marker_tr)
+    virtual void
+      render_marker(image_rgba8 const& src, markers_dispatch_params const& params, agg::trans_affine const& marker_tr)
     {
         // In the long term this should be a visitor pattern based on the type of
         // render src provided that converts the destination pixel type required.
-        render_raster_marker(ScanlineRenderer(renb_), ras_, src, feature_,
-                             marker_tr, params.opacity);
+        render_raster_marker(ScanlineRenderer(renb_), ras_, src, feature_, marker_tr, params.opacity);
         place_feature();
     }
 
@@ -122,49 +119,40 @@ struct grid_markers_renderer_context : markers_renderer_context
         }
     }
 
-private:
+  private:
     feature_impl const& feature_;
-    BufferType & buf_;
+    BufferType& buf_;
     pixfmt_type pixf_;
     renderer_base renb_;
-    RasterizerType & ras_;
-    PixMapType & pixmap_;
+    RasterizerType& ras_;
+    PixMapType& pixmap_;
     bool placed_;
 };
 
 } // namespace detail
 
-template <typename T>
+template<typename T>
 void grid_renderer<T>::process(markers_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
     using buf_type = grid_rendering_buffer;
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
-    using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
-                                                svg_attribute_type,
-                                                renderer_type,
-                                                pixfmt_type>;
+    using svg_renderer_type = svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_type, pixfmt_type>;
 
     buf_type render_buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
     ras_ptr->reset();
     box2d<double> clip_box = common_.query_extent_;
 
-    using renderer_context_type = detail::grid_markers_renderer_context<svg_renderer_type,
-                                                               renderer_type,
-                                                               buf_type,
-                                                               grid_rasterizer,
-                                                               buffer_type>;
+    using renderer_context_type =
+      detail::grid_markers_renderer_context<svg_renderer_type, renderer_type, buf_type, grid_rasterizer, buffer_type>;
     renderer_context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
 
-    render_markers_symbolizer(
-        sym, feature, prj_trans, common_, clip_box, renderer_context);
+    render_markers_symbolizer(sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
-template void grid_renderer<grid>::process(markers_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(markers_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 } // namespace mapnik
 
 #endif

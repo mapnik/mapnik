@@ -37,60 +37,61 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/fusion/include/vector.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 namespace detail {
 
 struct datasource_geometry_type
 {
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_empty const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::geometry_empty const&) const
     {
         return mapnik::datasource_geometry_t::Unknown;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::point<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::point<double> const&) const
     {
         return mapnik::datasource_geometry_t::Point;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::line_string<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::line_string<double> const&) const
     {
         return mapnik::datasource_geometry_t::LineString;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::polygon<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::polygon<double> const&) const
     {
         return mapnik::datasource_geometry_t::Polygon;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_point<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::multi_point<double> const&) const
     {
         return mapnik::datasource_geometry_t::Point;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_line_string<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::multi_line_string<double> const&) const
     {
         return mapnik::datasource_geometry_t::LineString;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::multi_polygon<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::multi_polygon<double> const&) const
     {
         return mapnik::datasource_geometry_t::Polygon;
     }
 
-    mapnik::datasource_geometry_t operator () (mapnik::geometry::geometry_collection<double> const&) const
+    mapnik::datasource_geometry_t operator()(mapnik::geometry::geometry_collection<double> const&) const
     {
         return mapnik::datasource_geometry_t::Collection;
     }
 };
-} // detail
+} // namespace detail
 
 static inline mapnik::datasource_geometry_t to_ds_type(mapnik::geometry::geometry<double> const& geom)
 {
     return util::apply_visitor(detail::datasource_geometry_type(), geom);
 }
 
-}}
-
+} // namespace util
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_TO_DS_TYPE_HPP

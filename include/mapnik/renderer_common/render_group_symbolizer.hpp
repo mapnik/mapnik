@@ -48,18 +48,18 @@ struct render_thunk_list_dispatch
         }
     }
 
-protected:
+  protected:
     pixel_position offset_;
 };
 
 MAPNIK_DECL
 void render_group_symbolizer(group_symbolizer const& sym,
-                             feature_impl & feature,
+                             feature_impl& feature,
                              attributes const& vars,
                              proj_transform const& prj_trans,
                              box2d<double> const& clipping_extent,
-                             renderer_common & common,
-                             render_thunk_list_dispatch & render_thunks);
+                             renderer_common& common,
+                             render_thunk_list_dispatch& render_thunks);
 
 } // namespace mapnik
 

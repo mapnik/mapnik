@@ -38,25 +38,27 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
+namespace boost {
+namespace interprocess {
+class mapped_region;
+}
+} // namespace boost
 
-namespace boost { namespace interprocess { class mapped_region; } }
-
-namespace mapnik
-{
+namespace mapnik {
 
 using mapped_region_ptr = std::shared_ptr<boost::interprocess::mapped_region>;
 
-class MAPNIK_DECL mapped_memory_cache :
-        public singleton<mapped_memory_cache, CreateStatic>,
-        private util::noncopyable
+class MAPNIK_DECL mapped_memory_cache : public singleton<mapped_memory_cache, CreateStatic>,
+                                        private util::noncopyable
 {
     friend class CreateStatic<mapped_memory_cache>;
-    std::unordered_map<std::string,mapped_region_ptr> cache_;
-public:
+    std::unordered_map<std::string, mapped_region_ptr> cache_;
+
+  public:
     bool insert(std::string const& key, mapped_region_ptr);
     /**
      * @brief removes the resource identified by key from the cache, if exists
-     * 
+     *
      * @param key unique identifier for the resource
      * @return true if the resource was removed
      * @return false if the resource was not removed or wasn't in the cache
@@ -68,6 +70,6 @@ public:
 
 extern template class MAPNIK_DECL singleton<mapped_memory_cache, CreateStatic>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MAPPED_MEMORY_CACHE_HPP

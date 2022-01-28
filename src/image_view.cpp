@@ -26,8 +26,7 @@
 #include <mapnik/image_view_null.hpp>
 #include <mapnik/pixel_types.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 template class MAPNIK_DECL image_view<image_rgba8>;
 template class MAPNIK_DECL image_view<image_gray8>;
 template class MAPNIK_DECL image_view<image_gray8s>;
@@ -40,4 +39,4 @@ template class MAPNIK_DECL image_view<image_gray64>;
 template class MAPNIK_DECL image_view<image_gray64s>;
 template class MAPNIK_DECL image_view<image_gray64f>;
 
-} // end ns mapnik
+} // namespace mapnik

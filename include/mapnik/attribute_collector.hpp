@@ -28,11 +28,11 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/expression.hpp>  // for expression_ptr, etc
+#include <mapnik/expression.hpp> // for expression_ptr, etc
 #include <mapnik/expression_node.hpp>
-#include <mapnik/parse_path.hpp>  // for path_processor_type
-#include <mapnik/path_expression.hpp>  // for path_expression_ptr
-#include <mapnik/text/placements/base.hpp>  // for text_placements
+#include <mapnik/parse_path.hpp>           // for path_processor_type
+#include <mapnik/path_expression.hpp>      // for path_expression_ptr
+#include <mapnik/text/placements/base.hpp> // for text_placements
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/group/group_symbolizer_properties.hpp>
 #include <mapnik/group/group_rule.hpp>
@@ -51,76 +51,71 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename Container>
+template<typename Container>
 struct expression_attributes
 {
     explicit expression_attributes(Container& names)
-        : names_(names) {}
+        : names_(names)
+    {}
 
-    void operator() (attribute const& attr) const
-    {
-        names_.emplace(attr.name());
-    }
+    void operator()(attribute const& attr) const { names_.emplace(attr.name()); }
 
-    template <typename Tag>
-    void operator() (binary_node<Tag> const& x) const
+    template<typename Tag>
+    void operator()(binary_node<Tag> const& x) const
     {
         util::apply_visitor(*this, x.left);
         util::apply_visitor(*this, x.right);
     }
 
-    template <typename Tag>
-    void operator() (unary_node<Tag> const& x) const
+    template<typename Tag>
+    void operator()(unary_node<Tag> const& x) const
     {
         util::apply_visitor(*this, x.expr);
     }
 
-    void operator() (regex_match_node const& x) const
-    {
-        util::apply_visitor(*this, x.expr);
-    }
+    void operator()(regex_match_node const& x) const { util::apply_visitor(*this, x.expr); }
 
-    void operator() (regex_replace_node const& x) const
-    {
-        util::apply_visitor(*this, x.expr);
-    }
+    void operator()(regex_replace_node const& x) const { util::apply_visitor(*this, x.expr); }
 
-    template <typename T>
-    void operator() (T const&) const {}
+    template<typename T>
+    void operator()(T const&) const
+    {}
 
-private:
+  private:
     Container& names_;
 };
 
 class group_attribute_collector : public util::noncopyable
 {
-private:
+  private:
     std::set<std::string>& names_;
     bool expand_index_columns_;
-public:
-    group_attribute_collector(std::set<std::string>& names,
-                              bool expand_index_columns)
-        : names_(names),
-          expand_index_columns_(expand_index_columns) {}
 
-    void operator() (group_symbolizer const& sym);
+  public:
+    group_attribute_collector(std::set<std::string>& names, bool expand_index_columns)
+        : names_(names)
+        , expand_index_columns_(expand_index_columns)
+    {}
+
+    void operator()(group_symbolizer const& sym);
 };
 
-template <typename Container>
+template<typename Container>
 struct extract_attribute_names
 {
     explicit extract_attribute_names(Container& names)
-        : names_(names),
-          f_attr_(names) {}
+        : names_(names)
+        , f_attr_(names)
+    {}
 
-    void operator() (mapnik::expression_ptr const& expr) const
+    void operator()(mapnik::expression_ptr const& expr) const
     {
         if (expr)
         {
             util::apply_visitor(f_attr_, *expr);
         }
     }
-    void operator() (mapnik::transform_type const& expr) const
+    void operator()(mapnik::transform_type const& expr) const
     {
         if (expr)
         {
@@ -128,7 +123,7 @@ struct extract_attribute_names
         }
     }
 
-    void operator() (mapnik::text_placements_ptr const& expr) const
+    void operator()(mapnik::text_placements_ptr const& expr) const
     {
         if (expr)
         {
@@ -136,39 +131,41 @@ struct extract_attribute_names
             expression_set expressions;
             // TODO - optimize (dane)
             expr->add_expressions(expressions);
-            for (it=expressions.begin(); it != expressions.end(); ++it)
+            for (it = expressions.begin(); it != expressions.end(); ++it)
             {
-                if (*it) util::apply_visitor(f_attr_, **it);
+                if (*it)
+                    util::apply_visitor(f_attr_, **it);
             }
         }
     }
 
-    void operator() (mapnik::path_expression_ptr const& expr) const
+    void operator()(mapnik::path_expression_ptr const& expr) const
     {
         if (expr)
         {
-            path_processor_type::collect_attributes(*expr,names_);
+            path_processor_type::collect_attributes(*expr, names_);
         }
     }
 
-    template <typename T>
-    void operator() (T const&) const {}
+    template<typename T>
+    void operator()(T const&) const
+    {}
 
-private:
+  private:
     Container& names_;
-    expression_attributes<std::set<std::string> > f_attr_;
+    expression_attributes<std::set<std::string>> f_attr_;
 };
 
 struct symbolizer_attributes
 {
-    symbolizer_attributes(std::set<std::string>& names,
-                          double & filter_factor)
-        : filter_factor_(filter_factor),
-          f_attrs_(names),
-          g_attrs_(names, true) {}
+    symbolizer_attributes(std::set<std::string>& names, double& filter_factor)
+        : filter_factor_(filter_factor)
+        , f_attrs_(names)
+        , g_attrs_(names, true)
+    {}
 
-    template <typename T>
-    void operator () (T const& sym)
+    template<typename T>
+    void operator()(T const& sym)
     {
         for (auto const& prop : sym.properties)
         {
@@ -176,7 +173,7 @@ struct symbolizer_attributes
         }
     }
 
-    void operator () (raster_symbolizer const& sym)
+    void operator()(raster_symbolizer const& sym)
     {
         boost::optional<double> filter_factor = get_optional<double>(sym, keys::filter_factor);
         if (filter_factor)
@@ -197,57 +194,51 @@ struct symbolizer_attributes
         }
     }
 
-    void operator () (group_symbolizer const& sym)
-    {
-        g_attrs_(sym);
-    }
+    void operator()(group_symbolizer const& sym) { g_attrs_(sym); }
 
-private:
-    double & filter_factor_;
-    extract_attribute_names<std::set<std::string> > f_attrs_;
+  private:
+    double& filter_factor_;
+    extract_attribute_names<std::set<std::string>> f_attrs_;
     group_attribute_collector g_attrs_;
 };
 
-
 class attribute_collector : public util::noncopyable
 {
-private:
-    std::set<std::string> & names_;
+  private:
+    std::set<std::string>& names_;
     double filter_factor_;
-    expression_attributes<std::set<std::string> > f_attr;
-public:
+    expression_attributes<std::set<std::string>> f_attr;
+
+  public:
 
     attribute_collector(std::set<std::string>& names)
-        : names_(names),
-          filter_factor_(1.0),
-          f_attr(names) {}
-    template <typename RuleType>
-    void operator() (RuleType const& r)
+        : names_(names)
+        , filter_factor_(1.0)
+        , f_attr(names)
+    {}
+    template<typename RuleType>
+    void operator()(RuleType const& r)
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
-        symbolizer_attributes s_attr(names_,filter_factor_);
+        symbolizer_attributes s_attr(names_, filter_factor_);
         for (auto const& sym : symbols)
         {
             util::apply_visitor(std::ref(s_attr), sym);
         }
 
         expression_ptr const& expr = r.get_filter();
-        util::apply_visitor(f_attr,*expr);
+        util::apply_visitor(f_attr, *expr);
     }
 
-    double get_filter_factor() const
-    {
-        return filter_factor_;
-    }
+    double get_filter_factor() const { return filter_factor_; }
 };
 
-
-inline void group_attribute_collector::operator() (group_symbolizer const& sym)
+inline void group_attribute_collector::operator()(group_symbolizer const& sym)
 {
     // find all column names referenced in the group symbolizer
     std::set<std::string> group_columns;
     attribute_collector column_collector(group_columns);
-    expression_attributes<std::set<std::string> > rk_attr(group_columns);
+    expression_attributes<std::set<std::string>> rk_attr(group_columns);
 
     // get columns from symbolizer repeat key
     expression_ptr repeat_key = get<mapnik::expression_ptr>(sym, keys::repeat_key);
@@ -289,7 +280,7 @@ inline void group_attribute_collector::operator() (group_symbolizer const& sym)
                 for (value_integer col_idx = start; col_idx < end; ++col_idx)
                 {
                     std::string col_idx_str;
-                    if (mapnik::util::to_string(col_idx_str,col_idx))
+                    if (mapnik::util::to_string(col_idx_str, col_idx))
                     {
                         std::string col_idx_name = col_name;
                         boost::replace_all(col_idx_name, "%", col_idx_str);

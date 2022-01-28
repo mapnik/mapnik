@@ -14,7 +14,7 @@
 
 namespace {
 
-template <typename Properties>
+template<typename Properties>
 mapnik::feature_ptr make_test_feature(mapnik::value_integer id, std::string const& wkt, Properties const& prop)
 {
     auto ctx = std::make_shared<mapnik::context_type>();
@@ -32,12 +32,12 @@ mapnik::feature_ptr make_test_feature(mapnik::value_integer id, std::string cons
     return feature;
 }
 
-template <typename Feature, typename Expression>
+template<typename Feature, typename Expression>
 mapnik::value_type evaluate(Feature const& feature, Expression const& expr)
 {
     auto value = mapnik::util::apply_visitor(
-        mapnik::evaluate<Feature, mapnik::value_type, mapnik::attributes>(
-            feature, mapnik::attributes()), expr);
+      mapnik::evaluate<Feature, mapnik::value_type, mapnik::attributes>(feature, mapnik::attributes()),
+      expr);
     return value;
 }
 
@@ -62,16 +62,16 @@ TEST_CASE("expressions")
     using properties_type = std::map<std::string, mapnik::value>;
     mapnik::transcoder tr("utf8");
 
-    properties_type prop = {{ "foo"   , tr.transcode("bar") },
-                            { "name"  , tr.transcode("Québec")},
-                            { "grass" , tr.transcode("grow")},
-                            { "wind"  , tr.transcode("blow")},
-                            { "sky"   , tr.transcode("is blue")},
-                            { "τ"     , mapnik::value_double(6.2831853)},
-                            { "double", mapnik::value_double(1.23456)},
-                            { "int"   , mapnik::value_integer(123)},
-                            { "bool"  , mapnik::value_bool(true)},
-                            { "null"  , mapnik::value_null()}};
+    properties_type prop = {{"foo", tr.transcode("bar")},
+                            {"name", tr.transcode("Québec")},
+                            {"grass", tr.transcode("grow")},
+                            {"wind", tr.transcode("blow")},
+                            {"sky", tr.transcode("is blue")},
+                            {"τ", mapnik::value_double(6.2831853)},
+                            {"double", mapnik::value_double(1.23456)},
+                            {"int", mapnik::value_integer(123)},
+                            {"bool", mapnik::value_bool(true)},
+                            {"null", mapnik::value_null()}};
 
     auto feature = make_test_feature(1, "POINT(100 200)", prop);
     auto eval = std::bind(evaluate_string, feature, _1);
@@ -142,7 +142,7 @@ TEST_CASE("expressions")
     TRY_CHECK(eval(" [ mapnik::geometry_type ] neq collection ") == true);
     TRY_CHECK(eval(" [mapnik::geometry_type] eq collection ") == false);
 
-    //unary expression
+    // unary expression
     TRY_CHECK(eval(" -123.456 ") == -123.456);
     TRY_CHECK(eval(" +123.456 ") == 123.456);
 
@@ -157,8 +157,8 @@ TEST_CASE("expressions")
     TRY_CHECK(eval(" [int] = 456 or [foo].match('foo') || length([foo]) = 3 ") == true);
     TRY_CHECK(eval(" not true  and not true  ") == false); // (not true) and (not true)
     TRY_CHECK(eval(" not false and not true  ") == false); // (not false) and (not true)
-    TRY_CHECK(eval(" not true  or  not false ") == true); // (not true) or (not false)
-    TRY_CHECK(eval(" not false or  not false ") == true); // (not false) or (not false)
+    TRY_CHECK(eval(" not true  or  not false ") == true);  // (not true) or (not false)
+    TRY_CHECK(eval(" not false or  not false ") == true);  // (not false) or (not false)
 
     // test not/and/or precedence using combinations of "not EQ1 OP1 not EQ2 OP2 not EQ3"
     TRY_CHECK(eval(" not [grass] = 'grow' and not [wind] = 'blow' and not [sky] = 'is blue' ") == false);
@@ -186,7 +186,7 @@ TEST_CASE("expressions")
 
     // regex
     // replace
-    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r")); // single quotes
+    TRY_CHECK(eval(" [foo].replace('(\\B)|( )','$1 ') ") == tr.transcode("b a r"));     // single quotes
     TRY_CHECK(eval(" [foo].replace(\"(\\B)|( )\",\"$1 \") ") == tr.transcode("b a r")); // double quotes
 
     // https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
@@ -195,7 +195,7 @@ TEST_CASE("expressions")
     auto val0 = eval(from_u8string(u8"'\u265C\u265E\u265D\u265B\u265A\u265D\u265E\u265C'.replace('\u265E','\u2658')"));
     auto val1 = eval("'♜♞♝♛♚♝♞♜'.replace('♞','♘')"); // ==> expected ♜♘♝♛♚♝♘♜
     TRY_CHECK(val0 == val1);
-    TRY_CHECK(val0.to_string() == val1.to_string()); // UTF-8
+    TRY_CHECK(val0.to_string() == val1.to_string());   // UTF-8
     TRY_CHECK(val0.to_unicode() == val1.to_unicode()); // Unicode
     // \u+NNNN \U+NNNNNNNN \xNN\xNN
     // single quotes
@@ -210,14 +210,13 @@ TEST_CASE("expressions")
 
     TRY_CHECK(val3 == val4);
     TRY_CHECK(val5 == val6);
-    TRY_CHECK(val3.to_string() == val4.to_string()); // UTF-8
+    TRY_CHECK(val3.to_string() == val4.to_string());   // UTF-8
     TRY_CHECK(val3.to_unicode() == val4.to_unicode()); // Unicode
-    TRY_CHECK(val5.to_string() == val6.to_string()); // UTF-8
+    TRY_CHECK(val5.to_string() == val6.to_string());   // UTF-8
     TRY_CHECK(val5.to_unicode() == val6.to_unicode()); // Unicode
     TRY_CHECK(val7 == val8);
-    TRY_CHECK(val7.to_string() == val8.to_string()); // UTF-8
+    TRY_CHECK(val7.to_string() == val8.to_string());   // UTF-8
     TRY_CHECK(val7.to_unicode() == val8.to_unicode()); // Unicode
-
 
     // following test will fail if boost_regex is built without ICU support (unpaired surrogates in output)
     TRY_CHECK(eval("[name].replace('(\\B)|( )',' ') ") == tr.transcode("Q u é b e c"));

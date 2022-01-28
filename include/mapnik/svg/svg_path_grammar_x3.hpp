@@ -25,7 +25,9 @@
 
 #include <mapnik/svg/svg_grammar_config_x3.hpp>
 
-namespace mapnik { namespace svg { namespace grammar {
+namespace mapnik {
+namespace svg {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
@@ -35,9 +37,10 @@ using svg_points_grammar_type = x3::rule<class svg_points_rule_tag>;
 svg_path_grammar_type const svg_path = "SVG Path";
 svg_points_grammar_type const svg_points = "SVG_Points";
 
-BOOST_SPIRIT_DECLARE(svg_path_grammar_type,
-                     svg_points_grammar_type);
+BOOST_SPIRIT_DECLARE(svg_path_grammar_type, svg_points_grammar_type);
 
-}}}
+} // namespace grammar
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_PATH_GRAMMAR_X3_HPP

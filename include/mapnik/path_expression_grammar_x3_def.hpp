@@ -26,27 +26,29 @@
 #include <mapnik/path_expression_grammar_x3.hpp>
 #include <mapnik/attribute.hpp>
 
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-using x3::standard_wide::char_;
 using x3::lexeme;
-auto create_string = [](auto & ctx) { _val(ctx).push_back(_attr(ctx)); };
-auto create_attribute = [](auto & ctx) { _val(ctx).push_back(mapnik::attribute(_attr(ctx))); };
+using x3::standard_wide::char_;
+auto create_string = [](auto& ctx) {
+    _val(ctx).push_back(_attr(ctx));
+};
+auto create_attribute = [](auto& ctx) {
+    _val(ctx).push_back(mapnik::attribute(_attr(ctx)));
+};
 // rules
 x3::rule<class attr_expression, std::string> const attr_expression("attribute");
 x3::rule<class str_expression, std::string> const str_expression("string");
 
 auto const attr_expression_def = +(char_ - ']');
-auto const str_expression_def = lexeme[+(char_ -'[')];
+auto const str_expression_def = lexeme[+(char_ - '[')];
 auto const path_expression_def = *(str_expression[create_string] | ('[' > attr_expression[create_attribute] > ']'));
 
-BOOST_SPIRIT_DEFINE(
-    path_expression,
-    attr_expression,
-    str_expression
-);
+BOOST_SPIRIT_DEFINE(path_expression, attr_expression, str_expression);
 
-}}
+} // namespace grammar
+} // namespace mapnik
 
-#endif //MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_DEF_HPP
+#endif // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_DEF_HPP

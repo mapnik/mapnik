@@ -46,16 +46,16 @@ struct field_descriptor
     std::streampos offset_;
 };
 
-
 class dbf_file : public mapnik::util::mapped_memory_file
 {
-private:
+  private:
     int num_records_;
     int num_fields_;
     std::size_t record_length_;
     std::vector<field_descriptor> fields_;
     char* record_;
-public:
+
+  public:
     dbf_file();
     dbf_file(std::string const& file_name);
     ~dbf_file();
@@ -64,11 +64,12 @@ public:
     field_descriptor const& descriptor(int col) const;
     void move_to(int index);
     std::string string_value(int col) const;
-    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const;
-private:
+    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl& f) const;
+
+  private:
     void read_header();
     int read_short();
     int read_int();
 };
 
-#endif //DBFFILE_HPP
+#endif // DBFFILE_HPP

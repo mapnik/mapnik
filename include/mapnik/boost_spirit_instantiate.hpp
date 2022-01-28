@@ -23,17 +23,21 @@
 #ifndef MAPNIK_BOOST_SPIRIT_INSTANTIATE_HPP
 #define MAPNIK_BOOST_SPIRIT_INSTANTIATE_HPP
 
-namespace boost { namespace spirit { namespace x3
-{
+namespace boost {
+namespace spirit {
+namespace x3 {
 // helper macro
-#define BOOST_SPIRIT_INSTANTIATE_UNUSED(rule_type, Iterator, Context)   \
-    template bool parse_rule<Iterator, Context, boost::spirit::x3::unused_type const>( \
-        rule_type rule_                                                 \
-        , Iterator& first, Iterator const& last                         \
-        , Context const& context, boost::spirit::x3::unused_type const& ); \
+#define BOOST_SPIRIT_INSTANTIATE_UNUSED(rule_type, Iterator, Context)                                                  \
+    template bool parse_rule<Iterator, Context, boost::spirit::x3::unused_type const>(                                 \
+      rule_type rule_,                                                                                                 \
+      Iterator & first,                                                                                                \
+      Iterator const& last,                                                                                            \
+      Context const& context,                                                                                          \
+      boost::spirit::x3::unused_type const&);                                                                          \
     /***/
 
-}}}
-
+} // namespace x3
+} // namespace spirit
+} // namespace boost
 
 #endif // MAPNIK_BOOST_SPIRIT_INSTANTIATE_HPP

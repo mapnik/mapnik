@@ -32,54 +32,54 @@
 #include <mapnik/geometry/box2d.hpp>
 
 enum pgraster_color_interp {
-  // Automatic color interpretation:
-  // uses grayscale for single band, rgb for 3 bands
-  // rgba for 4 bands
-  pgr_auto,
-  // Grayscale interpretation
-  pgr_grayscale,
-  pgr_indexed,
-  pgr_rgb,
-  pgr_rgba
+    // Automatic color interpretation:
+    // uses grayscale for single band, rgb for 3 bands
+    // rgba for 4 bands
+    pgr_auto,
+    // Grayscale interpretation
+    pgr_grayscale,
+    pgr_indexed,
+    pgr_rgb,
+    pgr_rgba
 };
 
 class pgraster_wkb_reader
 {
-public:
+  public:
 
-  pgraster_wkb_reader(const uint8_t* wkb, int size, int bnd=0)
-    : ptr_(wkb), bandno_(bnd)
-  {}
+    pgraster_wkb_reader(const uint8_t* wkb, int size, int bnd = 0)
+        : ptr_(wkb)
+        , bandno_(bnd)
+    {}
 
-  mapnik::raster_ptr get_raster();
+    mapnik::raster_ptr get_raster();
 
-  /// @param bnd band number. If 0 (default) it'll try to read all bands
-  ///            with automatic color interpretation (rgb for 3 bands,
-  ///            rgba for 4 bands, grayscale for 1 band).
-  ///            Any other value results in pixel
-  ///            values being copied verbatim into the returned raster
-  ///            for interpretation by the caller.
-  static mapnik::raster_ptr read(const uint8_t* wkb, int size, int bnd=0)
-  {
-    pgraster_wkb_reader reader(wkb,size,bnd);
-    return reader.get_raster();
-  }
+    /// @param bnd band number. If 0 (default) it'll try to read all bands
+    ///            with automatic color interpretation (rgb for 3 bands,
+    ///            rgba for 4 bands, grayscale for 1 band).
+    ///            Any other value results in pixel
+    ///            values being copied verbatim into the returned raster
+    ///            for interpretation by the caller.
+    static mapnik::raster_ptr read(const uint8_t* wkb, int size, int bnd = 0)
+    {
+        pgraster_wkb_reader reader(wkb, size, bnd);
+        return reader.get_raster();
+    }
 
-private:
-  mapnik::raster_ptr read_indexed(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
-  mapnik::raster_ptr read_grayscale(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
-  mapnik::raster_ptr read_rgba(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
+  private:
+    mapnik::raster_ptr read_indexed(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
+    mapnik::raster_ptr read_grayscale(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
+    mapnik::raster_ptr read_rgba(mapnik::box2d<double> const& bbox, uint16_t width, uint16_t height);
 
-  //int wkbsize_;
-  //const uint8_t* wkb_;
-  //const uint8_t* wkbend_;
-  const uint8_t* ptr_;
-  uint8_t endian_;
-  int bandno_;
-  uint16_t numBands_;
-  uint16_t width_;
-  uint16_t height_;
+    // int wkbsize_;
+    // const uint8_t* wkb_;
+    // const uint8_t* wkbend_;
+    const uint8_t* ptr_;
+    uint8_t endian_;
+    int bandno_;
+    uint16_t numBands_;
+    uint16_t width_;
+    uint16_t height_;
 };
-
 
 #endif // PGRASTER_WKB_READER_HPP

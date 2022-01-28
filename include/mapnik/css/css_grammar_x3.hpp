@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
@@ -31,8 +31,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 using property_value_type = boost::iterator_range<char const*>;
 using css_key_value = std::pair<std::string, property_value_type>;
 using definition_type = std::vector<css_key_value>;
@@ -40,8 +39,7 @@ using css_data = std::unordered_multimap<std::string, definition_type>;
 
 namespace x3 = boost::spirit::x3;
 
-namespace css_grammar
-{
+namespace css_grammar {
 
 class css_tag;
 class ident_tag;
@@ -58,17 +56,14 @@ css_grammar_type const css_grammar{"css"};
 css_skipper_type const css_skipper{"css skipper"};
 css_classes_type const css_classes{"css classes"};
 
-BOOST_SPIRIT_DECLARE(ident_grammar_type,
-                     css_classes_type,
-                     css_grammar_type,
-                     css_skipper_type);
+BOOST_SPIRIT_DECLARE(ident_grammar_type, css_classes_type, css_grammar_type, css_skipper_type);
 
-}
+} // namespace css_grammar
 
 css_grammar::ident_grammar_type const ident_grammar();
 css_grammar::css_classes_type const classes();
 css_grammar::css_grammar_type const grammar();
 css_grammar::css_skipper_type const skipper();
-}
+} // namespace mapnik
 
 #endif // MAPNIK_CSS_GRAMMAR_X3_HPP

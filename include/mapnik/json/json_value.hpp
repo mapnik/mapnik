@@ -30,23 +30,19 @@
 #include <string>
 #include <vector>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 struct json_value;
 
 using json_array = std::vector<json_value>;
 using json_object_element = std::pair<std::string, json_value>;
 using json_object = std::vector<json_object_element>;
-using json_value_base = mapnik::util::variant<value_null,
-                                              value_bool,
-                                              value_integer,
-                                              value_double,
-                                              std::string,
-                                              json_array,
-                                              json_object>;
+using json_value_base =
+  mapnik::util::variant<value_null, value_bool, value_integer, value_double, std::string, json_array, json_object>;
 struct json_value : json_value_base
 {
-#if __cpp_inheriting_constructors >= 200802  && !defined (_MSC_VER)
+#if __cpp_inheriting_constructors >= 200802 && !defined(_MSC_VER)
 
     using json_value_base::json_value_base;
 
@@ -54,12 +50,14 @@ struct json_value : json_value_base
 
     json_value() = default;
 
-    template <typename T>
-    json_value(T && val)
-        : json_value_base(std::forward<T>(val)) {}
+    template<typename T>
+    json_value(T&& val)
+        : json_value_base(std::forward<T>(val))
+    {}
 
 #endif
 };
-}}
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_JSON_VALUE_HPP

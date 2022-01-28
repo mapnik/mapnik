@@ -23,7 +23,6 @@
 #ifndef MAPNIK_GEOMETRY_SVG_PATH_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_PATH_GENERATOR_HPP
 
-
 // mapnik
 #include <mapnik/global.hpp>
 // for container stuff
@@ -49,102 +48,99 @@ MAPNIK_DISABLE_WARNING_POP
 // required by Karma to be recognized as a container of
 // attributes for output generation.
 
-namespace boost { namespace spirit { namespace traits {
+namespace boost {
+namespace spirit {
+namespace traits {
 
 // TODO - this needs to be made generic to any path type
 using path_type = mapnik::transform_path_adapter<mapnik::view_transform, mapnik::vertex_adapter>;
 
-template <>
-struct is_container<path_type const> : mpl::true_ {} ;
+template<>
+struct is_container<path_type const> : mpl::true_
+{};
 
-template <>
+template<>
 struct container_iterator<path_type const>
 {
     using type = mapnik::util::path_iterator<path_type>;
 };
 
-template <>
+template<>
 struct begin_container<path_type const>
 {
-    static mapnik::util::path_iterator<path_type>
-    call (path_type const& g)
+    static mapnik::util::path_iterator<path_type> call(path_type const& g)
     {
         return mapnik::util::path_iterator<path_type>(g);
     }
 };
 
-template <>
+template<>
 struct end_container<path_type const>
 {
-    static mapnik::util::path_iterator<path_type>
-    call (path_type const& /*g*/)
+    static mapnik::util::path_iterator<path_type> call(path_type const& /*g*/)
     {
         return mapnik::util::path_iterator<path_type>();
     }
 };
 
-}}}
+} // namespace traits
+} // namespace spirit
+} // namespace boost
 
-
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
 namespace karma = boost::spirit::karma;
 namespace phoenix = boost::phoenix;
 
 namespace svg_detail {
 
-template <typename Geometry>
+template<typename Geometry>
 struct get_type
 {
     using result_type = int;
-    result_type operator() (Geometry const& geom) const
-    {
-        return static_cast<int>(geom.type());
-    }
+    result_type operator()(Geometry const& geom) const { return static_cast<int>(geom.type()); }
 };
 
-template <typename T>
+template<typename T>
 struct get_first
 {
     using path_type = T;
     using result_type = typename path_type::value_type const;
-    result_type operator() (path_type const& geom) const
+    result_type operator()(path_type const& geom) const
     {
         typename path_type::value_type coord;
         geom.rewind(0);
-        std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
+        std::get<0>(coord) = geom.vertex(&std::get<1>(coord), &std::get<2>(coord));
         return coord;
     }
 };
 
-template <>
+template<>
 struct get_first<mapnik::path_type>
 {
     using path_type = mapnik::path_type;
     using result_type = path_type::value_type const;
-    result_type operator() (path_type const& geom) const
+    result_type operator()(path_type const& geom) const
     {
         path_type::value_type coord;
-        std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord),&std::get<2>(coord));
+        std::get<0>(coord) = geom.cont_.get_vertex(0, &std::get<1>(coord), &std::get<2>(coord));
         return coord;
     }
 };
 
-
-template <typename T>
+template<typename T>
 struct coordinate_policy : karma::real_policies<T>
 {
     using base_type = boost::spirit::karma::real_policies<T>;
     static int floatfield(T) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T) { return 4u ;}
+    static unsigned precision(T) { return 4u; }
 };
-}
+} // namespace svg_detail
 
-template <typename OutputIterator, typename Path>
-struct svg_path_generator :
-        karma::grammar<OutputIterator, Path()>
+template<typename OutputIterator, typename Path>
+struct svg_path_generator : karma::grammar<OutputIterator, Path()>
 {
-
     using path_type = Path;
     using coordinate_type = typename boost::remove_pointer<typename path_type::value_type>::type;
 
@@ -158,13 +154,13 @@ struct svg_path_generator :
     karma::rule<OutputIterator, path_type()> svg_path;
 
     // phoenix functions
-    phoenix::function<svg_detail::get_type<path_type> > _type;
-    phoenix::function<svg_detail::get_first<path_type> > _first;
+    phoenix::function<svg_detail::get_type<path_type>> _type;
+    phoenix::function<svg_detail::get_first<path_type>> _first;
     //
-    karma::real_generator<double, svg_detail::coordinate_policy<double> > coordinate;
-
+    karma::real_generator<double, svg_detail::coordinate_policy<double>> coordinate;
 };
 
-}}
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_SVG_PATH_GENERATOR_HPP

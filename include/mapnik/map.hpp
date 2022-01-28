@@ -44,8 +44,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct Featureset;
 using featureset_ptr = std::shared_ptr<Featureset>;
@@ -55,9 +54,8 @@ class layer;
 
 class MAPNIK_DECL Map : boost::equality_comparable<Map>
 {
-public:
-    enum aspect_fix_mode
-    {
+  public:
+    enum aspect_fix_mode {
         // grow the width or height of the specified geo bbox to fill the map size. default behaviour.
         GROW_BBOX,
         // grow the width or height of the map to accomodate the specified geo bbox.
@@ -79,7 +77,7 @@ public:
         aspect_fix_mode_MAX
     };
 
-private:
+  private:
     static const unsigned MIN_MAPSIZE = 16;
     static const unsigned MAX_MAPSIZE = MIN_MAPSIZE << 10;
     unsigned width_;
@@ -90,23 +88,23 @@ private:
     boost::optional<std::string> background_image_;
     composite_mode_e background_image_comp_op_;
     float background_image_opacity_;
-    std::map<std::string,feature_type_style> styles_;
-    std::map<std::string,font_set> fontsets_;
+    std::map<std::string, feature_type_style> styles_;
+    std::map<std::string, font_set> fontsets_;
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
     box2d<double> current_extent_;
-    boost::optional<box2d<double> > maximum_extent_;
+    boost::optional<box2d<double>> maximum_extent_;
     std::string base_path_;
     parameters extra_params_;
     boost::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
 
-public:
-    using const_style_iterator = std::map<std::string,feature_type_style>::const_iterator;
-    using style_iterator = std::map<std::string,feature_type_style>::iterator;
-    using const_fontset_iterator = std::map<std::string,font_set>::const_iterator;
-    using fontset_iterator = std::map<std::string,font_set>::iterator;
+  public:
+    using const_style_iterator = std::map<std::string, feature_type_style>::const_iterator;
+    using style_iterator = std::map<std::string, feature_type_style>::iterator;
+    using const_fontset_iterator = std::map<std::string, font_set>::const_iterator;
+    using fontset_iterator = std::map<std::string, font_set>::iterator;
 
     /*! \brief Default constructor.
      *
@@ -131,7 +129,7 @@ public:
     Map(Map const& rhs);
 
     // move ctor
-    Map(Map && other);
+    Map(Map&& other);
 
     // assignment operator
     Map& operator=(Map rhs);
@@ -142,12 +140,12 @@ public:
     /*! \brief Get all styles
      * @return Const reference to styles
      */
-    std::map<std::string,feature_type_style> const& styles() const;
+    std::map<std::string, feature_type_style> const& styles() const;
 
     /*! \brief Get all styles
      * @return Non-constant reference to styles
      */
-    std::map<std::string,feature_type_style> & styles();
+    std::map<std::string, feature_type_style>& styles();
 
     /*! \brief Get first iterator in styles.
      *  @return Constant style iterator.
@@ -175,7 +173,7 @@ public:
      *  @return true If success.
      *          false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style const& style);
+    bool insert_style(std::string const& name, feature_type_style const& style);
 
     /*! \brief Insert a style in the map by moving..
      *  @param name The name of the style.
@@ -183,7 +181,7 @@ public:
      *  @return true If success.
      *          false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style && style);
+    bool insert_style(std::string const& name, feature_type_style&& style);
 
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
@@ -210,7 +208,7 @@ public:
      *  @return true If success.
      *          false If failure.
      */
-    bool insert_fontset(std::string const& name, font_set && fontset);
+    bool insert_fontset(std::string const& name, font_set&& fontset);
 
     /*! \brief Find a fontset.
      *  @param name The name of the fontset.
@@ -221,12 +219,12 @@ public:
     /*! \brief Get all fontsets
      * @return Const reference to fontsets
      */
-    std::map<std::string,font_set> const& fontsets() const;
+    std::map<std::string, font_set> const& fontsets() const;
 
     /*! \brief Get all fontsets
      * @return Non-constant reference to fontsets
      */
-    std::map<std::string,font_set> & fontsets();
+    std::map<std::string, font_set>& fontsets();
 
     /*! \brief register fonts.
      */
@@ -248,7 +246,7 @@ public:
     /*! \brief Add a layer to the map by moving it.
      *  @param l The layer to add.
      */
-    void add_layer(layer && l);
+    void add_layer(layer&& l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
@@ -275,7 +273,7 @@ public:
     /*! \brief Get all layers.
      *  @return Non-constant layers.
      */
-    std::vector<layer> & layers();
+    std::vector<layer>& layers();
 
     /*! \brief Remove all layers and styles from the map.
      */
@@ -299,7 +297,7 @@ public:
 
     /*! \brief Resize the map.
      */
-    void resize(unsigned width,unsigned height);
+    void resize(unsigned width, unsigned height);
 
     /*! \brief Get the map projection.
      *  @return Map projection.
@@ -371,7 +369,7 @@ public:
 
     /*! \brief Get the map maximum extent as box2d<double>
      */
-    boost::optional<box2d<double> > const& maximum_extent() const;
+    boost::optional<box2d<double>> const& maximum_extent() const;
 
     void reset_maximum_extent();
 
@@ -400,9 +398,9 @@ public:
      */
     void zoom_all();
 
-    void pan(int x,int y);
+    void pan(int x, int y);
 
-    void pan_and_zoom(int x,int y,double zoom);
+    void pan_and_zoom(int x, int y, double zoom);
 
     /*! \brief Get current bounding box.
      *  @return The current bounding box.
@@ -469,43 +467,25 @@ public:
      */
     void set_extra_parameters(parameters& params);
 
-    boost::optional<std::string> const& font_directory() const
-    {
-        return font_directory_;
-    }
+    boost::optional<std::string> const& font_directory() const { return font_directory_; }
 
-    void set_font_directory(std::string const& dir)
-    {
-        font_directory_ = dir;
-    }
+    void set_font_directory(std::string const& dir) { font_directory_ = dir; }
 
-    freetype_engine::font_file_mapping_type const& get_font_file_mapping() const
-    {
-        return font_file_mapping_;
-    }
+    freetype_engine::font_file_mapping_type const& get_font_file_mapping() const { return font_file_mapping_; }
 
-    freetype_engine::font_file_mapping_type & get_font_file_mapping()
-    {
-        return font_file_mapping_;
-    }
+    freetype_engine::font_file_mapping_type& get_font_file_mapping() { return font_file_mapping_; }
 
-    freetype_engine::font_memory_cache_type const& get_font_memory_cache() const
-    {
-        return font_memory_cache_;
-    }
+    freetype_engine::font_memory_cache_type const& get_font_memory_cache() const { return font_memory_cache_; }
 
-    freetype_engine::font_memory_cache_type & get_font_memory_cache()
-    {
-        return font_memory_cache_;
-    }
+    freetype_engine::font_memory_cache_type& get_font_memory_cache() { return font_memory_cache_; }
 
-private:
-    friend void swap(Map & rhs, Map & lhs);
+  private:
+    friend void swap(Map& rhs, Map& lhs);
     void fixAspectRatio();
     void init_proj_transforms();
 };
 
-DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);
-}
+DEFINE_ENUM(aspect_fix_mode_e, Map::aspect_fix_mode);
+} // namespace mapnik
 
 #endif // MAPNIK_MAP_HPP

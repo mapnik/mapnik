@@ -50,13 +50,18 @@ MAPNIK_DISABLE_WARNING_POP
 #include <deque>
 #include <functional>
 
-template <std::size_t Max, std::size_t Min>
-struct geojson_linear : boost::geometry::index::linear<Max,Min> {};
+template<std::size_t Max, std::size_t Min>
+struct geojson_linear : boost::geometry::index::linear<Max, Min>
+{};
 
-namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree {
+namespace boost {
+namespace geometry {
+namespace index {
+namespace detail {
+namespace rtree {
 
-template <std::size_t Max, std::size_t Min>
-struct options_type<geojson_linear<Max,Min> >
+template<std::size_t Max, std::size_t Min>
+struct options_type<geojson_linear<Max, Min>>
 {
     using type = options<geojson_linear<Max, Min>,
                          insert_default_tag,
@@ -71,30 +76,35 @@ struct options_type<geojson_linear<Max,Min> >
 #endif
 };
 
-}}}}}
+} // namespace rtree
+} // namespace detail
+} // namespace index
+} // namespace geometry
+} // namespace boost
 
 class geojson_datasource : public mapnik::datasource
 {
-public:
+  public:
     using box_type = mapnik::box2d<double>;
-    using item_type = std::pair<box_type, std::pair<std::uint64_t, std::uint64_t> >;
-    using spatial_index_type = boost::geometry::index::rtree<item_type,geojson_linear<16,4> >;
+    using item_type = std::pair<box_type, std::pair<std::uint64_t, std::uint64_t>>;
+    using spatial_index_type = boost::geometry::index::rtree<item_type, geojson_linear<16, 4>>;
     // constructor
     geojson_datasource(mapnik::parameters const& params);
-    virtual ~geojson_datasource ();
+    virtual ~geojson_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    template <typename Iterator>
+    template<typename Iterator>
     void parse_geojson(Iterator start, Iterator end);
-    template <typename Iterator>
+    template<typename Iterator>
     void initialise_index(Iterator start, Iterator end);
     void initialise_disk_index(std::string const& filename);
-private:
+
+  private:
     void initialise_descriptor(mapnik::feature_ptr const&);
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;

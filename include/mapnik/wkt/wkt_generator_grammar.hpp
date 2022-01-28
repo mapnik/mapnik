@@ -35,60 +35,62 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/karma/domain.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace wkt {
+namespace mapnik {
+namespace wkt {
 
 namespace karma = boost::spirit::karma;
 
 namespace detail {
 
-template <typename T>
+template<typename T>
 struct wkt_coordinate_policy : karma::real_policies<T>
 {
     using base_type = boost::spirit::karma::real_policies<T>;
     static int floatfield(T) { return base_type::fmtflags::fixed; }
     static unsigned precision(T n)
     {
-        if (n == 0.0) return 0;
+        if (n == 0.0)
+            return 0;
         using namespace boost::spirit;
         return static_cast<unsigned>(14 - boost::math::trunc(log10(traits::get_absolute_value(n))));
     }
 
-    template <typename OutputIterator>
+    template<typename OutputIterator>
     static bool dot(OutputIterator& sink, T n, unsigned precision)
     {
-        if (n == 0) return true;
+        if (n == 0)
+            return true;
         return base_type::dot(sink, n, precision);
     }
 
-    template <typename OutputIterator>
-    static bool fraction_part(OutputIterator& sink, T n
-                       , unsigned adjprec, unsigned precision)
+    template<typename OutputIterator>
+    static bool fraction_part(OutputIterator& sink, T n, unsigned adjprec, unsigned precision)
     {
-        if (n == 0) return true;
+        if (n == 0)
+            return true;
         return base_type::fraction_part(sink, n, adjprec, precision);
     }
 };
 
-template <typename T>
+template<typename T>
 struct coordinate_generator;
 
-template <>
+template<>
 struct coordinate_generator<double>
 {
-    using generator = karma::real_generator<double, detail::wkt_coordinate_policy<double> >;
+    using generator = karma::real_generator<double, detail::wkt_coordinate_policy<double>>;
 };
 
-template <>
+template<>
 struct coordinate_generator<std::int64_t>
 {
     using generator = karma::int_generator<std::int64_t>;
 };
 
-}
+} // namespace detail
 
-template <typename OutputIterator, typename Geometry>
-struct wkt_generator_grammar :
-    karma::grammar<OutputIterator, Geometry()>
+template<typename OutputIterator, typename Geometry>
+struct wkt_generator_grammar : karma::grammar<OutputIterator, Geometry()>
 {
     using coordinate_type = typename Geometry::coordinate_type;
     wkt_generator_grammar();
@@ -113,7 +115,7 @@ struct wkt_generator_grammar :
     typename detail::coordinate_generator<coordinate_type>::generator coordinate;
 };
 
-}}
-
+} // namespace wkt
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_WKT_GENERATOR_HPP

@@ -30,7 +30,8 @@
 #include <string>
 #include <vector>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 MAPNIK_DECL bool exists(std::string const& value);
 MAPNIK_DECL bool is_directory(std::string const& value);
@@ -43,8 +44,7 @@ MAPNIK_DECL std::string dirname(std::string const& value);
 MAPNIK_DECL std::string basename(std::string const& value);
 MAPNIK_DECL std::vector<std::string> list_directory(std::string const& value);
 
-}}
-
-
+} // namespace util
+} // namespace mapnik
 
 #endif

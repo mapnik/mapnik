@@ -33,7 +33,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/geometry.hpp>
 #include <mapnik/json/positions_x3.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace grammar {
 
@@ -44,6 +45,8 @@ positions_grammar_type const positions = "Positions";
 
 BOOST_SPIRIT_DECLARE(positions_grammar_type);
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_POSITIONS_GRAMMAR_X3_HPP

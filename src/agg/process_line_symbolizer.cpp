@@ -56,51 +56,51 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename Symbolizer, typename Rasterizer, typename Feature>
-void set_join_caps_aa(Symbolizer const& sym, Rasterizer & ras, Feature & feature, attributes const& vars)
+template<typename Symbolizer, typename Rasterizer, typename Feature>
+void set_join_caps_aa(Symbolizer const& sym, Rasterizer& ras, Feature& feature, attributes const& vars)
 {
     line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
-    case MITER_JOIN:
-        ras.line_join(agg::outline_miter_accurate_join);
-        break;
-    case MITER_REVERT_JOIN:
-        ras.line_join(agg::outline_no_join);
-        break;
-    case ROUND_JOIN:
-        ras.line_join(agg::outline_round_join);
-        break;
-    default:
-        ras.line_join(agg::outline_no_join);
+        case MITER_JOIN:
+            ras.line_join(agg::outline_miter_accurate_join);
+            break;
+        case MITER_REVERT_JOIN:
+            ras.line_join(agg::outline_no_join);
+            break;
+        case ROUND_JOIN:
+            ras.line_join(agg::outline_round_join);
+            break;
+        default:
+            ras.line_join(agg::outline_no_join);
     }
 
     line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
 
     switch (cap)
     {
-    case BUTT_CAP:
-        ras.round_cap(false);
-        break;
-    case SQUARE_CAP:
-        ras.round_cap(false);
-        break;
-    default:
-        ras.round_cap(true);
+        case BUTT_CAP:
+            ras.round_cap(false);
+            break;
+        case SQUARE_CAP:
+            ras.round_cap(false);
+            break;
+        default:
+            ras.round_cap(true);
     }
 }
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
-                              mapnik::feature_impl & feature,
-                              proj_transform const& prj_trans)
+template<typename T0, typename T1>
+void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
+                                   mapnik::feature_impl& feature,
+                                   proj_transform const& prj_trans)
 
 {
     color const& col = get<color, keys::stroke>(sym, feature, common_.vars_);
-    unsigned r=col.red();
-    unsigned g=col.green();
-    unsigned b=col.blue();
-    unsigned a=col.alpha();
+    unsigned r = col.red();
+    unsigned g = col.green();
+    unsigned b = col.blue();
+    unsigned a = col.alpha();
 
     double gamma = get<value_double, keys::stroke_gamma>(sym, feature, common_.vars_);
     gamma_method_enum gamma_method = get<gamma_method_enum, keys::stroke_gamma_method>(sym, feature, common_.vars_);
@@ -113,8 +113,11 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         gamma_ = gamma;
     }
 
-    buffer_type & current_buffer = buffers_.top().get();
-    agg::rendering_buffer buf(current_buffer.bytes(), current_buffer.width(), current_buffer.height(), current_buffer.row_size());
+    buffer_type& current_buffer = buffers_.top().get();
+    agg::rendering_buffer buf(current_buffer.bytes(),
+                              current_buffer.width(),
+                              current_buffer.height(),
+                              current_buffer.row_size());
 
     using color_type = agg::rgba8;
     using order_type = agg::order_rgba;
@@ -128,22 +131,23 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
 
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
+    if (transform)
+        evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
 
     box2d<double> clip_box = clipping_extent(common_);
 
     value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
     value_double width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
-    value_double opacity = get<value_double,keys::stroke_opacity>(sym,feature, common_.vars_);
+    value_double opacity = get<value_double, keys::stroke_opacity>(sym, feature, common_.vars_);
     value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
     value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
     value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
     line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {
-        double pad_per_pixel = static_cast<double>(common_.query_extent_.width()/common_.width_);
-        double pixels = std::ceil(std::max(width / 2.0 + std::fabs(offset),
-                                          (std::fabs(offset) * offset_converter_default_threshold)));
+        double pad_per_pixel = static_cast<double>(common_.query_extent_.width() / common_.width_);
+        double pixels = std::ceil(
+          std::max(width / 2.0 + std::fabs(offset), (std::fabs(offset) * offset_converter_default_threshold)));
         double padding = pad_per_pixel * pixels * common_.scale_factor_;
 
         clip_box.pad(padding);
@@ -159,11 +163,15 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         set_join_caps_aa(sym, ras, feature, common_.vars_);
 
-        using vertex_converter_type = vertex_converter<clip_line_tag, clip_poly_tag, transform_tag,
+        using vertex_converter_type = vertex_converter<clip_line_tag,
+                                                       clip_poly_tag,
+                                                       transform_tag,
                                                        affine_transform_tag,
-                                                       simplify_tag, smooth_tag,
+                                                       simplify_tag,
+                                                       smooth_tag,
                                                        offset_transform_tag>;
-        vertex_converter_type converter(clip_box,sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+        vertex_converter_type
+          converter(clip_box, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
         if (clip)
         {
             geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
@@ -173,24 +181,32 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                 converter.template set<clip_line_tag>();
         }
         converter.set<transform_tag>(); // always transform
-        if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
-        converter.set<affine_transform_tag>(); // optional affine transform
-        if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-        if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        if (std::fabs(offset) > 0.0)
+            converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>();     // optional affine transform
+        if (simplify_tolerance > 0.0)
+            converter.set<simplify_tag>(); // optional simplify converter
+        if (smooth > 0.0)
+            converter.set<smooth_tag>(); // optional smooth converter
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer_type>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter, ras);
-        mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
+        mapnik::util::apply_visitor(vertex_processor_type(apply), feature.get_geometry());
     }
     else
     {
-        using vertex_converter_type = vertex_converter<clip_line_tag, clip_poly_tag, transform_tag,
+        using vertex_converter_type = vertex_converter<clip_line_tag,
+                                                       clip_poly_tag,
+                                                       transform_tag,
                                                        affine_transform_tag,
-                                                       simplify_tag, smooth_tag,
+                                                       simplify_tag,
+                                                       smooth_tag,
                                                        offset_transform_tag,
-                                                       dash_tag, stroke_tag>;
-        vertex_converter_type converter(clip_box, sym,common_.t_,prj_trans,tr,feature,common_.vars_,common_.scale_factor_);
+                                                       dash_tag,
+                                                       stroke_tag>;
+        vertex_converter_type
+          converter(clip_box, sym, common_.t_, prj_trans, tr, feature, common_.vars_, common_.scale_factor_);
         if (clip)
         {
             geometry::geometry_types type = geometry::geometry_type(feature.get_geometry());
@@ -200,18 +216,21 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
                 converter.template set<clip_line_tag>();
         }
         converter.set<transform_tag>(); // always transform
-        if (std::fabs(offset) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
-        converter.set<affine_transform_tag>(); // optional affine transform
-        if (simplify_tolerance > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-        if (smooth > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        if (std::fabs(offset) > 0.0)
+            converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>();     // optional affine transform
+        if (simplify_tolerance > 0.0)
+            converter.set<simplify_tag>(); // optional simplify converter
+        if (smooth > 0.0)
+            converter.set<smooth_tag>(); // optional smooth converter
         if (has_key(sym, keys::stroke_dasharray))
             converter.set<dash_tag>();
-        converter.set<stroke_tag>(); //always stroke
+        converter.set<stroke_tag>(); // always stroke
 
         using apply_vertex_converter_type = detail::apply_vertex_converter<vertex_converter_type, rasterizer>;
         using vertex_processor_type = geometry::vertex_processor<apply_vertex_converter_type>;
         apply_vertex_converter_type apply(converter, *ras_ptr);
-        mapnik::util::apply_visitor(vertex_processor_type(apply),feature.get_geometry());
+        mapnik::util::apply_visitor(vertex_processor_type(apply), feature.get_geometry());
 
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
         renderer_type ren(renb);
@@ -222,9 +241,6 @@ void agg_renderer<T0,T1>::process(line_symbolizer const& sym,
     }
 }
 
+template void agg_renderer<image_rgba8>::process(line_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-template void agg_renderer<image_rgba8>::process(line_symbolizer const&,
-                                              mapnik::feature_impl &,
-                                              proj_transform const&);
-
-}
+} // namespace mapnik

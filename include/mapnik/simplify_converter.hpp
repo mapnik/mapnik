@@ -16,21 +16,21 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct weighted_vertex : private util::noncopyable
 {
     vertex2d coord;
     double weight;
-    weighted_vertex *prev;
-    weighted_vertex *next;
+    weighted_vertex* prev;
+    weighted_vertex* next;
 
-    weighted_vertex(vertex2d coord_) :
-        coord(coord_),
-        weight(std::numeric_limits<double>::infinity()),
-        prev(nullptr),
-        next(nullptr) {}
+    weighted_vertex(vertex2d coord_)
+        : coord(coord_)
+        , weight(std::numeric_limits<double>::infinity())
+        , prev(nullptr)
+        , next(nullptr)
+    {}
 
     double nominalWeight()
     {
@@ -46,10 +46,7 @@ struct weighted_vertex : private util::noncopyable
 
     struct ascending_sort
     {
-        bool operator() (const weighted_vertex *a, const weighted_vertex *b) const
-        {
-            return b->weight > a->weight;
-        }
+        bool operator()(const weighted_vertex* a, const weighted_vertex* b) const { return b->weight > a->weight; }
     };
 };
 
@@ -76,49 +73,35 @@ struct sleeve
 
     bool inside(vertex2d const& q)
     {
-        bool _inside=false;
+        bool _inside = false;
 
-        for (unsigned i=0;i<4;++i)
+        for (unsigned i = 0; i < 4; ++i)
         {
-            if ((((v[i+1].y <= q.y) && (q.y < v[i].y)) ||
-                 ((v[i].y <= q.y) && (q.y < v[i+1].y))) &&
-                (q.x < (v[i].x - v[i+1].x) * (q.y - v[i+1].y)/ (v[i].y - v[i+1].y) + v[i+1].x))
-                _inside=!_inside;
+            if ((((v[i + 1].y <= q.y) && (q.y < v[i].y)) || ((v[i].y <= q.y) && (q.y < v[i + 1].y))) &&
+                (q.x < (v[i].x - v[i + 1].x) * (q.y - v[i + 1].y) / (v[i].y - v[i + 1].y) + v[i + 1].x))
+                _inside = !_inside;
         }
         return _inside;
     }
 };
 
-template <typename Geometry>
+template<typename Geometry>
 struct simplify_converter
 {
-public:
-    simplify_converter(Geometry & geom)
-        : geom_(geom),
-        tolerance_(0.0),
-        status_(initial),
-        algorithm_(radial_distance),
-        pos_(0)
+  public:
+    simplify_converter(Geometry& geom)
+        : geom_(geom)
+        , tolerance_(0.0)
+        , status_(initial)
+        , algorithm_(radial_distance)
+        , pos_(0)
     {}
 
-    enum status : std::uint8_t
-    {
-        initial,
-        process,
-        closing,
-        done,
-        cache
-    };
+    enum status : std::uint8_t { initial, process, closing, done, cache };
 
-    unsigned type() const
-    {
-        return static_cast<unsigned>(geom_.type());
-    }
+    unsigned type() const { return static_cast<unsigned>(geom_.type()); }
 
-    simplify_algorithm_e get_simplify_algorithm()
-    {
-        return algorithm_;
-    }
+    simplify_algorithm_e get_simplify_algorithm() { return algorithm_; }
 
     void set_simplify_algorithm(simplify_algorithm_e val)
     {
@@ -129,10 +112,7 @@ public:
         }
     }
 
-    double get_simplify_tolerance()
-    {
-        return tolerance_;
-    }
+    double get_simplify_tolerance() { return tolerance_; }
 
     void set_simplify_tolerance(double val)
     {
@@ -151,10 +131,7 @@ public:
         pos_ = 0;
     }
 
-    void rewind(unsigned int) const
-    {
-        pos_ = 0;
-    }
+    void rewind(unsigned int) const { pos_ = 0; }
 
     unsigned vertex(double* x, double* y)
     {
@@ -167,20 +144,20 @@ public:
         return output_vertex(x, y);
     }
 
-private:
+  private:
     unsigned output_vertex(double* x, double* y)
     {
         switch (algorithm_)
         {
-        case visvalingam_whyatt:
-        case douglas_peucker:
-            return output_vertex_cached(x, y);
-        case radial_distance:
-            return output_vertex_distance(x, y);
-        case zhao_saalfeld:
-            return output_vertex_sleeve(x, y);
-        default:
-            throw std::runtime_error("simplification algorithm not yet implemented");
+            case visvalingam_whyatt:
+            case douglas_peucker:
+                return output_vertex_cached(x, y);
+            case radial_distance:
+                return output_vertex_distance(x, y);
+            case zhao_saalfeld:
+                return output_vertex_sleeve(x, y);
+            default:
+                throw std::runtime_error("simplification algorithm not yet implemented");
         }
 
         return SEG_END;
@@ -267,10 +244,10 @@ private:
         return vtx.cmd;
     }
 
-    template <typename Iterator>
+    template<typename Iterator>
     bool fit_sleeve(Iterator itr, Iterator end, vertex2d const& v)
     {
-        sleeve s(*itr,v,tolerance_);
+        sleeve s(*itr, v, tolerance_);
         ++itr; // skip first vertex
         for (; itr != end; ++itr)
         {
@@ -288,12 +265,11 @@ private:
         std::size_t min_size = 1;
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
-            //if ((std::fabs(vtx.x - previous_vertex_.x) < 0.5) &&
-            //    (std::fabs(vtx.y - previous_vertex_.y) < 0.5))
-            //    continue;
+            // if ((std::fabs(vtx.x - previous_vertex_.x) < 0.5) &&
+            //     (std::fabs(vtx.y - previous_vertex_.y) < 0.5))
+            //     continue;
 
-            if (status_ == cache &&
-                vertices_.size() >= min_size)
+            if (status_ == cache && vertices_.size() >= min_size)
                 status_ = process;
 
             if (vtx.cmd == SEG_MOVETO)
@@ -306,7 +282,8 @@ private:
                 vertices_.push_back(vtx);
                 sleeve_cont_.push_back(vtx);
                 start_vertex_ = vtx;
-                if (status_ == process) break;
+                if (status_ == process)
+                    break;
             }
             else if (vtx.cmd == SEG_LINETO)
             {
@@ -318,7 +295,8 @@ private:
                     sleeve_cont_.push_back(vtx);
                     sleeve_cont_.push_back(last);
                     vertices_.push_back(vtx);
-                    if (status_ == process) break;
+                    if (status_ == process)
+                        break;
                 }
                 else
                 {
@@ -335,7 +313,8 @@ private:
                 vtx.x = start_vertex_.x;
                 vtx.y = start_vertex_.y;
                 vertices_.push_back(vtx);
-                if (status_ == process) break;
+                if (status_ == process)
+                    break;
             }
         }
 
@@ -388,7 +367,8 @@ private:
 
         reset();
 
-        switch (algorithm_) {
+        switch (algorithm_)
+        {
             case visvalingam_whyatt:
                 return init_vertices_visvalingam_whyatt();
             case radial_distance:
@@ -406,10 +386,10 @@ private:
 
     status init_vertices_visvalingam_whyatt()
     {
-        using VertexSet = std::set<weighted_vertex *, weighted_vertex::ascending_sort>;
-        using VertexList = std::vector<weighted_vertex *>;
+        using VertexSet = std::set<weighted_vertex*, weighted_vertex::ascending_sort>;
+        using VertexList = std::vector<weighted_vertex*>;
 
-        std::vector<weighted_vertex *> v_list;
+        std::vector<weighted_vertex*> v_list;
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
@@ -444,7 +424,7 @@ private:
         while (v.size() > 0)
         {
             VertexSet::iterator lowest = v.begin();
-            weighted_vertex *removed = *lowest;
+            weighted_vertex* removed = *lowest;
             if (removed->weight >= tolerance_)
             {
                 break;
@@ -453,8 +433,10 @@ private:
             v.erase(lowest);
 
             // Connect adjacent vertices with each other
-            if (removed->prev) removed->prev->next = removed->next;
-            if (removed->next) removed->next->prev = removed->prev;
+            if (removed->prev)
+                removed->prev->next = removed->next;
+            if (removed->next)
+                removed->next->prev = removed->prev;
             // Adjust weight and reinsert prev/next to move them to their correct position.
             if (removed->prev)
             {
@@ -489,40 +471,43 @@ private:
     void RDP(std::vector<vertex2d>& vertices, const size_t first, const size_t last)
     {
         // Squared length of a vector
-        auto sqlen = [] (vertex2d const& vec) { return vec.x*vec.x + vec.y*vec.y; };
-        // Compute square distance of p to a line segment
-        auto segment_distance = [&sqlen] (vertex2d const& p, vertex2d const& a, vertex2d const& b, vertex2d const& dir, double dir_sq_len)
-        {
-            // Special case where segment has same first and last point at which point we are just doing a radius check
-            if (dir_sq_len == 0)
-            {
-                return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
-            }
-
-            // Project p onto dir by ((p dot dir / dir dot dir) * dir)
-            double scale = ((p.x - a.x) * dir.x + (p.y - a.y) * dir.y) / dir_sq_len;
-            double projected_x = dir.x * scale;
-            double projected_y = dir.y * scale;
-            double projected_origin_distance = projected_x * projected_x + projected_y * projected_y;
-
-            // Projected point doesn't lie on the segment
-            if (projected_origin_distance > dir_sq_len)
-            {
-                // Projected point lies past the end of the segment
-                if (scale > 0)
-                {
-                    return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
-                }// Projected point lies before the beginning of the segment
-                else
-                {
-                    return sqlen(vertex2d(p.x - a.x, p.y - a.y, SEG_END));
-                }
-            }// Projected point lies on the segment
-            else
-            {
-                return sqlen(vertex2d(p.x - (projected_x + a.x), p.y - (projected_y + a.y), SEG_END));
-            }
+        auto sqlen = [](vertex2d const& vec) {
+            return vec.x * vec.x + vec.y * vec.y;
         };
+        // Compute square distance of p to a line segment
+        auto segment_distance =
+          [&sqlen](vertex2d const& p, vertex2d const& a, vertex2d const& b, vertex2d const& dir, double dir_sq_len) {
+              // Special case where segment has same first and last point at which point we are just doing a radius
+              // check
+              if (dir_sq_len == 0)
+              {
+                  return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
+              }
+
+              // Project p onto dir by ((p dot dir / dir dot dir) * dir)
+              double scale = ((p.x - a.x) * dir.x + (p.y - a.y) * dir.y) / dir_sq_len;
+              double projected_x = dir.x * scale;
+              double projected_y = dir.y * scale;
+              double projected_origin_distance = projected_x * projected_x + projected_y * projected_y;
+
+              // Projected point doesn't lie on the segment
+              if (projected_origin_distance > dir_sq_len)
+              {
+                  // Projected point lies past the end of the segment
+                  if (scale > 0)
+                  {
+                      return sqlen(vertex2d(p.x - b.x, p.y - b.y, SEG_END));
+                  } // Projected point lies before the beginning of the segment
+                  else
+                  {
+                      return sqlen(vertex2d(p.x - a.x, p.y - a.y, SEG_END));
+                  }
+              } // Projected point lies on the segment
+              else
+              {
+                  return sqlen(vertex2d(p.x - (projected_x + a.x), p.y - (projected_y + a.y), SEG_END));
+              }
+          };
 
         // Compute the directional vector along the segment
         vertex2d dir = vertex2d(vertices[last].x - vertices[first].x, vertices[last].y - vertices[first].y, SEG_END);
@@ -554,7 +539,7 @@ private:
             {
                 RDP(vertices, keeper, last);
             }
-        }// Everyone between the first and the last was close enough to the line
+        } // Everyone between the first and the last was close enough to the line
         else
         {
             // Mark each of them as discarded
@@ -569,7 +554,7 @@ private:
     {
         // Slurp out the original vertices
         std::vector<vertex2d> vertices;
-        //vertices.reserve(geom_.size());
+        // vertices.reserve(geom_.size());
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
@@ -603,18 +588,17 @@ private:
         return status_ = process;
     }
 
-    Geometry &                      geom_;
-    double                          tolerance_;
-    status                          status_;
-    simplify_algorithm_e            algorithm_;
-    std::deque<vertex2d>            vertices_;
-    std::deque<vertex2d>            sleeve_cont_;
-    vertex2d                        previous_vertex_;
-    vertex2d                        start_vertex_;
-    mutable size_t                  pos_;
+    Geometry& geom_;
+    double tolerance_;
+    status status_;
+    simplify_algorithm_e algorithm_;
+    std::deque<vertex2d> vertices_;
+    std::deque<vertex2d> sleeve_cont_;
+    vertex2d previous_vertex_;
+    vertex2d start_vertex_;
+    mutable size_t pos_;
 };
 
-
-}
+} // namespace mapnik
 
 #endif // MAPNIK_SIMPLIFY_CONVERTER_HPP

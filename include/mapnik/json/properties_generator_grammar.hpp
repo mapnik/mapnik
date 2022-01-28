@@ -37,13 +37,13 @@ MAPNIK_DISABLE_WARNING_POP
 #include <string>
 #include <tuple>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace karma = boost::spirit::karma;
 
-template <typename OutputIterator>
-struct escaped_string
-    : karma::grammar<OutputIterator, std::string(char const*)>
+template<typename OutputIterator>
+struct escaped_string : karma::grammar<OutputIterator, std::string(char const*)>
 {
     escaped_string();
     karma::rule<OutputIterator, std::string(char const*)> esc_str;
@@ -54,29 +54,29 @@ struct extract_string
 {
     using result_type = std::tuple<std::string, bool>;
 
-    result_type operator() (mapnik::value const& val) const
+    result_type operator()(mapnik::value const& val) const
     {
         bool need_quotes = val.is<value_unicode_string>();
         return std::make_tuple(val.to_string(), need_quotes);
     }
 };
 
-template <typename OutputIterator, typename KeyValueStore>
-struct properties_generator_grammar
-    : karma::grammar<OutputIterator, KeyValueStore()>
+template<typename OutputIterator, typename KeyValueStore>
+struct properties_generator_grammar : karma::grammar<OutputIterator, KeyValueStore()>
 {
     using pair_type = std::tuple<std::string, mapnik::value>;
     properties_generator_grammar();
     // rules
     karma::rule<OutputIterator, KeyValueStore()> properties;
     karma::rule<OutputIterator, pair_type()> pair;
-    karma::rule<OutputIterator, std::tuple<std::string,bool>()> value;
+    karma::rule<OutputIterator, std::tuple<std::string, bool>()> value;
     //
     escaped_string<OutputIterator> escaped_string_;
     boost::phoenix::function<extract_string> extract_string_;
     std::string quote_;
 };
 
-}}
+} // namespace json
+} // namespace mapnik
 
-#endif //MAPNIK_JSON_PROPERTIES_GENERATOR_GRAMMAR_HPP
+#endif // MAPNIK_JSON_PROPERTIES_GENERATOR_GRAMMAR_HPP
