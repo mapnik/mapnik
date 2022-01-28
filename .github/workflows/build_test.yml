@@ -1,0 +1,76 @@
+name: Build and Test
+
+on:
+  push:
+    branches-ignore:
+      - "no-ci-*"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  windows:
+    name: Windows memory mapped
+    uses: mapnik/mapnik/.github/workflows/windows.yml@gh_ci
+    with:
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'ON'
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+  
+  windows-mmf-off:
+    name: Windows file based
+    uses: mapnik/mapnik/.github/workflows/windows.yml@gh_ci
+    with:
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'OFF'
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+
+  ubuntu:
+    name: Linux memory mapped
+    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@gh_ci
+    with:
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'ON'
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+
+  ubuntu-mmf-off:
+    name: Linux file based
+    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@gh_ci
+    with:
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'OFF'
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+
+  macos:
+    name: MacOS memory mapped
+    uses: mapnik/mapnik/.github/workflows/macos.yml@gh_ci
+    with:
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'ON'
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+
+  macos-mmf-off:
+    name: MacOS file based
+    uses: mapnik/mapnik/.github/workflows/macos.yml@gh_ci
+    with:
+      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'OFF'
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
