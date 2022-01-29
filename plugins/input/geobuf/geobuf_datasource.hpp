@@ -32,6 +32,7 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/datasource_plugin.hpp>
 // boost
 #include <boost/optional.hpp>
 #include <mapnik/warning.hpp>
@@ -75,6 +76,7 @@ struct options_type<geobuf_linear<Max,Min> >
 
 }}}}}
 
+DATASOURCE_PLUGIN_DEF(geobuf_datasource_plugin, geobuf);
 class geobuf_datasource : public mapnik::datasource
 {
 public:

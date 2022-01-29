@@ -136,15 +136,15 @@ using datasource_ptr = std::shared_ptr<datasource>;
     #define DATASOURCE_PLUGIN(classname)
 #else
     #define DATASOURCE_PLUGIN(classname)                                    \
-        extern "C" MAPNIK_EXP const char * datasource_name()                \
+        extern "C" MAPNIK_DECL const char * datasource_name()                \
         {                                                                   \
             return classname::name();                                       \
         }                                                                   \
-        extern "C"  MAPNIK_EXP datasource* create(parameters const& params) \
+        extern "C"  MAPNIK_DECL datasource* create(parameters const& params) \
         {                                                                   \
             return new classname(params);                                   \
         }                                                                   \
-        extern "C" MAPNIK_EXP void destroy(datasource *ds)                  \
+        extern "C" MAPNIK_DECL void destroy(datasource *ds)                  \
         {                                                                   \
             delete ds;                                                      \
         }

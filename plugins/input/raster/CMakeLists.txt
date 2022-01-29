@@ -1,9 +1,13 @@
-add_library(input-raster MODULE
+add_library(input-raster ${_plugin_linkage})
+target_sources(input-raster ${_plugin_visibility}
     raster_datasource.cpp
     raster_featureset.cpp
     raster_info.cpp
 )
-target_link_libraries(input-raster PRIVATE mapnik::mapnik)
+target_link_libraries(input-raster ${_plugin_visibility} 
+    mapnik::mapnik
+    mapnik::datasource-base
+)
 set_target_properties(input-raster PROPERTIES 
     OUTPUT_NAME "raster"
     PREFIX "${_plugin_prefix}"

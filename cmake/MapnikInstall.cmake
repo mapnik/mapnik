@@ -23,6 +23,9 @@ endfunction()
 # Install plugins
 #
 function(mapnik_install_plugin _target)
+    if(MAPNIK_STATIC_PLUGINS)
+        return()
+    endif()
     install(TARGETS ${_target}
         RUNTIME DESTINATION ${PLUGINS_INSTALL_DIR}
             COMPONENT MapnikPluginRuntime

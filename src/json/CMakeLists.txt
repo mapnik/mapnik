@@ -1,4 +1,4 @@
-add_library(json STATIC
+target_sources(json PRIVATE
     extract_bounding_boxes_x3.cpp
     feature_from_geojson.cpp
     feature_grammar_x3.cpp
@@ -13,7 +13,6 @@ add_library(json STATIC
     topojson_grammar_x3.cpp
     unicode_string_grammar_x3.cpp
 )
-add_library(mapnik::json ALIAS json)
 
 target_include_directories(json PRIVATE
     ${JPEG_INCLUDE_DIR}

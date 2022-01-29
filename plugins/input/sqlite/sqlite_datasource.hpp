@@ -33,6 +33,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/value/types.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -44,6 +45,8 @@
 
 // sqlite
 #include "sqlite_connection.hpp"
+
+DATASOURCE_PLUGIN_DEF(sqlite_datasource_plugin, sqlite);
 
 class sqlite_datasource : public mapnik::datasource
 {

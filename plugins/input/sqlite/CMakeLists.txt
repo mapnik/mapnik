@@ -1,12 +1,13 @@
 find_package(SQLite3 REQUIRED)
 
-add_library(input-sqlite MODULE
+add_library(input-sqlite ${_plugin_linkage})
+target_sources(input-sqlite ${_plugin_visibility}
     sqlite_datasource.cpp
     sqlite_featureset.cpp
 )
-add_library(mapnik::plugin::input::sqlite ALIAS input-sqlite)
-target_link_libraries(input-sqlite PRIVATE
+target_link_libraries(input-sqlite ${_plugin_visibility}
     mapnik::mapnik 
+    mapnik::datasource-base
     SQLite::SQLite3
 )
 set_target_properties(input-sqlite PROPERTIES 

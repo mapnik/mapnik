@@ -1,15 +1,46 @@
 add_subdirectory(json)
 add_subdirectory(wkt)
 
-add_library(mapnik "")
-add_library(mapnik::mapnik ALIAS mapnik)
-
 if(BUILD_SHARED_LIBS)
+    # private as this should only be visibile when building, to dllexport/dllimport correctly
     target_compile_definitions(mapnik PRIVATE MAPNIK_EXPORTS)
 endif()
 
-target_link_libraries(mapnik PUBLIC mapnik::core)
-target_link_libraries(mapnik PRIVATE mapnik::agg)
+target_link_libraries(mapnik PUBLIC mapnik::core mapnik::datasource-base)
+target_link_libraries(mapnik PRIVATE 
+    mapnik::agg
+    # expr: if(MAPNIK_STATIC_PLUGINS == ON && <target> is build) then add link target
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-csv>>:input-csv>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-gdal>>:input-gdal>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geobuf>>:input-geobuf>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geojson>>:input-geojson>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-ogr>>:input-ogr>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-pgraster>>:input-pgraster>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-postgis>>:input-postgis>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-raster>>:input-raster>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-shape>>:input-shape>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-sqlite>>:input-sqlite>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-topojson>>:input-topojson>
+)
+target_compile_definitions(mapnik PRIVATE
+    # expr: if(MAPNIK_STATIC_PLUGINS == ON && <target> is build) then add build definition
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-csv>>:MAPNIK_STATIC_PLUGIN_CSV>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-gdal>>:MAPNIK_STATIC_PLUGIN_GDAL>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geobuf>>:MAPNIK_STATIC_PLUGIN_GEOBUF>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geojson>>:MAPNIK_STATIC_PLUGIN_GEOJSON>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-ogr>>:MAPNIK_STATIC_PLUGIN_OGR>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-pgraster>>:MAPNIK_STATIC_PLUGIN_PGRASTER>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-postgis>>:MAPNIK_STATIC_PLUGIN_POSTGIS>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-raster>>:MAPNIK_STATIC_PLUGIN_RASTER>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-shape>>:MAPNIK_STATIC_PLUGIN_SHAPE>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-sqlite>>:MAPNIK_STATIC_PLUGIN_SQLITE>
+    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-topojson>>:MAPNIK_STATIC_PLUGIN_TOPOJSON>
+
+)
+
+if(MAPNIK_STATIC_PLUGINS)
+    target_include_directories(mapnik PRIVATE "${PROJECT_SOURCE_DIR}/plugins")
+endif()
 
 set_target_properties(mapnik PROPERTIES 
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
@@ -31,6 +62,7 @@ if(MSVC)
     # 4910 warns about extern and dllexport at the same time. should be investigated at some point
     target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
 endif()
+
 
 target_sources(mapnik PRIVATE
     cairo_io.cpp
@@ -258,7 +290,10 @@ if(USE_TIFF)
 endif()
 
 if(USE_WEBP)
-    target_sources(mapnik PRIVATE webp_reader.cpp)
+    target_sources(mapnik PRIVATE 
+        webp_reader.cpp 
+        webp_io.cpp
+    )
 endif()
 
 if(USE_GRID_RENDERER)

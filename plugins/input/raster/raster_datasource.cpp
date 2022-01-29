@@ -43,7 +43,9 @@ using mapnik::datasource;
 using mapnik::parameters;
 using mapnik::image_reader;
 
-DATASOURCE_PLUGIN(raster_datasource)
+DATASOURCE_PLUGIN_IMPL(raster_datasource_plugin, raster_datasource);
+DATASOURCE_PLUGIN_EXPORT(raster_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_INIT(raster_datasource_plugin);
 
 raster_datasource::raster_datasource(parameters const& params)
   : datasource(params),

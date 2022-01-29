@@ -1,11 +1,13 @@
 find_package(PostgreSQL REQUIRED)
 
-add_library(input-postgis MODULE 
+add_library(input-postgis ${_plugin_linkage})
+target_sources(input-postgis ${_plugin_visibility}
     postgis_datasource.cpp 
     postgis_featureset.cpp 
 )
-target_link_libraries(input-postgis PRIVATE
+target_link_libraries(input-postgis ${_plugin_visibility}
     mapnik::mapnik  
+    mapnik::datasource-base
     PostgreSQL::PostgreSQL
 )
 set_target_properties(input-postgis PROPERTIES 

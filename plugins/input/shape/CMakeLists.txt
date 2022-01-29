@@ -1,4 +1,5 @@
-add_library(input-shape MODULE 
+add_library(input-shape ${_plugin_linkage})
+target_sources(input-shape ${_plugin_visibility}
     dbfile.cpp 
     dbf_test.cpp
     shape_datasource.cpp
@@ -6,7 +7,10 @@ add_library(input-shape MODULE
     shape_index_featureset.cpp
     shape_io.cpp shape_utils.cpp
 )
-target_link_libraries(input-shape PRIVATE mapnik::mapnik)
+target_link_libraries(input-shape ${_plugin_visibility} 
+    mapnik::mapnik
+    mapnik::datasource-base
+)
 set_target_properties(input-shape PROPERTIES 
     OUTPUT_NAME "shape"
     PREFIX "${_plugin_prefix}"

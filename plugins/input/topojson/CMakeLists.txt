@@ -1,11 +1,12 @@
-add_library(input-topojson MODULE
+add_library(input-topojson ${_plugin_linkage})
+target_sources(input-topojson ${_plugin_visibility}
     topojson_datasource.cpp
     topojson_featureset.cpp
 )
-add_library(mapnik::plugin::input::topojson ALIAS input-topojson)
-target_link_libraries(input-topojson PRIVATE
+target_link_libraries(input-topojson ${_plugin_visibility}
     mapnik::mapnik
     mapnik::json
+    mapnik::datasource-base
 )
 set_target_properties(input-topojson PROPERTIES 
     OUTPUT_NAME "topojson"

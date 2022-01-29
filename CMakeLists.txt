@@ -56,6 +56,7 @@ mapnik_option(USE_LOG "enables logging output. See log severity level." OFF)
 set(USE_LOG_SEVERITY "1" CACHE STRING "sets the logging severity (only applies when USE_LOG is ON")
 mapnik_option(USE_STATS "Enable statistics reporting" OFF)
 
+mapnik_option(STATIC_PLUGINS "statically link plugins into libmapnik" OFF)
 mapnik_option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 mapnik_option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
 mapnik_option(USE_PLUGIN_INPUT_GEOBUF "adds plugin input geobuf" ON)
@@ -344,6 +345,16 @@ if(NOT WIN32)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
 endif()
 
+if(MAPNIK_STATIC_PLUGINS)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_PLUGINS)
+endif()
+
+
+# when building static, this have to be public so that all depending libs know about
+if(NOT BUILD_SHARED_LIBS)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_DEFINE)
+endif()
+
 # force utf-8 source code processing
 # see https://docs.microsoft.com/de-de/cpp/build/reference/utf-8-set-source-and-executable-character-sets-to-utf-8?view=msvc-170
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
@@ -377,9 +388,18 @@ target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 mapnik_install(core)
 
+# forward declaring libraries to consume them when building static plugins (circle deps between mapnik <-> plugin_target)
+add_library(mapnik "")
+add_library(mapnik::mapnik ALIAS mapnik)
+add_library(wkt STATIC "")
+add_library(mapnik::wkt ALIAS wkt)
+add_library(json STATIC "")
+add_library(mapnik::json ALIAS json)
+# end forward declaration
+
 add_subdirectory(deps)
-add_subdirectory(src)
 add_subdirectory(plugins)
+add_subdirectory(src)
 add_subdirectory(utils)
 add_subdirectory(demo)
 if(BUILD_BENCHMARK)

@@ -37,8 +37,6 @@
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(gdal_datasource)
-
 using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::query;
@@ -48,9 +46,9 @@ using mapnik::datasource_exception;
 
 static std::once_flag once_flag;
 
-extern "C" MAPNIK_EXP void on_plugin_load()
-{
-    // initialize gdal formats
+DATASOURCE_PLUGIN_IMPL(gdal_datasource_plugin, gdal_datasource);
+DATASOURCE_PLUGIN_EXPORT(gdal_datasource_plugin);
+void gdal_datasource_plugin::init_once() const {
     std::call_once(once_flag,[](){
         GDALAllRegister();
     });
