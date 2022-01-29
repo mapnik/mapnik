@@ -1,10 +1,9 @@
-add_library(wkt STATIC
+target_sources(wkt PRIVATE 
     geometry_to_wkt.cpp
     mapnik_wkt_generator_grammar.cpp
     wkt_factory.cpp
     wkt_grammar_x3.cpp
 )
-add_library(mapnik::wkt ALIAS wkt)
 
 target_include_directories(wkt PRIVATE
     ${MAPNIK_INCLUDE_PATH}

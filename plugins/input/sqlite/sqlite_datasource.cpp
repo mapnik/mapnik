@@ -50,7 +50,9 @@ using mapnik::datasource_exception;
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(sqlite_datasource)
+DATASOURCE_PLUGIN_IMPL(sqlite_datasource_plugin, sqlite_datasource);
+DATASOURCE_PLUGIN_EXPORT(sqlite_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_INIT(sqlite_datasource_plugin);
 
 sqlite_datasource::sqlite_datasource(parameters const& params)
     : datasource(params),

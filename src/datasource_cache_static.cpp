@@ -26,14 +26,15 @@
 
 #ifdef MAPNIK_STATIC_PLUGINS
 #include <mapnik/params.hpp>
-
-// boost
-#include <boost/assign/list_of.hpp>
+#include <mapnik/datasource_plugin.hpp>
 #endif
 
 // stl
 #include <stdexcept>
 #include <unordered_map>
+
+
+#define REGISTER_STATIC_DATASOURCE_PLUGIN(classname) {std::string{classname::kName}, std::make_shared<classname>()}
 
 // static plugin linkage
 #ifdef MAPNIK_STATIC_PLUGINS
@@ -42,6 +43,9 @@
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GDAL)
         #include "input/gdal/gdal_datasource.hpp"
+    #endif
+    #if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
+        #include "input/geobuf/geobuf_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
         #include "input/geojson/geojson_datasource.hpp"
@@ -57,6 +61,9 @@
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OGR)
         #include "input/ogr/ogr_datasource.hpp"
+    #endif
+    #if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
+        #include "input/pgraster/pgraster_datasource.hpp"
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OSM)
         #include "input/osm/osm_datasource.hpp"
@@ -76,6 +83,9 @@
     #if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
         #include "input/sqlite/sqlite_datasource.hpp"
     #endif
+    #if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
+        #include "input/topojson/topojson_datasource.hpp"
+    #endif
 #endif
 
 namespace mapnik {
@@ -88,43 +98,52 @@ datasource_ptr ds_generator(parameters const& params)
 }
 
 typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
-using datasource_map = std::unordered_map<std::string, ds_generator_ptr>;
+using datasource_map = std::unordered_map<std::string, std::shared_ptr<datasource_plugin>>;
 
-static datasource_map ds_map = boost::assign::map_list_of
+static datasource_map ds_map{
     #if defined(MAPNIK_STATIC_PLUGIN_CSV)
-        (std::string("csv"), &ds_generator<csv_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(csv_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GDAL)
-        (std::string("gdal"), &ds_generator<gdal_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(gdal_datasource_plugin),
+    #endif
+    #if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(geobuf_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
-        (std::string("geojson"), &ds_generator<geojson_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(geojson_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OCCI)
-        (std::string("occi"), &ds_generator<occi_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(occi_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OGR)
-        (std::string("ogr"), &ds_generator<ogr_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(ogr_datasource_plugin),
+    #endif
+    #if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(pgraster_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_OSM)
-        (std::string("osm"), &ds_generator<osm_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(osm_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
-        (std::string("postgis"), &ds_generator<postgis_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(postgis_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
-        (std::string("raster"), &ds_generator<raster_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(raster_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
-        (std::string("rasterlite"), &ds_generator<rasterlite_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(rasterlite_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
-        (std::string("shape"), &ds_generator<shape_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(shape_datasource_plugin),
     #endif
     #if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
-        (std::string("sqlite"), &ds_generator<sqlite_datasource>)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(sqlite_datasource_plugin),
     #endif
-;
+    #if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
+        REGISTER_STATIC_DATASOURCE_PLUGIN(topojson_datasource_plugin),
+    #endif
+};
 #endif
 
 #ifdef MAPNIK_STATIC_PLUGINS
@@ -135,7 +154,7 @@ datasource_ptr create_static_datasource(parameters const& params)
     datasource_map::iterator it = ds_map.find(*type);
     if (it != ds_map.end())
     {
-        ds = it->second(params);
+        ds = it->second->create(params);
     }
     return ds;
 }

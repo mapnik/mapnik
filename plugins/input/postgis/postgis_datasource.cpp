@@ -49,7 +49,9 @@ MAPNIK_DISABLE_WARNING_POP
 #include <set>
 #include <sstream>
 
-DATASOURCE_PLUGIN(postgis_datasource)
+DATASOURCE_PLUGIN_IMPL(postgis_datasource_plugin, postgis_datasource);
+DATASOURCE_PLUGIN_EXPORT(postgis_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_INIT(postgis_datasource_plugin);
 
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";

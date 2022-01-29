@@ -1,8 +1,12 @@
-add_library(input-geobuf MODULE
+add_library(input-geobuf ${_plugin_linkage})
+target_sources(input-geobuf ${_plugin_visibility}
     geobuf_datasource.cpp
     geobuf_featureset.cpp
 )
-target_link_libraries(input-geobuf PRIVATE mapnik::mapnik)
+target_link_libraries(input-geobuf ${_plugin_visibility} 
+    mapnik::mapnik
+    mapnik::datasource-base
+)
 set_target_properties(input-geobuf PROPERTIES 
     OUTPUT_NAME "geobuf"
     PREFIX "${_plugin_prefix}"

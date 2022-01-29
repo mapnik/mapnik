@@ -1,12 +1,14 @@
 find_package(GDAL REQUIRED)
 
-add_library(input-gdal MODULE
+add_library(input-gdal ${_plugin_linkage})
+target_sources(input-gdal ${_plugin_visibility}
     gdal_datasource.cpp
     gdal_featureset.cpp
 )
-target_include_directories(input-gdal PRIVATE ${GDAL_INCLUDE_DIRS})
-target_link_libraries(input-gdal PRIVATE 
+target_include_directories(input-gdal ${_plugin_visibility} ${GDAL_INCLUDE_DIRS})
+target_link_libraries(input-gdal ${_plugin_visibility} 
     mapnik::mapnik
+    mapnik::datasource-base
     ${GDAL_LIBRARIES}
 )
 set_target_properties(input-gdal PROPERTIES 

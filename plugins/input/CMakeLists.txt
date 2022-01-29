@@ -1,5 +1,13 @@
 set(_plugin_prefix "")
 set(_plugin_suffix ".input")
+set(_plugin_linkage MODULE)
+set(_plugin_source_visibility PRIVATE)
+if(MAPNIK_STATIC_PLUGINS)
+    set(_plugin_linkage INTERFACE)
+    set(_plugin_visibility INTERFACE)
+endif()
+
+add_subdirectory(base)
 
 # add a list with all build plugins so the copy dependencies command can wait for all build events
 set(m_build_plugins "")
@@ -51,7 +59,7 @@ endif()
 #
 # Copy all plugin dlls, so that these are in the main output dir, since cmake copies those into ${MAPNIK_OUTPUT_DIR}/plugins/input, too.
 #
-if(WIN32)
+if(NOT MAPNIK_STATIC_PLUGINS AND WIN32)
     list(LENGTH m_build_plugins m_number_plugins)
     if(m_number_plugins GREATER 0)
         string(CONFIGURE

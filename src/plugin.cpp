@@ -23,6 +23,8 @@
 #include <mapnik/plugin.hpp>
 #include <stdexcept>
 
+#include <mapnik/datasource_plugin.hpp>
+
 #ifdef _WIN32
   #define NOMINMAX
   #include <windows.h>
@@ -58,12 +60,11 @@ PluginInfo::PluginInfo(std::string const& filename,
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
           if (module_ && module_->dl)
           {
-              callable_returning_string name_call = reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-                if (name_call) name_ = name_call();
-                callable_returning_void init_once = reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
-                if (init_once) {
-                    init_once();
-                }
+              datasource_plugin* plugin = reinterpret_cast<datasource_plugin*>(dlsym(module_->dl, "plugin"));
+              if(!plugin) 
+                throw std::runtime_error("plugin has a false interface"); //! todo: better error text
+              name_ = plugin->name();
+              plugin->init_once();
           }
 #else
   #ifdef MAPNIK_HAS_DLCFN

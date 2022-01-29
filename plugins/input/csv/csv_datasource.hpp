@@ -48,6 +48,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <string>
 
+#include <mapnik/datasource_plugin.hpp>
+
 template <std::size_t Max, std::size_t Min>
 struct csv_linear : boost::geometry::index::linear<Max,Min> {};
 
@@ -69,6 +71,9 @@ struct options_type<csv_linear<Max,Min> >
 #endif
 };
 }}}}}
+
+DATASOURCE_PLUGIN_DEF(csv_datasource_plugin, csv);
+
 
 class csv_datasource : public mapnik::datasource,
                        private csv_utils::csv_file_parser

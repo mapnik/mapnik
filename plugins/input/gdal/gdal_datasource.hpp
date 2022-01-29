@@ -31,7 +31,7 @@
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-
+#include <mapnik/datasource_plugin.hpp>
 // boost
 #include <boost/optional.hpp>
 
@@ -41,6 +41,8 @@
 
 // gdal
 #include <gdal_priv.h>
+
+DATASOURCE_PLUGIN_DEF(gdal_datasource_plugin, gdal);
 
 class gdal_datasource : public mapnik::datasource
 {

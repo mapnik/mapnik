@@ -37,6 +37,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value/types.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -74,6 +75,7 @@ struct pgraster_overview
 };
 
 
+DATASOURCE_PLUGIN_DEF(pgraster_datasource_plugin, pgraster);
 class pgraster_datasource : public datasource
 {
 public:

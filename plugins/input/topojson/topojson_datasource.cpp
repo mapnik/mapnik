@@ -42,7 +42,9 @@
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(topojson_datasource)
+DATASOURCE_PLUGIN_IMPL(topojson_datasource_plugin, topojson_datasource);
+DATASOURCE_PLUGIN_EXPORT(topojson_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_INIT(topojson_datasource_plugin);
 
 struct attr_value_converter
 {

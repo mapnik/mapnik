@@ -65,7 +65,10 @@ MAPNIK_DISABLE_WARNING_POP
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(csv_datasource)
+DATASOURCE_PLUGIN_IMPL(csv_datasource_plugin, csv_datasource);
+DATASOURCE_PLUGIN_EXPORT(csv_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_INIT(csv_datasource_plugin);
+
 
 csv_datasource::csv_datasource(parameters const& params)
 : datasource(params),

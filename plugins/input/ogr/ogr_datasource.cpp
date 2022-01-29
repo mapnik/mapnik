@@ -49,8 +49,6 @@ MAPNIK_DISABLE_WARNING_POP
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(ogr_datasource)
-
 using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::query;
@@ -63,8 +61,9 @@ using mapnik::filter_at_point;
 
 static std::once_flag once_flag;
 
-extern "C" MAPNIK_EXP void on_plugin_load()
-{
+DATASOURCE_PLUGIN_IMPL(ogr_datasource_plugin, ogr_datasource);
+DATASOURCE_PLUGIN_EXPORT(ogr_datasource_plugin);
+void ogr_datasource_plugin::init_once() const {
     // initialize ogr formats
     // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
     std::call_once(once_flag,[](){
