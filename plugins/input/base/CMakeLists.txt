@@ -9,3 +9,4 @@ target_include_directories(datasource-base INTERFACE
 target_link_libraries(datasource-base INTERFACE mapnik::core)
 
 mapnik_install(datasource-base)
+install(DIRECTORY include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")

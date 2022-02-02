@@ -1,3 +1,4 @@
+#include <mapnik/mapnik.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -20,6 +21,8 @@ MAPNIK_DISABLE_WARNING_POP
 int main(int argc, char** argv)
 {
     namespace po = boost::program_options;
+
+    mapnik::setup();
 
     bool verbose = false;
     bool auto_open = false;

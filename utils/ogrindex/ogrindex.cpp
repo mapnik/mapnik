@@ -27,6 +27,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/feature.hpp>
@@ -60,6 +61,7 @@ int main(int argc, char** argv)
     double ratio = DEFAULT_RATIO;
     vector<string> ogr_files;
 
+    mapnik::setup();
     try
     {
         po::options_description desc("ogrindex utility");

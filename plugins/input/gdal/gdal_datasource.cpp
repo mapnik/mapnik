@@ -44,13 +44,16 @@ using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
 using mapnik::query;
 
-static std::once_flag once_flag;
-
 DATASOURCE_PLUGIN_IMPL(gdal_datasource_plugin, gdal_datasource);
 DATASOURCE_PLUGIN_EXPORT(gdal_datasource_plugin);
-void gdal_datasource_plugin::init_once() const
+void gdal_datasource_plugin::after_load() const
 {
-    std::call_once(once_flag, []() { GDALAllRegister(); });
+    GDALAllRegister();
+}
+
+void gdal_datasource_plugin::before_unload() const
+{
+    GDALDestroyDriverManager();
 }
 
 gdal_datasource::gdal_datasource(parameters const& params)

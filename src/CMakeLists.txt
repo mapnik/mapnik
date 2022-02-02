@@ -43,6 +43,7 @@ if(MAPNIK_STATIC_PLUGINS)
 endif()
 
 set_target_properties(mapnik PROPERTIES 
+    POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnik"
     PREFIX "lib"
@@ -106,6 +107,7 @@ target_sources(mapnik PRIVATE
     layer.cpp
     load_map.cpp
     map.cpp
+    mapnik.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
     marker_helpers.cpp

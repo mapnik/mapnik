@@ -69,7 +69,8 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN_IMPL(geojson_datasource_plugin, geojson_datasource);
 DATASOURCE_PLUGIN_EXPORT(geojson_datasource_plugin);
-DATASOURCE_PLUGIN_EMPTY_INIT(geojson_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(geojson_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(geojson_datasource_plugin);
 
 struct attr_value_converter
 {

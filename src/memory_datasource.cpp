@@ -35,9 +35,14 @@
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(mapnik::memory_datasource)
+
+DATASOURCE_PLUGIN_EXPORT(mapnik::memory_datasource_plugin)
 
 namespace mapnik {
+
+DATASOURCE_PLUGIN_IMPL(memory_datasource_plugin, memory_datasource);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(memory_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(memory_datasource_plugin);
 
 struct accumulate_extent
 {
@@ -67,7 +72,7 @@ struct accumulate_extent
 
 const char* memory_datasource::name()
 {
-    return "memory";
+    return mapnik::memory_datasource_plugin::kName;
 }
 
 memory_datasource::memory_datasource(parameters const& _params)

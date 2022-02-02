@@ -60,6 +60,7 @@ class test : public benchmark::test_case
 // echo -180 -60 | cs2cs -f "%.10f" epsg:4326 +to epsg:3857
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     mapnik::box2d<double> from(-180, -80, 180, 80);
     mapnik::box2d<double> to(-20037508.3427892476, -15538711.0963092316, 20037508.3427892476, 15538711.0963092316);
     std::string from_str("epsg:4326");

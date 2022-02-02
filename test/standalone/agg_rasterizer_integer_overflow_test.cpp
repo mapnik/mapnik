@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/json/feature_parser.hpp>
@@ -22,6 +23,7 @@ const std::string
 
 TEST_CASE("agg_rasterizer_integer_overflow")
 {
+    mapnik::setup();
     SECTION("coordinates_do_not_overflow_and_polygon_is_rendered")
     {
         auto expected_color = mapnik::color("white");

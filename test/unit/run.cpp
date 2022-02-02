@@ -2,6 +2,7 @@
 #include "catch.hpp"
 
 #include <string>
+#include <mapnik/mapnik.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -20,6 +21,7 @@ int main(int argc, char** argv)
     session.cli(cli);
     int result = session.applyCommandLine(argc, argv);
 
+    mapnik::setup();
     if (!plugin_path.empty())
     {
         if (!mapnik::util::exists(plugin_path))

@@ -25,9 +25,9 @@
 
 // mapnik
 #include <mapnik/util/noncopyable.hpp>
-
 // stl
 #include <string>
+#include <memory>
 
 namespace mapnik {
 
@@ -50,8 +50,7 @@ class PluginInfo : util::noncopyable
 
   private:
     std::string filename_;
-    std::string name_;
-    mapnik_lib_t* module_;
+    std::unique_ptr<mapnik_lib_t> module_;
 };
 } // namespace mapnik
 
