@@ -50,7 +50,8 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN_IMPL(geobuf_datasource_plugin, geobuf_datasource);
 DATASOURCE_PLUGIN_EXPORT(geobuf_datasource_plugin);
-DATASOURCE_PLUGIN_EMPTY_INIT(geobuf_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(geobuf_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(geobuf_datasource_plugin);
 
 struct attr_value_converter
 {

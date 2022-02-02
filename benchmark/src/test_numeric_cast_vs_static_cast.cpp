@@ -74,5 +74,6 @@ class test_numeric : public benchmark::test_case
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     return benchmark::sequencer(argc, argv).run<test_static>("static_cast").run<test_numeric>("numeric_cast").done();
 }

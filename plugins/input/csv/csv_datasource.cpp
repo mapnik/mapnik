@@ -67,7 +67,8 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN_IMPL(csv_datasource_plugin, csv_datasource);
 DATASOURCE_PLUGIN_EXPORT(csv_datasource_plugin);
-DATASOURCE_PLUGIN_EMPTY_INIT(csv_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(csv_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(csv_datasource_plugin);
 
 csv_datasource::csv_datasource(parameters const& params)
     : datasource(params)

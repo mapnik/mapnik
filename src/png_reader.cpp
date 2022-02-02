@@ -80,8 +80,6 @@ class png_reader : public image_reader
     static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length);
 };
 
-namespace {
-
 image_reader* create_png_reader(std::string const& filename)
 {
     return new png_reader<std::filebuf>(filename);
@@ -92,9 +90,11 @@ image_reader* create_png_reader2(char const* data, std::size_t size)
     return new png_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
-const bool registered = register_image_reader("png", create_png_reader);
-const bool registered2 = register_image_reader("png", create_png_reader2);
-} // namespace
+void register_png_reader()
+{
+    const bool registered = register_image_reader("png", create_png_reader);
+    const bool registered2 = register_image_reader("png", create_png_reader2);
+}
 
 void user_error_fn(png_structp /*png_ptr*/, png_const_charp error_msg)
 {

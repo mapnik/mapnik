@@ -23,6 +23,7 @@
 #include <iostream>
 #include <string>
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/params.hpp>
@@ -40,6 +41,7 @@ int main(int argc, char** argv)
 
     std::cerr << "Geometry to WKB converter\n";
 
+    mapnik::setup();
     mapnik::datasource_cache::instance().register_datasources("/opt/mapnik/lib/mapnik/input/");
 
     std::string filename(argv[1]);

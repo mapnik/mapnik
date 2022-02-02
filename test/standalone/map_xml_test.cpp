@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
@@ -142,6 +143,7 @@ const bool registered =
 
 TEST_CASE("map xml I/O")
 {
+    mapnik::setup();
     // make sure plugins are loaded
     REQUIRE(registered);
 

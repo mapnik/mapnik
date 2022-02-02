@@ -47,51 +47,13 @@ namespace mapnik {
 
 struct _mapnik_lib_t
 {
+    std::string name;
     handle dl;
-};
-
-PluginInfo::PluginInfo(std::string const& filename, std::string const& library_name)
-    : filename_(filename)
-    , name_()
-    , module_(new mapnik_lib_t)
-{
-#ifdef _WIN32
-    if (module_)
-        module_->dl = LoadLibraryA(filename.c_str());
-    if (module_ && module_->dl)
-    {
-        datasource_plugin* plugin = reinterpret_cast<datasource_plugin*>(dlsym(module_->dl, "plugin"));
-        if (!plugin)
-            throw std::runtime_error("plugin has a false interface"); //! todo: better error text
-        name_ = plugin->name();
-        plugin->init_once();
-    }
-#else
-#ifdef MAPNIK_HAS_DLCFN
-    if (module_)
-        module_->dl = dlopen(filename.c_str(), RTLD_LAZY);
-    if (module_ && module_->dl)
-    {
-        callable_returning_string name_call =
-          reinterpret_cast<callable_returning_string>(dlsym(module_->dl, library_name.c_str()));
-        if (name_call)
-            name_ = name_call();
-        callable_returning_void init_once =
-          reinterpret_cast<callable_returning_void>(dlsym(module_->dl, "on_plugin_load"));
-        if (init_once)
-        {
-            init_once();
-        }
-    }
-#else
-    throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
-#endif
-#endif
-}
-
-PluginInfo::~PluginInfo()
-{
-    if (module_)
+    _mapnik_lib_t()
+        : name{"unknown"}
+        , dl{0}
+    {}
+    ~_mapnik_lib_t()
     {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
         /*
@@ -105,16 +67,45 @@ PluginInfo::~PluginInfo()
           in the case that gdal is linked as a shared library. This workaround therefore
           prevents crashes with gdal 1.11.x and gdal 2.x when using a static libgdal.
         */
-        if (module_->dl && name_ != "gdal" && name_ != "ogr")
+        if (dl /*&& name_ != "gdal" && name_ != "ogr"*/) // is the gdal issue sill present? We are now
+                                                         // unregister all drivers for ogal and gdal (todo:
+                                                         // before_unload call)
         {
 #ifndef MAPNIK_NO_DLCLOSE
-            dlclose(module_->dl), module_->dl = 0;
+            dlclose(dl);
+            dl = 0;
 #endif
         }
 #endif
-        delete module_;
     }
+};
+
+PluginInfo::PluginInfo(std::string const& filename, std::string const& library_name)
+    : filename_(filename)
+    , module_{std::make_unique<mapnik_lib_t>()}
+{
+#if defined(_WIN32)
+    if (module_)
+        module_->dl = LoadLibraryA(filename.c_str());
+#elif defined(MAPNIK_HAS_DLCFN)
+    if (module_)
+        module_->dl = dlopen(filename.c_str(), RTLD_LAZY);
+#else
+    throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
+#endif
+#if defined(MAPNIK_HAS_DLCFN) || defined(_WIN32)
+    if (module_ && module_->dl)
+    {
+        datasource_plugin* plugin{reinterpret_cast<datasource_plugin*>(get_symbol("plugin"))};
+        if (!plugin)
+            throw std::runtime_error("plugin has a false interface"); //! todo: better error text
+        module_->name = plugin->name();
+        plugin->after_load();
+    }
+#endif
 }
+
+PluginInfo::~PluginInfo() {}
 
 void* PluginInfo::get_symbol(std::string const& sym_name) const
 {
@@ -127,13 +118,13 @@ void* PluginInfo::get_symbol(std::string const& sym_name) const
 
 std::string const& PluginInfo::name() const
 {
-    return name_;
+    return module_->name;
 }
 
 bool PluginInfo::valid() const
 {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-    if (module_ && module_->dl && !name_.empty())
+    if (module_ && module_->dl && !module_->name.empty())
         return true;
 #endif
     return false;
@@ -141,7 +132,7 @@ bool PluginInfo::valid() const
 
 std::string PluginInfo::get_error() const
 {
-    return std::string("could not open: '") + name_ + "'";
+    return std::string("could not open: '") + module_->name + "'";
 }
 
 void PluginInfo::init()

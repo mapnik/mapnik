@@ -29,6 +29,11 @@ add_feature_info(BUILD_TESTING BUILD_TESTING "Adds tests")
 mapnik_option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) will be copied into CMAKE_INSTALL_PREFIX/MAPNIK_BIN_DIR." ON)
 
 mapnik_option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
+mapnik_option(BUILD_SHARED_PLUGINS "build dynamic plugins" ${BUILD_SHARED_LIBS}) # use BUILD_SHARED_LIBS as default option
+if(WIN32 AND BUILD_SHARED_PLUGINS AND NOT BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "static libmapnik and dynamic plugins won't work correctly")
+endif()
+
 mapnik_option(USE_EXTERNAL_MAPBOX_GEOMETRY "Use a external mapnik/geometry.hpp. If off, use the submodule" OFF)
 mapnik_option(USE_EXTERNAL_MAPBOX_POLYLABEL "Use a external mapnik/polylabel. If off, use the submodule" OFF)
 mapnik_option(USE_EXTERNAL_MAPBOX_PROTOZERO "Use a external mapnik/protozero. If off, use the submodule" OFF)
@@ -56,7 +61,6 @@ mapnik_option(USE_LOG "enables logging output. See log severity level." OFF)
 set(USE_LOG_SEVERITY "1" CACHE STRING "sets the logging severity (only applies when USE_LOG is ON")
 mapnik_option(USE_STATS "Enable statistics reporting" OFF)
 
-mapnik_option(STATIC_PLUGINS "statically link plugins into libmapnik" OFF)
 mapnik_option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 mapnik_option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
 mapnik_option(USE_PLUGIN_INPUT_GEOBUF "adds plugin input geobuf" ON)
@@ -345,11 +349,9 @@ if(NOT WIN32)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
 endif()
 
-if(MAPNIK_STATIC_PLUGINS)
+if(NOT BUILD_SHARED_PLUGINS)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_PLUGINS)
 endif()
-
-
 # when building static, this have to be public so that all depending libs know about
 if(NOT BUILD_SHARED_LIBS)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_DEFINE)
@@ -388,6 +390,7 @@ target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 mapnik_install(core)
 
+###
 # forward declaring libraries to consume them when building static plugins (circle deps between mapnik <-> plugin_target)
 add_library(mapnik "")
 add_library(mapnik::mapnik ALIAS mapnik)
@@ -396,6 +399,7 @@ add_library(mapnik::wkt ALIAS wkt)
 add_library(json STATIC "")
 add_library(mapnik::json ALIAS json)
 # end forward declaration
+###
 
 add_subdirectory(deps)
 add_subdirectory(plugins)
@@ -416,22 +420,22 @@ feature_summary(FILENAME "${CMAKE_CURRENT_BINARY_DIR}/packages.log" WHAT PACKAGE
 include(MapnikExport)
 include(MapnikExportPkgConfig)
 
-install(DIRECTORY include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
-install(DIRECTORY deps/agg/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
-install(DIRECTORY deps/mapnik DESTINATION ${MAPNIK_INCLUDE_DIR})
-install(DIRECTORY fonts/ DESTINATION ${FONTS_INSTALL_DIR} FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
+install(DIRECTORY include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
+install(DIRECTORY deps/agg/include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
+install(DIRECTORY deps/mapnik DESTINATION "${MAPNIK_INCLUDE_DIR}")
+install(DIRECTORY fonts/ DESTINATION "${FONTS_INSTALL_DIR}" FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
 
 if(NOT USE_EXTERNAL_MAPBOX_GEOMETRY)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_POLYLABEL)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_PROTOZERO)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_VARIANT)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 
 mapnik_install_targets()

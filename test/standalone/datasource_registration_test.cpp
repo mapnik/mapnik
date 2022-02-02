@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/util/fs.hpp>
@@ -11,6 +12,7 @@
 
 TEST_CASE("datasource_cache")
 {
+    mapnik::setup();
     SECTION("registration")
     {
         try

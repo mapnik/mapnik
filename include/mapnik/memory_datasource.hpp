@@ -26,12 +26,14 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // stl
 #include <deque>
 
 namespace mapnik {
 
+DATASOURCE_PLUGIN_DEF(memory_datasource_plugin, memory)
 class MAPNIK_DECL memory_datasource : public datasource
 {
     friend class memory_featureset;

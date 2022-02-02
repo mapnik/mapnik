@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/datasource_plugin.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
@@ -71,11 +72,9 @@ datasource_ptr datasource_cache::create(parameters const& params)
         throw config_error(std::string("Could not create datasource. Required ") + "parameter 'type' is missing");
     }
 
-    datasource_ptr ds;
-
 #ifdef MAPNIK_STATIC_PLUGINS
     // return if it's created, raise otherwise
-    ds = create_static_datasource(params);
+    datasource_ptr ds = create_static_datasource(params);
     if (ds)
     {
         return ds;
@@ -114,16 +113,14 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-      create_ds create_datasource = reinterpret_cast<create_ds>(itr->second->get_symbol("create"));
+    datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
 
     if (!create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") + itr->second->get_error());
     }
 
-    ds = datasource_ptr(create_datasource(params), datasource_deleter());
-
-    return ds;
+    return create_datasource->create(params);
 }
 
 std::string datasource_cache::plugin_directories()

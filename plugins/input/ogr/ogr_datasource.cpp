@@ -33,6 +33,7 @@
 #include <mapnik/timer.hpp>
 #include <mapnik/util/utf_conv_win.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -49,8 +50,6 @@ MAPNIK_DISABLE_WARNING_POP
 using mapnik::datasource;
 using mapnik::parameters;
 
-DATASOURCE_PLUGIN(ogr_datasource)
-
 using mapnik::attribute_descriptor;
 using mapnik::box2d;
 using mapnik::coord2d;
@@ -65,11 +64,19 @@ static std::once_flag once_flag;
 
 DATASOURCE_PLUGIN_IMPL(ogr_datasource_plugin, ogr_datasource);
 DATASOURCE_PLUGIN_EXPORT(ogr_datasource_plugin);
-void ogr_datasource_plugin::init_once() const
+
+void ogr_datasource_plugin::after_load() const
 {
     // initialize ogr formats
     // NOTE: in GDAL >= 2.0 this is the same as GDALAllRegister()
-    std::call_once(once_flag, []() { OGRRegisterAll(); });
+    OGRRegisterAll();
+}
+
+void ogr_datasource_plugin::before_unload() const
+{
+    // initialize ogr formats
+    // NOTE: in GDAL >= 2.0 this is the same as GDALDestroyDriverManager()
+    OGRCleanupAll();
 }
 
 ogr_datasource::ogr_datasource(parameters const& params)
