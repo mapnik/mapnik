@@ -28,23 +28,20 @@
 #include "connection.hpp"
 #include "resultset.hpp"
 
-class CursorResultSet : public IResultSet, private mapnik::util::noncopyable
+class CursorResultSet : public IResultSet,
+                        private mapnik::util::noncopyable
 {
-public:
-    CursorResultSet(std::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)
-        : conn_(conn),
-          cursorName_(cursorName),
-          fetch_size_(fetch_count),
-          is_closed_(false)
+  public:
+    CursorResultSet(std::shared_ptr<Connection> const& conn, std::string cursorName, int fetch_count)
+        : conn_(conn)
+        , cursorName_(cursorName)
+        , fetch_size_(fetch_count)
+        , is_closed_(false)
     {
         getNextResultSet();
     }
 
-    virtual ~CursorResultSet()
-    {
-        close();
-    }
-
+    virtual ~CursorResultSet() { close(); }
 
     virtual void close()
     {
@@ -63,65 +60,43 @@ public:
         }
     }
 
-    virtual int getNumFields() const
-    {
-        return rs_->getNumFields();
-    }
+    virtual int getNumFields() const { return rs_->getNumFields(); }
 
     virtual bool next()
     {
-        if (rs_->next()) {
+        if (rs_->next())
+        {
             return true;
-        } else if (rs_->size() == 0) {
+        }
+        else if (rs_->size() == 0)
+        {
             close();
             return false;
-        } else {
+        }
+        else
+        {
             getNextResultSet();
             return rs_->next();
         }
     }
 
-    virtual const char* getFieldName(int index) const
-    {
-        return rs_->getFieldName(index);
-    }
+    virtual const char* getFieldName(int index) const { return rs_->getFieldName(index); }
 
-    virtual int getFieldLength(int index) const
-    {
-        return rs_->getFieldLength(index);
-    }
+    virtual int getFieldLength(int index) const { return rs_->getFieldLength(index); }
 
-    virtual int getFieldLength(const char* name) const
-    {
-        return rs_->getFieldLength(name);
-    }
+    virtual int getFieldLength(const char* name) const { return rs_->getFieldLength(name); }
 
-    virtual int getTypeOID(int index) const
-    {
-        return rs_->getTypeOID(index);
-    }
+    virtual int getTypeOID(int index) const { return rs_->getTypeOID(index); }
 
-    virtual int getTypeOID(const char* name) const
-    {
-        return rs_->getTypeOID(name);
-    }
+    virtual int getTypeOID(const char* name) const { return rs_->getTypeOID(name); }
 
-    virtual bool isNull(int index) const
-    {
-        return rs_->isNull(index);
-    }
+    virtual bool isNull(int index) const { return rs_->isNull(index); }
 
-    virtual const char* getValue(int index) const
-    {
-        return rs_->getValue(index);
-    }
+    virtual const char* getValue(int index) const { return rs_->getValue(index); }
 
-    virtual const char* getValue(const char* name) const
-    {
-        return rs_->getValue(name);
-    }
+    virtual const char* getValue(const char* name) const { return rs_->getValue(name); }
 
-private:
+  private:
     void getNextResultSet()
     {
         std::ostringstream s;
@@ -132,7 +107,8 @@ private:
         rs_ = conn_->executeQuery(s.str());
         is_closed_ = false;
 
-        MAPNIK_LOG_DEBUG(postgis) << "postgis_cursor_resultset: FETCH result (" << cursorName_ << "): " << rs_->size() << " rows";
+        MAPNIK_LOG_DEBUG(postgis) << "postgis_cursor_resultset: FETCH result (" << cursorName_ << "): " << rs_->size()
+                                  << " rows";
     }
 
     std::shared_ptr<Connection> conn_;
@@ -140,8 +116,6 @@ private:
     std::shared_ptr<ResultSet> rs_;
     int fetch_size_;
     bool is_closed_;
-
-
 };
 
 #endif // POSTGIS_CURSORRESULTSET_HPP

@@ -26,51 +26,58 @@
 #include <ostream>
 #include <mapbox/variant.hpp>
 
-namespace mapbox { namespace util {
+namespace mapbox {
+namespace util {
 
 namespace detail {
 
 // operator<< helper
-template <typename Out>
+template<typename Out>
 class printer
 {
-public:
-    explicit printer(Out & out)
-        : out_(out) {}
+  public:
+    explicit printer(Out& out)
+        : out_(out)
+    {}
     printer& operator=(printer const&) = delete;
 
-// visitor
-    template <typename T>
+    // visitor
+    template<typename T>
     void operator()(T const& operand) const
     {
         out_ << operand;
     }
 
-/// specialized visitor for boolean
-    void operator()(bool const & val) const
+    /// specialized visitor for boolean
+    void operator()(bool const& val) const
     {
-        if (val) {
+        if (val)
+        {
             out_ << "true";
-        } else {
+        }
+        else
+        {
             out_ << "false";
         }
     }
-private:
-    Out & out_;
+
+  private:
+    Out& out_;
 };
 
 } // namespace detail
 
 // operator<<
-template <typename charT, typename traits, typename... Types>
-VARIANT_INLINE std::basic_ostream<charT, traits>&
-operator<< (std::basic_ostream<charT, traits>& out, variant<Types...> const& rhs)
+template<typename charT, typename traits, typename... Types>
+VARIANT_INLINE std::basic_ostream<charT, traits>& operator<<(std::basic_ostream<charT, traits>& out,
+                                                             variant<Types...> const& rhs)
 {
     detail::printer<std::basic_ostream<charT, traits>> visitor(out);
     mapnik::util::apply_visitor(visitor, rhs);
     return out;
 }
 
-}}
+} // namespace util
+} // namespace mapbox
 
 #endif // MAPNIK_UTIL_VARIANT_IO_HPP

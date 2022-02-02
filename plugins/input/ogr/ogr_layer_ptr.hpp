@@ -41,19 +41,15 @@ using gdal_dataset_type = OGRDataSource*;
 
 class ogr_layer_ptr
 {
-public:
+  public:
     ogr_layer_ptr()
-        : datasource_(nullptr),
-          layer_(nullptr),
-          owns_layer_(false),
-          is_valid_(false)
-    {
-    }
+        : datasource_(nullptr)
+        , layer_(nullptr)
+        , owns_layer_(false)
+        , is_valid_(false)
+    {}
 
-    ~ogr_layer_ptr()
-    {
-        free_layer();
-    }
+    ~ogr_layer_ptr() { free_layer(); }
 
     void free_layer()
     {
@@ -69,8 +65,7 @@ public:
         is_valid_ = false;
     }
 
-    void layer_by_name(gdal_dataset_type const datasource,
-                       std::string const& layer_name)
+    void layer_by_name(gdal_dataset_type const datasource, std::string const& layer_name)
     {
         free_layer();
 
@@ -91,8 +86,7 @@ public:
 #endif
     }
 
-    void layer_by_index(gdal_dataset_type const datasource,
-                        int layer_index)
+    void layer_by_index(gdal_dataset_type const datasource, int layer_index)
     {
         free_layer();
 
@@ -117,8 +111,7 @@ public:
 #endif
     }
 
-    void layer_by_sql(gdal_dataset_type const datasource,
-                      std::string const& layer_sql)
+    void layer_by_sql(gdal_dataset_type const datasource, std::string const& layer_sql)
     {
         free_layer();
 
@@ -151,27 +144,18 @@ public:
 #endif
     }
 
-    std::string const& layer_name() const
-    {
-        return layer_name_;
-    }
+    std::string const& layer_name() const { return layer_name_; }
 
-    OGRLayer* layer() const
-    {
-        return layer_;
-    }
+    OGRLayer* layer() const { return layer_; }
 
-    bool is_valid() const
-    {
-        return is_valid_;
-    }
+    bool is_valid() const { return is_valid_; }
 
-private:
+  private:
 
 #ifdef MAPNIK_LOG
     void debug_print_last_error()
     {
-        if (! is_valid_)
+        if (!is_valid_)
         {
             const std::string err = CPLGetLastErrorMsg();
             if (err.size() == 0)

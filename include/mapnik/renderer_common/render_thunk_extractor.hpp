@@ -57,12 +57,12 @@ struct virtual_renderer_common : renderer_common
 
 struct render_thunk_extractor
 {
-    render_thunk_extractor(box2d<double> & box,
-                           render_thunk_list & thunks,
-                           feature_impl & feature,
+    render_thunk_extractor(box2d<double>& box,
+                           render_thunk_list& thunks,
+                           feature_impl& feature,
                            attributes const& vars,
                            proj_transform const& prj_trans,
-                           virtual_renderer_common & common,
+                           virtual_renderer_common& common,
                            box2d<double> const& clipping_extent);
 
     void operator()(markers_symbolizer const& sym) const;
@@ -71,22 +71,21 @@ struct render_thunk_extractor
 
     void operator()(shield_symbolizer const& sym) const;
 
-    template <typename T>
-    void operator()(T const& ) const
+    template<typename T>
+    void operator()(T const&) const
     {
         // TODO: warning if unimplemented?
     }
 
-private:
-    void extract_text_thunk(text_render_thunk::helper_ptr && helper,
-                            text_symbolizer const& sym) const;
+  private:
+    void extract_text_thunk(text_render_thunk::helper_ptr&& helper, text_symbolizer const& sym) const;
 
-    box2d<double> & box_;
-    render_thunk_list & thunks_;
-    feature_impl & feature_;
+    box2d<double>& box_;
+    render_thunk_list& thunks_;
+    feature_impl& feature_;
     attributes const& vars_;
     proj_transform const& prj_trans_;
-    virtual_renderer_common & common_;
+    virtual_renderer_common& common_;
     box2d<double> clipping_extent_;
 
     void update_box() const;

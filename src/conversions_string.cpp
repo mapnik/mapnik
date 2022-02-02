@@ -42,7 +42,8 @@ MAPNIK_DISABLE_WARNING_POP
 #define snprintf _snprintf
 #endif
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 using namespace boost::spirit;
 
@@ -160,4 +161,4 @@ bool to_string(std::string& s, bool val)
 #endif
 
 } // end namespace util
-}
+} // namespace mapnik

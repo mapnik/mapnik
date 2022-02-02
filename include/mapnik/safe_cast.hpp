@@ -39,105 +39,113 @@ struct numeric_compare_same_sign
 {
     using sizeup = typename std::conditional<sizeof(T) >= sizeof(S), T, S>::type;
 
-    static inline bool less(T t, S s) {
-        return static_cast<sizeup>(t) < static_cast<sizeup>(s);
-    }
+    static inline bool less(T t, S s) { return static_cast<sizeup>(t) < static_cast<sizeup>(s); }
 
-    static inline bool greater(T t, S s) {
-        return static_cast<sizeup>(t) > static_cast<sizeup>(s);
-    }
+    static inline bool greater(T t, S s) { return static_cast<sizeup>(t) > static_cast<sizeup>(s); }
 };
 
 template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<!std::is_floating_point<T>::value && !std::is_floating_point<S>::value &&
-                                                   ((std::is_unsigned<T>::value && std::is_unsigned<S>::value)
-                                                    || (std::is_signed<T>::value && std::is_signed<S>::value))>
-    ::type> : numeric_compare_same_sign<T,S>
+struct numeric_compare<T,
+                       S,
+                       typename std::enable_if<!std::is_floating_point<T>::value && !std::is_floating_point<S>::value &&
+                                               ((std::is_unsigned<T>::value && std::is_unsigned<S>::value) ||
+                                                (std::is_signed<T>::value && std::is_signed<S>::value))>::type>
+    : numeric_compare_same_sign<T, S>
 {};
 
-
 template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<!std::is_floating_point<T>::value && !std::is_floating_point<S>::value &&
-                                                   std::is_integral<T>::value && std::is_signed<T>::value && std::is_unsigned<S>::value>::type>
+struct numeric_compare<
+  T,
+  S,
+  typename std::enable_if<!std::is_floating_point<T>::value && !std::is_floating_point<S>::value &&
+                          std::is_integral<T>::value && std::is_signed<T>::value && std::is_unsigned<S>::value>::type>
 {
-    static inline bool less(T t, S s) {
+    static inline bool less(T t, S s)
+    {
         return (t < static_cast<T>(0)) ? true : static_cast<std::uint64_t>(t) < static_cast<std::uint64_t>(s);
     }
 
-    static inline bool greater(T t, S s) {
+    static inline bool greater(T t, S s)
+    {
         return (t < static_cast<T>(0)) ? false : static_cast<std::uint64_t>(t) > static_cast<std::uint64_t>(s);
     }
 };
 
 template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<!std::is_floating_point<T>::value && !std::is_floating_point<S>::value &&
-                                                   std::is_integral<T>::value && std::is_unsigned<T>::value && std::is_signed<S>::value>::type>
+struct numeric_compare<
+  T,
+  S,
+  typename std::enable_if<!std::is_floating_point<T>::value && !std::is_floating_point<S>::value &&
+                          std::is_integral<T>::value && std::is_unsigned<T>::value && std::is_signed<S>::value>::type>
 {
-    static inline bool less(T t, S s) {
+    static inline bool less(T t, S s)
+    {
         return (s < static_cast<S>(0)) ? false : static_cast<std::uint64_t>(t) < static_cast<std::uint64_t>(s);
     }
 
-    static inline bool greater(T t, S s) {
+    static inline bool greater(T t, S s)
+    {
         return (s < static_cast<S>(0)) ? true : static_cast<std::uint64_t>(t) > static_cast<std::uint64_t>(s);
     }
 };
 
 template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<std::is_floating_point<T>::value && std::is_floating_point<S>::value>::type>
+struct numeric_compare<
+  T,
+  S,
+  typename std::enable_if<std::is_floating_point<T>::value && std::is_floating_point<S>::value>::type>
 {
-    static inline bool less(T t, S s) {
-        return t < s;
-    }
+    static inline bool less(T t, S s) { return t < s; }
 
-    static inline bool greater(T t, S s) {
-        return t > s;
-    }
+    static inline bool greater(T t, S s) { return t > s; }
 };
 
 template<typename T, typename S>
-struct numeric_compare<T,S,typename std::enable_if<
-        (std::is_floating_point<T>::value && std::is_integral<S>::value) ||
-        (std::is_integral<T>::value && std::is_floating_point<S>::value)>::type>
+struct numeric_compare<T,
+                       S,
+                       typename std::enable_if<(std::is_floating_point<T>::value && std::is_integral<S>::value) ||
+                                               (std::is_integral<T>::value && std::is_floating_point<S>::value)>::type>
 {
-    static inline bool less(T t, S s) {
-        return numeric_compare<double,double>::less(static_cast<double>(t),static_cast<double>(s));
+    static inline bool less(T t, S s)
+    {
+        return numeric_compare<double, double>::less(static_cast<double>(t), static_cast<double>(s));
     }
 
-    static inline bool greater(T t, S s) {
-        return numeric_compare<double,double>::greater(static_cast<double>(t),static_cast<double>(s));
+    static inline bool greater(T t, S s)
+    {
+        return numeric_compare<double, double>::greater(static_cast<double>(t), static_cast<double>(s));
     }
 };
 
 // floats
-template <typename T, typename Enable = void>
+template<typename T, typename Enable = void>
 struct bounds
 {
-    static const T lowest() { return static_cast<T>(-std::numeric_limits<T>::max());}
-    static const T highest() { return std::numeric_limits<T>::max();}
+    static const T lowest() { return static_cast<T>(-std::numeric_limits<T>::max()); }
+    static const T highest() { return std::numeric_limits<T>::max(); }
 };
 
 // integers
-template <typename T>
-struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::type >
+template<typename T>
+struct bounds<T, typename std::enable_if<std::numeric_limits<T>::is_integer>::type>
 {
-    static const T lowest() { return std::numeric_limits<T>::min();}
-    static const T highest() { return std::numeric_limits<T>::max();}
+    static const T lowest() { return std::numeric_limits<T>::min(); }
+    static const T highest() { return std::numeric_limits<T>::max(); }
 };
 
-} // ns detail
+} // namespace detail
 
-
-template <typename T, typename S>
+template<typename T, typename S>
 inline T safe_cast(S s)
 {
     static const auto max_val = detail::bounds<T>::highest();
     static const auto min_val = detail::bounds<T>::lowest();
 
-    if (detail::numeric_compare<S,T>::greater(s,max_val))
+    if (detail::numeric_compare<S, T>::greater(s, max_val))
     {
         return max_val;
     }
-    else if (detail::numeric_compare<S,T>::less(s,min_val))
+    else if (detail::numeric_compare<S, T>::less(s, min_val))
     {
         return min_val;
     }
@@ -147,8 +155,6 @@ inline T safe_cast(S s)
     }
 }
 
-} // ns mapnik
-
-
+} // namespace mapnik
 
 #endif // MAPNIK_SAFE_CAST_HPP

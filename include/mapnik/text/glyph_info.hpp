@@ -22,7 +22,7 @@
 #ifndef MAPNIK_GLYPH_INFO_HPP
 #define MAPNIK_GLYPH_INFO_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/util/noncopyable.hpp>
@@ -30,38 +30,39 @@
 #include <memory>
 #include <cmath>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class font_face;
 using face_ptr = std::shared_ptr<font_face>;
 
 struct glyph_info : util::noncopyable
 {
-    glyph_info(unsigned g_index,
-               unsigned c_index,
-               evaluated_format_properties_ptr const& f)
-        : glyph_index(g_index),
-          char_index(c_index),
-          format(f),
-          face(nullptr),
-          unscaled_ymin(0.0),
-          unscaled_ymax(0.0),
-          unscaled_advance(0.0),
-          unscaled_line_height(0.0),
-          scale_multiplier(1.0),
-          offset() {}
-    glyph_info(glyph_info && rhs)
-        : glyph_index(std::move(rhs.glyph_index)),
-          char_index(std::move(rhs.char_index)),
-          format(rhs.format), // take ref
-          face(std::move(rhs.face)), // shared_ptr move just ref counts, right?
-          unscaled_ymin(std::move(rhs.unscaled_ymin)),
-          unscaled_ymax(std::move(rhs.unscaled_ymax)),
-          unscaled_advance(std::move(rhs.unscaled_advance)),
-          unscaled_line_height(std::move(rhs.unscaled_line_height)),
-          scale_multiplier(std::move(rhs.scale_multiplier)),
-          offset(std::move(rhs.offset)) {}
+    glyph_info(unsigned g_index, unsigned c_index, evaluated_format_properties_ptr const& f)
+        : glyph_index(g_index)
+        , char_index(c_index)
+        , format(f)
+        , face(nullptr)
+        , unscaled_ymin(0.0)
+        , unscaled_ymax(0.0)
+        , unscaled_advance(0.0)
+        , unscaled_line_height(0.0)
+        , scale_multiplier(1.0)
+        , offset()
+    {}
+    glyph_info(glyph_info&& rhs)
+        : glyph_index(std::move(rhs.glyph_index))
+        , char_index(std::move(rhs.char_index))
+        , format(rhs.format)
+        , // take ref
+        face(std::move(rhs.face))
+        , // shared_ptr move just ref counts, right?
+        unscaled_ymin(std::move(rhs.unscaled_ymin))
+        , unscaled_ymax(std::move(rhs.unscaled_ymax))
+        , unscaled_advance(std::move(rhs.unscaled_advance))
+        , unscaled_line_height(std::move(rhs.unscaled_line_height))
+        , scale_multiplier(std::move(rhs.scale_multiplier))
+        , offset(std::move(rhs.offset))
+    {}
 
     unsigned glyph_index;
     // Position in the string of all characters i.e. before itemizing
@@ -84,6 +85,6 @@ struct glyph_info : util::noncopyable
     double line_height() const { return unscaled_line_height * scale_multiplier; };
 };
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // GLYPH_INFO_HPP

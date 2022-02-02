@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 // mapnik
 #include <mapnik/wkb.hpp>
 #include <mapnik/geometry.hpp>
@@ -28,12 +27,13 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <cmath>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
 struct twkb_reader : mapnik::util::noncopyable
 {
-private:
-    const char *twkb_;
+  private:
+    const char* twkb_;
     size_t size_;
     unsigned int pos_;
     // Metadata on the geometry we are parsing
@@ -54,9 +54,8 @@ private:
     int64_t coord_z_;
     int64_t coord_m_;
 
-public:
-    enum twkbGeometryType : std::uint8_t
-    {
+  public:
+    enum twkbGeometryType : std::uint8_t {
         twkbPoint = 1,
         twkbLineString = 2,
         twkbPolygon = 3,
@@ -67,16 +66,28 @@ public:
     };
 
     twkb_reader(char const* twkb, size_t size)
-        : twkb_(twkb), size_(size), pos_(0), twkb_type_(0), // Geometry type
-          has_bbox_(0),                                     // Bounding box?
-          has_size_(0),                                     // Size attribute?
-          has_idlist_(0),                                   // Presence of X/Y
-          has_z_(0),                                        // Presence of Z
-          has_m_(0),                                        // Presence of M
-          is_empty_(0),                                     // Empty?
-          factor_xy_(0.0), // Expansion factor for X/Y
-          factor_z_(0.0),  // Expansion factor for Z
-          factor_m_(0.0)   // Expansion factor for M
+        : twkb_(twkb)
+        , size_(size)
+        , pos_(0)
+        , twkb_type_(0)
+        , // Geometry type
+        has_bbox_(0)
+        , // Bounding box?
+        has_size_(0)
+        , // Size attribute?
+        has_idlist_(0)
+        , // Presence of X/Y
+        has_z_(0)
+        , // Presence of Z
+        has_m_(0)
+        , // Presence of M
+        is_empty_(0)
+        , // Empty?
+        factor_xy_(0.0)
+        , // Expansion factor for X/Y
+        factor_z_(0.0)
+        ,              // Expansion factor for Z
+        factor_m_(0.0) // Expansion factor for M
     {}
 
     mapnik::geometry::geometry<double> read()
@@ -102,37 +113,38 @@ public:
             size_ = read_unsigned_integer();
 
         // Read the [optional] bounding box information
-        if (has_bbox_) read_bbox();
+        if (has_bbox_)
+            read_bbox();
 
         switch (twkb_type_)
         {
-        case twkbPoint:
-            geom = read_point();
-            break;
-        case twkbLineString:
-            geom = read_linestring();
-            break;
-        case twkbPolygon:
-            geom = read_polygon();
-            break;
-        case twkbMultiPoint:
-            geom = read_multipoint();
-            break;
-        case twkbMultiLineString:
-            geom = read_multilinestring();
-            break;
-        case twkbMultiPolygon:
-            geom = read_multipolygon();
-            break;
-        case twkbGeometryCollection:
-            geom = read_collection();
-        default:
-            break;
+            case twkbPoint:
+                geom = read_point();
+                break;
+            case twkbLineString:
+                geom = read_linestring();
+                break;
+            case twkbPolygon:
+                geom = read_polygon();
+                break;
+            case twkbMultiPoint:
+                geom = read_multipoint();
+                break;
+            case twkbMultiLineString:
+                geom = read_multilinestring();
+                break;
+            case twkbMultiPolygon:
+                geom = read_multipolygon();
+                break;
+            case twkbGeometryCollection:
+                geom = read_collection();
+            default:
+                break;
         }
         return geom;
     }
 
-private:
+  private:
     int64_t unzigzag64(uint64_t val)
     {
         if (val & 0x01)
@@ -143,14 +155,18 @@ private:
 
     int32_t unzigzag32(uint32_t val)
     {
-        if (val & 0x01) return -1 * (int32_t)((val + 1) >> 1);
-        else return (int32_t)(val >> 1);
+        if (val & 0x01)
+            return -1 * (int32_t)((val + 1) >> 1);
+        else
+            return (int32_t)(val >> 1);
     }
 
     int8_t unzigzag8(uint8_t val)
     {
-        if (val & 0x01) return -1 * (int8_t)((val + 1) >> 1);
-        else return (int8_t)(val >> 1);
+        if (val & 0x01)
+            return -1 * (int8_t)((val + 1) >> 1);
+        else
+            return (int8_t)(val >> 1);
     }
 
     // Read from signed 64bit varint
@@ -176,7 +192,8 @@ private:
             // move the cursor in the resulting variable (7 bits)
             nShift += 7;
             // Hibit isn't set, so this is the last byte
-            if (!(nByte & 0x80)) {
+            if (!(nByte & 0x80))
+            {
                 return nVal;
             }
         }
@@ -258,17 +275,19 @@ private:
         }
     }
 
-    template <typename Ring>
-    void read_coords(Ring & ring, std::size_t num_points)
+    template<typename Ring>
+    void read_coords(Ring& ring, std::size_t num_points)
     {
         for (std::size_t i = 0; i < num_points; ++i)
         {
             coord_x_ += read_signed_integer();
             coord_y_ += read_signed_integer();
-            ring.emplace_back( coord_x_ / factor_xy_, coord_y_ / factor_xy_);
+            ring.emplace_back(coord_x_ / factor_xy_, coord_y_ / factor_xy_);
             // Skip Z and M
-            if (has_z_) coord_z_ += read_signed_integer();
-            if (has_m_) coord_m_ += read_signed_integer();
+            if (has_z_)
+                coord_z_ += read_signed_integer();
+            if (has_m_)
+                coord_m_ += read_signed_integer();
         }
     }
 
@@ -285,7 +304,8 @@ private:
     {
         mapnik::geometry::multi_point<double> multi_point;
         unsigned int num_points = read_unsigned_integer();
-        if (has_idlist_) read_idlist(num_points);
+        if (has_idlist_)
+            read_idlist(num_points);
 
         if (num_points > 0)
         {
@@ -314,7 +334,8 @@ private:
     {
         mapnik::geometry::multi_line_string<double> multi_line;
         unsigned int num_lines = read_unsigned_integer();
-        if (has_idlist_) read_idlist(num_lines);
+        if (has_idlist_)
+            read_idlist(num_lines);
         multi_line.reserve(num_lines);
         for (unsigned int i = 0; i < num_lines; ++i)
         {
@@ -346,7 +367,8 @@ private:
     {
         mapnik::geometry::multi_polygon<double> multi_poly;
         unsigned int num_polys = read_unsigned_integer();
-        if (has_idlist_) read_idlist(num_polys);
+        if (has_idlist_)
+            read_idlist(num_polys);
         for (unsigned int i = 0; i < num_polys; ++i)
         {
             multi_poly.push_back(read_polygon());
@@ -358,7 +380,8 @@ private:
     {
         unsigned int num_geometries = read_unsigned_integer();
         mapnik::geometry::geometry_collection<double> collection;
-        if (has_idlist_) read_idlist(num_geometries);
+        if (has_idlist_)
+            read_idlist(num_geometries);
         for (unsigned int i = 0; i < num_geometries; ++i)
         {
             collection.push_back(read());

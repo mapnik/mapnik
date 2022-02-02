@@ -30,7 +30,7 @@
 
 namespace mapnik {
 
-bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double> & geom);
+bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double>& geom);
 
 }
 

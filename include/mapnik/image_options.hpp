@@ -32,17 +32,19 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-
 namespace mapnik {
 
-using image_options_map = std::map<std::string, boost::optional<std::string> >;
-inline std::string to_string(boost::optional<std::string> const& val) { return val ? *val : "<unitialised>";}
+using image_options_map = std::map<std::string, boost::optional<std::string>>;
+inline std::string to_string(boost::optional<std::string> const& val)
+{
+    return val ? *val : "<unitialised>";
+}
 image_options_map parse_image_options(std::string const& options);
 
 #if defined(HAVE_PNG)
 int parse_png_filters(std::string const& str);
 #endif
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_OPTIONS_HPP

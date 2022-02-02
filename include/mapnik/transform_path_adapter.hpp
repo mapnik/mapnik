@@ -29,25 +29,25 @@
 
 #include <cstddef>
 
-namespace mapnik  {
+namespace mapnik {
 
-template <typename Transform, typename Geometry>
+template<typename Transform, typename Geometry>
 struct transform_path_adapter
 {
     // SFINAE value_type detector
-    template <typename T>
+    template<typename T>
     struct void_type
     {
         using type = void;
     };
 
-    template <typename T, typename D, typename _ = void>
+    template<typename T, typename D, typename _ = void>
     struct select_value_type
     {
         using type = D;
     };
 
-    template <typename T, typename D>
+    template<typename T, typename D>
     struct select_value_type<T, D, typename void_type<typename T::value_type>::type>
     {
         using type = typename T::value_type;
@@ -56,43 +56,38 @@ struct transform_path_adapter
     using size_type = std::size_t;
     using value_type = typename select_value_type<Geometry, void>::type;
 
-    transform_path_adapter(Transform const& _t,
-                           Geometry & _geom,
-                           proj_transform const& prj_trans)
-        : t_(&_t),
-          geom_(_geom),
-          prj_trans_(&prj_trans)  {}
+    transform_path_adapter(Transform const& _t, Geometry& _geom, proj_transform const& prj_trans)
+        : t_(&_t)
+        , geom_(_geom)
+        , prj_trans_(&prj_trans)
+    {}
 
-    explicit transform_path_adapter(Geometry & _geom)
-        : t_(0),
-          geom_(_geom),
-          prj_trans_(0)  {}
+    explicit transform_path_adapter(Geometry& _geom)
+        : t_(0)
+        , geom_(_geom)
+        , prj_trans_(0)
+    {}
 
-    void set_proj_trans(proj_transform const& prj_trans)
-    {
-        prj_trans_ = &prj_trans;
-    }
+    void set_proj_trans(proj_transform const& prj_trans) { prj_trans_ = &prj_trans; }
 
-    void set_trans(Transform  const& t)
-    {
-        t_ = &t;
-    }
+    void set_trans(Transform const& t) { t_ = &t; }
 
-    unsigned vertex(double *x, double *y) const
+    unsigned vertex(double* x, double* y) const
     {
         unsigned command;
         bool ok = false;
         bool skipped_points = false;
         while (!ok)
         {
-            command = geom_.vertex(x,y);
+            command = geom_.vertex(x, y);
             if (command == SEG_END || command == SEG_CLOSE)
             {
                 return command;
             }
-            double z=0;
+            double z = 0;
             ok = prj_trans_->backward(*x, *y, z);
-            if (!ok) {
+            if (!ok)
+            {
                 skipped_points = true;
             }
         }
@@ -100,33 +95,22 @@ struct transform_path_adapter
         {
             command = SEG_MOVETO;
         }
-        t_->forward(x,y);
+        t_->forward(x, y);
         return command;
     }
 
-    void rewind(unsigned pos) const
-    {
-        geom_.rewind(pos);
-    }
+    void rewind(unsigned pos) const { geom_.rewind(pos); }
 
-    unsigned type() const
-    {
-        return static_cast<unsigned>(geom_.type());
-    }
+    unsigned type() const { return static_cast<unsigned>(geom_.type()); }
 
-    Geometry const& geom() const
-    {
-        return geom_;
-    }
+    Geometry const& geom() const { return geom_; }
 
-private:
+  private:
     Transform const* t_;
-    Geometry & geom_;
+    Geometry& geom_;
     proj_transform const* prj_trans_;
 };
 
-
-}
-
+} // namespace mapnik
 
 #endif // MAPNIK_TRANSFORM_PATH_ADAPTER_HPP

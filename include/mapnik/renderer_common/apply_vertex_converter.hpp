@@ -23,22 +23,26 @@
 #ifndef MAPNIK_APPLY_VERTEX_ADAPTER_HPP
 #define MAPNIK_APPLY_VERTEX_ADAPTER_HPP
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename VertexConverter, typename Processor>
+template<typename VertexConverter, typename Processor>
 struct apply_vertex_converter
 {
-    apply_vertex_converter(VertexConverter & converter, Processor & proc)
-        : converter_(converter), proc_(proc) {}
-    template <typename Adapter>
-    void operator() (Adapter const& adapter)
+    apply_vertex_converter(VertexConverter& converter, Processor& proc)
+        : converter_(converter)
+        , proc_(proc)
+    {}
+    template<typename Adapter>
+    void operator()(Adapter const& adapter)
     {
         converter_.apply(adapter, proc_);
     }
-    VertexConverter & converter_;
-    Processor & proc_;
+    VertexConverter& converter_;
+    Processor& proc_;
 };
 
-}}
+} // namespace detail
+} // namespace mapnik
 
 #endif // MAPNIK_APPLY_VERTEX_ADAPTER_HPP

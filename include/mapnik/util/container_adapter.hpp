@@ -32,72 +32,74 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/include/support_container.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace boost { namespace spirit { namespace traits {
+namespace boost {
+namespace spirit {
+namespace traits {
 
-template <>
-struct is_container<mapnik::path_type const> : mpl::true_ {} ;
+template<>
+struct is_container<mapnik::path_type const> : mpl::true_
+{};
 
-template <>
-struct is_container<mapnik::vertex_adapter const> : mpl::true_ {} ;
+template<>
+struct is_container<mapnik::vertex_adapter const> : mpl::true_
+{};
 
 // make gcc and darwin toolsets happy.
 // FIXME
-//template <>
-//struct is_container<mapnik::geometry_container const> : mpl::false_ {} ;
+// template <>
+// struct is_container<mapnik::geometry_container const> : mpl::false_ {} ;
 
 //
-template <>
+template<>
 struct container_iterator<mapnik::path_type const>
 {
     using type = mapnik::util::path_iterator<mapnik::path_type>;
 };
 
-template <>
+template<>
 struct container_iterator<mapnik::vertex_adapter const>
 {
     using type = mapnik::util::path_iterator<mapnik::vertex_adapter>;
 };
 
-template <>
+template<>
 struct begin_container<mapnik::path_type const>
 {
-    static mapnik::util::path_iterator<mapnik::path_type>
-    call (mapnik::path_type const& p)
+    static mapnik::util::path_iterator<mapnik::path_type> call(mapnik::path_type const& p)
     {
         return mapnik::util::path_iterator<mapnik::path_type>(p);
     }
 };
 
-template <>
+template<>
 struct begin_container<mapnik::vertex_adapter const>
 {
-    static mapnik::util::path_iterator<mapnik::vertex_adapter>
-    call (mapnik::vertex_adapter const& p)
+    static mapnik::util::path_iterator<mapnik::vertex_adapter> call(mapnik::vertex_adapter const& p)
     {
         return mapnik::util::path_iterator<mapnik::vertex_adapter>(p);
     }
 };
 
-template <>
+template<>
 struct end_container<mapnik::path_type const>
 {
-    static mapnik::util::path_iterator<mapnik::path_type>
-    call (mapnik::path_type const&)
+    static mapnik::util::path_iterator<mapnik::path_type> call(mapnik::path_type const&)
     {
         return mapnik::util::path_iterator<mapnik::path_type>();
     }
 };
 
-template <>
+template<>
 struct end_container<mapnik::vertex_adapter const>
 {
-    static mapnik::util::path_iterator<mapnik::vertex_adapter>
-    call (mapnik::vertex_adapter const&)
+    static mapnik::util::path_iterator<mapnik::vertex_adapter> call(mapnik::vertex_adapter const&)
     {
         return mapnik::util::path_iterator<mapnik::vertex_adapter>();
     }
 };
 
-}}}
+} // namespace traits
+} // namespace spirit
+} // namespace boost
 
 #endif // CONTAINER_ADAPTER_HPP

@@ -24,8 +24,8 @@
 #define MAPNIK_RENDERER_COMMON_RENDER_THUNK_HPP
 
 // mapnik
-#include <mapnik/image_compositing.hpp> // composite_mode_e
-#include <mapnik/marker.hpp> // svg_attribute_type, svg_path_ptr
+#include <mapnik/image_compositing.hpp>       // composite_mode_e
+#include <mapnik/marker.hpp>                  // svg_attribute_type, svg_path_ptr
 #include <mapnik/symbolizer_enumerations.hpp> // halo_rasterizer_enum
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
@@ -56,8 +56,12 @@ struct vector_marker_render_thunk : util::movable
                                double opacity,
                                composite_mode_e comp_op,
                                bool snap_to_pixels)
-        : src_(src), attrs_(attrs), tr_(marker_trans), opacity_(opacity),
-          comp_op_(comp_op), snap_to_pixels_(snap_to_pixels)
+        : src_(src)
+        , attrs_(attrs)
+        , tr_(marker_trans)
+        , opacity_(opacity)
+        , comp_op_(comp_op)
+        , snap_to_pixels_(snap_to_pixels)
     {}
 };
 
@@ -74,8 +78,11 @@ struct raster_marker_render_thunk : util::movable
                                double opacity,
                                composite_mode_e comp_op,
                                bool snap_to_pixels)
-        : src_(src), tr_(marker_trans), opacity_(opacity), comp_op_(comp_op),
-          snap_to_pixels_(snap_to_pixels)
+        : src_(src)
+        , tr_(marker_trans)
+        , opacity_(opacity)
+        , comp_op_(comp_op)
+        , snap_to_pixels_(snap_to_pixels)
     {}
 };
 
@@ -90,23 +97,22 @@ struct text_render_thunk : util::movable
     composite_mode_e comp_op_;
     halo_rasterizer_enum halo_rasterizer_;
 
-    text_render_thunk(helper_ptr && helper,
-                      double opacity, composite_mode_e comp_op,
+    text_render_thunk(helper_ptr&& helper,
+                      double opacity,
+                      composite_mode_e comp_op,
                       halo_rasterizer_enum halo_rasterizer)
-        : helper_(std::move(helper)),
-          placements_(helper_->get()),
-          opacity_(opacity),
-          comp_op_(comp_op),
-          halo_rasterizer_(halo_rasterizer)
+        : helper_(std::move(helper))
+        , placements_(helper_->get())
+        , opacity_(opacity)
+        , comp_op_(comp_op)
+        , halo_rasterizer_(halo_rasterizer)
     {}
 };
 
 // Variant type for render thunks to allow us to re-render them
 // via a static visitor later.
 
-using render_thunk = util::variant<vector_marker_render_thunk,
-                                   raster_marker_render_thunk,
-                                   text_render_thunk>;
+using render_thunk = util::variant<vector_marker_render_thunk, raster_marker_render_thunk, text_render_thunk>;
 using render_thunk_list = std::list<render_thunk>;
 
 } // namespace mapnik

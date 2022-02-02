@@ -54,61 +54,39 @@ DATASOURCE_PLUGIN_EMPTY_INIT(geobuf_datasource_plugin);
 
 struct attr_value_converter
 {
-    mapnik::eAttributeType operator() (mapnik::value_integer) const
-    {
-        return mapnik::Integer;
-    }
+    mapnik::eAttributeType operator()(mapnik::value_integer) const { return mapnik::Integer; }
 
-    mapnik::eAttributeType operator() (double) const
-    {
-        return mapnik::Double;
-    }
+    mapnik::eAttributeType operator()(double) const { return mapnik::Double; }
 
-    mapnik::eAttributeType operator() (float) const
-    {
-        return mapnik::Double;
-    }
+    mapnik::eAttributeType operator()(float) const { return mapnik::Double; }
 
-    mapnik::eAttributeType operator() (bool) const
-    {
-        return mapnik::Boolean;
-    }
+    mapnik::eAttributeType operator()(bool) const { return mapnik::Boolean; }
 
-    mapnik::eAttributeType operator() (std::string const& ) const
-    {
-        return mapnik::String;
-    }
+    mapnik::eAttributeType operator()(std::string const&) const { return mapnik::String; }
 
-    mapnik::eAttributeType operator() (mapnik::value_unicode_string const&) const
-    {
-        return mapnik::String;
-    }
+    mapnik::eAttributeType operator()(mapnik::value_unicode_string const&) const { return mapnik::String; }
 
-    mapnik::eAttributeType operator() (mapnik::value_null const& ) const
-    {
-        return mapnik::String;
-    }
+    mapnik::eAttributeType operator()(mapnik::value_null const&) const { return mapnik::String; }
 };
 
 geobuf_datasource::geobuf_datasource(parameters const& params)
-    : datasource(params),
-      type_(datasource::Vector),
-      desc_(geobuf_datasource::name(),
-            *params.get<std::string>("encoding","utf-8")),
-      filename_(),
-      extent_(),
-      features_(),
-      tree_(nullptr)
+    : datasource(params)
+    , type_(datasource::Vector)
+    , desc_(geobuf_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
+    , filename_()
+    , extent_()
+    , features_()
+    , tree_(nullptr)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw mapnik::datasource_exception("Geobuf Plugin: missing <file> parameter");
+    if (!file)
+        throw mapnik::datasource_exception("Geobuf Plugin: missing <file> parameter");
 
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
         filename_ = *base + "/" + *file;
     else
         filename_ = *file;
-
 
     mapnik::util::file in(filename_);
     if (!in.is_open())
@@ -122,21 +100,18 @@ geobuf_datasource::geobuf_datasource(parameters const& params)
 }
 
 namespace {
-template <typename T>
+template<typename T>
 struct push_feature
 {
     using features_container = T;
-    push_feature(features_container & features)
-        : features_(features) {}
+    push_feature(features_container& features)
+        : features_(features)
+    {}
 
-    void operator() (mapnik::feature_ptr const& feature)
-    {
-        features_.push_back(feature);
-    }
-    features_container & features_;
+    void operator()(mapnik::feature_ptr const& feature) { features_.push_back(feature); }
+    features_container& features_;
 };
-}
-
+} // namespace
 
 void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
 {
@@ -144,7 +119,7 @@ void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
     push_feature_callback callback(features_);
     mapnik::util::geobuf<push_feature_callback> buf(data, size, callback);
     buf.read();
-    using values_container = std::vector< std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
+    using values_container = std::vector<std::pair<box_type, std::pair<std::size_t, std::size_t>>>;
     values_container values;
     values.reserve(features_.size());
     tree_ = std::make_unique<spatial_index_type>(values);
@@ -157,11 +132,11 @@ void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
             if (geometry_index == 0)
             {
                 extent_ = box;
-                for ( auto const& kv : *f)
+                for (auto const& kv : *f)
                 {
-                    desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(kv),
-                                                                      mapnik::util::apply_visitor(attr_value_converter(),
-                                                                                                  std::get<1>(kv))));
+                    desc_.add_descriptor(mapnik::attribute_descriptor(
+                      std::get<0>(kv),
+                      mapnik::util::apply_visitor(attr_value_converter(), std::get<1>(kv))));
                 }
             }
             else
@@ -178,7 +153,7 @@ void geobuf_datasource::parse_geobuf(char const* data, std::size_t size)
 
 geobuf_datasource::~geobuf_datasource() {}
 
-const char * geobuf_datasource::name()
+const char* geobuf_datasource::name()
 {
     return "geobuf";
 }
@@ -244,7 +219,7 @@ mapnik::featureset_ptr geobuf_datasource::features_at_point(mapnik::coord2d cons
     std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
     std::vector<mapnik::attribute_descriptor>::const_iterator itr = desc.begin();
     std::vector<mapnik::attribute_descriptor>::const_iterator end = desc.end();
-    for ( ;itr!=end;++itr)
+    for (; itr != end; ++itr)
     {
         q.add_property_name(itr->get_name());
     }

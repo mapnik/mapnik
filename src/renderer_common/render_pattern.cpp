@@ -41,11 +41,11 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <>
+template<>
 void render_pattern<image_rgba8>(marker_svg const& marker,
                                  agg::trans_affine const& tr,
                                  double opacity,
-                                 image_rgba8 & image)
+                                 image_rgba8& image)
 {
     using pixfmt = agg::pixfmt_rgba32_pre;
     using renderer_base = agg::renderer_base<pixfmt>;
@@ -53,8 +53,8 @@ void render_pattern<image_rgba8>(marker_svg const& marker,
     agg::scanline_u8 sl;
 
     mapnik::box2d<double> const& bbox = marker.bounding_box() * tr;
-    mapnik::coord<double,2> c = bbox.center();
-    agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
+    mapnik::coord<double, 2> c = bbox.center();
+    agg::trans_affine mtx = agg::trans_affine_translation(-c.x, -c.y);
     mtx.translate(0.5 * bbox.width(), 0.5 * bbox.height());
     mtx = tr * mtx;
 
@@ -64,10 +64,9 @@ void render_pattern<image_rgba8>(marker_svg const& marker,
 
     svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(marker.get_data()->source());
     svg_path_adapter svg_path(stl_storage);
-    svg::renderer_agg<svg_path_adapter,
-                      svg_attribute_type,
-                      renderer_solid,
-                      pixfmt> svg_renderer(svg_path, marker.get_data()->attributes());
+    svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_solid, pixfmt> svg_renderer(
+      svg_path,
+      marker.get_data()->attributes());
     rasterizer ras;
 
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);

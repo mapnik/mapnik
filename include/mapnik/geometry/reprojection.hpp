@@ -27,7 +27,6 @@
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/geometry.hpp>
 
-
 namespace mapnik {
 
 namespace geometry {
@@ -37,28 +36,27 @@ namespace geometry {
 // This is done this way so that large geometry collections that only have a few failing points or polygon parts could
 // still be return with out the few failing projections.
 
-template <typename T>
-MAPNIK_DECL geometry<T> reproject_copy(geometry<T> const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template<typename T>
+MAPNIK_DECL geometry<T> reproject_copy(geometry<T> const& geom, proj_transform const& proj_trans, unsigned int& n_err);
 
-template <typename T>
-MAPNIK_DECL T reproject_copy(T const& geom, proj_transform const& proj_trans, unsigned int & n_err);
+template<typename T>
+MAPNIK_DECL T reproject_copy(T const& geom, proj_transform const& proj_trans, unsigned int& n_err);
 
-template <typename T>
-MAPNIK_DECL T reproject_copy(T const& geom, projection const& source, projection const& dest, unsigned int & n_err);
-
+template<typename T>
+MAPNIK_DECL T reproject_copy(T const& geom, projection const& source, projection const& dest, unsigned int& n_err);
 
 // No error count is required for a non const reprojection and this will reproject in place.
 // because the reprojection is done on the same memory it is important to check if it succeeded,
 // otherwise you could be dealing with a corrupt geometry.
 
-template <typename T>
-MAPNIK_DECL bool reproject(T & geom, proj_transform const& proj_trans);
+template<typename T>
+MAPNIK_DECL bool reproject(T& geom, proj_transform const& proj_trans);
 
-template <typename T>
-MAPNIK_DECL bool reproject(T & geom, projection const& source, projection const& dest);
+template<typename T>
+MAPNIK_DECL bool reproject(T& geom, projection const& source, projection const& dest);
 
-} // end geometry ns
+} // namespace geometry
 
-} // end mapnik ns
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_REPROJECTION_HPP

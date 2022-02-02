@@ -34,14 +34,13 @@
 #include <string>
 #include <set>
 
-namespace mapnik
-{
+namespace mapnik {
 
 // fwd declare to reduce compile time
 using expression_ptr = std::shared_ptr<expr_node>;
 using expression_set = std::set<expression_ptr>;
 
-MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);
-}
+MAPNIK_DECL expression_ptr parse_expression(std::string const& wkt);
+} // namespace mapnik
 
 #endif // MAPNIK_EXPRESSION_HPP

@@ -34,25 +34,29 @@
 
 #include <mapnik/geometry/box2d.hpp>
 
-namespace visual_tests
-{
+namespace visual_tests {
 
 struct map_size
 {
-    map_size(std::size_t _width, std::size_t _height) : width(_width), height(_height) { }
-    map_size() { }
+    map_size(std::size_t _width, std::size_t _height)
+        : width(_width)
+        , height(_height)
+    {}
+    map_size() {}
     std::size_t width = 0;
     std::size_t height = 0;
 };
 
 struct config
 {
-    config() : status(true),
-               scales({ 1.0, 2.0 }),
-               sizes({ { 500, 100 } }),
-               tiles({ { 1, 1 } }),
-               bbox(),
-               ignored_renderers() { }
+    config()
+        : status(true)
+        , scales({1.0, 2.0})
+        , sizes({{500, 100}})
+        , tiles({{1, 1}})
+        , bbox()
+        , ignored_renderers()
+    {}
 
     bool status;
     std::vector<double> scales;
@@ -62,13 +66,7 @@ struct config
     std::set<std::string> ignored_renderers;
 };
 
-enum result_state : std::uint8_t
-{
-    STATE_OK,
-    STATE_FAIL,
-    STATE_ERROR,
-    STATE_OVERWRITE
-};
+enum result_state : std::uint8_t { STATE_OK, STATE_FAIL, STATE_ERROR, STATE_OVERWRITE };
 
 struct result
 {
@@ -87,6 +85,6 @@ struct result
 
 using result_list = std::vector<result>;
 
-}
+} // namespace visual_tests
 
 #endif

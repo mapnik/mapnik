@@ -27,15 +27,8 @@
 
 namespace mapnik {
 
-enum datasource_geometry_t : std::uint8_t {
-        Unknown = 0,
-        Point = 1,
-        LineString = 2,
-        Polygon = 3,
-        Collection = 4
-};
+enum datasource_geometry_t : std::uint8_t { Unknown = 0, Point = 1, LineString = 2, Polygon = 3, Collection = 4 };
 
 }
-
 
 #endif // MAPNIK_DATASOURCE_GEOMETRY_TYPE_HPP

@@ -23,25 +23,22 @@
 #ifndef MAPNIK_TRANSFORM_GRAMMAR_X3_DEF_HPP
 #define MAPNIK_TRANSFORM_GRAMMAR_X3_DEF_HPP
 
+#include <mapnik/expression_grammar_x3.hpp>
 #include <mapnik/transform/transform_expression.hpp>
 #include <mapnik/transform/transform_expression_grammar_x3.hpp>
-#include <mapnik/expression_grammar_x3.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <mapnik/warning_ignore.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 // skewX
-BOOST_FUSION_ADAPT_STRUCT(mapnik::skewX_node,
-                          (mapnik::expr_node, angle_))
+BOOST_FUSION_ADAPT_STRUCT(mapnik::skewX_node, (mapnik::expr_node, angle_))
 
 // skewY
-BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node,
-                          (mapnik::expr_node, angle_))
-
+BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node, (mapnik::expr_node, angle_))
 
 // Following specializations are required to avoid trasferring mapnik::skewX/Y nodes as underlying expressions
 //
@@ -53,23 +50,31 @@ BOOST_FUSION_ADAPT_STRUCT(mapnik::skewY_node,
 // }
 // which will fail to compile with latest (more strict) `mapbox::variant` (boost_1_61)
 
-namespace boost { namespace spirit { namespace x3 { namespace traits {
-template <>
-inline void move_to<mapnik::skewX_node, mapnik::detail::transform_node>(mapnik::skewX_node && src, mapnik::detail::transform_node& dst)
+namespace boost {
+namespace spirit {
+namespace x3 {
+namespace traits {
+template<>
+inline void move_to<mapnik::skewX_node, mapnik::detail::transform_node>(mapnik::skewX_node&& src,
+                                                                        mapnik::detail::transform_node& dst)
 {
     dst = std::move(src);
 }
 
-template <>
-inline void move_to<mapnik::skewY_node, mapnik::detail::transform_node>(mapnik::skewY_node && src, mapnik::detail::transform_node& dst)
+template<>
+inline void move_to<mapnik::skewY_node, mapnik::detail::transform_node>(mapnik::skewY_node&& src,
+                                                                        mapnik::detail::transform_node& dst)
 {
     dst = std::move(src);
 }
 
-}}}}
+} // namespace traits
+} // namespace x3
+} // namespace spirit
+} // namespace boost
 
-
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 namespace ascii = boost::spirit::x3::ascii;
@@ -82,17 +87,15 @@ namespace ascii = boost::spirit::x3::ascii;
 // separated by whitespace and/or a comma.
 
 using x3::double_;
-using x3::no_skip;
-using x3::no_case;
 using x3::lit;
+using x3::no_case;
+using x3::no_skip;
 
-auto const create_expr_node = [](auto const& ctx)
-{
+auto const create_expr_node = [](auto const& ctx) {
     _val(ctx) = _attr(ctx);
 };
 
-auto const construct_matrix = [] (auto const& ctx)
-{
+auto const construct_matrix = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
     auto const& a = boost::fusion::at<boost::mpl::int_<0>>(attr);
     auto const& b = boost::fusion::at<boost::mpl::int_<1>>(attr);
@@ -103,28 +106,25 @@ auto const construct_matrix = [] (auto const& ctx)
     _val(ctx) = mapnik::matrix_node(a, b, c, d, e, f);
 };
 
-auto const construct_translate = [](auto const& ctx)
-{
+auto const construct_translate = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
     auto const& dx = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& dy = boost::fusion::at<boost::mpl::int_<1>>(attr); //optional
+    auto const& dy = boost::fusion::at<boost::mpl::int_<1>>(attr); // optional
     _val(ctx) = mapnik::translate_node(dx, dy);
 };
 
-auto const construct_scale = [](auto const& ctx)
-{
+auto const construct_scale = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
     auto const& sx = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& sy = boost::fusion::at<boost::mpl::int_<1>>(attr); //optional
+    auto const& sy = boost::fusion::at<boost::mpl::int_<1>>(attr); // optional
     _val(ctx) = mapnik::scale_node(sx, sy);
 };
 
-auto const construct_rotate = [](auto const& ctx)
-{
+auto const construct_rotate = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
     auto const& a = boost::fusion::at<boost::mpl::int_<0>>(attr);
-    auto const& sx = boost::fusion::at<boost::mpl::int_<1>>(attr); //optional
-    auto const& sy = boost::fusion::at<boost::mpl::int_<2>>(attr); //optional
+    auto const& sx = boost::fusion::at<boost::mpl::int_<1>>(attr); // optional
+    auto const& sy = boost::fusion::at<boost::mpl::int_<2>>(attr); // optional
     _val(ctx) = mapnik::rotate_node(a, sx, sy);
 };
 
@@ -139,7 +139,7 @@ x3::rule<class skewX_node_class, mapnik::skewX_node> const skewX("skew X node");
 x3::rule<class skewY_node_class, mapnik::skewY_node> const skewY("skew Y node");
 x3::rule<class expr_tag, mapnik::expr_node> const expr("Expression");
 x3::rule<class sep_expr_tag, mapnik::expr_node> const sep_expr("Separated Expression");
-
+// clang-format off
 // start
 auto const transform_def = transform_list_rule;
 
@@ -195,20 +195,20 @@ auto const skewX_def = no_case[lit("skewX")]
 // skewY(<skew-angle>)
 auto const skewY_def = no_case[lit("skewY")]
     > '(' >  expr  > ')';
+// clang-format on
+BOOST_SPIRIT_DEFINE(expr,
+                    sep_expr,
+                    transform,
+                    transform_list_rule,
+                    transform_node_rule,
+                    matrix,
+                    translate,
+                    scale,
+                    rotate,
+                    skewX,
+                    skewY);
 
-BOOST_SPIRIT_DEFINE (
-    expr,
-    sep_expr,
-    transform,
-    transform_list_rule,
-    transform_node_rule,
-    matrix,
-    translate,
-    scale,
-    rotate,
-    skewX,
-    skewY);
-
-}} // ns
+} // namespace grammar
+} // namespace mapnik
 
 #endif

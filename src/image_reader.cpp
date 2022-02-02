@@ -25,8 +25,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/factory.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 inline boost::optional<std::string> type_from_bytes(char const* data, size_t size)
 {
@@ -44,7 +43,7 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
             return result_type("tiff");
         }
     }
-    if (size>=2)
+    if (size >= 2)
     {
         unsigned int magic = ((header[0] << 8) | header[1]) & 0xffff;
         if (magic == 0xffd8)
@@ -53,10 +52,10 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
         }
     }
 
-    if (size>=12)
+    if (size >= 12)
     {
-        if (header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F' &&
-            header[8] == 'W' && header[9] == 'E' && header[10] == 'B' && header[11] == 'P')
+        if (header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F' && header[8] == 'W' &&
+            header[9] == 'E' && header[10] == 'B' && header[11] == 'P')
         {
             return result_type("webp");
         }
@@ -68,14 +67,14 @@ image_reader* get_image_reader(char const* data, size_t size)
 {
     boost::optional<std::string> type = type_from_bytes(data, size);
     if (type)
-        return factory<image_reader,std::string,char const*,size_t>::instance().create_object(*type, data,size);
+        return factory<image_reader, std::string, char const*, size_t>::instance().create_object(*type, data, size);
     else
         throw image_reader_exception("image_reader: can't determine type from input data");
 }
 
-image_reader* get_image_reader(std::string const& filename,std::string const& type)
+image_reader* get_image_reader(std::string const& filename, std::string const& type)
 {
-    return factory<image_reader,std::string,std::string const&>::instance().create_object(type,filename);
+    return factory<image_reader, std::string, std::string const&>::instance().create_object(type, filename);
 }
 
 image_reader* get_image_reader(std::string const& filename)
@@ -83,7 +82,7 @@ image_reader* get_image_reader(std::string const& filename)
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        return factory<image_reader,std::string,std::string const&>::instance().create_object(*type,filename);
+        return factory<image_reader, std::string, std::string const&>::instance().create_object(*type, filename);
     }
     else
     {
@@ -91,4 +90,4 @@ image_reader* get_image_reader(std::string const& filename)
     }
 }
 
-}
+} // namespace mapnik

@@ -27,27 +27,28 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/expression.hpp>
 
-//stl
+// stl
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class MAPNIK_DECL xml_tree
 {
-public:
+  public:
     xml_tree();
     void set_filename(std::string const& fn);
     std::string const& filename() const;
-    xml_node &root();
+    xml_node& root();
     xml_node const& root() const;
-private:
+
+  private:
     xml_node node_;
     std::string file_;
-public:
-    mutable std::map<std::string,mapnik::expression_ptr> expr_cache_;
+
+  public:
+    mutable std::map<std::string, mapnik::expression_ptr> expr_cache_;
 };
 
-} //ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_XML_TREE_HPP

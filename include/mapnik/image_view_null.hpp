@@ -25,23 +25,23 @@
 
 #include <mapnik/image_view.hpp>
 
-//stl
+// stl
 #include <stdexcept>
 
 namespace mapnik {
 
-template <>
+template<>
 class MAPNIK_DECL image_view<image_null>
 {
-public:
+  public:
     using pixel_type = image_null::pixel_type;
     static const image_dtype dtype = image_null::dtype;
 
     image_view() {}
-    ~image_view() {};
+    ~image_view(){};
 
     image_view(image_view<image_null> const&) {}
-    image_view<image_null> & operator=(image_view<image_null> const&) { return *this; }
+    image_view<image_null>& operator=(image_view<image_null> const&) { return *this; }
     bool operator==(image_view<image_null> const&) const { return true; }
     bool operator<(image_view<image_null> const&) const { return false; }
 
@@ -49,7 +49,10 @@ public:
     std::size_t y() const { return 0; }
     std::size_t width() const { return 0; }
     std::size_t height() const { return 0; }
-    pixel_type operator() (std::size_t, std::size_t) const { throw std::runtime_error("Can not get from a null image view"); }
+    pixel_type operator()(std::size_t, std::size_t) const
+    {
+        throw std::runtime_error("Can not get from a null image view");
+    }
     std::size_t size() const { return 0; }
     std::size_t row_size() const { return 0; }
     const pixel_type* get_row(std::size_t) const { return nullptr; }
@@ -60,6 +63,6 @@ public:
     image_dtype get_dtype() const { return dtype; }
 };
 
-} // end ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_VIEW_NULL_HPP

@@ -39,43 +39,41 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include "raster_featureset.hpp"
 
-using mapnik::query;
-using mapnik::image_reader;
-using mapnik::feature_ptr;
-using mapnik::image_rgba8;
-using mapnik::raster;
 using mapnik::feature_factory;
+using mapnik::feature_ptr;
+using mapnik::image_reader;
+using mapnik::image_rgba8;
+using mapnik::query;
+using mapnik::raster;
 
-template <typename LookupPolicy>
+template<typename LookupPolicy>
 raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    box2d<double> const& extent,
                                                    query const& q)
-    : policy_(policy),
-      feature_id_(1),
-      ctx_(std::make_shared<mapnik::context_type>()),
-      extent_(extent),
-      bbox_(q.get_bbox()),
-      curIter_(policy_.begin()),
-      endIter_(policy_.end()),
-      filter_factor_(q.get_filter_factor())
-{
-}
+    : policy_(policy)
+    , feature_id_(1)
+    , ctx_(std::make_shared<mapnik::context_type>())
+    , extent_(extent)
+    , bbox_(q.get_bbox())
+    , curIter_(policy_.begin())
+    , endIter_(policy_.end())
+    , filter_factor_(q.get_filter_factor())
+{}
 
-template <typename LookupPolicy>
+template<typename LookupPolicy>
 raster_featureset<LookupPolicy>::~raster_featureset()
-{
-}
+{}
 
-template <typename LookupPolicy>
+template<typename LookupPolicy>
 feature_ptr raster_featureset<LookupPolicy>::next()
 {
     if (curIter_ != endIter_)
     {
-        feature_ptr feature(feature_factory::create(ctx_,feature_id_++));
+        feature_ptr feature(feature_factory::create(ctx_, feature_id_++));
 
         try
         {
-            std::unique_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
+            std::unique_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(), curIter_->format()));
 
             MAPNIK_LOG_DEBUG(raster) << "raster_featureset: Reader=" << curIter_->format() << "," << curIter_->file()
                                      << ",size(" << curIter_->width() << "," << curIter_->height() << ")";
@@ -98,17 +96,25 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                     int end_y = static_cast<int>(std::ceil(ext.maxy()));
 
                     // clip to available data
-                    if (x_off >= image_width) x_off = image_width - 1;
-                    if (y_off >= image_height) y_off = image_height - 1;
-                    if (x_off < 0) x_off = 0;
-                    if (y_off < 0) y_off = 0;
-                    if (end_x > image_width)  end_x = image_width;
-                    if (end_y > image_height) end_y = image_height;
+                    if (x_off >= image_width)
+                        x_off = image_width - 1;
+                    if (y_off >= image_height)
+                        y_off = image_height - 1;
+                    if (x_off < 0)
+                        x_off = 0;
+                    if (y_off < 0)
+                        y_off = 0;
+                    if (end_x > image_width)
+                        end_x = image_width;
+                    if (end_y > image_height)
+                        end_y = image_height;
 
                     int width = end_x - x_off;
                     int height = end_y - y_off;
-                    if (width < 1) width = 1;
-                    if (height < 1) height = 1;
+                    if (width < 1)
+                        width = 1;
+                    if (height < 1)
+                        height = 1;
 
                     // calculate actual box2d of returned raster
                     box2d<double> feature_raster_extent(rem.minx() + x_off,
@@ -117,20 +123,20 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                         rem.maxy() + y_off + height);
                     feature_raster_extent = t.backward(feature_raster_extent);
                     mapnik::image_any data = reader->read(x_off, y_off, width, height);
-                    mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), filter_factor_);
+                    mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent,
+                                                                                 intersect,
+                                                                                 std::move(data),
+                                                                                 filter_factor_);
                     feature->set_raster(raster);
                 }
             }
-        }
-        catch (mapnik::image_reader_exception const& ex)
+        } catch (mapnik::image_reader_exception const& ex)
         {
             MAPNIK_LOG_ERROR(raster) << "Raster Plugin: image reader exception caught: " << ex.what();
-        }
-        catch (std::exception const& ex)
+        } catch (std::exception const& ex)
         {
             MAPNIK_LOG_ERROR(raster) << "Raster Plugin: " << ex.what();
-        }
-        catch (...)
+        } catch (...)
         {
             MAPNIK_LOG_ERROR(raster) << "Raster Plugin: exception caught";
         }
@@ -147,8 +153,10 @@ std::string tiled_multi_file_policy::interpolate(std::string const& pattern, int
     int tms_y = tile_stride_ * ((image_height_ / tile_size_) - y - 1);
     int tms_x = tile_stride_ * x;
     // TODO - optimize by avoiding boost::format
-    std::string xs = (boost::format("%03d/%03d/%03d") % (tms_x / 1000000) % ((tms_x / 1000) % 1000) % (tms_x % 1000)).str();
-    std::string ys = (boost::format("%03d/%03d/%03d") % (tms_y / 1000000) % ((tms_y / 1000) % 1000) % (tms_y % 1000)).str();
+    std::string xs =
+      (boost::format("%03d/%03d/%03d") % (tms_x / 1000000) % ((tms_x / 1000) % 1000) % (tms_x % 1000)).str();
+    std::string ys =
+      (boost::format("%03d/%03d/%03d") % (tms_y / 1000000) % ((tms_y / 1000) % 1000) % (tms_y % 1000)).str();
     std::string rv(pattern);
     boost::algorithm::replace_all(rv, "${x}", xs);
     boost::algorithm::replace_all(rv, "${y}", ys);

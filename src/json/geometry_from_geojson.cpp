@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-
 // mapnik
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/json/json_grammar_config.hpp>
 #include <mapnik/json/feature_grammar_x3.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & geom)
+bool from_geojson(std::string const& json, mapnik::geometry::geometry<double>& geom)
 {
     namespace x3 = boost::spirit::x3;
     using space_type = mapnik::json::grammar::space_type;
@@ -41,10 +41,13 @@ bool from_geojson(std::string const& json, mapnik::geometry::geometry<double> & 
         {
             throw std::runtime_error("Can't parser GeoJSON Geometry");
         }
+    } catch (...)
+    {
+        return false;
     }
-    catch(...) { return false; }
 
     return true;
 }
 
-}}
+} // namespace json
+} // namespace mapnik

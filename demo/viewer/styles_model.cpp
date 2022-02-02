@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include "styles_model.hpp"
 #include <mapnik/config.hpp>
 #include <mapnik/util/variant.hpp>
@@ -39,70 +38,50 @@ class node : private mapnik::util::noncopyable
 {
     struct node_base
     {
-        virtual QString name() const=0;
-        virtual QIcon   icon() const=0;
+        virtual QString name() const = 0;
+        virtual QIcon icon() const = 0;
         virtual ~node_base() {}
     };
 
-    template <typename T>
+    template<typename T>
     struct wrap : public node_base
     {
-    wrap(T const& obj)
-        : obj_(obj) {}
+        wrap(T const& obj)
+            : obj_(obj)
+        {}
 
-    ~wrap() {}
+        ~wrap() {}
 
-    QString name () const
-    {
-        return obj_.name();
-    }
+        QString name() const { return obj_.name(); }
 
-    QIcon icon() const
-    {
-        return obj_.icon();
-    }
+        QIcon icon() const { return obj_.icon(); }
 
-    T obj_;
+        T obj_;
     };
 
-public:
-    template <typename T>
-    node ( T const& obj, node * parent=0)
-    : impl_(new wrap<T>(obj)),
-      parent_(parent)
+  public:
+    template<typename T>
+    node(T const& obj, node* parent = 0)
+        : impl_(new wrap<T>(obj))
+        , parent_(parent)
     {}
 
-    QString name() const
-    {
-        return impl_->name();
-    }
+    QString name() const { return impl_->name(); }
 
-    QIcon icon() const
-    {
-        return impl_->icon();
-    }
+    QIcon icon() const { return impl_->icon(); }
 
-    unsigned num_children() const
-    {
-        return children_.count();
-    }
+    unsigned num_children() const { return children_.count(); }
 
-    node * child(unsigned row) const
-    {
-        return children_.value(row);
-    }
+    node* child(unsigned row) const { return children_.value(row); }
 
-    node * parent() const
-    {
-        return parent_;
-    }
+    node* parent() const { return parent_; }
 
-    node * add_child(node * child)
+    node* add_child(node* child)
     {
         children_.push_back(child);
         return child;
     }
-    int row () const
+    int row() const
     {
         if (parent_)
             return parent_->children_.indexOf(const_cast<node*>(this));
@@ -110,94 +89,90 @@ public:
             return 0;
     }
 
-    ~node()
-    {
-        qDeleteAll(children_);
-    }
+    ~node() { qDeleteAll(children_); }
 
-private:
+  private:
     const std::unique_ptr<node_base> impl_;
     QList<node*> children_;
-    node * parent_;
+    node* parent_;
 };
-
 
 struct symbolizer_info
 {
-    QString operator() (mapnik::point_symbolizer const& sym) const
+    QString operator()(mapnik::point_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("PointSymbolizer");
     }
 
-    QString operator() (mapnik::line_symbolizer const& sym) const
+    QString operator()(mapnik::line_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("LineSymbolizer");
     }
 
-    QString operator() (mapnik::line_pattern_symbolizer const& sym) const
+    QString operator()(mapnik::line_pattern_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("LinePatternSymbolizer");
     }
 
-    QString operator() (mapnik::polygon_symbolizer const& sym) const
+    QString operator()(mapnik::polygon_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("PolygonSymbolizer");
     }
 
-    QString operator() (mapnik::polygon_pattern_symbolizer const& sym) const
+    QString operator()(mapnik::polygon_pattern_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("PolygonSymbolizer");
     }
 
-    QString operator() (mapnik::text_symbolizer const& sym) const
+    QString operator()(mapnik::text_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("TextSymbolizer");
     }
 
-    QString operator() (mapnik::shield_symbolizer const& sym) const
+    QString operator()(mapnik::shield_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("ShieldSymbolizer");
     }
 
-    QString operator() (mapnik::markers_symbolizer const& sym) const
+    QString operator()(mapnik::markers_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("MarkersSymbolizer");
     }
 
-    QString operator() (mapnik::building_symbolizer const& sym) const
+    QString operator()(mapnik::building_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
         return QString("BuildingSymbolizer");
     }
 
-    template <typename T>
-    QString operator() (T const& ) const
+    template<typename T>
+    QString operator()(T const&) const
     {
-        return QString ("FIXME");
+        return QString("FIXME");
     }
 };
 
 struct symbolizer_icon
 {
-    QIcon operator() (mapnik::polygon_symbolizer const& sym) const
+    QIcon operator()(mapnik::polygon_symbolizer const& sym) const
     {
-        QPixmap pix(16,16);
+        QPixmap pix(16, 16);
         QPainter painter(&pix);
         mapnik::color const& fill = mapnik::get<mapnik::color>(sym, mapnik::keys::fill);
-        QBrush brush(QColor(fill.red(),fill.green(),fill.blue(),fill.alpha()));
+        QBrush brush(QColor(fill.red(), fill.green(), fill.blue(), fill.alpha()));
         painter.fillRect(0, 0, 16, 16, brush);
         return QIcon(pix);
     }
 
-    QIcon operator() (mapnik::point_symbolizer const& sym) const
+    QIcon operator()(mapnik::point_symbolizer const& sym) const
     {
         // FIXME!
         /*
@@ -212,55 +187,57 @@ struct symbolizer_icon
         */
         return QIcon();
     }
-    QIcon operator() (mapnik::line_symbolizer const& sym) const
+    QIcon operator()(mapnik::line_symbolizer const& sym) const
     {
-        QPixmap pix(48,16);
+        QPixmap pix(48, 16);
         pix.fill();
         QPainter painter(&pix);
-        //mapnik::stroke const&  strk = sym.get_stroke();
+        // mapnik::stroke const&  strk = sym.get_stroke();
         mapnik::color const& col = mapnik::get<mapnik::color>(sym, mapnik::keys::stroke);
-        QPen pen(QColor(col.red(),col.green(),col.blue(),col.alpha()));
+        QPen pen(QColor(col.red(), col.green(), col.blue(), col.alpha()));
         pen.setWidth(mapnik::get<double>(sym, mapnik::keys::width));
         painter.setPen(pen);
-        painter.drawLine(0,7,47,7);
-        //painter.drawLine(7,15,12,0);
-        //painter.drawLine(12,0,8,15);
+        painter.drawLine(0, 7, 47, 7);
+        // painter.drawLine(7,15,12,0);
+        // painter.drawLine(12,0,8,15);
         return QIcon(pix);
     }
 
-    template <typename T>
-    QIcon operator() (T const& ) const
+    template<typename T>
+    QIcon operator()(T const&) const
     {
-        return QIcon (":/images/filter.png");
+        return QIcon(":/images/filter.png");
     }
 };
 
 class symbolizer_node
 {
-public:
-    symbolizer_node(mapnik::symbolizer const & sym)
-        : sym_(sym) {}
-    ~symbolizer_node(){}
+  public:
+    symbolizer_node(mapnik::symbolizer const& sym)
+        : sym_(sym)
+    {}
+    ~symbolizer_node() {}
 
     QString name() const
     {
-        //return QString("Symbolizer:fixme");
-        return mapnik::util::apply_visitor(symbolizer_info(),sym_);
+        // return QString("Symbolizer:fixme");
+        return mapnik::util::apply_visitor(symbolizer_info(), sym_);
     }
 
     QIcon icon() const
     {
-        return mapnik::util::apply_visitor(symbolizer_icon(),sym_);//QIcon(":/images/filter.png");
+        return mapnik::util::apply_visitor(symbolizer_icon(), sym_); // QIcon(":/images/filter.png");
     }
     mapnik::symbolizer const& sym_;
 };
 
 class rule_node
 {
-public:
-    rule_node(QString name,mapnik::rule const & r)
-    : name_(name),
-      rule_(r) {}
+  public:
+    rule_node(QString name, mapnik::rule const& r)
+        : name_(name)
+        , rule_(r)
+    {}
     ~rule_node() {}
     QString name() const
     {
@@ -268,81 +245,68 @@ public:
         return QString(mapnik::to_expression_string(*filter).c_str());
     }
 
-    QIcon icon() const
-    {
-        return QIcon(":/images/filter.png");
-    }
+    QIcon icon() const { return QIcon(":/images/filter.png"); }
 
-private:
+  private:
     QString name_;
     mapnik::rule const& rule_;
 };
 
 class style_node
 {
-public:
+  public:
     style_node(QString name, mapnik::feature_type_style const& style)
-    : name_(name),
-      style_(style) {}
+        : name_(name)
+        , style_(style)
+    {}
 
     ~style_node() {}
 
-    QString name() const
-    {
-        return name_;
-    }
+    QString name() const { return name_; }
 
-    QIcon icon() const
-    {
-        return QIcon(":/images/style.png");
-    }
+    QIcon icon() const { return QIcon(":/images/style.png"); }
 
-private:
+  private:
     QString name_;
     mapnik::feature_type_style const& style_;
 };
 
 class map_node
 {
-public:
+  public:
     explicit map_node(std::shared_ptr<mapnik::Map> map)
-    : map_(map)  {}
+        : map_(map)
+    {}
     ~map_node() {}
 
-    QString name() const
-    {
-        return QString("Map");
-    }
+    QString name() const { return QString("Map"); }
 
-    QIcon icon() const
-    {
-        return QIcon(":/images/map.png");
-    }
+    QIcon icon() const { return QIcon(":/images/map.png"); }
 
-private:
+  private:
     std::shared_ptr<mapnik::Map> map_;
 };
 
-StyleModel::StyleModel(std::shared_ptr<mapnik::Map> map, QObject * parent)
-    : QAbstractItemModel(parent),
-      root_(new node(map_node(map)))
+StyleModel::StyleModel(std::shared_ptr<mapnik::Map> map, QObject* parent)
+    : QAbstractItemModel(parent)
+    , root_(new node(map_node(map)))
 {
-    using style_type = std::map<std::string,mapnik::feature_type_style>;
-    style_type const & styles = map->styles();
+    using style_type = std::map<std::string, mapnik::feature_type_style>;
+    style_type const& styles = map->styles();
     style_type::const_iterator itr = styles.begin();
     style_type::const_iterator end = styles.end();
     for (; itr != end; ++itr)
     {
-        node * style_n = root_->add_child(new node(style_node(QString(itr->first.c_str()),itr->second),root_.get()));
+        node* style_n = root_->add_child(new node(style_node(QString(itr->first.c_str()), itr->second), root_.get()));
         mapnik::rules const& rules = itr->second.get_rules();
         mapnik::rules::const_iterator itr2 = rules.begin();
-        for ( ; itr2 != rules.end();++itr2)
+        for (; itr2 != rules.end(); ++itr2)
         {
-            node* rule_n = style_n->add_child(new node(rule_node(QString("Rule"),*itr2),style_n));
+            node* rule_n = style_n->add_child(new node(rule_node(QString("Rule"), *itr2), style_n));
             mapnik::rule::symbolizers::const_iterator itr3 = (*itr2).begin();
-            for ( ; itr3 !=itr2->end();++itr3)
+            for (; itr3 != itr2->end(); ++itr3)
             {
-            rule_n->add_child(new node(symbolizer_node(*itr3),rule_n));
+                rule_n->add_child(new node(symbolizer_node(*itr3), rule_n));
             }
         }
     }
@@ -351,38 +315,39 @@ StyleModel::StyleModel(std::shared_ptr<mapnik::Map> map, QObject * parent)
 StyleModel::~StyleModel() {}
 
 // interface
-QModelIndex StyleModel::index (int row, int col, QModelIndex const& parent) const
+QModelIndex StyleModel::index(int row, int col, QModelIndex const& parent) const
 {
-//   qDebug("index() row=%d col=%d parent::internalId() = %lld", row,col,parent.internalId());
-    node * parent_node;
+    //   qDebug("index() row=%d col=%d parent::internalId() = %lld", row,col,parent.internalId());
+    node* parent_node;
 
     if (!parent.isValid())
         parent_node = root_.get();
     else
         parent_node = static_cast<node*>(parent.internalPointer());
 
-    node * child_node = parent_node->child(row);
+    node* child_node = parent_node->child(row);
     if (child_node)
-        return createIndex(row,col,child_node);
+        return createIndex(row, col, child_node);
     else
         return QModelIndex();
 }
 
-QModelIndex StyleModel::parent (QModelIndex const& index) const
+QModelIndex StyleModel::parent(QModelIndex const& index) const
 {
-    node * child_node = static_cast<node*>(index.internalPointer());
-    node * parent_node = child_node->parent();
+    node* child_node = static_cast<node*>(index.internalPointer());
+    node* parent_node = child_node->parent();
     if (parent_node == root_.get())
         return QModelIndex();
 
-    return createIndex(parent_node->row(),0,parent_node);
+    return createIndex(parent_node->row(), 0, parent_node);
 }
 
 int StyleModel::rowCount(QModelIndex const& parent) const
 {
-    //qDebug("rowCount");
-    node * parent_node;
-    if (parent.column() > 0) return 0;
+    // qDebug("rowCount");
+    node* parent_node;
+    if (parent.column() > 0)
+        return 0;
     if (!parent.isValid())
         parent_node = root_.get();
     else
@@ -390,25 +355,24 @@ int StyleModel::rowCount(QModelIndex const& parent) const
     return parent_node->num_children();
 }
 
-int StyleModel::columnCount( QModelIndex const&) const
+int StyleModel::columnCount(QModelIndex const&) const
 {
     return 1;
 }
 
-QVariant StyleModel::data(const QModelIndex & index, int role) const
+QVariant StyleModel::data(const QModelIndex& index, int role) const
 {
-    //qDebug("data index::internalId() = %lld", index.internalId());
+    // qDebug("data index::internalId() = %lld", index.internalId());
     if (!index.isValid())
         return QVariant();
-    node * cur_node = static_cast<node*>(index.internalPointer());
+    node* cur_node = static_cast<node*>(index.internalPointer());
     if (cur_node)
     {
         if (role == Qt::DisplayRole)
         {
-
             return QVariant(cur_node->name());
         }
-        else if ( role == Qt::DecorationRole)
+        else if (role == Qt::DecorationRole)
         {
             return cur_node->icon();
         }

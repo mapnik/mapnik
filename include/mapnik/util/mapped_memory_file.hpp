@@ -36,43 +36,46 @@
 
 #include <string>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 /**
- * @brief memory mapped file abstraction. Implementation depends on MAPNIK_MEMORY_MAPPED_FILE. 
+ * @brief memory mapped file abstraction. Implementation depends on MAPNIK_MEMORY_MAPPED_FILE.
  * Might be a simple file wrapper, if MAPNIK_MEMORY_MAPPED_FILE=0
- * 
+ *
  */
-class MAPNIK_DECL mapped_memory_file : public noncopyable {
-    public:
+class MAPNIK_DECL mapped_memory_file : public noncopyable
+{
+  public:
 #ifdef MAPNIK_MEMORY_MAPPED_FILE
-        using file_source_type = boost::interprocess::ibufferstream;
+    using file_source_type = boost::interprocess::ibufferstream;
 #else
-        using file_source_type = std::ifstream;
+    using file_source_type = std::ifstream;
 #endif
 
-    public:
-        mapped_memory_file();
-        explicit mapped_memory_file(std::string const& file_name);
-        virtual ~mapped_memory_file();
+  public:
+    mapped_memory_file();
+    explicit mapped_memory_file(std::string const& file_name);
+    virtual ~mapped_memory_file();
 
-        file_source_type& file();
-        bool is_open() const;
-        void skip(std::streampos bytes);
+    file_source_type& file();
+    bool is_open() const;
+    void skip(std::streampos bytes);
 
-        /**
-         * @brief deletes the file identified by file_name. Might also remove the file from any caches.
-         */
-        static void deleteFile(std::string const& file_name);
-    protected:
-        const std::string file_name_;
+    /**
+     * @brief deletes the file identified by file_name. Might also remove the file from any caches.
+     */
+    static void deleteFile(std::string const& file_name);
+
+  protected:
+    const std::string file_name_;
 #ifdef MAPNIK_MEMORY_MAPPED_FILE
-        mapnik::mapped_region_ptr mapped_region_;
+    mapnik::mapped_region_ptr mapped_region_;
 #endif
-        file_source_type file_;
+    file_source_type file_;
 };
 
-
-} } 
+} // namespace util
+} // namespace mapnik
 
 #endif

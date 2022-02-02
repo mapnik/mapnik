@@ -30,8 +30,7 @@
 #include <string>
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct attribute;
 
@@ -39,6 +38,6 @@ using path_component = util::variant<std::string, attribute>;
 using path_expression = std::vector<path_component>;
 using path_expression_ptr = std::shared_ptr<path_expression>;
 
-}
+} // namespace mapnik
 
-#endif  // MAPNIK_PATH_EXPRESSION_HPP
+#endif // MAPNIK_PATH_EXPRESSION_HPP

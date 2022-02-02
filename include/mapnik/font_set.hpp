@@ -30,15 +30,14 @@
 #include <string>
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 class MAPNIK_DECL font_set
 {
-public:
+  public:
     // ctor/copy/move/dtor
     font_set(std::string const& name);
     font_set(font_set const& rhs);
-    font_set(font_set &&);
+    font_set(font_set&&);
     font_set& operator=(font_set rhs);
     ~font_set();
     // comparison
@@ -49,11 +48,11 @@ public:
     void add_face_name(std::string const& face_name);
     std::vector<std::string> const& get_face_names() const;
 
-private:
-    friend void swap(font_set & lhs, font_set & rhs);
+  private:
+    friend void swap(font_set& lhs, font_set& rhs);
     std::string name_;
     std::vector<std::string> face_names_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FONT_SET_HPP

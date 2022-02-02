@@ -26,11 +26,13 @@
 // geometry
 #include <mapbox/geometry/multi_point.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T>
+template<typename T>
 using multi_point = mapbox::geometry::multi_point<T>;
 
-}}
+}
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_MULTI_POINT_HPP

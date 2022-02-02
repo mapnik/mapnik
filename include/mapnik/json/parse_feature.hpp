@@ -20,22 +20,25 @@
  *
  *****************************************************************************/
 
-
 #ifndef MAPNIK_JSON_PARSE_FEATURE_HPP
 #define MAPNIK_JSON_PARSE_FEATURE_HPP
 
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
-template <typename Iterator>
-void parse_feature(Iterator start, Iterator end, feature_impl& feature, mapnik::transcoder const& tr = mapnik::transcoder("utf8"));
+template<typename Iterator>
+void parse_feature(Iterator start,
+                   Iterator end,
+                   feature_impl& feature,
+                   mapnik::transcoder const& tr = mapnik::transcoder("utf8"));
 
-template <typename Iterator>
+template<typename Iterator>
 void parse_geometry(Iterator start, Iterator end, feature_impl& feature);
 
-}}
-
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_PARSE_FEATURE_HPP

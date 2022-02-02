@@ -34,31 +34,31 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
-void set_gamma_method(T & ras_ptr, double gamma, gamma_method_enum method)
+template<typename T>
+void set_gamma_method(T& ras_ptr, double gamma, gamma_method_enum method)
 {
     switch (method)
     {
-    case GAMMA_POWER:
-        ras_ptr->gamma(agg::gamma_power(gamma));
-        break;
-    case GAMMA_LINEAR:
-        ras_ptr->gamma(agg::gamma_linear(0.0, gamma));
-        break;
-    case GAMMA_NONE:
-        ras_ptr->gamma(agg::gamma_none());
-        break;
-    case GAMMA_THRESHOLD:
-        ras_ptr->gamma(agg::gamma_threshold(gamma));
-        break;
-    case GAMMA_MULTIPLY:
-        ras_ptr->gamma(agg::gamma_multiply(gamma));
-        break;
-    default:
-        ras_ptr->gamma(agg::gamma_power(gamma));
+        case GAMMA_POWER:
+            ras_ptr->gamma(agg::gamma_power(gamma));
+            break;
+        case GAMMA_LINEAR:
+            ras_ptr->gamma(agg::gamma_linear(0.0, gamma));
+            break;
+        case GAMMA_NONE:
+            ras_ptr->gamma(agg::gamma_none());
+            break;
+        case GAMMA_THRESHOLD:
+            ras_ptr->gamma(agg::gamma_threshold(gamma));
+            break;
+        case GAMMA_MULTIPLY:
+            ras_ptr->gamma(agg::gamma_multiply(gamma));
+            break;
+        default:
+            ras_ptr->gamma(agg::gamma_power(gamma));
     }
 }
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_AGG_HELPERS_HPP

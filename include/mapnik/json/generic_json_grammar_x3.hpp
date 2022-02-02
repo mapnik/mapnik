@@ -32,7 +32,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <vector>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace x3 = boost::spirit::x3;
 
@@ -47,6 +48,8 @@ generic_json_key_value_type const key_value = "JSON Object element";
 BOOST_SPIRIT_DECLARE(generic_json_grammar_type);
 BOOST_SPIRIT_DECLARE(generic_json_key_value_type);
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_GENERIC_JSON_GRAMMAR_X3_HPP

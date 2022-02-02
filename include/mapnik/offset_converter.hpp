@@ -37,17 +37,16 @@
 #include <cstddef>
 #include <algorithm>
 
-namespace mapnik
-{
+namespace mapnik {
 
 static constexpr double offset_converter_default_threshold = 5.0;
 
-template <typename Geometry>
+template<typename Geometry>
 struct offset_converter
 {
     using size_type = std::size_t;
 
-    offset_converter(Geometry & geom)
+    offset_converter(Geometry& geom)
         : geom_(geom)
         , offset_(0.0)
         , threshold_(offset_converter_default_threshold)
@@ -58,26 +57,13 @@ struct offset_converter
         , cur_(vertex2d::no_init)
     {}
 
-    enum status
-    {
-        initial,
-        process
-    };
+    enum status { initial, process };
 
-    unsigned type() const
-    {
-        return static_cast<unsigned>(geom_.type());
-    }
+    unsigned type() const { return static_cast<unsigned>(geom_.type()); }
 
-    double get_offset() const
-    {
-        return offset_;
-    }
+    double get_offset() const { return offset_; }
 
-    double get_threshold() const
-    {
-        return threshold_;
-    }
+    double get_threshold() const { return threshold_; }
 
     void set_offset(double val)
     {
@@ -96,7 +82,7 @@ struct offset_converter
         // far will we be looking for self-intersections
     }
 
-    unsigned vertex(double * x, double * y)
+    unsigned vertex(double* x, double* y)
     {
         if (offset_ == 0.0)
         {
@@ -126,9 +112,9 @@ struct offset_converter
         double t = 1.0;
         double vt, ut;
 
-        for (size_t i = pos_; i+1 < vertices_.size(); ++i)
+        for (size_t i = pos_; i + 1 < vertices_.size(); ++i)
         {
-            //break; // uncomment this to see all the curls
+            // break; // uncomment this to see all the curls
 
             vertex2d const& u0 = vertices_[i];
 
@@ -139,11 +125,11 @@ struct offset_converter
                 break;
             }
 
-            vertex2d const& u1 = vertices_[i+1];
+            vertex2d const& u1 = vertices_[i + 1];
             double const dx = u0.x - cur_.x;
             double const dy = u0.y - cur_.y;
 
-            if (dx*dx + dy*dy > check_dist2)
+            if (dx * dx + dy * dy > check_dist2)
             {
                 break;
             }
@@ -159,7 +145,7 @@ struct offset_converter
             }
 
             t = vt;
-            pos_ = i+1;
+            pos_ = i + 1;
         }
 
         cur_.x = pre_.x + t * (cur_.x - pre_.x);
@@ -175,12 +161,9 @@ struct offset_converter
         pos_ = 0;
     }
 
-    void rewind(unsigned)
-    {
-        pos_ = 0;
-    }
+    void rewind(unsigned) { pos_ = 0; }
 
-private:
+  private:
 
     static double explement_reflex_angle(double angle)
     {
@@ -198,8 +181,12 @@ private:
         }
     }
 
-    static bool intersection(vertex2d const& u1, vertex2d const& u2, double* ut,
-                             vertex2d const& v1, vertex2d const& v2, double* vt)
+    static bool intersection(vertex2d const& u1,
+                             vertex2d const& u2,
+                             double* ut,
+                             vertex2d const& v1,
+                             vertex2d const& v2,
+                             double* vt)
     {
         double const dx = v1.x - u1.x;
         double const dy = v1.y - u1.y;
@@ -248,7 +235,7 @@ private:
     {
         double dot = x1x0 * x1x2 + y1y0 * y1y2; // dot product
         double det = x1x0 * y1y2 - y1y0 * x1x2; // determinant
-        double angle = std::atan2(det, dot); // atan2(y, x) or atan2(sin, cos)
+        double angle = std::atan2(det, dot);    // atan2(y, x) or atan2(sin, cos)
         // angle in [-tau/2; tau/2]
 
         if (offset_ > 0.0)
@@ -271,7 +258,7 @@ private:
     /**
      *  @brief  Translate (vx, vy) by rotated (dx, dy).
      */
-    static void displace(vertex2d & v, double dx, double dy, double a)
+    static void displace(vertex2d& v, double dx, double dy, double a)
     {
         v.x += dx * std::cos(a) - dy * std::sin(a);
         v.y += dx * std::sin(a) + dy * std::cos(a);
@@ -280,7 +267,7 @@ private:
     /**
      *  @brief  Translate (vx, vy) by rotated (0, -offset).
      */
-    void displace(vertex2d & v, double a) const
+    void displace(vertex2d& v, double a) const
     {
         v.x -= offset_ * std::sin(a);
         v.y += offset_ * std::cos(a);
@@ -289,7 +276,7 @@ private:
     /**
      *  @brief  (vx, vy) := (ux, uy) + rotated (0, -offset)
      */
-    void displace(vertex2d & v, vertex2d const& u, double a) const
+    void displace(vertex2d& v, vertex2d const& u, double a) const
     {
         v.x = u.x - offset_ * std::sin(a);
         v.y = u.y + offset_ * std::cos(a);
@@ -299,12 +286,14 @@ private:
     int point_line_position(vertex2d const& a, vertex2d const& b, vertex2d const& point) const
     {
         double position = (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x);
-        if (position > 1e-6) return 1;
-        if (position < -1e-6) return -1;
+        if (position > 1e-6)
+            return 1;
+        if (position < -1e-6)
+            return -1;
         return 0;
     }
 
-    void displace2(vertex2d & v1, vertex2d const& v0, vertex2d const& v2, double a, double b) const
+    void displace2(vertex2d& v1, vertex2d const& v0, vertex2d const& v2, double a, double b) const
     {
         double sa = offset_ * std::sin(a);
         double ca = offset_ * std::cos(a);
@@ -312,8 +301,8 @@ private:
         double hsa = h * sa;
         double hca = h * ca;
         double abs_offset = std::abs(offset_);
-        double hsaca = ca-hsa;
-        double hcasa = -sa-hca;
+        double hsaca = ca - hsa;
+        double hcasa = -sa - hca;
         double abs_hsaca = std::abs(hsaca);
         double abs_hcasa = std::abs(hcasa);
         double abs_hsa = std::abs(hsa);
@@ -324,19 +313,20 @@ private:
         v_tmp.y = v1.y + ca - hsa;
         v_tmp.cmd = v1.cmd;
 
-        int same = point_line_position(v0, v2, v_tmp)*point_line_position(v0, v2, v1);
+        int same = point_line_position(v0, v2, v_tmp) * point_line_position(v0, v2, v1);
 
         if (same >= 0 && std::abs(h) < 10)
         {
             v1.x = v_tmp.x;
             v1.y = v_tmp.y;
         }
-        else if ((v0.x-v1.x)*(v0.x-v1.x) + (v0.y-v1.y)*(v0.y-v1.y) +
-                (v0.x-v2.x)*(v0.x-v2.x) + (v0.y-v2.y)*(v0.y-v2.y) > offset_*offset_)
+        else if ((v0.x - v1.x) * (v0.x - v1.x) + (v0.y - v1.y) * (v0.y - v1.y) + (v0.x - v2.x) * (v0.x - v2.x) +
+                   (v0.y - v2.y) * (v0.y - v2.y) >
+                 offset_ * offset_)
         {
             if (abs_hsa > abs_offset || abs_hca > abs_offset)
             {
-                double scale = std::max(abs_hsa,abs_hca);
+                double scale = std::max(abs_hsa, abs_hca);
                 scale = scale < 1e-6 ? 1. : abs_offset / scale;
                 // interpolate hsa, hca to <0,abs_offset>
                 hsa = hsa * scale;
@@ -349,13 +339,13 @@ private:
         }
         else
         {
-            if (abs_hsaca*abs_hsaca + abs_hcasa*abs_hcasa > abs_offset*abs_offset)
+            if (abs_hsaca * abs_hsaca + abs_hcasa * abs_hcasa > abs_offset * abs_offset)
             {
-                double d = (abs_hsaca*abs_hsaca + abs_hcasa*abs_hcasa);
+                double d = (abs_hsaca * abs_hsaca + abs_hcasa * abs_hcasa);
                 d = d < 1e-6 ? 1. : d;
-                double scale = (abs_offset*abs_offset)/d;
-                v1.x = v1.x + hcasa*scale;
-                v1.y = v1.y + hsaca*scale;
+                double scale = (abs_offset * abs_offset) / d;
+                v1.x = v1.x + hcasa * scale;
+                v1.y = v1.y + hsaca * scale;
             }
             else
             {
@@ -395,15 +385,17 @@ private:
             if (v0.cmd == SEG_CLOSE)
             {
                 is_polygon = true;
-                auto & prev = points.back();
+                auto& prev = points.back();
                 if (prev.x == start.x && prev.y == start.y)
                 {
                     prev.x = v0.x; // hack
                     prev.y = v0.y;
                     prev.cmd = SEG_CLOSE; // account for dupes (line_to(move_to) + close_path) in agg poly clipper
                     std::size_t size = points.size();
-                    if (size > 1) close_points.push_back(points[size - 2]);
-                    else close_points.push_back(prev);
+                    if (size > 1)
+                        close_points.push_back(points[size - 2]);
+                    else
+                        close_points.push_back(prev);
                     continue;
                 }
                 else
@@ -419,7 +411,7 @@ private:
             points.push_back(v0);
         }
         // Push SEG_END
-        points.push_back(vertex2d(v0.x,v0.y,SEG_END));
+        points.push_back(vertex2d(v0.x, v0.y, SEG_END));
         std::size_t i = 0;
         v1 = points[i++];
         v2 = points[i++];
@@ -531,7 +523,8 @@ private:
             }
             else if (v2.cmd == SEG_END)
             {
-                if (!is_polygon) break;
+                if (!is_polygon)
+                    break;
                 v2.x = start_v2.x;
                 v2.y = start_v2.y;
             }
@@ -564,24 +557,23 @@ private:
                 bulge_steps = 1 + static_cast<int>(std::floor(half_turns / util::pi));
             }
 
-            #ifdef MAPNIK_LOG
+#ifdef MAPNIK_LOG
             if (bulge_steps == 0)
             {
                 // inside turn (sharp/obtuse angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Sharp joint [<< inside turn "
-                    << static_cast<int>(util::degrees(joint_angle))
-                    << " degrees >>]";
+                                         << " Sharp joint [<< inside turn "
+                                         << static_cast<int>(util::degrees(joint_angle)) << " degrees >>]";
             }
             else
             {
                 // outside turn (reflex angle)
                 MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                    << " Bulge joint >)) outside turn "
-                    << static_cast<int>(util::degrees(joint_angle))
-                    << " degrees ((< with " << bulge_steps << " segments";
+                                         << " Bulge joint >)) outside turn "
+                                         << static_cast<int>(util::degrees(joint_angle)) << " degrees ((< with "
+                                         << bulge_steps << " segments";
             }
-            #endif
+#endif
             tmp_prev.cmd = v1.cmd;
             tmp_prev.x = v1.x;
             tmp_prev.y = v1.y;
@@ -638,7 +630,8 @@ private:
 
     unsigned output_vertex(double* px, double* py)
     {
-        if (cur_.cmd == SEG_CLOSE) *px = *py = 0.0;
+        if (cur_.cmd == SEG_CLOSE)
+            *px = *py = 0.0;
         else
         {
             *px = cur_.x;
@@ -647,24 +640,21 @@ private:
         return cur_.cmd;
     }
 
-    void push_vertex(vertex2d const& v)
-    {
-        vertices_.push_back(v);
-    }
+    void push_vertex(vertex2d const& v) { vertices_.push_back(v); }
 
-    Geometry &              geom_;
-    double                  offset_;
-    double                  threshold_;
-    unsigned                half_turn_segments_;
-    status                  status_;
-    size_t                  pos_;
-    std::vector<vertex2d>   vertices_;
-    vertex2d                start_;
-    vertex2d                pre_first_;
-    vertex2d                pre_;
-    vertex2d                cur_;
+    Geometry& geom_;
+    double offset_;
+    double threshold_;
+    unsigned half_turn_segments_;
+    status status_;
+    size_t pos_;
+    std::vector<vertex2d> vertices_;
+    vertex2d start_;
+    vertex2d pre_first_;
+    vertex2d pre_;
+    vertex2d cur_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_OFFSET_CONVERTER_HPP

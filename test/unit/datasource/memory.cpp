@@ -28,9 +28,8 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 
-
-TEST_CASE("memory datasource") {
-
+TEST_CASE("memory datasource")
+{
     SECTION("empty featureset")
     {
         mapnik::parameters params;

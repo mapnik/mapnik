@@ -53,13 +53,12 @@ struct markers_placement_params
 
 class markers_basic_placement : util::noncopyable
 {
-public:
+  public:
     markers_basic_placement(markers_placement_params const& params)
         : params_(params)
-    {
-    }
+    {}
 
-protected:
+  protected:
     markers_placement_params const& params_;
 
     // Rotates the size_ box and translates the position.
@@ -69,7 +68,7 @@ protected:
         return box2d<double>(params_.size, tr);
     }
 
-    bool set_direction(double & angle) const
+    bool set_direction(double& angle) const
     {
         switch (params_.direction)
         {

@@ -44,15 +44,15 @@ const double DEFAULT_RATIO = 0.55;
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
-int main ()
+int main()
 #else
-int main (int argc,char** argv)
+int main(int argc, char** argv)
 #endif
 {
     using namespace mapnik;
     namespace po = boost::program_options;
 
-    bool verbose=false;
+    bool verbose = false;
     bool index_parts = false;
     unsigned int depth = DEFAULT_DEPTH;
     double ratio = DEFAULT_RATIO;
@@ -61,6 +61,7 @@ int main (int argc,char** argv)
     try
     {
         po::options_description desc("shapeindex utility");
+        // clang-format off
         desc.add_options()
             ("help,h", "produce usage message")
             ("version,V","print version string")
@@ -70,14 +71,14 @@ int main (int argc,char** argv)
             ("ratio,r",po::value<double>(),"split ratio (default 0.55)")
             ("shape_files",po::value<std::vector<std::string> >(),"shape files to index: file1 file2 ...fileN")
             ;
-
+        // clang-format on
         po::positional_options_description p;
-        p.add("shape_files",-1);
+        p.add("shape_files", -1);
         po::variables_map vm;
 #ifdef _WIN32
         std::vector<std::string> args;
         const auto wargs = po::split_winmain(GetCommandLineW());
-        for( auto it = wargs.begin() + 1; it != wargs.end(); ++it )
+        for (auto it = wargs.begin() + 1; it != wargs.end(); ++it)
             args.push_back(mapnik::utf16_to_utf8(*it));
         po::store(po::command_line_parser(args).options(desc).positional(p).run(), vm);
 #else
@@ -115,10 +116,9 @@ int main (int argc,char** argv)
 
         if (vm.count("shape_files"))
         {
-            shape_files=vm["shape_files"].as< std::vector<std::string> >();
+            shape_files = vm["shape_files"].as<std::vector<std::string>>();
         }
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::clog << "Error: " << ex.what() << std::endl;
         return EXIT_FAILURE;
@@ -135,45 +135,44 @@ int main (int argc,char** argv)
     for (auto const& filename : shape_files)
     {
         std::clog << "processing " << filename << std::endl;
-        std::string shapename (filename);
-        boost::algorithm::ireplace_last(shapename,".shp","");
-        std::string shapename_full (shapename + ".shp");
+        std::string shapename(filename);
+        boost::algorithm::ireplace_last(shapename, ".shp", "");
+        std::string shapename_full(shapename + ".shp");
         std::string shxname(shapename + ".shx");
-        if (! mapnik::util::exists (shapename_full))
+        if (!mapnik::util::exists(shapename_full))
         {
             std::clog << "Error : file " << shapename_full << " does not exist" << std::endl;
             continue;
         }
-        if (! mapnik::util::exists(shxname))
+        if (!mapnik::util::exists(shxname))
         {
             std::clog << "Error : shapefile index file (*.shx) " << shxname << " does not exist" << std::endl;
             continue;
         }
-        shape_file shp (shapename_full);
+        shape_file shp(shapename_full);
 
-        if (! shp.is_open())
+        if (!shp.is_open())
         {
             std::clog << "Error : cannot open " << shapename_full << std::endl;
             continue;
         }
 
-        shape_file shx (shxname);
+        shape_file shx(shxname);
         if (!shx.is_open())
         {
             std::clog << "Error : cannot open " << shxname << std::endl;
             continue;
         }
 
-        int code = shx.read_xdr_integer(); //file_code == 9994
+        int code = shx.read_xdr_integer(); // file_code == 9994
         std::clog << code << std::endl;
-        shx.skip(5*4);
+        shx.skip(5 * 4);
 
-        int file_length=shx.read_xdr_integer();
-        int version=shx.read_ndr_integer();
-        int shape_type=shx.read_ndr_integer();
+        int file_length = shx.read_xdr_integer();
+        int version = shx.read_ndr_integer();
+        int shape_type = shx.read_ndr_integer();
         box2d<double> extent;
         shx.read_envelope(extent);
-
 
         std::clog << "length=" << file_length << std::endl;
         std::clog << "version=" << version << std::endl;
@@ -187,12 +186,12 @@ int main (int argc,char** argv)
         }
         int pos = 50;
         shx.seek(pos * 2);
-        mapnik::box2d<float> extent_f { static_cast<float>(extent.minx()),
-                static_cast<float>(extent.miny()),
-                static_cast<float>(extent.maxx()),
-                static_cast<float>(extent.maxy())};
+        mapnik::box2d<float> extent_f{static_cast<float>(extent.minx()),
+                                      static_cast<float>(extent.miny()),
+                                      static_cast<float>(extent.maxx()),
+                                      static_cast<float>(extent.maxy())};
 
-        mapnik::quad_tree<mapnik::detail::node, mapnik::box2d<float> > tree(extent_f, depth, ratio);
+        mapnik::quad_tree<mapnik::detail::node, mapnik::box2d<float>> tree(extent_f, depth, ratio);
         int count = 0;
 
         if (shape_type != shape_io::shape_null)
@@ -216,32 +215,35 @@ int main (int argc,char** argv)
                 }
                 shape_type = shp.read_ndr_integer();
 
-                if (shape_type == shape_io::shape_null) continue;
+                if (shape_type == shape_io::shape_null)
+                    continue;
 
-                if (shape_type==shape_io::shape_point
-                    || shape_type==shape_io::shape_pointm
-                    || shape_type == shape_io::shape_pointz)
+                if (shape_type == shape_io::shape_point || shape_type == shape_io::shape_pointm ||
+                    shape_type == shape_io::shape_pointz)
                 {
-                    double x=shp.read_double();
-                    double y=shp.read_double();
-                    item_ext=box2d<double>(x,y,x,y);
+                    double x = shp.read_double();
+                    double y = shp.read_double();
+                    item_ext = box2d<double>(x, y, x, y);
                 }
                 else if (index_parts &&
-                         (shape_type == shape_io::shape_polygon || shape_type == shape_io::shape_polygonm || shape_type == shape_io::shape_polygonz
-                          || shape_type == shape_io::shape_polyline || shape_type == shape_io::shape_polylinem || shape_type == shape_io::shape_polylinez))
+                         (shape_type == shape_io::shape_polygon || shape_type == shape_io::shape_polygonm ||
+                          shape_type == shape_io::shape_polygonz || shape_type == shape_io::shape_polyline ||
+                          shape_type == shape_io::shape_polylinem || shape_type == shape_io::shape_polylinez))
                 {
                     shp.read_envelope(item_ext);
                     int num_parts = shp.read_ndr_integer();
                     int num_points = shp.read_ndr_integer();
                     std::vector<int> parts;
                     parts.resize(num_parts);
-                    std::for_each(parts.begin(), parts.end(), [&](int & part) { part = shp.read_ndr_integer();});
+                    std::for_each(parts.begin(), parts.end(), [&](int& part) { part = shp.read_ndr_integer(); });
                     for (int k = 0; k < num_parts; ++k)
                     {
                         int start = parts[k];
                         int end;
-                        if (k == num_parts - 1) end = num_points;
-                        else end = parts[k + 1];
+                        if (k == num_parts - 1)
+                            end = num_points;
+                        else
+                            end = parts[k + 1];
 
                         mapnik::geometry::linear_ring<double> ring;
                         ring.reserve(end - start);
@@ -258,15 +260,15 @@ int main (int argc,char** argv)
                             {
                                 std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                             }
-                            mapnik::box2d<float> ext_f {static_cast<float>(item_ext.minx()),
-                                    static_cast<float>(item_ext.miny()),
-                                    static_cast<float>(item_ext.maxx()),
-                                    static_cast<float>(item_ext.maxy())};
+                            mapnik::box2d<float> ext_f{static_cast<float>(item_ext.minx()),
+                                                       static_cast<float>(item_ext.miny()),
+                                                       static_cast<float>(item_ext.maxx()),
+                                                       static_cast<float>(item_ext.maxy())};
                             tree.insert(mapnik::detail::node(offset * 2, start, end, std::move(ext_f)), ext_f);
                             ++count;
                         }
                     }
-                    item_ext = mapnik::box2d<double>(); //invalid
+                    item_ext = mapnik::box2d<double>(); // invalid
                 }
                 else
                 {
@@ -279,10 +281,10 @@ int main (int argc,char** argv)
                     {
                         std::clog << "record number " << record_number << " box=" << item_ext << std::endl;
                     }
-                    mapnik::box2d<float> ext_f {static_cast<float>(item_ext.minx()),
-                            static_cast<float>(item_ext.miny()),
-                            static_cast<float>(item_ext.maxx()),
-                            static_cast<float>(item_ext.maxy())};
+                    mapnik::box2d<float> ext_f{static_cast<float>(item_ext.minx()),
+                                               static_cast<float>(item_ext.miny()),
+                                               static_cast<float>(item_ext.maxx()),
+                                               static_cast<float>(item_ext.maxy())};
 
                     tree.insert(mapnik::detail::node(offset * 2, -1, 0, std::move(ext_f)), ext_f);
                     ++count;
@@ -294,14 +296,14 @@ int main (int argc,char** argv)
         {
             std::clog << " number shapes=" << count << std::endl;
 #ifdef _WIN32
-            std::ofstream file(mapnik::utf8_to_utf16(shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
+            std::ofstream file(mapnik::utf8_to_utf16(shapename + ".index").c_str(), std::ios::trunc | std::ios::binary);
 #else
-            std::ofstream file((shapename+".index").c_str(), std::ios::trunc | std::ios::binary);
+            std::ofstream file((shapename + ".index").c_str(), std::ios::trunc | std::ios::binary);
 #endif
             if (!file)
             {
-                std::clog << "cannot open index file for writing file \""
-                          << (shapename+".index") << "\"" << std::endl;
+                std::clog << "cannot open index file for writing file \"" << (shapename + ".index") << "\""
+                          << std::endl;
             }
             else
             {

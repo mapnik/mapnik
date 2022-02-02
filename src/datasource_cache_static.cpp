@@ -33,59 +33,61 @@
 #include <stdexcept>
 #include <unordered_map>
 
-
-#define REGISTER_STATIC_DATASOURCE_PLUGIN(classname) {std::string{classname::kName}, std::make_shared<classname>()}
+#define REGISTER_STATIC_DATASOURCE_PLUGIN(classname)                                                                   \
+    {                                                                                                                  \
+        std::string{classname::kName}, std::make_shared<classname>()                                                   \
+    }
 
 // static plugin linkage
 #ifdef MAPNIK_STATIC_PLUGINS
-    #if defined(MAPNIK_STATIC_PLUGIN_CSV)
-        #include "input/csv/csv_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GDAL)
-        #include "input/gdal/gdal_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
-        #include "input/geobuf/geobuf_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
-        #include "input/geojson/geojson_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GEOS)
-        #include "input/geos/geos_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_KISMET)
-        #include "input/kismet/kismet_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_OCCI)
-        #include "input/occi/occi_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_OGR)
-        #include "input/ogr/ogr_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
-        #include "input/pgraster/pgraster_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_OSM)
-        #include "input/osm/osm_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
-        #include "input/postgis/postgis_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
-        #include "input/raster/raster_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
-        #include "input/rasterlite/rasterlite_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
-        #include "input/shape/shape_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
-        #include "input/sqlite/sqlite_datasource.hpp"
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
-        #include "input/topojson/topojson_datasource.hpp"
-    #endif
+#if defined(MAPNIK_STATIC_PLUGIN_CSV)
+#include "input/csv/csv_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GDAL)
+#include "input/gdal/gdal_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
+#include "input/geobuf/geobuf_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
+#include "input/geojson/geojson_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GEOS)
+#include "input/geos/geos_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_KISMET)
+#include "input/kismet/kismet_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_OCCI)
+#include "input/occi/occi_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_OGR)
+#include "input/ogr/ogr_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
+#include "input/pgraster/pgraster_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_OSM)
+#include "input/osm/osm_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
+#include "input/postgis/postgis_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_RASTER)
+#include "input/raster/raster_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
+#include "input/rasterlite/rasterlite_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
+#include "input/shape/shape_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
+#include "input/sqlite/sqlite_datasource.hpp"
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
+#include "input/topojson/topojson_datasource.hpp"
+#endif
 #endif
 
 namespace mapnik {
@@ -100,49 +102,50 @@ datasource_ptr ds_generator(parameters const& params)
 typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
 using datasource_map = std::unordered_map<std::string, std::shared_ptr<datasource_plugin>>;
 
-static datasource_map ds_map{
-    #if defined(MAPNIK_STATIC_PLUGIN_CSV)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(csv_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GDAL)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(gdal_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(geobuf_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(geojson_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_OCCI)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(occi_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_OGR)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(ogr_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(pgraster_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_OSM)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(osm_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(postgis_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(raster_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(rasterlite_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(shape_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(sqlite_datasource_plugin),
-    #endif
-    #if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
-        REGISTER_STATIC_DATASOURCE_PLUGIN(topojson_datasource_plugin),
-    #endif
+static datasource_map ds_map
+{
+#if defined(MAPNIK_STATIC_PLUGIN_CSV)
+    REGISTER_STATIC_DATASOURCE_PLUGIN(csv_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GDAL)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(gdal_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(geobuf_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(geojson_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_OCCI)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(occi_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_OGR)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(ogr_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(pgraster_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_OSM)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(osm_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(postgis_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_RASTER)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(raster_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(rasterlite_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(shape_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(sqlite_datasource_plugin),
+#endif
+#if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
+      REGISTER_STATIC_DATASOURCE_PLUGIN(topojson_datasource_plugin),
+#endif
 };
 #endif
 
@@ -182,4 +185,4 @@ std::vector<std::string> get_static_datasource_names()
     return names;
 }
 
-}
+} // namespace mapnik

@@ -80,7 +80,8 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
     cmd += ".exe";
 #endif
     cmd += " ";
-    if (index_parts) cmd+= "--index-parts ";
+    if (index_parts)
+        cmd += "--index-parts ";
     cmd += filename;
     if (silent)
     {
@@ -93,7 +94,7 @@ int create_shapefile_index(std::string const& filename, bool index_parts, bool s
     return std::system(cmd.c_str());
 }
 
-}
+} // namespace
 
 TEST_CASE("invalid shapeindex")
 {
@@ -102,8 +103,9 @@ TEST_CASE("invalid shapeindex")
     {
         SECTION("Invalid index")
         {
-            for (auto val : {std::make_tuple(true, std::string("mapnik-invalid-index.................")), // invalid header
-                           std::make_tuple(false, std::string("mapnik-index................."))})       // valid header + invalid index
+            for (auto val :
+                 {std::make_tuple(true, std::string("mapnik-invalid-index.................")), // invalid header
+                  std::make_tuple(false, std::string("mapnik-index................."))}) // valid header + invalid index
             {
                 std::string path = "test/data/shp/boundaries.shp";
                 std::string index_path = path.substr(0, path.rfind(".")) + ".index";
@@ -125,7 +127,8 @@ TEST_CASE("invalid shapeindex")
                     // ensure number of features are the same
                     CHECK(feature_count == feature_count_indexed);
                 }
-                else // the header is valid but index file itself is not - expect datasource to fail and return 0 features.
+                else // the header is valid but index file itself is not - expect datasource to fail and return 0
+                     // features.
                 {
                     CHECK(feature_count_indexed == 0);
                 }
@@ -145,9 +148,9 @@ TEST_CASE("shapeindex")
         {
             for (auto const& path : mapnik::util::list_directory("test/data/shp/"))
             {
-                if (boost::iends_with(path,".shp"))
+                if (boost::iends_with(path, ".shp"))
                 {
-                    for (bool index_parts : {false, true} )
+                    for (bool index_parts : {false, true})
                     {
                         CAPTURE(path);
                         CAPTURE(index_parts);

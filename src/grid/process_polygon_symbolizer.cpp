@@ -24,7 +24,6 @@
 
 // boost
 
-
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -48,44 +47,46 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 void grid_renderer<T>::process(polygon_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
     using renderer_type = agg::renderer_scanline_bin_solid<grid_renderer_base_type>;
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
-    using vertex_converter_type = vertex_converter<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag>;
+    using vertex_converter_type =
+      vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 
     ras_ptr->reset();
 
     grid_rendering_buffer buf(pixmap_.raw_data(), common_.width_, common_.height_, common_.width_);
 
-    render_polygon_symbolizer<vertex_converter_type>(
-      sym, feature, prj_trans, common_, common_.query_extent_, *ras_ptr,
-      [&](color const &, double) {
-        pixfmt_type pixf(buf);
+    render_polygon_symbolizer<vertex_converter_type>(sym,
+                                                     feature,
+                                                     prj_trans,
+                                                     common_,
+                                                     common_.query_extent_,
+                                                     *ras_ptr,
+                                                     [&](color const&, double) {
+                                                         pixfmt_type pixf(buf);
 
-        grid_renderer_base_type renb(pixf);
-        renderer_type ren(renb);
+                                                         grid_renderer_base_type renb(pixf);
+                                                         renderer_type ren(renb);
 
-        // render id
-        ren.color(color_type(feature.id()));
-        agg::scanline_bin sl;
-        ras_ptr->filling_rule(agg::fill_even_odd);
-        agg::render_scanlines(*ras_ptr, sl, ren);
+                                                         // render id
+                                                         ren.color(color_type(feature.id()));
+                                                         agg::scanline_bin sl;
+                                                         ras_ptr->filling_rule(agg::fill_even_odd);
+                                                         agg::render_scanlines(*ras_ptr, sl, ren);
 
-        // add feature properties to grid cache
-        pixmap_.add_feature(feature);
-      });
+                                                         // add feature properties to grid cache
+                                                         pixmap_.add_feature(feature);
+                                                     });
 }
 
+template void grid_renderer<grid>::process(polygon_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-template void grid_renderer<grid>::process(polygon_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
-
-}
+} // namespace mapnik
 
 #endif

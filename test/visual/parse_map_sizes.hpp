@@ -29,8 +29,8 @@
 
 namespace visual_tests {
 
-void parse_map_sizes(std::string const & str, std::vector<map_size> & sizes);
+void parse_map_sizes(std::string const& str, std::vector<map_size>& sizes);
 
 }
 
-#endif //VISUAL_TESTS_PARSE_MAP_SIZES_HPP
+#endif // VISUAL_TESTS_PARSE_MAP_SIZES_HPP

@@ -17,8 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
-
 #ifndef LAYER_LIST_MODEL_HPP
 #define LAYER_LIST_MODEL_HPP
 
@@ -32,20 +30,18 @@
 
 class LayerListModel : public QAbstractListModel
 {
-   Q_OBJECT
-   public:
-      LayerListModel(std::shared_ptr<mapnik::Map> map, QObject * parent = 0);
-      int rowCount(const QModelIndex &parent = QModelIndex()) const;
-      QVariant data(const QModelIndex &index, int role) const;
-      QVariant headerData(int section, Qt::Orientation orientation,
-                          int role = Qt::DisplayRole) const;
-      bool setData(const QModelIndex &index, const QVariant &value,
-                   int role = Qt::EditRole);
-      Qt::ItemFlags flags(QModelIndex const& index) const;
-      boost::optional<mapnik::layer&> map_layer(int i);
+    Q_OBJECT
+  public:
+    LayerListModel(std::shared_ptr<mapnik::Map> map, QObject* parent = 0);
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    QVariant data(const QModelIndex& index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
+    Qt::ItemFlags flags(QModelIndex const& index) const;
+    boost::optional<mapnik::layer&> map_layer(int i);
 
-   private:
-      std::shared_ptr<mapnik::Map> map_;
+  private:
+    std::shared_ptr<mapnik::Map> map_;
 };
 
-#endif //LAYER_LIST_MODEL_HPP
+#endif // LAYER_LIST_MODEL_HPP

@@ -31,8 +31,7 @@
 // stl
 #include <vector>
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct group_layout_manager
 {
@@ -43,26 +42,24 @@ struct group_layout_manager
     {}
 
     explicit group_layout_manager(group_layout const& layout)
-        : layout_(layout),
-          update_layout_(false)
-    {
-    }
+        : layout_(layout)
+        , update_layout_(false)
+    {}
 
     group_layout_manager(group_layout const& layout, pixel_position const& input_origin)
-        : layout_(layout),
-          input_origin_(input_origin),
-          update_layout_(false)
-    {
-    }
+        : layout_(layout)
+        , input_origin_(input_origin)
+        , update_layout_(false)
+    {}
 
-    group_layout_manager(group_layout const& layout, pixel_position const& input_origin,
+    group_layout_manager(group_layout const& layout,
+                         pixel_position const& input_origin,
                          std::vector<bound_box> const& item_boxes)
-        : layout_(layout),
-          input_origin_(input_origin),
-          member_boxes_(item_boxes),
-          update_layout_(true)
-    {
-    }
+        : layout_(layout)
+        , input_origin_(input_origin)
+        , member_boxes_(item_boxes)
+        , update_layout_(true)
+    {}
 
     void set_input_origin(double x, double y)
     {
@@ -96,7 +93,7 @@ struct group_layout_manager
 
     bound_box offset_box_at(size_t i);
 
-private:
+  private:
 
     void handle_update();
 
@@ -107,6 +104,6 @@ private:
     bool update_layout_;
 };
 
-}   // namespace mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_GROUP_LAYOUT_MANAGER_HPP

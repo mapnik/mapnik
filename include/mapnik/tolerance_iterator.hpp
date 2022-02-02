@@ -22,34 +22,28 @@
 #ifndef MAPNIK_TOLERANCE_ITERATOR_HPP
 #define MAPNIK_TOLERANCE_ITERATOR_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/debug.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class tolerance_iterator
 {
-public:
+  public:
     tolerance_iterator(double label_position_tolerance, double spacing)
-        : tolerance_(label_position_tolerance > 0 ?
-                        label_position_tolerance : spacing/2.0),
-          linear_position_(1.0),
-          value_(0),
-          initialized_(false),
-          values_tried_(0)
-    {
-    }
+        : tolerance_(label_position_tolerance > 0 ? label_position_tolerance : spacing / 2.0)
+        , linear_position_(1.0)
+        , value_(0)
+        , initialized_(false)
+        , values_tried_(0)
+    {}
 
     ~tolerance_iterator()
     {
-        //std::cout << "values tried:" << values_tried_ << "\n";
+        // std::cout << "values tried:" << values_tried_ << "\n";
     }
 
-    double get() const
-    {
-        return -value_;
-    }
+    double get() const { return -value_; }
 
     bool next()
     {
@@ -69,7 +63,7 @@ public:
         if (!initialized_)
         {
             initialized_ = true;
-            return true; //Always return value 0 as the first value.
+            return true; // Always return value 0 as the first value.
         }
         if (value_ == 0)
         {
@@ -88,7 +82,8 @@ public:
         }
         return true;
     }
-private:
+
+  private:
     double tolerance_;
     double linear_position_;
     double value_;
@@ -96,6 +91,6 @@ private:
     unsigned values_tried_;
 };
 
-}//ns mapnik
+} // namespace mapnik
 
 #endif // MAPNIK_TOLERANCE_ITERATOR_HPP

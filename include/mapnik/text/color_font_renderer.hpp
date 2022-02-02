@@ -34,8 +34,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // freetype2
-extern "C"
-{
+extern "C" {
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
@@ -48,17 +47,17 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/geometry/box2d.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 agg::trans_affine glyph_transform(agg::trans_affine const& tr,
                                   unsigned glyph_height,
-                                  int x, int y,
+                                  int x,
+                                  int y,
                                   double angle,
                                   box2d<double> const& bbox);
 
-template <typename T>
-void composite_color_glyph(T & pixmap,
+template<typename T>
+void composite_color_glyph(T& pixmap,
                            FT_Bitmap const& bitmap,
                            agg::trans_affine const& tr,
                            double opacity,
@@ -69,8 +68,8 @@ struct glyph_t;
 image_rgba8 render_glyph_image(glyph_t const& glyph,
                                FT_Bitmap const& bitmap,
                                agg::trans_affine const& tr,
-                               pixel_position & render_pos);
+                               pixel_position& render_pos);
 
-}
+} // namespace mapnik
 
 #endif

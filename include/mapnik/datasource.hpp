@@ -43,31 +43,27 @@ namespace mapnik {
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
-public:
+  public:
     datasource_exception(std::string const& message)
-      : message_(message)
+        : message_(message)
     {}
 
     ~datasource_exception() {}
 
-    virtual const char* what() const noexcept
-    {
-        return message_.c_str();
-    }
-private:
+    virtual const char* what() const noexcept { return message_.c_str(); }
+
+  private:
     std::string message_;
 };
 
 class MAPNIK_DECL datasource : private util::noncopyable
 {
-public:
-    enum datasource_t : std::uint8_t {
-        Vector,
-        Raster
-    };
+  public:
+    enum datasource_t : std::uint8_t { Vector, Raster };
 
-    datasource (parameters const& _params)
-       : params_(_params) {}
+    datasource(parameters const& _params)
+        : params_(_params)
+    {}
 
     /*!
      * @brief Get the configuration parameters of the data source.
@@ -76,25 +72,13 @@ public:
      *
      * @return The configuration parameters of the data source.
      */
-    parameters const& params() const
-    {
-        return params_;
-    }
+    parameters const& params() const { return params_; }
 
-    parameters & params()
-    {
-        return params_;
-    }
+    parameters& params() { return params_; }
 
-    bool operator==(datasource const& rhs) const
-    {
-        return params_ == rhs.params();
-    }
+    bool operator==(datasource const& rhs) const { return params_ == rhs.params(); }
 
-    bool operator!=(datasource const& rhs) const
-    {
-        return !(*this == rhs);
-    }
+    bool operator!=(datasource const& rhs) const { return !(*this == rhs); }
 
     /*!
      * @brief Get the type of the datasource
@@ -113,43 +97,22 @@ public:
     virtual box2d<double> envelope() const = 0;
     virtual layer_descriptor get_descriptor() const = 0;
     virtual ~datasource() {}
-protected:
+
+  protected:
     parameters params_;
 };
 
 using datasource_name = const char* (*)();
-using create_ds = datasource* (*) (parameters const&);
-using destroy_ds = void (*) (datasource *);
+using create_ds = datasource* (*)(parameters const&);
+using destroy_ds = void (*)(datasource*);
 
 class datasource_deleter
 {
-public:
-    void operator() (datasource* ds)
-    {
-        delete ds;
-    }
+  public:
+    void operator()(datasource* ds) { delete ds; }
 };
 
 using datasource_ptr = std::shared_ptr<datasource>;
-
-#ifdef MAPNIK_STATIC_PLUGINS
-    #define DATASOURCE_PLUGIN(classname)
-#else
-    #define DATASOURCE_PLUGIN(classname)                                    \
-        extern "C" MAPNIK_DECL const char * datasource_name()                \
-        {                                                                   \
-            return classname::name();                                       \
-        }                                                                   \
-        extern "C"  MAPNIK_DECL datasource* create(parameters const& params) \
-        {                                                                   \
-            return new classname(params);                                   \
-        }                                                                   \
-        extern "C" MAPNIK_DECL void destroy(datasource *ds)                  \
-        {                                                                   \
-            delete ds;                                                      \
-        }
-#endif
-
-}
+} // namespace mapnik
 
 #endif // MAPNIK_DATASOURCE_HPP

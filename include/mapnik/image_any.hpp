@@ -42,7 +42,6 @@ using image_base = util::variant<image_null,
                                  image_gray64s,
                                  image_gray64f>;
 
-
 struct MAPNIK_DECL image_any : image_base
 {
     image_any() = default;
@@ -54,10 +53,10 @@ struct MAPNIK_DECL image_any : image_base
               bool premultiplied = false,
               bool painted = false);
 
-    template <typename T>
-        image_any(T && _data)
-        noexcept(std::is_nothrow_constructible<image_base, T && >::value)
-        : image_base(std::forward<T>(_data)) {}
+    template<typename T>
+    image_any(T&& _data) noexcept(std::is_nothrow_constructible<image_base, T&&>::value)
+        : image_base(std::forward<T>(_data))
+    {}
 
     unsigned char const* bytes() const;
     unsigned char* bytes();
@@ -81,6 +80,6 @@ MAPNIK_DECL image_any create_image_any(int width,
                                        bool premultiplied = false,
                                        bool painted = false);
 
-} // end mapnik ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_ANY_HPP

@@ -27,35 +27,30 @@
 
 namespace mapnik {
 
-enum eAttributeType {
-    Integer=1,
-    Float  =2,
-    Double =3,
-    String =4,
-    Boolean =5,
-    Geometry=6,
-    Object=7
-};
+enum eAttributeType { Integer = 1, Float = 2, Double = 3, String = 4, Boolean = 5, Geometry = 6, Object = 7 };
 
 class attribute_descriptor
 {
-public:
-    attribute_descriptor(std::string const& name,unsigned type,
-                         bool primary_key=false,
-                         int size=-1,
-                         int precision=-1)
-        : name_(name),
-          type_(type),
-          size_(size),
-          precision_(precision),
-            primary_key_(primary_key) {}
+  public:
+    attribute_descriptor(std::string const& name,
+                         unsigned type,
+                         bool primary_key = false,
+                         int size = -1,
+                         int precision = -1)
+        : name_(name)
+        , type_(type)
+        , size_(size)
+        , precision_(precision)
+        , primary_key_(primary_key)
+    {}
 
     attribute_descriptor(attribute_descriptor const& other)
-        : name_(other.name_),
-          type_(other.type_),
-          size_(other.size_),
-          precision_(other.precision_),
-          primary_key_(other.primary_key_) {}
+        : name_(other.name_)
+        , type_(other.type_)
+        , size_(other.size_)
+        , precision_(other.precision_)
+        , primary_key_(other.primary_key_)
+    {}
 
     attribute_descriptor& operator=(attribute_descriptor rhs)
     {
@@ -68,32 +63,17 @@ public:
         return *this;
     }
 
-    std::string const& get_name() const
-    {
-        return name_;
-    }
+    std::string const& get_name() const { return name_; }
 
-    unsigned int get_type() const
-    {
-        return type_;
-    }
+    unsigned int get_type() const { return type_; }
 
-    bool is_primary_key() const
-    {
-        return primary_key_;
-    }
+    bool is_primary_key() const { return primary_key_; }
 
-    int get_size() const
-    {
-        return size_;
-    }
+    int get_size() const { return size_; }
 
-    int get_precision() const
-    {
-        return precision_;
-    }
+    int get_precision() const { return precision_; }
 
-private:
+  private:
     std::string name_;
     unsigned int type_;
     int size_;
@@ -101,6 +81,6 @@ private:
     bool primary_key_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_ATTRIBUTE_DESCRIPTOR_HPP

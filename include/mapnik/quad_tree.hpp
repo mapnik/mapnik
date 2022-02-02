@@ -35,9 +35,8 @@
 
 #include <cstring>
 
-namespace mapnik
-{
-template <typename T0, typename T1 = box2d<double>>
+namespace mapnik {
+template<typename T0, typename T1 = box2d<double>>
 class quad_tree : util::noncopyable
 {
     using value_type = T0;
@@ -49,7 +48,7 @@ class quad_tree : util::noncopyable
         using const_iterator = typename cont_type::const_iterator;
         bbox_type extent_;
         cont_type cont_;
-        node * children_[4];
+        node* children_[4];
 
         explicit node(bbox_type const& ext)
             : extent_(ext)
@@ -57,60 +56,44 @@ class quad_tree : util::noncopyable
             std::fill(children_, children_ + 4, nullptr);
         }
 
-        bbox_type const& extent() const
-        {
-            return extent_;
-        }
+        bbox_type const& extent() const { return extent_; }
 
-        iterator begin()
-        {
-            return cont_.begin();
-        }
+        iterator begin() { return cont_.begin(); }
 
-        const_iterator begin() const
-        {
-            return cont_.begin();
-        }
+        const_iterator begin() const { return cont_.begin(); }
 
-        iterator end()
-        {
-            return cont_.end();
-        }
+        iterator end() { return cont_.end(); }
 
-        const_iterator end() const
-        {
-            return cont_.end();
-        }
+        const_iterator end() const { return cont_.end(); }
 
         int num_subnodes() const
         {
             int _count = 0;
             for (int i = 0; i < 4; ++i)
             {
-                if (children_[i]) ++_count;
+                if (children_[i])
+                    ++_count;
             }
             return _count;
         }
-        ~node () {}
+        ~node() {}
     };
 
-    using nodes_type = std::vector<std::unique_ptr<node> >;
+    using nodes_type = std::vector<std::unique_ptr<node>>;
     using cont_type = typename node::cont_type;
     using node_data_iterator = typename cont_type::iterator;
 
-public:
+  public:
     using iterator = typename nodes_type::iterator;
     using const_iterator = typename nodes_type::const_iterator;
-    using result_type = typename std::vector<std::reference_wrapper<value_type> >;
+    using result_type = typename std::vector<std::reference_wrapper<value_type>>;
     using query_iterator = typename result_type::iterator;
 
-    explicit quad_tree(bbox_type const& ext,
-                       unsigned int max_depth = 8,
-                       double ratio = 0.55)
-        : max_depth_(max_depth),
-          ratio_(ratio),
-          query_result_(),
-          nodes_()
+    explicit quad_tree(bbox_type const& ext, unsigned int max_depth = 8, double ratio = 0.55)
+        : max_depth_(max_depth)
+        , ratio_(ratio)
+        , query_result_()
+        , nodes_()
     {
         nodes_.push_back(std::make_unique<node>(ext));
         root_ = nodes_[0].get();
@@ -129,23 +112,13 @@ public:
         return query_result_.begin();
     }
 
-    query_iterator query_end()
-    {
-        return query_result_.end();
-    }
+    query_iterator query_end() { return query_result_.end(); }
 
-    const_iterator begin() const
-    {
-        return nodes_.begin();
-    }
+    const_iterator begin() const { return nodes_.begin(); }
 
+    const_iterator end() const { return nodes_.end(); }
 
-    const_iterator end() const
-    {
-        return  nodes_.end();
-    }
-
-    void clear ()
+    void clear()
     {
         bbox_type ext = root_->extent_;
         nodes_.clear();
@@ -153,15 +126,9 @@ public:
         root_ = nodes_[0].get();
     }
 
-    bbox_type const& extent() const
-    {
-        return root_->extent_;
-    }
+    bbox_type const& extent() const { return root_->extent_; }
 
-    int count() const
-    {
-        return count_nodes(root_);
-    }
+    int count() const { return count_nodes(root_); }
 
     int count_items() const
     {
@@ -169,50 +136,48 @@ public:
         count_items(root_, _count);
         return _count;
     }
-    void trim()
-    {
-        trim_tree(root_);
-    }
+    void trim() { trim_tree(root_); }
 
-    template <typename OutputStream>
-    void write(OutputStream & out)
+    template<typename OutputStream>
+    void write(OutputStream& out)
     {
         static_assert(std::is_standard_layout<value_type>::value,
                       "Values stored in quad-tree must be standard layout types to allow serialisation");
         char header[16];
-        std::memset(header,0,16);
-        std::strcpy(header,"mapnik-index");
-        out.write(header,16);
-        write_node(out,root_);
+        std::memset(header, 0, 16);
+        std::strcpy(header, "mapnik-index");
+        out.write(header, 16);
+        write_node(out, root_);
     }
-private:
 
-    void query_node(bbox_type const& box, result_type & result, node * node_) const
+  private:
+
+    void query_node(bbox_type const& box, result_type& result, node* node_) const
     {
         if (node_)
         {
             bbox_type const& node_extent = node_->extent();
             if (box.intersects(node_extent))
             {
-                for (auto & n : *node_)
+                for (auto& n : *node_)
                 {
                     result.push_back(std::ref(n));
                 }
                 for (int k = 0; k < 4; ++k)
                 {
-                    query_node(box,result,node_->children_[k]);
+                    query_node(box, result, node_->children_[k]);
                 }
             }
         }
     }
 
-    void do_insert_data(value_type const& data, bbox_type const& box, node * n, unsigned int& depth)
+    void do_insert_data(value_type const& data, bbox_type const& box, node* n, unsigned int& depth)
     {
         if (++depth < max_depth_)
         {
             bbox_type const& node_extent = n->extent();
             bbox_type ext[4];
-            split_box(node_extent,ext);
+            split_box(node_extent, ext);
             for (int i = 0; i < 4; ++i)
             {
                 if (ext[i].contains(box))
@@ -230,7 +195,7 @@ private:
         n->cont_.push_back(data);
     }
 
-    void split_box(bbox_type const& node_extent, bbox_type * ext)
+    void split_box(bbox_type const& node_extent, bbox_type* ext)
     {
         typename bbox_type::value_type width = node_extent.width();
         typename bbox_type::value_type height = node_extent.height();
@@ -245,7 +210,7 @@ private:
         ext[3] = bbox_type(hix - width * ratio_, hiy - height * ratio_, hix, hiy);
     }
 
-    void trim_tree(node *& n)
+    void trim_tree(node*& n)
     {
         if (n)
         {
@@ -265,12 +230,12 @@ private:
                 }
             }
         }
-
     }
 
     int count_nodes(node const* n) const
     {
-        if (!n) return 0;
+        if (!n)
+            return 0;
         else
         {
             int _count = 1;
@@ -289,7 +254,7 @@ private:
             _count += n->cont_.size();
             for (int i = 0; i < 4; ++i)
             {
-                count_items(n->children_[i],_count);
+                count_items(n->children_[i], _count);
             }
         }
     }
@@ -301,15 +266,15 @@ private:
         {
             if (n->children_[i])
             {
-                offset +=sizeof(bbox_type) + (n->children_[i]->cont_.size() * sizeof(value_type)) + 3 * sizeof(int);
-                offset +=subnode_offset(n->children_[i]);
+                offset += sizeof(bbox_type) + (n->children_[i]->cont_.size() * sizeof(value_type)) + 3 * sizeof(int);
+                offset += subnode_offset(n->children_[i]);
             }
         }
         return offset;
     }
 
-    template <typename OutputStream>
-    void write_node(OutputStream & out, node const* n) const
+    template<typename OutputStream>
+    void write_node(OutputStream& out, node const* n) const
     {
         if (n)
         {
@@ -321,11 +286,13 @@ private:
             std::memcpy(node_record.get(), &offset, 4);
             std::memcpy(node_record.get() + 4, &n->extent_, sizeof(bbox_type));
             std::memcpy(node_record.get() + 4 + sizeof(bbox_type), &shape_count, 4);
-            for (int i=0; i < shape_count; ++i)
+            for (int i = 0; i < shape_count; ++i)
             {
-                memcpy(node_record.get() + 8 + sizeof(bbox_type) + i * sizeof(value_type), &(n->cont_[i]), sizeof(value_type));
+                memcpy(node_record.get() + 8 + sizeof(bbox_type) + i * sizeof(value_type),
+                       &(n->cont_[i]),
+                       sizeof(value_type));
             }
-            int num_subnodes=0;
+            int num_subnodes = 0;
             for (int i = 0; i < 4; ++i)
             {
                 if (n->children_[i])
@@ -334,7 +301,7 @@ private:
                 }
             }
             std::memcpy(node_record.get() + 8 + sizeof(bbox_type) + shape_count * sizeof(value_type), &num_subnodes, 4);
-            out.write(node_record.get(),recsize);
+            out.write(node_record.get(), recsize);
             for (int i = 0; i < 4; ++i)
             {
                 write_node(out, n->children_[i]);
@@ -346,9 +313,8 @@ private:
     const double ratio_;
     result_type query_result_;
     nodes_type nodes_;
-    node * root_;
-
+    node* root_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_QUAD_TREE_HPP

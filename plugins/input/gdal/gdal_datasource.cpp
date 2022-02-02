@@ -39,27 +39,26 @@ using mapnik::parameters;
 
 using mapnik::box2d;
 using mapnik::coord2d;
-using mapnik::query;
+using mapnik::datasource_exception;
 using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
-using mapnik::datasource_exception;
+using mapnik::query;
 
 static std::once_flag once_flag;
 
 DATASOURCE_PLUGIN_IMPL(gdal_datasource_plugin, gdal_datasource);
 DATASOURCE_PLUGIN_EXPORT(gdal_datasource_plugin);
-void gdal_datasource_plugin::init_once() const {
-    std::call_once(once_flag,[](){
-        GDALAllRegister();
-    });
+void gdal_datasource_plugin::init_once() const
+{
+    std::call_once(once_flag, []() { GDALAllRegister(); });
 }
 
 gdal_datasource::gdal_datasource(parameters const& params)
-    : datasource(params),
-      dataset_(nullptr, &GDALClose),
-      desc_(gdal_datasource::name(), "utf-8"),
-      nodata_value_(params.get<double>("nodata")),
-      nodata_tolerance_(*params.get<double>("nodata_tolerance",1e-12))
+    : datasource(params)
+    , dataset_(nullptr, &GDALClose)
+    , desc_(gdal_datasource::name(), "utf-8")
+    , nodata_value_(params.get<double>("nodata"))
+    , nodata_tolerance_(*params.get<double>("nodata_tolerance", 1e-12))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 
@@ -68,7 +67,8 @@ gdal_datasource::gdal_datasource(parameters const& params)
 #endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file) throw datasource_exception("missing <file> parameter");
+    if (!file)
+        throw datasource_exception("missing <file> parameter");
 
     boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
@@ -82,13 +82,13 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     shared_dataset_ = *params.get<mapnik::boolean_type>("shared", false);
     band_ = *params.get<mapnik::value_integer>("band", -1);
-    
+
     // Maximum memory limitation for image will be simply based on the maximum
     // area we allow for an image. The true memory footprint therefore will vary based
     // on the type of imagery that exists. This is not the maximum size of an image
     // on disk but rather the maximum size we will load into mapnik from GDAL.
     // max_im_area based on 50 mb limit for RGBA
-    max_image_area_ = *params.get<mapnik::value_integer>("max_image_area", (50*1024*1024) / 4);
+    max_image_area_ = *params.get<mapnik::value_integer>("max_image_area", (50 * 1024 * 1024) / 4);
 
 #if GDAL_VERSION_NUM >= 1600
     if (shared_dataset_)
@@ -103,7 +103,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
         dataset_.reset(static_cast<GDALDataset*>(ds));
     }
 
-    if (! dataset_)
+    if (!dataset_)
     {
         throw datasource_exception(CPLGetLastErrorMsg());
     }
@@ -123,7 +123,7 @@ gdal_datasource::gdal_datasource(parameters const& params)
         MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;
 
         bbox_override = extent_.from_string(*bbox_s);
-        if (! bbox_override)
+        if (!bbox_override)
         {
             throw datasource_exception("GDAL Plugin: bbox parameter '" + *bbox_s + "' invalid");
         }
@@ -137,26 +137,20 @@ gdal_datasource::gdal_datasource(parameters const& params)
         tr[3] = extent_.maxy();
         tr[4] = 0;
         tr[5] = -extent_.height() / (double)height_;
-        MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource extent override gives Geotransform="
-                               << tr[0] << "," << tr[1] << ","
-                               << tr[2] << "," << tr[3] << ","
-                               << tr[4] << "," << tr[5];
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource extent override gives Geotransform=" << tr[0] << "," << tr[1] << ","
+                               << tr[2] << "," << tr[3] << "," << tr[4] << "," << tr[5];
     }
     else
     {
         if (dataset_->GetGeoTransform(tr) != CPLE_None)
         {
-            MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource GetGeotransform failure gives="
-                                   << tr[0] << "," << tr[1] << ","
-                                   << tr[2] << "," << tr[3] << ","
-                                   << tr[4] << "," << tr[5];
+            MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource GetGeotransform failure gives=" << tr[0] << "," << tr[1] << ","
+                                   << tr[2] << "," << tr[3] << "," << tr[4] << "," << tr[5];
         }
         else
         {
-            MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform="
-                                   << tr[0] << "," << tr[1] << ","
-                                   << tr[2] << "," << tr[3] << ","
-                                   << tr[4] << "," << tr[5];
+            MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform=" << tr[0] << "," << tr[1] << "," << tr[2] << ","
+                                   << tr[3] << "," << tr[4] << "," << tr[5];
         }
     }
 
@@ -173,12 +167,12 @@ gdal_datasource::gdal_datasource(parameters const& params)
     dx_ = tr[1];
     dy_ = tr[5];
 
-    if (! bbox_override)
+    if (!bbox_override)
     {
         double x0 = tr[0];
         double y0 = tr[3];
-        double x1 = tr[0] + width_ * dx_ + height_ *tr[2];
-        double y1 = tr[3] + width_ *tr[4] + height_ * dy_;
+        double x1 = tr[0] + width_ * dx_ + height_ * tr[2];
+        double y1 = tr[3] + width_ * tr[4] + height_ * dy_;
 
         /*
           double x0 = tr[0] + (height_) * tr[2]; // minx
@@ -193,7 +187,6 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
-
 }
 
 gdal_datasource::~gdal_datasource()
@@ -206,7 +199,7 @@ datasource::datasource_t gdal_datasource::type() const
     return datasource::Raster;
 }
 
-const char * gdal_datasource::name()
+const char* gdal_datasource::name()
 {
     return "gdal";
 }
@@ -233,17 +226,17 @@ featureset_ptr gdal_datasource::features(query const& q) const
 #endif
 
     return std::make_shared<gdal_featureset>(*dataset_,
-                                              band_,
-                                              gdal_query(q),
-                                              extent_,
-                                              width_,
-                                              height_,
-                                              nbands_,
-                                              dx_,
-                                              dy_,
-                                              nodata_value_,
-                                              nodata_tolerance_,
-                                              max_image_area_);
+                                             band_,
+                                             gdal_query(q),
+                                             extent_,
+                                             width_,
+                                             height_,
+                                             nbands_,
+                                             dx_,
+                                             dy_,
+                                             nodata_value_,
+                                             nodata_tolerance_,
+                                             max_image_area_);
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -253,15 +246,15 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
 #endif
 
     return std::make_shared<gdal_featureset>(*dataset_,
-                                              band_,
-                                              gdal_query(pt),
-                                              extent_,
-                                              width_,
-                                              height_,
-                                              nbands_,
-                                              dx_,
-                                              dy_,
-                                              nodata_value_,
-                                              nodata_tolerance_,
-                                              max_image_area_);
+                                             band_,
+                                             gdal_query(pt),
+                                             extent_,
+                                             width_,
+                                             height_,
+                                             nbands_,
+                                             dx_,
+                                             dy_,
+                                             nodata_value_,
+                                             nodata_tolerance_,
+                                             max_image_area_);
 }

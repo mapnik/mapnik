@@ -17,24 +17,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 #include "info_dialog.hpp"
 
-
-info_dialog::info_dialog(QVector<QPair<QString,QString> > const& info, QWidget *parent)
-  : QDialog(parent)
+info_dialog::info_dialog(QVector<QPair<QString, QString>> const& info, QWidget* parent)
+    : QDialog(parent)
 {
-  ui.setupUi(this);
-  ui.tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Name"));
-  ui.tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Value"));
+    ui.setupUi(this);
+    ui.tableWidget->setHorizontalHeaderItem(0, new QTableWidgetItem("Name"));
+    ui.tableWidget->setHorizontalHeaderItem(1, new QTableWidgetItem("Value"));
 
-  ui.tableWidget->setRowCount(info.size());
-  ui.tableWidget->setColumnCount(2);
-  for (int i=0;i<info.size();++i)
-  {
-     QTableWidgetItem *keyItem = new QTableWidgetItem(info[i].first);
-     QTableWidgetItem *valueItem = new QTableWidgetItem(info[i].second);
-     ui.tableWidget->setItem(i,0,keyItem);
-     ui.tableWidget->setItem(i,1,valueItem);
-  }
+    ui.tableWidget->setRowCount(info.size());
+    ui.tableWidget->setColumnCount(2);
+    for (int i = 0; i < info.size(); ++i)
+    {
+        QTableWidgetItem* keyItem = new QTableWidgetItem(info[i].first);
+        QTableWidgetItem* valueItem = new QTableWidgetItem(info[i].second);
+        ui.tableWidget->setItem(i, 0, keyItem);
+        ui.tableWidget->setItem(i, 1, valueItem);
+    }
 }

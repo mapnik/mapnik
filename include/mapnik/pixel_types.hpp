@@ -27,8 +27,7 @@
 
 namespace mapnik {
 
-enum image_dtype : std::uint8_t
-{
+enum image_dtype : std::uint8_t {
     image_dtype_rgba8 = 0,
     image_dtype_gray8,
     image_dtype_gray8s,
@@ -44,18 +43,66 @@ enum image_dtype : std::uint8_t
     IMAGE_DTYPE_MAX
 };
 
-struct null_t { using type = std::uint8_t;  static const image_dtype id = image_dtype_null; };
-struct rgba8_t { using type = std::uint32_t;  static const image_dtype id = image_dtype_rgba8; };
-struct gray8_t { using type = std::uint8_t;   static const image_dtype id = image_dtype_gray8; };
-struct gray8s_t { using type = std::int8_t;   static const image_dtype id = image_dtype_gray8s; };
-struct gray16_t { using type = std::uint16_t; static const image_dtype id = image_dtype_gray16; };
-struct gray16s_t { using type = std::int16_t; static const image_dtype id = image_dtype_gray16s; };
-struct gray32_t { using type = std::uint32_t; static const image_dtype id = image_dtype_gray32; };
-struct gray32s_t { using type = std::int32_t; static const image_dtype id = image_dtype_gray32s; };
-struct gray32f_t { using type = float;        static const image_dtype id = image_dtype_gray32f; };
-struct gray64_t { using type = std::uint64_t; static const image_dtype id = image_dtype_gray64; };
-struct gray64s_t { using type = std::int64_t; static const image_dtype id = image_dtype_gray64s; };
-struct gray64f_t { using type = double;       static const image_dtype id = image_dtype_gray64f; };
+struct null_t
+{
+    using type = std::uint8_t;
+    static const image_dtype id = image_dtype_null;
+};
+struct rgba8_t
+{
+    using type = std::uint32_t;
+    static const image_dtype id = image_dtype_rgba8;
+};
+struct gray8_t
+{
+    using type = std::uint8_t;
+    static const image_dtype id = image_dtype_gray8;
+};
+struct gray8s_t
+{
+    using type = std::int8_t;
+    static const image_dtype id = image_dtype_gray8s;
+};
+struct gray16_t
+{
+    using type = std::uint16_t;
+    static const image_dtype id = image_dtype_gray16;
+};
+struct gray16s_t
+{
+    using type = std::int16_t;
+    static const image_dtype id = image_dtype_gray16s;
+};
+struct gray32_t
+{
+    using type = std::uint32_t;
+    static const image_dtype id = image_dtype_gray32;
+};
+struct gray32s_t
+{
+    using type = std::int32_t;
+    static const image_dtype id = image_dtype_gray32s;
+};
+struct gray32f_t
+{
+    using type = float;
+    static const image_dtype id = image_dtype_gray32f;
+};
+struct gray64_t
+{
+    using type = std::uint64_t;
+    static const image_dtype id = image_dtype_gray64;
+};
+struct gray64s_t
+{
+    using type = std::int64_t;
+    static const image_dtype id = image_dtype_gray64s;
+};
+struct gray64f_t
+{
+    using type = double;
+    static const image_dtype id = image_dtype_gray64f;
+};
 
-} // end ns
+} // namespace mapnik
 #endif // MAPNIK_PIXEL_TYPES_HPP

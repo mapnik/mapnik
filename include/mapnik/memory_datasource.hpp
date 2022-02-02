@@ -35,9 +35,10 @@ namespace mapnik {
 class MAPNIK_DECL memory_datasource : public datasource
 {
     friend class memory_featureset;
-public:
+
+  public:
     memory_datasource(parameters const& params);
-    static const char * name();
+    static const char* name();
     virtual ~memory_datasource();
     virtual datasource::datasource_t type() const;
     virtual featureset_ptr features(query const& q) const;
@@ -50,7 +51,8 @@ public:
     void set_envelope(box2d<double> const& box);
     size_t size() const;
     void clear();
-private:
+
+  private:
     std::deque<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
     datasource::datasource_t type_;
@@ -60,6 +62,6 @@ private:
     mutable bool dirty_extent_ = true;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MEMORY_DATASOURCE_HPP

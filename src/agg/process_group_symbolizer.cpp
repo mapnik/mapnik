@@ -50,23 +50,25 @@ namespace mapnik {
  * in the detector from the placement_finder.
  */
 
-template <typename T>
+template<typename T>
 struct thunk_renderer;
 
-template <>
+template<>
 struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 {
     using renderer_type = agg_renderer<image_rgba8>;
     using buffer_type = renderer_type::buffer_type;
     using text_renderer_type = agg_text_renderer<buffer_type>;
 
-    thunk_renderer(renderer_type &ren,
+    thunk_renderer(renderer_type& ren,
                    std::unique_ptr<rasterizer> const& ras_ptr,
-                   buffer_type & buf,
-                   renderer_common &common)
-        : ren_(ren), ras_ptr_(ras_ptr), buf_(buf), common_(common),
-          tex_(buf, HALO_RASTERIZER_FULL, src_over, src_over,
-               common.scale_factor_, common.font_manager_.get_stroker())
+                   buffer_type& buf,
+                   renderer_common& common)
+        : ren_(ren)
+        , ras_ptr_(ras_ptr)
+        , buf_(buf)
+        , common_(common)
+        , tex_(buf, HALO_RASTERIZER_FULL, src_over, src_over, common.scale_factor_, common.font_manager_.get_stroker())
     {}
 
     virtual void operator()(vector_marker_render_thunk const& thunk)
@@ -76,10 +78,8 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         using pixfmt_comp_type = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
-        using svg_renderer_type = svg::renderer_agg<svg_path_adapter,
-                                                    svg_attribute_type,
-                                                    renderer_type,
-                                                    pixfmt_comp_type>;
+        using svg_renderer_type =
+          svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_type, pixfmt_comp_type>;
         ras_ptr_->reset();
         buf_type render_buffer(buf_.bytes(), buf_.width(), buf_.height(), buf_.row_size());
         pixfmt_comp_type pixf(render_buffer);
@@ -91,8 +91,13 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
-        render_vector_marker(svg_renderer, *ras_ptr_, renb, thunk.src_->bounding_box(),
-                             offset_tr, thunk.opacity_, thunk.snap_to_pixels_);
+        render_vector_marker(svg_renderer,
+                             *ras_ptr_,
+                             renb,
+                             thunk.src_->bounding_box(),
+                             offset_tr,
+                             thunk.opacity_,
+                             thunk.snap_to_pixels_);
     }
 
     virtual void operator()(raster_marker_render_thunk const& thunk)
@@ -110,7 +115,13 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
 
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
-        render_raster_marker(renb, *ras_ptr_, thunk.src_, offset_tr, thunk.opacity_, common_.scale_factor_, thunk.snap_to_pixels_);
+        render_raster_marker(renb,
+                             *ras_ptr_,
+                             thunk.src_,
+                             offset_tr,
+                             thunk.opacity_,
+                             common_.scale_factor_,
+                             thunk.snap_to_pixels_);
     }
 
     virtual void operator()(text_render_thunk const& thunk)
@@ -128,34 +139,31 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
                 ren_.render_marker(glyphs->marker_pos(),
                                    *mark->marker_,
                                    mark->transform_,
-                                   thunk.opacity_, thunk.comp_op_);
+                                   thunk.opacity_,
+                                   thunk.comp_op_);
             }
             tex_.render(*glyphs);
         }
     }
 
-private:
-    renderer_type &ren_;
+  private:
+    renderer_type& ren_;
     std::unique_ptr<rasterizer> const& ras_ptr_;
-    buffer_type & buf_;
-    renderer_common &common_;
+    buffer_type& buf_;
+    renderer_common& common_;
     text_renderer_type tex_;
 };
 
-template <typename T0, typename T1>
-void agg_renderer<T0,T1>::process(group_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+template<typename T0, typename T1>
+void agg_renderer<T0, T1>::process(group_symbolizer const& sym,
+                                   mapnik::feature_impl& feature,
+                                   proj_transform const& prj_trans)
 {
     thunk_renderer<buffer_type> ren(*this, ras_ptr, buffers_.top().get(), common_);
 
-    render_group_symbolizer(
-        sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_,
-        ren);
+    render_group_symbolizer(sym, feature, common_.vars_, prj_trans, clipping_extent(common_), common_, ren);
 }
 
-template void agg_renderer<image_rgba8>::process(group_symbolizer const&,
-                                              mapnik::feature_impl &,
-                                              proj_transform const&);
+template void agg_renderer<image_rgba8>::process(group_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik

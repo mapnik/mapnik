@@ -40,23 +40,26 @@
 #include <stdexcept>
 
 #if LIBXML_VERSION >= 20900
-#define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA | XML_PARSE_HUGE | XML_PARSE_BIG_LINES)
+#define DEFAULT_OPTIONS                                                                                                \
+    (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA |                \
+     XML_PARSE_HUGE | XML_PARSE_BIG_LINES)
 #elif LIBXML_VERSION >= 20703
-#define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA | XML_PARSE_HUGE)
+#define DEFAULT_OPTIONS                                                                                                \
+    (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA | XML_PARSE_HUGE)
 #else
-#define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
+#define DEFAULT_OPTIONS                                                                                                \
+    (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 #endif
 
-namespace mapnik
-{
+namespace mapnik {
 class libxml2_loader : util::noncopyable
 {
-public:
-    libxml2_loader(const char *encoding = nullptr, int options = DEFAULT_OPTIONS, const char *url = nullptr) :
-        ctx_(0),
-        encoding_(encoding),
-        options_(options),
-        url_(url)
+  public:
+    libxml2_loader(const char* encoding = nullptr, int options = DEFAULT_OPTIONS, const char* url = nullptr)
+        : ctx_(0)
+        , encoding_(encoding)
+        , options_(options)
+        , url_(url)
     {
         LIBXML_TEST_VERSION;
         ctx_ = xmlNewParserCtxt();
@@ -74,7 +77,7 @@ public:
         }
     }
 
-    void load(std::string const& filename, xml_node &node)
+    void load(std::string const& filename, xml_node& node)
     {
         if (!mapnik::util::exists(filename))
         {
@@ -85,7 +88,7 @@ public:
 
         if (!doc)
         {
-            xmlError * error = xmlCtxtGetLastError(ctx_);
+            xmlError* error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 std::string msg("XML document not well formed:\n");
@@ -98,19 +101,20 @@ public:
         load(doc, node);
     }
 
-    void load(const int fd, xml_node &node)
+    void load(const int fd, xml_node& node)
     {
         xmlDocPtr doc = xmlCtxtReadFd(ctx_, fd, url_, encoding_, options_);
         load(doc, node);
     }
 
-    void load_string(std::string const& buffer, xml_node &node, std::string const & base_path)
+    void load_string(std::string const& buffer, xml_node& node, std::string const& base_path)
     {
         if (!base_path.empty())
         {
-            if (!mapnik::util::exists(base_path)) {
-                throw config_error(std::string("Could not locate base_path '") +
-                                   base_path + "': file or directory does not exist");
+            if (!mapnik::util::exists(base_path))
+            {
+                throw config_error(std::string("Could not locate base_path '") + base_path +
+                                   "': file or directory does not exist");
             }
         }
         // NOTE: base_path here helps libxml2 resolve entities correctly: https://github.com/mapnik/mapnik/issues/440
@@ -119,12 +123,12 @@ public:
         load(doc, node);
     }
 
-    void load(const xmlDocPtr doc, xml_node &node)
+    void load(const xmlDocPtr doc, xml_node& node)
     {
         if (!doc)
         {
             std::string msg("XML document not well formed");
-            xmlError * error = xmlCtxtGetLastError( ctx_ );
+            xmlError* error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 msg += ":\n";
@@ -145,8 +149,9 @@ public:
             throw config_error("XML XInclude error.  One or more files failed to load.");
         }
 
-        xmlNode * root = xmlDocGetRootElement(doc);
-        if (!root) {
+        xmlNode* root = xmlDocGetRootElement(doc);
+        if (!root)
+        {
             xmlFreeDoc(doc);
             throw config_error("XML document is empty.");
         }
@@ -155,58 +160,57 @@ public:
         xmlFreeDoc(doc);
     }
 
-private:
-    void inline append_attributes(xmlAttr *attributes, xml_node & node)
+  private:
+    void inline append_attributes(xmlAttr* attributes, xml_node& node)
     {
-        for (; attributes; attributes = attributes->next )
+        for (; attributes; attributes = attributes->next)
         {
-            node.add_attribute(reinterpret_cast<const char *>(attributes->name),
-                               reinterpret_cast<const char *>(attributes->children->content));
+            node.add_attribute(reinterpret_cast<const char*>(attributes->name),
+                               reinterpret_cast<const char*>(attributes->children->content));
         }
     }
 
-    void inline populate_tree(xmlNode *cur_node, xml_node &node)
+    void inline populate_tree(xmlNode* cur_node, xml_node& node)
     {
-        for (; cur_node; cur_node = cur_node->next )
+        for (; cur_node; cur_node = cur_node->next)
         {
             switch (cur_node->type)
             {
-            case XML_ELEMENT_NODE:
-            {
-                xml_node &new_node = node.add_child(reinterpret_cast<const char *>(cur_node->name), cur_node->line, false);
-                append_attributes(cur_node->properties, new_node);
-                populate_tree(cur_node->children, new_node);
-            }
-            break;
-            case XML_TEXT_NODE:
-            {
-                std::string trimmed(reinterpret_cast<const char *>(cur_node->content));
-                mapnik::util::trim(trimmed);
-                if (trimmed.empty()) break; //Don't add empty text nodes
-                node.add_child(trimmed.c_str(), cur_node->line, true);
-            }
-            break;
-            case XML_COMMENT_NODE:
+                case XML_ELEMENT_NODE: {
+                    xml_node& new_node =
+                      node.add_child(reinterpret_cast<const char*>(cur_node->name), cur_node->line, false);
+                    append_attributes(cur_node->properties, new_node);
+                    populate_tree(cur_node->children, new_node);
+                }
                 break;
-            default:
+                case XML_TEXT_NODE: {
+                    std::string trimmed(reinterpret_cast<const char*>(cur_node->content));
+                    mapnik::util::trim(trimmed);
+                    if (trimmed.empty())
+                        break; // Don't add empty text nodes
+                    node.add_child(trimmed.c_str(), cur_node->line, true);
+                }
                 break;
-
+                case XML_COMMENT_NODE:
+                    break;
+                default:
+                    break;
             }
         }
     }
 
     xmlParserCtxtPtr ctx_;
-    const char *encoding_;
+    const char* encoding_;
     int options_;
-    const char *url_;
+    const char* url_;
 };
 
-void read_xml(std::string const & filename, xml_node &node)
+void read_xml(std::string const& filename, xml_node& node)
 {
     libxml2_loader loader;
     loader.load(filename, node);
 }
-void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path)
+void read_xml_string(std::string const& str, xml_node& node, std::string const& base_path)
 {
     libxml2_loader loader;
     loader.load_string(str, node, base_path);

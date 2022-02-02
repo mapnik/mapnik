@@ -32,31 +32,32 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/value/types.hpp>
 
+namespace mapnik {
+namespace svg {
 
-namespace mapnik { namespace svg {
+/*!
+ * @brief Performs the actual generation of output calling the underlying library.
+ * A method to generate each kind of SVG tag is provided. The information needed
+ * needed to generate the attributes of a tag is passed within a *_output_attributes
+ * structure.
+ */
+template<typename OutputIterator>
+class svg_generator : private util::noncopyable
+{
+  public:
+    explicit svg_generator(OutputIterator& output_iterator);
+    ~svg_generator();
 
-    /*!
-     * @brief Performs the actual generation of output calling the underlying library.
-     * A method to generate each kind of SVG tag is provided. The information needed
-     * needed to generate the attributes of a tag is passed within a *_output_attributes
-     * structure.
-     */
-    template <typename OutputIterator>
-    class svg_generator : private util::noncopyable
-    {
-    public:
-        explicit svg_generator(OutputIterator& output_iterator);
-        ~svg_generator();
-
-        void generate_header();
-        void generate_opening_root(root_output_attributes const& root_attributes);
-        void generate_closing_root();
-        void generate_rect(rect_output_attributes const& rect_attributes);
-        void generate_opening_group(mapnik::value_integer val);
-        void generate_opening_group(std::string const& val);
-        void generate_closing_group();
-        OutputIterator& output_iterator_;
-    };
-    }}
+    void generate_header();
+    void generate_opening_root(root_output_attributes const& root_attributes);
+    void generate_closing_root();
+    void generate_rect(rect_output_attributes const& rect_attributes);
+    void generate_opening_group(mapnik::value_integer val);
+    void generate_opening_group(std::string const& val);
+    void generate_closing_group();
+    OutputIterator& output_iterator_;
+};
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_GENERATOR_HPP

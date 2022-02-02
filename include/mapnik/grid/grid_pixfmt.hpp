@@ -33,96 +33,86 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/grid/grid_pixel.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 //============================================================blender_gray
-template<typename ColorT> struct blender_gray
+template<typename ColorT>
+struct blender_gray
 {
     using color_type = ColorT;
     using value_type = typename color_type::value_type;
     using calc_type = typename color_type::calc_type;
     enum base_scale_e { base_shift = color_type::base_shift };
 
-    static AGG_INLINE void blend_pix(value_type* p, unsigned cv,
-                                     unsigned alpha, unsigned /*cover*/=0)
+    static AGG_INLINE void blend_pix(value_type* p, unsigned cv, unsigned alpha, unsigned /*cover*/ = 0)
     {
         *p = (value_type)((((cv - calc_type(*p)) * alpha) + (calc_type(*p) << base_shift)) >> base_shift);
     }
 };
 
-
-
 //=====================================================apply_gamma_dir_gray
-template<typename ColorT, class GammaLut> class apply_gamma_dir_gray
+template<typename ColorT, class GammaLut>
+class apply_gamma_dir_gray
 {
-public:
+  public:
     using value_type = typename ColorT::value_type;
 
-    apply_gamma_dir_gray(const GammaLut& gamma) : m_gamma(gamma) {}
+    apply_gamma_dir_gray(const GammaLut& gamma)
+        : m_gamma(gamma)
+    {}
 
-    AGG_INLINE void operator () (value_type* p)
-    {
-        *p = m_gamma.dir(*p);
-    }
+    AGG_INLINE void operator()(value_type* p) { *p = m_gamma.dir(*p); }
 
-private:
+  private:
     const GammaLut& m_gamma;
 };
-
-
 
 //=====================================================apply_gamma_inv_gray
-template<typename ColorT, class GammaLut> class apply_gamma_inv_gray
+template<typename ColorT, class GammaLut>
+class apply_gamma_inv_gray
 {
-public:
+  public:
     using value_type = typename ColorT::value_type;
 
-    apply_gamma_inv_gray(const GammaLut& gamma) : m_gamma(gamma) {}
+    apply_gamma_inv_gray(const GammaLut& gamma)
+        : m_gamma(gamma)
+    {}
 
-    AGG_INLINE void operator () (value_type* p)
-    {
-        *p = m_gamma.inv(*p);
-    }
+    AGG_INLINE void operator()(value_type* p) { *p = m_gamma.inv(*p); }
 
-private:
+  private:
     const GammaLut& m_gamma;
 };
 
-
-
 //=================================================pixfmt_alpha_blend_gray
-template<typename Blender, class RenBuf, unsigned Step=1, unsigned Offset=0>
+template<typename Blender, class RenBuf, unsigned Step = 1, unsigned Offset = 0>
 class pixfmt_alpha_blend_gray
 {
-public:
-    using rbuf_type = RenBuf  ;
+  public:
+    using rbuf_type = RenBuf;
     using row_data = typename rbuf_type::row_data;
-    using blender_type = Blender ;
+    using blender_type = Blender;
     using color_type = typename blender_type::color_type;
-    using order_type = int                              ; // A fake one
-    using value_type = typename color_type::value_type  ;
-    using calc_type = typename color_type::calc_type   ;
-    enum base_scale_e
-    {
+    using order_type = int; // A fake one
+    using value_type = typename color_type::value_type;
+    using calc_type = typename color_type::calc_type;
+    enum base_scale_e {
         base_shift = color_type::base_shift,
         base_scale = color_type::base_scale,
-        base_mask  = color_type::base_mask,
-        pix_width  = sizeof(value_type),
-        pix_step   = Step,
+        base_mask = color_type::base_mask,
+        pix_width = sizeof(value_type),
+        pix_step = Step,
         pix_offset = Offset
     };
 
-private:
+  private:
     //--------------------------------------------------------------------
-    static AGG_INLINE void copy_or_blend_pix(value_type* p,
-                                             const color_type& c,
-                                             unsigned cover)
+    static AGG_INLINE void copy_or_blend_pix(value_type* p, const color_type& c, unsigned cover)
     {
         if (c.a)
         {
             calc_type alpha = (calc_type(c.a) * (cover + 1)) >> 8;
-            if(alpha == base_mask)
+            if (alpha == base_mask)
             {
                 *p = c.v;
             }
@@ -133,13 +123,11 @@ private:
         }
     }
 
-
-    static AGG_INLINE void copy_or_blend_pix(value_type* p,
-                                             const color_type& c)
+    static AGG_INLINE void copy_or_blend_pix(value_type* p, const color_type& c)
     {
         if (c.a)
         {
-            if(c.a == base_mask)
+            if (c.a == base_mask)
             {
                 *p = c.v;
             }
@@ -150,11 +138,10 @@ private:
         }
     }
 
-
-public:
+  public:
     //--------------------------------------------------------------------
-    explicit pixfmt_alpha_blend_gray(rbuf_type& rb) :
-        m_rbuf(&rb)
+    explicit pixfmt_alpha_blend_gray(rbuf_type& rb)
+        : m_rbuf(&rb)
     {}
     void attach(rbuf_type& rb) { m_rbuf = &rb; }
     //--------------------------------------------------------------------
@@ -163,43 +150,31 @@ public:
     bool attach(PixFmt& pixf, int x1, int y1, int x2, int y2)
     {
         agg::rect_i r(x1, y1, x2, y2);
-        if(r.clip(agg::rect_i(0, 0, pixf.width()-1, pixf.height()-1)))
+        if (r.clip(agg::rect_i(0, 0, pixf.width() - 1, pixf.height() - 1)))
         {
             int stride = pixf.stride();
-            m_rbuf->attach(pixf.pix_ptr(r.x1, stride < 0 ? r.y2 : r.y1),
-                           (r.x2 - r.x1) + 1,
-                           (r.y2 - r.y1) + 1,
-                           stride);
+            m_rbuf->attach(pixf.pix_ptr(r.x1, stride < 0 ? r.y2 : r.y1), (r.x2 - r.x1) + 1, (r.y2 - r.y1) + 1, stride);
             return true;
         }
         return false;
     }
 
     //--------------------------------------------------------------------
-    AGG_INLINE unsigned width()  const { return m_rbuf->width();  }
+    AGG_INLINE unsigned width() const { return m_rbuf->width(); }
     AGG_INLINE unsigned height() const { return m_rbuf->height(); }
-    AGG_INLINE int      stride() const { return m_rbuf->stride(); }
+    AGG_INLINE int stride() const { return m_rbuf->stride(); }
 
     //--------------------------------------------------------------------
-    agg::int8u* row_ptr(int y)       { return m_rbuf->row_ptr(y); }
+    agg::int8u* row_ptr(int y) { return m_rbuf->row_ptr(y); }
     const agg::int8u* row_ptr(int y) const { return m_rbuf->row_ptr(y); }
-    row_data     row(int y)     const { return m_rbuf->row(y); }
+    row_data row(int y) const { return m_rbuf->row(y); }
 
-    const agg::int8u* pix_ptr(int x, int y) const
-    {
-        return m_rbuf->row_ptr(y) + x * Step + Offset;
-    }
+    const agg::int8u* pix_ptr(int x, int y) const { return m_rbuf->row_ptr(y) + x * Step + Offset; }
 
-    agg::int8u* pix_ptr(int x, int y)
-    {
-        return m_rbuf->row_ptr(y) + x * Step + Offset;
-    }
+    agg::int8u* pix_ptr(int x, int y) { return m_rbuf->row_ptr(y) + x * Step + Offset; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE static void make_pix(agg::int8u* p, const color_type& c)
-    {
-        *(value_type*)p = c.v;
-    }
+    AGG_INLINE static void make_pix(agg::int8u* p, const color_type& c) { *(value_type*)p = c.v; }
 
     //--------------------------------------------------------------------
     AGG_INLINE color_type pixel(int x, int y) const
@@ -217,60 +192,41 @@ public:
     //--------------------------------------------------------------------
     AGG_INLINE void blend_pixel(int x, int y, const color_type& c, agg::int8u cover)
     {
-        copy_or_blend_pix((value_type*)
-                          m_rbuf->row_ptr(x, y, 1) + x * Step + Offset,
-                          c,
-                          cover);
+        copy_or_blend_pix((value_type*)m_rbuf->row_ptr(x, y, 1) + x * Step + Offset, c, cover);
     }
 
-
     //--------------------------------------------------------------------
-    AGG_INLINE void copy_hline(int x, int y,
-                               unsigned len,
-                               const color_type& c)
+    AGG_INLINE void copy_hline(int x, int y, unsigned len, const color_type& c)
     {
-        value_type* p = (value_type*)
-            m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+        value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
 
         do
         {
             *p = c.v;
             p += Step;
-        }
-        while(--len);
+        } while (--len);
     }
 
-
     //--------------------------------------------------------------------
-    AGG_INLINE void copy_vline(int x, int y,
-                               unsigned len,
-                               const color_type& c)
+    AGG_INLINE void copy_vline(int x, int y, unsigned len, const color_type& c)
     {
         do
         {
-            value_type* p = (value_type*)
-                m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+            value_type* p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
             *p = c.v;
-        }
-        while(--len);
+        } while (--len);
     }
 
-
     //--------------------------------------------------------------------
-    void blend_hline(int x, int y,
-                     unsigned len,
-                     const color_type& c,
-                     agg::int8u /*cover*/)
+    void blend_hline(int x, int y, unsigned len, const color_type& c, agg::int8u /*cover*/)
     {
-        value_type* p = (value_type*)
-            m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+        value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
         do
         {
             *p = c.v;
             p += Step;
-        }
-        while(--len);
+        } while (--len);
         // We ignore alpha since grid_renderer is a binary renderer for now
         /*if (c.a)
         {
@@ -299,58 +255,45 @@ public:
         }*/
     }
 
-
     //--------------------------------------------------------------------
-    void blend_vline(int x, int y,
-                     unsigned len,
-                     const color_type& c,
-                     agg::int8u cover)
+    void blend_vline(int x, int y, unsigned len, const color_type& c, agg::int8u cover)
     {
         if (c.a)
         {
             value_type* p;
             calc_type alpha = (calc_type(c.a) * (cover + 1)) >> 8;
-            if(alpha == base_mask)
+            if (alpha == base_mask)
             {
                 do
                 {
-                    p = (value_type*)
-                        m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+                    p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
                     *p = c.v;
-                }
-                while(--len);
+                } while (--len);
             }
             else
             {
                 do
                 {
-                    p = (value_type*)
-                        m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+                    p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
                     Blender::blend_pix(p, c.v, alpha, cover);
-                }
-                while(--len);
+                } while (--len);
             }
         }
     }
 
-
     //--------------------------------------------------------------------
-    void blend_solid_hspan(int x, int y,
-                           unsigned len,
-                           const color_type& c,
-                           const agg::int8u* covers)
+    void blend_solid_hspan(int x, int y, unsigned len, const color_type& c, const agg::int8u* covers)
     {
         if (c.a)
         {
-            value_type* p = (value_type*)
-                m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+            value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
 
             do
             {
                 calc_type alpha = (calc_type(c.a) * (calc_type(*covers) + 1)) >> 8;
-                if(alpha == base_mask)
+                if (alpha == base_mask)
                 {
                     *p = c.v;
                 }
@@ -360,17 +303,12 @@ public:
                 }
                 p += Step;
                 ++covers;
-            }
-            while(--len);
+            } while (--len);
         }
     }
 
-
     //--------------------------------------------------------------------
-    void blend_solid_vspan(int x, int y,
-                           unsigned len,
-                           const color_type& c,
-                           const agg::int8u* covers)
+    void blend_solid_vspan(int x, int y, unsigned len, const color_type& c, const agg::int8u* covers)
     {
         if (c.a)
         {
@@ -378,10 +316,9 @@ public:
             {
                 calc_type alpha = (calc_type(c.a) * (calc_type(*covers) + 1)) >> 8;
 
-                value_type* p = (value_type*)
-                    m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+                value_type* p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
-                if(alpha == base_mask)
+                if (alpha == base_mask)
                 {
                     *p = c.v;
                 }
@@ -390,72 +327,59 @@ public:
                     Blender::blend_pix(p, c.v, alpha, *covers);
                 }
                 ++covers;
-            }
-            while(--len);
+            } while (--len);
         }
     }
 
-
     //--------------------------------------------------------------------
-    void copy_color_hspan(int x, int y,
-                          unsigned len,
-                          const color_type* colors)
+    void copy_color_hspan(int x, int y, unsigned len, const color_type* colors)
     {
-        value_type* p = (value_type*)
-            m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+        value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
 
         do
         {
             *p = colors->v;
             p += Step;
             ++colors;
-        }
-        while(--len);
+        } while (--len);
     }
 
-
     //--------------------------------------------------------------------
-    void copy_color_vspan(int x, int y,
-                          unsigned len,
-                          const color_type* colors)
+    void copy_color_vspan(int x, int y, unsigned len, const color_type* colors)
     {
         do
         {
-            value_type* p = (value_type*)
-                m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+            value_type* p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
             *p = colors->v;
             ++colors;
-        }
-        while(--len);
+        } while (--len);
     }
 
-
     //--------------------------------------------------------------------
-    void blend_color_hspan(int x, int y,
+    void blend_color_hspan(int x,
+                           int y,
                            unsigned len,
                            const color_type* colors,
                            const agg::int8u* covers,
                            agg::int8u cover)
     {
-        value_type* p = (value_type*)
-            m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+        value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
 
-        if(covers)
+        if (covers)
         {
             do
             {
                 copy_or_blend_pix(p, *colors++, *covers++);
                 p += Step;
-            }
-            while(--len);
+            } while (--len);
         }
         else
         {
-            if(cover == 255)
+            if (cover == 255)
             {
                 do
                 {
-                    if(colors->a == base_mask)
+                    if (colors->a == base_mask)
                     {
                         *p = colors->v;
                     }
@@ -465,8 +389,7 @@ public:
                     }
                     p += Step;
                     ++colors;
-                }
-                while(--len);
+                } while (--len);
             }
             else
             {
@@ -474,43 +397,38 @@ public:
                 {
                     copy_or_blend_pix(p, *colors++, cover);
                     p += Step;
-                }
-                while(--len);
+                } while (--len);
             }
         }
     }
 
-
-
     //--------------------------------------------------------------------
-    void blend_color_vspan(int x, int y,
+    void blend_color_vspan(int x,
+                           int y,
                            unsigned len,
                            const color_type* colors,
                            const agg::int8u* covers,
                            agg::int8u cover)
     {
         value_type* p;
-        if(covers)
+        if (covers)
         {
             do
             {
-                p = (value_type*)
-                    m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+                p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
                 copy_or_blend_pix(p, *colors++, *covers++);
-            }
-            while(--len);
+            } while (--len);
         }
         else
         {
-            if(cover == 255)
+            if (cover == 255)
             {
                 do
                 {
-                    p = (value_type*)
-                        m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+                    p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
-                    if(colors->a == base_mask)
+                    if (colors->a == base_mask)
                     {
                         *p = colors->v;
                     }
@@ -519,72 +437,64 @@ public:
                         copy_or_blend_pix(p, *colors);
                     }
                     ++colors;
-                }
-                while(--len);
+                } while (--len);
             }
             else
             {
                 do
                 {
-                    p = (value_type*)
-                        m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
+                    p = (value_type*)m_rbuf->row_ptr(x, y++, 1) + x * Step + Offset;
 
                     copy_or_blend_pix(p, *colors++, cover);
-                }
-                while(--len);
+                } while (--len);
             }
         }
     }
 
     //--------------------------------------------------------------------
-    template <typename Function>
+    template<typename Function>
     void for_each_pixel(Function f)
     {
-        for(unsigned y = 0; y < height(); ++y)
+        for (unsigned y = 0; y < height(); ++y)
         {
             row_data r = m_rbuf->row(y);
-            if(r.ptr)
+            if (r.ptr)
             {
                 unsigned len = r.x2 - r.x1 + 1;
 
-                value_type* p = (value_type*)
-                    m_rbuf->row_ptr(r.x1, y, len) + r.x1 * Step + Offset;
+                value_type* p = (value_type*)m_rbuf->row_ptr(r.x1, y, len) + r.x1 * Step + Offset;
 
                 do
                 {
                     f(p);
                     p += Step;
-                }
-                while(--len);
+                } while (--len);
             }
         }
     }
 
     //--------------------------------------------------------------------
-    template<typename GammaLut> void apply_gamma_dir(const GammaLut& g)
+    template<typename GammaLut>
+    void apply_gamma_dir(const GammaLut& g)
     {
         for_each_pixel(apply_gamma_dir_gray<color_type, GammaLut>(g));
     }
 
     //--------------------------------------------------------------------
-    template<typename GammaLut> void apply_gamma_inv(const GammaLut& g)
+    template<typename GammaLut>
+    void apply_gamma_inv(const GammaLut& g)
     {
         for_each_pixel(apply_gamma_inv_gray<color_type, GammaLut>(g));
     }
 
     //--------------------------------------------------------------------
     template<typename RenBuf2>
-    void copy_from(const RenBuf2& from,
-                   int xdst, int ydst,
-                   int xsrc, int ysrc,
-                   unsigned len)
+    void copy_from(const RenBuf2& from, int xdst, int ydst, int xsrc, int ysrc, unsigned len)
     {
         const agg::int8u* p = from.row_ptr(ysrc);
-        if(p)
+        if (p)
         {
-            memmove(m_rbuf->row_ptr(xdst, ydst, len) + xdst * pix_width,
-                    p + xsrc * pix_width,
-                    len * pix_width);
+            memmove(m_rbuf->row_ptr(xdst, ydst, len) + xdst * pix_width, p + xsrc * pix_width, len * pix_width);
         }
     }
 
@@ -592,26 +502,24 @@ public:
     template<typename SrcPixelFormatRenderer>
     void blend_from_color(const SrcPixelFormatRenderer& from,
                           const color_type& color,
-                          int xdst, int ydst,
-                          int /*xsrc*/, int ysrc,
+                          int xdst,
+                          int ydst,
+                          int /*xsrc*/,
+                          int ysrc,
                           unsigned len,
                           agg::int8u cover)
     {
         using src_value_type = typename SrcPixelFormatRenderer::value_type;
         const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
-        if(psrc)
+        if (psrc)
         {
-            value_type* pdst =
-                (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
+            value_type* pdst = (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
             do
             {
-                copy_or_blend_pix(pdst,
-                                  color,
-                                  (*psrc * cover + base_mask) >> base_shift);
+                copy_or_blend_pix(pdst, color, (*psrc * cover + base_mask) >> base_shift);
                 ++psrc;
                 ++pdst;
-            }
-            while(--len);
+            } while (--len);
         }
     }
 
@@ -619,46 +527,46 @@ public:
     template<typename SrcPixelFormatRenderer>
     void blend_from_lut(const SrcPixelFormatRenderer& from,
                         const color_type* color_lut,
-                        int xdst, int ydst,
-                        int /*xsrc*/, int ysrc,
+                        int xdst,
+                        int ydst,
+                        int /*xsrc*/,
+                        int ysrc,
                         unsigned len,
                         agg::int8u cover)
     {
         using src_value_type = typename SrcPixelFormatRenderer::value_type;
         const src_value_type* psrc = (src_value_type*)from.row_ptr(ysrc);
-        if(psrc)
+        if (psrc)
         {
-            value_type* pdst =
-                (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
+            value_type* pdst = (value_type*)m_rbuf->row_ptr(xdst, ydst, len) + xdst;
             do
             {
                 copy_or_blend_pix(pdst, color_lut[*psrc], cover);
                 ++psrc;
                 ++pdst;
-            }
-            while(--len);
+            } while (--len);
         }
     }
 
-private:
+  private:
     rbuf_type* m_rbuf;
 };
 
 using blender_gray16 = blender_gray<gray16>;
 
-using pixfmt_gray16 =  pixfmt_alpha_blend_gray<blender_gray16,
-                                               mapnik::grid_rendering_buffer>;     //----pixfmt_gray16
+using pixfmt_gray16 = pixfmt_alpha_blend_gray<blender_gray16,
+                                              mapnik::grid_rendering_buffer>; //----pixfmt_gray16
 
 using blender_gray32 = blender_gray<gray32>;
 
-using  pixfmt_gray32 = pixfmt_alpha_blend_gray<blender_gray32,
-                                               mapnik::grid_rendering_buffer>;     //----pixfmt_gray32
+using pixfmt_gray32 = pixfmt_alpha_blend_gray<blender_gray32,
+                                              mapnik::grid_rendering_buffer>; //----pixfmt_gray32
 
 using blender_gray64 = blender_gray<gray64>;
 
 using pixfmt_gray64 = pixfmt_alpha_blend_gray<blender_gray64,
-                                              mapnik::grid_rendering_buffer>;     //----pixfmt_gray64
+                                              mapnik::grid_rendering_buffer>; //----pixfmt_gray64
 
-}
+} // namespace mapnik
 
 #endif

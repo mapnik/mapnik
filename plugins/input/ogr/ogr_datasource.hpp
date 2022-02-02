@@ -52,18 +52,18 @@ DATASOURCE_PLUGIN_DEF(ogr_datasource_plugin, ogr);
 
 class ogr_datasource : public mapnik::datasource
 {
-public:
+  public:
     ogr_datasource(mapnik::parameters const& params);
-    virtual ~ogr_datasource ();
+    virtual ~ogr_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
 
-private:
+  private:
     void init(mapnik::parameters const& params);
     mapnik::box2d<double> extent_;
     mapnik::datasource::datasource_t type_;

@@ -31,21 +31,20 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 namespace x3 = boost::spirit::x3;
 
-namespace image_filter
-{
+namespace image_filter {
 
 struct image_filter_class;
-using image_filter_grammar_type = x3::rule<image_filter_class, std::vector<filter::filter_type> >;
+using image_filter_grammar_type = x3::rule<image_filter_class, std::vector<filter::filter_type>>;
 
 image_filter_grammar_type const start = "start";
 
 BOOST_SPIRIT_DECLARE(image_filter_grammar_type);
 
-}}
+} // namespace image_filter
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_FILTER_GRAMMAR_X3_HPP

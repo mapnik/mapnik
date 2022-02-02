@@ -27,10 +27,10 @@
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 class image_view
 {
-public:
+  public:
     using pixel = typename T::pixel;
     using pixel_type = typename T::pixel_type;
     static constexpr image_dtype dtype = T::dtype;
@@ -45,7 +45,7 @@ public:
     std::size_t y() const;
     std::size_t width() const;
     std::size_t height() const;
-    pixel_type const& operator() (std::size_t i, std::size_t j) const;
+    pixel_type const& operator()(std::size_t i, std::size_t j) const;
     std::size_t size() const;
     std::size_t row_size() const;
     pixel_type const* get_row(std::size_t row) const;
@@ -56,7 +56,7 @@ public:
     double get_scaling() const;
     image_dtype get_dtype() const;
 
-private:
+  private:
     std::size_t x_;
     std::size_t y_;
     std::size_t width_;
@@ -77,6 +77,6 @@ using image_view_gray64 = image_view<image_gray64>;
 using image_view_gray64s = image_view<image_gray64s>;
 using image_view_gray64f = image_view<image_gray64f>;
 
-} // end ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_VIEW_HPP

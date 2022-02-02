@@ -33,7 +33,7 @@ namespace mapnik {
 
 namespace detail {
 
-template <typename Detector, typename RendererType, typename ContextType>
+template<typename Detector, typename RendererType, typename ContextType>
 struct render_marker_symbolizer_visitor
 {
     using vector_dispatch_type = vector_markers_dispatch<Detector>;
@@ -41,21 +41,22 @@ struct render_marker_symbolizer_visitor
 
     render_marker_symbolizer_visitor(std::string const& filename,
                                      markers_symbolizer const& sym,
-                                     mapnik::feature_impl & feature,
+                                     mapnik::feature_impl& feature,
                                      proj_transform const& prj_trans,
                                      RendererType const& common,
                                      box2d<double> const& clip_box,
-                                     ContextType & renderer_context)
-        : filename_(filename),
-          sym_(sym),
-          feature_(feature),
-          prj_trans_(prj_trans),
-          common_(common),
-          clip_box_(clip_box),
-          renderer_context_(renderer_context) {}
+                                     ContextType& renderer_context)
+        : filename_(filename)
+        , sym_(sym)
+        , feature_(feature)
+        , prj_trans_(prj_trans)
+        , common_(common)
+        , clip_box_(clip_box)
+        , renderer_context_(renderer_context)
+    {}
 
     svg_attribute_type const& get_marker_attributes(svg_path_ptr const& stock_marker,
-                                                    svg_attribute_type & custom_attr) const
+                                                    svg_attribute_type& custom_attr) const
     {
         auto const& stock_attr = stock_marker->attributes();
         if (push_explicit_style(stock_attr, custom_attr, sym_, feature_, common_.vars_))
@@ -64,8 +65,8 @@ struct render_marker_symbolizer_visitor
             return stock_attr;
     }
 
-    template <typename Marker, typename Dispatch>
-    void render_marker(Marker const& mark, Dispatch & rasterizer_dispatch) const
+    template<typename Marker, typename Dispatch>
+    void render_marker(Marker const& mark, Dispatch& rasterizer_dispatch) const
     {
         auto const& vars = common_.vars_;
 
@@ -75,14 +76,8 @@ struct render_marker_symbolizer_visitor
             evaluate_transform(geom_tr, feature_, vars, *geometry_transform, common_.scale_factor_);
         }
 
-        vertex_converter_type converter(clip_box_,
-                                        sym_,
-                                        common_.t_,
-                                        prj_trans_,
-                                        geom_tr,
-                                        feature_,
-                                        vars,
-                                        common_.scale_factor_);
+        vertex_converter_type
+          converter(clip_box_, sym_, common_.t_, prj_trans_, geom_tr, feature_, vars, common_.scale_factor_);
 
         bool clip = get<value_bool, keys::clip>(sym_, feature_, vars);
         double offset = get<value_double, keys::offset>(sym_, feature_, vars);
@@ -108,18 +103,21 @@ struct render_marker_symbolizer_visitor
             }
         }
 
-        converter.template set<transform_tag>(); //always transform
-        if (std::fabs(offset) > 0.0) converter.template set<offset_transform_tag>(); // parallel offset
-        converter.template set<affine_transform_tag>(); // optional affine transform
-        if (simplify_tolerance > 0.0) converter.template set<simplify_tag>(); // optional simplify converter
-        if (smooth > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+        converter.template set<transform_tag>(); // always transform
+        if (std::fabs(offset) > 0.0)
+            converter.template set<offset_transform_tag>(); // parallel offset
+        converter.template set<affine_transform_tag>();     // optional affine transform
+        if (simplify_tolerance > 0.0)
+            converter.template set<simplify_tag>(); // optional simplify converter
+        if (smooth > 0.0)
+            converter.template set<smooth_tag>(); // optional smooth converter
 
         apply_markers_multi(feature_, vars, converter, rasterizer_dispatch, sym_);
     }
 
-    void operator() (marker_null const&) const {}
+    void operator()(marker_null const&) const {}
 
-    void operator() (marker_svg const& mark) const
+    void operator()(marker_svg const& mark) const
     {
         using namespace mapnik::svg;
 
@@ -137,8 +135,7 @@ struct render_marker_symbolizer_visitor
 
         // special case for simple ellipse markers
         // to allow for full control over rx/ry dimensions
-        if (filename_ == "shape://ellipse"
-           && (has_key(sym_,keys::width) || has_key(sym_,keys::height)))
+        if (filename_ == "shape://ellipse" && (has_key(sym_, keys::width) || has_key(sym_, keys::height)))
         {
             marker_ptr = std::make_shared<svg_storage_type>();
             is_ellipse = true;
@@ -177,13 +174,14 @@ struct render_marker_symbolizer_visitor
         render_marker(mark, rasterizer_dispatch);
     }
 
-    void operator() (marker_rgba8 const& mark) const
+    void operator()(marker_rgba8 const& mark) const
     {
         agg::trans_affine image_tr = agg::trans_affine_scaling(common_.scale_factor_);
 
         setup_transform_scaling(image_tr, mark.width(), mark.height(), feature_, common_.vars_, sym_);
         auto image_transform = get_optional<transform_type>(sym_, keys::image_transform);
-        if (image_transform) evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
+        if (image_transform)
+            evaluate_transform(image_tr, feature_, common_.vars_, *image_transform, common_.scale_factor_);
         box2d<double> const& bbox = mark.bounding_box();
         mapnik::image_rgba8 const& marker = mark.get_data();
         // - clamp sizes to > 4 pixels of interactivity
@@ -205,11 +203,11 @@ struct render_marker_symbolizer_visitor
   private:
     std::string const& filename_;
     markers_symbolizer const& sym_;
-    mapnik::feature_impl & feature_;
+    mapnik::feature_impl& feature_;
     proj_transform const& prj_trans_;
     RendererType const& common_;
     box2d<double> const& clip_box_;
-    ContextType & renderer_context_;
+    ContextType& renderer_context_;
 };
 
 } // namespace detail
@@ -221,16 +219,15 @@ markers_dispatch_params::markers_dispatch_params(box2d<double> const& size,
                                                  attributes const& vars,
                                                  double scale,
                                                  bool snap)
-    : placement_params{
-        size,
-        tr,
-        get<value_double, keys::spacing>(sym, feature, vars),
-        get<value_double, keys::spacing_offset>(sym, feature, vars),
-        get<value_double, keys::max_error>(sym, feature, vars),
-        get<value_bool, keys::allow_overlap>(sym, feature, vars),
-        get<value_bool, keys::avoid_edges>(sym, feature, vars),
-        get<direction_enum, keys::direction>(sym, feature, vars),
-        scale}
+    : placement_params{size,
+                       tr,
+                       get<value_double, keys::spacing>(sym, feature, vars),
+                       get<value_double, keys::spacing_offset>(sym, feature, vars),
+                       get<value_double, keys::max_error>(sym, feature, vars),
+                       get<value_bool, keys::allow_overlap>(sym, feature, vars),
+                       get<value_bool, keys::avoid_edges>(sym, feature, vars),
+                       get<direction_enum, keys::direction>(sym, feature, vars),
+                       scale}
     , placement_method(get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars))
     , ignore_placement(get<value_bool, keys::ignore_placement>(sym, feature, vars))
     , snap_to_pixels(snap)
@@ -241,25 +238,22 @@ markers_dispatch_params::markers_dispatch_params(box2d<double> const& size,
 }
 
 void render_markers_symbolizer(markers_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans,
                                renderer_common const& common,
                                box2d<double> const& clip_box,
-                               markers_renderer_context & renderer_context)
+                               markers_renderer_context& renderer_context)
 {
     using Detector = label_collision_detector4;
     using RendererType = renderer_common;
     using ContextType = markers_renderer_context;
-    using VisitorType = detail::render_marker_symbolizer_visitor<Detector,
-                                                                 RendererType,
-                                                                 ContextType>;
+    using VisitorType = detail::render_marker_symbolizer_visitor<Detector, RendererType, ContextType>;
 
     std::string filename = get<std::string>(sym, keys::file, feature, common.vars_, "shape://ellipse");
     if (!filename.empty())
     {
         auto mark = mapnik::marker_cache::instance().find(filename, true);
-        VisitorType visitor(filename, sym, feature, prj_trans, common, clip_box,
-                            renderer_context);
+        VisitorType visitor(filename, sym, feature, prj_trans, common, clip_box, renderer_context);
         util::apply_visitor(visitor, *mark);
     }
 }

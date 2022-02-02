@@ -40,178 +40,194 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_span_interpolator_linear.h"
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik  { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename T>
-struct agg_scaling_traits  {};
+template<typename T>
+struct agg_scaling_traits
+{};
 
-template <>
+template<>
 struct agg_scaling_traits<image_rgba8>
 {
     using pixfmt_pre = agg::pixfmt_rgba32_pre;
     using color_type = agg::rgba8;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_rgba_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_rgba_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_rgba_affine<img_src_type>;
-
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray8>
 {
     using pixfmt_pre = agg::pixfmt_gray8_pre;
     using color_type = agg::gray8;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray8s>
 {
     using pixfmt_pre = agg::pixfmt_gray8_pre;
     using color_type = agg::gray8;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray16>
 {
     using pixfmt_pre = agg::pixfmt_gray16_pre;
     using color_type = agg::gray16;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray16s>
 {
     using pixfmt_pre = agg::pixfmt_gray16_pre;
     using color_type = agg::gray16;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray32>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray32s>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray32f>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray64>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray64s>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <>
+template<>
 struct agg_scaling_traits<image_gray64f>
 {
     using pixfmt_pre = agg::pixfmt_gray32_pre;
     using color_type = agg::gray32;
     using interpolator_type = agg::span_interpolator_linear<>;
     using img_src_type = agg::image_accessor_clone<pixfmt_pre>;
-    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type,interpolator_type>;
+    using span_image_filter = agg::span_image_filter_gray_nn<img_src_type, interpolator_type>;
     using span_image_resample_affine = span_image_resample_gray_affine<img_src_type>;
 };
 
-template <typename Filter>
-void set_scaling_method(Filter & filter, scaling_method_e scaling_method, double filter_factor)
+template<typename Filter>
+void set_scaling_method(Filter& filter, scaling_method_e scaling_method, double filter_factor)
 {
-    switch(scaling_method)
+    switch (scaling_method)
     {
-    case SCALING_BILINEAR:
-        filter.calculate(agg::image_filter_bilinear(), true); break;
-    case SCALING_BICUBIC:
-        filter.calculate(agg::image_filter_bicubic(), true); break;
-    case SCALING_SPLINE16:
-        filter.calculate(agg::image_filter_spline16(), true); break;
-    case SCALING_SPLINE36:
-        filter.calculate(agg::image_filter_spline36(), true); break;
-    case SCALING_HANNING:
-        filter.calculate(agg::image_filter_hanning(), true); break;
-    case SCALING_HAMMING:
-        filter.calculate(agg::image_filter_hamming(), true); break;
-    case SCALING_HERMITE:
-        filter.calculate(agg::image_filter_hermite(), true); break;
-    case SCALING_KAISER:
-        filter.calculate(agg::image_filter_kaiser(), true); break;
-    case SCALING_QUADRIC:
-        filter.calculate(agg::image_filter_quadric(), true); break;
-    case SCALING_CATROM:
-        filter.calculate(agg::image_filter_catrom(), true); break;
-    case SCALING_GAUSSIAN:
-        filter.calculate(agg::image_filter_gaussian(), true); break;
-    case SCALING_BESSEL:
-        filter.calculate(agg::image_filter_bessel(), true); break;
-    case SCALING_MITCHELL:
-        filter.calculate(agg::image_filter_mitchell(), true); break;
-    case SCALING_SINC:
-        filter.calculate(agg::image_filter_sinc(filter_factor), true); break;
-    case SCALING_LANCZOS:
-        filter.calculate(agg::image_filter_lanczos(filter_factor), true); break;
-    case SCALING_BLACKMAN:
-        filter.calculate(agg::image_filter_blackman(filter_factor), true); break;
-    default:
-        break;
+        case SCALING_BILINEAR:
+            filter.calculate(agg::image_filter_bilinear(), true);
+            break;
+        case SCALING_BICUBIC:
+            filter.calculate(agg::image_filter_bicubic(), true);
+            break;
+        case SCALING_SPLINE16:
+            filter.calculate(agg::image_filter_spline16(), true);
+            break;
+        case SCALING_SPLINE36:
+            filter.calculate(agg::image_filter_spline36(), true);
+            break;
+        case SCALING_HANNING:
+            filter.calculate(agg::image_filter_hanning(), true);
+            break;
+        case SCALING_HAMMING:
+            filter.calculate(agg::image_filter_hamming(), true);
+            break;
+        case SCALING_HERMITE:
+            filter.calculate(agg::image_filter_hermite(), true);
+            break;
+        case SCALING_KAISER:
+            filter.calculate(agg::image_filter_kaiser(), true);
+            break;
+        case SCALING_QUADRIC:
+            filter.calculate(agg::image_filter_quadric(), true);
+            break;
+        case SCALING_CATROM:
+            filter.calculate(agg::image_filter_catrom(), true);
+            break;
+        case SCALING_GAUSSIAN:
+            filter.calculate(agg::image_filter_gaussian(), true);
+            break;
+        case SCALING_BESSEL:
+            filter.calculate(agg::image_filter_bessel(), true);
+            break;
+        case SCALING_MITCHELL:
+            filter.calculate(agg::image_filter_mitchell(), true);
+            break;
+        case SCALING_SINC:
+            filter.calculate(agg::image_filter_sinc(filter_factor), true);
+            break;
+        case SCALING_LANCZOS:
+            filter.calculate(agg::image_filter_lanczos(filter_factor), true);
+            break;
+        case SCALING_BLACKMAN:
+            filter.calculate(agg::image_filter_blackman(filter_factor), true);
+            break;
+        default:
+            break;
     }
 }
 
-}
+} // namespace detail
 
-} //
-
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_SCALING_TRAITS_HPP

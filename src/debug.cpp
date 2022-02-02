@@ -30,9 +30,11 @@
 #include <fstream>
 #include <cstdlib>
 
+// clang-format off
 #ifndef MAPNIK_LOG_FORMAT
 #define MAPNIK_LOG_FORMAT  Mapnik LOG> %Y-%m-%d %H:%M:%S:
 #endif
+// clang-format on
 
 #ifndef MAPNIK_DEFAULT_LOG_SEVERITY
 #ifdef MAPNIK_DEBUG
@@ -49,25 +51,27 @@ namespace mapnik {
 std::mutex logger::severity_mutex_;
 std::mutex logger::format_mutex_;
 
-std::atomic<bool> logger::severity_env_check_ {true};
-std::atomic<bool> logger::format_env_check_ {true};
+std::atomic<bool> logger::severity_env_check_{true};
+std::atomic<bool> logger::format_env_check_{true};
 
-std::atomic<logger::severity_type> logger::severity_level_ {
+std::atomic<logger::severity_type> logger::severity_level_
+{
 #else
 
-bool logger::severity_env_check_ {true};
-bool logger::format_env_check_ {true};
+bool logger::severity_env_check_{true};
+bool logger::format_env_check_{true};
 
-logger::severity_type logger::severity_level_ {
+logger::severity_type logger::severity_level_
+{
 #endif
 #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
     logger::debug
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
     logger::warn
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
-    logger::error
+logger::error
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
-    logger::none
+logger::none
 #else
 #error "Wrong default log severity level specified!"
 #endif
@@ -98,7 +102,6 @@ std::string logger::str()
     std::strftime(buf, sizeof(buf), logger::format_.c_str(), localtime(&tm));
     return buf;
 }
-
 
 // output
 
@@ -154,6 +157,5 @@ void logger::use_console()
 
     std::clog.rdbuf(saved_buf_);
 }
-
 
 } // namespace mapnik
