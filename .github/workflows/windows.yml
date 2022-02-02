@@ -21,7 +21,7 @@ on:
 
 env:
   VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
-  VCPKG_NUGET_REPOSITORY: https://github.com/mapnik/vcpkg-nuget.git
+  VCPKG_NUGET_REPOSITORY: https://github.com/mapnik/vcpkg-cache.git
   UPDATE: 1
   preset: windows-ci
 

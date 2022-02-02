@@ -11,7 +11,7 @@ on:
 jobs:
   windows:
     name: Windows memory mapped
-    uses: mapnik/mapnik/.github/workflows/windows.yml@gh_ci
+    uses: mapnik/mapnik/.github/workflows/windows.yml@master
     with:
       VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
@@ -22,7 +22,7 @@ jobs:
   
   windows-mmf-off:
     name: Windows file based
-    uses: mapnik/mapnik/.github/workflows/windows.yml@gh_ci
+    uses: mapnik/mapnik/.github/workflows/windows.yml@master
     with:
       VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
@@ -33,7 +33,7 @@ jobs:
 
   ubuntu:
     name: Linux memory mapped
-    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@gh_ci
+    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@master
     with:
       VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
@@ -44,7 +44,7 @@ jobs:
 
   ubuntu-mmf-off:
     name: Linux file based
-    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@gh_ci
+    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@master
     with:
       VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
@@ -55,7 +55,7 @@ jobs:
 
   macos:
     name: MacOS memory mapped
-    uses: mapnik/mapnik/.github/workflows/macos.yml@gh_ci
+    uses: mapnik/mapnik/.github/workflows/macos.yml@master
     with:
       VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
@@ -66,7 +66,7 @@ jobs:
 
   macos-mmf-off:
     name: MacOS file based
-    uses: mapnik/mapnik/.github/workflows/macos.yml@gh_ci
+    uses: mapnik/mapnik/.github/workflows/macos.yml@master
     with:
       VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
