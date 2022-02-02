@@ -18,7 +18,7 @@ jobs:
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
     secrets:
-      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
   
   windows-mmf-off:
     name: Windows file based
@@ -29,7 +29,7 @@ jobs:
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
     secrets:
-      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   ubuntu:
     name: Linux memory mapped
@@ -40,7 +40,7 @@ jobs:
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
     secrets:
-      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   ubuntu-mmf-off:
     name: Linux file based
@@ -51,7 +51,7 @@ jobs:
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
     secrets:
-      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   macos:
     name: MacOS memory mapped
@@ -62,7 +62,7 @@ jobs:
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
     secrets:
-      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   macos-mmf-off:
     name: MacOS file based
@@ -73,4 +73,4 @@ jobs:
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
     secrets:
-      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_NUGET_CI }}
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
