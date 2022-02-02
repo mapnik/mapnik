@@ -33,8 +33,10 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-struct grid_rasterizer :  agg::rasterizer_scanline_aa<>, util::noncopyable {};
+struct grid_rasterizer : agg::rasterizer_scanline_aa<>,
+                         util::noncopyable
+{};
 
-}
+} // namespace mapnik
 
-#endif //MAPNIK_AGG_RASTERIZER_HPP
+#endif // MAPNIK_AGG_RASTERIZER_HPP

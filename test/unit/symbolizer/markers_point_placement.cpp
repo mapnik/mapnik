@@ -7,116 +7,135 @@
 
 using namespace mapnik;
 
-TEST_CASE("marker placement point") {
+TEST_CASE("marker placement point")
+{
+    SECTION("empty geometry")
+    {
+        mapnik::geometry::line_string<double> g;
+        using va_type = mapnik::geometry::line_string_vertex_adapter<double>;
+        va_type va(g);
 
-SECTION("empty geometry") {
+        using detector_type = mapnik::label_collision_detector4;
+        detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
 
-    mapnik::geometry::line_string<double> g;
-    using va_type = mapnik::geometry::line_string_vertex_adapter<double>;
-    va_type va(g);
+        using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
 
-    using detector_type = mapnik::label_collision_detector4;
-    detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
+        mapnik::markers_placement_params params{mapnik::box2d<double>(0, 0, 10, 10),
+                                                agg::trans_affine(),
+                                                0,
+                                                NAN,
+                                                0,
+                                                false,
+                                                false,
+                                                DIRECTION_AUTO,
+                                                1.0};
 
-    using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
+        placement_type placement(va, detector, params);
 
-    mapnik::markers_placement_params params {
-        mapnik::box2d<double>(0, 0, 10, 10),
-        agg::trans_affine(),
-        0, NAN, 0, false, false, DIRECTION_AUTO, 1.0 };
+        double x, y, angle;
+        CHECK(!placement.get_point(x, y, angle, true));
+    }
 
-    placement_type placement(va, detector, params);
+    SECTION("point")
+    {
+        mapnik::geometry::point<double> g(2.0, 3.0);
+        using va_type = mapnik::geometry::point_vertex_adapter<double>;
+        va_type va(g);
 
-    double x, y, angle;
-    CHECK( !placement.get_point(x, y, angle, true) );
-}
+        using detector_type = mapnik::label_collision_detector4;
+        detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
 
-SECTION("point") {
+        using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
 
-    mapnik::geometry::point<double> g(2.0, 3.0);
-    using va_type = mapnik::geometry::point_vertex_adapter<double>;
-    va_type va(g);
+        mapnik::markers_placement_params params{mapnik::box2d<double>(0, 0, 10, 10),
+                                                agg::trans_affine(),
+                                                0,
+                                                NAN,
+                                                0,
+                                                false,
+                                                false,
+                                                DIRECTION_AUTO,
+                                                1.0};
 
-    using detector_type = mapnik::label_collision_detector4;
-    detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
+        placement_type placement(va, detector, params);
 
-    using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
+        double x, y, angle;
 
-    mapnik::markers_placement_params params {
-        mapnik::box2d<double>(0, 0, 10, 10),
-        agg::trans_affine(),
-        0, NAN, 0, false, false, DIRECTION_AUTO, 1.0 };
+        CHECK(placement.get_point(x, y, angle, true));
+        CHECK(x == Approx(2.0));
+        CHECK(y == Approx(3.0));
+        CHECK(angle == Approx(0.0));
 
-    placement_type placement(va, detector, params);
+        CHECK(!placement.get_point(x, y, angle, true));
+    }
 
-    double x, y, angle;
+    SECTION("line string")
+    {
+        mapnik::geometry::line_string<double> g;
+        g.emplace_back(1.0, 1.0);
+        g.emplace_back(2.0, 2.0);
+        using va_type = mapnik::geometry::line_string_vertex_adapter<double>;
+        va_type va(g);
 
-    CHECK( placement.get_point(x, y, angle, true) );
-    CHECK( x == Approx(2.0) );
-    CHECK( y == Approx(3.0) );
-    CHECK( angle == Approx(0.0) );
+        using detector_type = mapnik::label_collision_detector4;
+        detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
 
-    CHECK( !placement.get_point(x, y, angle, true) );
-}
+        using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
 
-SECTION("line string") {
+        mapnik::markers_placement_params params{mapnik::box2d<double>(0, 0, 10, 10),
+                                                agg::trans_affine(),
+                                                0,
+                                                NAN,
+                                                0,
+                                                false,
+                                                false,
+                                                DIRECTION_AUTO,
+                                                1.0};
 
-    mapnik::geometry::line_string<double> g;
-    g.emplace_back(1.0, 1.0);
-    g.emplace_back(2.0, 2.0);
-    using va_type = mapnik::geometry::line_string_vertex_adapter<double>;
-    va_type va(g);
+        placement_type placement(va, detector, params);
 
-    using detector_type = mapnik::label_collision_detector4;
-    detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
+        double x, y, angle;
 
-    using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
+        CHECK(placement.get_point(x, y, angle, true));
+        CHECK(x == Approx(1.5));
+        CHECK(y == Approx(1.5));
+        CHECK(angle == Approx(0));
 
-    mapnik::markers_placement_params params {
-        mapnik::box2d<double>(0, 0, 10, 10),
-        agg::trans_affine(),
-        0, NAN, 0, false, false, DIRECTION_AUTO, 1.0 };
+        CHECK(!placement.get_point(x, y, angle, true));
+    }
 
-    placement_type placement(va, detector, params);
+    SECTION("line string zero length")
+    {
+        mapnik::geometry::line_string<double> g;
+        g.emplace_back(1.0, 1.0);
+        g.emplace_back(1.0, 1.0);
+        using va_type = mapnik::geometry::line_string_vertex_adapter<double>;
+        va_type va(g);
 
-    double x, y, angle;
+        using detector_type = mapnik::label_collision_detector4;
+        detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
 
-    CHECK( placement.get_point(x, y, angle, true) );
-    CHECK( x == Approx(1.5) );
-    CHECK( y == Approx(1.5) );
-    CHECK( angle == Approx(0) );
+        using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
 
-    CHECK( !placement.get_point(x, y, angle, true) );
-}
+        mapnik::markers_placement_params params{mapnik::box2d<double>(0, 0, 10, 10),
+                                                agg::trans_affine(),
+                                                0,
+                                                NAN,
+                                                0,
+                                                false,
+                                                false,
+                                                DIRECTION_AUTO,
+                                                1.0};
 
-SECTION("line string zero length") {
+        placement_type placement(va, detector, params);
 
-    mapnik::geometry::line_string<double> g;
-    g.emplace_back(1.0, 1.0);
-    g.emplace_back(1.0, 1.0);
-    using va_type = mapnik::geometry::line_string_vertex_adapter<double>;
-    va_type va(g);
+        double x, y, angle;
 
-    using detector_type = mapnik::label_collision_detector4;
-    detector_type detector(mapnik::box2d<double>(0, 0, 100, 100));
+        CHECK(placement.get_point(x, y, angle, true));
+        CHECK(x == Approx(1.0));
+        CHECK(y == Approx(1.0));
+        CHECK(angle == Approx(0));
 
-    using placement_type = mapnik::markers_point_placement<va_type, detector_type>;
-
-    mapnik::markers_placement_params params {
-        mapnik::box2d<double>(0, 0, 10, 10),
-        agg::trans_affine(),
-        0, NAN, 0, false, false, DIRECTION_AUTO, 1.0 };
-
-    placement_type placement(va, detector, params);
-
-    double x, y, angle;
-
-    CHECK( placement.get_point(x, y, angle, true) );
-    CHECK( x == Approx(1.0) );
-    CHECK( y == Approx(1.0) );
-    CHECK( angle == Approx(0) );
-
-    CHECK( !placement.get_point(x, y, angle, true) );
-}
-
+        CHECK(!placement.get_point(x, y, angle, true));
+    }
 }

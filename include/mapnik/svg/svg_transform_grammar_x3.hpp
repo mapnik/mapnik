@@ -26,7 +26,9 @@
 // mapnik
 #include <mapnik/svg/svg_grammar_config_x3.hpp>
 
-namespace mapnik { namespace svg { namespace grammar {
+namespace mapnik {
+namespace svg {
+namespace grammar {
 
 using namespace boost::spirit::x3;
 
@@ -36,6 +38,8 @@ svg_transform_grammar_type const svg_transform = "SVG Transform";
 
 BOOST_SPIRIT_DECLARE(svg_transform_grammar_type);
 
-}}}
+} // namespace grammar
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_TRANSFORM_GRAMMAR_X3_HPP

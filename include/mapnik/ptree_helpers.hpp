@@ -34,8 +34,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template <typename T>
-void set_attr(boost::property_tree::ptree & pt, std::string const& name, T const& v)
+template<typename T>
+void set_attr(boost::property_tree::ptree& pt, std::string const& name, T const& v)
 {
     pt.put("<xmlattr>." + name, v);
 }

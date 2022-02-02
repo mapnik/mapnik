@@ -28,14 +28,14 @@
 // stl
 #include <string>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<double> const& geom);
+bool to_wkt(std::string& wkt, mapnik::geometry::geometry<double> const& geom);
 
-bool to_wkt(std::string & wkt,  mapnik::geometry::geometry<std::int64_t> const& geom);
+bool to_wkt(std::string& wkt, mapnik::geometry::geometry<std::int64_t> const& geom);
 
-}}
-
-
+} // namespace util
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_TO_WKT_HPP

@@ -32,13 +32,14 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
 using namespace boost::spirit;
 
 auto INTEGER = x3::int_type();
 #ifdef BIGINT
-//auto LONGLONG = x3::long_long_type();
+// auto LONGLONG = x3::long_long_type();
 #endif
 auto FLOAT = x3::float_type();
 auto DOUBLE = x3::double_type();
@@ -143,5 +144,5 @@ bool string2float(const char* iter, const char* end, float& result)
     bool r = x3::phrase_parse(iter, end, FLOAT, space, result);
     return r && (iter == end);
 }
-} // util
-} // mapnik
+} // namespace util
+} // namespace mapnik

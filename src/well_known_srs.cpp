@@ -36,17 +36,11 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-extern std::string const MAPNIK_GEOGRAPHIC_PROJ =
-    "epsg:4326";  //wgs84
+extern std::string const MAPNIK_GEOGRAPHIC_PROJ = "epsg:4326"; // wgs84
 
-extern std::string const MAPNIK_WEBMERCATOR_PROJ =
-    "epsg:3857"; // webmercator
+extern std::string const MAPNIK_WEBMERCATOR_PROJ = "epsg:3857"; // webmercator
 
-static const char * well_known_srs_strings[] = {
-    MAPNIK_GEOGRAPHIC_PROJ.c_str(),
-    MAPNIK_WEBMERCATOR_PROJ.c_str(),
-    ""
-};
+static const char* well_known_srs_strings[] = {MAPNIK_GEOGRAPHIC_PROJ.c_str(), MAPNIK_WEBMERCATOR_PROJ.c_str(), ""};
 
 boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {
@@ -68,16 +62,16 @@ boost::optional<bool> is_known_geographic(std::string const& srs)
     {
         return boost::optional<bool>(true);
     }
-    else if (trimmed ==  MAPNIK_WEBMERCATOR_PROJ)
+    else if (trimmed == MAPNIK_WEBMERCATOR_PROJ)
     {
         return boost::optional<bool>(false);
     }
     return boost::optional<bool>();
 }
 
-IMPLEMENT_ENUM( well_known_srs_e, well_known_srs_strings )
+IMPLEMENT_ENUM(well_known_srs_e, well_known_srs_strings)
 
-bool lonlat2merc(double & x, double & y)
+bool lonlat2merc(double& x, double& y)
 {
     using namespace util;
     auto dx = clamp(x, -180.0, 180.0);
@@ -87,7 +81,7 @@ bool lonlat2merc(double & x, double & y)
     return true;
 }
 
-bool lonlat2merc(double * x, double * y, std::size_t point_count, std::size_t stride)
+bool lonlat2merc(double* x, double* y, std::size_t point_count, std::size_t stride)
 {
     for (std::size_t i = 0; i < point_count; ++i)
     {
@@ -96,16 +90,16 @@ bool lonlat2merc(double * x, double * y, std::size_t point_count, std::size_t st
     return true;
 }
 
-bool lonlat2merc(std::vector<geometry::point<double>> & ls)
+bool lonlat2merc(std::vector<geometry::point<double>>& ls)
 {
-    for (auto & p : ls)
+    for (auto& p : ls)
     {
         lonlat2merc(p.x, p.y);
     }
     return true;
 }
 
-bool merc2lonlat(double & x, double & y)
+bool merc2lonlat(double& x, double& y)
 {
     using namespace util;
     auto rx = clamp(x / EARTH_RADIUS, -pi, pi);
@@ -115,22 +109,22 @@ bool merc2lonlat(double & x, double & y)
     return true;
 }
 
-bool merc2lonlat(double * x, double * y, std::size_t point_count, std::size_t stride)
+bool merc2lonlat(double* x, double* y, std::size_t point_count, std::size_t stride)
 {
-    for(std::size_t i = 0; i < point_count; ++i)
+    for (std::size_t i = 0; i < point_count; ++i)
     {
         merc2lonlat(x[i * stride], y[i * stride]);
     }
     return true;
 }
 
-bool merc2lonlat(std::vector<geometry::point<double>> & ls)
+bool merc2lonlat(std::vector<geometry::point<double>>& ls)
 {
-    for (auto & p : ls)
+    for (auto& p : ls)
     {
         merc2lonlat(p.x, p.y);
     }
     return true;
 }
 
-}
+} // namespace mapnik

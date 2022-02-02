@@ -36,7 +36,8 @@ MAPNIK_DISABLE_WARNING_POP
 
 #include <vector>
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace x3 = boost::spirit::x3;
 struct geojson_value;
@@ -44,17 +45,17 @@ using geojson_array = std::vector<geojson_value>;
 using geojson_object_element = std::pair<int, geojson_value>;
 using geojson_object = std::vector<geojson_object_element>;
 using geojson_value_base = mapnik::util::variant<value_null,
-                                              value_bool,
-                                              value_integer,
-                                              value_double,
-                                              std::string,
-                                              mapnik::geometry::geometry_types,
-                                              positions,
-                                              geojson_array,
-                                              geojson_object>;
+                                                 value_bool,
+                                                 value_integer,
+                                                 value_double,
+                                                 std::string,
+                                                 mapnik::geometry::geometry_types,
+                                                 positions,
+                                                 geojson_array,
+                                                 geojson_object>;
 struct geojson_value : geojson_value_base
 {
-#if __cpp_inheriting_constructors >= 200802 && !defined (_MSC_VER)
+#if __cpp_inheriting_constructors >= 200802 && !defined(_MSC_VER)
 
     using geojson_value_base::geojson_value_base;
 
@@ -62,9 +63,10 @@ struct geojson_value : geojson_value_base
 
     geojson_value() = default;
 
-    template <typename T>
-    geojson_value(T && val)
-        : geojson_value_base(std::forward<T>(val)) {}
+    template<typename T>
+    geojson_value(T&& val)
+        : geojson_value_base(std::forward<T>(val))
+    {}
 
 #endif
 };
@@ -79,6 +81,8 @@ geojson_key_value_type const geojson_key_value = "GeoJSON Key/Value Type";
 
 BOOST_SPIRIT_DECLARE(geojson_grammar_type, geojson_key_value_type);
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_GEOJSON_GRAMMAR_X3_HPP

@@ -28,23 +28,29 @@
 #include <iomanip>
 #include <iterator>
 
-namespace mapnik
-{
+namespace mapnik {
 
 rgb::rgb(rgba const& c)
-    : r(c.r), g(c.g), b(c.b) {}
+    : r(c.r)
+    , g(c.g)
+    , b(c.b)
+{}
 
 // ordering by mean(a,r,g,b), a, r, g, b
-bool rgba::mean_sort_cmp::operator() (const rgba& x, const rgba& y) const
+bool rgba::mean_sort_cmp::operator()(const rgba& x, const rgba& y) const
 {
     int t1 = x.a + x.r + x.g + x.b;
     int t2 = y.a + y.r + y.g + y.b;
-    if (t1 != t2) return t1 < t2;
+    if (t1 != t2)
+        return t1 < t2;
 
     // https://github.com/mapnik/mapnik/issues/1087
-    if (x.a != y.a) return x.a < y.a;
-    if (x.r != y.r) return x.r < y.r;
-    if (x.g != y.g) return x.g < y.g;
+    if (x.a != y.a)
+        return x.a < y.a;
+    if (x.r != y.r)
+        return x.r < y.r;
+    if (x.g != y.g)
+        return x.g < y.g;
     return x.b < y.b;
 }
 
@@ -85,12 +91,14 @@ std::string rgba_palette::to_string() const
         str << " colors";
     }
     str << std::hex << std::setfill('0');
-    for (unsigned i = 0; i < length; i++) {
+    for (unsigned i = 0; i < length; i++)
+    {
         str << " #";
         str << std::setw(2) << static_cast<unsigned>(rgb_pal_[i].r);
         str << std::setw(2) << static_cast<unsigned>(rgb_pal_[i].g);
         str << std::setw(2) << static_cast<unsigned>(rgb_pal_[i].b);
-        if (i < alphaLength) str << std::setw(2) << alpha_pal_[i];
+        if (i < alphaLength)
+            str << std::setw(2) << alpha_pal_[i];
     }
     str << "]";
     return str.str();
@@ -100,7 +108,8 @@ std::string rgba_palette::to_string() const
 unsigned char rgba_palette::quantize(unsigned val) const
 {
     unsigned char index = 0;
-    if (colors_ == 1 || val == 0) return index;
+    if (colors_ == 1 || val == 0)
+        return index;
 
     rgba_hash_table::iterator it = color_hashmap_.find(val);
     if (it != color_hashmap_.end())
@@ -115,15 +124,16 @@ unsigned char rgba_palette::quantize(unsigned val) const
 
         // find closest match based on mean of r,g,b,a
         std::vector<rgba>::const_iterator pit =
-            std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
-        index = std::distance(sorted_pal_.begin(),pit);
-        if (index == sorted_pal_.size()) index--;
+          std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
+        index = std::distance(sorted_pal_.begin(), pit);
+        if (index == sorted_pal_.size())
+            index--;
 
         dr = sorted_pal_[index].r - c.r;
         dg = sorted_pal_[index].g - c.g;
         db = sorted_pal_[index].b - c.b;
         da = sorted_pal_[index].a - c.a;
-        dist = dr*dr + dg*dg + db*db + da*da;
+        dist = dr * dr + dg * dg + db * db + da * da;
         int poz = index;
 
         // search neighbour positions in both directions for better match
@@ -134,11 +144,11 @@ unsigned char rgba_palette::quantize(unsigned val) const
             db = sorted_pal_[i].b - c.b;
             da = sorted_pal_[i].a - c.a;
             // stop criteria based on properties of used sorting
-            if ((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist)
+            if ((dr + db + dg + da) * (dr + db + dg + da) / 4 > dist)
             {
                 break;
             }
-            newdist = dr*dr + dg*dg + db*db + da*da;
+            newdist = dr * dr + dg * dg + db * db + da * da;
             if (newdist < dist)
             {
                 index = i;
@@ -153,11 +163,11 @@ unsigned char rgba_palette::quantize(unsigned val) const
             db = sorted_pal_[i].b - c.b;
             da = sorted_pal_[i].a - c.a;
             // stop criteria based on properties of used sorting
-            if ((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist)
+            if ((dr + db + dg + da) * (dr + db + dg + da) / 4 > dist)
             {
                 break;
             }
-            newdist = dr*dr + dg*dg + db*db + da*da;
+            newdist = dr * dr + dg * dg + db * db + da * da;
             if (newdist < dist)
             {
                 index = i;
@@ -176,8 +186,7 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
 {
     unsigned length = pal.length();
 
-    if ((type == PALETTE_RGBA && length % 4 > 0) ||
-        (type == PALETTE_RGB && length % 3 > 0) ||
+    if ((type == PALETTE_RGBA && length % 4 > 0) || (type == PALETTE_RGB && length % 3 > 0) ||
         (type == PALETTE_ACT && length != 772))
     {
         throw config_error("invalid palette length");
@@ -216,7 +225,7 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
     colors_ = sorted_pal_.size();
 
 #ifdef USE_DENSE_HASH_MAP
-    color_hashmap_.resize((colors_*2));
+    color_hashmap_.resize((colors_ * 2));
 #endif
     color_hashmap_.clear();
 

@@ -45,11 +45,11 @@ DATASOURCE_PLUGIN_DEF(raster_datasource_plugin, raster);
 
 class raster_datasource : public mapnik::datasource
 {
-public:
+  public:
     raster_datasource(const mapnik::parameters& params);
     virtual ~raster_datasource();
     datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(const mapnik::query& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
@@ -57,7 +57,7 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
     bool log_enabled() const;
 
-private:
+  private:
     mapnik::layer_descriptor desc_;
     std::string filename_;
     std::string format_;

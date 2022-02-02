@@ -12,24 +12,24 @@ MAPNIK_DISABLE_WARNING_POP
 #include <fstream>
 
 #if defined(HAVE_CAIRO)
-TEST_CASE("cairo_io") {
+TEST_CASE("cairo_io")
+{
+    SECTION("save_to_cairo_file - SVG")
+    {
+        std::string directory_name("/tmp/mapnik-tests/");
+        boost::filesystem::create_directories(directory_name);
+        REQUIRE(mapnik::util::exists(directory_name));
 
-SECTION("save_to_cairo_file - SVG") {
-    std::string directory_name("/tmp/mapnik-tests/");
-    boost::filesystem::create_directories(directory_name);
-    REQUIRE(mapnik::util::exists(directory_name));
+        std::string output_file(directory_name + "test_save_to_cairo_file.svg");
 
-    std::string output_file(directory_name + "test_save_to_cairo_file.svg");
+        mapnik::Map map(256, 256);
+        mapnik::save_to_cairo_file(map, output_file);
 
-    mapnik::Map map(256, 256);
-    mapnik::save_to_cairo_file(map, output_file);
+        std::ifstream stream(output_file, std::ios_base::in | std::ios_base::binary);
+        std::string actual_output(std::istreambuf_iterator<char>(stream.rdbuf()), std::istreambuf_iterator<char>());
 
-    std::ifstream stream(output_file, std::ios_base::in | std::ios_base::binary);
-    std::string actual_output(std::istreambuf_iterator<char>(stream.rdbuf()), std::istreambuf_iterator<char>());
-
-    // Check the Cairo SVG surface is using SVG 1.2
-    CHECK(actual_output.find("version=\"1.2\"") != std::string::npos);
-}
-
+        // Check the Cairo SVG surface is using SVG 1.2
+        CHECK(actual_output.find("version=\"1.2\"") != std::string::npos);
+    }
 }
 #endif

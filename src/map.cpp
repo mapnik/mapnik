@@ -45,102 +45,100 @@
 // stl
 #include <stdexcept>
 
-namespace mapnik
-{
+namespace mapnik {
 
-static const char * aspect_fix_mode_strings[] = {
-    "GROW_BBOX",
-    "GROW_CANVAS",
-    "SHRINK_BBOX",
-    "SHRINK_CANVAS",
-    "ADJUST_BBOX_WIDTH",
-    "ADJUST_BBOX_HEIGHT",
-    "ADJUST_CANVAS_WIDTH",
-    "ADJUST_CANVAS_HEIGHT",
-    "RESPECT",
-    ""
-};
+static const char* aspect_fix_mode_strings[] = {"GROW_BBOX",
+                                                "GROW_CANVAS",
+                                                "SHRINK_BBOX",
+                                                "SHRINK_CANVAS",
+                                                "ADJUST_BBOX_WIDTH",
+                                                "ADJUST_BBOX_HEIGHT",
+                                                "ADJUST_CANVAS_WIDTH",
+                                                "ADJUST_CANVAS_HEIGHT",
+                                                "RESPECT",
+                                                ""};
 
-IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings )
-
+IMPLEMENT_ENUM(aspect_fix_mode_e, aspect_fix_mode_strings)
 
 Map::Map()
-:   width_(400),
-    height_(400),
-    srs_(MAPNIK_GEOGRAPHIC_PROJ),
-    buffer_size_(0),
-    background_image_comp_op_(src_over),
-    background_image_opacity_(1.0),
-    aspectFixMode_(GROW_BBOX),
-    base_path_(""),
-    extra_params_(),
-    font_directory_(),
-    font_file_mapping_(),
-    font_memory_cache_() {}
+    : width_(400)
+    , height_(400)
+    , srs_(MAPNIK_GEOGRAPHIC_PROJ)
+    , buffer_size_(0)
+    , background_image_comp_op_(src_over)
+    , background_image_opacity_(1.0)
+    , aspectFixMode_(GROW_BBOX)
+    , base_path_("")
+    , extra_params_()
+    , font_directory_()
+    , font_file_mapping_()
+    , font_memory_cache_()
+{}
 
-Map::Map(int width,int height, std::string const& srs)
-    : width_(width),
-      height_(height),
-      srs_(srs),
-      buffer_size_(0),
-      background_image_comp_op_(src_over),
-      background_image_opacity_(1.0),
-      aspectFixMode_(GROW_BBOX),
-      base_path_(""),
-      extra_params_(),
-      font_directory_(),
-      font_file_mapping_(),
-      font_memory_cache_() {}
+Map::Map(int width, int height, std::string const& srs)
+    : width_(width)
+    , height_(height)
+    , srs_(srs)
+    , buffer_size_(0)
+    , background_image_comp_op_(src_over)
+    , background_image_opacity_(1.0)
+    , aspectFixMode_(GROW_BBOX)
+    , base_path_("")
+    , extra_params_()
+    , font_directory_()
+    , font_file_mapping_()
+    , font_memory_cache_()
+{}
 
 Map::Map(Map const& rhs)
-    : width_(rhs.width_),
-      height_(rhs.height_),
-      srs_(rhs.srs_),
-      buffer_size_(rhs.buffer_size_),
-      background_(rhs.background_),
-      background_image_(rhs.background_image_),
-      background_image_comp_op_(rhs.background_image_comp_op_),
-      background_image_opacity_(rhs.background_image_opacity_),
-      styles_(rhs.styles_),
-      fontsets_(rhs.fontsets_),
-      layers_(rhs.layers_),
-      aspectFixMode_(rhs.aspectFixMode_),
-      current_extent_(rhs.current_extent_),
-      maximum_extent_(rhs.maximum_extent_),
-      base_path_(rhs.base_path_),
-      extra_params_(rhs.extra_params_),
-      font_directory_(rhs.font_directory_),
-      font_file_mapping_(rhs.font_file_mapping_),
-      // on copy discard memory caches
-      font_memory_cache_()
+    : width_(rhs.width_)
+    , height_(rhs.height_)
+    , srs_(rhs.srs_)
+    , buffer_size_(rhs.buffer_size_)
+    , background_(rhs.background_)
+    , background_image_(rhs.background_image_)
+    , background_image_comp_op_(rhs.background_image_comp_op_)
+    , background_image_opacity_(rhs.background_image_opacity_)
+    , styles_(rhs.styles_)
+    , fontsets_(rhs.fontsets_)
+    , layers_(rhs.layers_)
+    , aspectFixMode_(rhs.aspectFixMode_)
+    , current_extent_(rhs.current_extent_)
+    , maximum_extent_(rhs.maximum_extent_)
+    , base_path_(rhs.base_path_)
+    , extra_params_(rhs.extra_params_)
+    , font_directory_(rhs.font_directory_)
+    , font_file_mapping_(rhs.font_file_mapping_)
+    ,
+    // on copy discard memory caches
+    font_memory_cache_()
 {
     init_proj_transforms();
 }
 
-
-Map::Map(Map && rhs)
-    : width_(std::move(rhs.width_)),
-      height_(std::move(rhs.height_)),
-      srs_(std::move(rhs.srs_)),
-      buffer_size_(std::move(rhs.buffer_size_)),
-      background_(std::move(rhs.background_)),
-      background_image_(std::move(rhs.background_image_)),
-      background_image_comp_op_(std::move(rhs.background_image_comp_op_)),
-      background_image_opacity_(std::move(rhs.background_image_opacity_)),
-      styles_(std::move(rhs.styles_)),
-      fontsets_(std::move(rhs.fontsets_)),
-      layers_(std::move(rhs.layers_)),
-      aspectFixMode_(std::move(rhs.aspectFixMode_)),
-      current_extent_(std::move(rhs.current_extent_)),
-      maximum_extent_(std::move(rhs.maximum_extent_)),
-      base_path_(std::move(rhs.base_path_)),
-      extra_params_(std::move(rhs.extra_params_)),
-      font_directory_(std::move(rhs.font_directory_)),
-      font_file_mapping_(std::move(rhs.font_file_mapping_)),
-      font_memory_cache_(std::move(rhs.font_memory_cache_)) {}
+Map::Map(Map&& rhs)
+    : width_(std::move(rhs.width_))
+    , height_(std::move(rhs.height_))
+    , srs_(std::move(rhs.srs_))
+    , buffer_size_(std::move(rhs.buffer_size_))
+    , background_(std::move(rhs.background_))
+    , background_image_(std::move(rhs.background_image_))
+    , background_image_comp_op_(std::move(rhs.background_image_comp_op_))
+    , background_image_opacity_(std::move(rhs.background_image_opacity_))
+    , styles_(std::move(rhs.styles_))
+    , fontsets_(std::move(rhs.fontsets_))
+    , layers_(std::move(rhs.layers_))
+    , aspectFixMode_(std::move(rhs.aspectFixMode_))
+    , current_extent_(std::move(rhs.current_extent_))
+    , maximum_extent_(std::move(rhs.maximum_extent_))
+    , base_path_(std::move(rhs.base_path_))
+    , extra_params_(std::move(rhs.extra_params_))
+    , font_directory_(std::move(rhs.font_directory_))
+    , font_file_mapping_(std::move(rhs.font_file_mapping_))
+    , font_memory_cache_(std::move(rhs.font_memory_cache_))
+{}
 
 Map::~Map() {}
-
 
 Map& Map::operator=(Map rhs)
 {
@@ -149,10 +147,10 @@ Map& Map::operator=(Map rhs)
     return *this;
 }
 
-void swap (Map & lhs, Map & rhs)
+void swap(Map& lhs, Map& rhs)
 {
     using std::swap;
-    std::swap(lhs.width_,  rhs.width_);
+    std::swap(lhs.width_, rhs.width_);
     std::swap(lhs.height_, rhs.height_);
     std::swap(lhs.srs_, rhs.srs_);
     std::swap(lhs.buffer_size_, rhs.buffer_size_);
@@ -168,41 +166,32 @@ void swap (Map & lhs, Map & rhs)
     std::swap(lhs.maximum_extent_, rhs.maximum_extent_);
     std::swap(lhs.base_path_, rhs.base_path_);
     std::swap(lhs.extra_params_, rhs.extra_params_);
-    std::swap(lhs.font_directory_,rhs.font_directory_);
-    std::swap(lhs.font_file_mapping_,rhs.font_file_mapping_);
+    std::swap(lhs.font_directory_, rhs.font_directory_);
+    std::swap(lhs.font_file_mapping_, rhs.font_file_mapping_);
     // on assignment discard memory caches
-    //std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
+    // std::swap(lhs.font_memory_cache_,rhs.font_memory_cache_);
 }
 
 bool Map::operator==(Map const& rhs) const
 {
-    return (width_ == rhs.width_) &&
-        (height_ == rhs.height_) &&
-        (srs_ == rhs.srs_) &&
-        (buffer_size_ == rhs.buffer_size_) &&
-        (background_ == rhs.background_) &&
-        (background_image_ == rhs.background_image_) &&
-        (background_image_comp_op_ == rhs.background_image_comp_op_) &&
-        (background_image_opacity_ == rhs.background_image_opacity_) &&
-        (styles_ == rhs.styles_) &&
-        (fontsets_ == rhs.fontsets_) &&
-        (layers_ == rhs.layers_) &&
-        (aspectFixMode_ == rhs.aspectFixMode_) &&
-        (current_extent_ == rhs.current_extent_) &&
-        (maximum_extent_ == rhs.maximum_extent_) &&
-        (base_path_ == rhs.base_path_) &&
-        (extra_params_ == rhs.extra_params_) &&
-        (font_directory_ == rhs.font_directory_) &&
-        (font_file_mapping_ == rhs.font_file_mapping_);
-        // Note: we don't care about font_memory_cache in comparison
+    return (width_ == rhs.width_) && (height_ == rhs.height_) && (srs_ == rhs.srs_) &&
+           (buffer_size_ == rhs.buffer_size_) && (background_ == rhs.background_) &&
+           (background_image_ == rhs.background_image_) &&
+           (background_image_comp_op_ == rhs.background_image_comp_op_) &&
+           (background_image_opacity_ == rhs.background_image_opacity_) && (styles_ == rhs.styles_) &&
+           (fontsets_ == rhs.fontsets_) && (layers_ == rhs.layers_) && (aspectFixMode_ == rhs.aspectFixMode_) &&
+           (current_extent_ == rhs.current_extent_) && (maximum_extent_ == rhs.maximum_extent_) &&
+           (base_path_ == rhs.base_path_) && (extra_params_ == rhs.extra_params_) &&
+           (font_directory_ == rhs.font_directory_) && (font_file_mapping_ == rhs.font_file_mapping_);
+    // Note: we don't care about font_memory_cache in comparison
 }
 
-std::map<std::string,feature_type_style> const& Map::styles() const
+std::map<std::string, feature_type_style> const& Map::styles() const
 {
     return styles_;
 }
 
-std::map<std::string,feature_type_style> & Map::styles()
+std::map<std::string, feature_type_style>& Map::styles()
 {
     return styles_;
 }
@@ -232,7 +221,7 @@ bool Map::insert_style(std::string const& name, feature_type_style const& style)
     return styles_.emplace(name, style).second;
 }
 
-bool Map::insert_style(std::string const& name, feature_type_style && style)
+bool Map::insert_style(std::string const& name, feature_type_style&& style)
 {
     return styles_.emplace(name, std::move(style)).second;
 }
@@ -244,11 +233,11 @@ void Map::remove_style(std::string const& name)
 
 boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
 {
-    std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
+    std::map<std::string, feature_type_style>::const_iterator itr = styles_.find(name);
     if (itr != styles_.end())
         return boost::optional<feature_type_style const&>(itr->second);
     else
-        return boost::optional<feature_type_style const&>() ;
+        return boost::optional<feature_type_style const&>();
 }
 
 bool Map::insert_fontset(std::string const& name, font_set const& fontset)
@@ -260,7 +249,7 @@ bool Map::insert_fontset(std::string const& name, font_set const& fontset)
     return fontsets_.emplace(name, fontset).second;
 }
 
-bool Map::insert_fontset(std::string const& name, font_set && fontset)
+bool Map::insert_fontset(std::string const& name, font_set&& fontset)
 {
     if (fontset.get_name() != name)
     {
@@ -271,19 +260,19 @@ bool Map::insert_fontset(std::string const& name, font_set && fontset)
 
 boost::optional<font_set const&> Map::find_fontset(std::string const& name) const
 {
-    std::map<std::string,font_set>::const_iterator itr = fontsets_.find(name);
+    std::map<std::string, font_set>::const_iterator itr = fontsets_.find(name);
     if (itr != fontsets_.end())
         return boost::optional<font_set const&>(itr->second);
     else
-        return boost::optional<font_set const&>() ;
+        return boost::optional<font_set const&>();
 }
 
-std::map<std::string,font_set> const& Map::fontsets() const
+std::map<std::string, font_set> const& Map::fontsets() const
 {
     return fontsets_;
 }
 
-std::map<std::string,font_set> & Map::fontsets()
+std::map<std::string, font_set>& Map::fontsets()
 {
     return fontsets_;
 }
@@ -300,7 +289,7 @@ bool Map::load_fonts()
     auto const& global_mapping = freetype_engine::get_mapping();
     for (auto const& kv : font_file_mapping_) // for every face-name -> idx/filepath
     {
-       auto const& file_path = kv.second.second;
+        auto const& file_path = kv.second.second;
         // do not attemp to re-cache in memory
         if (font_memory_cache_.find(file_path) != font_memory_cache_.end())
         {
@@ -315,8 +304,9 @@ bool Map::load_fonts()
         mapnik::util::file file(file_path);
         if (file)
         {
-            auto item = font_memory_cache_.emplace(file_path, std::make_pair(file.data(),file.size()));
-            if (item.second) result = true;
+            auto item = font_memory_cache_.emplace(file_path, std::make_pair(file.data(), file.size()));
+            if (item.second)
+                result = true;
         }
     }
     return result;
@@ -333,7 +323,7 @@ void Map::add_layer(layer const& l)
     layers_.emplace_back(l);
 }
 
-void Map::add_layer(layer && l)
+void Map::add_layer(layer&& l)
 {
     proj_transform_cache::init(srs_, l.srs());
     layers_.push_back(std::move(l));
@@ -341,7 +331,7 @@ void Map::add_layer(layer && l)
 
 void Map::remove_layer(size_t index)
 {
-    layers_.erase(layers_.begin()+index);
+    layers_.erase(layers_.begin() + index);
 }
 
 void Map::remove_all()
@@ -368,7 +358,7 @@ std::vector<layer> const& Map::layers() const
     return layers_;
 }
 
-std::vector<layer> & Map::layers()
+std::vector<layer>& Map::layers()
 {
     return layers_;
 }
@@ -385,20 +375,16 @@ unsigned Map::height() const
 
 void Map::set_width(unsigned _width)
 {
-    if (_width != width_ &&
-        _width >= MIN_MAPSIZE &&
-        _width <= MAX_MAPSIZE)
+    if (_width != width_ && _width >= MIN_MAPSIZE && _width <= MAX_MAPSIZE)
     {
-        width_=_width;
+        width_ = _width;
         fixAspectRatio();
     }
 }
 
 void Map::set_height(unsigned _height)
 {
-    if (_height != height_ &&
-        _height >= MIN_MAPSIZE &&
-        _height <= MAX_MAPSIZE)
+    if (_height != height_ && _height >= MIN_MAPSIZE && _height <= MAX_MAPSIZE)
     {
         height_ = _height;
         fixAspectRatio();
@@ -407,12 +393,8 @@ void Map::set_height(unsigned _height)
 
 void Map::resize(unsigned _width, unsigned _height)
 {
-    if ((_width != width_ ||
-         _height != height_) &&
-        _width >= MIN_MAPSIZE &&
-        _width <= MAX_MAPSIZE &&
-        _height >= MIN_MAPSIZE &&
-        _height <= MAX_MAPSIZE)
+    if ((_width != width_ || _height != height_) && _width >= MIN_MAPSIZE && _width <= MAX_MAPSIZE &&
+        _height >= MIN_MAPSIZE && _height <= MAX_MAPSIZE)
     {
         width_ = _width;
         height_ = _height;
@@ -420,16 +402,16 @@ void Map::resize(unsigned _width, unsigned _height)
     }
 }
 
-std::string const&  Map::srs() const
+std::string const& Map::srs() const
 {
     return srs_;
 }
 
 void Map::set_srs(std::string const& _srs)
 {
-    if (srs_ != _srs) init_proj_transforms();
+    if (srs_ != _srs)
+        init_proj_transforms();
     srs_ = _srs;
-
 }
 
 void Map::set_buffer_size(int _buffer_size)
@@ -487,7 +469,7 @@ void Map::set_maximum_extent(box2d<double> const& box)
     maximum_extent_.reset(box);
 }
 
-boost::optional<box2d<double> > const& Map::maximum_extent() const
+boost::optional<box2d<double>> const& Map::maximum_extent() const
 {
     return maximum_extent_;
 }
@@ -497,7 +479,7 @@ void Map::reset_maximum_extent()
     maximum_extent_.reset();
 }
 
-std::string const&  Map::base_path() const
+std::string const& Map::base_path() const
 {
     return base_path_;
 }
@@ -512,10 +494,7 @@ void Map::zoom(double factor)
     coord2d center = current_extent_.center();
     double w = factor * current_extent_.width();
     double h = factor * current_extent_.height();
-    current_extent_ = box2d<double>(center.x - 0.5 * w,
-                                    center.y - 0.5 * h,
-                                    center.x + 0.5 * w,
-                                    center.y + 0.5 * h);
+    current_extent_ = box2d<double>(center.x - 0.5 * w, center.y - 0.5 * h, center.x + 0.5 * w, center.y + 0.5 * h);
     fixAspectRatio();
 }
 
@@ -556,7 +535,8 @@ void Map::zoom_all()
         }
         if (success)
         {
-            if (maximum_extent_) {
+            if (maximum_extent_)
+            {
                 ext.clip(*maximum_extent_);
             }
             zoom_to_box(ext);
@@ -579,8 +559,7 @@ void Map::zoom_all()
                 throw std::runtime_error(s.str());
             }
         }
-    }
-    catch (proj_init_error const& ex)
+    } catch (proj_init_error const& ex)
     {
         throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
     }
@@ -588,63 +567,65 @@ void Map::zoom_all()
 
 void Map::zoom_to_box(box2d<double> const& box)
 {
-    current_extent_= box;
+    current_extent_ = box;
     fixAspectRatio();
 }
 
 void Map::fixAspectRatio()
 {
-    if (aspectFixMode_ == RESPECT) return;
+    if (aspectFixMode_ == RESPECT)
+        return;
     if (current_extent_.width() > 0 && current_extent_.height() > 0)
     {
         double ratio1 = static_cast<double>(width_) / static_cast<double>(height_);
         double ratio2 = current_extent_.width() / current_extent_.height();
-        if (ratio1 == ratio2) return;
+        if (ratio1 == ratio2)
+            return;
 
-        switch(aspectFixMode_)
+        switch (aspectFixMode_)
         {
-        case ADJUST_BBOX_HEIGHT:
-            current_extent_.height(current_extent_.width() / ratio1);
-            break;
-        case ADJUST_BBOX_WIDTH:
-            current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        case ADJUST_CANVAS_HEIGHT:
-            height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
-            break;
-        case ADJUST_CANVAS_WIDTH:
-            width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
-            break;
-        case GROW_BBOX:
-            if (ratio2 > ratio1)
+            case ADJUST_BBOX_HEIGHT:
                 current_extent_.height(current_extent_.width() / ratio1);
-            else
+                break;
+            case ADJUST_BBOX_WIDTH:
                 current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        case SHRINK_BBOX:
-            if (ratio2 < ratio1)
-                current_extent_.height(current_extent_.width() / ratio1);
-            else
-                current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        case GROW_CANVAS:
-            if (ratio2 > ratio1)
-                width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
-            else
+                break;
+            case ADJUST_CANVAS_HEIGHT:
                 height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
-            break;
-        case SHRINK_CANVAS:
-            if (ratio2 > ratio1)
-                height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
-            else
+                break;
+            case ADJUST_CANVAS_WIDTH:
                 width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
-            break;
-        default:
-            if (ratio2 > ratio1)
-                current_extent_.height(current_extent_.width() / ratio1);
-            else
-                current_extent_.width(current_extent_.height() * ratio1);
-            break;
+                break;
+            case GROW_BBOX:
+                if (ratio2 > ratio1)
+                    current_extent_.height(current_extent_.width() / ratio1);
+                else
+                    current_extent_.width(current_extent_.height() * ratio1);
+                break;
+            case SHRINK_BBOX:
+                if (ratio2 < ratio1)
+                    current_extent_.height(current_extent_.width() / ratio1);
+                else
+                    current_extent_.width(current_extent_.height() * ratio1);
+                break;
+            case GROW_CANVAS:
+                if (ratio2 > ratio1)
+                    width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
+                else
+                    height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
+                break;
+            case SHRINK_CANVAS:
+                if (ratio2 > ratio1)
+                    height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
+                else
+                    width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
+                break;
+            default:
+                if (ratio2 > ratio1)
+                    current_extent_.height(current_extent_.width() / ratio1);
+                else
+                    current_extent_.width(current_extent_.height() * ratio1);
+                break;
         }
     }
 }
@@ -663,49 +644,50 @@ box2d<double> Map::get_buffered_extent() const
     return ext;
 }
 
-void Map::pan(int x,int y)
+void Map::pan(int x, int y)
 {
     int dx = x - int(0.5 * width_);
     int dy = int(0.5 * height_) - y;
-    double s = static_cast<double>(width_)/current_extent_.width();
-    double minx  = current_extent_.minx() + dx/s;
-    double maxx  = current_extent_.maxx() + dx/s;
-    double miny  = current_extent_.miny() + dy/s;
-    double maxy  = current_extent_.maxy() + dy/s;
-    current_extent_.init(minx,miny,maxx,maxy);
+    double s = static_cast<double>(width_) / current_extent_.width();
+    double minx = current_extent_.minx() + dx / s;
+    double maxx = current_extent_.maxx() + dx / s;
+    double miny = current_extent_.miny() + dy / s;
+    double maxy = current_extent_.maxy() + dy / s;
+    current_extent_.init(minx, miny, maxx, maxy);
 }
 
-void Map::pan_and_zoom(int x,int y,double factor)
+void Map::pan_and_zoom(int x, int y, double factor)
 {
-    pan(x,y);
+    pan(x, y);
     zoom(factor);
 }
 
 double Map::scale() const
 {
-    if (width_>0)
-        return current_extent_.width()/static_cast<double>(width_);
+    if (width_ > 0)
+        return current_extent_.width() / static_cast<double>(width_);
     return current_extent_.width();
 }
 
 double Map::scale_denominator() const
 {
     projection map_proj(srs_);
-    return mapnik::scale_denominator( scale(), map_proj.is_geographic());
+    return mapnik::scale_denominator(scale(), map_proj.is_geographic());
 }
 
 view_transform Map::transform() const
 {
-    return view_transform(width_,height_,current_extent_);
+    return view_transform(width_, height_, current_extent_);
 }
 
 featureset_ptr Map::query_point(unsigned index, double x, double y) const
 {
     if (!current_extent_.valid())
     {
-        throw std::runtime_error("query_point: map extent is not initialized, you need to set a valid extent before querying");
+        throw std::runtime_error(
+          "query_point: map extent is not initialized, you need to set a valid extent before querying");
     }
-    if (!current_extent_.intersects(x,y))
+    if (!current_extent_.intersects(x, y))
     {
         throw std::runtime_error("query_point: x,y coords do not intersect map extent");
     }
@@ -717,7 +699,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         {
             proj_transform const* proj_trans_ptr = proj_transform_cache::get(layer.srs(), srs_);
             double z = 0;
-            if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x,y,z))
+            if (!proj_trans_ptr->equal() && !proj_trans_ptr->backward(x, y, z))
             {
                 throw std::runtime_error("query_point: could not project x,y into layer srs");
             }
@@ -727,7 +709,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             {
                 map_ex.clip(*maximum_extent_);
             }
-            if (!proj_trans_ptr->backward(map_ex,PROJ_ENVELOPE_POINTS))
+            if (!proj_trans_ptr->backward(map_ex, PROJ_ENVELOPE_POINTS))
             {
                 std::ostringstream s;
                 s << "query_point: could not project map extent '" << map_ex
@@ -735,12 +717,11 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
                 throw std::runtime_error(s.str());
             }
             double tol = (map_ex.maxx() - map_ex.minx()) / static_cast<double>(width_) * 3;
-            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y), tol);
+            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x, y), tol);
             MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
             if (fs)
             {
-                return std::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                             hit_test_filter(x,y,tol));
+                return std::make_shared<filter_featureset<hit_test_filter>>(fs, hit_test_filter(x, y, tol));
             }
         }
     }
@@ -748,8 +729,10 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
     {
         std::ostringstream s;
         s << "Invalid layer index passed to query_point: '" << index << "'";
-        if (!layers_.empty()) s << " for map with " << layers_.size() << " layers(s)";
-        else s << " (map has no layers)";
+        if (!layers_.empty())
+            s << " for map with " << layers_.size() << " layers(s)";
+        else
+            s << " (map has no layers)";
         throw std::out_of_range(s.str());
     }
     return mapnik::make_invalid_featureset();
@@ -758,10 +741,9 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 {
     view_transform tr = transform();
-    tr.backward(&x,&y);
-    return query_point(index,x,y);
+    tr.backward(&x, &y);
+    return query_point(index, x, y);
 }
-
 
 parameters const& Map::get_extra_parameters() const
 {
@@ -780,12 +762,7 @@ void Map::set_extra_parameters(parameters& params)
 
 void Map::init_proj_transforms()
 {
-    std::for_each(layers_.begin(),
-                  layers_.end(),
-                  [this] (auto const& l)
-                  {
-                      proj_transform_cache::init(srs_, l.srs());
-                  });
+    std::for_each(layers_.begin(), layers_.end(), [this](auto const& l) { proj_transform_cache::init(srs_, l.srs()); });
 }
 
-}
+} // namespace mapnik

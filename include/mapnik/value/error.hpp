@@ -32,30 +32,25 @@ namespace mapnik {
 
 class value_error : public std::exception
 {
-public:
-    value_error() :
-        what_() {}
+  public:
+    value_error()
+        : what_()
+    {}
 
-    value_error( std::string const& what ) :
-        what_( what )
+    value_error(std::string const& what)
+        : what_(what)
     {}
 
     virtual ~value_error() {}
 
-    virtual const char * what() const noexcept
-    {
-        return what_.c_str();
-    }
+    virtual const char* what() const noexcept { return what_.c_str(); }
 
-    void append_context(std::string const& ctx) const
-    {
-        what_ += " " + ctx;
-    }
+    void append_context(std::string const& ctx) const { what_ += " " + ctx; }
 
-protected:
+  protected:
     mutable std::string what_;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_VALUE_ERROR_HPP

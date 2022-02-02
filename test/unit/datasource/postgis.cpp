@@ -32,7 +32,8 @@
 
 /*
   Compile and run just this test:
-  clang++ -o test-postgis -g -I./test/ test/unit/run.cpp test/unit/datasource/postgis.cpp `mapnik-config --all-flags` && ./test-postgis -d yes
+  clang++ -o test-postgis -g -I./test/ test/unit/run.cpp test/unit/datasource/postgis.cpp `mapnik-config --all-flags` &&
+  ./test-postgis -d yes
 */
 
 #include <boost/optional/optional_io.hpp>
@@ -61,25 +62,24 @@ bool run(std::string const& command, bool okay_to_fail = false)
         std::clog << "Running " << cmd << "\n";
     }
     bool worked = (std::system(cmd.c_str()) == 0);
-    if (okay_to_fail == true) return true;
+    if (okay_to_fail == true)
+        return true;
     return worked;
 }
-
 
 std::string const dbname("mapnik-tmp-postgis-test-db");
 bool status = false;
 
 bool ping_postmaster()
 {
-    return (run("psql --version")
-            && run("dropdb --if-exists " + dbname)
-            && run("createdb -T template_postgis " + dbname));
+    return (run("psql --version") && run("dropdb --if-exists " + dbname) &&
+            run("createdb -T template_postgis " + dbname));
 }
 
-}
+} // namespace
 
-TEST_CASE("postgis") {
-
+TEST_CASE("postgis")
+{
     SECTION("Ping Postmaster (check if server is runnging and accessible")
     {
         if (!ping_postmaster())
@@ -96,12 +96,12 @@ TEST_CASE("postgis") {
     {
         SECTION("Postgis data initialization")
         {
-            //don't add 'true' here, to get error message, when drop fails. If it works nothing is output
+            // don't add 'true' here, to get error message, when drop fails. If it works nothing is output
             REQUIRE(run("dropdb --if-exists " + dbname));
             REQUIRE(run("createdb -T template_postgis " + dbname));
-            //REQUIRE(run("createdb " + dbname));
-            // Breaks when raster support is missing (unfortunately this is common)
-            //REQUIRE(run("psql -c 'CREATE EXTENSION postgis;' " + dbname, true));
+            // REQUIRE(run("createdb " + dbname));
+            //  Breaks when raster support is missing (unfortunately this is common)
+            // REQUIRE(run("psql -c 'CREATE EXTENSION postgis;' " + dbname, true));
             REQUIRE(run("psql -q -f ./test/data/sql/postgis-create-db-and-tables.sql " + dbname));
         }
 
@@ -165,7 +165,8 @@ TEST_CASE("postgis") {
             CHECK_THROWS(mapnik::datasource_cache::instance().create(params));
         }
 
-        SECTION("Postgis initialize dataset with persist_connection, schema, extent, geometry field, autodectect key field, simplify_geometries, row_limit")
+        SECTION("Postgis initialize dataset with persist_connection, schema, extent, geometry field, autodectect key "
+                "field, simplify_geometries, row_limit")
         {
             mapnik::parameters params(base_params);
             params["persist_connection"] = "false";
@@ -213,8 +214,28 @@ TEST_CASE("postgis") {
             REQUIRE(ds != nullptr);
             REQUIRE(ds->type() == mapnik::datasource::datasource_t::Vector);
             auto fields = ds->get_descriptor().get_descriptors();
-            require_field_names(fields, { "gid", "colbigint", "col_text", "col-char", "col+bool", "colnumeric", "colsmallint", "colfloat4", "colfloat8", "colcharacter" });
-            require_field_types(fields, { mapnik::Integer, mapnik::Integer, mapnik::String, mapnik::String, mapnik::Boolean, mapnik::Double, mapnik::Integer, mapnik::Double, mapnik::Double, mapnik::String });
+            require_field_names(fields,
+                                {"gid",
+                                 "colbigint",
+                                 "col_text",
+                                 "col-char",
+                                 "col+bool",
+                                 "colnumeric",
+                                 "colsmallint",
+                                 "colfloat4",
+                                 "colfloat8",
+                                 "colcharacter"});
+            require_field_types(fields,
+                                {mapnik::Integer,
+                                 mapnik::Integer,
+                                 mapnik::String,
+                                 mapnik::String,
+                                 mapnik::Boolean,
+                                 mapnik::Double,
+                                 mapnik::Integer,
+                                 mapnik::Double,
+                                 mapnik::Double,
+                                 mapnik::String});
         }
 
         SECTION("Postgis iterate features")
@@ -223,13 +244,14 @@ TEST_CASE("postgis") {
             params["table"] = "test";
             params["key_field"] = "gid";
             params["max_async_connection"] = "2";
-            //params["cursor_size"] = "2";
+            // params["cursor_size"] = "2";
             auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
 
             auto featureset = ds->features_at_point(mapnik::coord2d(1, 1));
             mapnik::feature_ptr feature;
-            while ((bool(feature = featureset->next()))) {
+            while ((bool(feature = featureset->next())))
+            {
                 REQUIRE(feature->get(2).to_string() == feature->get("col_text").to_string());
                 REQUIRE(feature->get(4).to_bool() == feature->get("col+bool").to_bool());
                 REQUIRE(feature->get(5).to_double() == feature->get("colnumeric").to_double());
@@ -238,12 +260,12 @@ TEST_CASE("postgis") {
 
             featureset = all_features(ds);
             feature = featureset->next();
-            //deactivate char tests for now: not yet implemented.
-            //add at postgis_datasource.cpp:423
-            //case 18:    // char
-            //REQUIRE("A" == feature->get("col-char").to_string());
+            // deactivate char tests for now: not yet implemented.
+            // add at postgis_datasource.cpp:423
+            // case 18:    // char
+            // REQUIRE("A" == feature->get("col-char").to_string());
             feature = featureset->next();
-            //REQUIRE("B" == feature->get("col-char").to_string());
+            // REQUIRE("B" == feature->get("col-char").to_string());
             feature = featureset->next();
             REQUIRE(false == feature->get("col+bool").to_bool());
         }
@@ -260,7 +282,8 @@ TEST_CASE("postgis") {
 
             featureset = all_features(ds);
             mapnik::feature_ptr feature;
-            while (bool(feature = featureset->next())) {
+            while (bool(feature = featureset->next()))
+            {
                 CHECK(feature->size() == 10);
             }
 
@@ -283,7 +306,8 @@ TEST_CASE("postgis") {
             REQUIRE(ds != nullptr);
             mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
-            INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
+            INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/"
+                                      << ext.maxy());
             REQUIRE(ext.minx() == -2);
             REQUIRE(ext.miny() == -2);
             REQUIRE(ext.maxx() == 5);
@@ -294,9 +318,9 @@ TEST_CASE("postgis") {
         {
             mapnik::parameters params(base_params);
             params["table"] = "(SELECT geom,"
-                                     " pg_typeof(!pixel_width!)::text as t_pixel_width,"
-                                     " pg_typeof(!pixel_height!)::text as t_pixel_height,"
-                                     " pg_typeof(!scale_denominator!)::text as t_scale_denom"
+                              " pg_typeof(!pixel_width!)::text as t_pixel_width,"
+                              " pg_typeof(!pixel_height!)::text as t_pixel_height,"
+                              " pg_typeof(!scale_denominator!)::text as t_scale_denom"
                               " FROM public.test LIMIT 1) as data";
             auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
@@ -319,10 +343,7 @@ TEST_CASE("postgis") {
             REQUIRE(ds != nullptr);
             auto featureset = all_features(ds);
             auto feature = featureset->next();
-            CHECKED_IF(feature != nullptr)
-            {
-                CHECK(feature->get("email").to_string() == "fake@mail.ru");
-            }
+            CHECKED_IF(feature != nullptr) { CHECK(feature->get("email").to_string() == "fake@mail.ru"); }
         }
 
         SECTION("Postgis interpolates !@uservar! tokens in query")
@@ -361,35 +382,34 @@ TEST_CASE("postgis") {
 
         SECTION("Postgis query extent: full dataset")
         {
-            //include schema to increase coverage
+            // include schema to increase coverage
             mapnik::parameters params(base_params);
             params["table"] = "(SELECT * FROM public.test) as data";
             auto ds = mapnik::datasource_cache::instance().create(params);
             REQUIRE(ds != nullptr);
             mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
-            INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
+            INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/"
+                                      << ext.maxy());
             REQUIRE(ext.minx() == -2);
             REQUIRE(ext.miny() == -2);
             REQUIRE(ext.maxx() == 5);
             REQUIRE(ext.maxy() == 4);
         }
-/* deactivated for merging: still investigating a proper fix
-   SECTION("Postgis query extent from subquery")
-   {
-   mapnik::parameters params(base_params);
-   params["table"] = "(SELECT * FROM test where gid=4) as data";
-   auto ds = mapnik::datasource_cache::instance().create(params);
-   REQUIRE(ds != nullptr);
-   mapnik::box2d<double> ext = ds->envelope();
-   CAPTURE(ext);
-   INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
-   REQUIRE(ext.minx() == 0);
-   REQUIRE(ext.miny() == 0);
-   REQUIRE(ext.maxx() == 1);
-   REQUIRE(ext.maxy() == 2);
-   }
-*/
+        /* deactivated for merging: still investigating a proper fix
+           SECTION("Postgis query extent from subquery")
+           {
+           mapnik::parameters params(base_params);
+           params["table"] = "(SELECT * FROM test where gid=4) as data";
+           auto ds = mapnik::datasource_cache::instance().create(params);
+           REQUIRE(ds != nullptr);
+           mapnik::box2d<double> ext = ds->envelope();
+           CAPTURE(ext);
+           INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" <<
+           ext.maxy()); REQUIRE(ext.minx() == 0); REQUIRE(ext.miny() == 0); REQUIRE(ext.maxx() == 1); REQUIRE(ext.maxy()
+           == 2);
+           }
+        */
         SECTION("Postgis query extent: from subquery with 'extent_from_subquery=true'")
         {
             mapnik::parameters params(base_params);
@@ -399,50 +419,47 @@ TEST_CASE("postgis") {
             REQUIRE(ds != nullptr);
             mapnik::box2d<double> ext = ds->envelope();
             CAPTURE(ext);
-            INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
+            INFO(std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/"
+                                      << ext.maxy());
             REQUIRE(ext.minx() == 0);
             REQUIRE(ext.miny() == 0);
             REQUIRE(ext.maxx() == 1);
             REQUIRE(ext.maxy() == 2);
         }
-/* deactivated for merging: still investigating a proper fix
-   SECTION("Postgis query extent: subset with 'extent_from_subquery=true' and 'scale_denominator'")
-   {
-   mapnik::parameters params(base_params);
-   // !!!! postgis-vt-util::z() returns 'null' when 'scale_denominator > 600000000'
-   // https://github.com/mapbox/postgis-vt-util/blob/559f073877696a6bfea41baf3e1065f9cf4d18d1/postgis-vt-util.sql#L615-L617
-   params["table"] = "(SELECT * FROM test where gid=4 AND z(!scale_denominator!) BETWEEN 0 AND 22) as data";
-   params["extent_from_subquery"] = "true";
-   auto ds = mapnik::datasource_cache::instance().create(params);
-   REQUIRE(ds != nullptr);
-   mapnik::box2d<double> ext = ds->envelope();
-   CAPTURE(ext);
-   INFO("" << std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/" << ext.maxy());
-   REQUIRE(ext.minx() == 0);
-   REQUIRE(ext.miny() == 0);
-   REQUIRE(ext.maxx() == 1);
-   REQUIRE(ext.maxy() == 2);
-   }
-*/
-
+        /* deactivated for merging: still investigating a proper fix
+           SECTION("Postgis query extent: subset with 'extent_from_subquery=true' and 'scale_denominator'")
+           {
+           mapnik::parameters params(base_params);
+           // !!!! postgis-vt-util::z() returns 'null' when 'scale_denominator > 600000000'
+           //
+           https://github.com/mapbox/postgis-vt-util/blob/559f073877696a6bfea41baf3e1065f9cf4d18d1/postgis-vt-util.sql#L615-L617
+           params["table"] = "(SELECT * FROM test where gid=4 AND z(!scale_denominator!) BETWEEN 0 AND 22) as data";
+           params["extent_from_subquery"] = "true";
+           auto ds = mapnik::datasource_cache::instance().create(params);
+           REQUIRE(ds != nullptr);
+           mapnik::box2d<double> ext = ds->envelope();
+           CAPTURE(ext);
+           INFO("" << std::setprecision(6) << std::fixed << ext.minx() << "/" << ext.miny() << " " << ext.maxx() << "/"
+           << ext.maxy()); REQUIRE(ext.minx() == 0); REQUIRE(ext.miny() == 0); REQUIRE(ext.maxx() == 1);
+           REQUIRE(ext.maxy() == 2);
+           }
+        */
     }
 }
 
-
-TEST_CASE("ConnectionCreator") {
-
-SECTION("ConnectionCreator::id() should not expose password")
+TEST_CASE("ConnectionCreator")
 {
-    mapnik::parameters params;
-    params["host"]              = "H";
-    params["port"]              = "1234";
-    params["dbname"]            = "D";
-    params["user"]              = "U";
-    params["password"]          = "SECRET";
-    params["connect_timeout"]   = "5";
-    params["application_name"]  = "A";
-    ConnectionCreator<Connection> creator(params);
-    CHECK(creator.id() == "host=H port=1234 dbname=D user=U connect_timeout=5 application_name=A");
-}
-
+    SECTION("ConnectionCreator::id() should not expose password")
+    {
+        mapnik::parameters params;
+        params["host"] = "H";
+        params["port"] = "1234";
+        params["dbname"] = "D";
+        params["user"] = "U";
+        params["password"] = "SECRET";
+        params["connect_timeout"] = "5";
+        params["application_name"] = "A";
+        ConnectionCreator<Connection> creator(params);
+        CHECK(creator.id() == "host=H port=1234 dbname=D user=U connect_timeout=5 application_name=A");
+    }
 }

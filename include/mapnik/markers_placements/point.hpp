@@ -29,28 +29,25 @@
 
 namespace mapnik {
 
-template <typename Locator, typename Detector>
+template<typename Locator, typename Detector>
 class markers_point_placement : public markers_basic_placement
 {
-public:
-    markers_point_placement(Locator & locator, Detector & detector,
-                            markers_placement_params const& params)
-        : markers_basic_placement(params),
-          locator_(locator),
-          detector_(detector),
-          done_(false),
-          use_angle_(false)
+  public:
+    markers_point_placement(Locator& locator, Detector& detector, markers_placement_params const& params)
+        : markers_basic_placement(params)
+        , locator_(locator)
+        , detector_(detector)
+        , done_(false)
+        , use_angle_(false)
     {
         locator_.rewind(0);
     }
 
     // Use angle of line
-    void use_angle(bool enable)
-    {
-        use_angle_ = enable;
-    }
+    void use_angle(bool enable) { use_angle_ = enable; }
 
-    // Start again at first marker. Returns the same list of markers only works when they were NOT added to the detector.
+    // Start again at first marker. Returns the same list of markers only works when they were NOT added to the
+    // detector.
     void rewind()
     {
         locator_.rewind(0);
@@ -58,7 +55,7 @@ public:
     }
 
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
-    bool get_point(double &x, double &y, double &angle, bool ignore_placement)
+    bool get_point(double& x, double& y, double& angle, bool ignore_placement)
     {
         if (this->done_)
         {
@@ -93,9 +90,9 @@ public:
         return true;
     }
 
-protected:
-    Locator & locator_;
-    Detector & detector_;
+  protected:
+    Locator& locator_;
+    Detector& detector_;
     bool done_;
     bool use_angle_;
 
@@ -124,6 +121,6 @@ protected:
     }
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_MARKERS_PLACEMENTS_POINT_HPP

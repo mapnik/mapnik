@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/color.hpp>
 
-//stl
+// stl
 #include <string>
 
 namespace mapnik {

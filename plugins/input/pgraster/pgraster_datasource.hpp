@@ -52,38 +52,37 @@
 #include "../postgis/resultset.hpp"
 #include "../postgis/cursorresultset.hpp"
 
-using mapnik::transcoder;
-using mapnik::datasource;
-using mapnik::feature_style_context_map;
-using mapnik::processor_context_ptr;
 using mapnik::box2d;
-using mapnik::layer_descriptor;
-using mapnik::featureset_ptr;
-using mapnik::feature_ptr;
-using mapnik::query;
-using mapnik::parameters;
 using mapnik::coord2d;
+using mapnik::datasource;
+using mapnik::feature_ptr;
+using mapnik::feature_style_context_map;
+using mapnik::featureset_ptr;
+using mapnik::layer_descriptor;
+using mapnik::parameters;
+using mapnik::processor_context_ptr;
+using mapnik::query;
+using mapnik::transcoder;
 
-typedef std::shared_ptr< ConnectionManager::PoolType> CnxPool_ptr;
+typedef std::shared_ptr<ConnectionManager::PoolType> CnxPool_ptr;
 
 struct pgraster_overview
 {
-  std::string schema;
-  std::string table;
-  std::string column;
-  float scale; // max absolute scale between x and y
+    std::string schema;
+    std::string table;
+    std::string column;
+    float scale; // max absolute scale between x and y
 };
-
 
 DATASOURCE_PLUGIN_DEF(pgraster_datasource_plugin, pgraster);
 class pgraster_datasource : public datasource
 {
-public:
-    pgraster_datasource(const parameters &params);
+  public:
+    pgraster_datasource(const parameters& params);
     ~pgraster_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
-    processor_context_ptr get_context(feature_style_context_map &) const;
+    static const char* name();
+    processor_context_ptr get_context(feature_style_context_map&) const;
     featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const;
     featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
@@ -91,15 +90,20 @@ public:
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
 
-private:
+  private:
     std::string sql_bbox(box2d<double> const& env) const;
-    std::string populate_tokens(std::string const& sql, double scale_denom,
+    std::string populate_tokens(std::string const& sql,
+                                double scale_denom,
                                 box2d<double> const& env,
-                                double pixel_width, double pixel_height,
+                                double pixel_width,
+                                double pixel_height,
                                 mapnik::attributes const& vars,
                                 bool intersect = true) const;
     std::string populate_tokens(std::string const& sql) const;
-    std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx= processor_context_ptr()) const;
+    std::shared_ptr<IResultSet> get_resultset(std::shared_ptr<Connection>& conn,
+                                              std::string const& sql,
+                                              CnxPool_ptr const& pool,
+                                              processor_context_ptr ctx = processor_context_ptr()) const;
     static const std::string RASTER_COLUMNS;
     static const std::string RASTER_OVERVIEWS;
     static const std::string SPATIAL_REF_SYS;
@@ -112,7 +116,7 @@ private:
     const std::string raster_table_; // possibly schema-qualified
     const std::string raster_field_;
     std::string parsed_schema_; // extracted from raster_table_ or table_
-    std::string parsed_table_; // extracted from raster_table_ or table_
+    std::string parsed_table_;  // extracted from raster_table_ or table_
     std::string key_field_;
     mapnik::value_integer cursor_fetch_size_;
     mapnik::value_integer row_limit_;

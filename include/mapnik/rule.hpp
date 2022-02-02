@@ -33,13 +33,13 @@
 #include <vector>
 #include <limits>
 
-namespace mapnik
-{
+namespace mapnik {
 class MAPNIK_DECL rule
 {
-public:
+  public:
     using symbolizers = std::vector<symbolizer>;
-private:
+
+  private:
 
     std::string name_;
     double min_scale_;
@@ -49,13 +49,13 @@ private:
     bool else_filter_;
     bool also_filter_;
 
-public:
+  public:
     rule();
     rule(std::string const& name,
          double min_scale_denominator = 0,
          double max_scale_denominator = std::numeric_limits<double>::infinity());
     rule(const rule& rhs);
-    rule(rule && rhs);
+    rule(rule&& rhs);
     rule& operator=(rule rhs);
     bool operator==(rule const& rhs) const;
     void set_max_scale(double scale);
@@ -64,7 +64,7 @@ public:
     double get_min_scale() const;
     void set_name(std::string const& name);
     std::string const& get_name() const;
-    void append(symbolizer && sym);
+    void append(symbolizer&& sym);
     void remove_at(size_t index);
     symbolizers const& get_symbolizers() const;
     symbolizers::const_iterator begin() const;
@@ -79,15 +79,11 @@ public:
     bool has_also_filter() const;
     inline bool active(double scale) const
     {
-        return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6 && !syms_.empty());
+        return (scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6 && !syms_.empty());
     }
-    inline void reserve(std::size_t size)
-    {
-        syms_.reserve(size);
-    }
-
+    inline void reserve(std::size_t size) { syms_.reserve(size); }
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_RULE_HPP

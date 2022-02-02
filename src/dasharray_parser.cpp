@@ -34,34 +34,34 @@ namespace mapnik {
 namespace util {
 
 namespace {
-inline bool setup_dashes(std::vector<double> & buf, dash_array & dash)
+inline bool setup_dashes(std::vector<double>& buf, dash_array& dash)
 {
-    if (buf.empty()) return false;
+    if (buf.empty())
+        return false;
     size_t size = buf.size();
     if (size % 2 == 1)
     {
-        buf.insert(buf.end(),buf.begin(),buf.end());
+        buf.insert(buf.end(), buf.begin(), buf.end());
     }
     std::vector<double>::const_iterator pos = buf.begin();
     while (pos != buf.end())
     {
-        if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
+        if (*pos > 0.0 || *(pos + 1) > 0.0) // avoid both dash and gap eq 0.0
         {
-            dash.emplace_back(*pos,*(pos + 1));
+            dash.emplace_back(*pos, *(pos + 1));
         }
-        pos +=2;
+        pos += 2;
     }
     return !buf.empty();
 }
-}
+} // namespace
 
-
-bool parse_dasharray(std::string const& value, dash_array & dash)
+bool parse_dasharray(std::string const& value, dash_array& dash)
 {
     using namespace boost::spirit;
-    using x3::no_skip;
-    using x3::double_;
     using x3::char_;
+    using x3::double_;
+    using x3::no_skip;
     boost::spirit::x3::ascii::space_type space;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
@@ -70,10 +70,8 @@ bool parse_dasharray(std::string const& value, dash_array & dash)
     std::vector<double> buf;
     auto first = value.begin();
     auto last = value.end();
-    bool r = x3::phrase_parse(first, last,
-                              (double_ % no_skip[char_(", ")] | "none"),
-                              space, buf);
-    if (r &&  first == last)
+    bool r = x3::phrase_parse(first, last, (double_ % no_skip[char_(", ")] | "none"), space, buf);
+    if (r && first == last)
     {
         return setup_dashes(buf, dash);
     }

@@ -39,52 +39,37 @@ namespace mapnik {
 
 class raster : private util::noncopyable
 {
-public:
+  public:
     box2d<double> ext_;
     box2d<double> query_ext_;
     image_any data_;
     double filter_factor_;
     boost::optional<double> nodata_;
-    
-    template <typename ImageData>
-    raster(box2d<double> const& ext,
-           box2d<double> const& query_ext,
-           ImageData && data,
-           double filter_factor)
-        : ext_(ext),
-          query_ext_(query_ext),
-          data_(std::move(data)),
-          filter_factor_(filter_factor) {}
 
-    template <typename ImageData>
-    raster(box2d<double> const& ext,
-           ImageData && data,
-           double filter_factor)
-        : ext_(ext),
-          query_ext_(ext),
-          data_(std::move(data)),
-          filter_factor_(filter_factor) {}
+    template<typename ImageData>
+    raster(box2d<double> const& ext, box2d<double> const& query_ext, ImageData&& data, double filter_factor)
+        : ext_(ext)
+        , query_ext_(query_ext)
+        , data_(std::move(data))
+        , filter_factor_(filter_factor)
+    {}
 
-    void set_nodata(double _nodata)
-    {
-        nodata_ = _nodata;
-    }
+    template<typename ImageData>
+    raster(box2d<double> const& ext, ImageData&& data, double filter_factor)
+        : ext_(ext)
+        , query_ext_(ext)
+        , data_(std::move(data))
+        , filter_factor_(filter_factor)
+    {}
 
-    boost::optional<double> const& nodata() const
-    {
-        return nodata_;
-    }
+    void set_nodata(double _nodata) { nodata_ = _nodata; }
 
-    double get_filter_factor() const
-    {
-        return filter_factor_;
-    }
+    boost::optional<double> const& nodata() const { return nodata_; }
 
-    void set_filter_factor(double factor)
-    {
-        filter_factor_ = factor;
-    }
+    double get_filter_factor() const { return filter_factor_; }
+
+    void set_filter_factor(double factor) { filter_factor_ = factor; }
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_RASTER_HPP

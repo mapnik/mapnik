@@ -34,7 +34,7 @@
 void setup_attributes(mapnik::context_ptr const& ctx,
                       std::set<std::string> const& names,
                       std::string const& shape_name,
-                      shape_io & shape,
-                      std::vector<int> & attr_ids);
+                      shape_io& shape,
+                      std::vector<int>& attr_ids);
 
 #endif // SHAPE_UTILS_HPP

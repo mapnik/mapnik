@@ -30,11 +30,13 @@
 #include <vector>
 
 // fwd declare
-namespace mapnik { namespace svg {
-    struct path_output_attributes;
-    struct rect_output_attributes;
-    struct root_output_attributes;
-}}
+namespace mapnik {
+namespace svg {
+struct path_output_attributes;
+struct rect_output_attributes;
+struct root_output_attributes;
+} // namespace svg
+} // namespace mapnik
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -43,39 +45,39 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/include/karma_rule.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-    using namespace boost::spirit;
+using namespace boost::spirit;
 
-
-template <typename OutputIterator>
+template<typename OutputIterator>
 struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::path_output_attributes()>
 {
     explicit svg_path_attributes_grammar();
     karma::rule<OutputIterator, mapnik::svg::path_output_attributes()> svg_path_attributes;
 };
 
-template <typename OutputIterator>
+template<typename OutputIterator>
 struct svg_path_dash_array_grammar : karma::grammar<OutputIterator, mapnik::dash_array()>
 {
     explicit svg_path_dash_array_grammar();
     karma::rule<OutputIterator, mapnik::dash_array()> svg_path_dash_array;
 };
 
-template <typename OutputIterator>
+template<typename OutputIterator>
 struct svg_rect_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::rect_output_attributes()>
 {
     explicit svg_rect_attributes_grammar();
     karma::rule<OutputIterator, mapnik::svg::rect_output_attributes()> svg_rect_attributes;
 };
 
-template <typename OutputIterator>
+template<typename OutputIterator>
 struct svg_root_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::root_output_attributes()>
 {
     explicit svg_root_attributes_grammar();
     karma::rule<OutputIterator, mapnik::svg::root_output_attributes()> svg_root_attributes;
 };
-}
-}
+} // namespace svg
+} // namespace mapnik
 
 #endif // SVG_OUTPUT_GRAMMARS_HPP

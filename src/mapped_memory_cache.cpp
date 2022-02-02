@@ -35,8 +35,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/interprocess/file_mapping.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 template class singleton<mapped_memory_cache, CreateStatic>;
 
@@ -53,7 +52,7 @@ bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(mutex_);
 #endif
-    return cache_.emplace(uri,mem).second;
+    return cache_.emplace(uri, mem).second;
 }
 
 bool mapped_memory_cache::remove(std::string const& key)
@@ -83,20 +82,19 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
     {
         try
         {
-            boost::interprocess::file_mapping mapping(uri.c_str(),boost::interprocess::read_only);
-            mapped_region_ptr region(std::make_shared<boost::interprocess::mapped_region>(mapping,boost::interprocess::read_only));
+            boost::interprocess::file_mapping mapping(uri.c_str(), boost::interprocess::read_only);
+            mapped_region_ptr region(
+              std::make_shared<boost::interprocess::mapped_region>(mapping, boost::interprocess::read_only));
             result.reset(region);
             if (update_cache)
             {
                 cache_.emplace(uri, *result);
             }
             return result;
-        }
-        catch (std::exception const& ex)
+        } catch (std::exception const& ex)
         {
             MAPNIK_LOG_ERROR(mapped_memory_cache)
-                << "Error loading mapped memory file: '"
-                << uri << "' (" << ex.what() << ")";
+              << "Error loading mapped memory file: '" << uri << "' (" << ex.what() << ")";
         }
     }
     /*
@@ -108,6 +106,6 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
     return result;
 }
 
-}
+} // namespace mapnik
 
 #endif

@@ -34,50 +34,54 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-void build_ellipse(symbolizer_base const& sym, mapnik::feature_impl & feature, attributes const& vars, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
+void build_ellipse(symbolizer_base const& sym,
+                   mapnik::feature_impl& feature,
+                   attributes const& vars,
+                   svg_storage_type& marker_ellipse,
+                   svg::svg_path_adapter& svg_path)
 {
     double width = 0.0;
     double height = 0.0;
     double half_stroke_width = 0.0;
-    if (has_key(sym,keys::width) && has_key(sym,keys::height))
+    if (has_key(sym, keys::width) && has_key(sym, keys::height))
     {
         width = get<double>(sym, keys::width, feature, vars, 0.0);
         height = get<double>(sym, keys::height, feature, vars, 0.0);
     }
-    else if (has_key(sym,keys::width))
+    else if (has_key(sym, keys::width))
     {
         width = height = get<double>(sym, keys::width, feature, vars, 0.0);
     }
-    else if (has_key(sym,keys::height))
+    else if (has_key(sym, keys::height))
     {
         width = height = get<double>(sym, keys::height, feature, vars, 0.0);
     }
-    if (has_key(sym,keys::stroke_width))
+    if (has_key(sym, keys::stroke_width))
     {
         half_stroke_width = get<double>(sym, keys::stroke_width, feature, vars, 0.0) / 2.0;
     }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
     styled_svg.push_attr();
     styled_svg.begin_path();
-    agg::ellipse c(0, 0, width/2.0, height/2.0);
+    agg::ellipse c(0, 0, width / 2.0, height / 2.0);
     styled_svg.storage().concat_path(c);
     styled_svg.end_path();
     styled_svg.pop_attr();
-    double lox,loy,hix,hiy;
+    double lox, loy, hix, hiy;
     styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
     lox -= half_stroke_width;
     loy -= half_stroke_width;
     hix += half_stroke_width;
     hiy += half_stroke_width;
-    styled_svg.set_dimensions(width,height);
-    marker_ellipse.set_dimensions(width,height);
-    marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
+    styled_svg.set_dimensions(width, height);
+    marker_ellipse.set_dimensions(width, height);
+    marker_ellipse.set_bounding_box(lox, loy, hix, hiy);
 }
 
 bool push_explicit_style(svg_attribute_type const& src,
-                         svg_attribute_type & dst,
+                         svg_attribute_type& dst,
                          symbolizer_base const& sym,
-                         feature_impl & feature,
+                         feature_impl& feature,
                          attributes const& vars)
 {
     auto fill_color = get_optional<color>(sym, keys::fill, feature, vars);
@@ -85,17 +89,13 @@ bool push_explicit_style(svg_attribute_type const& src,
     auto stroke_color = get_optional<color>(sym, keys::stroke, feature, vars);
     auto stroke_width = get_optional<double>(sym, keys::stroke_width, feature, vars);
     auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity, feature, vars);
-    if (fill_color ||
-        fill_opacity ||
-        stroke_color ||
-        stroke_width ||
-        stroke_opacity)
+    if (fill_color || fill_opacity || stroke_color || stroke_width || stroke_opacity)
     {
         bool success = false;
-        for(unsigned i = 0; i < src.size(); ++i)
+        for (unsigned i = 0; i < src.size(); ++i)
         {
             dst.push_back(src[i]);
-            mapnik::svg::path_attributes & attr = dst.back();
+            mapnik::svg::path_attributes& attr = dst.back();
             if (!attr.visibility_flag)
                 continue;
             success = true;
@@ -110,10 +110,10 @@ bool push_explicit_style(svg_attribute_type const& src,
                 if (stroke_color)
                 {
                     color const& s_color = *stroke_color;
-                    attr.stroke_color = agg::rgba(s_color.red()/255.0,
-                                                  s_color.green()/255.0,
-                                                  s_color.blue()/255.0,
-                                                  s_color.alpha()/255.0);
+                    attr.stroke_color = agg::rgba(s_color.red() / 255.0,
+                                                  s_color.green() / 255.0,
+                                                  s_color.blue() / 255.0,
+                                                  s_color.alpha() / 255.0);
                     attr.stroke_flag = true;
                 }
                 if (stroke_opacity)
@@ -127,10 +127,10 @@ bool push_explicit_style(svg_attribute_type const& src,
                 if (fill_color)
                 {
                     color const& f_color = *fill_color;
-                    attr.fill_color = agg::rgba(f_color.red()/255.0,
-                                                f_color.green()/255.0,
-                                                f_color.blue()/255.0,
-                                                f_color.alpha()/255.0);
+                    attr.fill_color = agg::rgba(f_color.red() / 255.0,
+                                                f_color.green() / 255.0,
+                                                f_color.blue() / 255.0,
+                                                f_color.alpha() / 255.0);
                     attr.fill_flag = true;
                 }
                 if (fill_opacity)
@@ -145,10 +145,10 @@ bool push_explicit_style(svg_attribute_type const& src,
     return false;
 }
 
-void setup_transform_scaling(agg::trans_affine & tr,
+void setup_transform_scaling(agg::trans_affine& tr,
                              double svg_width,
                              double svg_height,
-                             mapnik::feature_impl & feature,
+                             mapnik::feature_impl& feature,
                              attributes const& vars,
                              symbolizer_base const& sym)
 {
@@ -156,25 +156,27 @@ void setup_transform_scaling(agg::trans_affine & tr,
     double height = get<double>(sym, keys::height, feature, vars, 0.0);
     if (width > 0 && height > 0)
     {
-        double sx = width/svg_width;
-        double sy = height/svg_height;
-        tr *= agg::trans_affine_scaling(sx,sy);
+        double sx = width / svg_width;
+        double sy = height / svg_height;
+        tr *= agg::trans_affine_scaling(sx, sy);
     }
     else if (width > 0)
     {
-        double sx = width/svg_width;
+        double sx = width / svg_width;
         tr *= agg::trans_affine_scaling(sx);
     }
     else if (height > 0)
     {
-        double sy = height/svg_height;
+        double sy = height / svg_height;
         tr *= agg::trans_affine_scaling(sy);
     }
 }
 
-template <typename Processor>
-void apply_markers_single(vertex_converter_type & converter, Processor & proc,
-                          geometry::geometry<double> const& geom, geometry::geometry_types type)
+template<typename Processor>
+void apply_markers_single(vertex_converter_type& converter,
+                          Processor& proc,
+                          geometry::geometry<double> const& geom,
+                          geometry::geometry_types type)
 {
     if (type == geometry::geometry_types::Point)
     {
@@ -217,29 +219,28 @@ void apply_markers_single(vertex_converter_type & converter, Processor & proc,
     }
 }
 
-template <typename Processor>
-void apply_markers_multi(feature_impl const& feature, attributes const& vars,
-                         vertex_converter_type & converter, Processor & proc, symbolizer_base const& sym)
+template<typename Processor>
+void apply_markers_multi(feature_impl const& feature,
+                         attributes const& vars,
+                         vertex_converter_type& converter,
+                         Processor& proc,
+                         symbolizer_base const& sym)
 {
     auto const& geom = feature.get_geometry();
     geometry::geometry_types type = geometry::geometry_type(geom);
 
-    if (type == geometry::geometry_types::Point
-        ||
-        type == geometry::geometry_types::LineString
-        ||
+    if (type == geometry::geometry_types::Point || type == geometry::geometry_types::LineString ||
         type == geometry::geometry_types::Polygon)
     {
         apply_markers_single(converter, proc, geom, type);
     }
     else
     {
-
-        marker_multi_policy_enum multi_policy = get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
+        marker_multi_policy_enum multi_policy =
+          get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
         marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
 
-        if (placement == MARKER_POINT_PLACEMENT &&
-            multi_policy == MARKER_WHOLE_MULTI)
+        if (placement == MARKER_POINT_PLACEMENT && multi_policy == MARKER_WHOLE_MULTI)
         {
             geometry::point<double> pt;
             // test if centroid is contained by bounding box
@@ -251,14 +252,16 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars,
                 converter.apply(va, proc);
             }
         }
-        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT || placement == MARKER_POLYLABEL_PLACEMENT) &&
+        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT ||
+                  placement == MARKER_POLYLABEL_PLACEMENT) &&
                  multi_policy == MARKER_LARGEST_MULTI)
         {
             // Only apply to path with largest envelope area
             // TODO: consider using true area for polygon types
             if (type == geometry::geometry_types::MultiPolygon)
             {
-                geometry::multi_polygon<double> const& multi_poly = mapnik::util::get<geometry::multi_polygon<double> >(geom);
+                geometry::multi_polygon<double> const& multi_poly =
+                  mapnik::util::get<geometry::multi_polygon<double>>(geom);
                 double maxarea = 0;
                 geometry::polygon<double> const* largest = 0;
                 for (geometry::polygon<double> const& poly : multi_poly)
@@ -286,7 +289,8 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars,
         {
             if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
             {
-                MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
+                MAPNIK_LOG_WARN(marker_symbolizer)
+                  << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
             }
             if (type == geometry::geometry_types::GeometryCollection)
             {
@@ -302,12 +306,16 @@ void apply_markers_multi(feature_impl const& feature, attributes const& vars,
         }
     }
 }
-template void apply_markers_multi<vector_dispatch_type>(feature_impl const& feature, attributes const& vars,
-                                                        vertex_converter_type & converter, vector_dispatch_type & proc,
+template void apply_markers_multi<vector_dispatch_type>(feature_impl const& feature,
+                                                        attributes const& vars,
+                                                        vertex_converter_type& converter,
+                                                        vector_dispatch_type& proc,
                                                         symbolizer_base const& sym);
 
-template void apply_markers_multi<raster_dispatch_type>(feature_impl const& feature, attributes const& vars,
-                                                        vertex_converter_type & converter, raster_dispatch_type & proc,
+template void apply_markers_multi<raster_dispatch_type>(feature_impl const& feature,
+                                                        attributes const& vars,
+                                                        vertex_converter_type& converter,
+                                                        raster_dispatch_type& proc,
                                                         symbolizer_base const& sym);
 
 } // end namespace mapnik

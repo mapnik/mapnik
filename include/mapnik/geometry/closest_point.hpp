@@ -30,7 +30,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 using coordinate_type = double;
 
 struct closest_point_result
@@ -41,11 +42,11 @@ struct closest_point_result
 };
 
 using result_type = closest_point_result;
-template <typename T1, typename T2>
+template<typename T1, typename T2>
 MAPNIK_DECL result_type closest_point(T1 const& geom, mapnik::geometry::point<T2> const& pt);
 
-}}
-
+} // namespace geometry
+} // namespace mapnik
 
 #endif //
 #endif // MAPNIK_GEOMETRY_CLOSEST_POINT_HPP

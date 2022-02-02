@@ -39,19 +39,15 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-enum well_known_srs_enum : std::uint8_t {
-    WGS_84,
-    WEB_MERC,
-    well_known_srs_enum_MAX
-};
+enum well_known_srs_enum : std::uint8_t { WGS_84, WEB_MERC, well_known_srs_enum_MAX };
 
-DEFINE_ENUM( well_known_srs_e, well_known_srs_enum );
+DEFINE_ENUM(well_known_srs_e, well_known_srs_enum);
 
 constexpr double EARTH_RADIUS = 6378137.0;
 constexpr double EARTH_CIRCUMFERENCE = EARTH_RADIUS * util::tau;
 constexpr double MERC_MAX_EXTENT = EARTH_RADIUS * util::pi;
 constexpr double MERC_MAX_LATITUDE = 85.0511287798065923778;
-              // MERC_MAX_LATITUDE = degrees(2 * atan(exp(pi)) - pi / 2)
+// MERC_MAX_LATITUDE = degrees(2 * atan(exp(pi)) - pi / 2)
 
 extern MAPNIK_DECL std::string const MAPNIK_GEOGRAPHIC_PROJ;
 extern MAPNIK_DECL std::string const MAPNIK_WEBMERCATOR_PROJ;
@@ -59,16 +55,14 @@ extern MAPNIK_DECL std::string const MAPNIK_WEBMERCATOR_PROJ;
 MAPNIK_DECL boost::optional<bool> is_known_geographic(std::string const& srs);
 MAPNIK_DECL boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs);
 
-MAPNIK_DECL bool lonlat2merc(double & x, double & y);
-MAPNIK_DECL bool lonlat2merc(double * x, double * y, std::size_t point_count,
-                                                     std::size_t stride = 1);
-MAPNIK_DECL bool lonlat2merc(std::vector<geometry::point<double>> & ls);
+MAPNIK_DECL bool lonlat2merc(double& x, double& y);
+MAPNIK_DECL bool lonlat2merc(double* x, double* y, std::size_t point_count, std::size_t stride = 1);
+MAPNIK_DECL bool lonlat2merc(std::vector<geometry::point<double>>& ls);
 
-MAPNIK_DECL bool merc2lonlat(double & x, double & y);
-MAPNIK_DECL bool merc2lonlat(double * x, double * y, std::size_t point_count,
-                                                     std::size_t stride = 1);
-MAPNIK_DECL bool merc2lonlat(std::vector<geometry::point<double>> & ls);
+MAPNIK_DECL bool merc2lonlat(double& x, double& y);
+MAPNIK_DECL bool merc2lonlat(double* x, double* y, std::size_t point_count, std::size_t stride = 1);
+MAPNIK_DECL bool merc2lonlat(std::vector<geometry::point<double>>& ls);
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_WELL_KNOWN_SRS_HPP

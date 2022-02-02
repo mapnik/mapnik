@@ -25,16 +25,18 @@
 #include <mapnik/geometry/geometry_types.hpp>
 #include <mapnik/vertex.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 // point adapter
-template <typename T>
+template<typename T>
 point_vertex_adapter<T>::point_vertex_adapter(point<T> const& pt)
-    : pt_(pt),
-      first_(true) {}
+    : pt_(pt)
+    , first_(true)
+{}
 
-template <typename T>
-unsigned point_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * y) const
+template<typename T>
+unsigned point_vertex_adapter<T>::vertex(coordinate_type* x, coordinate_type* y) const
 {
     if (first_)
     {
@@ -46,28 +48,28 @@ unsigned point_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * 
     return mapnik::SEG_END;
 }
 
-template <typename T>
+template<typename T>
 void point_vertex_adapter<T>::rewind(unsigned) const
 {
     first_ = true;
 }
 
-template <typename T>
-geometry_types point_vertex_adapter<T>::type () const
+template<typename T>
+geometry_types point_vertex_adapter<T>::type() const
 {
     return geometry_types::Point;
 }
 
 // line_string adapter
-template <typename T>
+template<typename T>
 line_string_vertex_adapter<T>::line_string_vertex_adapter(line_string<T> const& line)
-    : line_(line),
-      current_index_(0),
-      end_index_(line.size())
+    : line_(line)
+    , current_index_(0)
+    , end_index_(line.size())
 {}
 
-template <typename T>
-unsigned line_string_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * y) const
+template<typename T>
+unsigned line_string_vertex_adapter<T>::vertex(coordinate_type* x, coordinate_type* y) const
 {
     if (current_index_ != end_index_)
     {
@@ -86,28 +88,29 @@ unsigned line_string_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_t
     return mapnik::SEG_END;
 }
 
-template <typename T>
+template<typename T>
 void line_string_vertex_adapter<T>::rewind(unsigned) const
 {
     current_index_ = 0;
 }
 
-template <typename T>
+template<typename T>
 geometry_types line_string_vertex_adapter<T>::type() const
 {
     return geometry_types::LineString;
 }
 
-template <typename T>
+template<typename T>
 polygon_vertex_adapter<T>::polygon_vertex_adapter(polygon<T> const& poly)
-    : poly_(poly),
-      rings_itr_(0),
-      rings_end_(poly_.size()),
-      current_index_(0),
-      end_index_(poly_.empty() ? 0 : poly_[0].size()),
-      start_loop_(true) {}
+    : poly_(poly)
+    , rings_itr_(0)
+    , rings_end_(poly_.size())
+    , current_index_(0)
+    , end_index_(poly_.empty() ? 0 : poly_[0].size())
+    , start_loop_(true)
+{}
 
-template <typename T>
+template<typename T>
 void polygon_vertex_adapter<T>::rewind(unsigned) const
 {
     rings_itr_ = 0;
@@ -116,8 +119,8 @@ void polygon_vertex_adapter<T>::rewind(unsigned) const
     end_index_ = poly_.empty() ? 0 : poly_[0].size();
     start_loop_ = true;
 }
-template <typename T>
-unsigned polygon_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * y) const
+template<typename T>
+unsigned polygon_vertex_adapter<T>::vertex(coordinate_type* x, coordinate_type* y) const
 {
     if (rings_itr_ == rings_end_)
     {
@@ -130,7 +133,7 @@ unsigned polygon_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type 
         *y = coord.y;
         if (start_loop_)
         {
-            start_loop_= false;
+            start_loop_ = false;
             return mapnik::SEG_MOVETO;
         }
         if (current_index_ == end_index_)
@@ -159,21 +162,22 @@ unsigned polygon_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type 
     return mapnik::SEG_END;
 }
 
-template <typename T>
-geometry_types polygon_vertex_adapter<T>::type () const
+template<typename T>
+geometry_types polygon_vertex_adapter<T>::type() const
 {
     return geometry_types::Polygon;
 }
 
 // ring adapter
-template <typename T>
+template<typename T>
 ring_vertex_adapter<T>::ring_vertex_adapter(linear_ring<T> const& ring)
-    : ring_(ring),
-      current_index_(0),
-      end_index_(ring_.size()),
-      start_loop_(true) {}
+    : ring_(ring)
+    , current_index_(0)
+    , end_index_(ring_.size())
+    , start_loop_(true)
+{}
 
-template <typename T>
+template<typename T>
 void ring_vertex_adapter<T>::rewind(unsigned) const
 {
     current_index_ = 0;
@@ -181,8 +185,8 @@ void ring_vertex_adapter<T>::rewind(unsigned) const
     start_loop_ = true;
 }
 
-template <typename T>
-unsigned ring_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * y) const
+template<typename T>
+unsigned ring_vertex_adapter<T>::vertex(coordinate_type* x, coordinate_type* y) const
 {
     if (current_index_ < end_index_)
     {
@@ -191,7 +195,7 @@ unsigned ring_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * y
         *y = coord.y;
         if (start_loop_)
         {
-            start_loop_= false;
+            start_loop_ = false;
             return mapnik::SEG_MOVETO;
         }
         if (current_index_ == end_index_)
@@ -204,8 +208,8 @@ unsigned ring_vertex_adapter<T>::vertex(coordinate_type * x, coordinate_type * y
     }
     return mapnik::SEG_END;
 }
-template <typename T>
-geometry_types ring_vertex_adapter<T>::type () const
+template<typename T>
+geometry_types ring_vertex_adapter<T>::type() const
 {
     return geometry_types::Polygon;
 }
@@ -215,4 +219,5 @@ template struct line_string_vertex_adapter<double>;
 template struct polygon_vertex_adapter<double>;
 template struct ring_vertex_adapter<double>;
 
-}}
+} // namespace geometry
+} // namespace mapnik

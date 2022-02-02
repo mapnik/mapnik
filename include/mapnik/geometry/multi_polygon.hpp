@@ -26,9 +26,10 @@
 // geometry
 #include <mapnik/geometry/polygon.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
-template <typename T, template <typename...> class Cont = std::vector>
+template<typename T, template<typename...> class Cont = std::vector>
 struct multi_polygon : Cont<polygon<T>>
 {
     using coordinate_type = T;
@@ -37,7 +38,7 @@ struct multi_polygon : Cont<polygon<T>>
     using container_type::container_type;
 };
 
-
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_MULTI_POLYGON_HPP

@@ -29,8 +29,8 @@ extern "C" {
 
 class IResultSet
 {
-public:
-    //virtual IResultSet& operator=(const IResultSet& rhs) = 0;
+  public:
+    // virtual IResultSet& operator=(const IResultSet& rhs) = 0;
     virtual ~IResultSet() {}
     virtual void close() = 0;
     virtual int getNumFields() const = 0;
@@ -45,12 +45,13 @@ public:
     virtual const char* getValue(const char* name) const = 0;
 };
 
-class ResultSet : public IResultSet, private mapnik::util::noncopyable
+class ResultSet : public IResultSet,
+                  private mapnik::util::noncopyable
 {
-public:
-    ResultSet(PGresult *res)
-      : res_(res),
-        pos_(-1)
+  public:
+    ResultSet(PGresult* res)
+        : res_(res)
+        , pos_(-1)
     {
         numTuples_ = PQntuples(res_);
     }
@@ -61,40 +62,19 @@ public:
         res_ = 0;
     }
 
-    virtual ~ResultSet()
-    {
-        PQclear(res_);
-    }
+    virtual ~ResultSet() { PQclear(res_); }
 
-    virtual int getNumFields() const
-    {
-        return PQnfields(res_);
-    }
+    virtual int getNumFields() const { return PQnfields(res_); }
 
-    int pos() const
-    {
-        return pos_;
-    }
+    int pos() const { return pos_; }
 
-    int size() const
-    {
-        return numTuples_;
-    }
+    int size() const { return numTuples_; }
 
-    virtual bool next()
-    {
-        return (++pos_ < numTuples_);
-    }
+    virtual bool next() { return (++pos_ < numTuples_); }
 
-    virtual const char* getFieldName(int index) const
-    {
-        return PQfname(res_, index);
-    }
+    virtual const char* getFieldName(int index) const { return PQfname(res_, index); }
 
-    virtual int getFieldLength(int index) const
-    {
-        return PQgetlength(res_, pos_, index);
-    }
+    virtual int getFieldLength(int index) const { return PQgetlength(res_, pos_, index); }
 
     virtual int getFieldLength(const char* name) const
     {
@@ -106,10 +86,7 @@ public:
         return 0;
     }
 
-    virtual int getTypeOID(int index) const
-    {
-        return PQftype(res_, index);
-    }
+    virtual int getTypeOID(int index) const { return PQftype(res_, index); }
 
     virtual int getTypeOID(const char* name) const
     {
@@ -121,15 +98,9 @@ public:
         return 0;
     }
 
-    virtual bool isNull(int index) const
-    {
-        return static_cast<bool>(PQgetisnull(res_, pos_, index));
-    }
+    virtual bool isNull(int index) const { return static_cast<bool>(PQgetisnull(res_, pos_, index)); }
 
-    virtual const char* getValue(int index) const
-    {
-        return PQgetvalue(res_, pos_, index);
-    }
+    virtual const char* getValue(int index) const { return PQgetvalue(res_, pos_, index); }
 
     virtual const char* getValue(const char* name) const
     {
@@ -141,7 +112,7 @@ public:
         return 0;
     }
 
-private:
+  private:
     PGresult* res_;
     int pos_;
     int numTuples_;

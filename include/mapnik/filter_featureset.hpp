@@ -29,14 +29,16 @@
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 class filter_featureset : public Featureset
 {
     using filter_type = T;
 
-public:
-    filter_featureset(featureset_ptr const& fs, filter_type && filter)
-        : fs_(fs), filter_(std::move(filter)) {}
+  public:
+    filter_featureset(featureset_ptr const& fs, filter_type&& filter)
+        : fs_(fs)
+        , filter_(std::move(filter))
+    {}
 
     feature_ptr next()
     {
@@ -48,10 +50,10 @@ public:
         return feature;
     }
 
-private:
+  private:
     featureset_ptr fs_;
     filter_type filter_;
 };
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FILTER_FEATURESET_HPP

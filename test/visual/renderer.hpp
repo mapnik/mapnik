@@ -60,18 +60,17 @@
 // boost
 #include <boost/filesystem.hpp>
 
-namespace visual_tests
-{
+namespace visual_tests {
 
-template <typename ImageType>
+template<typename ImageType>
 struct raster_renderer_base
 {
     using image_type = ImageType;
 
-    static constexpr const char * ext = ".png";
+    static constexpr const char* ext = ".png";
     static constexpr const bool support_tiles = true;
 
-    unsigned compare(image_type const & actual, boost::filesystem::path const& reference) const
+    unsigned compare(image_type const& actual, boost::filesystem::path const& reference) const
     {
         std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(reference.string(), "png"));
         if (!reader.get())
@@ -80,12 +79,12 @@ struct raster_renderer_base
         }
 
         mapnik::image_any ref_image_any = reader->read(0, 0, reader->width(), reader->height());
-        ImageType const & reference_image = mapnik::util::get<ImageType>(ref_image_any);
+        ImageType const& reference_image = mapnik::util::get<ImageType>(ref_image_any);
 
         return mapnik::compare(actual, reference_image, 0, true);
     }
 
-    void save(image_type const & image, boost::filesystem::path const& path) const
+    void save(image_type const& image, boost::filesystem::path const& path) const
     {
         mapnik::save_to_file(image, path.string(), "png32");
     }
@@ -97,7 +96,7 @@ struct vector_renderer_base
 
     static constexpr const bool support_tiles = false;
 
-    unsigned compare(image_type const & actual, boost::filesystem::path const& reference) const
+    unsigned compare(image_type const& actual, boost::filesystem::path const& reference) const
     {
         std::ifstream stream(reference.string().c_str(), std::ios_base::in | std::ios_base::binary);
         if (!stream)
@@ -108,7 +107,7 @@ struct vector_renderer_base
         return std::max(actual.size(), expected.size()) - std::min(actual.size(), expected.size());
     }
 
-    void save(image_type const & image, boost::filesystem::path const& path) const
+    void save(image_type const& image, boost::filesystem::path const& path) const
     {
         std::ofstream file(path.string().c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
         if (!file)
@@ -121,9 +120,9 @@ struct vector_renderer_base
 
 struct agg_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
-    static constexpr const char * name = "agg";
+    static constexpr const char* name = "agg";
 
-    image_type render(mapnik::Map const & map, double scale_factor) const
+    image_type render(mapnik::Map const& map, double scale_factor) const
     {
         image_type image(map.width(), map.height());
         mapnik::agg_renderer<image_type> ren(map, image, scale_factor);
@@ -135,13 +134,13 @@ struct agg_renderer : raster_renderer_base<mapnik::image_rgba8>
 #if defined(HAVE_CAIRO)
 struct cairo_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
-    static constexpr const char * name = "cairo";
+    static constexpr const char* name = "cairo";
 
-    image_type render(mapnik::Map const & map, double scale_factor) const
+    image_type render(mapnik::Map const& map, double scale_factor) const
     {
         mapnik::cairo_surface_ptr image_surface(
-            cairo_image_surface_create(CAIRO_FORMAT_ARGB32, map.width(), map.height()),
-            mapnik::cairo_surface_closer());
+          cairo_image_surface_create(CAIRO_FORMAT_ARGB32, map.width(), map.height()),
+          mapnik::cairo_surface_closer());
         mapnik::cairo_ptr image_context(mapnik::create_context(image_surface));
         mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map, image_context, scale_factor);
         ren.apply();
@@ -151,26 +150,23 @@ struct cairo_renderer : raster_renderer_base<mapnik::image_rgba8>
     }
 };
 
-using surface_create_type = cairo_surface_t *(&)(cairo_write_func_t, void *, double, double);
+using surface_create_type = cairo_surface_t* (&)(cairo_write_func_t, void*, double, double);
 
-template <surface_create_type SurfaceCreateFunction>
+template<surface_create_type SurfaceCreateFunction>
 struct cairo_vector_renderer : vector_renderer_base
 {
-    static cairo_status_t write(void *closure,
-                                const unsigned char *data,
-                                unsigned int length)
+    static cairo_status_t write(void* closure, const unsigned char* data, unsigned int length)
     {
-        std::ostringstream & ss = *reinterpret_cast<std::ostringstream*>(closure);
-        ss.write(reinterpret_cast<char const *>(data), length);
+        std::ostringstream& ss = *reinterpret_cast<std::ostringstream*>(closure);
+        ss.write(reinterpret_cast<char const*>(data), length);
         return ss ? CAIRO_STATUS_SUCCESS : CAIRO_STATUS_WRITE_ERROR;
     }
 
-    image_type render(mapnik::Map const & map, double scale_factor) const
+    image_type render(mapnik::Map const& map, double scale_factor) const
     {
         std::ostringstream ss(std::stringstream::binary);
-        mapnik::cairo_surface_ptr image_surface(
-            SurfaceCreateFunction(write, &ss, map.width(), map.height()),
-            mapnik::cairo_surface_closer());
+        mapnik::cairo_surface_ptr image_surface(SurfaceCreateFunction(write, &ss, map.width(), map.height()),
+                                                mapnik::cairo_surface_closer());
         mapnik::cairo_ptr image_context(mapnik::create_context(image_surface));
         mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map, image_context, scale_factor);
         ren.apply();
@@ -180,36 +176,33 @@ struct cairo_vector_renderer : vector_renderer_base
 };
 
 #ifdef CAIRO_HAS_SVG_SURFACE
-inline cairo_surface_t *create_svg_1_2(cairo_write_func_t write_func,
-                                       void *closure,
-                                       double width,
-                                       double height)
+inline cairo_surface_t* create_svg_1_2(cairo_write_func_t write_func, void* closure, double width, double height)
 {
-    cairo_surface_t * surface = cairo_svg_surface_create_for_stream(write_func, closure, width, height);
+    cairo_surface_t* surface = cairo_svg_surface_create_for_stream(write_func, closure, width, height);
     cairo_svg_surface_restrict_to_version(surface, CAIRO_SVG_VERSION_1_2);
     return surface;
 }
 
 struct cairo_svg_renderer : cairo_vector_renderer<create_svg_1_2>
 {
-    static constexpr const char * name = "cairo-svg";
-    static constexpr const char * ext = ".svg";
+    static constexpr const char* name = "cairo-svg";
+    static constexpr const char* ext = ".svg";
 };
 #endif
 
 #ifdef CAIRO_HAS_PS_SURFACE
 struct cairo_ps_renderer : cairo_vector_renderer<cairo_ps_surface_create_for_stream>
 {
-    static constexpr const char * name = "cairo-ps";
-    static constexpr const char * ext = ".ps";
+    static constexpr const char* name = "cairo-ps";
+    static constexpr const char* ext = ".ps";
 };
 #endif
 
 #ifdef CAIRO_HAS_PDF_SURFACE
 struct cairo_pdf_renderer : cairo_vector_renderer<cairo_pdf_surface_create_for_stream>
 {
-    static constexpr const char * name = "cairo-pdf";
-    static constexpr const char * ext = ".pdf";
+    static constexpr const char* name = "cairo-pdf";
+    static constexpr const char* ext = ".pdf";
 };
 #endif
 #endif
@@ -217,10 +210,10 @@ struct cairo_pdf_renderer : cairo_vector_renderer<cairo_pdf_surface_create_for_s
 #if defined(SVG_RENDERER)
 struct svg_renderer : vector_renderer_base
 {
-    static constexpr const char * name = "svg";
-    static constexpr const char * ext = ".svg";
+    static constexpr const char* name = "svg";
+    static constexpr const char* ext = ".svg";
 
-    image_type render(mapnik::Map const & map, double scale_factor) const
+    image_type render(mapnik::Map const& map, double scale_factor) const
     {
         std::stringstream ss;
         std::ostream_iterator<char> output_stream_iterator(ss);
@@ -234,14 +227,14 @@ struct svg_renderer : vector_renderer_base
 #if defined(GRID_RENDERER)
 struct grid_renderer : raster_renderer_base<mapnik::image_rgba8>
 {
-    static constexpr const char * name = "grid";
+    static constexpr const char* name = "grid";
 
-    void convert(mapnik::grid::data_type const & grid, image_type & image) const
+    void convert(mapnik::grid::data_type const& grid, image_type& image) const
     {
         for (std::size_t y = 0; y < grid.height(); ++y)
         {
-            mapnik::grid::value_type const * grid_row = grid.get_row(y);
-            image_type::pixel_type * image_row = image.get_row(y);
+            mapnik::grid::value_type const* grid_row = grid.get_row(y);
+            image_type::pixel_type* image_row = image.get_row(y);
             for (std::size_t x = 0; x < grid.width(); ++x)
             {
                 mapnik::grid::value_type val = grid_row[x];
@@ -268,7 +261,7 @@ struct grid_renderer : raster_renderer_base<mapnik::image_rgba8>
         }
     }
 
-    image_type render(mapnik::Map const & map, double scale_factor) const
+    image_type render(mapnik::Map const& map, double scale_factor) const
     {
         mapnik::grid grid(map.width(), map.height(), "__id__");
         mapnik::grid_renderer<mapnik::grid> ren(map, grid, scale_factor);
@@ -280,8 +273,8 @@ struct grid_renderer : raster_renderer_base<mapnik::image_rgba8>
 };
 #endif
 
-template <typename T>
-void set_rectangle(T const & src, T & dst, std::size_t x, std::size_t y)
+template<typename T>
+void set_rectangle(T const& src, T& dst, std::size_t x, std::size_t y)
 {
     mapnik::box2d<int> ext0(0, 0, dst.width(), dst.height());
     mapnik::box2d<int> ext1(x, y, x + src.width(), y + src.height());
@@ -291,8 +284,8 @@ void set_rectangle(T const & src, T & dst, std::size_t x, std::size_t y)
         mapnik::box2d<int> box = ext0.intersect(ext1);
         for (std::size_t pix_y = box.miny(); pix_y < static_cast<std::size_t>(box.maxy()); ++pix_y)
         {
-            typename T::pixel_type * row_to =  dst.get_row(pix_y);
-            typename T::pixel_type const * row_from = src.get_row(pix_y - y);
+            typename T::pixel_type* row_to = dst.get_row(pix_y);
+            typename T::pixel_type const* row_from = src.get_row(pix_y - y);
 
             for (std::size_t pix_x = box.minx(); pix_x < static_cast<std::size_t>(box.maxx()); ++pix_x)
             {
@@ -302,24 +295,23 @@ void set_rectangle(T const & src, T & dst, std::size_t x, std::size_t y)
     }
 }
 
-template <typename Renderer>
+template<typename Renderer>
 class renderer
 {
-public:
+  public:
     using renderer_type = Renderer;
     using image_type = typename Renderer::image_type;
 
-    renderer(boost::filesystem::path const & _output_dir, boost::filesystem::path const & _reference_dir, bool _overwrite)
-        : ren(), output_dir(_output_dir), reference_dir(_reference_dir), overwrite(_overwrite)
-    {
-    }
+    renderer(boost::filesystem::path const& _output_dir, boost::filesystem::path const& _reference_dir, bool _overwrite)
+        : ren()
+        , output_dir(_output_dir)
+        , reference_dir(_reference_dir)
+        , overwrite(_overwrite)
+    {}
 
-    image_type render(mapnik::Map const & map, double scale_factor) const
-    {
-        return ren.render(map, scale_factor);
-    }
+    image_type render(mapnik::Map const& map, double scale_factor) const { return ren.render(map, scale_factor); }
 
-    image_type render(mapnik::Map & map, double scale_factor, map_size const & tiles) const
+    image_type render(mapnik::Map& map, double scale_factor, map_size const& tiles) const
     {
         mapnik::box2d<double> box = map.get_current_extent();
         image_type image(map.width(), map.height());
@@ -330,11 +322,10 @@ public:
         {
             for (std::size_t tile_x = 0; tile_x < tiles.width; tile_x++)
             {
-                mapnik::box2d<double> tile_box(
-                    box.minx() + tile_x * tile_box_width,
-                    box.miny() + tile_y * tile_box_height,
-                    box.minx() + (tile_x + 1) * tile_box_width,
-                    box.miny() + (tile_y + 1) * tile_box_height);
+                mapnik::box2d<double> tile_box(box.minx() + tile_x * tile_box_width,
+                                               box.miny() + tile_y * tile_box_height,
+                                               box.minx() + (tile_x + 1) * tile_box_width,
+                                               box.miny() + (tile_y + 1) * tile_box_height);
                 map.zoom_to_box(tile_box);
                 image_type tile(ren.render(map, scale_factor));
                 set_rectangle(tile, image, tile_x * tile.width(), (tiles.height - 1 - tile_y) * tile.height());
@@ -343,10 +334,10 @@ public:
         return image;
     }
 
-    result report(image_type const & image,
-                  std::string const & name,
-                  map_size const & size,
-                  map_size const & tiles,
+    result report(image_type const& image,
+                  std::string const& name,
+                  map_size const& size,
+                  map_size const& tiles,
                   double scale_factor) const
     {
         boost::filesystem::path reference = reference_dir / image_file_name(name, size, tiles, scale_factor, true);
@@ -380,10 +371,10 @@ public:
         return res;
     }
 
-private:
-    std::string image_file_name(std::string const & test_name,
-                                map_size const & size,
-                                map_size const & tiles,
+  private:
+    std::string image_file_name(std::string const& test_name,
+                                map_size const& size,
+                                map_size const& tiles,
                                 double scale_factor,
                                 bool reference) const
     {
@@ -410,25 +401,31 @@ private:
 
 using renderer_type = mapnik::util::variant<renderer<agg_renderer>
 #if defined(HAVE_CAIRO)
-                                            ,renderer<cairo_renderer>
+                                            ,
+                                            renderer<cairo_renderer>
 #ifdef CAIRO_HAS_SVG_SURFACE
-                                            ,renderer<cairo_svg_renderer>
+                                            ,
+                                            renderer<cairo_svg_renderer>
 #endif
 #ifdef CAIRO_HAS_PS_SURFACE
-                                            ,renderer<cairo_ps_renderer>
+                                            ,
+                                            renderer<cairo_ps_renderer>
 #endif
 #ifdef CAIRO_HAS_PDF_SURFACE
-                                            ,renderer<cairo_pdf_renderer>
+                                            ,
+                                            renderer<cairo_pdf_renderer>
 #endif
 #endif
 #if defined(SVG_RENDERER)
-                                            ,renderer<svg_renderer>
+                                            ,
+                                            renderer<svg_renderer>
 #endif
 #if defined(GRID_RENDERER)
-                                            ,renderer<grid_renderer>
+                                            ,
+                                            renderer<grid_renderer>
 #endif
                                             >;
 
-}
+} // namespace visual_tests
 
 #endif

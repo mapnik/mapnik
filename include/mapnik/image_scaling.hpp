@@ -36,13 +36,10 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
+namespace mapnik {
 
-namespace mapnik
-{
-
-enum scaling_method_e
-{
-    SCALING_NEAR=0,
+enum scaling_method_e {
+    SCALING_NEAR = 0,
     SCALING_BILINEAR,
     SCALING_BICUBIC,
     SCALING_SPLINE16,
@@ -64,29 +61,36 @@ enum scaling_method_e
 MAPNIK_DECL boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name);
 MAPNIK_DECL boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method);
 
-template <typename T>
-MAPNIK_DECL void scale_image_agg(T & target, T const& source,
+template<typename T>
+MAPNIK_DECL void scale_image_agg(T& target,
+                                 T const& source,
                                  scaling_method_e scaling_method,
                                  double image_ratio_x,
                                  double image_ratio_y,
                                  double x_off_f,
                                  double y_off_f,
                                  double filter_factor,
-                                 boost::optional<double> const & nodata_value);
-template <typename T>
-inline void scale_image_agg(T & target, T const& source,
-                                 scaling_method_e scaling_method,
-                                 double image_ratio_x,
-                                 double image_ratio_y,
-                                 double x_off_f,
-                                 double y_off_f,
-                                 double filter_factor)
+                                 boost::optional<double> const& nodata_value);
+template<typename T>
+inline void scale_image_agg(T& target,
+                            T const& source,
+                            scaling_method_e scaling_method,
+                            double image_ratio_x,
+                            double image_ratio_y,
+                            double x_off_f,
+                            double y_off_f,
+                            double filter_factor)
 {
-    scale_image_agg(target, source, scaling_method,
-                    image_ratio_x,image_ratio_y,
-                    x_off_f, y_off_f, filter_factor,
+    scale_image_agg(target,
+                    source,
+                    scaling_method,
+                    image_ratio_x,
+                    image_ratio_y,
+                    x_off_f,
+                    y_off_f,
+                    filter_factor,
                     boost::optional<double>());
 }
-}
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_SCALING_HPP

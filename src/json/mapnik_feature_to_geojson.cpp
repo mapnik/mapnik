@@ -27,9 +27,10 @@
 // boost
 #include <boost/spirit/include/karma.hpp>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-bool to_geojson(std::string & json, mapnik::feature_impl const& feature)
+bool to_geojson(std::string& json, mapnik::feature_impl const& feature)
 {
     using sink_type = std::back_insert_iterator<std::string>;
     static mapnik::json::feature_generator_grammar<sink_type, mapnik::feature_impl> const grammar;
@@ -37,4 +38,5 @@ bool to_geojson(std::string & json, mapnik::feature_impl const& feature)
     return boost::spirit::karma::generate(sink, grammar, feature);
 }
 
-}}
+} // namespace util
+} // namespace mapnik

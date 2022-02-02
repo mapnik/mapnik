@@ -38,9 +38,9 @@
 #include <memory>
 #include <vector>
 #include <map>
-#include <ostream>                      // for basic_ostream, operator<<, etc
-#include <sstream>                      // for basic_stringstream
-#include <stdexcept>                    // for out_of_range
+#include <ostream>   // for basic_ostream, operator<<, etc
+#include <sstream>   // for basic_stringstream
+#include <stdexcept> // for out_of_range
 #include <iostream>
 
 namespace mapnik {
@@ -50,12 +50,13 @@ class feature_impl;
 
 using raster_ptr = std::shared_ptr<raster>;
 
-template <typename T>
+template<typename T>
 class context : private util::noncopyable
 
 {
     friend class feature_impl;
-public:
+
+  public:
     using map_type = T;
     using value_type = typename map_type::value_type;
     using key_type = typename map_type::key_type;
@@ -65,7 +66,8 @@ public:
     using const_iterator = typename map_type::const_iterator;
 
     context()
-        : mapping_() {}
+        : mapping_()
+    {}
 
     inline size_type push(key_type const& name)
     {
@@ -74,20 +76,17 @@ public:
         return index;
     }
 
-    inline void add(key_type const& name, size_type index)
-    {
-        mapping_.emplace(name, index);
-    }
+    inline void add(key_type const& name, size_type index) { mapping_.emplace(name, index); }
 
     inline size_type size() const { return mapping_.size(); }
-    inline const_iterator begin() const { return mapping_.begin();}
-    inline const_iterator end() const { return mapping_.end();}
+    inline const_iterator begin() const { return mapping_.begin(); }
+    inline const_iterator end() const { return mapping_.end(); }
 
-private:
+  private:
     map_type mapping_;
 };
 
-using context_type = context<std::map<std::string,std::size_t> >;
+using context_type = context<std::map<std::string, std::size_t>>;
 using context_ptr = std::shared_ptr<context_type>;
 
 static const value default_feature_value{};
@@ -95,38 +94,39 @@ static const value default_feature_value{};
 class MAPNIK_DECL feature_impl : private util::noncopyable
 {
     friend class feature_kv_iterator;
-public:
+
+  public:
 
     using value_type = mapnik::value;
     using cont_type = std::vector<value_type>;
     using iterator = feature_kv_iterator;
 
     feature_impl(context_ptr const& ctx, mapnik::value_integer _id)
-        : id_(_id),
-        ctx_(ctx),
-        data_(ctx_->mapping_.size()),
-        geom_(geometry::geometry_empty()),
-        raster_() {}
+        : id_(_id)
+        , ctx_(ctx)
+        , data_(ctx_->mapping_.size())
+        , geom_(geometry::geometry_empty())
+        , raster_()
+    {}
 
-    inline mapnik::value_integer id() const { return id_;}
-    inline void set_id(mapnik::value_integer _id) { id_ = _id;}
-    template <typename T>
+    inline mapnik::value_integer id() const { return id_; }
+    inline void set_id(mapnik::value_integer _id) { id_ = _id; }
+    template<typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {
         put(key, value(val));
     }
 
-    template <typename T>
+    template<typename T>
     inline void put_new(context_type::key_type const& key, T const& val)
     {
         put_new(key, value(val));
     }
 
-    inline void put(context_type::key_type const& key, value && val)
+    inline void put(context_type::key_type const& key, value&& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end()
-            && itr->second < data_.size())
+        if (itr != ctx_->mapping_.end() && itr->second < data_.size())
         {
             data_[itr->second] = std::move(val);
         }
@@ -136,11 +136,10 @@ public:
         }
     }
 
-    inline void put_new(context_type::key_type const& key, value && val)
+    inline void put_new(context_type::key_type const& key, value&& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end()
-            && itr->second < data_.size())
+        if (itr != ctx_->mapping_.end() && itr->second < data_.size())
         {
             data_[itr->second] = std::move(val);
         }
@@ -152,10 +151,7 @@ public:
         }
     }
 
-    inline bool has_key(context_type::key_type const& key) const
-    {
-        return (ctx_->mapping_.count(key) == 1);
-    }
+    inline bool has_key(context_type::key_type const& key) const { return (ctx_->mapping_.count(key) == 1); }
 
     inline value_type const& get(context_type::key_type const& key) const
     {
@@ -173,70 +169,31 @@ public:
         return default_feature_value;
     }
 
-    inline std::size_t size() const
-    {
-        return data_.size();
-    }
+    inline std::size_t size() const { return data_.size(); }
 
-    inline cont_type const& get_data() const
-    {
-        return data_;
-    }
+    inline cont_type const& get_data() const { return data_; }
 
-    inline void set_data(cont_type const& data)
-    {
-        data_ = data;
-    }
+    inline void set_data(cont_type const& data) { data_ = data; }
 
-    inline context_ptr context() const
-    {
-        return ctx_;
-    }
+    inline context_ptr context() const { return ctx_; }
 
-    inline void set_geometry(geometry::geometry<double> && geom)
-    {
-        geom_ = std::move(geom);
-    }
+    inline void set_geometry(geometry::geometry<double>&& geom) { geom_ = std::move(geom); }
 
-    inline void set_geometry_copy(geometry::geometry<double> const& geom)
-    {
-        geom_ = geom;
-    }
+    inline void set_geometry_copy(geometry::geometry<double> const& geom) { geom_ = geom; }
 
-    inline geometry::geometry<double> const& get_geometry() const
-    {
-        return geom_;
-    }
+    inline geometry::geometry<double> const& get_geometry() const { return geom_; }
 
-    inline geometry::geometry<double> & get_geometry()
-    {
-        return geom_;
-    }
+    inline geometry::geometry<double>& get_geometry() { return geom_; }
 
-    inline box2d<double> envelope() const
-    {
-        return mapnik::geometry::envelope(geom_);
-    }
+    inline box2d<double> envelope() const { return mapnik::geometry::envelope(geom_); }
 
-    inline raster_ptr const& get_raster() const
-    {
-        return raster_;
-    }
+    inline raster_ptr const& get_raster() const { return raster_; }
 
-    inline void set_raster(raster_ptr const& raster)
-    {
-        raster_ = raster;
-    }
+    inline void set_raster(raster_ptr const& raster) { raster_ = raster; }
 
-    inline feature_kv_iterator begin() const
-    {
-        return feature_kv_iterator(*this,true);
-    }
+    inline feature_kv_iterator begin() const { return feature_kv_iterator(*this, true); }
 
-    inline feature_kv_iterator end() const
-    {
-        return feature_kv_iterator(*this);
-    }
+    inline feature_kv_iterator end() const { return feature_kv_iterator(*this); }
 
     std::string to_string() const
     {
@@ -249,11 +206,11 @@ public:
             {
                 if (data_[kv.second] == mapnik::value_null())
                 {
-                    ss << "  " << kv.first  << ":null" << std::endl;
+                    ss << "  " << kv.first << ":null" << std::endl;
                 }
                 else
                 {
-                    ss << "  " << kv.first  << ":" <<  data_[kv.second] << std::endl;
+                    ss << "  " << kv.first << ":" << data_[kv.second] << std::endl;
                 }
             }
         }
@@ -261,7 +218,7 @@ public:
         return ss.str();
     }
 
-private:
+  private:
     mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
@@ -269,8 +226,7 @@ private:
     raster_ptr raster_;
 };
 
-
-inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
+inline std::ostream& operator<<(std::ostream& out, feature_impl const& f)
 {
     out << f.to_string();
     return out;
@@ -278,6 +234,6 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 
 using feature_ptr = std::shared_ptr<feature_impl>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_FEATURE_HPP

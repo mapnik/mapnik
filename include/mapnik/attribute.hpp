@@ -37,20 +37,21 @@ struct attribute
 {
     std::string name_;
     explicit attribute(std::string const& _name)
-        : name_(_name) {}
+        : name_(_name)
+    {}
 
-    template <typename V ,typename F>
+    template<typename V, typename F>
     V const& value(F const& f) const
     {
         return f.get(name_);
     }
 
-    std::string const& name() const { return name_;}
+    std::string const& name() const { return name_; }
 };
 
 struct geometry_type_attribute
 {
-    template <typename V, typename F>
+    template<typename V, typename F>
     V value(F const& f) const
     {
         return static_cast<mapnik::value_integer>(util::to_ds_type(f.get_geometry()));
@@ -61,10 +62,11 @@ struct global_attribute
 {
     std::string name;
     explicit global_attribute(std::string const& name_)
-        : name(name_) {}
+        : name(name_)
+    {}
 
-    template <typename V, typename C>
-    V const& operator() (C const& ctx)
+    template<typename V, typename C>
+    V const& operator()(C const& ctx)
     {
         return ctx.get(name);
     }
@@ -72,6 +74,6 @@ struct global_attribute
 
 using attributes = std::unordered_map<std::string, value>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_ATTRIBUTE_HPP

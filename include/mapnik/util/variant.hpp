@@ -26,44 +26,44 @@
 #include <mapnik/config.hpp>
 #include <mapbox/variant.hpp>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-template <typename T>
+template<typename T>
 using recursive_wrapper = typename mapbox::util::recursive_wrapper<T>;
 
 template<typename... Types>
-using variant = typename  mapbox::util::variant<Types...>;
-
+using variant = typename mapbox::util::variant<Types...>;
 
 // unary visitor interface
-template <typename F, typename V>
-auto VARIANT_INLINE apply_visitor(F&& f, V&& v)
-    -> decltype(v.visit(std::forward<V>(v), std::forward<F>(f)))
+template<typename F, typename V>
+auto VARIANT_INLINE apply_visitor(F&& f, V&& v) -> decltype(v.visit(std::forward<V>(v), std::forward<F>(f)))
 {
     return v.visit(std::forward<V>(v), std::forward<F>(f));
 }
 
 // binary visitor interface
-template <typename F, typename V>
+template<typename F, typename V>
 auto VARIANT_INLINE apply_visitor(F&& f, V&& v0, V&& v1)
-    -> decltype(v0.binary_visit(std::forward<V>(v0), std::forward<V>(v1), std::forward<F>(f)))
+  -> decltype(v0.binary_visit(std::forward<V>(v0), std::forward<V>(v1), std::forward<F>(f)))
 {
     return v0.binary_visit(std::forward<V>(v0), std::forward<V>(v1), std::forward<F>(f));
 }
 
 // getter interface
-template <typename ResultType, typename T>
-ResultType & get(T & var)
+template<typename ResultType, typename T>
+ResultType& get(T& var)
 {
     return var.template get<ResultType>();
 }
 
-template <typename ResultType, typename T>
+template<typename ResultType, typename T>
 ResultType const& get(T const& var)
 {
     return var.template get<ResultType>();
 }
 
-}}
+} // namespace util
+} // namespace mapnik
 
-#endif  // MAPNIK_UTIL_VARIANT_HPP
+#endif // MAPNIK_UTIL_VARIANT_HPP

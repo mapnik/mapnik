@@ -27,35 +27,43 @@
 
 #ifdef _WIN32
 #ifdef MAPNIK_STATIC_DEFINE
-#  define MAPNIK_DECL
-#  define MAPNIK_EXP
+#define MAPNIK_DECL
+#define MAPNIK_EXP
 #else
-#  define MAPNIK_EXP __declspec(dllexport)
-#  ifndef MAPNIK_DECL
-#    ifdef MAPNIK_EXPORTS
-        /* We are building this library */
-#      define MAPNIK_DECL __declspec(dllexport)
-#    else
-        /* We are using this library */
-#      define MAPNIK_DECL __declspec(dllimport)
-#    endif
-#  endif
+#define MAPNIK_EXP __declspec(dllexport)
+#ifndef MAPNIK_DECL
+#ifdef MAPNIK_EXPORTS
+/* We are building this library */
+#define MAPNIK_DECL __declspec(dllexport)
+#else
+/* We are using this library */
+#define MAPNIK_DECL __declspec(dllimport)
 #endif
-#  pragma warning( disable: 4251 )
-#  pragma warning( disable: 4275 )
-#  if (_MSC_VER >= 1400) // vc8
-#    pragma warning(disable : 4996) //_CRT_SECURE_NO_DEPRECATE
-#  endif
+#endif
+#endif
+#pragma warning(disable: 4251)
+#pragma warning(disable: 4275)
+#if (_MSC_VER >= 1400)         // vc8
+#pragma warning(disable: 4996) //_CRT_SECURE_NO_DEPRECATE
+#endif
 #else
-#  if __GNUC__ >= 4
-#  define MAPNIK_EXP __attribute__ ((visibility ("default")))
-#  define MAPNIK_DECL __attribute__ ((visibility ("default")))
-#  define MAPNIK_IMP __attribute__ ((visibility ("default")))
-#  else
-#  define MAPNIK_EXP
-#  define MAPNIK_DECL
-#  define MAPNIK_IMP
-#  endif
+#define MAPNIK_DECL __declspec(dllimport)
+#endif
+#pragma warning(disable: 4251)
+#pragma warning(disable: 4275)
+#if (_MSC_VER >= 1400)         // vc8
+#pragma warning(disable: 4996) //_CRT_SECURE_NO_DEPRECATE
+#endif
+#else
+#if __GNUC__ >= 4
+#define MAPNIK_EXP  __attribute__((visibility("default")))
+#define MAPNIK_DECL __attribute__((visibility("default")))
+#define MAPNIK_IMP  __attribute__((visibility("default")))
+#else
+#define MAPNIK_EXP
+#define MAPNIK_DECL
+#define MAPNIK_IMP
+#endif
 #endif
 
 #define PROJ_ENVELOPE_POINTS 20

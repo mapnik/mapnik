@@ -4,29 +4,36 @@
 class test : public benchmark::test_case
 {
     std::string value_;
-public:
+
+  public:
     test(mapnik::parameters const& params)
-     : test_case(params),
-       value_("123456789") {}
+        : test_case(params)
+        , value_("123456789")
+    {}
     bool validate() const
     {
         mapnik::value_integer result = 0;
-        if (!mapnik::util::string2int(value_.data(),value_.data()+value_.size(),result)) return false;
-        if (result != 123456789) return false;
+        if (!mapnik::util::string2int(value_.data(), value_.data() + value_.size(), result))
+            return false;
+        if (result != 123456789)
+            return false;
         result = 0;
-        if (!mapnik::util::string2int(value_,result)) return false;
-        if (result != 123456789) return false;
+        if (!mapnik::util::string2int(value_, result))
+            return false;
+        if (result != 123456789)
+            return false;
         return true;
     }
     bool operator()() const
     {
-        for (std::size_t i=0;i<iterations_;++i) {
+        for (std::size_t i = 0; i < iterations_; ++i)
+        {
             mapnik::value_integer result = 0;
-            mapnik::util::string2int(value_,result);
-            mapnik::util::string2int(value_.data(),value_.data()+value_.size(),result);
+            mapnik::util::string2int(value_, result);
+            mapnik::util::string2int(value_.data(), value_.data() + value_.size(), result);
         }
         return true;
     }
 };
 
-BENCHMARK(test,"string->int")
+BENCHMARK(test, "string->int")

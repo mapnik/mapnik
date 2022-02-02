@@ -30,25 +30,25 @@
 // stl
 #include <map>
 
-namespace  mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
 class MAPNIK_DECL svg_parser_exception : public std::exception
 {
-public:
+  public:
     svg_parser_exception(std::string const& message)
-      : message_(message) {}
+        : message_(message)
+    {}
 
     ~svg_parser_exception() {}
 
-    virtual const char* what() const noexcept
-    {
-        return message_.c_str();
-    }
-private:
+    virtual const char* what() const noexcept { return message_.c_str(); }
+
+  private:
     std::string message_;
 };
 
-}}
-
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_PARSER_EXCEPTION_HPP

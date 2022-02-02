@@ -29,96 +29,74 @@
 #include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/geometry/remove_empty.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 namespace detail {
 
-template <typename T>
+template<typename T>
 struct geometry_centroid
 {
     using result_type = bool;
 
-    geometry_centroid(point<T> & pt)
-        : pt_(pt) {}
+    geometry_centroid(point<T>& pt)
+        : pt_(pt)
+    {}
 
-    template <typename U>
-    result_type operator() (U const& geom) const
+    template<typename U>
+    result_type operator()(U const& geom) const
     {
         return util::apply_visitor(*this, geom);
     }
 
-    result_type operator() (geometry_empty const&) const
-    {
-        return false;
-    }
+    result_type operator()(geometry_empty const&) const { return false; }
 
-    result_type operator() (geometry_collection<T> const&) const
-    {
-        return false;
-    }
+    result_type operator()(geometry_collection<T> const&) const { return false; }
 
-    result_type operator() (point<T> const& geom) const
-    {
-        return centroid_simple(geom);
-    }
+    result_type operator()(point<T> const& geom) const { return centroid_simple(geom); }
 
-    result_type operator() (line_string<T> const& geom) const
-    {
-        return centroid_simple(geom);
-    }
+    result_type operator()(line_string<T> const& geom) const { return centroid_simple(geom); }
 
-    result_type operator() (polygon<T> const& geom) const
-    {
-        return centroid_simple(geom);
-    }
+    result_type operator()(polygon<T> const& geom) const { return centroid_simple(geom); }
 
-    result_type operator() (multi_point<T> const& geom) const
-    {
-        return centroid_simple(geom);
-    }
+    result_type operator()(multi_point<T> const& geom) const { return centroid_simple(geom); }
 
-    result_type operator() (multi_line_string<T> const& geom) const
-    {
-        return centroid_multi(geom);
-    }
+    result_type operator()(multi_line_string<T> const& geom) const { return centroid_multi(geom); }
 
-    result_type operator() (multi_polygon<T> const& geom) const
-    {
-        return centroid_multi(geom);
-    }
+    result_type operator()(multi_polygon<T> const& geom) const { return centroid_multi(geom); }
 
-    point<T> & pt_;
+    point<T>& pt_;
 
-private:
-    template <typename Geom>
-    result_type centroid_simple(Geom const & geom) const
+  private:
+    template<typename Geom>
+    result_type centroid_simple(Geom const& geom) const
     {
         try
         {
             boost::geometry::centroid(geom, pt_);
             return true;
-        }
-        catch (boost::geometry::centroid_exception const & e)
+        } catch (boost::geometry::centroid_exception const& e)
         {
             return false;
         }
     }
 
-    template <typename Geom>
-    result_type centroid_multi(Geom const & multi_geom) const
+    template<typename Geom>
+    result_type centroid_multi(Geom const& multi_geom) const
     {
         return centroid_simple(multi_geom);
     }
 };
 
-}
+} // namespace detail
 
-template <typename T1, typename T2>
-inline bool centroid(T1 const& geom, point<T2> & pt)
+template<typename T1, typename T2>
+inline bool centroid(T1 const& geom, point<T2>& pt)
 {
     return detail::geometry_centroid<T2>(pt)(geom);
 }
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_CENTROID_HPP

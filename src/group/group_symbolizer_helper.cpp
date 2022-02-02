@@ -33,18 +33,20 @@
 #include <mapnik/vertex_cache.hpp>
 #include <mapnik/tolerance_iterator.hpp>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 
-template <typename Helper>
+template<typename Helper>
 struct apply_find_line_placements : util::noncopyable
 {
-    apply_find_line_placements(view_transform const& t, proj_transform const& prj_trans, Helper & helper)
-        : t_(t),
-          prj_trans_(prj_trans),
-          helper_(helper) {}
+    apply_find_line_placements(view_transform const& t, proj_transform const& prj_trans, Helper& helper)
+        : t_(t)
+        , prj_trans_(prj_trans)
+        , helper_(helper)
+    {}
 
-    template <typename Adapter>
-    void operator() (Adapter & va) const
+    template<typename Adapter>
+    void operator()(Adapter& va) const
     {
         using vertex_adapter_type = Adapter;
         using path_type = transform_path_adapter<view_transform, vertex_adapter_type>;
@@ -53,20 +55,23 @@ struct apply_find_line_placements : util::noncopyable
     }
     view_transform const& t_;
     proj_transform const& prj_trans_;
-    Helper & helper_;
+    Helper& helper_;
 };
 
-} // ns detail
+} // namespace detail
 
-group_symbolizer_helper::group_symbolizer_helper(
-        group_symbolizer const& sym, feature_impl const& feature,
-        attributes const& vars,
-        proj_transform const& prj_trans,
-        unsigned width, unsigned height, double scale_factor,
-        view_transform const& t, DetectorType & detector,
-        box2d<double> const& query_extent)
-    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent),
-      detector_(detector)
+group_symbolizer_helper::group_symbolizer_helper(group_symbolizer const& sym,
+                                                 feature_impl const& feature,
+                                                 attributes const& vars,
+                                                 proj_transform const& prj_trans,
+                                                 unsigned width,
+                                                 unsigned height,
+                                                 double scale_factor,
+                                                 view_transform const& t,
+                                                 DetectorType& detector,
+                                                 box2d<double> const& query_extent)
+    : base_symbolizer_helper(sym, feature, vars, prj_trans, width, height, scale_factor, t, query_extent)
+    , detector_(detector)
 {}
 
 pixel_position_list const& group_symbolizer_helper::get()
@@ -95,10 +100,11 @@ pixel_position_list const& group_symbolizer_helper::get()
     return results_;
 }
 
-template <typename T>
-bool group_symbolizer_helper::find_line_placements(T & path)
+template<typename T>
+bool group_symbolizer_helper::find_line_placements(T& path)
 {
-    if (box_elements_.empty()) return true;
+    if (box_elements_.empty())
+        return true;
 
     vertex_cache pp(path);
 
@@ -113,10 +119,11 @@ bool group_symbolizer_helper::find_line_placements(T & path)
 
         double spacing = get_spacing(pp.length());
 
-        pp.forward(spacing/2.0);
+        pp.forward(spacing / 2.0);
         do
         {
-            tolerance_iterator tolerance_offset(text_props_->label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
+            tolerance_iterator tolerance_offset(text_props_->label_position_tolerance * scale_factor_,
+                                                spacing); // TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
@@ -133,10 +140,11 @@ bool group_symbolizer_helper::find_line_placements(T & path)
 
 bool group_symbolizer_helper::check_point_placement(pixel_position const& pos)
 {
-    if (box_elements_.empty()) return false;
+    if (box_elements_.empty())
+        return false;
 
     // offset boxes and check collision
-    std::list< box2d<double> > real_boxes;
+    std::list<box2d<double>> real_boxes;
     for (auto const& box_elem : box_elements_)
     {
         box2d<double> real_box = box2d<double>(box_elem.box_);
@@ -150,7 +158,7 @@ bool group_symbolizer_helper::check_point_placement(pixel_position const& pos)
 
     // add boxes to collision detector
     std::list<box_element>::iterator elem_itr = box_elements_.begin();
-    std::list< box2d<double> >::iterator real_itr = real_boxes.begin();
+    std::list<box2d<double>>::iterator real_itr = real_boxes.begin();
     while (elem_itr != box_elements_.end() && real_itr != real_boxes.end())
     {
         detector_.insert(*real_itr, elem_itr->repeat_key_);
@@ -165,19 +173,14 @@ bool group_symbolizer_helper::check_point_placement(pixel_position const& pos)
 
 bool group_symbolizer_helper::collision(box2d<double> const& box, value_unicode_string const& repeat_key) const
 {
-    if (!detector_.extent().intersects(box)
-            ||
-        (text_props_->avoid_edges && !dims_.contains(box))
-            ||
-        (text_props_->minimum_padding > 0 &&
-         !dims_.contains(box + (scale_factor_ * text_props_->minimum_padding)))
-            ||
+    if (!detector_.extent().intersects(box) || (text_props_->avoid_edges && !dims_.contains(box)) ||
+        (text_props_->minimum_padding > 0 && !dims_.contains(box + (scale_factor_ * text_props_->minimum_padding))) ||
         (!text_props_->allow_overlap &&
-            ((repeat_key.length() == 0 && !detector_.has_placement(box, text_props_->margin * scale_factor_))
-                ||
-             (repeat_key.length() > 0  && !detector_.has_placement(box, text_props_->margin * scale_factor_,
-                                                                   repeat_key, text_props_->repeat_distance * scale_factor_))))
-        )
+         ((repeat_key.length() == 0 && !detector_.has_placement(box, text_props_->margin * scale_factor_)) ||
+          (repeat_key.length() > 0 && !detector_.has_placement(box,
+                                                               text_props_->margin * scale_factor_,
+                                                               repeat_key,
+                                                               text_props_->repeat_distance * scale_factor_)))))
     {
         return true;
     }
@@ -189,8 +192,7 @@ double group_symbolizer_helper::get_spacing(double path_length) const
     int num_labels = 1;
     if (text_props_->label_spacing > 0)
     {
-        num_labels = static_cast<int>(std::floor(
-            path_length / (text_props_->label_spacing * scale_factor_)));
+        num_labels = static_cast<int>(std::floor(path_length / (text_props_->label_spacing * scale_factor_)));
     }
     if (num_labels <= 0)
     {
@@ -199,4 +201,4 @@ double group_symbolizer_helper::get_spacing(double path_length) const
     return path_length / num_labels;
 }
 
-} //namespace
+} // namespace mapnik

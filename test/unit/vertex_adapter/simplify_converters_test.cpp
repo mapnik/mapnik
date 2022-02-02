@@ -41,37 +41,44 @@ void simplify(std::string const& wkt_in, double tolerance, std::string const& me
 #endif
 }
 
-TEST_CASE("converters") {
+TEST_CASE("converters")
+{
+    SECTION("simplify")
+    {
+        simplify(std::string("LineString(0 0,2 2,3 5,4 1,5 0,6 7,7 0)"),
+                 4,
+                 "douglas-peucker",
+                 std::string("LineString(0 0,6 7,7 0)"));
 
-SECTION("simplify") {
+        simplify(std::string("LineString(0 0,2 2,3 5,4 1,5 0,6 7,7 0)"),
+                 2,
+                 "douglas-peucker",
+                 std::string("LineString(0 0,3 5,5 0,6 7,7 0)"));
 
-    simplify(   std::string("LineString(0 0,2 2,3 5,4 1,5 0,6 7,7 0)"),
-                4, "douglas-peucker",
-                std::string("LineString(0 0,6 7,7 0)"));
+        simplify(
+          std::string("LineString(10 0,9 -4,7 -7,4 -9,0 -10,-4 -9,-7 -7,-9 -4,-10 0,-9 4,-7 7,-4 9,0 10,4 9,7 7,9 4)"),
+          4,
+          "douglas-peucker",
+          std::string("LineString(10 0,0 -10,-10 0,0 10,9 4)"));
 
-    simplify(   std::string("LineString(0 0,2 2,3 5,4 1,5 0,6 7,7 0)"),
-                2, "douglas-peucker",
-                std::string("LineString(0 0,3 5,5 0,6 7,7 0)"));
+        simplify(std::string("LineString(0 0,1 1,2 2,0 10,0 0)"),
+                 10,
+                 "douglas-peucker",
+                 std::string("LineString(0 0,0 0)"));
 
-    simplify(   std::string("LineString(10 0,9 -4,7 -7,4 -9,0 -10,-4 -9,-7 -7,-9 -4,-10 0,-9 4,-7 7,-4 9,0 10,4 9,7 7,9 4)"),
-                4, "douglas-peucker",
-                std::string("LineString(10 0,0 -10,-10 0,0 10,9 4)"));
+        simplify(std::string("LineString(0 0,1 1,2 2,0 10,0 0)"),
+                 8,
+                 "douglas-peucker",
+                 std::string("LineString(0 0,0 10,0 0)"));
 
-    simplify(   std::string("LineString(0 0,1 1,2 2,0 10,0 0)"),
-                10, "douglas-peucker",
-                std::string("LineString(0 0,0 0)"));
+        simplify(std::string("LineString(0 0,1 1,2 2,0 10,0 0)"),
+                 1,
+                 "douglas-peucker",
+                 std::string("LineString(0 0,2 2,0 10,0 0)"));
 
-    simplify(   std::string("LineString(0 0,1 1,2 2,0 10,0 0)"),
-                8, "douglas-peucker",
-                std::string("LineString(0 0,0 10,0 0)"));
-
-    simplify(   std::string("LineString(0 0,1 1,2 2,0 10,0 0)"),
-                1, "douglas-peucker",
-                std::string("LineString(0 0,2 2,0 10,0 0)"));
-
-    simplify(   std::string("LineString(0 0, 1 -1, 2 2, 0 -10, 0 0, -5 7, 4 6)"),
-                3, "douglas-peucker",
-                std::string("LineString(0 0,0 -10,-5 7,4 6)"));
-
-}
+        simplify(std::string("LineString(0 0, 1 -1, 2 2, 0 -10, 0 0, -5 7, 4 6)"),
+                 3,
+                 "douglas-peucker",
+                 std::string("LineString(0 0,0 -10,-5 7,4 6)"));
+    }
 }

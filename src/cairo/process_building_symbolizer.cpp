@@ -34,13 +34,12 @@
 #include <cmath>
 #include <memory>
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(building_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     cairo_save_restore guard(context_);
     composite_mode_e comp_op = get<composite_mode_e, keys::comp_op>(sym, feature, common_.vars_);
@@ -51,37 +50,40 @@ void cairo_renderer<T>::process(building_symbolizer const& sym,
     context_.set_operator(comp_op);
 
     render_building_symbolizer::apply(
-        feature, prj_trans, common_.t_, height,
-        [&](path_type const& faces)
-        {
-            vertex_adapter va(faces);
-            context_.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8 / 255.0,
-                               fill.blue() * 0.8 / 255.0, fill.alpha() * opacity / 255.0);
-            context_.add_path(va);
-            context_.fill();
-        },
-        [&](path_type const& frame)
-        {
-            vertex_adapter va(frame);
-            context_.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8/255.0,
-                              fill.blue() * 0.8 / 255.0, fill.alpha() * opacity / 255.0);
-            context_.set_line_width(common_.scale_factor_);
-            context_.set_miter_limit(common_.scale_factor_ / 2.0);
-            context_.add_path(va);
-            context_.stroke();
-        },
-        [&](render_building_symbolizer::roof_type & roof)
-        {
-            context_.set_color(fill, opacity);
-            context_.add_path(roof);
-            context_.fill();
-        });
+      feature,
+      prj_trans,
+      common_.t_,
+      height,
+      [&](path_type const& faces) {
+          vertex_adapter va(faces);
+          context_.set_color(fill.red() * 0.8 / 255.0,
+                             fill.green() * 0.8 / 255.0,
+                             fill.blue() * 0.8 / 255.0,
+                             fill.alpha() * opacity / 255.0);
+          context_.add_path(va);
+          context_.fill();
+      },
+      [&](path_type const& frame) {
+          vertex_adapter va(frame);
+          context_.set_color(fill.red() * 0.8 / 255.0,
+                             fill.green() * 0.8 / 255.0,
+                             fill.blue() * 0.8 / 255.0,
+                             fill.alpha() * opacity / 255.0);
+          context_.set_line_width(common_.scale_factor_);
+          context_.set_miter_limit(common_.scale_factor_ / 2.0);
+          context_.add_path(va);
+          context_.stroke();
+      },
+      [&](render_building_symbolizer::roof_type& roof) {
+          context_.set_color(fill, opacity);
+          context_.add_path(roof);
+          context_.fill();
+      });
 }
 
-template void cairo_renderer<cairo_ptr>::process(building_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void
+  cairo_renderer<cairo_ptr>::process(building_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

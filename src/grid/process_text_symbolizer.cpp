@@ -33,28 +33,33 @@
 
 namespace mapnik {
 
-template <typename T>
+template<typename T>
 void grid_renderer<T>::process(text_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
+                               mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
     box2d<double> clip_box = clipping_extent(common_);
     agg::trans_affine tr;
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
-    if (transform) evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
-    text_symbolizer_helper helper(
-        sym, feature, common_.vars_, prj_trans,
-        common_.width_, common_.height_,
-        common_.scale_factor_,
-        common_.t_, common_.font_manager_, *common_.detector_,
-        clip_box, tr);
+    if (transform)
+        evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
+    text_symbolizer_helper helper(sym,
+                                  feature,
+                                  common_.vars_,
+                                  prj_trans,
+                                  common_.width_,
+                                  common_.height_,
+                                  common_.scale_factor_,
+                                  common_.t_,
+                                  common_.font_manager_,
+                                  *common_.detector_,
+                                  clip_box,
+                                  tr);
     bool placement_found = false;
 
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
 
-    grid_text_renderer<T> ren(pixmap_,
-                              comp_op,
-                              common_.scale_factor_);
+    grid_text_renderer<T> ren(pixmap_, comp_op, common_.scale_factor_);
 
     auto halo_transform = get_optional<transform_type>(sym, keys::halo_transform);
     if (halo_transform)
@@ -78,10 +83,8 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
     }
 }
 
-template void grid_renderer<grid>::process(text_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template void grid_renderer<grid>::process(text_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif

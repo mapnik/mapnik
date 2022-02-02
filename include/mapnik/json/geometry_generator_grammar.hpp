@@ -35,13 +35,14 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/karma/domain.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace json {
+namespace mapnik {
+namespace json {
 
 namespace karma = boost::spirit::karma;
 
 namespace detail {
 
-template <typename T>
+template<typename T>
 struct json_coordinate_policy : karma::real_policies<T>
 {
     using base_type = boost::spirit::karma::real_policies<T>;
@@ -49,32 +50,33 @@ struct json_coordinate_policy : karma::real_policies<T>
 
     static unsigned precision(T n)
     {
-        if (n == 0.0) return 0;
+        if (n == 0.0)
+            return 0;
         using namespace boost::spirit;
         return static_cast<unsigned>(14 - boost::math::trunc(log10(traits::get_absolute_value(n))));
     }
 
-    template <typename OutputIterator>
+    template<typename OutputIterator>
     static bool dot(OutputIterator& sink, T n, unsigned precision)
     {
-        if (n == 0) return true;
+        if (n == 0)
+            return true;
         return base_type::dot(sink, n, precision);
     }
 
-    template <typename OutputIterator>
-    static bool fraction_part(OutputIterator& sink, T n
-                              , unsigned adjprec, unsigned precision)
+    template<typename OutputIterator>
+    static bool fraction_part(OutputIterator& sink, T n, unsigned adjprec, unsigned precision)
     {
-        if (n == 0) return true;
+        if (n == 0)
+            return true;
         return base_type::fraction_part(sink, n, adjprec, precision);
     }
 };
 
-}
+} // namespace detail
 
-template <typename OutputIterator, typename Geometry>
-struct geometry_generator_grammar :
-        karma::grammar<OutputIterator, Geometry()>
+template<typename OutputIterator, typename Geometry>
+struct geometry_generator_grammar : karma::grammar<OutputIterator, Geometry()>
 {
     using coord_type = typename Geometry::coordinate_type;
     geometry_generator_grammar();
@@ -89,15 +91,16 @@ struct geometry_generator_grammar :
     karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point;
     karma::rule<OutputIterator, geometry::multi_point<coord_type>()> multi_point_coord;
     karma::rule<OutputIterator, geometry::multi_line_string<coord_type>()> multi_linestring;
-    karma::rule<OutputIterator, geometry::multi_line_string<coord_type> ()> multi_linestring_coord;
+    karma::rule<OutputIterator, geometry::multi_line_string<coord_type>()> multi_linestring_coord;
     karma::rule<OutputIterator, geometry::multi_polygon<coord_type>()> multi_polygon;
     karma::rule<OutputIterator, geometry::multi_polygon<coord_type>()> multi_polygon_coord;
     karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometry_collection;
     karma::rule<OutputIterator, geometry::geometry_collection<coord_type>()> geometries;
     //
-    karma::real_generator<coord_type, detail::json_coordinate_policy<coord_type> > coordinate;
+    karma::real_generator<coord_type, detail::json_coordinate_policy<coord_type>> coordinate;
 };
 
-}}
+} // namespace json
+} // namespace mapnik
 
 #endif // MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP

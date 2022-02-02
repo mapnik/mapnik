@@ -33,25 +33,27 @@ namespace mapnik {
 
 struct png_saver_pal
 {
-    png_saver_pal(std::ostream &, std::string const&, rgba_palette const&);
-    template <typename T>
-    void operator() (T const&) const;
+    png_saver_pal(std::ostream&, std::string const&, rgba_palette const&);
+    template<typename T>
+    void operator()(T const&) const;
+
   private:
-    std::ostream & stream_;
+    std::ostream& stream_;
     std::string const& t_;
     rgba_palette const& pal_;
 };
 
 struct png_saver
 {
-    png_saver(std::ostream &, std::string const&);
-    template <typename T>
-    void operator() (T const&) const;
+    png_saver(std::ostream&, std::string const&);
+    template<typename T>
+    void operator()(T const&) const;
+
   private:
-    std::ostream & stream_;
+    std::ostream& stream_;
     std::string const& t_;
 };
 
-} // end ns
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_UTIL_PNG_HPP

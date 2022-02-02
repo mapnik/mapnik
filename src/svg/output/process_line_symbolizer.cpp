@@ -27,18 +27,17 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 /*!
  * @brief Collect presentation attributes found in line symbolizer.
  */
-template <typename T>
+template<typename T>
 void svg_renderer<T>::process(line_symbolizer const& sym,
-                              mapnik::feature_impl & /*feature*/,
+                              mapnik::feature_impl& /*feature*/,
                               proj_transform const& /*prj_trans*/)
 {
-    path_attributes_.set_stroke_color(get<color>(sym, keys::stroke, mapnik::color(0,0,0)));
-    path_attributes_.set_stroke_opacity(get<value_double>(sym,keys::stroke_opacity, 1.0));
+    path_attributes_.set_stroke_color(get<color>(sym, keys::stroke, mapnik::color(0, 0, 0)));
+    path_attributes_.set_stroke_opacity(get<value_double>(sym, keys::stroke_opacity, 1.0));
     path_attributes_.set_stroke_width(get<value_double>(sym, keys::stroke_width, 1.0));
     /*
     path_attributes_.set_stroke_linecap(sym.get_stroke().get_line_cap());
@@ -48,9 +47,9 @@ void svg_renderer<T>::process(line_symbolizer const& sym,
     */
 }
 
-template void svg_renderer<std::ostream_iterator<char> >::process(line_symbolizer const& sym,
-                                                                  mapnik::feature_impl & feature,
-                                                                  proj_transform const& prj_trans);
-}
+template void svg_renderer<std::ostream_iterator<char>>::process(line_symbolizer const& sym,
+                                                                 mapnik::feature_impl& feature,
+                                                                 proj_transform const& prj_trans);
+} // namespace mapnik
 
 #endif

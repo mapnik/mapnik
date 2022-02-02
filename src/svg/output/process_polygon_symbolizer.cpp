@@ -27,23 +27,20 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 /*!
  * @brief Collect presentation attributes found in polygon symbolizer.
  */
-template <typename T>
-void svg_renderer<T>::process(polygon_symbolizer const& sym,
-                              mapnik::feature_impl &,
-                              proj_transform const&)
+template<typename T>
+void svg_renderer<T>::process(polygon_symbolizer const& sym, mapnik::feature_impl&, proj_transform const&)
 {
-    path_attributes_.set_fill_color(get<mapnik::color>(sym, keys::fill, mapnik::color(128,128,128)));
-    path_attributes_.set_fill_opacity(get<value_double>(sym,keys::fill_opacity, 1.0));
+    path_attributes_.set_fill_color(get<mapnik::color>(sym, keys::fill, mapnik::color(128, 128, 128)));
+    path_attributes_.set_fill_opacity(get<value_double>(sym, keys::fill_opacity, 1.0));
 }
 
-template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
-                                                                  mapnik::feature_impl & feature,
-                                                                  proj_transform const& prj_trans);
-}
+template void svg_renderer<std::ostream_iterator<char>>::process(polygon_symbolizer const& sym,
+                                                                 mapnik::feature_impl& feature,
+                                                                 proj_transform const& prj_trans);
+} // namespace mapnik
 
 #endif

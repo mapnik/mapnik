@@ -25,10 +25,11 @@
 
 #include <memory>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
+namespace detail {
 struct evaluated_format_properties;
 }
 using evaluated_format_properties_ptr = std::unique_ptr<detail::evaluated_format_properties>;
-}
+} // namespace mapnik
 
 #endif // EVALUATED_FORMAT_PROPERTIES_PTR_HPP

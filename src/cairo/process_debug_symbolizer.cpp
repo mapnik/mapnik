@@ -30,13 +30,12 @@
 #include <mapnik/cairo/cairo_renderer.hpp>
 #include <mapnik/label_collision_detector.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 namespace {
 
 // special implementation of the box drawing so that it's pixel-aligned
-inline void render_debug_box(cairo_context &context, box2d<double> const& b)
+inline void render_debug_box(cairo_context& context, box2d<double> const& b)
 {
     cairo_save_restore guard(context);
     double minx = std::floor(b.minx()) + 0.5;
@@ -51,16 +50,17 @@ inline void render_debug_box(cairo_context &context, box2d<double> const& b)
     context.stroke();
 }
 
-template <typename Context>
+template<typename Context>
 struct apply_vertex_mode
 {
-    apply_vertex_mode(Context & context, view_transform const& t, proj_transform const& prj_trans)
-        : context_(context),
-          t_(t),
-          prj_trans_(prj_trans) {}
+    apply_vertex_mode(Context& context, view_transform const& t, proj_transform const& prj_trans)
+        : context_(context)
+        , t_(t)
+        , prj_trans_(prj_trans)
+    {}
 
-    template <typename Adapter>
-    void operator() (Adapter const& va) const
+    template<typename Adapter>
+    void operator()(Adapter const& va) const
     {
         double x;
         double y;
@@ -69,9 +69,10 @@ struct apply_vertex_mode
         unsigned cmd = SEG_END;
         while ((cmd = va.vertex(&x, &y)) != mapnik::SEG_END)
         {
-            if (cmd == SEG_CLOSE) continue;
-            prj_trans_.backward(x,y,z);
-            t_.forward(&x,&y);
+            if (cmd == SEG_CLOSE)
+                continue;
+            prj_trans_.backward(x, y, z);
+            t_.forward(&x, &y);
             context_.move_to(std::floor(x) - 0.5, std::floor(y) + 0.5);
             context_.line_to(std::floor(x) + 1.5, std::floor(y) + 0.5);
             context_.move_to(std::floor(x) + 0.5, std::floor(y) - 0.5);
@@ -80,21 +81,22 @@ struct apply_vertex_mode
         }
     }
 
-    Context & context_;
+    Context& context_;
     view_transform const& t_;
     proj_transform const& prj_trans_;
 };
 
 } // anonymous namespace
 
-template <typename T>
+template<typename T>
 void cairo_renderer<T>::process(debug_symbolizer const& sym,
-                                  mapnik::feature_impl & feature,
-                                  proj_transform const& prj_trans)
+                                mapnik::feature_impl& feature,
+                                proj_transform const& prj_trans)
 {
     cairo_save_restore guard(context_);
 
-    debug_symbolizer_mode_enum mode = get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
+    debug_symbolizer_mode_enum mode =
+      get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
 
     context_.set_operator(src_over);
     context_.set_color(mapnik::color(255, 0, 0), 1.0);
@@ -105,7 +107,7 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
 
     if (mode == DEBUG_SYM_MODE_COLLISION)
     {
-        for (auto & n : *common_.detector_)
+        for (auto& n : *common_.detector_)
         {
             render_debug_box(context_, n.get().box);
         }
@@ -118,10 +120,8 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
     }
 }
 
-template void cairo_renderer<cairo_ptr>::process(debug_symbolizer const&,
-                                                 mapnik::feature_impl &,
-                                                 proj_transform const&);
+template void cairo_renderer<cairo_ptr>::process(debug_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
 
-}
+} // namespace mapnik
 
 #endif // HAVE_CAIRO

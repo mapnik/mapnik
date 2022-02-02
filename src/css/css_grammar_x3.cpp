@@ -22,7 +22,8 @@
 
 #include <mapnik/css/css_grammar_x3_def.hpp>
 
-namespace mapnik { namespace css_grammar {
+namespace mapnik {
+namespace css_grammar {
 
 namespace x3 = boost::spirit::x3;
 using iterator_type = char const*;
@@ -32,7 +33,7 @@ BOOST_SPIRIT_INSTANTIATE(ident_grammar_type, iterator_type, context_type);
 BOOST_SPIRIT_INSTANTIATE(css_classes_type, iterator_type, context_type);
 BOOST_SPIRIT_INSTANTIATE(css_grammar_type, iterator_type, context_type);
 BOOST_SPIRIT_INSTANTIATE(css_skipper_type, iterator_type, x3::unused_type);
-}
+} // namespace css_grammar
 
 css_grammar::ident_grammar_type const ident_grammar()
 {
@@ -53,4 +54,4 @@ css_grammar::css_skipper_type const skipper()
 {
     return css_grammar::css_skipper;
 }
-}
+} // namespace mapnik

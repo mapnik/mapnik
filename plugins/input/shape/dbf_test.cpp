@@ -27,38 +27,38 @@
 
 using namespace std;
 
-int main(int argc,char** argv)
+int main(int argc, char** argv)
 {
-    if (argc!=2)
+    if (argc != 2)
     {
-        cout<<"usage: dbfdump  <file_name>"<<endl;
+        cout << "usage: dbfdump  <file_name>" << endl;
         return 0;
     }
-    cout << argv[1]<<endl;
+    cout << argv[1] << endl;
     dbf_file dbf(argv[1]);
 
-    cout<<endl;
-    for (int i=0;i<dbf.num_records();++i)
+    cout << endl;
+    for (int i = 0; i < dbf.num_records(); ++i)
     {
-        dbf.move_to(i+1);
+        dbf.move_to(i + 1);
 
-        for (int j=0;j<dbf.num_fields();++j)
+        for (int j = 0; j < dbf.num_fields(); ++j)
         {
-            string name=dbf.descriptor(j).name_;
-            int width=dbf.descriptor(j).length_;
+            string name = dbf.descriptor(j).name_;
+            int width = dbf.descriptor(j).length_;
             int dec = dbf.descriptor(j).dec_;
-            string val=dbf.string_value(j);
+            string val = dbf.string_value(j);
             if (dec > 0)
             {
-                cout << name << "(" << width <<"," << dec << "):" << val << endl;
+                cout << name << "(" << width << "," << dec << "):" << val << endl;
             }
             else
             {
                 cout << name << "(" << width << "):" << val << endl;
             }
         }
-        cout<<endl;
+        cout << endl;
     }
-    cout<<"done!"<<endl;
+    cout << "done!" << endl;
     return 0;
 }

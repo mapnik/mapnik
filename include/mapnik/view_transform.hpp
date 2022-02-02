@@ -28,12 +28,11 @@
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/proj_transform.hpp>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class view_transform
 {
-private:
+  private:
     const int width_;
     const int height_;
     const box2d<double> extent_;
@@ -42,68 +41,49 @@ private:
     const double offset_x_;
     const double offset_y_;
     int offset_;
-public:
 
-    view_transform(int _width, int _height, box2d<double> const& _extent,
-                   double _offset_x = 0.0, double _offset_y = 0.0)
-        : width_(_width),
-          height_(_height),
-          extent_(_extent),
-          sx_(extent_.width() > 0 ? static_cast<double>(width_) / extent_.width() : 1.0),
-          sy_(extent_.height() > 0 ? static_cast<double>(height_) / extent_.height() : 1.0),
-          offset_x_(_offset_x),
-          offset_y_(_offset_y),
-          offset_(0) {}
+  public:
+
+    view_transform(int _width,
+                   int _height,
+                   box2d<double> const& _extent,
+                   double _offset_x = 0.0,
+                   double _offset_y = 0.0)
+        : width_(_width)
+        , height_(_height)
+        , extent_(_extent)
+        , sx_(extent_.width() > 0 ? static_cast<double>(width_) / extent_.width() : 1.0)
+        , sy_(extent_.height() > 0 ? static_cast<double>(height_) / extent_.height() : 1.0)
+        , offset_x_(_offset_x)
+        , offset_y_(_offset_y)
+        , offset_(0)
+    {}
 
     view_transform(view_transform const&) = default;
 
-    inline int offset() const
-    {
-        return offset_;
-    }
+    inline int offset() const { return offset_; }
 
-    inline void set_offset(int _offset)
-    {
-        offset_ = _offset;
-    }
+    inline void set_offset(int _offset) { offset_ = _offset; }
 
-    inline double offset_x() const
-    {
-        return offset_x_;
-    }
+    inline double offset_x() const { return offset_x_; }
 
-    inline double offset_y() const
-    {
-        return offset_y_;
-    }
+    inline double offset_y() const { return offset_y_; }
 
-    inline int width() const
-    {
-        return width_;
-    }
+    inline int width() const { return width_; }
 
-    inline int height() const
-    {
-        return height_;
-    }
+    inline int height() const { return height_; }
 
-    inline double scale_x() const
-    {
-        return sx_;
-    }
+    inline double scale_x() const { return sx_; }
 
-    inline double scale_y() const
-    {
-        return sy_;
-    }
+    inline double scale_y() const { return sy_; }
 
-    inline void forward(double *x, double *y) const
+    inline void forward(double* x, double* y) const
     {
         *x = (*x - extent_.minx()) * sx_ - (offset_x_ - offset_);
         *y = (extent_.maxy() - *y) * sy_ - (offset_y_ - offset_);
     }
 
-    inline void backward(double *x, double *y) const
+    inline void backward(double* x, double* y) const
     {
         *x = extent_.minx() + (*x + (offset_x_ - offset_)) / sx_;
         *y = extent_.maxy() - (*y + (offset_y_ - offset_)) / sy_;
@@ -121,8 +101,7 @@ public:
         return c;
     }
 
-    inline box2d<double> forward(box2d<double> const& e,
-                                 proj_transform const& prj_trans) const
+    inline box2d<double> forward(box2d<double> const& e, proj_transform const& prj_trans) const
     {
         double x0 = e.minx();
         double y0 = e.miny();
@@ -147,8 +126,7 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> backward(box2d<double> const& e,
-                                  proj_transform const& prj_trans) const
+    inline box2d<double> backward(box2d<double> const& e, proj_transform const& prj_trans) const
     {
         double x0 = e.minx();
         double y0 = e.miny();
@@ -173,12 +151,9 @@ public:
         return box2d<double>(x0, y0, x1, y1);
     }
 
-    inline box2d<double> const& extent() const
-    {
-        return extent_;
-    }
+    inline box2d<double> const& extent() const { return extent_; }
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_VIEW_TRANSFORM_HPP

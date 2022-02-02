@@ -32,7 +32,9 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace json { namespace grammar {
+namespace mapnik {
+namespace json {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
@@ -42,6 +44,8 @@ topojson_grammar_type const topology = "Topology";
 
 BOOST_SPIRIT_DECLARE(topojson_grammar_type);
 
-}}}
+} // namespace grammar
+} // namespace json
+} // namespace mapnik
 
-#endif //MAPNIK_TOPOJSON_GRAMMAR_X3_HPP
+#endif // MAPNIK_TOPOJSON_GRAMMAR_X3_HPP

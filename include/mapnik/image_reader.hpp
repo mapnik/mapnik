@@ -40,23 +40,21 @@ MAPNIK_DISABLE_WARNING_POP
 #include <stdexcept>
 #include <string>
 
-namespace mapnik
-{
+namespace mapnik {
 
 class image_reader_exception : public std::exception
 {
-private:
+  private:
     std::string message_;
-public:
+
+  public:
     image_reader_exception(std::string const& message)
-        : message_(message) {}
+        : message_(message)
+    {}
 
     ~image_reader_exception() {}
 
-    virtual const char* what() const noexcept
-    {
-        return message_.c_str();
-    }
+    virtual const char* what() const noexcept { return message_.c_str(); }
 };
 
 struct MAPNIK_DECL image_reader : private util::noncopyable
@@ -64,22 +62,22 @@ struct MAPNIK_DECL image_reader : private util::noncopyable
     virtual unsigned width() const = 0;
     virtual unsigned height() const = 0;
     virtual bool has_alpha() const = 0;
-    virtual boost::optional<box2d<double> > bounding_box() const = 0;
-    virtual void read(unsigned x,unsigned y,image_rgba8& image) = 0;
+    virtual boost::optional<box2d<double>> bounding_box() const = 0;
+    virtual void read(unsigned x, unsigned y, image_rgba8& image) = 0;
     virtual image_any read(unsigned x, unsigned y, unsigned width, unsigned height) = 0;
     virtual ~image_reader() {}
 };
 
-template <typename...Args>
-bool register_image_reader(std::string const& type, image_reader* (* fun)(Args...))
+template<typename... Args>
+bool register_image_reader(std::string const& type, image_reader* (*fun)(Args...))
 {
-    return factory<image_reader,std::string, Args...>::instance().register_product(type, fun);
+    return factory<image_reader, std::string, Args...>::instance().register_product(type, fun);
 }
 
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file, std::string const& type);
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file);
 MAPNIK_DECL image_reader* get_image_reader(char const* data, size_t size);
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_IMAGE_READER_HPP

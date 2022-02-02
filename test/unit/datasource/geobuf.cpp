@@ -35,9 +35,8 @@
 #include <locale>
 #include <boost/optional/optional_io.hpp>
 
-
-TEST_CASE("Geobuf") {
-
+TEST_CASE("Geobuf")
+{
     std::string geobuf_plugin("./plugins/input/geobuf.input");
     if (mapnik::util::exists(geobuf_plugin))
     {
@@ -51,7 +50,7 @@ TEST_CASE("Geobuf") {
             auto fs = all_features(ds);
             auto f = fs->next();
             auto const& geometry = f->get_geometry();
-            auto const& pt = mapnik::util::get<mapnik::geometry::point<double> >(geometry);
+            auto const& pt = mapnik::util::get<mapnik::geometry::point<double>>(geometry);
             REQUIRE(pt.x == 102.0);
             REQUIRE(pt.y == 0.5);
             CHECK(fs->next() == nullptr);
@@ -67,7 +66,7 @@ TEST_CASE("Geobuf") {
             auto fs = all_features(ds);
             auto f = fs->next();
             auto const& geometry = f->get_geometry();
-            auto const& mpt = mapnik::util::get<mapnik::geometry::multi_point<double> >(geometry);
+            auto const& mpt = mapnik::util::get<mapnik::geometry::multi_point<double>>(geometry);
             CHECK(mpt.size() == 2);
             REQUIRE(mpt[0].x == 100.0);
             REQUIRE(mpt[0].y == 0.0);
@@ -86,7 +85,7 @@ TEST_CASE("Geobuf") {
             auto fs = all_features(ds);
             auto f = fs->next();
             auto const& geometry = f->get_geometry();
-            auto const& line = mapnik::util::get<mapnik::geometry::line_string<double> >(geometry);
+            auto const& line = mapnik::util::get<mapnik::geometry::line_string<double>>(geometry);
             CHECK(line.size() == 4);
             REQUIRE(line[0].x == 102.0);
             REQUIRE(line[0].y == 0);
@@ -109,7 +108,7 @@ TEST_CASE("Geobuf") {
             auto fs = all_features(ds);
             auto f = fs->next();
             auto const& geometry = f->get_geometry();
-            auto const& mline = mapnik::util::get<mapnik::geometry::multi_line_string<double> >(geometry);
+            auto const& mline = mapnik::util::get<mapnik::geometry::multi_line_string<double>>(geometry);
             CHECK(mline.size() == 2);
             auto const& line1 = mline[0];
             REQUIRE(line1[0].x == 100.0);
@@ -127,12 +126,9 @@ TEST_CASE("Geobuf") {
         SECTION("Polygon")
         {
             //{"type":"Feature","id":1,"geometry":{"type":"Polygon","coordinates":[[[100,0],[101,0],[101,1],[100,1],[100,0]],[[100.8,0.8],[100.8,0.2],[100.2,0.2],[100.2,0.8],[100.8,0.8]]]},"properties":{"prop0":"value0","prop1":"{\"this\":\"that\"}"}}
-            auto files =
-                {
-                    "./test/data/geobuf/polygon.geobuf",
-                    "./test/data/geobuf/standalone-feature.geobuf",
-                    "./test/data/geobuf/standalone-geometry.geobuf"
-                };
+            auto files = {"./test/data/geobuf/polygon.geobuf",
+                          "./test/data/geobuf/standalone-feature.geobuf",
+                          "./test/data/geobuf/standalone-geometry.geobuf"};
 
             mapnik::parameters params;
             params["type"] = "geobuf";
@@ -144,7 +140,7 @@ TEST_CASE("Geobuf") {
                 auto fs = all_features(ds);
                 auto f = fs->next();
                 auto const& geometry = f->get_geometry();
-                auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double> >(geometry);
+                auto const& poly = mapnik::util::get<mapnik::geometry::polygon<double>>(geometry);
                 CHECK(poly.size() == 2);
                 auto const& exterior = poly[0];
                 REQUIRE(exterior[0].x == 100);
@@ -184,7 +180,7 @@ TEST_CASE("Geobuf") {
             auto fs = all_features(ds);
             auto f = fs->next();
             auto const& geometry = f->get_geometry();
-            auto const& mpoly = mapnik::util::get<mapnik::geometry::multi_polygon<double> >(geometry);
+            auto const& mpoly = mapnik::util::get<mapnik::geometry::multi_polygon<double>>(geometry);
             CHECK(mpoly.size() == 2);
             {
                 auto const& poly = mpoly[0];
@@ -238,12 +234,12 @@ TEST_CASE("Geobuf") {
             auto fs = all_features(ds);
             auto f = fs->next();
             auto const& geometry = f->get_geometry();
-            auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double> >(geometry);
+            auto const& collection = mapnik::util::get<mapnik::geometry::geometry_collection<double>>(geometry);
             CHECK(collection.size() == 2);
-            auto const& pt = mapnik::util::get<mapnik::geometry::point<double> >(collection[0]);
+            auto const& pt = mapnik::util::get<mapnik::geometry::point<double>>(collection[0]);
             REQUIRE(pt.x == 100.0);
             REQUIRE(pt.y == 0.0);
-            auto const& line = mapnik::util::get<mapnik::geometry::line_string<double> >(collection[1]);
+            auto const& line = mapnik::util::get<mapnik::geometry::line_string<double>>(collection[1]);
             REQUIRE(line[0].x == 101.0);
             REQUIRE(line[0].y == 0.0);
             REQUIRE(line[1].x == 102.0);

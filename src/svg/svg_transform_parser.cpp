@@ -27,9 +27,10 @@
 #include <string>
 #include <cstring>
 
-namespace mapnik { namespace svg {
+namespace mapnik {
+namespace svg {
 
-template <typename Transform>
+template<typename Transform>
 bool parse_svg_transform(const char* wkt, Transform& tr)
 {
     using namespace boost::spirit;
@@ -39,23 +40,20 @@ bool parse_svg_transform(const char* wkt, Transform& tr)
     using space_type = mapnik::svg::grammar::space_type;
 
 #if BOOST_VERSION >= 106700
-    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(tr)
-        [mapnik::svg::grammar::svg_transform];
+    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(tr)[mapnik::svg::grammar::svg_transform];
 
 #else
-    auto const grammar = x3::with<mapnik::svg::grammar::svg_transform_tag>(std::ref(tr))
-        [mapnik::svg::grammar::svg_transform];
+    auto const grammar =
+      x3::with<mapnik::svg::grammar::svg_transform_tag>(std::ref(tr))[mapnik::svg::grammar::svg_transform];
 #endif
 
     try
     {
-        if (!x3::phrase_parse(first, last, grammar, space_type())
-            || first != last)
+        if (!x3::phrase_parse(first, last, grammar, space_type()) || first != last)
         {
             throw std::runtime_error("Failed to parse svg-transform");
         }
-    }
-    catch (...)
+    } catch (...)
     {
         return false;
     }

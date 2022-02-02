@@ -37,49 +37,44 @@
 #include "ogr_featureset.hpp"
 #include "ogr_converter.hpp"
 
-using mapnik::query;
 using mapnik::box2d;
+using mapnik::feature_factory;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
+using mapnik::query;
 using mapnik::transcoder;
-using mapnik::feature_factory;
 
-
-ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
-                               OGRLayer & layer,
-                               OGRGeometry & extent,
+ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
+                               OGRLayer& layer,
+                               OGRGeometry& extent,
                                std::string const& encoding)
-    : ctx_(ctx),
-      layer_(layer),
-      layerdef_(layer.GetLayerDefn()),
-      tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn ()),
-      count_(0)
+    : ctx_(ctx)
+    , layer_(layer)
+    , layerdef_(layer.GetLayerDefn())
+    , tr_(new transcoder(encoding))
+    , fidcolumn_(layer_.GetFIDColumn())
+    , count_(0)
 
 {
-    layer_.SetSpatialFilter (&extent);
+    layer_.SetSpatialFilter(&extent);
 }
 
 ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
-                               OGRLayer & layer,
+                               OGRLayer& layer,
                                mapnik::box2d<double> const& extent,
                                std::string const& encoding)
-    : ctx_(ctx),
-      layer_(layer),
-      layerdef_(layer.GetLayerDefn()),
-      tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn()), // TODO - unused
-      count_(0)
+    : ctx_(ctx)
+    , layer_(layer)
+    , layerdef_(layer.GetLayerDefn())
+    , tr_(new transcoder(encoding))
+    , fidcolumn_(layer_.GetFIDColumn())
+    , // TODO - unused
+    count_(0)
 {
-    layer_.SetSpatialFilterRect (extent.minx(),
-                                 extent.miny(),
-                                 extent.maxx(),
-                                 extent.maxy());
+    layer_.SetSpatialFilterRect(extent.minx(), extent.miny(), extent.maxx(), extent.maxy());
 }
 
-ogr_featureset::~ogr_featureset()
-{
-}
+ogr_featureset::~ogr_featureset() {}
 
 feature_ptr ogr_featureset::next()
 {
@@ -90,16 +85,16 @@ feature_ptr ogr_featureset::next()
         // Proper solution is to avoid storing layer state in featureset
         layer_.ResetReading();
     }
-    OGRFeature *poFeature;
+    OGRFeature* poFeature;
     while ((poFeature = layer_.GetNextFeature()) != nullptr)
     {
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
         mapnik::value_integer feature_id = (poFeature->GetFID() + 1);
-        feature_ptr feature(feature_factory::create(ctx_,feature_id));
+        feature_ptr feature(feature_factory::create(ctx_, feature_id));
 
         OGRGeometry* geom = poFeature->GetGeometryRef();
-        if (geom && ! geom->IsEmpty())
+        if (geom && !geom->IsEmpty())
         {
             auto geom_corrected = ogr_converter::convert_geometry(geom);
             mapnik::geometry::correct(geom_corrected);
@@ -107,9 +102,8 @@ feature_ptr ogr_featureset::next()
         }
         else
         {
-            MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: Feature with null geometry="
-                << poFeature->GetFID();
-            OGRFeature::DestroyFeature( poFeature );
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: Feature with null geometry=" << poFeature->GetFID();
+            OGRFeature::DestroyFeature(poFeature);
             continue;
         }
 
@@ -124,67 +118,63 @@ feature_ptr ogr_featureset::next()
 
             switch (type_oid)
             {
-            case OFTInteger:
-            {
-                feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger(i));
-                break;
-            }
+                case OFTInteger: {
+                    feature->put<mapnik::value_integer>(fld_name, poFeature->GetFieldAsInteger(i));
+                    break;
+                }
 #if GDAL_VERSION_MAJOR >= 2
-            case OFTInteger64:
-            {
-                feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger64(i));
-                break;
-            }
+                case OFTInteger64: {
+                    feature->put<mapnik::value_integer>(fld_name, poFeature->GetFieldAsInteger64(i));
+                    break;
+                }
 #endif
 
-            case OFTReal:
-            {
-                feature->put( fld_name, poFeature->GetFieldAsDouble(i));
-                break;
-            }
+                case OFTReal: {
+                    feature->put(fld_name, poFeature->GetFieldAsDouble(i));
+                    break;
+                }
 
-            case OFTString:
-            case OFTWideString:     // deprecated !
-            {
-                feature->put( fld_name, tr_->transcode(poFeature->GetFieldAsString(i)));
-                break;
-            }
+                case OFTString:
+                case OFTWideString: // deprecated !
+                {
+                    feature->put(fld_name, tr_->transcode(poFeature->GetFieldAsString(i)));
+                    break;
+                }
 
-            case OFTIntegerList:
+                case OFTIntegerList:
 #if GDAL_VERSION_MAJOR >= 2
-            case OFTInteger64List:
+                case OFTInteger64List:
 #endif
-            case OFTRealList:
-            case OFTStringList:
-            case OFTWideStringList: // deprecated !
-            {
-                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
-                break;
-            }
+                case OFTRealList:
+                case OFTStringList:
+                case OFTWideStringList: // deprecated !
+                {
+                    MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
+                    break;
+                }
 
-            case OFTBinary:
-            {
-                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
-                //feature->put(name,feat->GetFieldAsBinary (i, size));
-                break;
-            }
+                case OFTBinary: {
+                    MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
+                    // feature->put(name,feat->GetFieldAsBinary (i, size));
+                    break;
+                }
 
-            case OFTDate:
-            case OFTTime:
-            case OFTDateTime:       // unhandled !
-            {
-                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
-                break;
-            }
+                case OFTDate:
+                case OFTTime:
+                case OFTDateTime: // unhandled !
+                {
+                    MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
+                    break;
+                }
 
-            default: // unknown
-            {
-                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unknown type_oid=" << type_oid;
-                break;
-            }
+                default: // unknown
+                {
+                    MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unknown type_oid=" << type_oid;
+                    break;
+                }
             }
         }
-        OGRFeature::DestroyFeature( poFeature );
+        OGRFeature::DestroyFeature(poFeature);
         return feature;
     }
 

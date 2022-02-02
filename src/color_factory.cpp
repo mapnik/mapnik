@@ -34,7 +34,7 @@ color parse_color(std::string const& str)
     auto const& grammar = mapnik::css_color_grammar::css_color;
     color c;
     std::string::const_iterator first = str.begin();
-    std::string::const_iterator last =  str.end();
+    std::string::const_iterator last = str.end();
     using namespace boost::spirit::x3::ascii;
 
     bool result = boost::spirit::x3::phrase_parse(first, last, grammar, space, c);
@@ -48,4 +48,4 @@ color parse_color(std::string const& str)
     }
 }
 
-}
+} // namespace mapnik

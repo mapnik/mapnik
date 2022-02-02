@@ -31,7 +31,9 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace svg { namespace grammar {
+namespace mapnik {
+namespace svg {
+namespace grammar {
 
 class relative_tag;
 class svg_path_tag;
@@ -50,10 +52,13 @@ using relative_type = std::reference_wrapper<bool> const;
 #endif
 
 using phrase_parse_context_type = x3::phrase_parse_context<space_type>::type;
-using svg_parse_context_type = x3::context<relative_tag, relative_type,
-                                           x3::context<svg_path_tag, svg_converter_wrapper_type,
-                                                       phrase_parse_context_type>>;
+using svg_parse_context_type =
+  x3::context<relative_tag,
+              relative_type,
+              x3::context<svg_path_tag, svg_converter_wrapper_type, phrase_parse_context_type>>;
 
-}}}
+} // namespace grammar
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_GRAMMAR_CONFIG_X3_HPP

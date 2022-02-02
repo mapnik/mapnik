@@ -23,7 +23,7 @@
 #ifndef MAPNIK_TEXT_ITEMIZER_HPP
 #define MAPNIK_TEXT_ITEMIZER_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/util/noncopyable.hpp>
@@ -42,29 +42,26 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <unicode/ubidi.h>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik
-{
+namespace mapnik {
 
 struct MAPNIK_DECL text_item : util::noncopyable
 {
-    text_item(unsigned s,
-              unsigned e,
-              UScriptCode sc,
-              UBiDiDirection d,
-              evaluated_format_properties_ptr const& f)
-      : start(s),
-        end(e),
-        script(sc),
-        dir(d),
-        format_(f) {}
-    text_item( text_item && rhs)
-      : start(std::move(rhs.start)),
-        end(std::move(rhs.end)),
-        script(std::move(rhs.script)),
-        dir(std::move(rhs.dir)),
-        format_(rhs.format_) {}
+    text_item(unsigned s, unsigned e, UScriptCode sc, UBiDiDirection d, evaluated_format_properties_ptr const& f)
+        : start(s)
+        , end(e)
+        , script(sc)
+        , dir(d)
+        , format_(f)
+    {}
+    text_item(text_item&& rhs)
+        : start(std::move(rhs.start))
+        , end(std::move(rhs.end))
+        , script(std::move(rhs.script))
+        , dir(std::move(rhs.dir))
+        , format_(rhs.format_)
+    {}
     unsigned start; // First char (UTF16 offset)
-    unsigned end; // Char _after_ the last char (UTF16 offset)
+    unsigned end;   // Char _after_ the last char (UTF16 offset)
     UScriptCode script;
     UBiDiDirection dir;
     evaluated_format_properties_ptr const& format_;
@@ -77,21 +74,26 @@ struct MAPNIK_DECL text_item : util::noncopyable
 
 class MAPNIK_DECL text_itemizer : util::noncopyable
 {
-public:
+  public:
     text_itemizer();
     void add_text(value_unicode_string const& str, evaluated_format_properties_ptr const& format);
-    std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
+    std::list<text_item> const& itemize(unsigned start = 0, unsigned end = 0);
     void clear();
     value_unicode_string const& text() const { return text_; }
     // Returns the start and end position of a certain line.
     // Only forced line breaks with \n characters are handled here.
     std::pair<unsigned, unsigned> line(unsigned i) const;
     unsigned num_lines() const;
-private:
-    template<typename T> struct run : util::noncopyable
+
+  private:
+    template<typename T>
+    struct run : util::noncopyable
     {
         run(T const& _data, unsigned _start, unsigned _end)
-            :  start(_start), end(_end), data(_data) {}
+            : start(_start)
+            , end(_end)
+            , data(_data)
+        {}
         unsigned start;
         unsigned end;
         T data;
@@ -114,9 +116,10 @@ private:
     void itemize_script();
     void create_item_list();
     std::list<text_item> output_;
-    template <typename T> typename T::const_iterator find_run(T const& list, unsigned position);
-    std::vector<unsigned> forced_line_breaks_; //Positions of \n characters
+    template<typename T>
+    typename T::const_iterator find_run(T const& list, unsigned position);
+    std::vector<unsigned> forced_line_breaks_; // Positions of \n characters
 };
-} //ns mapnik
+} // namespace mapnik
 
 #endif // TEXT_ITEMIZER_HPP

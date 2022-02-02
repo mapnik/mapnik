@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-//mapnik
+// mapnik
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
@@ -32,7 +32,8 @@ namespace mapnik {
 void evaluate_transform(agg::trans_affine& tr,
                         feature_impl const& feature,
                         attributes const& vars,
-                        transform_list_ptr const& trans_expr, double scale_factor)
+                        transform_list_ptr const& trans_expr,
+                        double scale_factor)
 {
     if (trans_expr)
     {
@@ -40,7 +41,5 @@ void evaluate_transform(agg::trans_affine& tr,
     }
 }
 // END FIXME
-
-
 
 } // end of namespace mapnik

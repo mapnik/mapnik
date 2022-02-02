@@ -32,6 +32,6 @@ using csv_value = std::string;
 using csv_line = std::vector<csv_value>;
 using csv_data = std::vector<csv_line>;
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_CSV_TYPES_HPP

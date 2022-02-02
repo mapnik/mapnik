@@ -32,14 +32,13 @@ class feature_impl;
 class proj_transform;
 struct renderer_common;
 
-coord<double, 2> pattern_offset(
-    symbolizer_base const & sym,
-    feature_impl const & feature,
-    proj_transform const & prj_trans,
-    renderer_common const & common,
-    unsigned pattern_width,
-    unsigned pattern_height);
+coord<double, 2> pattern_offset(symbolizer_base const& sym,
+                                feature_impl const& feature,
+                                proj_transform const& prj_trans,
+                                renderer_common const& common,
+                                unsigned pattern_width,
+                                unsigned pattern_height);
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_PATTERN_ALIGNMENT_HPP

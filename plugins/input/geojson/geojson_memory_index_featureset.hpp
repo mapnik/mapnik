@@ -31,16 +31,15 @@
 
 class geojson_memory_index_featureset : public mapnik::Featureset
 {
-public:
+  public:
     using array_type = std::deque<geojson_datasource::item_type>;
-    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE *)>;
+    using file_ptr = std::unique_ptr<std::FILE, int (*)(std::FILE*)>;
 
-    geojson_memory_index_featureset(std::string const& filename,
-                             array_type && index_array);
+    geojson_memory_index_featureset(std::string const& filename, array_type&& index_array);
     virtual ~geojson_memory_index_featureset();
     mapnik::feature_ptr next();
 
-private:
+  private:
     file_ptr file_;
     mapnik::value_integer feature_id_ = 1;
     const array_type index_array_;

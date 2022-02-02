@@ -53,13 +53,18 @@ MAPNIK_DISABLE_WARNING_POP
 
 using mapnik::datasource;
 
-template <std::size_t Max, std::size_t Min>
-struct geobuf_linear : boost::geometry::index::linear<Max,Min> {};
+template<std::size_t Max, std::size_t Min>
+struct geobuf_linear : boost::geometry::index::linear<Max, Min>
+{};
 
-namespace boost { namespace geometry { namespace index { namespace detail { namespace rtree {
+namespace boost {
+namespace geometry {
+namespace index {
+namespace detail {
+namespace rtree {
 
-template <std::size_t Max, std::size_t Min>
-struct options_type<geobuf_linear<Max,Min> >
+template<std::size_t Max, std::size_t Min>
+struct options_type<geobuf_linear<Max, Min>>
 {
     using type = options<geobuf_linear<Max, Min>,
                          insert_default_tag,
@@ -74,28 +79,33 @@ struct options_type<geobuf_linear<Max,Min> >
 #endif
 };
 
-}}}}}
+} // namespace rtree
+} // namespace detail
+} // namespace index
+} // namespace geometry
+} // namespace boost
 
 DATASOURCE_PLUGIN_DEF(geobuf_datasource_plugin, geobuf);
 class geobuf_datasource : public mapnik::datasource
 {
-public:
+  public:
     using box_type = mapnik::box2d<double>;
     using item_type = std::pair<box_type, std::pair<std::size_t, std::size_t>>;
-    using spatial_index_type = boost::geometry::index::rtree<item_type,geobuf_linear<16,4> >;
+    using spatial_index_type = boost::geometry::index::rtree<item_type, geobuf_linear<16, 4>>;
 
     // constructor
     geobuf_datasource(mapnik::parameters const& params);
-    virtual ~geobuf_datasource ();
+    virtual ~geobuf_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     void parse_geobuf(char const* buffer, std::size_t size);
-private:
+
+  private:
     mapnik::datasource::datasource_t type_;
     mapnik::layer_descriptor desc_;
     std::string filename_;
@@ -103,6 +113,5 @@ private:
     std::vector<mapnik::feature_ptr> features_;
     std::unique_ptr<spatial_index_type> tree_;
 };
-
 
 #endif // GEOBUF_DATASOURCE_HPP

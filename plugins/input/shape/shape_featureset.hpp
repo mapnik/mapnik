@@ -23,7 +23,7 @@
 #ifndef SHAPE_FEATURESET_HPP
 #define SHAPE_FEATURESET_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
@@ -32,20 +32,20 @@
 
 #include "shape_io.hpp"
 
-//boost
+// boost
 
 #include <boost/utility.hpp>
 
-using mapnik::Featureset;
 using mapnik::box2d;
-using mapnik::feature_ptr;
-using mapnik::transcoder;
 using mapnik::context_ptr;
+using mapnik::feature_ptr;
+using mapnik::Featureset;
+using mapnik::transcoder;
 
-template <typename filterT>
+template<typename filterT>
 class shape_featureset : public Featureset
 {
-public:
+  public:
     shape_featureset(filterT const& filter,
                      std::string const& shape_file,
                      std::set<std::string> const& attribute_names,
@@ -54,7 +54,7 @@ public:
     virtual ~shape_featureset();
     feature_ptr next();
 
-private:
+  private:
     filterT filter_;
     shape_io shape_;
     box2d<double> query_ext_;
@@ -67,4 +67,4 @@ private:
     context_ptr ctx_;
 };
 
-#endif //SHAPE_FEATURESET_HPP
+#endif // SHAPE_FEATURESET_HPP

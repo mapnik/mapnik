@@ -17,8 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
-
 #ifndef INFO_DIALOG_HPP
 #define INFO_DIALOG_HPP
 
@@ -27,12 +25,12 @@
 
 class info_dialog : public QDialog
 {
-  Q_OBJECT
+    Q_OBJECT
   public:
-      info_dialog(QVector<QPair<QString,QString> > const& info,QWidget * parent = 0);
-   private:
-      Ui::InfoDialog ui;
+    info_dialog(QVector<QPair<QString, QString>> const& info, QWidget* parent = 0);
+
+  private:
+    Ui::InfoDialog ui;
 };
 
-
-#endif //INFO_DIALOG_HPP
+#endif // INFO_DIALOG_HPP

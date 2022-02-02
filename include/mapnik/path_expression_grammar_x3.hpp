@@ -32,7 +32,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/spirit/home/x3.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace grammar {
+namespace mapnik {
+namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 struct path_expression_class; // top-most ID
@@ -42,6 +43,7 @@ path_expression_grammar_type const path_expression = "path_expression";
 
 BOOST_SPIRIT_DECLARE(path_expression_grammar_type);
 
-}}
+} // namespace grammar
+} // namespace mapnik
 
-#endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP
+#endif // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_X3_HPP

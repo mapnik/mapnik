@@ -30,48 +30,34 @@
 namespace mapnik {
 namespace svg {
 
-template <typename VertexSource ,typename AttributeSource>
-class svg_storage :  util::noncopyable
+template<typename VertexSource, typename AttributeSource>
+class svg_storage : util::noncopyable
 {
-public:
-    svg_storage() :
-      svg_width_(0),
-      svg_height_(0) {}
+  public:
+    svg_storage()
+        : svg_width_(0)
+        , svg_height_(0)
+    {}
 
-    VertexSource & source() // FIXME!! make const
+    VertexSource& source() // FIXME!! make const
     {
         return source_;
     }
 
-    AttributeSource & attributes() // FIXME!! make const
+    AttributeSource& attributes() // FIXME!! make const
     {
         return attributes_;
     }
 
-    void set_bounding_box(box2d<double> const& b)
-    {
-        bounding_box_ = b;
-    }
+    void set_bounding_box(box2d<double> const& b) { bounding_box_ = b; }
 
-    void set_bounding_box(double x0, double y0, double x1, double y1)
-    {
-        bounding_box_.init(x0,y0,x1,y1);
-    }
+    void set_bounding_box(double x0, double y0, double x1, double y1) { bounding_box_.init(x0, y0, x1, y1); }
 
-    box2d<double> const& bounding_box() const
-    {
-        return bounding_box_;
-    }
+    box2d<double> const& bounding_box() const { return bounding_box_; }
 
-    double width() const
-    {
-        return svg_width_;
-    }
+    double width() const { return svg_width_; }
 
-    double height() const
-    {
-        return svg_height_;
-    }
+    double height() const { return svg_height_; }
 
     void set_dimensions(double w, double h)
     {
@@ -79,17 +65,16 @@ public:
         svg_height_ = h;
     }
 
-private:
+  private:
 
     VertexSource source_;
     AttributeSource attributes_;
     box2d<double> bounding_box_;
     double svg_width_;
     double svg_height_;
-
 };
 
-}}
-
+} // namespace svg
+} // namespace mapnik
 
 #endif // MAPNIK_SVG_STORAGE_HPP

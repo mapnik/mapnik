@@ -26,34 +26,36 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/is_empty.hpp>
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 namespace detail {
 
 struct geometry_remove_empty
 {
-    mapnik::geometry::multi_line_string<double> operator() (mapnik::geometry::multi_line_string<double> const& geom) const
+    mapnik::geometry::multi_line_string<double>
+      operator()(mapnik::geometry::multi_line_string<double> const& geom) const
     {
         return remove_empty(geom);
     }
 
-    mapnik::geometry::multi_polygon<double> operator() (mapnik::geometry::multi_polygon<double> const& geom) const
+    mapnik::geometry::multi_polygon<double> operator()(mapnik::geometry::multi_polygon<double> const& geom) const
     {
         return remove_empty(geom);
     }
 
-    template <typename T>
-    T operator() (T const& geom) const
+    template<typename T>
+    T operator()(T const& geom) const
     {
         return geom;
     }
 
-private:
-    template <typename T>
+  private:
+    template<typename T>
     T remove_empty(T const& geom) const
     {
         T new_geom;
-        for (auto const & g : geom)
+        for (auto const& g : geom)
         {
             if (!g.empty())
             {
@@ -64,14 +66,15 @@ private:
     }
 };
 
-}
+} // namespace detail
 
-template <typename GeomType>
+template<typename GeomType>
 inline GeomType remove_empty(GeomType const& geom)
 {
     return detail::geometry_remove_empty()(geom);
 }
 
-}}
+} // namespace geometry
+} // namespace mapnik
 
 #endif // MAPNIK_GEOMETRY_REMOVE_EMPTY_HPP

@@ -27,8 +27,8 @@
 
 // stl
 #include <stdexcept> // std::runtime_error
-#include <cstdlib> // std::atexit
-#include <new> // operator new
+#include <cstdlib>   // std::atexit
+#include <new>       // operator new
 #include <type_traits>
 #include <atomic>
 
@@ -36,115 +36,102 @@
 #include <mutex>
 #endif
 
-namespace mapnik
-{
+namespace mapnik {
 
-template <typename T>
+template<typename T>
 class CreateUsingNew
 {
-public:
-    static T* create()
-    {
-        return new T;
-    }
-    static void destroy(T* obj)
-    {
-        delete obj;
-    }
+  public:
+    static T* create() { return new T; }
+    static void destroy(T* obj) { delete obj; }
 };
 
-template <typename T>
+template<typename T>
 class CreateStatic
 {
-private:
+  private:
     using storage_type = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
-public:
+
+  public:
 
     static T* create()
     {
         static storage_type static_memory;
-        return new(&static_memory) T;
+        return new (&static_memory) T;
     }
-    static void destroy(volatile T* obj)
+    static void destroy(volatile T* obj) { obj->~T(); }
+};
+
+#ifdef __GNUC__
+template<typename T, template<typename U> class CreatePolicy = CreateStatic>
+class MAPNIK_DECL singleton
+{
+#else
+template<typename T, template<typename U> class CreatePolicy = CreateStatic>
+class singleton
+{
+#endif
+    friend class CreatePolicy<T>;
+    static std::atomic<T*> pInstance_;
+    static std::atomic<bool> destroyed_;
+    singleton(const singleton& rhs);
+    singleton& operator=(const singleton&);
+
+    static void onDeadReference() { throw std::runtime_error("dead reference!"); }
+
+    static void DestroySingleton()
     {
-        obj->~T();
+        CreatePolicy<T>::destroy(pInstance_);
+        pInstance_ = 0;
+        destroyed_ = true;
+    }
+
+  protected:
+#ifdef MAPNIK_THREADSAFE
+    static std::mutex mutex_;
+#endif
+    singleton() {}
+
+  public:
+    static T& instance()
+    {
+        T* tmp = pInstance_.load(std::memory_order_acquire);
+        if (tmp == nullptr)
+        {
+#ifdef MAPNIK_THREADSAFE
+            std::lock_guard<std::mutex> lock(mutex_);
+#endif
+            tmp = pInstance_.load(std::memory_order_relaxed);
+            if (tmp == nullptr)
+            {
+                if (destroyed_)
+                {
+                    destroyed_ = false;
+                    onDeadReference();
+                }
+                else
+                {
+                    tmp = CreatePolicy<T>::create();
+                    pInstance_.store(tmp, std::memory_order_release);
+#ifndef MAPNIK_NO_ATEXIT
+                    // register destruction
+                    std::atexit(&DestroySingleton);
+#endif
+                }
+            }
+        }
+        return *tmp;
     }
 };
 
-
-#ifdef __GNUC__
-template <typename T,
-          template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
-{
-#else
-    template <typename T,
-              template <typename U> class CreatePolicy=CreateStatic> class singleton
-    {
-#endif
-        friend class CreatePolicy<T>;
-        static std::atomic<T*> pInstance_;
-        static std::atomic<bool> destroyed_;
-        singleton(const singleton &rhs);
-        singleton& operator=(const singleton&);
-
-        static void onDeadReference()
-        {
-            throw std::runtime_error("dead reference!");
-        }
-
-        static void DestroySingleton()
-        {
-            CreatePolicy<T>::destroy(pInstance_);
-            pInstance_ = 0;
-            destroyed_ = true;
-        }
-
-    protected:
 #ifdef MAPNIK_THREADSAFE
-        static std::mutex mutex_;
+template<typename T, template<typename U> class CreatePolicy>
+std::mutex singleton<T, CreatePolicy>::mutex_;
 #endif
-        singleton() {}
-
-    public:
-        static T& instance()
-        {
-            T * tmp = pInstance_.load(std::memory_order_acquire);
-            if (tmp == nullptr)
-            {
-#ifdef MAPNIK_THREADSAFE
-                std::lock_guard<std::mutex> lock(mutex_);
-#endif
-                tmp = pInstance_.load(std::memory_order_relaxed);
-                if (tmp == nullptr)
-                {
-                    if (destroyed_)
-                    {
-                        destroyed_ = false;
-                        onDeadReference();
-                    }
-                    else
-                    {
-                        tmp = CreatePolicy<T>::create();
-                        pInstance_.store(tmp, std::memory_order_release);
-#ifndef MAPNIK_NO_ATEXIT
-                        // register destruction
-                        std::atexit(&DestroySingleton);
-#endif
-                    }
-                }
-            }
-            return *tmp;
-        }
-    };
-
-#ifdef MAPNIK_THREADSAFE
-    template <typename T,
-              template <typename U> class CreatePolicy> std::mutex singleton<T,CreatePolicy>::mutex_;
-#endif
-    template <typename T,
-              template <typename U> class CreatePolicy> std::atomic<T*> singleton<T,CreatePolicy>::pInstance_;
-    template <typename T,
-              template <typename U> class CreatePolicy> std::atomic<bool> singleton<T,CreatePolicy>::destroyed_(false);
-}
+template<typename T, template<typename U> class CreatePolicy>
+std::atomic<T*> singleton<T, CreatePolicy>::pInstance_;
+template<typename T, template<typename U> class CreatePolicy>
+std::atomic<bool> singleton<T, CreatePolicy>::destroyed_(false);
+} // namespace mapnik
 
 #endif // MAPNIK_UTIL_SINGLETON_HPP

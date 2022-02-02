@@ -37,7 +37,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-namespace mapnik { namespace geometry {
+namespace mapnik {
+namespace geometry {
 
 // Interior algorithm is realized as a modification of Polylabel algorithm
 // from https://github.com/mapbox/polylabel.
@@ -47,25 +48,25 @@ namespace mapnik { namespace geometry {
 namespace detail {
 
 // get squared distance from a point to a segment
-template <class T>
-T segment_dist_sq(const point<T>& p,
-                  const point<T>& a,
-                  const point<T>& b)
+template<class T>
+T segment_dist_sq(const point<T>& p, const point<T>& a, const point<T>& b)
 {
     auto x = a.x;
     auto y = a.y;
     auto dx = b.x - x;
     auto dy = b.y - y;
 
-    if (dx != 0 || dy != 0) {
-
+    if (dx != 0 || dy != 0)
+    {
         auto t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
 
-        if (t > 1) {
+        if (t > 1)
+        {
             x = b.x;
             y = b.y;
-
-        } else if (t > 0) {
+        }
+        else if (t > 0)
+        {
             x += dx * t;
             y += dy * t;
         }
@@ -78,7 +79,7 @@ T segment_dist_sq(const point<T>& p,
 }
 
 // signed distance from point to polygon outline (negative if point is outside)
-template <class T>
+template<class T>
 auto point_to_polygon_dist(const point<T>& point, const polygon<T>& polygon)
 {
     bool inside = false;
@@ -91,8 +92,8 @@ auto point_to_polygon_dist(const point<T>& point, const polygon<T>& polygon)
             const auto& a = ring[i];
             const auto& b = ring[j];
 
-            if ((a.y > point.y) != (b.y > point.y) &&
-                (point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x)) inside = !inside;
+            if ((a.y > point.y) != (b.y > point.y) && (point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x))
+                inside = !inside;
 
             min_dist_sq = std::min(min_dist_sq, segment_dist_sq(point, a, b));
         }
@@ -101,13 +102,13 @@ auto point_to_polygon_dist(const point<T>& point, const polygon<T>& polygon)
     return (inside ? 1 : -1) * std::sqrt(min_dist_sq);
 }
 
-template <class T>
+template<class T>
 struct fitness_functor
 {
     fitness_functor(point<T> const& centroid, point<T> const& polygon_size)
-        : centroid(centroid),
-          max_size(std::max(polygon_size.x, polygon_size.y))
-        {}
+        : centroid(centroid)
+        , max_size(std::max(polygon_size.x, polygon_size.y))
+    {}
 
     T operator()(const point<T>& cell_center, T distance_polygon) const
     {
@@ -124,38 +125,35 @@ struct fitness_functor
     T max_size;
 };
 
-template <class T>
+template<class T>
 struct cell
 {
-    template <class FitnessFunc>
-    cell(const point<T>& c_, T h_,
-         const polygon<T>& polygon,
-         const FitnessFunc& ff)
-        : c(c_),
-          h(h_),
-          d(point_to_polygon_dist(c, polygon)),
-          fitness(ff(c, d)),
-          max_fitness(ff(c, d + h * std::sqrt(2)))
-        {}
+    template<class FitnessFunc>
+    cell(const point<T>& c_, T h_, const polygon<T>& polygon, const FitnessFunc& ff)
+        : c(c_)
+        , h(h_)
+        , d(point_to_polygon_dist(c, polygon))
+        , fitness(ff(c, d))
+        , max_fitness(ff(c, d + h * std::sqrt(2)))
+    {}
 
-    point<T> c; // cell center
-    T h; // half the cell size
-    T d; // distance from cell center to polygon
-    T fitness; // fitness of the cell center
+    point<T> c;    // cell center
+    T h;           // half the cell size
+    T d;           // distance from cell center to polygon
+    T fitness;     // fitness of the cell center
     T max_fitness; // a "potential" of the cell calculated from max distance to polygon within the cell
 };
 
-template <class T>
-point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox , T precision = 1)
+template<class T>
+point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox, T precision = 1)
 {
-    const point<T> size { bbox.width(), bbox.height() };
+    const point<T> size{bbox.width(), bbox.height()};
 
     const T cell_size = std::min(size.x, size.y);
     T h = cell_size / 2;
 
     // a priority queue of cells in order of their "potential" (max distance to polygon)
-    auto compare_func = [] (const cell<T>& a, const cell<T>& b)
-    {
+    auto compare_func = [](const cell<T>& a, const cell<T>& b) {
         return a.max_fitness < b.max_fitness;
     };
     using Queue = std::priority_queue<cell<T>, std::vector<cell<T>>, decltype(compare_func)>;
@@ -163,14 +161,14 @@ point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox , T precision
 
     if (cell_size == 0)
     {
-        return { bbox.minx(), bbox.miny() };
+        return {bbox.minx(), bbox.miny()};
     }
 
     point<T> centroid;
     if (!mapnik::geometry::centroid(polygon, centroid))
     {
         auto center = bbox.center();
-        return { center.x, center.y };
+        return {center.x, center.y};
     }
 
     fitness_functor<T> fitness_func(centroid, size);
@@ -200,7 +198,8 @@ point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox , T precision
         }
 
         // do not drill down further if there's no chance of a better solution
-        if (current_cell.max_fitness - best_cell.fitness <= precision) continue;
+        if (current_cell.max_fitness - best_cell.fitness <= precision)
+            continue;
 
         // split the cell into four cells
         h = current_cell.h / 2;
@@ -215,8 +214,8 @@ point<T> polylabel(polygon<T> const& polygon, box2d<T> const& bbox , T precision
 
 } // namespace detail
 
-template <class T>
-bool interior(polygon<T> const& polygon, double scale_factor, point<T> & pt)
+template<class T>
+bool interior(polygon<T> const& polygon, double scale_factor, point<T>& pt)
 {
     if (polygon.empty() || polygon.front().empty())
     {
@@ -232,8 +231,7 @@ bool interior(polygon<T> const& polygon, double scale_factor, point<T> & pt)
     return true;
 }
 
-template MAPNIK_DECL 
-bool interior(polygon<double> const& polygon, double scale_factor, point<double> & pt);
+template MAPNIK_DECL bool interior(polygon<double> const& polygon, double scale_factor, point<double>& pt);
 
-} }
-
+} // namespace geometry
+} // namespace mapnik

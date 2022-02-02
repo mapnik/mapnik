@@ -41,24 +41,23 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
                                            char quote,
                                            std::vector<std::string> const& headers,
                                            mapnik::context_ptr const& ctx)
-    : separator_(separator),
-      quote_(quote),
-      headers_(headers),
-      ctx_(ctx),
-      locator_(locator),
-      tr_("utf8")
+    : separator_(separator)
+    , quote_(quote)
+    , headers_(headers)
+    , ctx_(ctx)
+    , locator_(locator)
+    , tr_("utf8")
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-      //
-#elif defined( _WIN32)
-    ,file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
+//
+#elif defined(_WIN32)
+    , file_(_wfopen(mapnik::utf8_to_utf16(filename).c_str(), L"rb"), std::fclose)
 #else
-    ,file_(std::fopen(filename.c_str(),"rb"), std::fclose)
+    , file_(std::fopen(filename.c_str(), "rb"), std::fclose)
 #endif
 
 {
-#if defined (MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory =
-        mapnik::mapped_memory_cache::instance().find(filename, true);
+#if defined(MAPNIK_MEMORY_MAPPED_FILE)
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
     if (memory)
     {
         mapped_region_ = *memory;
@@ -68,23 +67,23 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
         throw std::runtime_error("could not create file mapping for " + filename);
     }
 #else
-    if (!file_) throw mapnik::datasource_exception("CSV Plugin: can't open file " + filename);
+    if (!file_)
+        throw mapnik::datasource_exception("CSV Plugin: can't open file " + filename);
 #endif
 
     std::string indexname = filename + ".index";
     std::ifstream index(indexname.c_str(), std::ios::binary);
-    if (!index) throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
-    mapnik::util::spatial_index<value_type,
-                                mapnik::bounding_box_filter<float>,
-                                std::ifstream,
-                                mapnik::box2d<float>>::query(filter, index, positions_);
+    if (!index)
+        throw mapnik::datasource_exception("CSV Plugin: can't open index file " + indexname);
+    mapnik::util::spatial_index<value_type, mapnik::bounding_box_filter<float>, std::ifstream, mapnik::box2d<float>>::
+      query(filter, index, positions_);
     positions_.erase(std::remove_if(positions_.begin(),
                                     positions_.end(),
-                                    [&](value_type const& pos)
-                                    { return !pos.box.intersects(filter.box_);}),
+                                    [&](value_type const& pos) { return !pos.box.intersects(filter.box_); }),
                      positions_.end());
-    std::sort(positions_.begin(), positions_.end(),
-              [](value_type const& lhs, value_type const& rhs) { return lhs.off < rhs.off;});
+    std::sort(positions_.begin(), positions_.end(), [](value_type const& lhs, value_type const& rhs) {
+        return lhs.off < rhs.off;
+    });
     itr_ = positions_.begin();
 }
 
@@ -113,7 +112,7 @@ mapnik::feature_ptr csv_index_featureset::next()
     }
     */
 
-    while( itr_ != positions_.end())
+    while (itr_ != positions_.end())
     {
         auto pos = *itr_++;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
@@ -128,10 +127,11 @@ mapnik::feature_ptr csv_index_featureset::next()
             return mapnik::feature_ptr();
         }
         auto const* start = record.data();
-        auto const*  end = start + record.size();
+        auto const* end = start + record.size();
 #endif
         auto feature = parse_feature(start, end);
-        if (feature) return feature;
+        if (feature)
+            return feature;
     }
     return mapnik::feature_ptr();
 }

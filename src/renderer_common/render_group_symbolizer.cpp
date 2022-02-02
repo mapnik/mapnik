@@ -33,12 +33,12 @@
 namespace mapnik {
 
 void render_group_symbolizer(group_symbolizer const& sym,
-                             feature_impl & feature,
+                             feature_impl& feature,
                              attributes const& vars,
                              proj_transform const& prj_trans,
                              box2d<double> const& clipping_extent,
-                             renderer_common & common,
-                             render_thunk_list_dispatch & render_thunks)
+                             renderer_common& common,
+                             render_thunk_list_dispatch& render_thunks)
 {
     // find all column names referenced in the group rules and symbolizers
     std::set<std::string> columns;
@@ -58,7 +58,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
 
     // keep track of the sub features that we'll want to symbolize
     // along with the group rules that they matched
-    std::vector< std::pair<group_rule_ptr, feature_ptr> > matches;
+    std::vector<std::pair<group_rule_ptr, feature_ptr>> matches;
 
     // create a copied 'virtual' common renderer for processing sub feature symbolizers
     // create an empty detector for it, so we are sure we won't hit anything
@@ -82,7 +82,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
         feature_ptr sub_feature = feature_factory::create(sub_feature_ctx, col_idx);
 
         // copy the necessary columns to sub feature
-        for(auto const& col_name : columns)
+        for (auto const& col_name : columns)
         {
             if (col_name.find('%') != std::string::npos)
             {
@@ -95,7 +95,7 @@ void render_group_symbolizer(group_symbolizer const& sym,
                 {
                     // indexed column
                     std::string col_idx_str;
-                    if (mapnik::util::to_string(col_idx_str,col_idx))
+                    if (mapnik::util::to_string(col_idx_str, col_idx))
                     {
                         std::string col_idx_name = col_name;
                         boost::replace_all(col_idx_name, "%", col_idx_str);
@@ -118,22 +118,23 @@ void render_group_symbolizer(group_symbolizer const& sym,
         // try to ensure that we don't get edge artefacts due to any
         // symbolizers with avoid-edges set: only the avoid-edges of
         // the group symbolizer itself should matter.
-        geometry::point<double> origin_pt(x,y);
+        geometry::point<double> origin_pt(x, y);
         sub_feature->set_geometry(origin_pt);
         // get the layout for this set of properties
         for (auto const& rule : props->get_rules())
         {
-             if (util::apply_visitor(evaluate<feature_impl,value_type,attributes>(*sub_feature,common.vars_),
-                                               *(rule->get_filter())).to_bool())
-             {
+            if (util::apply_visitor(evaluate<feature_impl, value_type, attributes>(*sub_feature, common.vars_),
+                                    *(rule->get_filter()))
+                  .to_bool())
+            {
                 // add matched rule and feature to the list of things to draw
                 matches.emplace_back(rule, sub_feature);
 
                 // construct a bounding box around all symbolizers for the matched rule
                 box2d<double> bounds;
                 render_thunk_list thunks;
-                render_thunk_extractor extractor(bounds, thunks, *sub_feature, common.vars_, prj_trans,
-                                                 virtual_renderer, clipping_extent);
+                render_thunk_extractor
+                  extractor(bounds, thunks, *sub_feature, common.vars_, prj_trans, virtual_renderer, clipping_extent);
 
                 for (auto const& _sym : *rule)
                 {
@@ -150,10 +151,16 @@ void render_group_symbolizer(group_symbolizer const& sym,
     }
 
     // create a symbolizer helper
-    group_symbolizer_helper helper(sym, feature, vars, prj_trans,
-                                   common.width_, common.height_,
-                                   common.scale_factor_, common.t_,
-                                   *common.detector_, clipping_extent);
+    group_symbolizer_helper helper(sym,
+                                   feature,
+                                   vars,
+                                   prj_trans,
+                                   common.width_,
+                                   common.height_,
+                                   common.scale_factor_,
+                                   common.t_,
+                                   *common.detector_,
+                                   clipping_extent);
 
     for (size_t i = 0; i < matches.size(); ++i)
     {
@@ -173,8 +180,10 @@ void render_group_symbolizer(group_symbolizer const& sym,
         // evaluate the repeat key with the matched sub feature if we have one
         if (rpt_key_expr)
         {
-            rpt_key_value = util::apply_visitor(evaluate<feature_impl,value_type,attributes>(*match_feature,common.vars_),
-                                                *rpt_key_expr).to_unicode();
+            rpt_key_value =
+              util::apply_visitor(evaluate<feature_impl, value_type, attributes>(*match_feature, common.vars_),
+                                  *rpt_key_expr)
+                .to_unicode();
         }
         helper.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
     }

@@ -27,8 +27,7 @@
 
 namespace mapnik {
 
-enum class keys : std::uint8_t
-{
+enum class keys : std::uint8_t {
     gamma = 0,
     gamma_method,
     opacity,
@@ -100,6 +99,5 @@ enum class keys : std::uint8_t
 };
 
 }
-
 
 #endif // MAPNIK_SYMBOLIZER_KEYS_HPP

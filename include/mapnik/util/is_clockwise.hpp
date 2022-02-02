@@ -25,9 +25,10 @@
 
 #include <cassert>
 
-namespace mapnik { namespace util {
+namespace mapnik {
+namespace util {
 
-template <typename T>
+template<typename T>
 bool is_clockwise(T const& ring)
 {
     double area = 0.0;
@@ -47,6 +48,7 @@ bool is_clockwise(T const& ring)
     }
     return (area < 0.0) ? true : false;
 }
-}}
+} // namespace util
+} // namespace mapnik
 
-#endif //MAPNIK_UTIL_IS_CLOCKWISE_HPP
+#endif // MAPNIK_UTIL_IS_CLOCKWISE_HPP
