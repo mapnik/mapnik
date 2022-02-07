@@ -1,6 +1,5 @@
 #ifndef MAPNIK_WARNING_HPP
 #define MAPNIK_WARNING_HPP
-
 // clang-format off
 #if defined(_MSC_VER)
     #define MAPNIK_DISABLE_WARNING_PUSH           __pragma(warning( push ))

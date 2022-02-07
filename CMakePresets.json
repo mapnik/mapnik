@@ -191,7 +191,8 @@
             ],
             "cacheVariables": {
                 "INSTALL_DEPENDENCIES": "ON",
-                "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin"
+                "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin",
+                "VCPKG_INSTALL_OPTIONS": "--debug"
             },
             "environment": {
                 "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/share/proj4"
@@ -206,7 +207,8 @@
                 "ci-options"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "--coverage"
+                "CMAKE_CXX_FLAGS": "--coverage",
+                "VCPKG_INSTALL_OPTIONS": "--debug"
             },
             "environment": {
                 "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-linux/share/proj4"
@@ -222,7 +224,8 @@
                 "ci-options"
             ],
             "cacheVariables": {
-                "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage"
+                "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage",
+                "VCPKG_INSTALL_OPTIONS": "--debug"
             },
             "environment": {
                 "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-osx/share/proj4"
