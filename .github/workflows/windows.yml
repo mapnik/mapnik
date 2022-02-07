@@ -53,6 +53,7 @@ jobs:
         run: ./vcpkg/bootstrap-vcpkg.bat
 
       - name: "Setup NuGet Credentials"
+        if: ${{ !(github.event_name == 'pull_request' || github.repository != 'mapnik/mapnik') }}
         shell: "bash"
         run: >
           `./vcpkg/vcpkg fetch nuget | tail -n 1`
@@ -64,10 +65,30 @@ jobs:
           -password "${{ secrets.NUGET_REGISTRY_PAT }}"
 
       - name: "Setup NuGet apikey"
+        if: ${{ !(github.event_name == 'pull_request' || github.repository != 'mapnik/mapnik') }}
         shell: "bash"
         run: >
           `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.NUGET_REGISTRY_PAT }}" -Source "${{ inputs.NUGET_REGISTRY }}"
+
+      - name: "Setup NuGet Credentials READONLY"
+        if: ${{ github.event_name == 'pull_request' || github.repository != 'mapnik/mapnik' }}
+        shell: "bash"
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "${{ inputs.NUGET_REGISTRY }}"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "${{ github.actor }}"
+          -password "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: "Setup NuGet apikey READONLY"
+        if: ${{ github.event_name == 'pull_request' || github.repository != 'mapnik/mapnik' }}
+        shell: "bash"
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
         run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset ${{env.preset}}
