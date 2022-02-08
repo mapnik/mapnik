@@ -13,6 +13,11 @@ For a complete change history, see the git log.
 
 - Mapnik now requires C++14 compliant compiler (`-std=c++14`)
 
+#### Breaking Changes
+
+- Reworked datasource plugin system. Plugins now need to implement a class with the macros in `datasource_plugin.hpp` ([#4291](https://github.com/mapnik/mapnik/pull/4291))
+- mapnik now has a global `mapnik::setup()` method which have to be called before any other functions of mapnik. Defined in `mapnik.hpp` ([#4291](https://github.com/mapnik/mapnik/pull/4291))
+
 #### Core
 
 - Rewrote parser grammars using Boost.Spirit X3 (replacing Boost.Spirit Qi)
@@ -27,6 +32,7 @@ For a complete change history, see the git log.
 - Slightly improved `sql_utils::table_from_sql` ([2587bb3](https://github.com/mapnik/mapnik/commit/2587bb3a1d8db397acfa8dcc2d332da3a8a9399f))
 - Added wrappers for proper quoting in SQL query construction: `sql_utils::identifier`, `sql_utils::literal` ([7b21713](https://github.com/mapnik/mapnik/commit/7b217133e2749b82c2638551045c4edbece15086))
 - Added two-argument `sql_utils::unquote`, `sql_utils::unquote_copy` that also collapse inner quotes ([a4e8ea2](https://github.com/mapnik/mapnik/commit/a4e8ea21be297d89bbf36ba594d6c661a7a9ac81))
+- Fixed mapnik static build with static plugins ([#4291](https://github.com/mapnik/mapnik/pull/4291))
 
 #### Plugins
 
