@@ -107,6 +107,7 @@ import sys
 import subprocess
 import itertools
 import inspect
+from collections import OrderedDict
 
 import SCons.Debug
 from SCons.Debug import logInstanceCreation
@@ -1289,7 +1290,7 @@ class ListAction(ActionBase):
         return result
 
     def get_varlist(self, target, source, env, executor=None):
-        result = SCons.Util.OrderedDict()
+        result = OrderedDict()
         for act in self.list:
             for var in act.get_varlist(target, source, env, executor):
                 result[var] = True
