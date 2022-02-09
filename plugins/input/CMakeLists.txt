@@ -6,7 +6,7 @@ set(_plugin_archive_output "${MAPNIK_OUTPUT_DIR}/lib")
 set(_plugin_fpic ON)
 set(_plugin_linkage MODULE)
 set(_plugin_visibility PRIVATE)
-if(MAPNIK_STATIC_PLUGINS)
+if(NOT BUILD_SHARED_PLUGINS)
     set(_plugin_linkage INTERFACE)
     set(_plugin_visibility INTERFACE)
 endif()
@@ -78,7 +78,7 @@ endif()
 #
 # Copy all plugin dlls, so that these are in the main output dir, since cmake copies those into ${MAPNIK_OUTPUT_DIR}/plugins/input, too.
 #
-if(NOT MAPNIK_STATIC_PLUGINS AND WIN32)
+if(BUILD_SHARED_PLUGINS AND WIN32)
     list(LENGTH m_build_plugins m_number_plugins)
     if(m_number_plugins GREATER 0)
         string(CONFIGURE

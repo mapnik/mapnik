@@ -9,36 +9,36 @@ endif()
 target_link_libraries(mapnik PUBLIC mapnik::core mapnik::datasource-base)
 target_link_libraries(mapnik PRIVATE 
     mapnik::agg
-    # expr: if(MAPNIK_STATIC_PLUGINS == ON && <target> is build) then add link target
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-csv>>:input-csv>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-gdal>>:input-gdal>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geobuf>>:input-geobuf>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geojson>>:input-geojson>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-ogr>>:input-ogr>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-pgraster>>:input-pgraster>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-postgis>>:input-postgis>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-raster>>:input-raster>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-shape>>:input-shape>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-sqlite>>:input-sqlite>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-topojson>>:input-topojson>
+    # expr: if(BUILD_SHARED_PLUGINS == OFF && <target> is build) then add link target
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-csv>>:input-csv>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-gdal>>:input-gdal>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-geobuf>>:input-geobuf>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-geojson>>:input-geojson>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-ogr>>:input-ogr>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-pgraster>>:input-pgraster>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-postgis>>:input-postgis>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-raster>>:input-raster>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-shape>>:input-shape>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-sqlite>>:input-sqlite>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-topojson>>:input-topojson>
 )
 target_compile_definitions(mapnik PRIVATE
-    # expr: if(MAPNIK_STATIC_PLUGINS == ON && <target> is build) then add build definition
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-csv>>:MAPNIK_STATIC_PLUGIN_CSV>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-gdal>>:MAPNIK_STATIC_PLUGIN_GDAL>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geobuf>>:MAPNIK_STATIC_PLUGIN_GEOBUF>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-geojson>>:MAPNIK_STATIC_PLUGIN_GEOJSON>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-ogr>>:MAPNIK_STATIC_PLUGIN_OGR>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-pgraster>>:MAPNIK_STATIC_PLUGIN_PGRASTER>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-postgis>>:MAPNIK_STATIC_PLUGIN_POSTGIS>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-raster>>:MAPNIK_STATIC_PLUGIN_RASTER>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-shape>>:MAPNIK_STATIC_PLUGIN_SHAPE>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-sqlite>>:MAPNIK_STATIC_PLUGIN_SQLITE>
-    $<$<AND:$<BOOL:${MAPNIK_STATIC_PLUGINS}>,$<TARGET_EXISTS:input-topojson>>:MAPNIK_STATIC_PLUGIN_TOPOJSON>
+    # expr: if(BUILD_SHARED_PLUGINS == OFF && <target> is build) then add build definition
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-csv>>:MAPNIK_STATIC_PLUGIN_CSV>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-gdal>>:MAPNIK_STATIC_PLUGIN_GDAL>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-geobuf>>:MAPNIK_STATIC_PLUGIN_GEOBUF>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-geojson>>:MAPNIK_STATIC_PLUGIN_GEOJSON>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-ogr>>:MAPNIK_STATIC_PLUGIN_OGR>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-pgraster>>:MAPNIK_STATIC_PLUGIN_PGRASTER>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-postgis>>:MAPNIK_STATIC_PLUGIN_POSTGIS>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-raster>>:MAPNIK_STATIC_PLUGIN_RASTER>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-shape>>:MAPNIK_STATIC_PLUGIN_SHAPE>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-sqlite>>:MAPNIK_STATIC_PLUGIN_SQLITE>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-topojson>>:MAPNIK_STATIC_PLUGIN_TOPOJSON>
 
 )
 
-if(MAPNIK_STATIC_PLUGINS)
+if(NOT BUILD_SHARED_PLUGINS)
     target_include_directories(mapnik PRIVATE "${PROJECT_SOURCE_DIR}/plugins")
 endif()
 
