@@ -23,7 +23,7 @@ endfunction()
 # Install plugins
 #
 function(mapnik_install_plugin _target)
-    if(MAPNIK_STATIC_PLUGINS)
+    if(NOT BUILD_SHARED_PLUGINS)
         return()
     endif()
     install(TARGETS ${_target}
