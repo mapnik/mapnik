@@ -86,7 +86,11 @@
 #endif
 
 #define REGISTER_STATIC_DATASOURCE_PLUGIN(classname)                                                                   \
-    ds_map.emplace(std::string{classname::kName}, std::make_shared<classname>())
+    {                                                                                                                  \
+        auto plugin = std::make_shared<classname>();                                                                   \
+        plugin->after_load();                                                                                          \
+        ds_map.emplace(std::string{classname::kName}, std::move(plugin));                                              \
+    }
 namespace mapnik {
 
 #ifdef MAPNIK_STATIC_PLUGINS
@@ -108,56 +112,55 @@ void init_datasource_cache_static()
     REGISTER_STATIC_DATASOURCE_PLUGIN(csv_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_GDAL)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(gdal_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(gdal_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_GEOBUF)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(geobuf_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(geobuf_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_GEOJSON)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(geojson_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(geojson_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_OCCI)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(occi_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(occi_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_OGR)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(ogr_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(ogr_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_PGRASTER)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(pgraster_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(pgraster_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_OSM)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(osm_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(osm_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_POSTGIS)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(postgis_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(postgis_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_RASTER)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(raster_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(raster_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_RASTERLITE)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(rasterlite_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(rasterlite_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_SHAPE)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(shape_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(shape_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_SQLITE)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(sqlite_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(sqlite_datasource_plugin);
 #endif
 #if defined(MAPNIK_STATIC_PLUGIN_TOPOJSON)
-      REGISTER_STATIC_DATASOURCE_PLUGIN(topojson_datasource_plugin);
+    REGISTER_STATIC_DATASOURCE_PLUGIN(topojson_datasource_plugin);
 #endif
 };
 
 datasource_ptr create_static_datasource(parameters const& params)
 {
-    datasource_ptr ds;
     boost::optional<std::string> type = params.get<std::string>("type");
     datasource_map::iterator it = ds_map.find(*type);
     if (it != ds_map.end())
     {
-        ds = it->second->create(params);
+        return it->second->create(params);
     }
-    return ds;
+    return datasource_ptr{};
 }
 #else
 datasource_ptr create_static_datasource(parameters const& /*params*/)
