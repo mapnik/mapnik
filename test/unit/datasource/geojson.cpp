@@ -81,8 +81,8 @@ void iterate_over_features(mapnik::featureset_ptr features)
 
 TEST_CASE("geojson")
 {
-    std::string geojson_plugin("./plugins/input/geojson.input");
-    if (mapnik::util::exists(geojson_plugin))
+    const bool have_geojson_plugin = mapnik::datasource_cache::instance().plugin_registered("geojson");
+    if (have_geojson_plugin)
     {
         SECTION("GeoJSON I/O errors")
         {
