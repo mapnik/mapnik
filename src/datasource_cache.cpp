@@ -113,7 +113,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-    datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
+      datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
 
     if (!create_datasource)
     {
@@ -131,7 +131,29 @@ std::string datasource_cache::plugin_directories()
     return boost::algorithm::join(plugin_directories_, ", ");
 }
 
-std::vector<std::string> datasource_cache::plugin_names()
+bool datasource_cache::plugin_registered(const std::string& plugin_name) const
+{
+#ifdef MAPNIK_STATIC_PLUGINS
+    const auto static_names = get_static_datasource_names();
+    const auto static_it = std::find(static_names.begin(), static_names.end(), plugin_name);
+    if (static_it != static_names.end())
+        return true;
+#endif
+
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
+#endif
+
+    std::map<std::string, std::shared_ptr<PluginInfo>>::const_iterator itr;
+    for (itr = plugins_.begin(); itr != plugins_.end(); ++itr)
+    {
+        if (itr->second->name() == plugin_name)
+            return true;
+    }
+    return false;
+}
+
+std::vector<std::string> datasource_cache::plugin_names() const
 {
     std::vector<std::string> names;
 
