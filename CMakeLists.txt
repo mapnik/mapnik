@@ -30,6 +30,7 @@ mapnik_option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) 
 
 mapnik_option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
 mapnik_option(BUILD_SHARED_PLUGINS "build dynamic plugins" ${BUILD_SHARED_LIBS}) # use BUILD_SHARED_LIBS as default option
+mapnik_option(BUILD_SHARED_CRT "(only windows with msvc) use msvc shared crt" ${BUILD_SHARED_LIBS}) # use BUILD_SHARED_LIBS as default option
 if(WIN32 AND BUILD_SHARED_PLUGINS AND NOT BUILD_SHARED_LIBS)
     message(FATAL_ERROR "static libmapnik and dynamic plugins won't work correctly")
 endif()
@@ -363,6 +364,11 @@ add_compile_options(
     "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>"
     "$<$<CXX_COMPILER_ID:MSVC>:/EHsc>"
 )
+if(BUILD_SHARED_CRT)
+    set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+else()
+    set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 
 add_library(core INTERFACE)
 add_library(mapnik::core ALIAS core)
