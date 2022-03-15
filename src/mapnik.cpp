@@ -39,3 +39,12 @@ void register_image_readers()
 #endif
 }
 } // namespace mapnik
+
+namespace {
+class AutoSetup final
+{
+  public:
+    AutoSetup() { mapnik::setup(); };
+};
+AutoSetup auto_setup{};
+} // namespace
