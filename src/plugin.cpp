@@ -48,10 +48,12 @@ namespace mapnik {
 struct _mapnik_lib_t
 {
     std::string name;
+    std::string error_str;
     handle dl;
     _mapnik_lib_t()
         : name{"unknown"}
-        , dl{0}
+        , error_str{""}
+        , dl{nullptr}
     {}
     ~_mapnik_lib_t()
     {
@@ -73,7 +75,7 @@ struct _mapnik_lib_t
         {
 #ifndef MAPNIK_NO_DLCLOSE
             dlclose(dl);
-            dl = 0;
+            dl = nullptr;
 #endif
         }
 #endif
@@ -84,25 +86,34 @@ PluginInfo::PluginInfo(std::string const& filename, std::string const& library_n
     : filename_(filename)
     , module_{std::make_unique<mapnik_lib_t>()}
 {
+    assert(module_ != nullptr);
 #if defined(_WIN32)
-    if (module_)
-        module_->dl = LoadLibraryA(filename.c_str());
+    module_->dl = LoadLibraryA(filename.c_str());
 #elif defined(MAPNIK_HAS_DLCFN)
-    if (module_)
-        module_->dl = dlopen(filename.c_str(), RTLD_LAZY);
+    module_->dl = dlopen(filename.c_str(), RTLD_LAZY);
 #else
     throw std::runtime_error("no support for loading dynamic objects (Mapnik not compiled with -DMAPNIK_HAS_DLCFN)");
 #endif
 #if defined(MAPNIK_HAS_DLCFN) || defined(_WIN32)
-    if (module_ && module_->dl)
+    if (module_->dl)
     {
         datasource_plugin* plugin{reinterpret_cast<datasource_plugin*>(get_symbol("plugin"))};
         if (!plugin)
             throw std::runtime_error("plugin has a false interface"); //! todo: better error text
         module_->name = plugin->name();
+        module_->error_str = "";
         plugin->after_load();
     }
+    else
+    {
+        const auto errcode = dlerror();
+#ifdef _WIN32
+        module_->error_str = std::system_category().message(errcode);
+#else
+        module_->error_str = errcode ? errcode : "";
 #endif
+    }
+#endif // defined(MAPNIK_HAS_DLCFN) || defined(_WIN32)
 }
 
 PluginInfo::~PluginInfo() {}
@@ -124,7 +135,7 @@ std::string const& PluginInfo::name() const
 bool PluginInfo::valid() const
 {
 #ifdef MAPNIK_SUPPORTS_DLOPEN
-    if (module_ && module_->dl && !module_->name.empty())
+    if (module_->dl && !module_->name.empty())
         return true;
 #endif
     return false;
@@ -132,7 +143,7 @@ bool PluginInfo::valid() const
 
 std::string PluginInfo::get_error() const
 {
-    return std::string("could not open: '") + module_->name + "'";
+    return std::string{"could not open: '"} + module_->name + "'. Error: " + module_->error_str;
 }
 
 void PluginInfo::init()
