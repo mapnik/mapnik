@@ -146,14 +146,4 @@ std::string PluginInfo::get_error() const
     return std::string{"could not open: '"} + module_->name + "'. Error: " + module_->error_str;
 }
 
-void PluginInfo::init()
-{
-    // do any initialization needed
-}
-
-void PluginInfo::exit()
-{
-    // do any shutdown needed
-}
-
 } // namespace mapnik

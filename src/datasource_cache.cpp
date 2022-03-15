@@ -54,15 +54,8 @@ bool is_input_plugin(std::string const& filename)
     return boost::algorithm::ends_with(filename, std::string(".input"));
 }
 
-datasource_cache::datasource_cache()
-{
-    PluginInfo::init();
-}
-
-datasource_cache::~datasource_cache()
-{
-    PluginInfo::exit();
-}
+datasource_cache::datasource_cache() {}
+datasource_cache::~datasource_cache() {}
 
 datasource_ptr datasource_cache::create(parameters const& params)
 {
