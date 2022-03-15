@@ -12,11 +12,12 @@ For a complete change history, see the git log.
 #### Notice
 
 - Mapnik now requires C++14 compliant compiler (`-std=c++14`)
+- Mapnik now supports CMake as a build system. See [#4191](https://github.com/mapnik/mapnik/pull/4191) and the [docs](https://github.com/mapnik/mapnik/blob/master/docs/cmake-usage.md) for more info.
 
 #### Breaking Changes
 
 - Reworked datasource plugin system. Plugins now need to implement a class with the macros in `datasource_plugin.hpp` ([#4291](https://github.com/mapnik/mapnik/pull/4291))
-- mapnik now has a global `mapnik::setup()` method which have to be called before any other functions of mapnik. Defined in `mapnik.hpp` ([#4291](https://github.com/mapnik/mapnik/pull/4291))
+- mapnik now has a global `mapnik::setup()` method which have to be called before any other functions of mapnik. Defined in `mapnik.hpp`. Note: In order not to insert this change into every code base, it is currently still called during the dynamic initialisation time. However, if mapnik is compiled statically, this function must be called.  ([#4291](https://github.com/mapnik/mapnik/pull/4291))
 
 #### Core
 
