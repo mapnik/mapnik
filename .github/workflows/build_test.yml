@@ -13,7 +13,7 @@ jobs:
     name: Windows memory mapped
     uses: mapnik/mapnik/.github/workflows/windows.yml@master
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: 01d6f6ff1e5332b926099f0c23bda996940ad4e8
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -24,7 +24,7 @@ jobs:
     name: Windows file based
     uses: mapnik/mapnik/.github/workflows/windows.yml@master
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: 01d6f6ff1e5332b926099f0c23bda996940ad4e8
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -35,7 +35,7 @@ jobs:
     name: Linux memory mapped
     uses: mapnik/mapnik/.github/workflows/ubuntu.yml@master
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: 01d6f6ff1e5332b926099f0c23bda996940ad4e8
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -46,7 +46,7 @@ jobs:
     name: Linux file based
     uses: mapnik/mapnik/.github/workflows/ubuntu.yml@master
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: 01d6f6ff1e5332b926099f0c23bda996940ad4e8
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -57,7 +57,7 @@ jobs:
     name: MacOS memory mapped
     uses: mapnik/mapnik/.github/workflows/macos.yml@master
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: 01d6f6ff1e5332b926099f0c23bda996940ad4e8
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -68,7 +68,7 @@ jobs:
     name: MacOS file based
     uses: mapnik/mapnik/.github/workflows/macos.yml@master
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: 01d6f6ff1e5332b926099f0c23bda996940ad4e8
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'

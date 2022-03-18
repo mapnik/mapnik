@@ -60,9 +60,14 @@
     "mapbox-geometry",
     "mapbox-polylabel",
     "mapbox-variant",
-    "proj4",
+    "proj",
     "protozero",
-    "sqlite3",
+    {
+      "name": "sqlite3",
+      "features": [
+        "rtree"
+      ]
+    },
     "tiff",
     "zlib"
   ]
