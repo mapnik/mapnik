@@ -62,7 +62,12 @@
     "mapbox-variant",
     "proj4",
     "protozero",
-    "sqlite3",
+    {
+      "name": "sqlite3",
+      "features": [
+        "rtree"
+      ]
+    },
     "tiff",
     "zlib"
   ]
