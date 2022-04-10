@@ -124,17 +124,20 @@ proj_transform::proj_transform(projection const& source, projection const& dest)
         {
 #ifdef MAPNIK_USE_PROJ
             ctx_ = proj_context_create();
+            proj_log_level(ctx_, PJ_LOG_ERROR);
             transform_ = proj_create_crs_to_crs(ctx_, source.params().c_str(), dest.params().c_str(), nullptr);
             if (transform_ == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") +
-                                         source.params() + "'->'" + dest.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform  (crs_to_crs) for given projections: '") +
+                                         source.params() + "'->'" + dest.params() +
+                                         "' because of " + std::string(proj_context_errno_string(ctx_, proj_context_errno(ctx_))));
             }
             PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
             if (transform_gis == nullptr)
             {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections: '") +
-                                         source.params() + "'->'" + dest.params() + "'");
+                throw std::runtime_error(std::string("Cannot initialize proj_transform (normalize) for given projections: '") +
+                                         source.params() + "'->'" + dest.params() +
+                                         "' because of " + std::string(proj_context_errno_string(ctx_, proj_context_errno(ctx_))));
             }
             proj_destroy(transform_);
             transform_ = transform_gis;
