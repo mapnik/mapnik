@@ -179,7 +179,8 @@
             "hidden": true,
             "cacheVariables": {
                 "BUILD_TESTING": "ON",
-                "BUILD_DEMO_VIEWER": "OFF"
+                "BUILD_DEMO_VIEWER": "OFF",
+                "CMAKE_TOOLCHAIN_FILE": "vcpkg/scripts/buildsystems/vcpkg.cmake"
             }
         },
         {

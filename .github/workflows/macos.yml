@@ -35,12 +35,12 @@ jobs:
           brew install automake ninja lcov
 
       - name: checkout mapnik
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: "recursive"
 
       - name: checkout vcpkg
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: "microsoft/vcpkg"
           ref: ${{ inputs.VCPKG_SHA }}
@@ -89,7 +89,7 @@ jobs:
           setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset=${{ env.preset }}
+        run: cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset=${{ env.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ env.preset }}
@@ -131,7 +131,7 @@ jobs:
         run: cmake --build --preset ${{ env.preset }} --target package
 
       - name: Upload mapnik build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: ${{ env.preset }}-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
@@ -139,7 +139,7 @@ jobs:
           retention-days: 2
 
       - name: Upload visual test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.preset }}-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/${{ env.preset }}/out/visual-test-results.tar.gz
