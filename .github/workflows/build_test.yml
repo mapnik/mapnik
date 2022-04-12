@@ -13,7 +13,7 @@ jobs:
     name: Windows memory mapped
     uses: ./.github/workflows/windows.yml
     with:
-      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      VCPKG_SHA: 4415a0f31b5a012ca2efba13cc18e16adefd89c0
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -24,7 +24,7 @@ jobs:
     name: Windows file based
     uses: ./.github/workflows/windows.yml
     with:
-      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      VCPKG_SHA: 4415a0f31b5a012ca2efba13cc18e16adefd89c0
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -35,7 +35,7 @@ jobs:
     name: Linux memory mapped
     uses: ./.github/workflows/ubuntu.yml
     with:
-      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      VCPKG_SHA: 4415a0f31b5a012ca2efba13cc18e16adefd89c0
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -46,7 +46,7 @@ jobs:
     name: Linux file based
     uses: ./.github/workflows/ubuntu.yml
     with:
-      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      VCPKG_SHA: 4415a0f31b5a012ca2efba13cc18e16adefd89c0
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -57,7 +57,7 @@ jobs:
     name: MacOS memory mapped
     uses: ./.github/workflows/macos.yml
     with:
-      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      VCPKG_SHA: 4415a0f31b5a012ca2efba13cc18e16adefd89c0
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -68,7 +68,7 @@ jobs:
     name: MacOS file based
     uses: ./.github/workflows/macos.yml
     with:
-      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      VCPKG_SHA: 4415a0f31b5a012ca2efba13cc18e16adefd89c0
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
