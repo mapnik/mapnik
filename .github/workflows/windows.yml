@@ -38,12 +38,12 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: checkout mapnik
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: "recursive"
 
       - name: checkout vcpkg
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: "microsoft/vcpkg"
           ref: ${{ inputs.VCPKG_SHA }}
@@ -91,7 +91,7 @@ jobs:
           setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset ${{env.preset}}
+        run: cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset ${{env.preset}}
 
       - name: Build
         run: cmake --build --preset ${{env.preset}}
@@ -104,7 +104,7 @@ jobs:
         continue-on-error: true
         working-directory: build/${{ env.preset }}/out
         env:
-          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj4
+          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj/data
         run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --input_coverage=${{ github.workspace }}/ctest.cov --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
 
       - name: Pack visual test results
@@ -120,7 +120,7 @@ jobs:
         if: failure()
         run: cmake --build --preset ${{env.preset}} --target package
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: ${{ env.preset }}-artifact-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
@@ -128,7 +128,7 @@ jobs:
           retention-days: 2
 
       - name: Upload visual test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.preset }}-visual-tests-mmio-${{ inputs.USE_MEMORY_MAPPED_FILE }}
           path: build/${{ env.preset }}/out/visual-test-results.tar.gz

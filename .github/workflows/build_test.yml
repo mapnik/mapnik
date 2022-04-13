@@ -11,9 +11,9 @@ on:
 jobs:
   windows:
     name: Windows memory mapped
-    uses: mapnik/mapnik/.github/workflows/windows.yml@master
+    uses: ./.github/workflows/windows.yml
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -22,9 +22,9 @@ jobs:
   
   windows-mmf-off:
     name: Windows file based
-    uses: mapnik/mapnik/.github/workflows/windows.yml@master
+    uses: ./.github/workflows/windows.yml
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -33,9 +33,9 @@ jobs:
 
   ubuntu:
     name: Linux memory mapped
-    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@master
+    uses: ./.github/workflows/ubuntu.yml
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -44,9 +44,9 @@ jobs:
 
   ubuntu-mmf-off:
     name: Linux file based
-    uses: mapnik/mapnik/.github/workflows/ubuntu.yml@master
+    uses: ./.github/workflows/ubuntu.yml
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
@@ -55,9 +55,9 @@ jobs:
 
   macos:
     name: MacOS memory mapped
-    uses: mapnik/mapnik/.github/workflows/macos.yml@master
+    uses: ./.github/workflows/macos.yml
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
@@ -66,9 +66,9 @@ jobs:
 
   macos-mmf-off:
     name: MacOS file based
-    uses: mapnik/mapnik/.github/workflows/macos.yml@master
+    uses: ./.github/workflows/macos.yml
     with:
-      VCPKG_SHA: 2e34a79a814551424d9b1a981b3b110e0a8fbdfd
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
