@@ -35,6 +35,7 @@
 #ifdef MAPNIK_USE_PROJ
 // proj
 #include <proj.h>
+#include <proj/io.hpp>
 #endif
 
 // stl
@@ -92,6 +93,29 @@ auto envelope_points(box2d<T> const& env, std::size_t num_points) -> geometry::m
 
 } // namespace
 
+// from src/4D_api.cpp
+/** Adds a " +type=crs" suffix to a PROJ string (if it is a PROJ string) */
+std::string pj_add_type_crs_if_needed(const std::string &str) {
+    std::string ret(str);
+    if ((str.rfind("proj=", 0) == 0 || str.rfind("+proj=", 0) == 0 ||
+         str.rfind("+init=", 0) == 0 || str.rfind("+title=", 0) == 0) &&
+        str.find("type=crs") == std::string::npos) {
+        ret += " +type=crs";
+    }
+    return ret;
+}
+
+void throw_proj_exception(PJ_CONTEXT *ctx, std::string msg)
+{
+    throw std::runtime_error(msg
+#if MAPNIK_PROJ_VERSION >= 80000
+                             + " because of "
+                             + std::string(proj_context_errno_string(ctx, proj_context_errno(ctx))));
+#else
+                             );
+#endif
+}
+
 proj_transform::proj_transform(projection const& source, projection const& dest)
     : is_source_longlat_(false)
     , is_dest_longlat_(false)
@@ -125,30 +149,80 @@ proj_transform::proj_transform(projection const& source, projection const& dest)
 #ifdef MAPNIK_USE_PROJ
             ctx_ = proj_context_create();
             proj_log_level(ctx_, PJ_LOG_ERROR);
-            transform_ = proj_create_crs_to_crs(ctx_, source.params().c_str(), dest.params().c_str(), nullptr);
-            if (transform_ == nullptr)
-            {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform  (crs_to_crs) for given projections: '") +
-                                         source.params() + "'->'" + dest.params() +
-#if MAPNIK_PROJ_VERSION >= 80000
-                                         "' because of " + std::string(proj_context_errno_string(ctx_, proj_context_errno(ctx_))));
-#else
-                                         "'");
-#endif
+            // we replicate what proj_create_crs_to_crs() does and then call
+            // proj_create_crs_to_crs_from_pj because we need a PJ object for
+            // proj_is_crs and we want to avoid running proj_create twice as
+            // as much (once ourselves and once in proj_create_crs_to_crs)
+            std::string crs_source = pj_add_type_crs_if_needed(source.params());
+            std::string crs_dest = pj_add_type_crs_if_needed(dest.params());
+            PJ* src;
+            PJ* dst;
+            try {
+                src = proj_create(ctx_, crs_source.c_str());
+            } catch( const std::exception& ) {
+                src = nullptr;
             }
-            PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
-            if (transform_gis == nullptr)
-            {
-                throw std::runtime_error(std::string("Cannot initialize proj_transform (normalize) for given projections: '") +
-                                         source.params() + "'->'" + dest.params() +
-#if MAPNIK_PROJ_VERSION >= 80000
-                                         "' because of " + std::string(proj_context_errno_string(ctx_, proj_context_errno(ctx_))));
-#else
-                                         "'");
-#endif
+            if (!src) {
+                throw_proj_exception(ctx_,
+                    std::string("Cannot instantiate source projection for '") + source.params() + "'");
             }
-            proj_destroy(transform_);
-            transform_ = transform_gis;
+            try {
+                dst = proj_create(ctx_, crs_dest.c_str());
+            } catch( const std::exception& ) {
+                dst = nullptr;
+            }
+            if (!dst) {
+                throw_proj_exception(ctx_,
+                    std::string("Cannot instantiate dest projection for '") + dest.params() + "'");
+            }
+            if (proj_is_crs(src) && proj_is_crs(dst)) {
+                // if both source and destination are a CRS, we can use
+                // proj_create_crs_to_crs
+                transform_ = proj_create_crs_to_crs_from_pj(ctx_, src, dst, nullptr, nullptr);
+                if (transform_ == nullptr)
+                {
+                    throw_proj_exception(ctx_,
+                        std::string("Cannot initialize proj_transform (crs_to_crs) for given projections: '") +
+                        source.params() + "'->'" + dest.params() + "'");
+                }
+                PJ* transform_gis = proj_normalize_for_visualization(ctx_, transform_);
+                if (transform_gis == nullptr)
+                {
+                    throw_proj_exception(ctx_,
+                        std::string("Cannot initialize proj_transform (normalize) for given projections: '") +
+                                             source.params() + "'->'" + dest.params() + "'");
+                }
+                proj_destroy(transform_);
+                transform_ = transform_gis;
+            } else {
+                // if one of the projections is not a CRS, then this was
+                // probably a user-supplied transform and we have to create
+                // the transform ourselves
+                auto formatter = osgeo::proj::io::PROJStringFormatter::create();
+                formatter->startInversion();
+                try {
+                    formatter->ingestPROJString(source.params());
+                } catch (const osgeo::proj::io::ParsingException &e) {
+                    throw_proj_exception(ctx_, std::string("Failed to ingest source: '") + source.params() + "'");
+                }
+                formatter->stopInversion();
+                try {
+                    formatter->ingestPROJString(dest.params());
+                } catch (const osgeo::proj::io::ParsingException &e) {
+                    throw_proj_exception(ctx_, std::string("Failed to ingest dest: '") + dest.params() + "'");
+                }
+                try {
+                    transform_ = proj_create(ctx_, formatter->toString().c_str());
+                } catch( const std::exception& ) {
+                    transform_ = nullptr;
+                }
+                if (!transform_) {
+                    throw_proj_exception(ctx_,
+                        std::string("Cannot instantiate custom projection pipeline: '") + formatter->toString() + "'");
+                }
+            }
+            proj_destroy(src);
+            proj_destroy(dst);
 #else
             throw std::runtime_error(
               std::string(
