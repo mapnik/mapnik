@@ -60,7 +60,7 @@
     "mapbox-geometry",
     "mapbox-polylabel",
     "mapbox-variant",
-    "proj4",
+    "proj",
     "protozero",
     {
       "name": "sqlite3",
