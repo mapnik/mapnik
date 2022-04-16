@@ -12,6 +12,11 @@ MAPNIK_DISABLE_WARNING_POP
 #include <fstream>
 
 #if defined(HAVE_CAIRO)
+#include <cairo-version.h>
+
+// see https://gitlab.freedesktop.org/cairo/cairo/-/issues/553
+// TLDR: cairo has removed the writing of the svg version in cairo 1.17.6
+#if (CAIRO_VERSION_MAJOR <= 1) && (CAIRO_VERSION_MINOR <= 17) && (CAIRO_VERSION_MICRO < 6)
 TEST_CASE("cairo_io")
 {
     SECTION("save_to_cairo_file - SVG")
@@ -32,4 +37,5 @@ TEST_CASE("cairo_io")
         CHECK(actual_output.find("version=\"1.2\"") != std::string::npos);
     }
 }
+#endif
 #endif
