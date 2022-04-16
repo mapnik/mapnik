@@ -15,6 +15,9 @@ on:
       USE_MEMORY_MAPPED_FILE:
         required: true
         type: string
+      BUILD_SHARED:
+        required: true
+        type: boolean
     secrets:
       NUGET_REGISTRY_PAT:
         required: true
@@ -91,7 +94,7 @@ jobs:
           setapikey "${{ secrets.GITHUB_TOKEN }}" -Source "${{ inputs.NUGET_REGISTRY }}"
 
       - name: Configure CMake
-        run: cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} --preset ${{env.preset}}
+        run: cmake -DUSE_MEMORY_MAPPED_FILE=${{ inputs.USE_MEMORY_MAPPED_FILE }} -DBUILD_SHARED_LIBS=${{ inputs.BUILD_SHARED }} --preset ${{env.preset}}
 
       - name: Build
         run: cmake --build --preset ${{env.preset}}

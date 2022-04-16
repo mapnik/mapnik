@@ -17,6 +17,7 @@ jobs:
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
+      BUILD_SHARED: true
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
   
@@ -28,6 +29,19 @@ jobs:
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
+      BUILD_SHARED: true
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
+  
+  windows-static:
+    name: Windows static
+    uses: ./.github/workflows/windows.yml
+    with:
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'ON'
+      BUILD_SHARED: false
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
@@ -39,6 +53,7 @@ jobs:
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
+      BUILD_SHARED: true
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
@@ -50,6 +65,19 @@ jobs:
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
+      BUILD_SHARED: true
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
+
+  ubuntu-static:
+    name: Linux static
+    uses: ./.github/workflows/ubuntu.yml
+    with:
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'ON'
+      BUILD_SHARED: false
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
@@ -61,6 +89,7 @@ jobs:
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'ON'
+      BUILD_SHARED: true
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
@@ -72,5 +101,18 @@ jobs:
       NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
       NUGET_USERNAME: mapnik
       USE_MEMORY_MAPPED_FILE: 'OFF'
+      BUILD_SHARED: true
+    secrets:
+      NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
+
+  macos-static:
+    name: MacOS static
+    uses: ./.github/workflows/macos.yml
+    with:
+      VCPKG_SHA: f6af75acc923c833a5620943e3fc7d5e4930f0df
+      NUGET_REGISTRY: https://nuget.pkg.github.com/mapnik/index.json
+      NUGET_USERNAME: mapnik
+      USE_MEMORY_MAPPED_FILE: 'ON'
+      BUILD_SHARED: false
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
