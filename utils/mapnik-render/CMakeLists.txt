@@ -9,6 +9,7 @@ target_link_libraries(mapnik-render PRIVATE
 
 set_target_properties(mapnik-render PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )
 
 mapnik_install_utility(mapnik-render)

@@ -12,6 +12,7 @@ target_link_libraries(svg2png PRIVATE
 
 set_target_properties(svg2png PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )
 
 mapnik_install_utility(svg2png)

@@ -15,6 +15,7 @@ target_link_libraries(mapnik-index PRIVATE
 
 set_target_properties(mapnik-index PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )
 
 mapnik_install_utility(mapnik-index)
