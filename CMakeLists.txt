@@ -302,13 +302,8 @@ if(USE_WEBP)
 endif()
 
 if(USE_CAIRO)
-    if(WIN32)
-        mapnik_find_package(Cairo REQUIRED)
-        list(APPEND MAPNIK_OPTIONAL_LIBS Cairo::Cairo)
-    else()
-        pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
-        list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
-    endif()
+    pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_CAIRO)
 endif()
 
@@ -364,11 +359,6 @@ add_compile_options(
     "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>"
     "$<$<CXX_COMPILER_ID:MSVC>:/EHsc>"
 )
-if(BUILD_SHARED_CRT)
-    set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-else()
-    set_property(GLOBAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
 
 add_library(core INTERFACE)
 add_library(mapnik::core ALIAS core)
