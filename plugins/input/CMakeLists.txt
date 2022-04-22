@@ -21,6 +21,7 @@ macro(add_plugin_target plugin_target output_name)
         LIBRARY_OUTPUT_DIRECTORY "${_plugin_library_output}"
         RUNTIME_OUTPUT_DIRECTORY "${_plugin_runtime_output}"
         ARCHIVE_OUTPUT_DIRECTORY "${_plugin_archive_output}"
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
     )
     mapnik_install_plugin(${plugin_target})
 endmacro()

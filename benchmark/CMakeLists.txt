@@ -37,6 +37,7 @@ function(mapnik_create_benchmark)
         RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
         ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
         OUTPUT_NAME "${BENCHNAME}"
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
     )
 endfunction()
 

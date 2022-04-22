@@ -40,6 +40,7 @@ void register_image_readers()
 }
 } // namespace mapnik
 
+#if !defined(MAPNIK_STATIC_PLUGINS) || !defined(_WIN32) 
 namespace {
 class AutoSetup final
 {
@@ -48,3 +49,4 @@ class AutoSetup final
 };
 AutoSetup auto_setup{};
 } // namespace
+#endif
