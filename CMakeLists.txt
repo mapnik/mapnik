@@ -296,15 +296,15 @@ if(USE_TIFF)
 endif()
 
 if(USE_WEBP)
-    mapnik_find_package(WebP REQUIRED)
+    pkg_check_modules(WebP REQUIRED IMPORTED_TARGET libwebp)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_WEBP)
-    list(APPEND MAPNIK_OPTIONAL_LIBS WebP::WebP)
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::WebP)
 endif()
 
 if(USE_CAIRO)
     pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
-    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_CAIRO)
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
 endif()
 
 if(USE_PROJ)
