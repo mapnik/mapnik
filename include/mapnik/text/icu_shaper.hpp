@@ -93,7 +93,8 @@ struct icu_shaper
                 std::size_t num_chars = static_cast<std::size_t>(num_char);
                 shaped.releaseBuffer(length);
                 bool shaped_status = true;
-                double max_glyph_height = 0;
+                double ymin = 0;
+                double ymax = 0;
                 if (U_SUCCESS(err) && (num_chars == length))
                 {
                     unsigned char_index = 0;
@@ -113,9 +114,8 @@ struct icu_shaper
                         {
                             g.face = face;
                             g.scale_multiplier = size / face->get_face()->units_per_EM;
-                            double tmp_height = g.height();
-                            if (tmp_height > max_glyph_height)
-                                max_glyph_height = tmp_height;
+                            ymin = std::min(ymin, g.ymin());
+                            ymax = std::max(ymax, g.ymax());
                             width_map[char_index++] += g.advance();
                             line.add_glyph(std::move(g), scale_factor);
                         }
@@ -123,7 +123,7 @@ struct icu_shaper
                 }
                 if (!shaped_status)
                     continue;
-                line.update_max_char_height(max_glyph_height);
+                line.update_max_char_height(ymin, ymax);
                 return;
             }
         }

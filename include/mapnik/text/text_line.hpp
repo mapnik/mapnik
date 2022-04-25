@@ -65,7 +65,11 @@ class MAPNIK_DECL text_line : util::noncopyable
     double max_char_height() const { return max_char_height_; }
 
     // Called for each font/style to update the maximum height of this line.
-    void update_max_char_height(double max_char_height);
+    void update_max_char_height(double ymin, double ymax);
+
+    // Verticall adjustment
+
+    double baseline_adjustment() const { return baseline_adjustment_;}
 
     // Line height including line spacing.
     double line_height() const { return line_height_; }
@@ -88,6 +92,7 @@ class MAPNIK_DECL text_line : util::noncopyable
     glyph_vector glyphs_;
     double line_height_;     // Includes line spacing (returned by freetype)
     double max_char_height_; // Max height of any glyphs in line - calculated by shaper
+    double baseline_adjustment_; // Adjustment to (0,0) origin
     double width_;
     double glyphs_width_;
     unsigned first_char_;

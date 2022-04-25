@@ -30,6 +30,7 @@ text_line::text_line(unsigned first_char, unsigned last_char)
     : glyphs_()
     , line_height_(0.0)
     , max_char_height_(0.0)
+    , baseline_adjustment_(0.0)
     , width_(0.0)
     , glyphs_width_(0.0)
     , first_char_(first_char)
@@ -42,6 +43,7 @@ text_line::text_line(text_line&& rhs)
     : glyphs_(std::move(rhs.glyphs_))
     , line_height_(std::move(rhs.line_height_))
     , max_char_height_(std::move(rhs.max_char_height_))
+    , baseline_adjustment_(std::move(baseline_adjustment_))
     , width_(std::move(rhs.width_))
     , glyphs_width_(std::move(rhs.glyphs_width_))
     , first_char_(std::move(rhs.first_char_))
@@ -92,9 +94,10 @@ double text_line::height() const
     return line_height_;
 }
 
-void text_line::update_max_char_height(double max_char_height)
+void text_line::update_max_char_height(double ymin, double ymax)
 {
-    max_char_height_ = std::max(max_char_height_, max_char_height);
+    max_char_height_ = std::max(max_char_height_, ymax - ymin);
+    baseline_adjustment_ = ymin;
 }
 
 void text_line::set_first_line(bool first_line)

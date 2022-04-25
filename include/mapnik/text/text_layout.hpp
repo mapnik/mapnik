@@ -117,6 +117,7 @@ class text_layout
 
     inline rotation const& orientation() const { return orientation_; }
     inline pixel_position const& displacement() const { return displacement_; }
+    inline double base_ajustment() const { return baseline_adjustment_; }
     inline box2d<double> const& bounds() const { return bounds_; }
     inline horizontal_alignment_e horizontal_alignment() const { return halign_; }
     pixel_position alignment_offset() const;
@@ -173,6 +174,7 @@ class text_layout
     bool repeat_wrap_char_ = false;
     bool rotate_displacement_ = false;
     double text_ratio_ = 0.0;
+    double baseline_adjustment_ = 0.0;
     pixel_position displacement_ = {0, 0};
     box2d<double> bounds_ = {0, 0, 0, 0};
 

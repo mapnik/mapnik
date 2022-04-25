@@ -360,7 +360,8 @@ struct harfbuzz_shaper
                     // Try next font in fontset
                     continue;
                 }
-                double max_glyph_height = 0;
+                double ymin = 0;
+                double ymax = 0;
                 for (auto const& c_id : clusters)
                 {
                     auto const& c = glyphinfos[c_id];
@@ -382,19 +383,18 @@ struct harfbuzz_shaper
                             // Overwrite default advance with better value provided by HarfBuzz
                             g.unscaled_advance = gpos.x_advance;
                             g.offset.set(gpos.x_offset * g.scale_multiplier, gpos.y_offset * g.scale_multiplier);
-                            double tmp_height = g.height();
+                            ymin = std::min(ymin, g.ymin());
+                            ymax = std::max(ymax, g.ymax());
                             if (g.face->is_color())
                             {
-                                tmp_height = g.ymax();
+                                ymin = 0.0;
                             }
-                            if (tmp_height > max_glyph_height)
-                                max_glyph_height = tmp_height;
                             width_map[char_index] += g.advance();
                             line.add_glyph(std::move(g), scale_factor);
                         }
                     }
                 }
-                line.update_max_char_height(max_glyph_height);
+                line.update_max_char_height(ymin, ymax);
                 break; // When we reach this point the current font had all glyphs.
             }
         }

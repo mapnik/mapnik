@@ -172,7 +172,6 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
 
         // Find text origin.
         pixel_position layout_center = pos + layout.displacement();
-
         if (!base_point_set)
         {
             glyphs->set_base_point(layout_center);
@@ -180,9 +179,10 @@ bool placement_finder::find_point_placement(pixel_position const& pos)
         }
 
         box2d<double> bbox = layout.bounds();
-        bbox.re_center(layout_center.x, layout_center.y);
 
-        /* For point placements it is faster to just check the bounding box. */
+        bbox.re_center(layout_center.x, layout_center.y - layout.base_ajustment());
+
+        // For point placements it is faster to just check the bounding box.
         if (collision(bbox, layouts_.text(), false))
             return false;
 

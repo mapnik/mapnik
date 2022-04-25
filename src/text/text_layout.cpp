@@ -210,6 +210,7 @@ void text_layout::layout()
     displacement_ = scale_factor_ * displacement_ + alignment_offset();
     if (rotate_displacement_)
         displacement_ = displacement_.rotate(!orientation_);
+
     // Find layout bounds, expanded for rotation
     rotated_box2d(bounds_, orientation_, displacement_, width_, height_);
 }
@@ -436,6 +437,7 @@ void text_layout::add_line(text_line&& line)
         line.set_first_line(true);
     }
     height_ += line.height();
+    baseline_adjustment_ = line.baseline_adjustment();
     glyphs_count_ += line.size();
     width_ = std::max(width_, line.width());
     lines_.emplace_back(std::move(line));
