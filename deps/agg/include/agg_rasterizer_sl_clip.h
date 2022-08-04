@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -24,7 +24,7 @@ namespace agg
     {
         poly_max_coord = (1 << 30) - 1 //----poly_max_coord
     };
-    
+
     //------------------------------------------------------------ras_conv_int
     struct ras_conv_int
     {
@@ -35,7 +35,7 @@ namespace agg
         }
         static int xi(int v) { return v; }
         static int yi(int v) { return v; }
-        static int upscale(double v) { return iround(v * poly_subpixel_scale); }
+        static int upscale(double v) { return iround(v * static_cast<double>(poly_subpixel_scale)); }
         static int downscale(int v)  { return v; }
     };
 
@@ -49,9 +49,9 @@ namespace agg
         }
         static int xi(int v) { return v; }
         static int yi(int v) { return v; }
-        static int upscale(double v) 
-        { 
-            return saturation<poly_max_coord>::iround(v * poly_subpixel_scale); 
+        static int upscale(double v)
+        {
+            return saturation<poly_max_coord>::iround(v * static_cast<double>(poly_subpixel_scale));
         }
         static int downscale(int v) { return v; }
     };
@@ -66,7 +66,7 @@ namespace agg
         }
         static int xi(int v) { return v * 3; }
         static int yi(int v) { return v; }
-        static int upscale(double v) { return iround(v * poly_subpixel_scale); }
+        static int upscale(double v) { return iround(v * static_cast<double>(poly_subpixel_scale)); }
         static int downscale(int v)  { return v; }
     };
 
@@ -78,10 +78,10 @@ namespace agg
         {
             return a * b / c;
         }
-        static int xi(double v) { return iround(v * poly_subpixel_scale); }
-        static int yi(double v) { return iround(v * poly_subpixel_scale); }
+        static int xi(double v) { return iround(v * static_cast<double>(poly_subpixel_scale)); }
+        static int yi(double v) { return iround(v * static_cast<double>(poly_subpixel_scale)); }
         static double upscale(double v) { return v; }
-        static double downscale(int v)  { return v / double(poly_subpixel_scale); }
+        static double downscale(int v)  { return v / static_cast<double>(poly_subpixel_scale); }
     };
 
     //--------------------------------------------------------ras_conv_dbl_3x
@@ -92,10 +92,10 @@ namespace agg
         {
             return a * b / c;
         }
-        static int xi(double v) { return iround(v * poly_subpixel_scale * 3); }
-        static int yi(double v) { return iround(v * poly_subpixel_scale); }
+        static int xi(double v) { return iround(v * static_cast<double>(poly_subpixel_scale) * 3); }
+        static int yi(double v) { return iround(v * static_cast<double>(poly_subpixel_scale)); }
         static double upscale(double v) { return v; }
-        static double downscale(int v)  { return v / double(poly_subpixel_scale); }
+        static double downscale(int v)  { return v / static_cast<double>(poly_subpixel_scale); }
     };
 
 
@@ -111,12 +111,12 @@ namespace agg
         typedef rect_base<coord_type>     rect_type;
 
         //--------------------------------------------------------------------
-        rasterizer_sl_clip() :  
+        rasterizer_sl_clip() :
             m_clip_box(0,0,0,0),
             m_x1(0),
             m_y1(0),
             m_f1(0),
-            m_clipping(false) 
+            m_clipping(false)
         {}
 
         //--------------------------------------------------------------------
@@ -145,8 +145,8 @@ namespace agg
         //------------------------------------------------------------------------
         template<class Rasterizer>
         AGG_INLINE void line_clip_y(Rasterizer& ras,
-                                    coord_type x1, coord_type y1, 
-                                    coord_type x2, coord_type y2, 
+                                    coord_type x1, coord_type y1,
+                                    coord_type x2, coord_type y2,
                                     unsigned   f1, unsigned   f2) const
         {
             f1 &= 10;
@@ -154,7 +154,7 @@ namespace agg
             if((f1 | f2) == 0)
             {
                 // Fully visible
-                ras.line(Conv::xi(x1), Conv::yi(y1), Conv::xi(x2), Conv::yi(y2)); 
+                ras.line(Conv::xi(x1), Conv::yi(y1), Conv::xi(x2), Conv::yi(y2));
             }
             else
             {
@@ -192,8 +192,8 @@ namespace agg
                     tx2 = x1 + Conv::mul_div(m_clip_box.y2-y1, x2-x1, y2-y1);
                     ty2 = m_clip_box.y2;
                 }
-                ras.line(Conv::xi(tx1), Conv::yi(ty1), 
-                         Conv::xi(tx2), Conv::yi(ty2)); 
+                ras.line(Conv::xi(tx1), Conv::yi(ty1),
+                         Conv::xi(tx2), Conv::yi(ty2));
             }
         }
 
@@ -288,8 +288,8 @@ namespace agg
             }
             else
             {
-                ras.line(Conv::xi(m_x1), Conv::yi(m_y1), 
-                         Conv::xi(x2),   Conv::yi(y2)); 
+                ras.line(Conv::xi(m_x1), Conv::yi(m_y1),
+                         Conv::xi(x2),   Conv::yi(y2));
             }
             m_x1 = x2;
             m_y1 = y2;
@@ -321,10 +321,10 @@ namespace agg
         void move_to(coord_type x1, coord_type y1) { m_x1 = x1; m_y1 = y1; }
 
         template<class Rasterizer>
-        void line_to(Rasterizer& ras, coord_type x2, coord_type y2) 
-        { 
-            ras.line(m_x1, m_y1, x2, y2); 
-            m_x1 = x2; 
+        void line_to(Rasterizer& ras, coord_type x2, coord_type y2)
+        {
+            ras.line(m_x1, m_y1, x2, y2);
+            m_x1 = x2;
             m_y1 = y2;
         }
 

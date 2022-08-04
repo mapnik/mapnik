@@ -44,13 +44,13 @@ namespace agg
     //------------------------------------------------------------------line_mr
     AGG_INLINE int line_mr(int x)
     {
-        return x >> (line_subpixel_shift - line_mr_subpixel_shift);
+        return x >> (line_subpixel_shift - static_cast<line_subpixel_scale_e>(line_mr_subpixel_shift));
     }
 
     //-------------------------------------------------------------------line_hr
     AGG_INLINE int line_hr(int x)
     {
-        return x << (line_subpixel_shift - line_mr_subpixel_shift);
+        return x << (line_subpixel_shift - static_cast<line_subpixel_scale_e>(line_mr_subpixel_shift));
     }
 
     //---------------------------------------------------------------line_dbl_hr
@@ -64,7 +64,7 @@ namespace agg
     {
         AGG_INLINE static int conv(double x)
         {
-            return iround(x * line_subpixel_scale);
+            return iround(x * static_cast<double>(line_subpixel_scale));
         }
     };
 
@@ -73,7 +73,7 @@ namespace agg
     {
         AGG_INLINE static int conv(double x)
         {
-            return saturation<line_max_coord>::iround(x * line_subpixel_scale);
+            return saturation<line_max_coord>::iround(x * static_cast<double>(line_subpixel_scale));
         }
     };
 
