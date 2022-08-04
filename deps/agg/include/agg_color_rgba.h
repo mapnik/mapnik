@@ -281,10 +281,10 @@ struct rgba8T
 
     static void convert(rgba8T<linear>& dst, const rgba& src)
     {
-        dst.r = value_type(uround(src.r * base_mask));
-        dst.g = value_type(uround(src.g * base_mask));
-        dst.b = value_type(uround(src.b * base_mask));
-        dst.a = value_type(uround(src.a * base_mask));
+        dst.r = value_type(uround(src.r * static_cast<double>(base_mask)));
+        dst.g = value_type(uround(src.g * static_cast<double>(base_mask)));
+        dst.b = value_type(uround(src.b * static_cast<double>(base_mask)));
+        dst.a = value_type(uround(src.a * static_cast<double>(base_mask)));
     }
 
     static void convert(rgba8T<sRGB>& dst, const rgba& src)
@@ -761,13 +761,13 @@ struct rgba16
     //--------------------------------------------------------------------
     static AGG_INLINE double to_double(value_type a)
     {
-        return double(a) / base_mask;
+        return static_cast<double>(a) / static_cast<double>(base_mask);
     }
 
     //--------------------------------------------------------------------
     static AGG_INLINE value_type from_double(double a)
     {
-        return value_type(uround(a * base_mask));
+        return value_type(uround(a * static_cast<double>(base_mask)));
     }
 
     //--------------------------------------------------------------------
@@ -955,7 +955,7 @@ struct rgba16
     AGG_INLINE self_type gradient(const self_type& c, double k) const
     {
         self_type ret;
-        calc_type ik = uround(k * base_mask);
+        calc_type ik = uround(k * static_cast<double>(base_mask));
         ret.r = lerp(r, c.r, ik);
         ret.g = lerp(g, c.g, ik);
         ret.b = lerp(b, c.b, ik);
@@ -1194,7 +1194,7 @@ struct rgba32
     //--------------------------------------------------------------------
     static AGG_INLINE value_type mult_cover(value_type a, cover_type b)
     {
-        return value_type(a * b / cover_mask);
+        return value_type(a * b / static_cast<float>(cover_mask));
     }
 
     //--------------------------------------------------------------------

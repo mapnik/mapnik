@@ -436,7 +436,8 @@ struct gray16
     static value_type luminance(const rgba& c)
     {
         // Calculate grayscale value as per ITU-R BT.709.
-        return value_type(uround((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) * base_mask));
+        return value_type(uround((0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b)
+                                 * static_cast<double>(base_mask)));
     }
 
     static value_type luminance(const rgba16& c)
@@ -537,13 +538,13 @@ struct gray16
     //--------------------------------------------------------------------
     static AGG_INLINE double to_double(value_type a)
     {
-        return double(a) / base_mask;
+        return static_cast<double>(a) / static_cast<double>(base_mask);
     }
 
     //--------------------------------------------------------------------
     static AGG_INLINE value_type from_double(double a)
     {
-        return value_type(uround(a * base_mask));
+        return value_type(uround(a * static_cast<double>(base_mask)));
     }
 
     //--------------------------------------------------------------------
@@ -698,7 +699,7 @@ struct gray16
     self_type gradient(self_type c, double k) const
     {
         self_type ret;
-        calc_type ik = uround(k * base_scale);
+        calc_type ik = uround(k * static_cast<double>(base_scale));
         ret.v = lerp(v, c.v, ik);
         ret.a = lerp(a, c.a, ik);
         return ret;
@@ -949,7 +950,7 @@ struct gray32
     //--------------------------------------------------------------------
     static AGG_INLINE value_type mult_cover(value_type a, cover_type b)
     {
-        return value_type(a * b / cover_mask);
+        return value_type(a * b / static_cast<double>(cover_mask));
     }
 
     //--------------------------------------------------------------------

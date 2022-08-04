@@ -153,7 +153,9 @@ unsigned vcgen_contour::vertex(double* x, double* y)
         case end_poly:
             if(!m_closed) return path_cmd_stop;
             m_status = stop;
-            return path_cmd_end_poly | path_flags_close | path_flags_ccw;
+            return path_cmd_end_poly
+                | static_cast<path_commands_e>(path_flags_close)
+                | static_cast<path_commands_e>(path_flags_ccw);
 
         case stop:
             return path_cmd_stop;
