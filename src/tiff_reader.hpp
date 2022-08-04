@@ -253,8 +253,8 @@ void tiff_reader<T>::init()
         read_method_ = stripped;
     }
     // TIFFTAG_EXTRASAMPLES
-    uint16 extrasamples = 0;
-    uint16* sampleinfo = nullptr;
+    std::uint16_t extrasamples = 0;
+    std::uint16_t* sampleinfo = nullptr;
     if (TIFFGetField(tif, TIFFTAG_EXTRASAMPLES, &extrasamples, &sampleinfo))
     {
         has_alpha_ = true;
@@ -265,7 +265,7 @@ void tiff_reader<T>::init()
     }
     // Try extracting bounding box from geoTIFF tags
     {
-        uint16 count = 0;
+        std::uint16_t count = 0;
         double* pixelscale;
         double* tilepoint;
         if (TIFFGetField(tif, 33550, &count, &pixelscale) == 1 && count == 3 &&

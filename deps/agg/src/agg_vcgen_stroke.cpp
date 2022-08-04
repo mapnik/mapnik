@@ -196,11 +196,15 @@ unsigned vcgen_stroke::vertex(double* x, double* y)
 
         case end_poly1:
             m_status = m_prev_status;
-            return path_cmd_end_poly | path_flags_close | path_flags_ccw;
+            return path_cmd_end_poly
+                | static_cast<path_commands_e>(path_flags_close)
+                | static_cast<path_commands_e>(path_flags_ccw);
 
         case end_poly2:
             m_status = m_prev_status;
-            return path_cmd_end_poly | path_flags_close | path_flags_cw;
+            return path_cmd_end_poly
+                | static_cast<path_commands_e>(path_flags_close)
+                | static_cast<path_commands_e>(path_flags_cw);
 
         case stop:
             cmd = path_cmd_stop;
