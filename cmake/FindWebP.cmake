@@ -63,8 +63,8 @@ if ("${WebP_FIND_VERSION}" VERSION_GREATER "${WebP_VERSION}")
 endif ()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(WebP 
-  REQUIRED_VARS 
+find_package_handle_standard_args(WebP
+  REQUIRED_VARS
     WebP_LIBRARY
     WebP_INCLUDE_DIR
   VERSION_VAR WebP_VERSION

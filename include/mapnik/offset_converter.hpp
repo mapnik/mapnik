@@ -640,7 +640,10 @@ struct offset_converter
         return cur_.cmd;
     }
 
-    void push_vertex(vertex2d const& v) { vertices_.push_back(v); }
+    void push_vertex(vertex2d const& v)
+    {
+        vertices_.push_back(v);
+    }
 
     Geometry& geom_;
     double offset_;

@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 3.15)
 include(cmake/GetVersion.cmake)
 get_mapnik_version()
 
-project(mapnik 
+project(mapnik
     VERSION ${MAPNIK_MAJOR_VERSION}.${MAPNIK_MINOR_VERSION}.${MAPNIK_PATCH_VERSION}
-    HOMEPAGE_URL "https://mapnik.org/" 
-    DESCRIPTION "Mapnik is an open source toolkit for developing mapping applications" 
-    LANGUAGES CXX 
+    HOMEPAGE_URL "https://mapnik.org/"
+    DESCRIPTION "Mapnik is an open source toolkit for developing mapping applications"
+    LANGUAGES CXX
 )
 message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
@@ -159,7 +159,7 @@ if(harfbuzz_FOUND)
     message(STATUS "Found harfbuzz native cmake")
     list(APPEND MAPNIK_OPTIONAL_LIBS harfbuzz::harfbuzz)
 else()
-    # Use pkg-config when harfbuzz is not found. 
+    # Use pkg-config when harfbuzz is not found.
     # It might be possible that in future version harfbuzz could only be found via pkg-config.
     # harfbuzz related discussion: https://github.com/harfbuzz/harfbuzz/issues/2653
     message(STATUS "harfbuzz not found via cmake. Searching via pkg-config...")
@@ -174,13 +174,13 @@ if(USE_EXTERNAL_MAPBOX_GEOMETRY)
         find_path(MAPBOX_GEOMETRY_INCLUDE_DIRS "mapbox/geometry.hpp" REQUIRED)
     endif()
 else()
-    set(MAPBOX_GEOMETRY_INCLUDE_DIRS 
+    set(MAPBOX_GEOMETRY_INCLUDE_DIRS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include>
         $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_GEOMETRY_INCLUDE_DIRS)
-    message(FATAL_ERROR "Set -DMAPBOX_GEOMETRY_INCLUDE_DIRS to the mapbox/geometry.hpp include dir") 
+    message(FATAL_ERROR "Set -DMAPBOX_GEOMETRY_INCLUDE_DIRS to the mapbox/geometry.hpp include dir")
 endif()
 
 if(USE_EXTERNAL_MAPBOX_POLYLABEL)
@@ -189,13 +189,13 @@ if(USE_EXTERNAL_MAPBOX_POLYLABEL)
         find_path(MAPBOX_POLYLABEL_INCLUDE_DIRS "mapbox/polylabel.hpp")
     endif()
 else()
-    set(MAPBOX_POLYLABEL_INCLUDE_DIRS 
+    set(MAPBOX_POLYLABEL_INCLUDE_DIRS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include>
         $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_POLYLABEL_INCLUDE_DIRS)
-    message(FATAL_ERROR "Set MAPBOX_POLYLABEL_INCLUDE_DIRS to the mapbox/geometry include dir") 
+    message(FATAL_ERROR "Set MAPBOX_POLYLABEL_INCLUDE_DIRS to the mapbox/geometry include dir")
 endif()
 
 if(USE_EXTERNAL_MAPBOX_PROTOZERO)
@@ -204,13 +204,13 @@ if(USE_EXTERNAL_MAPBOX_PROTOZERO)
         find_path(MAPBOX_PROTOZERO_INCLUDE_DIRS "protozero/pbf_message.hpp")
     endif()
 else()
-    set(MAPBOX_PROTOZERO_INCLUDE_DIRS 
+    set(MAPBOX_PROTOZERO_INCLUDE_DIRS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include>
         $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_PROTOZERO_INCLUDE_DIRS)
-    message(FATAL_ERROR "Set MAPBOX_PROTOZERO_INCLUDE_DIRS to the mapbox/protozero include dir") 
+    message(FATAL_ERROR "Set MAPBOX_PROTOZERO_INCLUDE_DIRS to the mapbox/protozero include dir")
 endif()
 
 if(USE_EXTERNAL_MAPBOX_VARIANT)
@@ -219,13 +219,13 @@ if(USE_EXTERNAL_MAPBOX_VARIANT)
         find_path(MAPBOX_VARIANT_INCLUDE_DIRS "mapbox/variant.hpp")
     endif()
 else()
-    set(MAPBOX_VARIANT_INCLUDE_DIRS 
+    set(MAPBOX_VARIANT_INCLUDE_DIRS
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include>
         $<INSTALL_INTERFACE:include>
     )
 endif()
 if(NOT MAPBOX_VARIANT_INCLUDE_DIRS)
-    message(FATAL_ERROR "Set MAPBOX_VARIANT_INCLUDE_DIRS to the mapbox/variant include dir") 
+    message(FATAL_ERROR "Set MAPBOX_VARIANT_INCLUDE_DIRS to the mapbox/variant include dir")
 endif()
 
 # (used by MapnikInstall.cmake. properties are needed since "set(...)" will be out of scope
@@ -237,7 +237,7 @@ if(USE_GLIBC_WORKAROUND)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_ENABLE_GLIBC_WORKAROUND)
 endif()
 
-if(USE_BIGINT) 
+if(USE_BIGINT)
     list(APPEND MAPNIK_COMPILE_DEFS BIGINT)
 endif()
 
@@ -338,7 +338,7 @@ if(USE_SVG_RENDERER)
     list(APPEND MAPNIK_COMPILE_DEFS SVG_RENDERER)
 endif()
 
-if(NOT WIN32) 
+if(NOT WIN32)
     message(STATUS "Compiling with -DMAPNIK_HAS_DLCFN")
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_HAS_DLCFN)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
@@ -352,8 +352,8 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_library(core INTERFACE)
 add_library(mapnik::core ALIAS core)
 
-target_include_directories(core INTERFACE  
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+target_include_directories(core INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${MAPBOX_GEOMETRY_INCLUDE_DIRS}>
     $<BUILD_INTERFACE:${MAPBOX_POLYLABEL_INCLUDE_DIRS}>
     $<BUILD_INTERFACE:${MAPBOX_VARIANT_INCLUDE_DIRS}>
@@ -362,7 +362,7 @@ target_include_directories(core INTERFACE
     $<INSTALL_INTERFACE:include>
     ${MAPNIK_OPTIONAL_LIBS_INCLUDE}
 )
-target_link_libraries(core INTERFACE 
+target_link_libraries(core INTERFACE
     Threads::Threads
     ICU::uc
     ICU::data

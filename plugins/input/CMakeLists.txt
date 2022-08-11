@@ -61,7 +61,7 @@ if(WIN32)
                 file(COPY ${m_deps} DESTINATION "@MAPNIK_OUTPUT_DIR@")
             ]] m_copy_dlls_str @ONLY
         )
-        file (GENERATE OUTPUT "copy_dlls_$<CONFIG>.cmake" 
+        file (GENERATE OUTPUT "copy_dlls_$<CONFIG>.cmake"
             CONTENT "${m_copy_dlls_str}"
         )
         add_custom_target(copy_plugin_dependencies ALL

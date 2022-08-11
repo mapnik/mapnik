@@ -7,7 +7,7 @@ target_link_libraries(input-topojson PRIVATE
     mapnik::mapnik
     mapnik::json
 )
-set_target_properties(input-topojson PROPERTIES 
+set_target_properties(input-topojson PROPERTIES
     OUTPUT_NAME "topojson"
     PREFIX "${_plugin_prefix}"
     SUFFIX "${_plugin_suffix}"

@@ -28,20 +28,39 @@
 #include "agg_basics.h"
 #include "agg_gamma_lut.h"
 
-namespace agg
-{
+namespace agg {
 // Supported byte orders for RGB and RGBA pixel formats
 //=======================================================================
-struct order_rgb  { enum rgb_e  { R=0, G=1, B=2, rgb_tag, hasAlpha=false }; };       //----order_rgb
-struct order_bgr  { enum bgr_e  { B=0, G=1, R=2, rgb_tag, hasAlpha=false }; };       //----order_bgr
-struct order_rgba { enum rgba_e { R=0, G=1, B=2, A=3, rgba_tag, hasAlpha=true }; }; //----order_rgba
-struct order_argb { enum argb_e { A=0, R=1, G=2, B=3, rgba_tag, hasAlpha=true }; }; //----order_argb
-struct order_abgr { enum abgr_e { A=0, B=1, G=2, R=3, rgba_tag, hasAlpha=true }; }; //----order_abgr
-struct order_bgra { enum bgra_e { B=0, G=1, R=2, A=3, rgba_tag, hasAlpha=true }; }; //----order_bgra
+struct order_rgb
+{
+    enum rgb_e { R = 0, G = 1, B = 2, rgb_tag, hasAlpha = false };
+}; //----order_rgb
+struct order_bgr
+{
+    enum bgr_e { B = 0, G = 1, R = 2, rgb_tag, hasAlpha = false };
+}; //----order_bgr
+struct order_rgba
+{
+    enum rgba_e { R = 0, G = 1, B = 2, A = 3, rgba_tag, hasAlpha = true };
+}; //----order_rgba
+struct order_argb
+{
+    enum argb_e { A = 0, R = 1, G = 2, B = 3, rgba_tag, hasAlpha = true };
+}; //----order_argb
+struct order_abgr
+{
+    enum abgr_e { A = 0, B = 1, G = 2, R = 3, rgba_tag, hasAlpha = true };
+}; //----order_abgr
+struct order_bgra
+{
+    enum bgra_e { B = 0, G = 1, R = 2, A = 3, rgba_tag, hasAlpha = true };
+}; //----order_bgra
 
 // Colorspace tag types.
-struct linear {};
-struct sRGB {};
+struct linear
+{};
+struct sRGB
+{};
 
 //====================================================================rgba
 struct rgba
@@ -57,11 +76,20 @@ struct rgba
     rgba() {}
 
     //--------------------------------------------------------------------
-    rgba(double r_, double g_, double b_, double a_=1.0) :
-        r(r_), g(g_), b(b_), a(a_) {}
+    rgba(double r_, double g_, double b_, double a_ = 1.0)
+        : r(r_)
+        , g(g_)
+        , b(b_)
+        , a(a_)
+    {}
 
     //--------------------------------------------------------------------
-    rgba(const rgba& c, double a_) : r(c.r), g(c.g), b(c.b), a(a_) {}
+    rgba(const rgba& c, double a_)
+        : r(c.r)
+        , g(c.g)
+        , b(c.b)
+        , a(a_)
+    {}
 
     //--------------------------------------------------------------------
     rgba& clear()
@@ -80,17 +108,17 @@ struct rgba
     //--------------------------------------------------------------------
     rgba& opacity(double a_)
     {
-        if (a_ < 0) a = 0;
-        else if (a_ > 1) a = 1;
-        else a = a_;
+        if (a_ < 0)
+            a = 0;
+        else if (a_ > 1)
+            a = 1;
+        else
+            a = a_;
         return *this;
     }
 
     //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return a;
-    }
+    double opacity() const { return a; }
 
     //--------------------------------------------------------------------
     rgba& premultiply()
@@ -114,7 +142,7 @@ struct rgba
             r *= a_;
             g *= a_;
             b *= a_;
-            a  = a_;
+            a = a_;
         }
         return *this;
     }
@@ -135,7 +163,6 @@ struct rgba
         }
         return *this;
     }
-
 
     //--------------------------------------------------------------------
     rgba gradient(rgba c, double k) const
@@ -167,17 +194,13 @@ struct rgba
     }
 
     //--------------------------------------------------------------------
-    static rgba no_color() { return rgba(0,0,0,0); }
+    static rgba no_color() { return rgba(0, 0, 0, 0); }
 
     //--------------------------------------------------------------------
     static rgba from_wavelength(double wl, double gamma = 1.0);
 
     //--------------------------------------------------------------------
-    explicit rgba(double wavelen, double gamma=1.0)
-    {
-        *this = from_wavelength(wavelen, gamma);
-    }
-
+    explicit rgba(double wavelen, double gamma = 1.0) { *this = from_wavelength(wavelen, gamma); }
 };
 
 inline rgba operator+(const rgba& a, const rgba& b)
@@ -226,8 +249,10 @@ inline rgba rgba::from_wavelength(double wl, double gamma)
     }
 
     double s = 1.0;
-    if (wl > 700.0)       s = 0.3 + 0.7 * (780.0 - wl) / (780.0 - 700.0);
-    else if (wl <  420.0) s = 0.3 + 0.7 * (wl - 380.0) / (420.0 - 380.0);
+    if (wl > 700.0)
+        s = 0.3 + 0.7 * (780.0 - wl) / (780.0 - 700.0);
+    else if (wl < 420.0)
+        s = 0.3 + 0.7 * (wl - 380.0) / (420.0 - 380.0);
 
     t.r = pow(t.r * s, gamma);
     t.g = pow(t.g * s, gamma);
@@ -240,23 +265,20 @@ inline rgba rgba_pre(double r, double g, double b, double a)
     return rgba(r, g, b, a).premultiply();
 }
 
-
 //===================================================================rgba8
 template<class Colorspace>
 struct rgba8T
 {
-    typedef int8u  value_type;
+    typedef int8u value_type;
     typedef int32u calc_type;
-    typedef int32  long_type;
-    enum base_scale_e
-    {
+    typedef int32 long_type;
+    enum base_scale_e {
         base_shift = 8,
         base_scale = 1 << base_shift,
-        base_mask  = base_scale - 1,
+        base_mask = base_scale - 1,
         base_MSB = 1 << (base_shift - 1)
     };
     typedef rgba8T self_type;
-
 
     value_type r;
     value_type g;
@@ -317,21 +339,23 @@ struct rgba8T
     rgba8T() {}
 
     //--------------------------------------------------------------------
-    rgba8T(unsigned r_, unsigned g_, unsigned b_, unsigned a_ = base_mask) :
-        r(value_type(r_)),
-        g(value_type(g_)),
-        b(value_type(b_)),
-        a(value_type(a_)) {}
+    rgba8T(unsigned r_, unsigned g_, unsigned b_, unsigned a_ = base_mask)
+        : r(value_type(r_))
+        , g(value_type(g_))
+        , b(value_type(b_))
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    rgba8T(const rgba& c)
-    {
-        convert(*this, c);
-    }
+    rgba8T(const rgba& c) { convert(*this, c); }
 
     //--------------------------------------------------------------------
-    rgba8T(const self_type& c, unsigned a_) :
-        r(c.r), g(c.g), b(c.b), a(value_type(a_)) {}
+    rgba8T(const self_type& c, unsigned a_)
+        : r(c.r)
+        , g(c.g)
+        , b(c.b)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
     template<class T>
@@ -349,46 +373,25 @@ struct rgba8T
     }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE double to_double(value_type a)
-    {
-        return double(a) / base_mask;
-    }
+    static AGG_INLINE double to_double(value_type a) { return double(a) / base_mask; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type from_double(double a)
-    {
-        return value_type(uround(a * base_mask));
-    }
+    static AGG_INLINE value_type from_double(double a) { return value_type(uround(a * base_mask)); }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type empty_value()
-    {
-        return 0;
-    }
+    static AGG_INLINE value_type empty_value() { return 0; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type full_value()
-    {
-        return base_mask;
-    }
+    static AGG_INLINE value_type full_value() { return base_mask; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE bool is_transparent() const
-    {
-        return a == 0;
-    }
+    AGG_INLINE bool is_transparent() const { return a == 0; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE bool is_opaque() const
-    {
-        return a == base_mask;
-    }
+    AGG_INLINE bool is_opaque() const { return a == base_mask; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type invert(value_type x)
-    {
-        return base_mask - x;
-    }
+    static AGG_INLINE value_type invert(value_type x) { return base_mask - x; }
 
     //--------------------------------------------------------------------
     // Fixed-point multiply, exact over int8u.
@@ -409,7 +412,8 @@ struct rgba8T
         {
             return base_mask;
         }
-        else return value_type((a * base_mask + (b >> 1)) / b);
+        else
+            return value_type((a * base_mask + (b >> 1)) / b);
     }
 
     //--------------------------------------------------------------------
@@ -429,23 +433,14 @@ struct rgba8T
     //--------------------------------------------------------------------
     // Fixed-point multiply, exact over int8u.
     // Specifically for multiplying a color component by a cover.
-    static AGG_INLINE value_type mult_cover(value_type a, cover_type b)
-    {
-        return multiply(a, b);
-    }
+    static AGG_INLINE value_type mult_cover(value_type a, cover_type b) { return multiply(a, b); }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE cover_type scale_cover(cover_type a, value_type b)
-    {
-        return multiply(b, a);
-    }
+    static AGG_INLINE cover_type scale_cover(cover_type a, value_type b) { return multiply(b, a); }
 
     //--------------------------------------------------------------------
     // Interpolate p to q by a, assuming q is premultiplied by a.
-    static AGG_INLINE value_type prelerp(value_type p, value_type q, value_type a)
-    {
-        return p + q - multiply(p, a);
-    }
+    static AGG_INLINE value_type prelerp(value_type p, value_type q, value_type a) { return p + q - multiply(p, a); }
 
     //--------------------------------------------------------------------
     // Interpolate p to q by a.
@@ -472,17 +467,17 @@ struct rgba8T
     //--------------------------------------------------------------------
     self_type& opacity(double a_)
     {
-        if (a_ < 0) a = 0;
-        else if (a_ > 1) a = 1;
-        else a = (value_type)uround(a_ * double(base_mask));
+        if (a_ < 0)
+            a = 0;
+        else if (a_ > 1)
+            a = 1;
+        else
+            a = (value_type)uround(a_ * double(base_mask));
         return *this;
     }
 
     //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return double(a) / double(base_mask);
-    }
+    double opacity() const { return double(a) / double(base_mask); }
 
     //--------------------------------------------------------------------
     AGG_INLINE self_type& premultiply()
@@ -604,7 +599,7 @@ struct rgba8T
     }
 
     //--------------------------------------------------------------------
-    static self_type no_color() { return self_type(0,0,0,0); }
+    static self_type no_color() { return self_type(0, 0, 0, 0); }
 
     //--------------------------------------------------------------------
     static self_type from_wavelength(double wl, double gamma = 1.0)
@@ -617,10 +612,9 @@ typedef rgba8T<linear> rgba8;
 typedef rgba8T<sRGB> srgba8;
 
 //-------------------------------------------------------------rgba8_pre
-inline rgba8 rgba8_pre(unsigned r, unsigned g, unsigned b,
-                       unsigned a = rgba8::base_mask)
+inline rgba8 rgba8_pre(unsigned r, unsigned g, unsigned b, unsigned a = rgba8::base_mask)
 {
-    return rgba8(r,g,b,a).premultiply();
+    return rgba8(r, g, b, a).premultiply();
 }
 inline rgba8 rgba8_pre(const rgba8& c)
 {
@@ -628,7 +622,7 @@ inline rgba8 rgba8_pre(const rgba8& c)
 }
 inline rgba8 rgba8_pre(const rgba8& c, unsigned a)
 {
-    return rgba8(c,a).premultiply();
+    return rgba8(c, a).premultiply();
 }
 inline rgba8 rgba8_pre(const rgba& c)
 {
@@ -636,11 +630,8 @@ inline rgba8 rgba8_pre(const rgba& c)
 }
 inline rgba8 rgba8_pre(const rgba& c, double a)
 {
-    return rgba8(c,a).premultiply();
+    return rgba8(c, a).premultiply();
 }
-
-
-
 
 //-------------------------------------------------------------rgb8_packed
 inline rgba8 rgb8_packed(unsigned v)
@@ -674,19 +665,16 @@ rgba8 rgba8_gamma_inv(rgba8 c, const GammaLUT& gamma)
     return rgba8(gamma.inv(c.r), gamma.inv(c.g), gamma.inv(c.b), c.a);
 }
 
-
-
 //==================================================================rgba16
 struct rgba16
 {
     typedef int16u value_type;
     typedef int32u calc_type;
-    typedef int64  long_type;
-    enum base_scale_e
-    {
+    typedef int64 long_type;
+    enum base_scale_e {
         base_shift = 16,
         base_scale = 1 << base_shift,
-        base_mask  = base_scale - 1,
+        base_mask = base_scale - 1,
         base_MSB = 1 << (base_shift - 1)
     };
     typedef rgba16 self_type;
@@ -700,69 +688,63 @@ struct rgba16
     rgba16() {}
 
     //--------------------------------------------------------------------
-    rgba16(unsigned r_, unsigned g_, unsigned b_, unsigned a_=base_mask) :
-        r(value_type(r_)),
-        g(value_type(g_)),
-        b(value_type(b_)),
-        a(value_type(a_)) {}
+    rgba16(unsigned r_, unsigned g_, unsigned b_, unsigned a_ = base_mask)
+        : r(value_type(r_))
+        , g(value_type(g_))
+        , b(value_type(b_))
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    rgba16(const self_type& c, unsigned a_) :
-        r(c.r), g(c.g), b(c.b), a(value_type(a_)) {}
+    rgba16(const self_type& c, unsigned a_)
+        : r(c.r)
+        , g(c.g)
+        , b(c.b)
+        , a(value_type(a_))
+    {}
 
     //--------------------------------------------------------------------
-    rgba16(const rgba& c) :
-        r((value_type)uround(c.r * double(base_mask))),
-        g((value_type)uround(c.g * double(base_mask))),
-        b((value_type)uround(c.b * double(base_mask))),
-        a((value_type)uround(c.a * double(base_mask))) {}
+    rgba16(const rgba& c)
+        : r((value_type)uround(c.r * double(base_mask)))
+        , g((value_type)uround(c.g * double(base_mask)))
+        , b((value_type)uround(c.b * double(base_mask)))
+        , a((value_type)uround(c.a * double(base_mask)))
+    {}
 
     //--------------------------------------------------------------------
-    rgba16(const rgba8& c) :
-        r(value_type((value_type(c.r) << 8) | c.r)),
-        g(value_type((value_type(c.g) << 8) | c.g)),
-        b(value_type((value_type(c.b) << 8) | c.b)),
-        a(value_type((value_type(c.a) << 8) | c.a)) {}
+    rgba16(const rgba8& c)
+        : r(value_type((value_type(c.r) << 8) | c.r))
+        , g(value_type((value_type(c.g) << 8) | c.g))
+        , b(value_type((value_type(c.b) << 8) | c.b))
+        , a(value_type((value_type(c.a) << 8) | c.a))
+    {}
 
     //--------------------------------------------------------------------
-    rgba16(const srgba8& c) :
-        r(sRGB_conv<value_type>::rgb_from_sRGB(c.r)),
-        g(sRGB_conv<value_type>::rgb_from_sRGB(c.g)),
-        b(sRGB_conv<value_type>::rgb_from_sRGB(c.b)),
-        a(sRGB_conv<value_type>::alpha_from_sRGB(c.a)) {}
+    rgba16(const srgba8& c)
+        : r(sRGB_conv<value_type>::rgb_from_sRGB(c.r))
+        , g(sRGB_conv<value_type>::rgb_from_sRGB(c.g))
+        , b(sRGB_conv<value_type>::rgb_from_sRGB(c.b))
+        , a(sRGB_conv<value_type>::alpha_from_sRGB(c.a))
+    {}
 
     //--------------------------------------------------------------------
-    operator rgba() const
-    {
-        return rgba(
-            r / 65535.0,
-            g / 65535.0,
-            b / 65535.0,
-            a / 65535.0);
-    }
+    operator rgba() const { return rgba(r / 65535.0, g / 65535.0, b / 65535.0, a / 65535.0); }
 
     //--------------------------------------------------------------------
-    operator rgba8() const
-    {
-        return rgba8(r >> 8, g >> 8, b >> 8, a >> 8);
-    }
+    operator rgba8() const { return rgba8(r >> 8, g >> 8, b >> 8, a >> 8); }
 
     //--------------------------------------------------------------------
     operator srgba8() const
     {
         // Return (non-premultiplied) sRGB values.
-        return srgba8(
-            sRGB_conv<value_type>::rgb_to_sRGB(r),
-            sRGB_conv<value_type>::rgb_to_sRGB(g),
-            sRGB_conv<value_type>::rgb_to_sRGB(b),
-            sRGB_conv<value_type>::alpha_to_sRGB(a));
+        return srgba8(sRGB_conv<value_type>::rgb_to_sRGB(r),
+                      sRGB_conv<value_type>::rgb_to_sRGB(g),
+                      sRGB_conv<value_type>::rgb_to_sRGB(b),
+                      sRGB_conv<value_type>::alpha_to_sRGB(a));
     }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE double to_double(value_type a)
-    {
-        return static_cast<double>(a) / static_cast<double>(base_mask);
-    }
+    static AGG_INLINE double to_double(value_type a) { return static_cast<double>(a) / static_cast<double>(base_mask); }
 
     //--------------------------------------------------------------------
     static AGG_INLINE value_type from_double(double a)
@@ -771,34 +753,19 @@ struct rgba16
     }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type empty_value()
-    {
-        return 0;
-    }
+    static AGG_INLINE value_type empty_value() { return 0; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type full_value()
-    {
-        return base_mask;
-    }
+    static AGG_INLINE value_type full_value() { return base_mask; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE bool is_transparent() const
-    {
-        return a == 0;
-    }
+    AGG_INLINE bool is_transparent() const { return a == 0; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE bool is_opaque() const
-    {
-        return a == base_mask;
-    }
+    AGG_INLINE bool is_opaque() const { return a == base_mask; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type invert(value_type x)
-    {
-        return base_mask - x;
-    }
+    static AGG_INLINE value_type invert(value_type x) { return base_mask - x; }
 
     //--------------------------------------------------------------------
     // Fixed-point multiply, exact over int16u.
@@ -819,7 +786,8 @@ struct rgba16
         {
             return base_mask;
         }
-        else return value_type((a * base_mask + (b >> 1)) / b);
+        else
+            return value_type((a * base_mask + (b >> 1)) / b);
     }
 
     //--------------------------------------------------------------------
@@ -839,23 +807,14 @@ struct rgba16
     //--------------------------------------------------------------------
     // Fixed-point multiply, almost exact over int16u.
     // Specifically for multiplying a color component by a cover.
-    static AGG_INLINE value_type mult_cover(value_type a, cover_type b)
-    {
-        return multiply(a, (b << 8) | b);
-    }
+    static AGG_INLINE value_type mult_cover(value_type a, cover_type b) { return multiply(a, (b << 8) | b); }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE cover_type scale_cover(cover_type a, value_type b)
-    {
-        return multiply((a << 8) | a, b) >> 8;
-    }
+    static AGG_INLINE cover_type scale_cover(cover_type a, value_type b) { return multiply((a << 8) | a, b) >> 8; }
 
     //--------------------------------------------------------------------
     // Interpolate p to q by a, assuming q is premultiplied by a.
-    static AGG_INLINE value_type prelerp(value_type p, value_type q, value_type a)
-    {
-        return p + q - multiply(p, a);
-    }
+    static AGG_INLINE value_type prelerp(value_type p, value_type q, value_type a) { return p + q - multiply(p, a); }
 
     //--------------------------------------------------------------------
     // Interpolate p to q by a.
@@ -882,17 +841,16 @@ struct rgba16
     //--------------------------------------------------------------------
     AGG_INLINE self_type& opacity(double a_)
     {
-        if (a_ < 0) a = 0;
-        if (a_ > 1) a = 1;
+        if (a_ < 0)
+            a = 0;
+        if (a_ > 1)
+            a = 1;
         a = value_type(uround(a_ * double(base_mask)));
         return *this;
     }
 
     //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return double(a) / double(base_mask);
-    }
+    double opacity() const { return double(a) / double(base_mask); }
 
     //--------------------------------------------------------------------
     AGG_INLINE self_type& premultiply()
@@ -1014,7 +972,7 @@ struct rgba16
     }
 
     //--------------------------------------------------------------------
-    static self_type no_color() { return self_type(0,0,0,0); }
+    static self_type no_color() { return self_type(0, 0, 0, 0); }
 
     //--------------------------------------------------------------------
     static self_type from_wavelength(double wl, double gamma = 1.0)
@@ -1022,7 +980,6 @@ struct rgba16
         return self_type(rgba::from_wavelength(wl, gamma));
     }
 };
-
 
 //------------------------------------------------------rgba16_gamma_dir
 template<class GammaLUT>
@@ -1055,127 +1012,100 @@ struct rgba32
     rgba32() {}
 
     //--------------------------------------------------------------------
-    rgba32(value_type r_, value_type g_, value_type b_, value_type a_= 1) :
-        r(r_), g(g_), b(b_), a(a_) {}
+    rgba32(value_type r_, value_type g_, value_type b_, value_type a_ = 1)
+        : r(r_)
+        , g(g_)
+        , b(b_)
+        , a(a_)
+    {}
 
     //--------------------------------------------------------------------
-    rgba32(const self_type& c, float a_) :
-        r(c.r), g(c.g), b(c.b), a(a_) {}
+    rgba32(const self_type& c, float a_)
+        : r(c.r)
+        , g(c.g)
+        , b(c.b)
+        , a(a_)
+    {}
 
     //--------------------------------------------------------------------
-    rgba32(const rgba& c) :
-        r(value_type(c.r)), g(value_type(c.g)), b(value_type(c.b)), a(value_type(c.a)) {}
+    rgba32(const rgba& c)
+        : r(value_type(c.r))
+        , g(value_type(c.g))
+        , b(value_type(c.b))
+        , a(value_type(c.a))
+    {}
 
     //--------------------------------------------------------------------
-    rgba32(const rgba8& c) :
-        r(value_type(c.r / 255.0)),
-        g(value_type(c.g / 255.0)),
-        b(value_type(c.b / 255.0)),
-        a(value_type(c.a / 255.0)) {}
+    rgba32(const rgba8& c)
+        : r(value_type(c.r / 255.0))
+        , g(value_type(c.g / 255.0))
+        , b(value_type(c.b / 255.0))
+        , a(value_type(c.a / 255.0))
+    {}
 
     //--------------------------------------------------------------------
-    rgba32(const srgba8& c) :
-        r(sRGB_conv<value_type>::rgb_from_sRGB(c.r)),
-        g(sRGB_conv<value_type>::rgb_from_sRGB(c.g)),
-        b(sRGB_conv<value_type>::rgb_from_sRGB(c.b)),
-        a(sRGB_conv<value_type>::alpha_from_sRGB(c.a)) {}
+    rgba32(const srgba8& c)
+        : r(sRGB_conv<value_type>::rgb_from_sRGB(c.r))
+        , g(sRGB_conv<value_type>::rgb_from_sRGB(c.g))
+        , b(sRGB_conv<value_type>::rgb_from_sRGB(c.b))
+        , a(sRGB_conv<value_type>::alpha_from_sRGB(c.a))
+    {}
 
     //--------------------------------------------------------------------
-    rgba32(const rgba16& c) :
-        r(value_type(c.r / 65535.0)),
-        g(value_type(c.g / 65535.0)),
-        b(value_type(c.b / 65535.0)),
-        a(value_type(c.a / 65535.0)) {}
+    rgba32(const rgba16& c)
+        : r(value_type(c.r / 65535.0))
+        , g(value_type(c.g / 65535.0))
+        , b(value_type(c.b / 65535.0))
+        , a(value_type(c.a / 65535.0))
+    {}
 
     //--------------------------------------------------------------------
-    operator rgba() const
-    {
-        return rgba(r, g, b, a);
-    }
+    operator rgba() const { return rgba(r, g, b, a); }
 
     //--------------------------------------------------------------------
-    operator rgba8() const
-    {
-        return rgba8(
-            uround(r * 255.0),
-            uround(g * 255.0),
-            uround(b * 255.0),
-            uround(a * 255.0));
-    }
+    operator rgba8() const { return rgba8(uround(r * 255.0), uround(g * 255.0), uround(b * 255.0), uround(a * 255.0)); }
 
     //--------------------------------------------------------------------
     operator srgba8() const
     {
-        return srgba8(
-            sRGB_conv<value_type>::rgb_to_sRGB(r),
-            sRGB_conv<value_type>::rgb_to_sRGB(g),
-            sRGB_conv<value_type>::rgb_to_sRGB(b),
-            sRGB_conv<value_type>::alpha_to_sRGB(a));
+        return srgba8(sRGB_conv<value_type>::rgb_to_sRGB(r),
+                      sRGB_conv<value_type>::rgb_to_sRGB(g),
+                      sRGB_conv<value_type>::rgb_to_sRGB(b),
+                      sRGB_conv<value_type>::alpha_to_sRGB(a));
     }
 
     //--------------------------------------------------------------------
     operator rgba16() const
     {
-        return rgba8(
-            uround(r * 65535.0),
-            uround(g * 65535.0),
-            uround(b * 65535.0),
-            uround(a * 65535.0));
+        return rgba8(uround(r * 65535.0), uround(g * 65535.0), uround(b * 65535.0), uround(a * 65535.0));
     }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE double to_double(value_type a)
-    {
-        return a;
-    }
+    static AGG_INLINE double to_double(value_type a) { return a; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type from_double(double a)
-    {
-        return value_type(a);
-    }
+    static AGG_INLINE value_type from_double(double a) { return value_type(a); }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type empty_value()
-    {
-        return 0;
-    }
+    static AGG_INLINE value_type empty_value() { return 0; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type full_value()
-    {
-        return 1;
-    }
+    static AGG_INLINE value_type full_value() { return 1; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE bool is_transparent() const
-    {
-        return a <= 0;
-    }
+    AGG_INLINE bool is_transparent() const { return a <= 0; }
 
     //--------------------------------------------------------------------
-    AGG_INLINE bool is_opaque() const
-    {
-        return a >= 1;
-    }
+    AGG_INLINE bool is_opaque() const { return a >= 1; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type invert(value_type x)
-    {
-        return 1 - x;
-    }
+    static AGG_INLINE value_type invert(value_type x) { return 1 - x; }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type multiply(value_type a, value_type b)
-    {
-        return value_type(a * b);
-    }
+    static AGG_INLINE value_type multiply(value_type a, value_type b) { return value_type(a * b); }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE value_type demultiply(value_type a, value_type b)
-    {
-        return (b == 0) ? 0 : value_type(a / b);
-    }
+    static AGG_INLINE value_type demultiply(value_type a, value_type b) { return (b == 0) ? 0 : value_type(a / b); }
 
     //--------------------------------------------------------------------
     template<typename T>
@@ -1198,10 +1128,7 @@ struct rgba32
     }
 
     //--------------------------------------------------------------------
-    static AGG_INLINE cover_type scale_cover(cover_type a, value_type b)
-    {
-        return cover_type(uround(a * b));
-    }
+    static AGG_INLINE cover_type scale_cover(cover_type a, value_type b) { return cover_type(uround(a * b)); }
 
     //--------------------------------------------------------------------
     // Interpolate p to q by a, assuming q is premultiplied by a.
@@ -1238,17 +1165,17 @@ struct rgba32
     //--------------------------------------------------------------------
     AGG_INLINE self_type& opacity(double a_)
     {
-        if (a_ < 0) a = 0;
-        else if (a_ > 1) a = 1;
-        else a = value_type(a_);
+        if (a_ < 0)
+            a = 0;
+        else if (a_ > 1)
+            a = 1;
+        else
+            a = value_type(a_);
         return *this;
     }
 
     //--------------------------------------------------------------------
-    double opacity() const
-    {
-        return a;
-    }
+    double opacity() const { return a; }
 
     //--------------------------------------------------------------------
     AGG_INLINE self_type& premultiply()
@@ -1324,10 +1251,14 @@ struct rgba32
             b += mult_cover(c.b, cover);
             a += mult_cover(c.a, cover);
         }
-        if (a > 1) a = 1;
-        if (r > a) r = a;
-        if (g > a) g = a;
-        if (b > a) b = a;
+        if (a > 1)
+            a = 1;
+        if (r > a)
+            r = a;
+        if (g > a)
+            g = a;
+        if (b > a)
+            b = a;
     }
 
     //--------------------------------------------------------------------
@@ -1349,7 +1280,7 @@ struct rgba32
     }
 
     //--------------------------------------------------------------------
-    static self_type no_color() { return self_type(0,0,0,0); }
+    static self_type no_color() { return self_type(0, 0, 0, 0); }
 
     //--------------------------------------------------------------------
     static self_type from_wavelength(double wl, double gamma = 1)
@@ -1357,8 +1288,6 @@ struct rgba32
         return self_type(rgba::from_wavelength(wl, gamma));
     }
 };
-}
-
-
+} // namespace agg
 
 #endif

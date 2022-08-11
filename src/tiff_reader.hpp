@@ -96,19 +96,49 @@ class tiff_reader : public image_reader
     unsigned width() const final;
     unsigned height() const final;
     boost::optional<box2d<double>> bounding_box() const final;
-    inline bool has_alpha() const final { return has_alpha_; }
+    inline bool has_alpha() const final
+    {
+        return has_alpha_;
+    }
     void read(unsigned x, unsigned y, image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
-    unsigned bits_per_sample() const { return bps_; }
-    unsigned sample_format() const { return sample_format_; }
-    unsigned photometric() const { return photometric_; }
-    bool is_tiled() const { return is_tiled_; }
-    unsigned tile_width() const { return tile_width_; }
-    unsigned tile_height() const { return tile_height_; }
-    unsigned rows_per_strip() const { return rows_per_strip_; }
-    unsigned planar_config() const { return planar_config_; }
-    unsigned compression() const { return compression_; }
+    unsigned bits_per_sample() const
+    {
+        return bps_;
+    }
+    unsigned sample_format() const
+    {
+        return sample_format_;
+    }
+    unsigned photometric() const
+    {
+        return photometric_;
+    }
+    bool is_tiled() const
+    {
+        return is_tiled_;
+    }
+    unsigned tile_width() const
+    {
+        return tile_width_;
+    }
+    unsigned tile_height() const
+    {
+        return tile_height_;
+    }
+    unsigned rows_per_strip() const
+    {
+        return rows_per_strip_;
+    }
+    unsigned planar_config() const
+    {
+        return planar_config_;
+    }
+    unsigned compression() const
+    {
+        return compression_;
+    }
 
   private:
     tiff_reader(const tiff_reader&);

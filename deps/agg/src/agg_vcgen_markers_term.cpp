@@ -19,8 +19,7 @@
 
 #include "agg_vcgen_markers_term.h"
 
-namespace agg
-{
+namespace agg {
 
 //------------------------------------------------------------------------
 void vcgen_markers_term::remove_all()
@@ -28,13 +27,12 @@ void vcgen_markers_term::remove_all()
     m_markers.remove_all();
 }
 
-
 //------------------------------------------------------------------------
 void vcgen_markers_term::add_vertex(double x, double y, unsigned cmd)
 {
-    if(is_move_to(cmd))
+    if (is_move_to(cmd))
     {
-        if(m_markers.size() & 1)
+        if (m_markers.size() & 1)
         {
             // Initial state, the first coordinate was added.
             // If two of more calls of start_vertex() occures
@@ -48,9 +46,9 @@ void vcgen_markers_term::add_vertex(double x, double y, unsigned cmd)
     }
     else
     {
-        if(is_vertex(cmd))
+        if (is_vertex(cmd))
         {
-            if(m_markers.size() & 1)
+            if (m_markers.size() & 1)
             {
                 // Initial state, the first coordinate was added.
                 // Add three more points, 0,1,1,0
@@ -60,7 +58,7 @@ void vcgen_markers_term::add_vertex(double x, double y, unsigned cmd)
             }
             else
             {
-                if(m_markers.size())
+                if (m_markers.size())
                 {
                     // Replace two last points: 0,1,1,0 -> 0,1,2,1
                     m_markers[m_markers.size() - 1] = m_markers[m_markers.size() - 2];
@@ -71,7 +69,6 @@ void vcgen_markers_term::add_vertex(double x, double y, unsigned cmd)
     }
 }
 
-
 //------------------------------------------------------------------------
 void vcgen_markers_term::rewind(unsigned path_id)
 {
@@ -79,18 +76,17 @@ void vcgen_markers_term::rewind(unsigned path_id)
     m_curr_idx = m_curr_id;
 }
 
-
 //------------------------------------------------------------------------
 unsigned vcgen_markers_term::vertex(double* x, double* y)
 {
-    if(m_curr_id > 2 || m_curr_idx >= m_markers.size())
+    if (m_curr_id > 2 || m_curr_idx >= m_markers.size())
     {
         return path_cmd_stop;
     }
     const coord_type& c = m_markers[m_curr_idx];
     *x = c.x;
     *y = c.y;
-    if(m_curr_idx & 1)
+    if (m_curr_idx & 1)
     {
         m_curr_idx += 3;
         return path_cmd_line_to;
@@ -99,5 +95,4 @@ unsigned vcgen_markers_term::vertex(double* x, double* y)
     return path_cmd_move_to;
 }
 
-
-}
+} // namespace agg

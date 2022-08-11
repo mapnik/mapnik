@@ -9,7 +9,7 @@ FetchContent_Declare(
   GIT_TAG        v2.13.7)
 FetchContent_MakeAvailable(Catch2)
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19.0") 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19.0")
     # for cmake 3.19+ https://cmake.org/cmake/help/git-stage/policy/CMP0110.html
     # might not be needed if catch updates its cmakes
     cmake_policy(SET CMP0110 OLD)
@@ -17,7 +17,7 @@ endif()
 
 add_subdirectory(visual)
 
-add_executable(mapnik-test-unit 
+add_executable(mapnik-test-unit
     unit/run.cpp
     unit/color/css_color.cpp
     unit/core/box2d_test.cpp
@@ -100,13 +100,13 @@ add_executable(mapnik-test-unit
     unit/vertex_adapter/transform_path_adapter.cpp
     unit/vertex_adapter/vertex_adapter.cpp
 )
-set_target_properties(mapnik-test-unit PROPERTIES 
+set_target_properties(mapnik-test-unit PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 target_link_libraries(mapnik-test-unit PUBLIC
-    Catch2::Catch2 
+    Catch2::Catch2
     mapnik::agg
     mapnik::mapnik
     mapnik::json
@@ -119,41 +119,41 @@ file(COPY cleanup.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(mapnik-test-unit PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
-set_target_properties(agg_rasterizer_integer_overflow_test PROPERTIES 
+set_target_properties(agg_rasterizer_integer_overflow_test PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
-    Catch2::Catch2 
-    mapnik::mapnik 
+    Catch2::Catch2
+    mapnik::mapnik
     mapnik::agg
     mapnik::json
 )
 target_include_directories(agg_rasterizer_integer_overflow_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
-set_target_properties(datasource_registration_test PROPERTIES 
+set_target_properties(datasource_registration_test PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 target_link_libraries(datasource_registration_test PUBLIC
     Catch2::Catch2
-    mapnik::mapnik 
+    mapnik::mapnik
     mapnik::agg
 )
 target_include_directories(datasource_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(font_registration_test standalone/font_registration_test.cpp)
-set_target_properties(font_registration_test PROPERTIES 
+set_target_properties(font_registration_test PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 target_link_libraries(font_registration_test PUBLIC
-    Catch2::Catch2 
-    mapnik::mapnik 
+    Catch2::Catch2
+    mapnik::mapnik
     mapnik::agg
     mapnik::json
 )
@@ -161,14 +161,14 @@ target_include_directories(font_registration_test PRIVATE "${Catch2_SOURCE_DIR}/
 
 #not workable since boost::filesystem native returns a wstring and the function taskes a std::string
 add_executable(map_xml_test standalone/map_xml_test.cpp)
-set_target_properties(map_xml_test PROPERTIES 
+set_target_properties(map_xml_test PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 target_link_libraries(map_xml_test PUBLIC
-    Catch2::Catch2 
-    mapnik::mapnik 
+    Catch2::Catch2
+    mapnik::mapnik
     mapnik::agg
     mapnik::json
 )
@@ -190,8 +190,8 @@ endif()
 
 catch_discover_tests(mapnik-test-unit
     WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    PROPERTIES 
-        ENVIRONMENT 
+    PROPERTIES
+        ENVIRONMENT
             "PATH=${m_test_path}"
 )
 catch_discover_tests(agg_rasterizer_integer_overflow_test WORKING_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
