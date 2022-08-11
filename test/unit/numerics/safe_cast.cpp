@@ -32,23 +32,62 @@
 
 TEST_CASE("saturated cast")
 {
-    SECTION("int8") { CAST_ASSERT(std::int8_t); }
-    SECTION("int16") { CAST_ASSERT(std::int16_t); }
-    SECTION("int32") { CAST_ASSERT(std::int32_t); }
+    SECTION("int8")
+    {
+        CAST_ASSERT(std::int8_t);
+    }
+    SECTION("int16")
+    {
+        CAST_ASSERT(std::int16_t);
+    }
+    SECTION("int32")
+    {
+        CAST_ASSERT(std::int32_t);
+    }
 
-    SECTION("int64") { CAST_ASSERT2(std::int64_t); }
-    SECTION("intmax") { CAST_ASSERT2(std::intmax_t); }
-    SECTION("intptr") { CAST_ASSERT2(std::intptr_t); }
+    SECTION("int64")
+    {
+        CAST_ASSERT2(std::int64_t);
+    }
+    SECTION("intmax")
+    {
+        CAST_ASSERT2(std::intmax_t);
+    }
+    SECTION("intptr")
+    {
+        CAST_ASSERT2(std::intptr_t);
+    }
 
-    SECTION("uint8") { CAST_ASSERT(std::uint8_t); }
-    SECTION("uint16") { CAST_ASSERT(std::uint16_t); }
-    SECTION("uint32") { CAST_ASSERT(std::uint32_t); }
+    SECTION("uint8")
+    {
+        CAST_ASSERT(std::uint8_t);
+    }
+    SECTION("uint16")
+    {
+        CAST_ASSERT(std::uint16_t);
+    }
+    SECTION("uint32")
+    {
+        CAST_ASSERT(std::uint32_t);
+    }
 
-    SECTION("uint64") { CAST_ASSERT3(std::uint64_t); }
-    SECTION("uintmax") { CAST_ASSERT3(std::uintmax_t); }
-    SECTION("uintptr") { CAST_ASSERT3(std::uintptr_t); }
+    SECTION("uint64")
+    {
+        CAST_ASSERT3(std::uint64_t);
+    }
+    SECTION("uintmax")
+    {
+        CAST_ASSERT3(std::uintmax_t);
+    }
+    SECTION("uintptr")
+    {
+        CAST_ASSERT3(std::uintptr_t);
+    }
 
-    SECTION("float") { CAST_ASSERT4(float); }
+    SECTION("float")
+    {
+        CAST_ASSERT4(float);
+    }
 
     SECTION("freeform")
     {

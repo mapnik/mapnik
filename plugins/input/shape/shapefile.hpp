@@ -171,15 +171,30 @@ class shape_file : public mapnik::util::mapped_memory_file
         file_.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
     }
 
-    inline void rewind() { seek(100); }
+    inline void rewind()
+    {
+        seek(100);
+    }
 
-    inline void seek(std::streampos pos) { file_.seekg(pos, std::ios::beg); }
+    inline void seek(std::streampos pos)
+    {
+        file_.seekg(pos, std::ios::beg);
+    }
 
-    inline std::streampos pos() { return file_.tellg(); }
+    inline std::streampos pos()
+    {
+        return file_.tellg();
+    }
 
-    inline bool is_eof() { return file_.eof(); }
+    inline bool is_eof()
+    {
+        return file_.eof();
+    }
 
-    inline bool is_good() { return file_.good(); }
+    inline bool is_good()
+    {
+        return file_.good();
+    }
 };
 
 #endif // SHAPEFILE_HPP

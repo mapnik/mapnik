@@ -3,7 +3,7 @@ add_library(input-geobuf MODULE
     geobuf_featureset.cpp
 )
 target_link_libraries(input-geobuf PRIVATE mapnik::mapnik)
-set_target_properties(input-geobuf PROPERTIES 
+set_target_properties(input-geobuf PROPERTIES
     OUTPUT_NAME "geobuf"
     PREFIX "${_plugin_prefix}"
     SUFFIX "${_plugin_suffix}"

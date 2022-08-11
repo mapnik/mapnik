@@ -22,10 +22,10 @@ install(
     DESTINATION ${MAPNIK_CMAKE_DIR}
 )
 
-# install our modules, so that the expected target names are found. 
+# install our modules, so that the expected target names are found.
 install(
-    FILES 
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCairo.cmake" 
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCairo.cmake"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindWebP.cmake"
     DESTINATION ${MAPNIK_CMAKE_DIR}/Modules
 )

@@ -160,7 +160,10 @@ class sqlite_connection
         return rc;
     }
 
-    sqlite3* operator*() { return db_; }
+    sqlite3* operator*()
+    {
+        return db_;
+    }
 
     bool load_extension(std::string const& ext_path)
     {

@@ -87,7 +87,7 @@ function(mapnik_install_targets)
             message(STATUS \"internal_executables: ${_internal_executables}\")
             message(STATUS \"internal_libraries: ${_internal_libraries}\")
             message(STATUS \"ADDITIONAL_LIBARIES_PATHS: ${ADDITIONAL_LIBARIES_PATHS}\")
-            
+
             include(BundleUtilities)
             fixup_bundle(\"${_internal_executables}\" \"${_internal_libraries}\" \"${ADDITIONAL_LIBARIES_PATHS}\")
         " COMPONENT MapnikRuntime)
