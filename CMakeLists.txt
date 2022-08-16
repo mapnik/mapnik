@@ -16,6 +16,7 @@ message(STATUS "mapnik version: ${PROJECT_VERSION}")
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # with newer cmake versions put all find_package in global scope
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(FeatureSummary)
 include(MapnikOption)
@@ -132,6 +133,7 @@ set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 # Begin project configuration
 
 # needs to be before the first call of find_boost.
+list(APPEND MAPNIK_COMPILE_DEFS BOOST_SPIRIT_X3_HIDE_CXX17_WARNING)
 if(USE_MULTITHREADED)
     set(Boost_USE_MULTITHREADED ON)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_THREADSAFE)
