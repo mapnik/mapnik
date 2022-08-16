@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -22,34 +22,32 @@
 
 #include "agg_basics.h"
 
-namespace agg {
-//--------------------------------------------------------------span_solid
-template<class ColorT>
-class span_solid
+namespace agg
 {
-  public:
-    typedef ColorT color_type;
-
-    //--------------------------------------------------------------------
-    void color(const color_type& c) { m_color = c; }
-    const color_type& color() const { return m_color; }
-
-    //--------------------------------------------------------------------
-    void prepare() {}
-
-    //--------------------------------------------------------------------
-    void generate(color_type* span, int x, int y, unsigned len)
+    //--------------------------------------------------------------span_solid
+    template<class ColorT> class span_solid
     {
-        do
-        {
-            *span++ = m_color;
-        } while (--len);
-    }
+    public:
+        typedef ColorT color_type;
 
-  private:
-    color_type m_color;
-};
+        //--------------------------------------------------------------------
+        void color(const color_type& c) { m_color = c; }
+        const color_type& color() const { return m_color; }
 
-} // namespace agg
+        //--------------------------------------------------------------------
+        void prepare() {}
+
+        //--------------------------------------------------------------------
+        void generate(color_type* span, int x, int y, unsigned len)
+        {   
+            do { *span++ = m_color; } while(--len);
+        }
+
+    private:
+        color_type m_color;
+    };
+
+
+}
 
 #endif
