@@ -54,7 +54,8 @@ target_link_libraries(mapnik-viewer PRIVATE
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini 
 "[mapnik]
 plugins_dir=${PLUGINS_INSTALL_DIR}
-fonts/1/dir=${FONTS_INSTALL_DIR}"
+fonts/1/dir=${FONTS_INSTALL_DIR}
+fonts/size=1"
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
