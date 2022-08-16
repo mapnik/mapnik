@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -21,63 +21,67 @@
 // https://github.com/mapnik/mapnik/issues/1860
 #include <mapnik/config.hpp>
 
-namespace agg {
-
-//======================================================vpgen_clip_polygon
-//
-// See Implementation agg_vpgen_clip_polygon.cpp
-//
-
-class MAPNIK_DECL vpgen_clip_polygon
+namespace agg
 {
-  public:
-    vpgen_clip_polygon()
-        : m_clip_box(0, 0, 1, 1)
-        , m_x1(0)
-        , m_y1(0)
-        , m_clip_flags(0)
-        , m_num_vertices(0)
-        , m_vertex(0)
-        , m_cmd(path_cmd_move_to)
-    {}
 
-    void clip_box(double _x1, double _y1, double _x2, double _y2)
+    //======================================================vpgen_clip_polygon
+    //
+    // See Implementation agg_vpgen_clip_polygon.cpp
+    //
+
+    class MAPNIK_DECL vpgen_clip_polygon
     {
-        m_clip_box.x1 = _x1;
-        m_clip_box.y1 = _y1;
-        m_clip_box.x2 = _x2;
-        m_clip_box.y2 = _y2;
-        m_clip_box.normalize();
-    }
+    public:
+        vpgen_clip_polygon() : 
+            m_clip_box(0, 0, 1, 1),
+            m_x1(0),
+            m_y1(0),
+            m_clip_flags(0),
+            m_num_vertices(0),
+            m_vertex(0),
+            m_cmd(path_cmd_move_to)
+        {
+        }
 
-    double x1() const { return m_clip_box.x1; }
-    double y1() const { return m_clip_box.y1; }
-    double x2() const { return m_clip_box.x2; }
-    double y2() const { return m_clip_box.y2; }
+        void clip_box(double _x1, double _y1, double _x2, double _y2)
+        {
+            m_clip_box.x1 = _x1;
+            m_clip_box.y1 = _y1;
+            m_clip_box.x2 = _x2;
+            m_clip_box.y2 = _y2;
+            m_clip_box.normalize();
+        }
 
-    static bool auto_close() { return true; }
-    static bool auto_unclose() { return false; }
 
-    void reset();
-    void move_to(double x, double y);
-    void line_to(double x, double y);
-    unsigned vertex(double* x, double* y);
+        double x1() const { return m_clip_box.x1; }
+        double y1() const { return m_clip_box.y1; }
+        double x2() const { return m_clip_box.x2; }
+        double y2() const { return m_clip_box.y2; }
 
-  private:
-    unsigned clipping_flags(double x, double y);
+        static bool auto_close()   { return true;  }
+        static bool auto_unclose() { return false; }
 
-  private:
-    rect_d m_clip_box;
-    double m_x1;
-    double m_y1;
-    unsigned m_clip_flags;
-    double m_x[4];
-    double m_y[4];
-    unsigned m_num_vertices;
-    unsigned m_vertex;
-    unsigned m_cmd;
-};
+        void     reset();
+        void     move_to(double x, double y);
+        void     line_to(double x, double y);
+        unsigned vertex(double* x, double* y);
 
-} // namespace agg
+    private:
+        unsigned clipping_flags(double x, double y);
+
+    private:
+        rect_d        m_clip_box;
+        double        m_x1;
+        double        m_y1;
+        unsigned      m_clip_flags;
+        double        m_x[4];
+        double        m_y[4];
+        unsigned      m_num_vertices;
+        unsigned      m_vertex;
+        unsigned      m_cmd;
+    };
+
+}
+
 
 #endif
