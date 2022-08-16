@@ -1,4 +1,4 @@
-find_package(PostgreSQL REQUIRED)
+mapnik_find_package(PostgreSQL REQUIRED)
 
 add_plugin_target(input-postgis "postgis")
 target_sources(input-postgis ${_plugin_visibility}

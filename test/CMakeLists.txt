@@ -1,5 +1,5 @@
-find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
-find_package(PostgreSQL REQUIRED)
+mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
+mapnik_find_package(PostgreSQL REQUIRED)
 
 include(FetchContent)
 
@@ -163,7 +163,6 @@ target_link_libraries(font_registration_test PUBLIC
 )
 target_include_directories(font_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
-#not workable since boost::filesystem native returns a wstring and the function taskes a std::string
 add_executable(map_xml_test standalone/map_xml_test.cpp)
 set_target_properties(map_xml_test PROPERTIES 
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"

@@ -1,4 +1,4 @@
-find_package(PostgreSQL REQUIRED)
+mapnik_find_package(PostgreSQL REQUIRED)
 
 add_plugin_target(input-pgraster "pgraster")
 target_sources(input-pgraster ${_plugin_visibility}
