@@ -63,11 +63,11 @@ if(CAIRO_INCLUDE_DIR AND NOT CAIRO_VERSION)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Cairo 
-  REQUIRED_VARS 
+find_package_handle_standard_args(Cairo
+  REQUIRED_VARS
     CAIRO_LIBRARY
     CAIRO_INCLUDE_DIR
-    VERSION_VAR   
+    VERSION_VAR
     CAIRO_VERSION_STRING
 )
 mark_as_advanced(CAIRO_INCLUDE_DIR CAIRO_LIBRARY)

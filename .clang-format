@@ -30,7 +30,7 @@ BraceWrapping:
   AfterFunction: true # see AllowShortFunctionsOnASingleLine
   AfterNamespace: false
   AfterStruct: true
-  AfterExternBlock: true
+  AfterExternBlock: false
   BeforeCatch: false
   BeforeElse: true
   BeforeLambdaBody: false

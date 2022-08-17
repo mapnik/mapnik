@@ -1,6 +1,6 @@
 find_package(GDAL REQUIRED)
 
-add_library(input-ogr MODULE 
+add_library(input-ogr MODULE
     ogr_converter.cpp
     ogr_datasource.cpp
     ogr_featureset.cpp
@@ -11,7 +11,7 @@ target_link_libraries(input-ogr PRIVATE
     mapnik::mapnik
     ${GDAL_LIBRARIES}
 )
-set_target_properties(input-ogr PROPERTIES 
+set_target_properties(input-ogr PROPERTIES
     OUTPUT_NAME "ogr"
     PREFIX "${_plugin_prefix}"
     SUFFIX "${_plugin_suffix}"

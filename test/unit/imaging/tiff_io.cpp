@@ -167,9 +167,15 @@ void test_tiff_reader(std::string const& pattern)
 
 TEST_CASE("tiff io")
 {
-    SECTION("tiff-reader rgb8+rgba8") { test_tiff_reader<mapnik::image_rgba8>("tiff_rgb"); }
+    SECTION("tiff-reader rgb8+rgba8")
+    {
+        test_tiff_reader<mapnik::image_rgba8>("tiff_rgb");
+    }
 
-    SECTION("tiff-reader gray8") { test_tiff_reader<mapnik::image_gray8>("tiff_gray"); }
+    SECTION("tiff-reader gray8")
+    {
+        test_tiff_reader<mapnik::image_gray8>("tiff_gray");
+    }
 
     SECTION("scan rgb8 striped")
     {

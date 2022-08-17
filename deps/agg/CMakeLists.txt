@@ -3,8 +3,8 @@ project(agg)
 add_library(agg INTERFACE)
 add_library(mapnik::agg ALIAS agg)
 
-target_include_directories(agg INTERFACE  
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+target_include_directories(agg INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(agg INTERFACE mapnik::core)

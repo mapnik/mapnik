@@ -6,10 +6,10 @@ add_library(input-sqlite MODULE
 )
 add_library(mapnik::plugin::input::sqlite ALIAS input-sqlite)
 target_link_libraries(input-sqlite PRIVATE
-    mapnik::mapnik 
+    mapnik::mapnik
     SQLite::SQLite3
 )
-set_target_properties(input-sqlite PROPERTIES 
+set_target_properties(input-sqlite PROPERTIES
     OUTPUT_NAME "sqlite"
     PREFIX "${_plugin_prefix}"
     SUFFIX "${_plugin_suffix}"
