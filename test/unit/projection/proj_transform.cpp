@@ -88,13 +88,16 @@ TEST_CASE("projection transform")
         mapnik::projection proj_4937("epsg:4937");
         //"Webmercator" WGS 84 / Pseudo-Mercator -- Spherical Mercator, Google Maps, OpenStreetMap, Bing, ArcGIS, ESRI
         mapnik::projection proj_3857("epsg:3857");
+        //axisswap, which is not a CRS
+        mapnik::projection proj_axisswap("+proj=axisswap +order=2,1");
 
         mapnik::proj_transform tr1(proj_4236, proj_27700);
         mapnik::proj_transform tr2(proj_4236, proj_8857);
         mapnik::proj_transform tr3(proj_4236, proj_4236);
         mapnik::proj_transform tr4(proj_4236, proj_4937);
         mapnik::proj_transform tr5(proj_4236, proj_3857);
-        std::initializer_list<std::reference_wrapper<mapnik::proj_transform>> transforms = {tr1, tr2, tr3, tr4, tr5};
+        mapnik::proj_transform tr6(proj_4236, proj_axisswap);
+        std::initializer_list<std::reference_wrapper<mapnik::proj_transform>> transforms = {tr1, tr2, tr3, tr4, tr5, tr6};
 
         std::initializer_list<std::tuple<double, double>> coords = {
           {-4.0278869, 57.8796955}, // Dórnach, Highland
