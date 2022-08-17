@@ -77,10 +77,7 @@ class singleton
     singleton(const singleton& rhs);
     singleton& operator=(const singleton&);
 
-    static void onDeadReference()
-    {
-        throw std::runtime_error("dead reference!");
-    }
+    static void onDeadReference() { throw std::runtime_error("dead reference!"); }
 
     static void DestroySingleton()
     {

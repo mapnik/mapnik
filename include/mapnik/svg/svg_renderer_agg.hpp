@@ -492,14 +492,8 @@ class renderer_agg : util::noncopyable
     }
 #endif
 
-    inline VertexSource& source() const
-    {
-        return source_;
-    }
-    inline AttributeSource const& attributes() const
-    {
-        return attributes_;
-    }
+    inline VertexSource& source() const { return source_; }
+    inline AttributeSource const& attributes() const { return attributes_; }
 
   private:
 

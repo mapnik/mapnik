@@ -9,7 +9,7 @@ Name: @_lib_name@
 Description: @_description@
 Version: @MAPNIK_VERSION@
 Libs: -L"${libdir}" -l$<TARGET_FILE_BASE_NAME:@_target@>$<TARGET_PROPERTY:@_target@,$<CONFIG>_POSTFIX>
-Cflags: -I"${includedir}" ]]
+Cflags: -I"${includedir}" ]] 
     _contents @ONLY)
 
     file(GENERATE
@@ -26,11 +26,11 @@ endfunction()
 function(create_pkg_config_file_mapnik _lib_name _description)
     get_target_property(m_compile_defs core INTERFACE_COMPILE_DEFINITIONS)
     string(JOIN " -D" m_str_compile_defs ${m_compile_defs})
-    if(m_str_compile_defs)
+    if(m_str_compile_defs) 
         set(m_str_compile_defs "-D${m_str_compile_defs}")
     endif()
 
-    set(m_requires
+    set(m_requires 
         libmapnikwkt
         libmapnikjson
         icu-uc
@@ -71,7 +71,7 @@ Description: @_description@
 Version: @MAPNIK_VERSION@
 Requires: @m_requires@
 Libs: -L"${libdir}" -l$<TARGET_FILE_BASE_NAME:mapnik>$<TARGET_PROPERTY:mapnik,$<CONFIG>_POSTFIX>
-Cflags: -I"${includedir}" @m_str_compile_defs@]]
+Cflags: -I"${includedir}" @m_str_compile_defs@]] 
     _contents @ONLY)
     file(GENERATE
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_lib_name}-$<CONFIG>.pc

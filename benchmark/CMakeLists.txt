@@ -1,6 +1,6 @@
 project(mapnik-benchmark)
 
-set(BENCHMARK_SRCS
+set(BENCHMARK_SRCS 
     src/normalize_angle.cpp
     src/test_array_allocation.cpp
     src/test_expression_parse.cpp
@@ -32,7 +32,7 @@ function(mapnik_create_benchmark)
     add_executable(${TARGET_NAME} ${ARGV0})
     target_include_directories(${TARGET_NAME} PRIVATE include)
     target_link_libraries(${TARGET_NAME} PRIVATE mapnik::agg mapnik::mapnik)
-    set_target_properties(${TARGET_NAME} PROPERTIES
+    set_target_properties(${TARGET_NAME} PROPERTIES 
         LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
         RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
         ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
@@ -46,7 +46,7 @@ foreach(benchmark ${BENCHMARK_SRCS})
 endforeach()
 
 file(COPY data DESTINATION "${MAPNIK_OUTPUT_DIR}/benchmark")
-file(COPY run_benchmarks
-    DESTINATION "${MAPNIK_OUTPUT_DIR}"
+file(COPY run_benchmarks 
+    DESTINATION "${MAPNIK_OUTPUT_DIR}" 
     FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE GROUP_WRITE GROUP_READ GROUP_EXECUTE WORLD_READ
 )

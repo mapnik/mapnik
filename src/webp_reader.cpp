@@ -27,8 +27,7 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-extern "C"
-{
+extern "C" {
 #include <webp/types.h>
 #include <webp/decode.h>
 }

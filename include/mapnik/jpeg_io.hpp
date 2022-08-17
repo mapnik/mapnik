@@ -29,8 +29,7 @@
 #include <ostream>
 #include <cstdio>
 
-extern "C"
-{
+extern "C" {
 #include <jpeglib.h>
 }
 

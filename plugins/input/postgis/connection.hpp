@@ -33,8 +33,7 @@
 #include <sstream>
 #include <iostream>
 
-extern "C"
-{
+extern "C" {
 #include "libpq-fe.h"
 }
 
@@ -237,20 +236,11 @@ class Connection
         return std::make_shared<ResultSet>(result);
     }
 
-    std::string client_encoding() const
-    {
-        return PQparameterStatus(conn_, "client_encoding");
-    }
+    std::string client_encoding() const { return PQparameterStatus(conn_, "client_encoding"); }
 
-    bool isOK() const
-    {
-        return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
-    }
+    bool isOK() const { return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD); }
 
-    bool isPending() const
-    {
-        return pending_;
-    }
+    bool isPending() const { return pending_; }
 
     void close()
     {

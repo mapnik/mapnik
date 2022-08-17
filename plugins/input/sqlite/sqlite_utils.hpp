@@ -45,8 +45,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // sqlite
-extern "C"
-{
+extern "C" {
 #include <sqlite3.h>
 }
 

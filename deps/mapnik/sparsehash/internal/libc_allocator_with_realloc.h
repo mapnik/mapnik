@@ -33,82 +33,87 @@
 #define UTIL_GTL_LIBC_ALLOCATOR_WITH_REALLOC_H_
 
 #include <mapnik/sparsehash/internal/sparseconfig.h>
-#include <stdlib.h> // for malloc/realloc/free
-#include <stddef.h> // for ptrdiff_t
-#include <new>      // for placement new
+#include <stdlib.h>           // for malloc/realloc/free
+#include <stddef.h>           // for ptrdiff_t
+#include <new>                // for placement new
 
 _START_GOOGLE_NAMESPACE_
 
 template<class T>
-class libc_allocator_with_realloc
-{
-  public:
-    typedef T value_type;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
+class libc_allocator_with_realloc {
+ public:
+  typedef T value_type;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
 
-    typedef T* pointer;
-    typedef const T* const_pointer;
-    typedef T& reference;
-    typedef const T& const_reference;
+  typedef T* pointer;
+  typedef const T* const_pointer;
+  typedef T& reference;
+  typedef const T& const_reference;
 
-    libc_allocator_with_realloc() {}
-    libc_allocator_with_realloc(const libc_allocator_with_realloc&) {}
-    ~libc_allocator_with_realloc() {}
+  libc_allocator_with_realloc() {}
+  libc_allocator_with_realloc(const libc_allocator_with_realloc&) {}
+  ~libc_allocator_with_realloc() {}
 
-    pointer address(reference r) const { return &r; }
-    const_pointer address(const_reference r) const { return &r; }
+  pointer address(reference r) const  { return &r; }
+  const_pointer address(const_reference r) const  { return &r; }
 
-    pointer allocate(size_type n, const_pointer = 0) { return static_cast<pointer>(malloc(n * sizeof(value_type))); }
-    void deallocate(pointer p, size_type) { free(p); }
-    pointer reallocate(pointer p, size_type n) { return static_cast<pointer>(realloc(p, n * sizeof(value_type))); }
+  pointer allocate(size_type n, const_pointer = 0) {
+    return static_cast<pointer>(malloc(n * sizeof(value_type)));
+  }
+  void deallocate(pointer p, size_type) {
+    free(p);
+  }
+  pointer reallocate(pointer p, size_type n) {
+    return static_cast<pointer>(realloc(p, n * sizeof(value_type)));
+  }
 
-    size_type max_size() const { return static_cast<size_type>(-1) / sizeof(value_type); }
+  size_type max_size() const  {
+    return static_cast<size_type>(-1) / sizeof(value_type);
+  }
 
-    void construct(pointer p, const value_type& val) { new (p) value_type(val); }
-    void destroy(pointer p) { p->~value_type(); }
+  void construct(pointer p, const value_type& val) {
+    new(p) value_type(val);
+  }
+  void destroy(pointer p) { p->~value_type(); }
 
-    template<class U>
-    libc_allocator_with_realloc(const libc_allocator_with_realloc<U>&)
-    {}
+  template <class U>
+  libc_allocator_with_realloc(const libc_allocator_with_realloc<U>&) {}
 
-    template<class U>
-    struct rebind
-    {
-        typedef libc_allocator_with_realloc<U> other;
-    };
+  template<class U>
+  struct rebind {
+    typedef libc_allocator_with_realloc<U> other;
+  };
 };
 
 // libc_allocator_with_realloc<void> specialization.
 template<>
-class libc_allocator_with_realloc<void>
-{
-  public:
-    typedef void value_type;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
-    typedef void* pointer;
-    typedef const void* const_pointer;
+class libc_allocator_with_realloc<void> {
+ public:
+  typedef void value_type;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
+  typedef void* pointer;
+  typedef const void* const_pointer;
 
-    template<class U>
-    struct rebind
-    {
-        typedef libc_allocator_with_realloc<U> other;
-    };
+  template<class U>
+  struct rebind {
+    typedef libc_allocator_with_realloc<U> other;
+  };
 };
 
 template<class T>
-inline bool operator==(const libc_allocator_with_realloc<T>&, const libc_allocator_with_realloc<T>&)
-{
-    return true;
+inline bool operator==(const libc_allocator_with_realloc<T>&,
+                       const libc_allocator_with_realloc<T>&) {
+  return true;
 }
 
 template<class T>
-inline bool operator!=(const libc_allocator_with_realloc<T>&, const libc_allocator_with_realloc<T>&)
-{
-    return false;
+inline bool operator!=(const libc_allocator_with_realloc<T>&,
+                       const libc_allocator_with_realloc<T>&) {
+  return false;
 }
 
 _END_GOOGLE_NAMESPACE_
 
-#endif // UTIL_GTL_LIBC_ALLOCATOR_WITH_REALLOC_H_
+#endif  // UTIL_GTL_LIBC_ALLOCATOR_WITH_REALLOC_H_

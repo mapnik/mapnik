@@ -2,7 +2,7 @@ add_executable(geometry_to_wkb main.cpp)
 
 target_link_libraries(geometry_to_wkb PRIVATE mapnik::mapnik)
 
-set_target_properties(geometry_to_wkb PROPERTIES
+set_target_properties(geometry_to_wkb PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )

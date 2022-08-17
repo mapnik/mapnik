@@ -32,8 +32,7 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-extern "C"
-{
+extern "C" {
 #include <tiffio.h>
 #define RealTIFFOpen  TIFFClientOpen
 #define RealTIFFClose TIFFClose
