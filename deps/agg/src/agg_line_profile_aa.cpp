@@ -42,7 +42,7 @@ void line_profile_aa::width(double w)
 //---------------------------------------------------------------------
 line_profile_aa::value_type* line_profile_aa::profile(double w)
 {
-    m_subpixel_width = uround(w * subpixel_scale);
+    m_subpixel_width = uround(w * static_cast<double>(subpixel_scale));
     unsigned size = m_subpixel_width + subpixel_scale * 6;
     if(size > m_profile.size())
     {
@@ -56,8 +56,8 @@ line_profile_aa::value_type* line_profile_aa::profile(double w)
 void line_profile_aa::set(double center_width, double smoother_width)
 {
     double base_val = 1.0;
-    if(center_width == 0.0)   center_width = 1.0 / subpixel_scale;
-    if(smoother_width == 0.0) smoother_width = 1.0 / subpixel_scale;
+    if(center_width == 0.0)   center_width = 1.0 / static_cast<double>(subpixel_scale);
+    if(smoother_width == 0.0) smoother_width = 1.0 / static_cast<double>(subpixel_scale);
 
     double width = center_width + smoother_width;
     if(width < m_min_width)
@@ -70,15 +70,15 @@ void line_profile_aa::set(double center_width, double smoother_width)
 
     value_type* ch = profile(center_width + smoother_width);
 
-    unsigned subpixel_center_width = unsigned(center_width * subpixel_scale);
-    unsigned subpixel_smoother_width = unsigned(smoother_width * subpixel_scale);
+    unsigned subpixel_center_width = unsigned(center_width * static_cast<double>(subpixel_scale));
+    unsigned subpixel_smoother_width = unsigned(smoother_width * static_cast<double>(subpixel_scale));
 
-    value_type* ch_center   = ch + subpixel_scale*2;
+    value_type* ch_center   = ch + subpixel_scale * 2;
     value_type* ch_smoother = ch_center + subpixel_center_width;
 
     unsigned i;
 
-    unsigned val = m_gamma[unsigned(base_val * aa_mask)];
+    unsigned val = m_gamma[unsigned(base_val * static_cast<double>(aa_mask))];
     ch = ch_center;
     for(i = 0; i < subpixel_center_width; i++)
     {
@@ -90,7 +90,7 @@ void line_profile_aa::set(double center_width, double smoother_width)
         *ch_smoother++ =
             m_gamma[unsigned((base_val -
                               base_val *
-                              (double(i) / subpixel_smoother_width)) * aa_mask)];
+                              (double(i) / subpixel_smoother_width)) * static_cast<double>(aa_mask))];
     }
 
     unsigned n_smoother = profile_size() -
@@ -113,4 +113,3 @@ void line_profile_aa::set(double center_width, double smoother_width)
 
 
 }
-

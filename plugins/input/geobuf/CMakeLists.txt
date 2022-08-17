@@ -8,4 +8,3 @@ target_link_libraries(input-geobuf ${_plugin_visibility}
     mapnik::mapnik
     mapnik::datasource-base
 )
-

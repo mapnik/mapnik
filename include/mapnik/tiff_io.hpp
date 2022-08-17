@@ -207,12 +207,12 @@ struct tag_setter
         TIFFSetField(output_, TIFFTAG_SAMPLESPERPIXEL, 4);
         if (data.get_premultiplied())
         {
-            uint16 extras[] = {EXTRASAMPLE_ASSOCALPHA};
+            std::uint16_t extras[] = {EXTRASAMPLE_ASSOCALPHA};
             TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
         }
         else
         {
-            uint16 extras[] = {EXTRASAMPLE_UNASSALPHA};
+            std::uint16_t extras[] = {EXTRASAMPLE_UNASSALPHA};
             TIFFSetField(output_, TIFFTAG_EXTRASAMPLES, 1, extras);
         }
         if (config_.compression == COMPRESSION_DEFLATE || config_.compression == COMPRESSION_ADOBE_DEFLATE ||

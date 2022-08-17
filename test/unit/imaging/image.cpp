@@ -381,7 +381,10 @@ TEST_CASE("image class")
         // swap empty <-> non-empty
         CHECK_NOTHROW(im.swap(im3));
         CHECK(im3.data() == nullptr);
-        CHECKED_IF(im.data() != nullptr) { CHECK(im(0, 0) == blue); }
+        CHECKED_IF(im.data() != nullptr)
+        {
+            CHECK(im(0, 0) == blue);
+        }
     }
 
 } // END TEST CASE

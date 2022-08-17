@@ -11,4 +11,3 @@ target_link_libraries(input-gdal ${_plugin_visibility}
     mapnik::datasource-base
     ${GDAL_LIBRARIES}
 )
-

@@ -9,7 +9,17 @@ on:
       - "**"
 
 jobs:
+  checkSource:
+    name: Check Source Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - uses: pre-commit/action@v3.0.0
+
   windows:
+    needs: checkSource
     name: Windows memory mapped
     uses: ./.github/workflows/windows.yml
     with:
@@ -20,8 +30,9 @@ jobs:
       BUILD_SHARED: true
     secrets:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
-  
+
   windows-mmf-off:
+    needs: checkSource
     name: Windows file based
     uses: ./.github/workflows/windows.yml
     with:
@@ -46,6 +57,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   ubuntu:
+    needs: checkSource
     name: Linux memory mapped
     uses: ./.github/workflows/ubuntu.yml
     with:
@@ -58,6 +70,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   ubuntu-mmf-off:
+    needs: checkSource
     name: Linux file based
     uses: ./.github/workflows/ubuntu.yml
     with:
@@ -82,6 +95,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   macos:
+    needs: checkSource
     name: MacOS memory mapped
     uses: ./.github/workflows/macos.yml
     with:
@@ -94,6 +108,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   macos-mmf-off:
+    needs: checkSource
     name: MacOS file based
     uses: ./.github/workflows/macos.yml
     with:
