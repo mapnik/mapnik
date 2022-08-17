@@ -29,7 +29,10 @@ class MAPNIK_DECL datasource_plugin
     };
 
 #define DATASOURCE_PLUGIN_IMPL(classname, pluginclassname)                                                             \
-    const char* classname::name() const { return kName; }                                                              \
+    const char* classname::name() const                                                                                \
+    {                                                                                                                  \
+        return kName;                                                                                                  \
+    }                                                                                                                  \
     mapnik::datasource_ptr classname::create(mapnik::parameters const& params) const                                   \
     {                                                                                                                  \
         return std::make_shared<pluginclassname>(params);                                                              \

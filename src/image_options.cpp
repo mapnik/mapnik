@@ -30,7 +30,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 #if defined(HAVE_PNG)
-extern "C" {
+extern "C"
+{
 #include <png.h>
 }
 #endif // HAVE_PNG

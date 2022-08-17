@@ -36,7 +36,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 // zlib
 #include <zlib.h> // for Z_DEFAULT_COMPRESSION
 
-extern "C" {
+extern "C"
+{
 #include <png.h>
 }
 #include <set>

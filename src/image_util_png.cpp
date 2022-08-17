@@ -21,7 +21,8 @@
  *****************************************************************************/
 
 #if defined(HAVE_PNG)
-extern "C" {
+extern "C"
+{
 #include <png.h>
 }
 #ifndef PNG_FAST_FILTERS // libpng < 1.6

@@ -16,8 +16,7 @@
 #include "agg_vpgen_clip_polygon.h"
 #include "agg_clip_liang_barsky.h"
 
-namespace agg
-{
+namespace agg {
 
 //------------------------------------------------------------------------
 // Determine the clipping code of the vertex according to the
@@ -39,22 +38,28 @@ namespace agg
 //
 unsigned vpgen_clip_polygon::clipping_flags(double x, double y)
 {
-    if(x < m_clip_box.x1)
+    if (x < m_clip_box.x1)
     {
-        if(y > m_clip_box.y2) return 6;
-        if(y < m_clip_box.y1) return 12;
+        if (y > m_clip_box.y2)
+            return 6;
+        if (y < m_clip_box.y1)
+            return 12;
         return 4;
     }
 
-    if(x > m_clip_box.x2)
+    if (x > m_clip_box.x2)
     {
-        if(y > m_clip_box.y2) return 3;
-        if(y < m_clip_box.y1) return 9;
+        if (y > m_clip_box.y2)
+            return 3;
+        if (y < m_clip_box.y1)
+            return 9;
         return 1;
     }
 
-    if(y > m_clip_box.y2) return 2;
-    if(y < m_clip_box.y1) return 8;
+    if (y > m_clip_box.y2)
+        return 2;
+    if (y < m_clip_box.y1)
+        return 8;
 
     return 0;
 }
@@ -72,17 +77,16 @@ void vpgen_clip_polygon::move_to(double x, double y)
     m_vertex = 0;
     m_num_vertices = 0;
     m_clip_flags = clipping_flags(x, y);
-    if(m_clip_flags == 0)
+    if (m_clip_flags == 0)
     {
         m_x[0] = x;
         m_y[0] = y;
         m_num_vertices = 1;
     }
-    m_x1  = x;
-    m_y1  = y;
+    m_x1 = x;
+    m_y1 = y;
     m_cmd = path_cmd_move_to;
 }
-
 
 //----------------------------------------------------------------------------
 void vpgen_clip_polygon::line_to(double x, double y)
@@ -91,9 +95,9 @@ void vpgen_clip_polygon::line_to(double x, double y)
     m_num_vertices = 0;
     unsigned flags = clipping_flags(x, y);
 
-    if(m_clip_flags == flags)
+    if (m_clip_flags == flags)
     {
-        if(flags == 0)
+        if (flags == 0)
         {
             m_x[0] = x;
             m_y[0] = y;
@@ -102,10 +106,7 @@ void vpgen_clip_polygon::line_to(double x, double y)
     }
     else
     {
-        m_num_vertices = clip_liang_barsky(m_x1, m_y1,
-                                           x, y,
-                                           m_clip_box,
-                                           m_x, m_y);
+        m_num_vertices = clip_liang_barsky(m_x1, m_y1, x, y, m_clip_box, m_x, m_y);
     }
 
     m_clip_flags = flags;
@@ -113,11 +114,10 @@ void vpgen_clip_polygon::line_to(double x, double y)
     m_y1 = y;
 }
 
-
 //----------------------------------------------------------------------------
 unsigned vpgen_clip_polygon::vertex(double* x, double* y)
 {
-    if(m_vertex < m_num_vertices)
+    if (m_vertex < m_num_vertices)
     {
         *x = m_x[m_vertex];
         *y = m_y[m_vertex];
@@ -129,5 +129,4 @@ unsigned vpgen_clip_polygon::vertex(double* x, double* y)
     return path_cmd_stop;
 }
 
-
-}
+} // namespace agg

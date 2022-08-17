@@ -25,7 +25,8 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/util/char_array_buffer.hpp>
 
-extern "C" {
+extern "C"
+{
 #include <png.h>
 }
 
