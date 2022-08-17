@@ -27,8 +27,7 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 
-extern "C"
-{
+extern "C" {
 #include FT_GLYPH_H
 #include FT_TRUETYPE_TABLES_H
 }

@@ -152,10 +152,7 @@ class hextree : private util::noncopyable
 
     ~hextree() {}
 
-    void setMaxColors(unsigned max_colors)
-    {
-        max_colors_ = max_colors;
-    }
+    void setMaxColors(unsigned max_colors) { max_colors_ = max_colors; }
 
     void setGamma(double g)
     {
@@ -166,15 +163,9 @@ class hextree : private util::noncopyable
         }
     }
 
-    void setTransMode(unsigned t)
-    {
-        trans_mode_ = t;
-    }
+    void setTransMode(unsigned t) { trans_mode_ = t; }
 
-    transparency_mode_t getTransMode() const
-    {
-        return trans_mode_;
-    }
+    transparency_mode_t getTransMode() const { return trans_mode_; }
 
     // process alpha value based on trans_mode_
     std::uint8_t preprocessAlpha(std::uint8_t a) const

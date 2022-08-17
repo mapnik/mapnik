@@ -23,8 +23,7 @@
 #ifndef POSTGIS_RESULTSET_HPP
 #define POSTGIS_RESULTSET_HPP
 
-extern "C"
-{
+extern "C" {
 #include "libpq-fe.h"
 }
 

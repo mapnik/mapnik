@@ -23,61 +23,72 @@
 #include "agg_vertex_sequence.h"
 #include <mapnik/config.hpp>
 
-namespace agg {
-
-//---------------------------------------------------------------vcgen_dash
-//
-// See Implementation agg_vcgen_dash.cpp
-//
-class MAPNIK_DECL vcgen_dash
+namespace agg
 {
-    enum max_dashes_e { max_dashes = 32 };
 
-    enum status_e { initial, ready, polyline, stop };
+    //---------------------------------------------------------------vcgen_dash
+    //
+    // See Implementation agg_vcgen_dash.cpp
+    //
+    class MAPNIK_DECL vcgen_dash
+    {
+        enum max_dashes_e
+        {
+            max_dashes = 32
+        };
 
-  public:
-    typedef vertex_sequence<vertex_dist, 6> vertex_storage;
+        enum status_e
+        {
+            initial,
+            ready,
+            polyline,
+            stop
+        };
 
-    vcgen_dash();
+    public:
+        typedef vertex_sequence<vertex_dist, 6> vertex_storage;
 
-    void remove_all_dashes();
-    void add_dash(double dash_len, double gap_len);
-    void dash_start(double ds);
+        vcgen_dash();
 
-    void shorten(double s) { m_shorten = s; }
-    double shorten() const { return m_shorten; }
+        void remove_all_dashes();
+        void add_dash(double dash_len, double gap_len);
+        void dash_start(double ds);
 
-    // Vertex Generator Interface
-    void remove_all();
-    void add_vertex(double x, double y, unsigned cmd);
+        void shorten(double s) { m_shorten = s; }
+        double shorten() const { return m_shorten; }
 
-    // Vertex Source Interface
-    void rewind(unsigned path_id);
-    unsigned vertex(double* x, double* y);
+        // Vertex Generator Interface
+        void remove_all();
+        void add_vertex(double x, double y, unsigned cmd);
 
-  private:
-    vcgen_dash(const vcgen_dash&);
-    const vcgen_dash& operator=(const vcgen_dash&);
+        // Vertex Source Interface
+        void     rewind(unsigned path_id);
+        unsigned vertex(double* x, double* y);
 
-    void calc_dash_start(double ds);
+    private:
+        vcgen_dash(const vcgen_dash&);
+        const vcgen_dash& operator = (const vcgen_dash&);
 
-    double m_dashes[max_dashes];
-    double m_total_dash_len;
-    unsigned m_num_dashes;
-    double m_dash_start;
-    double m_shorten;
-    double m_curr_dash_start;
-    unsigned m_curr_dash;
-    double m_curr_rest;
-    const vertex_dist* m_v1;
-    const vertex_dist* m_v2;
+        void calc_dash_start(double ds);
 
-    vertex_storage m_src_vertices;
-    unsigned m_closed;
-    status_e m_status;
-    unsigned m_src_vertex;
-};
+        double             m_dashes[max_dashes];
+        double             m_total_dash_len;
+        unsigned           m_num_dashes;
+        double             m_dash_start;
+        double             m_shorten;
+        double             m_curr_dash_start;
+        unsigned           m_curr_dash;
+        double             m_curr_rest;
+        const vertex_dist* m_v1;
+        const vertex_dist* m_v2;
 
-} // namespace agg
+        vertex_storage m_src_vertices;
+        unsigned       m_closed;
+        status_e       m_status;
+        unsigned       m_src_vertex;
+    };
+
+
+}
 
 #endif

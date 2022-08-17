@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -17,48 +17,49 @@
 
 #include "agg_math.h"
 
-namespace agg {
-template<class VertexSource>
-double path_length(VertexSource& vs, unsigned path_id = 0)
+namespace agg
 {
-    double len = 0.0;
-    double start_x = 0.0;
-    double start_y = 0.0;
-    double x1 = 0.0;
-    double y1 = 0.0;
-    double x2 = 0.0;
-    double y2 = 0.0;
-    bool first = true;
-
-    unsigned cmd;
-    vs.rewind(path_id);
-    while (!is_stop(cmd = vs.vertex(&x2, &y2)))
+    template<class VertexSource> 
+    double path_length(VertexSource& vs, unsigned path_id = 0)
     {
-        if (is_vertex(cmd))
+        double len = 0.0;
+        double start_x = 0.0;
+        double start_y = 0.0;
+        double x1 = 0.0;
+        double y1 = 0.0;
+        double x2 = 0.0;
+        double y2 = 0.0;
+        bool first = true;
+
+        unsigned cmd;
+        vs.rewind(path_id);
+        while(!is_stop(cmd = vs.vertex(&x2, &y2)))
         {
-            if (first || is_move_to(cmd))
+            if(is_vertex(cmd))
             {
-                start_x = x2;
-                start_y = y2;
+                if(first || is_move_to(cmd))
+                {
+                    start_x = x2;
+                    start_y = y2;
+                }
+                else
+                {
+                    len += calc_distance(x1, y1, x2, y2);
+                }
+                x1 = x2;
+                y1 = y2;
+                first = false;
             }
             else
             {
-                len += calc_distance(x1, y1, x2, y2);
-            }
-            x1 = x2;
-            y1 = y2;
-            first = false;
-        }
-        else
-        {
-            if (is_close(cmd) && !first)
-            {
-                len += calc_distance(x1, y1, start_x, start_y);
+                if(is_close(cmd) && !first)
+                {
+                    len += calc_distance(x1, y1, start_x, start_y);
+                }
             }
         }
+        return len;
     }
-    return len;
 }
-} // namespace agg
 
 #endif

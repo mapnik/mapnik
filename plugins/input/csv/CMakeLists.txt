@@ -8,8 +8,8 @@ target_sources(input-csv ${_plugin_visibility}
     csv_utils.cpp
 )
 target_link_libraries(input-csv ${_plugin_visibility}
-    mapnik::mapnik
-    mapnik::wkt
+    mapnik::mapnik 
+    mapnik::wkt 
     mapnik::json
     mapnik::datasource-base
 )

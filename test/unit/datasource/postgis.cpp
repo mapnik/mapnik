@@ -343,10 +343,7 @@ TEST_CASE("postgis")
             REQUIRE(ds != nullptr);
             auto featureset = all_features(ds);
             auto feature = featureset->next();
-            CHECKED_IF(feature != nullptr)
-            {
-                CHECK(feature->get("email").to_string() == "fake@mail.ru");
-            }
+            CHECKED_IF(feature != nullptr) { CHECK(feature->get("email").to_string() == "fake@mail.ru"); }
         }
 
         SECTION("Postgis interpolates !@uservar! tokens in query")

@@ -15,18 +15,21 @@
 
 #include "agg_vcgen_bspline.h"
 
-namespace agg {
+namespace agg
+{
 
 //------------------------------------------------------------------------
-vcgen_bspline::vcgen_bspline()
-    : m_src_vertices()
-    , m_spline_x()
-    , m_spline_y()
-    , m_interpolation_step(1.0 / 50.0)
-    , m_closed(0)
-    , m_status(initial)
-    , m_src_vertex(0)
-{}
+vcgen_bspline::vcgen_bspline() :
+    m_src_vertices(),
+    m_spline_x(),
+    m_spline_y(),
+    m_interpolation_step(1.0/50.0),
+    m_closed(0),
+    m_status(initial),
+    m_src_vertex(0)
+{
+}
+
 
 //------------------------------------------------------------------------
 void vcgen_bspline::remove_all()
@@ -37,17 +40,18 @@ void vcgen_bspline::remove_all()
     m_src_vertex = 0;
 }
 
+
 //------------------------------------------------------------------------
 void vcgen_bspline::add_vertex(double x, double y, unsigned cmd)
 {
     m_status = initial;
-    if (is_move_to(cmd))
+    if(is_move_to(cmd))
     {
         m_src_vertices.modify_last(point_d(x, y));
     }
     else
     {
-        if (is_vertex(cmd))
+        if(is_vertex(cmd))
         {
             m_src_vertices.add(point_d(x, y));
         }
@@ -58,15 +62,16 @@ void vcgen_bspline::add_vertex(double x, double y, unsigned cmd)
     }
 }
 
+
 //------------------------------------------------------------------------
 void vcgen_bspline::rewind(unsigned)
 {
     m_cur_abscissa = 0.0;
     m_max_abscissa = 0.0;
     m_src_vertex = 0;
-    if (m_status == initial && m_src_vertices.size() > 2)
+    if(m_status == initial && m_src_vertices.size() > 2)
     {
-        if (m_closed)
+        if(m_closed)
         {
             m_spline_x.init(m_src_vertices.size() + 8);
             m_spline_y.init(m_src_vertices.size() + 8);
@@ -85,7 +90,7 @@ void vcgen_bspline::rewind(unsigned)
             m_spline_y.init(m_src_vertices.size());
         }
         unsigned i;
-        for (i = 0; i < m_src_vertices.size(); i++)
+        for(i = 0; i < m_src_vertices.size(); i++)
         {
             double x = m_closed ? i + 4 : i;
             m_spline_x.add_point(x, m_src_vertices[i].x);
@@ -93,7 +98,7 @@ void vcgen_bspline::rewind(unsigned)
         }
         m_cur_abscissa = 0.0;
         m_max_abscissa = m_src_vertices.size() - 1;
-        if (m_closed)
+        if(m_closed)
         {
             m_cur_abscissa = 4.0;
             m_max_abscissa += 5.0;
@@ -112,73 +117,78 @@ void vcgen_bspline::rewind(unsigned)
     m_status = ready;
 }
 
+
+
+
+
+
 //------------------------------------------------------------------------
 unsigned vcgen_bspline::vertex(double* x, double* y)
 {
     unsigned cmd = path_cmd_line_to;
-    while (!is_stop(cmd))
+    while(!is_stop(cmd))
     {
-        switch (m_status)
+        switch(m_status)
         {
-            case initial:
-                rewind(0);
+        case initial:
+            rewind(0);
 
-            case ready:
-                if (m_src_vertices.size() < 2)
-                {
-                    cmd = path_cmd_stop;
-                    break;
-                }
+        case ready:
+            if(m_src_vertices.size() < 2)
+            {
+                cmd = path_cmd_stop;
+                break;
+            }
 
-                if (m_src_vertices.size() == 2)
-                {
-                    *x = m_src_vertices[m_src_vertex].x;
-                    *y = m_src_vertices[m_src_vertex].y;
-                    m_src_vertex++;
-                    if (m_src_vertex == 1)
-                        return path_cmd_move_to;
-                    if (m_src_vertex == 2)
-                        return path_cmd_line_to;
-                    cmd = path_cmd_stop;
-                    break;
-                }
-
-                cmd = path_cmd_move_to;
-                m_status = polygon;
-                m_src_vertex = 0;
-
-            case polygon:
-                if (m_cur_abscissa >= m_max_abscissa)
-                {
-                    if (m_closed)
-                    {
-                        m_status = end_poly;
-                        break;
-                    }
-                    else
-                    {
-                        *x = m_src_vertices[m_src_vertices.size() - 1].x;
-                        *y = m_src_vertices[m_src_vertices.size() - 1].y;
-                        m_status = end_poly;
-                        return path_cmd_line_to;
-                    }
-                }
-
-                *x = m_spline_x.get_stateful(m_cur_abscissa);
-                *y = m_spline_y.get_stateful(m_cur_abscissa);
+            if(m_src_vertices.size() == 2)
+            {
+                *x = m_src_vertices[m_src_vertex].x;
+                *y = m_src_vertices[m_src_vertex].y;
                 m_src_vertex++;
-                m_cur_abscissa += m_interpolation_step;
-                return (m_src_vertex == 1) ? path_cmd_move_to : path_cmd_line_to;
+                if(m_src_vertex == 1) return path_cmd_move_to;
+                if(m_src_vertex == 2) return path_cmd_line_to;
+                cmd = path_cmd_stop;
+                break;
+            }
 
-            case end_poly:
-                m_status = stop;
-                return path_cmd_end_poly | m_closed;
+            cmd = path_cmd_move_to;
+            m_status = polygon;
+            m_src_vertex = 0;
 
-            case stop:
-                return path_cmd_stop;
+        case polygon:
+            if(m_cur_abscissa >= m_max_abscissa)
+            {
+                if(m_closed)
+                {
+                    m_status = end_poly;
+                    break;
+                }
+                else
+                {
+                    *x = m_src_vertices[m_src_vertices.size() - 1].x;
+                    *y = m_src_vertices[m_src_vertices.size() - 1].y;
+                    m_status = end_poly;
+                    return path_cmd_line_to;
+                }
+            }
+
+            *x = m_spline_x.get_stateful(m_cur_abscissa);
+            *y = m_spline_y.get_stateful(m_cur_abscissa);
+            m_src_vertex++;
+            m_cur_abscissa += m_interpolation_step;
+            return (m_src_vertex == 1) ? path_cmd_move_to : path_cmd_line_to;
+
+        case end_poly:
+            m_status = stop;
+            return path_cmd_end_poly | m_closed;
+
+        case stop:
+            return path_cmd_stop;
         }
     }
     return cmd;
 }
 
-} // namespace agg
+
+}
+

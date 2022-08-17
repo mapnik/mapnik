@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -14,12 +14,12 @@
 //----------------------------------------------------------------------------
 //
 // polyline clipping converter
-// There an optimized Liang-Basky algorithm is used.
+// There an optimized Liang-Basky algorithm is used. 
 // The algorithm doesn't optimize the degenerate edges, i.e. it will never
-// break a closed polyline into two or more ones, instead, there will be
+// break a closed polyline into two or more ones, instead, there will be 
 // degenerate edges coinciding with the respective clipping boundaries.
-// This is a sub-optimal solution, because that optimization would require
-// extra, rather expensive math while the rasterizer tolerates it quite well,
+// This is a sub-optimal solution, because that optimization would require 
+// extra, rather expensive math while the rasterizer tolerates it quite well, 
 // without any considerable overhead.
 //
 //----------------------------------------------------------------------------
@@ -30,31 +30,35 @@
 #include "agg_conv_adaptor_vpgen.h"
 #include "agg_vpgen_clip_polyline.h"
 
-namespace agg {
-
-//=======================================================conv_clip_polyline
-template<class VertexSource>
-struct conv_clip_polyline : public conv_adaptor_vpgen<VertexSource, vpgen_clip_polyline>
+namespace agg
 {
-    typedef conv_adaptor_vpgen<VertexSource, vpgen_clip_polyline> base_type;
 
-    conv_clip_polyline(VertexSource& vs)
-        : conv_adaptor_vpgen<VertexSource, vpgen_clip_polyline>(vs)
-    {}
+    //=======================================================conv_clip_polyline
+    template<class VertexSource> 
+    struct conv_clip_polyline : public conv_adaptor_vpgen<VertexSource, vpgen_clip_polyline>
+    {
+        typedef conv_adaptor_vpgen<VertexSource, vpgen_clip_polyline> base_type;
 
-    void clip_box(double _x1, double _y1, double _x2, double _y2) { base_type::vpgen().clip_box(_x1, _y1, _x2, _y2); }
+        conv_clip_polyline(VertexSource& vs) : 
+            conv_adaptor_vpgen<VertexSource, vpgen_clip_polyline>(vs) {}
 
-    double x1() const { return base_type::vpgen().x1(); }
-    double y1() const { return base_type::vpgen().y1(); }
-    double x2() const { return base_type::vpgen().x2(); }
-    double y2() const { return base_type::vpgen().y2(); }
-    unsigned type() const { return base_type::type(); }
+        void clip_box(double _x1, double _y1, double _x2, double _y2)
+        {
+            base_type::vpgen().clip_box(_x1, _y1, _x2, _y2);
+        }
 
-  private:
-    conv_clip_polyline(const conv_clip_polyline<VertexSource>&);
-    const conv_clip_polyline<VertexSource>& operator=(const conv_clip_polyline<VertexSource>&);
-};
+        double x1() const { return base_type::vpgen().x1(); }
+        double y1() const { return base_type::vpgen().y1(); }
+        double x2() const { return base_type::vpgen().x2(); }
+        double y2() const { return base_type::vpgen().y2(); }
+        unsigned type() const { return base_type::type(); }
 
-} // namespace agg
+    private:
+        conv_clip_polyline(const conv_clip_polyline<VertexSource>&);
+        const conv_clip_polyline<VertexSource>& 
+            operator = (const conv_clip_polyline<VertexSource>&);
+    };
+
+}
 
 #endif

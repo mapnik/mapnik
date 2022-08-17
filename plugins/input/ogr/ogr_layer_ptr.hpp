@@ -144,20 +144,11 @@ class ogr_layer_ptr
 #endif
     }
 
-    std::string const& layer_name() const
-    {
-        return layer_name_;
-    }
+    std::string const& layer_name() const { return layer_name_; }
 
-    OGRLayer* layer() const
-    {
-        return layer_;
-    }
+    OGRLayer* layer() const { return layer_; }
 
-    bool is_valid() const
-    {
-        return is_valid_;
-    }
+    bool is_valid() const { return is_valid_; }
 
   private:
 

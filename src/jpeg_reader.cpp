@@ -26,8 +26,7 @@
 #include <mapnik/color.hpp>
 
 // jpeg
-extern "C"
-{
+extern "C" {
 #include <jpeglib.h>
 }
 

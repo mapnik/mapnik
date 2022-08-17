@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software
-// is granted provided this copyright notice appears in all copies.
+// Permission to copy, use, modify, sell and distribute this software 
+// is granted provided this copyright notice appears in all copies. 
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -18,41 +18,39 @@
 
 #include "agg_basics.h"
 
-namespace agg {
-//----------------------------------------------------------span_converter
-template<class SpanGenerator, class SpanConverter>
-class span_converter
+namespace agg
 {
-  public:
-    typedef typename SpanGenerator::color_type color_type;
-
-    span_converter(SpanGenerator& span_gen, SpanConverter& span_cnv)
-        : m_span_gen(&span_gen)
-        , m_span_cnv(&span_cnv)
-    {}
-
-    void attach_generator(SpanGenerator& span_gen) { m_span_gen = &span_gen; }
-    void attach_converter(SpanConverter& span_cnv) { m_span_cnv = &span_cnv; }
-
-    //--------------------------------------------------------------------
-    void prepare()
+    //----------------------------------------------------------span_converter
+    template<class SpanGenerator, class SpanConverter> class span_converter
     {
-        m_span_gen->prepare();
-        m_span_cnv->prepare();
-    }
+    public:
+        typedef typename SpanGenerator::color_type color_type;
 
-    //--------------------------------------------------------------------
-    void generate(color_type* span, int x, int y, unsigned len)
-    {
-        m_span_gen->generate(span, x, y, len);
-        m_span_cnv->generate(span, x, y, len);
-    }
+        span_converter(SpanGenerator& span_gen, SpanConverter& span_cnv) : 
+            m_span_gen(&span_gen), m_span_cnv(&span_cnv) {}
 
-  private:
-    SpanGenerator* m_span_gen;
-    SpanConverter* m_span_cnv;
-};
+        void attach_generator(SpanGenerator& span_gen) { m_span_gen = &span_gen; }
+        void attach_converter(SpanConverter& span_cnv) { m_span_cnv = &span_cnv; }
 
-} // namespace agg
+        //--------------------------------------------------------------------
+        void prepare() 
+        { 
+            m_span_gen->prepare(); 
+            m_span_cnv->prepare();
+        }
+
+        //--------------------------------------------------------------------
+        void generate(color_type* span, int x, int y, unsigned len)
+        {
+            m_span_gen->generate(span, x, y, len);
+            m_span_cnv->generate(span, x, y, len);
+        }
+
+    private:
+        SpanGenerator* m_span_gen;
+        SpanConverter* m_span_cnv;
+    };
+
+}
 
 #endif

@@ -6,8 +6,9 @@ target_sources(input-gdal ${_plugin_visibility}
     gdal_featureset.cpp
 )
 target_include_directories(input-gdal ${_plugin_visibility} ${GDAL_INCLUDE_DIRS})
-target_link_libraries(input-gdal ${_plugin_visibility}
+target_link_libraries(input-gdal ${_plugin_visibility} 
     mapnik::mapnik
     mapnik::datasource-base
     ${GDAL_LIBRARIES}
 )
+

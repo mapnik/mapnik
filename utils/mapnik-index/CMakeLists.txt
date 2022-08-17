@@ -13,7 +13,7 @@ target_link_libraries(mapnik-index PRIVATE
     Boost::program_options
 )
 
-set_target_properties(mapnik-index PROPERTIES
+set_target_properties(mapnik-index PROPERTIES 
     RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )
