@@ -6,7 +6,7 @@ target_sources(input-postgis ${_plugin_visibility}
     postgis_featureset.cpp 
 )
 target_link_libraries(input-postgis ${_plugin_visibility}
-    mapnik::mapnik  
+    mapnik::mapnik
     mapnik::datasource-base
     PostgreSQL::PostgreSQL
 )

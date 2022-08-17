@@ -1,5 +1,5 @@
 function(format_dir dir)
-    file(GLOB_RECURSE sources 
+    file(GLOB_RECURSE sources
         "${dir}/*.cpp"
         "${dir}/*.hpp"
     )

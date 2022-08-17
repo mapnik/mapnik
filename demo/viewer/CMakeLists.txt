@@ -14,7 +14,7 @@ set(PROJECT_SOURCES
     styles_model.cpp
     forms/about.ui
     forms/info.ui
-    forms/layer_info.ui    
+    forms/layer_info.ui
     mapnik_viewer.qrc
 )
 
@@ -37,7 +37,7 @@ endif()
 
 set_target_properties(mapnik-viewer PROPERTIES
     AUTOUIC_SEARCH_PATHS forms
-    AUTORCC ON    
+    AUTORCC ON
     AUTOUIC ON
     AUTOMOC ON
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
@@ -46,16 +46,17 @@ set_target_properties(mapnik-viewer PROPERTIES
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )
 
-target_link_libraries(mapnik-viewer PRIVATE 
+target_link_libraries(mapnik-viewer PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     mapnik::agg
     mapnik::mapnik
 )
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini 
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini
 "[mapnik]
 plugins_dir=${PLUGINS_INSTALL_DIR}
-fonts/1/dir=${FONTS_INSTALL_DIR}"
+fonts/1/dir=${FONTS_INSTALL_DIR}
+fonts/size=1"
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)

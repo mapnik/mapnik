@@ -7,7 +7,7 @@ target_sources(input-pgraster ${_plugin_visibility}
     pgraster_wkb_reader.cpp
 )
 target_link_libraries(input-pgraster ${_plugin_visibility}
-    mapnik::mapnik  
+    mapnik::mapnik
     mapnik::datasource-base
     PostgreSQL::PostgreSQL
 )

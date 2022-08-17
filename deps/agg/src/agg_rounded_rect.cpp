@@ -152,7 +152,9 @@ unsigned rounded_rect::vertex(double* x, double* y)
         else return path_cmd_line_to;
 
     case 8:
-        cmd = path_cmd_end_poly | path_flags_close | path_flags_ccw;
+        cmd = path_cmd_end_poly
+            | static_cast<path_commands_e>(path_flags_close)
+            | static_cast<path_commands_e>(path_flags_ccw);
         m_status++;
         break;
     }
@@ -161,4 +163,3 @@ unsigned rounded_rect::vertex(double* x, double* y)
 
 
 }
-

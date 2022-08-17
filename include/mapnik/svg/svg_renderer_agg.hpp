@@ -73,10 +73,10 @@ class linear_gradient_from_segment
 {
   public:
     linear_gradient_from_segment(double x1, double y1, double x2, double y2)
-        : x1_(x1 * agg::gradient_subpixel_scale)
-        , y1_(y1 * agg::gradient_subpixel_scale)
-        , x2_(x2 * agg::gradient_subpixel_scale)
-        , y2_(y2 * agg::gradient_subpixel_scale)
+        : x1_(x1 * static_cast<double>(agg::gradient_subpixel_scale))
+        , y1_(y1 * static_cast<double>(agg::gradient_subpixel_scale))
+        , x2_(x2 * static_cast<double>(agg::gradient_subpixel_scale))
+        , y2_(y2 * static_cast<double>(agg::gradient_subpixel_scale))
     {
         double dx = x2_ - x1_;
         double dy = y2_ - y1_;
@@ -492,8 +492,14 @@ class renderer_agg : util::noncopyable
     }
 #endif
 
-    inline VertexSource& source() const { return source_; }
-    inline AttributeSource const& attributes() const { return attributes_; }
+    inline VertexSource& source() const
+    {
+        return source_;
+    }
+    inline AttributeSource const& attributes() const
+    {
+        return attributes_;
+    }
 
   private:
 

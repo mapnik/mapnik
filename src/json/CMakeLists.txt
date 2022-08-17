@@ -17,19 +17,19 @@ target_sources(json PRIVATE
 target_include_directories(json PRIVATE
     ${JPEG_INCLUDE_DIR}
     ${LIBXML2_INCLUDE_DIR}
-    ${MAPBOX_POLYLABEL_INCLUDE_DIRS} 
+    ${MAPBOX_POLYLABEL_INCLUDE_DIRS}
     ${MAPBOX_GEOMETRY_INCLUDE_DIRS}
     ${MAPBOX_VARIANT_INCLUDE_DIRS}
 )
 target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
 
-set_target_properties(json PROPERTIES 
+set_target_properties(json PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnikjson"
     PREFIX "lib"
     IMPORT_PREFIX "lib"
-    VERSION ${MAPNIK_VERSION} 
+    VERSION ${MAPNIK_VERSION}
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}
     LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"

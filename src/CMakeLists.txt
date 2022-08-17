@@ -65,7 +65,6 @@ if(MSVC)
     target_compile_options(mapnik PUBLIC "/bigobj" "/wd4068" "/wd4661" "/wd4910")
 endif()
 
-
 target_sources(mapnik PRIVATE
     cairo_io.cpp
     color_factory.cpp
@@ -132,7 +131,7 @@ target_sources(mapnik PRIVATE
     simplify.cpp
     symbolizer_enumerations.cpp
     symbolizer_keys.cpp
-    symbolizer.cpp   
+    symbolizer.cpp
     transform_expression_grammar_x3.cpp
     transform_expression.cpp
     twkb.cpp
@@ -145,7 +144,7 @@ target_sources(mapnik PRIVATE
     wkb.cpp
     xml_tree.cpp
 )
-target_sources(mapnik PRIVATE 
+target_sources(mapnik PRIVATE
     ../deps/agg/src/agg_arc.cpp
     ../deps/agg/src/agg_arrowhead.cpp
     ../deps/agg/src/agg_bezier_arc.cpp
@@ -189,7 +188,7 @@ target_sources(mapnik PRIVATE
     agg/process_text_symbolizer.cpp
 )
 
-target_sources(mapnik PRIVATE     
+target_sources(mapnik PRIVATE
     css/css_color_grammar_x3.cpp
     css/css_grammar_x3.cpp
 )
@@ -247,12 +246,12 @@ target_sources(mapnik PRIVATE
     text/formatting/list.cpp
     text/formatting/registry.cpp
     text/formatting/text.cpp
-    
+
     text/placements/base.cpp
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/registry.cpp
-    text/placements/simple.cpp    
+    text/placements/simple.cpp
 )
 
 target_sources(mapnik PRIVATE
@@ -302,7 +301,7 @@ endif()
 if(USE_GRID_RENDERER)
     target_sources(mapnik PRIVATE
         grid/grid_renderer.cpp
-        grid/grid.cpp   
+        grid/grid.cpp
         grid/process_building_symbolizer.cpp
         grid/process_group_symbolizer.cpp
         grid/process_line_pattern_symbolizer.cpp
