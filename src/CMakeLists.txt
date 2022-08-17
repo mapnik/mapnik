@@ -7,7 +7,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 target_link_libraries(mapnik PUBLIC mapnik::core mapnik::datasource-base)
-target_link_libraries(mapnik PRIVATE 
+target_link_libraries(mapnik PRIVATE
     mapnik::agg
     # expr: if(BUILD_SHARED_PLUGINS == OFF && <target> is build) then add link target
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-csv>>:input-csv>
@@ -42,7 +42,7 @@ if(NOT BUILD_SHARED_PLUGINS)
     target_include_directories(mapnik PRIVATE "${PROJECT_SOURCE_DIR}/plugins")
 endif()
 
-set_target_properties(mapnik PROPERTIES 
+set_target_properties(mapnik PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnik"
@@ -132,7 +132,7 @@ target_sources(mapnik PRIVATE
     simplify.cpp
     symbolizer_enumerations.cpp
     symbolizer_keys.cpp
-    symbolizer.cpp   
+    symbolizer.cpp
     transform_expression_grammar_x3.cpp
     transform_expression.cpp
     twkb.cpp
@@ -145,7 +145,7 @@ target_sources(mapnik PRIVATE
     wkb.cpp
     xml_tree.cpp
 )
-target_sources(mapnik PRIVATE 
+target_sources(mapnik PRIVATE
     ../deps/agg/src/agg_arc.cpp
     ../deps/agg/src/agg_arrowhead.cpp
     ../deps/agg/src/agg_bezier_arc.cpp
@@ -189,7 +189,7 @@ target_sources(mapnik PRIVATE
     agg/process_text_symbolizer.cpp
 )
 
-target_sources(mapnik PRIVATE     
+target_sources(mapnik PRIVATE
     css/css_color_grammar_x3.cpp
     css/css_grammar_x3.cpp
 )
@@ -247,12 +247,12 @@ target_sources(mapnik PRIVATE
     text/formatting/list.cpp
     text/formatting/registry.cpp
     text/formatting/text.cpp
-    
+
     text/placements/base.cpp
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/registry.cpp
-    text/placements/simple.cpp    
+    text/placements/simple.cpp
 )
 
 target_sources(mapnik PRIVATE
@@ -293,8 +293,8 @@ if(USE_TIFF)
 endif()
 
 if(USE_WEBP)
-    target_sources(mapnik PRIVATE 
-        webp_reader.cpp 
+    target_sources(mapnik PRIVATE
+        webp_reader.cpp
         webp_io.cpp
     )
 endif()
@@ -302,7 +302,7 @@ endif()
 if(USE_GRID_RENDERER)
     target_sources(mapnik PRIVATE
         grid/grid_renderer.cpp
-        grid/grid.cpp   
+        grid/grid.cpp
         grid/process_building_symbolizer.cpp
         grid/process_group_symbolizer.cpp
         grid/process_line_pattern_symbolizer.cpp

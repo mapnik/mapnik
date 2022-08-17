@@ -34,7 +34,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // freetype2
-extern "C" {
+extern "C"
+{
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H

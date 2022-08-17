@@ -31,7 +31,8 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-extern "C" {
+extern "C"
+{
 #include <webp/encode.h>
 }
 MAPNIK_DISABLE_WARNING_POP

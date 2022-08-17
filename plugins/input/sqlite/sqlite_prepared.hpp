@@ -39,7 +39,8 @@
 #include "sqlite_connection.hpp"
 
 // sqlite
-extern "C" {
+extern "C"
+{
 #include <sqlite3.h>
 }
 
