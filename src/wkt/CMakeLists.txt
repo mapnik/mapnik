@@ -1,4 +1,4 @@
-target_sources(wkt PRIVATE 
+target_sources(wkt PRIVATE
     geometry_to_wkt.cpp
     mapnik_wkt_generator_grammar.cpp
     wkt_factory.cpp

@@ -6,7 +6,7 @@ target_sources(input-sqlite ${_plugin_visibility}
     sqlite_featureset.cpp
 )
 target_link_libraries(input-sqlite ${_plugin_visibility}
-    mapnik::mapnik 
+    mapnik::mapnik
     mapnik::datasource-base
     SQLite::SQLite3
 )

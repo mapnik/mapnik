@@ -13,7 +13,7 @@ endif()
 
 macro(add_plugin_target plugin_target output_name)
     add_library(${plugin_target} ${_plugin_linkage})
-    set_target_properties(${plugin_target} PROPERTIES 
+    set_target_properties(${plugin_target} PROPERTIES
         OUTPUT_NAME "${output_name}"
         POSITION_INDEPENDENT_CODE ${_plugin_fpic}
         PREFIX "${_plugin_prefix}"
