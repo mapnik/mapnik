@@ -123,7 +123,7 @@ endif()
 set(PLUGINS_INSTALL_DIR ${DEFAULT_PLUGINS_INSTALL_DIR} CACHE STRING "installs the plugins in the specified directory")
 message(STATUS "Installing plugins to ${PLUGINS_INSTALL_DIR}")
 
-set(FONTS_INSTALL_DIR ${MAPNIK_BIN_DIR}/fonts CACHE STRING "installs the fonts in the specified directory")
+set(FONTS_INSTALL_DIR ${MAPNIK_LIB_DIR}/mapnik/fonts CACHE STRING "installs the fonts in the specified directory")
 message(STATUS "Installing fonts to ${FONTS_INSTALL_DIR}")
 
 set(MAPNIK_COMPILE_DEFS "")
@@ -423,7 +423,8 @@ include(MapnikExportPkgConfig)
 install(DIRECTORY include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
 install(DIRECTORY deps/agg/include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
 install(DIRECTORY deps/mapnik DESTINATION "${MAPNIK_INCLUDE_DIR}")
-install(DIRECTORY fonts/ DESTINATION "${FONTS_INSTALL_DIR}" FILES_MATCHING PATTERN "*.py" EXCLUDE PATTERN "*")
+file(GLOB TTF_FONT_FILES "fonts/*/*/*.ttf")
+install(FILES ${TTF_FONT_FILES} DESTINATION "${FONTS_INSTALL_DIR}")
 
 if(NOT USE_EXTERNAL_MAPBOX_GEOMETRY)
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
