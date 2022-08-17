@@ -45,6 +45,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
   
   windows-static:
+    needs: checkSource
     name: Windows static
     uses: ./.github/workflows/windows.yml
     with:
@@ -83,6 +84,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   ubuntu-static:
+    needs: checkSource
     name: Linux static
     uses: ./.github/workflows/ubuntu.yml
     with:
@@ -121,6 +123,7 @@ jobs:
       NUGET_REGISTRY_PAT: ${{ secrets.VCPKG_CACHE_PAT }}
 
   macos-static:
+    needs: checkSource
     name: MacOS static
     uses: ./.github/workflows/macos.yml
     with:
