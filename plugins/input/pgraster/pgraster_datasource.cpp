@@ -56,7 +56,6 @@ DATASOURCE_PLUGIN_EXPORT(pgraster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(pgraster_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(pgraster_datasource_plugin);
 
-
 const std::string pgraster_datasource::RASTER_COLUMNS = "raster_columns";
 const std::string pgraster_datasource::RASTER_OVERVIEWS = "raster_overviews";
 const std::string pgraster_datasource::SPATIAL_REF_SYS = "spatial_ref_system";

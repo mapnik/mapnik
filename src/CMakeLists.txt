@@ -7,7 +7,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 target_link_libraries(mapnik PUBLIC mapnik::core mapnik::datasource-base)
-target_link_libraries(mapnik PRIVATE 
+target_link_libraries(mapnik PRIVATE
     mapnik::agg
     # expr: if(BUILD_SHARED_PLUGINS == OFF && <target> is build) then add link target
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-csv>>:input-csv>
@@ -42,7 +42,7 @@ if(NOT BUILD_SHARED_PLUGINS)
     target_include_directories(mapnik PRIVATE "${PROJECT_SOURCE_DIR}/plugins")
 endif()
 
-set_target_properties(mapnik PROPERTIES 
+set_target_properties(mapnik PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnik"
@@ -292,8 +292,8 @@ if(USE_TIFF)
 endif()
 
 if(USE_WEBP)
-    target_sources(mapnik PRIVATE 
-        webp_reader.cpp 
+    target_sources(mapnik PRIVATE
+        webp_reader.cpp
         webp_io.cpp
     )
 endif()
