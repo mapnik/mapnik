@@ -25,17 +25,12 @@ target_link_libraries(json PRIVATE mapnik::core ${ICUU_LIB})
 
 set_target_properties(json PROPERTIES
     POSITION_INDEPENDENT_CODE ON
-    DEBUG_POSTFIX "${MAPNIK_DEBUG_POSTFIX}"
     OUTPUT_NAME "mapnikjson"
     PREFIX "lib"
     IMPORT_PREFIX "lib"
     VERSION ${MAPNIK_VERSION}
     # see mapnik target for explanation
     SOVERSION ${MAPNIK_VERSION}
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
 )
 
 mapnik_install(json)

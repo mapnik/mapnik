@@ -10,9 +10,4 @@ target_link_libraries(shapeindex PRIVATE
     mapnik::mapnik
 )
 
-set_target_properties(shapeindex PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
-)
-
 mapnik_install_utility(shapeindex)
