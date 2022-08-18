@@ -33,11 +33,7 @@ function(mapnik_create_benchmark)
     target_include_directories(${TARGET_NAME} PRIVATE include)
     target_link_libraries(${TARGET_NAME} PRIVATE mapnik::agg mapnik::mapnik)
     set_target_properties(${TARGET_NAME} PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-        ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
         OUTPUT_NAME "${BENCHNAME}"
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
     )
 endfunction()
 

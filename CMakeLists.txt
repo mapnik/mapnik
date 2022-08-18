@@ -28,7 +28,6 @@ include(CTest)
 add_feature_info(BUILD_TESTING BUILD_TESTING "Adds tests")
 
 mapnik_option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) will be copied into CMAKE_INSTALL_PREFIX/MAPNIK_BIN_DIR." ON)
-
 mapnik_option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
 mapnik_option(BUILD_SHARED_PLUGINS "build dynamic plugins" ${BUILD_SHARED_LIBS}) # use BUILD_SHARED_LIBS as default option
 mapnik_option(BUILD_SHARED_CRT "(only windows with msvc) use msvc shared crt" ON)
@@ -94,18 +93,6 @@ mapnik_option(USE_GLIBC_WORKAROUND "see https://github.com/mapnik/mapnik/pull/37
 feature_summary(WHAT ENABLED_FEATURES DISABLED_FEATURES)
 feature_summary(FILENAME "${CMAKE_CURRENT_BINARY_DIR}/features.log" WHAT ENABLED_FEATURES DISABLED_FEATURES)
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
-message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
-# https://cmake.org/cmake/help/latest/prop_tgt/CXX_EXTENSIONS.html
-set(CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensions.") # Fallsback to -std=c++<ver> if off
-message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
-# https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD_REQUIRED.html#prop_tgt:CXX_STANDARD_REQUIRED
-set(CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
-
-# add debug postfix to the libraries
-set(MAPNIK_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
-message(STATUS "postfix for debug libraries: ${MAPNIK_DEBUG_POSTFIX}")
-
 include(GNUInstallDirs)
 # See for more details: https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html
 set(MAPNIK_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE STRING "Install directory for binaries")
@@ -130,7 +117,26 @@ set(MAPNIK_COMPILE_DEFS "")
 set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
+#############################
+#############################
 # Begin project configuration
+#############################
+#############################
+
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
+set(CMAKE_CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensions.") # Fallsback to -std=c++<ver> if off
+message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
+message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
+
+# add debug postfix to the libraries
+set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
+message(STATUS "postfix for debug libraries: ${CMAKE_DEBUG_POSTFIX}")
+
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib")
 
 # needs to be before the first call of find_boost.
 list(APPEND MAPNIK_COMPILE_DEFS BOOST_SPIRIT_X3_HIDE_CXX17_WARNING)

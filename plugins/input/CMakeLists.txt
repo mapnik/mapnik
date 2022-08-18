@@ -1,8 +1,6 @@
 set(_plugin_prefix "")
 set(_plugin_suffix ".input")
 set(_plugin_library_output "${MAPNIK_OUTPUT_DIR}/plugins/input")
-set(_plugin_runtime_output "${MAPNIK_OUTPUT_DIR}")
-set(_plugin_archive_output "${MAPNIK_OUTPUT_DIR}/lib")
 set(_plugin_fpic ON)
 set(_plugin_linkage MODULE)
 set(_plugin_visibility PRIVATE)
@@ -19,9 +17,6 @@ macro(add_plugin_target plugin_target output_name)
         PREFIX "${_plugin_prefix}"
         SUFFIX "${_plugin_suffix}"
         LIBRARY_OUTPUT_DIRECTORY "${_plugin_library_output}"
-        RUNTIME_OUTPUT_DIRECTORY "${_plugin_runtime_output}"
-        ARCHIVE_OUTPUT_DIRECTORY "${_plugin_archive_output}"
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>"
     )
     mapnik_install_plugin(${plugin_target})
 endmacro()
