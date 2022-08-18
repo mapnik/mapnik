@@ -2,11 +2,11 @@ name: Build and Test
 
 on:
   push:
+    branches:
+      - "master"
+  pull_request:
     branches-ignore:
       - "no-ci-*"
-  pull_request:
-    branches:
-      - "**"
 
 jobs:
   checkSource:
