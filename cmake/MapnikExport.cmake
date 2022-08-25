@@ -9,11 +9,26 @@ function(mapnik_export_cmake_config)
         COMPATIBILITY ExactVersion
     )
     get_property(MAPNIK_UTILITIES GLOBAL PROPERTY MAPNIK_UTILITIES)
-    list(JOIN MAPNIK_DEPENDENCIES "\n" MAPNIK_DEPENDENCIES)
+
+    # generate all find_dependency and pkg_config calls
+    set(mapnik_find_deps)
+    foreach(dep IN LISTS mapnik_deps)
+        set(ver_comment "# ${dep} used with version ${mapnik_${dep}_version}")
+        set(mapnik_find_deps "${mapnik_find_deps}\n${ver_comment}\n")
+        if(mapnik_${dep}_find_args)
+            list(REMOVE_DUPLICATES mapnik_${dep}_find_args)
+            list(JOIN mapnik_${dep}_find_args " " m_args_joined)
+            set(mapnik_find_deps "${mapnik_find_deps}find_dependency(${dep} ${m_args_joined})")
+        else()
+            list(JOIN mapnik_${dep}_pkg_args " " m_args_joined)
+            set(mapnik_find_deps "${mapnik_find_deps}pkg_check_modules(${dep} ${m_args_joined})")
+        endif()
+    endforeach()
+
     configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/mapnikConfig.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/mapnikConfig.cmake"
         INSTALL_DESTINATION ${MAPNIK_CMAKE_DIR}
-        PATH_VARS MAPNIK_INCLUDE_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR MAPNIK_DEPENDENCIES MAPNIK_UTILITIES
+        PATH_VARS MAPNIK_INCLUDE_DIR PLUGINS_INSTALL_DIR FONTS_INSTALL_DIR mapnik_find_deps MAPNIK_UTILITIES
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
     )
     install(

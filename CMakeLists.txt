@@ -148,7 +148,7 @@ else()
 endif()
 
 
-find_package(PkgConfig)
+mapnik_find_package(PkgConfig REQUIRED)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 
@@ -177,7 +177,7 @@ else()
     # It might be possible that in future version harfbuzz could only be found via pkg-config.
     # harfbuzz related discussion: https://github.com/harfbuzz/harfbuzz/issues/2653
     message(STATUS "harfbuzz not found via cmake. Searching via pkg-config...")
-    pkg_check_modules(harfbuzz REQUIRED IMPORTED_TARGET harfbuzz>=${HARFBUZZ_MIN_VERSION})
+    mapnik_pkg_check_modules(harfbuzz REQUIRED IMPORTED_TARGET harfbuzz>=${HARFBUZZ_MIN_VERSION})
     list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::harfbuzz)
 endif()
 
@@ -304,13 +304,13 @@ if(USE_TIFF)
 endif()
 
 if(USE_WEBP)
-    pkg_check_modules(WebP REQUIRED IMPORTED_TARGET libwebp)
+    mapnik_pkg_check_modules(WebP REQUIRED IMPORTED_TARGET libwebp)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_WEBP)
     list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::WebP)
 endif()
 
 if(USE_CAIRO)
-    pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
+    mapnik_pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_CAIRO)
     list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
 endif()
@@ -321,7 +321,7 @@ if(USE_PROJ)
     # currently the cmake files are not installed, when installing proj via apt-get. So search via pkg-config
     if(NOT PROJ_FOUND)
         message(STATUS "PROJ not found via FindPROJ. Searching via pkg-config...")
-        pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION})
+        mapnik_pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION})
         string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" _dummy "${PROJ_VERSION}")
         set(PROJ_VERSION_MAJOR "${CMAKE_MATCH_1}")
         set(PROJ_VERSION_MINOR "${CMAKE_MATCH_2}")
