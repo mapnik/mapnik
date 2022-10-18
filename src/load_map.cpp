@@ -594,10 +594,9 @@ void map_parser::parse_fontset(Map& map, xml_node const& node)
                 }
                 else
                 {
-                    // https://github.com/mapnik/mapnik/issues/1791
-                    MAPNIK_LOG_ERROR(fontset)
-                      << "warning: unable to find face-name '" << n.get_attr<std::string>("face-name", "")
-                      << "' in FontSet '" << fontset.get_name() << "'";
+                    MAPNIK_LOG_WARN(fontset)
+                        << "warning: unable to find face-name '" << n.get_attr<std::string>("face-name", "")
+                        << "' in FontSet '" << fontset.get_name() << "'";
                 }
             }
         }
