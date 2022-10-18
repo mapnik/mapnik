@@ -981,10 +981,11 @@ namespace agg
             {
                 join_path(a);
             }
-            else
-            {
-                line_to(x, y);
-            }
+            // We are adding an explicit line_to, even if we've already add the
+            // bezier arc to the current path. This is to prevent subsequent smooth
+            // bezier curves from accidentally assuming that the previous command
+            // was a bezier curve as well when calculating reflection points.
+            line_to(x, y);
         }
         else
         {
