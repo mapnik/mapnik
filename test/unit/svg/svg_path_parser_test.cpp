@@ -97,6 +97,7 @@ TEST_CASE("SVG path parser")
                                                                       std::make_tuple(450, 117.157, 4),
                                                                       std::make_tuple(382.843, 50, 4),
                                                                       std::make_tuple(300, 50, 4),
+								      std::make_tuple(300, 50, 2),
                                                                       std::make_tuple(300, 200, 79)};
         test_path_parser(str, expected);
     }
@@ -110,6 +111,7 @@ TEST_CASE("SVG path parser")
                                                                       std::make_tuple(192.157, 25, 4),
                                                                       std::make_tuple(125, 92.1573, 4),
                                                                       std::make_tuple(125, 175, 4),
+								      std::make_tuple(125, 175, 2),
                                                                       std::make_tuple(275, 175, 79)};
         test_path_parser(str, expected);
     }
@@ -123,21 +125,40 @@ TEST_CASE("SVG path parser")
                           "a25,100-30 0150-25l50-25";
 
         std::vector<std::tuple<double, double, unsigned>> expected = {
-          std::make_tuple(600, 350, 1),         std::make_tuple(650, 325, 2),
-          std::make_tuple(643.096, 311.193, 4), std::make_tuple(648.693, 294.404, 4),
-          std::make_tuple(662.5, 287.5, 4),     std::make_tuple(676.307, 280.596, 4),
-          std::make_tuple(693.096, 286.193, 4), std::make_tuple(700, 300, 4),
-          std::make_tuple(750, 275, 2),         std::make_tuple(734.991, 248.079, 4),
-          std::make_tuple(734.017, 220.66, 4),  std::make_tuple(747.825, 213.756, 4),
-          std::make_tuple(761.632, 206.852, 4), std::make_tuple(784.991, 223.079, 4),
-          std::make_tuple(800, 250, 4),         std::make_tuple(850, 225, 2),
-          std::make_tuple(827.153, 184.812, 4), std::make_tuple(819.825, 146.636, 4),
-          std::make_tuple(833.632, 139.733, 4), std::make_tuple(847.44, 132.829, 4),
-          std::make_tuple(877.153, 159.812, 4), std::make_tuple(900, 200, 4),
-          std::make_tuple(950, 175, 2),         std::make_tuple(919.382, 121.506, 4),
-          std::make_tuple(905.754, 72.5436, 4), std::make_tuple(919.561, 65.64, 4),
-          std::make_tuple(933.368, 58.7365, 4), std::make_tuple(969.382, 96.5057, 4),
-          std::make_tuple(1000, 150, 4),        std::make_tuple(1050, 125, 2)};
+	  std::make_tuple(600, 350, 1),
+	  std::make_tuple(650, 325, 2),
+	  std::make_tuple(643.096, 311.193, 4),
+	  std::make_tuple(648.693, 294.404, 4),
+	  std::make_tuple(662.5, 287.5, 4),
+	  std::make_tuple(676.307, 280.596, 4),
+	  std::make_tuple(693.096, 286.193, 4),
+	  std::make_tuple(700, 300, 4),
+	  std::make_tuple(700, 300, 2),
+	  std::make_tuple(750, 275, 2),
+	  std::make_tuple(734.991, 248.079, 4),
+	  std::make_tuple(734.017, 220.66, 4),
+	  std::make_tuple(747.825, 213.756, 4),
+	  std::make_tuple(761.632, 206.852, 4),
+	  std::make_tuple(784.991, 223.079, 4),
+	  std::make_tuple(800, 250, 4),
+	  std::make_tuple(800, 250, 2),
+	  std::make_tuple(850, 225, 2),
+	  std::make_tuple(827.153, 184.812, 4),
+	  std::make_tuple(819.825, 146.636, 4),
+	  std::make_tuple(833.632, 139.733, 4),
+	  std::make_tuple(847.44, 132.829, 4),
+	  std::make_tuple(877.153, 159.812, 4),
+	  std::make_tuple(900, 200, 4),
+	  std::make_tuple(900, 200, 2),
+	  std::make_tuple(950, 175, 2),
+	  std::make_tuple(919.382, 121.506, 4),
+	  std::make_tuple(905.754, 72.5436, 4),
+	  std::make_tuple(919.561, 65.64, 4),
+	  std::make_tuple(933.368, 58.7365, 4),
+	  std::make_tuple(969.382, 96.5057, 4),
+	  std::make_tuple(1000, 150, 4),
+	  std::make_tuple(1000, 150, 2),
+	  std::make_tuple(1050, 125, 2)};
         test_path_parser(str, expected);
     }
 
