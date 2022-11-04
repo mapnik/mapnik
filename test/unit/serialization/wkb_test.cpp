@@ -62,7 +62,6 @@ struct spatially_equal_visitor
     result_type operator()(mapnik::geometry::multi_line_string<double> const& lhs,
                            mapnik::geometry::multi_line_string<double> const& rhs) const
     {
-
         std::size_t size0 = lhs.size();
         std::size_t size1 = rhs.size();
         if (size0 != size1)
