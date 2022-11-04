@@ -51,7 +51,7 @@ std::string to_hex(const char* blob, std::size_t size)
     std::memset(hex, 0, 3);
     for (std::size_t pos = 0; pos < size; ++pos)
     {
-        std::sprintf(hex, "%02x", int(blob[pos]) & 0xff);
+        std::snprintf(hex, 3, "%02x", int(blob[pos]) & 0xff);
         s << hex;
     }
     return s.str();
