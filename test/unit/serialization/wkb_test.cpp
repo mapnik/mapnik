@@ -16,7 +16,7 @@
 #include <vector>
 #include <fstream>
 
-#if BOOST_VERSION >= 105800
+
 namespace {
 
 struct spatially_equal_visitor
@@ -97,7 +97,7 @@ bool spatially_equal(mapnik::geometry::geometry<T> const& g0, mapnik::geometry::
 }
 
 } // namespace
-#endif
+
 
 TEST_CASE("Well-known-geometries")
 {
@@ -131,9 +131,7 @@ TEST_CASE("Well-known-geometries")
                 REQUIRE(wkt0 == wkt1);
                 REQUIRE(wkt0 == wkt); // WKT round-trip
                 // compare spatially (NOTE: GeometryCollection comparison also enforces strict order)
-#if BOOST_VERSION >= 105800
                 REQUIRE(spatially_equal(geom_0, geom_1));
-#endif
             }
 
             // compare WKTS as ints
