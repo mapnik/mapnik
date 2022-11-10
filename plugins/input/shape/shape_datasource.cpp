@@ -141,15 +141,18 @@ shape_datasource::shape_datasource(parameters const& params)
                     break;
             }
         }
-    } catch (datasource_exception const& ex)
+    }
+    catch (datasource_exception const& ex)
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
-    } catch (const std::exception& ex)
+    }
+    catch (const std::exception& ex)
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
-    } catch (...) // exception: pipe_select_interrupter: Too many open files
+    }
+    catch (...) // exception: pipe_select_interrupter: Too many open files
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes";
         throw;

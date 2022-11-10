@@ -59,10 +59,12 @@ class test_numeric : public benchmark::test_case
             try
             {
                 x = boost::numeric_cast<std::uint8_t>(start_ * value_);
-            } catch (negative_overflow&)
+            }
+            catch (negative_overflow&)
             {
                 x = std::numeric_limits<std::uint8_t>::min();
-            } catch (positive_overflow&)
+            }
+            catch (positive_overflow&)
             {
                 x = std::numeric_limits<std::uint8_t>::max();
             }

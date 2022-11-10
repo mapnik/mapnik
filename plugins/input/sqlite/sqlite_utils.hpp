@@ -295,14 +295,16 @@ class sqlite_utils
                     one_success = true;
                 }
             }
-        } catch (mapnik::datasource_exception const& ex)
+        }
+        catch (mapnik::datasource_exception const& ex)
         {
             if (!existed)
             {
                 try
                 {
                     mapnik::util::remove(index_db);
-                } catch (...)
+                }
+                catch (...)
                 {};
             }
             throw mapnik::datasource_exception(ex.what());
@@ -318,7 +320,8 @@ class sqlite_utils
             try
             {
                 mapnik::util::remove(index_db);
-            } catch (...)
+            }
+            catch (...)
             {};
         }
         return false;
@@ -418,14 +421,16 @@ class sqlite_utils
                 ps.step_next();
                 one_success = true;
             }
-        } catch (mapnik::datasource_exception const& ex)
+        }
+        catch (mapnik::datasource_exception const& ex)
         {
             if (!existed)
             {
                 try
                 {
                     mapnik::util::remove(index_db);
-                } catch (...)
+                }
+                catch (...)
                 {};
             }
             throw mapnik::datasource_exception(ex.what());
@@ -441,7 +446,8 @@ class sqlite_utils
             try
             {
                 mapnik::util::remove(index_db);
-            } catch (...)
+            }
+            catch (...)
             {};
         }
         return false;
@@ -517,7 +523,8 @@ class sqlite_utils
             {
                 return true;
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             MAPNIK_LOG_DEBUG(sqlite) << "has_rtree returned:" << ex.what();
             return false;

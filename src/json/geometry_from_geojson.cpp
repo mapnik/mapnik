@@ -41,7 +41,8 @@ bool from_geojson(std::string const& json, mapnik::geometry::geometry<double>& g
         {
             throw std::runtime_error("Can't parser GeoJSON Geometry");
         }
-    } catch (...)
+    }
+    catch (...)
     {
         return false;
     }

@@ -174,7 +174,8 @@ struct do_xml_attribute_cast<mapnik::enumeration<T, MAX>>
             mapnik::enumeration<T, MAX> e;
             e.from_string(source);
             return result_type(e);
-        } catch (illegal_enum_value const& ex)
+        }
+        catch (illegal_enum_value const& ex)
         {
             MAPNIK_LOG_ERROR(do_xml_attribute_cast) << ex.what();
             return result_type();

@@ -104,7 +104,6 @@ TEST_CASE("geometry formats")
                                                     sizeof(sq_invalid_blob) / sizeof(sq_invalid_blob[0]),
                                                     mapnik::wkbGeneric);
             REQUIRE(geom.is<mapnik::geometry::geometry_empty>()); // returns geometry_empty
-
         }
         catch (std::exception const& ex)
         {

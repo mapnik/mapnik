@@ -165,7 +165,8 @@ TEST_CASE("font")
             mapnik::freetype_engine::register_fonts("C:\\Windows\\Fonts", true);
             face_names = mapnik::freetype_engine::face_names();
             REQUIRE(face_names.size() > 22);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << "\n";
             REQUIRE(false);

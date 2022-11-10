@@ -62,7 +62,8 @@ TEST_CASE("image")
 
                 REQUIRE(image.painted() == true);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << std::endl;
             REQUIRE(false);

@@ -75,7 +75,8 @@ struct geometry_centroid
         {
             boost::geometry::centroid(geom, pt_);
             return true;
-        } catch (boost::geometry::centroid_exception const& e)
+        }
+        catch (boost::geometry::centroid_exception const& e)
         {
             return false;
         }

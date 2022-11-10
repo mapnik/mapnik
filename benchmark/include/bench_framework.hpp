@@ -132,7 +132,8 @@ inline int handle_args(int argc, char** argv, mapnik::parameters& params)
             auto result = run(test_runner, name);                                                                      \
             testing::run_cleanup();                                                                                    \
             return result;                                                                                             \
-        } catch (std::exception const& ex)                                                                             \
+        }                                                                                                              \
+        catch (std::exception const& ex)                                                                               \
         {                                                                                                              \
             std::clog << ex.what() << "\n";                                                                            \
             testing::run_cleanup();                                                                                    \
@@ -263,7 +264,8 @@ int run(T const& test_runner, std::string const& name)
                       ips.u);
         std::clog << msg;
         return 0;
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << "test runner did not complete: " << ex.what() << "\n";
         return 4;

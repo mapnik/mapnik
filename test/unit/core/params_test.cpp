@@ -103,7 +103,8 @@ TEST_CASE("parameters")
             params["member"] = holder_member;
             REQUIRE((params.get<std::string>("member") == std::string("member")));
             REQUIRE((holder_member == std::string("member")));
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);

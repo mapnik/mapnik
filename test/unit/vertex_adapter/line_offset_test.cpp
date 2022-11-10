@@ -161,7 +161,8 @@ TEST_CASE("offsets")
                 // curve.
                 test_s_shaped_curve(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);

@@ -191,7 +191,8 @@ struct value_extractor_visitor
         try
         {
             var_ = boost::lexical_cast<T>(val);
-        } catch (boost::bad_lexical_cast const&)
+        }
+        catch (boost::bad_lexical_cast const&)
         {
             std::ostringstream s;
             s << "Failed converting from " << typeid(T1).name() << " to " << typeid(T).name();

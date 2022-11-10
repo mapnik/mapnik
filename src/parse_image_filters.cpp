@@ -41,7 +41,8 @@ bool parse_image_filters(std::string const& str, std::vector<filter_type>& image
     try
     {
         r = boost::spirit::x3::phrase_parse(itr, end, grammar, space, image_filters);
-    } catch (...)
+    }
+    catch (...)
     {
         image_filters.clear();
         r = false;

@@ -194,7 +194,8 @@ bool datasource_cache::register_datasources(std::string const& dir, bool recurse
                 }
             }
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(datasource_cache) << "register_datasources: " << ex.what();
     }
@@ -236,7 +237,8 @@ bool datasource_cache::register_datasource(std::string const& filename)
               << "Problem loading plugin library: " << filename
               << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(datasource_cache)
           << "Exception caught while loading plugin library: " << filename << " (" << ex.what() << ")";

@@ -135,7 +135,8 @@ class progress_timer : public timer
             s << wall_clock_elapsed() << "ms (cpu " << cpu_elapsed() << "ms)";
             s << std::setw(30 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n";
             os_ << s.str();
-        } catch (...)
+        }
+        catch (...)
         {} // eat any exceptions
     }
 

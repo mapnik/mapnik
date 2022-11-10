@@ -101,7 +101,8 @@ int main(int argc, char** argv)
         {
             ogr_files = vm["ogr_files"].as<vector<string>>();
         }
-    } catch (...)
+    }
+    catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
         return -1;

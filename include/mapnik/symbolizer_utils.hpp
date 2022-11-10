@@ -363,7 +363,8 @@ struct set_symbolizer_property_impl
             boost::optional<value_type> val = node.get_opt_attr<value_type>(name);
             if (val)
                 put(sym, key, *val);
-        } catch (config_error const& ex)
+        }
+        catch (config_error const& ex)
         {
             // try parsing as an expression
             boost::optional<expression_ptr> val = node.get_opt_attr<expression_ptr>(name);
