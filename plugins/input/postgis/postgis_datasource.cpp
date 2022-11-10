@@ -206,7 +206,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         }
                     }
                     rs->close();
-                } catch (mapnik::datasource_exception const& ex)
+                }
+                catch (mapnik::datasource_exception const& ex)
                 {
                     // let this pass on query error and use the fallback below
                     MAPNIK_LOG_WARN(postgis) << "postgis_datasource: metadata query failed: " << ex.what();
@@ -470,7 +471,8 @@ postgis_datasource::~postgis_datasource()
                 {
                     conn->close();
                 }
-            } catch (mapnik::datasource_exception const& ex)
+            }
+            catch (mapnik::datasource_exception const& ex)
             {
                 // happens when borrowObject tries to
                 // create a new connection and fails.
@@ -1112,7 +1114,8 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
                         g_type = "";
                     }
                 }
-            } catch (mapnik::datasource_exception const& ex)
+            }
+            catch (mapnik::datasource_exception const& ex)
             {
                 // let this pass on query error and use the fallback below
                 MAPNIK_LOG_WARN(postgis) << "postgis_datasource: metadata query failed: " << ex.what();

@@ -212,7 +212,8 @@ mapnik::color parse_color(T& err_handler, const char* str)
     try
     {
         c = mapnik::parse_color(str);
-    } catch (mapnik::config_error const& ex)
+    }
+    catch (mapnik::config_error const& ex)
     {
         err_handler.on_error("SVG parse error: failed to parse <color> with value \"" + std::string(str) + "\"");
     }
@@ -383,7 +384,8 @@ std::pair<unsigned, bool> parse_preserve_aspect_ratio(T& err_handler, char const
                          -x3::lit("defer") // only applicable to <image> which we don't support currently
                            > align[apply_align] > -(x3::lit("meet") | x3::lit("slice")[apply_slice]),
                          x3::space);
-    } catch (x3::expectation_failure<char const*> const& ex)
+    }
+    catch (x3::expectation_failure<char const*> const& ex)
     {
         err_handler.on_error("SVG parse error: failed to parse <preserveAspectRatio> with value \"" + std::string(str) +
                              "\"");
@@ -1671,7 +1673,8 @@ void svg_parser::parse(std::string const& filename)
     try
     {
         doc.parse<flags>(buffer.data());
-    } catch (rapidxml::parse_error const& ex)
+    }
+    catch (rapidxml::parse_error const& ex)
     {
         std::stringstream ss;
         ss << "SVG error: unable to parse \"" << filename << "\"";
@@ -1693,7 +1696,8 @@ void svg_parser::parse_from_string(std::string const& svg)
     try
     {
         doc.parse<flags>(buffer.data());
-    } catch (rapidxml::parse_error const& ex)
+    }
+    catch (rapidxml::parse_error const& ex)
     {
         std::stringstream ss;
         std::string str = (svg.length() > 1024) ? svg.substr(0, 1024) + "..." : svg;

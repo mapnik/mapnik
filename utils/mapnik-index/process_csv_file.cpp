@@ -54,7 +54,8 @@ std::pair<bool, typename T::value_type::first_type>
     {
         p.parse_csv_and_boxes(csv_file.file(), boxes);
         return std::make_pair(true, box_type(p.extent_));
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << ex.what() << std::endl;
         return std::make_pair(false, box_type(p.extent_));

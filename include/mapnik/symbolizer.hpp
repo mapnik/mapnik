@@ -159,7 +159,8 @@ struct enum_traits<simplify_algorithm_e>
             {                                                                                                          \
                 enum_.from_string(str);                                                                                \
                 return result_type(e(enum_));                                                                          \
-            } catch (...)                                                                                              \
+            }                                                                                                          \
+            catch (...)                                                                                                \
             {                                                                                                          \
                 return result_type();                                                                                  \
             }                                                                                                          \

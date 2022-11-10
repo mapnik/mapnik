@@ -150,7 +150,8 @@ feature_ptr shape_featureset<filterT>::next()
                 {
                     shape_.dbf().add_attribute(id, *tr_, *feature); // TODO optimize!!!
                 }
-            } catch (...)
+            }
+            catch (...)
             {
                 MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing attributes";
             }

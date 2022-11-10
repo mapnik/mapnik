@@ -167,7 +167,8 @@ int main(int argc, char** argv)
             test test_runner(params);
             return_value = run(test_runner, *name);
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << ex.what() << "\n";
         return -1;

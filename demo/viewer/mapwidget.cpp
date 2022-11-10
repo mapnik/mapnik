@@ -513,7 +513,8 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap& pix)
     catch (std::exception const& ex)
     {
         std::cerr << "exception: " << ex.what() << std::endl;
-    } catch (...)
+    }
+    catch (...)
     {
         std::cerr << "Unknown exception caught!\n";
     }
@@ -602,7 +603,8 @@ void MapWidget::updateMap()
             update();
             // emit signal to interested widgets
             emit mapViewChanged();
-        } catch (...)
+        }
+        catch (...)
         {
             std::cerr << "Unknown exception caught!\n";
         }

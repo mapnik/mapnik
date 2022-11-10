@@ -280,13 +280,15 @@ std::pair<bool, typename T::value_type::first_type>
     try
     {
         mapnik::json::extract_bounding_boxes(itr, end, boxes);
-    } catch (boost::spirit::x3::expectation_failure<base_iterator_type> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<base_iterator_type> const& ex)
     {
         std::clog << ex.what() << std::endl;
         std::clog << "Expected: " << ex.which();
         std::clog << " Got: \"" << std::string(ex.where(), ex.where() + 200) << '"' << std::endl;
         return std::make_pair(false, extent);
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << "mapnik-index (GeoJSON) : could not extract bounding boxes from : '" << filename << "'"
                   << std::endl;
@@ -324,12 +326,14 @@ std::pair<bool, typename T::value_type::first_type>
                                       << " size=" << item.second.second << std::endl;
                         return std::make_pair(false, extent);
                     }
-                } catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+                }
+                catch (x3::expectation_failure<std::string::const_iterator> const& ex)
                 {
                     if (verbose)
                         std::clog << ex.what() << std::endl;
                     return std::make_pair(false, extent);
-                } catch (...)
+                }
+                catch (...)
                 {
                     if (verbose)
                         std::clog << "Failed to parse: offset=" << item.second.first << " size=" << item.second.second

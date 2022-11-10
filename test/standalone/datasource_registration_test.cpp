@@ -42,7 +42,8 @@ TEST_CASE("datasource_cache")
                 success = cache.register_datasources("plugins/input", true);
                 CHECK(success == false);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << "\n";
             REQUIRE(false);

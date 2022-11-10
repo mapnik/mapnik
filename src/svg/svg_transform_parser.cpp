@@ -53,7 +53,8 @@ bool parse_svg_transform(const char* wkt, Transform& tr)
         {
             throw std::runtime_error("Failed to parse svg-transform");
         }
-    } catch (...)
+    }
+    catch (...)
     {
         return false;
     }

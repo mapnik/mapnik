@@ -75,7 +75,8 @@ image_options_map parse_image_options(std::string const& str)
         {
             throw std::runtime_error("Can't parse image options: " + str);
         }
-    } catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
     {
         throw std::runtime_error("Can't parse image options: " + str + " " + ex.what());
     }
@@ -103,7 +104,8 @@ int parse_png_filters(std::string const& str)
         {
             throw std::runtime_error("Can't parse PNG filters: " + str);
         }
-    } catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string> const& ex)
     {
         throw std::runtime_error("Can't parse PNG filters: " + str + " " + ex.what());
     }

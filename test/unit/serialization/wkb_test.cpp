@@ -16,7 +16,6 @@
 #include <vector>
 #include <fstream>
 
-
 namespace {
 
 struct spatially_equal_visitor
@@ -97,7 +96,6 @@ bool spatially_equal(mapnik::geometry::geometry<T> const& g0, mapnik::geometry::
 }
 
 } // namespace
-
 
 TEST_CASE("Well-known-geometries")
 {

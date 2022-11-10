@@ -559,7 +559,8 @@ void Map::zoom_all()
                 throw std::runtime_error(s.str());
             }
         }
-    } catch (proj_init_error const& ex)
+    }
+    catch (proj_init_error const& ex)
     {
         throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
     }

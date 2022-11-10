@@ -189,10 +189,12 @@ void MainWindow::load_map_file(QString const& filename)
     {
         mapnik::auto_cpu_timer t(std::clog, "loading map took: ");
         mapnik::load_map(*map, filename.toStdString());
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::cout << ex.what() << "\n";
-    } catch (...)
+    }
+    catch (...)
     {
         std::cerr << "Exception caught in load_map\n";
     }
@@ -416,7 +418,8 @@ void MainWindow::set_default_extent(double x0, double y0, double x1, double y1)
             mapWidget_->zoomToBox(default_extent_);
             std::cout << "SET DEFAULT EXT:" << default_extent_ << std::endl;
         }
-    } catch (...)
+    }
+    catch (...)
     {}
 }
 
