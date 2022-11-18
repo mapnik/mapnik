@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/value/types.hpp>
@@ -41,6 +42,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
+#include "agg_pixfmt_rgba.h"
 #include "agg_path_storage.h"
 #include "agg_conv_transform.h"
 #include "agg_conv_stroke.h"
@@ -124,121 +126,15 @@ class renderer_agg : util::noncopyable
     using vertex_source_type = VertexSource;
     using attribute_source_type = AttributeSource;
 
-    renderer_agg(VertexSource& source, AttributeSource const& attributes)
+    // mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre
+    renderer_agg(VertexSource& source, group const& svg_group)
         : source_(source)
         , curved_(source_)
         , curved_dashed_(curved_)
         , curved_stroked_(curved_)
         , curved_dashed_stroked_(curved_dashed_)
-        , attributes_(attributes)
+        , svg_group_(svg_group)
     {}
-
-    template<typename Rasterizer, typename Scanline, typename Renderer>
-    void render_gradient(Rasterizer& ras,
-                         Scanline& sl,
-                         Renderer& ren,
-                         gradient const& grad,
-                         agg::trans_affine const& mtx,
-                         double opacity,
-                         box2d<double> const& symbol_bbox,
-                         curved_trans_type& curved_trans,
-                         unsigned path_id)
-    {
-        using gamma_lut_type = agg::gamma_lut<agg::int8u, agg::int8u>;
-        using color_func_type = agg::gradient_lut<agg::color_interpolator<agg::rgba8>, 1024>;
-        using interpolator_type = agg::span_interpolator_linear<>;
-        using span_allocator_type = agg::span_allocator<agg::rgba8>;
-
-        span_allocator_type m_alloc;
-        color_func_type m_gradient_lut;
-        gamma_lut_type m_gamma_lut;
-
-        double x1, x2, y1, y2, radius;
-        grad.get_control_points(x1, y1, x2, y2, radius);
-
-        m_gradient_lut.remove_all();
-        for (mapnik::stop_pair const& st : grad.get_stop_array())
-        {
-            mapnik::color const& stop_color = st.second;
-            unsigned r = stop_color.red();
-            unsigned g = stop_color.green();
-            unsigned b = stop_color.blue();
-            unsigned a = stop_color.alpha();
-            m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
-        }
-        if (m_gradient_lut.build_lut())
-        {
-            agg::trans_affine transform = mtx;
-            double scale = mtx.scale();
-            transform.invert();
-            agg::trans_affine tr;
-            tr = grad.get_transform();
-            tr.invert();
-            transform *= tr;
-
-            if (grad.get_units() != USER_SPACE_ON_USE)
-            {
-                double bx1 = symbol_bbox.minx();
-                double by1 = symbol_bbox.miny();
-                double bx2 = symbol_bbox.maxx();
-                double by2 = symbol_bbox.maxy();
-
-                if (grad.get_units() == OBJECT_BOUNDING_BOX)
-                {
-                    bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
-                }
-                transform.translate(-bx1 / scale, -by1 / scale);
-                transform.scale(scale / (bx2 - bx1), scale / (by2 - by1));
-            }
-
-            if (grad.get_gradient_type() == RADIAL)
-            {
-                using gradient_adaptor_type = agg::gradient_radial_focus;
-                using span_gradient_type =
-                  agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
-
-                // the agg radial gradient assumes it is centred on 0
-                transform.translate(-x2, -y2);
-
-                // scale everything up since agg turns things into integers a bit too soon
-                int scaleup = 255;
-                radius *= scaleup;
-                x1 *= scaleup;
-                y1 *= scaleup;
-                x2 *= scaleup;
-                y2 *= scaleup;
-
-                transform.scale(scaleup, scaleup);
-                interpolator_type span_interpolator(transform);
-                gradient_adaptor_type gradient_adaptor(radius, (x1 - x2), (y1 - y2));
-
-                span_gradient_type span_gradient(span_interpolator, gradient_adaptor, m_gradient_lut, 0, radius);
-
-                render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
-            }
-            else
-            {
-                using gradient_adaptor_type = linear_gradient_from_segment;
-                using span_gradient_type =
-                  agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
-                // scale everything up since agg turns things into integers a bit too soon
-                int scaleup = 255;
-                x1 *= scaleup;
-                y1 *= scaleup;
-                x2 *= scaleup;
-                y2 *= scaleup;
-
-                transform.scale(scaleup, scaleup);
-
-                interpolator_type span_interpolator(transform);
-                gradient_adaptor_type gradient_adaptor(x1, y1, x2, y2);
-
-                span_gradient_type span_gradient(span_interpolator, gradient_adaptor, m_gradient_lut, 0, scaleup);
-
-                render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
-            }
-        }
-    }
 
     template<typename Rasterizer, typename Scanline, typename Renderer>
     void render(Rasterizer& ras,
@@ -249,67 +145,224 @@ class renderer_agg : util::noncopyable
                 box2d<double> const& symbol_bbox)
 
     {
-        using namespace agg;
-        trans_affine transform;
-
-        curved_stroked_trans_type curved_stroked_trans(curved_stroked_, transform);
-        curved_dashed_stroked_trans_type curved_dashed_stroked_trans(curved_dashed_stroked_, transform);
-        curved_trans_type curved_trans(curved_, transform);
-        curved_trans_contour_type curved_trans_contour(curved_trans);
-
-        curved_trans_contour.auto_detect_orientation(true);
-
-        for (unsigned i = 0; i < attributes_.size(); ++i)
+        for (auto const& elem : svg_group_.elements)
         {
-            mapnik::svg::path_attributes const& attr = attributes_[i];
-            if (!attr.visibility_flag)
-                continue;
+            mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>
+                                        (*this, ras, sl, ren, mtx, opacity, symbol_bbox, true), elem);
+        }
+    }
+
+    template<typename Rasterizer, typename Scanline, typename Renderer>
+    struct group_renderer
+    {
+        group_renderer(renderer_agg& renderer,
+                       Rasterizer & ras, Scanline& sl, Renderer& ren,
+                       agg::trans_affine const& mtx,
+                       double opacity,
+                       box2d<double> const& symbol_bbox,
+                       bool first = false)
+            : renderer_(renderer),
+              ras_(ras),
+              sl_(sl),
+              ren_(ren),
+              mtx_(mtx),
+              opacity_(opacity),
+              symbol_bbox_(symbol_bbox),
+              first_(first)
+        {}
+
+        void render_gradient(Rasterizer& ras,
+                             Scanline& sl,
+                             Renderer& ren,
+                             gradient const& grad,
+                             agg::trans_affine const& mtx,
+                             double opacity,
+                             box2d<double> const& symbol_bbox,
+                             curved_trans_type& curved_trans,
+                             unsigned path_id) const
+        {
+            using gamma_lut_type = agg::gamma_lut<agg::int8u, agg::int8u>;
+            using color_func_type = agg::gradient_lut<agg::color_interpolator<agg::rgba8>, 1024>;
+            using interpolator_type = agg::span_interpolator_linear<>;
+            using span_allocator_type = agg::span_allocator<agg::rgba8>;
+
+            span_allocator_type m_alloc;
+            color_func_type m_gradient_lut;
+            gamma_lut_type m_gamma_lut;
+
+            double x1, x2, y1, y2, radius;
+            grad.get_control_points(x1, y1, x2, y2, radius);
+
+            m_gradient_lut.remove_all();
+            for (mapnik::stop_pair const& st : grad.get_stop_array())
+            {
+                mapnik::color const& stop_color = st.second;
+                unsigned r = stop_color.red();
+                unsigned g = stop_color.green();
+                unsigned b = stop_color.blue();
+                unsigned a = stop_color.alpha();
+                m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
+            }
+            if (m_gradient_lut.build_lut())
+            {
+                agg::trans_affine transform = mtx;
+                double scale = mtx.scale();
+                transform.invert();
+                agg::trans_affine tr;
+                tr = grad.get_transform();
+                tr.invert();
+                transform *= tr;
+
+                if (grad.get_units() != USER_SPACE_ON_USE)
+                {
+                    double bx1 = symbol_bbox.minx();
+                    double by1 = symbol_bbox.miny();
+                    double bx2 = symbol_bbox.maxx();
+                    double by2 = symbol_bbox.maxy();
+
+                    if (grad.get_units() == OBJECT_BOUNDING_BOX)
+                    {
+                        bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
+                    }
+                    transform.translate(-bx1 / scale, -by1 / scale);
+                    transform.scale(scale / (bx2 - bx1), scale / (by2 - by1));
+                }
+
+                if (grad.get_gradient_type() == RADIAL)
+                {
+                    using gradient_adaptor_type = agg::gradient_radial_focus;
+                    using span_gradient_type =
+                        agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
+
+                    // the agg radial gradient assumes it is centred on 0
+                    transform.translate( -x2, -y2);
+
+                    // scale everything up since agg turns things into integers a bit too soon
+                    int scaleup = 255;
+                    radius *= scaleup;
+                    x1 *= scaleup;
+                    y1 *= scaleup;
+                    x2 *= scaleup;
+                    y2 *= scaleup;
+
+                    transform.scale(scaleup, scaleup);
+
+                    interpolator_type span_interpolator(transform);
+                    gradient_adaptor_type gradient_adaptor(radius, (x1 - x2), (y1 - y2));
+
+                    span_gradient_type span_gradient(span_interpolator, gradient_adaptor, m_gradient_lut, 0, radius);
+
+                    render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
+                }
+                else
+                {
+                    using gradient_adaptor_type = linear_gradient_from_segment;
+                    using span_gradient_type =
+                        agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
+                    // scale everything up since agg turns things into integers a bit too soon
+                    int scaleup = 255;
+                    x1 *= scaleup;
+                    y1 *= scaleup;
+                    x2 *= scaleup;
+                    y2 *= scaleup;
+
+                    transform.scale(scaleup, scaleup);
+
+                    interpolator_type span_interpolator(transform);
+                    gradient_adaptor_type gradient_adaptor(x1, y1, x2, y2);
+
+                    span_gradient_type span_gradient(span_interpolator, gradient_adaptor, m_gradient_lut, 0, scaleup);
+
+                    render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
+                }
+            }
+        }
+
+        void operator() (group const& g) const
+        {
+            double opacity = g.opacity;
+            if (first_) opacity *= opacity_; // adjust top level opacity
+            if (opacity < 1.0)
+            {
+                mapnik::image_rgba8 im(ren_.width(), ren_.height(), true, true);
+                agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
+                PixelFormat pixf(buf);
+                Renderer ren(pixf);
+                for (auto const& elem : g.elements)
+                {
+                    mapbox::util::apply_visitor(
+                        group_renderer(renderer_, ras_, sl_, ren, mtx_, opacity_, symbol_bbox_), elem);
+                }
+                ren_.blend_from(ren.ren(), 0, 0, 0, unsigned(g.opacity * 255));
+            }
+            else
+            {
+                for (auto const& elem : g.elements)
+                {
+                    mapbox::util::apply_visitor(
+                        group_renderer(renderer_, ras_, sl_, ren_, mtx_, opacity_, symbol_bbox_), elem);
+                }
+            }
+        }
+
+        void operator() (path_attributes const& attr) const
+        {
+            using namespace agg;
+            trans_affine transform;
+
+            curved_stroked_trans_type curved_stroked_trans(renderer_.curved_stroked_, transform);
+            curved_dashed_stroked_trans_type curved_dashed_stroked_trans(renderer_.curved_dashed_stroked_, transform);
+            curved_trans_type curved_trans(renderer_.curved_, transform);
+            curved_trans_contour_type curved_trans_contour(curved_trans);
+            curved_trans_contour.auto_detect_orientation(true);
+
+            if (!attr.visibility_flag) return;
 
             transform = attr.transform;
 
-            transform *= mtx;
+            transform *= mtx_;
             double scl = transform.scale();
-            // curved_.approximation_method(curve_inc);
-            curved_.approximation_scale(scl);
-            curved_.angle_tolerance(0.0);
+            // renderer_.curved_.approximation_method(curve_inc);
+            renderer_.curved_.approximation_scale(scl);
+            renderer_.curved_.angle_tolerance(0.0);
 
             typename PixelFormat::color_type color;
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                ras.reset();
+                ras_.reset();
                 // https://github.com/mapnik/mapnik/issues/1129
                 if (std::fabs(curved_trans_contour.width()) <= 1)
                 {
-                    ras.add_path(curved_trans, attr.index);
+                    ras_.add_path(curved_trans, attr.index);
                 }
                 else
                 {
                     curved_trans_contour.miter_limit(attr.miter_limit);
-                    ras.add_path(curved_trans_contour, attr.index);
+                    ras_.add_path(curved_trans_contour, attr.index);
                 }
 
                 if (attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras,
-                                    sl,
-                                    ren,
+                    render_gradient(ras_,
+                                    sl_,
+                                    ren_,
                                     attr.fill_gradient,
                                     transform,
-                                    attr.fill_opacity * attr.opacity * opacity,
-                                    symbol_bbox,
+                                    attr.fill_opacity,
+                                    symbol_bbox_,
                                     curved_trans,
                                     attr.index);
                 }
                 else
                 {
-                    ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
+                    ras_.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
                     color = attr.fill_color;
-                    color.opacity(color.opacity() * attr.fill_opacity * attr.opacity * opacity);
-                    ScanlineRenderer ren_s(ren);
+                    color.opacity(color.opacity() * attr.fill_opacity);
+                    ScanlineRenderer ren_s(ren_);
                     color.premultiply();
                     ren_s.color(color);
-                    render_scanlines(ras, sl, ren_s);
+                    render_scanlines(ras_, sl_, ren_s);
                 }
             }
 
@@ -317,97 +370,205 @@ class renderer_agg : util::noncopyable
             {
                 if (attr.dash.size() > 0)
                 {
-                    curved_dashed_stroked_.width(attr.stroke_width);
-                    curved_dashed_stroked_.line_join(attr.line_join);
-                    curved_dashed_stroked_.line_cap(attr.line_cap);
-                    curved_dashed_stroked_.miter_limit(attr.miter_limit);
-                    curved_dashed_stroked_.inner_join(inner_round);
-                    curved_dashed_stroked_.approximation_scale(scl);
+                    renderer_.curved_dashed_stroked_.width(attr.stroke_width);
+                    renderer_.curved_dashed_stroked_.line_join(attr.line_join);
+                    renderer_.curved_dashed_stroked_.line_cap(attr.line_cap);
+                    renderer_.curved_dashed_stroked_.miter_limit(attr.miter_limit);
+                    renderer_.curved_dashed_stroked_.inner_join(inner_round);
+                    renderer_.curved_dashed_stroked_.approximation_scale(scl);
 
                     // If the *visual* line width is considerable we
                     // turn on processing of curve cups.
                     //---------------------
                     if (attr.stroke_width * scl > 1.0)
                     {
-                        curved_.angle_tolerance(0.2);
+                        renderer_.curved_.angle_tolerance(0.2);
                     }
-                    ras.reset();
-                    curved_dashed_.remove_all_dashes();
+                    ras_.reset();
+                    renderer_.curved_dashed_.remove_all_dashes();
                     for (auto d : attr.dash)
                     {
-                        curved_dashed_.add_dash(std::get<0>(d), std::get<1>(d));
+                        renderer_.curved_dashed_.add_dash(std::get<0>(d), std::get<1>(d));
                     }
-                    curved_dashed_.dash_start(attr.dash_offset);
-                    ras.add_path(curved_dashed_stroked_trans, attr.index);
+                    renderer_.curved_dashed_.dash_start(attr.dash_offset);
+                    ras_.add_path(curved_dashed_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {
-                        render_gradient(ras,
-                                        sl,
-                                        ren,
+                        render_gradient(ras_,
+                                        sl_,
+                                        ren_,
                                         attr.stroke_gradient,
                                         transform,
-                                        attr.stroke_opacity * attr.opacity * opacity,
-                                        symbol_bbox,
+                                        attr.stroke_opacity,
+                                        symbol_bbox_,
                                         curved_trans,
                                         attr.index);
                     }
                     else
                     {
-                        ras.filling_rule(fill_non_zero);
+                        ras_.filling_rule(fill_non_zero);
                         color = attr.stroke_color;
-                        color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
-                        ScanlineRenderer ren_s(ren);
+                        color.opacity(color.opacity() * attr.stroke_opacity);
+                        ScanlineRenderer ren_s(ren_);
                         color.premultiply();
                         ren_s.color(color);
-                        render_scanlines(ras, sl, ren_s);
+                        render_scanlines(ras_, sl_, ren_s);
                     }
                 }
                 else
                 {
-                    curved_stroked_.width(attr.stroke_width);
-                    curved_stroked_.line_join(attr.line_join);
-                    curved_stroked_.line_cap(attr.line_cap);
-                    curved_stroked_.miter_limit(attr.miter_limit);
-                    curved_stroked_.inner_join(inner_round);
-                    curved_stroked_.approximation_scale(scl);
+                    renderer_.curved_stroked_.width(attr.stroke_width);
+                    renderer_.curved_stroked_.line_join(attr.line_join);
+                    renderer_.curved_stroked_.line_cap(attr.line_cap);
+                    renderer_.curved_stroked_.miter_limit(attr.miter_limit);
+                    renderer_.curved_stroked_.inner_join(inner_round);
+                    renderer_.curved_stroked_.approximation_scale(scl);
 
                     // If the *visual* line width is considerable we
                     // turn on processing of curve cups.
                     //---------------------
                     if (attr.stroke_width * scl > 1.0)
                     {
-                        curved_.angle_tolerance(0.2);
+                        renderer_.curved_.angle_tolerance(0.2);
                     }
-                    ras.reset();
-                    ras.add_path(curved_stroked_trans, attr.index);
+                    ras_.reset();
+                    ras_.add_path(curved_stroked_trans, attr.index);
                     if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                     {
-                        render_gradient(ras,
-                                        sl,
-                                        ren,
+                        render_gradient(ras_,
+                                        sl_,
+                                        ren_,
                                         attr.stroke_gradient,
                                         transform,
-                                        attr.stroke_opacity * attr.opacity * opacity,
-                                        symbol_bbox,
+                                        attr.stroke_opacity,
+                                        symbol_bbox_,
                                         curved_trans,
                                         attr.index);
                     }
                     else
                     {
-                        ras.filling_rule(fill_non_zero);
+                        ras_.filling_rule(fill_non_zero);
                         color = attr.stroke_color;
-                        color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
-                        ScanlineRenderer ren_s(ren);
+                        color.opacity(color.opacity() * attr.stroke_opacity);
+                        ScanlineRenderer ren_s(ren_);
                         color.premultiply();
                         ren_s.color(color);
-                        render_scanlines(ras, sl, ren_s);
+                        render_scanlines(ras_, sl_, ren_s);
                     }
                 }
             }
         }
-    }
+        renderer_agg& renderer_;
+        Rasterizer& ras_;
+        Scanline& sl_;
+        Renderer& ren_;
+        agg::trans_affine const& mtx_;
+        double opacity_;
+        box2d<double> const& symbol_bbox_;
+        bool first_;
+    };
 
 #if defined(GRID_RENDERER)
+
+    template<typename Rasterizer, typename Scanline, typename Renderer>
+    struct grid_renderer
+    {
+        grid_renderer(renderer_agg& renderer,
+                      Rasterizer& ras, Scanline& sl, Renderer& ren,
+                      agg::trans_affine const& mtx)
+            : renderer_(renderer),
+              ras_(ras),
+              sl_(sl),
+              ren_(ren),
+              mtx_(mtx)
+        {}
+
+        void operator() (group const& g) const
+        {
+            for (auto const& elem : g.elements)
+            {
+                mapbox::util::apply_visitor(
+                    grid_renderer(renderer_, ras_, sl_, ren_, mtx_), elem);
+            }
+        }
+        void operator() (path_attributes const& attr) const
+        {
+            using namespace agg;
+
+            trans_affine transform;
+            curved_stroked_trans_type curved_stroked_trans(renderer_.curved_stroked_, transform);
+            curved_trans_type curved_trans(renderer_.curved_, transform);
+            curved_trans_contour_type curved_trans_contour(curved_trans);
+
+            curved_trans_contour.auto_detect_orientation(true);
+
+            if (!attr.visibility_flag)
+                return;
+
+            transform = attr.transform;
+            transform *= mtx_;
+
+            double scl = transform.scale();
+            // renderer_.curved_.approximation_method(curve_inc);
+            renderer_.curved_.approximation_scale(scl);
+            renderer_.curved_.angle_tolerance(0.0);
+
+            typename PixelFormat::color_type color{0};
+
+            if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
+            {
+                ras_.reset();
+
+                if (std::fabs(curved_trans_contour.width()) <= 1)
+                {
+                    ras_.add_path(curved_trans, attr.index);
+                }
+                else
+                {
+                    curved_trans_contour.miter_limit(attr.miter_limit);
+                    ras_.add_path(curved_trans_contour, attr.index);
+                }
+
+                ras_.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
+                ScanlineRenderer ren_s(ren_);
+                ren_s.color(color);
+                render_scanlines(ras_, sl_, ren_s);
+            }
+
+            if (attr.stroke_flag || attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
+            {
+                renderer_.curved_stroked_.width(attr.stroke_width);
+                // m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
+                renderer_.curved_stroked_.line_join(attr.line_join);
+                renderer_.curved_stroked_.line_cap(attr.line_cap);
+                renderer_.curved_stroked_.miter_limit(attr.miter_limit);
+                renderer_.curved_stroked_.inner_join(inner_round);
+                renderer_.curved_stroked_.approximation_scale(scl);
+
+                // If the *visual* line width is considerable we
+                // turn on processing of curve cusps.
+                //---------------------
+                if (attr.stroke_width * scl > 1.0)
+                {
+                    renderer_.curved_.angle_tolerance(0.2);
+                }
+                ras_.reset();
+                ras_.add_path(curved_stroked_trans, attr.index);
+
+                ras_.filling_rule(fill_non_zero);
+                ScanlineRenderer ren_s(ren_);
+                ren_s.color(color);
+                render_scanlines(ras_, sl_, ren_s);
+            }
+        }
+
+        renderer_agg& renderer_;
+        Rasterizer& ras_;
+        Scanline& sl_;
+        Renderer& ren_;
+        agg::trans_affine const& mtx_;
+    };
+
     template<typename Rasterizer, typename Scanline, typename Renderer>
     void render_id(Rasterizer& ras,
                    Scanline& sl,
@@ -418,76 +579,10 @@ class renderer_agg : util::noncopyable
                    box2d<double> const& /*symbol_bbox*/)
 
     {
-        using namespace agg;
-
-        trans_affine transform;
-        curved_stroked_trans_type curved_stroked_trans(curved_stroked_, transform);
-        curved_trans_type curved_trans(curved_, transform);
-        curved_trans_contour_type curved_trans_contour(curved_trans);
-
-        curved_trans_contour.auto_detect_orientation(true);
-
-        for (unsigned i = 0; i < attributes_.size(); ++i)
+        for (auto const& elem : svg_group_.elements)
         {
-            mapnik::svg::path_attributes const& attr = attributes_[i];
-            if (!attr.visibility_flag)
-                continue;
-
-            transform = attr.transform;
-
-            transform *= mtx;
-            double scl = transform.scale();
-            // curved_.approximation_method(curve_inc);
-            curved_.approximation_scale(scl);
-            curved_.angle_tolerance(0.0);
-
-            typename PixelFormat::color_type color(feature_id);
-
-            if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
-            {
-                ras.reset();
-
-                if (std::fabs(curved_trans_contour.width()) <= 1)
-                {
-                    ras.add_path(curved_trans, attr.index);
-                }
-                else
-                {
-                    curved_trans_contour.miter_limit(attr.miter_limit);
-                    ras.add_path(curved_trans_contour, attr.index);
-                }
-
-                ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
-                ScanlineRenderer ren_s(ren);
-                ren_s.color(color);
-                render_scanlines(ras, sl, ren_s);
-            }
-
-            if (attr.stroke_flag || attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
-            {
-                curved_stroked_.width(attr.stroke_width);
-                // m_curved_stroked.line_join((attr.line_join == miter_join) ? miter_join_round : attr.line_join);
-                curved_stroked_.line_join(attr.line_join);
-                curved_stroked_.line_cap(attr.line_cap);
-                curved_stroked_.miter_limit(attr.miter_limit);
-                curved_stroked_.inner_join(inner_round);
-                curved_stroked_.approximation_scale(scl);
-
-                // If the *visual* line width is considerable we
-                // turn on processing of curve cusps.
-                //---------------------
-                if (attr.stroke_width * scl > 1.0)
-                {
-                    curved_.angle_tolerance(0.2);
-                }
-                ras.reset();
-                ras.add_path(curved_stroked_trans, attr.index);
-
-                ras.filling_rule(fill_non_zero);
-                ScanlineRenderer ren_s(ren);
-                ren_s.color(color);
-                render_scanlines(ras, sl, ren_s);
-            }
+            mapbox::util::apply_visitor(grid_renderer<Rasterizer, Scanline, Renderer>
+                                        (*this, ras, sl, ren, mtx), elem);
         }
     }
 #endif
@@ -496,9 +591,10 @@ class renderer_agg : util::noncopyable
     {
         return source_;
     }
-    inline AttributeSource const& attributes() const
+
+    inline group const& svg_group() const
     {
-        return attributes_;
+        return svg_group_;
     }
 
   private:
@@ -508,7 +604,7 @@ class renderer_agg : util::noncopyable
     curved_dashed_type curved_dashed_;
     curved_stroked_type curved_stroked_;
     curved_dashed_stroked_type curved_dashed_stroked_;
-    AttributeSource const& attributes_;
+    group const& svg_group_;
 };
 
 } // namespace svg

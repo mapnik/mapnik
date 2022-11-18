@@ -64,9 +64,19 @@ struct main_marker_visitor
 
     int operator()(mapnik::marker_svg const& marker) const
     {
+#if 1
+        using color_type = agg::rgba8;
+        using order_type = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; //comp blender
+        using buf_type = agg::rendering_buffer;
+        using pixfmt = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
+        using renderer_base = agg::renderer_base<pixfmt>;
+        using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
+#else
         using pixfmt = agg::pixfmt_rgba32_pre;
         using renderer_base = agg::renderer_base<pixfmt>;
         using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
+#endif
         agg::rasterizer_scanline_aa<> ras_ptr;
         agg::scanline_u8 sl;
 
@@ -109,9 +119,8 @@ struct main_marker_visitor
 
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
-        mapnik::svg::
-          renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre>
-            svg_renderer_this(svg_path, marker.get_data()->attributes());
+        mapnik::svg::renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt>
+            svg_renderer_this(svg_path, marker.get_data()->svg_group());
 
         svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 

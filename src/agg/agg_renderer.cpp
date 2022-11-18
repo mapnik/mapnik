@@ -433,7 +433,7 @@ struct agg_render_marker_visitor
         svg_path_adapter svg_path(stl_storage);
         svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_type, pixfmt_comp_type> svg_renderer(
           svg_path,
-          marker.get_data()->attributes());
+          marker.get_data()->svg_group());
 
         // https://github.com/mapnik/mapnik/issues/1316
         // https://github.com/mapnik/mapnik/issues/1866

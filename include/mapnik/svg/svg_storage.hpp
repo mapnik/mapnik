@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/util/noncopyable.hpp>
+#include <mapnik/svg/svg_group.hpp>
 
 namespace mapnik {
 namespace svg {
@@ -39,15 +40,9 @@ class svg_storage : util::noncopyable
         , svg_height_(0)
     {}
 
-    VertexSource& source() // FIXME!! make const
-    {
-        return source_;
-    }
+    VertexSource& source() { return source_;}
 
-    AttributeSource& attributes() // FIXME!! make const
-    {
-        return attributes_;
-    }
+    svg::group& svg_group() { return svg_group_; }
 
     void set_bounding_box(box2d<double> const& b) { bounding_box_ = b; }
 
@@ -68,7 +63,7 @@ class svg_storage : util::noncopyable
   private:
 
     VertexSource source_;
-    AttributeSource attributes_;
+    svg::group svg_group_;
     box2d<double> bounding_box_;
     double svg_width_;
     double svg_height_;

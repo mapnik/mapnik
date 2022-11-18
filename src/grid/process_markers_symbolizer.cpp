@@ -91,11 +91,11 @@ struct grid_markers_renderer_context : markers_renderer_context
 
     virtual void render_marker(svg_path_ptr const& src,
                                svg_path_adapter& path,
-                               svg_attribute_type const& attrs,
+                               svg::group const& svg_group,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr)
     {
-        SvgRenderer svg_renderer_(path, attrs);
+        SvgRenderer svg_renderer_(path, svg_group);
         agg::scanline_bin sl_;
         svg_renderer_.render_id(ras_, sl_, renb_, feature_.id(), marker_tr, params.opacity, src->bounding_box());
         place_feature();
@@ -146,13 +146,14 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     box2d<double> clip_box = common_.query_extent_;
 
     using renderer_context_type =
-      detail::grid_markers_renderer_context<svg_renderer_type, renderer_type, buf_type, grid_rasterizer, buffer_type>;
+        detail::grid_markers_renderer_context<svg_renderer_type, renderer_type, buf_type, grid_rasterizer, buffer_type>;
     renderer_context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
 
     render_markers_symbolizer(sym, feature, prj_trans, common_, clip_box, renderer_context);
 }
 
 template void grid_renderer<grid>::process(markers_symbolizer const&, mapnik::feature_impl&, proj_transform const&);
+
 } // namespace mapnik
 
-#endif
+#endif // GRID_RENDEDER

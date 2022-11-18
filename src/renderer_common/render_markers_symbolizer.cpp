@@ -55,14 +55,14 @@ struct render_marker_symbolizer_visitor
         , renderer_context_(renderer_context)
     {}
 
-    svg_attribute_type const& get_marker_attributes(svg_path_ptr const& stock_marker,
-                                                    svg_attribute_type& custom_attr) const
+    svg::group const& get_marker_attributes(svg_path_ptr const& stock_marker,
+                                            svg::group& custom_group_attrs) const
     {
-        auto const& stock_attr = stock_marker->attributes();
-        if (push_explicit_style(stock_attr, custom_attr, sym_, feature_, common_.vars_))
-            return custom_attr;
+        auto const& stock_group_attrs = stock_marker->svg_group();
+        if (push_explicit_style(stock_group_attrs, custom_group_attrs, sym_, feature_, common_.vars_))
+            return custom_group_attrs;
         else
-            return stock_attr;
+            return stock_group_attrs;
     }
 
     template<typename Marker, typename Dispatch>
@@ -130,8 +130,9 @@ struct render_marker_symbolizer_visitor
         svg_path_ptr marker_ptr = stock_vector_marker;
         bool is_ellipse = false;
 
-        svg_attribute_type s_attributes;
-        auto const& r_attributes = get_marker_attributes(stock_vector_marker, s_attributes);
+        //svg_attribute_type s_attributes;
+        svg::group svg_group_attrs;
+        auto const& svg_group_attrs_updated = get_marker_attributes(stock_vector_marker, svg_group_attrs);
 
         // special case for simple ellipse markers
         // to allow for full control over rx/ry dimensions
@@ -161,7 +162,7 @@ struct render_marker_symbolizer_visitor
 
         vector_dispatch_type rasterizer_dispatch(marker_ptr,
                                                  svg_path,
-                                                 r_attributes,
+                                                 svg_group_attrs_updated,
                                                  image_tr,
                                                  sym_,
                                                  *common_.detector_,

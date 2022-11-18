@@ -84,7 +84,7 @@ struct thunk_renderer : render_thunk_list_dispatch
         renderer_type ren(renb);
         svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(thunk.src_->source());
         svg_path_adapter svg_path(stl_storage);
-        svg_renderer_type svg_renderer(svg_path, thunk.attrs_);
+        svg_renderer_type svg_renderer(svg_path, thunk.group_attrs_);
         agg::trans_affine offset_tr = thunk.tr_;
         offset_tr.translate(offset_.x, offset_.y);
         agg::scanline_bin sl;

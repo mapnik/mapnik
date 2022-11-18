@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_bounding_box.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/safe_cast.hpp>
 
@@ -38,12 +39,15 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_conv_contour.h"
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
-#include "agg_bounding_rect.h"
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
+#include <vector>
 #include <deque>
 #include <stdexcept>
+
+#include <mapbox/variant.hpp>
+#include <mapnik/svg/svg_group.hpp>
 
 namespace mapnik {
 namespace svg {
@@ -53,30 +57,42 @@ class svg_converter : util::noncopyable
 {
   public:
 
-    svg_converter(VertexSource& source, AttributeSource& attributes)
-        : source_(source)
-        , attributes_(attributes)
-        , attr_stack_()
-        , svg_width_(0.0)
-        , svg_height_(0.0)
+    svg_converter(VertexSource& source, group& svg_group)
+        : source_(source),
+          svg_group_(svg_group),
+          attr_stack_(),
+          svg_width_(0.0),
+          svg_height_(0.0)
     {}
+
+    void begin_group()
+    {
+        current_group_->elements.emplace_back(group {cur_attr().opacity, {}, current_group_});
+        current_group_ = &current_group_->elements.back().get<group>();
+    }
+
+    void end_group()
+    {
+        current_group_ = current_group_->parent;
+    }
 
     void begin_path()
     {
         std::size_t idx = source_.start_new_path();
-        attributes_.emplace_back(cur_attr(), safe_cast<unsigned>(idx));
+        current_group_->elements.emplace_back(path_attributes {cur_attr(), safe_cast<unsigned>(idx)});
     }
 
     void end_path()
     {
-        if (attributes_.empty())
+        if (current_group_->elements.empty())
         {
             throw std::runtime_error("end_path : The path was not begun");
         }
-        path_attributes& attr = attributes_.back();
-        unsigned idx = attr.index;
-        attr = cur_attr();
-        attr.index = idx;
+        //auto& elem = current_group_->elements.back();
+        //auto& attr = elem.get<path_attributes>();
+        //unsigned index = attr.index;
+        //attr = cur_attr();
+        //attr.index = index;
     }
 
     void move_to(double x, double y, bool rel = false) // M, m
@@ -295,17 +311,10 @@ class svg_converter : util::noncopyable
     // Make all polygons CCW-oriented
     void arrange_orientations() { source_.arrange_orientations_all_paths(agg::path_flags_ccw); }
 
-    // FIXME!!!!
-    unsigned operator[](unsigned idx)
-    {
-        transform_ = attributes_[idx].transform;
-        return attributes_[idx].index;
-    }
-
     void bounding_rect(double* x1, double* y1, double* x2, double* y2)
     {
-        agg::conv_transform<mapnik::svg::svg_path_adapter> trans(source_, transform_);
-        agg::bounding_rect(trans, *this, 0, attributes_.size(), x1, y1, x2, y2);
+        agg::conv_transform<mapnik::svg::svg_path_adapter> path(source_, transform_);
+        bounding_box(path, svg_group_, *x1, *y1, *x2, *y2);
     }
 
     void set_dimensions(double w, double h)
@@ -334,7 +343,8 @@ class svg_converter : util::noncopyable
   private:
 
     VertexSource& source_;
-    AttributeSource& attributes_;
+    group& svg_group_;
+    group* current_group_ = &svg_group_;
     AttributeSource attr_stack_;
     agg::trans_affine transform_;
     double svg_width_;

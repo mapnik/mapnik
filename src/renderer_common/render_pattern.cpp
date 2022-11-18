@@ -47,11 +47,15 @@ void render_pattern<image_rgba8>(marker_svg const& marker,
                                  double opacity,
                                  image_rgba8& image)
 {
-    using pixfmt = agg::pixfmt_rgba32_pre;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using buf_type = agg::rendering_buffer;
+    using pixfmt = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
     using renderer_base = agg::renderer_base<pixfmt>;
     using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
-    agg::scanline_u8 sl;
 
+    agg::scanline_u8 sl;
     mapnik::box2d<double> const& bbox = marker.bounding_box() * tr;
     mapnik::coord<double, 2> c = bbox.center();
     agg::trans_affine mtx = agg::trans_affine_translation(-c.x, -c.y);
@@ -66,9 +70,8 @@ void render_pattern<image_rgba8>(marker_svg const& marker,
     svg_path_adapter svg_path(stl_storage);
     svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_solid, pixfmt> svg_renderer(
       svg_path,
-      marker.get_data()->attributes());
+      marker.get_data()->svg_group());
     rasterizer ras;
-
     svg_renderer.render(ras, sl, renb, mtx, opacity, bbox);
 }
 
