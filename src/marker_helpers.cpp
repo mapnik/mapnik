@@ -96,29 +96,34 @@ struct push_explicit_style
           stroke_opacity_(stroke_opacity)
     {}
 
-    void operator() (svg::group const& g) const
+    bool operator() (svg::group const& g) const
     {
         current_group_->elements.emplace_back(svg::group{g.opacity, {}, current_group_});
         current_group_ = &current_group_->elements.back().get<svg::group>();
+        bool success = false;
         for (auto const& elem : g.elements)
         {
-            mapbox::util::apply_visitor
+            if (mapbox::util::apply_visitor
                 (push_explicit_style(*current_group_,
                                      fill_color_,
                                      fill_opacity_,
                                      stroke_color_,
                                      stroke_width_,
-                                     stroke_opacity_), elem);
+                                     stroke_opacity_), elem))
+            {
+                success = true;
+            }
         }
         current_group_ = current_group_->parent;
+        return success;
     }
 
-    void operator() (svg::path_attributes const& attr) const
+    bool operator() (svg::path_attributes const& attr) const
     {
         svg::path_attributes new_attr{attr, attr.index};
 
         if (!attr.visibility_flag)
-                return;
+                return false;
 
         if (!attr.stroke_none)
         {
@@ -160,6 +165,7 @@ struct push_explicit_style
             }
         }
         current_group_->elements.emplace_back(new_attr);
+        return true;
     }
     mutable svg::group* current_group_;
     boost::optional<color> const& fill_color_;
@@ -182,19 +188,19 @@ bool push_explicit_style(svg::group const& src,
     auto stroke_color = get_optional<color>(sym, keys::stroke, feature, vars);
     auto stroke_width = get_optional<double>(sym, keys::stroke_width, feature, vars);
     auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity, feature, vars);
-
+    bool success = false;
     if (fill_color || fill_opacity || stroke_color || stroke_width || stroke_opacity)
     {
-
         for (auto const& elem : src.elements)
         {
-            mapbox::util::apply_visitor
+            if (mapbox::util::apply_visitor
                 (detail::push_explicit_style
                  (dst, fill_color, fill_opacity,
-                  stroke_color, stroke_width, stroke_opacity), elem);
+                  stroke_color, stroke_width, stroke_opacity), elem))
+                success = true;
         }
     }
-    return true;
+    return success;
 }
 
 void setup_transform_scaling(agg::trans_affine& tr,
