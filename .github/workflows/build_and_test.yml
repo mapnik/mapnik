@@ -1,0 +1,91 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches-ignore:
+      - "no-ci-*"
+
+env:
+  VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
+  VCPKG_NUGET_REPOSITORY: https://github.com/mathisloge/vcpkg-nuget.git
+
+jobs:
+  checkSource:
+    name: Check Source Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - uses: pre-commit/action@v3.0.0
+
+  buildAndTest:
+    name: Build and Test
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        memory-mapped: ["OFF", "ON"]
+        include:
+          - os: ubuntu-latest
+            mono: mono
+          - os: macos-latest
+            mono: mono
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: "Install required system packages"
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            choco install ninja OpenCppCoverage
+            echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt update
+            sudo apt install -y gperf libxxf86vm-dev ninja-build postgresql-client lcov autoconf-archive
+          else
+            brew install automake ninja lcov autoconf-archive
+          fi
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+          
+      - name: checkout mapnik
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: setup vcpkg
+        uses: ./.github/actions/setup_vcpkg
+        with:
+          vcpkg-sha: 34d2cf7e62d781f4bcb9c7f44f4d2389f568e92b
+          nuget-source: https://nuget.pkg.github.com/mapnik/index.json
+          nuget-username: ${{ github.actor }}
+          nuget-pat: ${{ secrets.GITHUB_TOKEN }}
+          mono: ${{ matrix.mono }}
+
+      - id: lc_platform
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ${{ runner.os }}
+          
+      - name: set lower case runner os
+        shell: "bash"
+        run: |
+          echo "PRESET=${{ steps.lc_platform.outputs.lowercase }}-ci" >>${GITHUB_ENV}
+
+      - name: Configure CMake
+        run: cmake -DUSE_MEMORY_MAPPED_FILE=${{ matrix.memory-mapped }} --preset ${{ env.PRESET }}
+
+      - name: Build
+        run: cmake --build --preset ${{ env.PRESET }}
+
+      - name: Run Tests
+        uses: ./.github/actions/run_tests
+        with:
+          cmake-preset: ${{ env.PRESET }}
