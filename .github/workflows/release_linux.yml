@@ -1,0 +1,55 @@
+name: Release Linux
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches-ignore:
+      - "no-ci-*"
+env: 
+  PRESET: linux-ci-release
+
+jobs:
+  build:
+    runs-on: "ubuntu-22.04"
+    steps:
+
+      - name: checkout mapnik
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: "Install required system packages"
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y ninja-build\
+            libicu-dev \
+            libfreetype6-dev \
+            libharfbuzz-dev \
+            libxml2-dev \
+            libjpeg-dev \
+            libtiff-dev \
+            libwebp-dev \
+            libcairo2-dev \
+            libproj-dev \
+            libgdal-dev \
+            libboost-filesystem-dev \
+            libboost-program-options-dev \
+            libboost-regex-dev
+
+      - name: Configure CMake
+        run: cmake --preset ${{ env.PRESET }}
+
+      - name: Build
+        run: cmake --build --preset ${{ env.PRESET }}
+
+      - name: Package
+        run: cmake --build --preset ${{ env.PRESET }} --target package
+
+      - name: Upload mapnik debian package
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.PRESET }}-deb
+          path: build/${{ env.PRESET }}/mapnik-*.deb
