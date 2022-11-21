@@ -293,7 +293,7 @@ class renderer_agg : util::noncopyable
                     mapbox::util::apply_visitor(
                         group_renderer(renderer_, ras_, sl_, ren, mtx_, opacity_, symbol_bbox_), elem);
                 }
-                ren_.blend_from(ren.ren(), 0, 0, 0, unsigned(g.opacity * 255));
+                ren_.blend_from(ren.ren(), 0, 0, 0, unsigned(opacity * 255));
             }
             else
             {
