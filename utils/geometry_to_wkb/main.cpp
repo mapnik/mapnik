@@ -56,7 +56,8 @@ int main(int argc, char** argv)
     try
     {
         ds = mapnik::datasource_cache::instance().create(p);
-    } catch (...)
+    }
+    catch (...)
     {
         std::cerr << "Can't create datasource!\n";
         return EXIT_FAILURE;

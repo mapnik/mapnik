@@ -107,12 +107,14 @@ int main(int argc, char** argv)
             std::cout << "output_table : " << output_table_name << "\n";
 
             mapnik::pgsql2sqlite(conn, query, output_table_name, output_file);
-        } catch (mapnik::datasource_exception& ex)
+        }
+        catch (mapnik::datasource_exception& ex)
         {
             std::cerr << ex.what() << "\n";
             return EXIT_FAILURE;
         }
-    } catch (std::exception& e)
+    }
+    catch (std::exception& e)
     {
         std::cerr << desc << "\n";
         std::cout << usage << "\n";

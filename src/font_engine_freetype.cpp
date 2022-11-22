@@ -216,7 +216,8 @@ bool freetype_engine::register_fonts_impl(std::string const& dir,
                 }
             }
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(font_engine_freetype) << "register_fonts: " << ex.what();
     }

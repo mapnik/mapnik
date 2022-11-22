@@ -3503,7 +3503,8 @@ class Capturer
         {                                                                                                              \
             static_cast<void>(__VA_ARGS__);                                                                            \
             catchAssertionHandler.handleExceptionNotThrownAsExpected();                                                \
-        } catch (...)                                                                                                  \
+        }                                                                                                              \
+        catch (...)                                                                                                    \
         {                                                                                                              \
             catchAssertionHandler.handleUnexpectedInflightException();                                                 \
         }                                                                                                              \
@@ -3523,7 +3524,8 @@ class Capturer
             {                                                                                                          \
                 static_cast<void>(__VA_ARGS__);                                                                        \
                 catchAssertionHandler.handleUnexpectedExceptionNotThrown();                                            \
-            } catch (...)                                                                                              \
+            }                                                                                                          \
+            catch (...)                                                                                                \
             {                                                                                                          \
                 catchAssertionHandler.handleExceptionThrownAsExpected();                                               \
             }                                                                                                          \
@@ -3546,10 +3548,12 @@ class Capturer
             {                                                                                                          \
                 static_cast<void>(expr);                                                                               \
                 catchAssertionHandler.handleUnexpectedExceptionNotThrown();                                            \
-            } catch (exceptionType const&)                                                                             \
+            }                                                                                                          \
+            catch (exceptionType const&)                                                                               \
             {                                                                                                          \
                 catchAssertionHandler.handleExceptionThrownAsExpected();                                               \
-            } catch (...)                                                                                              \
+            }                                                                                                          \
+            catch (...)                                                                                                \
             {                                                                                                          \
                 catchAssertionHandler.handleUnexpectedInflightException();                                             \
             }                                                                                                          \
@@ -3602,7 +3606,8 @@ class Capturer
             {                                                                                                          \
                 static_cast<void>(__VA_ARGS__);                                                                        \
                 catchAssertionHandler.handleUnexpectedExceptionNotThrown();                                            \
-            } catch (...)                                                                                              \
+            }                                                                                                          \
+            catch (...)                                                                                                \
             {                                                                                                          \
                 Catch::handleExceptionMatchExpr(catchAssertionHandler, matcher, #matcher##_catch_sr);                  \
             }                                                                                                          \
@@ -3849,7 +3854,8 @@ class ExceptionTranslatorRegistrar
                     std::rethrow_exception(std::current_exception());
                 else
                     return (*it)->translate(it + 1, itEnd);
-            } catch (T& ex)
+            }
+            catch (T& ex)
             {
                 return m_translateFunction(ex);
             }
@@ -4727,10 +4733,12 @@ auto makeMatchExpr(ArgT const& arg, MatcherT const& matcher, StringRef const& ma
             {                                                                                                          \
                 static_cast<void>(__VA_ARGS__);                                                                        \
                 catchAssertionHandler.handleUnexpectedExceptionNotThrown();                                            \
-            } catch (exceptionType const& ex)                                                                          \
+            }                                                                                                          \
+            catch (exceptionType const& ex)                                                                            \
             {                                                                                                          \
                 catchAssertionHandler.handleExpr(Catch::makeMatchExpr(ex, matcher, #matcher##_catch_sr));              \
-            } catch (...)                                                                                              \
+            }                                                                                                          \
+            catch (...)                                                                                                \
             {                                                                                                          \
                 catchAssertionHandler.handleUnexpectedInflightException();                                             \
             }                                                                                                          \
@@ -12197,7 +12205,8 @@ std::string ExceptionTranslatorRegistry::translateActiveException() const
         @try
         {
             return tryTranslators();
-        } @catch (NSException* exception)
+        }
+        @catch (NSException* exception)
         {
             return Catch::Detail::stringify([exception description]);
         }
@@ -12216,19 +12225,24 @@ std::string ExceptionTranslatorRegistry::translateActiveException() const
         }
         return tryTranslators();
 #endif
-    } catch (TestFailureException&)
+    }
+    catch (TestFailureException&)
     {
         std::rethrow_exception(std::current_exception());
-    } catch (std::exception& ex)
+    }
+    catch (std::exception& ex)
     {
         return ex.what();
-    } catch (std::string& msg)
+    }
+    catch (std::string& msg)
     {
         return msg;
-    } catch (const char* msg)
+    }
+    catch (const char* msg)
     {
         return msg;
-    } catch (...)
+    }
+    catch (...)
     {
         return "Unknown exception";
     }
@@ -15201,7 +15215,8 @@ Session::Session()
             try
             {
                 std::rethrow_exception(ex_ptr);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 Catch::cerr() << Column(ex.what()).indent(2) << '\n';
             }

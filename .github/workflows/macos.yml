@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Install required system packages
         run: |
-          brew install automake ninja lcov
+          brew install automake ninja lcov autoconf-archive
 
       - name: checkout mapnik
         uses: actions/checkout@v3

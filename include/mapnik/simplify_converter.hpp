@@ -184,6 +184,8 @@ struct simplify_converter
 
     unsigned output_vertex_distance(double* x, double* y)
     {
+        if (status_ == done)
+            return SEG_END;
         if (status_ == closing)
         {
             *x = *y = 0.0;
@@ -195,7 +197,12 @@ struct simplify_converter
         vertex2d vtx(vertex2d::no_init);
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
-            if (vtx.cmd == SEG_LINETO)
+            if (vtx.cmd == SEG_MOVETO)
+            {
+                start_vertex_ = vtx;
+                break;
+            }
+            else if (vtx.cmd == SEG_LINETO)
             {
                 if (distance_to_previous(vtx) > tolerance_)
                 {
@@ -227,15 +234,17 @@ struct simplify_converter
                 }
                 break;
             }
-            else if (vtx.cmd == SEG_MOVETO)
-            {
-                start_vertex_ = vtx;
-                break;
-            }
             else
             {
                 throw std::runtime_error("Unknown vertex command");
             }
+        }
+        if (vtx.cmd == SEG_END && last.cmd != SEG_END)
+        {
+            status_ = done;
+            *x = last.x;
+            *y = last.y;
+            return SEG_LINETO;
         }
 
         previous_vertex_ = vtx;

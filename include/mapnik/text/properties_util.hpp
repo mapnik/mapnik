@@ -63,7 +63,8 @@ struct set_property_from_xml_impl
             boost::optional<target_type> val_ = node.get_opt_attr<target_type>(name);
             if (val_)
                 val = *val_;
-        } catch (config_error const& ex)
+        }
+        catch (config_error const& ex)
         {
             boost::optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
             if (val_)
@@ -88,7 +89,8 @@ struct set_property_from_xml_impl<std::string, false>
             boost::optional<expression_ptr> val_ = node.get_opt_attr<expression_ptr>(name);
             if (val_)
                 val = *val_;
-        } catch (config_error const& ex)
+        }
+        catch (config_error const& ex)
         {
             boost::optional<target_type> val_ = node.get_opt_attr<target_type>(name);
             if (val_)
@@ -117,7 +119,8 @@ struct set_property_from_xml_impl<T0, true>
                 e.from_string(*enum_str);
                 val = enumeration_wrapper(e);
             }
-        } catch (...)
+        }
+        catch (...)
         {
             boost::optional<expression_ptr> expr = node.get_opt_attr<expression_ptr>(name);
             if (expr)

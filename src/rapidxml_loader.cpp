@@ -97,7 +97,8 @@ class rapidxml_loader : util::noncopyable
             {
                 populate_tree(child, node);
             }
-        } catch (rapidxml::parse_error const& e)
+        }
+        catch (rapidxml::parse_error const& e)
         {
             long line = static_cast<long>(std::count(&array.front(), e.where<char>(), '\n') + 1);
             throw config_error(e.what(), line, filename_);

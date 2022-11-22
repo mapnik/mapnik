@@ -306,7 +306,8 @@ void map_parser::parse_map(Map& map, xml_node const& node, std::string const& ba
             {
                 // create throwaway projection object here to ensure it is valid
                 projection proj(srs, true);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 throw mapnik::config_error(ex.what());
             }
@@ -387,14 +388,16 @@ void map_parser::parse_map(Map& map, xml_node const& node, std::string const& ba
                     }
                 }
             }
-        } catch (config_error const& ex)
+        }
+        catch (config_error const& ex)
         {
             ex.append_context(map_node);
             throw;
         }
 
         parse_map_include(map, map_node);
-    } catch (node_not_found const&)
+    }
+    catch (node_not_found const&)
     {
         throw config_error("Not a map file. Node 'Map' not found.");
     }
@@ -470,7 +473,8 @@ void map_parser::parse_map_include(Map& map, xml_node const& node)
                 }
             }
         }
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -569,7 +573,8 @@ void map_parser::parse_style(Map& map, xml_node const& node)
                 MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
             }
         }
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(std::string("in style '") + name + "'", node);
         throw;
@@ -594,8 +599,7 @@ void map_parser::parse_fontset(Map& map, xml_node const& node)
                 }
                 else
                 {
-                    // https://github.com/mapnik/mapnik/issues/1791
-                    MAPNIK_LOG_ERROR(fontset)
+                    MAPNIK_LOG_WARN(fontset)
                       << "warning: unable to find face-name '" << n.get_attr<std::string>("face-name", "")
                       << "' in FontSet '" << fontset.get_name() << "'";
                 }
@@ -612,7 +616,8 @@ void map_parser::parse_fontset(Map& map, xml_node const& node)
         // when it's parsed
         fontsets_.emplace(name, fontset);
         map.insert_fontset(name, std::move(fontset));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(std::string("in FontSet '") + name + "'", node);
         throw;
@@ -677,7 +682,8 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
         {
             // create throwaway projection object here to ensure it is valid
             projection proj(srs, true);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             throw mapnik::config_error(ex.what());
         }
@@ -861,10 +867,12 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
                 {
                     std::shared_ptr<datasource> ds = datasource_cache::instance().create(params);
                     lyr.set_datasource(ds);
-                } catch (std::exception const& ex)
+                }
+                catch (std::exception const& ex)
                 {
                     throw config_error(ex.what());
-                } catch (...)
+                }
+                catch (...)
                 {
                     throw config_error("Unknown exception occurred attempting to create datasoure for layer '" +
                                        lyr.name() + "'");
@@ -876,7 +884,8 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
             }
         }
         parent.add_layer(std::move(lyr));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         if (!name.empty())
         {
@@ -924,8 +933,8 @@ void map_parser::parse_rule(feature_type_style& style, xml_node const& node)
 
         parse_symbolizers(rule, node);
         style.add_rule(std::move(rule));
-
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         if (!name.empty())
         {
@@ -1044,7 +1053,8 @@ void map_parser::parse_point_symbolizer(rule& rule, xml_node const& node)
         }
 
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1062,7 +1072,8 @@ void map_parser::parse_dot_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, double>(sym, keys::height, node);
         set_symbolizer_property<symbolizer_base, composite_mode_e>(sym, keys::comp_op, node);
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1137,7 +1148,8 @@ void map_parser::parse_markers_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, direction_enum>(sym, keys::direction, node);
         parse_stroke(sym, node);
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1181,7 +1193,8 @@ void map_parser::parse_line_pattern_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, line_pattern_enum>(sym, keys::line_pattern, node);
         set_symbolizer_property<symbolizer_base, pattern_alignment_enum>(sym, keys::alignment, node);
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1221,7 +1234,8 @@ void map_parser::parse_polygon_pattern_symbolizer(rule& rule, xml_node const& no
         set_symbolizer_property<symbolizer_base, pattern_alignment_enum>(sym, keys::alignment, node);
         set_symbolizer_property<symbolizer_base, gamma_method_enum>(sym, keys::gamma_method, node);
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1258,7 +1272,8 @@ void map_parser::parse_text_symbolizer(rule& rule, xml_node const& node)
             set_symbolizer_property<symbolizer_base, value_double>(sym, keys::offset, node);
             rule.append(std::move(sym));
         }
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1333,7 +1348,8 @@ void map_parser::parse_shield_symbolizer(rule& rule, xml_node const& node)
         if (halo_rasterizer_)
             put(sym, keys::halo_rasterizer, halo_rasterizer_enum(*halo_rasterizer_));
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1364,7 +1380,8 @@ void map_parser::parse_line_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, double>(sym, keys::offset, node);
         set_symbolizer_property<symbolizer_base, line_rasterizer_enum>(sym, keys::line_rasterizer, node);
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1382,7 +1399,8 @@ void map_parser::parse_polygon_symbolizer(rule& rule, xml_node const& node)
         set_symbolizer_property<symbolizer_base, double>(sym, keys::gamma, node);
         set_symbolizer_property<symbolizer_base, gamma_method_enum>(sym, keys::gamma_method, node);
         rule.append(std::move(sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1402,7 +1420,8 @@ void map_parser::parse_building_symbolizer(rule& rule, xml_node const& node)
         if (height)
             put(building_sym, keys::height, *height);
         rule.append(std::move(building_sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1493,7 +1512,8 @@ void map_parser::parse_raster_symbolizer(rule& rule, xml_node const& node)
                 put(raster_sym, keys::colorizer, colorizer);
         }
         rule.append(std::move(raster_sym));
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1541,7 +1561,8 @@ void map_parser::parse_group_symbolizer(rule& rule, xml_node const& node)
         }
         put(symbol, keys::group_properties, prop);
         rule.append(std::move(symbol));
-    } catch (const config_error& ex)
+    }
+    catch (const config_error& ex)
     {
         ex.append_context(node);
         throw;
@@ -1636,7 +1657,8 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node
                 rc->add_stop(stop);
             }
         }
-    } catch (config_error const& ex)
+    }
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;
@@ -1677,7 +1699,8 @@ void map_parser::parse_group_rule(group_symbolizer_properties& prop, xml_node co
         }
 
         prop.add_rule(std::move(rule));
-    } catch (const config_error& ex)
+    }
+    catch (const config_error& ex)
     {
         ex.append_context(node);
         throw;

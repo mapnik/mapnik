@@ -218,7 +218,8 @@ void geojson_datasource::initialise_disk_index(std::string const& filename)
         try
         {
             mapnik::json::parse_feature(start, end, *feature, geojson_datasource_static_tr);
-        } catch (...)
+        }
+        catch (...)
         {
             throw std::runtime_error("Failed to parse geojson feature");
         }
@@ -237,7 +238,8 @@ void parse_geometry_or_feature(Iterator& itr, Iterator const& end, feature_impl&
     try
     {
         parse_feature(start, end, feature, tr);
-    } catch (...)
+    }
+    catch (...)
     {
         start = itr;
         parse_geometry(start, end, feature);
@@ -281,14 +283,16 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
                 try
                 {
                     mapnik::json::parse_feature(itr2, end2, *feature, geojson_datasource_static_tr);
-                } catch (...)
+                }
+                catch (...)
                 {
                     throw std::runtime_error("Failed to parse geojson feature");
                 }
                 initialise_descriptor(feature);
             }
         }
-    } catch (...)
+    }
+    catch (...)
     {
         cache_features_ = true; // force caching single feature
         itr = start;            // reset iteraror
@@ -297,7 +301,8 @@ void geojson_datasource::initialise_index(Iterator start, Iterator end)
         try
         {
             mapnik::json::parse_geometry_or_feature(itr, end, *feature, geojson_datasource_static_tr);
-        } catch (...)
+        }
+        catch (...)
         {
             if (from_inline_string_)
                 throw mapnik::datasource_exception(
@@ -361,7 +366,8 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
             mapnik::json::parse_feature(itr2, end2, *feature, geojson_datasource_static_tr);
             features_.push_back(std::move(feature));
         }
-    } catch (...)
+    }
+    catch (...)
     {
         itr = start;
         // try parsing as single Feature or single Geometry JSON
@@ -369,7 +375,8 @@ void geojson_datasource::parse_geojson(Iterator start, Iterator end)
         try
         {
             mapnik::json::parse_geometry_or_feature(itr, end, *feature, geojson_datasource_static_tr);
-        } catch (...)
+        }
+        catch (...)
         {
             if (from_inline_string_)
                 throw mapnik::datasource_exception(
@@ -471,7 +478,8 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             try
             {
                 mapnik::json::parse_feature(start, end, *feature, geojson_datasource_static_tr);
-            } catch (...)
+            }
+            catch (...)
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }
@@ -534,7 +542,8 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
             try
             {
                 mapnik::json::parse_feature(start2, end2, *feature, geojson_datasource_static_tr);
-            } catch (...)
+            }
+            catch (...)
             {
                 throw std::runtime_error("Failed to parse geojson feature");
             }

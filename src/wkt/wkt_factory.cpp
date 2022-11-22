@@ -36,7 +36,8 @@ bool from_wkt(std::string const& wkt, mapnik::geometry::geometry<double>& geom)
     try
     {
         result = x3::phrase_parse(itr, end, grammar::wkt, space, geom);
-    } catch (x3::expectation_failure<std::string::const_iterator> const& ex)
+    }
+    catch (x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         return false;
     }

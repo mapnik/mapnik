@@ -7,7 +7,8 @@
     try                                                                                                                \
     {                                                                                                                  \
         CHECK(expr);                                                                                                   \
-    } catch (Catch::TestFailureException&)                                                                             \
+    }                                                                                                                  \
+    catch (Catch::TestFailureException&)                                                                               \
     {                                                                                                                  \
         /* thrown by CHECK after it catches and reports */                                                             \
         /* an exception from expr => swallow this       */                                                             \
@@ -17,7 +18,8 @@
     try                                                                                                                \
     {                                                                                                                  \
         CHECK_FALSE(expr);                                                                                             \
-    } catch (Catch::TestFailureException&)                                                                             \
+    }                                                                                                                  \
+    catch (Catch::TestFailureException&)                                                                               \
     {}
 
 #endif // TEST_CATCH_EXT_HPP

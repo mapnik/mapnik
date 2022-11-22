@@ -210,7 +210,8 @@ text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontse
                     ptr->defaults.from_xml(xml, fontsets, is_shield);
                     return ptr;
                 }
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 // otherwise ensure it is valid
                 std::vector<directions_e> direction;

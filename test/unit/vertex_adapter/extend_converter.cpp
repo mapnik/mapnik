@@ -19,7 +19,8 @@ TEST_CASE("extend converter")
             mapnik::extend_converter<fake_path> c(path, 1000);
             double x, y;
             REQUIRE(c.vertex(&x, &y) == mapnik::SEG_END);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -38,7 +39,8 @@ TEST_CASE("extend converter")
             REQUIRE(y == 0);
             REQUIRE(c.vertex(&x, &y) == mapnik::SEG_END);
             REQUIRE(c.vertex(&x, &y) == mapnik::SEG_END);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -59,7 +61,8 @@ TEST_CASE("extend converter")
             REQUIRE(x == 1001);
             REQUIRE(y == 0);
             REQUIRE(c.vertex(&x, &y) == mapnik::SEG_END);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -83,7 +86,8 @@ TEST_CASE("extend converter")
             REQUIRE(x == 1002);
             REQUIRE(y == 0);
             REQUIRE(c.vertex(&x, &y) == mapnik::SEG_END);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -116,7 +120,8 @@ TEST_CASE("extend converter")
             REQUIRE(x == 1005);
             REQUIRE(y == 0);
             REQUIRE(c.vertex(&x, &y) == mapnik::SEG_END);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);

@@ -30,7 +30,8 @@ TEST_CASE("exceptions")
             // to avoid unused variable warning
             srs.params();
             REQUIRE(false);
-        } catch (...)
+        }
+        catch (...)
         {
             REQUIRE(true);
         }
@@ -44,7 +45,8 @@ TEST_CASE("exceptions")
             srs.init_proj();
             // oddly init_proj does not throw with old proj/ubuntu precise
             // REQUIRE(false);
-        } catch (...)
+        }
+        catch (...)
         {
             REQUIRE(true);
         }
@@ -53,7 +55,8 @@ TEST_CASE("exceptions")
         {
             mapnik::transcoder tr("bogus encoding");
             REQUIRE(false);
-        } catch (...)
+        }
+        catch (...)
         {
             REQUIRE(true);
         }
@@ -88,7 +91,8 @@ TEST_CASE("exceptions")
                 // should throw here with "CSV Plugin: no attribute 'foo'. Valid attributes are: x,y."
                 ren.apply();
                 REQUIRE(false);
-            } catch (...)
+            }
+            catch (...)
             {
                 REQUIRE(true);
             }
@@ -104,7 +108,8 @@ TEST_CASE("exceptions")
                 p2["file"] = "foo";
                 mapnik::datasource_cache::instance().create(p2);
                 REQUIRE(false);
-            } catch (...)
+            }
+            catch (...)
             {
                 REQUIRE(true);
             }

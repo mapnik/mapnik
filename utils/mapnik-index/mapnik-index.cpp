@@ -149,7 +149,8 @@ int main(int argc, char** argv)
         {
             use_bbox = true;
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << "Error: " << ex.what() << std::endl;
         return EXIT_FAILURE;

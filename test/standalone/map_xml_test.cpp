@@ -55,13 +55,13 @@ class tmp_dir
                     break;
                 }
             }
-
-        } catch (const std::exception& e)
+        }
+        catch (const std::exception& e)
         {
             std::cerr << "Exception caught while trying to remove "
                       << "temporary directory " << m_path << ": " << e.what() << "\n";
-
-        } catch (...)
+        }
+        catch (...)
         {
             std::cerr << "Unknown exception caught while trying to "
                       << "remove temporary directory " << m_path << "\n";
@@ -122,7 +122,8 @@ void load_map(mapnik::Map& m, bfs::path const& path)
     try
     {
         mapnik::load_map(m, path.generic_string());
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         // errors which come from the datasource not being loaded or
         // database not being set up aren't really useful - they're

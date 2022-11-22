@@ -109,7 +109,8 @@ TEST_CASE("clipping")
                 REQUIRE(clip_line(bbox, path) == mapnik::util::trim_copy(parts[2]));
             }
             stream.close();
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
         }
