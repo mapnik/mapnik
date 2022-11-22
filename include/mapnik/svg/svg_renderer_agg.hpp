@@ -475,12 +475,14 @@ class renderer_agg : util::noncopyable
     {
         grid_renderer(renderer_agg& renderer,
                       Rasterizer& ras, Scanline& sl, Renderer& ren,
-                      agg::trans_affine const& mtx)
+                      agg::trans_affine const& mtx,
+                      mapnik::value_integer const& feature_id)
             : renderer_(renderer),
               ras_(ras),
               sl_(sl),
               ren_(ren),
-              mtx_(mtx)
+              mtx_(mtx),
+              feature_id_(feature_id)
         {}
 
         void operator() (group const& g) const
@@ -488,7 +490,7 @@ class renderer_agg : util::noncopyable
             for (auto const& elem : g.elements)
             {
                 mapbox::util::apply_visitor(
-                    grid_renderer(renderer_, ras_, sl_, ren_, mtx_), elem);
+                    grid_renderer(renderer_, ras_, sl_, ren_, mtx_, feature_id_), elem);
             }
         }
         void operator() (path_attributes const& attr) const
@@ -513,7 +515,7 @@ class renderer_agg : util::noncopyable
             renderer_.curved_.approximation_scale(scl);
             renderer_.curved_.angle_tolerance(0.0);
 
-            typename PixelFormat::color_type color{0};
+            typename PixelFormat::color_type color{feature_id_};
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
@@ -567,6 +569,7 @@ class renderer_agg : util::noncopyable
         Scanline& sl_;
         Renderer& ren_;
         agg::trans_affine const& mtx_;
+        mapnik::value_integer const& feature_id_;
     };
 
     template<typename Rasterizer, typename Scanline, typename Renderer>
@@ -582,7 +585,7 @@ class renderer_agg : util::noncopyable
         for (auto const& elem : svg_group_.elements)
         {
             mapbox::util::apply_visitor(grid_renderer<Rasterizer, Scanline, Renderer>
-                                        (*this, ras, sl, ren, mtx), elem);
+                                        (*this, ras, sl, ren, mtx, feature_id), elem);
         }
     }
 #endif
