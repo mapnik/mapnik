@@ -265,7 +265,8 @@ TEST_CASE("offset converter")
                 // find the correspondance here.
                 offset_test::test_null_segment(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -283,7 +284,8 @@ TEST_CASE("offset converter")
                 // find the correspondance here.
                 offset_test::test_invalid_segment(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -301,7 +303,8 @@ TEST_CASE("offset converter")
                 // find the correspondance here.
                 offset_test::test_simple_segment(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -318,7 +321,8 @@ TEST_CASE("offset converter")
                 // test straight line consisting of more than one segment.
                 offset_test::test_straight_line(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -334,7 +338,8 @@ TEST_CASE("offset converter")
             {
                 offset_test::test_offset_curve(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);
@@ -350,7 +355,8 @@ TEST_CASE("offset converter")
             {
                 offset_test::test_s_shaped_curve(offset);
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::cerr << ex.what() << "\n";
             REQUIRE(false);

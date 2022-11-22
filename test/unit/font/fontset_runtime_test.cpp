@@ -64,7 +64,8 @@ TEST_CASE("fontset")
             mapnik::image_rgba8 buf(m.width(), m.height());
             mapnik::agg_renderer<mapnik::image_rgba8> ren(m, buf);
             ren.apply();
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             REQUIRE(std::string(ex.what()) ==
                     std::string("Unable to find specified font face 'DejaVu Sans Book' in font set: 'fontset'"));

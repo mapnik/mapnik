@@ -270,7 +270,8 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 }
             }
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "' (" << ex.what() << ")";
     }

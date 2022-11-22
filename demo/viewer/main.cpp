@@ -87,7 +87,8 @@ int main(int argc, char** argv)
                 window.set_scaling_factor(scaling_factor);
         }
         return app.exec();
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::cerr << "Could not start viewer: '" << ex.what() << "'\n";
         return 1;

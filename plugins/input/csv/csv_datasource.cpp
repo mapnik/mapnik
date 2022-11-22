@@ -287,7 +287,8 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
                     }
                     multi_type = type;
                 }
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 if (strict_)
                     throw ex;
@@ -333,7 +334,8 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
                     }
                     multi_type = type;
                 }
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 if (strict_)
                     throw ex;

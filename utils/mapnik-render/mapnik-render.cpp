@@ -176,7 +176,8 @@ int main(int argc, char** argv)
         {
             std::clog << "rendered to: " << img_file << "\n";
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << "Error " << ex.what() << std::endl;
         return -1;

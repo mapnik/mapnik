@@ -31,7 +31,7 @@ BraceWrapping:
   AfterNamespace: false
   AfterStruct: true
   AfterExternBlock: false
-  BeforeCatch: false
+  BeforeCatch: true
   BeforeElse: true
   BeforeLambdaBody: false
   BeforeWhile: false

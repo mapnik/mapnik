@@ -230,7 +230,8 @@ struct assign_value
                 try
                 {
                     val = parse_color(str);
-                } catch (...)
+                }
+                catch (...)
                 {
                     val = color(0, 0, 0);
                 }
@@ -266,7 +267,8 @@ std::tuple<T, bool> pre_evaluate_expression(expression_ptr const& expr)
     {
         return std::make_tuple(util::apply_visitor(mapnik::evaluate_expression<T, boost::none_t>(boost::none), *expr),
                                true);
-    } catch (...)
+    }
+    catch (...)
     {
         return std::make_tuple(T(), false);
     }

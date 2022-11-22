@@ -371,11 +371,13 @@ int main(int, char**)
 #endif
         // save map definition (data + style)
         save_map(m, "map.xml");
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::cerr << "### std::exception: " << ex.what() << std::endl;
         return EXIT_FAILURE;
-    } catch (...)
+    }
+    catch (...)
     {
         std::cerr << "### Unknown exception." << std::endl;
         return EXIT_FAILURE;

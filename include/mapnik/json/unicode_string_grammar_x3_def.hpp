@@ -69,7 +69,8 @@ auto push_utf16 = [](auto const& ctx) {
         {
             detail::push_utf8_impl(_val(ctx), *itr);
         }
-    } catch (...)
+    }
+    catch (...)
     {
         // caught
     }

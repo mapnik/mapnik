@@ -120,7 +120,8 @@ int main(int argc, char** argv)
         {
             shape_files = vm["shape_files"].as<std::vector<std::string>>();
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << "Error: " << ex.what() << std::endl;
         return EXIT_FAILURE;

@@ -187,7 +187,8 @@ TEST_CASE("blending")
               REQUIRE( to_string(blend<source_over_old_agg>(source,dest,cover)) == expected_str );
               }
             */
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << "\n";
             REQUIRE(false);

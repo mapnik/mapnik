@@ -244,11 +244,13 @@ int main(int argc, char** argv)
             main_marker_visitor visitor(svg_name, scale_factor, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << "Exception caught:" << ex.what() << std::endl;
         return -1;
-    } catch (...)
+    }
+    catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
         return -1;

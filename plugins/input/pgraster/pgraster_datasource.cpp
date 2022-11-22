@@ -256,7 +256,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     MAPNIK_LOG_DEBUG(pgraster) << "pgraster_datasource: no response from metadata query " << s.str();
                 }
                 rs->close();
-            } catch (mapnik::datasource_exception const& ex)
+            }
+            catch (mapnik::datasource_exception const& ex)
             {
                 // let this pass on query error and use the fallback below
                 MAPNIK_LOG_WARN(pgraster) << "pgraster_datasource: metadata query failed: " << ex.what();
@@ -565,7 +566,8 @@ pgraster_datasource::~pgraster_datasource()
                 {
                     conn->close();
                 }
-            } catch (mapnik::datasource_exception const& ex)
+            }
+            catch (mapnik::datasource_exception const& ex)
             {
                 // happens when borrowObject tries to
                 // create a new connection and fails.

@@ -46,7 +46,6 @@ class markers_vertex_last_placement : public markers_point_placement<Locator, De
         geometry::point<double> p_next;
         geometry::point<double> move_to;
         unsigned cmd0 = SEG_END;
-        unsigned cmd1 = SEG_END;
         unsigned cmd_next = SEG_END;
 
         while ((cmd_next = this->locator_.vertex(&p_next.x, &p_next.y)) != SEG_END)
@@ -60,13 +59,11 @@ class markers_vertex_last_placement : public markers_point_placement<Locator, De
                     break;
                 case SEG_LINETO:
                     p1 = p0;
-                    cmd1 = cmd0;
                     p0 = p_next;
                     cmd0 = cmd_next;
                     break;
                 case SEG_CLOSE:
                     p1 = p0;
-                    cmd1 = cmd0;
                     p0 = move_to;
                     cmd0 = cmd_next;
                     break;

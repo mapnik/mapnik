@@ -53,7 +53,8 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
         try
         {
             index_ = std::make_unique<shape_file>(shape_name + INDEX);
-        } catch (...)
+        }
+        catch (...)
         {
             MAPNIK_LOG_WARN(shape) << "shape_io: Could not open index=" << shape_name << INDEX;
         }
