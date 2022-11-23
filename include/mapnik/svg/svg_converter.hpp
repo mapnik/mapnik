@@ -65,6 +65,8 @@ class svg_converter : util::noncopyable
           svg_height_(0.0)
     {}
 
+    void set_opacity(double opacity) { svg_group_.opacity = opacity; }
+
     void begin_group()
     {
         current_group_->elements.emplace_back(group {cur_attr().opacity, {}, current_group_});

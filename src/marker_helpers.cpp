@@ -189,6 +189,7 @@ bool push_explicit_style(svg::group const& src,
     auto stroke_width = get_optional<double>(sym, keys::stroke_width, feature, vars);
     auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity, feature, vars);
     bool success = false;
+    dst.opacity = src.opacity;
     if (fill_color || fill_opacity || stroke_color || stroke_width || stroke_opacity)
     {
         for (auto const& elem : src.elements)

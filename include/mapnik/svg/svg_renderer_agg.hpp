@@ -145,10 +145,27 @@ class renderer_agg : util::noncopyable
                 box2d<double> const& symbol_bbox)
 
     {
-        for (auto const& elem : svg_group_.elements)
+        double adjusted_opacity = opacity * svg_group_.opacity; // adjust top level opacity
+        if (adjusted_opacity < 1.0)
         {
-            mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>
-                                        (*this, ras, sl, ren, mtx, opacity, symbol_bbox, true), elem);
+            mapnik::image_rgba8 im(ren.width(), ren.height(), true, true);
+            agg::rendering_buffer buf(im.bytes(), im.width(), im.height(), im.row_size());
+            PixelFormat pixf(buf);
+            Renderer ren_g(pixf);
+            for (auto const& elem : svg_group_.elements)
+            {
+                mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>
+                    (*this, ras, sl, ren_g, mtx, symbol_bbox), elem);
+            }
+            ren.blend_from(ren_g.ren(), 0, 0, 0, unsigned(adjusted_opacity * 255));
+        }
+        else
+        {
+            for (auto const& elem : svg_group_.elements)
+            {
+                mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>
+                                            (*this, ras, sl, ren, mtx, symbol_bbox), elem);
+            }
         }
     }
 
@@ -158,17 +175,13 @@ class renderer_agg : util::noncopyable
         group_renderer(renderer_agg& renderer,
                        Rasterizer & ras, Scanline& sl, Renderer& ren,
                        agg::trans_affine const& mtx,
-                       double opacity,
-                       box2d<double> const& symbol_bbox,
-                       bool first = false)
+                       box2d<double> const& symbol_bbox)
             : renderer_(renderer),
               ras_(ras),
               sl_(sl),
               ren_(ren),
               mtx_(mtx),
-              opacity_(opacity),
-              symbol_bbox_(symbol_bbox),
-              first_(first)
+              symbol_bbox_(symbol_bbox)
         {}
 
         void render_gradient(Rasterizer& ras,
@@ -281,7 +294,6 @@ class renderer_agg : util::noncopyable
         void operator() (group const& g) const
         {
             double opacity = g.opacity;
-            if (first_) opacity *= opacity_; // adjust top level opacity
             if (opacity < 1.0)
             {
                 mapnik::image_rgba8 im(ren_.width(), ren_.height(), true, true);
@@ -291,7 +303,7 @@ class renderer_agg : util::noncopyable
                 for (auto const& elem : g.elements)
                 {
                     mapbox::util::apply_visitor(
-                        group_renderer(renderer_, ras_, sl_, ren, mtx_, opacity_, symbol_bbox_), elem);
+                        group_renderer(renderer_, ras_, sl_, ren, mtx_, symbol_bbox_), elem);
                 }
                 ren_.blend_from(ren.ren(), 0, 0, 0, unsigned(opacity * 255));
             }
@@ -300,7 +312,7 @@ class renderer_agg : util::noncopyable
                 for (auto const& elem : g.elements)
                 {
                     mapbox::util::apply_visitor(
-                        group_renderer(renderer_, ras_, sl_, ren_, mtx_, opacity_, symbol_bbox_), elem);
+                        group_renderer(renderer_, ras_, sl_, ren_, mtx_, symbol_bbox_), elem);
                 }
             }
         }
@@ -463,9 +475,7 @@ class renderer_agg : util::noncopyable
         Scanline& sl_;
         Renderer& ren_;
         agg::trans_affine const& mtx_;
-        double opacity_;
         box2d<double> const& symbol_bbox_;
-        bool first_;
     };
 
 #if defined(GRID_RENDERER)

@@ -548,7 +548,9 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                         if (parser.css_style_)
                             process_css(parser, node);
                         parse_attr(parser, node);
+                        if (parser.path_.cur_attr().opacity < 1.0) parser.path_.begin_group();
                         parse_use(parser, node);
+                        if (parser.path_.cur_attr().opacity < 1.0) parser.path_.end_group();
                         parser.path_.pop_attr();
                         break;
                     default:
@@ -622,11 +624,10 @@ void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node)
     }
     else if (name == "svg"_case)
     {
-        parser.path_.end_group();
-        if (node->first_node() != nullptr)
-        {
-            parser.path_.pop_attr();
-        }
+        //if (node->first_node() != nullptr)
+        //{
+            //parser.path_.pop_attr();
+        //}
     }
     else if (name == "defs"_case)
     {
@@ -675,10 +676,10 @@ void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char
             parse_ellipse(parser, node);
             break;
         case "svg"_case:
-            parser.path_.begin_group();
-            parser.path_.push_attr();
+            //parser.path_.push_attr();
             parse_dimensions(parser, node);
             parse_attr(parser, node);
+            parser.path_.set_opacity(parser.path_.cur_attr().opacity);
             break;
         default:
             handle_unsupported(parser, unsupported_elements, name, "element");
