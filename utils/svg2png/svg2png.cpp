@@ -55,11 +55,12 @@ MAPNIK_DISABLE_WARNING_POP
 
 struct main_marker_visitor
 {
-    main_marker_visitor(std::string const& svg_name, double scale_factor, bool verbose, bool auto_open)
-        : svg_name_(svg_name)
-        , scale_factor_(scale_factor)
-        , verbose_(verbose)
-        , auto_open_(auto_open)
+    main_marker_visitor(std::string const& svg_name, double scale_factor, double opacity, bool verbose, bool auto_open)
+        : svg_name_(svg_name),
+          scale_factor_(scale_factor),
+          opacity_(opacity),
+          verbose_(verbose),
+          auto_open_(auto_open)
     {}
 
     int operator()(mapnik::marker_svg const& marker) const
@@ -80,7 +81,6 @@ struct main_marker_visitor
         agg::rasterizer_scanline_aa<> ras_ptr;
         agg::scanline_u8 sl;
 
-        double opacity = 1;
         double w, h;
         std::tie(w, h) = marker.dimensions();
         if (w == 0 || h == 0)
@@ -122,7 +122,7 @@ struct main_marker_visitor
         mapnik::svg::renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt>
             svg_renderer_this(svg_path, marker.get_data()->svg_group());
 
-        svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
+        svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity_, bbox);
 
         std::string png_name(svg_name_);
         boost::algorithm::ireplace_last(png_name, ".svg", ".png");
@@ -155,7 +155,8 @@ struct main_marker_visitor
 
   private:
     std::string svg_name_;
-    double scale_factor_ = 1.0;
+    double scale_factor_;
+    double opacity_;
     bool verbose_;
     bool auto_open_;
 };
@@ -171,6 +172,7 @@ int main(int argc, char** argv)
     std::vector<std::string> svg_files;
     mapnik::logger::instance().set_severity(mapnik::logger::error);
     double scale_factor = 1.0;
+    double opacity = 1.0;
     std::string usage = "Usage: svg2png [options] <svg-file(s)>";
     try
     {
@@ -183,6 +185,7 @@ int main(int argc, char** argv)
             ("open,o","automatically open the file after rendering (os x only)")
             ("strict,s","enables strict SVG parsing")
             ("scale-factor", po::value<double>(), "provide scaling factor (default: 1.0)")
+            ("opacity", po::value<double>(), "top level opacity (default: 1.0)")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
         // clang-format on
@@ -223,6 +226,10 @@ int main(int argc, char** argv)
         {
             scale_factor = vm["scale-factor"].as<double>();
         }
+        if (vm.count("opacity"))
+        {
+            opacity = vm["opacity"].as<double>();
+        }
         if (vm.count("svg"))
         {
             svg_files = vm["svg"].as<std::vector<std::string>>();
@@ -248,7 +255,7 @@ int main(int argc, char** argv)
             }
             std::shared_ptr<mapnik::marker const> marker =
               mapnik::marker_cache::instance().find(svg_name, false, strict);
-            main_marker_visitor visitor(svg_name, scale_factor, verbose, auto_open);
+            main_marker_visitor visitor(svg_name, scale_factor, opacity, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
     }
