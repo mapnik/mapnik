@@ -52,7 +52,6 @@
     },
     "icu",
     "libjpeg-turbo",
-    "libodb-pgsql",
     "libpng",
     "libpq",
     "libwebp",
