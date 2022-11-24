@@ -1570,11 +1570,18 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
         r = parse_svg_value(parser, attr->value(), has_percent);
     }
     // this logic for detecting %'s will not support mixed coordinates.
-    if (has_percent && gr.get_units() == USER_SPACE_ON_USE)
+    if (gr.get_units() == USER_SPACE_ON_USE)
     {
+        if (!has_percent && parser.path_.width() > 0 && parser.path_.height() > 0)
+        {
+            fx /= parser.path_.width();
+            fy /= parser.path_.height();
+            cx /= parser.path_.width();
+            cy /= parser.path_.height();
+            r  /= parser.path_.width();
+        }
         gr.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
     }
-
     gr.set_gradient_type(RADIAL);
     gr.set_control_points(fx, fy, cx, cy, r);
 
