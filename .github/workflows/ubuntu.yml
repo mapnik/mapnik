@@ -28,7 +28,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       postgres:
@@ -48,7 +48,7 @@ jobs:
       - name: Install required system packages
         shell: "bash"
         run: |
-          sudo apt-get install -y gperf libxxf86vm-dev ninja-build postgresql-client lcov
+          sudo apt-get install -y gperf libxxf86vm-dev ninja-build postgresql-client lcov autoconf-archive
 
       - name: checkout mapnik
         uses: actions/checkout@v3
