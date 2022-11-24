@@ -161,6 +161,15 @@ struct main_marker_visitor
     bool auto_open_;
 };
 
+void check_opacity_range(double opacity)
+{
+    using namespace boost::program_options;
+    if (opacity < 0.0 || opacity > 1.0)
+    {
+        throw invalid_option_value(std::to_string(opacity));
+    }
+}
+
 int main(int argc, char** argv)
 {
     namespace po = boost::program_options;
@@ -171,8 +180,8 @@ int main(int argc, char** argv)
     int status = 0;
     std::vector<std::string> svg_files;
     mapnik::logger::instance().set_severity(mapnik::logger::error);
-    double scale_factor = 1.0;
-    double opacity = 1.0;
+    double scale_factor;
+    double opacity;
     std::string usage = "Usage: svg2png [options] <svg-file(s)>";
     try
     {
@@ -184,8 +193,8 @@ int main(int argc, char** argv)
             ("verbose,v","verbose output")
             ("open,o","automatically open the file after rendering (os x only)")
             ("strict,s","enables strict SVG parsing")
-            ("scale-factor", po::value<double>(), "provide scaling factor (default: 1.0)")
-            ("opacity", po::value<double>(), "top level opacity (default: 1.0)")
+            ("scale-factor", po::value<double>()->default_value(1.0), "provide scaling factor (default: 1.0)")
+            ("opacity", po::value<double>()->default_value(1.0)->notifier(&check_opacity_range), "top level opacity (default: 1.0)")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
         // clang-format on
