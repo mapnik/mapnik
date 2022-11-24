@@ -37,7 +37,7 @@ void simplify(std::string const& wkt_in, double tolerance, std::string const& me
             output.emplace_back(x, y);
         }
         std::string wkt_out;
-        REQUIRE(mapnik::util::to_wkt(wkt_out, output));
+        REQUIRE(mapnik::util::to_wkt(wkt_out, mapnik::geometry::geometry<double>{output}));
         REQUIRE(wkt_out == expected);
     }
 }
