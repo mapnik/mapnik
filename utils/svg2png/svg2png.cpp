@@ -56,11 +56,11 @@ MAPNIK_DISABLE_WARNING_POP
 struct main_marker_visitor
 {
     main_marker_visitor(std::string const& svg_name, double scale_factor, double opacity, bool verbose, bool auto_open)
-        : svg_name_(svg_name),
-          scale_factor_(scale_factor),
-          opacity_(opacity),
-          verbose_(verbose),
-          auto_open_(auto_open)
+        : svg_name_(svg_name)
+        , scale_factor_(scale_factor)
+        , opacity_(opacity)
+        , verbose_(verbose)
+        , auto_open_(auto_open)
     {}
 
     int operator()(mapnik::marker_svg const& marker) const
@@ -68,7 +68,7 @@ struct main_marker_visitor
 #if 1
         using color_type = agg::rgba8;
         using order_type = agg::order_rgba;
-        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; //comp blender
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
         using buf_type = agg::rendering_buffer;
         using pixfmt = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
         using renderer_base = agg::renderer_base<pixfmt>;
@@ -120,7 +120,7 @@ struct main_marker_visitor
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
         mapnik::svg::renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt>
-            svg_renderer_this(svg_path, marker.get_data()->svg_group());
+          svg_renderer_this(svg_path, marker.get_data()->svg_group());
 
         svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity_, bbox);
 

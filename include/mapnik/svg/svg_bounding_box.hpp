@@ -33,29 +33,35 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 namespace svg {
 namespace detail {
-template <typename VertexSource>
+template<typename VertexSource>
 struct bounding_box
 {
     bounding_box(VertexSource& vs, double& x1, double& y1, double& x2, double& y2, bool& first)
-        : vs_(vs), x1_(x1), y1_(y1), x2_(x2), y2_(y2), first_(first) {}
+        : vs_(vs)
+        , x1_(x1)
+        , y1_(y1)
+        , x2_(x2)
+        , y2_(y2)
+        , first_(first)
+    {}
 
-    void operator() (group const& g) const
+    void operator()(group const& g) const
     {
         for (auto const& elem : g.elements)
         {
             mapbox::util::apply_visitor(bounding_box(vs_, x1_, y1_, x2_, y2_, first_), elem);
         }
     }
-    void operator() (path_attributes const& attr) const
+    void operator()(path_attributes const& attr) const
     {
         vs_.rewind(attr.index);
         vs_.transformer(const_cast<agg::trans_affine&>(attr.transform));
         unsigned cmd;
         double x;
         double y;
-        while(!is_stop(cmd = vs_.vertex(&x, &y)))
+        while (!is_stop(cmd = vs_.vertex(&x, &y)))
         {
-            if(is_vertex(cmd))
+            if (is_vertex(cmd))
             {
                 if (first_)
                 {
@@ -67,10 +73,14 @@ struct bounding_box
                 }
                 else
                 {
-                    if (x < x1_) x1_ = x;
-                    if (y < y1_) y1_ = y;
-                    if (x > x2_) x2_ = x;
-                    if (y > y2_) y2_ = y;
+                    if (x < x1_)
+                        x1_ = x;
+                    if (y < y1_)
+                        y1_ = y;
+                    if (x > x2_)
+                        x2_ = x;
+                    if (y > y2_)
+                        y2_ = y;
                 }
             }
         }
@@ -82,9 +92,9 @@ struct bounding_box
     double& y2_;
     bool& first_;
 };
-} // detail
+} // namespace detail
 
-template <typename VertexSource>
+template<typename VertexSource>
 void bounding_box(VertexSource& vs, group const& g, double& x1, double& y1, double& x2, double& y2)
 {
     bool first = true;
@@ -98,7 +108,7 @@ void bounding_box(VertexSource& vs, group const& g, double& x1, double& y1, doub
     }
 }
 
-} // svg
-} // mapnik
+} // namespace svg
+} // namespace mapnik
 
-#endif //MAPNIK_SVG_BOUNDING_BOX_HPP
+#endif // MAPNIK_SVG_BOUNDING_BOX_HPP

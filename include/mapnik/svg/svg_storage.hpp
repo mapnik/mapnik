@@ -40,7 +40,7 @@ class svg_storage : util::noncopyable
         , svg_height_(0)
     {}
 
-    VertexSource& source() { return source_;}
+    VertexSource& source() { return source_; }
 
     svg::group& svg_group() { return svg_group_; }
 

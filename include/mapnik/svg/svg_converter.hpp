@@ -58,30 +58,27 @@ class svg_converter : util::noncopyable
   public:
 
     svg_converter(VertexSource& source, group& svg_group)
-        : source_(source),
-          svg_group_(svg_group),
-          attr_stack_(),
-          svg_width_(0.0),
-          svg_height_(0.0)
+        : source_(source)
+        , svg_group_(svg_group)
+        , attr_stack_()
+        , svg_width_(0.0)
+        , svg_height_(0.0)
     {}
 
     void set_opacity(double opacity) { svg_group_.opacity = opacity; }
 
     void begin_group()
     {
-        current_group_->elements.emplace_back(group {cur_attr().opacity, {}, current_group_});
+        current_group_->elements.emplace_back(group{cur_attr().opacity, {}, current_group_});
         current_group_ = &current_group_->elements.back().get<group>();
     }
 
-    void end_group()
-    {
-        current_group_ = current_group_->parent;
-    }
+    void end_group() { current_group_ = current_group_->parent; }
 
     void begin_path()
     {
         std::size_t idx = source_.start_new_path();
-        current_group_->elements.emplace_back(path_attributes {cur_attr(), safe_cast<unsigned>(idx)});
+        current_group_->elements.emplace_back(path_attributes{cur_attr(), safe_cast<unsigned>(idx)});
     }
 
     void end_path()
@@ -90,11 +87,11 @@ class svg_converter : util::noncopyable
         {
             throw std::runtime_error("end_path : The path was not begun");
         }
-        //auto& elem = current_group_->elements.back();
-        //auto& attr = elem.get<path_attributes>();
-        //unsigned index = attr.index;
-        //attr = cur_attr();
-        //attr.index = index;
+        // auto& elem = current_group_->elements.back();
+        // auto& attr = elem.get<path_attributes>();
+        // unsigned index = attr.index;
+        // attr = cur_attr();
+        // attr.index = index;
     }
 
     void move_to(double x, double y, bool rel = false) // M, m

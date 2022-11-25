@@ -265,7 +265,7 @@ TEST_CASE("SVG parser")
         agg::line_cap_e expected_cap(agg::square_cap);
         REQUIRE(group_attrs.elements.size() == 1);
         // FIXME
-//REQUIRE(attrs[0].line_cap == expected_cap);
+        // REQUIRE(attrs[0].line_cap == expected_cap);
 
         double x, y;
         unsigned cmd;
@@ -432,7 +432,7 @@ TEST_CASE("SVG parser")
         agg::line_join_e expected_join(agg::bevel_join);
         REQUIRE(group_attrs.elements.size() == 1);
         // FIXME
-        //REQUIRE(attrs[0].line_join == expected_join);
+        // REQUIRE(attrs[0].line_join == expected_join);
     }
 
     SECTION("SVG <line>")
@@ -443,8 +443,9 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(0.3543307086614174,0.3543307086614174,
-                                              424.8425196850394059,141.3779527559055396));
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(0.3543307086614174, 0.3543307086614174, 424.8425196850394059, 141.3779527559055396));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -478,7 +479,7 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        REQUIRE(bbox == mapnik::box2d<double>(1.0, 1.0, 1199.0, 399.0));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -516,7 +517,7 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        REQUIRE(bbox == mapnik::box2d<double>(1.0, 1.0, 1199.0, 399.0));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -553,7 +554,7 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
+        REQUIRE(bbox == mapnik::box2d<double>(1.0, 1.0, 799.0, 599.0));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -649,15 +650,15 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,699.0,199.0));
+        REQUIRE(bbox == mapnik::box2d<double>(1.0, 1.0, 699.0, 199.0));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
 
         auto const& group_attrs = storage->svg_group();
         REQUIRE(group_attrs.elements.size() == 3);
- // FIXME
- //REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
+        // FIXME
+        // REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
 
         mapnik::svg::svg_path_adapter path(stl_storage);
         double x, y;
@@ -699,18 +700,18 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
+        REQUIRE(bbox == mapnik::box2d<double>(1.0, 1.0, 799.0, 599.0));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
         auto const& group_attrs = storage->svg_group();
         // FIXME
-        //REQUIRE(attrs.size() == 3);
-        //REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
-        //REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::RADIAL);
+        // REQUIRE(attrs.size() == 3);
+        // REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
+        // REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::RADIAL);
         agg::trans_affine transform;
         transform *= agg::trans_affine_translation(240, 155);
-        //REQUIRE(attrs[1].fill_gradient.get_transform() == transform);
+        // REQUIRE(attrs[1].fill_gradient.get_transform() == transform);
     }
 
     SECTION("SVG <gradient> with xlink:href")
@@ -721,16 +722,16 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(20,20,460,230));
+        REQUIRE(bbox == mapnik::box2d<double>(20, 20, 460, 230));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
         auto const& group_attrs = storage->svg_group();
         // FIXME
-        //REQUIRE(attrs.elements.size() == 2);
-        //REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::LINEAR);
-        //REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::LINEAR);
-        //REQUIRE(attrs[1].fill_gradient.has_stop());
+        // REQUIRE(attrs.elements.size() == 2);
+        // REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::LINEAR);
+        // REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::LINEAR);
+        // REQUIRE(attrs[1].fill_gradient.has_stop());
     }
 
     SECTION("SVG <gradient> with radial percents")
@@ -741,22 +742,22 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        REQUIRE(bbox == mapnik::box2d<double>(0,0,200,200));
+        REQUIRE(bbox == mapnik::box2d<double>(0, 0, 200, 200));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
         double x1, x2, y1, y2, r;
         // FIXME
-        //auto const& attrs = storage->attributes();
-        //REQUIRE(attrs.size() == 1);
-        //REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::RADIAL);
-        //REQUIRE(attrs[0].fill_gradient.has_stop());
-        //attrs[0].fill_gradient.get_control_points(x1, y1, x2, y2, r);
-        //REQUIRE(x1 == 0);
-        //REQUIRE(y1 == 0.25);
-        //REQUIRE(x2 == 0.10);
-        //REQUIRE(y2 == 0.10);
-        //REQUIRE(r == 0.75);
+        // auto const& attrs = storage->attributes();
+        // REQUIRE(attrs.size() == 1);
+        // REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::RADIAL);
+        // REQUIRE(attrs[0].fill_gradient.has_stop());
+        // attrs[0].fill_gradient.get_control_points(x1, y1, x2, y2, r);
+        // REQUIRE(x1 == 0);
+        // REQUIRE(y1 == 0.25);
+        // REQUIRE(x2 == 0.10);
+        // REQUIRE(y2 == 0.10);
+        // REQUIRE(r == 0.75);
     }
 
     SECTION("SVG <clipPath>")

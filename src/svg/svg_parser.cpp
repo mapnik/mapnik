@@ -548,9 +548,11 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                         if (parser.css_style_)
                             process_css(parser, node);
                         parse_attr(parser, node);
-                        if (parser.path_.cur_attr().opacity < 1.0) parser.path_.begin_group();
+                        if (parser.path_.cur_attr().opacity < 1.0)
+                            parser.path_.begin_group();
                         parse_use(parser, node);
-                        if (parser.path_.cur_attr().opacity < 1.0) parser.path_.end_group();
+                        if (parser.path_.cur_attr().opacity < 1.0)
+                            parser.path_.end_group();
                         parser.path_.pop_attr();
                         break;
                     default:
@@ -561,9 +563,11 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                         parse_attr(parser, node);
                         if (parser.path_.display())
                         {
-                            if (parser.path_.cur_attr().opacity < 1.0) parser.path_.begin_group();
+                            if (parser.path_.cur_attr().opacity < 1.0)
+                                parser.path_.begin_group();
                             parse_element(parser, node->name(), node);
-                            if (parser.path_.cur_attr().opacity < 1.0) parser.path_.end_group();
+                            if (parser.path_.cur_attr().opacity < 1.0)
+                                parser.path_.end_group();
                         }
                         parser.path_.pop_attr();
                 }
@@ -624,9 +628,9 @@ void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node)
     }
     else if (name == "svg"_case)
     {
-        //if (node->first_node() != nullptr)
+        // if (node->first_node() != nullptr)
         //{
-            //parser.path_.pop_attr();
+        // parser.path_.pop_attr();
         //}
     }
     else if (name == "defs"_case)
@@ -676,7 +680,7 @@ void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char
             parse_ellipse(parser, node);
             break;
         case "svg"_case:
-            //parser.path_.push_attr();
+            // parser.path_.push_attr();
             parse_dimensions(parser, node);
             parse_attr(parser, node);
             parser.path_.set_opacity(parser.path_.cur_attr().opacity);
@@ -1578,7 +1582,7 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
             fy /= parser.path_.height();
             cx /= parser.path_.width();
             cy /= parser.path_.height();
-            r  /= parser.path_.width();
+            r /= parser.path_.width();
         }
         gr.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
     }

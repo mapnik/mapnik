@@ -55,8 +55,7 @@ struct render_marker_symbolizer_visitor
         , renderer_context_(renderer_context)
     {}
 
-    svg::group const& get_marker_attributes(svg_path_ptr const& stock_marker,
-                                            svg::group& custom_group_attrs) const
+    svg::group const& get_marker_attributes(svg_path_ptr const& stock_marker, svg::group& custom_group_attrs) const
     {
         auto const& stock_group_attrs = stock_marker->svg_group();
         if (push_explicit_style(stock_group_attrs, custom_group_attrs, sym_, feature_, common_.vars_))
@@ -130,7 +129,7 @@ struct render_marker_symbolizer_visitor
         svg_path_ptr marker_ptr = stock_vector_marker;
         bool is_ellipse = false;
 
-        //svg_attribute_type s_attributes;
+        // svg_attribute_type s_attributes;
         svg::group svg_group_attrs;
         auto const& svg_group_attrs_updated = get_marker_attributes(stock_vector_marker, svg_group_attrs);
 

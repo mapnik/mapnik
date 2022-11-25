@@ -56,7 +56,6 @@ mapnik::image_rgba8 render_svg(std::string const& filename, double scale_factor)
     using renderer_base = agg::renderer_base<pixfmt>;
     using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
 
-
     agg::rasterizer_scanline_aa<> ras_ptr;
     agg::scanline_u8 sl;
 
@@ -78,9 +77,9 @@ mapnik::image_rgba8 render_svg(std::string const& filename, double scale_factor)
 
     mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(svg.get_data()->source());
     mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::
-        renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt>
-        renderer(svg_path, svg.get_data()->svg_group());
+    mapnik::svg::renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt> renderer(
+      svg_path,
+      svg.get_data()->svg_group());
     double opacity = 1.0;
     renderer.render(ras_ptr, sl, renb, mtx, opacity, {0, 0, svg_width, svg_height});
     return im;

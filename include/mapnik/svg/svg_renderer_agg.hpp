@@ -154,8 +154,9 @@ class renderer_agg : util::noncopyable
             Renderer ren_g(pixf);
             for (auto const& elem : svg_group_.elements)
             {
-                mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>
-                    (*this, ras, sl, ren_g, mtx, symbol_bbox), elem);
+                mapbox::util::apply_visitor(
+                  group_renderer<Rasterizer, Scanline, Renderer>(*this, ras, sl, ren_g, mtx, symbol_bbox),
+                  elem);
             }
             ren.blend_from(ren_g.ren(), 0, 0, 0, unsigned(adjusted_opacity * 255));
         }
@@ -163,8 +164,9 @@ class renderer_agg : util::noncopyable
         {
             for (auto const& elem : svg_group_.elements)
             {
-                mapbox::util::apply_visitor(group_renderer<Rasterizer, Scanline, Renderer>
-                                            (*this, ras, sl, ren, mtx, symbol_bbox), elem);
+                mapbox::util::apply_visitor(
+                  group_renderer<Rasterizer, Scanline, Renderer>(*this, ras, sl, ren, mtx, symbol_bbox),
+                  elem);
             }
         }
     }
@@ -173,15 +175,17 @@ class renderer_agg : util::noncopyable
     struct group_renderer
     {
         group_renderer(renderer_agg& renderer,
-                       Rasterizer & ras, Scanline& sl, Renderer& ren,
+                       Rasterizer& ras,
+                       Scanline& sl,
+                       Renderer& ren,
                        agg::trans_affine const& mtx,
                        box2d<double> const& symbol_bbox)
-            : renderer_(renderer),
-              ras_(ras),
-              sl_(sl),
-              ren_(ren),
-              mtx_(mtx),
-              symbol_bbox_(symbol_bbox)
+            : renderer_(renderer)
+            , ras_(ras)
+            , sl_(sl)
+            , ren_(ren)
+            , mtx_(mtx)
+            , symbol_bbox_(symbol_bbox)
         {}
 
         void render_gradient(Rasterizer& ras,
@@ -245,10 +249,10 @@ class renderer_agg : util::noncopyable
                 {
                     using gradient_adaptor_type = agg::gradient_radial_focus;
                     using span_gradient_type =
-                        agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
+                      agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
 
                     // the agg radial gradient assumes it is centred on 0
-                    transform.translate( -x2, -y2);
+                    transform.translate(-x2, -y2);
 
                     // scale everything up since agg turns things into integers a bit too soon
                     int scaleup = 255;
@@ -271,7 +275,7 @@ class renderer_agg : util::noncopyable
                 {
                     using gradient_adaptor_type = linear_gradient_from_segment;
                     using span_gradient_type =
-                        agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
+                      agg::span_gradient<agg::rgba8, interpolator_type, gradient_adaptor_type, color_func_type>;
                     // scale everything up since agg turns things into integers a bit too soon
                     int scaleup = 255;
                     x1 *= scaleup;
@@ -291,7 +295,7 @@ class renderer_agg : util::noncopyable
             }
         }
 
-        void operator() (group const& g) const
+        void operator()(group const& g) const
         {
             double opacity = g.opacity;
             if (opacity < 1.0)
@@ -302,8 +306,7 @@ class renderer_agg : util::noncopyable
                 Renderer ren(pixf);
                 for (auto const& elem : g.elements)
                 {
-                    mapbox::util::apply_visitor(
-                        group_renderer(renderer_, ras_, sl_, ren, mtx_, symbol_bbox_), elem);
+                    mapbox::util::apply_visitor(group_renderer(renderer_, ras_, sl_, ren, mtx_, symbol_bbox_), elem);
                 }
                 ren_.blend_from(ren.ren(), 0, 0, 0, unsigned(opacity * 255));
             }
@@ -311,13 +314,12 @@ class renderer_agg : util::noncopyable
             {
                 for (auto const& elem : g.elements)
                 {
-                    mapbox::util::apply_visitor(
-                        group_renderer(renderer_, ras_, sl_, ren_, mtx_, symbol_bbox_), elem);
+                    mapbox::util::apply_visitor(group_renderer(renderer_, ras_, sl_, ren_, mtx_, symbol_bbox_), elem);
                 }
             }
         }
 
-        void operator() (path_attributes const& attr) const
+        void operator()(path_attributes const& attr) const
         {
             using namespace agg;
             trans_affine transform;
@@ -328,7 +330,8 @@ class renderer_agg : util::noncopyable
             curved_trans_contour_type curved_trans_contour(curved_trans);
             curved_trans_contour.auto_detect_orientation(true);
 
-            if (!attr.visibility_flag) return;
+            if (!attr.visibility_flag)
+                return;
 
             transform = attr.transform;
 
@@ -484,26 +487,27 @@ class renderer_agg : util::noncopyable
     struct grid_renderer
     {
         grid_renderer(renderer_agg& renderer,
-                      Rasterizer& ras, Scanline& sl, Renderer& ren,
+                      Rasterizer& ras,
+                      Scanline& sl,
+                      Renderer& ren,
                       agg::trans_affine const& mtx,
                       mapnik::value_integer const& feature_id)
-            : renderer_(renderer),
-              ras_(ras),
-              sl_(sl),
-              ren_(ren),
-              mtx_(mtx),
-              feature_id_(feature_id)
+            : renderer_(renderer)
+            , ras_(ras)
+            , sl_(sl)
+            , ren_(ren)
+            , mtx_(mtx)
+            , feature_id_(feature_id)
         {}
 
-        void operator() (group const& g) const
+        void operator()(group const& g) const
         {
             for (auto const& elem : g.elements)
             {
-                mapbox::util::apply_visitor(
-                    grid_renderer(renderer_, ras_, sl_, ren_, mtx_, feature_id_), elem);
+                mapbox::util::apply_visitor(grid_renderer(renderer_, ras_, sl_, ren_, mtx_, feature_id_), elem);
             }
         }
-        void operator() (path_attributes const& attr) const
+        void operator()(path_attributes const& attr) const
         {
             using namespace agg;
 
@@ -594,8 +598,9 @@ class renderer_agg : util::noncopyable
     {
         for (auto const& elem : svg_group_.elements)
         {
-            mapbox::util::apply_visitor(grid_renderer<Rasterizer, Scanline, Renderer>
-                                        (*this, ras, sl, ren, mtx, feature_id), elem);
+            mapbox::util::apply_visitor(
+              grid_renderer<Rasterizer, Scanline, Renderer>(*this, ras, sl, ren, mtx, feature_id),
+              elem);
         }
     }
 #endif

@@ -146,7 +146,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     box2d<double> clip_box = common_.query_extent_;
 
     using renderer_context_type =
-        detail::grid_markers_renderer_context<svg_renderer_type, renderer_type, buf_type, grid_rasterizer, buffer_type>;
+      detail::grid_markers_renderer_context<svg_renderer_type, renderer_type, buf_type, grid_rasterizer, buffer_type>;
     renderer_context_type renderer_context(feature, render_buf, *ras_ptr, pixmap_);
 
     render_markers_symbolizer(sym, feature, prj_trans, common_, clip_box, renderer_context);

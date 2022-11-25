@@ -88,28 +88,28 @@ struct push_explicit_style
                         boost::optional<color> const& stroke_color,
                         boost::optional<double> const& stroke_width,
                         boost::optional<double> const& stroke_opacity)
-        : current_group_(&dst),
-          fill_color_(fill_color),
-          fill_opacity_(fill_opacity),
-          stroke_color_(stroke_color),
-          stroke_width_(stroke_width),
-          stroke_opacity_(stroke_opacity)
+        : current_group_(&dst)
+        , fill_color_(fill_color)
+        , fill_opacity_(fill_opacity)
+        , stroke_color_(stroke_color)
+        , stroke_width_(stroke_width)
+        , stroke_opacity_(stroke_opacity)
     {}
 
-    bool operator() (svg::group const& g) const
+    bool operator()(svg::group const& g) const
     {
         current_group_->elements.emplace_back(svg::group{g.opacity, {}, current_group_});
         current_group_ = &current_group_->elements.back().get<svg::group>();
         bool success = false;
         for (auto const& elem : g.elements)
         {
-            if (mapbox::util::apply_visitor
-                (push_explicit_style(*current_group_,
-                                     fill_color_,
-                                     fill_opacity_,
-                                     stroke_color_,
-                                     stroke_width_,
-                                     stroke_opacity_), elem))
+            if (mapbox::util::apply_visitor(push_explicit_style(*current_group_,
+                                                                fill_color_,
+                                                                fill_opacity_,
+                                                                stroke_color_,
+                                                                stroke_width_,
+                                                                stroke_opacity_),
+                                            elem))
             {
                 success = true;
             }
@@ -118,12 +118,12 @@ struct push_explicit_style
         return success;
     }
 
-    bool operator() (svg::path_attributes const& attr) const
+    bool operator()(svg::path_attributes const& attr) const
     {
         svg::path_attributes new_attr{attr, attr.index};
 
         if (!attr.visibility_flag)
-                return false;
+            return false;
 
         if (!attr.stroke_none)
         {
@@ -175,7 +175,7 @@ struct push_explicit_style
     boost::optional<double> const& stroke_opacity_;
 };
 
-} // detail
+} // namespace detail
 
 bool push_explicit_style(svg::group const& src,
                          svg::group& dst,
@@ -194,10 +194,13 @@ bool push_explicit_style(svg::group const& src,
     {
         for (auto const& elem : src.elements)
         {
-            if (mapbox::util::apply_visitor
-                (detail::push_explicit_style
-                 (dst, fill_color, fill_opacity,
-                  stroke_color, stroke_width, stroke_opacity), elem))
+            if (mapbox::util::apply_visitor(detail::push_explicit_style(dst,
+                                                                        fill_color,
+                                                                        fill_opacity,
+                                                                        stroke_color,
+                                                                        stroke_width,
+                                                                        stroke_opacity),
+                                            elem))
                 success = true;
         }
     }

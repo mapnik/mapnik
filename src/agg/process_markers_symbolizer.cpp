@@ -89,7 +89,8 @@ struct agg_markers_renderer_context : markers_renderer_context
                              params.snap_to_pixels);
     }
 
-    virtual void render_marker(image_rgba8 const& src, markers_dispatch_params const& params, agg::trans_affine const& marker_tr)
+    virtual void
+      render_marker(image_rgba8 const& src, markers_dispatch_params const& params, agg::trans_affine const& marker_tr)
     {
         // In the long term this should be a visitor pattern based on the type of
         // render src provided that converts the destination pixel type required.

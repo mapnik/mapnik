@@ -23,7 +23,6 @@
 #ifndef MAPNIK_SVG_GROUP_HPP
 #define MAPNIK_SVG_GROUP_HPP
 
-
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapbox/variant.hpp>
@@ -43,7 +42,7 @@ struct group
     group* parent = nullptr;
 };
 
-} // svg
-} // mapnik
+} // namespace svg
+} // namespace mapnik
 
-#endif //MAPNIK_SVG_GROUP_HPP
+#endif // MAPNIK_SVG_GROUP_HPP

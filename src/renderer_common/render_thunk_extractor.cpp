@@ -57,7 +57,7 @@ struct thunk_markers_renderer_context : markers_renderer_context
     }
 
     virtual void
-    render_marker(image_rgba8 const& src, markers_dispatch_params const& params, agg::trans_affine const& marker_tr)
+      render_marker(image_rgba8 const& src, markers_dispatch_params const& params, agg::trans_affine const& marker_tr)
     {
         raster_marker_render_thunk thunk(src, marker_tr, params.opacity, comp_op_, params.snap_to_pixels);
         thunks_.emplace_back(std::move(thunk));
