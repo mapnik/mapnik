@@ -49,10 +49,13 @@ struct group_renderer
         double opacity = g.opacity;
         if (opacity < 1.0)
         {
+            context_.push_group();
             for (auto const& elem : g.elements)
             {
                 mapbox::util::apply_visitor(group_renderer(transform_, context_, svg_path_, bbox_), elem);
             }
+            context_.pop_group();
+            context_.paint(opacity);
         }
         else
         {
@@ -159,10 +162,13 @@ void render_vector_marker(cairo_context& context,
     double adjusted_opacity = opacity * group_attrs.opacity; // adjust top level opacity
     if (adjusted_opacity < 1.0)
     {
+        context.push_group();
         for (auto const& elem : group_attrs.elements)
         {
             mapbox::util::apply_visitor(group_renderer(tr, context, svg_path, bbox), elem);
         }
+        context.pop_group();
+        context.paint(opacity);
     }
     else
     {
