@@ -104,7 +104,7 @@ jobs:
         continue-on-error: true
         working-directory: build/${{ env.preset }}/out
         env:
-          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-osx/share/proj/data
+          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-osx/share/proj
         run: ./mapnik-test-visual -j $(sysctl -n hw.logicalcpu) --output-dir ./visual-test-result
 
       - name: Pack visual test results
@@ -114,7 +114,7 @@ jobs:
       - name: Run Benchmark
         working-directory: build/${{ env.preset }}/out
         env:
-          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-osx/share/proj/data
+          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-osx/share/proj
         run: ./run_benchmarks
 
       - name: Coverage

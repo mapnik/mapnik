@@ -107,7 +107,7 @@ jobs:
         continue-on-error: true
         working-directory: build/${{ env.preset }}/out
         env:
-          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj/data
+          PROJ_LIB: ${{ github.workspace }}/build/${{ env.preset }}/vcpkg_installed/x64-windows/share/proj
         run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --input_coverage=${{ github.workspace }}/ctest.cov --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
 
       - name: Pack visual test results
