@@ -26,6 +26,7 @@ jobs:
 
   buildAndTest:
     name: Build and Test
+    needs: checkSource
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
