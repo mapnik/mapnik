@@ -34,7 +34,7 @@ class cairo_context;
 
 void render_vector_marker(cairo_context& context,
                           svg_path_adapter& svg_path,
-                          svg_attribute_type const& attributes,
+                          svg::group const& group_attr,
                           box2d<double> const& bbox,
                           agg::trans_affine const& tr,
                           double opacity);

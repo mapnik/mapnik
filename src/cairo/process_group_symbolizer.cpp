@@ -73,7 +73,7 @@ struct thunk_renderer : render_thunk_list_dispatch
         offset_tr.translate(offset_.x, offset_.y);
         mapnik::render_vector_marker(context_,
                                      svg_path,
-                                     thunk.attrs_,
+                                     thunk.group_attrs_,
                                      thunk.src_->bounding_box(),
                                      offset_tr,
                                      thunk.opacity_);

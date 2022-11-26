@@ -269,11 +269,10 @@ struct cairo_render_marker_visitor
                 marker_tr *= tr_;
             }
             marker_tr *= agg::trans_affine_scaling(common_.scale_factor_);
-            auto const& attributes = vmarker->attributes();
             svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(vmarker->source());
             svg::svg_path_adapter svg_path(stl_storage);
             marker_tr.translate(pos_.x, pos_.y);
-            render_vector_marker(context_, svg_path, attributes, bbox, marker_tr, opacity_);
+            render_vector_marker(context_, svg_path, vmarker->svg_group(), bbox, marker_tr, opacity_);
         }
     }
 
