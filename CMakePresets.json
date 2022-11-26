@@ -1,8 +1,8 @@
 {
-    "version": 2,
+    "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 20,
+        "minor": 25,
         "patch": 0
     },
     "configurePresets": [
@@ -214,6 +214,19 @@
             }
         },
         {
+            "name": "linux-ci-release",
+            "description": "used by the ci pipeline for releasing",
+            "inherits": [
+                "release-build",
+                "linux-gcc-release"
+            ],
+            "cacheVariables": {
+                "BUILD_TESTING": "OFF",
+                "BUILD_DEMO_VIEWER": "OFF",
+                "USE_MEMORY_MAPPED_FILE": "ON"
+            }
+        },
+        {
             "name": "macos-ci",
             "description": "used by the ci pipeline",
             "inherits": [
@@ -262,6 +275,10 @@
         {
             "name": "linux-ci",
             "configurePreset": "linux-ci"
+        },
+        {
+            "name": "linux-ci-release",
+            "configurePreset": "linux-ci-release"
         },
         {
             "name": "macos-ci",
