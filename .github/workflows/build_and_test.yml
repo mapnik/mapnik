@@ -28,6 +28,7 @@ jobs:
     name: Build and Test
     needs: checkSource
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         memory-mapped: ["OFF", "ON"]
