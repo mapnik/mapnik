@@ -62,6 +62,8 @@ mapnik_option(USE_LOG "enables logging output. See log severity level." OFF)
 set(USE_LOG_SEVERITY "1" CACHE STRING "sets the logging severity (only applies when USE_LOG is ON")
 mapnik_option(USE_STATS "Enable statistics reporting" OFF)
 
+mapnik_option(DISABLE_MAPNIK_AUTOSETUP "disables the autosetup. Need to call mapnik::setup() then" OFF)
+
 mapnik_option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 mapnik_option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
 mapnik_option(USE_PLUGIN_INPUT_GEOBUF "adds plugin input geobuf" ON)
@@ -359,6 +361,10 @@ endif()
 # when building static, this have to be public so that all depending libs know about
 if(NOT BUILD_SHARED_LIBS)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_DEFINE)
+endif()
+
+if(DISABLE_MAPNIK_AUTOSETUP)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DISABLE_AUTOSETUP)
 endif()
 
 # force utf-8 source code processing

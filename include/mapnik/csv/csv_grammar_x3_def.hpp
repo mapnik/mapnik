@@ -56,7 +56,7 @@ struct unesc_char_csv_ : x3::symbols<char>
           ("\"\"", '\"') // double quote
           ;
     }
-} unesc_char_csv;
+} const unesc_char_csv;
 
 template<typename T>
 struct literal : x3::parser<literal<T>>

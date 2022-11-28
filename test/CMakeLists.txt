@@ -108,6 +108,7 @@ target_link_libraries(mapnik-test-unit PUBLIC
     mapnik::json
     mapnik::wkt
     PostgreSQL::PostgreSQL
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 # workaround since the "offical" include dir would be <catch2/catch.hpp>
 file(COPY catch_ext.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
@@ -120,6 +121,7 @@ target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
     mapnik::mapnik
     mapnik::agg
     mapnik::json
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(agg_rasterizer_integer_overflow_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -128,6 +130,7 @@ target_link_libraries(datasource_registration_test PUBLIC
     Catch2::Catch2
     mapnik::mapnik
     mapnik::agg
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(datasource_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -137,6 +140,7 @@ target_link_libraries(font_registration_test PUBLIC
     mapnik::mapnik
     mapnik::agg
     mapnik::json
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(font_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -146,6 +150,7 @@ target_link_libraries(map_xml_test PUBLIC
     mapnik::mapnik
     mapnik::agg
     mapnik::json
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(map_xml_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 

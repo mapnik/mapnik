@@ -57,41 +57,35 @@ namespace x3 = boost::spirit::x3;
 
 namespace image_filter {
 
-using x3::attr;
-using x3::char_;
 using x3::double_;
-using x3::hex;
 using x3::lit;
-using x3::no_case;
-using x3::no_skip;
-using x3::omit;
 using x3::symbols;
 using x3::uint_parser;
 
-auto push_back = [](auto& ctx) {
+const auto push_back = [](auto& ctx) {
     _val(ctx).push_back(_attr(ctx));
 };
 
-auto set_rx_ry = [](auto& ctx) {
+const auto set_rx_ry = [](auto& ctx) {
     _val(ctx).rx = _val(ctx).ry = _attr(ctx);
 };
 
-auto set_ry = [](auto& ctx) {
+const auto set_ry = [](auto& ctx) {
     _val(ctx).ry = _attr(ctx);
 };
 
-auto offset_value = [](auto& ctx) {
+const auto offset_value = [](auto& ctx) {
     _val(ctx) = _attr(ctx);
 };
 
-auto percent = [](auto& ctx) {
+const auto percent = [](auto& ctx) {
     double val = std::abs(_val(ctx) / 100.0);
     if (val > 1.0)
         val = 1.0;
     _val(ctx) = val;
 };
 
-x3::uint_parser<unsigned, 10, 1, 3> radius;
+const x3::uint_parser<unsigned, 10, 1, 3> radius;
 
 // Import the expression rule
 namespace {
