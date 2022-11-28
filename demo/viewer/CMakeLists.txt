@@ -46,6 +46,7 @@ target_link_libraries(mapnik-viewer PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     mapnik::agg
     mapnik::mapnik
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini

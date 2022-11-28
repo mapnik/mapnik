@@ -40,7 +40,8 @@ void register_image_readers()
 }
 } // namespace mapnik
 
-#if !defined(MAPNIK_STATIC_PLUGINS) || !defined(_WIN32)
+// only on other systems then windows and in shared builds
+#if !defined(MAPNIK_DISABLE_AUTOSETUP) && MAPNIK_STATIC_PLUGINS == 0 && !defined(_WIN32)
 namespace {
 class AutoSetup final
 {

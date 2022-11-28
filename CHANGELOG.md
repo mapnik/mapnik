@@ -17,7 +17,7 @@ For a complete change history, see the git log.
 #### Breaking Changes
 
 - Reworked datasource plugin system. Plugins now need to implement a class with the macros in `datasource_plugin.hpp` ([#4291](https://github.com/mapnik/mapnik/pull/4291))
-- mapnik now has a global `mapnik::setup()` method which have to be called before any other functions of mapnik. Defined in `mapnik.hpp`. Note: In order not to insert this change into every code base, it is currently still called during the dynamic initialisation time. However, if mapnik is compiled statically, this function must be called.  ([#4291](https://github.com/mapnik/mapnik/pull/4291))
+- mapnik now has a global `mapnik::setup()` method which have to be called before any other functions of mapnik. Defined in `mapnik.hpp`. Currently there is a auto setup functionality. It can be disabled using the cmake option `DISABLE_MAPNIK_AUTOSETUP=ON`. Note: In order not to insert this change into every code base, it is currently still called during the dynamic initialisation time. However, if mapnik is compiled statically, this function must be called.  ([#4291](https://github.com/mapnik/mapnik/pull/4291))
 
 #### Core
 
