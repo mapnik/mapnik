@@ -114,7 +114,8 @@ int main(int argc, char** argv)
             test2 test_runner2(params);
             return_value = return_value | run(test_runner2, "csv_utils::getline_csv");
         }
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::clog << ex.what() << "\n";
         return -1;

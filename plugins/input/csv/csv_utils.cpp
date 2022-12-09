@@ -329,7 +329,8 @@ void csv_file_parser::parse_csv_and_boxes(std::istream& csv_file, T& boxes)
                     ++line_number;
                     break;
                 }
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 std::string s("CSV Plugin: error parsing headers: ");
                 s += ex.what();
@@ -431,7 +432,8 @@ void csv_file_parser::parse_csv_and_boxes(std::istream& csv_file, T& boxes)
                   << values.at(locator_.index) << "'";
                 throw mapnik::datasource_exception(s.str());
             }
-        } catch (mapnik::datasource_exception const& ex)
+        }
+        catch (mapnik::datasource_exception const& ex)
         {
             if (strict_)
                 throw ex;
@@ -439,7 +441,8 @@ void csv_file_parser::parse_csv_and_boxes(std::istream& csv_file, T& boxes)
             {
                 MAPNIK_LOG_ERROR(csv) << ex.what() << " at line: " << line_number;
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::ostringstream s;
             s << "CSV Plugin: unexpected error parsing line: " << line_number << " - found " << headers_.size()

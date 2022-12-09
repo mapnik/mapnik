@@ -19,7 +19,8 @@ TEST_CASE("symbolizer")
             REQUIRE(sym.properties.count(keys::markers_multipolicy) == static_cast<unsigned long>(1));
             marker_multi_policy_enum policy_out = get<mapnik::marker_multi_policy_enum>(sym, keys::markers_multipolicy);
             REQUIRE(policy_out == MARKER_WHOLE_MULTI);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << std::endl;
             REQUIRE(false);

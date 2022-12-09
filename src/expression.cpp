@@ -46,11 +46,13 @@ expression_ptr parse_expression(std::string const& str)
     try
     {
         r = boost::spirit::x3::phrase_parse(itr, end, parser, space, *node);
-    } catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         // no need to show "boost::spirit::x3::expectation_failure" which is a std::runtime_error
         throw config_error("Failed to parse expression: \"" + str + "\"");
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         // show "Could not initialize ICU resources" from boost::regex which is a std::runtime_error
         throw config_error(std::string(ex.what()) + " for expression: \"" + str + "\"");

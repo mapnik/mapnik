@@ -80,7 +80,8 @@ TEST_CASE("image io")
             {
                 std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw, *type));
                 REQUIRE(false);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 REQUIRE(
                   std::string(ex.what()) ==
@@ -132,7 +133,8 @@ TEST_CASE("image io")
             REQUIRE(type);
             REQUIRE_THROWS(mapnik::get_image_reader(should_throw, *type));
 #endif
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << "\n";
             REQUIRE(false);

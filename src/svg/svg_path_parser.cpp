@@ -53,7 +53,8 @@ bool parse_path(const char* wkt, PathType& p)
         {
             throw std::runtime_error("Failed to parse svg-path");
         }
-    } catch (...)
+    }
+    catch (...)
     {
         return false;
     }

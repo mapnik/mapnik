@@ -1,8 +1,8 @@
 {
-    "version": 2,
+    "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 20,
+        "minor": 25,
         "patch": 0
     },
     "configurePresets": [
@@ -195,7 +195,7 @@
                 "ADDITIONAL_LIBARIES_PATHS": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/bin"
             },
             "environment": {
-                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/share/proj/data"
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-windows/share/proj"
             }
         },
         {
@@ -210,7 +210,20 @@
                 "CMAKE_CXX_FLAGS": "--coverage"
             },
             "environment": {
-                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-linux/share/proj/data"
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-linux/share/proj"
+            }
+        },
+        {
+            "name": "linux-ci-release",
+            "description": "used by the ci pipeline for releasing",
+            "inherits": [
+                "release-build",
+                "linux-gcc-release"
+            ],
+            "cacheVariables": {
+                "BUILD_TESTING": "OFF",
+                "BUILD_DEMO_VIEWER": "OFF",
+                "USE_MEMORY_MAPPED_FILE": "ON"
             }
         },
         {
@@ -226,7 +239,7 @@
                 "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage"
             },
             "environment": {
-                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-osx/share/proj/data"
+                "PROJ_LIB": "${sourceDir}/build/${presetName}/vcpkg_installed/x64-osx/share/proj"
             }
         }
     ],
@@ -262,6 +275,10 @@
         {
             "name": "linux-ci",
             "configurePreset": "linux-ci"
+        },
+        {
+            "name": "linux-ci-release",
+            "configurePreset": "linux-ci-release"
         },
         {
             "name": "macos-ci",

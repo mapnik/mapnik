@@ -60,7 +60,8 @@ bool parse_topology_string(std::string const& buffer, mapnik::topojson::topology
     try
     {
         boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type(), topo);
-    } catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
     {
         std::cerr << "failed to parse TopoJSON..." << std::endl;
         std::cerr << ex.what() << std::endl;

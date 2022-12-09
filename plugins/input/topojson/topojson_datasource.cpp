@@ -174,7 +174,8 @@ void topojson_datasource::parse_topojson(T const& buffer)
     try
     {
         boost::spirit::x3::phrase_parse(itr, end, mapnik::json::grammar::topology, space_type(), topo_);
-    } catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<char const*> const& ex)
     {
         std::clog << "failed to parse TopoJSON..." << std::endl;
         std::clog << ex.what() << std::endl;

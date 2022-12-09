@@ -48,7 +48,8 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
     try
     {
         status = boost::spirit::x3::phrase_parse(itr, end, parser, space, *trans_list);
-    } catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
+    }
+    catch (boost::spirit::x3::expectation_failure<std::string::const_iterator> const& ex)
     {
         throw config_error("Failed to parse transform expression: \"" + str + "\"");
     }

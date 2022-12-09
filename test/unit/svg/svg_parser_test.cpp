@@ -89,7 +89,8 @@ TEST_CASE("SVG parser")
         try
         {
             p->parse(svg_name);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             REQUIRE(ex.what() == join(expected_errors));
         }
@@ -109,7 +110,8 @@ TEST_CASE("SVG parser")
         try
         {
             p->parse_from_string(svg_str);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             REQUIRE(ex.what() == join(expected_errors));
         }
@@ -124,7 +126,8 @@ TEST_CASE("SVG parser")
         try
         {
             p->parse(svg_name);
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             REQUIRE(ex.what() == join(expected_errors));
         }
@@ -151,7 +154,8 @@ TEST_CASE("SVG parser")
             try
             {
                 p->parse_from_string(svg_str);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 REQUIRE(ex.what() == std::string(expected_errors[0]));
             }
@@ -192,7 +196,8 @@ TEST_CASE("SVG parser")
             try
             {
                 p->parse_from_string(svg_str);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 REQUIRE(ex.what() == std::string(expected_errors[0]));
             }
@@ -217,7 +222,8 @@ TEST_CASE("SVG parser")
             try
             {
                 p->parse_from_string(svg_str);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 REQUIRE(ex.what() == std::string(expected_errors[0]));
             }
@@ -601,7 +607,8 @@ TEST_CASE("SVG parser")
             try
             {
                 p->parse(svg_name);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 REQUIRE(ex.what() == std::string(expected_errors[0]));
             }
@@ -627,7 +634,8 @@ TEST_CASE("SVG parser")
             try
             {
                 p->parse_from_string(svg_str);
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 REQUIRE(ex.what() == std::string(expected_errors[0]));
             }

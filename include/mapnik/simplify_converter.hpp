@@ -184,7 +184,8 @@ struct simplify_converter
 
     unsigned output_vertex_distance(double* x, double* y)
     {
-        if (status_ == done) return SEG_END;
+        if (status_ == done)
+            return SEG_END;
         if (status_ == closing)
         {
             *x = *y = 0.0;

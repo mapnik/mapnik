@@ -300,8 +300,8 @@ TEST_CASE("conversions")
             mapnik::value streamable(ustr);
             s << streamable;
             CHECK(s.str() == std::string("hello world!"));
-
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << "\n";
             REQUIRE(false);

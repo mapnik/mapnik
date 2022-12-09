@@ -214,7 +214,8 @@ int main(int argc, char** argv)
         {
             results = run.test_all(report);
         }
-    } catch (std::exception& e)
+    }
+    catch (std::exception& e)
     {
         std::cerr << "Error running tests: " << e.what() << std::endl;
         return 1;

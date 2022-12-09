@@ -68,7 +68,8 @@ TEST_CASE("copy")
 
                 REQUIRE((m0 == m2));
             }
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             std::clog << ex.what() << "\n";
             REQUIRE(false);

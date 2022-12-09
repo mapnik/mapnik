@@ -136,13 +136,16 @@ raster_datasource::raster_datasource(parameters const& params)
                 width_ = reader->width();
                 height_ = reader->height();
             }
-        } catch (mapnik::image_reader_exception const& ex)
+        }
+        catch (mapnik::image_reader_exception const& ex)
         {
             throw datasource_exception("Raster Plugin: image reader exception: " + std::string(ex.what()));
-        } catch (std::exception const& ex)
+        }
+        catch (std::exception const& ex)
         {
             throw datasource_exception("Raster Plugin: " + std::string(ex.what()));
-        } catch (...)
+        }
+        catch (...)
         {
             throw datasource_exception("Raster Plugin: image reader unknown exception caught");
         }

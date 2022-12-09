@@ -34,7 +34,8 @@ bool from_geojson(std::string const& json, feature_impl& feature)
         const char* start = json.c_str();
         const char* end = start + json.length();
         mapnik::json::parse_feature(start, end, feature);
-    } catch (...)
+    }
+    catch (...)
     {
         return false;
     }

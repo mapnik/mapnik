@@ -234,7 +234,8 @@ result_list runner::test_range(files_iterator begin,
             {
                 result_list r = test_one(file, report, fail_count.get());
                 std::move(r.begin(), r.end(), std::back_inserter(results));
-            } catch (std::exception const& ex)
+            }
+            catch (std::exception const& ex)
             {
                 result r;
                 r.state = STATE_ERROR;
@@ -303,7 +304,8 @@ result_list
     try
     {
         mapnik::load_map(map, style_path.string(), true);
-    } catch (std::exception const& ex)
+    }
+    catch (std::exception const& ex)
     {
         std::string what = ex.what();
         if (what.find("Could not create datasource") != std::string::npos ||
