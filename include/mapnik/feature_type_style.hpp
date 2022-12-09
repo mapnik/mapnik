@@ -43,7 +43,7 @@ namespace mapnik {
 
 class rule;
 
-enum filter_mode_enum { FILTER_ALL, FILTER_FIRST, filter_mode_enum_MAX };
+enum class filter_mode_enum { FILTER_ALL, FILTER_FIRST, filter_mode_enum_MAX };
 
 DEFINE_ENUM(filter_mode_e, filter_mode_enum);
 

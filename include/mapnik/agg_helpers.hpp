@@ -39,19 +39,19 @@ void set_gamma_method(T& ras_ptr, double gamma, gamma_method_enum method)
 {
     switch (method)
     {
-        case GAMMA_POWER:
+        case gamma_method_enum::GAMMA_POWER:
             ras_ptr->gamma(agg::gamma_power(gamma));
             break;
-        case GAMMA_LINEAR:
+        case gamma_method_enum::GAMMA_LINEAR:
             ras_ptr->gamma(agg::gamma_linear(0.0, gamma));
             break;
-        case GAMMA_NONE:
+        case gamma_method_enum::GAMMA_NONE:
             ras_ptr->gamma(agg::gamma_none());
             break;
-        case GAMMA_THRESHOLD:
+        case gamma_method_enum::GAMMA_THRESHOLD:
             ras_ptr->gamma(agg::gamma_threshold(gamma));
             break;
-        case GAMMA_MULTIPLY:
+        case gamma_method_enum::GAMMA_MULTIPLY:
             ras_ptr->gamma(agg::gamma_multiply(gamma));
             break;
         default:

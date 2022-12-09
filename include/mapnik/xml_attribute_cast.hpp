@@ -161,17 +161,20 @@ struct do_xml_attribute_cast<double>
     }
 };
 
-// specialization for mapnik::enumeration<T,int>
-template<typename T, int MAX>
-struct do_xml_attribute_cast<mapnik::enumeration<T, MAX>>
+// specialization for mapnik::enumeration<...>
+template<typename ENUM,
+         char const* (*F_TO_STRING)(ENUM),
+         ENUM (*F_FROM_STRING)(const char*),
+         std::map<ENUM, std::string> (*F_LOOKUP)()>
+struct do_xml_attribute_cast<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>>
 {
-    static inline boost::optional<mapnik::enumeration<T, MAX>> xml_attribute_cast_impl(xml_tree const& /*tree*/,
-                                                                                       std::string const& source)
+    using Enum = mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>;
+    static inline boost::optional<Enum> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
-        using result_type = typename boost::optional<mapnik::enumeration<T, MAX>>;
+        using result_type = typename boost::optional<Enum>;
         try
         {
-            mapnik::enumeration<T, MAX> e;
+            Enum e;
             e.from_string(source);
             return result_type(e);
         }

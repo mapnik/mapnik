@@ -69,7 +69,7 @@ struct enumeration_wrapper
     enumeration_wrapper() = delete;
     template<typename T>
     explicit enumeration_wrapper(T value_)
-        : value(value_)
+        : value(static_cast<int>(value_))
     {}
 
     inline bool operator==(enumeration_wrapper const& rhs) const { return value == rhs.value; }

@@ -68,7 +68,12 @@ struct thunk_renderer<image_rgba8> : render_thunk_list_dispatch
         , ras_ptr_(ras_ptr)
         , buf_(buf)
         , common_(common)
-        , tex_(buf, HALO_RASTERIZER_FULL, src_over, src_over, common.scale_factor_, common.font_manager_.get_stroker())
+        , tex_(buf,
+               halo_rasterizer_enum::HALO_RASTERIZER_FULL,
+               src_over,
+               src_over,
+               common.scale_factor_,
+               common.font_manager_.get_stroker())
     {}
 
     virtual void operator()(vector_marker_render_thunk const& thunk)

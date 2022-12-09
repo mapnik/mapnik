@@ -45,15 +45,9 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_pixfmt_rgba.h"
 #include "agg_color_rgba.h"
 #include "agg_rendering_buffer.h"
-#include "agg_rasterizer_outline.h"
 #include "agg_rasterizer_outline_aa.h"
-#include "agg_scanline_u.h"
-#include "agg_renderer_scanline.h"
 #include "agg_pattern_filters_rgba.h"
-#include "agg_span_allocator.h"
-#include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
-#include "agg_image_accessors.h"
 MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
@@ -216,17 +210,17 @@ struct agg_renderer_process_visitor_l
         line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym_, feature_, common_.vars_);
         switch (pattern)
         {
-            case LINE_PATTERN_WARP: {
+            case line_pattern_enum::LINE_PATTERN_WARP: {
                 warp_pattern pattern(pattern_image, common_, sym_, feature_, prj_trans_);
                 render(pattern);
                 break;
             }
-            case LINE_PATTERN_REPEAT: {
+            case line_pattern_enum::LINE_PATTERN_REPEAT: {
                 repeat_pattern pattern(pattern_image, common_, sym_, feature_, prj_trans_);
                 render(pattern);
                 break;
             }
-            case line_pattern_enum_MAX:
+            case line_pattern_enum::line_pattern_enum_MAX:
             default:
                 MAPNIK_LOG_ERROR(process_line_pattern_symbolizer) << "Incorrect line-pattern value.";
         }
@@ -265,10 +259,10 @@ void agg_renderer<T0, T1>::process(line_pattern_symbolizer const& sym,
     if (filename.empty())
         return;
     ras_ptr->reset();
-    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
     {
         ras_ptr->gamma(agg::gamma_power());
-        gamma_method_ = GAMMA_POWER;
+        gamma_method_ = gamma_method_enum::GAMMA_POWER;
         gamma_ = 1.0;
     }
 

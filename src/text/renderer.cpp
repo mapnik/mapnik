@@ -32,22 +32,6 @@
 #include <mapnik/image_any.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore_agg.hpp>
-#include "agg_rendering_buffer.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_color_rgba.h"
-#include "agg_scanline_u.h"
-#include "agg_image_filters.h"
-#include "agg_trans_bilinear.h"
-#include "agg_span_allocator.h"
-#include "agg_image_accessors.h"
-#include "agg_span_image_filter_rgba.h"
-#include "agg_renderer_base.h"
-#include "agg_renderer_scanline.h"
-MAPNIK_DISABLE_WARNING_POP
-
 namespace mapnik {
 
 text_renderer::text_renderer(halo_rasterizer_e rasterizer,
@@ -225,7 +209,7 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
         if (!error)
         {
             FT_Glyph_Transform(g, &halo_matrix, &start_halo);
-            if (rasterizer_ == HALO_RASTERIZER_FULL)
+            if (rasterizer_ == halo_rasterizer_enum::HALO_RASTERIZER_FULL)
             {
                 stroker_->init(halo_radius);
                 FT_Glyph_Stroke(&g, stroker_->get(), 1);
@@ -479,7 +463,7 @@ void grid_text_renderer<T>::render_halo_id(unsigned char* buffer,
 
 template<typename T>
 grid_text_renderer<T>::grid_text_renderer(pixmap_type& pixmap, composite_mode_e comp_op, double scale_factor)
-    : text_renderer(HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor)
+    : text_renderer(halo_rasterizer_enum::HALO_RASTERIZER_FAST, comp_op, src_over, scale_factor)
     , pixmap_(pixmap)
 {}
 

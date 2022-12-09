@@ -6,7 +6,7 @@
 
 TEST_CASE("enumeration")
 {
-    mapnik::line_cap_e e(mapnik::ROUND_CAP);
+    mapnik::line_cap_e e(mapnik::line_cap_enum::ROUND_CAP);
     CHECK(e.as_string() == "round");
     // note: test the << operator, which calls `as_string` internally
     // is not used in mapnik, but kept for back compat
