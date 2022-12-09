@@ -42,8 +42,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_scanline_bin.h"
-#include "agg_conv_stroke.h"
-#include "agg_conv_dash.h"
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
@@ -56,10 +54,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_impl& feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
+    const std::string filename = get<std::string, keys::file>(sym, feature, common_.vars_);
     if (filename.empty())
         return;
-    std::shared_ptr<mapnik::marker const> mark = marker_cache::instance().find(filename, true);
+    const auto mark = marker_cache::instance().find(filename, true);
     if (mark->is<mapnik::marker_null>())
         return;
 
@@ -70,10 +68,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
         return;
     }
 
-    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
-    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
-    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
-    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
+    const value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    const value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    const value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    const value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
 
     using pixfmt_type = typename grid_renderer_base_type::pixfmt_type;
     using color_type = typename grid_renderer_base_type::pixfmt_type::color_type;
@@ -90,12 +88,12 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     ras_ptr->reset();
 
     line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
-    std::size_t stroke_width = (pattern == LINE_PATTERN_WARP)
-                                 ? mark->width()
-                                 : get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
+    const std::size_t stroke_width = (pattern == line_pattern_enum::LINE_PATTERN_WARP)
+                                       ? mark->width()
+                                       : get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
 
     agg::trans_affine tr;
-    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    const auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform)
     {
         evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
@@ -104,10 +102,10 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     box2d<double> clipping_extent = common_.query_extent_;
     if (clip)
     {
-        double pad_per_pixel = static_cast<double>(common_.query_extent_.width() / common_.width_);
-        double pixels = std::ceil(
+        const double pad_per_pixel = static_cast<double>(common_.query_extent_.width() / common_.width_);
+        const double pixels = std::ceil(
           std::max(stroke_width / 2.0 + std::fabs(offset), (std::fabs(offset) * offset_converter_default_threshold)));
-        double padding = pad_per_pixel * pixels * common_.scale_factor_;
+        const double padding = pad_per_pixel * pixels * common_.scale_factor_;
 
         clipping_extent.pad(padding);
     }

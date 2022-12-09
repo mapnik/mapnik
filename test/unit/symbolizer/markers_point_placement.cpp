@@ -27,7 +27,7 @@ TEST_CASE("marker placement point")
                                                 0,
                                                 false,
                                                 false,
-                                                DIRECTION_AUTO,
+                                                direction_enum::DIRECTION_AUTO,
                                                 1.0};
 
         placement_type placement(va, detector, params);
@@ -54,7 +54,7 @@ TEST_CASE("marker placement point")
                                                 0,
                                                 false,
                                                 false,
-                                                DIRECTION_AUTO,
+                                                direction_enum::DIRECTION_AUTO,
                                                 1.0};
 
         placement_type placement(va, detector, params);
@@ -89,7 +89,7 @@ TEST_CASE("marker placement point")
                                                 0,
                                                 false,
                                                 false,
-                                                DIRECTION_AUTO,
+                                                direction_enum::DIRECTION_AUTO,
                                                 1.0};
 
         placement_type placement(va, detector, params);
@@ -124,7 +124,7 @@ TEST_CASE("marker placement point")
                                                 0,
                                                 false,
                                                 false,
-                                                DIRECTION_AUTO,
+                                                direction_enum::DIRECTION_AUTO,
                                                 1.0};
 
         placement_type placement(va, detector, params);

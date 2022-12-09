@@ -57,7 +57,7 @@ class feature_impl;
 class raster;
 
 //! \brief Enumerates the modes of interpolation
-enum colorizer_mode_enum : std::uint8_t {
+enum class colorizer_mode_enum : std::uint8_t {
     COLORIZER_INHERIT = 0,     //!< The stop inherits the mode from the colorizer
     COLORIZER_LINEAR = 1,      //!< Linear interpolation between colors, each channel separately
     COLORIZER_DISCRETE = 2,    //!< Single color for stop
@@ -80,7 +80,7 @@ class MAPNIK_DECL colorizer_stop
     //! \param[in] mode The stop mode
     //! \param[in] _color The stop color
     colorizer_stop(float value = 0,
-                   colorizer_mode mode = COLORIZER_INHERIT,
+                   colorizer_mode mode = colorizer_mode_enum::COLORIZER_INHERIT,
                    color const& _color = color(0, 0, 0, 0),
                    std::string const& label = "");
 
@@ -146,7 +146,8 @@ class MAPNIK_DECL raster_colorizer
 {
   public:
     //! \brief Constructor
-    raster_colorizer(colorizer_mode mode = COLORIZER_LINEAR, color const& _color = color(0, 0, 0, 0));
+    raster_colorizer(colorizer_mode mode = colorizer_mode_enum::COLORIZER_LINEAR,
+                     color const& _color = color(0, 0, 0, 0));
 
     //! \brief Destructor
     ~raster_colorizer();
@@ -158,7 +159,8 @@ class MAPNIK_DECL raster_colorizer
 
     void set_default_mode(colorizer_mode mode)
     {
-        default_mode_ = (mode == COLORIZER_INHERIT) ? COLORIZER_LINEAR : static_cast<colorizer_mode_enum>(mode);
+        default_mode_ =
+          (mode == colorizer_mode_enum::COLORIZER_INHERIT) ? colorizer_mode_enum::COLORIZER_LINEAR : mode.value_;
     }
 
     void set_default_mode_enum(colorizer_mode_enum mode) { set_default_mode(mode); }
