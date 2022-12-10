@@ -1,5 +1,6 @@
 #include "bench_framework.hpp"
 #include "compare_images.hpp"
+#include <memory>
 
 class test : public benchmark::test_case
 {
