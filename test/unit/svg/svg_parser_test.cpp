@@ -55,11 +55,11 @@ std::ostream& operator<<(std::ostream& os, mapnik::gradient const& gr)
     double cx, cy, fx, fy, r;
     gr.get_control_points(fx, fy, cx, cy, r);
 
-    os << "<gradient cx=\"" << cx <<  "\" cy=\"" << cy << "\""
-       << " fx=\"" << fx << "\" fy=\"" << fy << "\" r=\"" << r <<  "\">\n";
+    os << "<gradient cx=\"" << cx << "\" cy=\"" << cy << "\""
+       << " fx=\"" << fx << "\" fy=\"" << fy << "\" r=\"" << r << "\">\n";
     for (auto const& stop : gr.get_stop_array())
     {
-        os << "  <stop offset=\"" << std::get<0>(stop) << "\" color=\"" << std::get<1>(stop) <<  "\"/>\n";
+        os << "  <stop offset=\"" << std::get<0>(stop) << "\" color=\"" << std::get<1>(stop) << "\"/>\n";
     }
 
     os << "</gradient>\n";
@@ -69,8 +69,7 @@ std::ostream& operator<<(std::ostream& os, mapnik::gradient const& gr)
 
 std::ostream& operator<<(std::ostream& os, agg::trans_affine const& tr)
 {
-    os << "<transform>matrix(" << tr.sx << "," << tr.shy << ","
-       << tr.shx << "," << tr.sy << "," << tr.tx << ","
+    os << "<transform>matrix(" << tr.sx << "," << tr.shy << "," << tr.shx << "," << tr.sy << "," << tr.tx << ","
        << tr.ty << ")</transform>";
     return os;
 }
@@ -78,13 +77,14 @@ std::ostream& operator<<(std::ostream& os, agg::trans_affine const& tr)
 struct group_attribute_visitor
 {
     group_attribute_visitor(std::stringstream& ss, unsigned padding)
-        : ss_(ss), padding_(padding)
+        : ss_(ss)
+        , padding_(padding)
     {}
 
     void operator()(mapnik::svg::group const& g) const
     {
         padding_ += 2;
-        //ss_ << "padding=>" << padding_ << std::endl;
+        // ss_ << "padding=>" << padding_ << std::endl;
         std::string pad(padding_, ' ');
         ss_ << pad << "<g opacity=\"" << g.opacity << "\">" << std::endl;
         for (auto const& elem : g.elements)
@@ -112,7 +112,7 @@ struct group_attribute_visitor
         ss_ << pad << "  <stroke-width>" << attr.stroke_width << "</stroke-width>" << std::endl;
         ss_ << pad << "  <stroke-opacity>" << attr.stroke_opacity << "</stroke-opacity>" << std::endl;
         ss_ << pad << "</attribute>" << std::endl;
-        padding_ -=2;
+        padding_ -= 2;
     }
     std::stringstream& ss_;
     mutable unsigned padding_;
