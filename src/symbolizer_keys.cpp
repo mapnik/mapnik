@@ -36,13 +36,10 @@ static const property_meta_type key_meta[const_max_key] = {
   property_meta_type{"gamma", nullptr, property_types::target_double},
   property_meta_type{"gamma-method", nullptr, property_types::target_gamma_method},
   property_meta_type{"opacity", nullptr, property_types::target_double},
-  property_meta_type{"alignment",
-                     [](enumeration_wrapper e) {
-                         return enumeration<pattern_alignment_enum, pattern_alignment_enum_MAX>(
-                                  pattern_alignment_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_pattern_alignment},
+  property_meta_type{
+    "alignment",
+    [](enumeration_wrapper e) { return pattern_alignment_e(pattern_alignment_enum(e.value)).as_string(); },
+    property_types::target_pattern_alignment},
   property_meta_type{"offset", nullptr, property_types::target_double},
   property_meta_type{"comp-op",
                      [](enumeration_wrapper e) { return *comp_op_to_string(composite_mode_e(e.value)); },
@@ -54,14 +51,10 @@ static const property_meta_type key_meta[const_max_key] = {
   property_meta_type{"stroke-width", nullptr, property_types::target_double},
   property_meta_type{"stroke-opacity", nullptr, property_types::target_double},
   property_meta_type{"stroke-linejoin",
-                     [](enumeration_wrapper e) {
-                         return enumeration<line_join_enum, line_join_enum_MAX>(line_join_enum(e.value)).as_string();
-                     },
+                     [](enumeration_wrapper e) { return line_join_e(line_join_enum(e.value)).as_string(); },
                      property_types::target_line_join},
   property_meta_type{"stroke-linecap",
-                     [](enumeration_wrapper e) {
-                         return enumeration<line_cap_enum, line_cap_enum_MAX>(line_cap_enum(e.value)).as_string();
-                     },
+                     [](enumeration_wrapper e) { return line_cap_e(line_cap_enum(e.value)).as_string(); },
                      property_types::target_line_cap},
   property_meta_type{"stroke-gamma", nullptr, property_types::target_double},
   property_meta_type{"stroke-gamma-method", nullptr, property_types::target_gamma_method},
@@ -71,12 +64,9 @@ static const property_meta_type key_meta[const_max_key] = {
   property_meta_type{"geometry-transform", nullptr, property_types::target_transform},
   // TODO - should be called 'line-rasterizer' but for back compat with 2.3.x we keep as 'rasterizer'
   // https://github.com/mapnik/mapnik/issues/2503
-  property_meta_type{
-    "rasterizer",
-    [](enumeration_wrapper e) {
-        return enumeration<line_rasterizer_enum, line_rasterizer_enum_MAX>(line_rasterizer_enum(e.value)).as_string();
-    },
-    property_types::target_double},
+  property_meta_type{"rasterizer",
+                     [](enumeration_wrapper e) { return line_rasterizer_e(line_rasterizer_enum(e.value)).as_string(); },
+                     property_types::target_double},
   property_meta_type{"transform", nullptr, property_types::target_transform},
   property_meta_type{"spacing", nullptr, property_types::target_double},
   property_meta_type{"spacing-offset", nullptr, property_types::target_double},
@@ -97,50 +87,32 @@ static const property_meta_type key_meta[const_max_key] = {
   property_meta_type{"mesh-size", nullptr, property_types::target_double},
   property_meta_type{"premultiplied", nullptr, property_types::target_bool},
   property_meta_type{"smooth", nullptr, property_types::target_double},
-  property_meta_type{"smooth-algorithm",
-                     [](enumeration_wrapper e) {
-                         return enumeration<smooth_algorithm_enum, smooth_algorithm_enum_MAX>(
-                                  smooth_algorithm_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_smooth_algorithm},
+  property_meta_type{
+    "smooth-algorithm",
+    [](enumeration_wrapper e) { return smooth_algorithm_e(smooth_algorithm_enum(e.value)).as_string(); },
+    property_types::target_smooth_algorithm},
   property_meta_type{"simplify-algorithm",
                      [](enumeration_wrapper e) { return *simplify_algorithm_to_string(simplify_algorithm_e(e.value)); },
                      property_types::target_simplify_algorithm},
   property_meta_type{"simplify", nullptr, property_types::target_double},
-  property_meta_type{
-    "halo-rasterizer",
-    [](enumeration_wrapper e) {
-        return enumeration<halo_rasterizer_enum, halo_rasterizer_enum_MAX>(halo_rasterizer_enum(e.value)).as_string();
-    },
-    property_types::target_halo_rasterizer},
+  property_meta_type{"halo-rasterizer",
+                     [](enumeration_wrapper e) { return halo_rasterizer_e(halo_rasterizer_enum(e.value)).as_string(); },
+                     property_types::target_halo_rasterizer},
   property_meta_type{"text-placements", nullptr, property_types::target_double},
-  property_meta_type{
-    "placement",
-    [](enumeration_wrapper e) {
-        return enumeration<label_placement_enum, label_placement_enum_MAX>(label_placement_enum(e.value)).as_string();
-    },
-    property_types::target_placement},
-  property_meta_type{"placement", // FIXME - change property name
-                     [](enumeration_wrapper e) {
-                         return enumeration<marker_placement_enum, marker_placement_enum_MAX>(
-                                  marker_placement_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_markers_placement},
-  property_meta_type{"multi-policy",
-                     [](enumeration_wrapper e) {
-                         return enumeration<marker_multi_policy_enum, marker_multi_policy_enum_MAX>(
-                                  marker_multi_policy_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_markers_multipolicy},
+  property_meta_type{"placement",
+                     [](enumeration_wrapper e) { return label_placement_e(label_placement_enum(e.value)).as_string(); },
+                     property_types::target_placement},
   property_meta_type{
     "placement", // FIXME - change property name
-    [](enumeration_wrapper e) {
-        return enumeration<point_placement_enum, point_placement_enum_MAX>(point_placement_enum(e.value)).as_string();
-    },
-    property_types::target_double},
+    [](enumeration_wrapper e) { return marker_placement_e(marker_placement_enum(e.value)).as_string(); },
+    property_types::target_markers_placement},
+  property_meta_type{
+    "multi-policy",
+    [](enumeration_wrapper e) { return marker_multi_policy_e(marker_multi_policy_enum(e.value)).as_string(); },
+    property_types::target_markers_multipolicy},
+  property_meta_type{"placement", // FIXME - change property name
+                     [](enumeration_wrapper e) { return point_placement_e(point_placement_enum(e.value)).as_string(); },
+                     property_types::target_double},
   property_meta_type{"colorizer", nullptr, property_types::target_colorizer},
   property_meta_type{"halo-transform", nullptr, property_types::target_transform},
   property_meta_type{"num-columns", nullptr, property_types::target_integer},
@@ -152,53 +124,33 @@ static const property_meta_type key_meta[const_max_key] = {
   property_meta_type{"halo-comp-op",
                      [](enumeration_wrapper e) { return *comp_op_to_string(composite_mode_e(e.value)); },
                      property_types::target_halo_comp_op},
+  property_meta_type{"text-transform",
+                     [](enumeration_wrapper e) { return text_transform_e(text_transform_enum(e.value)).as_string(); },
+                     property_types::target_text_transform},
   property_meta_type{
-    "text-transform",
-    [](enumeration_wrapper e) {
-        return enumeration<text_transform_enum, text_transform_enum_MAX>(text_transform_enum(e.value)).as_string();
-    },
-    property_types::target_text_transform},
-  property_meta_type{"horizontal-alignment",
-                     [](enumeration_wrapper e) {
-                         return enumeration<horizontal_alignment_enum, horizontal_alignment_enum_MAX>(
-                                  horizontal_alignment_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_horizontal_alignment},
-  property_meta_type{"justify-alignment",
-                     [](enumeration_wrapper e) {
-                         return enumeration<justify_alignment_enum, justify_alignment_enum_MAX>(
-                                  justify_alignment_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_justify_alignment},
-  property_meta_type{"vertical-alignment",
-                     [](enumeration_wrapper e) {
-                         return enumeration<vertical_alignment_enum, vertical_alignment_enum_MAX>(
-                                  vertical_alignment_enum(e.value))
-                           .as_string();
-                     },
-                     property_types::target_vertical_alignment},
+    "horizontal-alignment",
+    [](enumeration_wrapper e) { return horizontal_alignment_e(horizontal_alignment_enum(e.value)).as_string(); },
+    property_types::target_horizontal_alignment},
   property_meta_type{
-    "upright",
-    [](enumeration_wrapper e) {
-        return enumeration<text_upright_enum, text_upright_enum_MAX>(text_upright_enum(e.value)).as_string();
-    },
-    property_types::target_upright},
+    "justify-alignment",
+    [](enumeration_wrapper e) { return justify_alignment_e(justify_alignment_enum(e.value)).as_string(); },
+    property_types::target_justify_alignment},
+  property_meta_type{
+    "vertical-alignment",
+    [](enumeration_wrapper e) { return vertical_alignment_e(vertical_alignment_enum(e.value)).as_string(); },
+    property_types::target_vertical_alignment},
+  property_meta_type{"upright",
+                     [](enumeration_wrapper e) { return text_upright_e(text_upright_enum(e.value)).as_string(); },
+                     property_types::target_upright},
   property_meta_type{"direction",
-                     [](enumeration_wrapper e) {
-                         return enumeration<direction_enum, direction_enum_MAX>(direction_enum(e.value)).as_string();
-                     },
+                     [](enumeration_wrapper e) { return direction_e(direction_enum(e.value)).as_string(); },
                      property_types::target_direction},
   property_meta_type{"avoid-edges", nullptr, property_types::target_bool},
   property_meta_type{"font-feature-settings", nullptr, property_types::target_font_feature_settings},
   property_meta_type{"extend", nullptr, property_types::target_double},
-  property_meta_type{
-    "line-pattern",
-    [](enumeration_wrapper e) {
-        return enumeration<line_pattern_enum, line_pattern_enum_MAX>(line_pattern_enum(e.value)).as_string();
-    },
-    property_types::target_line_pattern},
+  property_meta_type{"line-pattern",
+                     [](enumeration_wrapper e) { return line_pattern_e(line_pattern_enum(e.value)).as_string(); },
+                     property_types::target_line_pattern},
 
 };
 

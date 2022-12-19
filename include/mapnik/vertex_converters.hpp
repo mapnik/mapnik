@@ -46,7 +46,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_trans_affine.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"
-#include "agg_conv_smooth_poly1.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
@@ -156,30 +155,29 @@ struct converter_traits<T, mapnik::dash_tag>
 template<typename Symbolizer, typename PathType, typename Feature>
 void set_join_caps(Symbolizer const& sym, PathType& stroke, Feature const& feature, attributes const& vars)
 {
-    line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
+    const line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
-        case MITER_JOIN:
+        case line_join_enum::MITER_JOIN:
             stroke.generator().line_join(agg::miter_join);
             break;
-        case MITER_REVERT_JOIN:
+        case line_join_enum::MITER_REVERT_JOIN:
             stroke.generator().line_join(agg::miter_join);
             break;
-        case ROUND_JOIN:
+        case line_join_enum::ROUND_JOIN:
             stroke.generator().line_join(agg::round_join);
             break;
         default:
             stroke.generator().line_join(agg::bevel_join);
     }
 
-    line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
-
+    const line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
     switch (cap)
     {
-        case BUTT_CAP:
+        case line_cap_enum::BUTT_CAP:
             stroke.generator().line_cap(agg::butt_cap);
             break;
-        case SQUARE_CAP:
+        case line_cap_enum::SQUARE_CAP:
             stroke.generator().line_cap(agg::square_cap);
             break;
         default:

@@ -147,14 +147,14 @@ struct enum_traits<simplify_algorithm_e>
     static result_type from_string(std::string const& str) { return simplify_algorithm_from_string(str); }
 };
 
-#define ENUM_FROM_STRING(e)                                                                                            \
+#define ENUM_FROM_STRING(alias, e)                                                                                     \
     template<>                                                                                                         \
     struct enum_traits<e>                                                                                              \
     {                                                                                                                  \
         using result_type = boost::optional<e>;                                                                        \
         static result_type from_string(std::string const& str)                                                         \
         {                                                                                                              \
-            enumeration<e, e##_MAX> enum_;                                                                             \
+            enumeration<e, alias##_to_string, alias##_from_string, alias##_lookup> enum_;                              \
             try                                                                                                        \
             {                                                                                                          \
                 enum_.from_string(str);                                                                                \
@@ -166,26 +166,25 @@ struct enum_traits<simplify_algorithm_e>
             }                                                                                                          \
         }                                                                                                              \
     };
-
-ENUM_FROM_STRING(line_cap_enum)
-ENUM_FROM_STRING(line_join_enum)
-ENUM_FROM_STRING(point_placement_enum)
-ENUM_FROM_STRING(line_rasterizer_enum)
-ENUM_FROM_STRING(marker_placement_enum)
-ENUM_FROM_STRING(marker_multi_policy_enum)
-ENUM_FROM_STRING(debug_symbolizer_mode_enum)
-ENUM_FROM_STRING(pattern_alignment_enum)
-ENUM_FROM_STRING(halo_rasterizer_enum)
-ENUM_FROM_STRING(label_placement_enum)
-ENUM_FROM_STRING(vertical_alignment_enum)
-ENUM_FROM_STRING(horizontal_alignment_enum)
-ENUM_FROM_STRING(justify_alignment_enum)
-ENUM_FROM_STRING(text_transform_enum)
-ENUM_FROM_STRING(text_upright_enum)
-ENUM_FROM_STRING(direction_enum)
-ENUM_FROM_STRING(gamma_method_enum)
-ENUM_FROM_STRING(line_pattern_enum)
-ENUM_FROM_STRING(smooth_algorithm_enum)
+ENUM_FROM_STRING(line_cap_e, line_cap_enum)
+ENUM_FROM_STRING(line_join_e, line_join_enum)
+ENUM_FROM_STRING(point_placement_e, point_placement_enum)
+ENUM_FROM_STRING(line_rasterizer_e, line_rasterizer_enum)
+ENUM_FROM_STRING(marker_placement_e, marker_placement_enum)
+ENUM_FROM_STRING(marker_multi_policy_e, marker_multi_policy_enum)
+ENUM_FROM_STRING(debug_symbolizer_mode_e, debug_symbolizer_mode_enum)
+ENUM_FROM_STRING(pattern_alignment_e, pattern_alignment_enum)
+ENUM_FROM_STRING(halo_rasterizer_e, halo_rasterizer_enum)
+ENUM_FROM_STRING(label_placement_e, label_placement_enum)
+ENUM_FROM_STRING(vertical_alignment_e, vertical_alignment_enum)
+ENUM_FROM_STRING(horizontal_alignment_e, horizontal_alignment_enum)
+ENUM_FROM_STRING(justify_alignment_e, justify_alignment_enum)
+ENUM_FROM_STRING(text_transform_e, text_transform_enum)
+ENUM_FROM_STRING(text_upright_e, text_upright_enum)
+ENUM_FROM_STRING(direction_e, direction_enum)
+ENUM_FROM_STRING(gamma_method_e, gamma_method_enum)
+ENUM_FROM_STRING(line_pattern_e, line_pattern_enum)
+ENUM_FROM_STRING(smooth_algorithm_e, smooth_algorithm_enum)
 
 // enum
 template<typename T, bool is_enum = true>

@@ -4,6 +4,8 @@
 #include <mapnik/util/math.hpp>
 
 #include <mapnik/warning.hpp>
+#include <mapnik/symbolizer_enumerations.hpp>
+#include <mapnik/util/variant.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
 #include "agg_conv_smooth_poly1.h"
@@ -80,9 +82,9 @@ class smooth_converter
     {
         switch (algo)
         {
-            case SMOOTH_ALGORITHM_ADAPTIVE:
+            case smooth_algorithm_enum::SMOOTH_ALGORITHM_ADAPTIVE:
                 return adaptive_impl_type(geom);
-            case SMOOTH_ALGORITHM_BASIC:
+            case smooth_algorithm_enum::SMOOTH_ALGORITHM_BASIC:
             default:
                 break;
         }
@@ -92,7 +94,7 @@ class smooth_converter
   public:
     smooth_converter(Geometry& geom)
         : geom_(geom)
-        , impl_(std::move(init_impl(SMOOTH_ALGORITHM_BASIC, geom)))
+        , impl_(std::move(init_impl(smooth_algorithm_enum::SMOOTH_ALGORITHM_BASIC, geom)))
     {}
 
     void algorithm(smooth_algorithm_enum algo) { impl_ = init_impl(algo, geom_); }

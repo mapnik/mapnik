@@ -42,6 +42,7 @@
 namespace mapnik {
 
 class boolean_type;
+
 template<typename T>
 struct name_trait
 {
@@ -74,22 +75,26 @@ DEFINE_NAME_TRAIT(color, "color")
 DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr")
 DEFINE_NAME_TRAIT(font_feature_settings, "font-feature-settings")
 
-template<typename ENUM, int MAX>
-struct name_trait<mapnik::enumeration<ENUM, MAX>>
+template<typename ENUM,
+         char const* (*F_TO_STRING)(ENUM),
+         ENUM (*F_FROM_STRING)(const char*),
+         std::map<ENUM, std::string> (*F_LOOKUP)()>
+struct name_trait<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>>
 {
-    using Enum = enumeration<ENUM, MAX>;
-
+    using Enum = mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>;
     static std::string name()
     {
         std::string value_list("one of [");
-        for (unsigned i = 0; i < Enum::MAX; ++i)
+        const auto lookup{Enum::lookupMap()};
+        for (auto it = lookup.cbegin(); it != lookup.cend(); it++)
         {
-            value_list += Enum::get_string(i);
-            if (i + 1 < Enum::MAX)
+            value_list += it->second;
+            if (std::next(it) != lookup.cend())
+            {
                 value_list += ", ";
+            }
         }
-        value_list += "]";
-
+        value_list += ']';
         return value_list;
     }
 };
