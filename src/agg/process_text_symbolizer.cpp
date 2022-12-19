@@ -37,28 +37,32 @@ void agg_renderer<T0, T1>::process(text_symbolizer const& sym,
                                    mapnik::feature_impl& feature,
                                    proj_transform const& prj_trans)
 {
-    box2d<double> clip_box = clipping_extent(common_);
+    const box2d<double> clip_box = clipping_extent(common_);
     agg::trans_affine tr;
-    auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
+    const auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform)
         evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
-    text_symbolizer_helper helper(sym,
-                                  feature,
-                                  common_.vars_,
-                                  prj_trans,
-                                  common_.width_,
-                                  common_.height_,
-                                  common_.scale_factor_,
-                                  common_.t_,
-                                  common_.font_manager_,
-                                  *common_.detector_,
-                                  clip_box,
-                                  tr);
+    const text_symbolizer_helper helper(sym,
+                                        feature,
+                                        common_.vars_,
+                                        prj_trans,
+                                        common_.width_,
+                                        common_.height_,
+                                        common_.scale_factor_,
+                                        common_.t_,
+                                        common_.font_manager_,
+                                        *common_.detector_,
+                                        clip_box,
+                                        tr);
 
-    halo_rasterizer_enum halo_rasterizer =
-      get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature, common_.vars_, HALO_RASTERIZER_FULL);
-    composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
-    composite_mode_e halo_comp_op = get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
+    const halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym,
+                                                                           keys::halo_rasterizer,
+                                                                           feature,
+                                                                           common_.vars_,
+                                                                           halo_rasterizer_enum::HALO_RASTERIZER_FULL);
+    const composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature, common_.vars_, src_over);
+    const composite_mode_e halo_comp_op =
+      get<composite_mode_e>(sym, keys::halo_comp_op, feature, common_.vars_, src_over);
     agg_text_renderer<T0> ren(buffers_.top().get(),
                               halo_rasterizer,
                               comp_op,
@@ -66,7 +70,7 @@ void agg_renderer<T0, T1>::process(text_symbolizer const& sym,
                               common_.scale_factor_,
                               common_.font_manager_.get_stroker());
 
-    auto halo_transform = get_optional<transform_type>(sym, keys::halo_transform);
+    const auto halo_transform = get_optional<transform_type>(sym, keys::halo_transform);
     if (halo_transform)
     {
         agg::trans_affine halo_affine_transform;

@@ -36,10 +36,17 @@
 namespace mapnik {
 
 //! \brief Strings for the colorizer_mode enumeration
-static const char* colorizer_mode_strings[] =
-  {"inherit", "linear", "discrete", "exact", "linear-rgba", "linear-bgra", ""};
-
-IMPLEMENT_ENUM(colorizer_mode, colorizer_mode_strings)
+using colorizer_mode_str = detail::EnumStringT<colorizer_mode_enum>;
+constexpr detail::EnumMapT<colorizer_mode_enum, 7> colorizer_mode_map{{
+  colorizer_mode_str{colorizer_mode_enum::COLORIZER_INHERIT, "inherit"},
+  colorizer_mode_str{colorizer_mode_enum::COLORIZER_LINEAR, "linear"},
+  colorizer_mode_str{colorizer_mode_enum::COLORIZER_DISCRETE, "discrete"},
+  colorizer_mode_str{colorizer_mode_enum::COLORIZER_EXACT, "exact"},
+  colorizer_mode_str{colorizer_mode_enum::COLORIZER_LINEAR_RGBA, "linear-rgba"},
+  colorizer_mode_str{colorizer_mode_enum::COLORIZER_LINEAR_BGRA, "linear-bgra"},
+  colorizer_mode_str{colorizer_mode_enum::colorizer_mode_enum_MAX, ""},
+}};
+IMPLEMENT_ENUM(colorizer_mode, colorizer_mode_enum)
 
 colorizer_stop::colorizer_stop(float val, colorizer_mode mode, color const& _color, std::string const& label)
     : value_(val)
@@ -177,7 +184,7 @@ unsigned raster_colorizer::get_color(float val) const
     else
     {
         stopMode = stops_[stopIdx].get_mode();
-        if (stopMode == COLORIZER_INHERIT)
+        if (stopMode == colorizer_mode_enum::COLORIZER_INHERIT)
         {
             stopMode = default_mode_;
         }
@@ -206,7 +213,7 @@ unsigned raster_colorizer::get_color(float val) const
 
     switch (stopMode)
     {
-        case COLORIZER_LINEAR: {
+        case colorizer_mode_enum::COLORIZER_LINEAR: {
             // deal with this separately so we don't have to worry about div0
             if (nextStopValue == stopValue)
             {
@@ -228,7 +235,7 @@ unsigned raster_colorizer::get_color(float val) const
             }
         }
         break;
-        case COLORIZER_LINEAR_RGBA: {
+        case colorizer_mode_enum::COLORIZER_LINEAR_RGBA: {
             if (nextStopValue == stopValue)
             {
                 return stopColor.rgba();
@@ -240,7 +247,7 @@ unsigned raster_colorizer::get_color(float val) const
             outputColor = color(colorStart + fraction * (colorEnd - colorStart));
         }
         break;
-        case COLORIZER_LINEAR_BGRA: {
+        case colorizer_mode_enum::COLORIZER_LINEAR_BGRA: {
             if (nextStopValue == stopValue)
             {
                 return stopColor.rgba();
@@ -255,10 +262,10 @@ unsigned raster_colorizer::get_color(float val) const
             std::swap(outputColor.red_, outputColor.blue_);
         }
         break;
-        case COLORIZER_DISCRETE:
+        case colorizer_mode_enum::COLORIZER_DISCRETE:
             outputColor = stopColor;
             break;
-        case COLORIZER_EXACT:
+        case colorizer_mode_enum::COLORIZER_EXACT:
         default:
             // approximately equal (within epsilon)
             if (std::fabs(val - stopValue) < epsilon_)

@@ -73,7 +73,7 @@ coord<double, 2> pattern_offset(symbolizer_base const& sym,
     coord<double, 2> reference_position(0, 0);
     pattern_alignment_enum alignment_type = get<pattern_alignment_enum, keys::alignment>(sym, feature, common.vars_);
 
-    if (alignment_type == LOCAL_ALIGNMENT)
+    if (alignment_type == pattern_alignment_enum::LOCAL_ALIGNMENT)
     {
         apply_local_alignment apply(common.t_, prj_trans, reference_position.x, reference_position.y);
         util::apply_visitor(geometry::vertex_processor<apply_local_alignment>(apply), feature.get_geometry());

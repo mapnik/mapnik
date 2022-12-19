@@ -252,9 +252,9 @@ void text_symbolizer_properties::add_expressions(expression_set& output) const
 }
 
 text_layout_properties::text_layout_properties()
-    : halign(enumeration_wrapper(H_AUTO))
-    , jalign(enumeration_wrapper(J_AUTO))
-    , valign(enumeration_wrapper(V_AUTO))
+    : halign(enumeration_wrapper(static_cast<int>(horizontal_alignment_enum::H_AUTO)))
+    , jalign(enumeration_wrapper(static_cast<int>(justify_alignment_enum::J_AUTO)))
+    , valign(enumeration_wrapper(static_cast<int>(vertical_alignment_enum::V_AUTO)))
 {}
 
 void text_layout_properties::from_xml(xml_node const& node, fontset_map const& fontsets)
@@ -343,7 +343,7 @@ format_properties::format_properties()
     , fill(color(0, 0, 0))
     , halo_fill(color(255, 255, 255))
     , halo_radius(0.0)
-    , text_transform(enumeration_wrapper(NONE))
+    , text_transform(enumeration_wrapper(static_cast<int>(text_transform_enum::NONE)))
     , ff_settings()
 {}
 

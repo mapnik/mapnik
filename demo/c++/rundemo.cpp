@@ -131,8 +131,8 @@ int main(int, char**)
                 line_symbolizer line_sym;
                 put(line_sym, keys::stroke, color(171, 158, 137));
                 put(line_sym, keys::stroke_width, 2.0);
-                put(line_sym, keys::stroke_linecap, ROUND_CAP);
-                put(line_sym, keys::stroke_linejoin, ROUND_JOIN);
+                put(line_sym, keys::stroke_linecap, line_cap_enum::ROUND_CAP);
+                put(line_sym, keys::stroke_linejoin, line_join_enum::ROUND_JOIN);
                 r.append(std::move(line_sym));
             }
             roads34_style.add_rule(std::move(r));
@@ -148,8 +148,8 @@ int main(int, char**)
                 line_symbolizer line_sym;
                 put(line_sym, keys::stroke, color(171, 158, 137));
                 put(line_sym, keys::stroke_width, 4.0);
-                put(line_sym, keys::stroke_linecap, ROUND_CAP);
-                put(line_sym, keys::stroke_linejoin, ROUND_JOIN);
+                put(line_sym, keys::stroke_linecap, line_cap_enum::ROUND_CAP);
+                put(line_sym, keys::stroke_linejoin, line_join_enum::ROUND_JOIN);
                 r.append(std::move(line_sym));
             }
             roads2_style_1.add_rule(std::move(r));
@@ -164,8 +164,8 @@ int main(int, char**)
                 line_symbolizer line_sym;
                 put(line_sym, keys::stroke, color(255, 250, 115));
                 put(line_sym, keys::stroke_width, 2.0);
-                put(line_sym, keys::stroke_linecap, ROUND_CAP);
-                put(line_sym, keys::stroke_linejoin, ROUND_JOIN);
+                put(line_sym, keys::stroke_linecap, line_cap_enum::ROUND_CAP);
+                put(line_sym, keys::stroke_linejoin, line_join_enum::ROUND_JOIN);
                 r.append(std::move(line_sym));
             }
             roads2_style_2.add_rule(std::move(r));
@@ -181,8 +181,8 @@ int main(int, char**)
                 line_symbolizer line_sym;
                 put(line_sym, keys::stroke, color(188, 149, 28));
                 put(line_sym, keys::stroke_width, 7.0);
-                put(line_sym, keys::stroke_linecap, ROUND_CAP);
-                put(line_sym, keys::stroke_linejoin, ROUND_JOIN);
+                put(line_sym, keys::stroke_linecap, line_cap_enum::ROUND_CAP);
+                put(line_sym, keys::stroke_linejoin, line_join_enum::ROUND_JOIN);
                 r.append(std::move(line_sym));
             }
             roads1_style_1.add_rule(std::move(r));
@@ -197,8 +197,8 @@ int main(int, char**)
                 line_symbolizer line_sym;
                 put(line_sym, keys::stroke, color(242, 191, 36));
                 put(line_sym, keys::stroke_width, 5.0);
-                put(line_sym, keys::stroke_linecap, ROUND_CAP);
-                put(line_sym, keys::stroke_linejoin, ROUND_JOIN);
+                put(line_sym, keys::stroke_linecap, line_cap_enum::ROUND_CAP);
+                put(line_sym, keys::stroke_linejoin, line_join_enum::ROUND_JOIN);
                 r.append(std::move(line_sym));
             }
             roads1_style_2.add_rule(std::move(r));
