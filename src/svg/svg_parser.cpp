@@ -1000,7 +1000,11 @@ void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node)
         parser.path_.set_dimensions(0, 0);
         return;
     }
-    parser.path_.set_dimensions(width, height);
+    if (!parser.dimensions_)
+    {
+        parser.dimensions_ = true;
+        parser.path_.set_dimensions(width, height);
+    }
 }
 
 void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node)
