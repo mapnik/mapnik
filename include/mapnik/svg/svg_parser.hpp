@@ -111,7 +111,6 @@ class MAPNIK_DECL svg_parser : private util::noncopyable
     mapnik::css_data css_data_;
     boost::optional<viewbox> vbox_{};
     double normalized_diagonal_ = 0.0;
-    agg::trans_affine viewbox_tr_{};
     std::deque<double> font_sizes_{};
     error_handler err_handler_;
 };

@@ -64,7 +64,7 @@ auto const matrix_action = [](auto const& ctx) {
     auto d = boost::fusion::at_c<3>(attr);
     auto e = boost::fusion::at_c<4>(attr);
     auto f = boost::fusion::at_c<5>(attr);
-    tr = agg::trans_affine(a, b, c, d, e, f) * tr;
+    tr.premultiply(agg::trans_affine(a, b, c, d, e, f));
 };
 
 auto const rotate_action = [](auto const& ctx) {
@@ -75,14 +75,14 @@ auto const rotate_action = [](auto const& ctx) {
     auto cy = boost::fusion::at_c<2>(attr) ? *boost::fusion::at_c<2>(attr) : 0.0;
     if (cx == 0.0 && cy == 0.0)
     {
-        tr = agg::trans_affine_rotation(agg::deg2rad(a)) * tr;
+        tr.premultiply(agg::trans_affine_rotation(agg::deg2rad(a)));
     }
     else
     {
         agg::trans_affine t = agg::trans_affine_translation(-cx, -cy);
         t *= agg::trans_affine_rotation(agg::deg2rad(a));
         t *= agg::trans_affine_translation(cx, cy);
-        tr = t * tr;
+        tr.premultiply(t);
     }
 };
 
@@ -92,9 +92,9 @@ auto const translate_action = [](auto const& ctx) {
     auto tx = boost::fusion::at_c<0>(attr);
     auto ty = boost::fusion::at_c<1>(attr);
     if (ty)
-        tr = agg::trans_affine_translation(tx, *ty) * tr;
+        tr.premultiply(agg::trans_affine_translation(tx, *ty));
     else
-        tr = agg::trans_affine_translation(tx, 0.0) * tr;
+        tr.premultiply(agg::trans_affine_translation(tx, 0.0));
 };
 
 auto const scale_action = [](auto const& ctx) {
@@ -103,21 +103,21 @@ auto const scale_action = [](auto const& ctx) {
     auto sx = boost::fusion::at_c<0>(attr);
     auto sy = boost::fusion::at_c<1>(attr);
     if (sy)
-        tr = agg::trans_affine_scaling(sx, *sy) * tr;
+        tr.premultiply(agg::trans_affine_scaling(sx, *sy));
     else
-        tr = agg::trans_affine_scaling(sx, sx) * tr;
+        tr.premultiply(agg::trans_affine_scaling(sx, sx));
 };
 
 auto const skewX_action = [](auto const& ctx) {
     auto& tr = extract_transform(ctx);
     auto skew_x = _attr(ctx);
-    tr = agg::trans_affine_skewing(agg::deg2rad(skew_x), 0.0) * tr;
+    tr.premultiply(agg::trans_affine_skewing(agg::deg2rad(skew_x), 0.0));
 };
 
 auto const skewY_action = [](auto const& ctx) {
     auto& tr = extract_transform(ctx);
     auto skew_y = _attr(ctx);
-    tr = agg::trans_affine_skewing(0.0, agg::deg2rad(skew_y)) * tr;
+    tr.premultiply(agg::trans_affine_skewing(0.0, agg::deg2rad(skew_y)));
 };
 
 // rules
