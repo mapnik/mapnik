@@ -277,11 +277,11 @@ void base_symbolizer_helper::initialize_points() const
 
     switch (how_placed)
     {
-        case LINE_PLACEMENT:
+        case label_placement_enum::LINE_PLACEMENT:
             point_placement_ = false;
             return;
-        case GRID_PLACEMENT:
-        case ALTERNATING_GRID_PLACEMENT:
+        case label_placement_enum::GRID_PLACEMENT:
+        case label_placement_enum::ALTERNATING_GRID_PLACEMENT:
             point_placement_ = true;
             // Points for grid placement are generated in text_symbolizer_helper
             // because base_symbolizer_helper doesn't have the vertex converter.
@@ -296,7 +296,7 @@ void base_symbolizer_helper::initialize_points() const
 
     for (auto const& geom : geometries_to_process_)
     {
-        if (how_placed == VERTEX_PLACEMENT)
+        if (how_placed == label_placement_enum::VERTEX_PLACEMENT)
         {
             using apply_vertex_placement = detail::apply_vertex_placement<std::list<pixel_position>>;
             apply_vertex_placement apply(points_, t_, prj_trans_);
@@ -317,7 +317,7 @@ void base_symbolizer_helper::initialize_points() const
                 geometry::line_string_vertex_adapter<double> va(line);
                 success = label::middle_point(va, label_x, label_y);
             }
-            else if (how_placed == POINT_PLACEMENT || type == geometry::geometry_types::Point)
+            else if (how_placed == label_placement_enum::POINT_PLACEMENT || type == geometry::geometry_types::Point)
             {
                 geometry::point<double> pt;
                 if (geometry::centroid(geom, pt))
@@ -335,7 +335,7 @@ void base_symbolizer_helper::initialize_points() const
                 using transform_group_type = geometry::strategy_group<proj_backward_strategy, view_strategy>;
                 transform_group_type transform_group(ps, vs);
                 geometry::polygon<double> tranformed_poly(geometry::transform<double>(poly, transform_group));
-                if (how_placed == INTERIOR_PLACEMENT)
+                if (how_placed == label_placement_enum::INTERIOR_PLACEMENT)
                 {
                     geometry::point<double> pt;
                     if (geometry::interior(tranformed_poly, scale_factor_, pt))
@@ -343,7 +343,7 @@ void base_symbolizer_helper::initialize_points() const
                         points_.emplace_back(pt.x, pt.y);
                     }
                 }
-                else if (how_placed == POLYLABEL_PLACEMENT)
+                else if (how_placed == label_placement_enum::POLYLABEL_PLACEMENT)
                 {
                     double precision = geometry::polylabel_precision(tranformed_poly, scale_factor_);
                     geometry::point<double> pt;
@@ -408,7 +408,8 @@ void text_symbolizer_helper::init_converters()
     if (clip)
     {
         label_placement_enum how_placed = text_props_->label_placement;
-        if (how_placed == GRID_PLACEMENT || how_placed == ALTERNATING_GRID_PLACEMENT)
+        if (how_placed == label_placement_enum::GRID_PLACEMENT ||
+            how_placed == label_placement_enum::ALTERNATING_GRID_PLACEMENT)
         {
             converter_.template set<clip_poly_tag>();
         }
@@ -618,11 +619,11 @@ void text_symbolizer_helper::initialize_points() const
 {
     label_placement_enum how_placed = text_props_->label_placement;
 
-    if (how_placed == GRID_PLACEMENT)
+    if (how_placed == label_placement_enum::GRID_PLACEMENT)
     {
         initialize_grid_points<geometry::regular_grid_vertex_converter>();
     }
-    else if (how_placed == ALTERNATING_GRID_PLACEMENT)
+    else if (how_placed == label_placement_enum::ALTERNATING_GRID_PLACEMENT)
     {
         initialize_grid_points<geometry::alternating_grid_vertex_converter>();
     }

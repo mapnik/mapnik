@@ -51,7 +51,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_color_rgba.h"
 #include "agg_scanline_u.h"
 #include "agg_image_filters.h"
-#include "agg_trans_bilinear.h"
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_rgba.h"
@@ -74,8 +73,8 @@ agg_renderer<T0, T1>::agg_renderer(Map const& m, T0& pixmap, double scale_factor
     , buffers_()
     , internal_buffers_(m.width(), m.height())
     , inflated_buffer_()
-    , ras_ptr(new rasterizer)
-    , gamma_method_(GAMMA_POWER)
+    , ras_ptr(std::make_unique<rasterizer>())
+    , gamma_method_(gamma_method_enum::GAMMA_POWER)
     , gamma_(1.0)
     , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor)
 {
@@ -94,8 +93,8 @@ agg_renderer<T0, T1>::agg_renderer(Map const& m,
     , buffers_()
     , internal_buffers_(req.width(), req.height())
     , inflated_buffer_()
-    , ras_ptr(new rasterizer)
-    , gamma_method_(GAMMA_POWER)
+    , ras_ptr(std::make_unique<rasterizer>())
+    , gamma_method_(gamma_method_enum::GAMMA_POWER)
     , gamma_(1.0)
     , common_(m, req, vars, offset_x, offset_y, req.width(), req.height(), scale_factor)
 {
@@ -113,8 +112,8 @@ agg_renderer<T0, T1>::agg_renderer(Map const& m,
     , buffers_()
     , internal_buffers_(m.width(), m.height())
     , inflated_buffer_()
-    , ras_ptr(new rasterizer)
-    , gamma_method_(GAMMA_POWER)
+    , ras_ptr(std::make_unique<rasterizer>())
+    , gamma_method_(gamma_method_enum::GAMMA_POWER)
     , gamma_(1.0)
     , common_(m, attributes(), offset_x, offset_y, m.width(), m.height(), scale_factor, detector)
 {
@@ -405,10 +404,10 @@ struct agg_render_marker_visitor
         using renderer_type = agg::renderer_scanline_aa_solid<renderer_base>;
 
         ras_ptr_->reset();
-        if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+        if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
         {
             ras_ptr_->gamma(agg::gamma_power());
-            gamma_method_ = GAMMA_POWER;
+            gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
         agg::scanline_u8 sl;
@@ -451,10 +450,10 @@ struct agg_render_marker_visitor
         using renderer_base = agg::renderer_base<pixfmt_comp_type>;
 
         ras_ptr_->reset();
-        if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+        if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
         {
             ras_ptr_->gamma(agg::gamma_power());
-            gamma_method_ = GAMMA_POWER;
+            gamma_method_ = gamma_method_enum::GAMMA_POWER;
             gamma_ = 1.0;
         }
         agg::scanline_u8 sl;
