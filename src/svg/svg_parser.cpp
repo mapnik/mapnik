@@ -54,8 +54,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <fstream>
 #include <array>
 
-
-
 namespace mapnik {
 namespace svg {
 
@@ -533,45 +531,45 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
             {
                 switch (name)
                 {
-                case "g"_case:
-                    if (node->first_node() != nullptr)
-                    {
+                    case "g"_case:
+                        if (node->first_node() != nullptr)
+                        {
+                            parser.path_.push_attr();
+                            parse_id(parser, node);
+                            if (parser.css_style_)
+                                process_css(parser, node);
+                            parse_attr(parser, node);
+                        }
+                        break;
+                    case "svg"_case:
+                        if (node->first_node() != nullptr)
+                        {
+                            parser.path_.push_attr();
+                            parse_attr(parser, node);
+                            parse_dimensions(parser, node);
+                        }
+
+                        break;
+                    case "use"_case:
                         parser.path_.push_attr();
                         parse_id(parser, node);
                         if (parser.css_style_)
                             process_css(parser, node);
                         parse_attr(parser, node);
-                    }
-                    break;
-                case "svg"_case:
-                    if (node->first_node() != nullptr)
-                    {
+                        parse_use(parser, node);
+                        parser.path_.pop_attr();
+                        break;
+                    default:
                         parser.path_.push_attr();
+                        parse_id(parser, node);
+                        if (parser.css_style_)
+                            process_css(parser, node);
                         parse_attr(parser, node);
-                        parse_dimensions(parser, node);
-                    }
-
-                    break;
-                case "use"_case:
-                    parser.path_.push_attr();
-                    parse_id(parser, node);
-                    if (parser.css_style_)
-                        process_css(parser, node);
-                    parse_attr(parser, node);
-                    parse_use(parser, node);
-                    parser.path_.pop_attr();
-                    break;
-                default:
-                    parser.path_.push_attr();
-                    parse_id(parser, node);
-                    if (parser.css_style_)
-                        process_css(parser, node);
-                    parse_attr(parser, node);
-                    if (parser.path_.display())
-                    {
-                        parse_element(parser, node->name(), node);
-                    }
-                    parser.path_.pop_attr();
+                        if (parser.path_.display())
+                        {
+                            parse_element(parser, node->name(), node);
+                        }
+                        parser.path_.pop_attr();
                 }
             }
             else
@@ -934,48 +932,48 @@ void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node)
 
             switch (preserve_aspect_ratio.first)
             {
-            case none:
-                t.premultiply(agg::trans_affine_scaling(sx, sy));
-                break;
-            case xMinYMin:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                break;
-            case xMinYMid:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)));
-                break;
-            case xMinYMax:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)));
-                break;
-            case xMidYMin:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0));
-                break;
-            case xMidYMid: // (the default)
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                            -0.5 * (vbox.height - height / scale)));
-                break;
-            case xMidYMax:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                            -1.0 * (vbox.height - height / scale)));
+                case none:
+                    t.premultiply(agg::trans_affine_scaling(sx, sy));
                     break;
-            case xMaxYMin:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0));
-                break;
-            case xMaxYMid:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                            -0.5 * (vbox.height - height / scale)));
-                break;
-            case xMaxYMax:
-                t.premultiply(agg::trans_affine_scaling(scale, scale));
-                t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                            -1.0 * (vbox.height - height / scale)));
-                break;
+                case xMinYMin:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    break;
+                case xMinYMid:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)));
+                    break;
+                case xMinYMax:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)));
+                    break;
+                case xMidYMin:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0));
+                    break;
+                case xMidYMid: // (the default)
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                                -0.5 * (vbox.height - height / scale)));
+                    break;
+                case xMidYMax:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                                -1.0 * (vbox.height - height / scale)));
+                    break;
+                case xMaxYMin:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0));
+                    break;
+                case xMaxYMid:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                                -0.5 * (vbox.height - height / scale)));
+                    break;
+                case xMaxYMax:
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                                -1.0 * (vbox.height - height / scale)));
+                    break;
             };
 
             t.premultiply(agg::trans_affine_translation(-vbox.x0, -vbox.y0));
