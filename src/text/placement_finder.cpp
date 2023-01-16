@@ -97,7 +97,7 @@ placement_finder::placement_finder(feature_impl const& feature,
     , marker_unlocked_(false)
     , marker_displacement_()
     , move_dx_(0.0)
-    , horizontal_alignment_(H_LEFT)
+    , horizontal_alignment_(horizontal_alignment_enum::H_LEFT)
 {}
 
 bool placement_finder::next_position()
@@ -135,23 +135,23 @@ bool placement_finder::next_position()
 
 text_upright_e placement_finder::simplify_upright(text_upright_e upright, double angle) const
 {
-    if (upright == UPRIGHT_AUTO)
+    if (upright == text_upright_enum::UPRIGHT_AUTO)
     {
         angle = util::normalize_angle(angle);
-        return std::abs(angle) > util::tau / 4 ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        return std::abs(angle) > util::tau / 4 ? text_upright_enum::UPRIGHT_LEFT : text_upright_enum::UPRIGHT_RIGHT;
     }
-    if (upright == UPRIGHT_AUTO_DOWN)
+    if (upright == text_upright_enum::UPRIGHT_AUTO_DOWN)
     {
         angle = util::normalize_angle(angle);
-        return std::abs(angle) < util::tau / 4 ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        return std::abs(angle) < util::tau / 4 ? text_upright_enum::UPRIGHT_LEFT : text_upright_enum::UPRIGHT_RIGHT;
     }
-    if (upright == UPRIGHT_LEFT_ONLY)
+    if (upright == text_upright_enum::UPRIGHT_LEFT_ONLY)
     {
-        return UPRIGHT_LEFT;
+        return text_upright_enum::UPRIGHT_LEFT;
     }
-    if (upright == UPRIGHT_RIGHT_ONLY)
+    if (upright == text_upright_enum::UPRIGHT_RIGHT_ONLY)
     {
-        return UPRIGHT_RIGHT;
+        return text_upright_enum::UPRIGHT_RIGHT;
     }
     return upright;
 }
@@ -270,12 +270,12 @@ bool placement_finder::single_line_placement(vertex_cache& pp, text_upright_e or
         text_layout const& layout = *layout_ptr;
         pixel_position align_offset = layout.alignment_offset();
         pixel_position const& layout_displacement = layout.displacement();
-        double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
+        double sign = (real_orientation == text_upright_enum::UPRIGHT_LEFT) ? -1 : 1;
         // double offset = 0 - (layout_displacement.y + 0.5 * sign * layout.height());
         double offset = layout_displacement.y - 0.5 * sign * layout.height();
         double adjust_character_spacing = .0;
         double layout_width = layout.width();
-        bool adjust = layout.horizontal_alignment() == H_ADJUST;
+        bool adjust = layout.horizontal_alignment() == horizontal_alignment_enum::H_ADJUST;
 
         if (adjust)
         {
@@ -371,23 +371,30 @@ bool placement_finder::single_line_placement(vertex_cache& pp, text_upright_e or
 
     if (upside_down_glyph_count > static_cast<unsigned>(layouts_.text().length() / 2))
     {
-        if (orientation == UPRIGHT_AUTO)
+        if (orientation == text_upright_enum::UPRIGHT_AUTO)
         {
             // Try again with opposite orientation
             begin.restore();
-            return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
+            return single_line_placement(pp,
+                                         real_orientation == text_upright_enum::UPRIGHT_RIGHT
+                                           ? text_upright_enum::UPRIGHT_LEFT
+                                           : text_upright_enum::UPRIGHT_RIGHT);
         }
         // upright==left-only or right-only and more than 50% of characters upside down => no placement
-        else if (orientation == UPRIGHT_LEFT_ONLY || orientation == UPRIGHT_RIGHT_ONLY)
+        else if (orientation == text_upright_enum::UPRIGHT_LEFT_ONLY ||
+                 orientation == text_upright_enum::UPRIGHT_RIGHT_ONLY)
         {
             return false;
         }
     }
-    else if (orientation == UPRIGHT_AUTO_DOWN)
+    else if (orientation == text_upright_enum::UPRIGHT_AUTO_DOWN)
     {
         // Try again with opposite orientation
         begin.restore();
-        return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
+        return single_line_placement(pp,
+                                     real_orientation == text_upright_enum::UPRIGHT_RIGHT
+                                       ? text_upright_enum::UPRIGHT_LEFT
+                                       : text_upright_enum::UPRIGHT_RIGHT);
     }
 
     box2d<double> label_box;
@@ -424,7 +431,7 @@ void placement_finder::path_move_dx(vertex_cache& pp, double dx)
 double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
-    if (horizontal_alignment_ != H_ADJUST && text_props_->label_spacing > 0)
+    if (horizontal_alignment_ != horizontal_alignment_enum::H_ADJUST && text_props_->label_spacing > 0)
     {
         num_labels =
           static_cast<int>(std::floor(path_length / (text_props_->label_spacing * scale_factor_ + layout_width)));

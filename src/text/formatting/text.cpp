@@ -61,16 +61,16 @@ void text_node::apply(evaluated_format_properties_ptr const& p,
       util::apply_visitor(evaluate<feature_impl, value_type, attributes>(feature, vars), *text_).to_unicode();
     switch (p->text_transform)
     {
-        case UPPERCASE:
+        case text_transform_enum::UPPERCASE:
             text_str.toUpper();
             break;
-        case LOWERCASE:
+        case text_transform_enum::LOWERCASE:
             text_str.toLower();
             break;
-        case REVERSE:
+        case text_transform_enum::REVERSE:
             text_str.reverse();
             break;
-        case CAPITALIZE:
+        case text_transform_enum::CAPITALIZE:
 #if !UCONFIG_NO_BREAK_ITERATION
             // note: requires BreakIterator support in ICU which is optional
             text_str.toTitle(nullptr);

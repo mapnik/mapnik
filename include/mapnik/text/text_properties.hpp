@@ -159,7 +159,7 @@ struct MAPNIK_DECL text_layout_properties
 
 struct text_properties_expressions
 {
-    symbolizer_base::value_type label_placement = enumeration_wrapper(POINT_PLACEMENT);
+    symbolizer_base::value_type label_placement = enumeration_wrapper(label_placement_enum::POINT_PLACEMENT);
     symbolizer_base::value_type label_spacing = 0.0;
     symbolizer_base::value_type label_position_tolerance = 0.0;
     symbolizer_base::value_type avoid_edges = false;
@@ -171,7 +171,7 @@ struct text_properties_expressions
     symbolizer_base::value_type max_char_angle_delta = 22.5;
     symbolizer_base::value_type allow_overlap = false;
     symbolizer_base::value_type largest_bbox_only = true;
-    symbolizer_base::value_type upright = enumeration_wrapper(UPRIGHT_AUTO);
+    symbolizer_base::value_type upright = enumeration_wrapper(text_upright_enum::UPRIGHT_AUTO);
     symbolizer_base::value_type grid_cell_width = 0.0;
     symbolizer_base::value_type grid_cell_height = 0.0;
 };
