@@ -221,30 +221,34 @@ void agg_renderer<T0, T1>::process(debug_symbolizer const& sym,
                                    proj_transform const& prj_trans)
 {
     debug_symbolizer_mode_enum mode =
-      get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
+      get<debug_symbolizer_mode_enum>(sym,
+                                      keys::mode,
+                                      feature,
+                                      common_.vars_,
+                                      debug_symbolizer_mode_enum::DEBUG_SYM_MODE_COLLISION);
 
     ras_ptr->reset();
-    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    if (gamma_method_ != gamma_method_enum::GAMMA_POWER || gamma_ != 1.0)
     {
         ras_ptr->gamma(agg::gamma_power());
-        gamma_method_ = GAMMA_POWER;
+        gamma_method_ = gamma_method_enum::GAMMA_POWER;
         gamma_ = 1.0;
     }
 
-    if (mode == DEBUG_SYM_MODE_RINGS)
+    if (mode == debug_symbolizer_mode_enum::DEBUG_SYM_MODE_RINGS)
     {
         RingRenderer<buffer_type> renderer(*ras_ptr, buffers_.top().get(), common_.t_, prj_trans);
         render_ring_visitor<buffer_type> apply(renderer);
         mapnik::util::apply_visitor(apply, feature.get_geometry());
     }
-    else if (mode == DEBUG_SYM_MODE_COLLISION)
+    else if (mode == debug_symbolizer_mode_enum::DEBUG_SYM_MODE_COLLISION)
     {
         for (auto const& n : *common_.detector_)
         {
             draw_rect(buffers_.top().get(), n.get().box);
         }
     }
-    else if (mode == DEBUG_SYM_MODE_VERTEX)
+    else if (mode == debug_symbolizer_mode_enum::DEBUG_SYM_MODE_VERTEX)
     {
         using apply_vertex_mode = apply_vertex_mode<buffer_type>;
         apply_vertex_mode apply(buffers_.top().get(), common_.t_, prj_trans);

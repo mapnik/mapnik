@@ -20,21 +20,27 @@
  *
  *****************************************************************************/
 
+#include <algorithm>
+#include <string>
+#include <unordered_map>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/enumeration.hpp>
 
-// boost
-
 namespace mapnik {
-
-static const char* filter_mode_strings[] = {"all", "first", ""};
-
-IMPLEMENT_ENUM(filter_mode_e, filter_mode_strings)
+namespace {
+using E = detail::EnumStringT<filter_mode_enum>;
+constexpr detail::EnumMapT<filter_mode_enum, 3> filter_mode_e_map{{
+  E{filter_mode_enum::FILTER_ALL, "all"},
+  E{filter_mode_enum::FILTER_FIRST, "first"},
+  E{filter_mode_enum::filter_mode_enum_MAX, ""},
+}};
+} // namespace
+IMPLEMENT_ENUM(filter_mode_e, filter_mode_enum);
 
 feature_type_style::feature_type_style()
     : rules_()
-    , filter_mode_(FILTER_ALL)
+    , filter_mode_(filter_mode_enum::FILTER_ALL)
     , filters_()
     , direct_filters_()
     , comp_op_()

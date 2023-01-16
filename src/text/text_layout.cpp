@@ -466,32 +466,32 @@ void text_layout::shape_text(text_line& line)
 
 void text_layout::init_auto_alignment()
 {
-    if (valign_ == V_AUTO)
+    if (valign_ == vertical_alignment_enum::V_AUTO)
     {
         if (displacement_.y > 0.0)
-            valign_ = V_BOTTOM;
+            valign_ = vertical_alignment_enum::V_BOTTOM;
         else if (displacement_.y < 0.0)
-            valign_ = V_TOP;
+            valign_ = vertical_alignment_enum::V_TOP;
         else
-            valign_ = V_MIDDLE;
+            valign_ = vertical_alignment_enum::V_MIDDLE;
     }
-    if (halign_ == H_AUTO)
+    if (halign_ == horizontal_alignment_enum::H_AUTO)
     {
         if (displacement_.x > 0.0)
-            halign_ = H_RIGHT;
+            halign_ = horizontal_alignment_enum::H_RIGHT;
         else if (displacement_.x < 0.0)
-            halign_ = H_LEFT;
+            halign_ = horizontal_alignment_enum::H_LEFT;
         else
-            halign_ = H_MIDDLE;
+            halign_ = horizontal_alignment_enum::H_MIDDLE;
     }
-    if (jalign_ == J_AUTO)
+    if (jalign_ == justify_alignment_enum::J_AUTO)
     {
         if (displacement_.x > 0.0)
-            jalign_ = J_LEFT;
+            jalign_ = justify_alignment_enum::J_LEFT;
         else if (displacement_.x < 0.0)
-            jalign_ = J_RIGHT;
+            jalign_ = justify_alignment_enum::J_RIGHT;
         else
-            jalign_ = J_MIDDLE;
+            jalign_ = justify_alignment_enum::J_MIDDLE;
     }
 }
 
@@ -499,20 +499,20 @@ pixel_position text_layout::alignment_offset() const
 {
     pixel_position result(0, 0);
     // if needed, adjust for desired vertical alignment
-    if (valign_ == V_TOP)
+    if (valign_ == vertical_alignment_enum::V_TOP)
     {
         result.y = -0.5 * height(); // move center up by 1/2 the total height
     }
-    else if (valign_ == V_BOTTOM)
+    else if (valign_ == vertical_alignment_enum::V_BOTTOM)
     {
         result.y = 0.5 * height(); // move center down by the 1/2 the total height
     }
     // set horizontal position to middle of text
-    if (halign_ == H_LEFT)
+    if (halign_ == horizontal_alignment_enum::H_LEFT)
     {
         result.x = -0.5 * width(); // move center left by 1/2 the string width
     }
-    else if (halign_ == H_RIGHT)
+    else if (halign_ == horizontal_alignment_enum::H_RIGHT)
     {
         result.x = 0.5 * width(); // move center right by 1/2 the string width
     }
@@ -521,11 +521,11 @@ pixel_position text_layout::alignment_offset() const
 
 double text_layout::jalign_offset(double line_width) const
 {
-    if (jalign_ == J_MIDDLE)
+    if (jalign_ == justify_alignment_enum::J_MIDDLE)
         return -(line_width / 2.0);
-    if (jalign_ == J_LEFT)
+    if (jalign_ == justify_alignment_enum::J_LEFT)
         return -(width() / 2.0);
-    if (jalign_ == J_RIGHT)
+    if (jalign_ == justify_alignment_enum::J_RIGHT)
         return (width() / 2.0) - line_width;
     return 0;
 }

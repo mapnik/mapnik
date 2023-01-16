@@ -489,7 +489,7 @@ void map_parser::parse_style(Map& map, xml_node const& node)
         name = node.get_attr<std::string>("name");
         feature_type_style style;
 
-        filter_mode_e filter_mode = node.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
+        filter_mode_e filter_mode = node.get_attr<filter_mode_e>("filter-mode", filter_mode_enum::FILTER_ALL);
         style.set_filter_mode(filter_mode);
 
         // compositing
@@ -1586,9 +1586,10 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node
     try
     {
         // mode
-        colorizer_mode default_mode = node.get_attr<colorizer_mode>("default-mode", COLORIZER_LINEAR);
+        colorizer_mode default_mode =
+          node.get_attr<colorizer_mode>("default-mode", colorizer_mode_enum::COLORIZER_LINEAR);
 
-        if (default_mode == COLORIZER_INHERIT)
+        if (default_mode == colorizer_mode_enum::COLORIZER_INHERIT)
         {
             throw config_error("RasterColorizer mode must not be INHERIT. ");
         }
@@ -1626,7 +1627,7 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node
                 }
 
                 // mode default to INHERIT
-                colorizer_mode mode = n.get_attr<colorizer_mode>("mode", COLORIZER_INHERIT);
+                colorizer_mode mode = n.get_attr<colorizer_mode>("mode", colorizer_mode_enum::COLORIZER_INHERIT);
 
                 // value is required, and it must be bigger than the previous
                 optional<float> val = n.get_opt_attr<float>("value");

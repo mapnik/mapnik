@@ -43,9 +43,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
-#include "agg_scanline_p.h"
-#include "agg_conv_stroke.h"
-#include "agg_conv_dash.h"
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
 MAPNIK_DISABLE_WARNING_POP
@@ -59,30 +56,29 @@ namespace mapnik {
 template<typename Symbolizer, typename Rasterizer, typename Feature>
 void set_join_caps_aa(Symbolizer const& sym, Rasterizer& ras, Feature& feature, attributes const& vars)
 {
-    line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
+    const line_join_enum join = get<line_join_enum, keys::stroke_linejoin>(sym, feature, vars);
     switch (join)
     {
-        case MITER_JOIN:
+        case line_join_enum::MITER_JOIN:
             ras.line_join(agg::outline_miter_accurate_join);
             break;
-        case MITER_REVERT_JOIN:
+        case line_join_enum::MITER_REVERT_JOIN:
             ras.line_join(agg::outline_no_join);
             break;
-        case ROUND_JOIN:
+        case line_join_enum::ROUND_JOIN:
             ras.line_join(agg::outline_round_join);
             break;
         default:
             ras.line_join(agg::outline_no_join);
     }
 
-    line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
-
+    const line_cap_enum cap = get<line_cap_enum, keys::stroke_linecap>(sym, feature, vars);
     switch (cap)
     {
-        case BUTT_CAP:
+        case line_cap_enum::BUTT_CAP:
             ras.round_cap(false);
             break;
-        case SQUARE_CAP:
+        case line_cap_enum::SQUARE_CAP:
             ras.round_cap(false);
             break;
         default:
@@ -97,10 +93,10 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
 
 {
     color const& col = get<color, keys::stroke>(sym, feature, common_.vars_);
-    unsigned r = col.red();
-    unsigned g = col.green();
-    unsigned b = col.blue();
-    unsigned a = col.alpha();
+    const unsigned r = col.red();
+    const unsigned g = col.green();
+    const unsigned b = col.blue();
+    const unsigned a = col.alpha();
 
     double gamma = get<value_double, keys::stroke_gamma>(sym, feature, common_.vars_);
     gamma_method_enum gamma_method = get<gamma_method_enum, keys::stroke_gamma_method>(sym, feature, common_.vars_);
@@ -136,13 +132,14 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
 
     box2d<double> clip_box = clipping_extent(common_);
 
-    value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
-    value_double width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
-    value_double opacity = get<value_double, keys::stroke_opacity>(sym, feature, common_.vars_);
-    value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
-    value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
-    value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
-    line_rasterizer_enum rasterizer_e = get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
+    const value_bool clip = get<value_bool, keys::clip>(sym, feature, common_.vars_);
+    const value_double width = get<value_double, keys::stroke_width>(sym, feature, common_.vars_);
+    const value_double opacity = get<value_double, keys::stroke_opacity>(sym, feature, common_.vars_);
+    const value_double offset = get<value_double, keys::offset>(sym, feature, common_.vars_);
+    const value_double simplify_tolerance = get<value_double, keys::simplify_tolerance>(sym, feature, common_.vars_);
+    const value_double smooth = get<value_double, keys::smooth>(sym, feature, common_.vars_);
+    const line_rasterizer_enum rasterizer_e =
+      get<line_rasterizer_enum, keys::line_rasterizer>(sym, feature, common_.vars_);
     if (clip)
     {
         double pad_per_pixel = static_cast<double>(common_.query_extent_.width() / common_.width_);
@@ -153,7 +150,7 @@ void agg_renderer<T0, T1>::process(line_symbolizer const& sym,
         clip_box.pad(padding);
     }
 
-    if (rasterizer_e == RASTERIZER_FAST)
+    if (rasterizer_e == line_rasterizer_enum::RASTERIZER_FAST)
     {
         using renderer_type = agg::renderer_outline_aa<renderer_base>;
         using rasterizer_type = agg::rasterizer_outline_aa<renderer_type>;

@@ -46,26 +46,26 @@ class markers_placement_finder : util::noncopyable
         switch (marker_placement_enum(placement_type))
         {
             default:
-            case MARKER_POINT_PLACEMENT:
+            case marker_placement_enum::MARKER_POINT_PLACEMENT:
                 construct(&point_, locator, detector, params);
                 break;
-            case MARKER_ANGLED_POINT_PLACEMENT:
+            case marker_placement_enum::MARKER_ANGLED_POINT_PLACEMENT:
                 construct(&point_, locator, detector, params);
                 point_.use_angle(true);
                 break;
-            case MARKER_INTERIOR_PLACEMENT:
+            case marker_placement_enum::MARKER_INTERIOR_PLACEMENT:
                 construct(&interior_, locator, detector, params);
                 break;
-            case MARKER_LINE_PLACEMENT:
+            case marker_placement_enum::MARKER_LINE_PLACEMENT:
                 construct(&line_, locator, detector, params);
                 break;
-            case MARKER_VERTEX_FIRST_PLACEMENT:
+            case marker_placement_enum::MARKER_VERTEX_FIRST_PLACEMENT:
                 construct(&vertex_first_, locator, detector, params);
                 break;
-            case MARKER_VERTEX_LAST_PLACEMENT:
+            case marker_placement_enum::MARKER_VERTEX_LAST_PLACEMENT:
                 construct(&vertex_last_, locator, detector, params);
                 break;
-            case MARKER_POLYLABEL_PLACEMENT:
+            case marker_placement_enum::MARKER_POLYLABEL_PLACEMENT:
                 construct(&polylabel_, locator, detector, params);
                 break;
         }
@@ -73,26 +73,26 @@ class markers_placement_finder : util::noncopyable
 
     ~markers_placement_finder()
     {
-        switch (marker_placement_enum(placement_type_))
+        switch (marker_placement_enum{placement_type_})
         {
             default:
-            case MARKER_POINT_PLACEMENT:
-            case MARKER_ANGLED_POINT_PLACEMENT:
+            case marker_placement_enum::MARKER_POINT_PLACEMENT:
+            case marker_placement_enum::MARKER_ANGLED_POINT_PLACEMENT:
                 destroy(&point_);
                 break;
-            case MARKER_INTERIOR_PLACEMENT:
+            case marker_placement_enum::MARKER_INTERIOR_PLACEMENT:
                 destroy(&interior_);
                 break;
-            case MARKER_LINE_PLACEMENT:
+            case marker_placement_enum::MARKER_LINE_PLACEMENT:
                 destroy(&line_);
                 break;
-            case MARKER_VERTEX_FIRST_PLACEMENT:
+            case marker_placement_enum::MARKER_VERTEX_FIRST_PLACEMENT:
                 destroy(&vertex_first_);
                 break;
-            case MARKER_VERTEX_LAST_PLACEMENT:
+            case marker_placement_enum::MARKER_VERTEX_LAST_PLACEMENT:
                 destroy(&vertex_last_);
                 break;
-            case MARKER_POLYLABEL_PLACEMENT:
+            case marker_placement_enum::MARKER_POLYLABEL_PLACEMENT:
                 destroy(&polylabel_);
                 break;
         }
@@ -101,21 +101,21 @@ class markers_placement_finder : util::noncopyable
     // Get next point where the marker should be placed. Returns true if a place is found, false if none is found.
     bool get_point(double& x, double& y, double& angle, bool ignore_placement)
     {
-        switch (marker_placement_enum(placement_type_))
+        switch (marker_placement_enum{placement_type_})
         {
             default:
-            case MARKER_POINT_PLACEMENT:
-            case MARKER_ANGLED_POINT_PLACEMENT:
+            case marker_placement_enum::MARKER_POINT_PLACEMENT:
+            case marker_placement_enum::MARKER_ANGLED_POINT_PLACEMENT:
                 return point_.get_point(x, y, angle, ignore_placement);
-            case MARKER_INTERIOR_PLACEMENT:
+            case marker_placement_enum::MARKER_INTERIOR_PLACEMENT:
                 return interior_.get_point(x, y, angle, ignore_placement);
-            case MARKER_LINE_PLACEMENT:
+            case marker_placement_enum::MARKER_LINE_PLACEMENT:
                 return line_.get_point(x, y, angle, ignore_placement);
-            case MARKER_VERTEX_FIRST_PLACEMENT:
+            case marker_placement_enum::MARKER_VERTEX_FIRST_PLACEMENT:
                 return vertex_first_.get_point(x, y, angle, ignore_placement);
-            case MARKER_VERTEX_LAST_PLACEMENT:
+            case marker_placement_enum::MARKER_VERTEX_LAST_PLACEMENT:
                 return vertex_last_.get_point(x, y, angle, ignore_placement);
-            case MARKER_POLYLABEL_PLACEMENT:
+            case marker_placement_enum::MARKER_POLYLABEL_PLACEMENT:
                 return polylabel_.get_point(x, y, angle, ignore_placement);
         }
     }
