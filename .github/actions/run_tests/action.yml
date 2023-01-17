@@ -27,14 +27,14 @@ runs:
 
     - name: Test visuals (windows)
       continue-on-error: true
-      working-directory: build/${{ inputs.cmake-preset }}/out
+      working-directory: build/out
       shell: "pwsh"
       if: runner.os == 'Windows'
       run: OpenCppCoverage --modules *libmapnik* --modules mapnik*.exe  --modules *.input --sources ${{ github.workspace }} --export_type binary --input_coverage=${{ github.workspace }}/ctest.cov --cover_children -- .\mapnik-test-visual.exe -j (Get-CimInstance -ClassName Win32_ComputerSystem).NumberOfLogicalProcessors --output-dir ./visual-test-result
 
     - name: Test visuals (linux & mac)
       continue-on-error: true
-      working-directory: build/${{ inputs.cmake-preset }}/out
+      working-directory: build/out
       shell: "bash"
       if: runner.os != 'Windows'
       run: |
@@ -45,7 +45,7 @@ runs:
         fi
 
     - name: Pack visual test results
-      working-directory: build/${{ inputs.cmake-preset }}/out
+      working-directory: build/out
       shell: "pwsh"
       run: tar cfvz visual-test-results.tar.gz ./visual-test-result
     
@@ -60,16 +60,16 @@ runs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ inputs.cmake-preset }}-visual-tests-${{ steps.run-guid.outputs.GUID }}
-        path: build/${{ inputs.cmake-preset }}/out/visual-test-results.tar.gz
+        path: build/out/visual-test-results.tar.gz
 
     - name: Run Benchmarks
-      working-directory: build/${{ inputs.cmake-preset }}/out
+      working-directory: build/out
       if: runner.os != 'Windows'
       shell: "pwsh"
       run: ./run_benchmarks
 
     - name: Collect coverage (linux & macos)
-      working-directory: build/${{ inputs.cmake-preset }}
+      working-directory: build
       if: runner.os != 'Windows'
       shell: "bash"
       run: |
@@ -81,10 +81,10 @@ runs:
       if: runner.os != 'Windows'
       uses: codecov/codecov-action@v3
       with:
-        files: build/${{ inputs.cmake-preset }}/coverage.info
+        files: build/coverage.info
 
     - name: Upload coverage to Codecov (windows)
       if: runner.os == 'Windows'
       uses: codecov/codecov-action@v3
       with:
-        files: build/${{ inputs.cmake-preset }}/out/mapnik-test-visual.cov
+        files: build/out/mapnik-test-visual.cov

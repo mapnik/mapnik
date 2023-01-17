@@ -40,15 +40,13 @@ set_target_properties(mapnik-viewer PROPERTIES
     AUTORCC ON
     AUTOUIC ON
     AUTOMOC ON
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 
 target_link_libraries(mapnik-viewer PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     mapnik::agg
     mapnik::mapnik
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini

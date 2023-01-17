@@ -104,8 +104,6 @@ int tiff_map_proc(thandle_t, tdata_t*, toff_t*)
 }
 } // namespace detail
 
-namespace {
-
 image_reader* create_tiff_reader(std::string const& filename)
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
@@ -120,9 +118,10 @@ image_reader* create_tiff_reader2(char const* data, std::size_t size)
     return new tiff_reader<mapnik::util::char_array_buffer>(data, size);
 }
 
-const bool registered = register_image_reader("tiff", create_tiff_reader);
-const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
-
-} // namespace
+void register_tiff_reader()
+{
+    const bool registered = register_image_reader("tiff", create_tiff_reader);
+    const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
+}
 
 } // namespace mapnik

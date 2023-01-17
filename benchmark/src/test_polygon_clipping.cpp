@@ -510,6 +510,7 @@ expected_count << "\n"; valid = false;
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     mapnik::parameters params;
     benchmark::handle_args(argc, argv, params);
 

@@ -32,6 +32,7 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -81,6 +82,8 @@ struct options_type<geojson_linear<Max, Min>>
 } // namespace index
 } // namespace geometry
 } // namespace boost
+
+DATASOURCE_PLUGIN_DEF(geojson_datasource_plugin, geojson);
 
 class geojson_datasource : public mapnik::datasource
 {

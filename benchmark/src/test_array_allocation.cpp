@@ -349,6 +349,7 @@ class test7 : public benchmark::test_case
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     return benchmark::sequencer(argc, argv)
       .run<test4>("calloc")
       .run<test1>("malloc/memcpy")

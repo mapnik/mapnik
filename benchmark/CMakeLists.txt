@@ -31,11 +31,12 @@ function(mapnik_create_benchmark)
     set(TARGET_NAME "mapnik-benchmark-${BENCHNAME}")
     add_executable(${TARGET_NAME} ${ARGV0})
     target_include_directories(${TARGET_NAME} PRIVATE include)
-    target_link_libraries(${TARGET_NAME} PRIVATE mapnik::agg mapnik::mapnik)
+    target_link_libraries(${TARGET_NAME} PRIVATE
+        mapnik::agg
+        mapnik::mapnik
+        ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
+    )
     set_target_properties(${TARGET_NAME} PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-        ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
         OUTPUT_NAME "${BENCHNAME}"
     )
 endfunction()
