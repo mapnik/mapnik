@@ -33,14 +33,11 @@ namespace grammar {
 namespace x3 = boost::spirit::x3;
 using x3::double_;
 using x3::lit;
-using x3::no_case;
 using x3::omit;
 
-namespace {
-auto assign_helper = [](auto const& ctx) {
+const auto assign_helper = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
-} // namespace
 
 // rules
 x3::rule<class point_class, point> const point("Position");

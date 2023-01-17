@@ -47,7 +47,10 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 #include <stdexcept>
 
-DATASOURCE_PLUGIN(shape_datasource)
+DATASOURCE_PLUGIN_IMPL(shape_datasource_plugin, shape_datasource);
+DATASOURCE_PLUGIN_EXPORT(shape_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(shape_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(shape_datasource_plugin);
 
 using mapnik::attribute_descriptor;
 using mapnik::Boolean;

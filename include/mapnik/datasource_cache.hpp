@@ -47,7 +47,8 @@ class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateSt
     friend class CreateStatic<datasource_cache>;
 
   public:
-    std::vector<std::string> plugin_names();
+    bool plugin_registered(const std::string& plugin_name) const;
+    std::vector<std::string> plugin_names() const;
     std::string plugin_directories();
     bool register_datasources(std::string const& path, bool recurse = false);
     bool register_datasource(std::string const& path);
@@ -62,7 +63,7 @@ class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateSt
     // but the instance also needs its own mutex to protect the
     // plugins_ and plugin_directories_ members which are potentially
     // modified recusrively by register_datasources(path, true);
-    std::recursive_mutex instance_mutex_;
+    mutable std::recursive_mutex instance_mutex_;
 };
 
 extern template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;

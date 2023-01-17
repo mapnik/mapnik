@@ -4,17 +4,13 @@ add_executable(mapnik-test-visual
     runner.cpp
     run.cpp
 )
-set_target_properties(mapnik-test-visual PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
 target_link_libraries(mapnik-test-visual PRIVATE
     Catch2::Catch2
     Boost::program_options
     Boost::filesystem
     mapnik::mapnik
     mapnik::agg
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 # needed for cleanup.hpp
 target_include_directories(mapnik-test-visual PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")

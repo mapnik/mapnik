@@ -85,16 +85,14 @@ mapnik::datasource_ptr get_csv_ds(std::string const& file_name, bool strict = tr
 TEST_CASE("csv")
 {
     using mapnik::util::from_u8string;
-    std::string csv_plugin("./plugins/input/csv.input");
-    if (mapnik::util::exists(csv_plugin))
+
+    // check the CSV datasource is loaded
+    const bool have_csv_plugin = mapnik::datasource_cache::instance().plugin_registered("csv");
+    if (have_csv_plugin)
     {
         // make the tests silent since we intentionally test error conditions that are noisy
         auto const severity = mapnik::logger::instance().get_severity();
         mapnik::logger::instance().set_severity(mapnik::logger::none);
-
-        // check the CSV datasource is loaded
-        const std::vector<std::string> plugin_names = mapnik::datasource_cache::instance().plugin_names();
-        const bool have_csv_plugin = std::find(plugin_names.begin(), plugin_names.end(), "csv") != plugin_names.end();
 
         SECTION("CSV I/O errors")
         {
@@ -125,41 +123,38 @@ TEST_CASE("csv")
         {
             for (auto create_index : {false, true})
             {
-                if (have_csv_plugin)
-                {
-                    std::vector<std::string> broken;
-                    add_csv_files("test/data/csv/fails", broken);
-                    add_csv_files("test/data/csv/warns", broken);
-                    broken.emplace_back("test/data/csv/fails/does_not_exist.csv");
+                std::vector<std::string> broken;
+                add_csv_files("test/data/csv/fails", broken);
+                add_csv_files("test/data/csv/warns", broken);
+                broken.emplace_back("test/data/csv/fails/does_not_exist.csv");
 
-                    for (auto const& path : broken)
+                for (auto const& path : broken)
+                {
+                    bool require_fail = true;
+                    if (create_index)
                     {
-                        bool require_fail = true;
-                        if (create_index)
+                        int ret = create_disk_index(path);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        require_fail = (boost::iends_with(path, "feature_id_counting.csv")) ? false : true;
+                        if (!require_fail)
                         {
-                            int ret = create_disk_index(path);
-                            int ret_posix = (ret >> 8) & 0x000000ff;
-                            INFO(ret);
-                            INFO(ret_posix);
-                            require_fail = (boost::iends_with(path, "feature_id_counting.csv")) ? false : true;
-                            if (!require_fail)
-                            {
-                                REQUIRE(mapnik::util::exists(path + ".index"));
-                            }
+                            REQUIRE(mapnik::util::exists(path + ".index"));
                         }
-                        INFO(path);
-                        if (require_fail)
-                        {
-                            REQUIRE_THROWS(get_csv_ds(path));
-                        }
-                        else
-                        {
-                            CHECK(bool(get_csv_ds(path)));
-                        }
-                        if (mapnik::util::exists(path + ".index"))
-                        {
-                            CHECK(mapnik::util::remove(path + ".index"));
-                        }
+                    }
+                    INFO(path);
+                    if (require_fail)
+                    {
+                        REQUIRE_THROWS(get_csv_ds(path));
+                    }
+                    else
+                    {
+                        CHECK(bool(get_csv_ds(path)));
+                    }
+                    if (mapnik::util::exists(path + ".index"))
+                    {
+                        CHECK(mapnik::util::remove(path + ".index"));
                     }
                 }
             }
@@ -167,41 +162,38 @@ TEST_CASE("csv")
 
         SECTION("good files")
         {
-            if (have_csv_plugin)
-            {
-                std::vector<std::string> good;
-                add_csv_files("test/data/csv", good);
-                add_csv_files("test/data/csv/warns", good);
+            std::vector<std::string> good;
+            add_csv_files("test/data/csv", good);
+            add_csv_files("test/data/csv/warns", good);
 
-                for (auto const& path : good)
+            for (auto const& path : good)
+            {
+                // cleanup in the case of a failed previous run
+                if (mapnik::util::exists(path + ".index"))
                 {
-                    // cleanup in the case of a failed previous run
+                    mapnik::util::remove(path + ".index");
+                }
+                for (auto create_index : {false, true})
+                {
+                    if (create_index)
+                    {
+                        int ret = create_disk_index(path);
+                        int ret_posix = (ret >> 8) & 0x000000ff;
+                        INFO(ret);
+                        INFO(ret_posix);
+                        if (!boost::iends_with(path,
+                                               "more_headers_than_column_values.csv")) // mapnik-index won't create
+                                                                                       // *.index for 0 features
+                        {
+                            CHECK(mapnik::util::exists(path + ".index"));
+                        }
+                    }
+                    auto ds = get_csv_ds(path, false);
+                    // require a non-null pointer returned
+                    REQUIRE(bool(ds));
                     if (mapnik::util::exists(path + ".index"))
                     {
-                        mapnik::util::remove(path + ".index");
-                    }
-                    for (auto create_index : {false, true})
-                    {
-                        if (create_index)
-                        {
-                            int ret = create_disk_index(path);
-                            int ret_posix = (ret >> 8) & 0x000000ff;
-                            INFO(ret);
-                            INFO(ret_posix);
-                            if (!boost::iends_with(path,
-                                                   "more_headers_than_column_values.csv")) // mapnik-index won't create
-                                                                                           // *.index for 0 features
-                            {
-                                CHECK(mapnik::util::exists(path + ".index"));
-                            }
-                        }
-                        auto ds = get_csv_ds(path, false);
-                        // require a non-null pointer returned
-                        REQUIRE(bool(ds));
-                        if (mapnik::util::exists(path + ".index"))
-                        {
-                            CHECK(mapnik::util::remove(path + ".index"));
-                        }
+                        CHECK(mapnik::util::remove(path + ".index"));
                     }
                 }
             }

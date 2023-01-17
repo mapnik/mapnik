@@ -1,5 +1,5 @@
-find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
-find_package(PostgreSQL REQUIRED)
+mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS program_options)
+mapnik_find_package(PostgreSQL REQUIRED)
 
 include(FetchContent)
 
@@ -100,11 +100,7 @@ add_executable(mapnik-test-unit
     unit/vertex_adapter/transform_path_adapter.cpp
     unit/vertex_adapter/vertex_adapter.cpp
 )
-set_target_properties(mapnik-test-unit PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
+
 target_link_libraries(mapnik-test-unit PUBLIC
     Catch2::Catch2
     mapnik::agg
@@ -112,6 +108,7 @@ target_link_libraries(mapnik-test-unit PUBLIC
     mapnik::json
     mapnik::wkt
     PostgreSQL::PostgreSQL
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 # workaround since the "offical" include dir would be <catch2/catch.hpp>
 file(COPY catch_ext.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
@@ -119,58 +116,41 @@ file(COPY cleanup.hpp DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(mapnik-test-unit PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(agg_rasterizer_integer_overflow_test standalone/agg_rasterizer_integer_overflow_test.cpp)
-set_target_properties(agg_rasterizer_integer_overflow_test PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
 target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
     Catch2::Catch2
     mapnik::mapnik
     mapnik::agg
     mapnik::json
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(agg_rasterizer_integer_overflow_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
-set_target_properties(datasource_registration_test PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
 target_link_libraries(datasource_registration_test PUBLIC
     Catch2::Catch2
     mapnik::mapnik
     mapnik::agg
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(datasource_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(font_registration_test standalone/font_registration_test.cpp)
-set_target_properties(font_registration_test PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
 target_link_libraries(font_registration_test PUBLIC
     Catch2::Catch2
     mapnik::mapnik
     mapnik::agg
     mapnik::json
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(font_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
-#not workable since boost::filesystem native returns a wstring and the function taskes a std::string
 add_executable(map_xml_test standalone/map_xml_test.cpp)
-set_target_properties(map_xml_test PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
-)
 target_link_libraries(map_xml_test PUBLIC
     Catch2::Catch2
     mapnik::mapnik
     mapnik::agg
     mapnik::json
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 target_include_directories(map_xml_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 

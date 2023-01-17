@@ -31,6 +31,7 @@
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -46,6 +47,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <ogrsf_frmts.h>
 MAPNIK_DISABLE_WARNING_POP
 #include "ogr_layer_ptr.hpp"
+
+DATASOURCE_PLUGIN_DEF(ogr_datasource_plugin, ogr);
 
 class ogr_datasource : public mapnik::datasource
 {

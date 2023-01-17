@@ -37,8 +37,8 @@
 
 TEST_CASE("Geobuf")
 {
-    std::string geobuf_plugin("./plugins/input/geobuf.input");
-    if (mapnik::util::exists(geobuf_plugin))
+    const bool have_geobuf_plugin = mapnik::datasource_cache::instance().plugin_registered("geobuf");
+    if (have_geobuf_plugin)
     {
         SECTION("Point")
         {
