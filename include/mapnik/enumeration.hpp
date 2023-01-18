@@ -209,7 +209,7 @@ struct MAPNIK_DECL enumeration
 
 #define IMPLEMENT_ENUM(type_alias, enum_class)                                                                         \
     IMPLEMENT_ENUM_FNCS(type_alias, enum_class)                                                                        \
-    template class MAPNIK_DECL                                                                                         \
+    template struct MAPNIK_DECL                                                                                        \
       enumeration<enum_class, type_alias##_to_string, type_alias##_from_string, type_alias##_lookup>;
 
 /** Slim wrapper for enumerations. It creates a new type from a native enum and
