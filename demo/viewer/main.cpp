@@ -23,12 +23,14 @@
 #include <QSettings>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/mapnik.hpp>
 #include "mainwindow.hpp"
 
 int main(int argc, char** argv)
 {
     using mapnik::datasource_cache;
     using mapnik::freetype_engine;
+    mapnik::setup();
     try
     {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)

@@ -1,5 +1,28 @@
 set(_plugin_prefix "")
 set(_plugin_suffix ".input")
+set(_plugin_library_output "${MAPNIK_OUTPUT_DIR}/plugins/input")
+set(_plugin_fpic ON)
+set(_plugin_linkage MODULE)
+set(_plugin_visibility PRIVATE)
+if(NOT BUILD_SHARED_PLUGINS)
+    set(_plugin_linkage INTERFACE)
+    set(_plugin_visibility INTERFACE)
+endif()
+
+macro(add_plugin_target plugin_target output_name)
+    add_library(${plugin_target} ${_plugin_linkage})
+    set_target_properties(${plugin_target} PROPERTIES
+        OUTPUT_NAME "${output_name}"
+        POSITION_INDEPENDENT_CODE ${_plugin_fpic}
+        PREFIX "${_plugin_prefix}"
+        SUFFIX "${_plugin_suffix}"
+        LIBRARY_OUTPUT_DIRECTORY "${_plugin_library_output}"
+    )
+    mapnik_install_plugin(${plugin_target})
+endmacro()
+
+
+add_subdirectory(base)
 
 # add a list with all build plugins so the copy dependencies command can wait for all build events
 set(m_build_plugins "")
@@ -51,7 +74,7 @@ endif()
 #
 # Copy all plugin dlls, so that these are in the main output dir, since cmake copies those into ${MAPNIK_OUTPUT_DIR}/plugins/input, too.
 #
-if(WIN32)
+if(BUILD_SHARED_PLUGINS AND WIN32)
     list(LENGTH m_build_plugins m_number_plugins)
     if(m_number_plugins GREATER 0)
         string(CONFIGURE

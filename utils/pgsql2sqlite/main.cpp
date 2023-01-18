@@ -24,6 +24,7 @@
 #include "pgsql2sqlite.hpp"
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/mapnik.hpp>
 #include "connection_manager.hpp"
 
 #include <mapnik/warning.hpp>
@@ -46,6 +47,7 @@ int main(int argc, char** argv)
     po::options_description desc("Postgresql/PostGIS to SQLite3 converter\n Options");
     std::string usage = "usage: pgsql2sqlite --dbname db --table planet_osm_line --file osm.sqlite --query \"select * "
                         "from planet_osm_line\"";
+    mapnik::setup();
     try
     {
         // clang-format off

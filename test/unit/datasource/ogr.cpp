@@ -28,12 +28,12 @@
 #include <mapnik/image.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/util/fs.hpp>
+#include <mapnik/datasource_cache.hpp>
 
 TEST_CASE("ogr")
 {
-    std::string geojson_plugin("./plugins/input/ogr.input");
-    if (mapnik::util::exists(geojson_plugin))
+    const bool have_ogr_plugin = mapnik::datasource_cache::instance().plugin_registered("ogr");
+    if (have_ogr_plugin)
     {
         SECTION("ogr point feature")
         {

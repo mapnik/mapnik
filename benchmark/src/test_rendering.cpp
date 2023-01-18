@@ -95,6 +95,7 @@ class test : public benchmark::test_case
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     int return_value = 0;
     try
     {

@@ -31,8 +31,8 @@ namespace {
 
 mapnik::datasource_ptr get_gdal_ds(std::string const& file_name, boost::optional<mapnik::value_integer> band)
 {
-    std::string gdal_plugin("./plugins/input/gdal.input");
-    if (!mapnik::util::exists(gdal_plugin))
+    const bool have_gdal_plugin = mapnik::datasource_cache::instance().plugin_registered("gdal");
+    if (!have_gdal_plugin)
     {
         return mapnik::datasource_ptr();
     }

@@ -30,6 +30,7 @@ struct bench_func : benchmark::test_case
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     return benchmark::sequencer(argc, argv)
       .BENCH_FUNC1(mapnik::util::normalize_angle, +3)
       .BENCH_FUNC1(mapnik::util::normalize_angle, +6)

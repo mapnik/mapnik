@@ -150,32 +150,27 @@ namespace css_grammar {
 
 using x3::alnum;
 using x3::alpha;
-using x3::attr;
 using x3::char_;
 using x3::lexeme;
 using x3::lit;
-using x3::no_case;
-using x3::no_skip;
 using x3::raw;
 using x3::standard::space;
 
 // import unicode string rule
-namespace {
-auto const& css_string = mapnik::json::grammar::unicode_string;
-}
+const auto css_string = mapnik::json::grammar::unicode_string;
 
-auto assign_def = [](auto const& ctx) {
+const auto assign_def = [](auto const& ctx) {
     for (auto const& k : std::get<0>(_attr(ctx)))
     {
         _val(ctx).emplace(k, std::get<1>(_attr(ctx)));
     }
 };
 
-auto assign_key = [](auto const& ctx) {
+const auto assign_key = [](auto const& ctx) {
     _val(ctx).first = std::move(_attr(ctx));
 };
 
-auto assign_value = [](auto const& ctx) {
+const auto assign_value = [](auto const& ctx) {
     _val(ctx).second = std::move(_attr(ctx));
 };
 

@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
@@ -137,14 +138,17 @@ void load_map(mapnik::Map& m, bfs::path const& path)
 }
 
 } // anonymous namespace
-
+#ifndef MAPNIK_STATIC_PLUGINS
 const bool registered =
   mapnik::datasource_cache::instance().register_datasources((bfs::path("plugins") / "input").generic_string());
-
+#endif
 TEST_CASE("map xml I/O")
 {
+    mapnik::setup();
+#ifndef MAPNIK_STATIC_PLUGINS
     // make sure plugins are loaded
     REQUIRE(registered);
+#endif
 
     // make the tests silent since we intentially test error conditions that are noisy
     auto const severity = mapnik::logger::instance().get_severity();

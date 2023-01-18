@@ -2,6 +2,7 @@
 #define MAPNIK_BENCH_FRAMEWORK_HPP
 
 // mapnik
+#include <mapnik/mapnik.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/value/types.hpp>
@@ -124,6 +125,7 @@ inline int handle_args(int argc, char** argv, mapnik::parameters& params)
 #define BENCHMARK(test_class, name)                                                                                    \
     int main(int argc, char** argv)                                                                                    \
     {                                                                                                                  \
+        mapnik::setup();                                                                                               \
         try                                                                                                            \
         {                                                                                                              \
             mapnik::parameters params;                                                                                 \

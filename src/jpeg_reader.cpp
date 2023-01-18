@@ -91,7 +91,6 @@ class jpeg_reader : public image_reader
     static void attach_stream(j_decompress_ptr cinfo, input_stream* in);
 };
 
-namespace {
 image_reader* create_jpeg_reader(std::string const& filename)
 {
     return new jpeg_reader<std::filebuf>(filename);
@@ -101,10 +100,11 @@ image_reader* create_jpeg_reader2(char const* data, size_t size)
 {
     return new jpeg_reader<mapnik::util::char_array_buffer>(data, size);
 }
-
-const bool registered = register_image_reader("jpeg", create_jpeg_reader);
-const bool registered2 = register_image_reader("jpeg", create_jpeg_reader2);
-} // namespace
+void register_jpeg_reader()
+{
+    const bool registered = register_image_reader("jpeg", create_jpeg_reader);
+    const bool registered2 = register_image_reader("jpeg", create_jpeg_reader2);
+}
 
 // ctors
 template<typename T>

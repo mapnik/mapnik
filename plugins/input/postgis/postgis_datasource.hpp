@@ -34,6 +34,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value/types.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -62,6 +63,7 @@ using mapnik::transcoder;
 
 using CnxPool_ptr = std::shared_ptr<ConnectionManager::PoolType>;
 
+DATASOURCE_PLUGIN_DEF(postgis_datasource_plugin, postgis);
 class postgis_datasource : public datasource
 {
   public:

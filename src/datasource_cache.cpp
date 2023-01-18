@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/datasource_plugin.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
@@ -53,15 +54,8 @@ bool is_input_plugin(std::string const& filename)
     return boost::algorithm::ends_with(filename, std::string(".input"));
 }
 
-datasource_cache::datasource_cache()
-{
-    PluginInfo::init();
-}
-
-datasource_cache::~datasource_cache()
-{
-    PluginInfo::exit();
-}
+datasource_cache::datasource_cache() {}
+datasource_cache::~datasource_cache() {}
 
 datasource_ptr datasource_cache::create(parameters const& params)
 {
@@ -71,11 +65,9 @@ datasource_ptr datasource_cache::create(parameters const& params)
         throw config_error(std::string("Could not create datasource. Required ") + "parameter 'type' is missing");
     }
 
-    datasource_ptr ds;
-
 #ifdef MAPNIK_STATIC_PLUGINS
     // return if it's created, raise otherwise
-    ds = create_static_datasource(params);
+    datasource_ptr ds = create_static_datasource(params);
     if (ds)
     {
         return ds;
@@ -114,16 +106,14 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-      create_ds create_datasource = reinterpret_cast<create_ds>(itr->second->get_symbol("create"));
+      datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
 
     if (!create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") + itr->second->get_error());
     }
 
-    ds = datasource_ptr(create_datasource(params), datasource_deleter());
-
-    return ds;
+    return create_datasource->create(params);
 }
 
 std::string datasource_cache::plugin_directories()
@@ -134,7 +124,29 @@ std::string datasource_cache::plugin_directories()
     return boost::algorithm::join(plugin_directories_, ", ");
 }
 
-std::vector<std::string> datasource_cache::plugin_names()
+bool datasource_cache::plugin_registered(const std::string& plugin_name) const
+{
+#ifdef MAPNIK_STATIC_PLUGINS
+    const auto static_names = get_static_datasource_names();
+    const auto static_it = std::find(static_names.begin(), static_names.end(), plugin_name);
+    if (static_it != static_names.end())
+        return true;
+#endif
+
+#ifdef MAPNIK_THREADSAFE
+    std::lock_guard<std::recursive_mutex> lock(instance_mutex_);
+#endif
+
+    std::map<std::string, std::shared_ptr<PluginInfo>>::const_iterator itr;
+    for (itr = plugins_.begin(); itr != plugins_.end(); ++itr)
+    {
+        if (itr->second->name() == plugin_name)
+            return true;
+    }
+    return false;
+}
+
+std::vector<std::string> datasource_cache::plugin_names() const
 {
     std::vector<std::string> names;
 
