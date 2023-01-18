@@ -47,17 +47,16 @@ namespace mapnik {
 namespace grammar {
 
 namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
 using x3::double_;
 using x3::lit;
 using x3::no_case;
 
 // functors
-auto make_empty = [](auto const& ctx) {
+const auto make_empty = [](auto const& ctx) {
     _val(ctx) = geometry::geometry_empty();
 };
 
-auto add_ring = [](auto const& ctx) {
+const auto add_ring = [](auto const& ctx) {
     auto& ring = reinterpret_cast<geometry::linear_ring<double>&>(_attr(ctx));
     _val(ctx).push_back(std::move(ring));
 };

@@ -137,8 +137,11 @@ void render_thunk_extractor::extract_text_thunk(text_render_thunk::helper_ptr&& 
 {
     double opacity = get<double>(sym, keys::opacity, feature_, common_.vars_, 1.0);
     composite_mode_e comp_op = get<composite_mode_e>(sym, keys::comp_op, feature_, common_.vars_, src_over);
-    halo_rasterizer_enum halo_rasterizer =
-      get<halo_rasterizer_enum>(sym, keys::halo_rasterizer, feature_, common_.vars_, HALO_RASTERIZER_FULL);
+    halo_rasterizer_enum halo_rasterizer = get<halo_rasterizer_enum>(sym,
+                                                                     keys::halo_rasterizer,
+                                                                     feature_,
+                                                                     common_.vars_,
+                                                                     halo_rasterizer_enum::HALO_RASTERIZER_FULL);
 
     text_render_thunk thunk(std::move(helper), opacity, comp_op, halo_rasterizer);
     thunks_.emplace_back(std::move(thunk));

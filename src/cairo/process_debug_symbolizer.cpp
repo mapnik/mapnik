@@ -96,23 +96,27 @@ void cairo_renderer<T>::process(debug_symbolizer const& sym,
     cairo_save_restore guard(context_);
 
     debug_symbolizer_mode_enum mode =
-      get<debug_symbolizer_mode_enum>(sym, keys::mode, feature, common_.vars_, DEBUG_SYM_MODE_COLLISION);
+      get<debug_symbolizer_mode_enum>(sym,
+                                      keys::mode,
+                                      feature,
+                                      common_.vars_,
+                                      debug_symbolizer_mode_enum::DEBUG_SYM_MODE_COLLISION);
 
     context_.set_operator(src_over);
     context_.set_color(mapnik::color(255, 0, 0), 1.0);
-    context_.set_line_join(MITER_JOIN);
-    context_.set_line_cap(BUTT_CAP);
+    context_.set_line_join(line_join_enum::MITER_JOIN);
+    context_.set_line_cap(line_cap_enum::BUTT_CAP);
     context_.set_miter_limit(4.0);
     context_.set_line_width(1.0);
 
-    if (mode == DEBUG_SYM_MODE_COLLISION)
+    if (mode == debug_symbolizer_mode_enum::DEBUG_SYM_MODE_COLLISION)
     {
         for (auto& n : *common_.detector_)
         {
             render_debug_box(context_, n.get().box);
         }
     }
-    else if (mode == DEBUG_SYM_MODE_VERTEX)
+    else if (mode == debug_symbolizer_mode_enum::DEBUG_SYM_MODE_VERTEX)
     {
         using apply_vertex_mode = apply_vertex_mode<cairo_context>;
         apply_vertex_mode apply(context_, common_.t_, prj_trans);

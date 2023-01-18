@@ -39,8 +39,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-enum well_known_srs_enum : std::uint8_t { WGS_84, WEB_MERC, well_known_srs_enum_MAX };
-
+enum class well_known_srs_enum : std::uint8_t { WGS_84, WEB_MERC, well_known_srs_enum_MAX };
 DEFINE_ENUM(well_known_srs_e, well_known_srs_enum);
 
 constexpr double EARTH_RADIUS = 6378137.0;

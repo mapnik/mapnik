@@ -16,6 +16,7 @@ message(STATUS "mapnik version: ${PROJECT_VERSION}")
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # with newer cmake versions put all find_package in global scope
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(FeatureSummary)
 include(MapnikOption)
@@ -27,8 +28,13 @@ include(CTest)
 add_feature_info(BUILD_TESTING BUILD_TESTING "Adds tests")
 
 mapnik_option(INSTALL_DEPENDENCIES "if ON, all dependencies (eg. required dlls) will be copied into CMAKE_INSTALL_PREFIX/MAPNIK_BIN_DIR." ON)
-
 mapnik_option(BUILD_SHARED_LIBS "build mapnik dynamic(ON) or static(OFF)" ON)
+mapnik_option(BUILD_SHARED_PLUGINS "build dynamic plugins" ${BUILD_SHARED_LIBS}) # use BUILD_SHARED_LIBS as default option
+mapnik_option(BUILD_SHARED_CRT "(only windows with msvc) use msvc shared crt" ON)
+if(WIN32 AND BUILD_SHARED_PLUGINS AND NOT BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "static libmapnik and dynamic plugins won't work correctly")
+endif()
+
 mapnik_option(USE_EXTERNAL_MAPBOX_GEOMETRY "Use a external mapnik/geometry.hpp. If off, use the submodule" OFF)
 mapnik_option(USE_EXTERNAL_MAPBOX_POLYLABEL "Use a external mapnik/polylabel. If off, use the submodule" OFF)
 mapnik_option(USE_EXTERNAL_MAPBOX_PROTOZERO "Use a external mapnik/protozero. If off, use the submodule" OFF)
@@ -55,6 +61,8 @@ mapnik_option(USE_LOG "enables logging output. See log severity level." OFF)
 # 3 = none
 set(USE_LOG_SEVERITY "1" CACHE STRING "sets the logging severity (only applies when USE_LOG is ON")
 mapnik_option(USE_STATS "Enable statistics reporting" OFF)
+
+mapnik_option(DISABLE_MAPNIK_AUTOSETUP "disables the autosetup. Need to call mapnik::setup() then" OFF)
 
 mapnik_option(USE_PLUGIN_INPUT_CSV "adds plugin input csv" ON)
 mapnik_option(USE_PLUGIN_INPUT_GDAL "adds plugin input gdal" ON)
@@ -87,18 +95,6 @@ mapnik_option(USE_GLIBC_WORKAROUND "see https://github.com/mapnik/mapnik/pull/37
 feature_summary(WHAT ENABLED_FEATURES DISABLED_FEATURES)
 feature_summary(FILENAME "${CMAKE_CURRENT_BINARY_DIR}/features.log" WHAT ENABLED_FEATURES DISABLED_FEATURES)
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
-message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
-# https://cmake.org/cmake/help/latest/prop_tgt/CXX_EXTENSIONS.html
-set(CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensions.") # Fallsback to -std=c++<ver> if off
-message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
-# https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD_REQUIRED.html#prop_tgt:CXX_STANDARD_REQUIRED
-set(CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
-
-# add debug postfix to the libraries
-set(MAPNIK_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
-message(STATUS "postfix for debug libraries: ${MAPNIK_DEBUG_POSTFIX}")
-
 include(GNUInstallDirs)
 # See for more details: https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html
 set(MAPNIK_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE STRING "Install directory for binaries")
@@ -123,9 +119,29 @@ set(MAPNIK_COMPILE_DEFS "")
 set(MAPNIK_OPTIONAL_LIBS "")
 set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 
+#############################
+#############################
 # Begin project configuration
+#############################
+#############################
+
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
+set(CMAKE_CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensions.") # Fallsback to -std=c++<ver> if off
+message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
+message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
+
+# add debug postfix to the libraries
+set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
+message(STATUS "postfix for debug libraries: ${CMAKE_DEBUG_POSTFIX}")
+
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_CRT}>:DLL>")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib")
 
 # needs to be before the first call of find_boost.
+list(APPEND MAPNIK_COMPILE_DEFS BOOST_SPIRIT_X3_HIDE_CXX17_WARNING)
 if(USE_MULTITHREADED)
     set(Boost_USE_MULTITHREADED ON)
     list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_THREADSAFE)
@@ -134,7 +150,7 @@ else()
 endif()
 
 
-find_package(PkgConfig)
+mapnik_find_package(PkgConfig REQUIRED)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 
@@ -163,7 +179,7 @@ else()
     # It might be possible that in future version harfbuzz could only be found via pkg-config.
     # harfbuzz related discussion: https://github.com/harfbuzz/harfbuzz/issues/2653
     message(STATUS "harfbuzz not found via cmake. Searching via pkg-config...")
-    pkg_check_modules(harfbuzz REQUIRED IMPORTED_TARGET harfbuzz>=${HARFBUZZ_MIN_VERSION})
+    mapnik_pkg_check_modules(harfbuzz REQUIRED IMPORTED_TARGET harfbuzz>=${HARFBUZZ_MIN_VERSION})
     list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::harfbuzz)
 endif()
 
@@ -290,20 +306,15 @@ if(USE_TIFF)
 endif()
 
 if(USE_WEBP)
-    mapnik_find_package(WebP REQUIRED)
+    mapnik_pkg_check_modules(WebP REQUIRED IMPORTED_TARGET libwebp)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_WEBP)
-    list(APPEND MAPNIK_OPTIONAL_LIBS WebP::WebP)
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::WebP)
 endif()
 
 if(USE_CAIRO)
-    if(WIN32)
-        mapnik_find_package(Cairo REQUIRED)
-        list(APPEND MAPNIK_OPTIONAL_LIBS Cairo::Cairo)
-    else()
-        pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
-        list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
-    endif()
+    mapnik_pkg_check_modules(Cairo REQUIRED IMPORTED_TARGET cairo)
     list(APPEND MAPNIK_COMPILE_DEFS HAVE_CAIRO)
+    list(APPEND MAPNIK_OPTIONAL_LIBS PkgConfig::Cairo)
 endif()
 
 if(USE_PROJ)
@@ -312,7 +323,7 @@ if(USE_PROJ)
     # currently the cmake files are not installed, when installing proj via apt-get. So search via pkg-config
     if(NOT PROJ_FOUND)
         message(STATUS "PROJ not found via FindPROJ. Searching via pkg-config...")
-        pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION})
+        mapnik_pkg_check_modules(PROJ REQUIRED IMPORTED_TARGET proj>=${PROJ_MIN_VERSION})
         string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" _dummy "${PROJ_VERSION}")
         set(PROJ_VERSION_MAJOR "${CMAKE_MATCH_1}")
         set(PROJ_VERSION_MINOR "${CMAKE_MATCH_2}")
@@ -344,10 +355,24 @@ if(NOT WIN32)
     list(APPEND MAPNIK_OPTIONAL_LIBS ${CMAKE_DL_LIBS})
 endif()
 
+if(NOT BUILD_SHARED_PLUGINS)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_PLUGINS)
+endif()
+# when building static, this have to be public so that all depending libs know about
+if(NOT BUILD_SHARED_LIBS)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_STATIC_DEFINE)
+endif()
+
+if(DISABLE_MAPNIK_AUTOSETUP)
+    list(APPEND MAPNIK_COMPILE_DEFS MAPNIK_DISABLE_AUTOSETUP)
+endif()
+
 # force utf-8 source code processing
 # see https://docs.microsoft.com/de-de/cpp/build/reference/utf-8-set-source-and-executable-character-sets-to-utf-8?view=msvc-170
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options(
+    "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>"
+    "$<$<CXX_COMPILER_ID:MSVC>:/EHsc>"
+)
 
 add_library(core INTERFACE)
 add_library(mapnik::core ALIAS core)
@@ -377,9 +402,20 @@ target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 mapnik_install(core)
 
+###
+# forward declaring libraries to consume them when building static plugins (circle deps between mapnik <-> plugin_target)
+add_library(mapnik "")
+add_library(mapnik::mapnik ALIAS mapnik)
+add_library(wkt STATIC "")
+add_library(mapnik::wkt ALIAS wkt)
+add_library(json STATIC "")
+add_library(mapnik::json ALIAS json)
+# end forward declaration
+###
+
 add_subdirectory(deps)
-add_subdirectory(src)
 add_subdirectory(plugins)
+add_subdirectory(src)
 add_subdirectory(utils)
 add_subdirectory(demo)
 if(BUILD_BENCHMARK)
@@ -396,23 +432,23 @@ feature_summary(FILENAME "${CMAKE_CURRENT_BINARY_DIR}/packages.log" WHAT PACKAGE
 include(MapnikExport)
 include(MapnikExportPkgConfig)
 
-install(DIRECTORY include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
-install(DIRECTORY deps/agg/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
-install(DIRECTORY deps/mapnik DESTINATION ${MAPNIK_INCLUDE_DIR})
+install(DIRECTORY include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
+install(DIRECTORY deps/agg/include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
+install(DIRECTORY deps/mapnik DESTINATION "${MAPNIK_INCLUDE_DIR}")
 file(GLOB TTF_FONT_FILES "fonts/*/*/*.ttf")
-install(FILES ${TTF_FONT_FILES} DESTINATION ${FONTS_INSTALL_DIR})
+install(FILES ${TTF_FONT_FILES} DESTINATION "${FONTS_INSTALL_DIR}")
 
 if(NOT USE_EXTERNAL_MAPBOX_GEOMETRY)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_POLYLABEL)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_PROTOZERO)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_VARIANT)
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/ DESTINATION ${MAPNIK_INCLUDE_DIR})
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
 endif()
 
 mapnik_install_targets()

@@ -92,6 +92,7 @@ class test_offset : public benchmark::test_case
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     mapnik::parameters params;
     benchmark::handle_args(argc, argv, params);
     int return_value = 0;

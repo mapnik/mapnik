@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/map.hpp>
@@ -13,6 +14,7 @@
 
 TEST_CASE("font")
 {
+    mapnik::setup();
     SECTION("registration")
     {
         try

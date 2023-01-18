@@ -592,7 +592,7 @@ void feature_style_processor<Processor>::render_style(Processor& p,
                         util::apply_visitor(symbolizer_dispatch<Processor>(p, *feature, prj_trans), sym);
                     }
                 }
-                if (style->get_filter_mode() == FILTER_FIRST)
+                if (style->get_filter_mode() == filter_mode_enum::FILTER_FIRST)
                 {
                     // Stop iterating over rules and proceed with next feature.
                     do_also = false;

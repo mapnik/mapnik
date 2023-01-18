@@ -59,13 +59,13 @@ void path_output_attributes::set_stroke_linecap(line_cap_e stroke_linecap)
 {
     switch (stroke_linecap)
     {
-        case BUTT_CAP:
+        case line_cap_enum::BUTT_CAP:
             stroke_linecap_ = "butt";
             break;
-        case SQUARE_CAP:
+        case line_cap_enum::SQUARE_CAP:
             stroke_linecap_ = "square";
             break;
-        case ROUND_CAP:
+        case line_cap_enum::ROUND_CAP:
             stroke_linecap_ = "round";
             break;
         default:
@@ -77,16 +77,16 @@ void path_output_attributes::set_stroke_linejoin(line_join_e stroke_linejoin)
 {
     switch (stroke_linejoin)
     {
-        case MITER_JOIN:
+        case line_join_enum::MITER_JOIN:
             stroke_linejoin_ = "miter";
             break;
-        case MITER_REVERT_JOIN:
+        case line_join_enum::MITER_REVERT_JOIN:
             stroke_linejoin_ = "miter";
             break;
-        case ROUND_JOIN:
+        case line_join_enum::ROUND_JOIN:
             stroke_linejoin_ = "round";
             break;
-        case BEVEL_JOIN:
+        case line_join_enum::BEVEL_JOIN:
             stroke_linejoin_ = "bevel";
             break;
         default:

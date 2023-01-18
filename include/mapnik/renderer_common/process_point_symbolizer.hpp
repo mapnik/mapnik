@@ -52,28 +52,28 @@ void render_point_symbolizer(point_symbolizer const& sym,
 
     if (!mark->is<mapnik::marker_null>())
     {
-        value_double opacity = get<value_double, keys::opacity>(sym, feature, common.vars_);
-        value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, common.vars_);
-        value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym, feature, common.vars_);
-        point_placement_enum placement =
+        const value_double opacity = get<value_double, keys::opacity>(sym, feature, common.vars_);
+        const value_bool allow_overlap = get<value_bool, keys::allow_overlap>(sym, feature, common.vars_);
+        const value_bool ignore_placement = get<value_bool, keys::ignore_placement>(sym, feature, common.vars_);
+        const point_placement_enum placement =
           get<point_placement_enum, keys::point_placement_type>(sym, feature, common.vars_);
 
-        box2d<double> const& bbox = mark->bounding_box();
-        coord2d center = bbox.center();
+        const box2d<double>& bbox = mark->bounding_box();
+        const coord2d center = bbox.center();
 
         agg::trans_affine tr;
-        auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
+        const auto image_transform = get_optional<transform_type>(sym, keys::image_transform);
         if (image_transform)
             evaluate_transform(tr, feature, common.vars_, *image_transform, common.scale_factor_);
 
-        agg::trans_affine_translation recenter(-center.x, -center.y);
-        agg::trans_affine recenter_tr = recenter * tr;
+        const agg::trans_affine_translation recenter(-center.x, -center.y);
+        const agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(common.scale_factor_);
 
-        mapnik::geometry::geometry<double> const& geometry = feature.get_geometry();
+        const mapnik::geometry::geometry<double>& geometry = feature.get_geometry();
         mapnik::geometry::point<double> pt;
         geometry::geometry_types type = geometry::geometry_type(geometry);
-        if (placement == CENTROID_POINT_PLACEMENT || type == geometry::geometry_types::Point ||
+        if (placement == point_placement_enum::CENTROID_POINT_PLACEMENT || type == geometry::geometry_types::Point ||
             type == geometry::geometry_types::MultiPoint)
         {
             if (!geometry::centroid(geometry, pt))

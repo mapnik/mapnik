@@ -65,12 +65,14 @@ bool placement_finder::find_line_placements(T& path, bool points)
         // horizontal_alignment_e halign = layouts_.back()->horizontal_alignment();
 
         // halign == H_LEFT -> don't move
-        if (horizontal_alignment_ == H_MIDDLE || horizontal_alignment_ == H_AUTO || horizontal_alignment_ == H_ADJUST)
+        if (horizontal_alignment_ == horizontal_alignment_enum::H_MIDDLE ||
+            horizontal_alignment_ == horizontal_alignment_enum::H_AUTO ||
+            horizontal_alignment_ == horizontal_alignment_enum::H_ADJUST)
         {
             if (!pp.forward(spacing / 2.0))
                 continue;
         }
-        else if (horizontal_alignment_ == H_RIGHT)
+        else if (horizontal_alignment_ == horizontal_alignment_enum::H_RIGHT)
         {
             if (!pp.forward(pp.length()))
                 continue;

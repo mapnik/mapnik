@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <mapnik/mapnik.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
@@ -58,6 +59,7 @@ int main(int argc, char** argv)
     double ratio = DEFAULT_RATIO;
     std::vector<std::string> shape_files;
 
+    mapnik::setup();
     try
     {
         po::options_description desc("shapeindex utility");

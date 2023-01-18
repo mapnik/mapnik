@@ -26,6 +26,7 @@
 #include <string>
 #include <cmath>
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/marker.hpp>
@@ -179,6 +180,7 @@ int main(int argc, char** argv)
     bool strict = false;
     int status = 0;
     std::vector<std::string> svg_files;
+    mapnik::setup();
     mapnik::logger::instance().set_severity(mapnik::logger::error);
     double scale_factor;
     double opacity;

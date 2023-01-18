@@ -8,10 +8,7 @@ target_link_libraries(svg2png PRIVATE
     Boost::program_options
     mapnik::mapnik
     mapnik::agg
-)
-
-set_target_properties(svg2png PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 
 mapnik_install_utility(svg2png)

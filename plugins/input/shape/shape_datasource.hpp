@@ -32,6 +32,7 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/value/types.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -49,6 +50,8 @@ using mapnik::featureset_ptr;
 using mapnik::layer_descriptor;
 using mapnik::parameters;
 using mapnik::query;
+
+DATASOURCE_PLUGIN_DEF(shape_datasource_plugin, shape);
 
 class shape_datasource : public datasource
 {

@@ -51,7 +51,10 @@ MAPNIK_DISABLE_WARNING_POP
 #include <set>
 #include <sstream>
 
-DATASOURCE_PLUGIN(pgraster_datasource)
+DATASOURCE_PLUGIN_IMPL(pgraster_datasource_plugin, pgraster_datasource);
+DATASOURCE_PLUGIN_EXPORT(pgraster_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(pgraster_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(pgraster_datasource_plugin);
 
 const std::string pgraster_datasource::RASTER_COLUMNS = "raster_columns";
 const std::string pgraster_datasource::RASTER_OVERVIEWS = "raster_overviews";

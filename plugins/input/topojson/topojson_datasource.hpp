@@ -33,6 +33,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/json/topology.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -51,6 +52,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <map>
 #include <deque>
 #include <memory>
+
+DATASOURCE_PLUGIN_DEF(topojson_datasource_plugin, topojson);
 
 class topojson_datasource : public mapnik::datasource
 {

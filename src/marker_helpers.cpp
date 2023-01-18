@@ -302,7 +302,8 @@ void apply_markers_multi(feature_impl const& feature,
           get<marker_multi_policy_enum, keys::markers_multipolicy>(sym, feature, vars);
         marker_placement_enum placement = get<marker_placement_enum, keys::markers_placement_type>(sym, feature, vars);
 
-        if (placement == MARKER_POINT_PLACEMENT && multi_policy == MARKER_WHOLE_MULTI)
+        if (placement == marker_placement_enum::MARKER_POINT_PLACEMENT &&
+            multi_policy == marker_multi_policy_enum::MARKER_WHOLE_MULTI)
         {
             geometry::point<double> pt;
             // test if centroid is contained by bounding box
@@ -314,9 +315,10 @@ void apply_markers_multi(feature_impl const& feature,
                 converter.apply(va, proc);
             }
         }
-        else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT ||
-                  placement == MARKER_POLYLABEL_PLACEMENT) &&
-                 multi_policy == MARKER_LARGEST_MULTI)
+        else if ((placement == marker_placement_enum::MARKER_POINT_PLACEMENT ||
+                  placement == marker_placement_enum::MARKER_INTERIOR_PLACEMENT ||
+                  placement == marker_placement_enum::MARKER_POLYLABEL_PLACEMENT) &&
+                 multi_policy == marker_multi_policy_enum::MARKER_LARGEST_MULTI)
         {
             // Only apply to path with largest envelope area
             // TODO: consider using true area for polygon types
@@ -349,7 +351,8 @@ void apply_markers_multi(feature_impl const& feature,
         }
         else
         {
-            if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
+            if (multi_policy != marker_multi_policy_enum::MARKER_EACH_MULTI &&
+                placement != marker_placement_enum::MARKER_POINT_PLACEMENT)
             {
                 MAPNIK_LOG_WARN(marker_symbolizer)
                   << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";

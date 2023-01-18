@@ -46,7 +46,7 @@ struct is_mapnik_enumeration
 };
 
 template<typename T>
-struct is_mapnik_enumeration<T, typename std::enable_if<std::is_enum<typename T::native_type>::value>::type>
+struct is_mapnik_enumeration<T, typename std::enable_if_t<std::is_enum<typename T::native_type>::value>>
 {
     static constexpr bool value = true;
 };
@@ -117,7 +117,7 @@ struct set_property_from_xml_impl<T0, true>
             {
                 target_enum_type e;
                 e.from_string(*enum_str);
-                val = enumeration_wrapper(e);
+                val = enumeration_wrapper(e.value_);
             }
         }
         catch (...)
