@@ -6,5 +6,4 @@ target_sources(input-raster ${_plugin_visibility}
 )
 target_link_libraries(input-raster ${_plugin_visibility}
     mapnik::mapnik
-    mapnik::datasource-base
 )
