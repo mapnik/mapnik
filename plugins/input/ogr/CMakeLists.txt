@@ -10,6 +10,5 @@ target_sources(input-ogr ${_plugin_visibility}
 target_include_directories(input-ogr ${_plugin_visibility} ${GDAL_INCLUDE_DIRS})
 target_link_libraries(input-ogr ${_plugin_visibility}
     mapnik::mapnik
-    mapnik::datasource-base
     ${GDAL_LIBRARIES}
 )

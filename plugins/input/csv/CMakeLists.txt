@@ -11,5 +11,4 @@ target_link_libraries(input-csv ${_plugin_visibility}
     mapnik::mapnik
     mapnik::wkt
     mapnik::json
-    mapnik::datasource-base
 )
