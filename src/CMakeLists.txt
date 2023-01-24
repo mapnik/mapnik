@@ -6,7 +6,7 @@ if(BUILD_SHARED_LIBS)
     target_compile_definitions(mapnik PRIVATE MAPNIK_EXPORTS)
 endif()
 
-target_link_libraries(mapnik PUBLIC mapnik::core mapnik::datasource-base)
+target_link_libraries(mapnik PUBLIC mapnik::core)
 target_link_libraries(mapnik PRIVATE
     mapnik::agg
     # expr: if(BUILD_SHARED_PLUGINS == OFF && <target> is build) then add link target

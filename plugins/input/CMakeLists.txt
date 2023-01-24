@@ -21,9 +21,6 @@ macro(add_plugin_target plugin_target output_name)
     mapnik_install_plugin(${plugin_target})
 endmacro()
 
-
-add_subdirectory(base)
-
 # add a list with all build plugins so the copy dependencies command can wait for all build events
 set(m_build_plugins "")
 if(USE_PLUGIN_INPUT_CSV)

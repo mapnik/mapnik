@@ -8,5 +8,4 @@ target_sources(input-geojson ${_plugin_visibility}
 target_link_libraries(input-geojson ${_plugin_visibility}
     mapnik::mapnik
     mapnik::json
-    mapnik::datasource-base
 )
