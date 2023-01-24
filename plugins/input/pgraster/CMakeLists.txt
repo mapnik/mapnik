@@ -8,6 +8,5 @@ target_sources(input-pgraster ${_plugin_visibility}
 )
 target_link_libraries(input-pgraster ${_plugin_visibility}
     mapnik::mapnik
-    mapnik::datasource-base
     PostgreSQL::PostgreSQL
 )
