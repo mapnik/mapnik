@@ -9,5 +9,4 @@ target_sources(input-shape ${_plugin_visibility}
 )
 target_link_libraries(input-shape ${_plugin_visibility}
     mapnik::mapnik
-    mapnik::datasource-base
 )

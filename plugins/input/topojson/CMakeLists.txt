@@ -6,5 +6,4 @@ target_sources(input-topojson ${_plugin_visibility}
 target_link_libraries(input-topojson ${_plugin_visibility}
     mapnik::mapnik
     mapnik::json
-    mapnik::datasource-base
 )

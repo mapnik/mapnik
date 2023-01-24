@@ -1879,7 +1879,6 @@ if not preconfigured:
     env.Prepend(CPPPATH = '#deps/mapbox/geometry/include')
     env.Prepend(CPPPATH = '#deps/mapbox/protozero/include')
     env.Prepend(CPPPATH = '#deps/mapbox/polylabel/include')
-    env.Prepend(CPPPATH = '#plugins/input/base/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
