@@ -66,7 +66,7 @@ jobs:
       - name: setup vcpkg
         uses: ./.github/actions/setup_vcpkg
         with:
-          vcpkg-sha: 34d2cf7e62d781f4bcb9c7f44f4d2389f568e92b
+          vcpkg-sha: 71d3fa60b67540e9bf5fde2bf2188f579ff09433
           nuget-source: https://nuget.pkg.github.com/mapnik/index.json
           nuget-username: ${{ github.actor }}
           nuget-pat: ${{ secrets.GITHUB_TOKEN }}
