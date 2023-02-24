@@ -27,13 +27,7 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-
-BOOST_FUSION_ADAPT_STRUCT(mapnik::box2d<double>,
-                          (double, minx_)
-                          (double, miny_)
-                          (double, maxx_)
-                          (double, maxy_))
-
+BOOST_FUSION_ADAPT_STRUCT(mapnik::box2d<double>, (double, minx_)(double, miny_)(double, maxx_)(double, maxy_))
 
 int main(int argc, char** argv)
 {
@@ -156,7 +150,8 @@ int main(int argc, char** argv)
                     p = p.parent_path() / "fonts";
                     mapnik::freetype_engine::register_fonts(p, true);
                 }
-                catch (...) {}
+                catch (...)
+                {}
             }
         }
         else
@@ -194,9 +189,10 @@ int main(int argc, char** argv)
 
             auto start = str.begin();
             auto end = str.end();
-            if (!x3::phrase_parse(start, end,
-                                  x3::double_ >> -x3::lit(',') >> x3::double_ >> -x3::lit(',')
-                                  >> x3::double_ >> -x3::lit(',') >> x3::double_,
+            if (!x3::phrase_parse(start,
+                                  end,
+                                  x3::double_ >> -x3::lit(',') >> x3::double_ >> -x3::lit(',') >> x3::double_ >>
+                                    -x3::lit(',') >> x3::double_,
                                   x3::space,
                                   bbox))
             {
@@ -219,7 +215,7 @@ int main(int argc, char** argv)
                     return -1;
                 }
             }
-            std::cerr <<  "zoom to:" << bbox << std::endl;
+            std::cerr << "zoom to:" << bbox << std::endl;
             map.zoom_to_box(bbox);
         }
         else
