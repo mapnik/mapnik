@@ -77,7 +77,8 @@ class MAPNIK_DECL projection
     std::string const& params() const;
     void forward(double& x, double& y) const;
     void inverse(double& x, double& y) const;
-    std::string expanded() const;
+    std::string definition() const;
+    std::string description() const;
     void init_proj() const;
 
   private:

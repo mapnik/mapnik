@@ -196,13 +196,27 @@ projection::~projection()
 #endif
 }
 
-std::string projection::expanded() const
+std::string projection::description() const
 {
 #ifdef MAPNIK_USE_PROJ
     if (proj_)
     {
         PJ_PROJ_INFO info = proj_pj_info(proj_);
-        return mapnik::util::trim_copy(info.definition);
+        if (std::strlen(info.description) > 0)
+            return mapnik::util::trim_copy(info.description);
+    }
+#endif
+    return std::string("Undefined");
+}
+
+std::string projection::definition() const
+{
+#ifdef MAPNIK_USE_PROJ
+    if (proj_)
+    {
+        PJ_PROJ_INFO info = proj_pj_info(proj_);
+        if (std::strlen(info.definition) > 0)
+            return mapnik::util::trim_copy(info.definition);
     }
 #endif
     return params_;
