@@ -31,7 +31,7 @@
 #ifdef MAPNIK_USE_PROJ
 // proj
 #include <proj.h>
-#include <cmath> // HUGE_VAL
+#include <cmath>   // HUGE_VAL
 #include <cstring> // strlen
 #endif
 
