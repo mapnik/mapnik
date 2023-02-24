@@ -32,6 +32,7 @@
 // proj
 #include <proj.h>
 #include <cmath> // HUGE_VAL
+#include <cstring> // strlen
 #endif
 
 namespace mapnik {
