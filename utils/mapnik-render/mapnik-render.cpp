@@ -8,15 +8,32 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/adapted/struct.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 #include <string>
+#if __cplusplus >= 201703L
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
+
+BOOST_FUSION_ADAPT_STRUCT(mapnik::box2d<double>,
+                          (double, minx_)
+                          (double, miny_)
+                          (double, maxx_)
+                          (double, maxy_))
+
 
 int main(int argc, char** argv)
 {
@@ -35,7 +52,6 @@ int main(int argc, char** argv)
     logger.set_severity(mapnik::logger::error);
     int map_width = 600;
     int map_height = 400;
-
     try
     {
         po::options_description desc("mapnik-render utility");
@@ -51,7 +67,10 @@ int main(int argc, char** argv)
             ("map-width",po::value<int>(),"map width in pixels")
             ("map-height",po::value<int>(),"map height in pixels")
             ("variables","make map parameters available as render-time variables")
-            ;
+            ("bbox", po::value<std::string>(), "bounding box  e.g <minx,miny,maxx,maxy> in Map's SRS")
+            ("geographic,g","bounding box is in WGS 84 lon/lat")
+            ("plugins-dir", po::value<std::string>(), "directory containing input plug-ins (default: ./plugins/input)")
+            ("fonts-dir", po::value<std::string>(), "directory containing fonts (default: relative to <plugins-dir> or ./fonts if no <plugins-dir> specified)");
         // clang-format on
         po::positional_options_description p;
         p.add("xml", 1);
@@ -65,7 +84,6 @@ int main(int argc, char** argv)
             std::clog << "version " << MAPNIK_VERSION_STRING << std::endl;
             return 1;
         }
-
         if (vm.count("help"))
         {
             std::clog << desc << std::endl;
@@ -122,11 +140,92 @@ int main(int argc, char** argv)
             map_height = vm["map-height"].as<int>();
         }
 
-        mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
-        mapnik::freetype_engine::register_fonts("./fonts", true);
+        if (vm.count("plugins-dir"))
+        {
+            mapnik::datasource_cache::instance().register_datasources(vm["plugins-dir"].as<std::string>());
+            if (vm.count("fonts-dir"))
+            {
+                mapnik::freetype_engine::register_fonts(vm["fonts-dir"].as<std::string>(), true);
+            }
+            else
+            {
+                // relative to plugins-dir
+                try
+                {
+                    fs::path p(vm["plugins-dir"].as<std::string>());
+                    p = p.parent_path() / "fonts";
+                    mapnik::freetype_engine::register_fonts(p, true);
+                }
+                catch (...) {}
+            }
+        }
+        else
+        {
+            mapnik::datasource_cache::instance().register_datasources("./plugins/input");
+            mapnik::freetype_engine::register_fonts("./fonts", true);
+        }
+        if (verbose)
+        {
+            auto plugin_names = mapnik::datasource_cache::instance().plugin_names();
+            if (plugin_names.empty())
+            {
+                std::cerr << "*WARNING*: no datasource plug-ings registered" << std::endl;
+            }
+            else
+            {
+                std::cerr << "Registered datasource plug-ins:";
+                for (auto const& name : plugin_names)
+                {
+                    std::cerr << name << " ";
+                }
+                std::cerr << std::endl;
+            }
+        }
+
         mapnik::Map map(map_width, map_height);
         mapnik::load_map(map, xml_file, true);
-        map.zoom_all();
+
+        if (vm.count("bbox"))
+        {
+            namespace x3 = boost::spirit::x3;
+
+            mapnik::box2d<double> bbox;
+            std::string str = vm["bbox"].as<std::string>();
+
+            auto start = str.begin();
+            auto end = str.end();
+            if (!x3::phrase_parse(start, end,
+                                  x3::double_ >> -x3::lit(',') >> x3::double_ >> -x3::lit(',')
+                                  >> x3::double_ >> -x3::lit(',') >> x3::double_,
+                                  x3::space,
+                                  bbox))
+            {
+                std::cerr << "Failed to parse BBOX: " << str << std::endl;
+                return -1;
+            }
+            if (!bbox.valid())
+            {
+                std::cerr << "Invalid BBOX: " << str << std::endl;
+                return -1;
+            }
+            if (vm.count("geographic"))
+            {
+                mapnik::projection source("epsg:4326");
+                mapnik::projection destination(map.srs());
+                mapnik::proj_transform tr(source, destination);
+                if (!tr.forward(bbox))
+                {
+                    std::cerr << "Failed to project input BBOX into " << map.srs() << std::endl;
+                    return -1;
+                }
+            }
+            std::cerr <<  "zoom to:" << bbox << std::endl;
+            map.zoom_to_box(bbox);
+        }
+        else
+        {
+            map.zoom_all();
+        }
         mapnik::image_rgba8 im(map.width(), map.height());
         mapnik::request req(map.width(), map.height(), map.get_current_extent());
         req.set_buffer_size(map.buffer_size());
