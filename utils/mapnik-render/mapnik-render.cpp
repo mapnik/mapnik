@@ -23,8 +23,9 @@ MAPNIK_DISABLE_WARNING_POP
 #include <filesystem>
 namespace fs = std::filesystem;
 #else
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
+//#include <experimental/filesystem>
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 #endif
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::box2d<double>, (double, minx_)(double, miny_)(double, maxx_)(double, maxy_))
@@ -148,7 +149,7 @@ int main(int argc, char** argv)
                 {
                     fs::path p(vm["plugins-dir"].as<std::string>());
                     p = p.parent_path() / "fonts";
-                    mapnik::freetype_engine::register_fonts(p, true);
+                    mapnik::freetype_engine::register_fonts(p.c_str(), true);
                 }
                 catch (...)
                 {}
