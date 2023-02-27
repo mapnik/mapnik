@@ -30,8 +30,7 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/home/karma/domain.hpp>
+#include <boost/phoenix/function.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 #include <string>
