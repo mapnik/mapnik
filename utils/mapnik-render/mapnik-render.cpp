@@ -23,7 +23,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <filesystem>
 namespace fs = std::filesystem;
 #else
-//#include <experimental/filesystem>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 #endif
