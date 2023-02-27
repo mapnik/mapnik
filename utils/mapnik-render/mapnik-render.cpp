@@ -148,7 +148,7 @@ int main(int argc, char** argv)
                 {
                     fs::path p(vm["plugins-dir"].as<std::string>());
                     p = p.parent_path() / "fonts";
-                    mapnik::freetype_engine::register_fonts(p.c_str(), true);
+                    mapnik::freetype_engine::register_fonts(p.string(), true);
                 }
                 catch (...)
                 {}
