@@ -65,6 +65,8 @@ prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
 includedir=${prefix}/include
 libdir=${exec_prefix}/lib
+fonts_dir=${prefix}/@FONTS_INSTALL_DIR@
+plugins_dir=${prefix}/@PLUGINS_INSTALL_DIR@
 
 Name: @_lib_name@
 Description: @_description@
