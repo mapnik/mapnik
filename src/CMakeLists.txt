@@ -44,6 +44,8 @@ endif()
 
 set_target_properties(mapnik PROPERTIES
     POSITION_INDEPENDENT_CODE ON
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
     OUTPUT_NAME "mapnik"
     PREFIX "lib"
     IMPORT_PREFIX "lib" # for the archive on dll platforms
