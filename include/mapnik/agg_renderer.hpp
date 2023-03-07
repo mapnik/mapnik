@@ -92,7 +92,7 @@ class buffer_stack
 
     void pop()
     {
-        // ^ ensure irator is not out-of-range
+        // ^ ensure iterator is not out-of-range
         // prior calling this method
         ++position_;
     }
