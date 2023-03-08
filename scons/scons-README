@@ -1,4 +1,3 @@
-# Copyright (c) 2001 - 2021 The SCons Foundation
 
                  SCons - a software construction tool
 
@@ -46,6 +45,9 @@ EXECUTION REQUIREMENTS
 
 Running SCons requires Python 3.5 or higher.
 There should be no other dependencies or requirements to run SCons.
+
+As of SCons 4.2.0 support for Python 3.5 is deprecated and will be removed
+with the next major release.
 
 The default SCons configuration assumes use of the Microsoft Visual C++
 compiler suite on WIN32 systems (either through the Visual Studio
