@@ -2,7 +2,9 @@
 #
 # SCons - a Software Constructor
 #
-# Copyright (c) 2001 - 2021 The SCons Foundation
+# MIT License
+#
+# Copyright The SCons Foundation
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,15 +25,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "scripts/sconsign.py 215860fd4f6bea67896c145660a035fad20cc41c 2021-01-19 19:32:22 bdbaddog"
+__revision__ = "scripts/sconsign.py 49578b34582d9e92dac7d713a8e58599ae35aa63 Mon, 06 Mar 2023 23:32:38 -0400 bdbaddog"
 
-__version__ = "4.1.0"
+__version__ = "4.5.1"
 
-__build__ = "215860fd4f6bea67896c145660a035fad20cc41c"
+__build__ = "49578b34582d9e92dac7d713a8e58599ae35aa63"
 
-__buildsys__ = "ProDog2020"
+__buildsys__ = "M1DOG2021"
 
-__date__ = "2021-01-19 19:32:22"
+__date__ = "Mon, 06 Mar 2023 23:32:38 -0400"
 
 __developer__ = "bdbaddog"
 
@@ -39,7 +41,7 @@ import os
 import sys
 
 # python compatibility check
-if sys.version_info < (3, 5, 0):
+if sys.version_info < (3, 6, 0):
     msg = "scons: *** SCons version %s does not run under Python version %s.\n\
 Python >= 3.5 is required.\n"
     sys.stderr.write(msg % (__version__, sys.version.split()[0]))
