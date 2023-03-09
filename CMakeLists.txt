@@ -156,7 +156,9 @@ mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 
 mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS regex)
-
+if(CMAKE_CXX_STANDARD LESS 17)
+   set(USE_BOOST_FILESYSTEM ON)
+endif()
 if(CMAKE_CXX_STANDARD LESS 17 OR USE_BOOST_FILESYSTEM)
 mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem system)
 endif()
