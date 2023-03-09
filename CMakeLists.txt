@@ -411,12 +411,6 @@ target_link_libraries(core INTERFACE
     ${MAPNIK_OPTIONAL_LIBS}
 )
 
-if(CMAKE_CXX_STANDARD LESS 17 OR USE_BOOST_FILESYSTEM)
-target_link_libraries(core INTERFACE
-    Boost::filesystem
-)
-endif()
-
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 mapnik_install(core)
