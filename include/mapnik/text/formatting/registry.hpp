@@ -37,7 +37,7 @@ namespace formatting {
 
 using from_xml_function_ptr = node_ptr (*)(xml_node const&, fontset_map const&);
 
-class registry : public singleton<registry, CreateStatic>,
+class registry : public singleton_cxx11<registry>,
                  private util::noncopyable
 {
   public:

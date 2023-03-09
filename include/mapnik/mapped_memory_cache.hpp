@@ -48,10 +48,10 @@ namespace mapnik {
 
 using mapped_region_ptr = std::shared_ptr<boost::interprocess::mapped_region>;
 
-class MAPNIK_DECL mapped_memory_cache : public singleton<mapped_memory_cache, CreateStatic>,
+class MAPNIK_DECL mapped_memory_cache : public singleton_cxx11<mapped_memory_cache>,
                                         private util::noncopyable
 {
-    friend class CreateStatic<mapped_memory_cache>;
+    friend class singleton_cxx11<mapped_memory_cache>;
     std::unordered_map<std::string, mapped_region_ptr> cache_;
 
   public:
@@ -68,7 +68,7 @@ class MAPNIK_DECL mapped_memory_cache : public singleton<mapped_memory_cache, Cr
     void clear();
 };
 
-extern template class MAPNIK_DECL singleton<mapped_memory_cache, CreateStatic>;
+extern template class MAPNIK_DECL singleton_cxx11<mapped_memory_cache>;
 
 } // namespace mapnik
 

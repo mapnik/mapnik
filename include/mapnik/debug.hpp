@@ -45,7 +45,7 @@ namespace mapnik {
 // Global logger class that holds the configuration of severity, format
 // and file/console redirection.
 
-class MAPNIK_DECL logger : public singleton<logger, CreateStatic>,
+class MAPNIK_DECL logger : public singleton_cxx11<logger>,
                            private util::noncopyable
 {
   public:

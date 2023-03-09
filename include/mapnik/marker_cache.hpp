@@ -36,10 +36,10 @@ namespace mapnik {
 
 struct marker;
 
-class MAPNIK_DECL marker_cache : public singleton<marker_cache, CreateUsingNew>,
+class MAPNIK_DECL marker_cache : public singleton_cxx11<marker_cache>,
                                  private util::noncopyable
 {
-    friend class CreateUsingNew<marker_cache>;
+    friend class singleton_cxx11<marker_cache>;
 
   private:
     marker_cache();

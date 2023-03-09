@@ -41,11 +41,10 @@ class datasource;
 class parameters;
 class PluginInfo;
 
-class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateStatic>,
+class MAPNIK_DECL datasource_cache : public singleton_cxx11<datasource_cache>,
                                      private util::noncopyable
 {
-    friend class CreateStatic<datasource_cache>;
-
+    friend class singleton_cxx11<datasource_cache>;
   public:
     bool plugin_registered(const std::string& plugin_name) const;
     std::vector<std::string> plugin_names() const;
@@ -66,7 +65,7 @@ class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateSt
     mutable std::recursive_mutex instance_mutex_;
 };
 
-extern template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;
+extern template class MAPNIK_DECL singleton_cxx11<datasource_cache>;
 
 } // namespace mapnik
 

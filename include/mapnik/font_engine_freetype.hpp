@@ -50,10 +50,10 @@ using face_set_ptr = std::unique_ptr<font_face_set>;
 class font_face;
 using face_ptr = std::shared_ptr<font_face>;
 
-class MAPNIK_DECL freetype_engine : public singleton<freetype_engine, CreateUsingNew>,
+class MAPNIK_DECL freetype_engine : public singleton_cxx11<freetype_engine>,
                                     private util::noncopyable
 {
-    friend class CreateUsingNew<freetype_engine>;
+    friend class singleton_cxx11<freetype_engine>;
     friend class Map;
 
   public:
@@ -132,7 +132,7 @@ class MAPNIK_DECL face_manager
 };
 
 using face_manager_freetype = face_manager;
-extern template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
+extern template class MAPNIK_DECL singleton_cxx11<freetype_engine>;
 } // namespace mapnik
 
 #endif // MAPNIK_FONT_ENGINE_FREETYPE_HPP

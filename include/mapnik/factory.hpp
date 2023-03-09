@@ -33,7 +33,7 @@
 namespace mapnik {
 
 template<typename product_type, typename key_type, typename... Args>
-class factory : public singleton<factory<product_type, key_type, Args...>>
+class factory : public singleton_cxx11<factory<product_type, key_type, Args...>>
 {
   private:
     using product_creator = product_type* (*)(Args...);

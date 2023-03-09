@@ -37,9 +37,8 @@
 #include <string>
 #include <memory>
 
-using mapnik::CreateStatic;
 using mapnik::Pool;
-using mapnik::singleton;
+using mapnik::singleton_cxx11;
 
 template<typename T>
 class ConnectionCreator
@@ -110,13 +109,13 @@ class ConnectionCreator
     boost::optional<std::string> application_name_;
 };
 
-class ConnectionManager : public singleton<ConnectionManager, CreateStatic>
+class ConnectionManager : public singleton_cxx11<ConnectionManager>
 {
   public:
     using PoolType = Pool<Connection, ConnectionCreator>;
 
   private:
-    friend class CreateStatic<ConnectionManager>;
+    friend class singleton_cxx11<ConnectionManager>;
 
     using ContType = std::map<std::string, std::shared_ptr<PoolType>>;
     using HolderType = std::shared_ptr<Connection>;

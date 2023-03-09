@@ -62,6 +62,22 @@ class CreateStatic
     static void destroy(volatile T* obj) { obj->~T(); }
 };
 
+template<typename T>
+class singleton_cxx11
+{
+public:
+    static T& instance()
+    {
+        static T instance;
+        return instance;
+    }
+protected:
+#ifdef MAPNIK_THREADSAFE
+    static std::mutex mutex_;
+#endif
+};
+
+
 #ifdef __GNUC__
 template<typename T, template<typename U> class CreatePolicy = CreateStatic>
 class MAPNIK_DECL singleton
@@ -130,6 +146,8 @@ class singleton
 #ifdef MAPNIK_THREADSAFE
 template<typename T, template<typename U> class CreatePolicy>
 std::mutex singleton<T, CreatePolicy>::mutex_;
+template<typename T>
+std::mutex singleton_cxx11<T>::mutex_;
 #endif
 template<typename T, template<typename U> class CreatePolicy>
 std::atomic<T*> singleton<T, CreatePolicy>::pInstance_;

@@ -37,7 +37,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template class singleton<mapped_memory_cache, CreateStatic>;
+template class singleton_cxx11<mapped_memory_cache>;
 
 void mapped_memory_cache::clear()
 {

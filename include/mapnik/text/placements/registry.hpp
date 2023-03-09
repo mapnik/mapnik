@@ -36,7 +36,7 @@ namespace placements {
 
 using from_xml_function_ptr = text_placements_ptr (*)(xml_node const&, fontset_map const&, bool);
 
-class registry : public singleton<registry, CreateStatic>,
+class registry : public singleton_cxx11<registry>,
                  private util::noncopyable
 {
   public:

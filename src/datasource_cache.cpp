@@ -44,7 +44,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 
-template class singleton<datasource_cache, CreateStatic>;
+template class singleton_cxx11<datasource_cache>;
 
 extern datasource_ptr create_static_datasource(parameters const& params);
 extern std::vector<std::string> get_static_datasource_names();

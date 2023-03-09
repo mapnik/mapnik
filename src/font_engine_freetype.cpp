@@ -48,7 +48,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <stdexcept>
 
 namespace mapnik {
-template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
+template class MAPNIK_DECL singleton_cxx11<freetype_engine>;
 
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
