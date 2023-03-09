@@ -52,14 +52,20 @@ libmapnik_defines = copy(lib_env['CPPDEFINES'])
 ABI_VERSION = env['ABI_VERSION']
 
 enabled_imaging_libraries = []
+
+
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
+regex = 'boost_regex%s' % env['BOOST_APPEND']
+
 
 # clear out and re-set libs for this env
 # note: order matters on linux: see lorder | tsort
-lib_env['LIBS'] = [filesystem,
-                   regex]
+lib_env['LIBS'] = [regex]
+
+if int(env['CXX_STD']) < 17 or env['USE_BOOST_FILESYSTEM']:
+    lib_env['LIBS'].append(filesystem)
+    lib_env['LIBS'].append(system)
 
 if env['COVERAGE']:
     lib_env.Append(LINKFLAGS='--coverage')
@@ -95,7 +101,7 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
 if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
     lib_env['LIBS'].append('icui18n')
 
-lib_env['LIBS'].append(system)
+
 
 lib_env['LIBS'].append('harfbuzz')
 

@@ -5,7 +5,13 @@
 #include <mapnik/mapnik.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/datasource_cache.hpp>
+#if __cplusplus >= 201703L && !defined(USE_BOOST_FILESYSTEM)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
 #include <boost/filesystem/convenience.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 #include "cleanup.hpp" // run_cleanup()
 
@@ -43,7 +49,7 @@ int main(int argc, char** argv)
             std::clog << "Could not find " << working_dir << "\n";
             return -1;
         }
-        boost::filesystem::current_path(working_dir);
+        fs::current_path(working_dir);
     }
 
     if (result == 0)

@@ -1,0 +1,21 @@
+<svg opacity="1">
+  <g opacity="1">
+    <g opacity="1">
+      <attribute index="0">
+        <gradient x1="0" y1="0.25" x2="0.1" y2="0.1" r="0.75">
+          <stop offset="0" color="rgba(0,0,0,0.0)"/>
+          <stop offset="0.5" color="rgb(0,0,139)"/>
+          <stop offset="1" color="rgba(0,0,0,0.0)"/>
+        </gradient>
+        <gradient x1="0" y1="0" x2="0" y2="0" r="0">
+        </gradient>
+        <opacity>1</opacity>
+        <fill>rgb(0,0,0)</fill>
+        <fill-opacity>1</fill-opacity>
+        <stroke>rgb(0,0,0)</stroke>
+        <stroke-width>0.5</stroke-width>
+        <stroke-opacity>1</stroke-opacity>
+      </attribute>
+    </g>
+  </g>
+</svg>

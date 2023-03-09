@@ -4,10 +4,16 @@
 #include <mapnik/util/fs.hpp>
 
 #include <mapnik/warning.hpp>
+#if __cplusplus >= 201703L && !defined(USE_BOOST_FILESYSTEM)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/filesystem/convenience.hpp>
 MAPNIK_DISABLE_WARNING_POP
+namespace fs = boost::filesystem;
+#endif
 
 #include <fstream>
 
@@ -22,7 +28,7 @@ TEST_CASE("cairo_io")
     SECTION("save_to_cairo_file - SVG")
     {
         std::string directory_name("/tmp/mapnik-tests/");
-        boost::filesystem::create_directories(directory_name);
+        fs::create_directories(directory_name);
         REQUIRE(mapnik::util::exists(directory_name));
 
         std::string output_file(directory_name + "test_save_to_cairo_file.svg");

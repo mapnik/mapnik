@@ -49,6 +49,7 @@ mapnik_option(USE_PROJ "adds proj support" ON)
 mapnik_option(USE_GRID_RENDERER "adds grid renderer" ON)
 mapnik_option(USE_SVG_RENDERER "adds svg renderer" ON)
 mapnik_option(USE_BIGINT "uses 64 bit instead of 32" ON)
+mapnik_option(USE_BOOST_FILESYSTEM "use boost::filesytem even if `std::filesystem` is avaible (since c++17)" OFF)
 mapnik_option(USE_MEMORY_MAPPED_FILE "uses file cache" ON)
 mapnik_option(USE_MULTITHREADED "enables the multithreaded features (threadsafe)" ON)
 mapnik_option(USE_NO_ATEXIT "disable atexit" OFF)
@@ -154,7 +155,12 @@ mapnik_find_package(PkgConfig REQUIRED)
 mapnik_find_threads()
 mapnik_find_package(ICU REQUIRED COMPONENTS uc i18n data)
 
-mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem system regex)
+mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS regex)
+
+if(CMAKE_CXX_STANDARD LESS 17 OR USE_BOOST_FILESYSTEM)
+mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS filesystem system)
+endif()
+
 list(APPEND MAPNIK_COMPILE_DEFS BOOST_REGEX_HAS_ICU)
 if(USE_BOOST_REGEX_ICU_WORKAROUND)
     message(STATUS "using boost regex workaround")
@@ -255,6 +261,10 @@ endif()
 
 if(USE_BIGINT)
     list(APPEND MAPNIK_COMPILE_DEFS BIGINT)
+endif()
+
+if(USE_BOOST_FILESYSTEM)
+    list(APPEND MAPNIK_COMPILE_DEFS USE_BOOST_FILESYSYTEM)
 endif()
 
 if(USE_MEMORY_MAPPED_FILE)
@@ -394,10 +404,16 @@ target_link_libraries(core INTERFACE
     ICU::i18n
     Boost::headers
     Boost::regex
-    Boost::filesystem
     Freetype::Freetype
     ${MAPNIK_OPTIONAL_LIBS}
 )
+
+if(CMAKE_CXX_STANDARD LESS 17 OR USE_BOOST_FILESYSTEM)
+target_link_libraries(core INTERFACE
+    Boost::filesystem
+)
+endif()
+
 target_compile_definitions(core INTERFACE ${MAPNIK_COMPILE_DEFS})
 
 mapnik_install(core)

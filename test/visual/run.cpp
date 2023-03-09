@@ -49,9 +49,9 @@ using namespace visual_tests;
 namespace po = boost::program_options;
 
 runner::renderer_container
-  create_renderers(po::variables_map const& args, boost::filesystem::path const& output_dir, bool force_append = false)
+  create_renderers(po::variables_map const& args, fs::path const& output_dir, bool force_append = false)
 {
-    boost::filesystem::path reference_dir(args["images-dir"].as<std::string>());
+    fs::path reference_dir(args["images-dir"].as<std::string>());
     bool overwrite = args.count("overwrite");
     runner::renderer_container renderers;
 
@@ -185,11 +185,11 @@ int main(int argc, char** argv)
     mapnik::freetype_engine::register_fonts(vm["fonts"].as<std::string>(), true);
     mapnik::datasource_cache::instance().register_datasources(vm["plugins"].as<std::string>());
 
-    boost::filesystem::path output_dir(vm["output-dir"].as<std::string>());
+    fs::path output_dir(vm["output-dir"].as<std::string>());
 
     if (vm.count("unique-subdir"))
     {
-        output_dir /= boost::filesystem::unique_path();
+        output_dir /= std::tmpnam(nullptr);
     }
 
     config defaults;
