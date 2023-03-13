@@ -8,18 +8,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/debug.hpp>
-
-#if __cplusplus >= 201703L && !defined(USE_BOOST_FILESYSTEM)
-#include <filesystem>
-#include <cstdio>
-namespace fs = std::filesystem;
-using error_code = std::error_code;
-#else
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-using error_code = boost::system::error_code;
-#endif
-
+#include <mapnik/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/range/iterator_range_core.hpp>
 
@@ -42,13 +31,13 @@ std::string unique_mapnik_name()
 class tmp_dir
 {
   private:
-    fs::path m_path;
+    mapnik::fs::path m_path;
 
   public:
     tmp_dir()
-        : m_path(fs::temp_directory_path() / unique_mapnik_name())
+        : m_path(mapnik::fs::temp_directory_path() / unique_mapnik_name())
     {
-        fs::create_directories(m_path);
+        mapnik::fs::create_directories(m_path);
     }
 
     ~tmp_dir()
@@ -57,16 +46,16 @@ class tmp_dir
         // running, which isn't necessarily an error as far as this
         // code is concerned - it just wants to delete everything
         // underneath the temporary directory.
-        error_code err;
+        mapnik::error_code err;
 
         // catch all errors - we don't want to throw in the destructor
         try
         {
             // but loop while the path exists and the errors are
             // ignorable.
-            while (fs::exists(m_path))
+            while (mapnik::fs::exists(m_path))
             {
-                fs::remove_all(m_path, err);
+                mapnik::fs::remove_all(m_path, err);
 
                 // for any non-ignorable error, there's not much we can
                 // do from the destructor. it's in /tmp anyway, so it'll
@@ -89,22 +78,22 @@ class tmp_dir
         }
     }
 
-    fs::path path() const { return m_path; }
+    mapnik::fs::path path() const { return m_path; }
 };
 
-void compare_map(fs::path xml)
+void compare_map(mapnik::fs::path xml)
 {
     tmp_dir dir;
     mapnik::Map m(256, 256);
     REQUIRE(m.register_fonts("fonts", true));
-    fs::path abs_base = xml.parent_path();
+    mapnik::fs::path abs_base = xml.parent_path();
 
     // first, load the XML into a map object and save it. this
     // is a normalisation step to ensure that the file is in
     // whatever the current version of mapnik uses as the
     // standard indentation, quote style, etc...
     REQUIRE_NOTHROW(mapnik::load_map(m, xml.generic_string(), false, abs_base.generic_string()));
-    fs::path test_map1 = dir.path() / "mapnik-temp-map1.xml";
+    mapnik::fs::path test_map1 = dir.path() / "mapnik-temp-map1.xml";
     REQUIRE_NOTHROW(mapnik::save_map(m, test_map1.generic_string()));
 
     // create a new map, load the one saved in the previous
@@ -112,23 +101,24 @@ void compare_map(fs::path xml)
     mapnik::Map new_map(256, 256);
     REQUIRE(new_map.register_fonts("fonts", true));
     REQUIRE_NOTHROW(mapnik::load_map(new_map, test_map1.generic_string(), false, abs_base.generic_string()));
-    fs::path test_map2 = dir.path() / "mapnik-temp-map2.xml";
+    mapnik::fs::path test_map2 = dir.path() / "mapnik-temp-map2.xml";
     REQUIRE_NOTHROW(mapnik::save_map(new_map, test_map2.generic_string()));
 
     // if all the information survived the load/save round-trip
     // then the two files ought to be identical.
-    REQUIRE(fs::is_regular_file(test_map1));
-    REQUIRE(fs::is_regular_file(test_map2));
-    REQUIRE(fs::file_size(test_map1) == fs::file_size(test_map2));
+    REQUIRE(mapnik::fs::is_regular_file(test_map1));
+    REQUIRE(mapnik::fs::is_regular_file(test_map2));
+    REQUIRE(mapnik::fs::file_size(test_map1) == mapnik::fs::file_size(test_map2));
     std::ifstream in_map1(test_map1.native()), in_map2(test_map2.native());
     REQUIRE(std::equal(std::istream_iterator<char>(in_map1),
                        std::istream_iterator<char>(),
                        std::istream_iterator<char>(in_map2)));
 }
 
-void add_xml_files(fs::path dir, std::vector<fs::path>& xml_files)
+void add_xml_files(mapnik::fs::path dir, std::vector<mapnik::fs::path>& xml_files)
 {
-    for (auto const& entry : boost::make_iterator_range(fs::directory_iterator(dir), fs::directory_iterator()))
+    for (auto const& entry :
+         boost::make_iterator_range(mapnik::fs::directory_iterator(dir), mapnik::fs::directory_iterator()))
     {
         auto path = entry.path();
         if (path.extension().generic_string() == ".xml")
@@ -138,7 +128,7 @@ void add_xml_files(fs::path dir, std::vector<fs::path>& xml_files)
     }
 }
 
-void load_map(mapnik::Map& m, fs::path const& path)
+void load_map(mapnik::Map& m, mapnik::fs::path const& path)
 {
     try
     {
@@ -161,7 +151,7 @@ void load_map(mapnik::Map& m, fs::path const& path)
 } // anonymous namespace
 #ifndef MAPNIK_STATIC_PLUGINS
 const bool registered =
-  mapnik::datasource_cache::instance().register_datasources((fs::path("plugins") / "input").generic_string());
+  mapnik::datasource_cache::instance().register_datasources((mapnik::fs::path("plugins") / "input").generic_string());
 #endif
 TEST_CASE("map xml I/O")
 {
@@ -177,8 +167,8 @@ TEST_CASE("map xml I/O")
 
     SECTION("good maps")
     {
-        std::vector<fs::path> good_maps;
-        add_xml_files(fs::path("test") / "data" / "good_maps", good_maps);
+        std::vector<mapnik::fs::path> good_maps;
+        add_xml_files(mapnik::fs::path("test") / "data" / "good_maps", good_maps);
 
         for (auto const& path : good_maps)
         {
@@ -197,7 +187,7 @@ TEST_CASE("map xml I/O")
     SECTION("duplicate styles only throw in strict mode")
     {
         std::string duplicate_stylename(
-          (fs::path("test") / "data" / "broken_maps" / "duplicate_stylename.xml").generic_string());
+          (mapnik::fs::path("test") / "data" / "broken_maps" / "duplicate_stylename.xml").generic_string());
         CAPTURE(duplicate_stylename);
         mapnik::Map m(256, 256);
         REQUIRE(m.register_fonts("fonts", true));
@@ -209,9 +199,9 @@ TEST_CASE("map xml I/O")
 
     SECTION("broken maps")
     {
-        std::vector<fs::path> broken_maps;
-        add_xml_files(fs::path("test") / "data" / "broken_maps", broken_maps);
-        broken_maps.emplace_back(fs::path("test") / "data" / "broken_maps" / "does_not_exist.xml");
+        std::vector<mapnik::fs::path> broken_maps;
+        add_xml_files(mapnik::fs::path("test") / "data" / "broken_maps", broken_maps);
+        broken_maps.emplace_back(mapnik::fs::path("test") / "data" / "broken_maps" / "does_not_exist.xml");
 
         for (auto const& path : broken_maps)
         {

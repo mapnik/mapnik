@@ -59,19 +59,15 @@ std::string unique_name()
 {
     std::mt19937 gen(entropy());
     std::uniform_int_distribution<> distrib(0, 65535);
-    auto fmt = boost::format("%1$04x-%2$04x-%3$04x-%4$04x")
-        % distrib(gen)
-        % distrib(gen)
-        % distrib(gen)
-        %distrib(gen);
+    auto fmt = boost::format("%1$04x-%2$04x-%3$04x-%4$04x") % distrib(gen) % distrib(gen) % distrib(gen) % distrib(gen);
     return fmt.str();
 }
-}
+} // namespace
 
 runner::renderer_container
-  create_renderers(po::variables_map const& args, fs::path const& output_dir, bool force_append = false)
+  create_renderers(po::variables_map const& args, mapnik::fs::path const& output_dir, bool force_append = false)
 {
-    fs::path reference_dir(args["images-dir"].as<std::string>());
+    mapnik::fs::path reference_dir(args["images-dir"].as<std::string>());
     bool overwrite = args.count("overwrite");
     runner::renderer_container renderers;
 
@@ -205,7 +201,7 @@ int main(int argc, char** argv)
     mapnik::freetype_engine::register_fonts(vm["fonts"].as<std::string>(), true);
     mapnik::datasource_cache::instance().register_datasources(vm["plugins"].as<std::string>());
 
-    fs::path output_dir(vm["output-dir"].as<std::string>());
+    mapnik::fs::path output_dir(vm["output-dir"].as<std::string>());
 
     if (vm.count("unique-subdir"))
     {
