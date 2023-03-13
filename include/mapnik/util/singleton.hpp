@@ -65,18 +65,18 @@ class CreateStatic
 template<typename T>
 class singleton_cxx11
 {
-public:
+  public:
     static T& instance()
     {
         static T instance;
         return instance;
     }
-protected:
+
+  protected:
 #ifdef MAPNIK_THREADSAFE
     static std::mutex mutex_;
 #endif
 };
-
 
 #ifdef __GNUC__
 template<typename T, template<typename U> class CreatePolicy = CreateStatic>

@@ -45,6 +45,7 @@ class MAPNIK_DECL datasource_cache : public singleton_cxx11<datasource_cache>,
                                      private util::noncopyable
 {
     friend class singleton_cxx11<datasource_cache>;
+
   public:
     bool plugin_registered(const std::string& plugin_name) const;
     std::vector<std::string> plugin_names() const;
