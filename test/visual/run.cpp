@@ -36,6 +36,9 @@
 #include <windows.h>
 #endif
 
+#include <boost/format.hpp>
+#include <random>
+
 #ifdef MAPNIK_LOG
 using log_levels_map = std::map<std::string, mapnik::logger::severity_type>;
 
@@ -47,6 +50,23 @@ log_levels_map log_levels{{"debug", mapnik::logger::severity_type::debug},
 
 using namespace visual_tests;
 namespace po = boost::program_options;
+
+namespace {
+
+static std::random_device entropy;
+
+std::string unique_name()
+{
+    std::mt19937 gen(entropy());
+    std::uniform_int_distribution<> distrib(0, 65535);
+    auto fmt = boost::format("%1$04x-%2$04x-%3$04x-%4$04x")
+        % distrib(gen)
+        % distrib(gen)
+        % distrib(gen)
+        %distrib(gen);
+    return fmt.str();
+}
+}
 
 runner::renderer_container
   create_renderers(po::variables_map const& args, fs::path const& output_dir, bool force_append = false)
@@ -189,7 +209,7 @@ int main(int argc, char** argv)
 
     if (vm.count("unique-subdir"))
     {
-        output_dir /= std::tmpnam(nullptr);
+        output_dir /= unique_name();
     }
 
     config defaults;
