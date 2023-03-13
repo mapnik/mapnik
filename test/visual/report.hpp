@@ -76,8 +76,8 @@ class html_report
         : s(_s)
     {}
 
-    void report(result const& r, fs::path const& output_dir);
-    void summary(result_list const& results, fs::path const& output_dir);
+    void report(result const& r, mapnik::fs::path const& output_dir);
+    void summary(result_list const& results, mapnik::fs::path const& output_dir);
 
   protected:
     std::ostream& s;
@@ -119,7 +119,7 @@ class summary_visitor
     result_list const& result_;
 };
 
-void html_summary(result_list const& results, fs::path output_dir);
+void html_summary(result_list const& results, mapnik::fs::path output_dir);
 
 } // namespace visual_tests
 

@@ -20,21 +20,12 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/optional/optional_io.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-#if __cplusplus >= 201703L && !defined(USE_BOOST_FILESYSTEM)
-#include <filesystem>
-namespace fs = std::filesystem;
-#else
-MAPNIK_DISABLE_WARNING_PUSH
-#include <boost/filesystem/convenience.hpp>
-MAPNIK_DISABLE_WARNING_POP
-namespace fs = boost::filesystem;
-#endif
-
+#include <mapnik/filesystem.hpp>
 #include <mapnik/util/mapped_memory_file.hpp>
 
 inline void make_directory(std::string const& dir)
 {
-    fs::create_directories(dir);
+    mapnik::fs::create_directories(dir);
 }
 
 namespace {

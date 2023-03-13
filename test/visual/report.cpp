@@ -172,7 +172,7 @@ void console_short_report::report(result const& r)
     }
 }
 
-void html_report::report(result const& r, fs::path const& output_dir)
+void html_report::report(result const& r, mapnik::fs::path const& output_dir)
 {
     if (r.state == STATE_ERROR)
     {
@@ -180,8 +180,7 @@ void html_report::report(result const& r, fs::path const& output_dir)
     }
     else if (r.state == STATE_FAIL)
     {
-        using namespace fs;
-
+        using namespace mapnik::fs;
         path reference = output_dir / r.reference_image_path.filename();
         path actual = output_dir / r.actual_image_path.filename();
 
@@ -238,7 +237,7 @@ constexpr const char* html_footer = R"template(</div>
 </body>
 </html>)template";
 
-void html_report::summary(result_list const& results, fs::path const& output_dir)
+void html_report::summary(result_list const& results, mapnik::fs::path const& output_dir)
 {
     s << html_header;
 
@@ -253,11 +252,11 @@ void html_report::summary(result_list const& results, fs::path const& output_dir
     s << html_footer;
 }
 
-void html_summary(result_list const& results, fs::path output_dir)
+void html_summary(result_list const& results, mapnik::fs::path output_dir)
 {
-    fs::path html_root = output_dir / "visual-test-results";
-    fs::create_directories(html_root);
-    fs::path html_report_path = html_root / "index.html";
+    mapnik::fs::path html_root = output_dir / "visual-test-results";
+    mapnik::fs::create_directories(html_root);
+    mapnik::fs::path html_report_path = html_root / "index.html";
     std::clog << "View failure report at " << html_report_path << "\n";
     std::ofstream output_file(html_report_path.string());
     html_report report(output_file);
