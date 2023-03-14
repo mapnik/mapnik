@@ -82,7 +82,7 @@ class MapWidget : public QWidget
     void zoomToLevel(int level);
     void updateMap();
     void layerSelected(int);
-    void updateRenderer(QString const& txt);
+    void updateRenderer(int);
     void updateScaleFactor(double scale_factor);
   signals:
     void mapViewChanged();
