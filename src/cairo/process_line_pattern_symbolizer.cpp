@@ -216,20 +216,20 @@ void cairo_renderer<T>::process(line_pattern_symbolizer const& sym,
         return;
     }
 
-    line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
+    const line_pattern_enum pattern = get<line_pattern_enum, keys::line_pattern>(sym, feature, common_.vars_);
     switch (pattern)
     {
-        case LINE_PATTERN_WARP: {
+        case line_pattern_enum::LINE_PATTERN_WARP: {
             warp_pattern pattern(*marker, common_, sym, feature, prj_trans);
             pattern.render(context_);
             break;
         }
-        case LINE_PATTERN_REPEAT: {
+        case line_pattern_enum::LINE_PATTERN_REPEAT: {
             repeat_pattern pattern(*marker, common_, sym, feature, prj_trans);
             pattern.render(context_);
             break;
         }
-        case line_pattern_enum_MAX:
+        case line_pattern_enum::line_pattern_enum_MAX:
         default:
             MAPNIK_LOG_ERROR(process_line_pattern_symbolizer) << "Incorrect line-pattern value.";
     }

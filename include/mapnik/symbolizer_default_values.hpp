@@ -50,7 +50,7 @@ struct symbolizer_default<value_double, keys::gamma>
 template<>
 struct symbolizer_default<gamma_method_enum, keys::gamma_method>
 {
-    static gamma_method_enum value() { return GAMMA_POWER; }
+    static gamma_method_enum value() { return gamma_method_enum::GAMMA_POWER; }
 };
 
 // opacity
@@ -64,7 +64,7 @@ struct symbolizer_default<value_double, keys::opacity>
 template<>
 struct symbolizer_default<pattern_alignment_enum, keys::alignment>
 {
-    static pattern_alignment_enum value() { return GLOBAL_ALIGNMENT; }
+    static pattern_alignment_enum value() { return pattern_alignment_enum::GLOBAL_ALIGNMENT; }
 };
 
 // offset
@@ -127,14 +127,14 @@ struct symbolizer_default<value_double, keys::stroke_opacity>
 template<>
 struct symbolizer_default<line_join_enum, keys::stroke_linejoin>
 {
-    static line_join_enum value() { return MITER_JOIN; }
+    static line_join_enum value() { return line_join_enum::MITER_JOIN; }
 };
 
 // stroke-linecap
 template<>
 struct symbolizer_default<line_cap_enum, keys::stroke_linecap>
 {
-    static line_cap_enum value() { return BUTT_CAP; }
+    static line_cap_enum value() { return line_cap_enum::BUTT_CAP; }
 };
 
 // stroke-gamma
@@ -148,7 +148,7 @@ struct symbolizer_default<value_double, keys::stroke_gamma>
 template<>
 struct symbolizer_default<gamma_method_enum, keys::stroke_gamma_method>
 {
-    static gamma_method_enum value() { return GAMMA_POWER; }
+    static gamma_method_enum value() { return gamma_method_enum::GAMMA_POWER; }
 };
 
 // stroke-dashoffset
@@ -173,7 +173,7 @@ struct symbolizer_default<value_double, keys::stroke_miterlimit>
 template<>
 struct symbolizer_default<line_rasterizer_enum, keys::line_rasterizer>
 {
-    static line_rasterizer_enum value() { return RASTERIZER_FULL; }
+    static line_rasterizer_enum value() { return line_rasterizer_enum::RASTERIZER_FULL; }
 };
 
 // transform
@@ -315,7 +315,7 @@ struct symbolizer_default<value_double, keys::simplify_tolerance>
 template<>
 struct symbolizer_default<halo_rasterizer_enum, keys::halo_rasterizer>
 {
-    static halo_rasterizer_enum value() { return HALO_RASTERIZER_FULL; }
+    static halo_rasterizer_enum value() { return halo_rasterizer_enum::HALO_RASTERIZER_FULL; }
 };
 
 // text-placements
@@ -324,28 +324,28 @@ struct symbolizer_default<halo_rasterizer_enum, keys::halo_rasterizer>
 template<>
 struct symbolizer_default<point_placement_enum, keys::point_placement_type>
 {
-    static point_placement_enum value() { return CENTROID_POINT_PLACEMENT; }
+    static point_placement_enum value() { return point_placement_enum::CENTROID_POINT_PLACEMENT; }
 };
 
 // marker placement
 template<>
 struct symbolizer_default<marker_placement_enum, keys::markers_placement_type>
 {
-    static marker_placement_enum value() { return MARKER_POINT_PLACEMENT; }
+    static marker_placement_enum value() { return marker_placement_enum::MARKER_POINT_PLACEMENT; }
 };
 
 // multi-policy
 template<>
 struct symbolizer_default<marker_multi_policy_enum, keys::markers_multipolicy>
 {
-    static marker_multi_policy_enum value() { return MARKER_EACH_MULTI; }
+    static marker_multi_policy_enum value() { return marker_multi_policy_enum::MARKER_EACH_MULTI; }
 };
 
 // direction
 template<>
 struct symbolizer_default<direction_enum, keys::direction>
 {
-    static direction_enum value() { return DIRECTION_RIGHT; }
+    static direction_enum value() { return direction_enum::DIRECTION_RIGHT; }
 };
 
 // placement
@@ -380,7 +380,7 @@ struct symbolizer_default<value_bool, keys::avoid_edges>
 template<>
 struct symbolizer_default<line_pattern_enum, keys::line_pattern>
 {
-    static line_pattern_enum value() { return LINE_PATTERN_WARP; }
+    static line_pattern_enum value() { return line_pattern_enum::LINE_PATTERN_WARP; }
 };
 
 // extend
@@ -393,7 +393,7 @@ struct symbolizer_default<value_double, keys::extend>
 template<>
 struct symbolizer_default<smooth_algorithm_enum, keys::smooth_algorithm>
 {
-    static smooth_algorithm_enum value() { return SMOOTH_ALGORITHM_BASIC; }
+    static smooth_algorithm_enum value() { return smooth_algorithm_enum::SMOOTH_ALGORITHM_BASIC; }
 };
 
 } // namespace mapnik

@@ -55,9 +55,9 @@ void agg_renderer<T0, T1>::process(polygon_symbolizer const& sym,
       vertex_converter<clip_poly_tag, transform_tag, affine_transform_tag, simplify_tag, smooth_tag>;
 
     ras_ptr->reset();
-    double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
+    const double gamma = get<value_double>(sym, keys::gamma, feature, common_.vars_, 1.0);
     gamma_method_enum gamma_method =
-      get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, GAMMA_POWER);
+      get<gamma_method_enum>(sym, keys::gamma_method, feature, common_.vars_, gamma_method_enum::GAMMA_POWER);
     if (gamma != gamma_ || gamma_method != gamma_method_)
     {
         set_gamma_method(ras_ptr, gamma, gamma_method);

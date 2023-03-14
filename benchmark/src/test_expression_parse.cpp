@@ -36,6 +36,7 @@ class test : public benchmark::test_case
 
 int main(int argc, char** argv)
 {
+    mapnik::setup();
     mapnik::parameters params;
     benchmark::handle_args(argc, argv, params);
     test test_runner(params);

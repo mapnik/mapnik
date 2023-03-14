@@ -11,10 +11,7 @@ target_link_libraries(mapnik-index PRIVATE
     mapnik::json
     mapnik::wkt
     Boost::program_options
-)
-
-set_target_properties(mapnik-index PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 
 mapnik_install_utility(mapnik-index)

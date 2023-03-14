@@ -192,11 +192,11 @@ void cairo_context::set_operator(composite_mode_e comp_op)
 
 void cairo_context::set_line_join(line_join_e join)
 {
-    if (join == MITER_JOIN)
+    if (join == line_join_enum::MITER_JOIN)
         cairo_set_line_join(cairo_.get(), CAIRO_LINE_JOIN_MITER);
-    else if (join == MITER_REVERT_JOIN)
+    else if (join == line_join_enum::MITER_REVERT_JOIN)
         cairo_set_line_join(cairo_.get(), CAIRO_LINE_JOIN_MITER);
-    else if (join == ROUND_JOIN)
+    else if (join == line_join_enum::ROUND_JOIN)
         cairo_set_line_join(cairo_.get(), CAIRO_LINE_JOIN_ROUND);
     else
         cairo_set_line_join(cairo_.get(), CAIRO_LINE_JOIN_BEVEL);
@@ -205,9 +205,9 @@ void cairo_context::set_line_join(line_join_e join)
 
 void cairo_context::set_line_cap(line_cap_e cap)
 {
-    if (cap == BUTT_CAP)
+    if (cap == line_cap_enum::BUTT_CAP)
         cairo_set_line_cap(cairo_.get(), CAIRO_LINE_CAP_BUTT);
-    else if (cap == SQUARE_CAP)
+    else if (cap == line_cap_enum::SQUARE_CAP)
         cairo_set_line_cap(cairo_.get(), CAIRO_LINE_CAP_SQUARE);
     else
         cairo_set_line_cap(cairo_.get(), CAIRO_LINE_CAP_ROUND);
@@ -480,7 +480,7 @@ void cairo_context::add_text(glyph_positions const& pos,
         pixel_position new_pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
         glyph_path(glyph.glyph_index, pixel_position(sx + new_pos.x, sy - new_pos.y));
         set_line_width(2.0 * halo_radius);
-        set_line_join(ROUND_JOIN);
+        set_line_join(line_join_enum::ROUND_JOIN);
         set_color(glyph.format->halo_fill, glyph.format->halo_opacity);
         stroke();
     }

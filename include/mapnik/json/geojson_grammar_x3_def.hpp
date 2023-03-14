@@ -35,30 +35,30 @@ namespace grammar {
 
 namespace x3 = boost::spirit::x3;
 
-auto make_null = [](auto const& ctx) {
+const auto make_null = [](auto const& ctx) {
     _val(ctx) = mapnik::value_null{};
 };
 
-auto make_true = [](auto const& ctx) {
+const auto make_true = [](auto const& ctx) {
     _val(ctx) = true;
 };
 
-auto make_false = [](auto const& ctx) {
+const auto make_false = [](auto const& ctx) {
     _val(ctx) = false;
 };
 
-auto assign = [](auto const& ctx) {
+const auto assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-auto assign_key = [](auto const& ctx) {
+const auto assign_key = [](auto const& ctx) {
     std::string const& name = _attr(ctx);
     keys_map& keys = x3::get<keys_tag>(ctx);
     auto result = keys.insert(keys_map::value_type(name, keys.size() + 1));
     std::get<0>(_val(ctx)) = result.first->right;
 };
 
-auto assign_value = [](auto const& ctx) {
+const auto assign_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
@@ -81,7 +81,7 @@ struct geometry_type_ : x3::symbols<mapnik::geometry::geometry_types>
           ("\"GeometryCollection\"", mapnik::geometry::geometry_types::GeometryCollection) //
           ;
     }
-} geometry_type_sym;
+} const geometry_type_sym;
 
 // rules
 x3::rule<class json_object_tag, geojson_object> const object("JSON Object");
@@ -95,13 +95,9 @@ auto const geojson_double = x3::real_parser<value_double, x3::strict_real_polici
 auto const geojson_integer = x3::int_parser<value_integer, 10, 1, -1>();
 
 // import unicode string rule
-namespace {
-auto const& geojson_string = unicode_string;
-}
+const auto geojson_string = unicode_string;
 // import positions rule
-namespace {
-auto const& positions_rule = positions;
-}
+const auto positions_rule = positions;
 
 // GeoJSON types
 // clang-format off

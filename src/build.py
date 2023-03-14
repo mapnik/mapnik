@@ -87,6 +87,7 @@ if '-DHAVE_TIFF' in env['CPPDEFINES']:
 if '-DHAVE_WEBP' in env['CPPDEFINES']:
    lib_env['LIBS'].append('webp')
    enabled_imaging_libraries.append('webp_reader.cpp')
+   enabled_imaging_libraries.append('webp_io.cpp')
 
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     lib_env['LIBS'].append('xml2')
@@ -152,6 +153,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    mapnik.cpp
     expression_grammar_x3.cpp
     fs.cpp
     request.cpp

@@ -35,39 +35,36 @@ namespace x3 = boost::spirit::x3;
 
 namespace {
 
-auto make_null = [](auto const& ctx) {
+const auto make_null = [](auto const& ctx) {
     _val(ctx) = mapnik::value_null{};
 };
 
-auto make_true = [](auto const& ctx) {
+const auto make_true = [](auto const& ctx) {
     _val(ctx) = true;
 };
 
-auto make_false = [](auto const& ctx) {
+const auto make_false = [](auto const& ctx) {
     _val(ctx) = false;
 };
 
-auto assign = [](auto const& ctx) {
+const auto assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-auto assign_key = [](auto const& ctx) {
+const auto assign_key = [](auto const& ctx) {
     std::get<0>(_val(ctx)) = std::move(_attr(ctx));
 };
 
-auto assign_value = [](auto const& ctx) {
+const auto assign_value = [](auto const& ctx) {
     std::get<1>(_val(ctx)) = std::move(_attr(ctx));
 };
 
 } // namespace
 
 using x3::lit;
-using x3::string;
 
 // import unicode string rule
-namespace {
-auto const& json_string = mapnik::json::grammar::unicode_string;
-}
+const auto json_string = mapnik::json::grammar::unicode_string;
 
 // rules
 x3::rule<class json_object_tag, json_object> const object("JSON Object");

@@ -51,23 +51,17 @@ namespace grammar {
 namespace x3 = boost::spirit::x3;
 namespace ascii = boost::spirit::x3::ascii;
 using ascii::char_;
-using ascii::string;
 using x3::_attr;
 using x3::_val;
 using x3::alnum;
 using x3::alpha;
-using x3::bool_;
-using x3::double_;
-using x3::int_;
 using x3::lexeme;
 using x3::lit;
 using x3::no_case;
 using x3::no_skip;
 x3::uint_parser<char, 16, 2, 2> const hex2{};
 
-namespace {
-auto const& escaped_unicode = json::grammar::escaped_unicode;
-}
+const auto escaped_unicode = json::grammar::escaped_unicode;
 
 template<typename Context>
 inline mapnik::transcoder const& extract_transcoder(Context const& ctx)
@@ -75,19 +69,19 @@ inline mapnik::transcoder const& extract_transcoder(Context const& ctx)
     return x3::get<transcoder_tag>(ctx);
 }
 
-auto append = [](auto const& ctx) {
+const auto append = [](auto const& ctx) {
     _val(ctx) += _attr(ctx);
 };
 
-auto do_assign = [](auto const& ctx) {
+const auto do_assign = [](auto const& ctx) {
     _val(ctx) = std::move(_attr(ctx));
 };
 
-auto do_negate = [](auto const& ctx) {
+const auto do_negate = [](auto const& ctx) {
     _val(ctx) = std::move(unary_node<mapnik::tags::negate>(_attr(ctx)));
 };
 
-auto do_attribute = [](auto const& ctx) {
+const auto do_attribute = [](auto const& ctx) {
     auto const& attr = _attr(ctx);
     if (attr == "mapnik::geometry_type")
     {
@@ -99,84 +93,84 @@ auto do_attribute = [](auto const& ctx) {
     }
 };
 
-auto do_global_attribute = [](auto const& ctx) {
+const auto do_global_attribute = [](auto const& ctx) {
     _val(ctx) = std::move(global_attribute(_attr(ctx)));
 };
 
-auto do_add = [](auto const& ctx) {
+const auto do_add = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::plus>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_subt = [](auto const& ctx) {
+const auto do_subt = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::minus>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_mult = [](auto const& ctx) {
+const auto do_mult = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::mult>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_div = [](auto const& ctx) {
+const auto do_div = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::div>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_mod = [](auto const& ctx) {
+const auto do_mod = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::mod>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_unicode = [](auto const& ctx) {
+const auto do_unicode = [](auto const& ctx) {
     auto const& tr = extract_transcoder(ctx);
     _val(ctx) = std::move(tr.transcode(_attr(ctx).c_str()));
 };
 
-auto do_null = [](auto const& ctx) {
+const auto do_null = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::value_null());
 };
 
-auto do_not = [](auto const& ctx) {
+const auto do_not = [](auto const& ctx) {
     mapnik::unary_node<mapnik::tags::logical_not> node(_attr(ctx));
     _val(ctx) = std::move(node);
 };
 
-auto do_and = [](auto const& ctx) {
+const auto do_and = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::logical_and>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_or = [](auto const& ctx) {
+const auto do_or = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::logical_or>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_equal = [](auto const& ctx) {
+const auto do_equal = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::equal_to>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_not_equal = [](auto const& ctx) {
+const auto do_not_equal = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::not_equal_to>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_less = [](auto const& ctx) {
+const auto do_less = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::less>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_less_equal = [](auto const& ctx) {
+const auto do_less_equal = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::less_equal>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_greater = [](auto const& ctx) {
+const auto do_greater = [](auto const& ctx) {
     _val(ctx) = std::move(mapnik::binary_node<mapnik::tags::greater>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_greater_equal = [](auto const& ctx) {
+const auto do_greater_equal = [](auto const& ctx) {
     _val(ctx) =
       std::move(mapnik::binary_node<mapnik::tags::greater_equal>(std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
 // regex
-auto do_regex_match = [](auto const& ctx) {
+const auto do_regex_match = [](auto const& ctx) {
     auto const& tr = extract_transcoder(ctx);
     _val(ctx) = std::move(mapnik::regex_match_node(tr, std::move(_val(ctx)), std::move(_attr(ctx))));
 };
 
-auto do_regex_replace = [](auto const& ctx) {
+const auto do_regex_replace = [](auto const& ctx) {
     auto const& tr = extract_transcoder(ctx);
     auto const& pair = _attr(ctx);
     auto const& pattern = std::get<0>(pair);
@@ -197,7 +191,7 @@ struct boolean_ : x3::symbols<mapnik::value_bool>
           ("false", false) //
           ;
     }
-} boolean;
+} const boolean;
 
 struct floating_point_constants : x3::symbols<mapnik::value_double>
 {
@@ -208,7 +202,7 @@ struct floating_point_constants : x3::symbols<mapnik::value_double>
           ("rad_to_deg", 57.295779513082320876798154814105)   //
           ;
     }
-} float_const;
+} const float_const;
 
 // unary functions
 struct unary_function_types_ : x3::symbols<unary_function_impl>
@@ -225,7 +219,7 @@ struct unary_function_types_ : x3::symbols<unary_function_impl>
           ("length", length_impl()) //
           ;
     }
-} unary_func_types;
+} const unary_func_types;
 
 // binary functions
 
@@ -238,7 +232,7 @@ struct binary_function_types_ : x3::symbols<binary_function_impl>
           ("pow", binary_function_impl(pow_impl))  //
           ;
     }
-} binary_func_types;
+} const binary_func_types;
 
 // geometry types
 struct geometry_types_ : x3::symbols<mapnik::value_integer>
@@ -251,7 +245,7 @@ struct geometry_types_ : x3::symbols<mapnik::value_integer>
           ("collection", 4) //
           ;
     }
-} geometry_type;
+} const geometry_type;
 
 struct unesc_chars_ : x3::symbols<char>
 {
@@ -269,7 +263,7 @@ struct unesc_chars_ : x3::symbols<char>
           ("\\\"", '\"') //
           ;
     }
-} unesc_char;
+} const unesc_char;
 
 // rules
 x3::rule<class logical_expression, mapnik::expr_node> const logical_expression("logical expression");

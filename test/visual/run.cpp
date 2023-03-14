@@ -23,6 +23,7 @@
 #include "runner.hpp"
 #include "config.hpp"
 
+#include <mapnik/mapnik.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
@@ -166,6 +167,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    mapnik::setup();
 #ifdef MAPNIK_LOG
     std::string log_level(vm["log"].as<std::string>());
     log_levels_map::const_iterator level_iter = log_levels.find(log_level);

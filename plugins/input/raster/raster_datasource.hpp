@@ -31,6 +31,7 @@
 #include <mapnik/geometry/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/datasource_plugin.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -39,6 +40,8 @@
 // stl
 #include <vector>
 #include <string>
+
+DATASOURCE_PLUGIN_DEF(raster_datasource_plugin, raster);
 
 class raster_datasource : public mapnik::datasource
 {

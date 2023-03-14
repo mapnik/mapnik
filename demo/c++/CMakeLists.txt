@@ -1,8 +1,6 @@
 add_executable(mapnik-demo rundemo.cpp)
-set_target_properties(mapnik-demo PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
+target_link_libraries(mapnik-demo PRIVATE
+    mapnik::agg
+    mapnik::mapnik
+    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
-
-target_link_libraries(mapnik-demo PRIVATE mapnik::agg mapnik::mapnik)

@@ -110,7 +110,6 @@ class webp_reader : public image_reader
     void init();
 };
 
-namespace {
 image_reader* create_webp_reader(char const* data, std::size_t size)
 {
     return new webp_reader<external_buffer_policy>(data, size);
@@ -121,10 +120,11 @@ image_reader* create_webp_reader2(std::string const& filename)
     return new webp_reader<internal_buffer_policy>(filename);
 }
 
-const bool registered = register_image_reader("webp", create_webp_reader);
-const bool registered2 = register_image_reader("webp", create_webp_reader2);
-
-} // namespace
+void register_webp_reader()
+{
+    const bool registered = register_image_reader("webp", create_webp_reader);
+    const bool registered2 = register_image_reader("webp", create_webp_reader2);
+}
 
 // ctor
 template<typename T>

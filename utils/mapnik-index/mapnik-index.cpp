@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <mapnik/mapnik.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
@@ -62,6 +63,7 @@ int main(int argc, char** argv)
 {
     // using namespace mapnik;
     namespace po = boost::program_options;
+    mapnik::setup();
     bool verbose = false;
     bool validate_features = false;
     unsigned int depth = DEFAULT_DEPTH;

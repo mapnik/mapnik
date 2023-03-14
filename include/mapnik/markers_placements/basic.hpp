@@ -32,7 +32,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
-#include "agg_basics.h"
 #include "agg_trans_affine.h"
 MAPNIK_DISABLE_WARNING_POP
 
@@ -72,32 +71,32 @@ class markers_basic_placement : util::noncopyable
     {
         switch (params_.direction)
         {
-            case DIRECTION_UP:
+            case direction_enum::DIRECTION_UP:
                 angle = 0;
                 return true;
-            case DIRECTION_DOWN:
+            case direction_enum::DIRECTION_DOWN:
                 angle = util::pi;
                 return true;
-            case DIRECTION_AUTO:
+            case direction_enum::DIRECTION_AUTO:
                 angle = util::normalize_angle(angle);
                 if (std::abs(angle) > util::pi / 2)
                     angle += util::pi;
                 return true;
-            case DIRECTION_AUTO_DOWN:
+            case direction_enum::DIRECTION_AUTO_DOWN:
                 angle = util::normalize_angle(angle);
                 if (std::abs(angle) < util::pi / 2)
                     angle += util::pi;
                 return true;
-            case DIRECTION_LEFT:
+            case direction_enum::DIRECTION_LEFT:
                 angle += util::pi;
                 return true;
-            case DIRECTION_LEFT_ONLY:
+            case direction_enum::DIRECTION_LEFT_ONLY:
                 angle = util::normalize_angle(angle + util::pi);
                 return std::fabs(angle) < util::pi / 2;
-            case DIRECTION_RIGHT_ONLY:
+            case direction_enum::DIRECTION_RIGHT_ONLY:
                 angle = util::normalize_angle(angle);
                 return std::fabs(angle) < util::pi / 2;
-            case DIRECTION_RIGHT:
+            case direction_enum::DIRECTION_RIGHT:
             default:
                 return true;
         }

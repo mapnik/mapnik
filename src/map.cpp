@@ -46,19 +46,22 @@
 #include <stdexcept>
 
 namespace mapnik {
-
-static const char* aspect_fix_mode_strings[] = {"GROW_BBOX",
-                                                "GROW_CANVAS",
-                                                "SHRINK_BBOX",
-                                                "SHRINK_CANVAS",
-                                                "ADJUST_BBOX_WIDTH",
-                                                "ADJUST_BBOX_HEIGHT",
-                                                "ADJUST_CANVAS_WIDTH",
-                                                "ADJUST_CANVAS_HEIGHT",
-                                                "RESPECT",
-                                                ""};
-
-IMPLEMENT_ENUM(aspect_fix_mode_e, aspect_fix_mode_strings)
+namespace {
+using E = detail::EnumStringT<Map::aspect_fix_mode>;
+constexpr detail::EnumMapT<Map::aspect_fix_mode, 10> aspect_fix_mode_e_map{{
+  E{Map::aspect_fix_mode::GROW_BBOX, "GROW_BBOX"},
+  E{Map::aspect_fix_mode::GROW_CANVAS, "GROW_CANVAS"},
+  E{Map::aspect_fix_mode::SHRINK_BBOX, "SHRINK_BBOX"},
+  E{Map::aspect_fix_mode::SHRINK_CANVAS, "SHRINK_CANVAS"},
+  E{Map::aspect_fix_mode::ADJUST_BBOX_WIDTH, "ADJUST_BBOX_WIDTH"},
+  E{Map::aspect_fix_mode::ADJUST_BBOX_HEIGHT, "ADJUST_BBOX_HEIGHT"},
+  E{Map::aspect_fix_mode::ADJUST_CANVAS_WIDTH, "ADJUST_CANVAS_WIDTH"},
+  E{Map::aspect_fix_mode::ADJUST_CANVAS_HEIGHT, "ADJUST_CANVAS_HEIGHT"},
+  E{Map::aspect_fix_mode::RESPECT, "RESPECT"},
+  E{Map::aspect_fix_mode::aspect_fix_mode_MAX, ""},
+}};
+} // namespace
+IMPLEMENT_ENUM(aspect_fix_mode_e, Map::aspect_fix_mode)
 
 Map::Map()
     : width_(400)
