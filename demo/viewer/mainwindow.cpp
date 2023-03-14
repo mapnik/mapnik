@@ -106,10 +106,7 @@ MainWindow::MainWindow()
     // slider
     connect(slider_, SIGNAL(valueChanged(int)), mapWidget_, SLOT(zoomToLevel(int)));
     // renderer selector
-    connect(renderer_selector_,
-            SIGNAL(currentIndexChanged(int)),
-            mapWidget_,
-            SLOT(updateRenderer(int)));
+    connect(renderer_selector_, SIGNAL(currentIndexChanged(int)), mapWidget_, SLOT(updateRenderer(int)));
 
     // scale factor
     connect(scale_factor_, SIGNAL(valueChanged(double)), mapWidget_, SLOT(updateScaleFactor(double)));
