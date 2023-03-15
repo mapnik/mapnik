@@ -13,17 +13,19 @@
 #endif
 
 #include <mapnik/warning.hpp>
+
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/format.hpp>
-#include <boost/filesystem/convenience.hpp>
 #include <boost/optional/optional_io.hpp>
 MAPNIK_DISABLE_WARNING_POP
+
+#include <mapnik/filesystem.hpp>
 #include <mapnik/util/mapped_memory_file.hpp>
 
 inline void make_directory(std::string const& dir)
 {
-    boost::filesystem::create_directories(dir);
+    mapnik::fs::create_directories(dir);
 }
 
 namespace {

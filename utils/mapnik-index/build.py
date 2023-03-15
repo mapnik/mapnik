@@ -40,8 +40,7 @@ source = Split(
 headers = env['CPPPATH']
 
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-boost_system = 'boost_system%s' % env['BOOST_APPEND']
-libraries =  [env['MAPNIK_NAME'], boost_program_options, boost_system]
+libraries =  [env['MAPNIK_NAME'], boost_program_options]
 # need on linux: https://github.com/mapnik/mapnik/issues/3145
 libraries.append('mapnik-json')
 libraries.append('mapnik-wkt')

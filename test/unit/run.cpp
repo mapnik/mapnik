@@ -3,9 +3,9 @@
 
 #include <string>
 #include <mapnik/mapnik.hpp>
+#include <mapnik/filesystem.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/datasource_cache.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 #include "cleanup.hpp" // run_cleanup()
 
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
             std::clog << "Could not find " << working_dir << "\n";
             return -1;
         }
-        boost::filesystem::current_path(working_dir);
+        mapnik::fs::current_path(working_dir);
     }
 
     if (result == 0)
