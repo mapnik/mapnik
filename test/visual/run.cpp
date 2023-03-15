@@ -36,6 +36,9 @@
 #include <windows.h>
 #endif
 
+#include <boost/format.hpp>
+#include <random>
+
 #ifdef MAPNIK_LOG
 using log_levels_map = std::map<std::string, mapnik::logger::severity_type>;
 
@@ -48,10 +51,23 @@ log_levels_map log_levels{{"debug", mapnik::logger::severity_type::debug},
 using namespace visual_tests;
 namespace po = boost::program_options;
 
-runner::renderer_container
-  create_renderers(po::variables_map const& args, boost::filesystem::path const& output_dir, bool force_append = false)
+namespace {
+
+static std::random_device entropy;
+
+std::string unique_name()
 {
-    boost::filesystem::path reference_dir(args["images-dir"].as<std::string>());
+    std::mt19937 gen(entropy());
+    std::uniform_int_distribution<> distrib(0, 65535);
+    auto fmt = boost::format("%1$04x-%2$04x-%3$04x-%4$04x") % distrib(gen) % distrib(gen) % distrib(gen) % distrib(gen);
+    return fmt.str();
+}
+} // namespace
+
+runner::renderer_container
+  create_renderers(po::variables_map const& args, mapnik::fs::path const& output_dir, bool force_append = false)
+{
+    mapnik::fs::path reference_dir(args["images-dir"].as<std::string>());
     bool overwrite = args.count("overwrite");
     runner::renderer_container renderers;
 
@@ -185,11 +201,11 @@ int main(int argc, char** argv)
     mapnik::freetype_engine::register_fonts(vm["fonts"].as<std::string>(), true);
     mapnik::datasource_cache::instance().register_datasources(vm["plugins"].as<std::string>());
 
-    boost::filesystem::path output_dir(vm["output-dir"].as<std::string>());
+    mapnik::fs::path output_dir(vm["output-dir"].as<std::string>());
 
     if (vm.count("unique-subdir"))
     {
-        output_dir /= boost::filesystem::unique_path();
+        output_dir /= unique_name();
     }
 
     config defaults;
