@@ -31,7 +31,7 @@ namespace visual_tests {
 
 class runner
 {
-    using path_type = boost::filesystem::path;
+    using path_type = mapnik::fs::path;
     using files_iterator = std::vector<path_type>::const_iterator;
 
   public:

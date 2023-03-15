@@ -28,10 +28,7 @@
 #include <set>
 #include <string>
 #include <chrono>
-
-// boost
-#include <boost/filesystem.hpp>
-
+#include <mapnik/filesystem.hpp>
 #include <mapnik/geometry/box2d.hpp>
 
 namespace visual_tests {
@@ -76,8 +73,8 @@ struct result
     map_size size;
     map_size tiles;
     double scale_factor;
-    boost::filesystem::path actual_image_path;
-    boost::filesystem::path reference_image_path;
+    mapnik::fs::path actual_image_path;
+    mapnik::fs::path reference_image_path;
     std::string error_message;
     unsigned diff;
     std::chrono::high_resolution_clock::duration duration;

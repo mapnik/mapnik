@@ -149,8 +149,8 @@ runner::runner(runner::path_type const& styles_dir,
 
 result_list runner::test_all(report_type& report) const
 {
-    boost::filesystem::directory_iterator begin(styles_dir_);
-    boost::filesystem::directory_iterator end;
+    mapnik::fs::directory_iterator begin(styles_dir_);
+    mapnik::fs::directory_iterator end;
     std::vector<runner::path_type> files(begin, end);
     return test_parallel(files, report, jobs_);
 }
