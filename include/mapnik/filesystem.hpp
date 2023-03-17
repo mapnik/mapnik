@@ -23,6 +23,8 @@
 #ifndef MAPNIK_FILESYSTEM_HPP
 #define MAPNIK_FILESYSTEM_HPP
 
+#include <version>
+
 #if defined(__cpp_lib_filesystem) && !defined(USE_BOOST_FILESYSTEM)
 #include <filesystem>
 #else
