@@ -103,6 +103,7 @@ jobs:
             -DBUILD_SHARED_LIBS:BOOL=${{ matrix.static-build || 'ON' }} \
             -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard || '14' }} \
             -DUSE_MEMORY_MAPPED_FILE:BOOL=${{ matrix.memory-mapped || 'ON' }} \
+            -LA \
             --preset ${{ env.PRESET }}
 
       - name: Build
