@@ -23,7 +23,7 @@
 #ifndef MAPNIK_FILESYSTEM_HPP
 #define MAPNIK_FILESYSTEM_HPP
 
-#if (__cplusplus >= 201703L) && !defined(USE_BOOST_FILESYSTEM)
+#if !defined(USE_BOOST_FILESYSTEM)
 #include <filesystem>
 #else
 #include <boost/filesystem/operations.hpp> // for absolute, exists, etc
@@ -31,7 +31,7 @@
 #endif
 
 namespace mapnik {
-#if defined(__cpp_lib_filesystem) && !defined(USE_BOOST_FILESYSTEM)
+#if !defined(USE_BOOST_FILESYSTEM)
 namespace fs = std::filesystem;
 using error_code = std::error_code;
 #else
