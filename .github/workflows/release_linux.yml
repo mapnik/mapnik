@@ -40,7 +40,7 @@ jobs:
             libboost-regex-dev
 
       - name: Configure CMake
-        run: cmake --preset ${{ env.PRESET }}
+        run: cmake -LA --preset ${{ env.PRESET }}
 
       - name: Build
         run: cmake --build --preset ${{ env.PRESET }}
