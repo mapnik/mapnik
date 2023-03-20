@@ -23,20 +23,20 @@
 #ifndef MAPNIK_FILESYSTEM_HPP
 #define MAPNIK_FILESYSTEM_HPP
 
-#if (__cplusplus >= 201703L) && !defined(USE_BOOST_FILESYSTEM)
-#include <filesystem>
-#else
+#ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem/operations.hpp> // for absolute, exists, etc
 #include <boost/filesystem/path.hpp>       // for path, operator/
+#else
+#include <filesystem>
 #endif
 
 namespace mapnik {
-#if defined(__cpp_lib_filesystem) && !defined(USE_BOOST_FILESYSTEM)
-namespace fs = std::filesystem;
-using error_code = std::error_code;
-#else
+#ifdef USE_BOOST_FILESYSTEM
 namespace fs = boost::filesystem;
 using error_code = boost::system::error_code;
+#else
+namespace fs = std::filesystem;
+using error_code = std::error_code;
 #endif
 } // namespace mapnik
 
