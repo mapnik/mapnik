@@ -9,6 +9,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/filesystem.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -19,13 +20,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 #include <string>
-#if __cplusplus >= 201703L
-#include <filesystem>
-namespace fs = std::filesystem;
-#else
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-#endif
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::box2d<double>, (double, minx_)(double, miny_)(double, maxx_)(double, maxy_))
 
@@ -100,7 +94,8 @@ int main(int argc, char** argv)
         }
         else
         {
-            std::clog << "please provide an xml map as first argument!" << std::endl;
+            std::clog << "mapnik-render: no XML map specified" << std::endl;
+            std::clog << "Try \"mapnik-render --help\" for more information" << std::endl;
             return -1;
         }
 
@@ -146,7 +141,7 @@ int main(int argc, char** argv)
                 // relative to plugins-dir
                 try
                 {
-                    fs::path p(vm["plugins-dir"].as<std::string>());
+                    mapnik::fs::path p(vm["plugins-dir"].as<std::string>());
                     p = p.parent_path() / "fonts";
                     mapnik::freetype_engine::register_fonts(p.string(), true);
                 }
