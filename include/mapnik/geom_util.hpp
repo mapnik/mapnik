@@ -274,14 +274,12 @@ bool hit_test_first(PathType& path, double x, double y)
     {
         return false;
     }
-    unsigned count = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         if (command == SEG_CLOSE)
         {
             break;
         }
-        ++count;
         if (command == SEG_MOVETO)
         {
             x0 = x1;
