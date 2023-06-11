@@ -27,6 +27,7 @@
 #include <mapnik/geometry.hpp>
 // stl
 #include <string>
+#include <cstdint>
 
 namespace mapnik {
 namespace util {
