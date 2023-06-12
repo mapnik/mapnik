@@ -1,7 +1,6 @@
 #include "bench_framework.hpp"
 #include <mapnik/font_engine_freetype.hpp>
 #include <boost/format.hpp>
-#include <boost/foreach.hpp>
 
 class test : public benchmark::test_case
 {
