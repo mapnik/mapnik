@@ -467,6 +467,7 @@ opts.AddVariables(
     BoolVariable('MAPNIK_RENDER', 'Compile and install a utility to render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
+    BoolVariable('USE_BOOST_FILESYSTEM','Use boost::filesytem even if `std::filesystem` is avaible (since c++17)', 'False'),
     BoolVariable('QUIET', 'Reduce build verbosity', 'False'),
     )
 
@@ -535,6 +536,7 @@ pickle_store = [# Scons internal variables
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER',
         'BIGINT',
+        'USE_BOOST_FILESYSTEM',
         'HOST',
         'QUERIED_GDAL_DATA',
         'QUERIED_ICU_DATA',
@@ -1631,6 +1633,9 @@ if not preconfigured:
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
 
+    if env['USE_BOOST_FILESYSTEM']:
+        env.Append(CPPDEFINES = '-DUSE_BOOST_FILESYSTEM')
+
     if env['THREADING'] == 'multi':
         thread_flag = thread_suffix
     else:
@@ -1650,12 +1655,13 @@ if not preconfigured:
 
         # The other required boost headers.
         BOOST_LIBSHEADERS = [
-            ['system', 'boost/system/system_error.hpp', True],
-            ['filesystem', 'boost/filesystem/operations.hpp', True],
             ['regex', 'boost/regex.hpp', True],
             ['program_options', 'boost/program_options.hpp', False]
         ]
 
+        if int(env['CXX_STD']) < 17 or env['USE_BOOST_FILESYSTEM']:
+            BOOST_LIBSHEADERS.append(['system', 'boost/system/system_error.hpp', True])
+            BOOST_LIBSHEADERS.append(['filesystem', 'boost/filesystem/operations.hpp', True])
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
         if env['PRIORITIZE_LINKING']:
             conf.prioritize_paths(silent=True)

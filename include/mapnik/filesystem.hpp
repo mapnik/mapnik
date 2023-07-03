@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2021 Artem Pavlenko
+ * Copyright (C) 2023 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,23 +20,24 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_GEOMETRY_TO_WKT_HPP
-#define MAPNIK_GEOMETRY_TO_WKT_HPP
+#ifndef MAPNIK_FILESYSTEM_HPP
+#define MAPNIK_FILESYSTEM_HPP
 
-// mapnik
-#include <mapnik/geometry.hpp>
-// stl
-#include <string>
-#include <cstdint>
+#ifdef USE_BOOST_FILESYSTEM
+#include <boost/filesystem/operations.hpp> // for absolute, exists, etc
+#include <boost/filesystem/path.hpp>       // for path, operator/
+#else
+#include <filesystem>
+#endif
 
 namespace mapnik {
-namespace util {
-
-bool to_wkt(std::string& wkt, mapnik::geometry::geometry<double> const& geom);
-
-bool to_wkt(std::string& wkt, mapnik::geometry::geometry<std::int64_t> const& geom);
-
-} // namespace util
+#ifdef USE_BOOST_FILESYSTEM
+namespace fs = boost::filesystem;
+using error_code = boost::system::error_code;
+#else
+namespace fs = std::filesystem;
+using error_code = std::error_code;
+#endif
 } // namespace mapnik
 
-#endif // MAPNIK_GEOMETRY_TO_WKT_HPP
+#endif // MAPNIK_FILESYSTEM_HPP

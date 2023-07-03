@@ -25,7 +25,12 @@ jobs:
       - uses: pre-commit/action@v3.0.0
 
   buildAndTest:
-    name: Build and Test
+    name: >-
+      Build & Test
+      (${{ matrix.os }})
+      (C++ ${{ matrix.cxx-standard }})
+      ${{ matrix.memory-mapped == 'OFF' && '(USE_MEMORY_MAPPED_FILE=OFF)' || '' }}
+      ${{ matrix.static-build == 'OFF' && '(BUILD_SHARED_LIBS=OFF)' || '' }}
     needs: checkSource
     strategy:
       fail-fast: false
@@ -33,11 +38,20 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         memory-mapped: ["OFF", "ON"]
         static-build: ["OFF", "ON"]
+        cxx-standard: [14]
         include:
           - os: ubuntu-latest
             mono: mono
           - os: macos-latest
             mono: mono
+          - os: macos-latest
+            cxx-standard: 17
+            mono: mono
+          - os: ubuntu-latest
+            cxx-standard: 17
+            mono: mono
+          - os: windows-latest
+            cxx-standard: 17
 
     runs-on: ${{ matrix.os }}
 
@@ -66,7 +80,7 @@ jobs:
       - name: setup vcpkg
         uses: ./.github/actions/setup_vcpkg
         with:
-          vcpkg-sha: 71d3fa60b67540e9bf5fde2bf2188f579ff09433
+          vcpkg-sha: a960fde0b60b6392d70375fe513dfa7eb083cc3a
           nuget-source: https://nuget.pkg.github.com/mapnik/index.json
           nuget-username: ${{ github.actor }}
           nuget-pat: ${{ secrets.GITHUB_TOKEN }}
@@ -78,12 +92,19 @@ jobs:
           string: ${{ runner.os }}
           
       - name: set lower case runner os
-        shell: "bash"
+        shell: bash
         run: |
           echo "PRESET=${{ steps.lc_platform.outputs.lowercase }}-ci" >>${GITHUB_ENV}
 
       - name: Configure CMake
-        run: cmake -DUSE_MEMORY_MAPPED_FILE=${{ matrix.memory-mapped }} -DBUILD_SHARED_LIBS=${{ matrix.static-build }} --preset ${{ env.PRESET }}
+        shell: bash
+        run: |
+          cmake \
+            -DBUILD_SHARED_LIBS:BOOL=${{ matrix.static-build || 'ON' }} \
+            -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard || '14' }} \
+            -DUSE_MEMORY_MAPPED_FILE:BOOL=${{ matrix.memory-mapped || 'ON' }} \
+            -LA \
+            --preset ${{ env.PRESET }}
 
       - name: Build
         run: cmake --build --preset ${{ env.PRESET }}

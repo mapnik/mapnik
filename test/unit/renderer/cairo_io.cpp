@@ -1,14 +1,8 @@
 #include "catch.hpp"
 
 #include <mapnik/cairo_io.hpp>
+#include <mapnik/filesystem.hpp>
 #include <mapnik/util/fs.hpp>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/filesystem/convenience.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 #include <fstream>
 
 #if defined(HAVE_CAIRO)
@@ -22,7 +16,7 @@ TEST_CASE("cairo_io")
     SECTION("save_to_cairo_file - SVG")
     {
         std::string directory_name("/tmp/mapnik-tests/");
-        boost::filesystem::create_directories(directory_name);
+        mapnik::fs::create_directories(directory_name);
         REQUIRE(mapnik::util::exists(directory_name));
 
         std::string output_file(directory_name + "test_save_to_cairo_file.svg");
