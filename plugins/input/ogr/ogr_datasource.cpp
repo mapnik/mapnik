@@ -127,16 +127,23 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
 
     std::string driver = *params.get<std::string>("driver", "");
+    std::vector<ogr_utils::option_ptr> open_options_map = ogr_utils::split_open_options(*params.get<std::string>("open_options", ""));
+    char** open_options = ogr_utils::open_options_for_ogr(open_options_map);
 
     if (!driver.empty())
     {
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
         const char* papszAllowedDrivers[] = {driver.c_str(), nullptr};
+
         dataset_ = reinterpret_cast<gdal_dataset_type>(
-          GDALOpenEx(dataset_name_.c_str(), nOpenFlags, papszAllowedDrivers, nullptr, nullptr));
+          GDALOpenEx(dataset_name_.c_str(), nOpenFlags, papszAllowedDrivers, open_options, nullptr));
     }
     else
     {
+        if (open_options[0] != nullptr)
+        {
+            throw datasource_exception("<open_options> parameter provided but <driver> is missing");
+        }
         // open ogr driver
         dataset_ = reinterpret_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), false, nullptr));
     }
