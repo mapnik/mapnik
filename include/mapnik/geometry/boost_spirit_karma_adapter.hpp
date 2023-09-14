@@ -23,7 +23,11 @@
 #ifndef MAPNIK_BOOST_SPIRIT_KARMA_ADAPTER_HPP
 #define MAPNIK_BOOST_SPIRIT_KARMA_ADAPTER_HPP
 
+// mapnik
 #include <mapnik/geometry.hpp>
+
+// stl
+#include <cstdint>
 
 namespace boost {
 using mapbox::util::get;
