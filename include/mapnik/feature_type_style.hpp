@@ -28,7 +28,7 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_compositing.hpp>
-
+#include <mapnik/rule.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -40,8 +40,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <cstddef>
 
 namespace mapnik {
-
-class rule;
 
 enum class filter_mode_enum { FILTER_ALL, FILTER_FIRST, filter_mode_enum_MAX };
 
