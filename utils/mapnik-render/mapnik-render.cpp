@@ -36,6 +36,22 @@ int main(int argc, char** argv)
     int map_width = 600;
     int map_height = 400;
 
+    const char *envsev = std::getenv("MAPNIK_LOG_SEVERITY");
+    if ( envsev != nullptr)
+    {
+      if ( ! strncmp(envsev, "deb", 3) )
+        logger.set_severity(mapnik::logger::debug);
+      else if ( ! strncmp(envsev, "warn", 4) )
+        logger.set_severity(mapnik::logger::warn);
+      else if ( ! strncmp(envsev, "err", 3) )
+        logger.set_severity(mapnik::logger::error);
+      else
+        MAPNIK_LOG_ERROR("logger") <<
+              "Invalid value for MAPNIK_LOG_SEVERITY"
+              " environment variable, expected "
+              "'debug', 'warning' or 'error'";
+    }
+
     try
     {
         po::options_description desc("mapnik-render utility");
