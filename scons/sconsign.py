@@ -25,15 +25,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "scripts/sconsign.py 49578b34582d9e92dac7d713a8e58599ae35aa63 Mon, 06 Mar 2023 23:32:38 -0400 bdbaddog"
+__revision__ = "scripts/sconsign.py 120fd4f633e9ef3cafbc0fec35306d7555ffd1db Tue, 21 Mar 2023 12:11:27 -0400 bdbaddog"
 
-__version__ = "4.5.1"
+__version__ = "4.5.2"
 
-__build__ = "49578b34582d9e92dac7d713a8e58599ae35aa63"
+__build__ = "120fd4f633e9ef3cafbc0fec35306d7555ffd1db"
 
 __buildsys__ = "M1DOG2021"
 
-__date__ = "Mon, 06 Mar 2023 23:32:38 -0400"
+__date__ = "Tue, 21 Mar 2023 12:11:27 -0400"
 
 __developer__ = "bdbaddog"
 

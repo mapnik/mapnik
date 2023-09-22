@@ -23,9 +23,16 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-__revision__ = "scripts/scons.py 120fd4f633e9ef3cafbc0fec35306d7555ffd1db Tue, 21 Mar 2023 12:11:27 -0400 bdbaddog"
+"""Show or convert the configuration of an SCons cache directory.
+
+A cache of derived files is stored by file signature.
+The files are split into directories named by the first few
+digits of the signature. The prefix length used for directory
+names can be changed by this script.
+"""
+__revision__ = "scripts/scons-configure-cache.py 120fd4f633e9ef3cafbc0fec35306d7555ffd1db Tue, 21 Mar 2023 12:11:27 -0400 bdbaddog"
 
 __version__ = "4.5.2"
 
@@ -41,7 +48,7 @@ __developer__ = "bdbaddog"
 import os
 import sys
 
-# Python compatibility check
+# python compatibility check
 if sys.version_info < (3, 6, 0):
     msg = "scons: *** SCons version %s does not run under Python version %s.\n\
 Python >= 3.5 is required.\n"
@@ -77,27 +84,14 @@ if os.path.isdir(local_version):
 if os.path.isdir(local):
     libs.append(os.path.abspath(local))
 
+scons_version = 'scons-%s' % __version__
+
 sys.path = libs + sys.path
 
 ##############################################################################
 # END STANDARD SCons SCRIPT HEADER
 ##############################################################################
+from SCons.Utilities.ConfigureCache import main
 
 if __name__ == "__main__":
-    try:
-        import SCons.Script
-    except ImportError:
-        sys.stderr.write("SCons import failed. Unable to find engine files in:\n")
-        for path in libs:
-            sys.stderr.write("  {}\n".format(path))
-        raise
-
-    # this does all the work, and calls sys.exit
-    # with the proper exit status when done.
-    SCons.Script.main()
-
-# Local Variables:
-# tab-width:4
-# indent-tabs-mode:nil
-# End:
-# vim: set expandtab tabstop=4 shiftwidth=4:
+    main()
