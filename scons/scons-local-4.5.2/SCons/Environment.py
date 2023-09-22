@@ -1043,6 +1043,12 @@ class SubstitutionEnvironment:
         flags distributed into appropriate construction variables.
         See :meth:`ParseFlags`.
 
+        As a side effect, if *unique* is true, a new object is created
+        for each modified construction variable by the loop at the end.
+        This is silently expected by the :meth:`Override` *parse_flags*
+        functionality, which does not want to share the list (or whatever)
+        with the environment being overridden.
+
         Args:
             args: flags to merge
             unique: merge flags rather than appending (default: True).
@@ -1077,6 +1083,16 @@ class SubstitutionEnvironment:
                     try:
                         orig = orig + value
                     except (KeyError, TypeError):
+                        # If CPPDEFINES is a deque, adding value (a list)
+                        # results in TypeError, so we handle that case here.
+                        # Just in case we got called from Override, make
+                        # sure we make a copy, because we don't go through
+                        # the cleanup loops at the end of the outer for loop,
+                        # which implicitly gives us a new object.
+                        if isinstance(orig, deque):
+                            self[key] = self[key].copy()
+                            self.AppendUnique(CPPDEFINES=value, delete_existing=True)
+                            continue
                         try:
                             add_to_orig = orig.append
                         except AttributeError:
@@ -1095,6 +1111,7 @@ class SubstitutionEnvironment:
                 for v in orig[::-1]:
                     if v not in t:
                         t.insert(0, v)
+
             self[key] = t
 
 
@@ -1419,7 +1436,7 @@ class Base(SubstitutionEnvironment):
             if key == 'CPPDEFINES':
                 _add_cppdefines(self._dict, val)
                 continue
-                
+
             try:
                 orig = self._dict[key]
             except KeyError:
