@@ -40,6 +40,9 @@
 #include <cstdio>
 #include <algorithm>
 
+// boost string algo
+#include <boost/algorithm/string/trim.hpp>
+
 namespace csv_utils {
 namespace detail {
 
