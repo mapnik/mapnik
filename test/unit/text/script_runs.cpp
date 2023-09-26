@@ -5,7 +5,8 @@
 
 TEST_CASE("nested script runs")
 {
-    mapnik::value_unicode_string text(u"Nested text runs(первый(second(третий)))"); // mixed scripts
+    //mapnik::value_unicode_string text(u"Nested text runs(первый(second(третий)))"); // mixed scripts
+    mapnik::value_unicode_string text = UnicodeString::fromUTF8("Nested text runs(первый(second(третий)))");
     ScriptRun runs(text.getBuffer(), text.length());
     std::size_t count = 0;
     std::size_t size = 0;

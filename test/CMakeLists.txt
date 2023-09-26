@@ -101,6 +101,7 @@ add_executable(mapnik-test-unit
     unit/vertex_adapter/vertex_adapter.cpp
 )
 
+set_target_properties(mapnik-test-unit PROPERTIES COMPILE_FLAGS "-mxgot")
 target_link_libraries(mapnik-test-unit PUBLIC
     Catch2::Catch2
     mapnik::agg
@@ -123,6 +124,7 @@ target_link_libraries(agg_rasterizer_integer_overflow_test PUBLIC
     mapnik::json
     ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
+set_target_properties(agg_rasterizer_integer_overflow_test PROPERTIES COMPILE_FLAGS "-mxgot")
 target_include_directories(agg_rasterizer_integer_overflow_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(datasource_registration_test standalone/datasource_registration_test.cpp)
@@ -132,6 +134,7 @@ target_link_libraries(datasource_registration_test PUBLIC
     mapnik::agg
     ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
+set_target_properties(datasource_registration_test PROPERTIES COMPILE_FLAGS "-mxgot")
 target_include_directories(datasource_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(font_registration_test standalone/font_registration_test.cpp)
@@ -142,6 +145,7 @@ target_link_libraries(font_registration_test PUBLIC
     mapnik::json
     ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
+set_target_properties(font_registration_test PROPERTIES COMPILE_FLAGS "-mxgot")
 target_include_directories(font_registration_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(map_xml_test standalone/map_xml_test.cpp)
@@ -152,6 +156,7 @@ target_link_libraries(map_xml_test PUBLIC
     mapnik::json
     ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
+set_target_properties(map_xml_test PROPERTIES COMPILE_FLAGS "-mxgot")
 target_include_directories(map_xml_test PRIVATE "${Catch2_SOURCE_DIR}/single_include/catch2" "${CMAKE_CURRENT_BINARY_DIR}")
 
 include("${Catch2_SOURCE_DIR}/contrib/Catch.cmake")
