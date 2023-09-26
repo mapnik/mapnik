@@ -76,7 +76,8 @@ void ogr_datasource_plugin::before_unload() const
 {
     // initialize ogr formats
     // NOTE: in GDAL >= 2.0 this is the same as GDALDestroyDriverManager()
-    OGRCleanupAll();
+    //OGRCleanupAll();
+    OSRCleanup();
 }
 
 ogr_datasource::ogr_datasource(parameters const& params)

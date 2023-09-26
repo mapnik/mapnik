@@ -390,6 +390,9 @@ add_compile_options(
 add_library(core INTERFACE)
 add_library(mapnik::core ALIAS core)
 
+target_include_directories(core INTERFACE /usr/local/include/freetype2)
+target_link_directories(core INTERFACE /usr/local/lib)
+
 target_include_directories(core INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${MAPBOX_GEOMETRY_INCLUDE_DIRS}>
@@ -425,6 +428,7 @@ add_library(json STATIC "")
 add_library(mapnik::json ALIAS json)
 # end forward declaration
 ###
+set_target_properties(mapnik PROPERTIES COMPILE_FLAGS "-mxgot")
 
 add_subdirectory(deps)
 add_subdirectory(plugins)

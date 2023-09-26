@@ -95,7 +95,8 @@ MainWindow::MainWindow()
     createToolBars();
     createContextMenu();
 
-    setWindowTitle(tr("Mapnik Viewer"));
+    // setWindowTitle(tr("Mapnik Viewer"));
+    setWindowTitle(tr("飞渡矢量融合工具"));
     status = new QStatusBar(this);
     status->showMessage(tr(""));
     setStatusBar(status);
@@ -149,7 +150,7 @@ void MainWindow::open(QString const& path)
     if (!filename_.isEmpty())
     {
         load_map_file(filename_);
-        setWindowTitle(tr("%1 - Mapnik Viewer").arg(filename_));
+        // setWindowTitle(tr("%1 - Mapnik Viewer").arg(filename_));
     }
 }
 
@@ -160,7 +161,7 @@ void MainWindow::reload()
         mapnik::box2d<double> bbox = mapWidget_->getMap()->get_current_extent();
         load_map_file(filename_);
         mapWidget_->zoomToBox(bbox);
-        setWindowTitle(tr("%1 - *Reloaded*").arg(filename_));
+        // setWindowTitle(tr("%1 - *Reloaded*").arg(filename_));
     }
 }
 
