@@ -26,6 +26,7 @@
 
 #include <mapnik/geometry.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <cstdint>
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::geometry::point<double>,

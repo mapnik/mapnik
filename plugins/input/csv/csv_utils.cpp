@@ -32,6 +32,7 @@
 // csv grammar
 #include <mapnik/csv/csv_grammar_impl.hpp>
 //
+#include <boost/algorithm/string/trim.hpp>
 #include "csv_getline.hpp"
 #include "csv_utils.hpp"
 
