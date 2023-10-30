@@ -28,6 +28,9 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
+// stl
+#include <cstdint>
+
 namespace mapnik
 {
 
