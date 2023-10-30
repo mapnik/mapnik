@@ -428,7 +428,6 @@ add_library(json STATIC "")
 add_library(mapnik::json ALIAS json)
 # end forward declaration
 ###
-set_target_properties(mapnik PROPERTIES COMPILE_FLAGS "-mxgot")
 
 add_subdirectory(deps)
 add_subdirectory(plugins)
