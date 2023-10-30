@@ -33,6 +33,8 @@
 #include <mapnik/map.hpp>
 #endif
 
+class RoadMerger;
+class WaitingSpinnerWidget;
 class MapWidget : public QWidget
 {
     Q_OBJECT
@@ -45,7 +47,10 @@ class MapWidget : public QWidget
     };
 
     enum eRenderer { AGG, Cairo, Grid };
-
+    std::shared_ptr<WaitingSpinnerWidget> spinner;
+    std::shared_ptr<RoadMerger> roadMerger;
+    ~MapWidget();
+    std::shared_ptr<mapnik::Map> map(){ return map_; }
   private:
     std::shared_ptr<mapnik::Map> map_;
     int selected_;
@@ -71,6 +76,7 @@ class MapWidget : public QWidget
     void setMap(std::shared_ptr<mapnik::Map> map);
     void defaultView();
     void zoomToBox(mapnik::box2d<double> const& box);
+    void zoomAll();
     void zoomIn();
     void zoomOut();
     void panLeft();
@@ -84,6 +90,8 @@ class MapWidget : public QWidget
     void layerSelected(int);
     void updateRenderer(QString const& txt);
     void updateScaleFactor(double scale_factor);
+    void onMergeStart();
+    void onMergeEnd();
   signals:
     void mapViewChanged();
 

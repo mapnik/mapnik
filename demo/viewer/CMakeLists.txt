@@ -14,8 +14,12 @@ set(PROJECT_SOURCES
     styles_model.cpp
     forms/about.ui
     forms/info.ui
-    forms/layer_info.ui
+    forms/layer_info.ui    
     mapnik_viewer.qrc
+    roadmerger.h
+    roadmerger.cpp
+    waitingspinnerwidget.h
+    waitingspinnerwidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -37,23 +41,24 @@ endif()
 
 set_target_properties(mapnik-viewer PROPERTIES
     AUTOUIC_SEARCH_PATHS forms
-    AUTORCC ON
+    AUTORCC ON    
     AUTOUIC ON
     AUTOMOC ON
+    LIBRARY_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${MAPNIK_OUTPUT_DIR}/lib"
 )
 
-target_link_libraries(mapnik-viewer PRIVATE
+target_link_libraries(mapnik-viewer PRIVATE 
     Qt${QT_VERSION_MAJOR}::Widgets
     mapnik::agg
     mapnik::mapnik
-    ICU::data ICU::i18n ICU::uc # needed for the static build (TODO: why isn't this correctly propagated from mapnik::mapnik?)
 )
 
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/viewer.ini 
 "[mapnik]
 plugins_dir=${PLUGINS_INSTALL_DIR}
-fonts/1/dir=${FONTS_INSTALL_DIR}
-fonts/size=1"
+fonts/1/dir=${FONTS_INSTALL_DIR}"
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)

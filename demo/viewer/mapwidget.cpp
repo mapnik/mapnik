@@ -38,7 +38,8 @@
 #endif
 
 #include "mapwidget.hpp"
-#include "info_dialog.hpp"
+#include "roadmerger.h"
+#include "waitingspinnerwidget.h"
 
 using mapnik::box2d;
 using mapnik::coord2d;
@@ -76,6 +77,27 @@ MapWidget::MapWidget(QWidget* parent)
     pen_.setWidth(3);
     pen_.setCapStyle(Qt::RoundCap);
     pen_.setJoinStyle(Qt::RoundJoin);
+    roadMerger = std::make_shared<RoadMerger>(*this);
+//    roadMerger
+    spinner =  std::make_shared<WaitingSpinnerWidget>(this,"正在进行数据融合中，请稍后...");
+    connect(roadMerger.get(), &RoadMerger::signalMergeStart,this,&MapWidget::onMergeStart);
+    connect(roadMerger.get(), &RoadMerger::signalMergeEnd,this,&MapWidget::onMergeEnd);
+}
+
+MapWidget::~MapWidget()
+{
+    spinner->stop();
+}
+
+void MapWidget::onMergeStart()
+{
+    spinner->start();
+}
+
+void MapWidget::onMergeEnd()
+{
+    roadMerger->showRoadLayers();
+    spinner->stop();
 }
 
 void MapWidget::setTool(eTool tool)
@@ -133,98 +155,12 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
             start_y_ = e->y();
             drag_ = true;
         }
-        else if (cur_tool_ == Info)
-        {
-            if (map_)
-            {
-                QVector<QPair<QString, QString>> info;
-
-                projection map_proj(map_->srs(), true); // map projection
-                double scale_denom = scale_denominator(map_->scale(), map_proj.is_geographic());
-                view_transform t(map_->width(), map_->height(), map_->get_current_extent());
-
-                for (unsigned index = 0; index < map_->layer_count(); ++index)
-                {
-                    if (int(index) != selectedLayer_)
-                        continue;
-
-                    layer& layer = map_->layers()[index];
-                    if (!layer.visible(scale_denom))
-                        continue;
-                    std::string name = layer.name();
-                    double x = e->x();
-                    double y = e->y();
-                    std::cout << "query at " << x << "," << y << "\n";
-                    projection layer_proj(layer.srs(), true);
-                    mapnik::proj_transform prj_trans(map_proj, layer_proj);
-                    // std::auto_ptr<mapnik::memory_datasource> data(new mapnik::memory_datasource);
-                    mapnik::featureset_ptr fs = map_->query_map_point(index, x, y);
-
-                    if (fs)
-                    {
-                        feature_ptr feat = fs->next();
-                        if (feat)
-                        {
-                            feature_kv_iterator itr(*feat, true);
-                            feature_kv_iterator end(*feat);
-
-                            for (; itr != end; ++itr)
-                            {
-                                info.push_back(QPair<QString, QString>(QString(std::get<0>(*itr).c_str()),
-                                                                       std::get<1>(*itr).to_string().c_str()));
-                            }
-
-#if 0 //
-                       using path_type = mapnik::transform_path_adapter<mapnik::view_transform,mapnik::vertex_adapter>;
-
-                       for  (unsigned i=0; i < feat->num_geometries();++i)
-                       {
-                           mapnik::geometry_type const& geom = feat->get_geometry(i);
-                           mapnik::vertex_adapter va(geom);
-                           path_type path(t,va,prj_trans);
-                           if (va.size() > 0)
-                           {
-                               QPainterPath qpath;
-                               double x,y;
-                               va.vertex(&x,&y);
-                               qpath.moveTo(x,y);
-                               for (unsigned j = 1; j < geom.size(); ++j)
-                               {
-                                   va.vertex(&x,&y);
-                                   qpath.lineTo(x,y);
-                               }
-                               QPainter painter(&pix_);
-                               QPen pen(QColor(255,0,0,96));
-                               pen.setWidth(3);
-                               pen.setCapStyle(Qt::RoundCap);
-                               pen.setJoinStyle(Qt::RoundJoin);
-                               painter.setPen(pen);
-                               painter.drawPath(qpath);
-                               update();
-                           }
-                       }
-#endif
-                        }
-                    }
-
-                    if (info.size() > 0)
-                    {
-                        info_dialog info_dlg(info, this);
-                        info_dlg.exec();
-                        break;
-                    }
-                }
-
-                // remove annotation layer
-                map_->layers().erase(
-                  remove_if(map_->layers().begin(), map_->layers().end(), bind(&layer::name, _1) == "*annotations*"),
-                  map_->layers().end());
-            }
-        }
     }
     else if (e->button() == Qt::RightButton)
     {
-        // updateMap();
+        double x = e->x();
+        double y = e->y();
+        roadMerger->toggleMergedRoad(x,y);
     }
 }
 
@@ -281,6 +217,8 @@ void MapWidget::wheelEvent(QWheelEvent* e)
     QPointF corner(map_->width(), map_->height());
     QPointF zoomCoords;
     double zoom;
+    if( e->angleDelta().y() == 0 )
+        return;
     if (e->angleDelta().y() > 0)
     {
         zoom = 0.5;
@@ -379,6 +317,15 @@ void MapWidget::zoomToBox(mapnik::box2d<double> const& bbox)
     if (map_)
     {
         map_->zoom_to_box(bbox);
+        updateMap();
+    }
+}
+
+void MapWidget::zoomAll()
+{
+    if (map_)
+    {
+        map_->zoom_all();
         updateMap();
     }
 }
@@ -513,8 +460,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap& pix)
     catch (std::exception const& ex)
     {
         std::cerr << "exception: " << ex.what() << std::endl;
-    }
-    catch (...)
+    } catch (...)
     {
         std::cerr << "Unknown exception caught!\n";
     }
@@ -603,8 +549,7 @@ void MapWidget::updateMap()
             update();
             // emit signal to interested widgets
             emit mapViewChanged();
-        }
-        catch (...)
+        } catch (...)
         {
             std::cerr << "Unknown exception caught!\n";
         }

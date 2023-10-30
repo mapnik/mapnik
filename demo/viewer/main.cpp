@@ -23,21 +23,19 @@
 #include <QSettings>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/mapnik.hpp>
 #include "mainwindow.hpp"
+#include "roadmerger.h"
+#include "ThreadPool.h"
 
 int main(int argc, char** argv)
 {
     using mapnik::datasource_cache;
     using mapnik::freetype_engine;
-    mapnik::setup();
     try
     {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-        QCoreApplication::setOrganizationName("Mapnik");
-        QCoreApplication::setOrganizationDomain("mapnik.org");
         QCoreApplication::setApplicationName("Viewer");
         QSettings settings("viewer.ini", QSettings::IniFormat);
 
@@ -57,38 +55,10 @@ int main(int argc, char** argv)
         QApplication app(argc, argv);
         MainWindow window;
         window.show();
-        if (argc > 1)
-            window.open(argv[1]);
-        if (argc >= 3)
-        {
-            QStringList list = QString(argv[2]).split(",");
-            if (list.size() == 4)
-            {
-                bool ok;
-                double x0 = list[0].toDouble(&ok);
-                double y0 = list[1].toDouble(&ok);
-                double x1 = list[2].toDouble(&ok);
-                double y1 = list[3].toDouble(&ok);
-                if (ok)
-                    window.set_default_extent(x0, y0, x1, y1);
-            }
-        }
-        else
-        {
-            std::shared_ptr<mapnik::Map> map = window.get_map();
-            if (map)
-                map->zoom_all();
-        }
-        if (argc == 4)
-        {
-            bool ok;
-            double scaling_factor = QString(argv[3]).toDouble(&ok);
-            if (ok)
-                window.set_scaling_factor(scaling_factor);
-        }
+
+        window.mapWidget()->roadMerger->merge(argv[1],argv[2]);
         return app.exec();
-    }
-    catch (std::exception const& ex)
+    } catch (std::exception const& ex)
     {
         std::cerr << "Could not start viewer: '" << ex.what() << "'\n";
         return 1;
