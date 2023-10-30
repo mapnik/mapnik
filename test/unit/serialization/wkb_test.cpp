@@ -57,6 +57,23 @@ struct spatially_equal_visitor
         return true;
     }
 
+    result_type operator()(mapnik::geometry::multi_line_string<double> const& lhs,
+                           mapnik::geometry::multi_line_string<double> const& rhs) const
+    {
+
+        std::size_t size0 = lhs.size();
+        std::size_t size1 = rhs.size();
+        if (size0 != size1)
+            return false;
+
+        for (std::size_t index = 0; index < size0; ++index)
+        {
+            if (!boost::geometry::equals(lhs[index], rhs[index]))
+                return false;
+        }
+        return true;
+    }
+
     template <typename T>
     result_type operator() (T const& lhs, T const& rhs) const
     {
