@@ -30,14 +30,9 @@
 #include <stdexcept>
 
 // gdal
-#include <gdal_version.h>
 #include <ogrsf_frmts.h>
 
-#if GDAL_VERSION_MAJOR >= 2
 using gdal_dataset_type = GDALDataset*;
-#else
-using gdal_dataset_type = OGRDataSource*;
-#endif
 
 class ogr_layer_ptr
 {
