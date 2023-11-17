@@ -127,7 +127,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
 
     std::string driver = *params.get<std::string>("driver", "");
-    std::vector<ogr_utils::option_ptr> open_options_map = ogr_utils::split_open_options(*params.get<std::string>("open_options", ""));
+    std::vector<ogr_utils::option_ptr> open_options_map =
+      ogr_utils::split_open_options(*params.get<std::string>("open_options", ""));
     char** open_options = ogr_utils::open_options_for_ogr(open_options_map);
 
     if (!driver.empty())

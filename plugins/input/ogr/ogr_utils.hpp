@@ -36,8 +36,6 @@ std::vector<option_ptr> split_open_options(const std::string& options);
 
 char** open_options_for_ogr(std::vector<ogr_utils::option_ptr>& options);
 
-}  // namespace ogr_utils
-
-
+} // namespace ogr_utils
 
 #endif /* PLUGINS_INPUT_OGR_OGR_UTILS_HPP_ */

@@ -40,16 +40,18 @@ std::vector<ogr_utils::option_ptr> ogr_utils::split_open_options(const std::stri
             }
             escaped = !escaped;
         }
-        else if (current != ' ') {
+        else if (current != ' ')
+        {
             unescaped_str.push_back(current);
         }
         if (current == ' ' || i + 1 == options.size())
         {
-            if (!escaped) {
+            if (!escaped)
+            {
                 size_t count = unescaped_str.size();
                 if (count > 0)
                 {
-                    option_ptr opt (new char[count + 1], [](char* arr) { delete[] arr; });
+                    option_ptr opt(new char[count + 1], [](char* arr) { delete[] arr; });
                     unescaped_str.copy(opt.get(), count);
                     opt[count] = '\0';
                     opts.push_back(std::move(opt));
@@ -71,7 +73,6 @@ std::vector<ogr_utils::option_ptr> ogr_utils::split_open_options(const std::stri
     return opts;
 }
 
-
 char** ogr_utils::open_options_for_ogr(std::vector<ogr_utils::option_ptr>& options)
 {
     char** for_ogr = new char*[options.size() + 1];
@@ -82,4 +83,3 @@ char** ogr_utils::open_options_for_ogr(std::vector<ogr_utils::option_ptr>& optio
     for_ogr[options.size()] = nullptr;
     return for_ogr;
 }
-
