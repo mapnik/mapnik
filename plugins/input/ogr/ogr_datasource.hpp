@@ -47,6 +47,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <ogrsf_frmts.h>
 MAPNIK_DISABLE_WARNING_POP
 #include "ogr_layer_ptr.hpp"
+#include "ogr_utils.hpp"
 
 DATASOURCE_PLUGIN_DEF(ogr_datasource_plugin, ogr);
 

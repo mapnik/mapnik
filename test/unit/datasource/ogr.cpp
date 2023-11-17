@@ -29,6 +29,19 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include "../../../plugins/input/ogr/ogr_utils.hpp"
+
+inline std::vector<ogr_utils::option_ptr> split_options(std::string const& options)
+{
+    return ogr_utils::split_open_options(options);
+}
+
+void assert_option(std::vector<ogr_utils::option_ptr> const& options, size_t const& index, std::string const expected)
+{
+    auto const* opt = options.at(index).get();
+    REQUIRE(opt != nullptr);
+    REQUIRE_FALSE(strcmp(opt, expected.c_str()));
+}
 
 TEST_CASE("ogr")
 {
@@ -54,6 +67,62 @@ TEST_CASE("ogr")
             mapnik::image_any data = reader->read(0, 0, reader->width(), reader->height());
             mapnik::image_rgba8 expected = mapnik::util::get<mapnik::image_rgba8>(data);
             REQUIRE(mapnik::compare(expected, im) == 0);
+        }
+    }
+}
+
+TEST_CASE("ogr open_options")
+{
+    const bool have_ogr_plugin = mapnik::datasource_cache::instance().plugin_registered("ogr");
+    if (have_ogr_plugin)
+    {
+        SECTION("splitting open_options string")
+        {
+            std::string opts = "ZOOM=5";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, opts);
+        }
+        SECTION("splitting open_options string with multiple components")
+        {
+            std::string opts = "ZOOM=8 USE_BOUNDS=YES";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, "ZOOM=8");
+            assert_option(v, 1, "USE_BOUNDS=YES");
+        }
+        SECTION("open_options string with escaped character")
+        {
+            std::string opts = "MY_KEY=THIS\\ VALUE OTHER_KEY=SOMETHING";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, "MY_KEY=THIS VALUE");
+            assert_option(v, 1, "OTHER_KEY=SOMETHING");
+        }
+        SECTION("splitting open_options string with escaping")
+        {
+            std::string opts = "ZOOM=14 FANCY_OPTION=WITH\\ SPACE_VALUE";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, "ZOOM=14");
+            assert_option(v, 1, "FANCY_OPTION=WITH SPACE_VALUE");
+        }
+        SECTION("splitting open_options string, starts with space")
+        {
+            std::string opts = " ZOOM=14 K23=V45";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, "ZOOM=14");
+            assert_option(v, 1, "K23=V45");
+        }
+        SECTION("splitting open_options string, ends with space")
+        {
+            std::string opts = "ZOOM=14 K23=V46 ";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, "ZOOM=14");
+            assert_option(v, 1, "K23=V46");
+        }
+        SECTION("splitting open_options string, doubled space")
+        {
+            std::string opts = "ZOOM=14  K23=V47";
+            std::vector<ogr_utils::option_ptr> v = split_options(opts);
+            assert_option(v, 0, "ZOOM=14");
+            assert_option(v, 1, "K23=V47");
         }
     }
 }
