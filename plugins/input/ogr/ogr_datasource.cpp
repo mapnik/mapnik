@@ -24,8 +24,6 @@
 #include "ogr_featureset.hpp"
 #include "ogr_index_featureset.hpp"
 
-#include <gdal_version.h>
-
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/boolean.hpp>
@@ -93,11 +91,7 @@ ogr_datasource::~ogr_datasource()
 {
     // free layer before destroying the datasource
     layer_.free_layer();
-#if GDAL_VERSION_MAJOR >= 2
     GDALClose((GDALDatasetH)dataset_);
-#else
-    OGRDataSource::DestroyDataSource(dataset_);
-#endif
 }
 
 void ogr_datasource::init(mapnik::parameters const& params)
@@ -136,27 +130,15 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (!driver.empty())
     {
-#if GDAL_VERSION_MAJOR >= 2
         unsigned int nOpenFlags = GDAL_OF_READONLY | GDAL_OF_VECTOR;
         const char* papszAllowedDrivers[] = {driver.c_str(), nullptr};
         dataset_ = reinterpret_cast<gdal_dataset_type>(
           GDALOpenEx(dataset_name_.c_str(), nOpenFlags, papszAllowedDrivers, nullptr, nullptr));
-#else
-        OGRSFDriver* ogr_driver = OGRSFDriverRegistrar::GetRegistrar()->GetDriverByName(driver.c_str());
-        if (ogr_driver && ogr_driver != nullptr)
-        {
-            dataset_ = ogr_driver->Open((dataset_name_).c_str(), false);
-        }
-#endif
     }
     else
     {
         // open ogr driver
-#if GDAL_VERSION_MAJOR >= 2
         dataset_ = reinterpret_cast<gdal_dataset_type>(OGROpen(dataset_name_.c_str(), false, nullptr));
-#else
-        dataset_ = OGRSFDriverRegistrar::Open(dataset_name_.c_str(), false);
-#endif
     }
 
     if (!dataset_)
@@ -353,9 +335,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
             switch (type_oid)
             {
                 case OFTInteger:
-#if GDAL_VERSION_MAJOR >= 2
                 case OFTInteger64:
-#endif
                     desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
                     break;
 
@@ -373,9 +353,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
                     break;
 
                 case OFTIntegerList:
-#if GDAL_VERSION_MAJOR >= 2
                 case OFTInteger64List:
-#endif
                 case OFTRealList:
                 case OFTStringList:
                 case OFTWideStringList: // deprecated !
