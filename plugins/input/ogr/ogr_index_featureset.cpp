@@ -48,8 +48,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include "ogr_converter.hpp"
 #include "ogr_index.hpp"
 
-#include <gdal_version.h>
-
 using mapnik::box2d;
 using mapnik::feature_factory;
 using mapnik::feature_ptr;
@@ -153,12 +151,10 @@ feature_ptr ogr_index_featureset<filterT>::next()
                     feature->put<mapnik::value_integer>(fld_name, poFeature->GetFieldAsInteger(i));
                     break;
                 }
-#if GDAL_VERSION_MAJOR >= 2
                 case OFTInteger64: {
                     feature->put<mapnik::value_integer>(fld_name, poFeature->GetFieldAsInteger64(i));
                     break;
                 }
-#endif
 
                 case OFTReal: {
                     feature->put(fld_name, poFeature->GetFieldAsDouble(i));
@@ -173,9 +169,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                 }
 
                 case OFTIntegerList:
-#if GDAL_VERSION_MAJOR >= 2
                 case OFTInteger64List:
-#endif
                 case OFTRealList:
                 case OFTStringList:
                 case OFTWideStringList: // deprecated !
