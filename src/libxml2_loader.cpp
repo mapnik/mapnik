@@ -88,7 +88,7 @@ class libxml2_loader : util::noncopyable
 
         if (!doc)
         {
-            xmlError* error = xmlCtxtGetLastError(ctx_);
+            const xmlError* error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 std::string msg("XML document not well formed:\n");
@@ -128,7 +128,7 @@ class libxml2_loader : util::noncopyable
         if (!doc)
         {
             std::string msg("XML document not well formed");
-            xmlError* error = xmlCtxtGetLastError(ctx_);
+            const xmlError* error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 msg += ":\n";
