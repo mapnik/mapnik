@@ -15,4 +15,6 @@ if [ -f mapnik-settings.env ]; then
     . ./mapnik-settings.env
 fi
 
-$PYTHON scons/scons.py --implicit-deps-changed configure "$@"
+VARS=( $(cat mapnik-settings.env) )
+
+$PYTHON scons/scons.py --implicit-deps-changed configure ${VARS[*]} "$@"
