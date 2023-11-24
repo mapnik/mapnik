@@ -1,8 +1,20 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 set -eu
 
 : ${PYTHON:=python}
+
+# Only some shells (Bash and Z shell) support arrays. Therefore,
+# the following code provides an alternative for users calling the script
+# with shells other than Bash or Z shell (e.g. Debian users using Dash).
+THE_SHELL=$(basename $SHELL)
+if [ "$THE_SHELL" != "bash" ] && [ "$THE_SHELL" != "zsh" ]; then
+    if [ -f mapnik-settings.env ]; then
+        echo "WARNING: Reading from mapnik-settings.env is supported with Bash or Z shell only."
+    fi
+    $PYTHON scons/scons.py --implicit-deps-changed configure "$@"
+    exit 0
+fi
 
 # mapnik-settings.env is an optional file to store
 # environment variables that should be used before
@@ -10,11 +22,11 @@ set -eu
 # These do not normally need to be set except when
 # building against binary versions of dependencies like
 # done via bootstrap.sh
+VARS=()
 if [ -f mapnik-settings.env ]; then
     echo "Inheriting from mapnik-settings.env"
     . ./mapnik-settings.env
+    VARS=( $(cat mapnik-settings.env) )
 fi
-
-VARS=( $(cat mapnik-settings.env) )
 
 $PYTHON scons/scons.py --implicit-deps-changed configure ${VARS[*]} "$@"
