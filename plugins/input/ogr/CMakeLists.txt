@@ -4,6 +4,7 @@ add_plugin_target(input-ogr "ogr")
 target_sources(input-ogr ${_plugin_visibility}
     ogr_converter.cpp
     ogr_datasource.cpp
+    ogr_utils.cpp
     ogr_featureset.cpp
     ogr_index_featureset.cpp
 )
