@@ -39,6 +39,15 @@
 // boost
 #include <boost/algorithm/string.hpp>
 
+#include <iostream>
+#include <fstream>
+#include <map>
+#include "rapidjson/document.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include <QMessageBox>
+
 using mapnik::layer;
 
 MainWindow::MainWindow()
@@ -80,8 +89,112 @@ void MainWindow::save()
 {
     std::vector<long> result;
     mapWidget_->roadMerger->getMergeResult(result);
+    std::cout<<"size of result:"<<result.size();
+    // 将result转换成mwmId的json数组并保存文件
+    // 创建一个rapidjson的Document对象，类型为kArrayType
+    rapidjson::Document doc;
+    doc.SetArray();
 
-    // TODO： 将result转换成mwmId的json数组并保存文件
+    // 获取Document对象的分配器
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+    for(int i=0; i<result.size(); ++i)
+    {
+      long key = result[i];
+      if(m_osmid2featureid.find(key)!=m_osmid2featureid.end())
+      {
+        //jsonArray.append(QJsonValue(qint64(m_osmid2featureid[key])));
+        // 将元素转换为rapidjson的Value对象，类型为kNumberType
+        rapidjson::Value value(m_osmid2featureid[key]);
+
+        // 将Value对象推入Document对象的数组中
+        doc.PushBack(value, allocator);
+      }
+    }
+    // 创建一个StringBuffer对象，用于存储生成的json字符串
+    rapidjson::StringBuffer buffer;
+
+    // 创建一个Writer对象，用于将Document对象转换为json字符串
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
+    // 将Document对象接受Writer对象的访问，生成json字符串
+    doc.Accept(writer);
+
+    // 获取生成的json字符串
+    const char* json = buffer.GetString();
+
+    // 假设要写入的json文件的路径是"data.json"
+    std::ofstream file(m_midLinePath.toStdString());
+    if (file.is_open()) {
+      // 将json字符串写入文件中
+      file << json;
+      file.close();
+      // 弹出一个对话框，显示文件生成完成的消息
+      QMessageBox::information(nullptr, "完成", "成功生成midLine.json");
+      return;
+     }
+     else
+    {
+      QMessageBox::critical(nullptr, "错误", "无法打开文件");
+      return;
+    }
+     
+}
+
+bool MainWindow::loadFeatureid2osmid(const QString& jsonPath)
+{
+   std::ifstream file(jsonPath.toStdString());
+   if (file.is_open()) {
+    // 读取文件内容到一个字符串中
+    std::string content((std::istreambuf_iterator<char>(file)),
+                        (std::istreambuf_iterator<char>()));
+    file.close();
+
+    // 使用rapidjson的Document类解析字符串
+    rapidjson::Document doc;
+    doc.Parse(content.c_str());
+
+    // 检查是否是有效的json文档
+    if (doc.HasParseError()) {
+        // 处理错误情况
+        std::cout<<"doc.HasParseError()"<<std::endl;
+        return false;
+    }
+
+    // 检查是否是json数组
+    if (doc.IsArray()) {
+        // 获取json数组
+        rapidjson::Value& array = doc;
+
+        // 遍历json数组中的每个元素
+        for (rapidjson::SizeType i = 0; i < array.Size(); i++) {
+            // 检查是否是json数组
+            if (array[i].IsArray()) {
+                // 获取json数组
+                rapidjson::Value& subarray = array[i];
+
+                // 检查是否包含两个元素
+                if (subarray.Size() == 2) {
+                    // 获取第一个元素，转换为long类型
+                    long key = subarray[1].GetInt64();
+
+                    // 获取第二个元素，转换为long类型
+                    long value = subarray[0].GetInt64();
+
+                    // 将键值对插入到map中
+                    m_osmid2featureid.insert(std::make_pair(key, value));
+                }
+            }
+        }
+
+        return true;
+    }
+}
+return false;
+}
+
+void MainWindow::setMidLineJsonPath(const QString& midLineJsonPath)
+{
+  m_midLinePath = midLineJsonPath;
 }
 
 void MainWindow::createActions()

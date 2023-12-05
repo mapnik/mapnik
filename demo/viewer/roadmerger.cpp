@@ -311,6 +311,7 @@ void RoadMerger::addMergedLayer()
 
 void RoadMerger::toggleMergedRoad(double x, double y)
 {
+    std::cout<<"begin toggleMergedRoad"<<std::endl;
     auto map = mapWidget.getMap();
     mapnik::featureset_ptr fs = map->query_map_point(2, x, y);
     if (fs)
@@ -321,9 +322,11 @@ void RoadMerger::toggleMergedRoad(double x, double y)
             auto val = feat->get("MERGE_RESULT") == 1 ? 0 : 1;
             feat->put("MERGE_RESULT",val);
             feat = fs->next();
+            std::cout<<"toggle road "<<std::endl;
         }
     }
     mapWidget.updateMap();
+    std::cout<<"end toggleMergedRoad"<<std::endl;
 }
 
 void RoadMerger::getMergeResult(std::vector<long>& result)

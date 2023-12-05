@@ -36,8 +36,20 @@ int main(int argc, char** argv)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+        if(argc<6)
+        {
+         std::cerr << "Program is missing parameters!"  << "'\n";
+         return 1;
+        }
+        else
+        {
+         std::cout<<"arcv[0]:"<<argv[0]<<std::endl;
+         std::cout<<" arcv[1]:"<<argv[1]<<" argv[2]:"<<argv[2]<<" arcv[3]:"<<argv[3]<<" argv[4]:"<<argv[4]<<" argv[5]:"<<argv[5]<<std::endl;
+        }
+        QString appPath = argv[5];
+        QString iniFilePath = appPath + "/viewer.ini";
         QCoreApplication::setApplicationName("Viewer");
-        QSettings settings("viewer.ini", QSettings::IniFormat);
+        QSettings settings(iniFilePath, QSettings::IniFormat);
 
         // register input plug-ins
         QString plugins_dir = settings.value("mapnik/plugins_dir", QVariant("/usr/local/lib/mapnik/input/")).toString();
@@ -54,8 +66,15 @@ int main(int argc, char** argv)
 
         QApplication app(argc, argv);
         MainWindow window;
+        QString featureid2osmidPath = argv[3];
+        if(!window.loadFeatureid2osmid(featureid2osmidPath))
+        {
+          std::cerr << "Loading Featureid2osmid json failed!"  << "'\n";
+          return 1;
+        }
+        window.setMidLineJsonPath(argv[4]);
         window.show();
-
+        std::cout<<"arcv[1]:"<<argv[1]<<"argv[2]:"<<argv[2]<<std::endl;
         window.mapWidget()->roadMerger->merge(argv[1],argv[2]);
         return app.exec();
     } catch (std::exception const& ex)
