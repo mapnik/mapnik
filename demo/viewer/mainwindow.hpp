@@ -40,6 +40,8 @@ class MainWindow : public QMainWindow
 
   public:
     std::shared_ptr<mapnik::Map> get_map();
+    bool loadFeatureid2osmid(const QString& jsonPath);
+    void setMidLineJsonPath(const QString& midLineJsonPath);
 
   protected:
     void closeEvent(QCloseEvent* event);
@@ -67,6 +69,8 @@ class MainWindow : public QMainWindow
     QAction* aboutAct;
     // toolbars
     QToolBar* fileToolBar;
+    std::map<long,long> m_osmid2featureid;
+    QString m_midLinePath;
 };
 
 #endif // MAINWINDOW_HPP
