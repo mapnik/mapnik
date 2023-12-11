@@ -1,8 +1,6 @@
 
 OS := $(shell uname -s)
 
-PYTHON = python
-
 ifeq ($(JOBS),)
 	JOBS:=1
 endif
