@@ -214,17 +214,11 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
                    resH = height/zoomOutBox.height();
                 }
 
-                std::cout << "resW:" << resW << "\n";
-                std::cout << "resH:" << resH << "\n";
-
                 double scale = resW>resH ? resW:resH;
                 if (scale<1.0)
                 {
                    scale = 2.0;
                 }
-
-                std::cout << "scale:" << scale << "\n";
-                
                 mapnik::box2d<double> box(pt.x - 0.5 * width * scale,
                                         pt.y - 0.5 * height * scale,
                                         pt.x + 0.5 * width * scale,
@@ -574,28 +568,29 @@ void MapWidget::updateMap()
 
         try
         {
-            projection prj(map_->srs(), true); // map projection
-            box2d<double> ext = map_->get_current_extent();
-            double x0 = ext.minx();
-            double y0 = ext.miny();
-            double x1 = ext.maxx();
-            double y1 = ext.maxy();
-            double z = 0;
-            std::string dest_srs = {"epsg:4326"};
-            mapnik::proj_transform proj_tr(map_->srs(), dest_srs);
+            // projection prj(map_->srs(), true); // map projection
+            // box2d<double> ext = map_->get_current_extent();
+            // double x0 = ext.minx();
+            // double y0 = ext.miny();
+            // double x1 = ext.maxx();
+            // double y1 = ext.maxy();
+            // double z = 0;
+            // std::string dest_srs = {"epsg:4326"};
+            // mapnik::proj_transform proj_tr(map_->srs(), dest_srs);
 
-            proj_tr.forward(x0, y0, z);
-            proj_tr.forward(x1, y1, z);
-            std::cout << "MAP SIZE:" << map_->width() << "," << map_->height() << std::endl;
-            std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
+            // proj_tr.forward(x0, y0, z);
+            // proj_tr.forward(x1, y1, z);
+            // std::cout << "MAP SIZE:" << map_->width() << "," << map_->height() << std::endl;
+            // std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
             update();
-            std::cout<< "repaint"<<std::endl;
             // emit signal to interested widgets
             emit mapViewChanged();
+        }
+        catch (std::exception const& ex)
+        {
+            std::cerr << "exception: " << ex.what() << std::endl;
         } catch (...)
         {
-            update();
-            emit mapViewChanged();
             std::cerr << "Unknown exception caught!\n";
         }
     }
