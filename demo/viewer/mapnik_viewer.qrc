@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/" >
-        <file>images/about.png</file>
+        <file>images/zoomall.png</file>
         <file>images/canada_map.png</file>
         <file>images/down.png</file>
         <file>images/globe.png</file>
@@ -14,6 +14,9 @@
         <file>images/right.png</file>
         <file>images/up.png</file>
         <file>images/zoombox.png</file>
+        <file>images/zoomin.png</file>
+        <file>images/zoomout.png</file>
+        <file>images/save.png</file>
 	<file>images/style.png</file>
 	<file>images/filter.png</file>
 	<file>images/reload.png</file>
