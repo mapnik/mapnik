@@ -201,18 +201,23 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
                 double width = static_cast<double>(map_->width());
                 double height = static_cast<double>(map_->height());
                 mapnik::coord2d pt = zoomOutBox.center();
-                double resW = 0.25;
-                double resH = 0.25;
+                double resW = 1.25;
+                double resH = 1.25;
                 if (fabs(width)>0.000001 && fabs(zoomOutBox.width())>0.000001)
                 {
-                   resW = zoomOutBox.width()/width;
+                   resW = width/zoomOutBox.width();
                 }
 
                 if (fabs(height)>0.000001 && fabs(zoomOutBox.height())>0.000001)
                 {
-                   resH = zoomOutBox.height()/height;
+                   resH = height/zoomOutBox.height();
                 }
-                double scale = resW>resH?resW:resH;
+                double scale = resW>resH ? resW:resH;
+                if (scale<1.0)
+                {
+                   scale = 1.25;
+                }
+                
                 mapnik::box2d<double> box(pt.x - 0.5 * width * scale,
                                         pt.y - 0.5 * height * scale,
                                         pt.x + 0.5 * width * scale,
