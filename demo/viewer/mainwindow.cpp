@@ -198,10 +198,10 @@ void MainWindow::setMidLineJsonPath(const QString& midLineJsonPath)
 
 void MainWindow::createActions()
 {
-    zoomAllAct = new QAction(QIcon(":/images/home.png"), tr("全部"), this);
+    zoomAllAct = new QAction(QIcon(":/images/zoomall.png"), tr("全部"), this);
     connect(zoomAllAct, SIGNAL(triggered()), this, SLOT(zoom_all()));
 
-    zoomBoxAct = new QAction(QIcon(":/images/zoombox.png"), tr("框选缩放"), this);
+    zoomBoxAct = new QAction(QIcon(":/images/zoomin.png"), tr("框选缩放"), this);
     zoomBoxAct->setCheckable(true);
     connect(zoomBoxAct, SIGNAL(triggered()), this, SLOT(zoom_to_box()));
 
@@ -215,7 +215,7 @@ void MainWindow::createActions()
     panAct->setChecked(true);
 
 
-    aboutAct = new QAction(QIcon(":/images/about.png"), tr("&保存"), this);
+    aboutAct = new QAction(QIcon(":/images/save.png"), tr("&保存"), this);
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(save()));
 }
 
