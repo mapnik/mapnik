@@ -137,7 +137,6 @@ void MainWindow::save()
       QMessageBox::critical(nullptr, "错误", "无法打开文件");
     }
     QCoreApplication::quit();
-   return;
 }
 
 bool MainWindow::loadFeatureid2osmid(const QString& jsonPath)
