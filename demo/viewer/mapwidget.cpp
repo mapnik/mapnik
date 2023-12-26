@@ -198,11 +198,12 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
             {
                 view_transform t(map_->width(), map_->height(), map_->get_current_extent());
                 mapnik::box2d<double> zoomOutBox = t.backward(box2d<double>(start_x_, start_y_, end_x_, end_y_));
-                double width = static_cast<double>(map_->width());
-                double height = static_cast<double>(map_->height());
+                mapnik::box2d<double> curExtentBox =  map_->get_current_extent();
+                double width = curExtentBox.width();
+                double height = curExtentBox.height();
                 mapnik::coord2d pt = zoomOutBox.center();
-                double resW = 1.25;
-                double resH = 1.25;
+                double resW = 2.0;
+                double resH = 2.0;
                 if (fabs(width)>0.000001 && fabs(zoomOutBox.width())>0.000001)
                 {
                    resW = width/zoomOutBox.width();
@@ -219,7 +220,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
                 double scale = resW>resH ? resW:resH;
                 if (scale<1.0)
                 {
-                   scale = 1.25;
+                   scale = 2.0;
                 }
 
                 std::cout << "scale:" << scale << "\n";
