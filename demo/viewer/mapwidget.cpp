@@ -212,11 +212,17 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
                 {
                    resH = height/zoomOutBox.height();
                 }
+
+                std::cout << "resW:" << resW << "\n";
+                std::cout << "resH:" << resH << "\n";
+
                 double scale = resW>resH ? resW:resH;
                 if (scale<1.0)
                 {
                    scale = 1.25;
                 }
+
+                std::cout << "scale:" << scale << "\n";
                 
                 mapnik::box2d<double> box(pt.x - 0.5 * width * scale,
                                         pt.y - 0.5 * height * scale,
