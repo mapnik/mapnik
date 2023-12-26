@@ -47,6 +47,7 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include <QMessageBox>
+#include <QCoreApplication>
 
 using mapnik::layer;
 
@@ -130,14 +131,13 @@ void MainWindow::save()
       file.close();
       // 弹出一个对话框，显示文件生成完成的消息
       QMessageBox::information(nullptr, "完成", "成功生成midLine.json");
-      return;
      }
      else
     {
       QMessageBox::critical(nullptr, "错误", "无法打开文件");
-      return;
     }
-     
+    QCoreApplication::quit();
+   return;
 }
 
 bool MainWindow::loadFeatureid2osmid(const QString& jsonPath)

@@ -547,10 +547,13 @@ void MapWidget::updateMap()
             std::cout << "MAP SIZE:" << map_->width() << "," << map_->height() << std::endl;
             std::cout << "BBOX (WGS84): " << x0 << "," << y0 << "," << x1 << "," << y1 << "\n";
             update();
+            std::cout<< "repaint"<<std::endl;
             // emit signal to interested widgets
             emit mapViewChanged();
         } catch (...)
         {
+            update();
+            emit mapViewChanged();
             std::cerr << "Unknown exception caught!\n";
         }
     }
