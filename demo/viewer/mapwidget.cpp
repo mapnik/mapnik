@@ -62,7 +62,7 @@ MapWidget::MapWidget(QWidget* parent)
     , map_()
     , selected_(1)
     , extent_()
-    , cur_tool_(ZoomToBox)
+    , cur_tool_(ZoomIn)
     , start_x_(0)
     , start_y_(0)
     , end_x_(0)
@@ -111,7 +111,7 @@ void MapWidget::paintEvent(QPaintEvent*)
 
     if (drag_)
     {
-        if (cur_tool_ == ZoomToBox)
+        if (cur_tool_ == ZoomIn || cur_tool_ == ZoomOut)
         {
             unsigned width = end_x_ - start_x_;
             unsigned height = end_y_ - start_y_;
@@ -149,7 +149,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
 {
     if (e->button() == Qt::LeftButton)
     {
-        if (cur_tool_ == ZoomToBox || cur_tool_ == Pan)
+        if (cur_tool_ == ZoomIn || cur_tool_ == Pan || cur_tool_ == ZoomOut)
         {
             start_x_ = e->x();
             start_y_ = e->y();
@@ -166,7 +166,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
 
 void MapWidget::mouseMoveEvent(QMouseEvent* e)
 {
-    if (cur_tool_ == ZoomToBox || cur_tool_ == Pan)
+    if (cur_tool_ == ZoomIn || cur_tool_ == Pan || cur_tool_ == ZoomOut)
     {
         end_x_ = e->x();
         end_y_ = e->y();
@@ -180,13 +180,43 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
     {
         end_x_ = e->x();
         end_y_ = e->y();
-        if (cur_tool_ == ZoomToBox)
+        if (cur_tool_ == ZoomIn)
         {
             drag_ = false;
             if (map_)
             {
                 view_transform t(map_->width(), map_->height(), map_->get_current_extent());
                 box2d<double> box = t.backward(box2d<double>(start_x_, start_y_, end_x_, end_y_));
+                map_->zoom_to_box(box);
+                updateMap();
+            }
+        }
+        else if (cur_tool_ == ZoomOut)
+        {
+            drag_ = false;
+            if (map_)
+            {
+                view_transform t(map_->width(), map_->height(), map_->get_current_extent());
+                mapnik::box2d<double> zoomOutBox = t.backward(box2d<double>(start_x_, start_y_, end_x_, end_y_));
+                double width = static_cast<double>(map_->width());
+                double height = static_cast<double>(map_->height());
+                mapnik::coord2d pt = zoomOutBox.center();
+                double resW = 0.25;
+                double resH = 0.25;
+                if (fabs(width)>0.000001 && fabs(zoomOutBox.width())>0.000001)
+                {
+                   resW = zoomOutBox.width()/width;
+                }
+
+                if (fabs(height)>0.000001 && fabs(zoomOutBox.height())>0.000001)
+                {
+                   resH = zoomOutBox.height()/height;
+                }
+                double scale = resW>resH?resW:resH;
+                mapnik::box2d<double> box(pt.x - 0.5 * width * scale,
+                                        pt.y - 0.5 * height * scale,
+                                        pt.x + 0.5 * width * scale,
+                                        pt.y + 0.5 * height * scale);
                 map_->zoom_to_box(box);
                 updateMap();
             }
@@ -312,7 +342,16 @@ void MapWidget::keyPressEvent(QKeyEvent* e)
     }
 }
 
-void MapWidget::zoomToBox(mapnik::box2d<double> const& bbox)
+void MapWidget::zoomInToBox(mapnik::box2d<double> const& bbox)
+{
+    if (map_)
+    {
+        map_->zoom_to_box(bbox);
+        updateMap();
+    }
+}
+
+void MapWidget::zoomOutToBox(mapnik::box2d<double> const& box)
 {
     if (map_)
     {

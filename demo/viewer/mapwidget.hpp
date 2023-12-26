@@ -41,7 +41,8 @@ class MapWidget : public QWidget
 
   public:
     enum eTool {
-        ZoomToBox = 1,
+        ZoomIn = 1,
+        ZoomOut,
         Pan,
         Info,
     };
@@ -75,7 +76,8 @@ class MapWidget : public QWidget
     inline QPixmap const& pixmap() const { return pix_; }
     void setMap(std::shared_ptr<mapnik::Map> map);
     void defaultView();
-    void zoomToBox(mapnik::box2d<double> const& box);
+    void zoomInToBox(mapnik::box2d<double> const& box);
+    void zoomOutToBox(mapnik::box2d<double> const& box);
     void zoomAll();
     void zoomIn();
     void zoomOut();

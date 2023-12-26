@@ -28,6 +28,7 @@
 #include <QDoubleSpinBox>
 
 #include "mapwidget.hpp"
+#include <QSharedPointer>
 
 // using namespace mapnik;
 
@@ -47,7 +48,8 @@ class MainWindow : public QMainWindow
     void closeEvent(QCloseEvent* event);
   public slots:
     void zoom_all();
-    void zoom_to_box();
+    void zoomIn_to_box();
+    void zoomOut_to_box();
     void pan();
     void save();
 
@@ -61,14 +63,15 @@ class MainWindow : public QMainWindow
 
     MapWidget* mapWidget_;
     // actions
-    QActionGroup* toolsGroup;
+    QSharedPointer<QActionGroup> m_toolsGroup;
+    QSharedPointer<QAction> m_zoomAllAct;
+    QSharedPointer<QAction> m_zoomIn;
+    QSharedPointer<QAction> m_zoomOut;
+    QSharedPointer<QAction> m_panAct;
+    QSharedPointer<QAction> m_saveAct;
 
-    QAction* zoomAllAct;
-    QAction* zoomBoxAct;
-    QAction* panAct;
-    QAction* aboutAct;
     // toolbars
-    QToolBar* fileToolBar;
+    QSharedPointer<QToolBar> m_fileToolBar;
     std::map<long,long> m_osmid2featureid;
     QString m_midLinePath;
 };

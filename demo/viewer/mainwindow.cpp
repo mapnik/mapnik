@@ -68,7 +68,12 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-    delete mapWidget_;
+    if(mapWidget_)
+    {
+        delete mapWidget_;
+        mapWidget_ = NULL;
+    }
+    
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -76,9 +81,19 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->accept();
 }
 
-void MainWindow::zoom_to_box()
+void MainWindow::zoomIn_to_box()
 {
-    mapWidget_->setTool(MapWidget::ZoomToBox);
+    if (mapWidget_)
+    {
+        mapWidget_->setTool(MapWidget::ZoomIn);
+    }
+}
+void MainWindow::zoomOut_to_box()
+{
+    if (mapWidget_)
+    {
+        mapWidget_->setTool(MapWidget::ZoomOut);
+    }
 }
 
 void MainWindow::pan()
@@ -198,34 +213,53 @@ void MainWindow::setMidLineJsonPath(const QString& midLineJsonPath)
 
 void MainWindow::createActions()
 {
-    zoomAllAct = new QAction(QIcon(":/images/zoomall.png"), tr("全部"), this);
-    connect(zoomAllAct, SIGNAL(triggered()), this, SLOT(zoom_all()));
+    // create a smart pointer to an action group
+    m_toolsGroup = QSharedPointer<QActionGroup>::create(this);
 
-    zoomBoxAct = new QAction(QIcon(":/images/zoomin.png"), tr("框选缩放"), this);
-    zoomBoxAct->setCheckable(true);
-    connect(zoomBoxAct, SIGNAL(triggered()), this, SLOT(zoom_to_box()));
+    // create some smart pointers to actions
+    m_zoomAllAct = QSharedPointer<QAction>::create(QIcon(":/images/zoomall.png"), tr("全部"), this);
+    m_zoomIn = QSharedPointer<QAction>::create(QIcon(":/images/zoomin.png"), tr("框选放大"), this);
+    m_zoomOut = QSharedPointer<QAction>::create(QIcon(":/images/zoomout.png"), tr("框选缩小"), this);
+    m_panAct = QSharedPointer<QAction>::create(QIcon(":/images/pan.png"), tr("平移"), this);
+    m_saveAct = QSharedPointer<QAction>::create(QIcon(":/images/save.png"), tr("&保存"), this);
 
-    panAct = new QAction(QIcon(":/images/pan.png"), tr("平移"), this);
-    panAct->setCheckable(true);
-    connect(panAct, SIGNAL(triggered()), this, SLOT(pan()));
+    // connect the actions to the slots
+    connect(m_zoomAllAct.data(), SIGNAL(triggered()), this, SLOT(zoom_all()));
+    connect(m_zoomIn.data(), SIGNAL(triggered()), this, SLOT(zoomIn_to_box()));
+    connect(m_zoomOut.data(), SIGNAL(triggered()), this, SLOT(zoomOut_to_box()));
+    connect(m_panAct.data(), SIGNAL(triggered()), this, SLOT(pan()));
+    connect(m_saveAct.data(), SIGNAL(triggered()), this, SLOT(save()));
 
-    toolsGroup = new QActionGroup(this);
-    toolsGroup->addAction(zoomBoxAct);
-    toolsGroup->addAction(panAct);
-    panAct->setChecked(true);
+    // set some actions as checkable
+    m_zoomIn->setCheckable(true);
+    m_zoomOut->setCheckable(true);
+    m_panAct->setCheckable(true);
 
+    // add the actions to the action group
+    m_toolsGroup->addAction(m_zoomAllAct.data());
+    m_toolsGroup->addAction(m_zoomIn.data());
+    m_toolsGroup->addAction(m_zoomOut.data());
+    m_toolsGroup->addAction(m_panAct.data());
+    m_toolsGroup->addAction(m_saveAct.data());
 
-    aboutAct = new QAction(QIcon(":/images/save.png"), tr("&保存"), this);
-    connect(aboutAct, SIGNAL(triggered()), this, SLOT(save()));
+    // set the default checked action
+    m_panAct->setChecked(true);
 }
 
 void MainWindow::createToolBars()
 {
-    fileToolBar = addToolBar(tr("Actions"));
-    fileToolBar->addAction(zoomAllAct);
-    fileToolBar->addAction(zoomBoxAct);
-    fileToolBar->addAction(panAct);
-    fileToolBar->addAction(aboutAct);
+    // create a smart pointer to a tool bar
+    m_fileToolBar = QSharedPointer<QToolBar>::create(tr("Actions"));
+
+    // add the actions to the tool bar
+    m_fileToolBar->addAction(m_zoomAllAct.data());
+    m_fileToolBar->addAction(m_zoomIn.data());
+    m_fileToolBar->addAction(m_zoomOut.data());
+    m_fileToolBar->addAction(m_panAct.data());
+    m_fileToolBar->addAction(m_saveAct.data());
+
+    // add the tool bar to the widget
+    addToolBar(m_fileToolBar.data());
 }
 
 void MainWindow::zoom_all()
