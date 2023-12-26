@@ -342,16 +342,7 @@ void MapWidget::keyPressEvent(QKeyEvent* e)
     }
 }
 
-void MapWidget::zoomInToBox(mapnik::box2d<double> const& bbox)
-{
-    if (map_)
-    {
-        map_->zoom_to_box(bbox);
-        updateMap();
-    }
-}
-
-void MapWidget::zoomOutToBox(mapnik::box2d<double> const& box)
+void MapWidget::zoomToBox(mapnik::box2d<double> const& bbox)
 {
     if (map_)
     {
