@@ -144,6 +144,7 @@ struct setup_marker_visitor
 template<typename T>
 void cairo_renderer<T>::setup(Map const& map)
 {
+    start_map_processing(map);
     boost::optional<color> bg = m_.background();
     if (bg)
     {
