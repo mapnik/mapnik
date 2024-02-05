@@ -70,8 +70,8 @@ gradient& gradient::operator=(gradient rhs)
 bool gradient::operator==(gradient const& other) const
 {
     return transform_ == other.transform_ && x1_ == other.x1_ && y1_ == other.y1_ && x2_ == other.x2_ &&
-             y2_ == other.y2_ && r_ == other.r_ && std::equal(stops_.begin(), stops_.end(), other.stops_.begin()),
-           units_ == other.units_ && gradient_type_ == other.gradient_type_;
+        y2_ == other.y2_ && r_ == other.r_ && std::equal(stops_.begin(), stops_.end(), other.stops_.begin()) &&
+        units_ == other.units_ && gradient_type_ == other.gradient_type_;
 }
 
 void gradient::set_gradient_type(gradient_e grad)
