@@ -1533,8 +1533,8 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
         return;
     double cx = 0.5;
     double cy = 0.5;
-    double fx = 0.0;
-    double fy = 0.0;
+    double fx = 0.5;
+    double fy = 0.5;
     double r = 0.5;
     bool has_percent = false;
 
@@ -1543,11 +1543,19 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
     {
         cx = parse_svg_value(parser, attr->value(), has_percent);
     }
+    else if (gr.get_units() == USER_SPACE_ON_USE)
+    {
+        cx = 0.5 * (parser.vbox_ ? parser.vbox_->width : parser.path_.width()); // 50%
+    }
 
     attr = node->first_attribute("cy");
     if (attr != nullptr)
     {
         cy = parse_svg_value(parser, attr->value(), has_percent);
+    }
+    else if (gr.get_units() == USER_SPACE_ON_USE)
+    {
+        cy = 0.5 * (parser.vbox_ ? parser.vbox_->height : parser.path_.height()); // 50%
     }
 
     attr = node->first_attribute("fx");
@@ -1573,19 +1581,11 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
     {
         r = parse_svg_value(parser, attr->value(), has_percent);
     }
-    // this logic for detecting %'s will not support mixed coordinates.
-    if (gr.get_units() == USER_SPACE_ON_USE)
+    else if (gr.get_units() == USER_SPACE_ON_USE)
     {
-        if (!has_percent && parser.path_.width() > 0 && parser.path_.height() > 0)
-        {
-            fx /= parser.path_.width();
-            fy /= parser.path_.height();
-            cx /= parser.path_.width();
-            cy /= parser.path_.height();
-            r /= parser.path_.width();
-        }
-        gr.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
+        r = 0.5 * parser.normalized_diagonal_; // 50%
     }
+
     gr.set_gradient_type(RADIAL);
     gr.set_control_points(fx, fy, cx, cy, r);
 

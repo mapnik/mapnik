@@ -64,6 +64,8 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_span_interpolator_linear.h"
 MAPNIK_DISABLE_WARNING_POP
 
+#include <ostream>
+
 namespace mapnik {
 namespace svg {
 
@@ -222,16 +224,14 @@ class renderer_agg : util::noncopyable
             }
             if (m_gradient_lut.build_lut())
             {
-                agg::trans_affine transform = mtx;
-                double scale = mtx.scale();
-                transform.invert();
-                agg::trans_affine tr;
-                tr = grad.get_transform();
-                tr.invert();
+                agg::trans_affine tr = mtx;
+                agg::trans_affine transform = grad.get_transform();
                 transform *= tr;
+                transform.invert();
 
                 if (grad.get_units() != USER_SPACE_ON_USE)
                 {
+                    double scale = mtx.scale();
                     double bx1 = symbol_bbox.minx();
                     double by1 = symbol_bbox.miny();
                     double bx2 = symbol_bbox.maxx();
@@ -244,7 +244,17 @@ class renderer_agg : util::noncopyable
                     transform.translate(-bx1 / scale, -by1 / scale);
                     transform.scale(scale / (bx2 - bx1), scale / (by2 - by1));
                 }
-
+                else
+                {
+                    double scaledown = 255;
+                    x1 /= scaledown; // fx
+                    y1 /= scaledown; // fy
+                    x2 /= scaledown; // cx
+                    y2 /= scaledown; // cy
+                    radius /= scaledown;
+                    transform.translate(-symbol_bbox.minx(), -symbol_bbox.miny());
+                    transform.scale(1 / scaledown, 1 / scaledown);
+                }
                 if (grad.get_gradient_type() == RADIAL)
                 {
                     using gradient_adaptor_type = agg::gradient_radial_focus;
@@ -253,7 +263,6 @@ class renderer_agg : util::noncopyable
 
                     // the agg radial gradient assumes it is centred on 0
                     transform.translate(-x2, -y2);
-
                     // scale everything up since agg turns things into integers a bit too soon
                     int scaleup = 255;
                     radius *= scaleup;
@@ -261,7 +270,6 @@ class renderer_agg : util::noncopyable
                     y1 *= scaleup;
                     x2 *= scaleup;
                     y2 *= scaleup;
-
                     transform.scale(scaleup, scaleup);
 
                     interpolator_type span_interpolator(transform);
