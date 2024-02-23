@@ -42,6 +42,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/geometry.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/geometry/box2d.hpp>
+// std
+#include <cstdint>
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<double>, double, boost::geometry::cs::cartesian, x, y)
 BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::geometry::point<std::int64_t>,
