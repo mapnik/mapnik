@@ -39,18 +39,36 @@ struct geometry_is_empty
 
     bool operator()(mapnik::geometry::point<double> const&) const { return false; }
 
-    bool operator()(mapnik::geometry::line_string<double> const& geom) const { return geom.empty(); }
+    bool operator()(mapnik::geometry::line_string<double> const& line) const { return line.empty(); }
 
-    bool operator()(mapnik::geometry::polygon<double> const& geom) const
+    bool operator()(mapnik::geometry::polygon<double> const& poly) const
     {
-        return geom.empty() || geom.front().empty();
+        for (auto const& ring : poly)
+        {
+            if (!ring.empty()) return false;
+        }
+        return true;
     }
 
     bool operator()(mapnik::geometry::multi_point<double> const& geom) const { return geom.empty(); }
 
-    bool operator()(mapnik::geometry::multi_line_string<double> const& geom) const { return geom.empty(); }
+    bool operator()(mapnik::geometry::multi_line_string<double> const& mline) const
+    {
+        for (auto const& line : mline)
+        {
+            if (!line.empty()) return false;
+        }
+        return true;
+    }
 
-    bool operator()(mapnik::geometry::multi_polygon<double> const& geom) const { return geom.empty(); }
+    bool operator()(mapnik::geometry::multi_polygon<double> const& mpoly) const
+    {
+        for (auto const& poly : mpoly)
+        {
+            if (!operator()(poly)) return false;
+        }
+        return true;
+    }
 
     bool operator()(mapnik::geometry::geometry_collection<double> const& geom) const { return geom.empty(); }
 
