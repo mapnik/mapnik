@@ -28,6 +28,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/geometry_to_geojson.hpp>
 #include <mapnik/util/fs.hpp>
@@ -140,6 +141,11 @@ TEST_CASE("geojson")
                 std::string json(in);
                 mapnik::geometry::geometry<double> geom;
                 CHECK(mapnik::json::from_geojson(json, geom));
+                if (!mapnik::geometry::is_empty(geom))
+                {
+                    std::cerr << json << std::endl;
+                }
+                //REQUIRE(mapnik::geometry::is_empty(geom));
                 // round trip
                 std::string json_out;
                 CHECK(mapnik::util::to_geojson(json_out, geom));
