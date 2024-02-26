@@ -83,16 +83,16 @@ geometry_generator_grammar<OutputIterator, Geometry>::geometry_generator_grammar
     linear_ring_coord = lit('[') << -(point_coord % lit(',')) << lit(']')//linestring_coord.alias()
         ;
 
-    polygon_coord = lit('[') << linear_ring_coord % lit(',') << lit(']')
+    polygon_coord = lit('[') << -(linear_ring_coord % lit(',')) << lit(']')
         ;
 
     multi_point_coord = lit('[') << -(point_coord % lit(',')) << lit(']');//linestring_coord.alias()
         ;
 
-    multi_linestring_coord = lit('[') << linestring_coord  % lit(',') << lit(']')
+    multi_linestring_coord = lit('[') << -(linestring_coord  % lit(',')) << lit(']')
         ;
 
-    multi_polygon_coord = lit('[') << polygon_coord  % lit(',') << lit("]")
+    multi_polygon_coord = lit('[') << -(polygon_coord  % lit(',')) << lit("]")
         ;
 
     geometries = geometry % lit(',')

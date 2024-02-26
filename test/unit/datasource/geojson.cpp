@@ -125,11 +125,15 @@ TEST_CASE("geojson")
         SECTION("GeoJSON empty Geometries handling")
         {
             auto valid_empty_geometries = {"null", // Point can't be empty
-                                           "{ \"type\": \"LineString\", \"coordinates\": [] }",
-                                           "{ \"type\": \"Polygon\", \"coordinates\": [ [ ] ] } ",
-                                           "{ \"type\": \"MultiPoint\", \"coordinates\": [ ] }",
-                                           "{ \"type\": \"MultiLineString\", \"coordinates\": [ [] ] }",
-                                           "{ \"type\": \"MultiPolygon\", \"coordinates\": [[ []] ] }"};
+                                           "{ \"type\": \"LineString\", \"coordinates\":[]}",
+                                           "{ \"type\": \"Polygon\", \"coordinates\":[]} ",
+                                           "{ \"type\": \"Polygon\", \"coordinates\":[[]]} ",
+                                           "{ \"type\": \"MultiPoint\", \"coordinates\":[]}",
+                                           "{ \"type\": \"MultiLineString\", \"coordinates\":[]}",
+                                           "{ \"type\": \"MultiLineString\", \"coordinates\":[[]]}",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\":[]}",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\":[[]]}",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[]]] }"};
 
             for (auto const& in : valid_empty_geometries)
             {
