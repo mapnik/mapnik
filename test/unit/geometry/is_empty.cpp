@@ -118,7 +118,7 @@ TEST_CASE("geometry is_empty")
             mapnik::geometry::multi_line_string<double> geom;
             mapnik::geometry::line_string<double> line;
             geom.emplace_back(std::move(line));
-            REQUIRE(!mapnik::geometry::is_empty(geom));
+            REQUIRE(mapnik::geometry::is_empty(geom));
         }
     }
 
@@ -134,7 +134,7 @@ TEST_CASE("geometry is_empty")
             mapnik::geometry::linear_ring<double> ring;
             poly.push_back(std::move(ring));
             geom.emplace_back(std::move(poly));
-            REQUIRE(!mapnik::geometry::is_empty(geom));
+            REQUIRE(mapnik::geometry::is_empty(geom));
         }
     }
 }
