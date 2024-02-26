@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-
 #include "catch.hpp"
 
 #include <mapnik/geometry/is_empty.hpp>

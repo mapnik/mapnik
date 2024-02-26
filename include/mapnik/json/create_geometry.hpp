@@ -64,10 +64,11 @@ struct create_linestring
     {
         mapnik::geometry::line_string<double> line;
         std::size_t size = points.size();
-        //if (size < 2)
+        // if (size < 2)
         //{
-        //    throw std::runtime_error("RFC 7946: For type \"LineString\", the \"coordinates\" member is an array of two or more positions.");
-        //}
+        //     throw std::runtime_error("RFC 7946: For type \"LineString\", the \"coordinates\" member is an array of
+        //     two or more positions.");
+        // }
         line.reserve(size);
         for (auto&& pt : points)
         {
@@ -114,7 +115,7 @@ struct create_polygon
 
     void operator()(ring const& points) const
     {
-        //POLYGON EMPTY
+        // POLYGON EMPTY
         geom_ = std::move(mapnik::geometry::polygon<double>{});
     }
 
@@ -182,7 +183,7 @@ struct create_multilinestring
 
     void operator()(ring const& points) const
     {
-        //MULTILINESTRING EMPTY
+        // MULTILINESTRING EMPTY
         geom_ = std::move(mapnik::geometry::multi_line_string<double>{});
     }
 
@@ -231,7 +232,7 @@ struct create_multipolygon
 
     void operator()(rings const& rngs) const
     {
-        //MULTIPOLYGON
+        // MULTIPOLYGON
         mapnik::geometry::multi_polygon<double> multi_poly;
         mapnik::geometry::polygon<double> poly;
         std::size_t num_rings = rngs.size();
@@ -245,7 +246,7 @@ struct create_multipolygon
 
     void operator()(ring const& points) const
     {
-        //MULTIPOLYGON EMPTY
+        // MULTIPOLYGON EMPTY
         geom_ = std::move(mapnik::geometry::multi_polygon<double>{});
     }
 

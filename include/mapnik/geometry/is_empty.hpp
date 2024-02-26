@@ -45,7 +45,8 @@ struct geometry_is_empty
     {
         for (auto const& ring : poly)
         {
-            if (!ring.empty()) return false;
+            if (!ring.empty())
+                return false;
         }
         return true;
     }
@@ -56,7 +57,8 @@ struct geometry_is_empty
     {
         for (auto const& line : mline)
         {
-            if (!line.empty()) return false;
+            if (!line.empty())
+                return false;
         }
         return true;
     }
@@ -65,7 +67,8 @@ struct geometry_is_empty
     {
         for (auto const& poly : mpoly)
         {
-            if (!operator()(poly)) return false;
+            if (!operator()(poly))
+                return false;
         }
         return true;
     }
