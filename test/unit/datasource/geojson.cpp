@@ -141,11 +141,7 @@ TEST_CASE("geojson")
                 std::string json(in);
                 mapnik::geometry::geometry<double> geom;
                 CHECK(mapnik::json::from_geojson(json, geom));
-                if (!mapnik::geometry::is_empty(geom))
-                {
-                    std::cerr << json << std::endl;
-                }
-                // REQUIRE(mapnik::geometry::is_empty(geom));
+                REQUIRE(mapnik::geometry::is_empty(geom));
                 //  round trip
                 std::string json_out;
                 CHECK(mapnik::util::to_geojson(json_out, geom));
