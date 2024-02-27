@@ -28,6 +28,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geometry/geometry_type.hpp>
+#include <mapnik/geometry/is_empty.hpp>
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/geometry_to_geojson.hpp>
 #include <mapnik/util/fs.hpp>
@@ -125,18 +126,23 @@ TEST_CASE("geojson")
         SECTION("GeoJSON empty Geometries handling")
         {
             auto valid_empty_geometries = {"null", // Point can't be empty
-                                           "{ \"type\": \"LineString\", \"coordinates\": [] }",
-                                           "{ \"type\": \"Polygon\", \"coordinates\": [ [ ] ] } ",
-                                           "{ \"type\": \"MultiPoint\", \"coordinates\": [ ] }",
-                                           "{ \"type\": \"MultiLineString\", \"coordinates\": [ [] ] }",
-                                           "{ \"type\": \"MultiPolygon\", \"coordinates\": [[ []] ] }"};
+                                           "{ \"type\": \"LineString\", \"coordinates\":[]}",
+                                           "{ \"type\": \"Polygon\", \"coordinates\":[]} ",
+                                           "{ \"type\": \"Polygon\", \"coordinates\":[[]]} ",
+                                           "{ \"type\": \"MultiPoint\", \"coordinates\":[]}",
+                                           "{ \"type\": \"MultiLineString\", \"coordinates\":[]}",
+                                           "{ \"type\": \"MultiLineString\", \"coordinates\":[[]]}",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\":[]}",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\":[[]]}",
+                                           "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[]]] }"};
 
             for (auto const& in : valid_empty_geometries)
             {
                 std::string json(in);
                 mapnik::geometry::geometry<double> geom;
                 CHECK(mapnik::json::from_geojson(json, geom));
-                // round trip
+                REQUIRE(mapnik::geometry::is_empty(geom));
+                //  round trip
                 std::string json_out;
                 CHECK(mapnik::util::to_geojson(json_out, geom));
                 json.erase(std::remove_if(std::begin(json),
