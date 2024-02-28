@@ -196,6 +196,7 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T0>
     void setup(Map const& m, buffer_type& pixmap);
 };
 
+extern template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8>>;
 extern template class MAPNIK_DECL agg_renderer<image<rgba8_t>>;
 
 } // namespace mapnik
