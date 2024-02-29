@@ -137,6 +137,7 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
     void setup(Map const& m);
 };
 
+extern template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr>>;
 extern template class MAPNIK_DECL cairo_renderer<cairo_ptr>;
 
 } // namespace mapnik
