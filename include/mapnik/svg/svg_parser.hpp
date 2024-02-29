@@ -106,12 +106,12 @@ class MAPNIK_DECL svg_parser : private util::noncopyable
     bool strict_;
     bool ignore_;
     bool css_style_;
+    bool dimensions_ = false;
     std::map<std::string, gradient> gradient_map_;
     std::map<std::string, boost::property_tree::detail::rapidxml::xml_node<char> const*> node_cache_;
     mapnik::css_data css_data_;
     boost::optional<viewbox> vbox_{};
     double normalized_diagonal_ = 0.0;
-    agg::trans_affine viewbox_tr_{};
     std::deque<double> font_sizes_{};
     error_handler err_handler_;
 };

@@ -541,6 +541,15 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                             parse_attr(parser, node);
                         }
                         break;
+                    case "svg"_case:
+                        if (node->first_node() != nullptr)
+                        {
+                            parser.path_.push_attr();
+                            parse_attr(parser, node);
+                            parse_dimensions(parser, node);
+                        }
+
+                        break;
                     case "use"_case:
                         parser.path_.push_attr();
                         parse_id(parser, node);
@@ -642,37 +651,25 @@ void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char
     switch (name_to_int(name))
     {
         case "path"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_path(parser, node);
             break;
         case "polygon"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_polygon(parser, node);
             break;
         case "polyline"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_polyline(parser, node);
             break;
         case "line"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_line(parser, node);
             break;
         case "rect"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_rect(parser, node);
             break;
         case "circle"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_circle(parser, node);
             break;
         case "ellipse"_case:
-            parser.path_.transform().multiply(parser.viewbox_tr_);
             parse_ellipse(parser, node);
-            break;
-        case "svg"_case:
-            parser.path_.push_attr();
-            parse_dimensions(parser, node);
-            parse_attr(parser, node);
             break;
         default:
             handle_unsupported(parser, unsupported_elements, name, "element");
@@ -893,7 +890,6 @@ void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node)
     viewbox vbox = {0, 0, 0, 0};
     bool has_percent_height = true;
     bool has_percent_width = true;
-
     auto const* width_attr = node->first_attribute("width");
     if (width_attr)
     {
@@ -933,58 +929,56 @@ void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node)
             double sx = width / vbox.width;
             double sy = height / vbox.height;
             double scale = preserve_aspect_ratio.second ? std::min(sx, sy) : std::max(sx, sy);
+
             switch (preserve_aspect_ratio.first)
             {
                 case none:
-                    t = agg::trans_affine_scaling(sx, sy) * t;
+                    t.premultiply(agg::trans_affine_scaling(sx, sy));
                     break;
                 case xMinYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
                     break;
                 case xMinYMid:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)) * t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(0, -0.5 * (vbox.height - height / scale)));
                     break;
                 case xMinYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)) * t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(0, -1.0 * (vbox.height - height / scale)));
                     break;
                 case xMidYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0) * t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale), 0.0));
                     break;
                 case xMidYMid: // (the default)
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                      -0.5 * (vbox.height - height / scale)) *
-                        t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                                -0.5 * (vbox.height - height / scale)));
                     break;
                 case xMidYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
-                                                      -1.0 * (vbox.height - height / scale)) *
-                        t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-0.5 * (vbox.width - width / scale),
+                                                                -1.0 * (vbox.height - height / scale)));
                     break;
                 case xMaxYMin:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0) * t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale), 0.0));
                     break;
                 case xMaxYMid:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                      -0.5 * (vbox.height - height / scale)) *
-                        t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                                -0.5 * (vbox.height - height / scale)));
                     break;
                 case xMaxYMax:
-                    t = agg::trans_affine_scaling(scale, scale) * t;
-                    t = agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
-                                                      -1.0 * (vbox.height - height / scale)) *
-                        t;
+                    t.premultiply(agg::trans_affine_scaling(scale, scale));
+                    t.premultiply(agg::trans_affine_translation(-1.0 * (vbox.width - width / scale),
+                                                                -1.0 * (vbox.height - height / scale)));
                     break;
             };
+
+            t.premultiply(agg::trans_affine_translation(-vbox.x0, -vbox.y0));
+            parser.path_.transform().premultiply(t);
         }
-        t = agg::trans_affine_translation(-vbox.x0, -vbox.y0) * t;
-        parser.viewbox_tr_ = t;
     }
     else if (width == 0 || height == 0 || has_percent_width || has_percent_height)
     {
@@ -1004,7 +998,11 @@ void parse_dimensions(svg_parser& parser, rapidxml::xml_node<char> const* node)
         parser.path_.set_dimensions(0, 0);
         return;
     }
-    parser.path_.set_dimensions(width, height);
+    if (!parser.dimensions_)
+    {
+        parser.dimensions_ = true;
+        parser.path_.set_dimensions(width, height);
+    }
 }
 
 void parse_path(svg_parser& parser, rapidxml::xml_node<char> const* node)

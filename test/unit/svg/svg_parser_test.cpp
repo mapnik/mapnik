@@ -442,8 +442,8 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(0.3543307086614174,0.3543307086614174,
-        //                                       424.8425196850394059,141.3779527559055396));
+        REQUIRE(bbox == mapnik::box2d<double>(0.3779527559055118,0.3779527559055118,
+                                              453.1653543307086807,150.8031496062992005));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -478,7 +478,8 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        REQUIRE(bbox == mapnik::box2d<double>(0.3779527559055118,0.3779527559055118,
+                                              453.1653543307086807,150.8031496062992005));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -517,7 +518,8 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        REQUIRE(bbox == mapnik::box2d<double>(0.3779527559055118,0.3779527559055118,
+                                              453.1653543307086807,150.8031496062992005));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -555,7 +557,8 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
+        REQUIRE(bbox == mapnik::box2d<double>(75.7795275590551114,0.1889763779527559,
+                                              226.5826771653543119,113.1968503937007853));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -651,7 +654,8 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,699.0,199.0));
+        REQUIRE(bbox == mapnik::box2d<double>(0.3779527559055118,0.3779527559055118,
+                                              264.1889763779527698,75.2125984251968447));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -701,7 +705,8 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
+        REQUIRE(bbox == mapnik::box2d<double>(75.7795275590551114,0.1889763779527559,
+                                              226.5826771653543119,113.1968503937007853));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
@@ -722,7 +727,7 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(20,20,460,230));
+        REQUIRE(bbox == mapnik::box2d<double>(20,20,460,230));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
@@ -741,7 +746,7 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(0,0,200,200));
+        REQUIRE(bbox == mapnik::box2d<double>(0,0,200,200));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
