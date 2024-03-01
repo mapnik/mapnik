@@ -36,7 +36,7 @@ cairo_face::cairo_face(std::shared_ptr<font_library> const& library, face_ptr co
     : face_(face)
 {
     static cairo_user_data_key_t key;
-    c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_NO_HINTING);
+    c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING);
     cairo_font_face_set_user_data(c_face_, &key, new handle(library, face), destroy);
 }
 
@@ -381,6 +381,7 @@ void cairo_context::add_image(agg::trans_affine const& tr, image_rgba8 const& da
 void cairo_context::set_font_face(cairo_face_manager& manager, face_ptr face)
 {
     cairo_set_font_face(cairo_.get(), manager.get_face(face)->face());
+    check_object_status_and_throw_exception(*this);
 }
 
 void cairo_context::set_font_matrix(cairo_matrix_t const& matrix)

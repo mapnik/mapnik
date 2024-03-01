@@ -75,11 +75,11 @@ struct agg_markers_renderer_context : markers_renderer_context
 
     virtual void render_marker(svg_path_ptr const& src,
                                svg_path_adapter& path,
-                               svg_attribute_type const& attrs,
+                               svg::group const& group_attrs,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr)
     {
-        SvgRenderer svg_renderer(path, attrs);
+        SvgRenderer svg_renderer(path, group_attrs);
         render_vector_marker(svg_renderer,
                              ras_,
                              renb_,

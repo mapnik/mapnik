@@ -36,8 +36,8 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/phoenix/function.hpp>
+#include <boost/phoenix/operator.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 MAPNIK_DISABLE_WARNING_POP

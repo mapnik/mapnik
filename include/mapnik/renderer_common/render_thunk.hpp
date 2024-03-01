@@ -44,20 +44,20 @@ namespace mapnik {
 struct vector_marker_render_thunk : util::movable
 {
     svg_path_ptr src_;
-    svg_attribute_type attrs_;
+    svg::group group_attrs_;
     agg::trans_affine tr_;
     double opacity_;
     composite_mode_e comp_op_;
     bool snap_to_pixels_;
 
     vector_marker_render_thunk(svg_path_ptr const& src,
-                               svg_attribute_type const& attrs,
+                               svg::group const& group_attrs,
                                agg::trans_affine const& marker_trans,
                                double opacity,
                                composite_mode_e comp_op,
                                bool snap_to_pixels)
         : src_(src)
-        , attrs_(attrs)
+        , group_attrs_(group_attrs)
         , tr_(marker_trans)
         , opacity_(opacity)
         , comp_op_(comp_op)

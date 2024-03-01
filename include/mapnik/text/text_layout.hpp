@@ -33,7 +33,6 @@
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/evaluated_format_properties_ptr.hpp>
-#include <mapnik/text/rotation.hpp>
 
 // stl
 #include <vector>

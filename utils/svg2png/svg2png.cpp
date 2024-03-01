@@ -56,22 +56,32 @@ MAPNIK_DISABLE_WARNING_POP
 
 struct main_marker_visitor
 {
-    main_marker_visitor(std::string const& svg_name, double scale_factor, bool verbose, bool auto_open)
+    main_marker_visitor(std::string const& svg_name, double scale_factor, double opacity, bool verbose, bool auto_open)
         : svg_name_(svg_name)
         , scale_factor_(scale_factor)
+        , opacity_(opacity)
         , verbose_(verbose)
         , auto_open_(auto_open)
     {}
 
     int operator()(mapnik::marker_svg const& marker) const
     {
+#if 1
+        using color_type = agg::rgba8;
+        using order_type = agg::order_rgba;
+        using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+        using buf_type = agg::rendering_buffer;
+        using pixfmt = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
+        using renderer_base = agg::renderer_base<pixfmt>;
+        using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
+#else
         using pixfmt = agg::pixfmt_rgba32_pre;
         using renderer_base = agg::renderer_base<pixfmt>;
         using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
+#endif
         agg::rasterizer_scanline_aa<> ras_ptr;
         agg::scanline_u8 sl;
 
-        double opacity = 1;
         double w, h;
         std::tie(w, h) = marker.dimensions();
         if (w == 0 || h == 0)
@@ -110,11 +120,10 @@ struct main_marker_visitor
 
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(marker.get_data()->source());
         mapnik::svg::svg_path_adapter svg_path(stl_storage);
-        mapnik::svg::
-          renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre>
-            svg_renderer_this(svg_path, marker.get_data()->attributes());
+        mapnik::svg::renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt>
+          svg_renderer_this(svg_path, marker.get_data()->svg_group());
 
-        svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
+        svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity_, bbox);
 
         std::string png_name(svg_name_);
         boost::algorithm::ireplace_last(png_name, ".svg", ".png");
@@ -147,10 +156,20 @@ struct main_marker_visitor
 
   private:
     std::string svg_name_;
-    double scale_factor_ = 1.0;
+    double scale_factor_;
+    double opacity_;
     bool verbose_;
     bool auto_open_;
 };
+
+void check_opacity_range(double opacity)
+{
+    using namespace boost::program_options;
+    if (opacity < 0.0 || opacity > 1.0)
+    {
+        throw invalid_option_value(std::to_string(opacity));
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -163,7 +182,8 @@ int main(int argc, char** argv)
     std::vector<std::string> svg_files;
     mapnik::setup();
     mapnik::logger::instance().set_severity(mapnik::logger::error);
-    double scale_factor = 1.0;
+    double scale_factor;
+    double opacity;
     std::string usage = "Usage: svg2png [options] <svg-file(s)>";
     try
     {
@@ -175,7 +195,8 @@ int main(int argc, char** argv)
             ("verbose,v","verbose output")
             ("open,o","automatically open the file after rendering (os x only)")
             ("strict,s","enables strict SVG parsing")
-            ("scale-factor", po::value<double>(), "provide scaling factor (default: 1.0)")
+            ("scale-factor", po::value<double>()->default_value(1.0), "provide scaling factor (default: 1.0)")
+            ("opacity", po::value<double>()->default_value(1.0)->notifier(&check_opacity_range), "top level opacity (default: 1.0)")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
         // clang-format on
@@ -216,6 +237,10 @@ int main(int argc, char** argv)
         {
             scale_factor = vm["scale-factor"].as<double>();
         }
+        if (vm.count("opacity"))
+        {
+            opacity = vm["opacity"].as<double>();
+        }
         if (vm.count("svg"))
         {
             svg_files = vm["svg"].as<std::vector<std::string>>();
@@ -241,7 +266,7 @@ int main(int argc, char** argv)
             }
             std::shared_ptr<mapnik::marker const> marker =
               mapnik::marker_cache::instance().find(svg_name, false, strict);
-            main_marker_visitor visitor(svg_name, scale_factor, verbose, auto_open);
+            main_marker_visitor visitor(svg_name, scale_factor, opacity, verbose, auto_open);
             status = mapnik::util::apply_visitor(visitor, *marker);
         }
     }

@@ -56,11 +56,11 @@ struct cairo_renderer_process_visitor_p
         cairo_context context(cairo);
 
         svg_storage_type& svg = *marker.get_data();
-        svg_attribute_type const& svg_attributes = svg.attributes();
+        auto const& svg_group = svg.svg_group();
         svg::vertex_stl_adapter<svg::svg_path_storage> stl_storage(svg.source());
         svg::svg_path_adapter svg_path(stl_storage);
 
-        render_vector_marker(context, svg_path, svg_attributes, bbox, tr, opacity_);
+        render_vector_marker(context, svg_path, svg_group, bbox, tr, opacity_);
 
         return surface;
     }

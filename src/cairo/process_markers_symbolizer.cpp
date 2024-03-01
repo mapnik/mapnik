@@ -40,11 +40,11 @@ struct cairo_markers_renderer_context : markers_renderer_context
 
     virtual void render_marker(svg_path_ptr const& src,
                                svg_path_adapter& path,
-                               svg_attribute_type const& attrs,
+                               svg::group const& group_attrs,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr)
     {
-        render_vector_marker(ctx_, path, attrs, src->bounding_box(), marker_tr, params.opacity);
+        render_vector_marker(ctx_, path, group_attrs, src->bounding_box(), marker_tr, params.opacity);
     }
 
     virtual void

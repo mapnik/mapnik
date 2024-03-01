@@ -48,11 +48,11 @@ struct thunk_markers_renderer_context : markers_renderer_context
 
     virtual void render_marker(svg_path_ptr const& src,
                                svg_path_adapter& path,
-                               svg_attribute_type const& attrs,
+                               svg::group const& group_attrs,
                                markers_dispatch_params const& params,
                                agg::trans_affine const& marker_tr)
     {
-        vector_marker_render_thunk thunk(src, attrs, marker_tr, params.opacity, comp_op_, params.snap_to_pixels);
+        vector_marker_render_thunk thunk(src, group_attrs, marker_tr, params.opacity, comp_op_, params.snap_to_pixels);
         thunks_.emplace_back(std::move(thunk));
     }
 

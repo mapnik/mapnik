@@ -545,15 +545,15 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap& pix)
 #endif
 }
 
-void MapWidget::updateRenderer(QString const& txt)
+void MapWidget::updateRenderer(int index)
 {
-    if (txt == "AGG")
+    std::cerr << "updateRenderer:" << index << std::endl;
+    if (index == 0)
         cur_renderer_ = AGG;
-    else if (txt == "Cairo")
+    else if (index == 1)
         cur_renderer_ = Cairo;
-    else if (txt == "Grid")
+    else if (index == 2)
         cur_renderer_ = Grid;
-    std::cerr << "Update renderer called" << std::endl;
     updateMap();
 }
 

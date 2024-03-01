@@ -106,10 +106,7 @@ MainWindow::MainWindow()
     // slider
     connect(slider_, SIGNAL(valueChanged(int)), mapWidget_, SLOT(zoomToLevel(int)));
     // renderer selector
-    connect(renderer_selector_,
-            SIGNAL(currentIndexChanged(QString const&)),
-            mapWidget_,
-            SLOT(updateRenderer(QString const&)));
+    connect(renderer_selector_, SIGNAL(currentIndexChanged(int)), mapWidget_, SLOT(updateRenderer(int)));
 
     // scale factor
     connect(scale_factor_, SIGNAL(valueChanged(double)), mapWidget_, SLOT(updateScaleFactor(double)));
@@ -390,7 +387,7 @@ void MainWindow::createToolBars()
 
     scale_factor_ = new QDoubleSpinBox(fileToolBar);
     scale_factor_->setMinimum(0.1);
-    scale_factor_->setMaximum(5.0);
+    scale_factor_->setMaximum(10.0);
     scale_factor_->setSingleStep(0.1);
     scale_factor_->setValue(1.0);
 

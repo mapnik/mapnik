@@ -38,7 +38,7 @@ void test_path_parser(std::string const& str, Expected const& expected)
     mapnik::svg_path_ptr marker_path(std::make_shared<mapnik::svg_storage_type>());
     vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
     svg_path_adapter svg_path(stl_storage);
-    svg_converter_type svg(svg_path, marker_path->attributes());
+    svg_converter_type svg(svg_path, marker_path->svg_group());
 
     CHECK(mapnik::svg::parse_path(str.c_str(), svg));
     double x, y;

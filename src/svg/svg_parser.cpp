@@ -539,6 +539,7 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                             if (parser.css_style_)
                                 process_css(parser, node);
                             parse_attr(parser, node);
+                            parser.path_.begin_group();
                         }
                         break;
                     case "use"_case:
@@ -547,7 +548,11 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                         if (parser.css_style_)
                             process_css(parser, node);
                         parse_attr(parser, node);
+                        if (parser.path_.cur_attr().opacity < 1.0)
+                            parser.path_.begin_group();
                         parse_use(parser, node);
+                        if (parser.path_.cur_attr().opacity < 1.0)
+                            parser.path_.end_group();
                         parser.path_.pop_attr();
                         break;
                     default:
@@ -558,7 +563,11 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                         parse_attr(parser, node);
                         if (parser.path_.display())
                         {
+                            if (parser.path_.cur_attr().opacity < 1.0)
+                                parser.path_.begin_group();
                             parse_element(parser, node->name(), node);
+                            if (parser.path_.cur_attr().opacity < 1.0)
+                                parser.path_.end_group();
                         }
                         parser.path_.pop_attr();
                 }
@@ -611,6 +620,7 @@ void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node)
     auto name = name_to_int(node->name());
     if (!parser.is_defs_ && (name == "g"_case))
     {
+        parser.path_.end_group();
         if (node->first_node() != nullptr)
         {
             parser.path_.pop_attr();
@@ -618,10 +628,10 @@ void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node)
     }
     else if (name == "svg"_case)
     {
-        if (node->first_node() != nullptr)
-        {
-            parser.path_.pop_attr();
-        }
+        // if (node->first_node() != nullptr)
+        //{
+        // parser.path_.pop_attr();
+        //}
     }
     else if (name == "defs"_case)
     {
@@ -670,9 +680,10 @@ void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char
             parse_ellipse(parser, node);
             break;
         case "svg"_case:
-            parser.path_.push_attr();
+            // parser.path_.push_attr();
             parse_dimensions(parser, node);
             parse_attr(parser, node);
+            parser.path_.set_opacity(parser.path_.cur_attr().opacity);
             break;
         default:
             handle_unsupported(parser, unsupported_elements, name, "element");
@@ -864,6 +875,7 @@ void parse_attr(svg_parser& parser, char const* name, char const* value)
 
 void parse_attr(svg_parser& parser, rapidxml::xml_node<char> const* node)
 {
+    parser.path_.opacity(1.0); // default path opacity = 1.0
     for (rapidxml::xml_attribute<char> const* attr = node->first_attribute(); attr; attr = attr->next_attribute())
     {
         auto const* name = attr->name();
@@ -1521,8 +1533,8 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
         return;
     double cx = 0.5;
     double cy = 0.5;
-    double fx = 0.0;
-    double fy = 0.0;
+    double fx = 0.5;
+    double fy = 0.5;
     double r = 0.5;
     bool has_percent = false;
 
@@ -1531,11 +1543,19 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
     {
         cx = parse_svg_value(parser, attr->value(), has_percent);
     }
+    else if (gr.get_units() == USER_SPACE_ON_USE)
+    {
+        cx = 0.5 * (parser.vbox_ ? parser.vbox_->width : parser.path_.width()); // 50%
+    }
 
     attr = node->first_attribute("cy");
     if (attr != nullptr)
     {
         cy = parse_svg_value(parser, attr->value(), has_percent);
+    }
+    else if (gr.get_units() == USER_SPACE_ON_USE)
+    {
+        cy = 0.5 * (parser.vbox_ ? parser.vbox_->height : parser.path_.height()); // 50%
     }
 
     attr = node->first_attribute("fx");
@@ -1544,25 +1564,26 @@ void parse_radial_gradient(svg_parser& parser, rapidxml::xml_node<char> const* n
         fx = parse_svg_value(parser, attr->value(), has_percent);
     }
     else
+    {
         fx = cx;
-
+    }
     attr = node->first_attribute("fy");
     if (attr != nullptr)
     {
         fy = parse_svg_value(parser, attr->value(), has_percent);
     }
     else
+    {
         fy = cy;
-
+    }
     attr = node->first_attribute("r");
     if (attr != nullptr)
     {
         r = parse_svg_value(parser, attr->value(), has_percent);
     }
-    // this logic for detecting %'s will not support mixed coordinates.
-    if (has_percent && gr.get_units() == USER_SPACE_ON_USE)
+    else if (gr.get_units() == USER_SPACE_ON_USE)
     {
-        gr.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
+        r = 0.5 * parser.normalized_diagonal_; // 50%
     }
 
     gr.set_gradient_type(RADIAL);

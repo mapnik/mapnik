@@ -170,7 +170,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
             svg_path_ptr marker_path(std::make_shared<svg_storage_type>());
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
             svg_path_adapter svg_path(stl_storage);
-            svg_converter_type svg(svg_path, marker_path->attributes());
+            svg_converter_type svg(svg_path, marker_path->svg_group());
             svg_parser p(svg, strict);
             p.parse_from_string(known_svg_string);
 
@@ -211,7 +211,7 @@ std::shared_ptr<mapnik::marker const> marker_cache::find(std::string const& uri,
                 svg_path_ptr marker_path(std::make_shared<svg_storage_type>());
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
-                svg_converter_type svg(svg_path, marker_path->attributes());
+                svg_converter_type svg(svg_path, marker_path->svg_group());
                 svg_parser p(svg, strict);
                 p.parse(uri);
 

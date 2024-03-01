@@ -184,7 +184,7 @@ struct grid_render_marker_visitor
         svg_path_adapter svg_path(stl_storage);
         svg::renderer_agg<svg_path_adapter, svg_attribute_type, renderer_type, pixfmt_type> svg_renderer(
           svg_path,
-          marker.get_data()->attributes());
+          marker.get_data()->svg_group());
 
         svg_renderer.render_id(*ras_ptr_, sl, renb, feature_.id(), mtx, opacity_, bbox);
     }

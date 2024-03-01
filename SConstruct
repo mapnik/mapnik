@@ -43,7 +43,7 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX_STD = "14"
+DEFAULT_CXX_STD = "17"
 DEFAULT_CXX_CXXFLAGS = " -DU_USING_ICU_NAMESPACE=0"
 DEFAULT_CXX_LINKFLAGS = ""
 if sys.platform == 'darwin':
@@ -467,9 +467,9 @@ opts.AddVariables(
     BoolVariable('MAPNIK_RENDER', 'Compile and install a utility to render a map to an image', 'True'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
-    BoolVariable('USE_BOOST_FILESYSTEM','Use boost::filesytem even if `std::filesystem` is avaible (since c++17)', 'False'),
+    BoolVariable('USE_BOOST_FILESYSTEM','Use boost::filesytem even if `std::filesystem` is available (since c++17)', 'False'),
     BoolVariable('QUIET', 'Reduce build verbosity', 'False'),
-    )
+)
 
 # variables to pickle after successful configure step
 # these include all scons core variables as well as custom
@@ -1633,6 +1633,9 @@ if not preconfigured:
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
 
+    if int(env['CXX_STD']) < 17:
+        env['USE_BOOST_FILESYSTEM'] = True
+
     if env['USE_BOOST_FILESYSTEM']:
         env.Append(CPPDEFINES = '-DUSE_BOOST_FILESYSTEM')
 
@@ -1659,7 +1662,7 @@ if not preconfigured:
             ['program_options', 'boost/program_options.hpp', False]
         ]
 
-        if int(env['CXX_STD']) < 17 or env['USE_BOOST_FILESYSTEM']:
+        if env['USE_BOOST_FILESYSTEM']:
             BOOST_LIBSHEADERS.append(['system', 'boost/system/system_error.hpp', True])
             BOOST_LIBSHEADERS.append(['filesystem', 'boost/filesystem/operations.hpp', True])
         # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests

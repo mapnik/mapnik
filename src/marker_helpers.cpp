@@ -60,7 +60,7 @@ void build_ellipse(symbolizer_base const& sym,
     {
         half_stroke_width = get<double>(sym, keys::stroke_width, feature, vars, 0.0) / 2.0;
     }
-    svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
+    svg::svg_converter_type styled_svg(svg_path, marker_ellipse.svg_group());
     styled_svg.push_attr();
     styled_svg.begin_path();
     agg::ellipse c(0, 0, width / 2.0, height / 2.0);
@@ -78,8 +78,107 @@ void build_ellipse(symbolizer_base const& sym,
     marker_ellipse.set_bounding_box(lox, loy, hix, hiy);
 }
 
-bool push_explicit_style(svg_attribute_type const& src,
-                         svg_attribute_type& dst,
+namespace detail {
+
+struct push_explicit_style
+{
+    push_explicit_style(svg::group& dst,
+                        boost::optional<color> const& fill_color,
+                        boost::optional<double> const& fill_opacity,
+                        boost::optional<color> const& stroke_color,
+                        boost::optional<double> const& stroke_width,
+                        boost::optional<double> const& stroke_opacity)
+        : current_group_(&dst)
+        , fill_color_(fill_color)
+        , fill_opacity_(fill_opacity)
+        , stroke_color_(stroke_color)
+        , stroke_width_(stroke_width)
+        , stroke_opacity_(stroke_opacity)
+    {}
+
+    bool operator()(svg::group const& g) const
+    {
+        current_group_->elements.emplace_back(svg::group{g.opacity, {}, current_group_});
+        current_group_ = &current_group_->elements.back().get<svg::group>();
+        bool success = false;
+        for (auto const& elem : g.elements)
+        {
+            if (mapbox::util::apply_visitor(push_explicit_style(*current_group_,
+                                                                fill_color_,
+                                                                fill_opacity_,
+                                                                stroke_color_,
+                                                                stroke_width_,
+                                                                stroke_opacity_),
+                                            elem))
+            {
+                success = true;
+            }
+        }
+        current_group_ = current_group_->parent;
+        return success;
+    }
+
+    bool operator()(svg::path_attributes const& attr) const
+    {
+        svg::path_attributes new_attr{attr, attr.index};
+
+        if (!attr.visibility_flag)
+            return false;
+
+        if (!attr.stroke_none)
+        {
+            if (stroke_width_)
+            {
+                new_attr.stroke_width = *stroke_width_;
+                new_attr.stroke_flag = true;
+            }
+            if (stroke_color_)
+            {
+                color const& s_color = *stroke_color_;
+                new_attr.stroke_color = agg::rgba(s_color.red() / 255.0,
+                                                  s_color.green() / 255.0,
+                                                  s_color.blue() / 255.0,
+                                                  s_color.alpha() / 255.0);
+                new_attr.stroke_flag = true;
+            }
+            if (stroke_opacity_)
+            {
+                new_attr.stroke_opacity = *stroke_opacity_;
+                new_attr.stroke_flag = true;
+            }
+        }
+        if (!attr.fill_none)
+        {
+            if (fill_color_)
+            {
+                color const& f_color = *fill_color_;
+                new_attr.fill_color = agg::rgba(f_color.red() / 255.0,
+                                                f_color.green() / 255.0,
+                                                f_color.blue() / 255.0,
+                                                f_color.alpha() / 255.0);
+                new_attr.fill_flag = true;
+            }
+            if (fill_opacity_)
+            {
+                new_attr.fill_opacity = *fill_opacity_;
+                new_attr.fill_flag = true;
+            }
+        }
+        current_group_->elements.emplace_back(new_attr);
+        return true;
+    }
+    mutable svg::group* current_group_;
+    boost::optional<color> const& fill_color_;
+    boost::optional<double> const& fill_opacity_;
+    boost::optional<color> const& stroke_color_;
+    boost::optional<double> const& stroke_width_;
+    boost::optional<double> const& stroke_opacity_;
+};
+
+} // namespace detail
+
+bool push_explicit_style(svg::group const& src,
+                         svg::group& dst,
                          symbolizer_base const& sym,
                          feature_impl& feature,
                          attributes const& vars)
@@ -89,60 +188,23 @@ bool push_explicit_style(svg_attribute_type const& src,
     auto stroke_color = get_optional<color>(sym, keys::stroke, feature, vars);
     auto stroke_width = get_optional<double>(sym, keys::stroke_width, feature, vars);
     auto stroke_opacity = get_optional<double>(sym, keys::stroke_opacity, feature, vars);
+    bool success = false;
+    dst.opacity = src.opacity;
     if (fill_color || fill_opacity || stroke_color || stroke_width || stroke_opacity)
     {
-        bool success = false;
-        for (unsigned i = 0; i < src.size(); ++i)
+        for (auto const& elem : src.elements)
         {
-            dst.push_back(src[i]);
-            mapnik::svg::path_attributes& attr = dst.back();
-            if (!attr.visibility_flag)
-                continue;
-            success = true;
-
-            if (!attr.stroke_none)
-            {
-                if (stroke_width)
-                {
-                    attr.stroke_width = *stroke_width;
-                    attr.stroke_flag = true;
-                }
-                if (stroke_color)
-                {
-                    color const& s_color = *stroke_color;
-                    attr.stroke_color = agg::rgba(s_color.red() / 255.0,
-                                                  s_color.green() / 255.0,
-                                                  s_color.blue() / 255.0,
-                                                  s_color.alpha() / 255.0);
-                    attr.stroke_flag = true;
-                }
-                if (stroke_opacity)
-                {
-                    attr.stroke_opacity = *stroke_opacity;
-                    attr.stroke_flag = true;
-                }
-            }
-            if (!attr.fill_none)
-            {
-                if (fill_color)
-                {
-                    color const& f_color = *fill_color;
-                    attr.fill_color = agg::rgba(f_color.red() / 255.0,
-                                                f_color.green() / 255.0,
-                                                f_color.blue() / 255.0,
-                                                f_color.alpha() / 255.0);
-                    attr.fill_flag = true;
-                }
-                if (fill_opacity)
-                {
-                    attr.fill_opacity = *fill_opacity;
-                    attr.fill_flag = true;
-                }
-            }
+            if (mapbox::util::apply_visitor(detail::push_explicit_style(dst,
+                                                                        fill_color,
+                                                                        fill_opacity,
+                                                                        stroke_color,
+                                                                        stroke_width,
+                                                                        stroke_opacity),
+                                            elem))
+                success = true;
         }
-        return success;
     }
-    return false;
+    return success;
 }
 
 void setup_transform_scaling(agg::trans_affine& tr,

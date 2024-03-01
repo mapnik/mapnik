@@ -87,11 +87,6 @@ pixel_position evaluate_displacement(double dx, double dy, directions_e dir)
     }
 }
 
-pixel_position pixel_position::rotate(rotation const& rot) const
-{
-    return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
-}
-
 text_layout::text_layout(face_manager_freetype& font_manager,
                          feature_impl const& feature,
                          attributes const& attrs,

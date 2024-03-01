@@ -30,12 +30,126 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/util/fs.hpp>
 #include "util.hpp"
 #include <fstream>
 #include <iterator>
+#include <iomanip>
+#include <sstream>
+// boost
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace // internal
 {
+
+std::ostream& operator<<(std::ostream& os, agg::rgba8 const& c)
+{
+    os << mapnik::color{c.r, c.g, c.b, c.a};
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, mapnik::gradient const& gr)
+{
+    double cx, cy, fx, fy, r;
+    gr.get_control_points(fx, fy, cx, cy, r);
+
+    os << "<gradient cx=\"" << cx << "\" cy=\"" << cy << "\""
+       << " fx=\"" << fx << "\" fy=\"" << fy << "\" r=\"" << r << "\">\n";
+    for (auto const& stop : gr.get_stop_array())
+    {
+        os << "  <stop offset=\"" << std::get<0>(stop) << "\" color=\"" << std::get<1>(stop) << "\"/>\n";
+    }
+
+    os << "</gradient>\n";
+
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, agg::trans_affine const& tr)
+{
+    os << "<transform>matrix(" << tr.sx << "," << tr.shy << "," << tr.shx << "," << tr.sy << "," << tr.tx << ","
+       << tr.ty << ")</transform>";
+    return os;
+}
+
+struct group_attribute_visitor
+{
+    group_attribute_visitor(std::stringstream& ss, unsigned padding)
+        : ss_(ss)
+        , padding_(padding)
+    {}
+
+    void operator()(mapnik::svg::group const& g) const
+    {
+        padding_ += 2;
+        // ss_ << "padding=>" << padding_ << std::endl;
+        std::string pad(padding_, ' ');
+        ss_ << pad << "<g opacity=\"" << g.opacity << "\">" << std::endl;
+        for (auto const& elem : g.elements)
+        {
+            mapbox::util::apply_visitor(group_attribute_visitor(ss_, padding_), elem);
+        }
+        ss_ << pad << "</g>" << std::endl;
+        padding_ -= 2;
+    }
+    void operator()(mapnik::svg::path_attributes const& attr) const
+    {
+        padding_ += 2;
+        std::string pad(padding_, ' ');
+        ss_ << pad << "<attribute index=\"" << attr.index << "\">" << std::endl;
+        ss_ << pad << attr.transform << std::endl;
+        if (!attr.fill_gradient.get_stop_array().empty())
+            ss_ << pad << attr.fill_gradient;
+        if (!attr.stroke_gradient.get_stop_array().empty())
+            ss_ << pad << attr.stroke_gradient;
+
+        ss_ << pad << "  <opacity>" << attr.opacity << "</opacity>" << std::endl;
+        ss_ << pad << "  <fill>" << attr.fill_color << "</fill>" << std::endl;
+        ss_ << pad << "  <fill-opacity>" << attr.fill_opacity << "</fill-opacity>" << std::endl;
+        ss_ << pad << "  <stroke>" << attr.stroke_color << "</stroke>" << std::endl;
+        ss_ << pad << "  <stroke-width>" << attr.stroke_width << "</stroke-width>" << std::endl;
+        ss_ << pad << "  <stroke-opacity>" << attr.stroke_opacity << "</stroke-opacity>" << std::endl;
+        ss_ << pad << "</attribute>" << std::endl;
+        padding_ -= 2;
+    }
+    std::stringstream& ss_;
+    mutable unsigned padding_;
+};
+
+bool check_equal_attributes(std::string const& svg_file, mapnik::svg::group const& g)
+{
+    unsigned padding = 0;
+    std::stringstream ss;
+    ss << "<svg opacity=\"" << g.opacity << "\">" << std::endl;
+    for (auto const& elem : g.elements)
+    {
+        mapbox::util::apply_visitor(group_attribute_visitor(ss, padding), elem);
+    }
+    ss << "</svg>" << std::endl;
+
+    std::string well_known_xml = svg_file + ".xml";
+    if (!mapnik::util::exists(well_known_xml))
+    {
+        std::cerr << "Well-known-xml-filename:" << well_known_xml << std::endl;
+        std::cerr << ss.str() << std::endl;
+        return false;
+    }
+    else
+    {
+        boost::property_tree::ptree t0, t1;
+        boost::property_tree::read_xml(well_known_xml, t0, boost::property_tree::xml_parser::trim_whitespace);
+        boost::property_tree::read_xml(ss, t1, boost::property_tree::xml_parser::trim_whitespace);
+
+        if (t0 != t1)
+        {
+            std::cerr << ss.str() << std::endl;
+        }
+        return (t0 == t1);
+    }
+}
+
 struct test_parser
 {
     mapnik::svg_storage_type path;
@@ -47,7 +161,7 @@ struct test_parser
     explicit test_parser(bool strict = false)
         : stl_storage(path.source())
         , svg_path(stl_storage)
-        , svg(svg_path, path.attributes())
+        , svg(svg_path, path.svg_group())
         , p(svg, strict)
     {}
 
@@ -261,10 +375,10 @@ TEST_CASE("SVG parser")
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
         mapnik::svg::svg_path_adapter path(stl_storage);
 
-        auto const& attrs = storage->attributes();
+        auto const& group_attrs = storage->svg_group();
         agg::line_cap_e expected_cap(agg::square_cap);
-        REQUIRE(attrs.size() == 1);
-        REQUIRE(attrs[0].line_cap == expected_cap);
+
+        REQUIRE(check_equal_attributes(svg_name, group_attrs));
 
         double x, y;
         unsigned cmd;
@@ -427,23 +541,22 @@ TEST_CASE("SVG parser")
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
 
-        auto const& attrs = storage->attributes();
+        auto const& group_attrs = storage->svg_group();
         agg::line_join_e expected_join(agg::bevel_join);
-        REQUIRE(attrs.size() == 1);
-        REQUIRE(attrs[0].line_join == expected_join);
+        REQUIRE(check_equal_attributes(svg_name, group_attrs));
     }
 
     SECTION("SVG <line>")
     {
-        //
         std::string svg_name("./test/data/svg/line.svg");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(0.3543307086614174,0.3543307086614174,
-        //                                       424.8425196850394059,141.3779527559055396));
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(0.3779527559055118, 0.3779527559055118, 453.1653543307086807, 150.8031496062992005));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -471,14 +584,15 @@ TEST_CASE("SVG parser")
 
     SECTION("SVG <polyline>")
     {
-        //
         std::string svg_name("./test/data/svg/polyline.svg");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(0.3779527559055118, 0.3779527559055118, 453.1653543307086807, 150.8031496062992005));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -510,14 +624,15 @@ TEST_CASE("SVG parser")
 
     SECTION("SVG <polygon>")
     {
-        //
         std::string svg_name("./test/data/svg/polygon.svg");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,1199.0,399.0));
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(0.3779527559055118, 0.3779527559055118, 453.1653543307086807, 150.8031496062992005));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -548,14 +663,16 @@ TEST_CASE("SVG parser")
 
     SECTION("SVG <gradient>")
     {
-        //
         std::string svg_name("./test/data/svg/gradient.svg");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
+
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(75.7795275590551114, 0.1889763779527559, 226.5826771653543119, 113.1968503937007853));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
@@ -651,15 +768,17 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,699.0,199.0));
+
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(0.3779527559055118, 0.3779527559055118, 264.1889763779527698, 75.2125984251968447));
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
 
-        auto const& attrs = storage->attributes();
-        REQUIRE(attrs.size() == 3);
-        REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
+        auto const& group_attrs = storage->svg_group();
 
+        REQUIRE(check_equal_attributes(svg_name, group_attrs));
         mapnik::svg::svg_path_adapter path(stl_storage);
         double x, y;
         unsigned cmd;
@@ -694,24 +813,20 @@ TEST_CASE("SVG parser")
 
     SECTION("SVG <gradient> with transformations")
     {
-        //
         std::string svg_name("./test/data/svg/gradient-transform.svg");
         std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(svg_name, false);
         REQUIRE(marker);
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(1.0,1.0,799.0,599.0));
+        REQUIRE(
+          bbox ==
+          mapnik::box2d<double>(75.7795275590551114, 0.1889763779527559, 226.5826771653543119, 113.1968503937007853));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
-        auto const& attrs = storage->attributes();
-        REQUIRE(attrs.size() == 3);
-        REQUIRE(attrs[1].fill_gradient == attrs[2].fill_gradient);
-        REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::RADIAL);
-        agg::trans_affine transform;
-        transform *= agg::trans_affine_translation(240, 155);
-        REQUIRE(attrs[1].fill_gradient.get_transform() == transform);
+        auto const& group_attrs = storage->svg_group();
+        REQUIRE(check_equal_attributes(svg_name, group_attrs));
     }
 
     SECTION("SVG <gradient> with xlink:href")
@@ -722,15 +837,12 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(20,20,460,230));
+        REQUIRE(bbox == mapnik::box2d<double>(20, 20, 460, 230));
         auto storage = svg.get_data();
         REQUIRE(storage);
 
-        auto const& attrs = storage->attributes();
-        REQUIRE(attrs.size() == 2);
-        REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::LINEAR);
-        REQUIRE(attrs[1].fill_gradient.get_gradient_type() == mapnik::LINEAR);
-        REQUIRE(attrs[1].fill_gradient.has_stop());
+        auto const& group_attrs = storage->svg_group();
+        REQUIRE(check_equal_attributes(svg_name, group_attrs));
     }
 
     SECTION("SVG <gradient> with radial percents")
@@ -741,21 +853,10 @@ TEST_CASE("SVG parser")
         REQUIRE(marker->is<mapnik::marker_svg>());
         mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
         auto bbox = svg.bounding_box();
-        // REQUIRE(bbox == mapnik::box2d<double>(0,0,200,200));
+        REQUIRE(bbox == mapnik::box2d<double>(0, 0, 200, 200));
         auto storage = svg.get_data();
         REQUIRE(storage);
-
-        double x1, x2, y1, y2, r;
-        auto const& attrs = storage->attributes();
-        REQUIRE(attrs.size() == 1);
-        REQUIRE(attrs[0].fill_gradient.get_gradient_type() == mapnik::RADIAL);
-        REQUIRE(attrs[0].fill_gradient.has_stop());
-        attrs[0].fill_gradient.get_control_points(x1, y1, x2, y2, r);
-        REQUIRE(x1 == 0);
-        REQUIRE(y1 == 0.25);
-        REQUIRE(x2 == 0.10);
-        REQUIRE(y2 == 0.10);
-        REQUIRE(r == 0.75);
+        REQUIRE(check_equal_attributes(svg_name, storage->svg_group()));
     }
 
     SECTION("SVG <clipPath>")

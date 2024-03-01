@@ -20,27 +20,29 @@
  *
  *****************************************************************************/
 
-#if defined(HAVE_CAIRO)
+#ifndef MAPNIK_SVG_GROUP_HPP
+#define MAPNIK_SVG_GROUP_HPP
 
-#ifndef MAPNIK_CAIRO_RENDER_VECTOR_HPP
-#define MAPNIK_CAIRO_RENDER_VECTOR_HPP
-
-// mapnik
-#include <mapnik/marker.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapbox/variant.hpp>
+#include <vector>
 
 namespace mapnik {
+namespace svg {
 
-class cairo_context;
+struct group;
 
-void render_vector_marker(cairo_context& context,
-                          svg_path_adapter& svg_path,
-                          svg::group const& group_attr,
-                          box2d<double> const& bbox,
-                          agg::trans_affine const& tr,
-                          double opacity);
+using group_element = mapbox::util::variant<path_attributes, group>;
 
+struct group
+{
+    double opacity = 1.0;
+    std::vector<group_element> elements;
+    group* parent = nullptr;
+};
+
+} // namespace svg
 } // namespace mapnik
 
-#endif // MAPNIK_CAIRO_RENDER_VECTOR_HPP
-
-#endif
+#endif // MAPNIK_SVG_GROUP_HPP

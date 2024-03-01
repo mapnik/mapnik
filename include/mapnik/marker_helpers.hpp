@@ -56,7 +56,7 @@ struct vector_markers_dispatch : util::noncopyable
 {
     vector_markers_dispatch(svg_path_ptr const& src,
                             svg_path_adapter& path,
-                            svg_attribute_type const& attrs,
+                            svg::group const& group_attrs,
                             agg::trans_affine const& marker_trans,
                             symbolizer_base const& sym,
                             Detector& detector,
@@ -69,7 +69,7 @@ struct vector_markers_dispatch : util::noncopyable
         , renderer_context_(renderer_context)
         , src_(src)
         , path_(path)
-        , attrs_(attrs)
+        , group_attrs_(group_attrs)
         , detector_(detector)
     {}
 
@@ -86,7 +86,7 @@ struct vector_markers_dispatch : util::noncopyable
             agg::trans_affine matrix = params_.placement_params.tr;
             matrix.rotate(angle);
             matrix.translate(x, y);
-            renderer_context_.render_marker(src_, path_, attrs_, params_, matrix);
+            renderer_context_.render_marker(src_, path_, group_attrs_, params_, matrix);
         }
     }
 
@@ -101,7 +101,7 @@ struct vector_markers_dispatch : util::noncopyable
     markers_renderer_context& renderer_context_;
     svg_path_ptr const& src_;
     svg_path_adapter& path_;
-    svg_attribute_type const& attrs_;
+    svg::group const& group_attrs_;
     Detector& detector_;
 };
 
@@ -152,8 +152,8 @@ void build_ellipse(symbolizer_base const& sym,
                    svg_storage_type& marker_ellipse,
                    svg::svg_path_adapter& svg_path);
 
-bool push_explicit_style(svg_attribute_type const& src,
-                         svg_attribute_type& dst,
+bool push_explicit_style(svg::group const& src,
+                         svg::group& dst,
                          symbolizer_base const& sym,
                          feature_impl& feature,
                          attributes const& vars);

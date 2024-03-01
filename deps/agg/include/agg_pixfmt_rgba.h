@@ -24,6 +24,7 @@
 #ifndef AGG_PIXFMT_RGBA_INCLUDED
 #define AGG_PIXFMT_RGBA_INCLUDED
 
+#include <mapnik/config.hpp>
 #include <cstring>
 #include <cmath>
 #include "agg_basics.h"
@@ -3166,6 +3167,10 @@ private:
 
 
 
+extern template struct MAPNIK_DECL comp_op_rgba_hue<agg::rgba8, agg::order_rgba>;
+extern template struct MAPNIK_DECL comp_op_rgba_saturation<agg::rgba8, agg::order_rgba>;
+extern template struct MAPNIK_DECL comp_op_rgba_color<agg::rgba8, agg::order_rgba>;
+extern template struct MAPNIK_DECL comp_op_rgba_value<agg::rgba8, agg::order_rgba>;
 
 //-----------------------------------------------------------------------
 typedef blender_rgba<rgba8, order_rgba> blender_rgba32; //----blender_rgba32

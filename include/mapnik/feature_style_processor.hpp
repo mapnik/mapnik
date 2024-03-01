@@ -47,7 +47,11 @@ struct layer_rendering_material;
 enum eAttributeCollectionPolicy { DEFAULT = 0, COLLECT_ALL = 1 };
 
 template<typename Processor>
+#ifdef __GNUC__
+class MAPNIK_DECL feature_style_processor
+#else
 class feature_style_processor
+#endif
 {
   public:
     explicit feature_style_processor(Map const& m, double scale_factor = 1.0);

@@ -48,12 +48,17 @@ namespace {
 
 mapnik::image_rgba8 render_svg(std::string const& filename, double scale_factor)
 {
-    using pixfmt = agg::pixfmt_rgba32_pre;
+    using color_type = agg::rgba8;
+    using order_type = agg::order_rgba;
+    using blender_type = agg::comp_op_adaptor_rgba_pre<color_type, order_type>; // comp blender
+    using buf_type = agg::rendering_buffer;
+    using pixfmt = agg::pixfmt_custom_blend_rgba<blender_type, buf_type>;
     using renderer_base = agg::renderer_base<pixfmt>;
     using renderer_solid = agg::renderer_scanline_aa_solid<renderer_base>;
 
     agg::rasterizer_scanline_aa<> ras_ptr;
     agg::scanline_u8 sl;
+
     std::shared_ptr<mapnik::marker const> marker = mapnik::marker_cache::instance().find(filename, false);
     mapnik::marker_svg const& svg = mapnik::util::get<mapnik::marker_svg>(*marker);
     double svg_width, svg_height;
@@ -72,9 +77,9 @@ mapnik::image_rgba8 render_svg(std::string const& filename, double scale_factor)
 
     mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(svg.get_data()->source());
     mapnik::svg::svg_path_adapter svg_path(stl_storage);
-    mapnik::svg::
-      renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, agg::pixfmt_rgba32_pre>
-        renderer(svg_path, svg.get_data()->attributes());
+    mapnik::svg::renderer_agg<mapnik::svg_path_adapter, mapnik::svg_attribute_type, renderer_solid, pixfmt> renderer(
+      svg_path,
+      svg.get_data()->svg_group());
     double opacity = 1.0;
     renderer.render(ras_ptr, sl, renb, mtx, opacity, {0, 0, svg_width, svg_height});
     return im;
@@ -101,8 +106,8 @@ TEST_CASE("SVG renderer")
         double scale_factor = 1.0;
         std::string octocat_inline("./test/data/svg/octocat.svg");
         std::string octocat_css("./test/data/svg/octocat-css.svg");
-        auto image1 = render_svg(octocat_inline, 1.0);
-        auto image2 = render_svg(octocat_css, 1.0);
+        auto image1 = render_svg(octocat_inline, scale_factor);
+        auto image2 = render_svg(octocat_css, scale_factor);
         REQUIRE(equal(image1, image2));
     }
 }
