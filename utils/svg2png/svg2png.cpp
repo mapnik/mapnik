@@ -133,7 +133,7 @@ struct main_marker_visitor
         if (auto_open_)
         {
             std::ostringstream s;
-#ifdef DARWIN
+#ifdef __APPLE__
             s << "open " << png_name;
 #else
             s << "xdg-open " << png_name;
