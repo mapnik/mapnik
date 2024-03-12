@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10' 
+          python-version: '3.10'
       - uses: pre-commit/action@v3.0.0
 
   buildAndTest:
@@ -71,7 +71,7 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
-          
+
       - name: checkout mapnik
         uses: actions/checkout@v3
         with:
@@ -80,7 +80,7 @@ jobs:
       - name: setup vcpkg
         uses: ./.github/actions/setup_vcpkg
         with:
-          vcpkg-sha: a960fde0b60b6392d70375fe513dfa7eb083cc3a
+          vcpkg-sha: e105a86c97b8ab13d4dbe3f7bd9ebc17ece31634
           nuget-source: https://nuget.pkg.github.com/mapnik/index.json
           nuget-username: ${{ github.actor }}
           nuget-pat: ${{ secrets.GITHUB_TOKEN }}
@@ -90,7 +90,7 @@ jobs:
         uses: ASzc/change-string-case-action@v5
         with:
           string: ${{ runner.os }}
-          
+
       - name: set lower case runner os
         shell: bash
         run: |
