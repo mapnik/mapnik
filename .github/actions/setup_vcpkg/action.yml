@@ -22,7 +22,7 @@ runs:
   using: "composite"
   steps:
     - name: checkout vcpkg
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: "microsoft/vcpkg"
         ref: ${{ inputs.vcpkg-sha }}

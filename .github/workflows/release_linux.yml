@@ -7,7 +7,7 @@ on:
   pull_request:
     branches-ignore:
       - "no-ci-*"
-env: 
+env:
   PRESET: linux-ci-release
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     steps:
 
       - name: checkout mapnik
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
@@ -49,7 +49,7 @@ jobs:
         run: cmake --build --preset ${{ env.PRESET }} --target package
 
       - name: Upload mapnik debian package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PRESET }}-deb
           path: build/${{ env.PRESET }}/mapnik-*.deb

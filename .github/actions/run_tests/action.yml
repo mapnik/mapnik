@@ -48,7 +48,7 @@ runs:
       working-directory: build/out
       shell: "pwsh"
       run: tar cfvz visual-test-results.tar.gz ./visual-test-result
-    
+
     - name: Generate run guid
       id: run-guid
       shell: "pwsh"
@@ -57,7 +57,7 @@ runs:
         echo ("GUID=" + $guid.toString()) >> $env:GITHUB_OUTPUT
 
     - name: Upload visual test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.cmake-preset }}-visual-tests-${{ steps.run-guid.outputs.GUID }}
         path: build/out/visual-test-results.tar.gz
@@ -79,12 +79,12 @@ runs:
 
     - name: Upload coverage to Codecov (linux & macos)
       if: runner.os != 'Windows'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: build/coverage.info
 
     - name: Upload coverage to Codecov (windows)
       if: runner.os == 'Windows'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: build/out/mapnik-test-visual.cov
