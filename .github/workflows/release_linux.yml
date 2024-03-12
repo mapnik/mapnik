@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PRESET }}-deb
-          path: build/${{ env.PRESET }}/mapnik-*.deb
+          path: build/mapnik-*.deb
