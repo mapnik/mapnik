@@ -1582,11 +1582,25 @@ if not preconfigured:
         env['SKIPPED_DEPS'].append('png')
 
     if env['WEBP']:
-        OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
-        inc_path = env['%s_INCLUDES' % 'WEBP']
-        lib_path = env['%s_LIBS' % 'WEBP']
-        env.AppendUnique(CPPPATH = fix_path(inc_path))
-        env.AppendUnique(LIBPATH = fix_path(lib_path))
+        if env.get('WEBP_LIBS') or env.get('WEBP_INCLUDES'):
+            OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
+            inc_path = env['WEBP_INCLUDES']
+            lib_path = env['WEBP_LIBS']
+            env.AppendUnique(CPPPATH = fix_path(inc_path))
+            env.AppendUnique(LIBPATH = fix_path(lib_path))
+        else:
+            cmd = 'pkg-config libwebp --libs --cflags'
+            if env['RUNTIME_LINK'] == 'static':
+                cmd += ' --static'
+            temp_env = Environment(ENV=os.environ)
+            try:
+                temp_env.ParseConfig(cmd)
+                for lib in temp_env['LIBS']:
+                    env.AppendUnique(LIBPATH = fix_path(lib))
+                for inc in temp_env['CPPPATH']:
+                    env.AppendUnique(CPPPATH = fix_path(inc))
+            except OSError as e:
+                pass
     else:
         env['SKIPPED_DEPS'].append('webp')
 
