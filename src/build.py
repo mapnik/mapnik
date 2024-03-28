@@ -92,6 +92,8 @@ if '-DHAVE_TIFF' in env['CPPDEFINES']:
 
 if '-DHAVE_WEBP' in env['CPPDEFINES']:
    lib_env['LIBS'].append('webp')
+   if env['RUNTIME_LINK'] == 'static':
+       lib_env['LIBS'].append('sharpyuv');
    enabled_imaging_libraries.append('webp_reader.cpp')
    enabled_imaging_libraries.append('webp_io.cpp')
 
