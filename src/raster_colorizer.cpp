@@ -101,7 +101,7 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 }
 
 namespace {
-template <typename PixelType>
+template<typename PixelType>
 float get_nodata_color()
 {
     return 0; // rgba(0,0,0,0)
@@ -115,7 +115,7 @@ float get_nodata_color<std::uint8_t>()
     return static_cast<float>(0xff000000);
 }
 
-}
+} // namespace
 
 template<typename T>
 void raster_colorizer::colorize(image_rgba8& out,
