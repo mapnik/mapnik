@@ -38,8 +38,9 @@ plugin_env['LIBS'] = []
 plugin_env.Append(LIBS=env['PLUGINS']['gdal']['lib'])
 
 if env['RUNTIME_LINK'] == 'static':
-    cmd = '%s --dep-libs' % plugin_env['GDAL_CONFIG']
+    cmd = '%s --libs --dep-libs' % plugin_env['GDAL_CONFIG']
     plugin_env.ParseConfig(cmd)
+
 
 # Link Library to Dependencies
 libraries = copy(plugin_env['LIBS'])

@@ -43,8 +43,14 @@ plugin_env['LIBS'] = []
 plugin_env.Append(LIBS=env['PLUGINS']['ogr']['lib'])
 
 if env['RUNTIME_LINK'] == 'static':
-    cmd = '%s --dep-libs' % plugin_env['GDAL_CONFIG']
+    cmd = '%s --libs --dep-libs' % plugin_env['GDAL_CONFIG']
     plugin_env.ParseConfig(cmd)
+    cmd = 'pkg-config libpq --libs --static'
+    try:
+        plugin_env.ParseConfig(cmd)
+    except:
+        pass
+
 
 # Link Library to Dependencies
 libraries = copy(plugin_env['LIBS'])
