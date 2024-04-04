@@ -91,11 +91,15 @@ if '-DHAVE_TIFF' in env['CPPDEFINES']:
    enabled_imaging_libraries.append('tiff_reader.cpp')
 
 if '-DHAVE_WEBP' in env['CPPDEFINES']:
-   lib_env['LIBS'].append('webp')
-   if env['RUNTIME_LINK'] == 'static':
-       lib_env['LIBS'].append('sharpyuv');
-   enabled_imaging_libraries.append('webp_reader.cpp')
-   enabled_imaging_libraries.append('webp_io.cpp')
+    cmd="pkg-config libwebp --libs"
+    if env['RUNTIME_LINK'] == 'static':
+        cmd += " --static"
+    try:
+        lib_env.ParseConfig(cmd)
+    except:
+        lib_env['LIBS'].append('webp')
+    enabled_imaging_libraries.append('webp_reader.cpp')
+    enabled_imaging_libraries.append('webp_io.cpp')
 
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     lib_env['LIBS'].append('xml2')
