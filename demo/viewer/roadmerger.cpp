@@ -37,6 +37,8 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 
 #define MERGE_RESULT "MERGE_RESULT"
 
+#define NeedAddCehui_RESULT "NeedAddCehui_RESULT"
+
 // 计算缓冲区
 static MultiPolygonPtr bufferGeom(geometry::geometry<double>& geom,double buffer_distance = 0.001){
     const int points_per_circle = buffer_distance;
@@ -110,6 +112,7 @@ RoadMerger::RoadMerger(MapWidget& mapWidget_):QThread(),
     clipedBaseSource = std::make_shared<memory_datasource>(p);
     cehuiBufferSource = std::make_shared<memory_datasource>(p);
     mergedSource = std::make_shared<memory_datasource>(p);
+    mergedResultSource = std::make_shared<memory_datasource>(p);
 }
 
 
@@ -309,6 +312,43 @@ void RoadMerger::addMergedLayer()
     mapWidget.getMap()->add_layer(lyr);
 }
 
+void RoadMerger::addClipedCehuiLayer()
+{
+    feature_type_style poly_style;
+    {
+        rule r;
+        r.set_filter(parse_expression("[NeedAddCehui_RESULT] = 1"));
+        {
+            line_symbolizer line_sym;
+            put(line_sym, keys::stroke, color("yellow"));
+            put(line_sym, keys::stroke_width, 2.0);
+            put(line_sym, keys::stroke_linecap, mapnik::line_cap_enum::ROUND_CAP);
+            put(line_sym, keys::stroke_linejoin, mapnik::line_join_enum::ROUND_JOIN);
+            r.append(std::move(line_sym));
+        }
+        poly_style.add_rule(std::move(r));
+    }
+    {
+        rule r;
+        r.set_filter(parse_expression("[NeedAddCehui_RESULT] = 0"));
+        {
+            line_symbolizer line_sym;
+            put(line_sym, keys::stroke, color("grey"));
+            put(line_sym, keys::stroke_width, 1.0);
+            put(line_sym, keys::stroke_linecap, mapnik::line_cap_enum::ROUND_CAP);
+            put(line_sym, keys::stroke_linejoin, mapnik::line_join_enum::ROUND_JOIN);
+            r.append(std::move(line_sym));
+        }
+        poly_style.add_rule(std::move(r));
+    }
+    mapWidget.getMap()->insert_style("needAddCehui_layer", std::move(poly_style));
+
+    layer lyr("needAddCehui_layer");
+    lyr.set_datasource(clipedCehuiSource);
+    lyr.add_style("needAddCehui_layer");
+    mapWidget.getMap()->add_layer(lyr);
+}
+
 void RoadMerger::toggleMergedRoad(double x, double y)
 {
     std::cout<<"begin toggleMergedRoad"<<std::endl;
@@ -331,6 +371,7 @@ void RoadMerger::toggleMergedRoad(double x, double y)
 
 void RoadMerger::getMergeResult(std::vector<long>& result)
 {
+    mergedResultSource->clear();
     query q(mergedSource->envelope());
     q.add_property_name("MERGE_RESULT");
     q.add_property_name("OSMID");
@@ -339,7 +380,111 @@ void RoadMerger::getMergeResult(std::vector<long>& result)
     while(feat){
         if( feat->get("MERGE_RESULT") == 1 ){
             result.push_back(feat->get("OSMID").to_int());
+            mergedResultSource->push(feat);
         }
         feat = fs->next();
+    }
+}
+
+void RoadMerger::generateResultBuffer(std::vector<mapnik::geometry::multi_polygon<double>>& out){
+    // 生成results数据buffer
+    {
+        ThreadPool pool(16);
+        std::vector< std::future<MultiPolygonPtr> > results;
+        mapnik::auto_cpu_timer t(std::clog, "生成result数据buffer took: ");
+
+        query q(mergedResultSource->envelope());
+        auto fs = mergedResultSource->features(q);
+        feature_ptr feat = fs->next();
+        while(feat){
+            results.emplace_back(pool.enqueue([&,feat] {
+
+                auto res = bufferGeom(feat->get_geometry());
+                return res;
+
+            }));
+            feat = fs->next();
+        }
+        for(auto && result: results){
+            out.push_back(*result.get());
+        }
+    }
+}
+
+
+void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
+                              std::vector<mapnik::geometry::multi_polygon<double>>& buffers,
+                              mapnik::geometry::geometry<double>& out)
+{
+    if( in.is<geometry::multi_line_string<double>>()){
+        auto line = in.get<geometry::multi_line_string<double>>();
+        mapnik::geometry::multi_line_string<double> result;
+        for(auto it = buffers.begin(); it != buffers.end(); it++){
+            mapnik::geometry::multi_polygon<double>& poly = *it;
+            mapnik::geometry::line_string<double> outline;
+            boost::geometry::intersection(line,poly,outline);
+            if( !outline.empty() ){
+                std::cout << "*************" << std::endl;
+                result.push_back(outline);
+            }
+        }
+
+        if( !result.empty() ){
+            out.set<mapnik::geometry::multi_line_string<double>>(result);
+        }
+    }
+    else if(in.is<geometry::line_string<double>>()){
+        auto line = in.get<geometry::line_string<double>>();
+        mapnik::geometry::multi_line_string<double> result;
+        for(auto it = buffers.begin(); it != buffers.end(); it++){
+            mapnik::geometry::multi_polygon<double>& poly = *it;
+            mapnik::geometry::line_string<double> outline;
+            boost::geometry::intersection(line,poly,outline);
+            if( !outline.empty() ){
+                std::cout << "*************" << std::endl;
+                result.push_back(outline);
+            }
+        }
+        if( !result.empty() ){
+            out.set<mapnik::geometry::multi_line_string<double>>(result);
+        }
+    }
+}
+
+void RoadMerger::clipedCehuiData()
+{
+    std::vector<mapnik::geometry::multi_polygon<double>> mergedResultBuffer;
+    generateResultBuffer(mergedResultBuffer);
+    if(mergedResultBuffer.size())
+    {
+        std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
+
+        //
+        query q(cehuiDS->envelope());
+        q.add_property_name("OSMID");
+        auto fs = cehuiDS->features(q);
+        feature_ptr feat = fs->next();
+
+        {
+            ThreadPool pool(8);
+            std::vector< std::future<feature_ptr> > results;
+            int count = 1;
+            while(feat){
+                feature_ptr cloneFeat = feat;
+                results.emplace_back(pool.enqueue([&,cloneFeat] {
+                    mapnik::geometry::geometry<double> out;
+                    clipedLineEx(cloneFeat->get_geometry(),mergedResultBuffer,out);
+                    feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), count));
+                    feature->put_new("OSMID",cloneFeat->get("OSMID"));
+                    feature->put_new("NeedAddCehui_RESULT",1);
+                    feature->set_geometry(mapnik::geometry::geometry<double>(out));
+                    return feature;
+                }));
+                feat = fs->next();
+            }
+            for(auto && result: results){
+                clipedCehuiSource->push(result.get());
+            }
+        }
     }
 }

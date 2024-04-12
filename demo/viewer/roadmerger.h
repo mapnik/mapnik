@@ -4,6 +4,12 @@
 
 #include "mapwidget.hpp"
 #include <mapnik/memory_datasource.hpp>
+#include <mapnik/geometry/boost_adapters.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geometry/multi_polygon.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/register/multi_linestring.hpp>
+#include <boost/geometry/multi/geometries/register/multi_polygon.hpp>
 #include <QThread>
 
 class RoadMerger : public QThread
@@ -17,6 +23,11 @@ class RoadMerger : public QThread
 
     // 融合后的数据源
     std::shared_ptr<mapnik::memory_datasource> mergedSource;
+
+    //results of mergedSource
+    std::shared_ptr<mapnik::memory_datasource> mergedResultSource;
+
+    std::shared_ptr<mapnik::memory_datasource> clipedCehuiSource;
 
     QString baseShp;
     QString cehuiShp;
@@ -35,6 +46,14 @@ public:
 
     // 获取融合结果
     void getMergeResult(std::vector<long>& result);
+
+    void generateResultBuffer(std::vector<mapnik::geometry::multi_polygon<double>>& out);
+
+    void clipedLineEx(mapnik::geometry::geometry<double>& in,std::vector<mapnik::geometry::multi_polygon<double>>& buffers,mapnik::geometry::geometry<double>& out);
+
+    void clipedCehuiData();
+
+
 protected:
     void run();
 
@@ -47,6 +66,7 @@ private:
     void addLineLayer(QString const& name,std::shared_ptr<mapnik::datasource> ds,std::string color, double lineWidth = 1.0);
     void addPolygonLayer(QString const& name,std::shared_ptr<mapnik::datasource> ds,std::string stroke,std::string fill);
     void addMergedLayer();
+    void addClipedCehuiLayer();
 };
 
 #endif // ROADMERGER_H
