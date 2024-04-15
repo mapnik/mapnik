@@ -43,15 +43,22 @@ class MainWindow : public QMainWindow
     std::shared_ptr<mapnik::Map> get_map();
     bool loadFeatureid2osmid(const QString& jsonPath);
     void setMidLineJsonPath(const QString& midLineJsonPath);
+    void setCompleteRoadsFile(const QString& completeRoadsFile);
 
   protected:
     void closeEvent(QCloseEvent* event);
+
+  signals:
+     void afterSave_signal();
+
   public slots:
     void zoom_all();
     void zoomIn_to_box();
     void zoomOut_to_box();
     void pan();
     void save();
+    void afterSave();
+    void completeRoads();
 
     MapWidget* mapWidget(){
         return mapWidget_;
@@ -69,11 +76,13 @@ class MainWindow : public QMainWindow
     QSharedPointer<QAction> m_zoomOut;
     QSharedPointer<QAction> m_panAct;
     QSharedPointer<QAction> m_saveAct;
+    QSharedPointer<QAction> m_completeRoads;
 
     // toolbars
     QSharedPointer<QToolBar> m_fileToolBar;
     std::map<long,long> m_osmid2featureid;
     QString m_midLinePath;
+    QString m_completeRoadsFile;
 };
 
 #endif // MAINWINDOW_HPP

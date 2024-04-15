@@ -212,6 +212,30 @@ void RoadMerger::showRoadLayers()
     mapWidget.zoomAll();
 }
 
+void RoadMerger::clearLayers()
+{
+    mapWidget.getMap()->remove_all();
+}
+
+void RoadMerger::showClipedCehuiOnMap()
+{
+    // 显示基础路网数据
+    addLineLayer("base",clipedBaseSource,"#bbbbbb");
+
+    // 显示测绘路网数据
+    addLineLayer("cehui",clipedCehuiSource,"green",2.0);
+
+    // 显示融合图层
+    addMergedLayer();
+
+    mapWidget.zoomAll();
+}
+
+void RoadMerger::exportCompleteRoads(const QString& completeRoadsFile)
+{
+
+}
+
 void RoadMerger::addLineLayer(QString const& name,QString const& shpPath,std::string lineColor, double lineWidth)
 {
     parameters p;
@@ -466,7 +490,7 @@ void RoadMerger::clipedCehuiData()
         feature_ptr feat = fs->next();
 
         {
-            ThreadPool pool(8);
+            ThreadPool pool(16);
             std::vector< std::future<feature_ptr> > results;
             int count = 1;
             while(feat){

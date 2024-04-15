@@ -53,6 +53,12 @@ public:
 
     void clipedCehuiData();
 
+    void clearLayers();
+
+    void showClipedCehuiOnMap();
+
+    void exportCompleteRoads(const QString& completeRoadsFile);
+
 
 protected:
     void run();

@@ -49,6 +49,8 @@
 #include <QMessageBox>
 #include <QCoreApplication>
 
+#include "completeRoadsWidget.hpp"
+
 using mapnik::layer;
 
 MainWindow::MainWindow()
@@ -151,6 +153,24 @@ void MainWindow::save()
     {
       QMessageBox::critical(nullptr, "错误", "无法打开文件");
     }
+
+    emit afterSave_signal();
+//    QCoreApplication::quit();
+}
+
+void MainWindow::afterSave()
+{
+    mapWidget_->roadMerger->clearLayers();
+    mapWidget_->roadMerger->clipedCehuiData();
+    mapWidget_->roadMerger->showClipedCehuiOnMap();
+    m_completeRoads->setCheckable(true);
+    CompleteRoadsWidget* pCompleteRoadsWidget = new CompleteRoadsWidget();
+    pCompleteRoadsWidget->exec();
+}
+
+void MainWindow::completeRoads()
+{
+    mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile);
     QCoreApplication::quit();
 }
 
@@ -211,6 +231,11 @@ void MainWindow::setMidLineJsonPath(const QString& midLineJsonPath)
   m_midLinePath = midLineJsonPath;
 }
 
+void MainWindow::setCompleteRoadsFile(const QString& completeRoadsFile)
+{
+    m_completeRoadsFile = completeRoadsFile;
+}
+
 void MainWindow::createActions()
 {
     // create a smart pointer to an action group
@@ -222,6 +247,7 @@ void MainWindow::createActions()
     m_zoomOut = QSharedPointer<QAction>::create(QIcon(":/images/zoomout.png"), tr("框选缩小"), this);
     m_panAct = QSharedPointer<QAction>::create(QIcon(":/images/pan.png"), tr("平移"), this);
     m_saveAct = QSharedPointer<QAction>::create(QIcon(":/images/save.png"), tr("&保存"), this);
+    m_completeRoads = QSharedPointer<QAction>::create(QIcon(":/images/home.png"), tr("&补全道路"), this);
 
     // connect the actions to the slots
     connect(m_zoomAllAct.data(), SIGNAL(triggered()), this, SLOT(zoom_all()));
@@ -229,11 +255,15 @@ void MainWindow::createActions()
     connect(m_zoomOut.data(), SIGNAL(triggered()), this, SLOT(zoomOut_to_box()));
     connect(m_panAct.data(), SIGNAL(triggered()), this, SLOT(pan()));
     connect(m_saveAct.data(), SIGNAL(triggered()), this, SLOT(save()));
+    connect(this, SIGNAL(afterSave_signal()), this, SLOT(afterSave()));
+    connect(m_completeRoads.data(), SIGNAL(triggered()), this, SLOT(completeRoads()));
 
     // set some actions as checkable
     m_zoomIn->setCheckable(true);
     m_zoomOut->setCheckable(true);
     m_panAct->setCheckable(true);
+    m_saveAct->setChecked(true);
+    m_completeRoads->setCheckable(true);
 
     // add the actions to the action group
     m_toolsGroup->addAction(m_zoomAllAct.data());
@@ -241,9 +271,8 @@ void MainWindow::createActions()
     m_toolsGroup->addAction(m_zoomOut.data());
     m_toolsGroup->addAction(m_panAct.data());
     m_toolsGroup->addAction(m_saveAct.data());
+    m_toolsGroup->addAction(m_completeRoads.data());
 
-    // set the default checked action
-    m_panAct->setChecked(true);
 }
 
 void MainWindow::createToolBars()
@@ -257,6 +286,7 @@ void MainWindow::createToolBars()
     m_fileToolBar->addAction(m_zoomOut.data());
     m_fileToolBar->addAction(m_panAct.data());
     m_fileToolBar->addAction(m_saveAct.data());
+    m_fileToolBar->addAction(m_completeRoads.data());
 
     // add the tool bar to the widget
     addToolBar(m_fileToolBar.data());
