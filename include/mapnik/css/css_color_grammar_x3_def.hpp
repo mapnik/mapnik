@@ -352,9 +352,9 @@ auto const rgb_color_def = lit("rgb")
     >> attr(255) >> lit(')');
 
 auto const rgb_color_percent_def = lit("rgb")
-    >> lit('(') >> dec3[percent_red] >> lit('%')
-    >> lit(',') >> dec3[percent_green] >> lit('%')
-    >> lit(',') >> dec3[percent_blue] >> lit('%')
+    >> lit('(') >> double_[percent_red] >> lit('%')
+    >> lit(',') >> double_[percent_green] >> lit('%')
+    >> lit(',') >> double_[percent_blue] >> lit('%')
     >> attr(255) >> lit(')');
 
 auto const rgba_color_def = lit("rgba")
@@ -364,24 +364,24 @@ auto const rgba_color_def = lit("rgba")
     >> lit(',') >> double_[opacity] >> lit(')');
 
 auto const rgba_color_percent_def = lit("rgba")
-    >> lit('(') >> dec3[percent_red] >> lit('%')
-    >> lit(',') >> dec3[percent_green] >> lit('%')
-    >> lit(',') >> dec3[percent_blue] >> lit('%')
+    >> lit('(') >> double_[percent_red] >> lit('%')
+    >> lit(',') >> double_[percent_green] >> lit('%')
+    >> lit(',') >> double_[percent_blue] >> lit('%')
     >> lit(',') >> double_[opacity] >> lit(')');
 
-auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint16_t,std::uint8_t,std::uint8_t, double >> {} =
+auto const hsl_values = x3::rule<class hsl_values, std::tuple<std::uint16_t, double, double, double >> {} =
     lit("hsl")
     >> lit('(') >> dec3
-    >> lit(',') >> dec3 >> lit('%')
-    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> double_ >> lit('%')
+    >> lit(',') >> double_ >> lit('%')
     >> attr(1.0) >> lit(')')
     ;
 
-auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint16_t,std::uint8_t,std::uint8_t, double >> {} =
+auto const hsla_values = x3::rule<class hsla_values, std::tuple<std::uint16_t, double, double, double >> {} =
     lit("hsla")
     >> lit('(') >> dec3
-    >> lit(',') >> dec3 >> lit('%')
-    >> lit(',') >> dec3 >> lit('%')
+    >> lit(',') >> double_ >> lit('%')
+    >> lit(',') >> double_ >> lit('%')
     >> lit(',') >> double_ >> lit(')')
     ;
 

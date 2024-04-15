@@ -14,6 +14,9 @@ TEST_CASE("CSS color")
         using namespace mapnik::css_color_grammar;
         CHECK(percent_converter::call(1.0) == 3);
         CHECK(percent_converter::call(60.0) == 153);
+        CHECK(percent_converter::call(10) == 26);
+        CHECK(percent_converter::call(35) == 89);
+        CHECK(percent_converter::call(35.4999) == 91);
         // should not overflow on invalid input
         CHECK(percent_converter::call(100000.0) == 255);
         CHECK(percent_converter::call(-100000.0) == 0);
@@ -35,13 +38,20 @@ TEST_CASE("CSS color")
         }
         {
             // rgb (percent)
-            std::string s("rgb(50%,0%,100%)");
+            std::string s1("rgb(50%,0%,100%)");
             mapnik::color c;
-            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c));
             CHECK(c.alpha() == 0xff);
             CHECK(c.red() == 0x80);
             CHECK(c.green() == 0x00);
             CHECK(c.blue() == 0xff);
+            // rgb (fractional percent)
+            std::string s2("rgb(50.5%,0.5%,99.5%)"); // #8101fe
+            CHECK(boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0xff);
+            CHECK(c.red() == 0x81);
+            CHECK(c.green() == 0x01);
+            CHECK(c.blue() == 0xfe);
         }
         {
             // rgba
@@ -55,13 +65,20 @@ TEST_CASE("CSS color")
         }
         {
             // rgba (percent)
-            std::string s("rgba(50%,0%,100%,0.5)");
+            std::string s1("rgba(50%,0%,100%,0.5)");
             mapnik::color c;
-            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(boost::spirit::x3::phrase_parse(s1.cbegin(), s1.cend(), color_grammar, space, c));
             CHECK(c.alpha() == 0x80);
             CHECK(c.red() == 0x80);
             CHECK(c.green() == 0x00);
             CHECK(c.blue() == 0xff);
+            // rgba (fractional percent)
+            std::string s2("rgb(50.5%,0.5%,99.5%)"); //#8101fe80
+            CHECK(boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 0x80);
+            CHECK(c.red() == 0x81);
+            CHECK(c.green() == 0x01);
+            CHECK(c.blue() == 0xfe);
         }
         {
             // named colours
@@ -82,6 +99,16 @@ TEST_CASE("CSS color")
             CHECK(c.red() == 64);
             CHECK(c.green() == 64);
             CHECK(c.blue() == 191);
+        }
+        // hsl (fractional percent)
+        {
+            std::string s("hsl(240,50.5%,49.5%)"); // Color(R=62,G=62,B=190,A=255)
+            mapnik::color c;
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 255);
+            CHECK(c.red() == 62);
+            CHECK(c.green() == 62);
+            CHECK(c.blue() == 190);
         }
         // hsl (hue range 0..360)
         {
@@ -115,6 +142,16 @@ TEST_CASE("CSS color")
             CHECK(c.red() == 64);
             CHECK(c.green() == 64);
             CHECK(c.blue() == 191);
+        }
+        // hsla (fractional percent)
+        {
+            std::string s("hsl(240,50.5%,49.5%,0.5)"); // Color(R=62,G=62,B=190,A=128)
+            mapnik::color c;
+            CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
+            CHECK(c.alpha() == 128);
+            CHECK(c.red() == 62);
+            CHECK(c.green() == 62);
+            CHECK(c.blue() == 190);
         }
         // hsla (hue range 0..360)
         {

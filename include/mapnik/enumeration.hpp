@@ -149,9 +149,7 @@ struct MAPNIK_DECL enumeration
 {
     using native_type = ENUM;
     constexpr operator ENUM() const { return value_; }
-    // constexpr bool operator==(const enumeration_new& rhs) { return value_ == rhs.value_; }
     void operator=(ENUM v) { value_ = v; }
-    void operator=(const enumeration& other) { value_ = other.value_; }
 
     enumeration()
         : value_()
