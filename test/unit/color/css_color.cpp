@@ -145,7 +145,7 @@ TEST_CASE("CSS color")
         }
         // hsla (fractional percent)
         {
-            std::string s("hsl(240,50.5%,49.5%,0.5)"); // Color(R=62,G=62,B=190,A=128)
+            std::string s("hsla(240,50.5%,49.5%,0.5)"); // Color(R=62,G=62,B=190,A=128)
             mapnik::color c;
             CHECK(boost::spirit::x3::phrase_parse(s.cbegin(), s.cend(), color_grammar, space, c));
             CHECK(c.alpha() == 128);
