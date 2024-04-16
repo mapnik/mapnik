@@ -161,6 +161,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
         double x = e->x();
         double y = e->y();
         roadMerger->toggleMergedRoad(x,y);
+        roadMerger->toggleNeedCompleteRoad(x,y);
     }
 }
 

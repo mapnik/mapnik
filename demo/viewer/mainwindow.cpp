@@ -164,8 +164,8 @@ void MainWindow::afterSave()
     mapWidget_->roadMerger->clipedCehuiData();
     mapWidget_->roadMerger->showClipedCehuiOnMap();
     m_completeRoads->setCheckable(true);
-    CompleteRoadsWidget* pCompleteRoadsWidget = new CompleteRoadsWidget();
-    pCompleteRoadsWidget->exec();
+//    CompleteRoadsWidget* pCompleteRoadsWidget = new CompleteRoadsWidget();
+//    pCompleteRoadsWidget->exec();
 }
 
 void MainWindow::completeRoads()
