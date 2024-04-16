@@ -36,22 +36,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        memory-mapped: ["OFF", "ON"]
-        static-build: ["OFF", "ON"]
-        cxx-standard: [14]
+        memory-mapped: ["ON"]
+        static-build: ["OFF"]
+        cxx-standard: [17]
         include:
           - os: ubuntu-latest
             mono: mono
           - os: macos-latest
             mono: mono
-          - os: macos-latest
-            cxx-standard: 17
-            mono: mono
-          - os: ubuntu-latest
-            cxx-standard: 17
-            mono: mono
           - os: windows-latest
-            cxx-standard: 17
 
     runs-on: ${{ matrix.os }}
 
@@ -80,7 +73,7 @@ jobs:
       - name: setup vcpkg
         uses: ./.github/actions/setup_vcpkg
         with:
-          vcpkg-sha: e105a86c97b8ab13d4dbe3f7bd9ebc17ece31634
+          vcpkg-sha: b4a3d89125e45bc8f80fb94bef9761d4f4e14fb9
           nuget-source: https://nuget.pkg.github.com/mapnik/index.json
           nuget-username: ${{ github.actor }}
           nuget-pat: ${{ secrets.GITHUB_TOKEN }}
@@ -101,7 +94,7 @@ jobs:
         run: |
           cmake \
             -DBUILD_SHARED_LIBS:BOOL=${{ matrix.static-build || 'ON' }} \
-            -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard || '14' }} \
+            -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }}  \
             -DUSE_MEMORY_MAPPED_FILE:BOOL=${{ matrix.memory-mapped || 'ON' }} \
             -LA \
             --preset ${{ env.PRESET }}
