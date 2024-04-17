@@ -54,7 +54,7 @@ public:
 
     void generateResultBuffer(std::vector<mapnik::geometry::multi_polygon<double>>& out);
 
-    void clipedLineEx(mapnik::geometry::geometry<double>& in,std::vector<mapnik::geometry::multi_polygon<double>>& buffers,mapnik::geometry::geometry<double>& out);
+    bool clipedLineEx(mapnik::geometry::geometry<double>& in,std::vector<mapnik::geometry::multi_polygon<double>>& buffers,mapnik::geometry::geometry<double>& out);
 
     void clipedCehuiData();
 

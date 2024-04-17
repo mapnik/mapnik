@@ -39,6 +39,29 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 
 #define NeedAddCehui_RESULT "NeedAddCehui_RESULT"
 
+
+// 合并相交或相互包含的多边形
+static void mergePolygons(std::vector<geometry::multi_polygon<double>>& polygons) {
+    bool merged = true;
+    while (merged) {
+        merged = false;
+        for (size_t i = 0; i < polygons.size(); ++i) {
+            for (size_t j = i + 1; j < polygons.size(); ++j) {
+                if (!boost::geometry::disjoint(polygons[i], polygons[j])) {
+                    // 合并多边形
+                    boost::geometry::union_(polygons[i], polygons[j], polygons[i]);
+                    polygons.erase(polygons.begin() + j);
+                    merged = true;
+                    break;
+                }
+            }
+            if (merged) {
+                break;
+            }
+        }
+    }
+}
+
 // 计算缓冲区
 static MultiPolygonPtr bufferGeom(geometry::geometry<double>& geom,double buffer_distance = 0.001){
     const int points_per_circle = buffer_distance;
@@ -485,51 +508,143 @@ void RoadMerger::generateResultBuffer(std::vector<mapnik::geometry::multi_polygo
 
             feat = fs->next();
         }
+
         for(auto && result: results){
             out.push_back(*result.get());
         }
+
+        mergePolygons(out);
+
+//        for(auto && result: results){
+//            out.push_back(*result.get());
+//        }
     }
 }
 
 
-void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
+bool RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
                               std::vector<mapnik::geometry::multi_polygon<double>>& buffers,
                               mapnik::geometry::geometry<double>& out)
 {
-    if( in.is<geometry::multi_line_string<double>>()){
-        auto line = in.get<geometry::multi_line_string<double>>();
+    if(in.is<geometry::line_string<double>>())
+    {
+        auto line = in.get<geometry::line_string<double>>();
+        bool isDisjoin = true;
         mapnik::geometry::multi_line_string<double> result;
-        for(auto it = buffers.begin(); it != buffers.end(); it++){
+        for(auto it = buffers.begin(); it != buffers.end(); it++)
+        {
             mapnik::geometry::multi_polygon<double>& poly = *it;
-            mapnik::geometry::line_string<double> outline;
-            boost::geometry::intersection(line,poly,outline);
-//            boost::geometry::difference(line,poly,outline);
-            if( !outline.empty() ){
-                std::cout << "*************" << std::endl;
-                result.push_back(outline);
+            if(!boost::geometry::disjoint(line, poly))
+            {
+                isDisjoin = false;
+                if(boost::geometry::intersects(line, poly))
+                {
+                    mapnik::geometry::multi_point<double> intersection_points;
+                    boost::geometry::intersection(line, poly, intersection_points);
+                    std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
+                    if(intersection_points.size())
+                    {
+                        std::map<int,int> intersectIndex2SegIndex;
+
+                        for(int i=0; i<line.size()-1; ++i)
+                        {
+                            geometry::line_string<double> curSeg;
+                            curSeg.push_back(line[i]);
+                            curSeg.push_back(line[i+1]);
+                            for(int j=0;j<intersection_points.size();j++)
+                            {
+                                if(boost::geometry::intersects(intersection_points[j], curSeg))
+                                {
+                                    intersectIndex2SegIndex.emplace(j,i);
+                                }
+                            }
+
+                        }
+
+
+                        int startIndex = 0;
+                        int endIndex = 0;
+                        for(int e=0; e<intersection_points.size(); ++e)
+                        {
+                            geometry::line_string<double> cutline;
+                            if(e!=0)
+                            {
+                                cutline.push_back(intersection_points[e-1]);
+                            }
+                            int segIndex = intersectIndex2SegIndex[e];
+                            endIndex = segIndex +1;
+
+                            for(int f=startIndex; f<endIndex; ++f)
+                            {
+                                cutline.push_back(line[f]);
+                            }
+                            cutline.push_back(intersection_points[e]);
+
+                            bool isInBuffer = false;
+                            for(auto itor = buffers.begin(); itor != buffers.end(); itor++)
+                            {
+                                mapnik::geometry::multi_polygon<double>& tempoly = *itor;
+                                if(boost::geometry::within(cutline, tempoly))
+                                {
+                                    isInBuffer = true;
+                                    std::cout<<"cutline is In buffer."<<std::endl;
+                                    break;
+                                }
+                            }
+                            if(!isInBuffer)
+                            {
+                                result.push_back(cutline);
+                            }
+
+                            startIndex = endIndex;
+                        }
+
+                    }
+
+                }
             }
         }
 
-        if( !result.empty() ){
-            out.set<mapnik::geometry::multi_line_string<double>>(result);
+        if(isDisjoin)
+        {
+            result.push_back(line);
+            std::cout<<"in.is geometry::line_string. It is disjoint."<<std::endl;
         }
-    }
-    else if(in.is<geometry::line_string<double>>()){
-        auto line = in.get<geometry::line_string<double>>();
-        mapnik::geometry::multi_line_string<double> result;
-        for(auto it = buffers.begin(); it != buffers.end(); it++){
-            mapnik::geometry::multi_polygon<double>& poly = *it;
-            mapnik::geometry::line_string<double> outline;
-            boost::geometry::intersection(line,poly,outline);
-//            boost::geometry::difference(line,poly,outline);
-            if( !outline.empty() ){
-                std::cout << "*************" << std::endl;
-                result.push_back(outline);
+
+        bool hasNeedCut = false;
+
+        if(result.size())
+        {
+//            out.set<mapnik::geometry::multi_line_string<double>>(result);
+            mapnik::geometry::multi_line_string<double> allResult;
+            for(int i=0; i<result.size(); ++i)
+            {
+                mapnik::geometry::line_string<double> temline = result[i];
+                for(auto itorCheck = buffers.begin(); itorCheck != buffers.end(); itorCheck++)
+                {
+                    mapnik::geometry::multi_polygon<double>& checkPoly = *itorCheck;
+                    if(!boost::geometry::disjoint(temline, checkPoly))
+                    {
+                        hasNeedCut = true;
+                        mapnik::geometry::multi_line_string<double> subResult;
+                        clipedLineEx(result[i], buffers, &subResult);
+                        for(int t=0;t<subResult.size();t++)
+                        {
+                            allResult.push_back(subResult[t]);
+                        }
+                    }
+                }
             }
+            out.set<mapnik::geometry::multi_line_string<double>>(allResult);
+            std::cout<<"allResult count:"<<result.size()<<std::endl;
         }
-        if( !result.empty() ){
-            out.set<mapnik::geometry::multi_line_string<double>>(result);
-        }
+
+        return hasNeedCut;
+    }
+    else
+    {
+        std::cout<<"has other geometry type"<<std::endl;
+        return false;
     }
 }
 
