@@ -448,8 +448,8 @@ feature_summary(FILENAME "${CMAKE_CURRENT_BINARY_DIR}/packages.log" WHAT PACKAGE
 include(MapnikExport)
 include(MapnikExportPkgConfig)
 
-install(DIRECTORY include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
-install(DIRECTORY deps/agg/include/ DESTINATION "${MAPNIK_INCLUDE_DIR}")
+install(DIRECTORY include/mapnik/ DESTINATION "${MAPNIK_INCLUDE_DIR}/mapnik")
+install(DIRECTORY deps/agg/include/ DESTINATION "${MAPNIK_INCLUDE_DIR}/mapnik/agg")
 install(DIRECTORY deps/mapnik DESTINATION "${MAPNIK_INCLUDE_DIR}")
 file(GLOB TTF_FONT_FILES "fonts/*/*/*.ttf")
 install(FILES ${TTF_FONT_FILES} DESTINATION "${FONTS_INSTALL_DIR}")

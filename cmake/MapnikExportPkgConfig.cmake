@@ -9,7 +9,7 @@ Name: @_lib_name@
 Description: @_description@
 Version: @MAPNIK_VERSION@
 Libs: -L"${libdir}" -l$<TARGET_FILE_BASE_NAME:@_target@>$<TARGET_PROPERTY:@_target@,$<CONFIG>_POSTFIX>
-Cflags: -I"${includedir}" ]]
+Cflags: -I"${includedir}" -I"${includedir}/mapnik" ]]
     _contents @ONLY)
 
     file(GENERATE
@@ -73,7 +73,7 @@ Description: @_description@
 Version: @MAPNIK_VERSION@
 Requires: @m_requires@
 Libs: -L"${libdir}" -l$<TARGET_FILE_BASE_NAME:mapnik>$<TARGET_PROPERTY:mapnik,$<CONFIG>_POSTFIX>
-Cflags: -I"${includedir}" @m_str_compile_defs@]]
+Cflags: -I"${includedir}" -I"${includedir}/mapnik" -I"${includedir}/mapnik/agg" @m_str_compile_defs@]]
     _contents @ONLY)
     file(GENERATE
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_lib_name}-$<CONFIG>.pc
