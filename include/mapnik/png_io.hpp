@@ -40,6 +40,7 @@ extern "C" {
 #include <png.h>
 }
 #include <set>
+#include <string>
 MAPNIK_DISABLE_WARNING_POP
 
 #define MAX_OCTREE_LEVELS 4
