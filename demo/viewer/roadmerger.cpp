@@ -40,27 +40,27 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #define NeedAddCehui_RESULT "NeedAddCehui_RESULT"
 
 
-// 合并相交或相互包含的多边形
-static void mergePolygons(std::vector<geometry::multi_polygon<double>>& polygons) {
-    bool merged = true;
-    while (merged) {
-        merged = false;
-        for (size_t i = 0; i < polygons.size(); ++i) {
-            for (size_t j = i + 1; j < polygons.size(); ++j) {
-                if (!boost::geometry::disjoint(polygons[i], polygons[j])) {
-                    // 合并多边形
-                    boost::geometry::union_(polygons[i], polygons[j], polygons[i]);
-                    polygons.erase(polygons.begin() + j);
-                    merged = true;
-                    break;
-                }
-            }
-            if (merged) {
-                break;
-            }
-        }
-    }
-}
+//// 合并相交或相互包含的多边形
+//static void mergePolygons(std::vector<geometry::multi_polygon<double>>& polygons) {
+//    bool merged = true;
+//    while (merged) {
+//        merged = false;
+//        for (size_t i = 0; i < polygons.size(); ++i) {
+//            for (size_t j = i + 1; j < polygons.size(); ++j) {
+//                if (!boost::geometry::disjoint(polygons[i], polygons[j])) {
+//                    // 合并多边形
+//                    boost::geometry::union_(polygons[i], polygons[j], polygons[i]);
+//                    polygons.erase(polygons.begin() + j);
+//                    merged = true;
+//                    break;
+//                }
+//            }
+//            if (merged) {
+//                break;
+//            }
+//        }
+//    }
+//}
 
 // 计算缓冲区
 static MultiPolygonPtr bufferGeom(geometry::geometry<double>& geom,double buffer_distance = 0.001){
@@ -512,12 +512,6 @@ void RoadMerger::generateResultBuffer(std::vector<mapnik::geometry::multi_polygo
         for(auto && result: results){
             out.push_back(*result.get());
         }
-
-        mergePolygons(out);
-
-//        for(auto && result: results){
-//            out.push_back(*result.get());
-//        }
     }
 }
 
@@ -534,28 +528,34 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
         mapnik::geometry::multi_line_string<double> result;
         for(auto it = buffers.begin(); it != buffers.end(); it++)
         {
-            mapnik::geometry::multi_polygon<double>& poly = *it;
-            if(!boost::geometry::disjoint(line, poly))
+            mapnik::geometry::multi_polygon<double>& multiPoly = *it;
+            for(auto polyItor = multiPoly.begin(); polyItor != multiPoly.end(); polyItor++)
             {
-                isDisjoin = false;
-                if(boost::geometry::intersects(line, poly))
+                mapnik::geometry::polygon<double>& poly = *polyItor;
+                if(!boost::geometry::disjoint(line, poly))
                 {
-                    mapnik::geometry::multi_point<double> intersection_points;
-                    boost::geometry::intersection(line, poly, intersection_points);
-                    std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
-                    if(intersection_points.size())
+                    isDisjoin = false;
+                    if(boost::geometry::intersects(line, poly))
                     {
-                        for(int i=0;i<intersection_points.size();i++)
+                        mapnik::geometry::multi_point<double> intersection_points;
+                        boost::geometry::intersection(line, poly, intersection_points);
+                        std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
+                        if(intersection_points.size())
                         {
-                            std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
-                            std::cout<<"intersection_points["<<i<<"] x:"<< intersection_points[i].x <<std::endl;
-                            std::cout<<"intersection_points["<<i<<"] y:"<< intersection_points[i].y <<std::endl;
-                            allIntersection_points.push_back(intersection_points[i]);
+                            for(int i=0;i<intersection_points.size();i++)
+                            {
+                                std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
+                                std::cout<<"intersection_points["<<i<<"] x:"<< intersection_points[i].x <<std::endl;
+                                std::cout<<"intersection_points["<<i<<"] y:"<< intersection_points[i].y <<std::endl;
+                                allIntersection_points.push_back(intersection_points[i]);
+                            }
                         }
-                    }
 
+                    }
                 }
             }
+
+
         }
 
         if(isDisjoin)
@@ -616,7 +616,21 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
                     cutline.push_back(node.pos);
                     if(cutline.size()>1)
                     {
-                        result.push_back(cutline);
+                        bool isOut = true;
+                        for(auto itor = buffers.begin(); itor != buffers.end(); itor++)
+                        {
+                            mapnik::geometry::multi_polygon<double>& polyCheck = *itor;
+                            if(boost::geometry::within(cutline[0], polyCheck)
+                               || boost::geometry::intersects(cutline[0], polyCheck))
+                            {
+                                isOut = false;
+                                break;
+                            }
+
+                        }
+
+                        if(isOut)
+                            result.push_back(cutline);
                     }
 
                     cutline.clear();
@@ -630,8 +644,6 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
             }
 
             out = result;
-
-//            out.set<mapnik::geometry::multi_line_string<double>>(result);
             std::cout<<"result count:"<<result.size()<<std::endl;
         }
 
