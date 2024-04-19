@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
     waitingspinnerwidget.h
     waitingspinnerwidget.cpp
     cehuidatainfo.hpp
+    completeRoadsWidget.hpp
+    completeRoadsWidget.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
