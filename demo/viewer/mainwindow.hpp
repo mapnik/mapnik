@@ -29,8 +29,7 @@
 
 #include "mapwidget.hpp"
 #include <QSharedPointer>
-
-class CompleteRoadsWidget;
+#include "completeRoadsWidget.hpp"
 
 
 // using namespace mapnik;
@@ -88,6 +87,8 @@ class MainWindow : public QMainWindow
     QString m_completeRoadsFile;
 
     QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
+    QSharedPointer<QDockWidget> m_dockWidget;
+
 };
 
 #endif // MAINWINDOW_HPP

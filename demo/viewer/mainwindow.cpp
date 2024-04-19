@@ -51,7 +51,6 @@
 #include "rapidjson/stringbuffer.h"
 #include <QMessageBox>
 #include <QCoreApplication>
-#include "completeRoadsWidget.hpp"
 
 using mapnik::layer;
 
@@ -65,7 +64,7 @@ MainWindow::MainWindow()
     // 创建自定义部件
     m_completeRoadsWidget = QSharedPointer<CompleteRoadsWidget>::create(this);
     // 创建 QDockWidget 并设置特性
-    QSharedPointer<QDockWidget> m_dockWidget =  QSharedPointer<QDockWidget>::create(this);
+    m_dockWidget =  QSharedPointer<QDockWidget>::create(this);
     m_dockWidget->setWidget(m_completeRoadsWidget.data());
     m_dockWidget->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
