@@ -73,9 +73,12 @@ runs:
       if: runner.os != 'Windows'
       shell: "bash"
       run: |
-        lcov --directory . --capture --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
-        lcov --list coverage.info
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          LCOV_EXTRA_OPTIONS="--ignore-errors gcov --ignore-errors inconsistent --ignore-errors unused"
+        fi
+        lcov ${LCOV_EXTRA_OPTIONS:-} --directory . --capture --output-file coverage.info
+        lcov ${LCOV_EXTRA_OPTIONS:-} --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
+        lcov ${LCOV_EXTRA_OPTIONS:-} --list coverage.info
 
     - name: Upload coverage to Codecov (linux & macos)
       if: runner.os != 'Windows'
