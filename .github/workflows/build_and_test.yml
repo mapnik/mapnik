@@ -93,9 +93,9 @@ jobs:
         shell: bash
         run: |
           cmake \
-            -DBUILD_SHARED_LIBS:BOOL=${{ matrix.static-build || 'ON' }} \
+            -DBUILD_SHARED_LIBS:BOOL='ON' \
             -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }}  \
-            -DUSE_MEMORY_MAPPED_FILE:BOOL=${{ matrix.memory-mapped || 'ON' }} \
+            -DUSE_MEMORY_MAPPED_FILE:BOOL='ON' \
             -LA \
             --preset ${{ env.PRESET }}
 
