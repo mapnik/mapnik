@@ -1,3 +1,6 @@
+#ifndef COMPLETEROADSWIDGET_HPP
+#define COMPLETEROADSWIDGET_HPP
+
 #include <QWidget>
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -16,3 +19,5 @@ private slots:
 private:
     QListWidget * m_listWidget;
 };
+
+#endif //COMPLETEROADSWIDGET_HPP
