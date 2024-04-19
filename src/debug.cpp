@@ -61,13 +61,12 @@ std::atomic<logger::severity_type> logger::severity_level_
 bool logger::severity_env_check_{true};
 bool logger::format_env_check_{true};
 
-logger::severity_type logger::severity_level_
-{
+logger::severity_type logger::severity_level_{
 #endif
 #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
     logger::debug
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
-    logger::warn
+  logger::warn
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
 logger::error
 #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3

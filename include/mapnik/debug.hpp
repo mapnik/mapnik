@@ -96,10 +96,7 @@ class MAPNIK_DECL logger : public singleton<logger, CreateStatic>,
     }
 
     // format
-    static std::string const& get_format()
-    {
-        return format_;
-    }
+    static std::string const& get_format() { return format_; }
 
     static void set_format(std::string const& format)
     {
@@ -211,10 +208,7 @@ class base_log : public util::noncopyable
 
   private:
 #ifdef MAPNIK_LOG
-    inline bool check_severity()
-    {
-        return Severity >= logger::get_object_severity(object_name_);
-    }
+    inline bool check_severity() { return Severity >= logger::get_object_severity(object_name_); }
 
     typename output_policy::stream_buffer streambuf_;
     std::string object_name_;

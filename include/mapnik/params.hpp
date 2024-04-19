@@ -75,18 +75,18 @@ class MAPNIK_DECL parameters : public param_map
 #ifdef _MSC_VER
 template MAPNIK_DECL std::optional<std::string> parameters::get(std::string const& key) const;
 template MAPNIK_DECL std::optional<std::string> parameters::get(std::string const& key,
-                                                                  std::string const& default_opt_value) const;
+                                                                std::string const& default_opt_value) const;
 template MAPNIK_DECL std::optional<value_double> parameters::get(std::string const& key) const;
 template MAPNIK_DECL std::optional<value_double> parameters::get(std::string const& key,
-                                                                   value_double const& default_opt_value) const;
+                                                                 value_double const& default_opt_value) const;
 
 template MAPNIK_DECL std::optional<value_integer> parameters::get(std::string const& key) const;
 template MAPNIK_DECL std::optional<value_integer> parameters::get(std::string const& key,
-                                                                    value_integer const& default_opt_value) const;
+                                                                  value_integer const& default_opt_value) const;
 
 template MAPNIK_DECL std::optional<value_bool> parameters::get(std::string const& key) const;
 template MAPNIK_DECL std::optional<value_bool> parameters::get(std::string const& key,
-                                                                 value_bool const& default_opt_value) const;
+                                                               value_bool const& default_opt_value) const;
 
 template MAPNIK_DECL std::optional<mapnik::boolean_type> parameters::get(std::string const& key) const;
 template MAPNIK_DECL std::optional<mapnik::boolean_type>

@@ -260,9 +260,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     if (geometry_field_.empty())
     {
         std::ostringstream s;
-        s << "Sqlite Plugin: unable to detect the column "
-          << "containing a valid geometry on table '" << geometry_table_ << "'. "
-          << "Please provide a column name by passing the 'geometry_field' option "
+        s << "Sqlite Plugin: unable to detect the column " << "containing a valid geometry on table '"
+          << geometry_table_ << "'. " << "Please provide a column name by passing the 'geometry_field' option "
           << "or indicate a different spatial table to use by passing the 'geometry_table' option";
         throw datasource_exception(s.str());
     }
@@ -316,12 +315,9 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
             else
             {
                 std::ostringstream s;
-                s << "Sqlite Plugin: could not generate spatial index"
-                  << " for table '" << geometry_table_ << "'"
-                  << " as no primary key can be detected."
-                  << " You should either declare an INTEGER PRIMARY KEY"
-                  << " or set the 'key_field' option to force a"
-                  << " given field to be used as the primary key";
+                s << "Sqlite Plugin: could not generate spatial index" << " for table '" << geometry_table_ << "'"
+                  << " as no primary key can be detected." << " You should either declare an INTEGER PRIMARY KEY"
+                  << " or set the 'key_field' option to force a" << " given field to be used as the primary key";
                 throw datasource_exception(s.str());
             }
         }

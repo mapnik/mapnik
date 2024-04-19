@@ -47,7 +47,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <iosfwd>
 #include <string>
 
-
 template<std::size_t Max, std::size_t Min>
 struct csv_linear : boost::geometry::index::linear<Max, Min>
 {};

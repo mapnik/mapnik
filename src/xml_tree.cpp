@@ -58,7 +58,10 @@ struct name_trait
     template<>                                                                                                         \
     struct name_trait<type>                                                                                            \
     {                                                                                                                  \
-        static std::string name() { return std::string("type ") + type_name; }                                         \
+        static std::string name()                                                                                      \
+        {                                                                                                              \
+            return std::string("type ") + type_name;                                                                   \
+        }                                                                                                              \
     };
 
 DEFINE_NAME_TRAIT(double, "double")

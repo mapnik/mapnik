@@ -613,15 +613,9 @@ class renderer_agg : util::noncopyable
     }
 #endif
 
-    inline VertexSource& source() const
-    {
-        return source_;
-    }
+    inline VertexSource& source() const { return source_; }
 
-    inline group const& svg_group() const
-    {
-        return svg_group_;
-    }
+    inline group const& svg_group() const { return svg_group_; }
 
   private:
 

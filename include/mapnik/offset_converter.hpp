@@ -561,15 +561,13 @@ struct offset_converter
             if (bulge_steps == 0)
             {
                 // inside turn (sharp/obtuse angle)
-                MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                                         << " Sharp joint [<< inside turn "
+                MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:" << " Sharp joint [<< inside turn "
                                          << static_cast<int>(util::degrees(joint_angle)) << " degrees >>]";
             }
             else
             {
                 // outside turn (reflex angle)
-                MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
-                                         << " Bulge joint >)) outside turn "
+                MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:" << " Bulge joint >)) outside turn "
                                          << static_cast<int>(util::degrees(joint_angle)) << " degrees ((< with "
                                          << bulge_steps << " segments";
             }
@@ -640,10 +638,7 @@ struct offset_converter
         return cur_.cmd;
     }
 
-    void push_vertex(vertex2d const& v)
-    {
-        vertices_.push_back(v);
-    }
+    void push_vertex(vertex2d const& v) { vertices_.push_back(v); }
 
     Geometry& geom_;
     double offset_;

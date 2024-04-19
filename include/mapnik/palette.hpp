@@ -46,7 +46,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <vector>
 #include <tuple>
 
-#define U2RED(x)   ((x)&0xff)
+#define U2RED(x)   ((x) & 0xff)
 #define U2GREEN(x) (((x) >> 8) & 0xff)
 #define U2BLUE(x)  (((x) >> 16) & 0xff)
 #define U2ALPHA(x) (((x) >> 24) & 0xff)

@@ -492,14 +492,14 @@ std::string proj_transform::definition() const
     }
     else
 #endif
-        if (wgs84_to_merc_)
-        {
-            return "wgs84 => merc";
-        }
-        else if (merc_to_wgs84_)
-        {
-            return "merc => wgs84";
-        }
+      if (wgs84_to_merc_)
+    {
+        return "wgs84 => merc";
+    }
+    else if (merc_to_wgs84_)
+    {
+        return "merc => wgs84";
+    }
     return "unknown";
 }
 

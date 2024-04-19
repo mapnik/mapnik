@@ -215,8 +215,8 @@ struct grid_render_marker_visitor
                                     0.0,
                                     0.0,
                                     1.0,
-                                    std::nullopt); // TODO: is 1.0 a valid default here, and do we even care in grid_renderer
-                                             // what the image looks like?
+                                    std::nullopt); // TODO: is 1.0 a valid default here, and do we even care in
+                                                   // grid_renderer what the image looks like?
             pixmap_.set_rectangle(feature_.id(),
                                   target,
                                   boost::math::iround(pos_.x - cx),

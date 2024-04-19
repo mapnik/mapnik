@@ -464,8 +464,7 @@ struct set_symbolizer_property_impl<Symbolizer, T, true>
                     const auto [result_value, is_evaluated] = pre_evaluate_expression<value>(*val);
                     if (is_evaluated)
                     {
-                        const auto enum_val2 =
-                          detail::enum_traits<value_type>::from_string(result_value.to_string());
+                        const auto enum_val2 = detail::enum_traits<value_type>::from_string(result_value.to_string());
                         if (enum_val2)
                         {
                             put(sym, key, *enum_val);

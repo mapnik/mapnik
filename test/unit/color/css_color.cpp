@@ -73,7 +73,7 @@ TEST_CASE("CSS color")
             CHECK(c.green() == 0x00);
             CHECK(c.blue() == 0xff);
             // rgba (fractional percent)
-            std::string s2("rgb(50.5%,0.5%,99.5%)"); //#8101fe80
+            std::string s2("rgb(50.5%,0.5%,99.5%)"); // #8101fe80
             CHECK(boost::spirit::x3::phrase_parse(s2.cbegin(), s2.cend(), color_grammar, space, c));
             CHECK(c.alpha() == 0x80);
             CHECK(c.red() == 0x81);

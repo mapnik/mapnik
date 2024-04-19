@@ -134,13 +134,13 @@ struct MAPNIK_DECL enumeration
     std::map<enum_class, std::string> fnc_name##_lookup()                                                              \
     {                                                                                                                  \
         std::map<enum_class, std::string> val_map;                                                                     \
-        std::transform(                                                                                                \
-          fnc_name##_map.begin(),                                                                                      \
-          fnc_name##_map.end(),                                                                                        \
-          std::inserter(val_map, val_map.end()),                                                                       \
-          [](const mapnik::detail::EnumStringT<enum_class>& val) {                                                     \
-              return std::pair<enum_class, std::string>{std::get<0>(val), std::string{std::get<1>(val).data()}};       \
-          });                                                                                                          \
+        std::transform(fnc_name##_map.begin(),                                                                         \
+                       fnc_name##_map.end(),                                                                           \
+                       std::inserter(val_map, val_map.end()),                                                          \
+                       [](const mapnik::detail::EnumStringT<enum_class>& val) {                                        \
+                           return std::pair<enum_class, std::string>{std::get<0>(val),                                 \
+                                                                     std::string{std::get<1>(val).data()}};            \
+                       });                                                                                             \
         return val_map;                                                                                                \
     }
 

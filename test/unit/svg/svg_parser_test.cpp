@@ -55,8 +55,8 @@ std::ostream& operator<<(std::ostream& os, mapnik::gradient const& gr)
     double cx, cy, fx, fy, r;
     gr.get_control_points(fx, fy, cx, cy, r);
 
-    os << "<gradient cx=\"" << cx << "\" cy=\"" << cy << "\""
-       << " fx=\"" << fx << "\" fy=\"" << fy << "\" r=\"" << r << "\">\n";
+    os << "<gradient cx=\"" << cx << "\" cy=\"" << cy << "\"" << " fx=\"" << fx << "\" fy=\"" << fy << "\" r=\"" << r
+       << "\">\n";
     for (auto const& stop : gr.get_stop_array())
     {
         os << "  <stop offset=\"" << std::get<0>(stop) << "\" color=\"" << std::get<1>(stop) << "\"/>\n";

@@ -68,13 +68,12 @@ class tmp_dir
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Exception caught while trying to remove "
-                      << "temporary directory " << m_path << ": " << e.what() << "\n";
+            std::cerr << "Exception caught while trying to remove " << "temporary directory " << m_path << ": "
+                      << e.what() << "\n";
         }
         catch (...)
         {
-            std::cerr << "Unknown exception caught while trying to "
-                      << "remove temporary directory " << m_path << "\n";
+            std::cerr << "Unknown exception caught while trying to " << "remove temporary directory " << m_path << "\n";
         }
     }
 

@@ -27,7 +27,7 @@
 #include <mapnik/version.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/quad_tree.hpp>
-//#include <mapnik/util/spatial_index.hpp>
+// #include <mapnik/util/spatial_index.hpp>
 #include <mapnik/geometry/envelope.hpp>
 #include "shapefile.hpp"
 #include "shape_io.hpp"

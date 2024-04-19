@@ -61,8 +61,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <optional>
 
 namespace mapnik {
-using std::optional;
 using boost::property_tree::ptree;
+using std::optional;
 
 void serialize_text_placements(ptree& node, text_placements_ptr const& p, bool explicit_defaults)
 {

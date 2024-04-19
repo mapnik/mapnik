@@ -72,10 +72,7 @@ struct extract_value<value_bool>
         return std::nullopt;
     }
 
-    static inline std::optional<value_bool> do_extract_from_bool(value_bool const& source)
-    {
-        return source;
-    }
+    static inline std::optional<value_bool> do_extract_from_bool(value_bool const& source) { return source; }
 };
 
 template<>

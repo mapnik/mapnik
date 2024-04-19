@@ -144,6 +144,7 @@ class sqlite_utils
     static void get_tables(std::shared_ptr<sqlite_connection> ds, std::vector<std::string>& tables)
     {
         std::ostringstream sql;
+        // clang-format off
         // todo handle finding tables from attached db's
         sql << " SELECT name FROM sqlite_master"
             << " WHERE type IN ('table','view')"
@@ -155,6 +156,7 @@ class sqlite_utils
             << " SELECT name FROM sqlite_temp_master"
             << " WHERE type IN ('table','view')"
             << " ORDER BY 1";
+        // clang-format on
         sqlite3_stmt* stmt = 0;
         const int rc = sqlite3_prepare_v2(*(*ds), sql.str().c_str(), -1, &stmt, 0);
         if (rc == SQLITE_OK)
@@ -352,8 +354,7 @@ class sqlite_utils
                         {
                             std::ostringstream error_msg;
                             error_msg << "Sqlite Plugin: invalid type for key field '" << rs->column_name(1)
-                                      << "' when creating index "
-                                      << "type was: " << type_oid << "";
+                                      << "' when creating index " << "type was: " << type_oid << "";
                             throw mapnik::datasource_exception(error_msg.str());
                         }
                         const sqlite_int64 pkid = rs->column_integer64(1);

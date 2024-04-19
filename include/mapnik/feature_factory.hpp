@@ -28,7 +28,7 @@
 #include <mapnik/value/types.hpp>
 
 // boost
-//#include <boost/pool/pool_alloc.hpp>
+// #include <boost/pool/pool_alloc.hpp>
 
 namespace mapnik {
 struct feature_factory

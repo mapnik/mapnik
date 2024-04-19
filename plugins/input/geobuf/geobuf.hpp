@@ -404,8 +404,8 @@ struct geobuf : util::noncopyable
     }
 
     template<typename T>
-    geometry::multi_line_string<double>
-      read_multi_linestring(T& reader, std::optional<std::vector<std::uint32_t>> const& lengths)
+    geometry::multi_line_string<double> read_multi_linestring(T& reader,
+                                                              std::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::multi_line_string<double> multi_line;
         multi_line.reserve(!lengths ? 1 : lengths->size());
