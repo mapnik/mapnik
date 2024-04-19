@@ -12,6 +12,7 @@
 #include <boost/geometry/multi/geometries/register/multi_polygon.hpp>
 #include <QThread>
 #include <mapnik/color.hpp>
+#include "cehuidatainfo.hpp"
 
 class RoadMerger : public QThread
 {
@@ -31,12 +32,12 @@ class RoadMerger : public QThread
 
     QString baseShp;
     QString cehuiShp;
-    MapWidget& mapWidget;
+    MapWidget* mapWidget;
 
     int m_mergedSourceIndex;
     int m_clipedCehuiSourceIndex;
 public:
-    RoadMerger(MapWidget& mapWidget);
+    RoadMerger(MapWidget* mapWidget);
 
     // 启动融合过程
     void merge(QString const& base,QString const& cehui);
@@ -64,6 +65,13 @@ public:
 
     bool exportCompleteRoads(const QString& completeRoadsFile);
 
+    void getCompleteRoadsResult(std::vector<cehuidataInfo>& result);
+
+    std::string convertToWKT(const mapnik::geometry::line_string<double>& lineString);
+
+    std::string convertToWKT(const mapnik::geometry::multi_line_string<double>& multiLineString);
+
+    bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const std::string& groupId, const QString& completeRoadsFile);
 
 protected:
     void run();

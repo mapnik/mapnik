@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-        if(argc<6)
+        if(argc<7)
         {
          std::cerr << "Program is missing parameters!"  << "'\n";
          return 1;
@@ -73,6 +73,7 @@ int main(int argc, char** argv)
           return 1;
         }
         window.setMidLineJsonPath(argv[4]);
+        window.setCompleteRoadsFile(argv[6]);
         window.show();
         std::cout<<"arcv[1]:"<<argv[1]<<"argv[2]:"<<argv[2]<<std::endl;
         window.mapWidget()->roadMerger->merge(argv[1],argv[2]);

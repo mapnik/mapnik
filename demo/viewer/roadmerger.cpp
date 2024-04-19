@@ -28,6 +28,14 @@
 #include <chrono>
 #include "ThreadPool.h"
 
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+
 //BOOST_GEOMETRY_REGISTER_MULTI_LINESTRING(mapnik::geometry::multi_line_string<double>)
 //BOOST_GEOMETRY_REGISTER_MULTI_POLYGON(mapnik::geometry::multi_polygon<double>);
 
@@ -128,7 +136,7 @@ static std::shared_ptr<datasource> readShp(const std::string& path){
 //***************************************
 // RoadMerger
 //***************************************
-RoadMerger::RoadMerger(MapWidget& mapWidget_):QThread(),
+RoadMerger::RoadMerger(MapWidget* mapWidget_):QThread(),
    mapWidget(mapWidget_)
 {
     parameters p;
@@ -215,10 +223,10 @@ void RoadMerger::run()
 void RoadMerger::merge(QString const& base,QString const& cehui){
     baseShp = base;
     cehuiShp = cehui;
-    unsigned width = mapWidget.width();
-    unsigned height = mapWidget.height();
+    unsigned width = mapWidget->width();
+    unsigned height = mapWidget->height();
     std::shared_ptr<mapnik::Map> map(new mapnik::Map(width, height));
-    mapWidget.setMap(map);
+    mapWidget->setMap(map);
     start();
 }
 
@@ -236,7 +244,7 @@ void RoadMerger::showRoadLayers()
     // 显示融合图层
     addMergedLayer();
 
-    mapWidget.zoomAll();
+    mapWidget->zoomAll();
 
     m_mergedSourceIndex = 2;
     m_clipedCehuiSourceIndex =-1;
@@ -244,7 +252,7 @@ void RoadMerger::showRoadLayers()
 
 void RoadMerger::clearLayers()
 {
-    mapWidget.getMap()->remove_all();
+    mapWidget->getMap()->remove_all();
     m_mergedSourceIndex = -1;
     m_clipedCehuiSourceIndex =-1;
 }
@@ -264,14 +272,178 @@ void RoadMerger::showClipedCehuiOnMap()
     // 显示融合图层
     addMergedLayer();
 
-    mapWidget.zoomAll();
+    mapWidget->zoomAll();
     m_clipedCehuiSourceIndex =3;
     m_mergedSourceIndex = 4;
 }
 
+std::string RoadMerger::convertToWKT(const mapnik::geometry::line_string<double>& lineString)
+{
+    // 将geometry::line_string<double>转换为WKT格式
+    std::stringstream wktStream;
+    wktStream << "LINESTRING (";
+    for (const auto& point : lineString) {
+        wktStream << point.x << " " << point.y << ",";
+    }
+    wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
+    wktStream << ")";
+    return wktStream.str();
+}
+
+std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<double>& multiLineString)
+{
+    std::stringstream wktStream;
+    wktStream << "MULTILINESTRING (";
+    for (const auto& segment : multiLineString) {
+        wktStream << "(";
+        for (const auto& point : segment) {
+            wktStream << point.x << " " << point.y << ",";
+        }
+        wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
+        wktStream << "),";
+    }
+    wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
+    wktStream << ")";
+
+    return wktStream.str();
+}
+
+
+
+bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const std::string& groupId, const QString& completeRoadsFile)
+{
+    using namespace rapidjson;
+    // 创建一个JSON对象
+    Document document;
+    document.SetObject();
+    Document::AllocatorType& allocator = document.GetAllocator();
+
+    Value jsonValue(kStringType);
+
+    std::string strValue = groupId;
+    jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+
+    // 添加groupId
+    document.AddMember("groupId", jsonValue, allocator);
+
+    // 添加updateInfos
+    Value updateInfos(kArrayType);
+    Value updateInfo(kObjectType);
+    updateInfo.AddMember("type", "add", allocator);
+
+    // 添加fileCompletes
+    Value fileCompletes(kArrayType);
+
+    for(int i=0;i<result.size();++i)
+    {
+
+        const cehuidataInfo& info = result[i];
+        Value fileComplete(kObjectType);
+
+        fileComplete.AddMember("OSMID", info.OSMID, allocator);
+
+        strValue = info.ID;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("id", jsonValue, allocator);
+
+        strValue = info.PATHNAME;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("name", jsonValue, allocator);
+
+        strValue = info.geometryWkt;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("info", jsonValue, allocator);
+
+        strValue = info.KIND;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("level", jsonValue, allocator);
+
+        strValue = info.WIDTH;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("width", jsonValue, allocator);
+
+        strValue = info.DIRECTION;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("bidirectional", jsonValue, allocator);
+
+        strValue = info.LENGTH;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("length", jsonValue, allocator);
+
+        fileCompletes.PushBack(fileComplete, allocator);
+    }
+
+    updateInfo.AddMember("fileCompletes", fileCompletes, allocator);
+    updateInfos.PushBack(updateInfo, allocator);
+
+    document.AddMember("updateInfos", updateInfos, allocator);
+
+    // 将JSON写入文件
+    std::ofstream file(completeRoadsFile.toStdString());
+    if (file.is_open())
+    {
+        // 将json字符串写入文件中
+        StringBuffer buffer;
+        Writer<StringBuffer> writer(buffer);
+        document.Accept(writer);
+        file << buffer.GetString();
+        file.close();
+        return true;
+    }
+    else
+    {
+      return false;
+    }
+}
+
+void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
+{
+    query q(clipedCehuiSource->envelope());
+    q.add_property_name("NeedAddCehui_RESULT");
+    q.add_property_name("ID");
+    q.add_property_name("KIND_NUM");
+    q.add_property_name("KIND");
+    q.add_property_name("WIDTH");
+    q.add_property_name("DIRECTION");
+    q.add_property_name("LENGTH");
+    q.add_property_name("PATHNAME");
+    q.add_property_name("OSMID");
+    auto fs = clipedCehuiSource->features(q);
+    feature_ptr feat = fs->next();
+    while(feat){
+        if( feat->get("NeedAddCehui_RESULT") == 1 ){
+            cehuidataInfo info;
+            info.ID = feat->get("ID").to_string();
+            info.KIND_NUM = feat->get("KIND_NUM").to_string();
+            info.KIND = feat->get("KIND").to_string();
+            info.WIDTH = feat->get("WIDTH").to_string();
+            info.DIRECTION = feat->get("DIRECTION").to_string();
+            info.LENGTH = feat->get("LENGTH").to_string();
+            info.PATHNAME = feat->get("PATHNAME").to_string();
+            info.OSMID = feat->get("OSMID").to_int();
+            geometry::geometry<double>& geo = feat->get_geometry();
+            if(geo.is<geometry::line_string<double> >())
+            {
+                mapnik::geometry::line_string<double>& lineString = geo.get<geometry::line_string<double>>();
+                info.geometryWkt = convertToWKT(lineString);
+            }
+            else if(geo.is<geometry::multi_line_string<double>>())
+            {
+                mapnik::geometry::multi_line_string<double>& multilineString = geo.get<geometry::multi_line_string<double>>();
+                info.geometryWkt = convertToWKT(multilineString);
+            }
+
+            result.push_back(info);
+        }
+        feat = fs->next();
+    }
+}
+
 bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile)
 {
-
+    std::vector<cehuidataInfo> result;
+    getCompleteRoadsResult(result);
+    return SerializeCompleteRoadInfos(result,"1", completeRoadsFile);
 }
 
 void RoadMerger::addLineLayer(QString const& name,QString const& shpPath,std::string lineColor, double lineWidth)
@@ -299,12 +471,12 @@ void RoadMerger::addLineLayer(QString const& name,std::shared_ptr<mapnik::dataso
         }
         line_style.add_rule(std::move(r));
     }
-    mapWidget.getMap()->insert_style(name.toStdString(), std::move(line_style));
+    mapWidget->getMap()->insert_style(name.toStdString(), std::move(line_style));
 
     layer lyr(name.toStdString());
     lyr.set_datasource(ds);
     lyr.add_style(name.toStdString());
-    mapWidget.getMap()->add_layer(lyr);
+    mapWidget->getMap()->add_layer(lyr);
 }
 
 void RoadMerger::addPolygonLayer(QString const& name,std::shared_ptr<mapnik::datasource> ds,mapnik::color stroke,mapnik::color fill)
@@ -329,12 +501,12 @@ void RoadMerger::addPolygonLayer(QString const& name,std::shared_ptr<mapnik::dat
         }
         poly_style.add_rule(std::move(r));
     }
-    mapWidget.getMap()->insert_style(name.toStdString(), std::move(poly_style));
+    mapWidget->getMap()->insert_style(name.toStdString(), std::move(poly_style));
 
     layer lyr(name.toStdString());
     lyr.set_datasource(ds);
     lyr.add_style(name.toStdString());
-    mapWidget.getMap()->add_layer(lyr);
+    mapWidget->getMap()->add_layer(lyr);
 }
 
 void RoadMerger::addMergedLayer()
@@ -366,12 +538,12 @@ void RoadMerger::addMergedLayer()
         }
         poly_style.add_rule(std::move(r));
     }
-    mapWidget.getMap()->insert_style("merged_layer", std::move(poly_style));
+    mapWidget->getMap()->insert_style("merged_layer", std::move(poly_style));
 
     layer lyr("merged_layer");
     lyr.set_datasource(mergedSource);
     lyr.add_style("merged_layer");
-    mapWidget.getMap()->add_layer(lyr);
+    mapWidget->getMap()->add_layer(lyr);
 }
 
 void RoadMerger::addClipedCehuiLayer()
@@ -403,12 +575,12 @@ void RoadMerger::addClipedCehuiLayer()
         }
         poly_style.add_rule(std::move(r));
     }
-    mapWidget.getMap()->insert_style("needAddCehui_layer", std::move(poly_style));
+    mapWidget->getMap()->insert_style("needAddCehui_layer", std::move(poly_style));
 
     layer lyr("needAddCehui_layer");
     lyr.set_datasource(clipedCehuiSource);
     lyr.add_style("needAddCehui_layer");
-    mapWidget.getMap()->add_layer(lyr);
+    mapWidget->getMap()->add_layer(lyr);
 }
 
 void RoadMerger::addSelectedResultBufferLayer()
@@ -425,7 +597,7 @@ void RoadMerger::toggleMergedRoad(double x, double y)
         return;
     }
 
-    auto map = mapWidget.getMap();
+    auto map = mapWidget->getMap();
     mapnik::featureset_ptr fs = map->query_map_point(m_mergedSourceIndex, x, y);
     if (fs)
     {
@@ -439,7 +611,7 @@ void RoadMerger::toggleMergedRoad(double x, double y)
             std::cout<<"toggle road "<<std::endl;
         }
     }
-    mapWidget.updateMap();
+    mapWidget->updateMap();
     std::cout<<"end toggleMergedRoad"<<std::endl;
 }
 
@@ -452,7 +624,7 @@ void RoadMerger::toggleNeedCompleteRoad(double x, double y)
         return;
     }
 
-    auto map = mapWidget.getMap();
+    auto map = mapWidget->getMap();
     mapnik::featureset_ptr fs = map->query_map_point(m_clipedCehuiSourceIndex, x, y);
     if (fs)
     {
@@ -466,7 +638,7 @@ void RoadMerger::toggleNeedCompleteRoad(double x, double y)
             std::cout<<"toggle complete road "<<std::endl;
         }
     }
-    mapWidget.updateMap();
+    mapWidget->updateMap();
     std::cout<<"end toggleNeedCompleteRoad"<<std::endl;
 }
 
@@ -703,6 +875,13 @@ void RoadMerger::clipedCehuiData()
                        for(int i=0; i<lines.size(); i++)
                        {
                            feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), count));
+                           feature->put_new("ID",cloneFeat->get("ID"));
+                           feature->put_new("KIND_NUM",cloneFeat->get("KIND_NUM"));
+                           feature->put_new("KIND",cloneFeat->get("KIND"));
+                           feature->put_new("WIDTH",cloneFeat->get("WIDTH"));
+                           feature->put_new("DIRECTION",cloneFeat->get("DIRECTION"));
+                           feature->put_new("LENGTH",cloneFeat->get("LENGTH"));
+                           feature->put_new("PATHNAME",cloneFeat->get("PATHNAME"));
                            feature->put_new("OSMID",cloneFeat->get("OSMID"));
                            feature->put_new("NeedAddCehui_RESULT",1);
                            feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));

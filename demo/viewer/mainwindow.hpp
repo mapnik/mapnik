@@ -86,8 +86,8 @@ class MainWindow : public QMainWindow
     QString m_midLinePath;
     QString m_completeRoadsFile;
 
-    QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
-    QSharedPointer<QDockWidget> m_dockWidget;
+//    QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
+//    QSharedPointer<QDockWidget> m_dockWidget;
 
 };
 

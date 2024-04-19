@@ -77,7 +77,7 @@ MapWidget::MapWidget(QWidget* parent)
     pen_.setWidth(3);
     pen_.setCapStyle(Qt::RoundCap);
     pen_.setJoinStyle(Qt::RoundJoin);
-    roadMerger = std::make_shared<RoadMerger>(*this);
+    roadMerger = std::make_shared<RoadMerger>(this);
 //    roadMerger
     spinner =  std::make_shared<WaitingSpinnerWidget>(this,"正在进行数据融合中，请稍后...");
     connect(roadMerger.get(), &RoadMerger::signalMergeStart,this,&MapWidget::onMergeStart);

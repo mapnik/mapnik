@@ -3,20 +3,20 @@
 #if !defined CEHUIDATAINFO_HPP
 #define CEHUIDATAINFO_HPP
 
-#include<string>
+#include <string>
 
 struct cehuidataInfo
 {
     /* data */
     std::string ID;
-    int KIND_NUM;
+    std::string KIND_NUM;
     std::string KIND;
-    double WIDTH;
-    int DIRECTION;
-    double LENGTH;
+    std::string WIDTH;
+    std::string DIRECTION;
+    std::string LENGTH;
     std::string PATHNAME;
     int OSMID;
-
+    std::string geometryWkt;
 };
 
 
