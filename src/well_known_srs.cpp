@@ -72,7 +72,7 @@ boost::optional<bool> is_known_geographic(std::string const& srs)
 
 using well_known_srs_e_str = mapnik::detail::EnumStringT<well_known_srs_enum>;
 constexpr detail::EnumMapT<well_known_srs_enum, 3> well_known_srs_e_map{{
-  well_known_srs_e_str{well_known_srs_enum::WGS_84, detail::mapnik_string_view{MAPNIK_GEOGRAPHIC_PROJ_STR}},
+  well_known_srs_e_str{well_known_srs_enum::WGS_84, MAPNIK_GEOGRAPHIC_PROJ_STR},
   well_known_srs_e_str{well_known_srs_enum::WEB_MERC, MAPNIK_WEBMERCATOR_PROJ_STR},
   well_known_srs_e_str{well_known_srs_enum::well_known_srs_enum_MAX, ""},
 }};

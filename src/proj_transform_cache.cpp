@@ -26,14 +26,14 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/utility/string_view.hpp>
 MAPNIK_DISABLE_WARNING_POP
+#include <string_view>
 
 namespace mapnik {
 namespace proj_transform_cache {
 namespace {
 using key_type = std::pair<std::string, std::string>;
-using compatible_key_type = std::pair<boost::string_view, boost::string_view>;
+using compatible_key_type = std::pair<std::string_view, std::string_view>;
 
 struct compatible_hash
 {
@@ -59,7 +59,7 @@ thread_local static cache_type cache_ = {};
 
 void init(std::string const& source, std::string const& dest)
 {
-    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
+    compatible_key_type key = std::make_pair<std::string_view, std::string_view>(source, dest);
     auto itr = cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == cache_.end())
     {
@@ -71,7 +71,7 @@ void init(std::string const& source, std::string const& dest)
 
 proj_transform const* get(std::string const& source, std::string const& dest)
 {
-    compatible_key_type key = std::make_pair<boost::string_view, boost::string_view>(source, dest);
+    compatible_key_type key = std::make_pair<std::string_view, std::string_view>(source, dest);
     auto itr = cache_.find(key, compatible_hash{}, compatible_predicate{});
     if (itr == cache_.end())
     {
