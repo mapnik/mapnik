@@ -20,6 +20,7 @@ set(PROJECT_SOURCES
     roadmerger.cpp
     waitingspinnerwidget.h
     waitingspinnerwidget.cpp
+    cehuidatainfo.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
