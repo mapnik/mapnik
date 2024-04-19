@@ -132,6 +132,9 @@ set(CMAKE_CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensi
 message(STATUS "Using c++${CMAKE_CXX_STANDARD}")
 message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
 
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
+
 # add debug postfix to the libraries
 set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
 message(STATUS "postfix for debug libraries: ${CMAKE_DEBUG_POSTFIX}")
