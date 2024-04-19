@@ -126,7 +126,7 @@ set(MAPNIK_OPTIONAL_LIBS_INCLUDE "")
 #############################
 #############################
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "Sets the c++ standard. c++14 is minimum.")
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "Sets the c++ standard. c++17 is minimum.")
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # require the specified CMAKE_CXX_STANDARD
 set(CMAKE_CXX_EXTENSIONS OFF CACHE STRING "Enables the compiler specific extensions.") # Fallsback to -std=c++<ver> if off
 message(STATUS "Using c++${CMAKE_CXX_STANDARD}")

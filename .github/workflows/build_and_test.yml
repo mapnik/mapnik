@@ -29,15 +29,11 @@ jobs:
       Build & Test
       (${{ matrix.os }})
       (C++ ${{ matrix.cxx-standard }})
-      ${{ matrix.memory-mapped == 'OFF' && '(USE_MEMORY_MAPPED_FILE=OFF)' || '' }}
-      ${{ matrix.static-build == 'OFF' && '(BUILD_SHARED_LIBS=OFF)' || '' }}
     needs: checkSource
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        memory-mapped: ["ON"]
-        static-build: ["OFF"]
         cxx-standard: [17]
         include:
           - os: ubuntu-latest
