@@ -50,8 +50,8 @@ geojson_index_featureset::geojson_index_featureset(std::string const& filename,
     ctx_(std::make_shared<mapnik::context_type>())
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
-    if (memory)
+    const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);
+    if (memory.has_value())
     {
         mapped_region_ = *memory;
     }

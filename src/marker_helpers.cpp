@@ -83,11 +83,11 @@ namespace detail {
 struct push_explicit_style
 {
     push_explicit_style(svg::group& dst,
-                        boost::optional<color> const& fill_color,
-                        boost::optional<double> const& fill_opacity,
-                        boost::optional<color> const& stroke_color,
-                        boost::optional<double> const& stroke_width,
-                        boost::optional<double> const& stroke_opacity)
+                        std::optional<color> const& fill_color,
+                        std::optional<double> const& fill_opacity,
+                        std::optional<color> const& stroke_color,
+                        std::optional<double> const& stroke_width,
+                        std::optional<double> const& stroke_opacity)
         : current_group_(&dst)
         , fill_color_(fill_color)
         , fill_opacity_(fill_opacity)
@@ -168,11 +168,11 @@ struct push_explicit_style
         return true;
     }
     mutable svg::group* current_group_;
-    boost::optional<color> const& fill_color_;
-    boost::optional<double> const& fill_opacity_;
-    boost::optional<color> const& stroke_color_;
-    boost::optional<double> const& stroke_width_;
-    boost::optional<double> const& stroke_opacity_;
+    std::optional<color> const& fill_color_;
+    std::optional<double> const& fill_opacity_;
+    std::optional<color> const& stroke_color_;
+    std::optional<double> const& stroke_width_;
+    std::optional<double> const& stroke_opacity_;
 };
 
 } // namespace detail

@@ -89,7 +89,7 @@ MAPNIK_DECL void warp_image(T& target,
                             unsigned mesh_size,
                             scaling_method_e scaling_method,
                             double filter_factor,
-                            boost::optional<double> const& nodata_value)
+                            std::optional<double> const& nodata_value)
 {
     using image_type = T;
     using pixel_type = typename image_type::pixel_type;
@@ -163,13 +163,11 @@ MAPNIK_DECL void warp_image(T& target,
             rasterizer.line_to_d(std::floor(polygon[4]), std::floor(polygon[5]));
             rasterizer.line_to_d(std::floor(polygon[6]), std::floor(polygon[7]));
 
-            std::size_t x0 = i * mesh_size;
-            std::size_t y0 = j * mesh_size;
-            std::size_t x1 = (i + 1) * mesh_size;
-            std::size_t y1 = (j + 1) * mesh_size;
-            x1 = std::min(x1, source.width());
-            y1 = std::min(y1, source.height());
-            agg::trans_affine tr(polygon, x0, y0, x1, y1);
+            const std::size_t x0 = i * mesh_size;
+            const std::size_t y0 = j * mesh_size;
+            const std::size_t x1 = std::min((i + 1) * mesh_size, source.width());
+            const std::size_t y1 = std::min((j + 1) * mesh_size, source.height());
+            const agg::trans_affine tr(polygon, x0, y0, x1, y1);
             if (tr.is_valid())
             {
                 interpolator_type interpolator(tr);
@@ -184,7 +182,7 @@ MAPNIK_DECL void warp_image(T& target,
                     using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_resample_affine;
                     agg::image_filter_lut filter;
                     detail::set_scaling_method(filter, scaling_method, filter_factor);
-                    boost::optional<typename span_gen_type::value_type> nodata;
+                    std::optional<typename span_gen_type::value_type> nodata;
                     if (nodata_value)
                     {
                         nodata = safe_cast<typename span_gen_type::value_type>(*nodata_value);
@@ -209,7 +207,7 @@ struct warp_image_visitor
                        unsigned mesh_size,
                        scaling_method_e scaling_method,
                        double filter_factor,
-                       boost::optional<double> const& nodata_value)
+                       std::optional<double> const& nodata_value)
         : target_raster_(target_raster)
         , prj_trans_(prj_trans)
         , source_ext_(source_ext)
@@ -253,7 +251,7 @@ struct warp_image_visitor
     unsigned mesh_size_;
     scaling_method_e scaling_method_;
     double filter_factor_;
-    boost::optional<double> const& nodata_value_;
+    std::optional<double> const& nodata_value_;
 };
 
 } // namespace detail
@@ -265,7 +263,7 @@ void reproject_and_scale_raster(raster& target,
                                 double offset_y,
                                 unsigned mesh_size,
                                 scaling_method_e scaling_method,
-                                boost::optional<double> const& nodata_value)
+                                std::optional<double> const& nodata_value)
 {
     detail::warp_image_visitor warper(target,
                                       prj_trans,
@@ -287,14 +285,7 @@ void reproject_and_scale_raster(raster& target,
                                 unsigned mesh_size,
                                 scaling_method_e scaling_method)
 {
-    reproject_and_scale_raster(target,
-                               source,
-                               prj_trans,
-                               offset_x,
-                               offset_y,
-                               mesh_size,
-                               scaling_method,
-                               boost::optional<double>());
+    reproject_and_scale_raster(target, source, prj_trans, offset_x, offset_y, mesh_size, scaling_method, std::nullopt);
 }
 
 template MAPNIK_DECL void warp_image(image_rgba8&,
@@ -307,7 +298,7 @@ template MAPNIK_DECL void warp_image(image_rgba8&,
                                      unsigned,
                                      scaling_method_e,
                                      double,
-                                     boost::optional<double> const&);
+                                     std::optional<double> const&);
 
 template MAPNIK_DECL void warp_image(image_gray8&,
                                      image_gray8 const&,
@@ -319,7 +310,7 @@ template MAPNIK_DECL void warp_image(image_gray8&,
                                      unsigned,
                                      scaling_method_e,
                                      double,
-                                     boost::optional<double> const&);
+                                     std::optional<double> const&);
 
 template MAPNIK_DECL void warp_image(image_gray16&,
                                      image_gray16 const&,
@@ -331,7 +322,7 @@ template MAPNIK_DECL void warp_image(image_gray16&,
                                      unsigned,
                                      scaling_method_e,
                                      double,
-                                     boost::optional<double> const&);
+                                     std::optional<double> const&);
 
 template MAPNIK_DECL void warp_image(image_gray32f&,
                                      image_gray32f const&,
@@ -343,6 +334,6 @@ template MAPNIK_DECL void warp_image(image_gray32f&,
                                      unsigned,
                                      scaling_method_e,
                                      double,
-                                     boost::optional<double> const&);
+                                     std::optional<double> const&);
 
 } // namespace mapnik

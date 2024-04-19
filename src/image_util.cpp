@@ -313,8 +313,8 @@ MAPNIK_DECL void
 template<typename T>
 MAPNIK_DECL void save_to_file(T const& image, std::string const& filename)
 {
-    boost::optional<std::string> type = type_from_filename(filename);
-    if (type)
+    const auto type = type_from_filename(filename);
+    if (type.has_value())
     {
         save_to_file<T>(image, filename, *type);
     }
@@ -325,8 +325,8 @@ MAPNIK_DECL void save_to_file(T const& image, std::string const& filename)
 template<typename T>
 MAPNIK_DECL void save_to_file(T const& image, std::string const& filename, rgba_palette const& palette)
 {
-    boost::optional<std::string> type = type_from_filename(filename);
-    if (type)
+    const auto type = type_from_filename(filename);
+    if (type.has_value())
     {
         save_to_file<T>(image, filename, *type, palette);
     }
@@ -425,11 +425,11 @@ struct is_solid_visitor
         if (image.size() > 0)
         {
             pixel_type const first_p = *image.begin();
-            auto itr = std::find_if(/*std::execution::par_unseq,*/ // still missing on ubuntu with
-                                                                   // clang++10/libc++ (!)
-                                    image.begin(),
-                                    image.end(),
-                                    [first_p](pixel_type const p) { return first_p != p; });
+            const auto itr = std::find_if(/*std::execution::par_unseq,*/ // still missing on ubuntu with
+                                                                         // clang++10/libc++ (!)
+                                          image.begin(),
+                                          image.end(),
+                                          [first_p](auto&& p) { return first_p != p; });
             return (itr == image.end());
         }
         return true;

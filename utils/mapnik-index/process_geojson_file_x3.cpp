@@ -251,8 +251,8 @@ std::pair<bool, typename T::value_type::first_type>
     box_type extent;
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
     mapnik::mapped_region_ptr mapped_region;
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
-    if (!memory)
+    const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);
+    if (!memory.has_value())
     {
         std::clog << "Error : cannot memory map " << filename << std::endl;
         return std::make_pair(false, extent);

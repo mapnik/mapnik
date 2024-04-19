@@ -24,11 +24,11 @@
 #define GDAL_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/featureset.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/util/variant.hpp>
-// boost
-#include <boost/optional.hpp>
+#include <optional>
 
 class GDALDataset;
 class GDALRasterBand;
@@ -60,7 +60,7 @@ class gdal_featureset : public mapnik::Featureset
                     int nbands,
                     double dx,
                     double dy,
-                    boost::optional<double> const& nodata,
+                    std::optional<double> const& nodata,
                     double nodata_tolerance,
                     int64_t max_image_area);
     virtual ~gdal_featureset();
@@ -85,7 +85,7 @@ class gdal_featureset : public mapnik::Featureset
     double dx_;
     double dy_;
     int nbands_;
-    boost::optional<double> nodata_value_;
+    std::optional<double> nodata_value_;
     double nodata_tolerance_;
     int64_t max_image_area_;
     bool first_;

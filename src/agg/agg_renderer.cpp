@@ -56,12 +56,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_span_image_filter_rgba.h"
 MAPNIK_DISABLE_WARNING_POP
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
 #include <cmath>
 
@@ -167,7 +161,7 @@ void agg_renderer<T0, T1>::setup(Map const& m, buffer_type& pixmap)
     buffers_.emplace(pixmap);
 
     mapnik::set_premultiplied_alpha(pixmap, true);
-    boost::optional<color> const& bg = m.background();
+    auto&& bg = m.background();
     if (bg)
     {
         if (bg->alpha() < 255)
@@ -184,7 +178,7 @@ void agg_renderer<T0, T1>::setup(Map const& m, buffer_type& pixmap)
         }
     }
 
-    boost::optional<std::string> const& image_filename = m.background_image();
+    auto&& image_filename = m.background_image();
     if (image_filename)
     {
         // NOTE: marker_cache returns premultiplied image, if needed
@@ -229,7 +223,7 @@ void agg_renderer<T0, T1>::start_layer_processing(layer const& lay, box2d<double
     }
 
     common_.query_extent_ = query_extent;
-    boost::optional<box2d<double>> const& maximum_extent = lay.maximum_extent();
+    auto&& maximum_extent = lay.maximum_extent();
     if (maximum_extent)
     {
         common_.query_extent_.clip(*maximum_extent);

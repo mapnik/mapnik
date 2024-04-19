@@ -86,11 +86,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::init");
 #endif
 
-    boost::optional<std::string> file = params.get<std::string>("file");
+    const auto file = params.get<std::string>("file");
     if (!file)
         throw datasource_exception("Sqlite Plugin: missing <file> parameter");
 
-    boost::optional<std::string> base = params.get<std::string>("base");
+    const auto base = params.get<std::string>("base");
     if (base)
         dataset_name_ = *base + "/" + *file;
     else
@@ -106,12 +106,12 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // TODO - remove this option once all datasources have an indexing api
     bool auto_index = *params.get<mapnik::boolean_type>("auto_index", true);
 
-    boost::optional<std::string> ext = params.get<std::string>("extent");
-    if (ext)
+    const auto ext = params.get<std::string>("extent");
+    if (ext.has_value())
         extent_initialized_ = extent_.from_string(*ext);
 
-    boost::optional<std::string> wkb = params.get<std::string>("wkb_format");
-    if (wkb)
+    const auto wkb = params.get<std::string>("wkb_format");
+    if (wkb.has_value())
     {
         if (*wkb == "spatialite")
         {
@@ -139,14 +139,14 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // databases are relative to directory containing dataset_name_.  Sqlite
     // will default to attaching from cwd.  Typicaly usage means that the
     // map loader will produce full paths here.
-    boost::optional<std::string> attachdb = params.get<std::string>("attachdb");
-    if (attachdb)
+    const auto attachdb = params.get<std::string>("attachdb");
+    if (attachdb.has_value())
     {
         parse_attachdb(*attachdb);
     }
 
-    boost::optional<std::string> initdb = params.get<std::string>("initdb");
-    if (initdb)
+    const auto initdb = params.get<std::string>("initdb");
+    if (initdb.has_value())
     {
         init_statements_.push_back(*initdb);
     }
@@ -154,11 +154,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // now actually create the connection and start executing setup sql
     dataset_ = std::make_shared<sqlite_connection>(dataset_name_);
 
-    boost::optional<mapnik::value_integer> table_by_index = params.get<mapnik::value_integer>("table_by_index");
+    const auto table_by_index = params.get<mapnik::value_integer>("table_by_index");
 
     int passed_parameters = 0;
     passed_parameters += params.get<std::string>("table") ? 1 : 0;
-    passed_parameters += table_by_index ? 1 : 0;
+    passed_parameters += table_by_index.has_value() ? 1 : 0;
 
     if (passed_parameters > 1)
     {
@@ -426,13 +426,13 @@ box2d<double> sqlite_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_type() const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::get_geometry_type");
 #endif
 
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     if (dataset_)
     {
         // get geometry type by querying first features
@@ -470,7 +470,7 @@ boost::optional<mapnik::datasource_geometry_t> sqlite_datasource::get_geometry_t
                     int type = static_cast<int>(*result);
                     if (multi_type > 0 && multi_type != type)
                     {
-                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        result = mapnik::datasource_geometry_t::Collection;
                         return result;
                     }
                     multi_type = type;

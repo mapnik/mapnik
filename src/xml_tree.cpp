@@ -331,15 +331,15 @@ bool xml_node::has_attribute(std::string const& name) const
 }
 
 template<typename T>
-boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
+std::optional<T> xml_node::get_opt_attr(std::string const& name) const
 {
     if (attributes_.empty())
-        return boost::optional<T>();
+        return std::nullopt;
     std::map<std::string, xml_attribute>::const_iterator itr = attributes_.find(name);
     if (itr == attributes_.end())
-        return boost::optional<T>();
+        return std::nullopt;
     itr->second.processed = true;
-    boost::optional<T> result = xml_attribute_cast<T>(tree_, std::string(itr->second.value));
+    std::optional<T> result = xml_attribute_cast<T>(tree_, std::string(itr->second.value));
     if (!result)
     {
         throw config_error(std::string("Failed to parse attribute '") + name + "'. Expected " + name_trait<T>::name() +
@@ -352,7 +352,7 @@ boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
 template<typename T>
 T xml_node::get_attr(std::string const& name, T const& default_opt_value) const
 {
-    boost::optional<T> val = get_opt_attr<T>(name);
+    auto val = get_opt_attr<T>(name);
     if (val)
         return *val;
     return default_opt_value;
@@ -361,7 +361,7 @@ T xml_node::get_attr(std::string const& name, T const& default_opt_value) const
 template<typename T>
 T xml_node::get_attr(std::string const& name) const
 {
-    boost::optional<T> val = get_opt_attr<T>(name);
+    const auto val = get_opt_attr<T>(name);
     if (val)
         return *val;
     throw attribute_not_found(name_, name);
@@ -392,7 +392,7 @@ std::string const& xml_node::get_text() const
 template<typename T>
 T xml_node::get_value() const
 {
-    boost::optional<T> result = xml_attribute_cast<T>(tree_, get_text());
+    std::optional<T> result = xml_attribute_cast<T>(tree_, get_text());
     if (!result)
     {
         throw config_error(std::string("Failed to parse value. Expected ") + name_trait<T>::name() + " but got '" +
@@ -414,7 +414,7 @@ std::string xml_node::line_to_string() const
     return number;
 }
 
-#define compile_get_opt_attr(T) template boost::optional<T> xml_node::get_opt_attr<T>(std::string const&) const
+#define compile_get_opt_attr(T) template std::optional<T> xml_node::get_opt_attr<T>(std::string const&) const
 #define compile_get_attr(T)                                                                                            \
     template T xml_node::get_attr<T>(std::string const&) const;                                                        \
     template T xml_node::get_attr<T>(std::string const&, T const&) const

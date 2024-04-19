@@ -27,20 +27,19 @@
 
 namespace mapnik {
 
-inline boost::optional<std::string> type_from_bytes(char const* data, size_t size)
+inline std::optional<std::string> type_from_bytes(char const* data, size_t size)
 {
-    using result_type = boost::optional<std::string>;
     unsigned char const* header = reinterpret_cast<unsigned char const*>(data);
     if (size >= 4)
     {
         unsigned int magic = (header[0] << 24) | (header[1] << 16) | (header[2] << 8) | header[3];
         if (magic == 0x89504E47U)
         {
-            return result_type("png");
+            return "png";
         }
         else if (magic == 0x49492A00U || magic == 0x4D4D002AU)
         {
-            return result_type("tiff");
+            return "tiff";
         }
     }
     if (size >= 2)
@@ -48,7 +47,7 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
         unsigned int magic = ((header[0] << 8) | header[1]) & 0xffff;
         if (magic == 0xffd8)
         {
-            return result_type("jpeg");
+            return "jpeg";
         }
     }
 
@@ -57,16 +56,16 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
         if (header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F' && header[8] == 'W' &&
             header[9] == 'E' && header[10] == 'B' && header[11] == 'P')
         {
-            return result_type("webp");
+            return "webp";
         }
     }
-    return result_type();
+    return std::nullopt;
 }
 
 image_reader* get_image_reader(char const* data, size_t size)
 {
-    boost::optional<std::string> type = type_from_bytes(data, size);
-    if (type)
+    const auto type = type_from_bytes(data, size);
+    if (type.has_value())
         return factory<image_reader, std::string, char const*, size_t>::instance().create_object(*type, data, size);
     else
         throw image_reader_exception("image_reader: can't determine type from input data");
@@ -79,8 +78,8 @@ image_reader* get_image_reader(std::string const& filename, std::string const& t
 
 image_reader* get_image_reader(std::string const& filename)
 {
-    boost::optional<std::string> type = type_from_filename(filename);
-    if (type)
+    const auto type = type_from_filename(filename);
+    if (type.has_value())
     {
         return factory<image_reader, std::string, std::string const&>::instance().create_object(*type, filename);
     }

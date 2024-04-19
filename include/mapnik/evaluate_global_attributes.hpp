@@ -131,11 +131,11 @@ struct evaluate_expression
 };
 
 template<typename T>
-struct evaluate_expression<T, boost::none_t>
+struct evaluate_expression<T, std::nullopt_t>
 {
     using value_type = T;
 
-    evaluate_expression(boost::none_t) {}
+    evaluate_expression(std::nullopt_t) {}
 
     value_type operator()(attribute const&) const
     {
@@ -265,7 +265,7 @@ std::tuple<T, bool> pre_evaluate_expression(expression_ptr const& expr)
 {
     try
     {
-        return std::make_tuple(util::apply_visitor(mapnik::evaluate_expression<T, boost::none_t>(boost::none), *expr),
+        return std::make_tuple(util::apply_visitor(mapnik::evaluate_expression<T, std::nullopt_t>(std::nullopt), *expr),
                                true);
     }
     catch (...)

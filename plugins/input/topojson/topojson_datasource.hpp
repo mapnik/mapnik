@@ -38,7 +38,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
 #include <boost/version.hpp>
@@ -47,11 +46,10 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
-#include <vector>
 #include <string>
 #include <map>
-#include <deque>
 #include <memory>
+#include <optional>
 
 DATASOURCE_PLUGIN_DEF(topojson_datasource_plugin, topojson);
 
@@ -66,13 +64,13 @@ class topojson_datasource : public mapnik::datasource
     // constructor
     topojson_datasource(mapnik::parameters const& params);
     virtual ~topojson_datasource();
-    mapnik::datasource::datasource_t type() const;
+    mapnik::datasource::datasource_t type() const override;
     static const char* name();
-    mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
-    mapnik::box2d<double> envelope() const;
-    mapnik::layer_descriptor get_descriptor() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
+    mapnik::featureset_ptr features(mapnik::query const& q) const override;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
+    mapnik::box2d<double> envelope() const override;
+    mapnik::layer_descriptor get_descriptor() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
     template<typename T>
     void parse_topojson(T const& buffer);
 

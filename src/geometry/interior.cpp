@@ -28,14 +28,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 #include <queue>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
 
 namespace mapnik {
 namespace geometry {

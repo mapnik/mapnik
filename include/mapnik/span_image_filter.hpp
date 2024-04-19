@@ -24,13 +24,6 @@
 #define MAPNIK_SPAN_IMAGE_FILTER_INCLUDED
 
 #include <mapnik/safe_cast.hpp>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore_agg.hpp>
@@ -38,7 +31,7 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include "agg_span_image_filter_rgba.h"
 MAPNIK_DISABLE_WARNING_POP
 
-#include <limits>
+#include <optional>
 
 namespace mapnik {
 
@@ -58,7 +51,7 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
     span_image_resample_gray_affine(source_type& src,
                                     interpolator_type& inter,
                                     agg::image_filter_lut const& filter,
-                                    boost::optional<value_type> const& nodata_value)
+                                    std::optional<value_type> const& nodata_value)
         : base_type(src, inter, filter)
         , nodata_value_(nodata_value)
     {}
@@ -152,7 +145,7 @@ class span_image_resample_gray_affine : public agg::span_image_resample_affine<S
     }
 
   private:
-    boost::optional<value_type> nodata_value_;
+    std::optional<value_type> nodata_value_;
 };
 
 template<class Source>
@@ -170,7 +163,7 @@ class span_image_resample_rgba_affine : public agg::span_image_resample_rgba_aff
     span_image_resample_rgba_affine(source_type& src,
                                     interpolator_type& inter,
                                     agg::image_filter_lut const& _filter,
-                                    boost::optional<value_type> const& nodata_value)
+                                    std::optional<value_type> const& nodata_value)
         : agg::span_image_resample_rgba_affine<Source>(src, inter, _filter)
     {}
 };

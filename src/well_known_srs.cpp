@@ -25,14 +25,9 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/enumeration.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
 #include <cmath>
+#include <optional>
 
 namespace mapnik {
 constexpr const char MAPNIK_GEOGRAPHIC_PROJ_STR[10]{"epsg:4326"};
@@ -43,31 +38,31 @@ extern std::string const MAPNIK_WEBMERCATOR_PROJ = MAPNIK_WEBMERCATOR_PROJ_STR; 
 
 static const char* well_known_srs_strings[] = {MAPNIK_GEOGRAPHIC_PROJ.c_str(), MAPNIK_WEBMERCATOR_PROJ.c_str(), ""};
 
-boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
+std::optional<well_known_srs_e> is_well_known_srs(std::string const& srs)
 {
     if (srs == MAPNIK_GEOGRAPHIC_PROJ)
     {
-        return boost::optional<well_known_srs_e>(mapnik::well_known_srs_enum::WGS_84);
+        return mapnik::well_known_srs_enum::WGS_84;
     }
     else if (srs == MAPNIK_WEBMERCATOR_PROJ)
     {
-        return boost::optional<well_known_srs_e>(mapnik::well_known_srs_enum::WEB_MERC);
+        return mapnik::well_known_srs_enum::WEB_MERC;
     }
-    return boost::optional<well_known_srs_e>();
+    return std::nullopt;
 }
 
-boost::optional<bool> is_known_geographic(std::string const& srs)
+std::optional<bool> is_known_geographic(std::string const& srs)
 {
     std::string trimmed = util::trim_copy(srs);
     if (trimmed == MAPNIK_GEOGRAPHIC_PROJ)
     {
-        return boost::optional<bool>(true);
+        return true;
     }
     else if (trimmed == MAPNIK_WEBMERCATOR_PROJ)
     {
-        return boost::optional<bool>(false);
+        return false;
     }
-    return boost::optional<bool>();
+    return std::nullopt;
 }
 
 using well_known_srs_e_str = mapnik::detail::EnumStringT<well_known_srs_enum>;

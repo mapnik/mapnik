@@ -64,14 +64,14 @@ class test : public benchmark::test_case
         , preview_(*params.get<std::string>("preview", ""))
         , im_(m_->width(), m_->height())
     {
-        boost::optional<std::string> map = params.get<std::string>("map");
+        const auto map = params.get<std::string>("map");
         if (!map)
         {
             throw std::runtime_error("please provide a --map=<path to xml> arg");
         }
         xml_ = *map;
 
-        boost::optional<std::string> ext = params.get<std::string>("extent");
+        auto ext = params.get<std::string>("extent");
         mapnik::load_map(*m_, xml_, true);
         if (ext && !ext->empty())
         {
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
     {
         mapnik::parameters params;
         benchmark::handle_args(argc, argv, params);
-        boost::optional<std::string> name = params.get<std::string>("name");
+        const auto name = params.get<std::string>("name");
         if (!name)
         {
             std::clog << "please provide a name for this test\n";

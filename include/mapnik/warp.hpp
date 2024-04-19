@@ -40,7 +40,7 @@ MAPNIK_DECL void reproject_and_scale_raster(raster& target,
                                             double offset_y,
                                             unsigned mesh_size,
                                             scaling_method_e scaling_method,
-                                            boost::optional<double> const& nodata_value);
+                                            std::optional<double> const& nodata_value);
 
 MAPNIK_DECL void reproject_and_scale_raster(raster& target,
                                             raster const& source,
@@ -61,7 +61,7 @@ MAPNIK_DECL void warp_image(T& target,
                             unsigned mesh_size,
                             scaling_method_e scaling_method,
                             double filter_factor,
-                            boost::optional<double> const& nodata_value);
+                            std::optional<double> const& nodata_value);
 } // namespace mapnik
 
 #endif // MAPNIK_WARP_HPP

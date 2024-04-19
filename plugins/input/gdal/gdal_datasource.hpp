@@ -49,13 +49,13 @@ class gdal_datasource : public mapnik::datasource
   public:
     gdal_datasource(mapnik::parameters const& params);
     virtual ~gdal_datasource();
-    mapnik::datasource::datasource_t type() const;
+    mapnik::datasource::datasource_t type() const override;
     static const char* name();
-    mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
-    mapnik::box2d<double> envelope() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    mapnik::layer_descriptor get_descriptor() const;
+    mapnik::featureset_ptr features(mapnik::query const& q) const override;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
+    mapnik::box2d<double> envelope() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
+    mapnik::layer_descriptor get_descriptor() const override;
 
   private:
     std::unique_ptr<GDALDataset, decltype(&GDALClose)> dataset_;
@@ -69,7 +69,7 @@ class gdal_datasource : public mapnik::datasource
     double dy_;
     int nbands_;
     bool shared_dataset_;
-    boost::optional<double> nodata_value_;
+    std::optional<double> nodata_value_;
     double nodata_tolerance_;
     int64_t max_image_area_;
 };

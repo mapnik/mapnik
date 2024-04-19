@@ -203,8 +203,8 @@ text_placements_ptr text_placements_simple::from_xml(xml_node const& xml, fontse
             {
                 // we don't use parse_expression(placements_string) directly here to benefit from the cache in the
                 // xml_node
-                boost::optional<expression_ptr> val = xml.get_opt_attr<expression_ptr>("placements");
-                if (val)
+                const auto val = xml.get_opt_attr<expression_ptr>("placements");
+                if (val.has_value())
                 {
                     text_placements_ptr ptr = std::make_shared<text_placements_simple>(*val);
                     ptr->defaults.from_xml(xml, fontsets, is_shield);

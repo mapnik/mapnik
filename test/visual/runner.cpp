@@ -260,7 +260,7 @@ void runner::parse_params(mapnik::parameters const& params, config& cfg) const
 {
     cfg.status = *params.get<mapnik::value_bool>("status", cfg.status);
 
-    boost::optional<std::string> sizes = params.get<std::string>("sizes");
+    std::optional<std::string> sizes = params.get<std::string>("sizes");
 
     if (sizes)
     {
@@ -268,7 +268,7 @@ void runner::parse_params(mapnik::parameters const& params, config& cfg) const
         parse_map_sizes(*sizes, cfg.sizes);
     }
 
-    boost::optional<std::string> tiles = params.get<std::string>("tiles");
+    std::optional<std::string> tiles = params.get<std::string>("tiles");
 
     if (tiles)
     {
@@ -276,7 +276,7 @@ void runner::parse_params(mapnik::parameters const& params, config& cfg) const
         parse_map_sizes(*tiles, cfg.tiles);
     }
 
-    boost::optional<std::string> bbox_string = params.get<std::string>("bbox");
+    std::optional<std::string> bbox_string = params.get<std::string>("bbox");
 
     if (bbox_string)
     {
@@ -286,7 +286,7 @@ void runner::parse_params(mapnik::parameters const& params, config& cfg) const
     for (auto const& renderer : renderers_)
     {
         std::string renderer_name = mapnik::util::apply_visitor(renderer_name_visitor(), renderer);
-        boost::optional<mapnik::value_bool> enabled = params.get<mapnik::value_bool>(renderer_name);
+        std::optional<mapnik::value_bool> enabled = params.get<mapnik::value_bool>(renderer_name);
         if (enabled && !*enabled)
         {
             cfg.ignored_renderers.insert(renderer_name);

@@ -63,7 +63,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -82,7 +81,7 @@ MAPNIK_DISABLE_WARNING_POP
 using boost::tokenizer;
 
 namespace mapnik {
-using boost::optional;
+using std::optional;
 using util::name_to_int;
 using util::operator"" _case;
 
@@ -135,10 +134,10 @@ class map_parser : util::noncopyable
     void ensure_font_face(std::string const& face_name);
     void find_unused_nodes(xml_node const& root);
     void find_unused_nodes_recursive(xml_node const& node, std::string& error_text);
-    std::string ensure_relative_to_xml(boost::optional<std::string> const& opt_path);
+    std::string ensure_relative_to_xml(std::optional<std::string> const& opt_path);
     void ensure_exists(std::string const& file_path);
     void check_styles(Map const& map);
-    boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node, std::string const& name);
+    std::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node, std::string const& name);
 
     bool strict_;
     std::string filename_;
@@ -849,15 +848,15 @@ void map_parser::parse_layer(Parent& parent, xml_node const& node)
                     }
                 }
 
-                boost::optional<std::string> base_param = params.get<std::string>("base");
-                boost::optional<std::string> file_param = params.get<std::string>("file");
+                const auto base_param = params.get<std::string>("base");
+                const auto file_param = params.get<std::string>("file");
 
-                if (base_param)
+                if (base_param.has_value())
                 {
                     params["base"] = ensure_relative_to_xml(base_param);
                 }
 
-                else if (file_param)
+                else if (file_param.has_value())
                 {
                     params["file"] = ensure_relative_to_xml(file_param);
                 }
@@ -1461,8 +1460,8 @@ void map_parser::parse_raster_symbolizer(rule& rule, xml_node const& node)
             }
             else
             {
-                boost::optional<scaling_method_e> method = scaling_method_from_string(scaling_method);
-                if (method)
+                const auto method = scaling_method_from_string(scaling_method);
+                if (method.has_value())
                 {
                     put(raster_sym, keys::scaling, *method);
                 }
@@ -1753,7 +1752,7 @@ void map_parser::ensure_font_face(std::string const& face_name)
     }
 }
 
-std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> const& opt_path)
+std::string map_parser::ensure_relative_to_xml(std::optional<std::string> const& opt_path)
 {
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;

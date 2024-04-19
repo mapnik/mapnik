@@ -80,15 +80,15 @@ class pgraster_datasource : public datasource
   public:
     pgraster_datasource(const parameters& params);
     ~pgraster_datasource();
-    mapnik::datasource::datasource_t type() const;
+    mapnik::datasource::datasource_t type() const override;
     static const char* name();
-    processor_context_ptr get_context(feature_style_context_map&) const;
-    featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const;
-    featureset_ptr features(query const& q) const;
-    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
-    mapnik::box2d<double> envelope() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    layer_descriptor get_descriptor() const;
+    processor_context_ptr get_context(feature_style_context_map&) const override;
+    featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const override;
+    featureset_ptr features(query const& q) const override;
+    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const override;
+    mapnik::box2d<double> envelope() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
+    layer_descriptor get_descriptor() const override;
 
   private:
     std::string sql_bbox(box2d<double> const& env) const;

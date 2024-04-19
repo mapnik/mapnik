@@ -210,15 +210,15 @@ class MAPNIK_DECL layer
 
     // compositing
     void set_comp_op(composite_mode_e comp_op);
-    boost::optional<composite_mode_e> comp_op() const;
+    std::optional<composite_mode_e> comp_op() const;
     void set_opacity(double opacity);
     double get_opacity() const;
 
     void set_maximum_extent(box2d<double> const& box);
-    boost::optional<box2d<double>> const& maximum_extent() const;
+    std::optional<box2d<double>> const& maximum_extent() const;
     void reset_maximum_extent();
     void set_buffer_size(int size);
-    boost::optional<int> const& buffer_size() const;
+    std::optional<int> const& buffer_size() const;
     void reset_buffer_size();
     ~layer();
 
@@ -235,9 +235,9 @@ class MAPNIK_DECL layer
     std::vector<std::string> styles_;
     std::vector<layer> layers_;
     datasource_ptr ds_;
-    boost::optional<int> buffer_size_;
-    boost::optional<box2d<double>> maximum_extent_;
-    boost::optional<composite_mode_e> comp_op_;
+    std::optional<int> buffer_size_;
+    std::optional<box2d<double>> maximum_extent_;
+    std::optional<composite_mode_e> comp_op_;
     double opacity_;
 };
 } // namespace mapnik

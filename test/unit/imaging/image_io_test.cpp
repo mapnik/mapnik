@@ -58,7 +58,7 @@ TEST_CASE("image io")
     SECTION("readers")
     {
         std::string should_throw;
-        boost::optional<std::string> type;
+        std::optional<std::string> type;
         try
         {
             mapnik::image_rgba8 im_og;

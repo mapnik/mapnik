@@ -30,7 +30,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/program_options.hpp>
 MAPNIK_DISABLE_WARNING_POP
 

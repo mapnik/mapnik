@@ -248,7 +248,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     box2d<double> buffered_query_ext(query_ext); // buffered
 
     double buffer_padding = 2.0 * scale * p.scale_factor();
-    boost::optional<int> layer_buffer_size = lay.buffer_size();
+    const auto layer_buffer_size = lay.buffer_size();
     if (layer_buffer_size) // if layer overrides buffer size, use this value to compute buffered extent
     {
         buffer_padding *= *layer_buffer_size;
@@ -261,7 +261,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material&
     buffered_query_ext.height(query_ext.height() + buffer_padding);
 
     // clip buffered extent by maximum extent, if supplied
-    boost::optional<box2d<double>> const& maximum_extent = m_.maximum_extent();
+    auto&& maximum_extent = m_.maximum_extent();
     if (maximum_extent)
     {
         buffered_query_ext.clip(*maximum_extent);

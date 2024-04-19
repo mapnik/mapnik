@@ -32,8 +32,6 @@
 
 #include <gdal_version.h>
 
-#include <mutex>
-
 using mapnik::datasource;
 using mapnik::parameters;
 
@@ -69,12 +67,12 @@ gdal_datasource::gdal_datasource(parameters const& params)
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::init");
 #endif
 
-    boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file)
+    auto file = params.get<std::string>("file");
+    if (!file.has_value())
         throw datasource_exception("missing <file> parameter");
 
-    boost::optional<std::string> base = params.get<std::string>("base");
-    if (base)
+    auto base = params.get<std::string>("base");
+    if (base.has_value())
     {
         dataset_name_ = *base + "/" + *file;
     }
@@ -120,8 +118,8 @@ gdal_datasource::gdal_datasource(parameters const& params)
 
     double tr[6];
     bool bbox_override = false;
-    boost::optional<std::string> bbox_s = params.get<std::string>("extent");
-    if (bbox_s)
+    const auto bbox_s = params.get<std::string>("extent");
+    if (bbox_s.has_value())
     {
         MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;
 
@@ -212,9 +210,9 @@ box2d<double> gdal_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> gdal_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> gdal_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource_geometry_t>();
+    return std::nullopt;
 }
 
 layer_descriptor gdal_datasource::get_descriptor() const

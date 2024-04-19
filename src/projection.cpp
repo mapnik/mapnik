@@ -44,8 +44,8 @@ projection::projection(std::string const& params, bool defer_proj_init)
     , proj_(nullptr)
     , proj_ctx_(nullptr)
 {
-    boost::optional<bool> is_known = is_known_geographic(params_);
-    if (is_known)
+    const auto is_known = is_known_geographic(params_);
+    if (is_known.has_value())
     {
         is_geographic_ = *is_known;
     }
@@ -131,7 +131,7 @@ bool projection::is_geographic() const
     return is_geographic_;
 }
 
-boost::optional<well_known_srs_e> projection::well_known() const
+std::optional<well_known_srs_e> projection::well_known() const
 {
     return is_well_known_srs(params_);
 }

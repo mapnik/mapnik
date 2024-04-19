@@ -38,6 +38,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <optional>
 
 namespace mapnik {
 
@@ -91,7 +92,7 @@ class MAPNIK_DECL datasource : private util::noncopyable
         // default implementation without context use features method
         return features(q);
     }
-    virtual boost::optional<datasource_geometry_t> get_geometry_type() const = 0;
+    virtual std::optional<datasource_geometry_t> get_geometry_type() const = 0;
     virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
     virtual box2d<double> envelope() const = 0;

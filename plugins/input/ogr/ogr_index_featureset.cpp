@@ -70,8 +70,8 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const& c
     , feature_envelope_()
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file, true);
-    if (memory)
+    const auto memory = mapnik::mapped_memory_cache::instance().find(index_file, true);
+    if (memory.has_value())
     {
         boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()), (*memory)->get_size());
         ogr_index<filterT, boost::interprocess::ibufferstream>::query(filter, file, ids_);

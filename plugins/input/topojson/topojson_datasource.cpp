@@ -23,9 +23,6 @@
 #include "topojson_datasource.hpp"
 #include "topojson_featureset.hpp"
 
-#include <fstream>
-#include <algorithm>
-
 // boost
 #include <boost/algorithm/string.hpp>
 
@@ -132,18 +129,18 @@ topojson_datasource::topojson_datasource(parameters const& params)
     , tr_(new mapnik::transcoder(*params.get<std::string>("encoding", "utf-8")))
     , tree_(nullptr)
 {
-    boost::optional<std::string> inline_string = params.get<std::string>("inline");
+    const auto inline_string = params.get<std::string>("inline");
     if (inline_string)
     {
         inline_string_ = *inline_string;
     }
     else
     {
-        boost::optional<std::string> file = params.get<std::string>("file");
+        const auto file = params.get<std::string>("file");
         if (!file)
             throw mapnik::datasource_exception("TopoJSON Plugin: missing <file> parameter");
 
-        boost::optional<std::string> base = params.get<std::string>("base");
+        const auto base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
@@ -225,9 +222,9 @@ const char* topojson_datasource::name()
     return "topojson";
 }
 
-boost::optional<mapnik::datasource_geometry_t> topojson_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> topojson_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     std::size_t num_features = topo_.geometries.size();
     for (std::size_t i = 0; i < num_features && i < 5; ++i)
@@ -238,12 +235,12 @@ boost::optional<mapnik::datasource_geometry_t> topojson_datasource::get_geometry
         {
             if (multi_type > 0 && multi_type != type)
             {
-                result.reset(mapnik::datasource_geometry_t::Collection);
+                result = mapnik::datasource_geometry_t::Collection;
                 return result;
             }
             else
             {
-                result.reset(static_cast<mapnik::datasource_geometry_t>(type));
+                result = static_cast<mapnik::datasource_geometry_t>(type);
             }
             multi_type = type;
         }

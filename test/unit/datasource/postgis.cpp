@@ -36,8 +36,6 @@
   ./test-postgis -d yes
 */
 
-#include <boost/optional/optional_io.hpp>
-
 namespace {
 
 bool run(std::string const& command, bool okay_to_fail = false)

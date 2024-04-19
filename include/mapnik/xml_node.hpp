@@ -26,17 +26,12 @@
 // mapnik
 #include <mapnik/config.hpp> // for MAPNIK_DECL
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
 #include <list>
 #include <string>
 #include <map>
 #include <exception>
+#include <optional>
 
 namespace mapnik {
 class MAPNIK_DECL xml_tree;
@@ -129,7 +124,7 @@ class MAPNIK_DECL xml_node
     bool has_attribute(std::string const& name) const;
 
     template<typename T>
-    boost::optional<T> get_opt_attr(std::string const& name) const;
+    std::optional<T> get_opt_attr(std::string const& name) const;
 
     template<typename T>
     T get_attr(std::string const& name, T const& default_opt_value) const;

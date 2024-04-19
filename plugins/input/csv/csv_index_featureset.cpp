@@ -57,8 +57,8 @@ csv_index_featureset::csv_index_featureset(std::string const& filename,
 
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
-    if (memory)
+    const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);
+    if (memory.has_value())
     {
         mapped_region_ = *memory;
     }

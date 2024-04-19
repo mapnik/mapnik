@@ -29,7 +29,6 @@
 MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_UNUSED_VARIABLE
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
@@ -37,6 +36,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <cmath>
+#include <optional>
 
 namespace mapnik {
 
@@ -91,7 +91,7 @@ struct store
     {
         m.v2 = m.v1;
         m.v1 = e.vertex;
-        m.output = boost::none;
+        m.output = std::nullopt;
     }
 };
 
@@ -177,7 +177,7 @@ struct extender_def : public msm::front::state_machine_def<extender_def>
         : extend_length(extend_length)
     {}
 
-    boost::optional<vertex2d> output;
+    std::optional<vertex2d> output;
     vertex2d v1, v2;
     double extend_length;
 };

@@ -55,11 +55,11 @@ raster_datasource::raster_datasource(parameters const& params)
 {
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";
 
-    boost::optional<std::string> file = params.get<std::string>("file");
+    const auto file = params.get<std::string>("file");
     if (!file)
         throw datasource_exception("Raster Plugin: missing <file> parameter ");
 
-    boost::optional<std::string> base = params.get<std::string>("base");
+    const auto base = params.get<std::string>("base");
     if (base)
         filename_ = *base + "/" + *file;
     else
@@ -69,15 +69,15 @@ raster_datasource::raster_datasource(parameters const& params)
     tile_size_ = *params.get<mapnik::value_integer>("tile_size", 1024);
     tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
-    boost::optional<std::string> format_from_filename = mapnik::type_from_filename(*file);
+    const auto format_from_filename = mapnik::type_from_filename(*file);
     format_ = *params.get<std::string>("format", format_from_filename ? (*format_from_filename) : "tiff");
 
-    boost::optional<mapnik::value_double> lox = params.get<mapnik::value_double>("lox");
-    boost::optional<mapnik::value_double> loy = params.get<mapnik::value_double>("loy");
-    boost::optional<mapnik::value_double> hix = params.get<mapnik::value_double>("hix");
-    boost::optional<mapnik::value_double> hiy = params.get<mapnik::value_double>("hiy");
+    const auto lox = params.get<mapnik::value_double>("lox");
+    const auto loy = params.get<mapnik::value_double>("loy");
+    const auto hix = params.get<mapnik::value_double>("hix");
+    const auto hiy = params.get<mapnik::value_double>("hiy");
 
-    boost::optional<std::string> ext = params.get<std::string>("extent");
+    const auto ext = params.get<std::string>("extent");
 
     if (lox && loy && hix && hiy)
     {
@@ -108,8 +108,8 @@ raster_datasource::raster_datasource(parameters const& params)
 
     if (multi_tiles_)
     {
-        boost::optional<mapnik::value_integer> x_width = params.get<mapnik::value_integer>("x_width");
-        boost::optional<mapnik::value_integer> y_width = params.get<mapnik::value_integer>("y_width");
+        const auto x_width = params.get<mapnik::value_integer>("x_width");
+        const auto y_width = params.get<mapnik::value_integer>("y_width");
 
         if (!x_width)
         {
@@ -121,8 +121,8 @@ raster_datasource::raster_datasource(parameters const& params)
             throw datasource_exception("Raster Plugin: y-width parameter not supplied for multi-tiled data source.");
         }
 
-        width_ = x_width.get() * tile_size_;
-        height_ = y_width.get() * tile_size_;
+        width_ = x_width.value() * tile_size_;
+        height_ = y_width.value() * tile_size_;
     }
     else
     {
@@ -174,9 +174,9 @@ mapnik::box2d<double> raster_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> raster_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> raster_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource_geometry_t>();
+    return std::nullopt;
 }
 
 layer_descriptor raster_datasource::get_descriptor() const

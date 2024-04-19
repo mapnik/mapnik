@@ -104,8 +104,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         throw mapnik::datasource_exception("Pgraster Plugin: missing <table> parameter");
     }
 
-    boost::optional<std::string> ext = params.get<std::string>("extent");
-    if (ext && !ext->empty())
+    const auto ext = params.get<std::string>("extent");
+    if (ext.has_value() && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
@@ -124,9 +124,8 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    boost::optional<value_integer> initial_size = params.get<value_integer>("initial_size", 1);
-    boost::optional<mapnik::boolean_type> autodetect_key_field =
-      params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    const auto initial_size = params.get<value_integer>("initial_size", 1);
+    const auto autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
@@ -298,14 +297,12 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
             std::ostringstream err;
             if (parsed_schema_.empty())
             {
-                err << "Pgraster Plugin: unable to lookup available table"
-                    << " overviews due to unknown schema";
+                err << "Pgraster Plugin: unable to lookup available table" << " overviews due to unknown schema";
                 throw mapnik::datasource_exception(err.str());
             }
             if (geometryColumn_.empty())
             {
-                err << "Pgraster Plugin: unable to lookup available table"
-                    << " overviews due to unknown column name";
+                err << "Pgraster Plugin: unable to lookup available table" << " overviews due to unknown column name";
                 throw mapnik::datasource_exception(err.str());
             }
 
@@ -415,8 +412,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                 else if (result_rows > 1)
                 {
                     std::ostringstream err;
-                    err << "PostGIS Plugin: Error: '"
-                        << "multi column primary key detected but is not supported";
+                    err << "PostGIS Plugin: Error: '" << "multi column primary key detected but is not supported";
                     throw mapnik::datasource_exception(err.str());
                 }
             }
@@ -489,8 +485,7 @@ pgraster_datasource::pgraster_datasource(parameters const& params)
                     }
 
                     rs_oid->close();
-                    error_s << " for key_field '" << fld_name << "' - "
-                            << "must be an integer primary key";
+                    error_s << " for key_field '" << fld_name << "' - " << "must be an integer primary key";
 
                     rs->close();
                     throw mapnik::datasource_exception(error_s.str());
@@ -1120,8 +1115,8 @@ box2d<double> pgraster_datasource::envelope() const
             }
             else
             {
-                s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent(" << identifier(col) << "::geometry) as ext from ";
+                s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)" << " FROM (SELECT ST_Extent("
+                  << identifier(col) << "::geometry) as ext from ";
 
                 if (extent_from_subquery_)
                 {
@@ -1167,7 +1162,7 @@ box2d<double> pgraster_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> pgraster_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> pgraster_datasource::get_geometry_type() const
 {
-    return boost::optional<mapnik::datasource_geometry_t>();
+    return std::nullopt;
 }

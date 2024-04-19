@@ -36,7 +36,6 @@
 #include <mapnik/util/from_u8string.hpp>
 #include <mapnik/util/fs.hpp>
 #include <boost/format.hpp>
-#include <boost/optional/optional_io.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH

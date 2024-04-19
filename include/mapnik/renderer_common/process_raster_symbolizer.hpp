@@ -31,6 +31,7 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/renderer_common.hpp>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -66,7 +67,7 @@ struct image_dispatcher
                      raster_symbolizer const& sym,
                      feature_impl const& feature,
                      F& composite,
-                     boost::optional<double> const& nodata,
+                     std::optional<double> const& nodata,
                      bool need_scaling)
         : start_x_(start_x)
         , start_y_(start_y)
@@ -156,7 +157,7 @@ struct image_dispatcher
     raster_symbolizer const& sym_;
     feature_impl const& feature_;
     composite_function& composite_;
-    boost::optional<double> const& nodata_;
+    std::optional<double> const& nodata_;
     bool need_scaling_;
 };
 
@@ -181,7 +182,7 @@ struct image_warp_dispatcher
                           raster_symbolizer const& sym,
                           feature_impl const& feature,
                           F& composite,
-                          boost::optional<double> const& nodata)
+                          std::optional<double> const& nodata)
         : prj_trans_(prj_trans)
         , start_x_(start_x)
         , start_y_(start_y)
@@ -265,7 +266,7 @@ struct image_warp_dispatcher
     raster_symbolizer const& sym_;
     feature_impl const& feature_;
     composite_function& composite_;
-    boost::optional<double> const& nodata_;
+    std::optional<double> const& nodata_;
 };
 
 } // namespace detail

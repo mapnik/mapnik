@@ -21,8 +21,6 @@
  *****************************************************************************/
 
 #include <algorithm>
-#include <string>
-#include <unordered_map>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/enumeration.hpp>
@@ -150,7 +148,7 @@ void feature_type_style::set_comp_op(composite_mode_e _comp_op)
     comp_op_ = _comp_op;
 }
 
-boost::optional<composite_mode_e> feature_type_style::comp_op() const
+std::optional<composite_mode_e> feature_type_style::comp_op() const
 {
     return comp_op_;
 }

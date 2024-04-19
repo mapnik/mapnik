@@ -42,14 +42,9 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/image.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 #include <memory>
 #include <vector>
+#include <optional>
 
 namespace mapnik {
 
@@ -193,7 +188,7 @@ class MAPNIK_DECL raster_colorizer
     colorizer_stops const& get_stops() const { return stops_; }
 
     template<typename T>
-    void colorize(image_rgba8& out, T const& in, boost::optional<double> const& nodata, feature_impl const& f) const;
+    void colorize(image_rgba8& out, T const& in, std::optional<double> const& nodata, feature_impl const& f) const;
 
     //! \brief Perform the translation of input to output
     //!

@@ -63,19 +63,17 @@ bool mapped_memory_cache::remove(std::string const& key)
     return cache_.erase(key) > 0;
 }
 
-boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& uri, bool update_cache)
+std::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& uri, bool update_cache)
 {
 #ifdef MAPNIK_THREADSAFE
     std::lock_guard<std::mutex> lock(mutex_);
 #endif
 
     using iterator_type = std::unordered_map<std::string, mapped_region_ptr>::const_iterator;
-    boost::optional<mapped_region_ptr> result;
     iterator_type itr = cache_.find(uri);
     if (itr != cache_.end())
     {
-        result.reset(itr->second);
-        return result;
+        return itr->second;
     }
 
     if (mapnik::util::exists(uri))
@@ -85,12 +83,11 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
             boost::interprocess::file_mapping mapping(uri.c_str(), boost::interprocess::read_only);
             mapped_region_ptr region(
               std::make_shared<boost::interprocess::mapped_region>(mapping, boost::interprocess::read_only));
-            result.reset(region);
             if (update_cache)
             {
-                cache_.emplace(uri, *result);
+                cache_.emplace(uri, region);
             }
-            return result;
+            return region;
         }
         catch (std::exception const& ex)
         {
@@ -104,7 +101,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         MAPNIK_LOG_WARN(mapped_memory_cache) << "Memory region does not exist file: " << uri;
     }
     */
-    return result;
+    return std::nullopt;
 }
 
 } // namespace mapnik

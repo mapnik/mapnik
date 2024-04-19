@@ -31,12 +31,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
+#include <optional>
 
 namespace boost {
 namespace interprocess {
@@ -64,7 +59,7 @@ class MAPNIK_DECL mapped_memory_cache : public singleton<mapped_memory_cache, Cr
      * @return false if the resource was not removed or wasn't in the cache
      */
     bool remove(std::string const& key);
-    boost::optional<mapped_region_ptr> find(std::string const& key, bool update_cache = false);
+    std::optional<mapped_region_ptr> find(std::string const& key, bool update_cache = false);
     void clear();
 };
 

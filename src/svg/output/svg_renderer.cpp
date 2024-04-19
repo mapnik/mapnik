@@ -30,9 +30,6 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/font_set.hpp>
 
-// stl
-#include <ostream>
-
 namespace mapnik {
 
 template<typename T>
@@ -81,8 +78,8 @@ void svg_renderer<T>::start_map_processing(Map const& map)
     svg::root_output_attributes root_attributes(common_.width_, common_.height_);
     generator_.generate_opening_root(root_attributes);
 
-    boost::optional<color> const& bgcolor = map.background();
-    if (bgcolor)
+    auto&& bgcolor = map.background();
+    if (bgcolor.has_value())
     {
         // generate background color as a rectangle that spans the whole image.
         svg::rect_output_attributes bg_attributes(0, 0, common_.width_, common_.height_, *bgcolor);

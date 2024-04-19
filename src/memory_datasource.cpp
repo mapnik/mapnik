@@ -159,7 +159,7 @@ box2d<double> memory_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<datasource_geometry_t> memory_datasource::get_geometry_type() const
+std::optional<datasource_geometry_t> memory_datasource::get_geometry_type() const
 {
     // TODO - detect this?
     return datasource_geometry_t::Collection;

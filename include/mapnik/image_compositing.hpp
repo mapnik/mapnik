@@ -26,14 +26,9 @@
 #include <mapnik/config.hpp>
 #include <mapnik/image.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
 #include <string>
+#include <optional>
 
 namespace mapnik {
 
@@ -80,8 +75,8 @@ enum composite_mode_e {
     divide
 };
 
-MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
-MAPNIK_DECL boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op);
+MAPNIK_DECL std::optional<composite_mode_e> comp_op_from_string(std::string const& name);
+MAPNIK_DECL std::optional<std::string> comp_op_to_string(composite_mode_e comp_op);
 
 template<typename T>
 MAPNIK_DECL void composite(T& dst, T const& src, composite_mode_e mode, float opacity = 1, int dx = 0, int dy = 0);

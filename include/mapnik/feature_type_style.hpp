@@ -29,15 +29,11 @@
 #include <mapnik/image_filter_types.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <vector>
 #include <cstddef>
+#include <optional>
 
 namespace mapnik {
 
@@ -56,7 +52,7 @@ class MAPNIK_DECL feature_type_style
     std::vector<filter::filter_type> filters_;
     std::vector<filter::filter_type> direct_filters_;
     // comp-op
-    boost::optional<composite_mode_e> comp_op_;
+    std::optional<composite_mode_e> comp_op_;
     float opacity_;
     bool image_filters_inflate_;
     friend void swap(feature_type_style& lhs, feature_type_style& rhs);
@@ -87,7 +83,7 @@ class MAPNIK_DECL feature_type_style
     std::vector<filter::filter_type>& direct_image_filters();
     // compositing
     void set_comp_op(composite_mode_e comp_op);
-    boost::optional<composite_mode_e> comp_op() const;
+    std::optional<composite_mode_e> comp_op() const;
     void set_opacity(float opacity);
     float get_opacity() const;
     void set_image_filters_inflate(bool inflate);

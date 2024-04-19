@@ -35,11 +35,11 @@
 
 // stl
 #include <map>
+#include <optional>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
@@ -53,7 +53,7 @@ namespace detail {
 struct evaluated_format_properties
 {
     std::string face_name;
-    boost::optional<font_set> fontset;
+    std::optional<font_set> fontset;
     double text_size;
     double character_spacing;
     double line_spacing;
@@ -113,7 +113,7 @@ struct MAPNIK_DECL format_properties
     void add_expressions(expression_set& output) const;
 
     std::string face_name;
-    boost::optional<font_set> fontset;
+    std::optional<font_set> fontset;
     // expressions
     symbolizer_base::value_type text_size;
     symbolizer_base::value_type character_spacing;

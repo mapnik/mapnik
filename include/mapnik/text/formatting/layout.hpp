@@ -25,12 +25,7 @@
 
 #include <mapnik/text/formatting/base.hpp>
 #include <mapnik/text/text_properties.hpp>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
+#include <optional>
 
 namespace mapnik {
 namespace formatting {
@@ -48,18 +43,18 @@ class MAPNIK_DECL layout_node : public node
     void set_child(node_ptr child);
     node_ptr get_child() const;
     //
-    boost::optional<symbolizer_base::value_type> dx;
-    boost::optional<symbolizer_base::value_type> dy;
-    boost::optional<symbolizer_base::value_type> halign;
-    boost::optional<symbolizer_base::value_type> valign;
-    boost::optional<symbolizer_base::value_type> jalign;
-    boost::optional<symbolizer_base::value_type> text_ratio;
-    boost::optional<symbolizer_base::value_type> wrap_width;
-    boost::optional<symbolizer_base::value_type> wrap_char;
-    boost::optional<symbolizer_base::value_type> wrap_before;
-    boost::optional<symbolizer_base::value_type> repeat_wrap_char;
-    boost::optional<symbolizer_base::value_type> rotate_displacement;
-    boost::optional<symbolizer_base::value_type> orientation;
+    std::optional<symbolizer_base::value_type> dx;
+    std::optional<symbolizer_base::value_type> dy;
+    std::optional<symbolizer_base::value_type> halign;
+    std::optional<symbolizer_base::value_type> valign;
+    std::optional<symbolizer_base::value_type> jalign;
+    std::optional<symbolizer_base::value_type> text_ratio;
+    std::optional<symbolizer_base::value_type> wrap_width;
+    std::optional<symbolizer_base::value_type> wrap_char;
+    std::optional<symbolizer_base::value_type> wrap_before;
+    std::optional<symbolizer_base::value_type> repeat_wrap_char;
+    std::optional<symbolizer_base::value_type> rotate_displacement;
+    std::optional<symbolizer_base::value_type> orientation;
 
   private:
     node_ptr child_;

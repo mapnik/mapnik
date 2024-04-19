@@ -36,7 +36,6 @@
 #include <algorithm>
 #include <cctype>
 #include <locale>
-#include <boost/optional/optional_io.hpp>
 
 /*
 
@@ -152,14 +151,15 @@ TEST_CASE("geojson")
                 REQUIRE(json == json_out);
             }
 
-            auto invalid_empty_geometries = {"{ \"type\": \"Point\", \"coordinates\": [] }",
-                                             "{ \"type\": \"LineString\", \"coordinates\": [[]] }"
-                                             "{ \"type\": \"Polygon\", \"coordinates\": [[[]]] }",
-                                             "{ \"type\": \"MultiPoint\", \"coordinates\": [[]] }",
-                                             "{ \"type\": \"MultiLineString\", \"coordinates\": [[[]]] }",
-                                             "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[[]]]] }"};
+            constexpr auto invalid_empty_geometries =
+              std::array{"{ \"type\": \"Point\", \"coordinates\": [] }",
+                         "{ \"type\": \"LineString\", \"coordinates\": [[]] }",
+                         "{ \"type\": \"Polygon\", \"coordinates\": [[[]]] }",
+                         "{ \"type\": \"MultiPoint\", \"coordinates\": [[]] }",
+                         "{ \"type\": \"MultiLineString\", \"coordinates\": [[[]]] }",
+                         "{ \"type\": \"MultiPolygon\", \"coordinates\": [[[[]]]] }"};
 
-            for (auto const& json : invalid_empty_geometries)
+            for (auto&& json : invalid_empty_geometries)
             {
                 mapnik::geometry::geometry<double> geom;
                 CHECK(!mapnik::json::from_geojson(json, geom));
