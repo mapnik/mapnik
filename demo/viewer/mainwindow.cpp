@@ -23,6 +23,9 @@
 // qt
 #include <QtGui>
 #include <QToolBar>
+#include <QLabel>
+#include <QDockWidget>
+#include <QDebug>
 // mapnik
 
 #ifndef Q_MOC_RUN // QT moc chokes on BOOST_JOIN
@@ -48,7 +51,6 @@
 #include "rapidjson/stringbuffer.h"
 #include <QMessageBox>
 #include <QCoreApplication>
-
 #include "completeRoadsWidget.hpp"
 
 using mapnik::layer;
@@ -59,6 +61,19 @@ MainWindow::MainWindow()
 
     mapWidget_->setFocusPolicy(Qt::StrongFocus);
     mapWidget_->setFocus();
+
+    // 创建自定义部件
+    m_completeRoadsWidget = QSharedPointer<CompleteRoadsWidget>::create(this);
+    // 创建 QDockWidget 并设置特性
+    QSharedPointer<QDockWidget> m_dockWidget =  QSharedPointer<QDockWidget>::create(this);
+    m_dockWidget->setWidget(m_completeRoadsWidget.data());
+    m_dockWidget->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+
+    // 将 QDockWidget 添加到 QMainWindow
+    this->addDockWidget(Qt::LeftDockWidgetArea, m_dockWidget.data());
+
+    // 设置停靠区域
+    m_dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
     // setCentralWidget(mapWidget_);
     setCentralWidget(mapWidget_);
@@ -164,8 +179,6 @@ void MainWindow::afterSave()
     mapWidget_->roadMerger->clipedCehuiData();
     mapWidget_->roadMerger->showClipedCehuiOnMap();
     m_completeRoads->setCheckable(true);
-//    CompleteRoadsWidget* pCompleteRoadsWidget = new CompleteRoadsWidget();
-//    pCompleteRoadsWidget->exec();
 }
 
 void MainWindow::completeRoads()

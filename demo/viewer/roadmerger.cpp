@@ -269,7 +269,7 @@ void RoadMerger::showClipedCehuiOnMap()
     m_mergedSourceIndex = 4;
 }
 
-void RoadMerger::exportCompleteRoads(const QString& completeRoadsFile)
+bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile)
 {
 
 }
@@ -620,12 +620,27 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
                         for(auto itor = buffers.begin(); itor != buffers.end(); itor++)
                         {
                             mapnik::geometry::multi_polygon<double>& polyCheck = *itor;
-                            if(boost::geometry::within(cutline[0], polyCheck)
-                               || boost::geometry::intersects(cutline[0], polyCheck))
+                            bool isStartIntersects = boost::geometry::intersects(cutline[0], polyCheck);
+                            bool isEndIntersects = boost::geometry::intersects(cutline[cutline.size()-1], polyCheck);
+                            bool isStartWithin = boost::geometry::within(cutline[0], polyCheck);
+                            bool isEndWithin = boost::geometry::within(cutline[cutline.size()-1], polyCheck);
+
+                            if(boost::geometry::within(cutline, polyCheck)
+                               ||(isStartIntersects && isEndIntersects)
+                               || (isStartWithin && isEndIntersects)
+                               || (isStartIntersects && isEndWithin)
+                               || (isStartWithin && isEndWithin))
                             {
                                 isOut = false;
                                 break;
                             }
+
+//                            if(boost::geometry::within(cutline[0], polyCheck)
+//                               || boost::geometry::intersects(cutline[0], polyCheck))
+//                            {
+//                                isOut = false;
+//                                break;
+//                            }
 
                         }
 
@@ -656,6 +671,9 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
 
 void RoadMerger::clipedCehuiData()
 {
+    clipedCehuiSource->clear();
+    selectedResultBufferSource->clear();
+
     std::vector<mapnik::geometry::multi_polygon<double>> mergedResultBuffer;
     generateResultBuffer(mergedResultBuffer);
     if(mergedResultBuffer.size())

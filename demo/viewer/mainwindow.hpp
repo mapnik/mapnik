@@ -30,6 +30,9 @@
 #include "mapwidget.hpp"
 #include <QSharedPointer>
 
+class CompleteRoadsWidget;
+
+
 // using namespace mapnik;
 
 class MainWindow : public QMainWindow
@@ -83,6 +86,8 @@ class MainWindow : public QMainWindow
     std::map<long,long> m_osmid2featureid;
     QString m_midLinePath;
     QString m_completeRoadsFile;
+
+    QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
 };
 
 #endif // MAINWINDOW_HPP

@@ -62,7 +62,7 @@ public:
 
     void showClipedCehuiOnMap();
 
-    void exportCompleteRoads(const QString& completeRoadsFile);
+    bool exportCompleteRoads(const QString& completeRoadsFile);
 
 
 protected:
