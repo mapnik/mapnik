@@ -63,9 +63,9 @@ void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& c
         // 添加一行数据
         QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
 
-        std::cout<<"cehuidata.ID:"<<cehuidata.ID<<std::endl;
-        std::cout<<"cehuidata.PATHNAME:"<<cehuidata.PATHNAME<<std::endl;
-        std::cout<<"cehuidata.LENGTH:"<<cehuidata.LENGTH<<std::endl;
+//        std::cout<<"cehuidata.ID:"<<cehuidata.ID<<std::endl;
+//        std::cout<<"cehuidata.PATHNAME:"<<cehuidata.PATHNAME<<std::endl;
+//        std::cout<<"cehuidata.LENGTH:"<<cehuidata.LENGTH<<std::endl;
 
         item->setText(m_idIndexInTreeWidget, cehuidata.ID.c_str());
         item->setText(m_nameIndexInTreeWidget, cehuidata.PATHNAME.c_str());

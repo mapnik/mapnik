@@ -202,19 +202,7 @@ void MainWindow::startCompleteRoads()
     mapWidget_->roadMerger->showClipedCehuiOnMap();
     std::vector<cehuidataInfo> result;
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
-//    qDebug() << "startCompleteRoads:result size" << result.size();
-
-//    //test code
-//    for(auto& cehuidata:result)
-//    {
-//        std::string id = cehuidata.ID;
-//        std::string name = cehuidata.PATHNAME;
-//        std::string len = cehuidata.LENGTH;
-//        std::cout<<"startCompleteRoads::cehuidata.ID:"<<cehuidata.ID<<std::endl;
-//        std::cout<<"startCompleteRoads::cehuidata.PATHNAME:"<<cehuidata.PATHNAME<<std::endl;
-//        std::cout<<"startCompleteRoads::cehuidata.LENGTH:"<<cehuidata.LENGTH<<std::endl;
-//    }
-
+    qDebug() << "startCompleteRoads:result size" << result.size();
     emit updateCheckedItems_signal(result);
     m_dockWidget->setVisible(true);
 

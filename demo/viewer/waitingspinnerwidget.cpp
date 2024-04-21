@@ -130,6 +130,11 @@ void WaitingSpinnerWidget::start() {
 }
 
 void WaitingSpinnerWidget::stop() {
+    if(label==NULL || _timer==NULL)
+    {
+        return;
+    }
+
     _isSpinning = false;
     hide();
     label->hide();

@@ -204,7 +204,8 @@ void RoadMerger::run()
             results.emplace_back(pool.enqueue([&,cloneFeat] {
                 mapnik::geometry::geometry<double> out;
                 clipLine(cloneFeat->get_geometry(),cehuiBuffer,out);
-                feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), count));
+                context_ptr contextPtr = std::make_shared<mapnik::context_type>();
+                feature_ptr feature(feature_factory::create(contextPtr, count));
                 feature->put_new("OSMID",cloneFeat->get("OSMID"));
                 feature->put_new("MERGE_RESULT",1);
                 feature->set_geometry(mapnik::geometry::geometry<double>(out));
@@ -771,12 +772,6 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
                    curSeg.push_back(nodeList[i].pos);
                    curSeg.push_back(nodeList[i+1].pos);
 
-                   std::cout<<"pos.x:"<< nodeList[i].pos.x <<std::endl;
-                   std::cout<<"pos.y:"<< nodeList[i].pos.y <<std::endl;
-
-                   std::cout<<"cossPoint.x:"<< cossPoint.x <<std::endl;
-                   std::cout<<"cossPoint.y:"<< cossPoint.y <<std::endl;
-
                    if(boost::geometry::intersects(cossPoint, curSeg))
                    {
                        nodeInfo node = {cossPoint,true};
@@ -907,7 +902,8 @@ void RoadMerger::clipedCehuiData()
                        mapnik::geometry::multi_line_string<double>& lines = out;
                        for(int i=0; i<lines.size(); i++)
                        {
-                           feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), count));
+                           context_ptr contextPtr = std::make_shared<mapnik::context_type>();
+                           feature_ptr feature(feature_factory::create(contextPtr, count));
                            std::stringstream ss;
                            ss << cloneFeat->get("OSMID").to_int() << "_"<<i;
                            std::string sID = ss.str();
@@ -947,7 +943,8 @@ void RoadMerger::clipedCehuiData()
         //test code:
         for(auto& buffer:mergedResultBuffer)
         {
-            feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), 1));
+            context_ptr contextPtr = std::make_shared<mapnik::context_type>();
+            feature_ptr feature(feature_factory::create(contextPtr, 1));
             feature->put_new("mergedResultBuffer",1);
             feature->set_geometry(mapnik::geometry::geometry<double>(buffer));
             selectedResultBufferSource->push(feature);
