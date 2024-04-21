@@ -9,6 +9,7 @@ struct cehuidataInfo
 {
     /* data */
     std::string ID;
+    std::string newID;
     std::string KIND_NUM;
     std::string KIND;
     std::string WIDTH;

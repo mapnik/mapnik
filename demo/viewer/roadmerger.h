@@ -73,6 +73,8 @@ public:
 
     bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const std::string& groupId, const QString& completeRoadsFile);
 
+    void OnItemCheckBoxChanged(const QString& id, int status);
+
 protected:
     void run();
 

@@ -52,6 +52,7 @@ class MainWindow : public QMainWindow
 
   signals:
      void afterSave_signal();
+     void updateCheckedItems_signal(const std::vector<cehuidataInfo>& cehuidataInfoList);
 
   public slots:
     void zoom_all();
@@ -60,7 +61,10 @@ class MainWindow : public QMainWindow
     void pan();
     void save();
     void afterSave();
-    void completeRoads();
+    void startCompleteRoads();
+    void finishCompleteRoads();
+
+    void OnItemCheckBoxChanged(const QString& id, int status);
 
     MapWidget* mapWidget(){
         return mapWidget_;
@@ -78,7 +82,7 @@ class MainWindow : public QMainWindow
     QSharedPointer<QAction> m_zoomOut;
     QSharedPointer<QAction> m_panAct;
     QSharedPointer<QAction> m_saveAct;
-    QSharedPointer<QAction> m_completeRoads;
+    QSharedPointer<QAction> m_completeRoadsAct;
 
     // toolbars
     QSharedPointer<QToolBar> m_fileToolBar;
@@ -86,8 +90,8 @@ class MainWindow : public QMainWindow
     QString m_midLinePath;
     QString m_completeRoadsFile;
 
-//    QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
-//    QSharedPointer<QDockWidget> m_dockWidget;
+    QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
+    QSharedPointer<QDockWidget> m_dockWidget;
 
 };
 

@@ -35,6 +35,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <unicode/unistr.h> // ICU的头文件
 
 //BOOST_GEOMETRY_REGISTER_MULTI_LINESTRING(mapnik::geometry::multi_line_string<double>)
 //BOOST_GEOMETRY_REGISTER_MULTI_POLYGON(mapnik::geometry::multi_polygon<double>);
@@ -340,9 +341,14 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
         const cehuidataInfo& info = result[i];
         Value fileComplete(kObjectType);
 
+        std::cout<<"info.OSMID: "<<info.OSMID<<std::endl;
+
         fileComplete.AddMember("OSMID", info.OSMID, allocator);
 
         strValue = info.ID;
+
+        std::cout<<"info.ID: "<<strValue<<std::endl;
+
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
         fileComplete.AddMember("id", jsonValue, allocator);
 
@@ -841,6 +847,27 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
     }
 }
 
+void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
+{
+    std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
+    query q(clipedCehuiSource->envelope());
+    q.add_property_name("ID");
+    q.add_property_name("NeedAddCehui_RESULT");
+    auto fs = clipedCehuiSource->features(q);
+    feature_ptr feat = fs->next();
+    while(feat){
+        std::string strId = feat->get("ID").to_string();
+        if(strId==id.toStdString())
+        {
+            feat->put("NeedAddCehui_RESULT", status);
+        }
+        feat = fs->next();
+    }
+
+    mapWidget->updateMap();
+    std::cout<<"end OnItemCheckBoxChanged"<<std::endl;
+}
+
 void RoadMerger::clipedCehuiData()
 {
     clipedCehuiSource->clear();
@@ -854,6 +881,12 @@ void RoadMerger::clipedCehuiData()
 
         //
         query q(cehuiDS->envelope());
+        q.add_property_name("KIND_NUM");
+        q.add_property_name("KIND");
+        q.add_property_name("WIDTH");
+        q.add_property_name("DIRECTION");
+        q.add_property_name("LENGTH");
+        q.add_property_name("PATHNAME");
         q.add_property_name("OSMID");
         auto fs = cehuiDS->features(q);
         feature_ptr feat = fs->next();
@@ -875,7 +908,12 @@ void RoadMerger::clipedCehuiData()
                        for(int i=0; i<lines.size(); i++)
                        {
                            feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), count));
-                           feature->put_new("ID",cloneFeat->get("ID"));
+                           std::stringstream ss;
+                           ss << cloneFeat->get("OSMID").to_int() << "_"<<i;
+                           std::string sID = ss.str();
+                           icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
+                           mapnik::value val = unicodeString;
+                           feature->put_new("ID", val);
                            feature->put_new("KIND_NUM",cloneFeat->get("KIND_NUM"));
                            feature->put_new("KIND",cloneFeat->get("KIND"));
                            feature->put_new("WIDTH",cloneFeat->get("WIDTH"));
