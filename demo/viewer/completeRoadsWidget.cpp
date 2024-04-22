@@ -1,6 +1,7 @@
 #include "completeRoadsWidget.hpp"
 #include <QHeaderView>
 #include <iostream>
+#include <QComboBox>
 
 CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -12,6 +13,8 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
     m_checkedIndexInTreeWidget = 2;
 
     // 将列表控件和按钮添加到布局中
+    m_groupidComboBox = new QComboBox(this);
+    layout->addWidget(m_groupidComboBox);
     layout->addWidget(m_treeWidget);
     layout->addWidget(submitButton);
 
@@ -44,13 +47,28 @@ void CompleteRoadsWidget::OnItemChanged(QTreeWidgetItem* item,int column)
     }
 }
 
+void CompleteRoadsWidget::updateGroupidComboBox(const QStringList &listItems)
+{
+    if (m_groupidComboBox && listItems.size()>0)
+    {
+        // 清除comboBox中的所有现有项
+        m_groupidComboBox->clear();
+
+        // 添加新的列表项
+        m_groupidComboBox->addItems(listItems);
+
+        // 设置默认选中第一项
+        m_groupidComboBox->setCurrentIndex(0);
+    }
+}
+
 void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList)
 {
     qDebug() << "CompleteRoadsWidget::updateCheckedItems:cehuidataInfoList size " << cehuidataInfoList.size();
     m_treeWidget->clear();
     m_treeWidget->setColumnCount(3); // 设置列数为4
     QStringList headers;
-    headers << "id" << "name" <<"checked";
+    headers << "ID" << "名称" <<"选中状态";
     m_treeWidget->setHeaderLabels(headers); // 设置标题
 
     // 设置列宽度自适应
@@ -63,18 +81,17 @@ void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& c
         // 添加一行数据
         QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
 
-//        std::cout<<"cehuidata.ID:"<<cehuidata.ID<<std::endl;
-//        std::cout<<"cehuidata.PATHNAME:"<<cehuidata.PATHNAME<<std::endl;
-//        std::cout<<"cehuidata.LENGTH:"<<cehuidata.LENGTH<<std::endl;
+       std::cout<<"cehuidata.ID:"<<cehuidata.ID<<std::endl;
+       std::cout<<"cehuidata.NAME:"<<cehuidata.NAME<<std::endl;
 
         item->setText(m_idIndexInTreeWidget, cehuidata.ID.c_str());
-        item->setText(m_nameIndexInTreeWidget, cehuidata.PATHNAME.c_str());
+        item->setText(m_nameIndexInTreeWidget, cehuidata.NAME.c_str());
         item->setCheckState(m_checkedIndexInTreeWidget, Qt::Checked); // 在第三列添加未选中的复选框
     }
 }
 
 void CompleteRoadsWidget::submitCheckedItems()
 {
-    emit exportCompleteRoads_signal();
-//    qDebug() << "选中的数据项:" << checkedItems.join(", ");
+    QString groupid = m_groupidComboBox->currentText();
+    emit exportCompleteRoads_signal(groupid);
 }

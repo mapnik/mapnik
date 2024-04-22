@@ -63,7 +63,7 @@ public:
 
     void showClipedCehuiOnMap();
 
-    bool exportCompleteRoads(const QString& completeRoadsFile);
+    bool exportCompleteRoads(const QString& completeRoadsFile, const QString& groupId);
 
     void getCompleteRoadsResult(std::vector<cehuidataInfo>& result);
 
@@ -71,9 +71,11 @@ public:
 
     std::string convertToWKT(const mapnik::geometry::multi_line_string<double>& multiLineString);
 
-    bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const std::string& groupId, const QString& completeRoadsFile);
+    bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& completeRoadsFile);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
+
+    void loadCehuiTableFields(const QString& cehuiTableIniFilePath);
 
 protected:
     void run();
@@ -90,6 +92,8 @@ private:
     void addClipedCehuiLayer();
 
     void addSelectedResultBufferLayer();
+
+    std::map<std::string, std::string> m_cehuiKey2fieldName;
 };
 
 #endif // ROADMERGER_H

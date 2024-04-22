@@ -51,6 +51,7 @@
 #include "rapidjson/stringbuffer.h"
 #include <QMessageBox>
 #include <QCoreApplication>
+#include <cstdlib>
 
 using mapnik::layer;
 
@@ -187,12 +188,14 @@ void MainWindow::OnItemCheckBoxChanged(const QString& id, int status)
     mapWidget_->roadMerger->OnItemCheckBoxChanged(id, status);
 }
 
-void MainWindow::finishCompleteRoads()
+void MainWindow::finishCompleteRoads(const QString& groupid)
 {
     std::vector<cehuidataInfo> result;
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
-    mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile);
-    QCoreApplication::quit();
+    mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile, groupid);
+    // QCoreApplication::quit();
+    // 正常退出
+    exit(EXIT_SUCCESS);
 }
 
 void MainWindow::startCompleteRoads()
@@ -208,6 +211,14 @@ void MainWindow::startCompleteRoads()
 
     m_completeRoadsAct->setCheckable(false);
     m_completeRoadsAct->setEnabled(false);
+}
+
+void MainWindow::loadCehuiTableFields(const QString& cehuiTableIniFilePath)
+{
+    if (mapWidget_!=NULL && mapWidget_->roadMerger!=NULL)
+    {
+        mapWidget_->roadMerger->loadCehuiTableFields(cehuiTableIniFilePath);
+    }
 }
 
 bool MainWindow::loadFeatureid2osmid(const QString& jsonPath)
@@ -261,6 +272,59 @@ bool MainWindow::loadFeatureid2osmid(const QString& jsonPath)
 return false;
 }
 
+bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
+{
+    QStringList groupidsListItems;
+    std::ifstream file(groupidsFilePath.toStdString());
+    if (file.is_open()) {
+        // 读取文件内容到一个字符串中
+        std::string content((std::istreambuf_iterator<char>(file)),
+                            (std::istreambuf_iterator<char>()));
+        file.close();
+
+        // 使用rapidjson的Document类解析字符串
+        rapidjson::Document doc;
+        doc.Parse(content.c_str());
+
+        // 检查是否是有效的json文档
+        if (doc.HasParseError()) {
+            // 处理错误情况
+            return false;
+        }
+
+        // 检查是否是json数组
+        if (doc.IsArray()) {
+            // 获取json数组
+            rapidjson::Value& array = doc;
+
+            // 遍历json数组中的每个元素
+            for (rapidjson::SizeType i = 0; i < array.Size(); i++) 
+            {
+                // 检查是否是json数组
+                if (array[i].IsArray()) 
+                {
+                    // 获取json数组
+                    rapidjson::Value& val = array[i];
+                    rapidjson::Type type = val.GetType();
+                    if (rapidjson::kStringType==type)
+                    {
+                        QString strVal = val.GetString();
+                        groupidsListItems.push_back(strVal);
+                    }
+                }
+            }
+
+            if (m_completeRoadsWidget)
+            {
+                m_completeRoadsWidget->updateGroupidComboBox(groupidsListItems);
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
 void MainWindow::setMidLineJsonPath(const QString& midLineJsonPath)
 {
   m_midLinePath = midLineJsonPath;
@@ -295,7 +359,7 @@ void MainWindow::createActions()
 
     connect(this, SIGNAL(updateCheckedItems_signal(const std::vector<cehuidataInfo>&)), m_completeRoadsWidget.data(), SLOT(updateCheckedItems(const std::vector<cehuidataInfo>&)));
     connect(m_completeRoadsWidget.data(), SIGNAL(itemCheckBoxChanged_signal(const QString&, int)), this, SLOT(OnItemCheckBoxChanged(const QString&, int)));
-    connect(m_completeRoadsWidget.data(), SIGNAL(exportCompleteRoads_signal()), this, SLOT(finishCompleteRoads()));
+    connect(m_completeRoadsWidget.data(), SIGNAL(exportCompleteRoads_signal(const QString&)), this, SLOT(finishCompleteRoads(const QString&)));
 
 
     // set some actions as checkable

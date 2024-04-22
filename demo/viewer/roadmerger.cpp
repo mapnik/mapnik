@@ -24,6 +24,7 @@
 #include <boost/geometry/multi/geometries/register/multi_polygon.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/timer.hpp>
+#include <QSettings>
 
 #include <chrono>
 #include "ThreadPool.h"
@@ -47,6 +48,19 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #define MERGE_RESULT "MERGE_RESULT"
 
 #define NeedAddCehui_RESULT "NeedAddCehui_RESULT"
+
+
+#ifndef
+#define  IDKEY "id"
+#endif
+
+#ifndef
+#define  NAMEKEY "name"
+#endif
+
+#ifndef
+#define  DIRECTIONKEY "direction"
+#endif
 
 
 //// 合并相交或相互包含的多边形
@@ -312,7 +326,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<d
 
 
 
-bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const std::string& groupId, const QString& completeRoadsFile)
+bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& completeRoadsFile)
 {
     using namespace rapidjson;
     // 创建一个JSON对象
@@ -322,7 +336,7 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
 
     Value jsonValue(kStringType);
 
-    std::string strValue = groupId;
+    std::string strValue = groupId.toStdString();
     jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
 
     // 添加groupId
@@ -342,40 +356,24 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
         const cehuidataInfo& info = result[i];
         Value fileComplete(kObjectType);
 
-        std::cout<<"info.OSMID: "<<info.OSMID<<std::endl;
-
-        fileComplete.AddMember("OSMID", info.OSMID, allocator);
-
         strValue = info.ID;
 
         std::cout<<"info.ID: "<<strValue<<std::endl;
 
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("id", jsonValue, allocator);
+        fileComplete.AddMember(IDKEY, jsonValue, allocator);
 
-        strValue = info.PATHNAME;
+        strValue = info.NAME;
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("name", jsonValue, allocator);
-
-        strValue = info.geometryWkt;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("info", jsonValue, allocator);
-
-        strValue = info.KIND;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("level", jsonValue, allocator);
-
-        strValue = info.WIDTH;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("width", jsonValue, allocator);
+        fileComplete.AddMember(NAMEKEY, jsonValue, allocator);
 
         strValue = info.DIRECTION;
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("bidirectional", jsonValue, allocator);
+        fileComplete.AddMember(DIRECTIONKEY, jsonValue, allocator);
 
-        strValue = info.LENGTH;
+        strValue = info.geometryWkt;
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("length", jsonValue, allocator);
+        fileComplete.AddMember("geometry", jsonValue, allocator);
 
         fileCompletes.PushBack(fileComplete, allocator);
     }
@@ -405,29 +403,23 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
 
 void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
 {
+    std::string idFieldName = m_cehuiKey2fieldName[IDKEY];
+    std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
+    std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
+
     query q(clipedCehuiSource->envelope());
     q.add_property_name("NeedAddCehui_RESULT");
-    q.add_property_name("ID");
-    q.add_property_name("KIND_NUM");
-    q.add_property_name("KIND");
-    q.add_property_name("WIDTH");
-    q.add_property_name("DIRECTION");
-    q.add_property_name("LENGTH");
-    q.add_property_name("PATHNAME");
-    q.add_property_name("OSMID");
+    q.add_property_name(idFieldName);
+    q.add_property_name(nameFieldName);
+    q.add_property_name(dirFieldName);
     auto fs = clipedCehuiSource->features(q);
     feature_ptr feat = fs->next();
     while(feat){
         if( feat->get("NeedAddCehui_RESULT") == 1 ){
             cehuidataInfo info;
-            info.ID = feat->get("ID").to_string();
-            info.KIND_NUM = feat->get("KIND_NUM").to_string();
-            info.KIND = feat->get("KIND").to_string();
-            info.WIDTH = feat->get("WIDTH").to_string();
-            info.DIRECTION = feat->get("DIRECTION").to_string();
-            info.LENGTH = feat->get("LENGTH").to_string();
-            info.PATHNAME = feat->get("PATHNAME").to_string();
-            info.OSMID = feat->get("OSMID").to_int();
+            info.ID = feat->get(idFieldName).to_string();
+            info.NAME = feat->get(nameFieldName).to_string();
+            info.DIRECTION = feat->get(dirFieldName).to_string();
             geometry::geometry<double>& geo = feat->get_geometry();
             if(geo.is<geometry::line_string<double> >())
             {
@@ -446,11 +438,11 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
     }
 }
 
-bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile)
+bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile, const QString& groupid)
 {
     std::vector<cehuidataInfo> result;
     getCompleteRoadsResult(result);
-    return SerializeCompleteRoadInfos(result,"1", completeRoadsFile);
+    return SerializeCompleteRoadInfos(result, groupid, completeRoadsFile);
 }
 
 void RoadMerger::addLineLayer(QString const& name,QString const& shpPath,std::string lineColor, double lineWidth)
@@ -844,14 +836,15 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
 
 void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
 {
+    std::string idFieldName = m_cehuiKey2fieldName[IDKEY];
     std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
     query q(clipedCehuiSource->envelope());
-    q.add_property_name("ID");
+    q.add_property_name(idFieldName);
     q.add_property_name("NeedAddCehui_RESULT");
     auto fs = clipedCehuiSource->features(q);
     feature_ptr feat = fs->next();
     while(feat){
-        std::string strId = feat->get("ID").to_string();
+        std::string strId = feat->get(idFieldName).to_string();
         if(strId==id.toStdString())
         {
             feat->put("NeedAddCehui_RESULT", status);
@@ -865,6 +858,10 @@ void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
 
 void RoadMerger::clipedCehuiData()
 {
+    std::string idFieldName = m_cehuiKey2fieldName[IDKEY];
+    std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
+    std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
+
     clipedCehuiSource->clear();
     selectedResultBufferSource->clear();
 
@@ -876,16 +873,11 @@ void RoadMerger::clipedCehuiData()
 
         //
         query q(cehuiDS->envelope());
-        q.add_property_name("KIND_NUM");
-        q.add_property_name("KIND");
-        q.add_property_name("WIDTH");
-        q.add_property_name("DIRECTION");
-        q.add_property_name("LENGTH");
-        q.add_property_name("PATHNAME");
-        q.add_property_name("OSMID");
+        q.add_property_name(idFieldName);
+        q.add_property_name(nameFieldName);
+        q.add_property_name(dirFieldName);
         auto fs = cehuiDS->features(q);
         feature_ptr feat = fs->next();
-
         {
             ThreadPool pool(16);
             std::vector< std::future<std::vector<feature_ptr> > > results;
@@ -905,19 +897,14 @@ void RoadMerger::clipedCehuiData()
                            context_ptr contextPtr = std::make_shared<mapnik::context_type>();
                            feature_ptr feature(feature_factory::create(contextPtr, count));
                            std::stringstream ss;
-                           ss << cloneFeat->get("OSMID").to_int() << "_"<<i;
+                           ss << cloneFeat->get(idFieldName).to_string() << "_"<<i;
                            std::string sID = ss.str();
                            icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
                            mapnik::value val = unicodeString;
-                           feature->put_new("ID", val);
-                           feature->put_new("KIND_NUM",cloneFeat->get("KIND_NUM"));
-                           feature->put_new("KIND",cloneFeat->get("KIND"));
-                           feature->put_new("WIDTH",cloneFeat->get("WIDTH"));
-                           feature->put_new("DIRECTION",cloneFeat->get("DIRECTION"));
-                           feature->put_new("LENGTH",cloneFeat->get("LENGTH"));
-                           feature->put_new("PATHNAME",cloneFeat->get("PATHNAME"));
-                           feature->put_new("OSMID",cloneFeat->get("OSMID"));
-                           feature->put_new("NeedAddCehui_RESULT",1);
+                           feature->put_new(idFieldName, val);
+                           feature->put_new(nameFieldName,cloneFeat->get(nameFieldName));
+                           feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
+                           feature->put_new("NeedAddCehui_RESULT", 1);
                            feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));
                            result.emplace_back(feature);
                        }
@@ -951,4 +938,26 @@ void RoadMerger::clipedCehuiData()
         }
 
     }
+}
+
+
+void RoadMerger::loadCehuiTableFields(const QString& cehuiTableIniFilePath)
+{
+    m_cehuiKey2fieldName.clear();
+    QSettings settings(cehuiTableIniFilePath, QSettings::IniFormat);
+    // 读取数据表字段名配置
+    settings.beginGroup("cehuidata");
+    QString idField = settings.value(IDKEY, "id").toString();
+    QString nameField = settings.value(NAMEKEY, "name").toString();
+    QString directionField = settings.value(DIRECTIONKEY, "direction").toString();
+    settings.endGroup();
+
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(IDKEY, idField));
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, nameField));
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, directionField));
+
+    // 输出读取的配置
+    qDebug() << "idField:" << idField;
+    qDebug() << "nameField:" << nameField;
+    qDebug() << "directionField:" << directionField;
 }

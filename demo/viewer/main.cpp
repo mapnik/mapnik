@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-        if(argc<7)
+        if(argc<8)
         {
          std::cerr << "Program is missing parameters!"  << "'\n";
          return 1;
@@ -72,6 +72,19 @@ int main(int argc, char** argv)
           std::cerr << "Loading Featureid2osmid json failed!"  << "'\n";
           return 1;
         }
+
+        //读取测绘数据字段的配置
+        QString cehuiTableIniFilePath = appPath + "/cehui.ini";
+        window.loadCehuiTableFields(cehuiTableIniFilePath);
+
+        //更新groupid下拉框
+        QString groupidsPath = argv[7];
+        if(!window.updateGroupidComboBox(groupidsPath))
+        {
+          std::cerr << "updateGroupidComboBox failed!"  << "'\n";
+          return 1;
+        }
+
         window.setMidLineJsonPath(argv[4]);
         window.setCompleteRoadsFile(argv[6]);
         window.show();

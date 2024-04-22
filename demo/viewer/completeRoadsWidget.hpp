@@ -17,12 +17,12 @@ public:
 signals:
     void itemCheckBoxChanged_signal(const QString& id, int status);
 
-    void exportCompleteRoads_signal();
+    void exportCompleteRoads_signal(const QString& groupid);
 
 public slots:
     void updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList);
-
     void OnItemChanged(QTreeWidgetItem* item,int column);
+    void updateGroupidComboBox(const QStringList &listItems);
 
 private slots:
     void submitCheckedItems();
@@ -32,6 +32,8 @@ private:
     int m_idIndexInTreeWidget;
     int m_nameIndexInTreeWidget;
     int m_checkedIndexInTreeWidget;
+
+    QComboBox *m_groupidComboBox;
 };
 
 #endif //COMPLETEROADSWIDGET_HPP

@@ -44,8 +44,10 @@ class MainWindow : public QMainWindow
   public:
     std::shared_ptr<mapnik::Map> get_map();
     bool loadFeatureid2osmid(const QString& jsonPath);
+    void loadCehuiTableFields(const QString& cehuiTableIniFilePath);
     void setMidLineJsonPath(const QString& midLineJsonPath);
-    void setCompleteRoadsFile(const QString& completeRoadsFile);
+    void setCompleteRoadsFile(const QString& completeRoadsFilePath);
+    bool updateGroupidComboBox(const QString& groupidsFilePath);
 
   protected:
     void closeEvent(QCloseEvent* event);
@@ -62,7 +64,7 @@ class MainWindow : public QMainWindow
     void save();
     void afterSave();
     void startCompleteRoads();
-    void finishCompleteRoads();
+    void finishCompleteRoads(const QString& groupid);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 

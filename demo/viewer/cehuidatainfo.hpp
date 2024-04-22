@@ -8,16 +8,12 @@
 struct cehuidataInfo
 {
     /* data */
-    std::string ID;
-    std::string newID;
-    std::string KIND_NUM;
-    std::string KIND;
-    std::string WIDTH;
-    std::string DIRECTION;
-    std::string LENGTH;
-    std::string PATHNAME;
-    int OSMID;
-    std::string geometryWkt;
+    std::string ID="";
+    std::string NAME="";
+    std::string Type="";
+    std::string DIRECTION="";
+    std::string LENGTH="";
+    std::string geometryWkt="";
 };
 
 
