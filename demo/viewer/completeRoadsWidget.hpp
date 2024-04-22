@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QDebug>
+#include <QComboBox>
 #include "cehuidatainfo.hpp"
 
 class CompleteRoadsWidget : public QWidget {
