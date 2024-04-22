@@ -50,15 +50,15 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #define NeedAddCehui_RESULT "NeedAddCehui_RESULT"
 
 
-#ifndef
+#ifndef  IDKEY
 #define  IDKEY "id"
 #endif
 
-#ifndef
+#ifndef  NAMEKEY
 #define  NAMEKEY "name"
 #endif
 
-#ifndef
+#ifndef  DIRECTIONKEY
 #define  DIRECTIONKEY "direction"
 #endif
 
