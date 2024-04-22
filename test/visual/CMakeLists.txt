@@ -14,5 +14,3 @@ target_link_libraries(mapnik-test-visual PRIVATE
 
 # needed for cleanup.hpp
 target_include_directories(mapnik-test-visual PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
-
-mapnik_install_utility(mapnik-test-visual)
