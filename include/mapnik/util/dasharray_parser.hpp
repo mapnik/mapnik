@@ -30,7 +30,7 @@
 namespace mapnik {
 namespace util {
 
-bool parse_dasharray(std::string const& value, dash_array& dash);
+MAPNIK_DECL bool parse_dasharray(std::string const& value, dash_array& dash);
 
 }
 } // namespace mapnik
