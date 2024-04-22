@@ -70,7 +70,7 @@ bool parse_dasharray(std::string const& value, dash_array& dash)
     std::vector<double> buf;
     auto first = value.begin();
     auto last = value.end();
-    bool r = x3::phrase_parse(first, last, (double_ % no_skip[char_(", ")] | "none"), space, buf);
+    bool r = x3::phrase_parse(first, last, (double_ % -char_(',') | "none"), space, buf);
     if (r && first == last)
     {
         return setup_dashes(buf, dash);
