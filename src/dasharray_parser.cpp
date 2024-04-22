@@ -61,7 +61,6 @@ bool parse_dasharray(std::string const& value, dash_array& dash)
     using namespace boost::spirit;
     using x3::char_;
     using x3::double_;
-    using x3::no_skip;
     boost::spirit::x3::ascii::space_type space;
     // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
