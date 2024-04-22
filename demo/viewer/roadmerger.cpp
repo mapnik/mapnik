@@ -953,9 +953,9 @@ void RoadMerger::loadCehuiTableFields(const QString& cehuiTableIniFilePath)
     QString directionField = settings.value(DIRECTIONKEY, "direction").toString();
     settings.endGroup();
 
-    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(IDKEY, idField.toStdString));
-    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, nameField.toStdString));
-    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, directionField.toStdString));
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(IDKEY, idField.toStdString()));
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, nameField.toStdString()));
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, directionField.toStdString()));
 
     // 输出读取的配置
     qDebug() << "idField:" << idField;
