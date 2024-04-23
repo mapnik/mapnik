@@ -112,7 +112,7 @@ int main(int argc, char** argv)
         }
 
         //读取测绘数据字段的配置
-        QString cehuiTableIniFilePath = appPath + "/cehui.ini";
+        QString cehuiTableIniFilePath = iniFilePath;
         window.loadCehuiTableFields(cehuiTableIniFilePath);
 
         //更新groupid下拉框
