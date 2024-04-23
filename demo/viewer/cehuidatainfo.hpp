@@ -22,7 +22,7 @@ struct cehuidataInfo
         NAME="";
         Type="";
         DIRECTION="";   //单向 双向
-        WIDTH = "10"
+        WIDTH = "10";
         LEVEL="3";   //道路等级，1县道，2省道，3国道，4高速
         geometryWkt="";
     }
