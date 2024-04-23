@@ -38,6 +38,8 @@
 #include <iostream>
 #include <fstream>
 #include <unicode/unistr.h> // ICU的头文件
+#include <atomic>
+#include <cstdint> // 包含int64_t的定义
 
 //BOOST_GEOMETRY_REGISTER_MULTI_LINESTRING(mapnik::geometry::multi_line_string<double>)
 //BOOST_GEOMETRY_REGISTER_MULTI_POLYGON(mapnik::geometry::multi_polygon<double>);
@@ -68,6 +70,17 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #ifndef  DIRECTIONKEY
 #define  DIRECTIONKEY "direction"
 #endif
+
+
+// 全局原子变量
+std::atomic<int64_t> global_id(0);
+
+// 生成一个全局唯一的ID
+int64_t generate_global_id() 
+{
+    // 使用原子操作来递增id
+    return global_id.fetch_add(1, std::memory_order_relaxed);
+}
 
 
 //// 合并相交或相互包含的多边形
@@ -348,6 +361,9 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<d
 
 bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& completeRoadsFile)
 {
+    qDebug() << "SerializeCompleteRoadInfos:: result size:"<< result.size();
+
+    qDebug() << "SerializeCompleteRoadInfos:: groupId:"<< groupId;
     using namespace rapidjson;
     // 创建一个JSON对象
     Document document;
@@ -418,23 +434,25 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
         document.Accept(writer);
         file << buffer.GetString();
         file.close();
+
+        qDebug() << "SerializeCompleteRoadInfos finished.";
         return true;
     }
     else
     {
-      return false;
+        qDebug() << "SerializeCompleteRoadInfos fail.";
+        return false;
     }
 }
 
 void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
 {
-    std::string idFieldName = m_cehuiKey2fieldName[IDKEY];
     std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
     std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
 
     query q(clipedCehuiSource->envelope());
     q.add_property_name(NeedAddCehui_RESULT);
-    q.add_property_name(idFieldName);
+    q.add_property_name(IDKEY);
     q.add_property_name(nameFieldName);
     q.add_property_name(dirFieldName);
     auto fs = clipedCehuiSource->features(q);
@@ -442,7 +460,7 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
     while(feat){
         if( feat->get(NeedAddCehui_RESULT) == 1 ){
             cehuidataInfo info;
-            info.ID = feat->get(idFieldName).to_string();
+            info.ID = feat->get(IDKEY).to_string();
             info.NAME = feat->get(nameFieldName).to_string();
             info.DIRECTION = feat->get(dirFieldName).to_string();
             geometry::geometry<double>& geo = feat->get_geometry();
@@ -861,15 +879,14 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
 
 void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
 {
-    std::string idFieldName = m_cehuiKey2fieldName[IDKEY];
     std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
     query q(clipedCehuiSource->envelope());
-    q.add_property_name(idFieldName);
+    q.add_property_name(IDKEY);
     q.add_property_name(NeedAddCehui_RESULT);
     auto fs = clipedCehuiSource->features(q);
     feature_ptr feat = fs->next();
     while(feat){
-        std::string strId = feat->get(idFieldName).to_string();
+        std::string strId = feat->get(IDKEY).to_string();
         if(strId==id.toStdString())
         {
             feat->put(NeedAddCehui_RESULT, status);
@@ -883,11 +900,9 @@ void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
 
 void RoadMerger::clipedCehuiData()
 {
-    std::string idFieldName = m_cehuiKey2fieldName[IDKEY];
     std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
     std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
 
-    qDebug() << "idFieldName:"<< QString::fromStdString(idFieldName);
     qDebug() << "nameFieldName:"<< QString::fromStdString(nameFieldName);
     qDebug() << "dirFieldName:"<< QString::fromStdString(dirFieldName);
 
@@ -902,7 +917,6 @@ void RoadMerger::clipedCehuiData()
 
         //
         query q(cehuiDS->envelope());
-        q.add_property_name(idFieldName);
         q.add_property_name(nameFieldName);
         q.add_property_name(dirFieldName);
         auto fs = cehuiDS->features(q);
@@ -925,12 +939,11 @@ void RoadMerger::clipedCehuiData()
                        {
                            context_ptr contextPtr = std::make_shared<mapnik::context_type>();
                            feature_ptr feature(feature_factory::create(contextPtr, count));
-                           std::stringstream ss;
-                           ss << cloneFeat->get(idFieldName).to_string() << "_"<<i;
-                           std::string sID = ss.str();
+                           int64_t id = generate_global_id();
+                           std::string sID = QString::number(myInt64).toStdString();
                            icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
                            mapnik::value val = unicodeString;
-                           feature->put_new(idFieldName, val);
+                           feature->put_new(IDKEY, val);
                            feature->put_new(nameFieldName,cloneFeat->get(nameFieldName));
                            feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
                            feature->put_new(NeedAddCehui_RESULT, 1);
@@ -976,17 +989,14 @@ void RoadMerger::loadCehuiTableFields(const QString& cehuiTableIniFilePath)
     QSettings settings(cehuiTableIniFilePath, QSettings::IniFormat);
     // 读取数据表字段名配置
     settings.beginGroup("cehuidata");
-    QString idField = settings.value(IDKEY, "id").toString();
     QString nameField = settings.value(NAMEKEY, "name").toString();
     QString directionField = settings.value(DIRECTIONKEY, "direction").toString();
     settings.endGroup();
 
-    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(IDKEY, idField.toStdString()));
     m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, nameField.toStdString()));
     m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(DIRECTIONKEY, directionField.toStdString()));
 
     // 输出读取的配置
-    qDebug() << "idField:" << idField;
     qDebug() << "nameField:" << nameField;
     qDebug() << "directionField:" << directionField;
 }
