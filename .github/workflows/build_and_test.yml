@@ -76,7 +76,7 @@ jobs:
           mono: ${{ matrix.mono }}
 
       - id: lc_platform
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ runner.os }}
 
