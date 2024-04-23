@@ -46,9 +46,15 @@ using namespace mapnik;
 
 typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 
-#define MERGE_RESULT "MERGE_RESULT"
 
+#ifndef  MERGE_RESULT
+#define MERGE_RESULT "MERGE_RESULT"
+#endif
+
+
+#ifndef NeedAddCehui_RESULT
 #define NeedAddCehui_RESULT "NeedAddCehui_RESULT"
+#endif
 
 
 #ifndef  IDKEY
@@ -222,7 +228,7 @@ void RoadMerger::run()
                 context_ptr contextPtr = std::make_shared<mapnik::context_type>();
                 feature_ptr feature(feature_factory::create(contextPtr, count));
                 feature->put_new("OSMID",cloneFeat->get("OSMID"));
-                feature->put_new("MERGE_RESULT",1);
+                feature->put_new(MERGE_RESULT,1);
                 feature->set_geometry(mapnik::geometry::geometry<double>(out));
                 return feature;
             }));
@@ -307,6 +313,19 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::line_string<double>
     return wktStream.str();
 }
 
+std::string RoadMerger::convertToCustomText(const mapnik::geometry::line_string<double>& lineString)
+{
+    // 将geometry::line_string<double>转换为WKT格式
+    std::stringstream wktStream;
+    wktStream << "";
+    for (const auto& point : lineString) {
+        wktStream << point.x << "," << point.y << ";";
+    }
+    wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
+    wktStream << "";
+    return wktStream.str();
+}
+
 std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<double>& multiLineString)
 {
     std::stringstream wktStream;
@@ -361,20 +380,25 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
 
         std::cout<<"info.ID: "<<strValue<<std::endl;
 
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember(IDKEY, jsonValue, allocator);
-
         strValue = info.NAME;
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember(NAMEKEY, jsonValue, allocator);
-
-        strValue = info.DIRECTION;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember(DIRECTIONKEY, jsonValue, allocator);
+        fileComplete.AddMember("name", jsonValue, allocator);
 
         strValue = info.geometryWkt;
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("geometry", jsonValue, allocator);
+        fileComplete.AddMember("info", jsonValue, allocator);
+
+        strValue = info.LEVEL;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("level", jsonValue, allocator);
+
+        strValue = info.WIDTH;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("width", jsonValue, allocator);
+
+        strValue = info.DIRECTION;
+        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        fileComplete.AddMember("bidirectional", jsonValue, allocator);
 
         fileCompletes.PushBack(fileComplete, allocator);
     }
@@ -409,14 +433,14 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
     std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
 
     query q(clipedCehuiSource->envelope());
-    q.add_property_name("NeedAddCehui_RESULT");
+    q.add_property_name(NeedAddCehui_RESULT);
     q.add_property_name(idFieldName);
     q.add_property_name(nameFieldName);
     q.add_property_name(dirFieldName);
     auto fs = clipedCehuiSource->features(q);
     feature_ptr feat = fs->next();
     while(feat){
-        if( feat->get("NeedAddCehui_RESULT") == 1 ){
+        if( feat->get(NeedAddCehui_RESULT) == 1 ){
             cehuidataInfo info;
             info.ID = feat->get(idFieldName).to_string();
             info.NAME = feat->get(nameFieldName).to_string();
@@ -425,7 +449,7 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
             if(geo.is<geometry::line_string<double> >())
             {
                 mapnik::geometry::line_string<double>& lineString = geo.get<geometry::line_string<double>>();
-                info.geometryWkt = convertToWKT(lineString);
+                info.geometryWkt = convertToCustomText(lineString);
             }
             else if(geo.is<geometry::multi_line_string<double>>())
             {
@@ -604,8 +628,8 @@ void RoadMerger::toggleMergedRoad(double x, double y)
         feature_ptr feat = fs->next();
         while (feat)
         {
-            auto val = feat->get("MERGE_RESULT") == 1 ? 0 : 1;
-            feat->put("MERGE_RESULT",val);
+            auto val = feat->get(MERGE_RESULT) == 1 ? 0 : 1;
+            feat->put(MERGE_RESULT,val);
 
             feat = fs->next();
             std::cout<<"toggle road "<<std::endl;
@@ -631,8 +655,8 @@ void RoadMerger::toggleNeedCompleteRoad(double x, double y)
         feature_ptr feat = fs->next();
         while (feat)
         {
-            auto val = feat->get("NeedAddCehui_RESULT") == 1 ? 0 : 1;
-            feat->put("NeedAddCehui_RESULT",val);
+            auto val = feat->get(NeedAddCehui_RESULT) == 1 ? 0 : 1;
+            feat->put(NeedAddCehui_RESULT,val);
 
             feat = fs->next();
             std::cout<<"toggle complete road "<<std::endl;
@@ -645,12 +669,12 @@ void RoadMerger::toggleNeedCompleteRoad(double x, double y)
 void RoadMerger::getMergeResult(std::vector<long>& result)
 {
     query q(mergedSource->envelope());
-    q.add_property_name("MERGE_RESULT");
+    q.add_property_name(MERGE_RESULT);
     q.add_property_name("OSMID");
     auto fs = mergedSource->features(q);
     feature_ptr feat = fs->next();
     while(feat){
-        if( feat->get("MERGE_RESULT") == 1 ){
+        if( feat->get(MERGE_RESULT) == 1 ){
             result.push_back(feat->get("OSMID").to_int());
         }
         feat = fs->next();
@@ -664,11 +688,11 @@ void RoadMerger::generateResultBuffer(std::vector<mapnik::geometry::multi_polygo
         std::vector< std::future<MultiPolygonPtr> > results;
         mapnik::auto_cpu_timer t(std::clog, "生成result数据buffer took: ");
         query q(mergedSource->envelope());
-        q.add_property_name("MERGE_RESULT");
+        q.add_property_name(MERGE_RESULT);
         auto fs = mergedSource->features(q);
         feature_ptr feat = fs->next();
         while(feat){
-            if( feat->get("MERGE_RESULT") == 1 )
+            if( feat->get(MERGE_RESULT) == 1 )
             {
                 results.emplace_back(pool.enqueue([&,feat] {
 
@@ -841,14 +865,14 @@ void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
     std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
     query q(clipedCehuiSource->envelope());
     q.add_property_name(idFieldName);
-    q.add_property_name("NeedAddCehui_RESULT");
+    q.add_property_name(NeedAddCehui_RESULT);
     auto fs = clipedCehuiSource->features(q);
     feature_ptr feat = fs->next();
     while(feat){
         std::string strId = feat->get(idFieldName).to_string();
         if(strId==id.toStdString())
         {
-            feat->put("NeedAddCehui_RESULT", status);
+            feat->put(NeedAddCehui_RESULT, status);
         }
         feat = fs->next();
     }
@@ -905,7 +929,7 @@ void RoadMerger::clipedCehuiData()
                            feature->put_new(idFieldName, val);
                            feature->put_new(nameFieldName,cloneFeat->get(nameFieldName));
                            feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
-                           feature->put_new("NeedAddCehui_RESULT", 1);
+                           feature->put_new(NeedAddCehui_RESULT, 1);
                            feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));
                            result.emplace_back(feature);
                        }

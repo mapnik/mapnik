@@ -21,11 +21,43 @@
 #include <QApplication>
 #include <QStringList>
 #include <QSettings>
+#include <QString>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include "mainwindow.hpp"
 #include "roadmerger.h"
 #include "ThreadPool.h"
+
+namespace fd{
+
+struct MergemapParam
+{
+  QString basemap;
+  QString cehuipath;
+  QString featureid2osmidPath;
+  QString midlinePath;
+  QString appBinDir;
+  QString groupidsPath;
+  QString completeRoadsPath;
+};
+
+void loadMergemapIniFile(const QString& mergemapIniFile, MergemapParam& mergParam)
+{
+  QSettings settings(mergemapIniFile, QSettings::IniFormat);
+  // 读取数据表字段名配置
+  settings.beginGroup("mergemap");
+  mergParam.basemap = settings.value("basemap", "basemap.shp").toString();
+  mergParam.cehuipath = settings.value("cehuipath", "cehui.shp").toString();
+  mergParam.featureid2osmidPath = settings.value("featureid2osmidPath", "featureid2osmid.json").toString();
+  mergParam.midlinePath = settings.value("midlinePath", "midline.json").toString();
+  mergParam.appBinDir = settings.value("appBinDir", "./").toString();
+  mergParam.groupidsPath = settings.value("groupidsPath", "groupids.json").toString();
+  mergParam.completeRoadsPath = settings.value("completeRoadsPath", "completeRoads.json").toString();
+  settings.endGroup();
+}
+
+
+}
 
 int main(int argc, char** argv)
 {
@@ -36,7 +68,7 @@ int main(int argc, char** argv)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-        if(argc<8)
+        if(argc<2)
         {
          std::cerr << "Program is missing parameters!"  << "'\n";
          return 1;
@@ -44,9 +76,15 @@ int main(int argc, char** argv)
         else
         {
          std::cout<<"arcv[0]:"<<argv[0]<<std::endl;
-         std::cout<<" arcv[1]:"<<argv[1]<<" argv[2]:"<<argv[2]<<" arcv[3]:"<<argv[3]<<" argv[4]:"<<argv[4]<<" argv[5]:"<<argv[5]<<std::endl;
+         std::cout<<" arcv[1]:"<<argv[1]<<std::endl;
         }
-        QString appPath = argv[5];
+
+        QString mergemapIniFilePath = argv[1];
+        fd::MergemapParam mergParam;
+        fd::loadMergemapIniFile(mergemapIniFilePath, mergParam);
+
+
+        QString appPath = mergParam.appBinDir;
         QString iniFilePath = appPath + "/viewer.ini";
         QCoreApplication::setApplicationName("Viewer");
         QSettings settings(iniFilePath, QSettings::IniFormat);
@@ -66,7 +104,7 @@ int main(int argc, char** argv)
 
         QApplication app(argc, argv);
         MainWindow window;
-        QString featureid2osmidPath = argv[3];
+        QString featureid2osmidPath = mergParam.featureid2osmidPath;
         if(!window.loadFeatureid2osmid(featureid2osmidPath))
         {
           std::cerr << "Loading Featureid2osmid json failed!"  << "'\n";
@@ -78,18 +116,18 @@ int main(int argc, char** argv)
         window.loadCehuiTableFields(cehuiTableIniFilePath);
 
         //更新groupid下拉框
-        QString groupidsPath = argv[7];
+        QString groupidsPath = mergParam.groupidsPath;
         if(!window.updateGroupidComboBox(groupidsPath))
         {
           std::cerr << "updateGroupidComboBox failed!"  << "'\n";
           return 1;
         }
 
-        window.setMidLineJsonPath(argv[4]);
-        window.setCompleteRoadsFile(argv[6]);
+        window.setMidLineJsonPath(mergParam.midlinePath);
+        window.setCompleteRoadsFile(mergParam.completeRoadsPath);
         window.show();
-        std::cout<<"arcv[1]:"<<argv[1]<<"argv[2]:"<<argv[2]<<std::endl;
-        window.mapWidget()->roadMerger->merge(argv[1],argv[2]);
+        std::cout<<"mergParam.basemap:"<<mergParam.basemap.toStdString()<<"mergParam.cehuipath:"<<mergParam.cehuipath.toStdString()<<std::endl;
+        window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
         return app.exec();
     } catch (std::exception const& ex)
     {

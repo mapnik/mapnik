@@ -71,6 +71,9 @@ public:
 
     std::string convertToWKT(const mapnik::geometry::multi_line_string<double>& multiLineString);
 
+
+    std::string convertToCustomText(const mapnik::geometry::line_string<double>& lineString);
+
     bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& completeRoadsFile);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
