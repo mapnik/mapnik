@@ -72,15 +72,21 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #endif
 
 
-// 全局原子变量
-std::atomic<int64_t> global_id(0);
-
-// 生成一个全局唯一的ID
-int64_t generate_global_id() 
+namespace fd
 {
-    // 使用原子操作来递增id
-    return global_id.fetch_add(1, std::memory_order_relaxed);
+    // 全局原子变量
+    std::atomic<int64_t> global_id(0);
+
+    // 生成一个全局唯一的ID
+    int64_t generate_global_id() 
+    {
+        // 使用原子操作来递增id
+        return global_id.fetch_add(1, std::memory_order_relaxed);
+    }
+
 }
+
+
 
 
 //// 合并相交或相互包含的多边形
@@ -939,8 +945,8 @@ void RoadMerger::clipedCehuiData()
                        {
                            context_ptr contextPtr = std::make_shared<mapnik::context_type>();
                            feature_ptr feature(feature_factory::create(contextPtr, count));
-                           int64_t id = generate_global_id();
-                           std::string sID = QString::number(myInt64).toStdString();
+                           int64_t id = fd::generate_global_id();
+                           std::string sID = QString::number(id).toStdString();
                            icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
                            mapnik::value val = unicodeString;
                            feature->put_new(IDKEY, val);
