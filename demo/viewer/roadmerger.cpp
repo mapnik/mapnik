@@ -887,9 +887,9 @@ void RoadMerger::clipedCehuiData()
     std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
     std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
 
-    qDebug() << "idFieldName:"<< QString::fromStdString(idFieldName) << idField;
-    qDebug() << "nameFieldName:"<< QString::fromStdString(nameFieldName) << idField;
-    qDebug() << "dirFieldName:"<< QString::fromStdString(dirFieldName) << idField;
+    qDebug() << "idFieldName:"<< QString::fromStdString(idFieldName);
+    qDebug() << "nameFieldName:"<< QString::fromStdString(nameFieldName);
+    qDebug() << "dirFieldName:"<< QString::fromStdString(dirFieldName);
 
     clipedCehuiSource->clear();
     selectedResultBufferSource->clear();
