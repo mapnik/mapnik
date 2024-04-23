@@ -887,6 +887,10 @@ void RoadMerger::clipedCehuiData()
     std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
     std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
 
+    qDebug() << "idFieldName:"<< QString::fromStdString(idFieldName) << idField;
+    qDebug() << "nameFieldName:"<< QString::fromStdString(nameFieldName) << idField;
+    qDebug() << "dirFieldName:"<< QString::fromStdString(dirFieldName) << idField;
+
     clipedCehuiSource->clear();
     selectedResultBufferSource->clear();
 
@@ -979,7 +983,7 @@ void RoadMerger::loadCehuiTableFields(const QString& cehuiTableIniFilePath)
 
     m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(IDKEY, idField.toStdString()));
     m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, nameField.toStdString()));
-    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(NAMEKEY, directionField.toStdString()));
+    m_cehuiKey2fieldName.insert(std::make_pair<std::string, std::string>(DIRECTIONKEY, directionField.toStdString()));
 
     // 输出读取的配置
     qDebug() << "idField:" << idField;
