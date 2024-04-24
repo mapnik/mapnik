@@ -26,6 +26,7 @@
 #include <mapnik/util/timer.hpp>
 #include <QSettings>
 #include <QDebug>
+#include <QMessageBox>
 
 #include <chrono>
 #include "ThreadPool.h"
@@ -70,6 +71,8 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #ifndef  DIRECTIONKEY
 #define  DIRECTIONKEY "direction"
 #endif
+
+using namespace rapidjson;
 
 
 namespace fd
@@ -370,7 +373,6 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
     qDebug() << "SerializeCompleteRoadInfos:: result size:"<< result.size();
 
     qDebug() << "SerializeCompleteRoadInfos:: groupId:"<< groupId;
-    using namespace rapidjson;
     // 创建一个JSON对象
     Document document;
     document.SetObject();
@@ -430,23 +432,33 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
 
     document.AddMember("updateInfos", updateInfos, allocator);
 
+    // 将json字符串写入文件中
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    document.Accept(writer);
+    // 获取生成的json字符串
+    const char* json = buffer.GetString();
+    QString data = json;
+
+    qDebug() << "completeRoadsFile:"<<completeRoadsFile;
+    qDebug() << "json:"<<data;
+
     // 将JSON写入文件
     std::ofstream file(completeRoadsFile.toStdString());
     if (file.is_open())
     {
-        // 将json字符串写入文件中
-        StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
-        document.Accept(writer);
-        file << buffer.GetString();
+        file << json;
         file.close();
 
         qDebug() << "SerializeCompleteRoadInfos finished.";
+        // 弹出一个对话框，显示文件生成完成的消息
+        QMessageBox::information(nullptr, "完成", "成功生成补全道路数据");
         return true;
     }
     else
     {
         qDebug() << "SerializeCompleteRoadInfos fail.";
+        QMessageBox::critical(nullptr, "错误", "无法打开文件");
         return false;
     }
 }
