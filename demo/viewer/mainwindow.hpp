@@ -55,6 +55,7 @@ class MainWindow : public QMainWindow
   signals:
      void afterSave_signal();
      void updateCheckedItems_signal(const std::vector<cehuidataInfo>& cehuidataInfoList);
+     void quit_signal();
 
   public slots:
     void zoom_all();

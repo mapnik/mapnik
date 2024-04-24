@@ -193,9 +193,11 @@ void MainWindow::finishCompleteRoads(const QString& groupid)
     std::vector<cehuidataInfo> result;
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
     mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile, groupid);
+
+    emit quit_signal();
     // QCoreApplication::quit();
-    // 正常退出
-    exit(EXIT_SUCCESS);
+    // // 正常退出
+    // exit(EXIT_SUCCESS);
 }
 
 void MainWindow::startCompleteRoads()
