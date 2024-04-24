@@ -364,10 +364,10 @@ bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
                         }
                         groupinfo.name = strVal;
                     }
-                    
+                    groupInfoList.push_back(groupinfo);
                 }
                 
-                groupInfoList.push_back(groupinfo);
+                
             }
 
             if (m_completeRoadsWidget)
