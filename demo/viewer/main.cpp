@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 
         QApplication app(argc, argv);
         MainWindow window;
-        connect(&window, SIGNAL(quit_signal()), &app, &QCoreApplication::quit, Qt::QueuedConnection);
+        connect(&window, SIGNAL(quit_signal()), &app, SLOT(QCoreApplication::quit()), Qt::QueuedConnection);
         QString featureid2osmidPath = mergParam.featureid2osmidPath;
         if(!window.loadFeatureid2osmid(featureid2osmidPath))
         {
