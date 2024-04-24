@@ -300,35 +300,30 @@ bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
             // 遍历json数组中的每个元素
             for (rapidjson::SizeType i = 0; i < array.Size(); i++) 
             {
-                // 检查是否是json数组
-                if (array[i].IsArray()) 
-                {
-                    // 获取json数组
-                    rapidjson::Value& val = array[i];
-                    QString strVal = "";
-                    // 检查 "number" 是否为整数
-                    if (val.IsInt()) {
-                        strVal = QString::number(val.GetInt());
-                    }
-                    else if (val.IsUint()) { // 检查 "number" 是否为无符号整数
-                        strVal = QString::number(val.GetUint());
-                    }
-                    else if (val.IsInt64()) { // 检查 "number" 是否为64位整数
-                        strVal = QString::number(val.GetInt64());
-                    }
-                    else if (val.IsUint64()) { // 检查 "number" 是否为无符号64位整数
-                        strVal = QString::number(val.GetUint64());
-                    }
-                    else if (val.IsDouble()) { // 检查 "number" 是否为浮点数
-                        strVal = QString::number(val.GetDouble(), 'g', 15);
-                    }
-                    else if (val.IsString())
-                    {
-                        strVal = val.GetString();
-                    }
-                    groupidsListItems.push_back(strVal);
-                    qDebug() << "groupid:" << strVal;
+                rapidjson::Value& val = array[i];
+                QString strVal = "";
+                // 检查 "number" 是否为整数
+                if (val.IsInt()) {
+                    strVal = QString::number(val.GetInt());
                 }
+                else if (val.IsUint()) { // 检查 "number" 是否为无符号整数
+                    strVal = QString::number(val.GetUint());
+                }
+                else if (val.IsInt64()) { // 检查 "number" 是否为64位整数
+                    strVal = QString::number(val.GetInt64());
+                }
+                else if (val.IsUint64()) { // 检查 "number" 是否为无符号64位整数
+                    strVal = QString::number(val.GetUint64());
+                }
+                else if (val.IsDouble()) { // 检查 "number" 是否为浮点数
+                    strVal = QString::number(val.GetDouble(), 'g', 15);
+                }
+                else if (val.IsString())
+                {
+                    strVal = val.GetString();
+                }
+                groupidsListItems.push_back(strVal);
+                qDebug() << "groupid:" << strVal;
             }
 
             if (m_completeRoadsWidget)
