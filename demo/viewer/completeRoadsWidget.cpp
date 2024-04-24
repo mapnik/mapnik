@@ -46,15 +46,19 @@ void CompleteRoadsWidget::OnItemChanged(QTreeWidgetItem* item,int column)
     }
 }
 
-void CompleteRoadsWidget::updateGroupidComboBox(const QStringList &listItems)
+void CompleteRoadsWidget::updateGroupidComboBox(const std::vector<GroupInfo>& groupInfoList)
 {
-    if (m_groupidComboBox && listItems.size()>0)
+    if (m_groupidComboBox && groupInfoList.size()>0)
     {
         // 清除comboBox中的所有现有项
         m_groupidComboBox->clear();
 
         // 添加新的列表项
-        m_groupidComboBox->addItems(listItems);
+        for (auto & info : groupInfoList)
+        {
+            // 添加带有文本和自定义数据的项目
+            m_groupidComboBox->addItem(info.name, info.id);
+        }
 
         // 设置默认选中第一项
         m_groupidComboBox->setCurrentIndex(0);
@@ -91,6 +95,6 @@ void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& c
 
 void CompleteRoadsWidget::submitCheckedItems()
 {
-    QString groupid = m_groupidComboBox->currentText();
+    QString groupid = m_groupidComboBox->currentData().toString();
     emit exportCompleteRoads_signal(groupid);
 }

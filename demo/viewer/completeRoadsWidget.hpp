@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QComboBox>
 #include "cehuidatainfo.hpp"
+#include "groupinfo.hpp"
 
 class CompleteRoadsWidget : public QWidget {
     Q_OBJECT
@@ -23,7 +24,7 @@ signals:
 public slots:
     void updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList);
     void OnItemChanged(QTreeWidgetItem* item,int column);
-    void updateGroupidComboBox(const QStringList &listItems);
+    void updateGroupidComboBox(const std::vector<GroupInfo>& groupInfoList);
 
 private slots:
     void submitCheckedItems();
