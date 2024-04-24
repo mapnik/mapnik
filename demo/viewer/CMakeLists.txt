@@ -25,6 +25,7 @@ set(PROJECT_SOURCES
     cehuidatainfo.hpp
     completeRoadsWidget.hpp
     completeRoadsWidget.cpp
+    groupinfo.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

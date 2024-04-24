@@ -292,8 +292,7 @@ bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
         // 检查是否是有效的json文档
         if (doc.HasParseError()) {
             // 处理错误情况
-            std::cout << "Parse error: " << rapidjson::GetParseError_En(doc.GetParseError()) << "\n";
-            std::cout << "Error offset: " << doc.GetErrorOffset() << "\n";
+            std::cout << "Parse Error" << std::endl;
             return false;
         }
 
