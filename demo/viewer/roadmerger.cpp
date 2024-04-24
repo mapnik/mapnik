@@ -615,7 +615,7 @@ void RoadMerger::addClipedCehuiLayer()
         {
             line_symbolizer line_sym;
             put(line_sym, keys::stroke, color("yellow"));
-            put(line_sym, keys::stroke_width, 2.0);
+            put(line_sym, keys::stroke_width, 6.0);
             put(line_sym, keys::stroke_linecap, mapnik::line_cap_enum::ROUND_CAP);
             put(line_sym, keys::stroke_linejoin, mapnik::line_join_enum::ROUND_JOIN);
             r.append(std::move(line_sym));

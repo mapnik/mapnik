@@ -305,12 +305,29 @@ bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
                 {
                     // 获取json数组
                     rapidjson::Value& val = array[i];
-                    rapidjson::Type type = val.GetType();
-                    if (rapidjson::kStringType==type)
-                    {
-                        QString strVal = val.GetString();
-                        groupidsListItems.push_back(strVal);
+                    QString strVal = "";
+                    // 检查 "number" 是否为整数
+                    if (val.IsInt()) {
+                        strVal = QString::number(val.GetInt());
                     }
+                    else if (val.IsUint()) { // 检查 "number" 是否为无符号整数
+                        strVal = QString::number(val.GetUint());
+                    }
+                    else if (val.IsInt64()) { // 检查 "number" 是否为64位整数
+                        strVal = QString::number(val.GetInt64());
+                    }
+                    else if (val.IsUint64()) { // 检查 "number" 是否为无符号64位整数
+                        strVal = QString::number(val.GetUint64());
+                    }
+                    else if (val.IsDouble()) { // 检查 "number" 是否为浮点数
+                        strVal = QString::number(val.GetDouble(), 'g', 15);
+                    }
+                    else if (val.IsString())
+                    {
+                        strVal = val.GetString();
+                    }
+                    groupidsListItems.push_back(strVal);
+                    qDebug() << "groupid:" << strVal;
                 }
             }
 
