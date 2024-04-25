@@ -29,6 +29,10 @@
 #include <mapnik/warning_ignore.hpp>
 #include <boost/filesystem/operations.hpp>  // for absolute, exists, etc
 #include <boost/filesystem/path.hpp>    // for path, operator/
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108500
+#include <boost/filesystem/directory.hpp>  // for directory_iterator
+#endif
 #pragma GCC diagnostic pop
 
 // stl
