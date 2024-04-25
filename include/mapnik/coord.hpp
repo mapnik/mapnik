@@ -94,7 +94,7 @@ struct coord<T, 2>
     }
 
     template<typename T2>
-    bool operator==(coord<T2, 2> const& rhs)
+    bool operator==(coord<T2, 2> const& rhs) const
     {
         return x == rhs.x && y == rhs.y;
     }
