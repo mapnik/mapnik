@@ -88,6 +88,11 @@ jobs:
         run: |
           echo "PRESET=$(echo "${{ runner.os }}" | perl -ne "print lc")-ci" >> ${GITHUB_ENV}
 
+      - name: Ensure libtool is installed on macOS
+        shell: bash
+        run: brew install libtool
+        if: runner.os == 'macOS'
+
       - name: Configure CMake
         shell: bash
         run: |
