@@ -404,17 +404,17 @@ void MainWindow::createActions()
     m_completeRoadsAct = new QAction(QIcon(":/images/home.png"), tr("&补全道路"), this);
 
     // connect the actions to the slots
-    connect(m_zoomAllAct.data(), SIGNAL(triggered()), this, SLOT(zoom_all()));
-    connect(m_zoomIn.data(), SIGNAL(triggered()), this, SLOT(zoomIn_to_box()));
-    connect(m_zoomOut.data(), SIGNAL(triggered()), this, SLOT(zoomOut_to_box()));
-    connect(m_panAct.data(), SIGNAL(triggered()), this, SLOT(pan()));
-    connect(m_saveAct.data(), SIGNAL(triggered()), this, SLOT(save()));
+    connect(m_zoomAllAct, SIGNAL(triggered()), this, SLOT(zoom_all()));
+    connect(m_zoomIn, SIGNAL(triggered()), this, SLOT(zoomIn_to_box()));
+    connect(m_zoomOut, SIGNAL(triggered()), this, SLOT(zoomOut_to_box()));
+    connect(m_panAct, SIGNAL(triggered()), this, SLOT(pan()));
+    connect(m_saveAct, SIGNAL(triggered()), this, SLOT(save()));
     connect(this, SIGNAL(afterSave_signal()), this, SLOT(afterSave()));
-    connect(m_completeRoadsAct.data(), SIGNAL(triggered()), this, SLOT(startCompleteRoads()));
+    connect(m_completeRoadsAct, SIGNAL(triggered()), this, SLOT(startCompleteRoads()));
 
-    connect(this, SIGNAL(updateCheckedItems_signal(const std::vector<cehuidataInfo>&)), m_completeRoadsWidget.data(), SLOT(updateCheckedItems(const std::vector<cehuidataInfo>&)));
-    connect(m_completeRoadsWidget.data(), SIGNAL(itemCheckBoxChanged_signal(const QString&, int)), this, SLOT(OnItemCheckBoxChanged(const QString&, int)));
-    connect(m_completeRoadsWidget.data(), SIGNAL(exportCompleteRoads_signal(const QString&)), this, SLOT(finishCompleteRoads(const QString&)));
+    connect(this, SIGNAL(updateCheckedItems_signal(const std::vector<cehuidataInfo>&)), m_completeRoadsWidget, SLOT(updateCheckedItems(const std::vector<cehuidataInfo>&)));
+    connect(m_completeRoadsWidget, SIGNAL(itemCheckBoxChanged_signal(const QString&, int)), this, SLOT(OnItemCheckBoxChanged(const QString&, int)));
+    connect(m_completeRoadsWidget, SIGNAL(exportCompleteRoads_signal(const QString&)), this, SLOT(finishCompleteRoads(const QString&)));
 
 
     // set some actions as checkable
@@ -426,12 +426,12 @@ void MainWindow::createActions()
     m_completeRoadsAct->setEnabled(false);
 
     // add the actions to the action group
-    m_toolsGroup->addAction(m_zoomAllAct.data());
-    m_toolsGroup->addAction(m_zoomIn.data());
-    m_toolsGroup->addAction(m_zoomOut.data());
-    m_toolsGroup->addAction(m_panAct.data());
-    m_toolsGroup->addAction(m_saveAct.data());
-    m_toolsGroup->addAction(m_completeRoadsAct.data());
+    m_toolsGroup->addAction(m_zoomAllAct);
+    m_toolsGroup->addAction(m_zoomIn);
+    m_toolsGroup->addAction(m_zoomOut);
+    m_toolsGroup->addAction(m_panAct);
+    m_toolsGroup->addAction(m_saveAct);
+    m_toolsGroup->addAction(m_completeRoadsAct);
 
 }
 
@@ -439,12 +439,12 @@ void MainWindow::createToolBars()
 {
     m_fileToolBar = addToolBar(tr("Actions"));
     // add the actions to the tool bar
-    m_fileToolBar->addAction(m_zoomAllAct.data());
-    m_fileToolBar->addAction(m_zoomIn.data());
-    m_fileToolBar->addAction(m_zoomOut.data());
-    m_fileToolBar->addAction(m_panAct.data());
-    m_fileToolBar->addAction(m_saveAct.data());
-    m_fileToolBar->addAction(m_completeRoadsAct.data());
+    m_fileToolBar->addAction(m_zoomAllAct);
+    m_fileToolBar->addAction(m_zoomIn);
+    m_fileToolBar->addAction(m_zoomOut);
+    m_fileToolBar->addAction(m_panAct);
+    m_fileToolBar->addAction(m_saveAct);
+    m_fileToolBar->addAction(m_completeRoadsAct);
 }
 
 void MainWindow::zoom_all()
