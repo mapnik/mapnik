@@ -425,6 +425,6 @@ void MainWindow::merge(QString const& base,QString const& cehui)
 {
     if(mapWidget_ && mapWidget_->roadMerger)
     {
-        mapWidget_->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
+        mapWidget_->roadMerger->merge(base,cehui);
     }
 }

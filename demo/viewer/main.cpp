@@ -133,7 +133,12 @@ int main(int argc, char** argv)
         // Quit application when work is finished
         QObject::connect(&window, SIGNAL(quit_signal()), &app, SLOT(quit()));
         // Run the user-hook (doDownload) from the application event loop.
-        QTimer::singleShot(0, &window, SLOT(merge()));
+        QString base = mergParam.basemap;
+        QString cehui = mergParam.cehuipath;
+        // 使用 lambda 表达式传递参数
+        QTimer::singleShot(0, &window, base, cehui {
+            window.merge(base, cehui);
+        });
         return app.exec();
     } catch (std::exception const& ex)
     {
