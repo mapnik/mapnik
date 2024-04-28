@@ -63,7 +63,7 @@ public:
 
     void showClipedCehuiOnMap();
 
-    bool exportCompleteRoads(const QString& completeRoadsFile, const QString& groupId);
+    bool exportCompleteRoads(const QString& completeRoadsFile, const QString& groupId, const QString& version);
 
     void getCompleteRoadsResult(std::vector<cehuidataInfo>& result);
 

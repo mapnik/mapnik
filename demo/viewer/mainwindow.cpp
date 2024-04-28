@@ -191,10 +191,9 @@ void MainWindow::OnItemCheckBoxChanged(const QString& id, int status)
 
 void MainWindow::finishCompleteRoads(const QString& groupid, const QString& version)
 {
-    std::vector<cehuidataInfo> result;
-    mapWidget_->roadMerger->getCompleteRoadsResult(result);
-    mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile, groupid);
-
+    // std::vector<cehuidataInfo> result;
+    // mapWidget_->roadMerger->getCompleteRoadsResult(result);
+    mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile, groupid, version);
     emit completeRoads_quit_signal();
     // QCoreApplication::quit();
     // // 正常退出

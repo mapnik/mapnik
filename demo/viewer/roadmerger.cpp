@@ -505,11 +505,11 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
     }
 }
 
-bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile, const QString& groupid, const QString& version)
+bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile, const QString& groupId, const QString& version)
 {
     std::vector<cehuidataInfo> result;
     getCompleteRoadsResult(result);
-    return SerializeCompleteRoadInfos(result, groupid, completeRoadsFile);
+    return SerializeCompleteRoadInfos(result, groupId, version, completeRoadsFile);
 }
 
 void RoadMerger::addLineLayer(QString const& name,QString const& shpPath,std::string lineColor, double lineWidth)
