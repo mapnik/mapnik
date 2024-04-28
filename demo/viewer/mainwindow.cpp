@@ -64,14 +64,14 @@ MainWindow::MainWindow()
     mapWidget_->setFocus();
 
     // 创建自定义部件
-    m_completeRoadsWidget = QSharedPointer<CompleteRoadsWidget>::create(this);
+    m_completeRoadsWidget = new CompleteRoadsWidget(this);
     // 创建 QDockWidget 并设置特性
-    m_dockWidget =  QSharedPointer<QDockWidget>::create(this);
-    m_dockWidget->setWidget(m_completeRoadsWidget.data());
+    m_dockWidget =  new QDockWidget(this);
+    m_dockWidget->setWidget(m_completeRoadsWidget);
     m_dockWidget->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
     // 将 QDockWidget 添加到 QMainWindow
-    this->addDockWidget(Qt::LeftDockWidgetArea, m_dockWidget.data());
+    this->addDockWidget(Qt::LeftDockWidgetArea, m_dockWidget);
 
     // 设置停靠区域
     m_dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -87,12 +87,12 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-    if(mapWidget_)
-    {
-        delete mapWidget_;
-        mapWidget_ = NULL;
-    }
-    
+    // if(mapWidget_)
+    // {
+    //     delete mapWidget_;
+    //     mapWidget_ = NULL;
+    // }
+    delete mapWidget_;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -393,16 +393,15 @@ void MainWindow::setCompleteRoadsFile(const QString& completeRoadsFile)
 
 void MainWindow::createActions()
 {
-    // create a smart pointer to an action group
-    m_toolsGroup = QSharedPointer<QActionGroup>::create(this);
+    m_toolsGroup = new QActionGroup(this);
 
     // create some smart pointers to actions
-    m_zoomAllAct = QSharedPointer<QAction>::create(QIcon(":/images/zoomall.png"), tr("全部"), this);
-    m_zoomIn = QSharedPointer<QAction>::create(QIcon(":/images/zoomin.png"), tr("框选放大"), this);
-    m_zoomOut = QSharedPointer<QAction>::create(QIcon(":/images/zoomout.png"), tr("框选缩小"), this);
-    m_panAct = QSharedPointer<QAction>::create(QIcon(":/images/pan.png"), tr("平移"), this);
-    m_saveAct = QSharedPointer<QAction>::create(QIcon(":/images/save.png"), tr("&保存"), this);
-    m_completeRoadsAct = QSharedPointer<QAction>::create(QIcon(":/images/home.png"), tr("&补全道路"), this);
+    m_zoomAllAct = new QAction(QIcon(":/images/zoomall.png"), tr("全部"), this);
+    m_zoomIn = new QAction(QIcon(":/images/zoomin.png"), tr("框选放大"), this);
+    m_zoomOut = new QAction(QIcon(":/images/zoomout.png"), tr("框选缩小"), this);
+    m_panAct = new QAction(QIcon(":/images/pan.png"), tr("平移"), this);
+    m_saveAct = new QAction(QIcon(":/images/save.png"), tr("&保存"), this);
+    m_completeRoadsAct = new QAction(QIcon(":/images/home.png"), tr("&补全道路"), this);
 
     // connect the actions to the slots
     connect(m_zoomAllAct.data(), SIGNAL(triggered()), this, SLOT(zoom_all()));
@@ -438,9 +437,7 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBars()
 {
-    // create a smart pointer to a tool bar
-    m_fileToolBar = QSharedPointer<QToolBar>::create(tr("Actions"));
-
+    m_fileToolBar = addToolBar(tr("Actions"));
     // add the actions to the tool bar
     m_fileToolBar->addAction(m_zoomAllAct.data());
     m_fileToolBar->addAction(m_zoomIn.data());
@@ -448,9 +445,6 @@ void MainWindow::createToolBars()
     m_fileToolBar->addAction(m_panAct.data());
     m_fileToolBar->addAction(m_saveAct.data());
     m_fileToolBar->addAction(m_completeRoadsAct.data());
-
-    // add the tool bar to the widget
-    addToolBar(m_fileToolBar.data());
 }
 
 void MainWindow::zoom_all()

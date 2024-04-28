@@ -79,22 +79,22 @@ class MainWindow : public QMainWindow
 
     MapWidget* mapWidget_;
     // actions
-    QSharedPointer<QActionGroup> m_toolsGroup;
-    QSharedPointer<QAction> m_zoomAllAct;
-    QSharedPointer<QAction> m_zoomIn;
-    QSharedPointer<QAction> m_zoomOut;
-    QSharedPointer<QAction> m_panAct;
-    QSharedPointer<QAction> m_saveAct;
-    QSharedPointer<QAction> m_completeRoadsAct;
+    QActionGroup* m_toolsGroup;
+    QAction* m_zoomAllAct;
+    QAction* m_zoomIn;
+    QAction* m_zoomOut;
+    QAction* m_panAct;
+    QAction* m_saveAct;
+    QAction* m_completeRoadsAct;
 
     // toolbars
-    QSharedPointer<QToolBar> m_fileToolBar;
+    QToolBar* m_fileToolBar;
     std::map<long,long> m_osmid2featureid;
     QString m_midLinePath;
     QString m_completeRoadsFile;
 
-    QSharedPointer<CompleteRoadsWidget> m_completeRoadsWidget;
-    QSharedPointer<QDockWidget> m_dockWidget;
+    CompleteRoadsWidget* m_completeRoadsWidget;
+    QDockWidget* m_dockWidget;
 
 };
 
