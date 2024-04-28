@@ -27,6 +27,7 @@
 #include "mainwindow.hpp"
 #include "roadmerger.h"
 #include "ThreadPool.h"
+#include <QTimer>
 
 namespace fd{
 
@@ -128,7 +129,11 @@ int main(int argc, char** argv)
         window.setCompleteRoadsFile(mergParam.completeRoadsPath);
         window.show();
         std::cout<<"mergParam.basemap:"<<mergParam.basemap.toStdString()<<"mergParam.cehuipath:"<<mergParam.cehuipath.toStdString()<<std::endl;
-        window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
+        // window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
+        // Quit application when work is finished
+        QObject::connect(&window, SIGNAL(quit_signal()), &app, SLOT(quit()));
+        // Run the user-hook (doDownload) from the application event loop.
+        QTimer::singleShot(0, &window, SLOT(merge()));
         return app.exec();
     } catch (std::exception const& ex)
     {

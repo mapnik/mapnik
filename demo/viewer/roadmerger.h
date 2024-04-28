@@ -74,7 +74,7 @@ public:
 
     std::string convertToCustomText(const mapnik::geometry::line_string<double>& lineString);
 
-    bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupid, const QString& version, const QString& completeRoadsFile);
+    bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& version, const QString& completeRoadsFile);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 

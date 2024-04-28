@@ -55,7 +55,7 @@ class MainWindow : public QMainWindow
   signals:
      void afterSave_signal();
      void updateCheckedItems_signal(const std::vector<cehuidataInfo>& cehuidataInfoList);
-     void quit_signal();
+     void completeRoads_quit_signal();
 
   public slots:
     void zoom_all();
@@ -66,6 +66,7 @@ class MainWindow : public QMainWindow
     void afterSave();
     void startCompleteRoads();
     void finishCompleteRoads(const QString& groupid, const QString& version);
+    void merge(QString const& base,QString const& cehui);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 

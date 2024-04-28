@@ -195,8 +195,8 @@ void MainWindow::finishCompleteRoads(const QString& groupid, const QString& vers
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
     mapWidget_->roadMerger->exportCompleteRoads(m_completeRoadsFile, groupid);
 
-    // emit quit_signal();
-    QCoreApplication::quit();
+    emit completeRoads_quit_signal();
+    // QCoreApplication::quit();
     // // 正常退出
     // exit(EXIT_SUCCESS);
 }
@@ -419,4 +419,12 @@ void MainWindow::zoom_all()
 std::shared_ptr<mapnik::Map> MainWindow::get_map()
 {
     return mapWidget_->getMap();
+}
+
+void MainWindow::merge(QString const& base,QString const& cehui)
+{
+    if(mapWidget_ && mapWidget_->roadMerger)
+    {
+        mapWidget_->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
+    }
 }

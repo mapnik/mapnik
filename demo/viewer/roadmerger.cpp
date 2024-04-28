@@ -368,7 +368,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<d
 
 
 
-bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupid, const QString& version, const QString& completeRoadsFile)
+bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& version, const QString& completeRoadsFile)
 {
     qDebug() << "SerializeCompleteRoadInfos:: result size:"<< result.size();
 
