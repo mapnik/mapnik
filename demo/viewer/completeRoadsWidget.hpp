@@ -19,7 +19,7 @@ public:
 signals:
     void itemCheckBoxChanged_signal(const QString& id, int status);
 
-    void exportCompleteRoads_signal(const QString& groupid);
+    void exportCompleteRoads_signal(const QString& groupid, const QString& version);
 
 public slots:
     void updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList);
@@ -36,6 +36,7 @@ private:
     int m_checkedIndexInTreeWidget;
 
     QComboBox *m_groupidComboBox;
+    QComboBox *m_groupversionComboBox;
 };
 
 #endif //COMPLETEROADSWIDGET_HPP

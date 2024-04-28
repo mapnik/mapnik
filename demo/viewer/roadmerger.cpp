@@ -368,7 +368,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<d
 
 
 
-bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& completeRoadsFile)
+bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupid, const QString& version, const QString& completeRoadsFile)
 {
     qDebug() << "SerializeCompleteRoadInfos:: result size:"<< result.size();
 
@@ -385,6 +385,11 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
 
     // 添加groupId
     document.AddMember("groupId", jsonValue, allocator);
+
+    // 添加version
+    bool ok = false;
+    int intVersion = version.toInt(&ok);
+    document.AddMember("groupVersion", intVersion, allocator);
 
     // 添加updateInfos
     Value updateInfos(kArrayType);
@@ -420,9 +425,10 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
         fileComplete.AddMember("width", jsonValue, allocator);
 
-        strValue = info.DIRECTION;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("bidirectional", jsonValue, allocator);
+        // strValue = info.DIRECTION;
+        // jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+        // fileComplete.AddMember("bidirectional", jsonValue, allocator);
+        fileComplete.AddMember("bidirectional", 1, allocator);
 
         fileCompletes.PushBack(fileComplete, allocator);
     }
@@ -499,7 +505,7 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
     }
 }
 
-bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile, const QString& groupid)
+bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile, const QString& groupid, const QString& version)
 {
     std::vector<cehuidataInfo> result;
     getCompleteRoadsResult(result);
@@ -861,13 +867,6 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
                                 break;
                             }
 
-//                            if(boost::geometry::within(cutline[0], polyCheck)
-//                               || boost::geometry::intersects(cutline[0], polyCheck))
-//                            {
-//                                isOut = false;
-//                                break;
-//                            }
-
                         }
 
                         if(isOut)
@@ -949,9 +948,7 @@ void RoadMerger::clipedCehuiData()
                     mapnik::geometry::multi_line_string<double> out;
                     clipedLineEx(cloneFeat->get_geometry(),mergedResultBuffer,out);
                     std::vector<feature_ptr> result;
-//                    if(out.is<geometry::multi_line_string<double>>())
                     {
-//                       mapnik::geometry::multi_line_string<double> lines = out.get<geometry::multi_line_string<double>>();
                        mapnik::geometry::multi_line_string<double>& lines = out;
                        for(int i=0; i<lines.size(); i++)
                        {

@@ -13,7 +13,9 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
 
     // 将列表控件和按钮添加到布局中
     m_groupidComboBox = new QComboBox(this);
+    m_groupversionComboBox = new QComboBox(this);
     layout->addWidget(m_groupidComboBox);
+    layout->addWidget(m_groupversionComboBox);
     layout->addWidget(m_treeWidget);
     layout->addWidget(submitButton);
 
@@ -22,7 +24,25 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
 
     connect(m_treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(OnItemChanged(QTreeWidgetItem*,int)));
 
+    // 连接 m_groupidComboBox 的信号到自定义的槽函数
+    connect(m_groupidComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateVersionComboBox(int)));
+
     this->setLayout(layout);
+}
+
+void CompleteRoadsWidget::updateVersionComboBox(int index) 
+{
+    // 根据 m_groupidComboBox 的选项变化更新 m_groupversionComboBox 的列表信息
+    if (m_groupidComboBox && m_groupversionComboBox) 
+    {
+        m_groupversionComboBox->clear(); // 清空 m_groupversionComboBox 的当前列表
+        // 根据 m_groupidComboBox 选择的不同，为 m_groupversionComboBox 添加不同的选项
+        GroupInfo data = m_groupidComboBox->itemData(index).value<GroupInfo>();
+        for (int number : data.versions) 
+        {
+            m_groupversionComboBox->addItem(QString::number(number));
+        }
+    }
 }
 
 void CompleteRoadsWidget::OnItemChanged(QTreeWidgetItem* item,int column)
@@ -57,7 +77,9 @@ void CompleteRoadsWidget::updateGroupidComboBox(const std::vector<GroupInfo>& gr
         for (auto & info : groupInfoList)
         {
             // 添加带有文本和自定义数据的项目
-            m_groupidComboBox->addItem(info.name, info.id);
+            QVariant var;
+            var.setValue(info); // 将 MyData 实例转换为 QVariant
+            m_groupidComboBox->addItem(info.name, var);
         }
 
         // 设置默认选中第一项
@@ -95,6 +117,9 @@ void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& c
 
 void CompleteRoadsWidget::submitCheckedItems()
 {
-    QString groupid = m_groupidComboBox->currentData().toString();
-    emit exportCompleteRoads_signal(groupid);
+    int index = m_groupidComboBox->currentIndex();
+    GroupInfo data = comboBox->itemData(index).value<GroupInfo>();
+    QString id = data.id;
+    QString version = m_groupversionComboBox->currentText();
+    emit exportCompleteRoads_signal(data.id, version);
 }

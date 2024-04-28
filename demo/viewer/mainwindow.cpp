@@ -189,7 +189,7 @@ void MainWindow::OnItemCheckBoxChanged(const QString& id, int status)
     mapWidget_->roadMerger->OnItemCheckBoxChanged(id, status);
 }
 
-void MainWindow::finishCompleteRoads(const QString& groupid)
+void MainWindow::finishCompleteRoads(const QString& groupid, const QString& version)
 {
     std::vector<cehuidataInfo> result;
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
@@ -271,8 +271,8 @@ bool MainWindow::loadFeatureid2osmid(const QString& jsonPath)
 
         return true;
     }
-}
-return false;
+ }
+ return false;
 }
 
 bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
@@ -285,98 +285,56 @@ bool MainWindow::updateGroupidComboBox(const QString& groupidsFilePath)
                             (std::istreambuf_iterator<char>()));
         file.close();
 
-        // 使用rapidjson的Document类解析字符串
+        // 使用 rapidjson::Document 解析 JSON 字符串
         rapidjson::Document doc;
         doc.Parse(content.c_str());
 
-        // 检查是否是有效的json文档
+        // 检查是否有解析错误
         if (doc.HasParseError()) {
-            // 处理错误情况
-            std::cout << "Parse Error" << std::endl;
+            std::cerr << "JSON 解析错误：" << doc.GetParseError() << std::endl;
             return false;
         }
 
-        // 检查是否是json数组
-        if (doc.IsArray()) {
-            // 获取json数组
-            rapidjson::Value& array = doc;
-
-            // 遍历json数组中的每个元素
-            for (rapidjson::SizeType i = 0; i < array.Size(); i++) 
-            {
-                rapidjson::Value& val = array[i];
-
-                if (val.IsArray() && val.Size()==2)
-                {
-                    GroupInfo groupinfo;
-
-                    //id
-                    rapidjson::Value& idVal = val[0];
-                    {
-                        QString strVal = "";
-                        // 检查 "number" 是否为整数
-                        if (idVal.IsInt()) {
-                            strVal = QString::number(idVal.GetInt());
-                        }
-                        else if (idVal.IsUint()) { // 检查 "number" 是否为无符号整数
-                            strVal = QString::number(idVal.GetUint());
-                        }
-                        else if (idVal.IsInt64()) { // 检查 "number" 是否为64位整数
-                            strVal = QString::number(idVal.GetInt64());
-                        }
-                        else if (idVal.IsUint64()) { // 检查 "number" 是否为无符号64位整数
-                            strVal = QString::number(idVal.GetUint64());
-                        }
-                        else if (idVal.IsDouble()) { // 检查 "number" 是否为浮点数
-                            strVal = QString::number(idVal.GetDouble(), 'g', 15);
-                        }
-                        else if (idVal.IsString())
-                        {
-                            strVal = idVal.GetString();
-                        }
-                        groupinfo.id = strVal;
-
-                    }
-
-                    //name
-                    rapidjson::Value& nameVal = val[1];
-                    {
-                        QString strVal = "";
-                        // 检查 "number" 是否为整数
-                        if (nameVal.IsInt()) {
-                            strVal = QString::number(nameVal.GetInt());
-                        }
-                        else if (nameVal.IsUint()) { // 检查 "number" 是否为无符号整数
-                            strVal = QString::number(nameVal.GetUint());
-                        }
-                        else if (nameVal.IsInt64()) { // 检查 "number" 是否为64位整数
-                            strVal = QString::number(nameVal.GetInt64());
-                        }
-                        else if (nameVal.IsUint64()) { // 检查 "number" 是否为无符号64位整数
-                            strVal = QString::number(nameVal.GetUint64());
-                        }
-                        else if (nameVal.IsDouble()) { // 检查 "number" 是否为浮点数
-                            strVal = QString::number(nameVal.GetDouble(), 'g', 15);
-                        }
-                        else if (nameVal.IsString())
-                        {
-                            strVal = nameVal.GetString();
-                        }
-                        groupinfo.name = strVal;
-                    }
-                    groupInfoList.push_back(groupinfo);
-                }
-                
-                
-            }
-
-            if (m_completeRoadsWidget)
-            {
-                m_completeRoadsWidget->updateGroupidComboBox(groupInfoList);
-            }
-
-            return true;
+        // 确保解析得到的是一个数组
+        if (!doc.IsArray()) {
+            std::cerr << "JSON 不是一个数组" << std::endl;
+            return false;
         }
+
+        // 遍历数组
+        for (rapidjson::SizeType i = 0; i < doc.Size(); i++) {
+            // 获取数组中的对象
+            const rapidjson::Value& obj = doc[i];
+
+            // 确保对象包含 "name"、"id" 和 "version" 成员
+            if (obj.IsObject() && obj.HasMember("groupName") && obj.HasMember("groupId") && obj.HasMember("groupVersion")) {
+                GroupInfo info;
+                // 输出 "name" 和 "id"
+                info.name = obj["groupName"].GetString();
+                info.id = obj["groupId"].GetString();
+                std::cout << "groupName: " << obj["groupName"].GetString() << ", groupId: " << obj["groupId"].GetString() << std::endl;
+
+                // 输出 "version" 数组
+                const rapidjson::Value& version = obj["groupVersion"];
+                if (version.IsArray()) {
+                    std::cout << "groupVersion: ";
+                    for (rapidjson::SizeType j = 0; j < version.Size(); j++) {
+                        // 输出版本号
+                        std::cout << version[j].GetInt() << (j != version.Size() - 1 ? ", " : "");
+                        info.versions.push_back(version[j].GetInt());
+                    }
+                    std::cout << std::endl;
+                }
+                groupInfoList.push_back(info);
+            }
+        }
+
+
+        if (m_completeRoadsWidget)
+        {
+            m_completeRoadsWidget->updateGroupidComboBox(groupInfoList);
+        }
+        return true;
     }
     return false;
 }
@@ -414,7 +372,7 @@ void MainWindow::createActions()
 
     connect(this, SIGNAL(updateCheckedItems_signal(const std::vector<cehuidataInfo>&)), m_completeRoadsWidget, SLOT(updateCheckedItems(const std::vector<cehuidataInfo>&)));
     connect(m_completeRoadsWidget, SIGNAL(itemCheckBoxChanged_signal(const QString&, int)), this, SLOT(OnItemCheckBoxChanged(const QString&, int)));
-    connect(m_completeRoadsWidget, SIGNAL(exportCompleteRoads_signal(const QString&)), this, SLOT(finishCompleteRoads(const QString&)));
+    connect(m_completeRoadsWidget, SIGNAL(exportCompleteRoads_signal(const QString&, const QString&)), this, SLOT(finishCompleteRoads(const QString&, const QString&)));
 
 
     // set some actions as checkable

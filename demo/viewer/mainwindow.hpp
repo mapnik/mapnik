@@ -65,7 +65,7 @@ class MainWindow : public QMainWindow
     void save();
     void afterSave();
     void startCompleteRoads();
-    void finishCompleteRoads(const QString& groupid);
+    void finishCompleteRoads(const QString& groupid, const QString& version);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 
