@@ -25,6 +25,7 @@ public slots:
     void updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList);
     void OnItemChanged(QTreeWidgetItem* item,int column);
     void updateGroupidComboBox(const std::vector<GroupInfo>& groupInfoList);
+    void updateVersionComboBox(int index);
 
 private slots:
     void submitCheckedItems();
