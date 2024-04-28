@@ -49,6 +49,9 @@ class MainWindow : public QMainWindow
     void setCompleteRoadsFile(const QString& completeRoadsFilePath);
     bool updateGroupidComboBox(const QString& groupidsFilePath);
 
+
+    void setBaseInfo(const QString& base, const QString& cehui);
+
   protected:
     void closeEvent(QCloseEvent* event);
 
@@ -66,7 +69,7 @@ class MainWindow : public QMainWindow
     void afterSave();
     void startCompleteRoads();
     void finishCompleteRoads(const QString& groupid, const QString& version);
-    void merge(QString const& base,QString const& cehui);
+    void merge();
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 
@@ -96,6 +99,10 @@ class MainWindow : public QMainWindow
 
     CompleteRoadsWidget* m_completeRoadsWidget;
     QDockWidget* m_dockWidget;
+
+
+    QString m_base;
+    QString m_cehui;
 
 };
 

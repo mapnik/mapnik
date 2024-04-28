@@ -349,6 +349,12 @@ void MainWindow::setCompleteRoadsFile(const QString& completeRoadsFile)
     m_completeRoadsFile = completeRoadsFile;
 }
 
+void MainWindow::setBaseInfo(const QString& base, const QString&cehui)
+{
+    m_base = base;
+    m_cehui = cehui;
+}
+
 void MainWindow::createActions()
 {
     m_toolsGroup = new QActionGroup(this);
@@ -421,10 +427,10 @@ std::shared_ptr<mapnik::Map> MainWindow::get_map()
     return mapWidget_->getMap();
 }
 
-void MainWindow::merge(QString const& base,QString const& cehui)
+void MainWindow::merge()
 {
     if(mapWidget_ && mapWidget_->roadMerger)
     {
-        mapWidget_->roadMerger->merge(base,cehui);
+        mapWidget_->roadMerger->merge(m_base, m_cehui);
     }
 }

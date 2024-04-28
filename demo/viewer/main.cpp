@@ -131,14 +131,10 @@ int main(int argc, char** argv)
         std::cout<<"mergParam.basemap:"<<mergParam.basemap.toStdString()<<"mergParam.cehuipath:"<<mergParam.cehuipath.toStdString()<<std::endl;
         // window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
         // Quit application when work is finished
-        QObject::connect(&window, SIGNAL(quit_signal()), &app, SLOT(quit()));
+        QObject::connect(&window, SIGNAL(completeRoads_quit_signal()), &app, SLOT(quit()));
         // Run the user-hook (doDownload) from the application event loop.
-        QString base = mergParam.basemap;
-        QString cehui = mergParam.cehuipath;
-        // 使用 lambda 表达式传递参数
-        QTimer::singleShot(0, &, base, cehui {
-            window.merge(base, cehui);
-        });
+        window.setBaseInfo(mergParam.basemap, mergParam.cehuipath);
+        QTimer::singleShot(0, &window, SLOT(merge()));
         return app.exec();
     } catch (std::exception const& ex)
     {
