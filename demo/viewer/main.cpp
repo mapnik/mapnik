@@ -136,7 +136,7 @@ int main(int argc, char** argv)
         QString base = mergParam.basemap;
         QString cehui = mergParam.cehuipath;
         // 使用 lambda 表达式传递参数
-        QTimer::singleShot(0, &window, base, cehui {
+        QTimer::singleShot(0, &, base, cehui {
             window.merge(base, cehui);
         });
         return app.exec();
