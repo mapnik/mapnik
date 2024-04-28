@@ -118,7 +118,7 @@ void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& c
 void CompleteRoadsWidget::submitCheckedItems()
 {
     int index = m_groupidComboBox->currentIndex();
-    GroupInfo data = comboBox->itemData(index).value<GroupInfo>();
+    GroupInfo data = m_groupidComboBox->itemData(index).value<GroupInfo>();
     QString id = data.id;
     QString version = m_groupversionComboBox->currentText();
     emit exportCompleteRoads_signal(data.id, version);
