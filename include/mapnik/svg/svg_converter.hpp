@@ -73,7 +73,11 @@ class svg_converter : util::noncopyable
         current_group_ = &current_group_->elements.back().get<group>();
     }
 
-    void end_group() { current_group_ = current_group_->parent; }
+    void end_group()
+    {
+        if (current_group_->parent != nullptr)
+            current_group_ = current_group_->parent;
+    }
 
     void begin_path()
     {
