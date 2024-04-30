@@ -500,7 +500,7 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
 
     switch (node->type())
     {
-        case rapidxml::node_element: {
+        case rapidxml::node_element:
             parser.font_sizes_.push_back(parser.font_sizes_.back());
             switch (name)
             {
@@ -525,57 +525,43 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
                 case "radialGradient"_case:
                     parse_radial_gradient(parser, node);
                     break;
-            }
-
-            if (!parser.is_defs_) // FIXME
-            {
-                switch (name)
-                {
-                    case "g"_case:
-                        if (node->first_node() != nullptr)
-                        {
-                            parser.path_.push_attr();
-                            parse_id(parser, node);
-                            if (parser.css_style_)
-                                process_css(parser, node);
-                            parse_attr(parser, node);
-                            parser.path_.begin_group();
-                        }
-                        break;
-                    case "use"_case:
-                        parser.path_.push_attr();
-                        parse_id(parser, node);
-                        if (parser.css_style_)
-                            process_css(parser, node);
-                        parse_attr(parser, node);
+                case "g"_case:
+                    parser.path_.push_attr();
+                    parse_id(parser, node);
+                    if (parser.css_style_)
+                        process_css(parser, node);
+                    parse_attr(parser, node);
+                    parser.path_.begin_group();
+                    break;
+                case "use"_case:
+                    parser.path_.push_attr();
+                    parse_id(parser, node);
+                    if (parser.css_style_)
+                        process_css(parser, node);
+                    parse_attr(parser, node);
+                    if (parser.path_.cur_attr().opacity < 1.0)
+                        parser.path_.begin_group();
+                    parse_use(parser, node);
+                    if (parser.path_.cur_attr().opacity < 1.0)
+                        parser.path_.end_group();
+                    parser.path_.pop_attr();
+                    break;
+                default:
+                    parser.path_.push_attr();
+                    parse_id(parser, node);
+                    if (parser.css_style_)
+                        process_css(parser, node);
+                    parse_attr(parser, node);
+                    if (parser.path_.display())
+                    {
                         if (parser.path_.cur_attr().opacity < 1.0)
                             parser.path_.begin_group();
-                        parse_use(parser, node);
+                        parse_element(parser, node->name(), node);
                         if (parser.path_.cur_attr().opacity < 1.0)
                             parser.path_.end_group();
-                        parser.path_.pop_attr();
-                        break;
-                    default:
-                        parser.path_.push_attr();
-                        parse_id(parser, node);
-                        if (parser.css_style_)
-                            process_css(parser, node);
-                        parse_attr(parser, node);
-                        if (parser.path_.display())
-                        {
-                            if (parser.path_.cur_attr().opacity < 1.0)
-                                parser.path_.begin_group();
-                            parse_element(parser, node->name(), node);
-                            if (parser.path_.cur_attr().opacity < 1.0)
-                                parser.path_.end_group();
-                        }
-                        parser.path_.pop_attr();
-                }
-            }
-            else
-            {
-                // save node for later
-                parse_id(parser, node);
+                    }
+                    parser.path_.pop_attr();
+                    break;
             }
 
             if ("style"_case == name)
@@ -607,8 +593,7 @@ void traverse_tree(svg_parser& parser, rapidxml::xml_node<char> const* node)
             }
 
             end_element(parser, node);
-        }
-        break;
+            break;
         default:
             break;
     }
@@ -618,20 +603,14 @@ void end_element(svg_parser& parser, rapidxml::xml_node<char> const* node)
 {
     parser.font_sizes_.pop_back();
     auto name = name_to_int(node->name());
-    if (!parser.is_defs_ && (name == "g"_case))
+    if (name == "g"_case)
     {
         parser.path_.end_group();
-        if (node->first_node() != nullptr)
-        {
-            parser.path_.pop_attr();
-        }
+        parser.path_.pop_attr();
     }
     else if (name == "svg"_case)
     {
-        // if (node->first_node() != nullptr)
-        //{
-        // parser.path_.pop_attr();
-        //}
+        parser.path_.pop_attr();
     }
     else if (name == "defs"_case)
     {
@@ -680,7 +659,7 @@ void parse_element(svg_parser& parser, char const* name, rapidxml::xml_node<char
             parse_ellipse(parser, node);
             break;
         case "svg"_case:
-            // parser.path_.push_attr();
+            parser.path_.push_attr();
             parse_dimensions(parser, node);
             parse_attr(parser, node);
             parser.path_.set_opacity(parser.path_.cur_attr().opacity);
