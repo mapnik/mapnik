@@ -228,7 +228,23 @@
             }
         },
         {
-            "name": "macos-ci",
+            "name": "macos-ci-arm64",
+            "description": "used by the ci pipeline",
+            "inherits": [
+                "use-ninja",
+                "release-with-debug-build",
+                "default-build-dir",
+                "ci-options"
+            ],
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-fprofile-arcs -ftest-coverage"
+            },
+            "environment": {
+                "PROJ_LIB": "${sourceDir}/build/vcpkg_installed/arm64-osx/share/proj"
+            }
+        },
+        {
+            "name": "macos-ci-x64",
             "description": "used by the ci pipeline",
             "inherits": [
                 "use-ninja",
@@ -282,8 +298,12 @@
             "configurePreset": "linux-ci-release"
         },
         {
-            "name": "macos-ci",
-            "configurePreset": "macos-ci"
+            "name": "macos-ci-arm64",
+            "configurePreset": "macos-ci-arm64"
+        },
+        {
+            "name": "macos-ci-x64",
+            "configurePreset": "macos-ci-x64"
         }
     ],
     "testPresets": [
@@ -313,8 +333,15 @@
             ]
         },
         {
-            "name": "macos-ci",
-            "configurePreset": "macos-ci",
+            "name": "macos-ci-arm64",
+            "configurePreset": "macos-ci-arm64",
+            "inherits": [
+                "test-default"
+            ]
+        },
+        {
+            "name": "macos-ci-x64",
+            "configurePreset": "macos-ci-x64",
             "inherits": [
                 "test-default"
             ]

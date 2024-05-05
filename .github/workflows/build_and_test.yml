@@ -83,10 +83,16 @@ jobs:
           nuget-pat: ${{ secrets.GITHUB_TOKEN }}
           mono: ${{ matrix.mono }}
 
-      - name: set lower case runner os
+      - name: Set PRESET environment variable to lower case runner OS
         shell: bash
         run: |
-          echo "PRESET=$(echo "${{ runner.os }}" | perl -ne "print lc")-ci" >> ${GITHUB_ENV}
+          LC_RUNNER_OS=$(echo "${RUNNER_OS}" | perl -ne "print lc")
+          if [ "${RUNNER_OS}" == "macOS" ]; then
+            MACOS_ARCH=${{ (matrix.os == 'macos-14' || matrix.os == 'macos-latest') && 'arm64' || 'x64' }}
+            echo "PRESET=${LC_RUNNER_OS}-ci-${MACOS_ARCH}" >> ${GITHUB_ENV}
+          else
+            echo "PRESET=${LC_RUNNER_OS}-ci" >> ${GITHUB_ENV}
+          fi
 
       - name: Ensure libtool is installed on macOS
         shell: bash
