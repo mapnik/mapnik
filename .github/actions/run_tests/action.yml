@@ -74,7 +74,7 @@ runs:
       shell: "bash"
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-          LCOV_EXTRA_OPTIONS="--ignore-errors gcov --ignore-errors inconsistent --ignore-errors unused"
+          LCOV_EXTRA_OPTIONS="--ignore-errors count,gcov,inconsistent,range,unused --keep-going"
         fi
         lcov ${LCOV_EXTRA_OPTIONS:-} --directory . --capture --output-file coverage.info
         lcov ${LCOV_EXTRA_OPTIONS:-} --remove coverage.info '/usr/*' '*/vcpkg_installed/*'  '/.cache/*' '*/test/*'  --output-file coverage.info
