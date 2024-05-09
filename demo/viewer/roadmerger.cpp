@@ -958,12 +958,20 @@ void RoadMerger::clipedCehuiData()
                        {
                            context_ptr contextPtr = std::make_shared<mapnik::context_type>();
                            feature_ptr feature(feature_factory::create(contextPtr, count));
+
+                           //id
                            int64_t id = fd::generate_global_id();
                            std::string sID = QString::number(id).toStdString();
                            icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
                            mapnik::value val = unicodeString;
                            feature->put_new(IDKEY, val);
-                           feature->put_new(nameFieldName,cloneFeat->get(nameFieldName));
+
+                           //name
+                           std::string nameStr = cloneFeat->get(nameFieldName).to_string() + "_" + std::to_string(i);
+                           icu::UnicodeString unicodeName = icu::UnicodeString::fromUTF8(icu::StringPiece(nameStr.c_str()));
+                           mapnik::value nameVal = unicodeName;
+                           feature->put_new(nameFieldName, nameVal);
+                           
                            feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
                            feature->put_new(NeedAddCehui_RESULT, 1);
                            feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));
