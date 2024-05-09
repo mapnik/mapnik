@@ -132,9 +132,7 @@ int main(int argc, char** argv)
         // window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
         // Quit application when work is finished
         QObject::connect(&window, SIGNAL(completeRoads_quit_signal()), &app, SLOT(quit()));
-        // Run the user-hook (doDownload) from the application event loop.
-        window.setBaseInfo(mergParam.basemap, mergParam.cehuipath);
-        QTimer::singleShot(0, &window, SLOT(merge()));
+        window.merge(mergParam.basemap, mergParam.cehuipath);
         return app.exec();
     } catch (std::exception const& ex)
     {

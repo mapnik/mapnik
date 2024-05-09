@@ -72,6 +72,10 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #define  DIRECTIONKEY "direction"
 #endif
 
+#ifndef  LonLatPrecision
+#define LonLatPrecision 8
+#endif
+
 using namespace rapidjson;
 
 
@@ -328,7 +332,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::line_string<double>
     std::stringstream wktStream;
     wktStream << "LINESTRING (";
     for (const auto& point : lineString) {
-        wktStream << point.x << " " << point.y << ",";
+        wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << " " << point.y << ",";
     }
     wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
     wktStream << ")";

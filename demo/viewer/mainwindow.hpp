@@ -48,9 +48,7 @@ class MainWindow : public QMainWindow
     void setMidLineJsonPath(const QString& midLineJsonPath);
     void setCompleteRoadsFile(const QString& completeRoadsFilePath);
     bool updateGroupidComboBox(const QString& groupidsFilePath);
-
-
-    void setBaseInfo(const QString& base, const QString& cehui);
+    void merge(const QString& base, const QString& cehui);
 
   protected:
     void closeEvent(QCloseEvent* event);
@@ -69,7 +67,6 @@ class MainWindow : public QMainWindow
     void afterSave();
     void startCompleteRoads();
     void finishCompleteRoads(const QString& groupid, const QString& version);
-    void merge();
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 
