@@ -411,7 +411,7 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
 
         strValue = info.ID;
 
-        std::cout<<"info.ID: "<<strValue<<std::endl;
+        // std::cout<<"info.ID: "<<strValue<<std::endl;
 
         strValue = info.NAME;
         jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
@@ -660,10 +660,10 @@ void RoadMerger::addSelectedResultBufferLayer()
 
 void RoadMerger::toggleMergedRoad(double x, double y)
 {
-    std::cout<<"begin toggleMergedRoad"<<std::endl;
+    // std::cout<<"begin toggleMergedRoad"<<std::endl;
     if(m_mergedSourceIndex==-1)
     {
-        std::cout<<"end toggleMergedRoad"<<std::endl;
+        // std::cout<<"end toggleMergedRoad"<<std::endl;
         return;
     }
 
@@ -678,19 +678,19 @@ void RoadMerger::toggleMergedRoad(double x, double y)
             feat->put(MERGE_RESULT,val);
 
             feat = fs->next();
-            std::cout<<"toggle road "<<std::endl;
+            // std::cout<<"toggle road "<<std::endl;
         }
     }
     mapWidget->updateMap();
-    std::cout<<"end toggleMergedRoad"<<std::endl;
+    // std::cout<<"end toggleMergedRoad"<<std::endl;
 }
 
 void RoadMerger::toggleNeedCompleteRoad(double x, double y)
 {
-    std::cout<<"begin toggleNeedCompleteRoad"<<std::endl;
+    // std::cout<<"begin toggleNeedCompleteRoad"<<std::endl;
     if(m_clipedCehuiSourceIndex==-1)
     {
-        std::cout<<"end toggleNeedCompleteRoad"<<std::endl;
+        // std::cout<<"end toggleNeedCompleteRoad"<<std::endl;
         return;
     }
 
@@ -705,11 +705,11 @@ void RoadMerger::toggleNeedCompleteRoad(double x, double y)
             feat->put(NeedAddCehui_RESULT,val);
 
             feat = fs->next();
-            std::cout<<"toggle complete road "<<std::endl;
+            // std::cout<<"toggle complete road "<<std::endl;
         }
     }
     mapWidget->updateMap();
-    std::cout<<"end toggleNeedCompleteRoad"<<std::endl;
+    // std::cout<<"end toggleNeedCompleteRoad"<<std::endl;
 }
 
 void RoadMerger::getMergeResult(std::vector<long>& result)
@@ -781,14 +781,14 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
                     {
                         mapnik::geometry::multi_point<double> intersection_points;
                         boost::geometry::intersection(line, poly, intersection_points);
-                        std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
+                        // std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
                         if(intersection_points.size())
                         {
                             for(int i=0;i<intersection_points.size();i++)
                             {
-                                std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
-                                std::cout<<"intersection_points["<<i<<"] x:"<< intersection_points[i].x <<std::endl;
-                                std::cout<<"intersection_points["<<i<<"] y:"<< intersection_points[i].y <<std::endl;
+                                // std::cout<<"intersection_points' count:"<< intersection_points.size() <<std::endl;
+                                // std::cout<<"intersection_points["<<i<<"] x:"<< intersection_points[i].x <<std::endl;
+                                // std::cout<<"intersection_points["<<i<<"] y:"<< intersection_points[i].y <<std::endl;
                                 allIntersection_points.push_back(intersection_points[i]);
                             }
                         }
@@ -804,7 +804,7 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
         {
             result.push_back(line);
             out = result;
-            std::cout<<"in.is geometry::line_string. It is disjoint."<<std::endl;
+            // std::cout<<"in.is geometry::line_string. It is disjoint."<<std::endl;
             return;
         }
 
@@ -888,19 +888,19 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
             }
 
             out = result;
-            std::cout<<"result count:"<<result.size()<<std::endl;
+            // std::cout<<"result count:"<<result.size()<<std::endl;
         }
 
     }
     else
     {
-        std::cout<<"has other geometry type"<<std::endl;
+        // std::cout<<"has other geometry type"<<std::endl;
     }
 }
 
 void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
 {
-    std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
+    // std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
     query q(clipedCehuiSource->envelope());
     q.add_property_name(IDKEY);
     q.add_property_name(NeedAddCehui_RESULT);
@@ -916,7 +916,7 @@ void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
     }
 
     mapWidget->updateMap();
-    std::cout<<"end OnItemCheckBoxChanged"<<std::endl;
+    // std::cout<<"end OnItemCheckBoxChanged"<<std::endl;
 }
 
 void RoadMerger::clipedCehuiData()
@@ -971,7 +971,7 @@ void RoadMerger::clipedCehuiData()
                            icu::UnicodeString unicodeName = icu::UnicodeString::fromUTF8(icu::StringPiece(nameStr.c_str()));
                            mapnik::value nameVal = unicodeName;
                            feature->put_new(nameFieldName, nameVal);
-                           
+
                            feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
                            feature->put_new(NeedAddCehui_RESULT, 1);
                            feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));

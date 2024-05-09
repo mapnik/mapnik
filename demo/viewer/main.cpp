@@ -128,7 +128,7 @@ int main(int argc, char** argv)
         window.setMidLineJsonPath(mergParam.midlinePath);
         window.setCompleteRoadsFile(mergParam.completeRoadsPath);
         window.show();
-        std::cout<<"mergParam.basemap:"<<mergParam.basemap.toStdString()<<"mergParam.cehuipath:"<<mergParam.cehuipath.toStdString()<<std::endl;
+        //std::cout<<"mergParam.basemap:"<<mergParam.basemap.toStdString()<<"mergParam.cehuipath:"<<mergParam.cehuipath.toStdString()<<std::endl;
         // window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
         // Quit application when work is finished
         QObject::connect(&window, SIGNAL(completeRoads_quit_signal()), &app, SLOT(quit()));
