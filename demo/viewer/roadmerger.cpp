@@ -341,7 +341,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::line_string<double>
 
 std::string RoadMerger::convertToCustomText(const mapnik::geometry::line_string<double>& lineString)
 {
-    // 将geometry::line_string<double>转换为WKT格式
+    // 将geometry::line_string<double>转换为自定义格式
     std::stringstream wktStream;
     wktStream << "";
     for (const auto& point : lineString) {
