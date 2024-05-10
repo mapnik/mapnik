@@ -345,7 +345,7 @@ std::string RoadMerger::convertToCustomText(const mapnik::geometry::line_string<
     std::stringstream wktStream;
     wktStream << "";
     for (const auto& point : lineString) {
-        wktStream << point.x << "," << point.y << ";";
+        wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << "," << point.y << ";";
     }
     wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
     wktStream << "";
@@ -359,7 +359,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<d
     for (const auto& segment : multiLineString) {
         wktStream << "(";
         for (const auto& point : segment) {
-            wktStream << point.x << " " << point.y << ",";
+            wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << " " << point.y << ",";
         }
         wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
         wktStream << "),";
