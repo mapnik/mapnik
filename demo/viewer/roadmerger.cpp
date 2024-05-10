@@ -331,42 +331,59 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::line_string<double>
     // 将geometry::line_string<double>转换为WKT格式
     std::stringstream wktStream;
     wktStream << "LINESTRING (";
-    for (const auto& point : lineString) {
+    for (const auto& point : lineString) 
+    {
         wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << " " << point.y << ",";
     }
-    wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
-    wktStream << ")";
-    return wktStream.str();
+
+    std::string wkt = wktStream.str();
+    if (!wkt.empty() && lineString.size()>0) {
+        wkt.erase(wkt.size() - 1); // 删除最后一个字符（分号）
+    }
+
+    wkt = wkt + ")";
+    return wkt;
 }
 
 std::string RoadMerger::convertToCustomText(const mapnik::geometry::line_string<double>& lineString)
 {
-    // 将geometry::line_string<double>转换为自定义格式
-    std::stringstream wktStream;
-    wktStream << "";
+    // 将geometry::line_string<double>转换为WKT格式
+    std::stringstream customStream;
     for (const auto& point : lineString) {
-        wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << "," << point.y << ";";
+        customStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << "," << point.y << ";";
     }
-    wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
-    wktStream << "";
-    return wktStream.str();
+
+    std::string customText = customStream.str();
+    if (!customText.empty()) {
+        customText.erase(customText.size() - 1); // 删除最后一个字符（分号）
+    }
+    return customText;
 }
 
 std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<double>& multiLineString)
 {
     std::stringstream wktStream;
     wktStream << "MULTILINESTRING (";
-    for (const auto& segment : multiLineString) {
+    for (int i =0; i<multiLineString.size(); ++i) 
+    {
+        const auto& segment = multiLineString[i];
         wktStream << "(";
-        for (const auto& point : segment) {
-            wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << " " << point.y << ",";
+        for (int j = 0; j< segment.size(); ++j) 
+        {
+            const auto& point = segment[j];
+            wktStream << std::fixed << std::setprecision(LonLatPrecision) << point.x << " " << point.y;
+            if(j!=segment.size()-1)
+            {
+                wktStream << ",";
+            }
         }
-        wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
-        wktStream << "),";
+        wktStream << ")";
+        if(i!=multiLineString.size()-1)
+        {
+            wktStream << ",";
+        }
     }
-    wktStream.seekp(-1, std::ios_base::end); // 移除最后一个逗号
     wktStream << ")";
-
     return wktStream.str();
 }
 
