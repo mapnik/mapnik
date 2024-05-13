@@ -92,7 +92,7 @@ MainWindow::~MainWindow()
     //     delete mapWidget_;
     //     mapWidget_ = NULL;
     // }
-    delete mapWidget_;
+    // delete mapWidget_;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
