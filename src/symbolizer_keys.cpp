@@ -112,7 +112,7 @@ static const property_meta_type key_meta[const_max_key] = {
     property_types::target_markers_multipolicy},
   property_meta_type{"placement", // FIXME - change property name
                      [](enumeration_wrapper e) { return point_placement_e(point_placement_enum(e.value)).as_string(); },
-                     property_types::target_double},
+                     property_types::target_placement},
   property_meta_type{"colorizer", nullptr, property_types::target_colorizer},
   property_meta_type{"halo-transform", nullptr, property_types::target_transform},
   property_meta_type{"num-columns", nullptr, property_types::target_integer},
