@@ -13,6 +13,7 @@ project(mapnik
 )
 message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../depends")
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
