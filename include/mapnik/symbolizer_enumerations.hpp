@@ -28,9 +28,11 @@
 namespace mapnik {
 
 enum class line_cap_enum : std::uint8_t { BUTT_CAP, SQUARE_CAP, ROUND_CAP, line_cap_enum_MAX };
+
 DEFINE_ENUM(line_cap_e, line_cap_enum);
 
 enum class line_join_enum : std::uint8_t { MITER_JOIN, MITER_REVERT_JOIN, ROUND_JOIN, BEVEL_JOIN, line_join_enum_MAX };
+
 DEFINE_ENUM(line_join_e, line_join_enum);
 
 enum class line_rasterizer_enum : std::uint8_t {
@@ -38,9 +40,11 @@ enum class line_rasterizer_enum : std::uint8_t {
     RASTERIZER_FAST, // agg::rasterizer_outline_aa, twice as fast but only good for thin lines
     line_rasterizer_enum_MAX
 };
+
 DEFINE_ENUM(line_rasterizer_e, line_rasterizer_enum);
 
 enum class halo_rasterizer_enum : std::uint8_t { HALO_RASTERIZER_FULL, HALO_RASTERIZER_FAST, halo_rasterizer_enum_MAX };
+
 DEFINE_ENUM(halo_rasterizer_e, halo_rasterizer_enum);
 
 enum class point_placement_enum : std::uint8_t {
@@ -48,6 +52,7 @@ enum class point_placement_enum : std::uint8_t {
     INTERIOR_POINT_PLACEMENT,
     point_placement_enum_MAX
 };
+
 DEFINE_ENUM(point_placement_e, point_placement_enum);
 
 enum class pattern_alignment_enum : std::uint8_t { LOCAL_ALIGNMENT, GLOBAL_ALIGNMENT, pattern_alignment_enum_MAX };
@@ -59,6 +64,7 @@ enum class debug_symbolizer_mode_enum : std::uint8_t {
     DEBUG_SYM_MODE_RINGS,
     debug_symbolizer_mode_enum_MAX
 };
+
 DEFINE_ENUM(debug_symbolizer_mode_e, debug_symbolizer_mode_enum);
 
 // markers
@@ -73,6 +79,7 @@ enum class marker_placement_enum : std::uint8_t {
     MARKER_POLYLABEL_PLACEMENT,
     marker_placement_enum_MAX
 };
+
 DEFINE_ENUM(marker_placement_e, marker_placement_enum);
 
 enum class marker_multi_policy_enum : std::uint8_t {
@@ -81,6 +88,7 @@ enum class marker_multi_policy_enum : std::uint8_t {
     MARKER_LARGEST_MULTI, // only the largest component of a multi gets a marker
     marker_multi_policy_enum_MAX
 };
+
 DEFINE_ENUM(marker_multi_policy_e, marker_multi_policy_enum);
 
 enum class text_transform_enum : std::uint8_t {
@@ -122,9 +130,11 @@ enum class horizontal_alignment_enum : std::uint8_t {
     H_ADJUST,
     horizontal_alignment_enum_MAX
 };
+
 DEFINE_ENUM(horizontal_alignment_e, horizontal_alignment_enum);
 
 enum class justify_alignment_enum : std::uint8_t { J_LEFT = 0, J_MIDDLE, J_RIGHT, J_AUTO, justify_alignment_enum_MAX };
+
 DEFINE_ENUM(justify_alignment_e, justify_alignment_enum);
 
 enum class text_upright_enum : std::uint8_t {
@@ -136,6 +146,7 @@ enum class text_upright_enum : std::uint8_t {
     UPRIGHT_RIGHT_ONLY,
     text_upright_enum_MAX
 };
+
 DEFINE_ENUM(text_upright_e, text_upright_enum);
 
 enum class direction_enum : std::uint8_t {
@@ -149,6 +160,7 @@ enum class direction_enum : std::uint8_t {
     DIRECTION_DOWN,
     direction_enum_MAX
 };
+
 DEFINE_ENUM(direction_e, direction_enum);
 
 enum class gamma_method_enum : std::uint8_t {
@@ -159,9 +171,11 @@ enum class gamma_method_enum : std::uint8_t {
     GAMMA_MULTIPLY,  // agg::gamma_multiply
     gamma_method_enum_MAX
 };
+
 DEFINE_ENUM(gamma_method_e, gamma_method_enum);
 
 enum class line_pattern_enum : std::uint8_t { LINE_PATTERN_WARP, LINE_PATTERN_REPEAT, line_pattern_enum_MAX };
+
 DEFINE_ENUM(line_pattern_e, line_pattern_enum);
 
 enum class smooth_algorithm_enum : std::uint8_t {
@@ -169,6 +183,7 @@ enum class smooth_algorithm_enum : std::uint8_t {
     SMOOTH_ALGORITHM_ADAPTIVE,
     smooth_algorithm_enum_MAX
 };
+
 DEFINE_ENUM(smooth_algorithm_e, smooth_algorithm_enum);
 
 } // namespace mapnik

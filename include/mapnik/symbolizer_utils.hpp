@@ -147,25 +147,26 @@ inline std::string symbolizer_name(symbolizer const& sym)
     return type;
 }
 
-template <typename Meta>
+template<typename Meta>
 class symbolizer_property_value_string
 {
-public:
-    symbolizer_property_value_string (Meta const& meta)
-        : meta_(meta) {}
+  public:
+    symbolizer_property_value_string(Meta const& meta)
+        : meta_(meta)
+    {}
 
-    std::string operator() ( mapnik::enumeration_wrapper const& e) const
+    std::string operator()(mapnik::enumeration_wrapper const& e) const
     {
         std::stringstream ss;
         auto const& convert_fun_ptr(std::get<1>(meta_));
-        if ( convert_fun_ptr )
+        if (convert_fun_ptr)
         {
             ss << '\"' << convert_fun_ptr(e) << '\"';
         }
         return ss.str();
     }
 
-    std::string operator () ( path_expression_ptr const& expr) const
+    std::string operator()(path_expression_ptr const& expr) const
     {
         std::ostringstream ss;
         if (expr)
@@ -175,17 +176,17 @@ public:
         return ss.str();
     }
 
-    std::string operator () (text_placements_ptr const& expr) const
+    std::string operator()(text_placements_ptr const& expr) const
     {
         return std::string("\"<fixme-text-placement-ptr>\"");
     }
 
-    std::string operator () (raster_colorizer_ptr const& expr) const
+    std::string operator()(raster_colorizer_ptr const& expr) const
     {
         return std::string("\"<fixme-raster-colorizer-ptr>\"");
     }
 
-    std::string operator () (transform_type const& expr) const
+    std::string operator()(transform_type const& expr) const
     {
         std::ostringstream ss;
         if (expr)
@@ -195,43 +196,44 @@ public:
         return ss.str();
     }
 
-    std::string operator () (expression_ptr const& expr) const
+    std::string operator()(expression_ptr const& expr) const
     {
         std::ostringstream ss;
         if (expr)
         {
-            ss << '\"' <<  mapnik::to_expression_string(*expr) <<  '\"';
+            ss << '\"' << mapnik::to_expression_string(*expr) << '\"';
         }
         return ss.str();
     }
 
-    std::string operator () (color const& c) const
+    std::string operator()(color const& c) const
     {
         std::ostringstream ss;
         ss << '\"' << c << '\"';
         return ss.str();
     }
 
-    std::string operator () (dash_array const& dash) const
+    std::string operator()(dash_array const& dash) const
     {
         std::ostringstream ss;
         for (std::size_t i = 0; i < dash.size(); ++i)
         {
             ss << dash[i].first << "," << dash[i].second;
-            if ( i + 1 < dash.size() ) ss << ',';
+            if (i + 1 < dash.size())
+                ss << ',';
         }
         return ss.str();
     }
 
-    template <typename T>
-    std::string operator () ( T const& val ) const
+    template<typename T>
+    std::string operator()(T const& val) const
     {
         std::ostringstream ss;
         ss << '\"' << val << '\"';
         return ss.str();
     }
 
-private:
+  private:
     Meta const& meta_;
 };
 
@@ -239,8 +241,8 @@ struct symbolizer_to_json
 {
     using result_type = std::string;
 
-    template <typename T>
-    auto operator() (T const& sym) const -> result_type
+    template<typename T>
+    auto operator()(T const& sym) const -> result_type
     {
         std::stringstream ss;
         ss << "{\"type\":\"" << mapnik::symbolizer_traits<T>::name() << "\",";
@@ -249,10 +251,12 @@ struct symbolizer_to_json
         for (auto const& prop : sym.properties)
         {
             auto const& meta = mapnik::get_meta(prop.first);
-            if (first) first = false;
-            else ss << ",";
-            ss << "\"" <<  std::get<0>(meta) << "\":";
-            ss << util::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta),prop.second);
+            if (first)
+                first = false;
+            else
+                ss << ",";
+            ss << "\"" << std::get<0>(meta) << "\":";
+            ss << util::apply_visitor(symbolizer_property_value_string<property_meta_type>(meta), prop.second);
         }
         ss << "}}";
         return ss.str();
