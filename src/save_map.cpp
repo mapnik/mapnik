@@ -194,7 +194,7 @@ class serialize_symbolizer_property
         std::ostringstream os;
         for (std::size_t i = 0; i < dash.size(); ++i)
         {
-            os << dash[i].first << ", " << dash[i].second;
+            os << dash[i].first << "," << dash[i].second;
             if (i + 1 < dash.size())
                 os << ",";
         }
