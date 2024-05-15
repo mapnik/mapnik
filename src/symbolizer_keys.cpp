@@ -103,16 +103,16 @@ static const property_meta_type key_meta[const_max_key] = {
                      [](enumeration_wrapper e) { return label_placement_e(label_placement_enum(e.value)).as_string(); },
                      property_types::target_placement},
   property_meta_type{
-    "placement", // FIXME - change property name
-    [](enumeration_wrapper e) { return marker_placement_e(marker_placement_enum(e.value)).as_string(); },
-    property_types::target_markers_placement},
+      "placement",
+      [](enumeration_wrapper e) { return marker_placement_e(marker_placement_enum(e.value)).as_string(); },
+      property_types::target_markers_placement},
   property_meta_type{
-    "multi-policy",
-    [](enumeration_wrapper e) { return marker_multi_policy_e(marker_multi_policy_enum(e.value)).as_string(); },
-    property_types::target_markers_multipolicy},
-  property_meta_type{"placement", // FIXME - change property name
-                     [](enumeration_wrapper e) { return point_placement_e(point_placement_enum(e.value)).as_string(); },
-                     property_types::target_placement},
+      "multi-policy",
+      [](enumeration_wrapper e) { return marker_multi_policy_e(marker_multi_policy_enum(e.value)).as_string(); },
+      property_types::target_markers_multipolicy},
+  property_meta_type{"placement",
+      [](enumeration_wrapper e) { return point_placement_e(point_placement_enum(e.value)).as_string(); },
+      property_types::target_placement},
   property_meta_type{"colorizer", nullptr, property_types::target_colorizer},
   property_meta_type{"halo-transform", nullptr, property_types::target_transform},
   property_meta_type{"num-columns", nullptr, property_types::target_integer},
