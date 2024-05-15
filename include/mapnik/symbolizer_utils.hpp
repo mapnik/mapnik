@@ -30,6 +30,7 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/expression_string.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/xml_tree.hpp>
@@ -146,9 +147,6 @@ inline std::string symbolizer_name(symbolizer const& sym)
     return type;
 }
 
-// https://github.com/mapnik/mapnik/issues/2324
-/*
-
 template <typename Meta>
 class symbolizer_property_value_string
 {
@@ -162,7 +160,7 @@ public:
         auto const& convert_fun_ptr(std::get<1>(meta_));
         if ( convert_fun_ptr )
         {
-            ss << convert_fun_ptr(e);
+            ss << '\"' << convert_fun_ptr(e) << '\"';
         }
         return ss.str();
     }
@@ -202,7 +200,7 @@ public:
         std::ostringstream ss;
         if (expr)
         {
-            ss << '\"' << "FIXME" <<  '\"';
+            ss << '\"' <<  mapnik::to_expression_string(*expr) <<  '\"';
         }
         return ss.str();
     }
@@ -219,7 +217,7 @@ public:
         std::ostringstream ss;
         for (std::size_t i = 0; i < dash.size(); ++i)
         {
-            ss << dash[i].first << ", " << dash[i].second;
+            ss << dash[i].first << "," << dash[i].second;
             if ( i + 1 < dash.size() ) ss << ',';
         }
         return ss.str();
@@ -229,7 +227,7 @@ public:
     std::string operator () ( T const& val ) const
     {
         std::ostringstream ss;
-        ss << val;
+        ss << '\"' << val << '\"';
         return ss.str();
     }
 
@@ -260,8 +258,6 @@ struct symbolizer_to_json
         return ss.str();
     }
 };
-
-*/
 
 namespace {
 
