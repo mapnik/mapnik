@@ -34,7 +34,7 @@ namespace fd{
 struct MergemapParam
 {
   QString basemap;
-  QString cehuipath;
+  QVector<QString> cehuipathList;
   QString featureid2osmidPath;
   QString midlinePath;
   QString appBinDir;
@@ -48,7 +48,8 @@ void loadMergemapIniFile(const QString& mergemapIniFile, MergemapParam& mergPara
   // 读取数据表字段名配置
   settings.beginGroup("mergemap");
   mergParam.basemap = settings.value("basemap", "basemap.shp").toString();
-  mergParam.cehuipath = settings.value("cehuipath", "cehui.shp").toString();
+  QString cehuipathList = settings.value("cehuipath", "cehui.shp").toString();
+  mergParam.cehuipathList = cehuipathList.split(';',QString::SkipEmptyParts).toVector();
   mergParam.featureid2osmidPath = settings.value("featureid2osmidPath", "featureid2osmid.json").toString();
   mergParam.midlinePath = settings.value("midlinePath", "midline.json").toString();
   mergParam.appBinDir = settings.value("appBinDir", "./").toString();
@@ -132,7 +133,7 @@ int main(int argc, char** argv)
         // window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
         // Quit application when work is finished
         QObject::connect(&window, SIGNAL(completeRoads_quit_signal()), &app, SLOT(quit()));
-        window.merge(mergParam.basemap, mergParam.cehuipath);
+        window.merge(mergParam.basemap, mergParam.cehuipathList);
         return app.exec();
     } catch (std::exception const& ex)
     {

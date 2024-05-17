@@ -189,7 +189,7 @@ RoadMerger::RoadMerger(MapWidget* mapWidget_):QThread(),
 {
     parameters p;
     clipedBaseSource = std::make_shared<memory_datasource>(p);
-    cehuiBufferSource = std::make_shared<memory_datasource>(p);
+    // cehuiBufferSource = std::make_shared<memory_datasource>(p);
     mergedSource = std::make_shared<memory_datasource>(p);
     clipedCehuiSource = std::make_shared<memory_datasource>(p);
     selectedResultBufferSource = std::make_shared<memory_datasource>(p);
@@ -202,45 +202,60 @@ RoadMerger::RoadMerger(MapWidget* mapWidget_):QThread(),
 void RoadMerger::run()
 {
     emit signalMergeStart();
-
-    std::shared_ptr<datasource> baseDS = readShp(baseShp.toStdString());
-    std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
-
-    // 生成测绘数据buffer
+    std::vector<mapnik::box2d<double>> cehuiBoxList;
+    std::shared_ptr<datasource> baseDS = readShp(m_baseShp.toStdString());
     std::vector<geometry::multi_polygon<double>> cehuiBuffer;
+    // 生成测绘数据buffer
     {
         ThreadPool pool(16);
-        std::vector< std::future<MultiPolygonPtr> > results;
         mapnik::auto_cpu_timer t(std::clog, "生成测绘数据buffer took: ");
+        std::vector< std::future<MultiPolygonPtr> > results;
+        for (int i=0;i<m_cehuiShpList.size();++i)
+        {
+            QString cehuiShp = m_cehuiShpList[i];
+            std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
+            mapnik::box2d<double> subBox = cehuiDS->envelope();
+            cehuiBoxList.push_back(subBox);
+            query q(subBox);
+            auto fs = cehuiDS->features(q);
+            feature_ptr feat = fs->next();
+            while(feat){
+                results.emplace_back(pool.enqueue([&,feat] {
 
-        query q(cehuiDS->envelope());
-        auto fs = cehuiDS->features(q);
-        feature_ptr feat = fs->next();
-        while(feat){
-            results.emplace_back(pool.enqueue([&,feat] {
+                    auto res = bufferGeom(feat->get_geometry());
+                    return res;
 
-                auto res = bufferGeom(feat->get_geometry());
-                return res;
-
-            }));
-            feat = fs->next();
+                }));
+                feat = fs->next();
+            }
         }
-        for(auto && result: results){
+
+        for(auto && result: results)
+        {
             cehuiBuffer.push_back(*result.get());
         }
     }
-    for(int i = 0; i < cehuiBuffer.size(); i++){
-        feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), 1));
-        feature->set_geometry(mapnik::geometry::geometry<double>(cehuiBuffer[i]));
-        cehuiBufferSource->push(feature);
+
+    // 创建一个新的box2d对象，用于合并所有boxes
+    mapnik::box2d<double> combinedBox;
+
+    // 合并所有的box2d对象
+    for (const auto& box : cehuiBoxList) {
+        combinedBox.expand_to_include(box);
     }
+    
+    
+    // for(int i = 0; i < cehuiBuffer.size(); i++){
+    //     feature_ptr feature(feature_factory::create(std::make_shared<mapnik::context_type>(), 1));
+    //     feature->set_geometry(mapnik::geometry::geometry<double>(cehuiBuffer[i]));
+    //     cehuiBufferSource->push(feature);
+    // }
 
     //
-    query q(cehuiDS->envelope());
+    query q(combinedBox);
     q.add_property_name("OSMID");
     auto fs = baseDS->features(q);
     feature_ptr feat = fs->next();
-
     {
         mapnik::auto_cpu_timer t(std::clog, "剪裁测绘数据buffer took: ");
         ThreadPool pool(16);
@@ -269,9 +284,9 @@ void RoadMerger::run()
 }
 
 // 启动融合过程
-void RoadMerger::merge(QString const& base,QString const& cehui){
-    baseShp = base;
-    cehuiShp = cehui;
+void RoadMerger::merge(QString const& base,QVector<QString> const& cehuishpList){
+    m_baseShp = base;
+    m_cehuiShpList = cehuishpList;
     unsigned width = mapWidget->width();
     unsigned height = mapWidget->height();
     std::shared_ptr<mapnik::Map> map(new mapnik::Map(width, height));
@@ -284,18 +299,24 @@ void RoadMerger::merge(QString const& base,QString const& cehui){
  */
 void RoadMerger::showRoadLayers()
 {
+    int index = 0;
     // 显示基础路网数据
     addLineLayer("base",clipedBaseSource,"#bbbbbb");
 
-    // 显示测绘路网数据
-    addLineLayer("cehui",cehuiShp,"green",2.0);
-
+    // // 显示测绘路网数据
+    // addLineLayer("cehui",cehuiShp,"green",2.0);
+    for (int i=0;i<m_cehuiShpList.size();++i)
+    {
+        QString cehuiShp = m_cehuiShpList[i];
+        QString name = QString("cehui_%1").arg(i);
+        addLineLayer(name,cehuiShp,"green",2.0);
+    }
+    index += m_cehuiShpList.size();
     // 显示融合图层
     addMergedLayer();
-
+    index++;
     mapWidget->zoomAll();
-
-    m_mergedSourceIndex = 2;
+    m_mergedSourceIndex = index;
     m_clipedCehuiSourceIndex =-1;
 }
 
@@ -310,20 +331,26 @@ void RoadMerger::showClipedCehuiOnMap()
 {
     // 显示基础路网数据
     addLineLayer("base",clipedBaseSource,"#bbbbbb");
-
+    int index = 0;
     addSelectedResultBufferLayer();
-
-    // 显示测绘路网数据
-    addLineLayer("cehui",cehuiShp,"green",2.0);
-
+    index++;
+    // // 显示测绘路网数据
+    // addLineLayer("cehui",cehuiShp,"green",2.0);
+    for (int i=0;i<m_cehuiShpList.size();++i)
+    {
+        QString cehuiShp = m_cehuiShpList[i];
+        QString name = QString("cehui_%1").arg(i);
+        addLineLayer(name,cehuiShp,"green",2.0);
+        index++;
+    }
     addClipedCehuiLayer();
-
+    index++;
+    m_clipedCehuiSourceIndex =index;
     // 显示融合图层
     addMergedLayer();
-
+    index++;
+    m_mergedSourceIndex =index;
     mapWidget->zoomAll();
-    m_clipedCehuiSourceIndex =3;
-    m_mergedSourceIndex = 4;
 }
 
 std::string RoadMerger::convertToWKT(const mapnik::geometry::line_string<double>& lineString)
@@ -951,67 +978,69 @@ void RoadMerger::clipedCehuiData()
     generateResultBuffer(mergedResultBuffer);
     if(mergedResultBuffer.size())
     {
-        std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
-
-        //
-        query q(cehuiDS->envelope());
-        q.add_property_name(nameFieldName);
-        q.add_property_name(dirFieldName);
-        auto fs = cehuiDS->features(q);
-        feature_ptr feat = fs->next();
+        for (int i=0;i<m_cehuiShpList.size();++i)
         {
-            ThreadPool pool(16);
-            std::vector< std::future<std::vector<feature_ptr> > > results;
-            int count = 1;
-            while(feat){
-                feature_ptr cloneFeat = feat;
-                results.emplace_back(pool.enqueue([&,cloneFeat] {
-                    mapnik::geometry::multi_line_string<double> out;
-                    clipedLineEx(cloneFeat->get_geometry(),mergedResultBuffer,out);
-                    std::vector<feature_ptr> result;
-                    {
-                       mapnik::geometry::multi_line_string<double>& lines = out;
-                       for(int i=0; i<lines.size(); i++)
-                       {
-                           context_ptr contextPtr = std::make_shared<mapnik::context_type>();
-                           feature_ptr feature(feature_factory::create(contextPtr, count));
-
-                           //id
-                           int64_t id = fd::generate_global_id();
-                           std::string sID = QString::number(id).toStdString();
-                           icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
-                           mapnik::value val = unicodeString;
-                           feature->put_new(IDKEY, val);
-
-                           //name
-                           std::string nameStr = cloneFeat->get(nameFieldName).to_string() + "_" + std::to_string(i);
-                           icu::UnicodeString unicodeName = icu::UnicodeString::fromUTF8(icu::StringPiece(nameStr.c_str()));
-                           mapnik::value nameVal = unicodeName;
-                           feature->put_new(nameFieldName, nameVal);
-
-                           feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
-                           feature->put_new(NeedAddCehui_RESULT, 1);
-                           feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));
-                           result.emplace_back(feature);
-                       }
-                    }
-
-                    return result;
-                }));
-                feat = fs->next();
-            }
-
-            for(auto && result: results)
+            QString cehuiShp = m_cehuiShpList[i];
+            std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
+            //
+            query q(cehuiDS->envelope());
+            q.add_property_name(nameFieldName);
+            q.add_property_name(dirFieldName);
+            auto fs = cehuiDS->features(q);
+            feature_ptr feat = fs->next();
             {
-                std::vector<feature_ptr> featureVector = result.get();
-                for(auto& feature:featureVector)
-                {
-                    clipedCehuiSource->push(feature);
+                ThreadPool pool(16);
+                std::vector< std::future<std::vector<feature_ptr> > > results;
+                int count = 1;
+                while(feat){
+                    feature_ptr cloneFeat = feat;
+                    results.emplace_back(pool.enqueue([&,cloneFeat] {
+                        mapnik::geometry::multi_line_string<double> out;
+                        clipedLineEx(cloneFeat->get_geometry(),mergedResultBuffer,out);
+                        std::vector<feature_ptr> result;
+                        {
+                           mapnik::geometry::multi_line_string<double>& lines = out;
+                           for(int i=0; i<lines.size(); i++)
+                           {
+                               context_ptr contextPtr = std::make_shared<mapnik::context_type>();
+                               feature_ptr feature(feature_factory::create(contextPtr, count));
+
+                               //id
+                               int64_t id = fd::generate_global_id();
+                               std::string sID = QString::number(id).toStdString();
+                               icu::UnicodeString unicodeString = icu::UnicodeString::fromUTF8(icu::StringPiece(sID.c_str()));
+                               mapnik::value val = unicodeString;
+                               feature->put_new(IDKEY, val);
+
+                               //name
+                               std::string nameStr = cloneFeat->get(nameFieldName).to_string() + "-" + std::to_string(i);
+                               icu::UnicodeString unicodeName = icu::UnicodeString::fromUTF8(icu::StringPiece(nameStr.c_str()));
+                               mapnik::value nameVal = unicodeName;
+                               feature->put_new(nameFieldName, nameVal);
+                               feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
+                               feature->put_new(NeedAddCehui_RESULT, 1);
+                               feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));
+                               result.emplace_back(feature);
+                           }
+                        }
+
+                        return result;
+                    }));
+                    feat = fs->next();
                 }
 
-            }
-        }
+                for(auto && result: results)
+                {
+                    std::vector<feature_ptr> featureVector = result.get();
+                    for(auto& feature:featureVector)
+                    {
+                        clipedCehuiSource->push(feature);
+                    }
 
+                }
+            }
+            
+        }
 
         //test code:
         for(auto& buffer:mergedResultBuffer)

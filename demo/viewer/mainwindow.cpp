@@ -420,7 +420,7 @@ std::shared_ptr<mapnik::Map> MainWindow::get_map()
     return mapWidget_->getMap();
 }
 
-void MainWindow::merge(const QString& base, const QString& cehui)
+void MainWindow::merge(QString const& base, QVector<QString> const& cehui)
 {
     if(mapWidget_ && mapWidget_->roadMerger)
     {

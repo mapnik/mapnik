@@ -48,7 +48,7 @@ class MainWindow : public QMainWindow
     void setMidLineJsonPath(const QString& midLineJsonPath);
     void setCompleteRoadsFile(const QString& completeRoadsFilePath);
     bool updateGroupidComboBox(const QString& groupidsFilePath);
-    void merge(const QString& base, const QString& cehui);
+    void merge(QString const& base,QVector<QString> const& cehui);
 
   protected:
     void closeEvent(QCloseEvent* event);

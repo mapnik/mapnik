@@ -20,8 +20,8 @@ class RoadMerger : public QThread
     // 基础路网剪裁后的数据源
     std::shared_ptr<mapnik::memory_datasource> clipedBaseSource;
 
-    // 测绘数据缓冲区数据源
-    std::shared_ptr<mapnik::memory_datasource> cehuiBufferSource;
+    // // 测绘数据缓冲区数据源
+    // std::shared_ptr<mapnik::memory_datasource> cehuiBufferSource;
 
     // 融合后的数据源
     std::shared_ptr<mapnik::memory_datasource> mergedSource;
@@ -30,8 +30,8 @@ class RoadMerger : public QThread
 
     std::shared_ptr<mapnik::memory_datasource> selectedResultBufferSource;
 
-    QString baseShp;
-    QString cehuiShp;
+    QString m_baseShp;
+    QVector<QString> m_cehuiShpList;
     MapWidget* mapWidget;
 
     int m_mergedSourceIndex;
@@ -40,7 +40,7 @@ public:
     RoadMerger(MapWidget* mapWidget);
 
     // 启动融合过程
-    void merge(QString const& base,QString const& cehui);
+    void merge(QString const& base,QVector<QString> const& cehui);
 
     // 显示路网图层
     void showRoadLayers();
