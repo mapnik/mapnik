@@ -231,21 +231,21 @@ class symbolizer_property_value_string
     std::string operator()(mapnik::value_double val) const
     {
         std::ostringstream ss;
-        ss  << val;
+        ss << val;
         return ss.str();
     }
 
     std::string operator()(mapnik::value_integer val) const
     {
         std::ostringstream ss;
-        ss  << val;
+        ss << val;
         return ss.str();
     }
 
     std::string operator()(mapnik::value_bool val) const
     {
         std::ostringstream ss;
-        ss  << mapnik::boolean_type(val);
+        ss << mapnik::boolean_type(val);
         return ss.str();
     }
 
