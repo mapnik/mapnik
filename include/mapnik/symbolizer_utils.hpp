@@ -24,6 +24,7 @@
 #define MAPNIK_SYMBOLIZER_UTILS_HPP
 
 // mapnik
+#include <mapnik/boolean.hpp>
 #include <mapnik/symbolizer_keys.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/path_expression.hpp>
@@ -216,12 +217,35 @@ class symbolizer_property_value_string
     std::string operator()(dash_array const& dash) const
     {
         std::ostringstream ss;
+        ss << '[';
         for (std::size_t i = 0; i < dash.size(); ++i)
         {
             ss << dash[i].first << "," << dash[i].second;
             if (i + 1 < dash.size())
                 ss << ',';
         }
+        ss << ']';
+        return ss.str();
+    }
+
+    std::string operator()(mapnik::value_double val) const
+    {
+        std::ostringstream ss;
+        ss  << val;
+        return ss.str();
+    }
+
+    std::string operator()(mapnik::value_integer val) const
+    {
+        std::ostringstream ss;
+        ss  << val;
+        return ss.str();
+    }
+
+    std::string operator()(mapnik::value_bool val) const
+    {
+        std::ostringstream ss;
+        ss  << mapnik::boolean_type(val);
         return ss.str();
     }
 
