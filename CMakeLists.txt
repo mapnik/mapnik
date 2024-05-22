@@ -13,7 +13,7 @@ project(mapnik
 )
 message(STATUS "mapnik version: ${PROJECT_VERSION}")
 
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../depends")
+# set(CMAKE_INSTALL_RPATH "$ORIGIN/../depends")
 # https://cliutils.gitlab.io/modern-cmake/chapters/features/ides.html
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -135,7 +135,7 @@ message(STATUS "Using c++ extensions: ${CXX_EXTENSIONS}")
 
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=1")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=1")
 
 # add debug postfix to the libraries
 set(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "sets the debug library postfix on mapnik, wkt and json")
