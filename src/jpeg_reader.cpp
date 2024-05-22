@@ -75,7 +75,7 @@ class jpeg_reader : public image_reader
     ~jpeg_reader();
     unsigned width() const final;
     unsigned height() const final;
-    boost::optional<box2d<double>> bounding_box() const final;
+    std::optional<box2d<double>> bounding_box() const override final;
     inline bool has_alpha() const final { return false; }
     void read(unsigned x, unsigned y, image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
@@ -260,9 +260,9 @@ unsigned jpeg_reader<T>::height() const
 }
 
 template<typename T>
-boost::optional<box2d<double>> jpeg_reader<T>::bounding_box() const
+std::optional<box2d<double>> jpeg_reader<T>::bounding_box() const
 {
-    return boost::optional<box2d<double>>();
+    return std::nullopt;
 }
 
 template<typename T>
@@ -289,8 +289,8 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_rgba8& image)
     row_stride = cinfo.output_width * cinfo.output_components;
     buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
 
-    unsigned w = std::min(unsigned(image.width()), width_ - x0);
-    unsigned h = std::min(unsigned(image.height()), height_ - y0);
+    const unsigned w = std::min(unsigned(image.width()), width_ - x0);
+    const unsigned h = std::min(unsigned(image.height()), height_ - y0);
 
     const std::unique_ptr<unsigned int[]> out_row(new unsigned int[w]);
     unsigned row = 0;

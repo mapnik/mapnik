@@ -37,6 +37,6 @@
 
 #define MAPNIK_VERSION_AT_LEAST(major, minor, patch) (MAPNIK_VERSION >= MAPNIK_VERSION_ENCODE(major, minor, patch))
 
-#define MAPNIK_VERSION_ENCODE(major, minor, patch) ((major)*100000 + (minor)*100 + (patch))
+#define MAPNIK_VERSION_ENCODE(major, minor, patch) ((major) * 100000 + (minor) * 100 + (patch))
 
 #endif // MAPNIK_VERSION_HPP

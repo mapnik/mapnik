@@ -427,7 +427,7 @@ int Map::buffer_size() const
     return buffer_size_;
 }
 
-boost::optional<color> const& Map::background() const
+std::optional<color> const& Map::background() const
 {
     return background_;
 }
@@ -437,7 +437,7 @@ void Map::set_background(color const& c)
     background_ = c;
 }
 
-boost::optional<std::string> const& Map::background_image() const
+std::optional<std::string> const& Map::background_image() const
 {
     return background_image_;
 }
@@ -469,10 +469,10 @@ void Map::set_background_image_opacity(float opacity)
 
 void Map::set_maximum_extent(box2d<double> const& box)
 {
-    maximum_extent_.reset(box);
+    maximum_extent_ = box;
 }
 
-boost::optional<box2d<double>> const& Map::maximum_extent() const
+std::optional<box2d<double>> const& Map::maximum_extent() const
 {
     return maximum_extent_;
 }
@@ -555,8 +555,7 @@ void Map::zoom_all()
             else
             {
                 std::ostringstream s;
-                s << "could not zoom to combined layer extents "
-                  << "using zoom_all because proj4 could not "
+                s << "could not zoom to combined layer extents " << "using zoom_all because proj4 could not "
                   << "back project any layer extents into the map srs "
                   << "(set map 'maximum-extent' to override layer extents)";
                 throw std::runtime_error(s.str());

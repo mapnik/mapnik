@@ -28,26 +28,25 @@
 
 namespace mapnik {
 
-template boost::optional<std::string> parameters::get(std::string const& key) const;
-template boost::optional<std::string> parameters::get(std::string const& key,
-                                                      std::string const& default_opt_value) const;
+template std::optional<std::string> parameters::get(std::string const& key) const;
+template std::optional<std::string> parameters::get(std::string const& key, std::string const& default_opt_value) const;
 
-template boost::optional<value_double> parameters::get(std::string const& key) const;
-template boost::optional<value_double> parameters::get(std::string const& key,
-                                                       value_double const& default_opt_value) const;
+template std::optional<value_double> parameters::get(std::string const& key) const;
+template std::optional<value_double> parameters::get(std::string const& key,
+                                                     value_double const& default_opt_value) const;
 
-template boost::optional<value_bool> parameters::get(std::string const& key) const;
-template boost::optional<value_bool> parameters::get(std::string const& key, value_bool const& default_opt_value) const;
+template std::optional<value_bool> parameters::get(std::string const& key) const;
+template std::optional<value_bool> parameters::get(std::string const& key, value_bool const& default_opt_value) const;
 
-template boost::optional<boolean_type> parameters::get(std::string const& key) const;
-template boost::optional<boolean_type> parameters::get(std::string const& key,
-                                                       boolean_type const& default_opt_value) const;
+template std::optional<boolean_type> parameters::get(std::string const& key) const;
+template std::optional<boolean_type> parameters::get(std::string const& key,
+                                                     boolean_type const& default_opt_value) const;
 
-template boost::optional<value_null> parameters::get(std::string const& key) const;
-template boost::optional<value_null> parameters::get(std::string const& key, value_null const& default_opt_value) const;
+template std::optional<value_null> parameters::get(std::string const& key) const;
+template std::optional<value_null> parameters::get(std::string const& key, value_null const& default_opt_value) const;
 
-template boost::optional<value_integer> parameters::get(std::string const& key) const;
-template boost::optional<value_integer> parameters::get(std::string const& key,
-                                                        value_integer const& default_opt_value) const;
+template std::optional<value_integer> parameters::get(std::string const& key) const;
+template std::optional<value_integer> parameters::get(std::string const& key,
+                                                      value_integer const& default_opt_value) const;
 
 } // namespace mapnik

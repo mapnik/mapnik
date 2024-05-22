@@ -26,12 +26,7 @@
 #include <mapnik/json/json_value.hpp>
 #include <mapnik/util/variant.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
+#include <optional>
 #include <tuple>
 #include <vector>
 #include <list>
@@ -53,37 +48,37 @@ using properties = std::vector<property>;
 struct point
 {
     coordinate coord;
-    boost::optional<properties> props;
+    std::optional<properties> props;
 };
 
 struct multi_point
 {
     std::vector<coordinate> points;
-    boost::optional<properties> props;
+    std::optional<properties> props;
 };
 
 struct linestring
 {
     std::vector<index_type> rings;
-    boost::optional<properties> props;
+    std::optional<properties> props;
 };
 
 struct multi_linestring
 {
     std::vector<std::vector<index_type>> lines;
-    boost::optional<properties> props;
+    std::optional<properties> props;
 };
 
 struct polygon
 {
     std::vector<std::vector<index_type>> rings;
-    boost::optional<properties> props;
+    std::optional<properties> props;
 };
 
 struct multi_polygon
 {
     std::vector<std::vector<std::vector<index_type>>> polygons;
-    boost::optional<properties> props;
+    std::optional<properties> props;
 };
 
 struct empty
@@ -118,8 +113,8 @@ struct topology
 {
     std::vector<geometry> geometries;
     std::vector<arc> arcs;
-    boost::optional<transform> tr;
-    boost::optional<bounding_box> bbox;
+    std::optional<transform> tr;
+    std::optional<bounding_box> bbox;
 };
 
 } // namespace topojson

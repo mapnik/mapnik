@@ -28,13 +28,8 @@
 #include <mapnik/geometry/point.hpp>
 #include <mapnik/util/math.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
+#include <optional>
 #include <vector>
 
 namespace mapnik {
@@ -51,8 +46,8 @@ constexpr double MERC_MAX_LATITUDE = 85.0511287798065923778;
 extern MAPNIK_DECL std::string const MAPNIK_GEOGRAPHIC_PROJ;
 extern MAPNIK_DECL std::string const MAPNIK_WEBMERCATOR_PROJ;
 
-MAPNIK_DECL boost::optional<bool> is_known_geographic(std::string const& srs);
-MAPNIK_DECL boost::optional<well_known_srs_e> is_well_known_srs(std::string const& srs);
+MAPNIK_DECL std::optional<bool> is_known_geographic(std::string const& srs);
+MAPNIK_DECL std::optional<well_known_srs_e> is_well_known_srs(std::string const& srs);
 
 MAPNIK_DECL bool lonlat2merc(double& x, double& y);
 MAPNIK_DECL bool lonlat2merc(double* x, double* y, std::size_t point_count, std::size_t stride = 1);

@@ -25,17 +25,12 @@
 
 #include <map>
 #include <string>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
+#include <optional>
 
 namespace mapnik {
 
-using image_options_map = std::map<std::string, boost::optional<std::string>>;
-inline std::string to_string(boost::optional<std::string> const& val)
+using image_options_map = std::map<std::string, std::optional<std::string>>;
+inline std::string to_string(std::optional<std::string> const& val)
 {
     return val ? *val : "<unitialised>";
 }

@@ -26,14 +26,14 @@ class test : public benchmark::test_case
         , scale_factor_(*params.get<mapnik::value_double>("scale_factor", 1.0))
         , preview_(*params.get<std::string>("preview", ""))
     {
-        boost::optional<std::string> map = params.get<std::string>("map");
+        const auto map = params.get<std::string>("map");
         if (!map)
         {
             throw std::runtime_error("please provide a --map <path to xml> arg");
         }
         xml_ = *map;
 
-        boost::optional<std::string> ext = params.get<std::string>("extent");
+        const auto ext = params.get<std::string>("extent");
         if (ext && !ext->empty())
         {
             if (!extent_.from_string(*ext))
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     {
         mapnik::parameters params;
         benchmark::handle_args(argc, argv, params);
-        boost::optional<std::string> name = params.get<std::string>("name");
+        const auto name = params.get<std::string>("name");
         if (!name)
         {
             std::clog << "please provide a name for this test\n";

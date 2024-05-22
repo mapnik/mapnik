@@ -42,7 +42,7 @@ namespace x3 = boost::spirit::x3;
 
 using x3::lit;
 using x3::ascii::char_;
-using pair_type = std::pair<std::string, boost::optional<std::string>>;
+using pair_type = std::pair<std::string, std::optional<std::string>>;
 
 x3::rule<class image_options, image_options_map> const image_options("image options");
 x3::rule<class key_value, pair_type> const key_value("key_value");

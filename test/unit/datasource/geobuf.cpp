@@ -33,7 +33,6 @@
 #include <algorithm>
 #include <cctype>
 #include <locale>
-#include <boost/optional/optional_io.hpp>
 
 TEST_CASE("Geobuf")
 {

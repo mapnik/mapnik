@@ -6,7 +6,6 @@
   "dependencies": [
     "boost-assign",
     "boost-bimap",
-    "boost-filesystem",
     "boost-format",
     "boost-geometry",
     "boost-gil",

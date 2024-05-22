@@ -101,14 +101,14 @@ geojson_datasource::geojson_datasource(parameters const& params)
     , num_features_to_query_(
         std::max(mapnik::value_integer(1), *params.get<mapnik::value_integer>("num_features_to_query", 5)))
 {
-    boost::optional<std::string> inline_string = params.get<std::string>("inline");
+    const auto inline_string = params.get<std::string>("inline");
     if (!inline_string)
     {
-        boost::optional<std::string> file = params.get<std::string>("file");
+        const auto file = params.get<std::string>("file");
         if (!file)
             throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
-        boost::optional<std::string> base = params.get<std::string>("base");
+        const auto base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
@@ -143,9 +143,8 @@ geojson_datasource::geojson_datasource(parameters const& params)
         char const* start = file_buffer.c_str();
         char const* end = (count == 1) ? start + file_buffer.length() : start;
 #else
-        boost::optional<mapnik::mapped_region_ptr> mapped_region =
-          mapnik::mapped_memory_cache::instance().find(filename_, false);
-        if (!mapped_region)
+        const auto mapped_region = mapnik::mapped_memory_cache::instance().find(filename_, false);
+        if (!mapped_region.has_value())
         {
             throw std::runtime_error("could not get file mapping for " + filename_);
         }
@@ -440,9 +439,9 @@ mapnik::layer_descriptor geojson_datasource::get_descriptor() const
     return desc_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     if (has_disk_index_)
     {
@@ -489,7 +488,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
                 int type = static_cast<int>(*result);
                 if (multi_type > 0 && multi_type != type)
                 {
-                    result.reset(mapnik::datasource_geometry_t::Collection);
+                    result = mapnik::datasource_geometry_t::Collection;
                     return result;
                 }
                 multi_type = type;
@@ -507,7 +506,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
                 int type = static_cast<int>(*result);
                 if (multi_type > 0 && multi_type != type)
                 {
-                    result.reset(mapnik::datasource_geometry_t::Collection);
+                    result = mapnik::datasource_geometry_t::Collection;
                     return result;
                 }
                 multi_type = type;
@@ -554,7 +553,7 @@ boost::optional<mapnik::datasource_geometry_t> geojson_datasource::get_geometry_
                 int type = static_cast<int>(*result);
                 if (multi_type > 0 && multi_type != type)
                 {
-                    result.reset(mapnik::datasource_geometry_t::Collection);
+                    result = mapnik::datasource_geometry_t::Collection;
                     return result;
                 }
                 multi_type = type;

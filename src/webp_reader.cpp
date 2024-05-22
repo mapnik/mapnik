@@ -101,7 +101,7 @@ class webp_reader : public image_reader
     ~webp_reader();
     unsigned width() const final;
     unsigned height() const final;
-    boost::optional<box2d<double>> bounding_box() const final;
+    std::optional<box2d<double>> bounding_box() const final override;
     inline bool has_alpha() const final { return has_alpha_; }
     void read(unsigned x, unsigned y, image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
@@ -208,9 +208,9 @@ unsigned webp_reader<T>::height() const
 }
 
 template<typename T>
-boost::optional<box2d<double>> webp_reader<T>::bounding_box() const
+std::optional<box2d<double>> webp_reader<T>::bounding_box() const
 {
-    return boost::optional<box2d<double>>();
+    return std::nullopt;
 }
 
 template<typename T>

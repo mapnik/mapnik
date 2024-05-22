@@ -50,19 +50,19 @@ class MAPNIK_DECL format_node : public node
     void set_child(node_ptr child);
     node_ptr get_child() const;
 
-    boost::optional<std::string> face_name;
-    boost::optional<font_set> fontset;
-    boost::optional<symbolizer_base::value_type> text_size;
-    boost::optional<symbolizer_base::value_type> character_spacing;
-    boost::optional<symbolizer_base::value_type> line_spacing;
-    boost::optional<symbolizer_base::value_type> text_opacity;
-    boost::optional<symbolizer_base::value_type> wrap_before;
-    boost::optional<symbolizer_base::value_type> repeat_wrap_char;
-    boost::optional<symbolizer_base::value_type> text_transform;
-    boost::optional<symbolizer_base::value_type> fill;
-    boost::optional<symbolizer_base::value_type> halo_fill;
-    boost::optional<symbolizer_base::value_type> halo_radius;
-    boost::optional<symbolizer_base::value_type> ff_settings;
+    std::optional<std::string> face_name;
+    std::optional<font_set> fontset;
+    std::optional<symbolizer_base::value_type> text_size;
+    std::optional<symbolizer_base::value_type> character_spacing;
+    std::optional<symbolizer_base::value_type> line_spacing;
+    std::optional<symbolizer_base::value_type> text_opacity;
+    std::optional<symbolizer_base::value_type> wrap_before;
+    std::optional<symbolizer_base::value_type> repeat_wrap_char;
+    std::optional<symbolizer_base::value_type> text_transform;
+    std::optional<symbolizer_base::value_type> fill;
+    std::optional<symbolizer_base::value_type> halo_fill;
+    std::optional<symbolizer_base::value_type> halo_radius;
+    std::optional<symbolizer_base::value_type> ff_settings;
 
   private:
     node_ptr child_;

@@ -30,12 +30,10 @@
 #include <mapnik/pool.hpp>
 #include <mapnik/util/singleton.hpp>
 
-// boost
-#include <boost/optional.hpp>
-
 // stl
 #include <string>
 #include <memory>
+#include <optional>
 
 using mapnik::CreateStatic;
 using mapnik::Pool;
@@ -78,7 +76,7 @@ class ConnectionCreator
         {
             // only set fallback_application_name, so that application_name
             // can still be overriden with PGAPPNAME environment variable
-            append_param(connect_str, "fallback_application_name=", "mapnik");
+            append_param(connect_str, "fallback_application_name=", std::string{"mapnik"});
         }
         return connect_str;
     }
@@ -96,18 +94,18 @@ class ConnectionCreator
         return true;
     }
 
-    static bool append_param(std::string& dest, char const* key, boost::optional<std::string> const& opt)
+    static bool append_param(std::string& dest, char const* key, std::optional<std::string> const& opt)
     {
         return opt && append_param(dest, key, *opt);
     }
 
-    boost::optional<std::string> host_;
-    boost::optional<std::string> port_;
-    boost::optional<std::string> dbname_;
-    boost::optional<std::string> user_;
-    boost::optional<std::string> password_;
-    boost::optional<std::string> connect_timeout_;
-    boost::optional<std::string> application_name_;
+    std::optional<std::string> host_;
+    std::optional<std::string> port_;
+    std::optional<std::string> dbname_;
+    std::optional<std::string> user_;
+    std::optional<std::string> password_;
+    std::optional<std::string> connect_timeout_;
+    std::optional<std::string> application_name_;
 };
 
 class ConnectionManager : public singleton<ConnectionManager, CreateStatic>

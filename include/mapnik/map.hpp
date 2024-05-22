@@ -33,11 +33,8 @@
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
+
+#include <boost/optional/optional_fwd.hpp>
 
 // stl
 #include <memory>
@@ -84,8 +81,8 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
     unsigned height_;
     std::string srs_;
     int buffer_size_;
-    boost::optional<color> background_;
-    boost::optional<std::string> background_image_;
+    std::optional<color> background_;
+    std::optional<std::string> background_image_;
     composite_mode_e background_image_comp_op_;
     float background_image_opacity_;
     std::map<std::string, feature_type_style> styles_;
@@ -93,10 +90,10 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
     box2d<double> current_extent_;
-    boost::optional<box2d<double>> maximum_extent_;
+    std::optional<box2d<double>> maximum_extent_;
     std::string base_path_;
     parameters extra_params_;
-    boost::optional<std::string> font_directory_;
+    std::optional<std::string> font_directory_;
     freetype_engine::font_file_mapping_type font_file_mapping_;
     freetype_engine::font_memory_cache_type font_memory_cache_;
 
@@ -318,7 +315,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
      *  @return Background color as boost::optional
      *  object
      */
-    boost::optional<color> const& background() const;
+    std::optional<color> const& background() const;
 
     /*! \brief Set the map background image filename.
      *  @param image_filename Background image filename.
@@ -329,7 +326,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
      *  @return Background image path as std::string
      *  object
      */
-    boost::optional<std::string> const& background_image() const;
+    std::optional<std::string> const& background_image() const;
 
     /*! \brief Set the compositing operation uses to blend the background image into the background color.
      *  @param comp_op compositing operation.
@@ -369,7 +366,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
 
     /*! \brief Get the map maximum extent as box2d<double>
      */
-    boost::optional<box2d<double>> const& maximum_extent() const;
+    std::optional<box2d<double>> const& maximum_extent() const;
 
     void reset_maximum_extent();
 
@@ -467,7 +464,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
      */
     void set_extra_parameters(parameters& params);
 
-    boost::optional<std::string> const& font_directory() const { return font_directory_; }
+    std::optional<std::string> const& font_directory() const { return font_directory_; }
 
     void set_font_directory(std::string const& dir) { font_directory_ = dir; }
 

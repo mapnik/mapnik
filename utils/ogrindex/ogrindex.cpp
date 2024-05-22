@@ -212,8 +212,7 @@ int main(int argc, char** argv)
 
         catch (...)
         {
-            std::clog << "unknown exception..."
-                      << "\n";
+            std::clog << "unknown exception..." << "\n";
             return -1;
         }
     }

@@ -96,23 +96,23 @@ csv_datasource::csv_datasource(parameters const& params)
             separator_ = val.front();
     }
 
-    boost::optional<std::string> ext = params.get<std::string>("extent");
+    const auto ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
 
-    boost::optional<std::string> inline_string = params.get<std::string>("inline");
+    const auto inline_string = params.get<std::string>("inline");
     if (inline_string)
     {
         inline_string_ = *inline_string;
     }
     else
     {
-        boost::optional<std::string> file = params.get<std::string>("file");
+        const auto file = params.get<std::string>("file");
         if (!file)
             throw mapnik::datasource_exception("CSV Plugin: missing <file> parameter");
-        boost::optional<std::string> base = params.get<std::string>("base");
+        const auto base = params.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
@@ -254,9 +254,9 @@ mapnik::layer_descriptor csv_datasource::get_descriptor() const
     return desc_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type_impl(std::istream& stream) const
+std::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type_impl(std::istream& stream) const
 {
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     if (tree_)
     {
         int multi_type = 0;
@@ -282,7 +282,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
                     int type = static_cast<int>(*result);
                     if (multi_type > 0 && multi_type != type)
                     {
-                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        result = mapnik::datasource_geometry_t::Collection;
                         return result;
                     }
                     multi_type = type;
@@ -329,7 +329,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
                     int type = static_cast<int>(*result);
                     if (multi_type > 0 && multi_type != type)
                     {
-                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        result = mapnik::datasource_geometry_t::Collection;
                         return result;
                     }
                     multi_type = type;
@@ -347,7 +347,7 @@ boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type
     return result;
 }
 
-boost::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> csv_datasource::get_geometry_type() const
 {
     if (inline_string_.empty())
     {

@@ -70,7 +70,7 @@ class png_reader : public image_reader
     ~png_reader();
     unsigned width() const final;
     unsigned height() const final;
-    boost::optional<box2d<double>> bounding_box() const final;
+    std::optional<box2d<double>> bounding_box() const final;
     inline bool has_alpha() const final { return has_alpha_; }
     void read(unsigned x, unsigned y, image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
@@ -211,9 +211,9 @@ unsigned png_reader<T>::height() const
 }
 
 template<typename T>
-boost::optional<box2d<double>> png_reader<T>::bounding_box() const
+std::optional<box2d<double>> png_reader<T>::bounding_box() const
 {
-    return boost::optional<box2d<double>>();
+    return std::nullopt;
 }
 
 template<typename T>

@@ -33,12 +33,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/datasource_plugin.hpp>
 
-// boost
-#include <boost/optional.hpp>
-#include <memory>
-
 // stl
-#include <vector>
 #include <string>
 
 #include <mapnik/warning.hpp>
@@ -47,7 +42,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <ogrsf_frmts.h>
 MAPNIK_DISABLE_WARNING_POP
 #include "ogr_layer_ptr.hpp"
-#include "ogr_utils.hpp"
 
 DATASOURCE_PLUGIN_DEF(ogr_datasource_plugin, ogr);
 
@@ -56,13 +50,13 @@ class ogr_datasource : public mapnik::datasource
   public:
     ogr_datasource(mapnik::parameters const& params);
     virtual ~ogr_datasource();
-    mapnik::datasource::datasource_t type() const;
+    mapnik::datasource::datasource_t type() const override;
     static const char* name();
-    mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
-    mapnik::box2d<double> envelope() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    mapnik::layer_descriptor get_descriptor() const;
+    mapnik::featureset_ptr features(mapnik::query const& q) const override;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
+    mapnik::box2d<double> envelope() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
+    mapnik::layer_descriptor get_descriptor() const override;
 
   private:
     void init(mapnik::parameters const& params);

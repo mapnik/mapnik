@@ -34,12 +34,7 @@
 #include <mapnik/value/types.hpp>
 #include <mapnik/datasource_plugin.hpp>
 
-// boost
-#include <boost/optional.hpp>
-#include <memory>
-
 // stl
-#include <vector>
 #include <string>
 
 #include "shape_io.hpp"
@@ -58,13 +53,13 @@ class shape_datasource : public datasource
   public:
     shape_datasource(parameters const& params);
     virtual ~shape_datasource();
-    datasource::datasource_t type() const;
+    datasource::datasource_t type() const override;
     static const char* name();
-    featureset_ptr features(query const& q) const;
-    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
-    box2d<double> envelope() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
-    layer_descriptor get_descriptor() const;
+    featureset_ptr features(query const& q) const override;
+    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const override;
+    box2d<double> envelope() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
+    layer_descriptor get_descriptor() const override;
 
   private:
     void init(shape_io& shape);

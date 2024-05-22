@@ -50,12 +50,7 @@
 #include <functional>
 #include <map>
 #include <tuple>
-
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
+#include <optional>
 
 namespace mapnik {
 
@@ -129,21 +124,21 @@ struct enum_traits
 template<>
 struct enum_traits<composite_mode_e>
 {
-    using result_type = boost::optional<composite_mode_e>;
+    using result_type = std::optional<composite_mode_e>;
     static result_type from_string(std::string const& str) { return comp_op_from_string(str); }
 };
 
 template<>
 struct enum_traits<scaling_method_e>
 {
-    using result_type = boost::optional<scaling_method_e>;
+    using result_type = std::optional<scaling_method_e>;
     static result_type from_string(std::string const& str) { return scaling_method_from_string(str); }
 };
 
 template<>
 struct enum_traits<simplify_algorithm_e>
 {
-    using result_type = boost::optional<simplify_algorithm_e>;
+    using result_type = std::optional<simplify_algorithm_e>;
     static result_type from_string(std::string const& str) { return simplify_algorithm_from_string(str); }
 };
 
@@ -151,7 +146,7 @@ struct enum_traits<simplify_algorithm_e>
     template<>                                                                                                         \
     struct enum_traits<e>                                                                                              \
     {                                                                                                                  \
-        using result_type = boost::optional<e>;                                                                        \
+        using result_type = std::optional<e>;                                                                          \
         static result_type from_string(std::string const& str)                                                         \
         {                                                                                                              \
             enumeration<e, alias##_to_string, alias##_from_string, alias##_lookup> enum_;                              \
@@ -433,7 +428,7 @@ T get(symbolizer_base const& sym,
 }
 
 template<typename T>
-boost::optional<T>
+std::optional<T>
   get_optional(symbolizer_base const& sym, keys key, mapnik::feature_impl const& feature, attributes const& vars)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
@@ -442,7 +437,7 @@ boost::optional<T>
     {
         return util::apply_visitor(extract_value<T>(feature, vars), itr->second);
     }
-    return boost::optional<T>();
+    return std::nullopt;
 }
 
 template<typename T>
@@ -470,7 +465,7 @@ T get(symbolizer_base const& sym, keys key, T const& default_value)
 }
 
 template<typename T>
-boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
+std::optional<T> get_optional(symbolizer_base const& sym, keys key)
 {
     using const_iterator = symbolizer_base::cont_type::const_iterator;
     const_iterator itr = sym.properties.find(key);
@@ -478,7 +473,7 @@ boost::optional<T> get_optional(symbolizer_base const& sym, keys key)
     {
         return util::apply_visitor(extract_raw_value<T>(), itr->second);
     }
-    return boost::optional<T>{};
+    return std::nullopt;
 }
 
 } // namespace mapnik

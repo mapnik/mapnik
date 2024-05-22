@@ -23,12 +23,6 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/feature.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 namespace mapnik {
 
 feature_kv_iterator::feature_kv_iterator(feature_impl const& f, bool begin)

@@ -32,12 +32,12 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/optional.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <string>
 #include <exception>
+#include <optional>
 
 namespace mapnik {
 
@@ -361,25 +361,23 @@ inline bool is_webp(std::string const& filename)
     return boost::algorithm::iends_with(filename, std::string(".webp"));
 }
 
-inline boost::optional<std::string> type_from_filename(std::string const& filename)
-
+inline std::optional<std::string> type_from_filename(std::string const& filename)
 {
-    using result_type = boost::optional<std::string>;
     if (is_png(filename))
-        return result_type("png");
+        return "png";
     if (is_jpeg(filename))
-        return result_type("jpeg");
+        return "jpeg";
     if (is_tiff(filename))
-        return result_type("tiff");
+        return "tiff";
     if (is_pdf(filename))
-        return result_type("pdf");
+        return "pdf";
     if (is_svg(filename))
-        return result_type("svg");
+        return "svg";
     if (is_ps(filename))
-        return result_type("ps");
+        return "ps";
     if (is_webp(filename))
-        return result_type("webp");
-    return result_type();
+        return "webp";
+    return std::nullopt;
 }
 
 inline std::string guess_type(std::string const& filename)

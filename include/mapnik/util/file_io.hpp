@@ -60,25 +60,13 @@ class file : public util::noncopyable
         }
     }
 
-    inline bool is_open() const
-    {
-        return file_ ? true : false;
-    }
+    inline bool is_open() const { return file_ ? true : false; }
 
-    explicit operator bool() const
-    {
-        return this->is_open();
-    }
+    explicit operator bool() const { return this->is_open(); }
 
-    inline std::FILE* get() const
-    {
-        return file_.get();
-    }
+    inline std::FILE* get() const { return file_.get(); }
 
-    inline std::size_t size() const
-    {
-        return size_;
-    }
+    inline std::size_t size() const { return size_; }
 
     inline data_type data() const
     {

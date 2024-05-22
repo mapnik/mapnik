@@ -86,7 +86,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int nbands,
                                  double dx,
                                  double dy,
-                                 boost::optional<double> const& nodata,
+                                 std::optional<double> const& nodata,
                                  double nodata_tolerance,
                                  int64_t max_image_area)
     : dataset_(dataset)

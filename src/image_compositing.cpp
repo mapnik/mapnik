@@ -64,24 +64,24 @@ static const comp_op_lookup_type comp_lookup =
     _color,
     "color")(_value, "value")(linear_dodge, "linear-dodge")(linear_burn, "linear-burn")(divide, "divide");
 
-boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
+std::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 {
-    boost::optional<composite_mode_e> mode;
+    std::optional<composite_mode_e> mode;
     comp_op_lookup_type::right_const_iterator right_iter = comp_lookup.right.find(name);
     if (right_iter != comp_lookup.right.end())
     {
-        mode.reset(right_iter->second);
+        mode = right_iter->second;
     }
     return mode;
 }
 
-boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op)
+std::optional<std::string> comp_op_to_string(composite_mode_e comp_op)
 {
-    boost::optional<std::string> mode;
+    std::optional<std::string> mode;
     comp_op_lookup_type::left_const_iterator left_iter = comp_lookup.left.find(comp_op);
     if (left_iter != comp_lookup.left.end())
     {
-        mode.reset(left_iter->second);
+        mode = left_iter->second;
     }
     return mode;
 }

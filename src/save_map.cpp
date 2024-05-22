@@ -53,16 +53,16 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/optional.hpp>
 #include <boost/version.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <iostream>
+#include <optional>
 
 namespace mapnik {
-using boost::optional;
 using boost::property_tree::ptree;
+using std::optional;
 
 void serialize_text_placements(ptree& node, text_placements_ptr const& p, bool explicit_defaults)
 {
@@ -405,7 +405,7 @@ void serialize_style(ptree& map_node, std::string const& name, feature_type_styl
         set_attr(style_node, "image-filters-inflate", image_filters_inflate);
     }
 
-    boost::optional<composite_mode_e> comp_op = style.comp_op();
+    auto&& comp_op = style.comp_op();
     if (comp_op)
     {
         set_attr(style_node, "comp-op", *comp_op_to_string(*comp_op));
@@ -547,7 +547,7 @@ void serialize_layer(ptree& map_node, layer const& lyr, bool explicit_defaults)
         set_attr(layer_node, "group-by", lyr.group_by());
     }
 
-    boost::optional<int> const& buffer_size = lyr.buffer_size();
+    auto&& buffer_size = lyr.buffer_size();
     if (buffer_size || explicit_defaults)
     {
         set_attr(layer_node, "buffer-size", *buffer_size);

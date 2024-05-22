@@ -107,8 +107,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
         throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
     }
 
-    boost::optional<std::string> ext = params.get<std::string>("extent");
-    if (ext && !ext->empty())
+    const auto ext = params.get<std::string>("extent");
+    if (ext.has_value() && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
@@ -127,19 +127,17 @@ postgis_datasource::postgis_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    boost::optional<mapnik::value_integer> initial_size = params.get<mapnik::value_integer>("initial_size", 1);
-    boost::optional<mapnik::boolean_type> autodetect_key_field =
-      params.get<mapnik::boolean_type>("autodetect_key_field", false);
-    boost::optional<mapnik::boolean_type> estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
+    const auto initial_size = params.get<mapnik::value_integer>("initial_size", 1);
+    const auto autodetect_key_field = params.get<mapnik::boolean_type>("autodetect_key_field", false);
+    const auto estimate_extent = params.get<mapnik::boolean_type>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;
-    boost::optional<mapnik::boolean_type> simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
+    const auto simplify_opt = params.get<mapnik::boolean_type>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
 
-    boost::optional<mapnik::boolean_type> twkb_opt = params.get<mapnik::boolean_type>("twkb_encoding", false);
+    const auto twkb_opt = params.get<mapnik::boolean_type>("twkb_encoding", false);
     twkb_encoding_ = twkb_opt && *twkb_opt;
 
-    boost::optional<mapnik::boolean_type> simplify_preserve_opt =
-      params.get<mapnik::boolean_type>("simplify_dp_preserve", false);
+    const auto simplify_preserve_opt = params.get<mapnik::boolean_type>("simplify_dp_preserve", false);
     simplify_dp_preserve_ = simplify_preserve_opt && *simplify_preserve_opt;
 
     ConnectionManager::instance().registerPool(creator_, *initial_size, pool_max_size_);
@@ -310,8 +308,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                     else if (result_rows > 1)
                     {
                         std::ostringstream err;
-                        err << "PostGIS Plugin: Error: '"
-                            << "multi column primary key detected but is not supported";
+                        err << "PostGIS Plugin: Error: '" << "multi column primary key detected but is not supported";
                         throw mapnik::datasource_exception(err.str());
                     }
                 }
@@ -387,8 +384,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         }
 
                         rs_oid->close();
-                        error_s << " for key_field '" << fld_name << "' - "
-                                << "must be an integer primary key";
+                        error_s << " for key_field '" << fld_name << "' - " << "must be an integer primary key";
 
                         rs->close();
                         throw mapnik::datasource_exception(error_s.str());
@@ -1024,8 +1020,8 @@ box2d<double> postgis_datasource::envelope() const
             }
             else
             {
-                s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
-                  << " FROM (SELECT ST_Extent(" << identifier(geometryColumn_) << ") as ext from ";
+                s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)" << " FROM (SELECT ST_Extent("
+                  << identifier(geometryColumn_) << ") as ext from ";
 
                 if (extent_from_subquery_)
                 {
@@ -1067,9 +1063,9 @@ box2d<double> postgis_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
 
     CnxPool_ptr pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
@@ -1099,17 +1095,17 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
                     g_type = rs->getValue("type");
                     if (boost::algorithm::contains(g_type, "line"))
                     {
-                        result.reset(mapnik::datasource_geometry_t::LineString);
+                        result = mapnik::datasource_geometry_t::LineString;
                         return result;
                     }
                     else if (boost::algorithm::contains(g_type, "point"))
                     {
-                        result.reset(mapnik::datasource_geometry_t::Point);
+                        result = mapnik::datasource_geometry_t::Point;
                         return result;
                     }
                     else if (boost::algorithm::contains(g_type, "polygon"))
                     {
-                        result.reset(mapnik::datasource_geometry_t::Polygon);
+                        result = mapnik::datasource_geometry_t::Polygon;
                         return result;
                     }
                     else // geometry
@@ -1131,8 +1127,8 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
 
                 std::string prev_type("");
 
-                s << "SELECT ST_GeometryType(" << identifier(geometryColumn_) << ") AS geom"
-                  << " FROM " << populate_tokens(table_);
+                s << "SELECT ST_GeometryType(" << identifier(geometryColumn_) << ") AS geom" << " FROM "
+                  << populate_tokens(table_);
 
                 if (row_limit_ > 0 && row_limit_ < 5)
                 {
@@ -1150,26 +1146,26 @@ boost::optional<mapnik::datasource_geometry_t> postgis_datasource::get_geometry_
                     if (boost::algorithm::icontains(data, "line"))
                     {
                         g_type = "linestring";
-                        result.reset(mapnik::datasource_geometry_t::LineString);
+                        result = mapnik::datasource_geometry_t::LineString;
                     }
                     else if (boost::algorithm::icontains(data, "point"))
                     {
                         g_type = "point";
-                        result.reset(mapnik::datasource_geometry_t::Point);
+                        result = mapnik::datasource_geometry_t::Point;
                     }
                     else if (boost::algorithm::icontains(data, "polygon"))
                     {
                         g_type = "polygon";
-                        result.reset(mapnik::datasource_geometry_t::Polygon);
+                        result = mapnik::datasource_geometry_t::Polygon;
                     }
                     else // geometry
                     {
-                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        result = mapnik::datasource_geometry_t::Collection;
                         return result;
                     }
                     if (!prev_type.empty() && g_type != prev_type)
                     {
-                        result.reset(mapnik::datasource_geometry_t::Collection);
+                        result = mapnik::datasource_geometry_t::Collection;
                         return result;
                     }
                     prev_type = g_type;

@@ -32,12 +32,12 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/value/types.hpp>
+#include <mapnik/datasource_plugin.hpp>
 #include "csv_utils.hpp"
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/version.hpp>
 #include <boost/geometry/strategies/cartesian/disjoint_box_box.hpp>
 #include <boost/geometry/index/rtree.hpp>
@@ -45,10 +45,7 @@ MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <iosfwd>
-#include <vector>
 #include <string>
-
-#include <mapnik/datasource_plugin.hpp>
 
 template<std::size_t Max, std::size_t Min>
 struct csv_linear : boost::geometry::index::linear<Max, Min>
@@ -93,18 +90,18 @@ class csv_datasource : public mapnik::datasource,
 
     csv_datasource(mapnik::parameters const& params);
     virtual ~csv_datasource();
-    mapnik::datasource::datasource_t type() const;
+    mapnik::datasource::datasource_t type() const override;
     static const char* name();
-    mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
-    mapnik::box2d<double> envelope() const;
-    mapnik::layer_descriptor get_descriptor() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
+    mapnik::featureset_ptr features(mapnik::query const& q) const override;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
+    mapnik::box2d<double> envelope() const override;
+    mapnik::layer_descriptor get_descriptor() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
 
   private:
     void parse_csv(std::istream&);
-    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const& values);
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type_impl(std::istream&) const;
+    virtual void add_feature(mapnik::value_integer index, mapnik::csv_line const& values) override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type_impl(std::istream&) const;
 
     mapnik::layer_descriptor desc_;
     std::string filename_;

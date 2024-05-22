@@ -32,7 +32,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
@@ -40,6 +39,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <string>
 #include <sstream>
 #include <stdexcept>
+#include <optional>
 
 namespace mapnik {
 namespace detail {
@@ -47,13 +47,13 @@ namespace detail {
 template<typename T>
 struct extract_value
 {
-    static inline boost::optional<T> do_extract_from_string(std::string const& /*source*/)
+    static inline std::optional<T> do_extract_from_string(std::string const& /*source*/)
     {
         std::ostringstream s;
         s << "No conversion from std::string to " << typeid(T).name();
         throw std::runtime_error(s.str());
     }
-    static inline boost::optional<T> do_extract_from_bool(value_bool const& /*source*/)
+    static inline std::optional<T> do_extract_from_bool(value_bool const& /*source*/)
     {
         std::ostringstream s;
         s << "No conversion from boolean to " << typeid(T).name();
@@ -64,110 +64,103 @@ struct extract_value
 template<>
 struct extract_value<value_bool>
 {
-    static inline boost::optional<value_bool> do_extract_from_string(std::string const& source)
+    static inline std::optional<value_bool> do_extract_from_string(std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<value_bool>(result);
-        return boost::optional<value_bool>();
+            return std::optional<value_bool>(result);
+        return std::nullopt;
     }
 
-    static inline boost::optional<value_bool> do_extract_from_bool(value_bool const& source)
-    {
-        return boost::optional<value_bool>(source);
-    }
+    static inline std::optional<value_bool> do_extract_from_bool(value_bool const& source) { return source; }
 };
 
 template<>
 struct extract_value<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean_type> do_extract_from_string(std::string const& source)
+    static inline std::optional<mapnik::boolean_type> do_extract_from_string(std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean_type>(result);
-        return boost::optional<mapnik::boolean_type>();
+            return std::optional<mapnik::boolean_type>(result);
+        return std::nullopt;
     }
 
-    static inline boost::optional<mapnik::boolean_type> do_extract_from_bool(value_bool const& source)
+    static inline std::optional<mapnik::boolean_type> do_extract_from_bool(value_bool const& source)
     {
-        return boost::optional<mapnik::boolean_type>(source);
+        return std::optional<mapnik::boolean_type>(source);
     }
 };
 
 template<>
 struct extract_value<mapnik::value_integer>
 {
-    static inline boost::optional<mapnik::value_integer> do_extract_from_string(std::string const& source)
+    static inline std::optional<mapnik::value_integer> do_extract_from_string(std::string const& source)
     {
         mapnik::value_integer result;
         if (mapnik::util::string2int(source, result))
-            return boost::optional<mapnik::value_integer>(result);
-        return boost::optional<mapnik::value_integer>();
+            return std::optional<mapnik::value_integer>(result);
+        return std::nullopt;
     }
-    static inline boost::optional<mapnik::value_integer> do_extract_from_bool(value_bool const& source)
+    static inline std::optional<mapnik::value_integer> do_extract_from_bool(value_bool const& source)
     {
-        return boost::optional<mapnik::value_integer>(boost::lexical_cast<mapnik::value_integer>(source));
+        return std::optional<mapnik::value_integer>(boost::lexical_cast<mapnik::value_integer>(source));
     }
 };
 
 template<>
 struct extract_value<mapnik::value_double>
 {
-    static inline boost::optional<mapnik::value_double> do_extract_from_string(std::string const& source)
+    static inline std::optional<mapnik::value_double> do_extract_from_string(std::string const& source)
     {
         mapnik::value_double result;
         if (mapnik::util::string2double(source, result))
-            return boost::optional<double>(result);
-        return boost::optional<double>();
+            return std::optional<double>(result);
+        return std::nullopt;
     }
 
-    static inline boost::optional<mapnik::value_double> do_extract_from_bool(value_bool const& source)
+    static inline std::optional<mapnik::value_double> do_extract_from_bool(value_bool const& source)
     {
-        return boost::optional<double>(boost::lexical_cast<double>(source));
+        return std::optional<double>(boost::lexical_cast<double>(source));
     }
 };
 
 template<>
 struct extract_value<mapnik::value_null>
 {
-    static inline boost::optional<mapnik::value_null> do_extract_from_string(std::string const&)
+    static inline std::optional<mapnik::value_null> do_extract_from_string(std::string const&)
     {
-        return boost::optional<mapnik::value_null>(); // FIXME
+        return std::nullopt; // FIXME
     }
 
-    static inline boost::optional<mapnik::value_null> do_extract_from_bool(value_bool const&)
+    static inline std::optional<mapnik::value_null> do_extract_from_bool(value_bool const&)
     {
-        return boost::optional<mapnik::value_null>(); // FIXME
+        return std::nullopt; // FIXME
     }
 };
 
 template<>
 struct extract_value<std::string>
 {
-    static inline boost::optional<std::string> do_extract_from_string(std::string const& source)
+    static inline std::optional<std::string> do_extract_from_string(std::string const& source)
     {
-        return boost::optional<std::string>(source);
+        return std::optional<std::string>(source);
     }
 
-    static inline boost::optional<std::string> do_extract_from_bool(value_bool const& source)
+    static inline std::optional<std::string> do_extract_from_bool(value_bool const& source)
     {
-        if (source)
-        {
-            return boost::optional<std::string>("true");
-        }
-        return boost::optional<std::string>("false");
+        return source ? "true" : "false";
     }
 };
 
 template<typename T>
-boost::optional<T> param_cast(std::string const& source)
+std::optional<T> param_cast(std::string const& source)
 {
     return extract_value<T>::do_extract_from_string(source);
 }
 
 template<typename T>
-boost::optional<T> param_cast(value_bool const& source)
+std::optional<T> param_cast(value_bool const& source)
 {
     return extract_value<T>::do_extract_from_bool(source);
 }
@@ -177,7 +170,7 @@ boost::optional<T> param_cast(value_bool const& source)
 template<typename T>
 struct value_extractor_visitor
 {
-    value_extractor_visitor(boost::optional<T>& var)
+    value_extractor_visitor(std::optional<T>& var)
         : var_(var)
     {}
 
@@ -200,7 +193,7 @@ struct value_extractor_visitor
         }
     }
 
-    boost::optional<T>& var_;
+    std::optional<T>& var_;
 };
 
 namespace params_detail {
@@ -209,11 +202,11 @@ template<typename T>
 struct converter
 {
     using value_type = T;
-    using return_type = boost::optional<value_type>;
+    using return_type = std::optional<value_type>;
     static return_type
-      extract(parameters const& params, std::string const& name, boost::optional<T> const& default_opt_value)
+      extract(parameters const& params, std::string const& name, std::optional<T> const& default_opt_value)
     {
-        boost::optional<T> result(default_opt_value);
+        std::optional<T> result(default_opt_value);
         parameters::const_iterator itr = params.find(name);
         if (itr != params.end())
         {
@@ -226,15 +219,15 @@ struct converter
 } // end namespace params_detail
 
 template<typename T>
-boost::optional<T> parameters::get(std::string const& key) const
+std::optional<T> parameters::get(std::string const& key) const
 {
-    return params_detail::converter<T>::extract(*this, key, boost::none);
+    return params_detail::converter<T>::extract(*this, key, std::nullopt);
 }
 
 template<typename T>
-boost::optional<T> parameters::get(std::string const& key, T const& default_opt_value) const
+std::optional<T> parameters::get(std::string const& key, T const& default_opt_value) const
 {
-    return params_detail::converter<T>::extract(*this, key, boost::optional<T>(default_opt_value));
+    return params_detail::converter<T>::extract(*this, key, std::optional<T>(default_opt_value));
 }
 
 } // namespace mapnik

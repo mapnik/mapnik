@@ -9,7 +9,7 @@ class test : public benchmark::test_case
         : test_case(params)
         , line_data_("this is one line\nand this is a second line\nand a third line")
     {
-        boost::optional<std::string> line_data = params.get<std::string>("line");
+        auto line_data = params.get<std::string>("line");
         if (line_data)
         {
             line_data_ = *line_data;
@@ -57,7 +57,7 @@ class test2 : public benchmark::test_case
         : test_case(params)
         , line_data_("this is one line\nand this is a second line\nand a third line")
     {
-        boost::optional<std::string> line_data = params.get<std::string>("line");
+        auto line_data = params.get<std::string>("line");
         if (line_data)
         {
             line_data_ = *line_data;

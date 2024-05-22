@@ -36,17 +36,12 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/text/font_feature_settings.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
 #include <string>
 #include <map>
 #include <typeinfo>
 #include <utility>
+#include <optional>
 #include <stdexcept>
 
 namespace mapnik {
@@ -55,7 +50,7 @@ namespace detail {
 template<typename T>
 struct do_xml_attribute_cast
 {
-    static inline boost::optional<T> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& /*source*/)
+    static inline std::optional<T> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& /*source*/)
     {
         std::string err_msg("No conversion from std::string to ");
         err_msg += std::string(typeid(T).name());
@@ -67,13 +62,13 @@ struct do_xml_attribute_cast
 template<>
 struct do_xml_attribute_cast<mapnik::boolean_type>
 {
-    static inline boost::optional<mapnik::boolean_type> xml_attribute_cast_impl(xml_tree const& /*tree*/,
-                                                                                std::string const& source)
+    static inline std::optional<mapnik::boolean_type> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                              std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::boolean_type>(result);
-        return boost::optional<mapnik::boolean_type>();
+            return result;
+        return std::nullopt;
     }
 };
 
@@ -81,13 +76,13 @@ struct do_xml_attribute_cast<mapnik::boolean_type>
 template<>
 struct do_xml_attribute_cast<mapnik::value_bool>
 {
-    static inline boost::optional<mapnik::value_bool> xml_attribute_cast_impl(xml_tree const& /*tree*/,
-                                                                              std::string const& source)
+    static inline std::optional<mapnik::value_bool> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                            std::string const& source)
     {
         bool result;
         if (mapnik::util::string2bool(source, result))
-            return boost::optional<mapnik::value_bool>(result);
-        return boost::optional<mapnik::value_bool>();
+            return result;
+        return std::nullopt;
     }
 };
 
@@ -95,12 +90,12 @@ struct do_xml_attribute_cast<mapnik::value_bool>
 template<>
 struct do_xml_attribute_cast<int>
 {
-    static inline boost::optional<int> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline std::optional<int> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         int result;
         if (mapnik::util::string2int(source, result))
-            return boost::optional<int>(result);
-        return boost::optional<int>();
+            return result;
+        return std::nullopt;
     }
 };
 
@@ -109,13 +104,13 @@ struct do_xml_attribute_cast<int>
 template<>
 struct do_xml_attribute_cast<mapnik::value_integer>
 {
-    static inline boost::optional<mapnik::value_integer> xml_attribute_cast_impl(xml_tree const& /*tree*/,
-                                                                                 std::string const& source)
+    static inline std::optional<mapnik::value_integer> xml_attribute_cast_impl(xml_tree const& /*tree*/,
+                                                                               std::string const& source)
     {
         int result;
         if (mapnik::util::string2int(source, result))
-            return boost::optional<mapnik::value_integer>(result);
-        return boost::optional<mapnik::value_integer>();
+            return result;
+        return std::nullopt;
     }
 };
 
@@ -126,12 +121,12 @@ struct do_xml_attribute_cast<mapnik::value_integer>
 template<>
 struct do_xml_attribute_cast<unsigned>
 {
-    static inline boost::optional<unsigned> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline std::optional<unsigned> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         int result;
         if (mapnik::util::string2int(source, result) && result >= 0)
-            return boost::optional<unsigned>(static_cast<unsigned>(result));
-        return boost::optional<unsigned>();
+            return static_cast<unsigned>(result);
+        return std::nullopt;
     }
 };
 
@@ -139,12 +134,12 @@ struct do_xml_attribute_cast<unsigned>
 template<>
 struct do_xml_attribute_cast<float>
 {
-    static inline boost::optional<float> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline std::optional<float> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         float result;
         if (mapnik::util::string2float(source, result))
-            return boost::optional<float>(result);
-        return boost::optional<float>();
+            return result;
+        return std::nullopt;
     }
 };
 
@@ -152,12 +147,12 @@ struct do_xml_attribute_cast<float>
 template<>
 struct do_xml_attribute_cast<double>
 {
-    static inline boost::optional<double> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline std::optional<double> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
         double result;
         if (mapnik::util::string2double(source, result))
-            return boost::optional<double>(result);
-        return boost::optional<double>();
+            return result;
+        return std::nullopt;
     }
 };
 
@@ -169,19 +164,19 @@ template<typename ENUM,
 struct do_xml_attribute_cast<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>>
 {
     using Enum = mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRING, F_LOOKUP>;
-    static inline boost::optional<Enum> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
+    static inline std::optional<Enum> xml_attribute_cast_impl(xml_tree const& /*tree*/, std::string const& source)
     {
-        using result_type = typename boost::optional<Enum>;
         try
         {
             Enum e;
             e.from_string(source);
-            return result_type(e);
+            return e;
         }
         catch (illegal_enum_value const& ex)
         {
             MAPNIK_LOG_ERROR(do_xml_attribute_cast) << ex.what();
-            return result_type();
+            return std::nullopt;
+            ;
         }
     }
 };
@@ -190,7 +185,7 @@ struct do_xml_attribute_cast<mapnik::enumeration<ENUM, F_TO_STRING, F_FROM_STRIN
 template<>
 struct do_xml_attribute_cast<mapnik::color>
 {
-    static inline boost::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
+    static inline std::optional<mapnik::color> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
     {
         return parse_color(source);
     }
@@ -200,9 +195,9 @@ struct do_xml_attribute_cast<mapnik::color>
 template<>
 struct do_xml_attribute_cast<std::string>
 {
-    static inline boost::optional<std::string> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
+    static inline std::optional<std::string> xml_attribute_cast_impl(xml_tree const&, std::string const& source)
     {
-        return boost::optional<std::string>(source);
+        return source;
     }
 };
 
@@ -210,8 +205,8 @@ struct do_xml_attribute_cast<std::string>
 template<>
 struct do_xml_attribute_cast<mapnik::expression_ptr>
 {
-    static inline boost::optional<mapnik::expression_ptr> xml_attribute_cast_impl(xml_tree const& tree,
-                                                                                  std::string const& source)
+    static inline std::optional<mapnik::expression_ptr> xml_attribute_cast_impl(xml_tree const& tree,
+                                                                                std::string const& source)
     {
         std::map<std::string, mapnik::expression_ptr>::const_iterator itr = tree.expr_cache_.find(source);
         if (itr != tree.expr_cache_.end())
@@ -231,8 +226,8 @@ struct do_xml_attribute_cast<mapnik::expression_ptr>
 template<>
 struct do_xml_attribute_cast<mapnik::font_feature_settings>
 {
-    static inline boost::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const&,
-                                                                                         std::string const& source)
+    static inline std::optional<mapnik::font_feature_settings> xml_attribute_cast_impl(xml_tree const&,
+                                                                                       std::string const& source)
     {
         return mapnik::font_feature_settings(source);
     }
@@ -241,7 +236,7 @@ struct do_xml_attribute_cast<mapnik::font_feature_settings>
 } // end namespace detail
 
 template<typename T>
-boost::optional<T> xml_attribute_cast(xml_tree const& tree, std::string const& source)
+std::optional<T> xml_attribute_cast(xml_tree const& tree, std::string const& source)
 {
     return detail::do_xml_attribute_cast<T>::xml_attribute_cast_impl(tree, source);
 }

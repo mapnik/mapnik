@@ -37,7 +37,6 @@
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
 #include <boost/version.hpp>
 #include <boost/geometry/strategies/cartesian/disjoint_box_box.hpp>
 #include <boost/geometry/index/rtree.hpp>
@@ -50,6 +49,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <map>
 #include <deque>
 #include <functional>
+#include <optional>
 
 template<std::size_t Max, std::size_t Min>
 struct geojson_linear : boost::geometry::index::linear<Max, Min>
@@ -94,13 +94,13 @@ class geojson_datasource : public mapnik::datasource
     // constructor
     geojson_datasource(mapnik::parameters const& params);
     virtual ~geojson_datasource();
-    mapnik::datasource::datasource_t type() const;
+    mapnik::datasource::datasource_t type() const override;
     static const char* name();
-    mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
-    mapnik::box2d<double> envelope() const;
-    mapnik::layer_descriptor get_descriptor() const;
-    boost::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
+    mapnik::featureset_ptr features(mapnik::query const& q) const override;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const override;
+    mapnik::box2d<double> envelope() const override;
+    mapnik::layer_descriptor get_descriptor() const override;
+    std::optional<mapnik::datasource_geometry_t> get_geometry_type() const override;
     template<typename Iterator>
     void parse_geojson(Iterator start, Iterator end);
     template<typename Iterator>

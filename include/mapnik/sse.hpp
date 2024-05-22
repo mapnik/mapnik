@@ -26,7 +26,7 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
-#define ROUND_DOWN(x, s) ((x) & ~((s)-1))
+#define ROUND_DOWN(x, s) ((x) & ~((s) - 1))
 
 typedef union {
     __m128i v;

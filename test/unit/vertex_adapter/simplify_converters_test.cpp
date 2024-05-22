@@ -26,7 +26,7 @@ void simplify(std::string const& wkt_in, double tolerance, std::string const& me
         mapnik::geometry::line_string<double> line = input.get<mapnik::geometry::line_string<double>>();
         mapnik::geometry::line_string_vertex_adapter<double> va(line);
         mapnik::simplify_converter<mapnik::geometry::line_string_vertex_adapter<double>> generalizer(va);
-        generalizer.set_simplify_algorithm(mapnik::simplify_algorithm_from_string(method).get());
+        generalizer.set_simplify_algorithm(mapnik::simplify_algorithm_from_string(method).value());
         generalizer.set_simplify_tolerance(tolerance);
         mapnik::geometry::line_string<double> output;
         mapnik::CommandType cmd;

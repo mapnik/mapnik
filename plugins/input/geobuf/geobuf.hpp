@@ -32,8 +32,8 @@
 #include <cmath>
 #include <cassert>
 #include <vector>
+#include <optional>
 
-#include <boost/optional.hpp>
 #include <protozero/pbf_reader.hpp>
 
 namespace mapnik {
@@ -293,7 +293,7 @@ struct geobuf : util::noncopyable
 
     template<typename T>
     geometry::geometry<double>
-      read_coords(T& reader, geometry_type_e type, boost::optional<std::vector<std::uint32_t>> const& lengths)
+      read_coords(T& reader, geometry_type_e type, std::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::geometry<double> geom = geometry::geometry_empty();
         switch (type)
@@ -404,8 +404,8 @@ struct geobuf : util::noncopyable
     }
 
     template<typename T>
-    geometry::multi_line_string<double>
-      read_multi_linestring(T& reader, boost::optional<std::vector<std::uint32_t>> const& lengths)
+    geometry::multi_line_string<double> read_multi_linestring(T& reader,
+                                                              std::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::multi_line_string<double> multi_line;
         multi_line.reserve(!lengths ? 1 : lengths->size());
@@ -432,7 +432,7 @@ struct geobuf : util::noncopyable
     }
 
     template<typename T>
-    geometry::polygon<double> read_polygon(T& reader, boost::optional<std::vector<std::uint32_t>> const& lengths)
+    geometry::polygon<double> read_polygon(T& reader, std::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::polygon<double> poly;
         poly.reserve(!lengths ? 1 : lengths->size());
@@ -460,7 +460,7 @@ struct geobuf : util::noncopyable
 
     template<typename T>
     geometry::multi_polygon<double> read_multi_polygon(T& reader,
-                                                       boost::optional<std::vector<std::uint32_t>> const& lengths)
+                                                       std::optional<std::vector<std::uint32_t>> const& lengths)
     {
         geometry::multi_polygon<double> multi_poly;
         if (!lengths)
@@ -496,7 +496,7 @@ struct geobuf : util::noncopyable
     {
         geometry::geometry<double> geom = geometry::geometry_empty();
         geometry_type_e type = Unknown;
-        boost::optional<std::vector<std::uint32_t>> lengths;
+        std::optional<std::vector<std::uint32_t>> lengths;
         while (reader.next())
         {
             switch (reader.tag())

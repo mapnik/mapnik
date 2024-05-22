@@ -175,14 +175,14 @@ struct symbolizer_attributes
 
     void operator()(raster_symbolizer const& sym)
     {
-        boost::optional<double> filter_factor = get_optional<double>(sym, keys::filter_factor);
+        const auto filter_factor = get_optional<double>(sym, keys::filter_factor);
         if (filter_factor)
         {
             filter_factor_ = *filter_factor;
         }
         else
         {
-            boost::optional<scaling_method_e> scaling_method = get_optional<scaling_method_e>(sym, keys::scaling);
+            const auto scaling_method = get_optional<scaling_method_e>(sym, keys::scaling);
             if (scaling_method && *scaling_method != SCALING_NEAR)
             {
                 filter_factor_ = 2;

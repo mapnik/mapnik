@@ -32,7 +32,6 @@
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/optional.hpp>
 
 // freetype2
 extern "C" {
@@ -45,7 +44,6 @@ MAPNIK_DISABLE_WARNING_POP
 
 // stl
 #include <algorithm>
-#include <stdexcept>
 
 namespace mapnik {
 template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
@@ -481,7 +479,7 @@ face_set_ptr face_manager::get_face_set(font_set const& fset)
     return face_set;
 }
 
-face_set_ptr face_manager::get_face_set(std::string const& name, boost::optional<font_set> fset)
+face_set_ptr face_manager::get_face_set(std::string const& name, std::optional<font_set> fset)
 {
     if (fset && fset->size() > 0)
     {

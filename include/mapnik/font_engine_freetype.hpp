@@ -35,11 +35,7 @@
 #include <map>
 #include <utility> // pair
 #include <vector>
-
-namespace boost {
-template<class T>
-class optional;
-}
+#include <optional>
 
 namespace mapnik {
 
@@ -117,7 +113,7 @@ class MAPNIK_DECL face_manager
     face_ptr get_face(std::string const& name);
     face_set_ptr get_face_set(std::string const& name);
     face_set_ptr get_face_set(font_set const& fset);
-    face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset);
+    face_set_ptr get_face_set(std::string const& name, std::optional<font_set> fset);
     stroker_ptr get_stroker() const { return stroker_; }
 
   private:

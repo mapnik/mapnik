@@ -79,12 +79,12 @@ geobuf_datasource::geobuf_datasource(parameters const& params)
     , features_()
     , tree_(nullptr)
 {
-    boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file)
+    const auto file = params.get<std::string>("file");
+    if (!file.has_value())
         throw mapnik::datasource_exception("Geobuf Plugin: missing <file> parameter");
 
-    boost::optional<std::string> base = params.get<std::string>("base");
-    if (base)
+    const auto base = params.get<std::string>("base");
+    if (base.has_value())
         filename_ = *base + "/" + *file;
     else
         filename_ = *file;
@@ -159,9 +159,9 @@ const char* geobuf_datasource::name()
     return "geobuf";
 }
 
-boost::optional<mapnik::datasource_geometry_t> geobuf_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> geobuf_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     int multi_type = 0;
     unsigned num_features = features_.size();
     for (unsigned i = 0; i < num_features && i < 5; ++i)
@@ -172,7 +172,7 @@ boost::optional<mapnik::datasource_geometry_t> geobuf_datasource::get_geometry_t
             int type = static_cast<int>(*result);
             if (multi_type > 0 && multi_type != type)
             {
-                result.reset(mapnik::datasource_geometry_t::Collection);
+                result = mapnik::datasource_geometry_t::Collection;
                 return result;
             }
             multi_type = type;

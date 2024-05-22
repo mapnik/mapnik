@@ -66,26 +66,24 @@ static const scaling_method_lookup_type scaling_lookup =
     SCALING_SINC,
     "sinc")(SCALING_LANCZOS, "lanczos")(SCALING_BLACKMAN, "blackman");
 
-boost::optional<scaling_method_e> scaling_method_from_string(std::string const& name)
+std::optional<scaling_method_e> scaling_method_from_string(std::string const& name)
 {
-    boost::optional<scaling_method_e> mode;
     scaling_method_lookup_type::right_const_iterator right_iter = scaling_lookup.right.find(name);
     if (right_iter != scaling_lookup.right.end())
     {
-        mode.reset(right_iter->second);
+        return right_iter->second;
     }
-    return mode;
+    return std::nullopt;
 }
 
-boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method)
+std::optional<std::string> scaling_method_to_string(scaling_method_e scaling_method)
 {
-    boost::optional<std::string> mode;
     scaling_method_lookup_type::left_const_iterator left_iter = scaling_lookup.left.find(scaling_method);
     if (left_iter != scaling_lookup.left.end())
     {
-        mode.reset(left_iter->second);
+        return left_iter->second;
     }
-    return mode;
+    return std::nullopt;
 }
 
 template<typename T>
@@ -97,7 +95,7 @@ void scale_image_agg(T& target,
                      double x_off_f,
                      double y_off_f,
                      double filter_factor,
-                     boost::optional<double> const& nodata_value)
+                     std::optional<double> const& nodata_value)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
@@ -157,8 +155,8 @@ void scale_image_agg(T& target,
         using span_gen_type = typename detail::agg_scaling_traits<image_type>::span_image_resample_affine;
         agg::image_filter_lut filter;
         detail::set_scaling_method(filter, scaling_method, filter_factor);
-        boost::optional<typename span_gen_type::value_type> nodata;
-        if (nodata_value)
+        std::optional<typename span_gen_type::value_type> nodata;
+        if (nodata_value.has_value())
         {
             nodata.emplace(safe_cast<typename span_gen_type::value_type>(*nodata_value));
         }
@@ -175,7 +173,7 @@ template MAPNIK_DECL void scale_image_agg(image_rgba8&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray8&,
                                           image_gray8 const&,
@@ -185,7 +183,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray8&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray8s&,
                                           image_gray8s const&,
@@ -195,7 +193,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray8s&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray16&,
                                           image_gray16 const&,
@@ -205,7 +203,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray16&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray16s&,
                                           image_gray16s const&,
@@ -215,7 +213,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray16s&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray32&,
                                           image_gray32 const&,
@@ -225,7 +223,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray32&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray32s&,
                                           image_gray32s const&,
@@ -235,7 +233,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray32s&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray32f&,
                                           image_gray32f const&,
@@ -245,7 +243,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray32f&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray64&,
                                           image_gray64 const&,
@@ -255,7 +253,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray64&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray64s&,
                                           image_gray64s const&,
@@ -265,7 +263,7 @@ template MAPNIK_DECL void scale_image_agg(image_gray64s&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 
 template MAPNIK_DECL void scale_image_agg(image_gray64f&,
                                           image_gray64f const&,
@@ -275,5 +273,5 @@ template MAPNIK_DECL void scale_image_agg(image_gray64f&,
                                           double,
                                           double,
                                           double,
-                                          boost::optional<double> const&);
+                                          std::optional<double> const&);
 } // namespace mapnik

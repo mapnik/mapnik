@@ -16,26 +16,24 @@ static const simplify_algorithm_lookup_type simplify_lookup =
     douglas_peucker,
     "douglas-peucker")(visvalingam_whyatt, "visvalingam-whyatt")(zhao_saalfeld, "zhao-saalfeld");
 
-boost::optional<simplify_algorithm_e> simplify_algorithm_from_string(std::string const& name)
+std::optional<simplify_algorithm_e> simplify_algorithm_from_string(std::string const& name)
 {
-    boost::optional<simplify_algorithm_e> algo;
     simplify_algorithm_lookup_type::right_const_iterator right_iter = simplify_lookup.right.find(name);
     if (right_iter != simplify_lookup.right.end())
     {
-        algo.reset(right_iter->second);
+        return right_iter->second;
     }
-    return algo;
+    return std::nullopt;
 }
 
-boost::optional<std::string> simplify_algorithm_to_string(simplify_algorithm_e value)
+std::optional<std::string> simplify_algorithm_to_string(simplify_algorithm_e value)
 {
-    boost::optional<std::string> algo;
     simplify_algorithm_lookup_type::left_const_iterator left_iter = simplify_lookup.left.find(value);
     if (left_iter != simplify_lookup.left.end())
     {
-        algo.reset(left_iter->second);
+        return left_iter->second;
     }
-    return algo;
+    return std::nullopt;
 }
 
 } // namespace mapnik

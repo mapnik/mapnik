@@ -399,11 +399,11 @@ text_symbolizer_helper::text_symbolizer_helper(text_symbolizer const& sym,
 void text_symbolizer_helper::init_converters()
 {
     // setup vertex converter
-    value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
-    value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
-    value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
-    value_double extend = mapnik::get<value_double, keys::extend>(sym_, feature_, vars_);
-    boost::optional<value_double> offset = get_optional<value_double>(sym_, keys::offset, feature_, vars_);
+    const value_bool clip = mapnik::get<value_bool, keys::clip>(sym_, feature_, vars_);
+    const value_double simplify_tolerance = mapnik::get<value_double, keys::simplify_tolerance>(sym_, feature_, vars_);
+    const value_double smooth = mapnik::get<value_double, keys::smooth>(sym_, feature_, vars_);
+    const value_double extend = mapnik::get<value_double, keys::extend>(sym_, feature_, vars_);
+    const auto offset = get_optional<value_double>(sym_, keys::offset, feature_, vars_);
 
     if (clip)
     {
@@ -426,7 +426,7 @@ void text_symbolizer_helper::init_converters()
         converter_.template set<simplify_tag>(); // optional simplify converter
     if (smooth > 0.0)
         converter_.template set<smooth_tag>(); // optional smooth converter
-    if (offset)
+    if (offset.has_value())
         converter_.template set<offset_transform_tag>(); // optional offset converter
 }
 

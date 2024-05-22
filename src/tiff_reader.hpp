@@ -16,7 +16,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
-#include "tiff_reader.hpp"
 
 // stl
 #include <memory>
@@ -78,7 +77,7 @@ class tiff_reader : public image_reader
     int tile_height_;
     std::size_t width_;
     std::size_t height_;
-    boost::optional<box2d<double>> bbox_;
+    std::optional<box2d<double>> bbox_;
     unsigned bps_;
     unsigned sample_format_;
     unsigned photometric_;
@@ -95,50 +94,20 @@ class tiff_reader : public image_reader
     virtual ~tiff_reader();
     unsigned width() const final;
     unsigned height() const final;
-    boost::optional<box2d<double>> bounding_box() const final;
-    inline bool has_alpha() const final
-    {
-        return has_alpha_;
-    }
+    std::optional<box2d<double>> bounding_box() const final;
+    inline bool has_alpha() const final { return has_alpha_; }
     void read(unsigned x, unsigned y, image_rgba8& image) final;
     image_any read(unsigned x, unsigned y, unsigned width, unsigned height) final;
     // methods specific to tiff reader
-    unsigned bits_per_sample() const
-    {
-        return bps_;
-    }
-    unsigned sample_format() const
-    {
-        return sample_format_;
-    }
-    unsigned photometric() const
-    {
-        return photometric_;
-    }
-    bool is_tiled() const
-    {
-        return is_tiled_;
-    }
-    unsigned tile_width() const
-    {
-        return tile_width_;
-    }
-    unsigned tile_height() const
-    {
-        return tile_height_;
-    }
-    unsigned rows_per_strip() const
-    {
-        return rows_per_strip_;
-    }
-    unsigned planar_config() const
-    {
-        return planar_config_;
-    }
-    unsigned compression() const
-    {
-        return compression_;
-    }
+    unsigned bits_per_sample() const { return bps_; }
+    unsigned sample_format() const { return sample_format_; }
+    unsigned photometric() const { return photometric_; }
+    bool is_tiled() const { return is_tiled_; }
+    unsigned tile_width() const { return tile_width_; }
+    unsigned tile_height() const { return tile_height_; }
+    unsigned rows_per_strip() const { return rows_per_strip_; }
+    unsigned planar_config() const { return planar_config_; }
+    unsigned compression() const { return compression_; }
 
   private:
     tiff_reader(const tiff_reader&);
@@ -189,9 +158,9 @@ tiff_reader<T>::tiff_reader(std::string const& filename)
     , is_tiled_(false)
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(filename, true);
+    const auto memory = mapnik::mapped_memory_cache::instance().find(filename, true);
 
-    if (memory)
+    if (memory.has_value())
     {
         mapped_region_ = *memory;
         stream_.buffer(static_cast<char*>(mapped_region_->get_address()), mapped_region_->get_size());
@@ -311,7 +280,7 @@ void tiff_reader<T>::init()
             double loy = tilepoint[4];
             double hix = lox + pixelscale[0] * width_;
             double hiy = loy - pixelscale[1] * height_;
-            bbox_.reset(box2d<double>(lox, loy, hix, hiy));
+            bbox_ = box2d<double>{lox, loy, hix, hiy};
             MAPNIK_LOG_DEBUG(tiff_reader) << "Bounding Box:" << *bbox_;
         }
     }
@@ -319,11 +288,11 @@ void tiff_reader<T>::init()
     {
         if (height_ > 128 * 1024 * 1024)
         {
-            std::size_t line_size = (bands_ * width_ * bps_ + 7) / 8;
+            const std::size_t line_size = (bands_ * width_ * bps_ + 7) / 8;
             std::size_t default_strip_height = 8192 / line_size;
             if (default_strip_height == 0)
                 default_strip_height = 1;
-            std::size_t num_strips = height_ / default_strip_height;
+            const std::size_t num_strips = height_ / default_strip_height;
             if (num_strips > 128 * 1024 * 1024)
             {
                 throw image_reader_exception("Can't allocate tiff");
@@ -349,7 +318,7 @@ unsigned tiff_reader<T>::height() const
 }
 
 template<typename T>
-boost::optional<box2d<double>> tiff_reader<T>::bounding_box() const
+std::optional<box2d<double>> tiff_reader<T>::bounding_box() const
 {
     return bbox_;
 }
@@ -395,14 +364,14 @@ image_any tiff_reader<T>::read_any_gray(std::size_t x0, std::size_t y0, std::siz
         if (tif)
         {
             image_type data(width, height);
-            std::size_t block_size = rows_per_strip_ > 0 ? rows_per_strip_ : tile_height_;
-            std::size_t start_y = y0 - y0 % block_size;
-            std::size_t end_y = std::min(y0 + height, height_);
-            std::size_t start_x = x0;
-            std::size_t end_x = std::min(x0 + width, width_);
-            std::size_t element_size = sizeof(pixel_type);
+            const std::size_t block_size = rows_per_strip_ > 0 ? rows_per_strip_ : tile_height_;
+            const std::size_t start_y = y0 - y0 % block_size;
+            const std::size_t end_y = std::min(y0 + height, height_);
+            const std::size_t start_x = x0;
+            const std::size_t end_x = std::min(x0 + width, width_);
+            constexpr std::size_t element_size = sizeof(pixel_type);
             MAPNIK_LOG_DEBUG(tiff_reader) << "SCANLINE SIZE=" << TIFFScanlineSize(tif);
-            std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1) / element_size;
+            const std::size_t size_to_allocate = (TIFFScanlineSize(tif) + element_size - 1) / element_size;
             std::unique_ptr<pixel_type[]> const scanline(new pixel_type[size_to_allocate]);
             if (planar_config_ == PLANARCONFIG_CONTIG)
             {
@@ -469,8 +438,8 @@ image_any tiff_reader<T>::read(unsigned x, unsigned y, unsigned width, unsigned 
     {
         throw image_reader_exception("Can't allocate tiff > 10000x10000");
     }
-    std::size_t x0 = static_cast<std::size_t>(x);
-    std::size_t y0 = static_cast<std::size_t>(y);
+    const std::size_t x0 = static_cast<std::size_t>(x);
+    const std::size_t y0 = static_cast<std::size_t>(y);
     switch (photometric_)
     {
         case PHOTOMETRIC_MINISBLACK:
@@ -591,7 +560,7 @@ struct tiff_reader_traits
                           std::size_t tile_width,
                           std::size_t tile_height)
     {
-        std::uint32_t tile_size = TIFFTileSize(tif);
+        const std::uint32_t tile_size = TIFFTileSize(tif);
         return (TIFFReadEncodedTile(tif, TIFFComputeTile(tif, x, y, 0, 0), buf, tile_size) != -1);
     }
 
@@ -644,22 +613,20 @@ void tiff_reader<T>::read_tiled(std::size_t x0, std::size_t y0, ImageData& image
     TIFF* tif = open(stream_);
     if (tif)
     {
-        std::uint32_t tile_size = TIFFTileSize(tif);
+        const std::uint32_t tile_size = TIFFTileSize(tif);
         std::unique_ptr<pixel_type[]> tile(new pixel_type[tile_size]);
-        std::size_t width = image.width();
-        std::size_t height = image.height();
-        std::size_t start_y = (y0 / tile_height_) * tile_height_;
-        std::size_t end_y = ((y0 + height) / tile_height_ + 1) * tile_height_;
-        std::size_t start_x = (x0 / tile_width_) * tile_width_;
-        std::size_t end_x = ((x0 + width) / tile_width_ + 1) * tile_width_;
-        end_y = std::min(end_y, height_);
-        end_x = std::min(end_x, width_);
-        bool pick_first_band =
+        const std::size_t width = image.width();
+        const std::size_t height = image.height();
+        const std::size_t start_y = (y0 / tile_height_) * tile_height_;
+        const std::size_t end_y = std::min(((y0 + height) / tile_height_ + 1) * tile_height_, height_);
+        const std::size_t start_x = (x0 / tile_width_) * tile_width_;
+        const std::size_t end_x = std::min(((x0 + width) / tile_width_ + 1) * tile_width_, width_);
+        const bool pick_first_band =
           (bands_ > 1) && (tile_size / (tile_width_ * tile_height_ * sizeof(pixel_type)) == bands_);
         for (std::size_t y = start_y; y < end_y; y += tile_height_)
         {
-            std::size_t ty0 = std::max(y0, y) - y;
-            std::size_t ty1 = std::min(height + y0, y + tile_height_) - y;
+            const std::size_t ty0 = std::max(y0, y) - y;
+            const std::size_t ty1 = std::min(height + y0, y + tile_height_) - y;
 
             for (std::size_t x = start_x; x < end_x; x += tile_width_)
             {
@@ -677,8 +644,8 @@ void tiff_reader<T>::read_tiled(std::size_t x0, std::size_t y0, ImageData& image
                         tile[n] = tile[n * bands_];
                     }
                 }
-                std::size_t tx0 = std::max(x0, x);
-                std::size_t tx1 = std::min(width + x0, x + tile_width_);
+                const std::size_t tx0 = std::max(x0, x);
+                const std::size_t tx1 = std::min(width + x0, x + tile_width_);
                 std::size_t row_index = y + ty0 - y0;
 
                 if (detail::tiff_reader_traits<ImageData>::reverse)
@@ -712,22 +679,23 @@ void tiff_reader<T>::read_stripped(std::size_t x0, std::size_t y0, ImageData& im
     TIFF* tif = open(stream_);
     if (tif)
     {
-        std::uint32_t strip_size = TIFFStripSize(tif);
+        const std::uint32_t strip_size = TIFFStripSize(tif);
         std::unique_ptr<pixel_type[]> strip(new pixel_type[strip_size]);
-        std::size_t width = image.width();
-        std::size_t height = image.height();
+        const std::size_t width = image.width();
+        const std::size_t height = image.height();
 
-        std::size_t start_y = (y0 / rows_per_strip_) * rows_per_strip_;
-        std::size_t end_y = std::min(y0 + height, height_);
-        std::size_t tx0, tx1, ty0, ty1;
-        tx0 = x0;
-        tx1 = std::min(width + x0, width_);
+        const std::size_t start_y = (y0 / rows_per_strip_) * rows_per_strip_;
+        const std::size_t end_y = std::min(y0 + height, height_);
+        const std::size_t tx0{x0};
+        const std::size_t tx1{std::min(width + x0, width_)};
+
         std::size_t row = 0;
-        bool pick_first_band = (bands_ > 1) && (strip_size / (width_ * rows_per_strip_ * sizeof(pixel_type)) == bands_);
+        const bool pick_first_band =
+          (bands_ > 1) && (strip_size / (width_ * rows_per_strip_ * sizeof(pixel_type)) == bands_);
         for (std::size_t y = start_y; y < end_y; y += rows_per_strip_)
         {
-            ty0 = std::max(y0, y) - y;
-            ty1 = std::min(end_y, y + rows_per_strip_) - y;
+            const std::size_t ty0 = std::max(y0, y) - y;
+            const std::size_t ty1 = std::min(end_y, y + rows_per_strip_) - y;
 
             if (!detail::tiff_reader_traits<ImageData>::read_strip(tif, y, rows_per_strip_, width_, strip.get()))
             {

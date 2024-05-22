@@ -72,12 +72,12 @@ shape_datasource::shape_datasource(parameters const& params)
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
 #endif
-    boost::optional<std::string> file = params.get<std::string>("file");
-    if (!file)
+    const auto file = params.get<std::string>("file");
+    if (!file.has_value())
         throw datasource_exception("Shape Plugin: missing <file> parameter");
 
-    boost::optional<std::string> base = params.get<std::string>("base");
-    if (base)
+    const auto base = params.get<std::string>("base");
+    if (base.has_value())
         shape_name_ = *base + "/" + *file;
     else
         shape_name_ = *file;
@@ -307,13 +307,13 @@ box2d<double> shape_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> shape_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> shape_datasource::get_geometry_type() const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::get_geometry_type");
 #endif
 
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     switch (shape_type_)
     {
         case shape_io::shape_point:
@@ -322,19 +322,19 @@ boost::optional<mapnik::datasource_geometry_t> shape_datasource::get_geometry_ty
         case shape_io::shape_multipoint:
         case shape_io::shape_multipointm:
         case shape_io::shape_multipointz: {
-            result.reset(mapnik::datasource_geometry_t::Point);
+            result = mapnik::datasource_geometry_t::Point;
             break;
         }
         case shape_io::shape_polyline:
         case shape_io::shape_polylinem:
         case shape_io::shape_polylinez: {
-            result.reset(mapnik::datasource_geometry_t::LineString);
+            result = mapnik::datasource_geometry_t::LineString;
             break;
         }
         case shape_io::shape_polygon:
         case shape_io::shape_polygonm:
         case shape_io::shape_polygonz: {
-            result.reset(mapnik::datasource_geometry_t::Polygon);
+            result = mapnik::datasource_geometry_t::Polygon;
             break;
         }
         default:

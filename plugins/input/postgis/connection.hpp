@@ -42,7 +42,7 @@ extern "C" {
 class Connection
 {
   public:
-    Connection(std::string const& connection_str, boost::optional<std::string> const& password)
+    Connection(std::string const& connection_str, std::optional<std::string> const& password)
         : cursorId(0)
         , closed_(false)
         , pending_(false)
@@ -236,20 +236,11 @@ class Connection
         return std::make_shared<ResultSet>(result);
     }
 
-    std::string client_encoding() const
-    {
-        return PQparameterStatus(conn_, "client_encoding");
-    }
+    std::string client_encoding() const { return PQparameterStatus(conn_, "client_encoding"); }
 
-    bool isOK() const
-    {
-        return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
-    }
+    bool isOK() const { return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD); }
 
-    bool isPending() const
-    {
-        return pending_;
-    }
+    bool isPending() const { return pending_; }
 
     void close()
     {

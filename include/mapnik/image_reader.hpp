@@ -30,15 +30,9 @@
 #include <mapnik/factory.hpp>
 #include <mapnik/geometry/box2d.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
-
 // stl
-#include <stdexcept>
 #include <string>
+#include <optional>
 
 namespace mapnik {
 
@@ -62,7 +56,7 @@ struct MAPNIK_DECL image_reader : private util::noncopyable
     virtual unsigned width() const = 0;
     virtual unsigned height() const = 0;
     virtual bool has_alpha() const = 0;
-    virtual boost::optional<box2d<double>> bounding_box() const = 0;
+    virtual std::optional<box2d<double>> bounding_box() const = 0;
     virtual void read(unsigned x, unsigned y, image_rgba8& image) = 0;
     virtual image_any read(unsigned x, unsigned y, unsigned width, unsigned height) = 0;
     virtual ~image_reader() {}

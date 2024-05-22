@@ -123,8 +123,8 @@ void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> co
         common_.detector_->clear();
     }
     common_.query_extent_ = query_extent;
-    boost::optional<box2d<double>> const& maximum_extent = lay.maximum_extent();
-    if (maximum_extent)
+    auto&& maximum_extent = lay.maximum_extent();
+    if (maximum_extent.has_value())
     {
         common_.query_extent_.clip(*maximum_extent);
     }
@@ -207,7 +207,6 @@ struct grid_render_marker_visitor
         else
         {
             image_rgba8 target(data.width(), data.height());
-            boost::optional<double> nodata;
             mapnik::scale_image_agg(target,
                                     data,
                                     SCALING_NEAR,
@@ -216,8 +215,8 @@ struct grid_render_marker_visitor
                                     0.0,
                                     0.0,
                                     1.0,
-                                    nodata); // TODO: is 1.0 a valid default here, and do we even care in grid_renderer
-                                             // what the image looks like?
+                                    std::nullopt); // TODO: is 1.0 a valid default here, and do we even care in
+                                                   // grid_renderer what the image looks like?
             pixmap_.set_rectangle(feature_.id(),
                                   target,
                                   boost::math::iround(pos_.x - cx),

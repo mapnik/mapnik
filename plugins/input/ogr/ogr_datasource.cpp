@@ -45,6 +45,8 @@ MAPNIK_DISABLE_WARNING_POP
 #include <sstream>
 #include <stdexcept>
 
+#include "ogr_utils.hpp"
+
 using mapnik::datasource;
 using mapnik::parameters;
 
@@ -100,8 +102,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
     mapnik::progress_timer __stats__(std::clog, "ogr_datasource::init");
 #endif
 
-    boost::optional<std::string> file = params.get<std::string>("file");
-    boost::optional<std::string> string = params.get<std::string>("string");
+    const auto file = params.get<std::string>("file");
+    auto string = params.get<std::string>("string");
     if (!string)
         string = params.get<std::string>("inline");
     if (!file && !string)
@@ -115,7 +117,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     else
     {
-        boost::optional<std::string> base = params.get<std::string>("base");
+        const auto base = params.get<std::string>("base");
         if (base)
         {
             dataset_name_ = *base + "/" + *file;
@@ -164,14 +166,14 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
 
     // initialize layer
-    boost::optional<std::string> layer_by_name = params.get<std::string>("layer");
-    boost::optional<mapnik::value_integer> layer_by_index = params.get<mapnik::value_integer>("layer_by_index");
-    boost::optional<std::string> layer_by_sql = params.get<std::string>("layer_by_sql");
+    const auto layer_by_name = params.get<std::string>("layer");
+    const auto layer_by_index = params.get<mapnik::value_integer>("layer_by_index");
+    const auto layer_by_sql = params.get<std::string>("layer_by_sql");
 
     int passed_parameters = 0;
-    passed_parameters += layer_by_name ? 1 : 0;
-    passed_parameters += layer_by_index ? 1 : 0;
-    passed_parameters += layer_by_sql ? 1 : 0;
+    passed_parameters += layer_by_name.has_value() ? 1 : 0;
+    passed_parameters += layer_by_index.has_value() ? 1 : 0;
+    passed_parameters += layer_by_sql.has_value() ? 1 : 0;
 
     if (passed_parameters > 1)
     {
@@ -267,8 +269,8 @@ void ogr_datasource::init(mapnik::parameters const& params)
     OGRLayer* layer = layer_.layer();
 
     // initialize envelope
-    boost::optional<std::string> ext = params.get<std::string>("extent");
-    if (ext && !ext->empty())
+    const auto ext = params.get<std::string>("extent");
+    if (ext.has_value() && !ext->empty())
     {
         extent_.from_string(*ext);
     }
@@ -402,9 +404,9 @@ box2d<double> ogr_datasource::envelope() const
     return extent_;
 }
 
-boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type() const
 {
-    boost::optional<mapnik::datasource_geometry_t> result;
+    std::optional<mapnik::datasource_geometry_t> result;
     if (dataset_ && layer_.is_valid())
     {
         OGRLayer* layer = layer_.layer();
@@ -417,19 +419,19 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
         {
             case wkbPoint:
             case wkbMultiPoint:
-                result.reset(mapnik::datasource_geometry_t::Point);
+                result = mapnik::datasource_geometry_t::Point;
                 break;
             case wkbLinearRing:
             case wkbLineString:
             case wkbMultiLineString:
-                result.reset(mapnik::datasource_geometry_t::LineString);
+                result = mapnik::datasource_geometry_t::LineString;
                 break;
             case wkbPolygon:
             case wkbMultiPolygon:
-                result.reset(mapnik::datasource_geometry_t::Polygon);
+                result = mapnik::datasource_geometry_t::Polygon;
                 break;
             case wkbGeometryCollection:
-                result.reset(mapnik::datasource_geometry_t::Collection);
+                result = mapnik::datasource_geometry_t::Collection;
                 break;
             case wkbNone:
             case wkbUnknown: {
@@ -451,19 +453,19 @@ boost::optional<mapnik::datasource_geometry_t> ogr_datasource::get_geometry_type
                             {
                                 case wkbPoint:
                                 case wkbMultiPoint:
-                                    result.reset(mapnik::datasource_geometry_t::Point);
+                                    result = mapnik::datasource_geometry_t::Point;
                                     break;
                                 case wkbLinearRing:
                                 case wkbLineString:
                                 case wkbMultiLineString:
-                                    result.reset(mapnik::datasource_geometry_t::LineString);
+                                    result = mapnik::datasource_geometry_t::LineString;
                                     break;
                                 case wkbPolygon:
                                 case wkbMultiPolygon:
-                                    result.reset(mapnik::datasource_geometry_t::Polygon);
+                                    result = mapnik::datasource_geometry_t::Polygon;
                                     break;
                                 case wkbGeometryCollection:
-                                    result.reset(mapnik::datasource_geometry_t::Collection);
+                                    result = mapnik::datasource_geometry_t::Collection;
                                     break;
                                 default:
                                     break;

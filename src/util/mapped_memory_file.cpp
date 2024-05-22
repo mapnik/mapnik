@@ -21,9 +21,9 @@ mapped_memory_file::mapped_memory_file(std::string const& file_name)
 #endif
 {
 #if defined(MAPNIK_MEMORY_MAPPED_FILE)
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(file_name, true);
+    const auto memory = mapnik::mapped_memory_cache::instance().find(file_name, true);
 
-    if (memory)
+    if (memory.has_value())
     {
         mapped_region_ = *memory;
         file_.buffer(static_cast<char*>(mapped_region_->get_address()), mapped_region_->get_size());

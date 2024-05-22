@@ -115,8 +115,7 @@ class sqlite_connection
             s << "'" << sqlite3_errmsg(db_) << "'";
         else
             s << "unknown error, lost connection";
-        s << " (" << file_ << ")"
-          << "\nFull sql was: '" << sql << "'";
+        s << " (" << file_ << ")" << "\nFull sql was: '" << sql << "'";
 
         throw mapnik::datasource_exception(s.str());
     }
@@ -160,10 +159,7 @@ class sqlite_connection
         return rc;
     }
 
-    sqlite3* operator*()
-    {
-        return db_;
-    }
+    sqlite3* operator*() { return db_; }
 
     bool load_extension(std::string const& ext_path)
     {

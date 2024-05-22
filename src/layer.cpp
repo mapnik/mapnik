@@ -227,10 +227,10 @@ void layer::set_datasource(datasource_ptr const& ds)
 
 void layer::set_maximum_extent(box2d<double> const& box)
 {
-    maximum_extent_.reset(box);
+    maximum_extent_ = box;
 }
 
-boost::optional<box2d<double>> const& layer::maximum_extent() const
+std::optional<box2d<double>> const& layer::maximum_extent() const
 {
     return maximum_extent_;
 }
@@ -242,10 +242,10 @@ void layer::reset_maximum_extent()
 
 void layer::set_buffer_size(int size)
 {
-    buffer_size_.reset(size);
+    buffer_size_ = size;
 }
 
-boost::optional<int> const& layer::buffer_size() const
+std::optional<int> const& layer::buffer_size() const
 {
     return buffer_size_;
 }
@@ -297,7 +297,7 @@ void layer::set_comp_op(composite_mode_e comp_op)
     comp_op_ = comp_op;
 }
 
-boost::optional<composite_mode_e> layer::comp_op() const
+std::optional<composite_mode_e> layer::comp_op() const
 {
     return comp_op_;
 }

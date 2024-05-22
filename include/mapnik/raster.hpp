@@ -29,11 +29,7 @@
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/util/variant.hpp>
 
-#include <mapnik/warning.hpp>
-MAPNIK_DISABLE_WARNING_PUSH
-#include <mapnik/warning_ignore.hpp>
-#include <boost/optional.hpp>
-MAPNIK_DISABLE_WARNING_POP
+#include <optional>
 
 namespace mapnik {
 
@@ -44,7 +40,7 @@ class raster : private util::noncopyable
     box2d<double> query_ext_;
     image_any data_;
     double filter_factor_;
-    boost::optional<double> nodata_;
+    std::optional<double> nodata_;
 
     template<typename ImageData>
     raster(box2d<double> const& ext, box2d<double> const& query_ext, ImageData&& data, double filter_factor)
@@ -64,7 +60,7 @@ class raster : private util::noncopyable
 
     void set_nodata(double _nodata) { nodata_ = _nodata; }
 
-    boost::optional<double> const& nodata() const { return nodata_; }
+    std::optional<double> const& nodata() const { return nodata_; }
 
     double get_filter_factor() const { return filter_factor_; }
 
