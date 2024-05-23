@@ -81,6 +81,14 @@ void WaitingSpinnerWidget::initialize() {
 
 }
 
+void WaitingSpinnerWidget::setText(QString text)
+{
+    if (label)
+    {
+        label->setText(text);
+    } 
+}
+
 void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
     updatePosition();
     QPainter painter(this);
@@ -127,6 +135,11 @@ void WaitingSpinnerWidget::start() {
         _timer->start();
         _currentCounter = 0;
     }
+
+    if (label)
+    {
+        label->setVisible(true);
+    } 
 }
 
 void WaitingSpinnerWidget::stop() {

@@ -93,8 +93,12 @@ class MapWidget : public QWidget
     void updateScaleFactor(double scale_factor);
     void onMergeStart();
     void onMergeEnd();
+
+    void onClipedCehuiDataStart();
+    void onClipedCehuiDataEnd();
   signals:
     void mapViewChanged();
+    void clipedCehuiDataFinished();
 
   protected:
     void paintEvent(QPaintEvent* ev);

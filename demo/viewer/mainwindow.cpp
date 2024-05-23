@@ -82,6 +82,7 @@ MainWindow::MainWindow()
     createToolBars();
     setWindowTitle(tr("飞渡-路网融合助手"));
     resize(800, 600);
+    connect(mapWidget_, SIGNAL(clipedCehuiDataFinished()),this,SLOT(previewCompleteRoadsResult()));
 }
 
 MainWindow::~MainWindow()
@@ -202,16 +203,20 @@ void MainWindow::finishCompleteRoads(const QString& groupid, const QString& vers
 void MainWindow::startCompleteRoads()
 {
     mapWidget_->roadMerger->clearLayers();
-    mapWidget_->roadMerger->clipedCehuiData();
+    m_completeRoadsAct->setCheckable(false);
+    m_completeRoadsAct->setEnabled(false);
+    mapWidget_->roadMerger->setTaskType(RoadMerger::TaskType::ClipedCehuiData);
+    mapWidget_->roadMerger->start();
+}
+
+void MainWindow::previewCompleteRoadsResult()
+{
     mapWidget_->roadMerger->showClipedCehuiOnMap();
     std::map<std::string, std::vector<cehuidataInfo>> result;
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
     qDebug() << "startCompleteRoads:result size" << result.size();
     emit updateCheckedItems_signal(result);
     m_dockWidget->setVisible(true);
-
-    m_completeRoadsAct->setCheckable(false);
-    m_completeRoadsAct->setEnabled(false);
 }
 
 void MainWindow::loadCehuiTableFields(const QString& cehuiTableIniFilePath)

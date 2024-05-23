@@ -13,6 +13,7 @@
 #include <QThread>
 #include <mapnik/color.hpp>
 #include "cehuidatainfo.hpp"
+#include <atomic>
 
 class RoadMerger : public QThread
 {
@@ -37,6 +38,13 @@ class RoadMerger : public QThread
     int m_mergedSourceIndex;
     int m_clipedCehuiSourceIndex;
 public:
+
+    enum TaskType
+    {
+        MergeRoad=0,
+        ClipedCehuiData=1
+    };
+
     RoadMerger(MapWidget* mapWidget);
 
     // 启动融合过程
@@ -80,12 +88,18 @@ public:
 
     void loadCehuiTableFields(const QString& cehuiTableIniFilePath);
 
+    //0: 融合地图；1：裁剪补录道路
+    void setTaskType(TaskType type);
+
 protected:
     void run();
 
 signals:
     void signalMergeStart();
     void signalMergeEnd();
+
+    void signalClipedCehuiDataStart();
+    void signalClipedCehuiDataEnd();
 
 private:
     void addLineLayer(QString const& name,QString const& baseShp,std::string color, double lineWidth = 1.0);
@@ -97,6 +111,8 @@ private:
     void addSelectedResultBufferLayer();
 
     std::map<std::string, std::string> m_cehuiKey2fieldName;
+
+    std::atomic<int> m_atomicInt; // 原子变量声明
 };
 
 #endif // ROADMERGER_H
