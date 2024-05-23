@@ -82,7 +82,7 @@ MapWidget::MapWidget(QWidget* parent)
     spinner = new WaitingSpinnerWidget(this,"正在进行数据融合中，请稍后...");
     connect(roadMerger, SIGNAL(signalMergeStart()),this,SLOT(onMergeStart()));
     connect(roadMerger, SIGNAL(signalMergeEnd()),this,SLOT(onMergeEnd()));
-    connect(roadMerger, SIGNAL(signalClipedCehuiDataStar()),this,SLOT(onClipedCehuiDataStart()));
+    connect(roadMerger, SIGNAL(signalClipedCehuiDataStart()),this,SLOT(onClipedCehuiDataStart()));
     connect(roadMerger, SIGNAL(signalClipedCehuiDataEnd()),this,SLOT(onClipedCehuiDataEnd()));
 }
 
