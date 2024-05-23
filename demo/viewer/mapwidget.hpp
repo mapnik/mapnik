@@ -49,7 +49,7 @@ class MapWidget : public QWidget
 
     enum eRenderer { AGG, Cairo, Grid };
     WaitingSpinnerWidget* spinner;
-    std::shared_ptr<RoadMerger> roadMerger;
+    RoadMerger* roadMerger;
     ~MapWidget();
     std::shared_ptr<mapnik::Map> map(){ return map_; }
   private:
