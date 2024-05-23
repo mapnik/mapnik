@@ -28,12 +28,13 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include "roadmerger.h"
 
 #ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
 #endif
 
-class RoadMerger;
+//class RoadMerger;
 class WaitingSpinnerWidget;
 class MapWidget : public QWidget
 {

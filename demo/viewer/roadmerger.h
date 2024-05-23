@@ -2,7 +2,7 @@
 #define ROADMERGER_H
 
 
-#include "mapwidget.hpp"
+//#include "mapwidget.hpp"
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/geometry.hpp>
@@ -14,6 +14,9 @@
 #include <mapnik/color.hpp>
 #include "cehuidatainfo.hpp"
 #include <atomic>
+#include <QMap>
+
+class MapWidget;
 
 class RoadMerger : public QThread
 {
