@@ -1,8 +1,6 @@
 #ifndef ROADMERGER_H
 #define ROADMERGER_H
-
-
-//#include "mapwidget.hpp"
+#include "mapwidget.hpp"
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/geometry/boost_adapters.hpp>
 #include <mapnik/geometry.hpp>
@@ -16,7 +14,6 @@
 #include <atomic>
 #include <QMap>
 
-class MapWidget;
 
 class RoadMerger : public QThread
 {

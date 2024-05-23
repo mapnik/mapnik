@@ -1,5 +1,4 @@
 #include "roadmerger.h"
-#include "mapwidget.hpp"
 #include <mapnik/map.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
