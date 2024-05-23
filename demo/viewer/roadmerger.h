@@ -31,7 +31,7 @@ class RoadMerger : public QThread
     std::shared_ptr<mapnik::memory_datasource> selectedResultBufferSource;
 
     QString m_baseShp;
-    QVector<QString> m_cehuiShpList;
+    QMap<QString, QString> m_cehuiDatasource2shp;
     MapWidget* mapWidget;
 
     int m_mergedSourceIndex;
@@ -40,7 +40,7 @@ public:
     RoadMerger(MapWidget* mapWidget);
 
     // 启动融合过程
-    void merge(QString const& base,QVector<QString> const& cehui);
+    void merge(QString const& base,QMap<QString, QString> const& cehuiDatasource2shp);
 
     // 显示路网图层
     void showRoadLayers();
@@ -65,7 +65,7 @@ public:
 
     bool exportCompleteRoads(const QString& completeRoadsFile, const QString& groupId, const QString& version);
 
-    void getCompleteRoadsResult(std::vector<cehuidataInfo>& result);
+    void getCompleteRoadsResult(std::map<std::string, std::vector<cehuidataInfo>>& result);
 
     std::string convertToWKT(const mapnik::geometry::line_string<double>& lineString);
 
@@ -74,7 +74,7 @@ public:
 
     std::string convertToCustomText(const mapnik::geometry::line_string<double>& lineString);
 
-    bool SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& version, const QString& completeRoadsFile);
+    bool SerializeCompleteRoadInfos(const std::map<std::string, std::vector<cehuidataInfo>>& result, const QString& groupId, const QString& version, const QString& completeRoadsFile);
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 

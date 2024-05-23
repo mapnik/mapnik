@@ -41,6 +41,7 @@
 #include <unicode/unistr.h> // ICU的头文件
 #include <atomic>
 #include <cstdint> // 包含int64_t的定义
+#include <QFileInfo>
 
 //BOOST_GEOMETRY_REGISTER_MULTI_LINESTRING(mapnik::geometry::multi_line_string<double>)
 //BOOST_GEOMETRY_REGISTER_MULTI_POLYGON(mapnik::geometry::multi_polygon<double>);
@@ -70,6 +71,10 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 
 #ifndef  DIRECTIONKEY
 #define  DIRECTIONKEY "direction"
+#endif
+
+#ifndef  DATASOURCEKEY
+#define  DATASOURCEKEY "datasource"
 #endif
 
 #ifndef  LonLatPrecision
@@ -210,9 +215,10 @@ void RoadMerger::run()
         ThreadPool pool(16);
         mapnik::auto_cpu_timer t(std::clog, "生成测绘数据buffer took: ");
         std::vector< std::future<MultiPolygonPtr> > results;
-        for (int i=0;i<m_cehuiShpList.size();++i)
+        for (QMap<QString, QString>::const_iterator iter = m_cehuiDatasource2shp.constBegin(); 
+            iter != m_cehuiDatasource2shp.constEnd(); ++iter)
         {
-            QString cehuiShp = m_cehuiShpList[i];
+            QString cehuiShp = iter.value();
             std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
             mapnik::box2d<double> subBox = cehuiDS->envelope();
             cehuiBoxList.push_back(subBox);
@@ -284,9 +290,9 @@ void RoadMerger::run()
 }
 
 // 启动融合过程
-void RoadMerger::merge(QString const& base,QVector<QString> const& cehuishpList){
+void RoadMerger::merge(QString const& base,QMap<QString, QString> const& cehuiDatasource2shp){
     m_baseShp = base;
-    m_cehuiShpList = cehuishpList;
+    m_cehuiDatasource2shp = cehuiDatasource2shp;
     unsigned width = mapWidget->width();
     unsigned height = mapWidget->height();
     std::shared_ptr<mapnik::Map> map(new mapnik::Map(width, height));
@@ -305,13 +311,14 @@ void RoadMerger::showRoadLayers()
 
     // // 显示测绘路网数据
     // addLineLayer("cehui",cehuiShp,"green",2.0);
-    for (int i=0;i<m_cehuiShpList.size();++i)
+    for (QMap<QString, QString>::const_iterator iter = m_cehuiDatasource2shp.constBegin(); 
+    iter != m_cehuiDatasource2shp.constEnd(); ++iter)
     {
-        QString cehuiShp = m_cehuiShpList[i];
-        QString name = QString("cehui_%1").arg(i);
+        QString name = iter.key();
+        QString cehuiShp = iter.value();
         addLineLayer(name,cehuiShp,"green",2.0);
+        index++;
     }
-    index += m_cehuiShpList.size();
     // 显示融合图层
     addMergedLayer();
     index++;
@@ -336,10 +343,11 @@ void RoadMerger::showClipedCehuiOnMap()
     index++;
     // // 显示测绘路网数据
     // addLineLayer("cehui",cehuiShp,"green",2.0);
-    for (int i=0;i<m_cehuiShpList.size();++i)
+    for (QMap<QString, QString>::const_iterator iter = m_cehuiDatasource2shp.constBegin(); 
+    iter != m_cehuiDatasource2shp.constEnd(); ++iter)
     {
-        QString cehuiShp = m_cehuiShpList[i];
-        QString name = QString("cehui_%1").arg(i);
+        QString name = iter.key();
+        QString cehuiShp = iter.value();
         addLineLayer(name,cehuiShp,"green",2.0);
         index++;
     }
@@ -416,7 +424,7 @@ std::string RoadMerger::convertToWKT(const mapnik::geometry::multi_line_string<d
 
 
 
-bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& result, const QString& groupId, const QString& version, const QString& completeRoadsFile)
+bool RoadMerger::SerializeCompleteRoadInfos(const std::map<std::string, std::vector<cehuidataInfo>>& result, const QString& groupId, const QString& version, const QString& completeRoadsFile)
 {
     qDebug() << "SerializeCompleteRoadInfos:: result size:"<< result.size();
 
@@ -447,38 +455,34 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
     // 添加fileCompletes
     Value fileCompletes(kArrayType);
 
-    for(int i=0;i<result.size();++i)
-    {
 
-        const cehuidataInfo& info = result[i];
-        Value fileComplete(kObjectType);
+    for (const auto& pair : result) {
+        // 遍历与键关联的vector
+        for (const auto& info : pair.second) {
+            Value fileComplete(kObjectType);
+            strValue = info.NAME;
+            jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+            fileComplete.AddMember("name", jsonValue, allocator);
 
-        strValue = info.ID;
+            strValue = info.geometryWkt;
+            jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+            fileComplete.AddMember("info", jsonValue, allocator);
 
-        // std::cout<<"info.ID: "<<strValue<<std::endl;
+            strValue = info.LEVEL;
+            jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+            fileComplete.AddMember("level", jsonValue, allocator);
 
-        strValue = info.NAME;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("name", jsonValue, allocator);
+            strValue = info.WIDTH;
+            jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+            fileComplete.AddMember("width", jsonValue, allocator);
 
-        strValue = info.geometryWkt;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("info", jsonValue, allocator);
+            // strValue = info.DIRECTION;
+            // jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
+            // fileComplete.AddMember("bidirectional", jsonValue, allocator);
+            fileComplete.AddMember("bidirectional", 1, allocator);
 
-        strValue = info.LEVEL;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("level", jsonValue, allocator);
-
-        strValue = info.WIDTH;
-        jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        fileComplete.AddMember("width", jsonValue, allocator);
-
-        // strValue = info.DIRECTION;
-        // jsonValue.SetString(strValue.c_str(), strValue.size(),allocator);
-        // fileComplete.AddMember("bidirectional", jsonValue, allocator);
-        fileComplete.AddMember("bidirectional", 1, allocator);
-
-        fileCompletes.PushBack(fileComplete, allocator);
+            fileCompletes.PushBack(fileComplete, allocator);
+        }
     }
 
     updateInfo.AddMember("fileCompletes", fileCompletes, allocator);
@@ -517,7 +521,7 @@ bool RoadMerger::SerializeCompleteRoadInfos(const std::vector<cehuidataInfo>& re
     }
 }
 
-void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
+void RoadMerger::getCompleteRoadsResult(std::map<std::string, std::vector<cehuidataInfo>>& result)
 {
     std::string nameFieldName = m_cehuiKey2fieldName[NAMEKEY];
     std::string dirFieldName = m_cehuiKey2fieldName[DIRECTIONKEY];
@@ -525,6 +529,7 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
     query q(clipedCehuiSource->envelope());
     q.add_property_name(NeedAddCehui_RESULT);
     q.add_property_name(IDKEY);
+    q.add_property_name(DATASOURCEKEY);
     q.add_property_name(nameFieldName);
     q.add_property_name(dirFieldName);
     auto fs = clipedCehuiSource->features(q);
@@ -535,6 +540,8 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
             info.ID = feat->get(IDKEY).to_string();
             info.NAME = feat->get(nameFieldName).to_string();
             info.DIRECTION = feat->get(dirFieldName).to_string();
+            std::string datasourceName = feat->get(DATASOURCEKEY).to_string();
+
             geometry::geometry<double>& geo = feat->get_geometry();
             if(geo.is<geometry::line_string<double> >())
             {
@@ -547,7 +554,7 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
                 info.geometryWkt = convertToWKT(multilineString);
             }
 
-            result.push_back(info);
+            result[datasourceName].push_back(info);
         }
         feat = fs->next();
     }
@@ -555,7 +562,7 @@ void RoadMerger::getCompleteRoadsResult(std::vector<cehuidataInfo>& result)
 
 bool RoadMerger::exportCompleteRoads(const QString& completeRoadsFile, const QString& groupId, const QString& version)
 {
-    std::vector<cehuidataInfo> result;
+    std::map<std::string, std::vector<cehuidataInfo>> result;
     getCompleteRoadsResult(result);
     return SerializeCompleteRoadInfos(result, groupId, version, completeRoadsFile);
 }
@@ -978,9 +985,11 @@ void RoadMerger::clipedCehuiData()
     generateResultBuffer(mergedResultBuffer);
     if(mergedResultBuffer.size())
     {
-        for (int i=0;i<m_cehuiShpList.size();++i)
+        for (QMap<QString, QString>::const_iterator iter = m_cehuiDatasource2shp.constBegin(); 
+            iter != m_cehuiDatasource2shp.constEnd(); ++iter)
         {
-            QString cehuiShp = m_cehuiShpList[i];
+            QString cehuiShp = iter.value();
+            QString dataSourceName = iter.key(); 
             std::shared_ptr<datasource> cehuiDS = readShp(cehuiShp.toStdString());
             //
             query q(cehuiDS->envelope());
@@ -1017,7 +1026,16 @@ void RoadMerger::clipedCehuiData()
                                icu::UnicodeString unicodeName = icu::UnicodeString::fromUTF8(icu::StringPiece(nameStr.c_str()));
                                mapnik::value nameVal = unicodeName;
                                feature->put_new(nameFieldName, nameVal);
+
+                               //datasource
+                               std::string datasourceStr = dataSourceName.toStdString();
+                               icu::UnicodeString unicodeDatasource= icu::UnicodeString::fromUTF8(icu::StringPiece(datasourceStr.c_str()));
+                               mapnik::value datasourceVal = unicodeDatasource;
+                               feature->put_new(DATASOURCEKEY, datasourceVal);
+
+                               //direct
                                feature->put_new(dirFieldName,cloneFeat->get(dirFieldName));
+                               //NeedAddCehui_RESULT
                                feature->put_new(NeedAddCehui_RESULT, 1);
                                feature->set_geometry(mapnik::geometry::geometry<double>(lines.at(i)));
                                result.emplace_back(feature);

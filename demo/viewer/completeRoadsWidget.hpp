@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include "cehuidatainfo.hpp"
 #include "groupinfo.hpp"
+#include "treewidget.hpp"
 
 class CompleteRoadsWidget : public QWidget {
     Q_OBJECT
@@ -22,7 +23,7 @@ signals:
     void exportCompleteRoads_signal(const QString& groupid, const QString& version);
 
 public slots:
-    void updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList);
+    void updateCheckedItems(const std::map<std::string, std::vector<cehuidataInfo>>& cehuidataInfoList);
     void OnItemChanged(QTreeWidgetItem* item,int column);
     void updateGroupidComboBox(const std::vector<GroupInfo>& groupInfoList);
     void updateVersionComboBox(int index);
@@ -31,10 +32,10 @@ private slots:
     void submitCheckedItems();
 
 private:
-    QTreeWidget* m_treeWidget;
+    TreeWidget* m_treeWidget;
     int m_idIndexInTreeWidget;
     int m_nameIndexInTreeWidget;
-    int m_checkedIndexInTreeWidget;
+    //int m_checkedIndexInTreeWidget;
 
     QComboBox *m_groupidComboBox;
     QComboBox *m_groupversionComboBox;

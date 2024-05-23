@@ -46,7 +46,6 @@
 #include <fstream>
 #include <map>
 #include "rapidjson/document.h"
-#include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include <QMessageBox>
@@ -205,7 +204,7 @@ void MainWindow::startCompleteRoads()
     mapWidget_->roadMerger->clearLayers();
     mapWidget_->roadMerger->clipedCehuiData();
     mapWidget_->roadMerger->showClipedCehuiOnMap();
-    std::vector<cehuidataInfo> result;
+    std::map<std::string, std::vector<cehuidataInfo>> result;
     mapWidget_->roadMerger->getCompleteRoadsResult(result);
     qDebug() << "startCompleteRoads:result size" << result.size();
     emit updateCheckedItems_signal(result);
@@ -369,7 +368,7 @@ void MainWindow::createActions()
     connect(this, SIGNAL(afterSave_signal()), this, SLOT(afterSave()));
     connect(m_completeRoadsAct, SIGNAL(triggered()), this, SLOT(startCompleteRoads()));
 
-    connect(this, SIGNAL(updateCheckedItems_signal(const std::vector<cehuidataInfo>&)), m_completeRoadsWidget, SLOT(updateCheckedItems(const std::vector<cehuidataInfo>&)));
+    connect(this, SIGNAL(updateCheckedItems_signal(const std::map<std::string, std::vector<cehuidataInfo>>&)), m_completeRoadsWidget, SLOT(updateCheckedItems(const std::map<std::string, std::vector<cehuidataInfo>>&)));
     connect(m_completeRoadsWidget, SIGNAL(itemCheckBoxChanged_signal(const QString&, int)), this, SLOT(OnItemCheckBoxChanged(const QString&, int)));
     connect(m_completeRoadsWidget, SIGNAL(exportCompleteRoads_signal(const QString&, const QString&)), this, SLOT(finishCompleteRoads(const QString&, const QString&)));
 
@@ -420,7 +419,7 @@ std::shared_ptr<mapnik::Map> MainWindow::get_map()
     return mapWidget_->getMap();
 }
 
-void MainWindow::merge(QString const& base, QVector<QString> const& cehui)
+void MainWindow::merge(QString const& base, QMap<QString, QString> const& cehui)
 {
     if(mapWidget_ && mapWidget_->roadMerger)
     {

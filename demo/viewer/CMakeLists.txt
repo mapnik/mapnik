@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
     completeRoadsWidget.hpp
     completeRoadsWidget.cpp
     groupinfo.hpp
+    treewidget.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

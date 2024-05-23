@@ -5,11 +5,12 @@
 CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);
     QPushButton *submitButton = new QPushButton("提交选中项", this);
-    m_treeWidget = new QTreeWidget(this);
+    m_treeWidget = new TreeWidget(this);
 
+    //m_checkedIndexInTreeWidget = 0;
+    m_nameIndexInTreeWidget = 0;
     m_idIndexInTreeWidget = 0;
-    m_nameIndexInTreeWidget = 1;
-    m_checkedIndexInTreeWidget = 2;
+    
 
     // 将列表控件和按钮添加到布局中
     m_groupidComboBox = new QComboBox(this);
@@ -47,12 +48,12 @@ void CompleteRoadsWidget::updateVersionComboBox(int index)
 
 void CompleteRoadsWidget::OnItemChanged(QTreeWidgetItem* item,int column)
 {
-    if (column == m_checkedIndexInTreeWidget) { // 指定复选框所在的列
+    if (column == m_nameIndexInTreeWidget) { // 指定复选框所在的列
         // 获取复选框状态
         Qt::CheckState state = item->checkState(column);
 
         // 获取其他列的值
-        QString id = item->text(m_idIndexInTreeWidget);
+        QString id = item->data(m_idIndexInTreeWidget, Qt::UserRole).toString();
 
         // 根据复选框状态和其他列的值执行操作
         if (state == Qt::Checked)
@@ -87,31 +88,37 @@ void CompleteRoadsWidget::updateGroupidComboBox(const std::vector<GroupInfo>& gr
     }
 }
 
-void CompleteRoadsWidget::updateCheckedItems(const std::vector<cehuidataInfo>& cehuidataInfoList)
+void CompleteRoadsWidget::updateCheckedItems(const std::map<std::string, std::vector<cehuidataInfo>>& cehuidataInfoMap)
 {
-    qDebug() << "CompleteRoadsWidget::updateCheckedItems:cehuidataInfoList size " << cehuidataInfoList.size();
+    qDebug() << "CompleteRoadsWidget::updateCheckedItems:cehuidataInfoMap size " << cehuidataInfoMap.size();
     m_treeWidget->clear();
-    m_treeWidget->setColumnCount(3); // 设置列数为4
+    m_treeWidget->setColumnCount(1); // 设置列数为1
     QStringList headers;
-    headers << "ID" << "名称" <<"选中状态";
+    headers << "名称";
     m_treeWidget->setHeaderLabels(headers); // 设置标题
 
     // 设置列宽度自适应
     m_treeWidget->header()->setStretchLastSection(false); // 禁止最后一列自动填充剩余空间
     m_treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents); // 设置列宽度自适应内容
 
-    for(int i=0;i<cehuidataInfoList.size();++i)
-    {
-        const cehuidataInfo& cehuidata = cehuidataInfoList[i];
-        // 添加一行数据
-        QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
+    for (const auto& pair : cehuidataInfoMap) {
+        // 创建一个父节点
+        QTreeWidgetItem* parentItem = new QTreeWidgetItem(m_treeWidget);
+        parentItem->setText(m_nameIndexInTreeWidget, QString::fromStdString(pair.first)); // 设置父节点的文本为map的键
+        parentItem->setFlags(parentItem->flags() | Qt::ItemIsUserCheckable); // 设置为可复选
+        parentItem->setCheckState(m_nameIndexInTreeWidget, Qt::Checked); // 默认选中
 
-    //    std::cout<<"cehuidata.ID:"<<cehuidata.ID<<std::endl;
-    //    std::cout<<"cehuidata.NAME:"<<cehuidata.NAME<<std::endl;
-
-        item->setText(m_idIndexInTreeWidget, cehuidata.ID.c_str());
-        item->setText(m_nameIndexInTreeWidget, cehuidata.NAME.c_str());
-        item->setCheckState(m_checkedIndexInTreeWidget, Qt::Checked); // 在第三列添加未选中的复选框
+        // 遍历与键关联的vector
+        for (const auto& cehuidata : pair.second) {
+            // 为每个cehuidataInfo对象创建一个子节点
+            QTreeWidgetItem* childItem = new QTreeWidgetItem(parentItem);
+            QVariant idVar;
+            idVar.setValue(QString(cehuidata.ID.c_str()));
+            childItem->setData(m_idIndexInTreeWidget, Qt::UserRole, idVar);
+            childItem->setText(m_nameIndexInTreeWidget, cehuidata.NAME.c_str());
+            childItem->setFlags(childItem->flags() | Qt::ItemIsUserCheckable); // 设置为可复选
+            childItem->setCheckState(m_nameIndexInTreeWidget, Qt::Checked); // 默认选中
+        }
     }
 }
 

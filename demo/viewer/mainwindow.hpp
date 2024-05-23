@@ -48,14 +48,14 @@ class MainWindow : public QMainWindow
     void setMidLineJsonPath(const QString& midLineJsonPath);
     void setCompleteRoadsFile(const QString& completeRoadsFilePath);
     bool updateGroupidComboBox(const QString& groupidsFilePath);
-    void merge(QString const& base,QVector<QString> const& cehui);
+    void merge(QString const& base, QMap<QString, QString> const& cehui);
 
   protected:
     void closeEvent(QCloseEvent* event);
 
   signals:
      void afterSave_signal();
-     void updateCheckedItems_signal(const std::vector<cehuidataInfo>& cehuidataInfoList);
+     void updateCheckedItems_signal(const std::map<std::string, std::vector<cehuidataInfo>>& cehuidataInfoList);
      void completeRoads_quit_signal();
 
   public slots:

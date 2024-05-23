@@ -28,13 +28,18 @@
 #include "roadmerger.h"
 #include "ThreadPool.h"
 #include <QTimer>
+#include "rapidjson/document.h"
+#include "rapidjson/error/en.h"
+#include <iostream>
+#include <fstream>
+
 
 namespace fd{
 
 struct MergemapParam
 {
   QString basemap;
-  QVector<QString> cehuipathList;
+  QMap<QString, QString> cehuiDataSource2path;
   QString featureid2osmidPath;
   QString midlinePath;
   QString appBinDir;
@@ -42,14 +47,60 @@ struct MergemapParam
   QString completeRoadsPath;
 };
 
+
+QMap<QString, QString> loadCehuiDataSource2path(const QString& cehuijsonpath)
+{
+    QMap<QString, QString> resultMap;
+    std::ifstream file(cehuijsonpath.toStdString());
+    if (file.is_open()) {
+        // 读取文件内容到一个字符串中
+        std::string content((std::istreambuf_iterator<char>(file)),
+                            (std::istreambuf_iterator<char>()));
+        file.close();
+
+        // 使用rapidjson的Document类解析字符串
+        rapidjson::Document doc;
+        doc.Parse<rapidjson::kParseStopWhenDoneFlag>(content.c_str());
+
+        // 检查是否是有效的json文档
+        if (doc.HasParseError()) {
+            // 处理错误情况
+            fprintf(stderr, "\nHasParseError: %s(pos: %u)\n",
+            rapidjson::GetParseError_En(doc.GetParseError()),
+            (unsigned)(doc.GetErrorOffset()));
+
+            return resultMap;
+        }
+
+        // 确保它是一个数组
+        if (doc.IsArray()) {
+            // 遍历数组
+            for (rapidjson::SizeType i = 0; i < doc.Size(); i++) {
+                // 获取数组中的对象
+                const rapidjson::Value& obj = doc[i];
+
+                // 确保对象包含"sourcename"和"path"
+                if (obj.HasMember("sourcename") && obj.HasMember("path")) {
+                    QString sourceName = QString::fromStdString(obj["sourcename"].GetString());
+                    QString path = QString::fromStdString(obj["path"].GetString());
+                    // 将解析的数据添加到QMap中
+                    resultMap.insert(sourceName, path);
+                }
+            }
+        }
+        return resultMap;
+    }
+    return resultMap;
+}
+
 void loadMergemapIniFile(const QString& mergemapIniFile, MergemapParam& mergParam)
 {
   QSettings settings(mergemapIniFile, QSettings::IniFormat);
   // 读取数据表字段名配置
   settings.beginGroup("mergemap");
   mergParam.basemap = settings.value("basemap", "basemap.shp").toString();
-  QString cehuipathList = settings.value("cehuipath", "cehui.shp").toString();
-  mergParam.cehuipathList = cehuipathList.split(';',QString::SkipEmptyParts).toVector();
+  QString cehuijsonpath = settings.value("cehuijsonpath", "cehui.json").toString();
+  mergParam.cehuiDataSource2path = loadCehuiDataSource2path(cehuijsonpath);
   mergParam.featureid2osmidPath = settings.value("featureid2osmidPath", "featureid2osmid.json").toString();
   mergParam.midlinePath = settings.value("midlinePath", "midline.json").toString();
   mergParam.appBinDir = settings.value("appBinDir", "./").toString();
@@ -133,7 +184,7 @@ int main(int argc, char** argv)
         // window.mapWidget()->roadMerger->merge(mergParam.basemap,mergParam.cehuipath);
         // Quit application when work is finished
         QObject::connect(&window, SIGNAL(completeRoads_quit_signal()), &app, SLOT(quit()));
-        window.merge(mergParam.basemap, mergParam.cehuipathList);
+        window.merge(mergParam.basemap, mergParam.cehuiDataSource2path);
         return app.exec();
     } catch (std::exception const& ex)
     {
