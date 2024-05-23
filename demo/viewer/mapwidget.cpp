@@ -80,12 +80,10 @@ MapWidget::MapWidget(QWidget* parent)
     roadMerger = std::make_shared<RoadMerger>(this);
 //    roadMerger
     spinner = new WaitingSpinnerWidget(this,"正在进行数据融合中，请稍后...");
-    connect(roadMerger, &RoadMerger::signalMergeStart,this,&MapWidget::onMergeStart);
-    connect(roadMerger, &RoadMerger::signalMergeEnd,this,&MapWidget::onMergeEnd);
-
-
-    connect(roadMerger, &RoadMerger::signalClipedCehuiDataStart,this,&MapWidget::onClipedCehuiDataStart);
-    connect(roadMerger, &RoadMerger::signalClipedCehuiDataEnd,this,&MapWidget::onClipedCehuiDataEnd);
+    connect(roadMerger, SIGNAL(signalMergeStart()),this,SLOT(onMergeStart()));
+    connect(roadMerger, SIGNAL(signalMergeEnd()),this,SLOT(onMergeEnd()));
+    connect(roadMerger, SIGNAL(signalClipedCehuiDataStar()),this,SLOT(onClipedCehuiDataStart()));
+    connect(roadMerger, SIGNAL(signalClipedCehuiDataEnd()),this,SLOT(onClipedCehuiDataEnd()));
 }
 
 MapWidget::~MapWidget()
