@@ -35,9 +35,6 @@ MAPNIK_DISABLE_WARNING_PUSH
 #include <boost/interprocess/file_mapping.hpp>
 MAPNIK_DISABLE_WARNING_POP
 
-#include <locale>
-#include <codecvt>
-
 namespace mapnik {
 
 template class singleton<mapped_memory_cache, CreateStatic>;
@@ -85,14 +82,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
     {
         try
         {
-            // boost::interprocess::file_mapping mapping(uri.c_str(), boost::interprocess::read_only);
-            // UTF-8字符串
-            std::string utf8_string = uri;
-            // 创建用于转换的wstring_convert对象
-            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            // 将UTF-8转换为UTF-16
-            std::wstring utf16_string = converter.from_bytes(utf8_string);
-            boost::interprocess::file_mapping mapping(utf16_string.c_str(),boost::interprocess::read_only);
+            boost::interprocess::file_mapping mapping(uri.c_str(), boost::interprocess::read_only);
             mapped_region_ptr region(
               std::make_shared<boost::interprocess::mapped_region>(mapping, boost::interprocess::read_only));
             result.reset(region);
