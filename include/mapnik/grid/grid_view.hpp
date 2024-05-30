@@ -97,22 +97,7 @@ class hit_grid_view
         , features_(rhs.features_)
     {}
 
-    hit_grid_view<T>& operator=(hit_grid_view<T> const& rhs)
-    {
-        if (&rhs == this)
-            return *this;
-        x_ = rhs.x_;
-        y_ = rhs.y_;
-        width_ = rhs.width_;
-        height_ = rhs.height_;
-        data_ = rhs.data_;
-        key_ = rhs.key_;
-        id_name_ = rhs.id_name_;
-        names_ = rhs.names_;
-        f_keys_ = rhs.f_keys_;
-        features_ = rhs.features_;
-        return *this;
-    }
+    hit_grid_view<T>& operator=(hit_grid_view<T> const& rhs) = delete;
 
     inline unsigned x() const { return x_; }
 
