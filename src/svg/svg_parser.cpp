@@ -293,7 +293,7 @@ bool parse_font_size(T& parser, char const* str)
     css_relative_size relative;
 
     std::size_t size = parser.font_sizes_.size();
-    double parent_font_size = size > 1 ? parser.font_sizes_[size - 2] : 10.0;
+    double parent_font_size = size > 1 ? parser.font_sizes_[size - 2] : 16.0; // medium/16px
     const char* cur = str; // phrase_parse mutates the first iterator
     const char* end = str + std::strlen(str);
 
@@ -1645,7 +1645,8 @@ svg_parser::svg_parser(svg_converter_type& path, bool strict)
     , css_style_(false)
     , err_handler_(strict)
 {
-    font_sizes_.push_back(10.0);
+    font_sizes_.push_back(16.0); // default medium/16px
+    //https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#values
 }
 
 svg_parser::~svg_parser() {}
