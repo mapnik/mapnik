@@ -98,6 +98,8 @@ void render_thunk_extractor::operator()(markers_symbolizer const& sym) const
 
 void render_thunk_extractor::operator()(text_symbolizer const& sym) const
 {
+    if (!mapnik::get<text_placements_ptr>(sym, keys::text_placements_))
+        return;
     auto helper = std::make_unique<text_symbolizer_helper>(sym,
                                                            feature_,
                                                            vars_,
@@ -116,6 +118,8 @@ void render_thunk_extractor::operator()(text_symbolizer const& sym) const
 
 void render_thunk_extractor::operator()(shield_symbolizer const& sym) const
 {
+    if (!mapnik::get<text_placements_ptr>(sym, keys::text_placements_))
+        return;
     auto helper = std::make_unique<text_symbolizer_helper>(sym,
                                                            feature_,
                                                            vars_,

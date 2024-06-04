@@ -51,7 +51,8 @@ void grid_renderer<T>::process(shield_symbolizer const& sym,
     auto transform = get_optional<transform_type>(sym, keys::geometry_transform);
     if (transform)
         evaluate_transform(tr, feature, common_.vars_, *transform, common_.scale_factor_);
-
+    if (!mapnik::get<text_placements_ptr>(sym, keys::text_placements_))
+        return;
     text_symbolizer_helper helper(sym,
                                   feature,
                                   common_.vars_,
