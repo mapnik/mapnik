@@ -312,7 +312,7 @@ class MAPNIK_DECL Map : boost::equality_comparable<Map>
     void set_background(color const& c);
 
     /*! \brief Get the map background color
-     *  @return Background color as boost::optional
+     *  @return Background color as std::optional
      *  object
      */
     std::optional<color> const& background() const;
