@@ -126,7 +126,6 @@ class postgis_datasource : public datasource
     mapnik::value_double twkb_rounding_adjustment_;
     mapnik::value_double simplify_snap_ratio_;
     mapnik::value_double simplify_dp_ratio_;
-    mapnik::value_double simplify_prefilter_;
     bool simplify_dp_preserve_;
     mapnik::value_double simplify_clip_resolution_;
     std::regex re_tokens_;

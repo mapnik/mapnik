@@ -89,7 +89,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
     // See https://github.com/mapnik/mapnik/issues/1639
     // See http://trac.osgeo.org/postgis/ticket/2093
     simplify_dp_ratio_(*params_.get<mapnik::value_double>("simplify_dp_ratio", 1.0 / 20.0))
-    , simplify_prefilter_(*params_.get<mapnik::value_double>("simplify_prefilter", 0.0))
     , simplify_dp_preserve_(false)
     , simplify_clip_resolution_(*params_.get<mapnik::value_double>("simplify_clip_resolution", 0.0))
     , re_tokens_("!(@?\\w+)!")
