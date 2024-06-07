@@ -51,7 +51,7 @@ layer_info_dialog::layer_info_dialog(mapnik::layer& lay, QWidget* parent)
         int index = 0;
         for (pos = ps.begin(); pos != ps.end(); ++pos)
         {
-            boost::optional<std::string> result;
+            std::optional<std::string> result;
             mapnik::util::apply_visitor(mapnik::value_extractor_visitor<std::string>(result), pos->second);
             if (result)
             {
