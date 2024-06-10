@@ -1,6 +1,6 @@
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2021 Artem Pavlenko
+# Copyright (C) 2024 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@ import re
 import platform
 from glob import glob
 from copy import copy
-from subprocess import Popen, PIPE
+from subprocess import run, Popen, PIPE
 from SCons.SConf import SetCacheMode
 import pickle
 
@@ -949,54 +949,17 @@ int main()
     return ret
 
 def CheckProjData(context, silent=False):
-
     if not silent:
         context.Message('Checking for PROJ_LIB directory...')
-    ret, out = context.TryRun("""
+    result = run(['pkg-config', 'proj', '--variable=datadir'], stdout=PIPE)
+    value = result.stdout.decode('utf-8').strip()
 
-#include <proj.h>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <fstream>
-
-std::vector<std::string> split_searchpath(std::string const& paths)
-{
-    std::vector<std::string> output;
-    std::stringstream ss(paths);
-    std::string path;
-
-    for( std::string path;std::getline(ss, path, ':');)
-    {
-        output.push_back(path);
-    }
-    return output;
-}
-
-int main()
-{
-    PJ_INFO info = proj_info();
-    std::string result = info.searchpath;
-    for (auto path : split_searchpath(result))
-    {
-        std::ifstream file(path + "/proj.db");
-        if (file)
-        {
-            std::cout << path;
-            return 0;
-        }
-    }
-    return -1;
-}
-
-""", '.cpp')
-    value = out.strip()
     if silent:
         context.did_show_result=1
-    if ret:
-        context.Result('proj_info.searchpath returned %s' % value)
+    if os.path.exists(value):
+        context.Result('`pkg-config proj --variable=datadir` returned:\n%s ' % value)
     else:
+        value = None
         context.Result('Failed to detect (mapnik-config will have null value)')
     return value
 
