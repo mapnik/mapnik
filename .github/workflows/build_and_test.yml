@@ -38,7 +38,7 @@ jobs:
           - macos-13
           - macos-14
           - ubuntu-latest
-          - windows-latest
+          - windows-19
         cxx-standard:
           - 17
         include:
@@ -48,7 +48,7 @@ jobs:
             mono: mono
           - os: ubuntu-latest
             mono: mono
-          - os: windows-latest
+          - os: windows-19
 
     runs-on: ${{ matrix.os }}
 
