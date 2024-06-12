@@ -67,7 +67,7 @@ MainWindow::MainWindow()
     // 创建 QDockWidget 并设置特性
     m_dockWidget =  new QDockWidget(this);
     m_dockWidget->setWidget(m_completeRoadsWidget);
-    m_dockWidget->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    m_dockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
     // 将 QDockWidget 添加到 QMainWindow
     this->addDockWidget(Qt::LeftDockWidgetArea, m_dockWidget);
@@ -406,6 +406,7 @@ void MainWindow::createToolBars()
     m_fileToolBar->addAction(m_panAct);
     m_fileToolBar->addAction(m_saveAct);
     m_fileToolBar->addAction(m_completeRoadsAct);
+    m_fileToolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 }
 
 void MainWindow::zoom_all()
