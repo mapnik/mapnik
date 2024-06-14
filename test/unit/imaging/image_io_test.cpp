@@ -23,11 +23,6 @@ MAPNIK_DISABLE_WARNING_POP
 #include <mapnik/filesystem.hpp>
 #include <mapnik/util/mapped_memory_file.hpp>
 
-inline void make_directory(std::string const& dir)
-{
-    mapnik::fs::create_directories(dir);
-}
-
 namespace {
 template<typename T>
 void check_tiny_png_image_quantising(T const& im)
@@ -182,8 +177,9 @@ TEST_CASE("image io")
         supported_types.push_back(std::make_tuple("webp", "webp"));
 #endif
 
-        std::string directory_name("/tmp/mapnik-tests/");
-        make_directory(directory_name);
+        std::string directory_name = mapnik::fs::path(mapnik::fs::temp_directory_path() / "mapnik-tests").string();
+
+        mapnik::fs::create_directories(directory_name);
         REQUIRE(mapnik::util::exists(directory_name));
 
         for (auto const& info : supported_types)
@@ -191,7 +187,7 @@ TEST_CASE("image io")
             std::string extension;
             std::string format;
             std::tie(extension, format) = info;
-            std::string filename = (boost::format(directory_name + "mapnik-%1%.%2%") % named_color % extension).str();
+            std::string filename = (boost::format(directory_name + "/mapnik-%1%.%2%") % named_color % extension).str();
             mapnik::save_to_file(im, filename);
             std::string str = mapnik::save_to_string(im, format);
             std::ostringstream ss;
