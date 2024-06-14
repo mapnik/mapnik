@@ -15,7 +15,7 @@ env:
 jobs:
   checkSource:
     name: Check Source Code
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -35,20 +35,17 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-13
           - macos-14
-          - ubuntu-latest
-          - windows-2019
+          - ubuntu-24.04
+          - windows-2022
         cxx-standard:
           - 17
         include:
-          - os: macos-13
-            mono: mono
           - os: macos-14
             mono: mono
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             mono: mono
-          - os: windows-2019
+          - os: windows-2022
 
     runs-on: ${{ matrix.os }}
 
@@ -88,7 +85,7 @@ jobs:
         run: |
           LC_RUNNER_OS=$(echo "${RUNNER_OS}" | perl -ne "print lc")
           if [ "${RUNNER_OS}" == "macOS" ]; then
-            MACOS_ARCH=${{ (matrix.os == 'macos-14' || matrix.os == 'macos-latest') && 'arm64' || 'x64' }}
+            MACOS_ARCH=${{ matrix.os == 'macos-14' && 'arm64' || 'x64' }}
             echo "PRESET=${LC_RUNNER_OS}-ci-${MACOS_ARCH}" >> ${GITHUB_ENV}
           else
             echo "PRESET=${LC_RUNNER_OS}-ci" >> ${GITHUB_ENV}
