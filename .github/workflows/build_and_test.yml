@@ -15,7 +15,7 @@ env:
 jobs:
   checkSource:
     name: Check Source Code
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -36,14 +36,14 @@ jobs:
       matrix:
         os:
           - macos-14
-          - ubuntu-24.04
+          - ubuntu-22.04
           - windows-2022
         cxx-standard:
           - 17
         include:
           - os: macos-14
             mono: mono
-          - os: ubuntu-24.04
+          - os: ubuntu-22.04
             mono: mono
           - os: windows-2022
 
