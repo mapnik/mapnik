@@ -7,11 +7,11 @@ Developers: Please commit along with changes.
 For a complete change history, see the git log.
 
 
-## UNRELEASED
+## Mapnik 4.0.0
 
 #### Notice
 
-- Mapnik now requires C++14 compliant compiler (`-std=c++14`)
+- Mapnik now requires C++17 compliant compiler (`-std=c++17`)
 - Mapnik now supports CMake as a build system. See [#4191](https://github.com/mapnik/mapnik/pull/4191) and the [docs](https://github.com/mapnik/mapnik/blob/master/docs/cmake-usage.md) for more info.
 
 #### Breaking Changes
