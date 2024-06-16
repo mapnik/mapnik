@@ -97,7 +97,7 @@ step "creating tarball of ${TARBALL_COMPRESSED}"
 cd ../
 tar cjf ${TARBALL_COMPRESSED} ${TARBALL_NAME}/
 step "uploading to github"
-# https://developer.github.com/v3/repos/releases/#create-a-release
+# https://developer.github.com/v3/repos/rseleases/#create-a-release
 IS_PRERELEASE=false
 if [[ ${MAPNIK_VERSION} =~ 'rc' ]] || [[ ${MAPNIK_VERSION} =~ 'alpha' ]]; then
   IS_PRERELEASE=true
@@ -105,27 +105,31 @@ fi
 IS_DRAFT=true
 step "creating a draft release"
 
-export CHANGELOG_REF=$(python -c "print '${MAPNIK_VERSION}'.replace('.','').replace('v','').split('-')[0]")
+export CHANGELOG_REF=$(python3 -c "print('${MAPNIK_VERSION}'.replace('.','').replace('v','').split('-')[0])")
 export RELEASE_NOTES="Mapnik ${MAPNIK_VERSION}\r\n\r\n[Changelog](https://github.com/mapnik/mapnik/blob/${MAPNIK_VERSION}/CHANGELOG.md#${CHANGELOG_REF})"
 step "release notes: $RELEASE_NOTES"
 
 # create draft release
-curl --data "{\"tag_name\": \"${MAPNIK_VERSION}\",\"target_commitish\": \"master\",\"name\": \"${MAPNIK_VERSION}\",\"body\": \"${RELEASE_NOTES}\",\"draft\": ${IS_DRAFT},\"prerelease\": ${IS_PRERELEASE}}" \
-https://api.github.com/repos/mapnik/mapnik/releases?access_token=${GITHUB_TOKEN_MAPNIK_PUBLIC_REPO} \
-> create_response.json
+curl --data "{\"tag_name\": \"${MAPNIK_VERSION}\",\"target_commitish\": \"master\",\"name\": \"Mapnik ${MAPNIK_VERSION}\",\"body\": \"${RELEASE_NOTES}\",\"draft\": ${IS_DRAFT},\"prerelease\": ${IS_PRERELEASE}}" \
+     https://api.github.com/repos/mapnik/mapnik/releases \
+     -H "Authorization: bearer ${GITHUB_TOKEN_MAPNIK_PUBLIC_REPO}" \
+     > create_response.json
 cat create_response.json
 # parse out upload url and form it up to post tarball
-UPLOAD_URL=$(python -c "import json;print json.load(open('create_response.json'))['upload_url'].replace('{?name,label}','?name=${TARBALL_COMPRESSED}')")
-HTML_URL=$(python -c "import json;print json.load(open('create_response.json'))['html_url']")
+UPLOAD_URL=$(python3 -c "import json;print(json.load(open('create_response.json'))['upload_url'].replace('{?name,label}','?name=${TARBALL_COMPRESSED}'))")
+HTML_URL=$(python3 -c "import json;print(json.load(open('create_response.json'))['html_url'])")
 
 step "upload url: $UPLOAD_URL"
 
 # upload source tarball
-curl ${UPLOAD_URL} \
--X POST \
--H "Authorization: token ${GITHUB_TOKEN_MAPNIK_PUBLIC_REPO}" \
--H "Content-Type:application/octet-stream" \
---data-binary @${TARBALL_COMPRESSED}
+curl -L \
+     -X POST \
+     -H "Accept: application/vnd.github+json" \
+     -H "Authorization: bearer ${GITHUB_TOKEN_MAPNIK_PUBLIC_REPO}" \
+     -H "X-GitHub-Api-Version: 2022-11-28" \
+     -H "Content-Type:application/octet-stream" \
+     ${UPLOAD_URL} \
+     --data-binary "@${TARBALL_COMPRESSED}"
 
 echo
 step "Success: view your new draft release at ${HTML_URL}"
