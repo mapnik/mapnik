@@ -42,8 +42,8 @@ To use a Python interpreter that is not named `python` for your build, do
 something like the following instead:
 
 ```bash
-    $ PYTHON=python2 ./configure
-    $ make PYTHON=python2
+    $ PYTHON=python3 ./configure
+    $ make PYTHON=python3
 ```
 
 NOTE: the above will not work on windows, rather see https://github.com/mapnik/mapnik/wiki/WindowsInstallation
@@ -71,15 +71,15 @@ For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationT
 
 Build system dependencies are:
 
- * C++ compiler supporting `-std=c++14` (like >= g++ 4.8 or >= clang++ 3.4)
- * >= 2 GB RAM (> 5 GB for g++)
- * Python 2.4-2.7 
+ * C++ compiler supporting `-std=c++17` (like >= g++ 9 or >= clang++ 5)
+ * \>= 2 GB RAM (> 5 GB for g++)
+ * Python 3
  * Scons (a copy is bundled) or CMake >= 3.15 see [docs/cmake-usage.md](./docs/cmake-usage.md)
 
 Mapnik Core depends on:
 
  * Boost
-    - >= 1.73 is required
+    - \>= 1.73 is required
     - These libraries are used:
       - filesystem
       - system
