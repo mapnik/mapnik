@@ -39,7 +39,11 @@
 namespace mapnik {
 
 template<typename T>
+#ifdef _WIN32
 class CreateUsingNew
+#else
+class MAPNIK_DECL CreateUsingNew
+#endif
 {
   public:
     static T* create() { return new T; }
@@ -47,7 +51,11 @@ class CreateUsingNew
 };
 
 template<typename T>
+#ifdef _WIN32
 class CreateStatic
+#else
+class MAPNIK_DECL CreateStatic
+#endif
 {
   private:
     using storage_type = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
