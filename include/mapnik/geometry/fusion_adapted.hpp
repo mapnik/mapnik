@@ -26,6 +26,8 @@
 #include <mapnik/geometry/polygon.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
+#include <cstdint>
+
 BOOST_FUSION_ADAPT_STRUCT(mapnik::geometry::point<double>, (double, x)(double, y))
 
 BOOST_FUSION_ADAPT_STRUCT(mapnik::geometry::point<std::int64_t>, (std::int64_t, x)(std::int64_t, y))
