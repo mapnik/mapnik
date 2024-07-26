@@ -42,7 +42,6 @@
 #include <stdexcept>
 
 namespace mapnik {
-
 namespace { // (local)
 
 // Returns points in clockwise order. This allows us to do anti-meridian checks.
@@ -88,6 +87,36 @@ auto envelope_points(box2d<T> const& env, std::size_t num_points) -> geometry::m
     }
 
     return coords;
+}
+
+std::vector<box2d<double>> split_bounding_box(box2d<double> const& bbox)
+{
+    std::vector<box2d<double>> output;
+    if (bbox.minx() < 0 && bbox.maxx() > 0)
+    {
+        if (bbox.miny() < 0 && bbox.maxy() > 0)
+        {
+            output.emplace_back(bbox.minx(), bbox.miny(), 0, 0);
+            output.emplace_back(0, bbox.miny(), bbox.maxx(), 0);
+            output.emplace_back(0, 0, bbox.maxx(), bbox.maxy());
+            output.emplace_back(bbox.minx(), 0, 0, bbox.maxy());
+        }
+        else
+        {
+            output.emplace_back(bbox.minx(), bbox.miny(), 0, bbox.maxy());
+            output.emplace_back(0, bbox.miny(), bbox.maxx(), bbox.maxy());
+        }
+    }
+    else if (bbox.miny() < 0 && bbox.maxy() > 0)
+    {
+        output.emplace_back(bbox.minx(), bbox.miny(), bbox.maxx(), 0);
+        output.emplace_back(bbox.minx(), 0, bbox.maxx(), bbox.maxy());
+    }
+    else
+    {
+        output.push_back(bbox);
+    }
+    return output;
 }
 
 } // namespace
@@ -398,7 +427,7 @@ bool proj_transform::backward(box2d<double>& box) const
 }
 
 // More robust, but expensive, bbox transform
-// in the face of proj4 out of bounds conditions.
+// in the face of libproj out of bounds conditions.
 // Can result in 20 -> 10 r/s performance hit.
 // Alternative is to provide proper clipping box
 // in the target srs by setting map 'maximum-extent'
@@ -413,27 +442,34 @@ bool proj_transform::backward(box2d<double>& env, std::size_t points) const
         return backward(env);
     }
 
-    auto coords = envelope_points(env, points); // this is always clockwise
-
-    for (auto& p : coords)
-    {
-        double z = 0;
-        if (!backward(p.x, p.y, z))
-            return false;
-    }
-
     box2d<double> result;
-    boost::geometry::envelope(coords, result);
-
-    if (is_source_longlat_ && !util::is_clockwise(coords))
+    for (auto b : split_bounding_box(env))
     {
-        // we've gone to a geographic CS, and our clockwise envelope has
-        // changed into an anticlockwise one. This means we've crossed the antimeridian, and
-        // need to expand the X direction to +/-180 to include all the data. Once we can deal
-        // with multiple bboxes in queries we can improve.
-        double miny = result.miny();
-        result.expand_to_include(-180.0, miny);
-        result.expand_to_include(180.0, miny);
+        auto coords = envelope_points(b, points); // this is always clockwise
+        for (auto& p : coords)
+        {
+            double z = 0;
+            if (!backward(p.x, p.y, z))
+                return false;
+        }
+        if (!result.valid())
+            boost::geometry::envelope(coords, result);
+        else
+        {
+            box2d<double> bb;
+            boost::geometry::envelope(coords, bb);
+            result.expand_to_include(bb);
+        }
+        if (is_source_longlat_ && !util::is_clockwise(coords))
+        {
+            // we've gone to a geographic CS, and our clockwise envelope has
+            // changed into an anticlockwise one. This means we've crossed the antimeridian, and
+            // need to expand the X direction to +/-180 to include all the data. Once we can deal
+            // with multiple bboxes in queries we can improve.
+            double miny = result.miny();
+            result.expand_to_include(-180.0, miny);
+            result.expand_to_include(180.0, miny);
+        }
     }
 
     env.re_center(result.center().x, result.center().y);
@@ -453,32 +489,45 @@ bool proj_transform::forward(box2d<double>& env, std::size_t points) const
     }
 
     auto coords = envelope_points(env, points); // this is always clockwise
-
+    double z = 0;
     for (auto& p : coords)
     {
-        double z = 0;
         if (!forward(p.x, p.y, z))
             return false;
     }
 
     box2d<double> result;
-    boost::geometry::envelope(coords, result);
-
-    if (is_dest_longlat_ && !util::is_clockwise(coords))
+    for (auto b : split_bounding_box(env))
     {
-        // we've gone to a geographic CS, and our clockwise envelope has
-        // changed into an anticlockwise one. This means we've crossed the antimeridian, and
-        // need to expand the X direction to +/-180 to include all the data. Once we can deal
-        // with multiple bboxes in queries we can improve.
-        double miny = result.miny();
-        result.expand_to_include(-180.0, miny);
-        result.expand_to_include(180.0, miny);
+        auto coords = envelope_points(b, points); // this is always clockwise
+        for (auto& p : coords)
+        {
+            double z = 0;
+            if (!forward(p.x, p.y, z))
+                return false;
+        }
+        if (!result.valid())
+            boost::geometry::envelope(coords, result);
+        else
+        {
+            box2d<double> bb;
+            boost::geometry::envelope(coords, bb);
+            result.expand_to_include(bb);
+        }
+        if (is_dest_longlat_ && !util::is_clockwise(coords))
+        {
+            // we've gone to a geographic CS, and our clockwise envelope has
+            // changed into an anticlockwise one. This means we've crossed the antimeridian, and
+            // need to expand the X direction to +/-180 to include all the data. Once we can deal
+            // with multiple bboxes in queries we can improve.
+            double miny = result.miny();
+            result.expand_to_include(-180.0, miny);
+            result.expand_to_include(180.0, miny);
+        }
     }
-
     env.re_center(result.center().x, result.center().y);
     env.height(result.height());
     env.width(result.width());
-
     return true;
 }
 
