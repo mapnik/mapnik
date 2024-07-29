@@ -81,6 +81,7 @@ class MAPNIK_DECL projection
     std::string description() const;
     void init_proj();
     std::optional<box2d<double>> area_of_use() const;
+
   private:
     void swap(projection& rhs);
 

@@ -210,15 +210,14 @@ TEST_CASE("projection transform")
         mapnik::projection prj_geog("epsg:4326");
         mapnik::projection prj_proj("epsg:3995");
 
-
         mapnik::proj_transform prj_trans_fwd(prj_proj, prj_geog);
         mapnik::proj_transform prj_trans_rev(prj_geog, prj_proj);
 
         // bounds
-        const mapnik::box2d<double> bounds{-180.0,60.0,180.0,90.0};
+        const mapnik::box2d<double> bounds{-180.0, 60.0, 180.0, 90.0};
         {
-             // projected bounds
-            mapnik::box2d<double> projected_bounds{-3299207.53,-3333134.03, 3299207.53, 3333134.03};
+            // projected bounds
+            mapnik::box2d<double> projected_bounds{-3299207.53, -3333134.03, 3299207.53, 3333134.03};
             CHECKED_IF(prj_trans_fwd.forward(projected_bounds, PROJ_ENVELOPE_POINTS))
             {
                 CHECK(projected_bounds.minx() == Approx(bounds.minx()));
@@ -230,7 +229,7 @@ TEST_CASE("projection transform")
 
         {
             // check the same logic works for .backward()
-            mapnik::box2d<double> projected_bounds{-3299207.53,-3333134.03, 3299207.53, 3333134.03};
+            mapnik::box2d<double> projected_bounds{-3299207.53, -3333134.03, 3299207.53, 3333134.03};
             CHECKED_IF(prj_trans_rev.backward(projected_bounds, PROJ_ENVELOPE_POINTS))
             {
                 CHECK(projected_bounds.minx() == Approx(bounds.minx()));
