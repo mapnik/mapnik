@@ -6,6 +6,13 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.1
+
+- Use CMAKE_INSTALL_LIBDIR for libdir in pkg-config files
+- Support gcc 14
+- Improved accuracy of bounding box re-projections. Automatic spliting at (0, 0) and merging results.
+- Fixes missing features when using WGS 84 / Arctic Polar Stereographic (`epsg:4326 <-> epsg:3995`)
+- Added `area_of_use` method to `mapnik::projection`
 
 ## Mapnik 4.0.0
 
