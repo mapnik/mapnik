@@ -16,6 +16,8 @@ TEST_CASE("projection transform")
         CHECK(proj_4326.is_geographic());
         CHECK(!proj_3857.is_geographic());
 
+        CHECK(*proj_4326.area_of_use() == mapnik::box2d<double>(-180, -90, 180, 90));
+        CHECK(*proj_3857.area_of_use() == mapnik::box2d<double>(-180, -85.06, 180, 85.06));
         mapnik::proj_transform prj_trans(proj_4326, proj_3857);
 
         double minx = -45.0;
@@ -48,6 +50,7 @@ TEST_CASE("projection transform")
     {
         mapnik::projection proj_4269("epsg:4269");
         mapnik::projection proj_3857("epsg:3857");
+
         mapnik::proj_transform prj_trans(proj_4269, proj_3857);
         mapnik::proj_transform prj_trans2(proj_3857, proj_4269);
 
@@ -200,7 +203,42 @@ TEST_CASE("projection transform")
             }
         }
     }
-#endif
+    SECTION("Test proj north/south poles bbox")
+    {
+        // WGS 84 / Arctic Polar Stereographic
+
+        mapnik::projection prj_geog("epsg:4326");
+        mapnik::projection prj_proj("epsg:3995");
+
+        mapnik::proj_transform prj_trans_fwd(prj_proj, prj_geog);
+        mapnik::proj_transform prj_trans_rev(prj_geog, prj_proj);
+
+        // bounds
+        const mapnik::box2d<double> bounds{-180.0, 60.0, 180.0, 90.0};
+        {
+            // projected bounds
+            mapnik::box2d<double> projected_bounds{-3299207.53, -3333134.03, 3299207.53, 3333134.03};
+            CHECKED_IF(prj_trans_fwd.forward(projected_bounds, PROJ_ENVELOPE_POINTS))
+            {
+                CHECK(projected_bounds.minx() == Approx(bounds.minx()));
+                CHECK(projected_bounds.miny() == Approx(48.65640)); // this is expected
+                CHECK(projected_bounds.maxx() == Approx(bounds.maxx()));
+                CHECK(projected_bounds.maxy() == Approx(bounds.maxy()));
+            }
+        }
+
+        {
+            // check the same logic works for .backward()
+            mapnik::box2d<double> projected_bounds{-3299207.53, -3333134.03, 3299207.53, 3333134.03};
+            CHECKED_IF(prj_trans_rev.backward(projected_bounds, PROJ_ENVELOPE_POINTS))
+            {
+                CHECK(projected_bounds.minx() == Approx(bounds.minx()));
+                CHECK(projected_bounds.miny() == Approx(48.65640)); // this is expected
+                CHECK(projected_bounds.maxx() == Approx(bounds.maxx()));
+                CHECK(projected_bounds.maxy() == Approx(bounds.maxy()));
+            }
+        }
+    }
 
     SECTION("proj_transform of coordinate arrays with stride > 1")
     {
@@ -237,7 +275,6 @@ TEST_CASE("projection transform")
             }
         }
 
-#ifdef MAPNIK_USE_PROJ
         SECTION("lonlat <-> New Zealand Transverse Mercator 2000")
         {
             mapnik::projection const proj_2193("epsg:2193");

@@ -94,7 +94,7 @@ bool projection::operator!=(const projection& other) const
     return !(*this == other);
 }
 
-void projection::init_proj() const
+void projection::init_proj()
 {
 #ifdef MAPNIK_USE_PROJ
     if (!proj_)
@@ -117,6 +117,11 @@ void projection::init_proj() const
         }
         PJ_TYPE type = proj_get_type(proj_);
         is_geographic_ = (type == PJ_TYPE_GEOGRAPHIC_2D_CRS || type == PJ_TYPE_GEOGRAPHIC_3D_CRS) ? true : false;
+        double west_lon, south_lat, east_lon, north_lat;
+        if (proj_get_area_of_use(proj_ctx_, proj_, &west_lon, &south_lat, &east_lon, &north_lat, nullptr))
+        {
+            area_of_use_ = box2d<double>{west_lon, south_lat, east_lon, north_lat};
+        }
     }
 #endif
 }
@@ -129,6 +134,11 @@ bool projection::is_initialized() const
 bool projection::is_geographic() const
 {
     return is_geographic_;
+}
+
+std::optional<box2d<double>> projection::area_of_use() const
+{
+    return area_of_use_;
 }
 
 std::optional<well_known_srs_e> projection::well_known() const

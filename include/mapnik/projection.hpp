@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/well_known_srs.hpp>
-
+#include <mapnik/geometry/box2d.hpp>
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
 #include <mapnik/warning_ignore.hpp>
@@ -79,7 +79,8 @@ class MAPNIK_DECL projection
     void inverse(double& x, double& y) const;
     std::string definition() const;
     std::string description() const;
-    void init_proj() const;
+    void init_proj();
+    std::optional<box2d<double>> area_of_use() const;
 
   private:
     void swap(projection& rhs);
@@ -87,7 +88,8 @@ class MAPNIK_DECL projection
   private:
     std::string params_;
     bool defer_proj_init_;
-    mutable bool is_geographic_;
+    bool is_geographic_;
+    std::optional<box2d<double>> area_of_use_;
     mutable PJ* proj_;
     mutable PJ_CONTEXT* proj_ctx_;
 };
