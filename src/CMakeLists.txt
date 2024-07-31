@@ -51,7 +51,7 @@ set_target_properties(mapnik PROPERTIES
     IMPORT_PREFIX "lib" # for the archive on dll platforms
     VERSION ${MAPNIK_VERSION}
     # see https://github.com/mapnik/mapnik/pull/4248#issuecomment-925596509 => ABI compability only with the full version
-    SOVERSION ${MAPNIK_VERSION}
+    SOVERSION ${MAPNIK_MAJOR_VERSION}.${MAPNIK_MINOR_VERSION}
 )
 
 if(MSVC)
