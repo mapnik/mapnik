@@ -22,7 +22,7 @@ set_target_properties(wkt PROPERTIES
     IMPORT_PREFIX "lib"
     VERSION ${MAPNIK_VERSION}
     # see mapnik target for explanation
-    SOVERSION ${MAPNIK_VERSION}
+    SOVERSION ${MAPNIK_MAJOR_VERSION}.${MAPNIK_MINOR_VERSION}
 )
 
 mapnik_install(wkt)
