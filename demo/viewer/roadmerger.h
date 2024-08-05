@@ -86,6 +86,8 @@ public:
 
     void OnItemCheckBoxChanged(const QString& id, int status);
 
+    void OnFeatureBlinking(const QString& id, int status);
+
     void loadCehuiTableFields(const QString& cehuiTableIniFilePath);
 
     //0: 融合地图；1：裁剪补录道路
@@ -100,6 +102,10 @@ signals:
 
     void signalClipedCehuiDataStart();
     void signalClipedCehuiDataEnd();
+
+
+    //更新某一个TreeWidgetItem状态值
+    void signalUpdateTreeWidgetItem(QString id, int status);
 
 private:
     void addLineLayer(QString const& name,QString const& baseShp,std::string color, double lineWidth = 1.0);

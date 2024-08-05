@@ -81,6 +81,11 @@ typedef std::shared_ptr<geometry::multi_polygon<double>> MultiPolygonPtr;
 #define LonLatPrecision 8
 #endif
 
+
+#ifndef  FeatureEnvelopePadding
+#define FeatureEnvelopePadding 0.001
+#endif
+
 using namespace rapidjson;
 
 
@@ -764,6 +769,11 @@ void RoadMerger::toggleNeedCompleteRoad(double x, double y)
             auto val = feat->get(NeedAddCehui_RESULT) == 1 ? 0 : 1;
             feat->put(NeedAddCehui_RESULT,val);
 
+            //update QTreeWidgetItem
+            std::string strId = feat->get(IDKEY).to_string();
+            QString id = strId.c_str();
+            emit signalUpdateTreeWidgetItem(id,val);
+
             feat = fs->next();
             // std::cout<<"toggle complete road "<<std::endl;
         }
@@ -958,6 +968,35 @@ void RoadMerger::clipedLineEx(mapnik::geometry::geometry<double>& in,
     }
 }
 
+void RoadMerger::OnFeatureBlinking(const QString& id, int status)
+{
+    query q(clipedCehuiSource->envelope());
+    q.add_property_name(IDKEY);
+    q.add_property_name(NeedAddCehui_RESULT);
+    auto fs = clipedCehuiSource->features(q);
+    box2d<double> featureEnvelope;
+    bool isFind = false;
+    feature_ptr feat = fs->next();
+    while(feat){
+        std::string strId = feat->get(IDKEY).to_string();
+        if(strId==id.toStdString())
+        {
+            feat->put(NeedAddCehui_RESULT, status);
+            featureEnvelope = feat->envelope();
+            isFind = true;
+            break;
+        }
+        feat = fs->next();
+    }
+
+    if (isFind && featureEnvelope.valid()) {
+        featureEnvelope.pad(FeatureEnvelopePadding);
+        mapWidget->zoomToBox(featureEnvelope);
+    }
+
+    mapWidget->updateMap();
+}
+
 void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
 {
     // std::cout<<"begin OnItemCheckBoxChanged"<<std::endl;
@@ -971,12 +1010,38 @@ void RoadMerger::OnItemCheckBoxChanged(const QString& id, int status)
         if(strId==id.toStdString())
         {
             feat->put(NeedAddCehui_RESULT, status);
+            break;
         }
         feat = fs->next();
     }
 
     mapWidget->updateMap();
     // std::cout<<"end OnItemCheckBoxChanged"<<std::endl;
+    /*query q(clipedCehuiSource->envelope());
+    q.add_property_name(IDKEY);
+    q.add_property_name(NeedAddCehui_RESULT);
+    auto fs = clipedCehuiSource->features(q);
+    box2d<double> featureEnvelope;
+    bool isFind = false;
+    feature_ptr feat = fs->next();
+    while(feat){
+        std::string strId = feat->get(IDKEY).to_string();
+        if(strId==id.toStdString())
+        {
+            feat->put(NeedAddCehui_RESULT, status);
+            featureEnvelope = feat->envelope();
+            isFind = true;
+            break;
+        }
+        feat = fs->next();
+    }
+
+    if (isFind && status && featureEnvelope.valid()) {
+        featureEnvelope.pad(FeatureEnvelopePadding);
+        mapWidget->zoomToBox(featureEnvelope);
+    }
+
+    mapWidget->updateMap();*/
 }
 
 void RoadMerger::clipedCehuiData()

@@ -9,7 +9,7 @@ public:
         connect(this, &TreeWidget::itemClicked, this, &TreeWidget::onItemChanged);
     }
 
-private slots:
+public slots:
     void onItemChanged(QTreeWidgetItem *item, int column) {
         if(column == 0) { // 第0列是勾选框
             Qt::CheckState state = item->checkState(0);

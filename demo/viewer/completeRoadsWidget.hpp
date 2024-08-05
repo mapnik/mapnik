@@ -22,11 +22,15 @@ signals:
 
     void exportCompleteRoads_signal(const QString& groupid, const QString& version);
 
+    void itemBlinking_signal(const QString& id, int status);
+
 public slots:
     void updateCheckedItems(const std::map<std::string, std::vector<cehuidataInfo>>& cehuidataInfoList);
     void OnItemChanged(QTreeWidgetItem* item,int column);
+    void OnItemBlinking(QTreeWidgetItem* item,int column);
     void updateGroupidComboBox(const std::vector<GroupInfo>& groupInfoList);
     void updateVersionComboBox(int index);
+    void updateOneCheckedItem(QString id, int status);
 
 private slots:
     void submitCheckedItems();

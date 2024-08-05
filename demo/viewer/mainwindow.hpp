@@ -30,6 +30,7 @@
 #include "mapwidget.hpp"
 #include <QSharedPointer>
 #include "completeRoadsWidget.hpp"
+#include <QTimer>
 
 
 // using namespace mapnik;
@@ -70,10 +71,16 @@ class MainWindow : public QMainWindow
     void previewCompleteRoadsResult();
 
     void OnItemCheckBoxChanged(const QString& id, int status);
+    void OnItemBlinking(const QString& id, int status);
 
     MapWidget* mapWidget(){
         return mapWidget_;
     }
+
+ private slots:
+     void startBlinking();
+     void stopBlinking();
+     void doBlinking();
 
   private:
     void createActions();
@@ -102,6 +109,13 @@ class MainWindow : public QMainWindow
     QString m_base;
     QString m_cehui;
 
+    //闪烁效果
+    QString m_blinkId;
+    int m_blinkStatus;
+    QTimer * m_timer;
+    int m_msecInterval;
+    int m_blinkCount;
+    const int m_maxBlinks;
 };
 
 #endif // MAINWINDOW_HPP

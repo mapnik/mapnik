@@ -84,6 +84,7 @@ MapWidget::MapWidget(QWidget* parent)
     connect(roadMerger, SIGNAL(signalMergeEnd()),this,SLOT(onMergeEnd()));
     connect(roadMerger, SIGNAL(signalClipedCehuiDataStart()),this,SLOT(onClipedCehuiDataStart()));
     connect(roadMerger, SIGNAL(signalClipedCehuiDataEnd()),this,SLOT(onClipedCehuiDataEnd()));
+    connect(roadMerger, SIGNAL(signalUpdateTreeWidgetItem(QString, int)),this,SIGNAL(signalUpdateTreeWidgetItem(QString, int)));
 }
 
 MapWidget::~MapWidget()

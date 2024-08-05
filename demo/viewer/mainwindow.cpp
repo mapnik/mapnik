@@ -55,7 +55,7 @@
 
 using mapnik::layer;
 
-MainWindow::MainWindow()
+MainWindow::MainWindow():m_timer(new QTimer(this)),m_msecInterval(200), m_blinkCount(0), m_maxBlinks(3)
 {
     mapWidget_ = new MapWidget(this);
 
@@ -83,6 +83,10 @@ MainWindow::MainWindow()
     setWindowTitle(tr("飞渡-路网融合助手"));
     resize(800, 600);
     connect(mapWidget_, SIGNAL(clipedCehuiDataFinished()),this,SLOT(previewCompleteRoadsResult()));
+    connect(mapWidget_, SIGNAL(signalUpdateTreeWidgetItem(QString, int)),m_completeRoadsWidget,SLOT(updateOneCheckedItem(QString, int)));
+
+    //blink
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(doBlinking()));
 }
 
 MainWindow::~MainWindow()
@@ -182,6 +186,37 @@ void MainWindow::afterSave()
 
     m_saveAct->setCheckable(false);
     m_saveAct->setEnabled(false);
+}
+
+void MainWindow::startBlinking() 
+{
+    m_blinkCount = 0; // 重置闪烁计数
+    m_timer->start(m_msecInterval); // 设置计时器间隔为500毫秒
+ }
+
+void MainWindow::stopBlinking()
+{
+    m_timer->stop();
+    mapWidget_->roadMerger->OnFeatureBlinking(m_blinkId, m_blinkStatus);
+}
+
+void MainWindow::doBlinking()
+{
+    if (m_blinkCount <= m_maxBlinks) {
+        int curblinkStatus = (m_blinkCount % 2 == 0 ? m_blinkStatus : !m_blinkStatus);
+        mapWidget_->roadMerger->OnFeatureBlinking(m_blinkId, curblinkStatus);
+        m_blinkCount++;
+    }
+    else {
+        stopBlinking();
+    }
+}
+
+void MainWindow::OnItemBlinking(const QString& id, int status)
+{
+    m_blinkId = id;
+    m_blinkStatus = status;
+    startBlinking();
 }
 
 void MainWindow::OnItemCheckBoxChanged(const QString& id, int status)
@@ -375,6 +410,7 @@ void MainWindow::createActions()
 
     connect(this, SIGNAL(updateCheckedItems_signal(const std::map<std::string, std::vector<cehuidataInfo>>&)), m_completeRoadsWidget, SLOT(updateCheckedItems(const std::map<std::string, std::vector<cehuidataInfo>>&)));
     connect(m_completeRoadsWidget, SIGNAL(itemCheckBoxChanged_signal(const QString&, int)), this, SLOT(OnItemCheckBoxChanged(const QString&, int)));
+    connect(m_completeRoadsWidget, SIGNAL(itemBlinking_signal(const QString&, int)), this, SLOT(OnItemBlinking(const QString&, int)));
     connect(m_completeRoadsWidget, SIGNAL(exportCompleteRoads_signal(const QString&, const QString&)), this, SLOT(finishCompleteRoads(const QString&, const QString&)));
 
 
