@@ -100,7 +100,6 @@ class MapWidget : public QWidget
     void mapViewChanged();
     void clipedCehuiDataFinished();
 
-    //更新某一个TreeWidgetItem状态值
     void signalUpdateTreeWidgetItem(QString id, int status);
 
   protected:
