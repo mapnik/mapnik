@@ -18,7 +18,7 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
     // 将列表控件和按钮添加到布局中
     //所属编组
     m_groupidComboBox = new QComboBox(this);
-    QLabel *groupIdLabel = new QLabel("&所属编组", this);
+    QLabel *groupIdLabel = new QLabel("所属编组", this);
     groupIdLabel->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
     groupIdLabel->setBuddy(m_groupidComboBox);
     hlayout1->addWidget(groupIdLabel);
@@ -29,7 +29,7 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
 
     //已有版本
     m_groupversionComboBox = new QComboBox(this);
-    QLabel *groupVersionLabel = new QLabel("&已有版本", this);
+    QLabel *groupVersionLabel = new QLabel("已有版本", this);
     groupVersionLabel->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
     groupVersionLabel->setBuddy(m_groupversionComboBox);
     hlayout2->addWidget(groupVersionLabel);
