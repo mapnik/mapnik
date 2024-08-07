@@ -4,11 +4,13 @@
 #include <QLabel>
 
 CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
-    QHBoxLayout* hlayout1 = new QHBoxLayout();
-    QHBoxLayout* hlayout2 = new QHBoxLayout();
-    QVBoxLayout *vlayout = new QVBoxLayout(this);
+    QGridLayout *mainLayout = new QGridLayout(this);
+    mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
     QPushButton *submitButton = new QPushButton("提交选中项", this);
+    submitButton->setFixedHeight(40);
+    submitButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_treeWidget = new TreeWidget(this);
+    m_treeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     //m_checkedIndexInTreeWidget = 0;
     m_nameIndexInTreeWidget = 0;
@@ -18,28 +20,29 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
     // 将列表控件和按钮添加到布局中
     //所属编组
     m_groupidComboBox = new QComboBox(this);
-    QLabel *groupIdLabel = new QLabel("所属编组", this);
-    groupIdLabel->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
-    groupIdLabel->setBuddy(m_groupidComboBox);
-    hlayout1->addWidget(groupIdLabel);
-    hlayout1->addStretch();
-    hlayout1->addWidget(m_groupidComboBox);
-    hlayout1->addStretch();
-    vlayout->addLayout(hlayout1);
+    QLabel *groupIdLabel = new QLabel(this);
+    QString groupIdLabelText = "<span style='letter-spacing:4px;'>所属编组</span>";
+    groupIdLabel->setText(groupIdLabelText);
+    groupIdLabel->setAlignment(Qt::AlignCenter);
+    groupIdLabel->setMaximumSize(QSize(80,40));
+    mainLayout->addWidget(groupIdLabel,0,0,1,1);
+    mainLayout->addWidget(m_groupidComboBox,0,1,1,1);
 
     //已有版本
     m_groupversionComboBox = new QComboBox(this);
-    QLabel *groupVersionLabel = new QLabel("已有版本", this);
-    groupVersionLabel->setAlignment(Qt::AlignBottom | Qt::AlignLeft);
-    groupVersionLabel->setBuddy(m_groupversionComboBox);
-    hlayout2->addWidget(groupVersionLabel);
-    hlayout2->addStretch();
-    hlayout2->addWidget(m_groupversionComboBox);
-    hlayout2->addStretch();
-    vlayout->addLayout(hlayout2);
+    QLabel *groupVersionLabel = new QLabel(this);
+    QString groupVersionLabelText = "<span style='letter-spacing:4px;'>已有版本</span>";
+    groupVersionLabel->setText(groupVersionLabelText);
+    groupVersionLabel->setAlignment(Qt::AlignCenter);
+    groupVersionLabel->setMaximumSize(QSize(80,40));
+    mainLayout->addWidget(groupVersionLabel,1,0,1,1);
+    mainLayout->addWidget(m_groupversionComboBox,1,1,1,1);
 
-    vlayout->addWidget(m_treeWidget);
-    vlayout->addWidget(submitButton);
+    mainLayout->addWidget(m_treeWidget,2,0,10,-1);
+    mainLayout->addWidget(submitButton,12,0,1,-1);
+
+    mainLayout->setContentsMargins(15, 15, 15, 15); // 设置边距
+    mainLayout->setSpacing(10); // 设置控件间距
 
     // 连接按钮的点击信号到槽函数
     connect(submitButton, SIGNAL(clicked(bool)), this, SLOT(submitCheckedItems()));
@@ -50,7 +53,7 @@ CompleteRoadsWidget::CompleteRoadsWidget(QWidget *parent) : QWidget(parent) {
     // 连接 m_groupidComboBox 的信号到自定义的槽函数
     connect(m_groupidComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateVersionComboBox(int)));
 
-    this->setLayout(vlayout);
+    this->setLayout(mainLayout);
 }
 
 void CompleteRoadsWidget::updateVersionComboBox(int index) 
