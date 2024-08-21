@@ -223,23 +223,25 @@ class Gnuplotter(Plotter):
 
 def untar(fname):
     import tarfile
-    tar = tarfile.open(name=fname, mode='r')
-    for tarinfo in tar:
-        tar.extract(tarinfo)
-    tar.close()
+    with tarfile.open(name=fname, mode='r') as tar:
+        for tarinfo in tar:
+            try:
+                tar.extract(tarinfo, filter="tar")
+            except TypeError:
+                tar.extract(tarinfo)
 
 
 def unzip(fname):
     import zipfile
-    zf = zipfile.ZipFile(fname, 'r')
-    for name in zf.namelist():
-        dir = os.path.dirname(name)
-        try:
-            os.makedirs(dir)
-        except OSError:
-            pass
-        with open(name, 'wb') as f:
-            f.write(zf.read(name))
+    with zipfile.ZipFile(fname, 'r') as zf:
+        for name in zf.namelist():
+            dir = os.path.dirname(name)
+            try:
+                os.makedirs(dir)
+            except OSError:
+                pass
+            with open(name, 'wb') as f:
+                f.write(zf.read(name))
 
 
 def read_tree(dir):
@@ -258,6 +260,8 @@ def redirect_to_file(command, log):
 def tee_to_file(command, log):
     return '%s 2>&1 | tee %s' % (command, log)
 
+def makedict(**kw):
+    return kw
 
 class SConsTimer:
     """
@@ -275,9 +279,6 @@ class SConsTimer:
 
     name = 'scons-time'
     name_spaces = ' ' * len(name)
-
-    def makedict(**kw):
-        return kw
 
     default_settings = makedict(
         chdir=None,
@@ -550,7 +551,7 @@ class SConsTimer:
         specified prefix, extracts the run numbers from each file name,
         and returns the next run number after the largest it finds.
         """
-        x = re.compile(re.escape(prefix) + '-([0-9]+).*')
+        x = re.compile(re.escape(prefix) + r'-([0-9]+).*')
         matches = [x.match(e) for e in os.listdir(dir)]
         matches = [_f for _f in matches if _f]
         if not matches:

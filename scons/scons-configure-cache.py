@@ -32,15 +32,15 @@ The files are split into directories named by the first few
 digits of the signature. The prefix length used for directory
 names can be changed by this script.
 """
-__revision__ = "scripts/scons-configure-cache.py 265be6883fadbb5a545612265acc919595158366 Sun, 17 Mar 2024 17:33:54 -0700 bdbaddog"
+__revision__ = "scripts/scons-configure-cache.py 7c688f694c644b61342670ce92977bf4a396c0d4 Sun, 07 Jul 2024 16:52:07 -0700 bdbaddog"
 
-__version__ = "4.7.0"
+__version__ = "4.8.0"
 
-__build__ = "265be6883fadbb5a545612265acc919595158366"
+__build__ = "7c688f694c644b61342670ce92977bf4a396c0d4"
 
 __buildsys__ = "M1Dog2021"
 
-__date__ = "Sun, 17 Mar 2024 17:33:54 -0700"
+__date__ = "Sun, 07 Jul 2024 16:52:07 -0700"
 
 __developer__ = "bdbaddog"
 
@@ -51,7 +51,7 @@ import sys
 # python compatibility check
 if sys.version_info < (3, 6, 0):
     msg = "scons: *** SCons version %s does not run under Python version %s.\n\
-Python >= 3.5 is required.\n"
+Python >= 3.6.0 is required.\n"
     sys.stderr.write(msg % (__version__, sys.version.split()[0]))
     sys.exit(1)
 
