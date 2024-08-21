@@ -6,6 +6,13 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.2
+
+Released August 21st, 2024
+
+- CMake build - set `SOVERSION` to `${MAPNIK_MAJOR_VERSION}.${MAPNIK_MINOR_VERSION}`
+- Upgraded SCons build system to v4.8.0
+
 ## Mapnik 4.0.1
 
 - Use CMAKE_INSTALL_LIBDIR for libdir in pkg-config files
