@@ -304,6 +304,6 @@ TEST_CASE("projection transform")
                 CHECK(points[1].y == Approx(-39.283333));
             }
         }
-#endif // MAPNIK_USE_PROJ
     }
+#endif // MAPNIK_USE_PROJ
 }
