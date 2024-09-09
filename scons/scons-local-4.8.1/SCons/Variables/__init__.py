@@ -43,6 +43,11 @@ from .PathVariable import PathVariable
 __all__ = [
     "Variable",
     "Variables",
+    "BoolVariable",
+    "EnumVariable",
+    "ListVariable",
+    "PackageVariable",
+    "PathVariable",
 ]
 
 class Variable:
@@ -56,7 +61,10 @@ class Variable:
 
     def __str__(self) -> str:
         """Provide a way to "print" a Variable object."""
-        return f"({self.key!r}, {self.aliases}, {self.help!r}, {self.default!r}, {self.validator}, {self.converter})"
+        return (
+            f"({self.key!r}, {self.aliases}, {self.help!r}, {self.default!r}, "
+            f"validator={self.validator}, converter={self.converter})"
+        )
 
 
 class Variables:
@@ -282,7 +290,13 @@ class Variables:
         for option in self.options:
             if option.validator and option.key in values:
                 if option.do_subst:
-                    value = env.subst('${%s}' % option.key)
+                    val = env[option.key]
+                    if not SCons.Util.is_String(val):
+                        # issue #4585: a _ListVariable should not be further
+                        #    substituted, breaks on values with spaces.
+                        value = val
+                    else:
+                        value = env.subst('${%s}' % option.key)
                 else:
                     value = env[option.key]
                 option.validator(option.key, value, env)

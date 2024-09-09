@@ -51,7 +51,7 @@ Can be used as a replacement for autoconf's ``--with-xxx=yyy`` ::
 """
 
 import os
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Union
 
 import SCons.Errors
 
@@ -60,13 +60,16 @@ __all__ = ['PackageVariable',]
 ENABLE_STRINGS = ('1', 'yes', 'true',  'on', 'enable', 'search')
 DISABLE_STRINGS = ('0', 'no',  'false', 'off', 'disable')
 
-def _converter(val):
+def _converter(val: Union[str, bool]) -> Union[str, bool]:
     """Convert package variables.
 
     Returns True or False if one of the recognized truthy or falsy
     values is seen, else return the value unchanged (expected to
     be a path string).
     """
+    if isinstance(val, bool):
+        # mainly for the subst=False case: default might be a bool
+        return val
     lval = val.lower()
     if lval in ENABLE_STRINGS:
         return True
@@ -75,7 +78,7 @@ def _converter(val):
     return val
 
 
-def _validator(key, val, env, searchfunc) -> None:
+def _validator(key: str, val, env, searchfunc) -> None:
     """Validate package variable for valid path.
 
     Checks that if a path is given as the value, that pathname actually exists.

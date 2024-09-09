@@ -93,12 +93,12 @@ class _PathVariableClass:
     """
 
     @staticmethod
-    def PathAccept(key, val, env) -> None:
+    def PathAccept(key: str, val, env) -> None:
         """Validate path with no checking."""
         return
 
     @staticmethod
-    def PathIsDir(key, val, env) -> None:
+    def PathIsDir(key: str, val, env) -> None:
         """Validate path is a directory."""
         if os.path.isdir(val):
             return
@@ -109,7 +109,7 @@ class _PathVariableClass:
         raise SCons.Errors.UserError(msg)
 
     @staticmethod
-    def PathIsDirCreate(key, val, env) -> None:
+    def PathIsDirCreate(key: str, val, env) -> None:
         """Validate path is a directory, creating if needed."""
         if os.path.isdir(val):
             return
@@ -123,7 +123,7 @@ class _PathVariableClass:
             raise SCons.Errors.UserError(msg) from exc
 
     @staticmethod
-    def PathIsFile(key, val, env) -> None:
+    def PathIsFile(key: str, val, env) -> None:
         """Validate path is a file."""
         if not os.path.isfile(val):
             if os.path.isdir(val):
@@ -133,7 +133,7 @@ class _PathVariableClass:
             raise SCons.Errors.UserError(msg)
 
     @staticmethod
-    def PathExists(key, val, env) -> None:
+    def PathExists(key: str, val, env) -> None:
         """Validate path exists."""
         if not os.path.exists(val):
             msg = f'Path for variable {key!r} does not exist: {val}'

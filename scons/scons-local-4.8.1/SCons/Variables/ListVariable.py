@@ -81,6 +81,7 @@ class _ListVariable(collections.UserList):
         if allowedElems is None:
             allowedElems = []
         super().__init__([_f for _f in initlist if _f])
+        # TODO: why sorted? don't we want to display in the order user gave?
         self.allowedElems = sorted(allowedElems)
 
     def __cmp__(self, other):
@@ -118,6 +119,9 @@ def _converter(val, allowedElems, mapdict) -> _ListVariable:
     The arguments *allowedElems* and *mapdict* are non-standard
     for a :class:`Variables` converter: the lambda in the
     :func:`ListVariable` function arranges for us to be called correctly.
+
+    Incoming values ``all`` and ``none`` are recognized and converted
+    into their expanded form.
     """
     if val == 'none':
         val = []
@@ -155,7 +159,7 @@ def _validator(key, val, env) -> None:
     allowedElems = env[key].allowedElems
     if isinstance(val, _ListVariable):  # not substituted, use .data
         notAllowed = [v for v in val.data if v not in allowedElems]
-    else:  # val will be a string
+    else:  # presumably a string
         notAllowed = [v for v in val.split() if v not in allowedElems]
     if notAllowed:
         # Converter only synthesized 'all' and 'none', they are never

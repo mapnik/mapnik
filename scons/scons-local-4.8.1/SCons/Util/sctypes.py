@@ -11,7 +11,8 @@ import codecs
 import os
 import pprint
 import re
-from typing import Optional
+import sys
+from typing import Optional, Union
 
 from collections import UserDict, UserList, UserString, deque
 from collections.abc import MappingView, Iterable
@@ -50,38 +51,63 @@ StringTypes = (str, UserString)
 # Empirically, it is faster to check explicitly for str than for basestring.
 BaseStringTypes = str
 
+# Later Python versions allow us to explicitly apply type hints based off the
+# return value similar to isinstance(), albeit not as precise.
+if sys.version_info >= (3, 13):
+    from typing import TypeAlias, TypeIs
+
+    DictTypeRet: TypeAlias = TypeIs[Union[dict, UserDict]]
+    ListTypeRet: TypeAlias = TypeIs[Union[list, UserList, deque]]
+    SequenceTypeRet: TypeAlias = TypeIs[Union[list, tuple, deque, UserList, MappingView]]
+    TupleTypeRet: TypeAlias = TypeIs[tuple]
+    StringTypeRet: TypeAlias = TypeIs[Union[str, UserString]]
+elif sys.version_info >= (3, 10):
+    from typing import TypeAlias, TypeGuard
+
+    DictTypeRet: TypeAlias = TypeGuard[Union[dict, UserDict]]
+    ListTypeRet: TypeAlias = TypeGuard[Union[list, UserList, deque]]
+    SequenceTypeRet: TypeAlias = TypeGuard[Union[list, tuple, deque, UserList, MappingView]]
+    TupleTypeRet: TypeAlias = TypeGuard[tuple]
+    StringTypeRet: TypeAlias = TypeGuard[Union[str, UserString]]
+else:
+    DictTypeRet = Union[bool, bool]
+    ListTypeRet = Union[bool, bool]
+    SequenceTypeRet = Union[bool, bool]
+    TupleTypeRet = Union[bool, bool]
+    StringTypeRet = Union[bool, bool]
+
 
 def is_Dict(  # pylint: disable=redefined-outer-name,redefined-builtin
     obj, isinstance=isinstance, DictTypes=DictTypes
-) -> bool:
+) -> DictTypeRet:
     """Check if object is a dict."""
     return isinstance(obj, DictTypes)
 
 
 def is_List(  # pylint: disable=redefined-outer-name,redefined-builtin
     obj, isinstance=isinstance, ListTypes=ListTypes
-) -> bool:
+) -> ListTypeRet:
     """Check if object is a list."""
     return isinstance(obj, ListTypes)
 
 
 def is_Sequence(  # pylint: disable=redefined-outer-name,redefined-builtin
     obj, isinstance=isinstance, SequenceTypes=SequenceTypes
-) -> bool:
+) -> SequenceTypeRet:
     """Check if object is a sequence."""
     return isinstance(obj, SequenceTypes)
 
 
 def is_Tuple(  # pylint: disable=redefined-builtin
     obj, isinstance=isinstance, tuple=tuple
-) -> bool:
+) -> TupleTypeRet:
     """Check if object is a tuple."""
     return isinstance(obj, tuple)
 
 
 def is_String(  # pylint: disable=redefined-outer-name,redefined-builtin
     obj, isinstance=isinstance, StringTypes=StringTypes
-) -> bool:
+) -> StringTypeRet:
     """Check if object is a string."""
     return isinstance(obj, StringTypes)
 
