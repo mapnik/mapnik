@@ -41,10 +41,9 @@ struct MAPNIK_DECL Featureset : private util::noncopyable
     virtual ~Featureset() {}
 };
 
-struct MAPNIK_DECL invalid_featureset final : Featureset
+struct MAPNIK_DECL invalid_featureset : Featureset
 {
     feature_ptr next() { return feature_ptr(); }
-    ~invalid_featureset() {}
 };
 
 using featureset_ptr = std::shared_ptr<Featureset>;
