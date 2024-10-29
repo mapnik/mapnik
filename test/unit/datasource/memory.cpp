@@ -7,7 +7,7 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+i * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,7 +36,7 @@ TEST_CASE("memory datasource")
         mapnik::datasource_ptr ds = std::make_shared<mapnik::memory_datasource>(params);
         CHECK(ds != nullptr);
         auto fs = all_features(ds);
-        REQUIRE(!mapnik::is_valid(fs));
+        REQUIRE(mapnik::is_empty(fs));
         while (auto f = fs->next())
         {
             CHECK(false); // shouldn't get here

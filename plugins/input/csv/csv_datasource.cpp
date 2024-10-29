@@ -436,7 +436,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
                                                           ctx_);
         }
     }
-    return mapnik::make_invalid_featureset();
+    return mapnik::make_empty_featureset();
 }
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const

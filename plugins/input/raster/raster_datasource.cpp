@@ -227,5 +227,5 @@ featureset_ptr raster_datasource::features_at_point(coord2d const&, double tol) 
 {
     MAPNIK_LOG_WARN(raster) << "raster_datasource: feature_at_point not supported";
 
-    return mapnik::make_invalid_featureset();
+    return mapnik::make_empty_featureset();
 }
