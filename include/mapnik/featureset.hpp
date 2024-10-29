@@ -41,21 +41,21 @@ struct MAPNIK_DECL Featureset : private util::noncopyable
     virtual ~Featureset() {}
 };
 
-struct MAPNIK_DECL invalid_featureset : Featureset
+struct MAPNIK_DECL empty_featureset : Featureset
 {
     feature_ptr next() { return feature_ptr(); }
 };
 
 using featureset_ptr = std::shared_ptr<Featureset>;
 
-inline featureset_ptr make_invalid_featureset()
+inline featureset_ptr make_empty_featureset()
 {
-    return std::make_shared<invalid_featureset>();
+    return std::make_shared<empty_featureset>();
 }
 
-inline bool is_valid(featureset_ptr const& ptr)
+inline bool is_empty(featureset_ptr const& ptr)
 {
-    return (dynamic_cast<invalid_featureset*>(ptr.get()) == nullptr) ? true : false;
+    return (dynamic_cast<empty_featureset*>(ptr.get()) != nullptr) ? true : false;
 }
 
 } // namespace mapnik
