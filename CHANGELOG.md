@@ -6,6 +6,16 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.3
+
+Released October 30th, 2024
+
+- Remove 'final' specifier from invalid_featureset implementation
+  (issues with dynamic_cast<> when building using Apple clang version 16.0.0 on darwin-arm64)
+- Rename invalid_featureset to empty_featureset
+- Upgrade to SCons v4.8.1
+- Fix unit tests e.g  #endif statement (via @bgardner-noggin)
+
 ## Mapnik 4.0.2
 
 Released August 21st, 2024
