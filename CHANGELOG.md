@@ -10,6 +10,8 @@ For a complete change history, see the git log.
 
 Released October 30th, 2024
 
+(Packaged from [05389e3c7](https://github.com/mapnik/mapnik/commit/05389e3c7))
+
 - Remove 'final' specifier from invalid_featureset implementation
   (issues with dynamic_cast<> when building using Apple clang version 16.0.0 on darwin-arm64)
 - Rename invalid_featureset to empty_featureset
