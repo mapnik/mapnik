@@ -22,11 +22,11 @@ fi
 # These do not normally need to be set except when
 # building against binary versions of dependencies like
 # done via bootstrap.sh
-VARS=()
+
 if [ -f mapnik-settings.env ]; then
     echo "Inheriting from mapnik-settings.env"
     . ./mapnik-settings.env
     VARS=( $(cat mapnik-settings.env) )
 fi
 
-$PYTHON scons/scons.py --implicit-deps-changed configure ${VARS[*]} "$@"
+$PYTHON scons/scons.py --implicit-deps-changed configure ${VARS[*]:-} "$@"
