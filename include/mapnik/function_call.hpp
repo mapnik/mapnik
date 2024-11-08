@@ -107,7 +107,6 @@ struct float_impl
     value_type operator()(value_type const& val) const { return val.to_double(); }
 };
 
-
 // min
 inline value_type min_impl(value_type const& arg1, value_type const& arg2)
 {
