@@ -209,14 +209,17 @@ struct unary_function_types_ : x3::symbols<unary_function_impl>
 {
     unary_function_types_()
     {
-        add("sin", sin_impl())      //
-          ("cos", cos_impl())       //
-          ("tan", tan_impl())       //
-          ("atan", atan_impl())     //
-          ("exp", exp_impl())       //
-          ("log", log_impl())       //
-          ("abs", abs_impl())       //
-          ("length", length_impl()) //
+        add("sin", sin_impl())       //
+           ("cos", cos_impl())       //
+           ("tan", tan_impl())       //
+           ("atan", atan_impl())     //
+           ("exp", exp_impl())       //
+           ("log", log_impl())       //
+           ("abs", abs_impl())       //
+           ("length", length_impl()) //
+           ("int", int_impl())       //
+           ("float", float_impl())   //
+           ("str", str_impl())       //
           ;
     }
 } const unary_func_types;
