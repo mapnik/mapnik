@@ -94,6 +94,15 @@ TEST_CASE("expressions")
     TRY_CHECK(parse_and_dump("'escaped \\' apostrophe'") == "'escaped \\' apostrophe'");
     TRY_CHECK(parse_and_dump("'escaped \\\\ backslash'") == "'escaped \\\\ backslash'");
 
+    // explicit conversions
+    TRY_CHECK(eval("int('123')") == 123);
+    TRY_CHECK(eval("float('3.14'+'159')") == 3.14159);
+    TRY_CHECK(eval("bool(-0.001)") == true);
+    TRY_CHECK(eval("bool(0.001)") == true);
+    TRY_CHECK(eval("bool(0.0)") == false);
+    TRY_CHECK(eval("str(123)") == tr.transcode("123"));
+    TRY_CHECK(eval("float(str(3.14) + str(159))") == 3.14159);
+
     // floating point constants
     TRY_CHECK(parse_and_dump("pi") == "3.14159");
     TRY_CHECK(parse_and_dump("deg_to_rad") == "0.0174533");
