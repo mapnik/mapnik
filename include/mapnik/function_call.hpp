@@ -95,6 +95,12 @@ struct str_impl
     value_type operator()(value_type const& val) const { return val.to_unicode(); }
 };
 
+// bool
+struct bool_impl
+{
+    value_type operator()(value_type const& val) const { return val.to_bool(); }
+};
+
 // int
 struct int_impl
 {

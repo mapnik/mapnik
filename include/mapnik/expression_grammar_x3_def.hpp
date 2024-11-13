@@ -217,6 +217,7 @@ struct unary_function_types_ : x3::symbols<unary_function_impl>
           ("log", log_impl())       //
           ("abs", abs_impl())       //
           ("length", length_impl()) //
+          ("bool", bool_impl())     //
           ("int", int_impl())       //
           ("float", float_impl())   //
           ("str", str_impl())       //
