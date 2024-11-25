@@ -42,6 +42,7 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/util/timer.hpp>
 #endif
 
@@ -408,12 +409,17 @@ void MainWindow::set_default_extent(double x0, double y0, double x1, double y1)
         std::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
         if (map_ptr)
         {
-            mapnik::projection prj(map_ptr->srs());
-            prj.forward(x0, y0);
-            prj.forward(x1, y1);
-            default_extent_ = mapnik::box2d<double>(x0, y0, x1, y1);
-            mapWidget_->zoomToBox(default_extent_);
-            std::cout << "SET DEFAULT EXT:" << default_extent_ << std::endl;
+            mapnik::projection wgs84("epsg:4326");
+            mapnik::projection map_proj(map_ptr->srs());
+            std::cerr << map_ptr->srs() << std::endl;
+            mapnik::proj_transform tr(wgs84, map_proj);
+            auto bbox = mapnik::box2d<double>(x0, y0, x1, y1);
+            if (tr.forward(bbox))
+            {
+                default_extent_ = bbox;
+                mapWidget_->zoomToBox(default_extent_);
+                std::cout << "SET DEFAULT EXT:" << default_extent_ << std::endl;
+            }
         }
     }
     catch (...)
