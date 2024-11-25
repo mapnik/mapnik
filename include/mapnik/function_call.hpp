@@ -89,6 +89,30 @@ struct length_impl
     value_type operator()(value_type const& val) const { return val.to_unicode().length(); }
 };
 
+// str
+struct str_impl
+{
+    value_type operator()(value_type const& val) const { return val.to_unicode(); }
+};
+
+// bool
+struct bool_impl
+{
+    value_type operator()(value_type const& val) const { return val.to_bool(); }
+};
+
+// int
+struct int_impl
+{
+    value_type operator()(value_type const& val) const { return val.to_int(); }
+};
+
+// float
+struct float_impl
+{
+    value_type operator()(value_type const& val) const { return val.to_double(); }
+};
+
 // min
 inline value_type min_impl(value_type const& arg1, value_type const& arg2)
 {

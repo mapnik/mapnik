@@ -441,7 +441,7 @@ struct convert<value_bool>
     template<typename T>
     value_bool operator()(T val) const
     {
-        return val > 0 ? true : false;
+        return val == 0 ? false : true;
     }
 };
 
