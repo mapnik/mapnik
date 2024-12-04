@@ -6,6 +6,16 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.4
+
+Released December 4th, 2024
+
+(Packaged from []()
+
+- Implicit conversions operators in Expressions bool(expr), int(expr), float(expr), str(expr)
+- value::to_bool() - sync logic with Python bool() operator e.g `if 0 -> false : else -> true`
+- Demo viewer - fix bounding box reprojection
+
 ## Mapnik 4.0.3
 
 Released October 30th, 2024
