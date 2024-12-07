@@ -455,16 +455,20 @@ file(GLOB TTF_FONT_FILES "fonts/*/*/*.ttf")
 install(FILES ${TTF_FONT_FILES} DESTINATION "${FONTS_INSTALL_DIR}")
 
 if(NOT USE_EXTERNAL_MAPBOX_GEOMETRY)
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/geometry/include/"
+        DESTINATION "${MAPNIK_INCLUDE_DIR}/mapnik/")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_POLYLABEL)
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/polylabel/include/"
+        DESTINATION "${MAPNIK_INCLUDE_DIR}/mapnik/")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_PROTOZERO)
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/protozero/include/"
+        DESTINATION "${MAPNIK_INCLUDE_DIR}/mapnik/")
 endif()
 if(NOT USE_EXTERNAL_MAPBOX_VARIANT)
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/" DESTINATION "${MAPNIK_INCLUDE_DIR}")
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/deps/mapbox/variant/include/"
+        DESTINATION "${MAPNIK_INCLUDE_DIR}/mapnik/")
 endif()
 
 mapnik_install_targets()
