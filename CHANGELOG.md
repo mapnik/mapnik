@@ -12,7 +12,7 @@ Released December 4th, 2024
 
 (Packaged from [51a8a59f1](https://github.com/mapnik/mapnik/commit/51a8a59f1)
 
-- Implicit conversions operators in Expressions bool(expr), int(expr), float(expr), str(expr)
+- Explicit conversions operators in Expressions bool(expr), int(expr), float(expr), str(expr)
 - value::to_bool() - sync logic with Python bool() operator e.g `if 0 -> false : else -> true`
 - Demo viewer - fix bounding box reprojection
 
