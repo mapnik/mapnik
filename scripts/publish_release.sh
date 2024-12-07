@@ -57,11 +57,27 @@ step "Checking out ${MAPNIK_VERSION}"
 git checkout "tags/${MAPNIK_VERSION}"
 
 step "checking submodules"
-step "vendorizing and cleaning up mapbox variant"
+step "vendorizing and cleaning up"
 git submodule update --init deps/mapbox/variant
-rm -rf deps/mapbox/variant/.git
+git submodule update --init deps/mapbox/geometry
+git submodule update --init deps/mapbox/polylabel
+git submodule update --init deps/mapbox/protozero
+
+rm -rf deps/mapbox/variant/.git*
+rm -rf deps/mapbox/variant/.mason
 rm -f deps/mapbox/variant/*yml
 rm -f deps/mapbox/variant/Jamroot
+rm -f deps/mapbox/variant/.travis.yml
+
+rm -rf deps/mapbox/geometry/.git*
+rm -f deps/mapbox/geometry/.travis.yml
+
+rm -rf deps/mapbox/polylabel/.git*
+rm -rf deps/mapbox/polylabel/.mason
+rm -f deps/mapbox/polylabel/.travis.yml
+
+rm -rf deps/mapbox/protozero/.git*
+rm -f deps/mapbox/protozero/.travis.yml
 
 function check_and_tag() {
     REPO_DIR=$1
@@ -88,14 +104,14 @@ check_and_tag test/data test-data
 # test data visual
 check_and_tag test/data-visual test-data-visual
 
-step "removing .git and .gitignore"
-rm -rf .git
-rm -rf .gitignore
+step "removing .git and .gitignore etc"
+rm -rf .git*
 export TARBALL_COMPRESSED=${TARBALL_NAME}.tar.bz2
 echo ${MAPNIK_VERSION} > RELEASE_VERSION.md
 step "creating tarball of ${TARBALL_COMPRESSED}"
 cd ../
 tar cjf ${TARBALL_COMPRESSED} ${TARBALL_NAME}/
+
 step "uploading to github"
 # https://developer.github.com/v3/repos/rseleases/#create-a-release
 IS_PRERELEASE=false
