@@ -692,7 +692,7 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map&
 
 featureset_ptr postgis_datasource::features(query const& q) const
 {
-    // if the driver is in asynchronous mode, return the appropriate fetaures
+    // if the driver is in asynchronous mode, return the appropriate features
     if (asynchronous_request_)
     {
         return features_with_context(q, std::make_shared<postgis_processor_context>());
