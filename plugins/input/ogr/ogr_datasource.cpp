@@ -60,8 +60,6 @@ using mapnik::filter_in_box;
 using mapnik::layer_descriptor;
 using mapnik::query;
 
-static std::once_flag once_flag;
-
 DATASOURCE_PLUGIN_IMPL(ogr_datasource_plugin, ogr_datasource);
 DATASOURCE_PLUGIN_EXPORT(ogr_datasource_plugin);
 
