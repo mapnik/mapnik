@@ -2,6 +2,7 @@
 #include <unicode/unistr.h>
 #include <mapnik/unicode.hpp>
 #include <mapnik/text/scrptrun.hpp>
+#include <utility>
 
 TEST_CASE("nested script runs")
 {
@@ -19,7 +20,7 @@ TEST_CASE("nested script runs")
         ++count;
     }
     REQUIRE(count == 7);
-    REQUIRE(size == text.length());
+    REQUIRE(std::cmp_equal(size, text.length()));
 }
 
 TEST_CASE("many punctuation chars")
@@ -46,5 +47,5 @@ TEST_CASE("empty runs")
         ++count;
     }
     REQUIRE(count == 1);
-    REQUIRE(size == text.length());
+    REQUIRE(std::cmp_equal(size, text.length()));
 }

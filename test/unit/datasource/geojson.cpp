@@ -38,6 +38,7 @@
 #include <locale>
 #include <string_view>
 #include <array>
+#include <utility>
 
 /*
 
@@ -208,8 +209,9 @@ TEST_CASE("geojson")
                         else
                         {
                             // at least 1 feature should be queried
-                            REQUIRE(fields.size() == std::min(std::max(mapnik::value_integer(1), num_features_to_query),
-                                                              mapnik::value_integer(2)));
+                            REQUIRE(std::cmp_equal(fields.size(),std::min(std::max(mapnik::value_integer(1),
+                                                                                   num_features_to_query),
+                                                                          mapnik::value_integer(2))));
                         }
                     }
                     // cleanup

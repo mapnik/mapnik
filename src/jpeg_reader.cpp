@@ -102,8 +102,8 @@ image_reader* create_jpeg_reader2(char const* data, size_t size)
 }
 void register_jpeg_reader()
 {
-    const bool registered = register_image_reader("jpeg", create_jpeg_reader);
-    const bool registered2 = register_image_reader("jpeg", create_jpeg_reader2);
+    [[maybe_unused]] const bool registered = register_image_reader("jpeg", create_jpeg_reader);
+    [[maybe_unused]] const bool registered2 = register_image_reader("jpeg", create_jpeg_reader2);
 }
 
 // ctors

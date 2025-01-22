@@ -120,8 +120,8 @@ image_reader* create_tiff_reader2(char const* data, std::size_t size)
 
 void register_tiff_reader()
 {
-    const bool registered = register_image_reader("tiff", create_tiff_reader);
-    const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
+    [[maybe_unused]] const bool registered = register_image_reader("tiff", create_tiff_reader);
+    [[maybe_unused]] const bool registered2 = register_image_reader("tiff", create_tiff_reader2);
 }
 
 } // namespace mapnik

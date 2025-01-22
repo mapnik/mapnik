@@ -30,7 +30,7 @@ class test : public benchmark::test_case
             tree.insert(i, box);
         }
         // bounding box query
-        std::size_t count = 0;
+        [[maybe_unused]] std::size_t count = 0;
         for (size_t i = 0; i < iterations_; ++i)
         {
             int cx = uniform_dist(engine);

@@ -11,11 +11,9 @@ class test : public benchmark::test_case
     bool validate() const { return mapnik::freetype_engine::register_fonts("./fonts", true); }
     bool operator()() const
     {
-        unsigned long count = 0;
         for (unsigned i = 0; i < iterations_; ++i)
         {
             mapnik::freetype_engine::register_fonts("./fonts", true);
-            count++;
         }
         return true;
     }

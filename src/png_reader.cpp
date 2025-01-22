@@ -92,8 +92,8 @@ image_reader* create_png_reader2(char const* data, std::size_t size)
 
 void register_png_reader()
 {
-    const bool registered = register_image_reader("png", create_png_reader);
-    const bool registered2 = register_image_reader("png", create_png_reader2);
+    [[maybe_unused]] const bool registered = register_image_reader("png", create_png_reader);
+    [[maybe_unused]] const bool registered2 = register_image_reader("png", create_png_reader2);
 }
 
 void user_error_fn(png_structp /*png_ptr*/, png_const_charp error_msg)

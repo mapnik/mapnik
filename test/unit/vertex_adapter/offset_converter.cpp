@@ -1,4 +1,3 @@
-
 #include "catch.hpp"
 #include "fake_path.hpp"
 
@@ -97,7 +96,7 @@ void test_straight_line(double const& offset)
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
-    unsigned cmd1 = off_path.vertex(&x1, &y1);
+    [[maybe_unused]] unsigned cmd1 = off_path.vertex(&x1, &y1);
     double d = dist(x0, y0, x1, y1);
     while (true)
     {
@@ -152,7 +151,7 @@ void test_offset_curve(double const& offset)
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
-    unsigned cmd1 = off_path.vertex(&x1, &y1);
+    [[maybe_unused]] unsigned cmd1 = off_path.vertex(&x1, &y1);
     double d = dist(x0, y0, x1, y1);
     while (true)
     {
@@ -216,7 +215,7 @@ void test_s_shaped_curve(double const& offset)
 
     double x0, y0, x1, y1;
     unsigned cmd0 = off_path_new.vertex(&x0, &y0);
-    unsigned cmd1 = off_path.vertex(&x1, &y1);
+    [[maybe_unused]] unsigned cmd1 = off_path.vertex(&x1, &y1);
     double d = dist(x0, y0, x1, y1);
     while (true)
     {

@@ -17,8 +17,6 @@ TEST_CASE("datasource_cache")
     {
         try
         {
-            mapnik::logger logger;
-            mapnik::logger::severity_type original_severity = logger.get_severity();
             bool success = false;
             auto& cache = mapnik::datasource_cache::instance();
 

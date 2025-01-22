@@ -376,7 +376,6 @@ TEST_CASE("SVG parser")
         mapnik::svg::svg_path_adapter path(stl_storage);
 
         auto const& group_attrs = storage->svg_group();
-        agg::line_cap_e expected_cap(agg::square_cap);
 
         REQUIRE(check_equal_attributes(svg_name, group_attrs));
 
@@ -540,9 +539,7 @@ TEST_CASE("SVG parser")
         auto storage = svg.get_data();
         REQUIRE(storage);
         mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage(storage->source());
-
         auto const& group_attrs = storage->svg_group();
-        agg::line_join_e expected_join(agg::bevel_join);
         REQUIRE(check_equal_attributes(svg_name, group_attrs));
     }
 
