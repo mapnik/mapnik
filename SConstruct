@@ -43,7 +43,7 @@ ICU_LIBS_DEFAULT='/usr/'
 
 DEFAULT_CC = "cc"
 DEFAULT_CXX = "c++"
-DEFAULT_CXX_STD = "17"
+DEFAULT_CXX_STD = "20"
 DEFAULT_CXX_CXXFLAGS = " -DU_USING_ICU_NAMESPACE=0"
 DEFAULT_CXX_LINKFLAGS = ""
 if sys.platform == 'darwin':
@@ -477,7 +477,7 @@ opts.AddVariables(
 pickle_store = [# Scons internal variables
         'CC', # compiler user to check if c deps compile during configure
         'CXX', # C++ compiler to compile mapnik
-        'CXX_STD', # C++ standard e.g 17 (as in -std=c++17)
+        'CXX_STD', # C++ standard e.g 20 (as in -std=c++20)
         'CFLAGS',
         'CPPDEFINES',
         'CPPFLAGS', # c preprocessor flags
@@ -1609,9 +1609,6 @@ if not preconfigured:
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
-
-    if int(env['CXX_STD']) < 17:
-        env['USE_BOOST_FILESYSTEM'] = True
 
     if env['USE_BOOST_FILESYSTEM']:
         env.Append(CPPDEFINES = '-DUSE_BOOST_FILESYSTEM')
