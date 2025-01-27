@@ -40,7 +40,7 @@ jobs:
           - ubuntu-22.04
           - windows-2022
         cxx-standard:
-          - 17
+          - 20
 
     steps:
       - name: Checkout Mapnik
