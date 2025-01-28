@@ -225,7 +225,8 @@ struct harfbuzz_shaper
                            text_itemizer& itemizer,
                            std::map<unsigned, double>& width_map,
                            face_manager_freetype& font_manager,
-                           double scale_factor)
+                           double scale_factor,
+                           const std::string &lang)
     {
         unsigned start = line.first_char();
         unsigned end = line.last_char();
@@ -281,15 +282,19 @@ struct harfbuzz_shaper
 
                 hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
                 auto script = detail::_icu_script_to_script(text_item.script);
-                auto language = detail::script_to_language(script);
-                MAPNIK_LOG_DEBUG(harfbuzz_shaper)
-                  << "RUN:[" << text_item.start << "," << text_item.end << "]"
-                  << " LANGUAGE:" << ((language != nullptr) ? hb_language_to_string(language) : "unknown")
-                  << " SCRIPT:" << script << "(" << text_item.script << ") " << uscript_getShortName(text_item.script)
-                  << " FONT:" << face->family_name();
-                if (language != HB_LANGUAGE_INVALID)
+                hb_language_t hb_lang;
+                if (!lang.empty()) {
+                    hb_lang = hb_language_from_string(lang.c_str(), -1);
+                } else {
+                    hb_lang = detail::script_to_language(script);
+                    MAPNIK_LOG_DEBUG(harfbuzz_shaper) << "RUN:[" << text_item.start << "," << text_item.end << "]"
+                                                      << " LANGUAGE:" << ((hb_lang != nullptr) ? hb_language_to_string(hb_lang) : "unknown")
+                                                      << " SCRIPT:" << script << "(" << text_item.script << ") " << uscript_getShortName(text_item.script)
+                                                      << " FONT:" << face->family_name();
+                }
+                if (hb_lang != HB_LANGUAGE_INVALID)
                 {
-                    hb_buffer_set_language(buffer.get(), language); // set most common language for the run based script
+                    hb_buffer_set_language(buffer.get(), hb_lang); // set most common language for the run based script
                 }
                 hb_buffer_set_script(buffer.get(), script);
 

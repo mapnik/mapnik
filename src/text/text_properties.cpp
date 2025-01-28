@@ -270,6 +270,10 @@ void text_layout_properties::from_xml(xml_node const& node, fontset_map const& f
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);
     set_property_from_xml<justify_alignment_e>(jalign, "justify-alignment", node);
+    std::string lang_ = node.get_attr<std::string>("lang", "");
+    if (!lang_.empty()) {
+        lang = lang_;
+    }
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree& node,

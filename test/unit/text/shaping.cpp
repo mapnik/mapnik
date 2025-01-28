@@ -28,7 +28,7 @@ void test_shaping(mapnik::font_set const& fontset,
     itemizer.add_text(ustr, props);
 
     mapnik::text_line line(0, length);
-    mapnik::harfbuzz_shaper::shape_text(line, itemizer, width_map, fm, scale_factor);
+    mapnik::harfbuzz_shaper::shape_text(line, itemizer, width_map, fm, scale_factor, "");
 
     std::size_t index = 0;
     for (auto const& g : line)
