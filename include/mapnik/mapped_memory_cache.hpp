@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/warning.hpp>
 #include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
@@ -63,7 +64,10 @@ class MAPNIK_DECL mapped_memory_cache : public singleton<mapped_memory_cache, Cr
     void clear();
 };
 
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_ATTRIBUTES
 extern template class MAPNIK_DECL singleton<mapped_memory_cache, CreateStatic>;
+MAPNIK_DISABLE_WARNING_POP
 
 } // namespace mapnik
 

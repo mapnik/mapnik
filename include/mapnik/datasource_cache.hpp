@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/warning.hpp>
 #include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 
@@ -66,7 +67,10 @@ class MAPNIK_DECL datasource_cache : public singleton<datasource_cache, CreateSt
     mutable std::recursive_mutex instance_mutex_;
 };
 
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_ATTRIBUTES
 extern template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;
+MAPNIK_DISABLE_WARNING_POP
 
 } // namespace mapnik
 

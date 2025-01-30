@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/warning.hpp>
 #include <mapnik/util/singleton.hpp>
 #include <mapnik/util/noncopyable.hpp>
 #include <mapnik/font_set.hpp>
@@ -128,7 +129,10 @@ class MAPNIK_DECL face_manager
 };
 
 using face_manager_freetype = face_manager;
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_ATTRIBUTES
 extern template class MAPNIK_DECL singleton<freetype_engine, CreateUsingNew>;
+MAPNIK_DISABLE_WARNING_POP
 } // namespace mapnik
 
 #endif // MAPNIK_FONT_ENGINE_FREETYPE_HPP
