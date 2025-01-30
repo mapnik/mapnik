@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/warning.hpp>
 #include <mapnik/debug.hpp>
 
 // stl
@@ -152,8 +153,11 @@ struct MAPNIK_DECL enumeration
 
 #define IMPLEMENT_ENUM(type_alias, enum_class)                                                                         \
     IMPLEMENT_ENUM_FNCS(type_alias, enum_class)                                                                        \
+    MAPNIK_DISABLE_WARNING_PUSH                                                                                        \
+    MAPNIK_DISABLE_WARNING_ATTRIBUTES                                                                                  \
     template struct MAPNIK_DECL                                                                                        \
-      enumeration<enum_class, type_alias##_to_string, type_alias##_from_string, type_alias##_lookup>;
+      enumeration<enum_class, type_alias##_to_string, type_alias##_from_string, type_alias##_lookup>;                  \
+    MAPNIK_DISABLE_WARNING_POP
 
 /** Slim wrapper for enumerations. It creates a new type from a native enum and
  * a char pointer array. It almost exactly behaves like a native enumeration

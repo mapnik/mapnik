@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-
+#include <mapnik/warning.hpp>
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_any.hpp>
@@ -42,6 +42,9 @@
 
 namespace mapnik {
 
+MAPNIK_DISABLE_WARNING_PUSH
+MAPNIK_DISABLE_WARNING_ATTRIBUTES
+
 #if defined(HAVE_CAIRO)
 template class MAPNIK_DECL feature_style_processor<cairo_renderer<cairo_ptr>>;
 #endif
@@ -56,4 +59,5 @@ template class MAPNIK_DECL feature_style_processor<grid_renderer<grid>>;
 
 template class MAPNIK_DECL feature_style_processor<agg_renderer<image_rgba8>>;
 
+MAPNIK_DISABLE_WARNING_POP
 } // namespace mapnik
