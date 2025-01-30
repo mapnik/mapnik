@@ -27,7 +27,6 @@ inline void run_cleanup()
     // to make sure valgrind output is clean
     // http://xmlsoft.org/xmlmem.html
 #if defined(HAVE_LIBXML2)
-    xmlCleanupCharEncodingHandlers();
     xmlCleanupEncodingAliases();
     xmlCleanupGlobals();
     xmlCleanupParser();
