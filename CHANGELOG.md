@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released January 31st, 2025
 
-(Packaged from [](https://github.com/mapnik/mapnik/commit/)
+(Packaged from [11414a561](https://github.com/mapnik/mapnik/commit/11414a561)
 
 - Fix compilation warnings using `clang` and `gcc` (WIP)
 - Default to -std=c++20
