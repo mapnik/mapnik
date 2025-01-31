@@ -6,6 +6,17 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.5
+
+Released January 31st, 2025
+
+(Packaged from [](https://github.com/mapnik/mapnik/commit/)
+
+- Fix compilation warnings using `clang` and `gcc` (WIP)
+- Default to -std=c++20
+- Remove deprecated `xmlCleanupCharEncodingHandlers()`
+- Update min deps versions (boost >= 1.83, harfbuzz >=8.3.0, proj >=9.4.0)
+
 ## Mapnik 4.0.4
 
 Released December 4th, 2024
