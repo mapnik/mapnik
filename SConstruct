@@ -64,11 +64,11 @@ SCONS_CONFIGURE_CACHE = 'config.cache'
 SCONF_TEMP_DIR = '.sconf_temp'
 # auto-search directories for boost libs/headers
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
-BOOST_MIN_VERSION = '1.73'
+BOOST_MIN_VERSION = '1.83'
 #CAIRO_MIN_VERSION = '1.8.0'
-PROJ_MIN_VERSION = (7, 2, 0)
+PROJ_MIN_VERSION = (9, 4, 0)
 PROJ_MIN_VERSION_STRING = "%s.%s.%s" % PROJ_MIN_VERSION
-HARFBUZZ_MIN_VERSION = (0, 9, 34)
+HARFBUZZ_MIN_VERSION = (8, 3, 0)
 HARFBUZZ_MIN_VERSION_STRING = "%s.%s.%s" % HARFBUZZ_MIN_VERSION
 
 
