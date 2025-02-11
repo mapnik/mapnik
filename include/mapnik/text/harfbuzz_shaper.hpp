@@ -226,7 +226,7 @@ struct harfbuzz_shaper
                            std::map<unsigned, double>& width_map,
                            face_manager_freetype& font_manager,
                            double scale_factor,
-                           const std::string &lang)
+                           const std::optional<std::string> lang)
     {
         unsigned start = line.first_char();
         unsigned end = line.last_char();
@@ -283,8 +283,8 @@ struct harfbuzz_shaper
                 hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
                 auto script = detail::_icu_script_to_script(text_item.script);
                 hb_language_t hb_lang;
-                if (!lang.empty()) {
-                    hb_lang = hb_language_from_string(lang.c_str(), -1);
+                if (lang) {
+                    hb_lang = hb_language_from_string(lang->c_str(), -1);
                 } else {
                     hb_lang = detail::script_to_language(script);
                     MAPNIK_LOG_DEBUG(harfbuzz_shaper) << "RUN:[" << text_item.start << "," << text_item.end << "]"

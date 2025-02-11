@@ -167,7 +167,7 @@ class text_layout
     // Precalculated values for maximum performance
     rotation orientation_ = {0, 1.0};
     char wrap_char_ = ' ';
-    std::string lang_ = "";
+    std::optional<std::string> lang_;
     double wrap_width_ = 0.0;
     bool wrap_before_ = false;
     bool repeat_wrap_char_ = false;
