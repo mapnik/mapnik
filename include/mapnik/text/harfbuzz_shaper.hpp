@@ -283,14 +283,18 @@ struct harfbuzz_shaper
                 hb_font_t* font(hb_ft_font_create(face->get_face(), nullptr));
                 auto script = detail::_icu_script_to_script(text_item.script);
                 hb_language_t hb_lang;
-                if (lang) {
+                if (lang)
+                {
                     hb_lang = hb_language_from_string(lang->c_str(), -1);
-                } else {
+                }
+                else
+                {
                     hb_lang = detail::script_to_language(script);
-                    MAPNIK_LOG_DEBUG(harfbuzz_shaper) << "RUN:[" << text_item.start << "," << text_item.end << "]"
-                                                      << " LANGUAGE:" << ((hb_lang != nullptr) ? hb_language_to_string(hb_lang) : "unknown")
-                                                      << " SCRIPT:" << script << "(" << text_item.script << ") " << uscript_getShortName(text_item.script)
-                                                      << " FONT:" << face->family_name();
+                    MAPNIK_LOG_DEBUG(harfbuzz_shaper)
+                      << "RUN:[" << text_item.start << "," << text_item.end << "]"
+                      << " LANGUAGE:" << ((hb_lang != nullptr) ? hb_language_to_string(hb_lang) : "unknown")
+                      << " SCRIPT:" << script << "(" << text_item.script << ") "
+                      << uscript_getShortName(text_item.script) << " FONT:" << face->family_name();
                 }
                 if (hb_lang != HB_LANGUAGE_INVALID)
                 {

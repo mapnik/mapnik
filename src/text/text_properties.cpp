@@ -136,7 +136,8 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
     layout_defaults.from_xml(node, fontsets);
     format_defaults.from_xml(node, fontsets, is_shield);
     formatting::node_ptr n(formatting::node::from_xml(node, fontsets));
-    if (n) set_format_tree(n);
+    if (n)
+        set_format_tree(n);
 }
 
 void text_symbolizer_properties::to_xml(boost::property_tree::ptree& node,
@@ -206,7 +207,8 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree& node,
 
     layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
     format_defaults.to_xml(node, explicit_defaults, dfl.format_defaults);
-    if (tree_) tree_->to_xml(node);
+    if (tree_)
+        tree_->to_xml(node);
 }
 
 void text_symbolizer_properties::add_expressions(expression_set& output) const
