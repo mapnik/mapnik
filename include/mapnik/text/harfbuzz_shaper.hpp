@@ -226,7 +226,7 @@ struct harfbuzz_shaper
                            std::map<unsigned, double>& width_map,
                            face_manager_freetype& font_manager,
                            double scale_factor,
-                           const std::optional<std::string> lang)
+                           std::optional<std::string> lang = std::optional<std::string>(std::nullopt))
     {
         unsigned start = line.first_char();
         unsigned end = line.last_char();
