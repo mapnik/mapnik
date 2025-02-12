@@ -136,8 +136,7 @@ void text_symbolizer_properties::from_xml(xml_node const& node, fontset_map cons
     layout_defaults.from_xml(node, fontsets);
     format_defaults.from_xml(node, fontsets, is_shield);
     formatting::node_ptr n(formatting::node::from_xml(node, fontsets));
-    if (n)
-        set_format_tree(n);
+    if (n) set_format_tree(n);
 }
 
 void text_symbolizer_properties::to_xml(boost::property_tree::ptree& node,
@@ -207,8 +206,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree& node,
 
     layout_defaults.to_xml(node, explicit_defaults, dfl.layout_defaults);
     format_defaults.to_xml(node, explicit_defaults, dfl.format_defaults);
-    if (tree_)
-        tree_->to_xml(node);
+    if (tree_) tree_->to_xml(node);
 }
 
 void text_symbolizer_properties::add_expressions(expression_set& output) const
@@ -270,8 +268,7 @@ void text_layout_properties::from_xml(xml_node const& node, fontset_map const& f
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);
     set_property_from_xml<justify_alignment_e>(jalign, "justify-alignment", node);
-    std::optional<std::string> lang_ = node.get_attr<std::string>("lang");
-    if (lang_) lang = *lang_;
+    lang = node.get_opt_attr<std::string>("lang");
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree& node,
@@ -302,6 +299,8 @@ void text_layout_properties::to_xml(boost::property_tree::ptree& node,
         serialize_property("rotate-displacement", rotate_displacement, node);
     if (!(orientation == dfl.orientation) || explicit_defaults)
         serialize_property("orientation", orientation, node);
+    if (lang)
+        set_attr(node, "lang", *lang);
 }
 
 void text_layout_properties::add_expressions(expression_set& output) const
