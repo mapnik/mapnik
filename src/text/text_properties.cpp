@@ -270,6 +270,7 @@ void text_layout_properties::from_xml(xml_node const& node, fontset_map const& f
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);
     set_property_from_xml<justify_alignment_e>(jalign, "justify-alignment", node);
+    lang = node.get_opt_attr<std::string>("lang");
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree& node,
@@ -300,6 +301,8 @@ void text_layout_properties::to_xml(boost::property_tree::ptree& node,
         serialize_property("rotate-displacement", rotate_displacement, node);
     if (!(orientation == dfl.orientation) || explicit_defaults)
         serialize_property("orientation", orientation, node);
+    if (lang)
+        set_attr(node, "lang", *lang);
 }
 
 void text_layout_properties::add_expressions(expression_set& output) const

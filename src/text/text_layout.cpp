@@ -113,6 +113,7 @@ text_layout::text_layout(face_manager_freetype& font_manager,
       util::apply_visitor(extract_value<std::string>(feature, attrs), layout_properties_.wrap_char);
     if (!wrap_str.empty())
         wrap_char_ = wrap_str[0];
+    lang_ = layout_properties_.lang;
     wrap_width_ = util::apply_visitor(extract_value<value_double>(feature, attrs), layout_properties_.wrap_width);
     double angle = util::apply_visitor(extract_value<value_double>(feature, attrs), layout_properties_.orientation);
     orientation_.init(util::radians(angle));
@@ -456,7 +457,7 @@ void text_layout::clear()
 
 void text_layout::shape_text(text_line& line)
 {
-    harfbuzz_shaper::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_);
+    harfbuzz_shaper::shape_text(line, itemizer_, width_map_, font_manager_, scale_factor_, lang_);
 }
 
 void text_layout::init_auto_alignment()
