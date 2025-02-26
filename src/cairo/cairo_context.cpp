@@ -469,7 +469,7 @@ void cairo_context::add_text(glyph_positions const& pos,
         if (halo_radius <= 0.0 || halo_radius > 1024.0)
             continue;
         double text_size = glyph.format->text_size * scale_factor;
-        text_size += (count++ % 2 == 0) ? 1e-12:-1e-12;
+        text_size += (count++ % 2 == 0) ? 1e-12 : -1e-12;
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
@@ -491,7 +491,7 @@ void cairo_context::add_text(glyph_positions const& pos,
     {
         glyph_info const& glyph = glyph_pos.glyph;
         double text_size = glyph.format->text_size * scale_factor;
-        text_size += (count++ % 2 == 0) ? 1e-12:-1e-12;
+        text_size += (count++ % 2 == 0) ? 1e-12 : -1e-12;
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
