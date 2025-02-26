@@ -217,7 +217,22 @@ void agg_text_renderer<T>::render(glyph_positions const& pos)
                 if (!error)
                 {
                     FT_BitmapGlyph bit = reinterpret_cast<FT_BitmapGlyph>(g);
-                    if (bit->bitmap.pixel_mode != FT_PIXEL_MODE_BGRA)
+                    if (bit->bitmap.pixel_mode == FT_PIXEL_MODE_BGRA)
+                    {
+                        pixel_position render_pos(base_point);
+                        image_rgba8 glyph_image(render_glyph_image(glyph, bit->bitmap, transform_, render_pos));
+                        const constexpr std::size_t pixel_size = sizeof(image_rgba8::pixel_type);
+                        render_halo<pixel_size>(glyph_image.bytes(),
+                                                glyph_image.width(),
+                                                glyph_image.height(),
+                                                halo_fill,
+                                                render_pos.x,
+                                                render_pos.y,
+                                                halo_radius,
+                                                halo_opacity,
+                                                halo_comp_op_);
+                    }
+                    else
                     {
                         composite_bitmap(pixmap_,
                                          &bit->bitmap,
