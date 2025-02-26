@@ -2,7 +2,7 @@
 
 Above all Mapnik is about making beautiful maps. This aim drives us to be constantly forward looking. Progress in technology and design are reshaping the art of the possible for maps. Mapnik joins the best ideas in high quality graphics with robust patterns and algorithms for spatial data access. The goal should be no less than enabling a new generation of map makers and gorgeous maps.
 
-Mapnik is a library. It is not a server - rather it's for writing servers. Or for writing desktop graphics engines to display maps. Or for visualizing new galaxies - its up to you. If you have an inclination for scripting and something to render in real world or celestial coordinates, Mapnik is for you. Mapnik is not a full solution, or even half a solution. At its best, Mapnik is a drawing api that provides the right tools for the developer to make sense of, and art from, geodata. 
+Mapnik is a library. It is not a server - rather it's for writing servers. Or for writing desktop graphics engines to display maps. Or for visualizing new galaxies - it's up to you. If you have an inclination for scripting and something to render in real world or celestial coordinates, Mapnik is for you. Mapnik is not a full solution, or even half a solution. At its best, Mapnik is a drawing api that provides the right tools for the developer to make sense of, and art from, geodata. 
 
 But Mapnik is not just about drawing on a canvas. Beautiful maps can also be interactive maps and Mapnik aims to provide very flexible, custom access to geo features both in its C++ api and in binding languages. MetaWriters and the Grid renderer are two recent advances that enable highly interactive feature display in mapping applications using JSON serialized features, but more will come.
 
