@@ -414,7 +414,6 @@ class cairo_context : private util::noncopyable
   private:
     cairo_ptr cairo_;
     std::random_device rd_;
-
 };
 
 template<typename Context>
