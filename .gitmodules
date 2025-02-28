@@ -4,7 +4,7 @@
         branch = master
 [submodule "test/data-visual"]
         path = test/data-visual
-        url = git@github.com:mapnik/test-data-visual.git
+        url = https://github.com/mapnik/test-data-visual.git
         branch = master
 [submodule "deps/mapbox/variant"]
         path = deps/mapbox/variant
