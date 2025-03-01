@@ -47,6 +47,7 @@ MAPNIK_DISABLE_WARNING_POP
 #include <memory>
 #include <map>
 #include <stdexcept>
+#include <random>
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH
@@ -403,9 +404,16 @@ class cairo_context : private util::noncopyable
             }
         }
     }
+    inline double generate_offset()
+    {
+        std::mt19937 gen(rd_());
+        std::uniform_real_distribution<> dis{0.0, 1e-6};
+        return dis(gen);
+    }
 
   private:
     cairo_ptr cairo_;
+    std::random_device rd_;
 };
 
 template<typename Context>

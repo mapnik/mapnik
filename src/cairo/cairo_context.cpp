@@ -426,7 +426,6 @@ void cairo_context::show_glyph(unsigned long index, pixel_position const& pos)
     glyph.index = index;
     glyph.x = pos.x;
     glyph.y = pos.y;
-
     cairo_show_glyphs(cairo_.get(), &glyph, 1);
     check_object_status_and_throw_exception(*this);
 }
@@ -448,27 +447,22 @@ void cairo_context::add_text(glyph_positions const& pos,
                              composite_mode_e halo_comp_op,
                              double scale_factor)
 {
+    auto off = generate_offset();
     pixel_position const& base_point = pos.get_base_point();
     const double sx = base_point.x;
     const double sy = base_point.y;
-
-    for (auto const& glyph_pos : pos)
-    {
-        glyph_info const& glyph = glyph_pos.glyph;
-        glyph.face->set_character_sizes(glyph.format->text_size * scale_factor);
-    }
-
     // render halo
     double halo_radius = 0;
     set_operator(halo_comp_op);
     for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
+        glyph.face->set_character_sizes(glyph.format->text_size * scale_factor);
         halo_radius = glyph.format->halo_radius * scale_factor;
         // make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0)
             continue;
-        double text_size = glyph.format->text_size * scale_factor;
+        double text_size = glyph.format->text_size * scale_factor + off;
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
@@ -489,19 +483,19 @@ void cairo_context::add_text(glyph_positions const& pos,
     for (auto const& glyph_pos : pos)
     {
         glyph_info const& glyph = glyph_pos.glyph;
-        double text_size = glyph.format->text_size * scale_factor;
+        double text_size = glyph.format->text_size * scale_factor + off;
         cairo_matrix_t matrix;
         matrix.xx = text_size * glyph_pos.rot.cos;
         matrix.xy = text_size * glyph_pos.rot.sin;
         matrix.yx = text_size * -glyph_pos.rot.sin;
         matrix.yy = text_size * glyph_pos.rot.cos;
-        matrix.x0 = 0;
-        matrix.y0 = 0;
+        pixel_position new_pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
+        matrix.x0 = new_pos.x;
+        matrix.y0 = -new_pos.y;
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
-        pixel_position new_pos = glyph_pos.pos + glyph.offset.rotate(glyph_pos.rot);
         set_color(glyph.format->fill, glyph.format->text_opacity);
-        show_glyph(glyph.glyph_index, pixel_position(sx + new_pos.x, sy - new_pos.y));
+        show_glyph(glyph.glyph_index, pixel_position(sx, sy));
     }
 }
 

@@ -43,12 +43,14 @@ runs:
 
     - name: Pack visual test results
       working-directory: build/out
+      if: runner.os != 'macOS'
       shell: bash
       run: |
         tar -vzcf visual-test-results.tar.gz visual-test-result
 
     - name: Upload visual test results
       uses: actions/upload-artifact@v4
+      if: runner.os != 'macOS'
       with:
         name: ${{ inputs.cmake-preset }}-visual-tests-${{ github.sha }}
         path: build/out/visual-test-results.tar.gz
