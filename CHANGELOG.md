@@ -10,7 +10,7 @@ For a complete change history, see the git log.
 
 Released March 2nd, 2025
 
-(Packaged from xxx)
+(Packaged from [eb86d9513](https://github.com/mapnik/mapnik/commit/eb86d9513))
 
 - Add 'lang' parameter to TextSymbolizer
   PR https://github.com/mapnik/mapnik/pull/4492
@@ -28,7 +28,7 @@ Released March 2nd, 2025
 
 Released January 31st, 2025
 
-(Packaged from [11414a561](https://github.com/mapnik/mapnik/commit/11414a561)
+(Packaged from [11414a561](https://github.com/mapnik/mapnik/commit/11414a561))
 
 - Fix compilation warnings using `clang` and `gcc` (WIP)
 - Default to -std=c++20
@@ -39,7 +39,7 @@ Released January 31st, 2025
 
 Released December 4th, 2024
 
-(Packaged from [51a8a59f1](https://github.com/mapnik/mapnik/commit/51a8a59f1)
+(Packaged from [51a8a59f1](https://github.com/mapnik/mapnik/commit/51a8a59f1))
 
 - Explicit conversions operators in Expressions bool(expr), int(expr), float(expr), str(expr)
 - value::to_bool() - sync logic with Python bool() operator e.g `if 0 -> false : else -> true`
