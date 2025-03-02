@@ -6,6 +6,24 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.6
+
+Released March 2nd, 2025
+
+(Packaged from xxx)
+
+- Add 'lang' parameter to TextSymbolizer
+  PR https://github.com/mapnik/mapnik/pull/4492
+  PR https://github.com/mapnik/mapnik/pull/4493
+  https://github.com/mapnik/mapnik/issues/4494
+
+- AGG text - add missing `halo` renderer (rasterizer="full")
+
+- Attempt to disable 'cairo' glyph caching
+  PR https://github.com/mapnik/mapnik/pull/4498
+  https://github.com/mapnik/mapnik/issues/4497
+
+
 ## Mapnik 4.0.5
 
 Released January 31st, 2025
