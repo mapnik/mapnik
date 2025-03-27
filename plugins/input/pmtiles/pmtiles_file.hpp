@@ -19,8 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef PMTILES_FILE_HPP
-#define PMTILES_FILE_HPP
+
+#ifndef MAPNIK_PMTILES_FILE_HPP
+#define MAPNIK_PMTILES_FILE_HPP
 
 #include <mapnik/global.hpp>
 #define MAPNIK_MEMORY_MAPPED_FILE
@@ -33,9 +34,9 @@
 #include <fstream>
 
 // boost
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
+//#include <boost/iostreams/filtering_stream.hpp>
+//#include <boost/iostreams/copy.hpp>
+//#include <boost/iostreams/filter/gzip.hpp>
 #include <boost/json.hpp>
 //#include <boost/format.hpp>
 #include "vector_tile_compression.hpp"
@@ -348,8 +349,7 @@ class pmtiles_file : public mapnik::util::mapped_memory_file
         char const* data_;
         bool check_valid() const
         {
-            return (std::string(data_, data_ + 7) == "PMTiles" &&
-                    data_[7] == 0x3);
+            return (std::string(data_, data_ + 7) == "PMTiles");
         }
         int version() const { return data_[7]; }
         std::uint64_t root_dir_offset() const
@@ -434,9 +434,7 @@ public:
         : mapped_memory_file(file_name)
           //: file_(file_name.c_str(), boost::interprocess::read_only),
           //region_(file_, boost::interprocess::read_only)
-    {
-
-    }
+    {}
 
     ~pmtiles_file() {}
 
@@ -445,10 +443,9 @@ public:
     {
         header h(data());
         if (!h.check_valid())
-            std::cerr << "FAIL" << std::endl;
+            std::cerr << "PMTiles: invalid magic number" << std::endl;
         else
         {
-            std::cerr << "Gotcha!" << std::endl;
             std::cerr << "Version:" << h.version() << std::endl;
             std::cerr << "Min zoom:" << h.min_zoom() << std::endl;
             std::cerr << "Max zoom:" << h.max_zoom() << std::endl;
@@ -472,16 +469,25 @@ public:
         header h(data());
         auto metadata_offset = h.metadata_offset();
         auto metadata_length = h.metadata_length();
-        using namespace boost::iostreams;
-        namespace io = boost::iostreams;
+        //using namespace boost::iostreams;
+        //namespace io = boost::iostreams;
         std::string metadata;
-        filtering_istream in;
+
+        //filtering_istream in;
+        //if (h.internal_compression() == compression_type::GZIP)
+        //{
+        //    in.push(gzip_decompressor());
+        //}
+        //in.push(array_source(data() + metadata_offset, metadata_length));
+        //io::copy(in, io::back_inserter(metadata));
         if (h.internal_compression() == compression_type::GZIP)
         {
-            in.push(gzip_decompressor());
+            mapnik::vector_tile_impl::zlib_decompress(data() + metadata_offset, metadata_length, metadata);
         }
-        in.push(array_source(data() + metadata_offset, metadata_length));
-        io::copy(in, io::back_inserter(metadata));
+        else
+        {
+            metadata = {data() + metadata_offset, metadata_length};
+        }
         boost::json::value json_value;
         try
         {
@@ -554,4 +560,4 @@ public:
 };
 }
 
-#endif //PMTILES_FILE_HPP
+#endif //MAPNIK_PMTILES_FILE_HPP

@@ -160,7 +160,7 @@ mapnik::feature_ptr mvt_layer::next_feature()
             }
             mapnik::vector_tile_impl::GeometryPBF geoms(geom_itr);
             mapnik::geometry::geometry<double> geom =
-                    mapnik::vector_tile_impl::decode_geometry<double>(geoms, geometry_type,
+                mapnik::vector_tile_impl::decode_geometry<double>(geoms, (std::int32_t)geometry_type,
                             1, tile_x_, tile_y_, scale_, -1.0 * scale_);
             if (geom.is<mapnik::geometry::geometry_empty>())
             {
@@ -297,4 +297,3 @@ mvt_io::mvt_io(std::string&& data, mapnik::context_ptr const& ctx, const uint32_
         }
     }
 }
-

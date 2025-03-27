@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: LGPL-2.1-or-later
 /*****************************************************************************
  *
- * This file is part of Mapnik Vector Tile Plugin
+ * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2023 Geofabrik GmbH
+ * Copyright (C) 2025 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,6 +20,7 @@
  *
  *****************************************************************************/
 
+
 #ifndef PMTILES_FEATURESET_HPP_
 #define PMTILES_FEATURESET_HPP_
 
@@ -28,19 +28,24 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
-// sqlite
-#include "sqlite_connection.hpp"
 #include "mvt_io.hpp"
-#include "pmtiles_file.hpp"
+
+
+namespace mapnik {
+class pmtiles_file; //fwd decl
+}
 
 class pmtiles_featureset : public mapnik::Featureset
 {
 public:
     pmtiles_featureset(std::shared_ptr<mapnik::pmtiles_file> file_ptr,
                        mapnik::context_ptr const& ctx,
-                       const int zoom,
+                       int const zoom,
                        mapnik::box2d<double> const& extent,
-                       const std::string & layer);
+                       std::string const& layer,
+                       std::unordered_map<std::string,
+                       std::string> & vector_tile_cache,
+                       std::size_t datasource_hash);
 
     virtual ~pmtiles_featureset();
     mapnik::feature_ptr next();
@@ -51,8 +56,9 @@ private:
     mapnik::context_ptr context_;
     int zoom_;
     mapnik::box2d<double> const& extent_;
-    const std::string& layer_;
+    std::string const& layer_;
     std::unique_ptr<mvt_io> vector_tile_;
+    std::unordered_map<std::string, std::string> & vector_tile_cache_;
     int xmin_;
     int xmax_;
     int ymin_;
@@ -61,6 +67,7 @@ private:
     int x_ = 0;
     /// y index of the currently accessed tile
     int y_ = 0;
+    std::size_t datasource_hash_;
     bool next_tile();
     bool open_tile();
 };

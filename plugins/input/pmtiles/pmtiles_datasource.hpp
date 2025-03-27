@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: LGPL-2.1-or-later
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -25,8 +24,6 @@
 #define PMTILES_DATASOURCE_HPP_
 
 #include <mapnik/datasource.hpp>
-//#include <mapnik/featureset.hpp>
-#include "sqlite_connection.hpp"
 #include <mapnik/params.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
@@ -37,9 +34,17 @@
 
 #include <memory>
 #include <string>
-#include "pmtiles_file.hpp"
+#include <tuple>
+#include <unordered_map>
 
 DATASOURCE_PLUGIN_DEF(pmtiles_datasource_plugin, pmtiles);
+
+namespace mapnik {
+
+using zxy_type = std::tuple<std::uint8_t, std::uint32_t, std::uint32_t>;
+
+class pmtiles_file; //fwd decl
+}
 
 class pmtiles_datasource : public mapnik::datasource
 {
@@ -60,6 +65,7 @@ private:
     mapnik::context_ptr get_query_context(mapnik::query const& q) const;
     std::string database_path_;
     std::shared_ptr<mapnik::pmtiles_file> file_ptr_;
+    static std::unordered_map<std::string, std::string> & tile_cache();
 public:
     mapnik::box2d<double> extent_;
     std::int64_t minzoom_ = 0;

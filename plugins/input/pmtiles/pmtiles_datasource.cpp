@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: LGPL-2.1-or-later
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -23,6 +22,7 @@
 
 #include "pmtiles_datasource.hpp"
 #include "pmtiles_featureset.hpp"
+#include "pmtiles_file.hpp"
 #include "vector_tile_projection.hpp"
 #include <mapnik/geom_util.hpp>
 #include <mapnik/util/fs.hpp>
@@ -30,6 +30,7 @@
 #include <mapnik/datasource_plugin.hpp>
 #include <string>
 #include <algorithm>
+#include <thread>
 
 DATASOURCE_PLUGIN_IMPL(pmtiles_datasource_plugin, pmtiles_datasource);
 DATASOURCE_PLUGIN_EXPORT(pmtiles_datasource_plugin);
@@ -212,7 +213,7 @@ namespace {
     {
         for (std::int64_t zoom = 0; zoom < 19; ++zoom)
         {
-            if (scale > scales[zoom]) return minzoom;
+            if (scale > scales[zoom]) return std::min(zoom, minzoom);
             else if (scale < scales[zoom] && scale > scales[zoom + 1])
             {
                 return std::min(zoom, maxzoom);
@@ -221,12 +222,23 @@ namespace {
         return maxzoom;
     }
 }
+
+std::unordered_map<std::string, std::string> & pmtiles_datasource::tile_cache()
+{
+    static thread_local std::unordered_map<std::string, std::string> vector_tile_cache;
+    return vector_tile_cache;
+}
+
 mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) const
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "pmtiles_datasource::features");
 #endif
-
+    auto & vector_tile_cache = tile_cache();
+    if (vector_tile_cache.size() > 32) vector_tile_cache.clear();
+    std::cerr << "Address of Datasource:" << std::addressof(*this) << " cache size:" <<  vector_tile_cache.size() << std::endl;
+    auto datasource_hash = std::hash<std::string>{}(database_path_);
+    std::cerr << "vector_tile_cache address:" << std::addressof(vector_tile_cache) << std::endl;
     mapnik::box2d<double> const& box = q.get_bbox();
     std::cerr << "scale_denominator:" << q.scale_denominator() << std::endl;
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
@@ -237,7 +249,7 @@ mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) cons
     {
         throw mapnik::datasource_exception("Failed to create memory mapping for " + database_path_);
     }
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom, box, layer_));
+    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom, box, layer_, vector_tile_cache, datasource_hash));
 }
 
 mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
@@ -248,5 +260,6 @@ mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d con
 
     mapnik::filter_at_point filter(pt, tol);
     mapnik::context_ptr context = get_context_with_attributes();
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom_, filter.box_, layer_));
+    auto datasource_hash = std::hash<std::string>{}(database_path_);
+    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom_, filter.box_, layer_, tile_cache(), datasource_hash));
 }
