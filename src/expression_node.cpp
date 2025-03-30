@@ -38,10 +38,15 @@ MAPNIK_DISABLE_WARNING_POP
 namespace mapnik {
 
 #if defined(BOOST_REGEX_HAS_ICU)
-static void fromUTF32toUTF8(std::basic_string<UChar32> const& src, std::string& dst)
+static void fromUTF32toUTF8(boost::u32regex const& src, std::string& dst)
 {
-    int32_t len = safe_cast<int32_t>(src.length());
-    value_unicode_string::fromUTF32(src.data(), len).toUTF8String(dst);
+    boost::u32regex::iterator src_iterator = src.begin();
+    boost::u32regex::iterator src_end = src.end();
+
+    for (; src_iterator != src_end; ++src_iterator)
+    {
+        value_unicode_string::fromUTF32(src_iterator, 1).toUTF8String(dst);
+    }
 }
 #endif
 
@@ -106,7 +111,7 @@ std::string regex_match_node::to_string() const
     str_ += ".match('";
     auto const& pattern = impl_.get()->pattern_;
 #if defined(BOOST_REGEX_HAS_ICU)
-    fromUTF32toUTF8(pattern.str(), str_);
+    fromUTF32toUTF8(pattern, str_);
 #else
     str_ += pattern.str();
 #endif
@@ -151,7 +156,7 @@ std::string regex_replace_node::to_string() const
     auto const& pattern = impl_.get()->pattern_;
     auto const& format = impl_.get()->format_;
 #if defined(BOOST_REGEX_HAS_ICU)
-    fromUTF32toUTF8(pattern.str(), str_);
+    fromUTF32toUTF8(pattern, str_);
     str_ += "','";
     format.toUTF8String(str_);
 #else
