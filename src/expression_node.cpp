@@ -40,13 +40,8 @@ namespace mapnik {
 #if defined(BOOST_REGEX_HAS_ICU)
 static void fromUTF32toUTF8(boost::u32regex const& src, std::string& dst)
 {
-    boost::u32regex::iterator src_iterator = src.begin();
-    boost::u32regex::iterator src_end = src.end();
-
-    for (; src_iterator != src_end; ++src_iterator)
-    {
-        value_unicode_string::fromUTF32(src_iterator, 1).toUTF8String(dst);
-    }
+    std::int32_t size = safe_cast<std::int32_t>(src.size());
+    value_unicode_string::fromUTF32(src.expression(), size).toUTF8String(dst);
 }
 #endif
 
