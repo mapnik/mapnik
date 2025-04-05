@@ -20,19 +20,11 @@
  *
  *****************************************************************************/
 
-
+#include <mapnik/well_known_srs.hpp>
 #include "pmtiles_featureset.hpp"
 #include "vector_tile_compression.hpp"
 #include "pmtiles_file.hpp"
 #include <boost/format.hpp>
-#include <math.h>
-#if 0
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <iterator>
-#endif
 
 pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::pmtiles_file> file_ptr,
                                        mapnik::context_ptr const& ctx, const int zoom,
@@ -50,11 +42,10 @@ pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::pmtiles_file> fil
     datasource_hash_(datasource_hash)
 {
     int tile_count = 1 << zoom;
-    constexpr double width = 2.0 * 6378137 * M_PI;
-    xmin_ = static_cast<int>((extent_.minx() + width / 2) * (tile_count / width));
-    xmax_ = static_cast<int>((extent_.maxx() + width / 2) * (tile_count / width));
-    ymin_ = static_cast<int>(((width / 2) - extent_.maxy()) * (tile_count / width));
-    ymax_ = static_cast<int>(((width / 2) - extent_.miny()) * (tile_count / width));
+    xmin_ = static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    xmax_ = static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     x_ = xmin_;
     y_ = ymin_;
     open_tile();
@@ -110,28 +101,10 @@ bool pmtiles_featureset::next_tile()
 bool pmtiles_featureset::open_tile()
 {
     auto tile = file_ptr_->get_tile(zoom_, x_, y_);
-
     auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x_ % y_).str();
     auto itr = vector_tile_cache_.find(datasource_key);
     if (itr == vector_tile_cache_.end())
     {
-#if 0
-        using namespace boost::iostreams;
-        namespace io = boost::iostreams;
-        filtering_istream in;
-        if (mapnik::vector_tile_impl::is_gzip_compressed(file_ptr_->data() + tile.first, tile.second))
-        {
-            in.push(gzip_decompressor());
-        }
-        else if (mapnik::vector_tile_impl::is_zlib_compressed(file_ptr_->data() + tile.first, tile.second))
-        {
-            in.push(zlib_decompressor());
-        }
-        in.push(array_source(file_ptr_->data() + tile.first, tile.second));
-        std::string buffer;
-        io::copy(in, io::back_inserter(buffer));
-        vector_tile_.reset(new mvt_io(std::move(buffer), context_, x_, y_, zoom_, layer_));
-#else
         std::cerr << "\e[41m" << layer_ << " - " << datasource_key << "\e[0m" << std::endl;
         if (mapnik::vector_tile_impl::is_gzip_compressed(file_ptr_->data() + tile.first, tile.second) ||
             mapnik::vector_tile_impl::is_zlib_compressed(file_ptr_->data() + tile.first, tile.second))
@@ -143,7 +116,6 @@ bool pmtiles_featureset::open_tile()
         } else {
             vector_tile_.reset(new mvt_io(std::string(file_ptr_->data() + tile.first, tile.second), context_, x_, y_, zoom_, layer_));
         }
-#endif
     }
     else
     {
