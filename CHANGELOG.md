@@ -6,6 +6,18 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.0.7
+
+Released April 5th, 2025
+
+(Packaged from [5619599ea](https://github.com/mapnik/mapnik/commit/5619599ea))
+
+- Upgrade SCons to v4.9.1
+- Fix to support clang/libc++ >= 19 (via @hummeltech)
+  https://github.com/mapnik/mapnik/pull/4500
+  https://github.com/mapnik/mapnik/issues/4499
+
+
 ## Mapnik 4.0.6
 
 Released March 2nd, 2025
