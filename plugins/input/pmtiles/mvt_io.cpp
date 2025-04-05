@@ -26,69 +26,63 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/well_known_srs.hpp>
 #include <stdexcept>
+#include <cmath>
 
-
-mvt_layer::mvt_layer(const uint32_t x, const uint32_t y, const uint32_t zoom,
-        mapnik::context_ptr const& ctx)
+mvt_io::mvt_layer::mvt_layer(mvt_io & io)
     : keys_(),
-    values_(),
-    context_(ctx),
-    tr_("utf-8")
-{
-    resolution_ = mapnik::EARTH_CIRCUMFERENCE / (1 << zoom);
-    tile_x_ = -0.5 * mapnik::EARTH_CIRCUMFERENCE + x * resolution_;
-    tile_y_ =  0.5 * mapnik::EARTH_CIRCUMFERENCE - y * resolution_;
-}
+      values_(),
+      io_(io)
+{}
 
-void mvt_layer::add_feature(const protozero::data_view& feature)
+void mvt_io::mvt_layer::add_feature(const protozero::data_view& feature)
 {
     features_.emplace_back(feature);
 }
 
-bool mvt_layer::has_features() const
+bool mvt_io::mvt_layer::has_features() const
 {
     return !features_.empty();
 }
 
-void mvt_layer::add_key(std::string&& key)
+void mvt_io::mvt_layer::add_key(std::string&& key)
 {
     keys_.push_back(key);
 }
 
-void mvt_layer::add_value(pbf_attr_value_type value)
+void mvt_io::mvt_layer::add_value(pbf_attr_value_type value)
 {
     values_.push_back(value);
 }
 
-void mvt_layer::set_name(std::string&& name)
+void mvt_io::mvt_layer::set_name(std::string&& name)
 {
     name_ = name;
 }
 
-void mvt_layer::set_extent(uint32_t extent)
+void mvt_io::mvt_layer::set_extent(uint32_t extent)
 {
     extent_ = extent;
 }
 
-uint32_t mvt_layer::extent() const
+uint32_t mvt_io::mvt_layer::extent() const
 {
     return extent_;
 }
 
-void mvt_layer::finish_reading()
+void mvt_io::mvt_layer::finish_reading()
 {
     num_keys_ = keys_.size();
     num_values_ = values_.size();
-    scale_ = static_cast<double>(extent_ / resolution_);
+    scale_ = static_cast<double>(extent_ / io_.resolution_);
 }
 
-mapnik::feature_ptr mvt_layer::next_feature()
+mapnik::feature_ptr mvt_io::mvt_layer::next_feature()
 {
     while (feature_index_ < features_.size())
     {
         const protozero::data_view d (features_.at(feature_index_));
         protozero::pbf_reader f (d);
-        mapnik::feature_ptr feature = mapnik::feature_factory::create(context_, feature_index_);
+        mapnik::feature_ptr feature = mapnik::feature_factory::create(io_.context_, feature_index_);
         ++feature_index_;
         mvt_message::geom_type geometry_type = mvt_message::geom_type::unknown;
         bool has_geometry = false;
@@ -118,7 +112,7 @@ mapnik::feature_ptr mvt_layer::next_feature()
                             if (feature->has_key(name))
                             {
                                 pbf_attr_value_type val = values_.at(key_value);
-                                value_visitor vv(tr_, feature, name);
+                                value_visitor vv(io_.tr_, feature, name);
                                 mapnik::util::apply_visitor(vv, val);
                             }
                         }
@@ -161,7 +155,7 @@ mapnik::feature_ptr mvt_layer::next_feature()
             mapnik::vector_tile_impl::GeometryPBF geoms(geom_itr);
             mapnik::geometry::geometry<double> geom =
                 mapnik::vector_tile_impl::decode_geometry<double>(geoms, (std::int32_t)geometry_type,
-                            1, tile_x_, tile_y_, scale_, -1.0 * scale_);
+                            1, io_.tile_x_, io_.tile_y_, scale_, -1.0 * scale_);
             if (geom.is<mapnik::geometry::geometry_empty>())
             {
                 continue;
@@ -183,7 +177,7 @@ mapnik::feature_ptr mvt_layer::next_feature()
 
 bool mvt_io::read_layer(protozero::pbf_message<mvt_message::layer>& pbf_layer)
 {
-    layer_.reset(new mvt_layer(x_, y_, zoom_, context_));
+    layer_.reset(new mvt_layer(*this));
     bool ignore_layer = false;
     while (pbf_layer.next())
     {
@@ -211,7 +205,7 @@ bool mvt_io::read_layer(protozero::pbf_message<mvt_message::layer>& pbf_layer)
             }
             break;
         case mvt_message::layer::keys:
-            layer_->add_key(std::move(pbf_layer.get_string()));
+            layer_->add_key(pbf_layer.get_string());
             break;
         case mvt_message::layer::values:
         {
@@ -282,13 +276,15 @@ mapnik::feature_ptr mvt_io::next()
 }
 
 mvt_io::mvt_io(std::string&& data, mapnik::context_ptr const& ctx, const uint32_t x, const uint32_t y, const uint32_t zoom, std::string layer_name)
-        : reader_(data),
-        context_(ctx),
-        x_(x),
-        y_(y),
-        zoom_(zoom),
-        layer_name_(layer_name)
+    : reader_(data),
+      context_(ctx),
+      layer_name_(layer_name),
+      tr_("utf-8")
 {
+    resolution_ = mapnik::EARTH_CIRCUMFERENCE / (1 << zoom);
+    tile_x_ = -0.5 * mapnik::EARTH_CIRCUMFERENCE + x * resolution_;
+    tile_y_ =  0.5 * mapnik::EARTH_CIRCUMFERENCE - y * resolution_;
+
     while (reader_.next(static_cast<uint32_t>(mvt_message::tile::layer))) {
         const auto data_view(reader_.get_view());
         protozero::pbf_message<mvt_message::layer> msg_layer(data_view);
