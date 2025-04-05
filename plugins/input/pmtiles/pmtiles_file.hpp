@@ -24,7 +24,6 @@
 #define MAPNIK_PMTILES_FILE_HPP
 
 #include <mapnik/global.hpp>
-#define MAPNIK_MEMORY_MAPPED_FILE
 #include <mapnik/util/mapped_memory_file.hpp>
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
