@@ -70,7 +70,6 @@ public:
     mapnik::box2d<double> extent_;
     std::int64_t minzoom_ = 0;
     std::int64_t maxzoom_ = 14;
-    std::int64_t zoom_ = 14;
     std::string json_;
     std::string layer_;
     mapnik::layer_descriptor desc_;

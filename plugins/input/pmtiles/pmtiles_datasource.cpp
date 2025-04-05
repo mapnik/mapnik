@@ -124,13 +124,6 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
     mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
 
-    std::optional<mapnik::value_integer> zoom = params.get<mapnik::value_integer>("zoom");
-    if (!zoom)
-    {
-         throw mapnik::datasource_exception("pmtiles Plugin: parameter 'zoom' missing");
-    }
-    zoom_ = *zoom;
-
     auto metadata = file_ptr_->metadata();
     auto layers = metadata.at("vector_layers");
     bool found = false;
@@ -205,16 +198,16 @@ mapnik::context_ptr pmtiles_datasource::get_query_context(mapnik::query const& q
 
 namespace {
 
-    double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 17471320.7509,
-                       8735660.37545, 4367830.18772, 2183915.09386, 1091957.54693, 545978.773466,
-                       272989.386733, 136494.693366, 68247.3466832, 34123.6733416, 17061.8366708,
-                       8530.9183354,  4265.4591677,  2132.72958385, 1066.36479192, 533.182395962};
+    constexpr double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 17471320.7509,
+                                 8735660.37545, 4367830.18772, 2183915.09386, 1091957.54693, 545978.773466,
+                                 272989.386733, 136494.693366, 68247.3466832, 34123.6733416, 17061.8366708,
+                                 8530.9183354,  4265.4591677,  2132.72958385, 1066.36479192, 533.182395962};
     std::int64_t scale_to_zoom(double scale, std::int64_t minzoom, std::int64_t maxzoom)
     {
         for (std::int64_t zoom = 0; zoom < 19; ++zoom)
         {
-            if (scale > scales[zoom]) return std::min(zoom, minzoom);
-            else if (scale < scales[zoom] && scale > scales[zoom + 1])
+            if (scale > std::ceil(scales[zoom])) return std::min(zoom, minzoom);
+            else if (scale < std::ceil(scales[zoom]) && scale > std::ceil(scales[zoom + 1]))
             {
                 return std::min(zoom, maxzoom);
             }
@@ -235,21 +228,20 @@ mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) cons
     mapnik::progress_timer __stats__(std::clog, "pmtiles_datasource::features");
 #endif
     auto & vector_tile_cache = tile_cache();
-    if (vector_tile_cache.size() > 32) vector_tile_cache.clear();
+    if (vector_tile_cache.size() > 16)
+    {
+        vector_tile_cache.clear();
+    }
     std::cerr << "Address of Datasource:" << std::addressof(*this) << " cache size:" <<  vector_tile_cache.size() << std::endl;
     auto datasource_hash = std::hash<std::string>{}(database_path_);
     std::cerr << "vector_tile_cache address:" << std::addressof(vector_tile_cache) << std::endl;
-    mapnik::box2d<double> const& box = q.get_bbox();
-    std::cerr << "scale_denominator:" << q.scale_denominator() << std::endl;
+    mapnik::box2d<double> const& bbox = q.get_bbox();
+
+    std::cerr << "bbox:" << bbox << " scale_denominator:" << q.scale_denominator() << std::endl;
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
     std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
-    auto && file_ptr = std::make_unique<mapnik::pmtiles_file>(database_path_);
-    if (!file_ptr->is_good())
-    {
-        throw mapnik::datasource_exception("Failed to create memory mapping for " + database_path_);
-    }
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom, box, layer_, vector_tile_cache, datasource_hash));
+    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
 }
 
 mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
@@ -261,5 +253,5 @@ mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d con
     mapnik::filter_at_point filter(pt, tol);
     mapnik::context_ptr context = get_context_with_attributes();
     auto datasource_hash = std::hash<std::string>{}(database_path_);
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom_, filter.box_, layer_, tile_cache(), datasource_hash));
+    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, maxzoom_, filter.box_, layer_, tile_cache(), datasource_hash));
 }
