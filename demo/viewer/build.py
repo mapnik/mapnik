@@ -40,8 +40,8 @@ ini_template += 'fonts/size=%d\n' % fonts
 
 ini = ini_template % locals()
 
-open('viewer.ini','w').write(ini)
-
-try:
-    os.chmod('viewer.ini',0o666)
-except: pass
+if not os.path.isfile('viewer.ini'):
+    open('viewer.ini','w').write(ini)
+    try:
+        os.chmod('viewer.ini',0o666)
+    except: pass
