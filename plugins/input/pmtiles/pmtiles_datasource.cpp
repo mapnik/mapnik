@@ -28,6 +28,7 @@
 #include <mapnik/util/fs.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/datasource_plugin.hpp>
+#include <mapnik/well_known_srs.hpp>
 #include <string>
 #include <algorithm>
 #include <thread>
@@ -247,11 +248,20 @@ mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) cons
 mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
 #ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "pmtiles_datasource::features");
+    mapnik::progress_timer __stats__(std::clog, "pmtiles_datasource::features_at_point");
 #endif
 
     mapnik::filter_at_point filter(pt, tol);
     mapnik::context_ptr context = get_context_with_attributes();
     auto datasource_hash = std::hash<std::string>{}(database_path_);
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, maxzoom_, filter.box_, layer_, tile_cache(), datasource_hash));
+    int tile_count = 1 << maxzoom_;
+    auto tile_x = static_cast<int>((pt.x + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    auto tile_y = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - pt.y) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+
+    double x0 = tile_x *  (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
+    double y0 = -tile_y * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
+    double x1 = (tile_x + 1) *  (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
+    double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
+    auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
+    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
 }
