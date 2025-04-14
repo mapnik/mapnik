@@ -55,8 +55,8 @@ private:
     std::shared_ptr<mapnik::pmtiles_file> file_ptr_;
     mapnik::context_ptr context_;
     int zoom_;
-    mapnik::box2d<double> const& extent_;
-    std::string const& layer_;
+    mapnik::box2d<double> const extent_;
+    std::string const layer_;
     std::unique_ptr<mvt_io> vector_tile_;
     std::unordered_map<std::string, std::string> & vector_tile_cache_;
     int xmin_;
