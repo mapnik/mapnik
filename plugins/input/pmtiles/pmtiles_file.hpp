@@ -514,47 +514,53 @@ public:
 
     std::pair<uint64_t, uint32_t> get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y)
     {
-        auto tile_id = zxy_to_tileid(z, x, y);
-        //std::cerr << "TileID:" << tile_id << std::endl;
-        //header h(file_.buffer().first);
-        //std::cerr << "Root dir offset:" << root_dir_offset_ << std::endl;
-        //std::cerr << "Root dir length:" << root_dir_length_ << std::endl;
-        std::uint64_t dir_offset = root_dir_offset_;
-        std::uint64_t dir_length = root_dir_length_;
-        //using namespace boost::iostreams;
-        //namespace io = boost::iostreams;
-        //filtering_istream in;
-        //in.set_auto_close(false);
+        try {
+            auto tile_id = zxy_to_tileid(z, x, y);
+            //std::cerr << "TileID:" << tile_id << std::endl;
+            //header h(file_.buffer().first);
+            //std::cerr << "Root dir offset:" << root_dir_offset_ << std::endl;
+            //std::cerr << "Root dir length:" << root_dir_length_ << std::endl;
+            std::uint64_t dir_offset = root_dir_offset_;
+            std::uint64_t dir_length = root_dir_length_;
+            //using namespace boost::iostreams;
+            //namespace io = boost::iostreams;
+            //filtering_istream in;
+            //in.set_auto_close(false);
 
-        //if (h.internal_compression() == compression_type::GZIP)
-        //{
-        //    in.push(gzip_decompressor());
-        //}
+            //if (h.internal_compression() == compression_type::GZIP)
+            //{
+            //    in.push(gzip_decompressor());
+            //}
 
-        for (std::size_t depth = 0; depth < 4; ++depth)
-        {
-            std::string decompressed_dir;
-            mapnik::vector_tile_impl::zlib_decompress(data() + dir_offset, dir_length, decompressed_dir);
-            auto dir_entries = deserialize_directory(decompressed_dir);
-            auto entry = find_tile(dir_entries, tile_id);
-            if (entry.length > 0)
+            for (std::size_t depth = 0; depth < 4; ++depth)
             {
-                if (entry.run_length > 0)
+                std::string decompressed_dir;
+                mapnik::vector_tile_impl::zlib_decompress(data() + dir_offset, dir_length, decompressed_dir);
+                auto dir_entries = deserialize_directory(decompressed_dir);
+                auto entry = find_tile(dir_entries, tile_id);
+                if (entry.length > 0)
                 {
-                    return std::make_pair(tile_data_offset_ + entry.offset, entry.length);
+                    if (entry.run_length > 0)
+                    {
+                        return std::make_pair(tile_data_offset_ + entry.offset, entry.length);
+                    }
+                    else
+                    {
+                        dir_offset = leaf_directories_offset_ + entry.offset;
+                        dir_length = entry.length;
+                    }
                 }
                 else
                 {
-                    dir_offset = leaf_directories_offset_ + entry.offset;
-                    dir_length = entry.length;
+                    return std::make_pair(0, 0);
                 }
             }
-            else
-            {
-                return std::make_pair(0, 0);
-            }
+            return std::make_pair(0, 0);
         }
-        return std::make_pair(0, 0);
+        catch (std::exception const& ex)
+        {
+            return std::make_pair(0, 0);
+        }
     }
 };
 }
