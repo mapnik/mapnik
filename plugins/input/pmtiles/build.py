@@ -29,6 +29,7 @@ MAPNIK_VECTOR_TILE = '../../../deps/mapbox/mapnik-vector-tile/src'
 plugin_env = plugin_base.Clone()
 
 plugin_env.Prepend(CPPPATH = '#deps/mapbox/mapnik-vector-tile/src')
+plugin_env.Prepend(CPPPATH = '#plugins/input/sqlite')
 plugin_env.Append(CPPDEFINES = 'MAPNIK_VECTOR_TILE_LIBRARY=1')
 
 plugin_sources = Split(
@@ -42,8 +43,8 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-libraries = [ 'sqlite3', 'boost_iostreams', 'boost_json' ] #FIXME!
-libraries = [ 'boost_json' ]
+#libraries = [ 'sqlite3', 'boost_iostreams'] #FIXME!
+libraries = []
 
 linkflags = []
 if env['SQLITE_LINKFLAGS']:

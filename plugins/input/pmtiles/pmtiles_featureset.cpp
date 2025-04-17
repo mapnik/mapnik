@@ -22,11 +22,10 @@
 
 #include <mapnik/well_known_srs.hpp>
 #include "pmtiles_featureset.hpp"
-#include "vector_tile_compression.hpp"
 #include "pmtiles_file.hpp"
 #include <boost/format.hpp>
 
-pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::pmtiles_file> file_ptr,
+pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::tile_source> file_ptr,
                                        mapnik::context_ptr const& ctx, const int zoom,
                                        mapnik::box2d<double> const& extent, std::string const& layer,
                                        std::unordered_map<std::string, std::string> & vector_tile_cache,
@@ -100,28 +99,20 @@ bool pmtiles_featureset::next_tile()
 
 bool pmtiles_featureset::open_tile()
 {
-    auto tile = file_ptr_->get_tile(zoom_, x_, y_);
     auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x_ % y_).str();
     auto itr = vector_tile_cache_.find(datasource_key);
     if (itr == vector_tile_cache_.end())
     {
         std::cerr << "\e[41m" << layer_ << " - " << datasource_key << "\e[0m" << std::endl;
-        if (mapnik::vector_tile_impl::is_gzip_compressed(file_ptr_->data() + tile.first, tile.second) ||
-            mapnik::vector_tile_impl::is_zlib_compressed(file_ptr_->data() + tile.first, tile.second))
-        {
-            std::string decompressed;
-            mapnik::vector_tile_impl::zlib_decompress(file_ptr_->data() + tile.first, tile.second, decompressed);
-            vector_tile_cache_.emplace(datasource_key, decompressed);
-            vector_tile_.reset(new mvt_io(std::move(decompressed), context_, x_, y_, zoom_, layer_));
-        } else {
-            vector_tile_.reset(new mvt_io(std::string(file_ptr_->data() + tile.first, tile.second), context_, x_, y_, zoom_, layer_));
-        }
+        auto decompressed = file_ptr_->get_tile(zoom_, x_, y_);
+        vector_tile_cache_.emplace(datasource_key, decompressed);
+        vector_tile_.reset(new mvt_io(std::move(decompressed), context_, x_, y_, zoom_, layer_));
     }
     else
     {
         std::cerr << "\e[42m" << layer_ << " - " << datasource_key << "\e[0m" << std::endl;
-        std::string tile = itr->second;
-        vector_tile_.reset(new mvt_io(std::move(tile), context_, x_, y_, zoom_, layer_));
+        std::string buffer = itr->second;
+        vector_tile_.reset(new mvt_io(std::move(buffer), context_, x_, y_, zoom_, layer_));
     }
     return true;
 }

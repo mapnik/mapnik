@@ -4,6 +4,7 @@
  * This file is part of Mapnik Vector Tile Plugin
  *
  * Copyright (C) 2023 Geofabrik GmbH
+ * Copyright (C) 2025 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

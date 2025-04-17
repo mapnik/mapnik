@@ -24,20 +24,16 @@
 #define MAPNIK_PMTILES_FILE_HPP
 
 #include <mapnik/global.hpp>
-#include <mapnik/util/mapped_memory_file.hpp>
-#include <boost/interprocess/file_mapping.hpp>
-#include <boost/interprocess/mapped_region.hpp>
+#include "tile_source.hpp"
 // stl
 #include <iostream>
 #include <tuple>
 #include <fstream>
 
 // boost
-//#include <boost/iostreams/filtering_stream.hpp>
-//#include <boost/iostreams/copy.hpp>
-//#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/json.hpp>
-//#include <boost/format.hpp>
+#include <boost/interprocess/file_mapping.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+// mapnik_vector_tile
 #include "vector_tile_compression.hpp"
 
 namespace mapnik {
@@ -339,7 +335,7 @@ inline std::uint64_t read_uint64_xdr(char const* buf, std::size_t pos)
     return val;
 }
 
-class pmtiles_file : public mapnik::util::mapped_memory_file
+class pmtiles_file : public tile_source
 {
     struct header
     {
@@ -428,17 +424,16 @@ class pmtiles_file : public mapnik::util::mapped_memory_file
 public:
 
     pmtiles_file() {}
-
     pmtiles_file(std::string const& file_name)
-        : mapped_memory_file(file_name)
-          //: file_(file_name.c_str(), boost::interprocess::read_only),
-          //region_(file_, boost::interprocess::read_only)
-    {}
+        : file_(file_name.c_str(), boost::interprocess::read_only),
+        region_(file_, boost::interprocess::read_only)
+    {
+        init();
+    }
 
-    ~pmtiles_file() {}
+    ~pmtiles_file() = default;
 
-    template<typename Datasource>
-    void read_header(Datasource & source)
+    void init()
     {
         header h(data());
         if (!h.check_valid())
@@ -451,9 +446,9 @@ public:
             std::cerr << "Min Lon/Lat:" << h.minx() << "," << h.miny() << std::endl;
             std::cerr << "Max Lon/Lat:" << h.maxx() << "," << h.maxy() << std::endl;
 
-            source.minzoom_ = h.min_zoom();
-            source.maxzoom_ = h.max_zoom();
-            source.extent_ = mapnik::box2d<double>{h.minx(), h.miny(),h.maxx(), h.maxy()};
+            minzoom_ = h.min_zoom();
+            maxzoom_ = h.max_zoom();
+            extent_ = mapnik::box2d<double>{h.minx(), h.miny(),h.maxx(), h.maxy()};
             root_dir_offset_ = h.root_dir_offset();
             root_dir_length_ = h.root_dir_length();
             tile_data_offset_ = h.tile_data_offset();
@@ -463,75 +458,33 @@ public:
             std::cerr << "Addressed tile count:" << h.addressed_tile_count() << std::endl;
         }
     }
-    boost::json::value metadata() const
-    {
-        header h(data());
-        auto metadata_offset = h.metadata_offset();
-        auto metadata_length = h.metadata_length();
-        //using namespace boost::iostreams;
-        //namespace io = boost::iostreams;
-        std::string metadata;
 
-        //filtering_istream in;
-        //if (h.internal_compression() == compression_type::GZIP)
-        //{
-        //    in.push(gzip_decompressor());
-        //}
-        //in.push(array_source(data() + metadata_offset, metadata_length));
-        //io::copy(in, io::back_inserter(metadata));
-        if (h.internal_compression() == compression_type::GZIP)
-        {
-            mapnik::vector_tile_impl::zlib_decompress(data() + metadata_offset, metadata_length, metadata);
-        }
-        else
-        {
-            metadata = {data() + metadata_offset, metadata_length};
-        }
-        boost::json::value json_value;
-        try
-        {
-            json_value = boost::json::parse(metadata);
-        }
-        catch (std::exception const& ex)
-        {
-            std::cerr << ex.what() << std::endl;
-        }
-        return json_value;
+    inline bool is_good()
+    {
+        return (region_.get_size() > 0);
     }
-    inline void seek(std::streampos pos) { file_.seekg(pos, std::ios::beg); }
-    inline std::streampos pos() { return file_.tellg(); }
-    inline bool is_eof() { return file_.eof(); }
-    inline bool is_good() { return file_.good(); }
-    //inline bool is_good() { return (region_.get_size() > 0);}
-    //inline char const* data() const { return reinterpret_cast<char const*>(region_.get_address()); }
-    inline char const* data() const { return file_.buffer().first; }
-    //boost::interprocess::file_mapping file_;
-    //boost::interprocess::mapped_region region_;
+
+private:
+    inline char const* data() const
+    {
+        return reinterpret_cast<char const*>(region_.get_address());
+    }
+    boost::interprocess::file_mapping file_;
+    boost::interprocess::mapped_region region_;
     std::uint64_t root_dir_offset_;
     std::uint64_t root_dir_length_;
     std::uint64_t tile_data_offset_;
     std::uint64_t leaf_directories_offset_;
+    std::uint8_t minzoom_ = 1;
+    std::uint8_t maxzoom_ = 14;
+    mapnik::box2d<double> extent_;
 
-    std::pair<uint64_t, uint32_t> get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y)
+    std::pair<uint64_t, uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
         try {
             auto tile_id = zxy_to_tileid(z, x, y);
-            //std::cerr << "TileID:" << tile_id << std::endl;
-            //header h(file_.buffer().first);
-            //std::cerr << "Root dir offset:" << root_dir_offset_ << std::endl;
-            //std::cerr << "Root dir length:" << root_dir_length_ << std::endl;
             std::uint64_t dir_offset = root_dir_offset_;
             std::uint64_t dir_length = root_dir_length_;
-            //using namespace boost::iostreams;
-            //namespace io = boost::iostreams;
-            //filtering_istream in;
-            //in.set_auto_close(false);
-
-            //if (h.internal_compression() == compression_type::GZIP)
-            //{
-            //    in.push(gzip_decompressor());
-            //}
-
             for (std::size_t depth = 0; depth < 4; ++depth)
             {
                 std::string decompressed_dir;
@@ -561,6 +514,61 @@ public:
         {
             return std::make_pair(0, 0);
         }
+    }
+public:
+
+    std::uint8_t minzoom() const
+    {
+        return minzoom_;
+    }
+
+    std::uint8_t maxzoom() const
+    {
+        return maxzoom_;
+    }
+
+    mapnik::box2d<double> const& extent() const
+    {
+        return extent_;
+    }
+
+    std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
+    {
+        auto tile = get_tile_position(z, x, y);
+        if (mapnik::vector_tile_impl::is_gzip_compressed(data() + tile.first, tile.second) ||
+            mapnik::vector_tile_impl::is_zlib_compressed(data() + tile.first, tile.second))
+        {
+            std::string decompressed;
+            mapnik::vector_tile_impl::zlib_decompress(data() + tile.first, tile.second, decompressed);
+            return decompressed;
+        }
+        return std::string(data() + tile.first, tile.second);
+    }
+
+    boost::json::value metadata() const
+    {
+        header h(data());
+        auto metadata_offset = h.metadata_offset();
+        auto metadata_length = h.metadata_length();
+        std::string metadata;
+        if (h.internal_compression() == compression_type::GZIP)
+        {
+            mapnik::vector_tile_impl::zlib_decompress(data() + metadata_offset, metadata_length, metadata);
+        }
+        else
+        {
+            metadata = {data() + metadata_offset, metadata_length};
+        }
+        boost::json::value json_value;
+        try
+        {
+            json_value = boost::json::parse(metadata);
+        }
+        catch (std::exception const& ex)
+        {
+            std::cerr << ex.what() << std::endl;
+        }
+        return json_value;
     }
 };
 }

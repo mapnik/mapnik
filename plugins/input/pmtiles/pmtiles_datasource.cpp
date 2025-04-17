@@ -23,6 +23,7 @@
 #include "pmtiles_datasource.hpp"
 #include "pmtiles_featureset.hpp"
 #include "pmtiles_file.hpp"
+#include "mbtiles_source.hpp"
 #include "vector_tile_projection.hpp"
 #include <mapnik/geom_util.hpp>
 #include <mapnik/util/fs.hpp>
@@ -103,14 +104,22 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
         throw mapnik::datasource_exception("pmtiles Plugin: parameter 'layer' is missing.");
     }
 
-    file_ptr_ = std::make_shared<mapnik::pmtiles_file>(database_path_);
-    if (!file_ptr_->is_good())
+    if (database_path_.ends_with(".pmtiles"))
     {
-        throw mapnik::datasource_exception("Failed to create memory mapping for " + database_path_);
+        file_ptr_ = std::make_shared<mapnik::pmtiles_file>(database_path_);
+    }
+    else // assuming mbtiles
+    {
+        file_ptr_ = std::make_shared<mapnik::mbtiles_source>(database_path_);
     }
 
-    file_ptr_->read_header(*this);
-
+    //if (!file_ptr->is_good())
+    //{
+    //    throw mapnik::datasource_exception("Failed to create memory mapping for " + database_path_);
+    //}
+    minzoom_ = file_ptr_->minzoom();
+    maxzoom_ = file_ptr_->maxzoom();
+    extent_ = file_ptr_->extent();
     // overwrite envelope with user supplied
     std::optional<std::string> ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
@@ -126,6 +135,7 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
 
     auto metadata = file_ptr_->metadata();
+
     auto layers = metadata.at("vector_layers");
     bool found = false;
     for (auto const& layer : layers.as_array())
@@ -265,3 +275,5 @@ mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d con
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
     return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
 }
+// Boost.Json header only
+#include <boost/json/src.hpp>

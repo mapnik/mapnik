@@ -32,13 +32,13 @@
 
 
 namespace mapnik {
-class pmtiles_file; //fwd decl
+class tile_source; //fwd decl
 }
 
 class pmtiles_featureset : public mapnik::Featureset
 {
 public:
-    pmtiles_featureset(std::shared_ptr<mapnik::pmtiles_file> file_ptr,
+    pmtiles_featureset(std::shared_ptr<mapnik::tile_source> file_ptr,
                        mapnik::context_ptr const& ctx,
                        int const zoom,
                        mapnik::box2d<double> const& extent,
@@ -52,7 +52,7 @@ public:
 private:
     mapnik::feature_ptr next_feature();
     bool valid() const;
-    std::shared_ptr<mapnik::pmtiles_file> file_ptr_;
+    std::shared_ptr<mapnik::tile_source> file_ptr_;
     mapnik::context_ptr context_;
     int zoom_;
     mapnik::box2d<double> const extent_;
