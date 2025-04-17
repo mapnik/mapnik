@@ -25,13 +25,13 @@
 #include "pmtiles_file.hpp"
 #include <boost/format.hpp>
 
-pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::tile_source> file_ptr,
+pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::tile_source> source_ptr,
                                        mapnik::context_ptr const& ctx, const int zoom,
                                        mapnik::box2d<double> const& extent, std::string const& layer,
                                        std::unordered_map<std::string, std::string> & vector_tile_cache,
                                        std::size_t datasource_hash)
 :
-    file_ptr_(file_ptr),
+    source_ptr_(source_ptr),
     context_(ctx),
     zoom_(zoom),
     extent_(extent),
@@ -104,7 +104,7 @@ bool pmtiles_featureset::open_tile()
     if (itr == vector_tile_cache_.end())
     {
         std::cerr << "\e[41m" << layer_ << " - " << datasource_key << "\e[0m" << std::endl;
-        auto decompressed = file_ptr_->get_tile(zoom_, x_, y_);
+        auto decompressed = source_ptr_->get_tile(zoom_, x_, y_);
         vector_tile_cache_.emplace(datasource_key, decompressed);
         vector_tile_.reset(new mvt_io(std::move(decompressed), context_, x_, y_, zoom_, layer_));
     }

@@ -106,20 +106,20 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
 
     if (database_path_.ends_with(".pmtiles"))
     {
-        file_ptr_ = std::make_shared<mapnik::pmtiles_file>(database_path_);
+        source_ptr_ = std::make_shared<mapnik::pmtiles_file>(database_path_);
     }
     else // assuming mbtiles
     {
-        file_ptr_ = std::make_shared<mapnik::mbtiles_source>(database_path_);
+        source_ptr_ = std::make_shared<mapnik::mbtiles_source>(database_path_);
     }
 
     //if (!file_ptr->is_good())
     //{
     //    throw mapnik::datasource_exception("Failed to create memory mapping for " + database_path_);
     //}
-    minzoom_ = file_ptr_->minzoom();
-    maxzoom_ = file_ptr_->maxzoom();
-    extent_ = file_ptr_->extent();
+    minzoom_ = source_ptr_->minzoom();
+    maxzoom_ = source_ptr_->maxzoom();
+    extent_ = source_ptr_->extent();
     // overwrite envelope with user supplied
     std::optional<std::string> ext = params.get<std::string>("extent");
     if (ext && !ext->empty())
@@ -134,7 +134,7 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
     mapnik::lonlat2merc(extent_.maxx_, extent_.maxy_);
 
-    auto metadata = file_ptr_->metadata();
+    auto metadata = source_ptr_->metadata();
 
     auto layers = metadata.at("vector_layers");
     bool found = false;
@@ -252,7 +252,7 @@ mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) cons
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
     std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
+    return mapnik::featureset_ptr(new pmtiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
 }
 
 mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
@@ -273,7 +273,7 @@ mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d con
     double x1 = (tile_x + 1) *  (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
-    return mapnik::featureset_ptr(new pmtiles_featureset(file_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
+    return mapnik::featureset_ptr(new pmtiles_featureset(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
 }
 // Boost.Json header only
 #include <boost/json/src.hpp>

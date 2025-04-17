@@ -64,7 +64,7 @@ private:
     mapnik::context_ptr get_context_with_attributes() const;
     mapnik::context_ptr get_query_context(mapnik::query const& q) const;
     std::string database_path_;
-    std::shared_ptr<mapnik::tile_source> file_ptr_;
+    std::shared_ptr<mapnik::tile_source> source_ptr_;
     static std::unordered_map<std::string, std::string> & tile_cache();
 public:
     mapnik::box2d<double> extent_;
