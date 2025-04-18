@@ -21,3 +21,6 @@
 [submodule "deps/mapbox/polylabel"]
         path = deps/mapbox/polylabel
         url = https://github.com/mapbox/polylabel.git
+[submodule "deps/mapbox/mapnik-vector-tile"]
+	path = deps/mapbox/mapnik-vector-tile
+	url = https://github.com/mapnik/mapnik-vector-tile.git
