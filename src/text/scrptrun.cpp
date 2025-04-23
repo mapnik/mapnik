@@ -21,7 +21,7 @@
 #pragma GCC diagnostic pop
 
 #include <mapnik/text/scrptrun.hpp>
-
+#include <sstream>
 #define ARRAY_SIZE(array) (sizeof array  / sizeof array[0])
 
 const char ScriptRun::fgClassID=0;
@@ -123,6 +123,18 @@ UBool ScriptRun::next()
     // if we've fallen off the end of the text, we're done
     if (scriptEnd >= charLimit) {
         return false;
+    }
+    // DEBUG crash
+    int32_t charArraySize = ARRAY_SIZE(charArray)
+    if (charLimit > charArraySize) {
+    std::stringstream ss;
+      for (int32_t i = 0; i < charArraySize; ++i) {
+          ss << static_cast<int>(charArray[i]); // Cast UChar to its integer (decimal) value
+          if (i < charArraySize - 1) {
+            ss << ",";
+          }
+      }
+      MAPNIK_LOG_ERROR(scrptrun) << "charArray out of bounds, charArray: "<< ss.str() << " charArraySize: " << charArraySize << ", charLimit: " << charLimit << "\n";
     }
     
     scriptCode = USCRIPT_COMMON;
