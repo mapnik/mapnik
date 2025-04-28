@@ -43,8 +43,7 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-#libraries = [ 'sqlite3', 'boost_iostreams'] #FIXME!
-libraries = []
+libraries = [ 'sqlite3']
 
 linkflags = []
 if env['SQLITE_LINKFLAGS']:
