@@ -20,9 +20,9 @@
  *
  *****************************************************************************/
 
-#include "pmtiles_datasource.hpp"
-#include "pmtiles_featureset.hpp"
-#include "pmtiles_file.hpp"
+#include "tiles_datasource.hpp"
+#include "tiles_featureset.hpp"
+#include "pmtiles_source.hpp"
 #include "mbtiles_source.hpp"
 #include "vector_tile_projection.hpp"
 #include <mapnik/geom_util.hpp>
@@ -34,51 +34,51 @@
 #include <algorithm>
 #include <thread>
 
-DATASOURCE_PLUGIN_IMPL(pmtiles_datasource_plugin, pmtiles_datasource);
-DATASOURCE_PLUGIN_EXPORT(pmtiles_datasource_plugin);
-DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(pmtiles_datasource_plugin);
-DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(pmtiles_datasource_plugin);
+DATASOURCE_PLUGIN_IMPL(tiles_datasource_plugin, tiles_datasource);
+DATASOURCE_PLUGIN_EXPORT(tiles_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(tiles_datasource_plugin);
+DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(tiles_datasource_plugin);
 
-pmtiles_datasource::pmtiles_datasource(mapnik::parameters const& params)
+tiles_datasource::tiles_datasource(mapnik::parameters const& params)
     : datasource(params),
-      desc_(pmtiles_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
+      desc_(tiles_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
 {
     init(params);
 }
 
-pmtiles_datasource::~pmtiles_datasource() {}
+tiles_datasource::~tiles_datasource() {}
 
-mapnik::datasource::datasource_t pmtiles_datasource::type() const
+mapnik::datasource::datasource_t tiles_datasource::type() const
 {
     return datasource::Vector;
 }
 
-const char * pmtiles_datasource::name()
+const char * tiles_datasource::name()
 {
-    return "pmtiles";
+    return "tiles";
 }
 
-mapnik::layer_descriptor pmtiles_datasource::get_descriptor() const
+mapnik::layer_descriptor tiles_datasource::get_descriptor() const
 {
     return desc_;
 }
 
-std::optional<mapnik::datasource_geometry_t> pmtiles_datasource::get_geometry_type() const
+std::optional<mapnik::datasource_geometry_t> tiles_datasource::get_geometry_type() const
 {
     return mapnik::datasource_geometry_t::Collection;
 }
 
-mapnik::box2d<double> pmtiles_datasource::envelope() const
+mapnik::box2d<double> tiles_datasource::envelope() const
 {
     return extent_;
 }
 
-void pmtiles_datasource::init(mapnik::parameters const& params)
+void tiles_datasource::init(mapnik::parameters const& params)
 {
     std::optional<std::string> file = params.get<std::string>("file");
     if (!file)
     {
-        throw mapnik::datasource_exception("pmtiles Plugin: missing <file> parameter");
+        throw mapnik::datasource_exception("Tiles Plugin: missing <file> parameter");
     }
 
     std::optional<std::string> base = params.get<std::string>("base");
@@ -92,7 +92,7 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     }
     if (!mapnik::util::exists(database_path_))
     {
-        throw mapnik::datasource_exception("pmtiles Plugin: " + database_path_ + " does not exist");
+        throw mapnik::datasource_exception("Tiles Plugin: " + database_path_ + " does not exist");
     }
     std::optional<std::string> layer = params.get<std::string>("layer");
     try
@@ -101,22 +101,22 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     }
     catch (std::bad_optional_access&)
     {
-        throw mapnik::datasource_exception("pmtiles Plugin: parameter 'layer' is missing.");
+        throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
     }
-
+    std::cerr << "Database path:" << database_path_ << std::endl;
     if (database_path_.ends_with(".pmtiles"))
     {
-        source_ptr_ = std::make_shared<mapnik::pmtiles_file>(database_path_);
+        source_ptr_ = std::make_shared<mapnik::pmtiles_source>(database_path_);
     }
-    else // assuming mbtiles
+    else if (database_path_.ends_with(".mbtiles"))
     {
         source_ptr_ = std::make_shared<mapnik::mbtiles_source>(database_path_);
     }
+    else
+    {
+        throw mapnik::datasource_exception("Unexpected file extension in tiles source: " + database_path_);
+    }
 
-    //if (!file_ptr->is_good())
-    //{
-    //    throw mapnik::datasource_exception("Failed to create memory mapping for " + database_path_);
-    //}
     minzoom_ = source_ptr_->minzoom();
     maxzoom_ = source_ptr_->maxzoom();
     extent_ = source_ptr_->extent();
@@ -128,7 +128,7 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     }
     if (!extent_.valid())
     {
-        throw mapnik::datasource_exception("pmtiles Plugin: " + database_path_ + " extent is invalid.");
+        throw mapnik::datasource_exception("Tiles Plugin: " + database_path_ + " extent is invalid.");
     }
     // Bounds are specified in EPSG:4326, therefore transformation is required.
     mapnik::lonlat2merc(extent_.minx_, extent_.miny_);
@@ -178,7 +178,7 @@ void pmtiles_datasource::init(mapnik::parameters const& params)
     }
 }
 
-mapnik::context_ptr pmtiles_datasource::get_context_with_attributes() const
+mapnik::context_ptr tiles_datasource::get_context_with_attributes() const
 {
     mapnik::context_ptr context = std::make_shared<mapnik::context_type>();
     std::vector<mapnik::attribute_descriptor> const& desc_ar = desc_.get_descriptors();
@@ -189,7 +189,7 @@ mapnik::context_ptr pmtiles_datasource::get_context_with_attributes() const
     return context;
 }
 
-mapnik::context_ptr pmtiles_datasource::get_query_context(mapnik::query const& q) const
+mapnik::context_ptr tiles_datasource::get_query_context(mapnik::query const& q) const
 {
     mapnik::context_ptr context = std::make_shared<mapnik::context_type>();
     std::vector<mapnik::attribute_descriptor> const& desc_ar = desc_.get_descriptors();
@@ -227,16 +227,16 @@ namespace {
     }
 }
 
-std::unordered_map<std::string, std::string> & pmtiles_datasource::tile_cache()
+std::unordered_map<std::string, std::string> & tiles_datasource::tile_cache()
 {
     static thread_local std::unordered_map<std::string, std::string> vector_tile_cache;
     return vector_tile_cache;
 }
 
-mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) const
+mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
 {
 #ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "pmtiles_datasource::features");
+    mapnik::progress_timer __stats__(std::clog, "tiles_datasource::features");
 #endif
     auto & vector_tile_cache = tile_cache();
     if (vector_tile_cache.size() > 16)
@@ -252,13 +252,13 @@ mapnik::featureset_ptr pmtiles_datasource::features(mapnik::query const& q) cons
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
     std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
-    return mapnik::featureset_ptr(new pmtiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
+    return mapnik::featureset_ptr(new tiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
 }
 
-mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
+mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
 #ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "pmtiles_datasource::features_at_point");
+    mapnik::progress_timer __stats__(std::clog, "tiles_datasource::features_at_point");
 #endif
 
     mapnik::filter_at_point filter(pt, tol);
@@ -273,7 +273,7 @@ mapnik::featureset_ptr pmtiles_datasource::features_at_point(mapnik::coord2d con
     double x1 = (tile_x + 1) *  (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
-    return mapnik::featureset_ptr(new pmtiles_featureset(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
+    return mapnik::featureset_ptr(new tiles_featureset(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
 }
 // Boost.Json header only
 #include <boost/json/src.hpp>

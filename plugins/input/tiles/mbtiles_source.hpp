@@ -26,7 +26,7 @@
 
 #include <mapnik/global.hpp>
 
-#include "tile_source.hpp"
+#include "tiles_source.hpp"
 #include "sqlite_connection.hpp"
 
 // mapnik_vector_tile
@@ -37,7 +37,7 @@
 namespace mapnik {
 
 
-class mbtiles_source : public tile_source
+class mbtiles_source : public tiles_source
 {
 private:
     std::uint8_t minzoom_ = 1;

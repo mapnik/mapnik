@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 
-#ifndef PMTILES_FEATURESET_HPP_
-#define PMTILES_FEATURESET_HPP_
+#ifndef TILES_FEATURESET_HPP
+#define TILES_FEATURESET_HPP
 
 #include <memory>
 // mapnik
@@ -32,27 +32,27 @@
 
 
 namespace mapnik {
-class tile_source; //fwd decl
+class tiles_source; //fwd decl
 }
 
-class pmtiles_featureset : public mapnik::Featureset
+class tiles_featureset : public mapnik::Featureset
 {
 public:
-    pmtiles_featureset(std::shared_ptr<mapnik::tile_source> source_ptr,
-                       mapnik::context_ptr const& ctx,
-                       int const zoom,
-                       mapnik::box2d<double> const& extent,
-                       std::string const& layer,
-                       std::unordered_map<std::string,
-                       std::string> & vector_tile_cache,
-                       std::size_t datasource_hash);
+    tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
+                     mapnik::context_ptr const& ctx,
+                     int const zoom,
+                     mapnik::box2d<double> const& extent,
+                     std::string const& layer,
+                     std::unordered_map<std::string,
+                     std::string> & vector_tile_cache,
+                     std::size_t datasource_hash);
 
-    virtual ~pmtiles_featureset();
+    virtual ~tiles_featureset();
     mapnik::feature_ptr next();
 private:
     mapnik::feature_ptr next_feature();
     bool valid() const;
-    std::shared_ptr<mapnik::tile_source> source_ptr_;
+    std::shared_ptr<mapnik::tiles_source> source_ptr_;
     mapnik::context_ptr context_;
     int zoom_;
     mapnik::box2d<double> const extent_;
@@ -72,4 +72,4 @@ private:
     bool open_tile();
 };
 
-#endif /* PMTILES_FEATURESET_HPP_ */
+#endif //TILES_FEATURESET_HPP

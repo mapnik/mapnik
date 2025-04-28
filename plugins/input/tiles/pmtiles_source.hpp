@@ -20,11 +20,11 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PMTILES_FILE_HPP
-#define MAPNIK_PMTILES_FILE_HPP
+#ifndef MAPNIK_PMTILES_SOURCE_HPP
+#define MAPNIK_PMTILES_SOURCE_HPP
 
 #include <mapnik/global.hpp>
-#include "tile_source.hpp"
+#include "tiles_source.hpp"
 // stl
 #include <iostream>
 #include <tuple>
@@ -335,7 +335,7 @@ inline std::uint64_t read_uint64_xdr(char const* buf, std::size_t pos)
     return val;
 }
 
-class pmtiles_file : public tile_source
+class pmtiles_source : public tiles_source
 {
     struct header
     {
@@ -423,15 +423,19 @@ class pmtiles_file : public tile_source
     };
 public:
 
-    pmtiles_file() {}
-    pmtiles_file(std::string const& file_name)
+    pmtiles_source() {}
+    pmtiles_source(std::string const& file_name)
         : file_(file_name.c_str(), boost::interprocess::read_only),
-        region_(file_, boost::interprocess::read_only)
+          region_(file_, boost::interprocess::read_only)
     {
+        if (!is_good())
+        {
+            throw mapnik::datasource_exception("Failed to create memory mapping for " + file_name);
+        }
         init();
     }
 
-    ~pmtiles_file() = default;
+    ~pmtiles_source() = default;
 
     void init()
     {
@@ -573,4 +577,4 @@ public:
 };
 }
 
-#endif //MAPNIK_PMTILES_FILE_HPP
+#endif //MAPNIK_PMTILES_SOURCE_HPP

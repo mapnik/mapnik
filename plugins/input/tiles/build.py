@@ -22,7 +22,7 @@
 Import ('plugin_base')
 Import ('env')
 
-PLUGIN_NAME = 'pmtiles'
+PLUGIN_NAME = 'tiles'
 
 MAPNIK_VECTOR_TILE = '../../../deps/mapbox/mapnik-vector-tile/src'
 
@@ -43,9 +43,9 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-libraries = [ 'sqlite3']
-
+libraries = ['sqlite3']
 linkflags = []
+
 if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
     plugin_env.Append(LINKFLAGS=linkflags)

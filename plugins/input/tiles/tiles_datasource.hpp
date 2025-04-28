@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef PMTILES_DATASOURCE_HPP_
-#define PMTILES_DATASOURCE_HPP_
+#ifndef TILES_DATASOURCE_HPP_
+#define TILES_DATASOURCE_HPP_
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
@@ -37,20 +37,20 @@
 #include <tuple>
 #include <unordered_map>
 
-DATASOURCE_PLUGIN_DEF(pmtiles_datasource_plugin, pmtiles);
+DATASOURCE_PLUGIN_DEF(tiles_datasource_plugin, tiles);
 
 namespace mapnik {
 
 using zxy_type = std::tuple<std::uint8_t, std::uint32_t, std::uint32_t>;
-class tile_source; //fwd decl
+class tiles_source; //fwd decl
 
 }
 
-class pmtiles_datasource : public mapnik::datasource
+class tiles_datasource : public mapnik::datasource
 {
 public:
-    pmtiles_datasource(mapnik::parameters const& params);
-    virtual ~pmtiles_datasource ();
+    tiles_datasource(mapnik::parameters const& params);
+    virtual ~tiles_datasource ();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
@@ -64,7 +64,7 @@ private:
     mapnik::context_ptr get_context_with_attributes() const;
     mapnik::context_ptr get_query_context(mapnik::query const& q) const;
     std::string database_path_;
-    std::shared_ptr<mapnik::tile_source> source_ptr_;
+    std::shared_ptr<mapnik::tiles_source> source_ptr_;
     static std::unordered_map<std::string, std::string> & tile_cache();
 public:
     mapnik::box2d<double> extent_;
@@ -77,4 +77,4 @@ public:
 
 
 
-#endif // PMTILES_DATASOURCE_HPP_
+#endif // TILES_DATASOURCE_HPP_

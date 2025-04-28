@@ -28,7 +28,7 @@
 
 namespace mapnik {
 
-class tile_source
+class tiles_source
 {
 public:
     virtual std::uint8_t minzoom() const = 0;
@@ -36,7 +36,7 @@ public:
     virtual mapnik::box2d<double> const& extent() const = 0;
     virtual boost::json::value metadata() const = 0;
     virtual std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const = 0;
-    virtual ~tile_source() = default;
+    virtual ~tiles_source() = default;
 };
 
 }

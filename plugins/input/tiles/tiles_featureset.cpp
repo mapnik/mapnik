@@ -20,12 +20,14 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/well_known_srs.hpp>
-#include "pmtiles_featureset.hpp"
-#include "pmtiles_file.hpp"
+#include "tiles_source.hpp"
+#include "tiles_featureset.hpp"
+// boost
 #include <boost/format.hpp>
 
-pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::tile_source> source_ptr,
+tiles_featureset::tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
                                        mapnik::context_ptr const& ctx, const int zoom,
                                        mapnik::box2d<double> const& extent, std::string const& layer,
                                        std::unordered_map<std::string, std::string> & vector_tile_cache,
@@ -50,14 +52,14 @@ pmtiles_featureset::pmtiles_featureset(std::shared_ptr<mapnik::tile_source> sour
     open_tile();
 }
 
-pmtiles_featureset::~pmtiles_featureset() { }
+tiles_featureset::~tiles_featureset() { }
 
-bool pmtiles_featureset::valid() const
+bool tiles_featureset::valid() const
 {
     return vector_tile_.get() != nullptr;
 }
 
-mapnik::feature_ptr pmtiles_featureset::next_feature()
+mapnik::feature_ptr tiles_featureset::next_feature()
 {
     mapnik::feature_ptr f = mapnik::feature_ptr();
     if (valid()) {
@@ -66,7 +68,7 @@ mapnik::feature_ptr pmtiles_featureset::next_feature()
     return f;
 }
 
-mapnik::feature_ptr pmtiles_featureset::next()
+mapnik::feature_ptr tiles_featureset::next()
 {
     // If current tile is processed completely, go forward to the next tile.
     // else step forward to the next feature
@@ -85,7 +87,7 @@ mapnik::feature_ptr pmtiles_featureset::next()
     return mapnik::feature_ptr();
 }
 
-bool pmtiles_featureset::next_tile()
+bool tiles_featureset::next_tile()
 {
     ++x_;
     if (x_ <= xmax_)
@@ -97,7 +99,7 @@ bool pmtiles_featureset::next_tile()
     return y_ <= ymax_;
 }
 
-bool pmtiles_featureset::open_tile()
+bool tiles_featureset::open_tile()
 {
     auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x_ % y_).str();
     auto itr = vector_tile_cache_.find(datasource_key);
