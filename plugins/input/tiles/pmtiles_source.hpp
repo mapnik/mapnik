@@ -479,7 +479,7 @@ private:
     std::uint64_t root_dir_length_;
     std::uint64_t tile_data_offset_;
     std::uint64_t leaf_directories_offset_;
-    std::uint8_t minzoom_ = 1;
+    std::uint8_t minzoom_ = 0;
     std::uint8_t maxzoom_ = 14;
     mapnik::box2d<double> extent_;
 
