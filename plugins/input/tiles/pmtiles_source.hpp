@@ -441,7 +441,9 @@ public:
     {
         header h(data());
         if (!h.check_valid())
-            std::cerr << "PMTiles: invalid magic number" << std::endl;
+        {
+            throw mapnik::datasource_exception("PMTiles: invalid magic number");
+        }
         else
         {
             std::cerr << "Version:" << h.version() << std::endl;
