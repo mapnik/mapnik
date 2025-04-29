@@ -102,17 +102,9 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
 
 namespace {
 template<typename PixelType>
-float get_nodata_color()
+std::int32_t get_nodata_color()
 {
     return 0; // rgba(0,0,0,0)
-}
-
-template<>
-float get_nodata_color<std::uint8_t>()
-{
-    // GDAL specific interpretation of nodata
-    // for GDT_Byte single band -> rgba(0,0,0,255)
-    return static_cast<float>(0xff000000);
 }
 
 } // namespace
@@ -128,7 +120,7 @@ void raster_colorizer::colorize(image_rgba8& out,
 
     const std::size_t width = std::min(in.width(), out.width());
     const std::size_t height = std::min(in.height(), out.height());
-
+    auto nodata_color = get_nodata_color<pixel_type>();
     for (std::size_t y = 0; y < height; ++y)
     {
         pixel_type const* in_row = in.get_row(y);
@@ -138,7 +130,7 @@ void raster_colorizer::colorize(image_rgba8& out,
             pixel_type val = in_row[x];
             if (nodata && (std::fabs(val - *nodata) < epsilon_))
             {
-                out_row[x] = get_nodata_color<pixel_type>();
+                out_row[x] = nodata_color;
             }
             else
             {
