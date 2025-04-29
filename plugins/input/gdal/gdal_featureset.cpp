@@ -350,7 +350,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     // set nodata value to be used in raster colorizer
                     if (nodata_value_)
                         raster->set_nodata(*nodata_value_);
-                    else
+                    else if (raster_has_nodata)
                         raster->set_nodata(raster_nodata);
                     feature->set_raster(raster);
                     break;
@@ -380,7 +380,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     // set nodata value to be used in raster colorizer
                     if (nodata_value_)
                         raster->set_nodata(*nodata_value_);
-                    else
+                    else if (raster_has_nodata)
                         raster->set_nodata(raster_nodata);
                     feature->set_raster(raster);
                     break;
@@ -409,7 +409,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     // set nodata value to be used in raster colorizer
                     if (nodata_value_)
                         raster->set_nodata(*nodata_value_);
-                    else
+                    else if (raster_has_nodata)
                         raster->set_nodata(raster_nodata);
                     feature->set_raster(raster);
                     break;
@@ -438,7 +438,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     // set nodata value to be used in raster colorizer
                     if (nodata_value_)
                         raster->set_nodata(*nodata_value_);
-                    else
+                    else if (raster_has_nodata)
                         raster->set_nodata(raster_nodata);
                     feature->set_raster(raster);
                     break;
@@ -468,7 +468,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     // set nodata value to be used in raster colorizer
                     if (nodata_value_)
                         raster->set_nodata(*nodata_value_);
-                    else
+                    else if (raster_has_nodata)
                         raster->set_nodata(raster_nodata);
                     feature->set_raster(raster);
                     break;
