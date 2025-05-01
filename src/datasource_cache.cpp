@@ -106,7 +106,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #ifdef __GNUC__
     __extension__
 #endif
-    datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
+      datasource_plugin* create_datasource = reinterpret_cast<datasource_plugin*>(itr->second->get_symbol("plugin"));
 
     if (!create_datasource)
     {

@@ -36,34 +36,29 @@
 
 namespace mapnik {
 
-
 class mbtiles_source : public tiles_source
 {
-private:
+  private:
     std::uint8_t minzoom_ = 1;
     std::uint8_t maxzoom_ = 14;
     mapnik::box2d<double> extent_;
     std::string database_path_;
     std::shared_ptr<sqlite_connection> dataset_;
-    inline std::uint8_t zoom_from_string(std::string const& str)
-    {
-        return std::stoi(str);
-    }
-    std::int32_t convert_y(std::int32_t y, std::uint8_t zoom) const
-    {
-        return (1 << zoom) - 1 - y;
-    }
+    inline std::uint8_t zoom_from_string(std::string const& str) { return std::stoi(str); }
+    std::int32_t convert_y(std::int32_t y, std::uint8_t zoom) const { return (1 << zoom) - 1 - y; }
 
-public:
+  public:
     mbtiles_source(std::string const& database_path)
         : database_path_(database_path)
     {
         int sqlite_mode = SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
         dataset_ = std::make_shared<sqlite_connection>(database_path_, sqlite_mode);
         auto result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'format';");
-        if (!result->is_valid() || !result->step_next() || result->column_type(0) != SQLITE_TEXT || strcmp(result->column_text(0), "pbf"))
+        if (!result->is_valid() || !result->step_next() || result->column_type(0) != SQLITE_TEXT ||
+            strcmp(result->column_text(0), "pbf"))
         {
-            throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ + " has unsupported vector tile format, expected 'pbf'.");
+            throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ +
+                                               " has unsupported vector tile format, expected 'pbf'.");
         }
         result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'bounds';");
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)
@@ -92,26 +87,21 @@ public:
         }
     }
 
-    std::uint8_t minzoom() const
-    {
-        return minzoom_;
-    }
+    std::uint8_t minzoom() const { return minzoom_; }
 
-    std::uint8_t maxzoom() const
-    {
-        return maxzoom_;
-    }
+    std::uint8_t maxzoom() const { return maxzoom_; }
 
-    mapnik::box2d<double> const& extent() const
-    {
-        return extent_;
-    }
+    mapnik::box2d<double> const& extent() const { return extent_; }
 
     std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
-        std::string sql = (boost::format("SELECT tile_data FROM tiles WHERE zoom_level = %1% AND tile_column = %2% AND tile_row = %3%") % (int)z % x % convert_y(y, z)).str();
+        std::string sql =
+          (boost::format(
+             "SELECT tile_data FROM tiles WHERE zoom_level = %1% AND tile_column = %2% AND tile_row = %3%") %
+           (int)z % x % convert_y(y, z))
+            .str();
         std::cerr << sql << std::endl;
-        std::shared_ptr<sqlite_resultset> result (dataset_->execute_query(sql));
+        std::shared_ptr<sqlite_resultset> result(dataset_->execute_query(sql));
         int size = 0;
         char const* blob = nullptr;
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_BLOB)
@@ -143,7 +133,8 @@ public:
         }
         if (metadata.empty())
         {
-            throw mapnik::datasource_exception("PMTiles plugin: " + database_path_ + " has no 'json' entry in metadata table.");
+            throw mapnik::datasource_exception("PMTiles plugin: " + database_path_ +
+                                               " has no 'json' entry in metadata table.");
         }
         try
         {
@@ -157,6 +148,6 @@ public:
     }
 };
 
-}
+} // namespace mapnik
 
-#endif //MAPNIK_MBTILES_SOURCE_HPP
+#endif // MAPNIK_MBTILES_SOURCE_HPP

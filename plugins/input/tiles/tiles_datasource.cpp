@@ -40,8 +40,8 @@ DATASOURCE_PLUGIN_EMPTY_AFTER_LOAD(tiles_datasource_plugin);
 DATASOURCE_PLUGIN_EMPTY_BEFORE_UNLOAD(tiles_datasource_plugin);
 
 tiles_datasource::tiles_datasource(mapnik::parameters const& params)
-    : datasource(params),
-      desc_(tiles_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
+    : datasource(params)
+    , desc_(tiles_datasource::name(), *params.get<std::string>("encoding", "utf-8"))
 {
     init(params);
 }
@@ -53,7 +53,7 @@ mapnik::datasource::datasource_t tiles_datasource::type() const
     return datasource::Vector;
 }
 
-const char * tiles_datasource::name()
+const char* tiles_datasource::name()
 {
     return "tiles";
 }
@@ -209,25 +209,26 @@ mapnik::context_ptr tiles_datasource::get_query_context(mapnik::query const& q) 
 
 namespace {
 
-    constexpr double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 17471320.7509,
-                                 8735660.37545, 4367830.18772, 2183915.09386, 1091957.54693, 545978.773466,
-                                 272989.386733, 136494.693366, 68247.3466832, 34123.6733416, 17061.8366708,
-                                 8530.9183354,  4265.4591677,  2132.72958385, 1066.36479192, 533.182395962};
-    std::int64_t scale_to_zoom(double scale, std::int64_t minzoom, std::int64_t maxzoom)
+constexpr double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 17471320.7509,
+                             8735660.37545, 4367830.18772, 2183915.09386, 1091957.54693, 545978.773466,
+                             272989.386733, 136494.693366, 68247.3466832, 34123.6733416, 17061.8366708,
+                             8530.9183354,  4265.4591677,  2132.72958385, 1066.36479192, 533.182395962};
+std::int64_t scale_to_zoom(double scale, std::int64_t minzoom, std::int64_t maxzoom)
+{
+    for (std::int64_t zoom = 0; zoom < 19; ++zoom)
     {
-        for (std::int64_t zoom = 0; zoom < 19; ++zoom)
+        if (scale > std::ceil(scales[zoom]))
+            return std::min(zoom, minzoom);
+        else if (scale < std::ceil(scales[zoom]) && scale > std::ceil(scales[zoom + 1]))
         {
-            if (scale > std::ceil(scales[zoom])) return std::min(zoom, minzoom);
-            else if (scale < std::ceil(scales[zoom]) && scale > std::ceil(scales[zoom + 1]))
-            {
-                return std::min(zoom, maxzoom);
-            }
+            return std::min(zoom, maxzoom);
         }
-        return maxzoom;
     }
+    return maxzoom;
 }
+} // namespace
 
-std::unordered_map<std::string, std::string> & tiles_datasource::tile_cache()
+std::unordered_map<std::string, std::string>& tiles_datasource::tile_cache()
 {
     static thread_local std::unordered_map<std::string, std::string> vector_tile_cache;
     return vector_tile_cache;
@@ -238,12 +239,13 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "tiles_datasource::features");
 #endif
-    auto & vector_tile_cache = tile_cache();
+    auto& vector_tile_cache = tile_cache();
     if (vector_tile_cache.size() > 16)
     {
         vector_tile_cache.clear();
     }
-    std::cerr << "Address of Datasource:" << std::addressof(*this) << " cache size:" <<  vector_tile_cache.size() << std::endl;
+    std::cerr << "Address of Datasource:" << std::addressof(*this) << " cache size:" << vector_tile_cache.size()
+              << std::endl;
     auto datasource_hash = std::hash<std::string>{}(database_path_);
     std::cerr << "vector_tile_cache address:" << std::addressof(vector_tile_cache) << std::endl;
     mapnik::box2d<double> const& bbox = q.get_bbox();
@@ -252,7 +254,8 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
     std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
-    return mapnik::featureset_ptr(new tiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
+    return mapnik::featureset_ptr(
+      new tiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
 }
 
 mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
@@ -265,15 +268,18 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     mapnik::context_ptr context = get_context_with_attributes();
     auto datasource_hash = std::hash<std::string>{}(database_path_);
     int tile_count = 1 << maxzoom_;
-    auto tile_x = static_cast<int>((pt.x + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    auto tile_y = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - pt.y) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    auto tile_x =
+      static_cast<int>((pt.x + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    auto tile_y =
+      static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - pt.y) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
 
-    double x0 = tile_x *  (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
+    double x0 = tile_x * (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y0 = -tile_y * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
-    double x1 = (tile_x + 1) *  (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
+    double x1 = (tile_x + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) - 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
-    return mapnik::featureset_ptr(new tiles_featureset(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
+    return mapnik::featureset_ptr(
+      new tiles_featureset(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
 }
 // Boost.Json header only
 #include <boost/json/src.hpp>

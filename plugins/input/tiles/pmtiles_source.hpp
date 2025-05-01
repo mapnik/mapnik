@@ -38,130 +38,143 @@
 
 namespace mapnik {
 
-enum class compression_type : std::uint8_t
-{
-    UNKNOWN = 0x0,
-    NONE = 0x1,
-    GZIP = 0x2,
-    BROTLI = 0x3,
-    ZSTD = 0x4
-};
+enum class compression_type : std::uint8_t { UNKNOWN = 0x0, NONE = 0x1, GZIP = 0x2, BROTLI = 0x3, ZSTD = 0x4 };
 
-struct entryv3 {
+struct entryv3
+{
     uint64_t tile_id;
     uint64_t offset;
     uint32_t length;
     uint32_t run_length;
 
     entryv3()
-        : tile_id(0), offset(0), length(0), run_length(0) {}
+        : tile_id(0)
+        , offset(0)
+        , length(0)
+        , run_length(0)
+    {}
 
     entryv3(uint64_t _tile_id, uint64_t _offset, uint32_t _length, uint32_t _run_length)
-        : tile_id(_tile_id), offset(_offset), length(_length), run_length(_run_length) {
-    }
+        : tile_id(_tile_id)
+        , offset(_offset)
+        , length(_length)
+        , run_length(_run_length)
+    {}
 };
 namespace {
 struct varint_too_long_exception : std::exception
 {
-    const char *what() const noexcept override {
-        return "varint too long exception";
-    }
+    const char* what() const noexcept override { return "varint too long exception"; }
 };
 
 struct end_of_buffer_exception : std::exception
 {
-    const char *what() const noexcept override
-    {
-        return "end of buffer exception";
-    }
+    const char* what() const noexcept override { return "end of buffer exception"; }
 };
-struct malformed_directory_exception : std::exception {
-    const char *what() const noexcept override {
-        return "malformed directory exception";
-    }
+struct malformed_directory_exception : std::exception
+{
+    const char* what() const noexcept override { return "malformed directory exception"; }
 };
 
 constexpr const int8_t max_varint_length = sizeof(uint64_t) * 8 / 7 + 1;
 // from https://github.com/mapbox/protozero/blob/master/include/protozero/varint.hpp
-uint64_t decode_varint_impl(const char **data, const char *end)
+uint64_t decode_varint_impl(const char** data, const char* end)
 {
-    const auto *begin = reinterpret_cast<const int8_t *>(*data);
-    const auto *iend = reinterpret_cast<const int8_t *>(end);
-    const int8_t *p = begin;
+    const auto* begin = reinterpret_cast<const int8_t*>(*data);
+    const auto* iend = reinterpret_cast<const int8_t*>(end);
+    const int8_t* p = begin;
     uint64_t val = 0;
-    if (iend - begin >= max_varint_length) {  // fast path
-        do {
+    if (iend - begin >= max_varint_length)
+    { // fast path
+        do
+        {
             int64_t b = *p++;
             val = ((uint64_t(b) & 0x7fU));
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 7U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 14U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 21U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 28U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 35U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 42U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 49U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x7fU) << 56U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             b = *p++;
             val |= ((uint64_t(b) & 0x01U) << 63U);
-            if (b >= 0) {
+            if (b >= 0)
+            {
                 break;
             }
             throw varint_too_long_exception{};
         } while (false);
-    } else {
+    }
+    else
+    {
         unsigned int shift = 0;
-        while (p != iend && *p < 0) {
+        while (p != iend && *p < 0)
+        {
             val |= (uint64_t(*p++) & 0x7fU) << shift;
             shift += 7;
         }
-        if (p == iend) {
+        if (p == iend)
+        {
             throw end_of_buffer_exception{};
         }
         val |= uint64_t(*p++) << shift;
     }
 
-    *data = reinterpret_cast<const char *>(p);
+    *data = reinterpret_cast<const char*>(p);
     return val;
 }
 
-uint64_t decode_varint(const char **data, const char *end) {
+uint64_t decode_varint(const char** data, const char* end)
+{
     // If this is a one-byte varint, decode it here.
-    if (end != *data && ((static_cast<uint64_t>(**data) & 0x80U) == 0)) {
+    if (end != *data && ((static_cast<uint64_t>(**data) & 0x80U) == 0))
+    {
         const auto val = static_cast<uint64_t>(**data);
         ++(*data);
         return val;
@@ -172,17 +185,18 @@ uint64_t decode_varint(const char **data, const char *end) {
 
 inline std::vector<entryv3> deserialize_directory(std::string const& decompressed)
 {
-    const char *t = decompressed.data();
-    const char *end = t + decompressed.size();
+    const char* t = decompressed.data();
+    const char* end = t + decompressed.size();
 
     const uint64_t num_entries_64bit = decode_varint(&t, end);
     // Sanity check to avoid excessive memory allocation attempt:
     // each directory entry takes at least 4 bytes
-    if (num_entries_64bit / 4U > decompressed.size()) {
+    if (num_entries_64bit / 4U > decompressed.size())
+    {
         throw malformed_directory_exception();
     }
     const size_t num_entries = static_cast<size_t>(num_entries_64bit);
-    //std::cerr << "Decompressed size" << decompressed.size() << std::endl;
+    // std::cerr << "Decompressed size" << decompressed.size() << std::endl;
     std::vector<entryv3> result;
     result.resize(num_entries);
 
@@ -281,7 +295,7 @@ entryv3 find_tile(std::vector<entryv3> const& entries, uint64_t tile_id)
 
     return entryv3{0, 0, 0, 0};
 }
-void rotate(int64_t n, uint32_t &x, uint32_t &y, uint32_t rx, uint32_t ry)
+void rotate(int64_t n, uint32_t& x, uint32_t& y, uint32_t rx, uint32_t ry)
 {
     if (ry == 0)
     {
@@ -309,7 +323,8 @@ inline uint64_t zxy_to_tileid(uint8_t z, uint32_t x, uint32_t y)
     uint64_t acc = ((1LL << (z * 2U)) - 1) / 3;
     uint32_t tx = x, ty = y;
     int a = z - 1;
-    for (uint32_t s = 1LL << a; s > 0; s >>= 1) {
+    for (uint32_t s = 1LL << a; s > 0; s >>= 1)
+    {
         uint32_t rx = s & tx;
         uint32_t ry = s & ty;
         rotate(s, tx, ty, rx, ry);
@@ -340,93 +355,39 @@ class pmtiles_source : public tiles_source
     struct header
     {
         explicit header(char const* data)
-            : data_(data) {}
+            : data_(data)
+        {}
         char const* data_;
-        bool check_valid() const
-        {
-            return (std::string(data_, data_ + 7) == "PMTiles");
-        }
+        bool check_valid() const { return (std::string(data_, data_ + 7) == "PMTiles"); }
         int version() const { return data_[7]; }
-        std::uint64_t root_dir_offset() const
-        {
-            return read_uint64_xdr(data_, 8);
-        }
-        std::uint64_t root_dir_length() const
-        {
-            return read_uint64_xdr(data_, 16);
-        }
-        std::uint64_t metadata_offset() const
-        {
-            return read_uint64_xdr(data_, 24);
-        }
-        std::uint64_t metadata_length() const
-        {
-            return read_uint64_xdr(data_, 32);
-        }
-        std::uint64_t leaf_directories_offset() const
-        {
-            return read_uint64_xdr(data_, 40);
-        }
-        std::uint64_t leaf_directories_length() const
-        {
-            return read_uint64_xdr(data_, 48);
-        }
-        std::uint64_t tile_data_offset() const
-        {
-            return read_uint64_xdr(data_, 56);
-        }
-        std::uint64_t tile_data_length() const
-        {
-            return read_uint64_xdr(data_, 64);
-        }
-        std::uint64_t addressed_tile_count() const
-        {
-            return read_uint64_xdr(data_, 72);
-        }
-        std::uint64_t tile_entries_count() const
-        {
-            return read_uint64_xdr(data_, 80);
-        }
-        std::uint64_t tile_content_count() const
-        {
-            return read_uint64_xdr(data_, 88);
-        }
+        std::uint64_t root_dir_offset() const { return read_uint64_xdr(data_, 8); }
+        std::uint64_t root_dir_length() const { return read_uint64_xdr(data_, 16); }
+        std::uint64_t metadata_offset() const { return read_uint64_xdr(data_, 24); }
+        std::uint64_t metadata_length() const { return read_uint64_xdr(data_, 32); }
+        std::uint64_t leaf_directories_offset() const { return read_uint64_xdr(data_, 40); }
+        std::uint64_t leaf_directories_length() const { return read_uint64_xdr(data_, 48); }
+        std::uint64_t tile_data_offset() const { return read_uint64_xdr(data_, 56); }
+        std::uint64_t tile_data_length() const { return read_uint64_xdr(data_, 64); }
+        std::uint64_t addressed_tile_count() const { return read_uint64_xdr(data_, 72); }
+        std::uint64_t tile_entries_count() const { return read_uint64_xdr(data_, 80); }
+        std::uint64_t tile_content_count() const { return read_uint64_xdr(data_, 88); }
 
         int min_zoom() const { return static_cast<int>(data_[100]); }
         int max_zoom() const { return static_cast<int>(data_[101]); }
-        double minx() const
-        {
-            return read_int32_ndr(data_, 102)/1e7;
-        }
-        double miny() const
-        {
-            return read_int32_ndr(data_, 106)/1e7;
-        }
-        double maxx() const
-        {
-            return read_int32_ndr(data_, 110)/1e7;
-        }
-        double maxy() const
-        {
-            return read_int32_ndr(data_, 114)/1e7;
-        }
-        compression_type internal_compression() const
-        {
-            return compression_type(data_[97]);
-        }
-        compression_type tile_compression() const
-        {
-            return compression_type(data_[98]);
-        }
-
-
+        double minx() const { return read_int32_ndr(data_, 102) / 1e7; }
+        double miny() const { return read_int32_ndr(data_, 106) / 1e7; }
+        double maxx() const { return read_int32_ndr(data_, 110) / 1e7; }
+        double maxy() const { return read_int32_ndr(data_, 114) / 1e7; }
+        compression_type internal_compression() const { return compression_type(data_[97]); }
+        compression_type tile_compression() const { return compression_type(data_[98]); }
     };
-public:
+
+  public:
 
     pmtiles_source() {}
     pmtiles_source(std::string const& file_name)
-        : file_(file_name.c_str(), boost::interprocess::read_only),
-          region_(file_, boost::interprocess::read_only)
+        : file_(file_name.c_str(), boost::interprocess::read_only)
+        , region_(file_, boost::interprocess::read_only)
     {
         if (!is_good())
         {
@@ -454,7 +415,7 @@ public:
 
             minzoom_ = h.min_zoom();
             maxzoom_ = h.max_zoom();
-            extent_ = mapnik::box2d<double>{h.minx(), h.miny(),h.maxx(), h.maxy()};
+            extent_ = mapnik::box2d<double>{h.minx(), h.miny(), h.maxx(), h.maxy()};
             root_dir_offset_ = h.root_dir_offset();
             root_dir_length_ = h.root_dir_length();
             tile_data_offset_ = h.tile_data_offset();
@@ -465,16 +426,10 @@ public:
         }
     }
 
-    inline bool is_good()
-    {
-        return (region_.get_size() > 0);
-    }
+    inline bool is_good() { return (region_.get_size() > 0); }
 
-private:
-    inline char const* data() const
-    {
-        return reinterpret_cast<char const*>(region_.get_address());
-    }
+  private:
+    inline char const* data() const { return reinterpret_cast<char const*>(region_.get_address()); }
     boost::interprocess::file_mapping file_;
     boost::interprocess::mapped_region region_;
     std::uint64_t root_dir_offset_;
@@ -487,7 +442,8 @@ private:
 
     std::pair<uint64_t, uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
-        try {
+        try
+        {
             auto tile_id = zxy_to_tileid(z, x, y);
             std::uint64_t dir_offset = root_dir_offset_;
             std::uint64_t dir_length = root_dir_length_;
@@ -521,22 +477,14 @@ private:
             return std::make_pair(0, 0);
         }
     }
-public:
 
-    std::uint8_t minzoom() const
-    {
-        return minzoom_;
-    }
+  public:
 
-    std::uint8_t maxzoom() const
-    {
-        return maxzoom_;
-    }
+    std::uint8_t minzoom() const { return minzoom_; }
 
-    mapnik::box2d<double> const& extent() const
-    {
-        return extent_;
-    }
+    std::uint8_t maxzoom() const { return maxzoom_; }
+
+    mapnik::box2d<double> const& extent() const { return extent_; }
 
     std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
@@ -577,6 +525,6 @@ public:
         return json_value;
     }
 };
-}
+} // namespace mapnik
 
-#endif //MAPNIK_PMTILES_SOURCE_HPP
+#endif // MAPNIK_PMTILES_SOURCE_HPP

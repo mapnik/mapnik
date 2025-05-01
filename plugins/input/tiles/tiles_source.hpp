@@ -30,7 +30,7 @@ namespace mapnik {
 
 class tiles_source
 {
-public:
+  public:
     virtual std::uint8_t minzoom() const = 0;
     virtual std::uint8_t maxzoom() const = 0;
     virtual mapnik::box2d<double> const& extent() const = 0;
@@ -39,6 +39,6 @@ public:
     virtual ~tiles_source() = default;
 };
 
-}
+} // namespace mapnik
 
 #endif // MAPNIK_TILE_SOURCE_HPP

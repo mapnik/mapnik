@@ -42,31 +42,32 @@ DATASOURCE_PLUGIN_DEF(tiles_datasource_plugin, tiles);
 namespace mapnik {
 
 using zxy_type = std::tuple<std::uint8_t, std::uint32_t, std::uint32_t>;
-class tiles_source; //fwd decl
+class tiles_source; // fwd decl
 
-}
+} // namespace mapnik
 
 class tiles_datasource : public mapnik::datasource
 {
-public:
+  public:
     tiles_datasource(mapnik::parameters const& params);
-    virtual ~tiles_datasource ();
+    virtual ~tiles_datasource();
     mapnik::datasource::datasource_t type() const;
-    static const char * name();
+    static const char* name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     std::optional<mapnik::datasource_geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
 
-private:
+  private:
     void init(mapnik::parameters const& params);
     mapnik::context_ptr get_context_with_attributes() const;
     mapnik::context_ptr get_query_context(mapnik::query const& q) const;
     std::string database_path_;
     std::shared_ptr<mapnik::tiles_source> source_ptr_;
-    static std::unordered_map<std::string, std::string> & tile_cache();
-public:
+    static std::unordered_map<std::string, std::string>& tile_cache();
+
+  public:
     mapnik::box2d<double> extent_;
     std::int64_t minzoom_ = 0;
     std::int64_t maxzoom_ = 14;
@@ -74,7 +75,5 @@ public:
     std::string layer_;
     mapnik::layer_descriptor desc_;
 };
-
-
 
 #endif // TILES_DATASOURCE_HPP_

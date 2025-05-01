@@ -28,31 +28,41 @@
 #include <boost/format.hpp>
 
 tiles_featureset::tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
-                                       mapnik::context_ptr const& ctx, const int zoom,
-                                       mapnik::box2d<double> const& extent, std::string const& layer,
-                                       std::unordered_map<std::string, std::string> & vector_tile_cache,
-                                       std::size_t datasource_hash)
-:
-    source_ptr_(source_ptr),
-    context_(ctx),
-    zoom_(zoom),
-    extent_(extent),
-    layer_(layer),
-    vector_tile_(nullptr),
-    vector_tile_cache_(vector_tile_cache),
-    datasource_hash_(datasource_hash)
+                                   mapnik::context_ptr const& ctx,
+                                   const int zoom,
+                                   mapnik::box2d<double> const& extent,
+                                   std::string const& layer,
+                                   std::unordered_map<std::string, std::string>& vector_tile_cache,
+                                   std::size_t datasource_hash)
+    : source_ptr_(source_ptr)
+    , context_(ctx)
+    , zoom_(zoom)
+    , extent_(extent)
+    , layer_(layer)
+    , vector_tile_(nullptr)
+    , vector_tile_cache_(vector_tile_cache)
+    , datasource_hash_(datasource_hash)
 {
+    extent_.set_minx(extent_.minx() + 1e-6);
+    extent_.set_maxx(extent_.maxx() - 1e-6);
+    extent_.set_miny(extent_.miny() + 1e-6);
+    extent_.set_maxy(extent_.maxy() - 1e-6);
+
     int tile_count = 1 << zoom;
-    xmin_ = static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    xmax_ = static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    xmin_ =
+      static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    xmax_ =
+      static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) *
+                             (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) *
+                             (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     x_ = xmin_;
     y_ = ymin_;
     open_tile();
 }
 
-tiles_featureset::~tiles_featureset() { }
+tiles_featureset::~tiles_featureset() {}
 
 bool tiles_featureset::valid() const
 {
@@ -62,7 +72,8 @@ bool tiles_featureset::valid() const
 mapnik::feature_ptr tiles_featureset::next_feature()
 {
     mapnik::feature_ptr f = mapnik::feature_ptr();
-    if (valid()) {
+    if (valid())
+    {
         f = vector_tile_->next();
     }
     return f;
@@ -73,7 +84,8 @@ mapnik::feature_ptr tiles_featureset::next()
     // If current tile is processed completely, go forward to the next tile.
     // else step forward to the next feature
     mapnik::feature_ptr f = next_feature();
-    if (f) {
+    if (f)
+    {
         return f;
     }
     while (next_tile() && open_tile() && valid())

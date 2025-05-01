@@ -34,56 +34,37 @@
 
 using pbf_attr_value_type = mapnik::util::variant<std::string, float, double, int64_t, uint64_t, bool>;
 
-
 class mvt_io
 {
     struct value_visitor
     {
-        mapnik::transcoder & tr_;
-        mapnik::feature_ptr & feature_;
+        mapnik::transcoder& tr_;
+        mapnik::feature_ptr& feature_;
         std::string const& name_;
 
-        value_visitor(mapnik::transcoder & tr,
-                      mapnik::feature_ptr & feature,
-                      std::string const& name)
-            : tr_(tr),
-              feature_(feature),
-              name_(name) {}
+        value_visitor(mapnik::transcoder& tr, mapnik::feature_ptr& feature, std::string const& name)
+            : tr_(tr)
+            , feature_(feature)
+            , name_(name)
+        {}
 
-        void operator() (std::string const& val)
-        {
-            feature_->put(name_, tr_.transcode(val.data(), val.length()));
-        }
+        void operator()(std::string const& val) { feature_->put(name_, tr_.transcode(val.data(), val.length())); }
 
-        void operator() (bool const& val)
-        {
-            feature_->put(name_, static_cast<mapnik::value_bool>(val));
-        }
+        void operator()(bool const& val) { feature_->put(name_, static_cast<mapnik::value_bool>(val)); }
 
-        void operator() (int64_t const& val)
-        {
-            feature_->put(name_, static_cast<mapnik::value_integer>(val));
-        }
+        void operator()(int64_t const& val) { feature_->put(name_, static_cast<mapnik::value_integer>(val)); }
 
-        void operator() (uint64_t const& val)
-        {
-            feature_->put(name_, static_cast<mapnik::value_integer>(val));
-        }
+        void operator()(uint64_t const& val) { feature_->put(name_, static_cast<mapnik::value_integer>(val)); }
 
-        void operator() (double const& val)
-        {
-            feature_->put(name_, static_cast<mapnik::value_double>(val));
-        }
+        void operator()(double const& val) { feature_->put(name_, static_cast<mapnik::value_double>(val)); }
 
-        void operator() (float const& val)
-        {
-            feature_->put(name_, static_cast<mapnik::value_double>(val));
-        }
+        void operator()(float const& val) { feature_->put(name_, static_cast<mapnik::value_double>(val)); }
     };
 
     struct mvt_layer
     {
-        // We have to store the features as strings because they go out of scope otherwise (leading to PBF parsing errors).
+        // We have to store the features as strings because they go out of scope otherwise (leading to PBF parsing
+        // errors).
         std::vector<std::string> features_;
         size_t feature_index_ = 0;
         std::vector<std::string> keys_;
@@ -96,9 +77,10 @@ class mvt_io
         double scale_ = 0;
         std::string name_;
         uint32_t extent_ = 4096;
-        mvt_io & io_;
-    public:
-        explicit mvt_layer(mvt_io & io);
+        mvt_io& io_;
+
+      public:
+        explicit mvt_layer(mvt_io& io);
         void add_feature(const protozero::data_view& feature);
         bool has_features() const;
         void add_key(std::string&& key);
@@ -119,14 +101,17 @@ class mvt_io
     std::string layer_name_;
     std::unique_ptr<mvt_layer> layer_;
     mapnik::transcoder tr_;
-    //Read a layer from PBF. Returns true if requested layer was parsed.
+    // Read a layer from PBF. Returns true if requested layer was parsed.
     bool read_layer(protozero::pbf_message<mvt_message::layer>& l);
 
-public:
-    explicit mvt_io(std::string&& data, mapnik::context_ptr const& ctx, const uint32_t x, const uint32_t y, const uint32_t zoom, std::string layer_name);
+  public:
+    explicit mvt_io(std::string&& data,
+                    mapnik::context_ptr const& ctx,
+                    const uint32_t x,
+                    const uint32_t y,
+                    const uint32_t zoom,
+                    std::string layer_name);
     mapnik::feature_ptr next();
 };
-
-
 
 #endif // PLUGINS_INPUT_MBTILES_VECTOR_MVT_IO_HPP_
