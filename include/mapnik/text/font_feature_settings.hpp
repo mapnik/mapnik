@@ -84,7 +84,7 @@ inline bool operator==(font_feature_settings const& lhs, font_feature_settings c
 }
 
 constexpr unsigned int font_feature_range_global_start = 0u;
-static const unsigned int font_feature_range_global_end = std::numeric_limits<unsigned int>::max();
+static const unsigned int font_feature_range_global_end = (std::numeric_limits<unsigned int>::max)();
 
 #include <mapnik/warning.hpp>
 MAPNIK_DISABLE_WARNING_PUSH

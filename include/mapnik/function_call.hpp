@@ -116,13 +116,13 @@ struct float_impl
 // min
 inline value_type min_impl(value_type const& arg1, value_type const& arg2)
 {
-    return std::min(arg1.to_double(), arg2.to_double());
+    return (std::min)(arg1.to_double(), arg2.to_double());
 }
 
 // max
 inline value_type max_impl(value_type const& arg1, value_type const& arg2)
 {
-    return std::max(arg1.to_double(), arg2.to_double());
+    return (std::max)(arg1.to_double(), arg2.to_double());
 }
 
 // pow
