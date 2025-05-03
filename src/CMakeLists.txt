@@ -21,6 +21,7 @@ target_link_libraries(mapnik PRIVATE
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-shape>>:input-shape>
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-sqlite>>:input-sqlite>
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-topojson>>:input-topojson>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-tiles>>:input-tiles>
 )
 target_compile_definitions(mapnik PRIVATE
     # expr: if(BUILD_SHARED_PLUGINS == OFF && <target> is build) then add build definition
@@ -35,7 +36,7 @@ target_compile_definitions(mapnik PRIVATE
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-shape>>:MAPNIK_STATIC_PLUGIN_SHAPE>
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-sqlite>>:MAPNIK_STATIC_PLUGIN_SQLITE>
     $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-topojson>>:MAPNIK_STATIC_PLUGIN_TOPOJSON>
-
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_PLUGINS}>>,$<TARGET_EXISTS:input-tiles>>:MAPNIK_STATIC_PLUGIN_TILES>
 )
 
 if(NOT BUILD_SHARED_PLUGINS)
