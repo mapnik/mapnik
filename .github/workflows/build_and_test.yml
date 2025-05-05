@@ -43,6 +43,10 @@ jobs:
           - 20
 
     steps:
+      - name: Enable long paths (Windows)
+        run: git config --global core.longpaths true
+        if: runner.os == 'Windows'
+
       - name: Checkout Mapnik
         uses: actions/checkout@v4
         with:
