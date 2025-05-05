@@ -1,4 +1,5 @@
-find_package(SQLite3 REQUIRED)
+mapnik_find_package(SQLite3 REQUIRED)
+mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS json)
 
 add_plugin_target(input-tiles "tiles")
 add_compile_definitions(MAPNIK_VECTOR_TILE_LIBRARY=1)
@@ -17,4 +18,5 @@ target_include_directories(input-tiles ${_plugin_visibility} "${PROJECT_SOURCE_D
 target_link_libraries(input-tiles ${_plugin_visibility}
     mapnik::mapnik
     SQLite::SQLite3
+    Boost::json
 )

@@ -24,7 +24,7 @@ Import ('env')
 
 PLUGIN_NAME = 'tiles'
 
-MAPNIK_VECTOR_TILE = '../../../deps/mapbox/mapnik-vector-tile/src'
+MAPNIK_VECTOR_TILE = '#deps/mapbox/mapnik-vector-tile/src'
 
 plugin_env = plugin_base.Clone()
 
@@ -43,7 +43,7 @@ plugin_sources = Split(
 )
 
 # Link Library to Dependencies
-libraries = ['sqlite3']
+libraries = ['sqlite3', 'boost_json']
 linkflags = []
 
 if env['SQLITE_LINKFLAGS']:

@@ -281,5 +281,3 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     return mapnik::featureset_ptr(
       new tiles_featureset(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash));
 }
-// Boost.Json header only
-#include <boost/json/src.hpp>
