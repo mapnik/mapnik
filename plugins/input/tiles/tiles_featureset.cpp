@@ -117,14 +117,12 @@ bool tiles_featureset::open_tile()
     auto itr = vector_tile_cache_.find(datasource_key);
     if (itr == vector_tile_cache_.end())
     {
-        std::cerr << "\e[41m" << layer_ << " - " << datasource_key << "\e[0m" << std::endl;
         auto decompressed = source_ptr_->get_tile(zoom_, x_, y_);
         vector_tile_cache_.emplace(datasource_key, decompressed);
         vector_tile_.reset(new mvt_io(std::move(decompressed), context_, x_, y_, zoom_, layer_));
     }
     else
     {
-        std::cerr << "\e[42m" << layer_ << " - " << datasource_key << "\e[0m" << std::endl;
         std::string buffer = itr->second;
         vector_tile_.reset(new mvt_io(std::move(buffer), context_, x_, y_, zoom_, layer_));
     }
