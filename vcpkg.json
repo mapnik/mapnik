@@ -16,6 +16,7 @@
         "icu"
       ]
     },
+    "boost-json",
     "boost-msm",
     "boost-program-options",
     "boost-property-tree",
