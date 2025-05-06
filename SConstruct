@@ -113,21 +113,21 @@ pretty_dep_names = {
 # Core plugin build configuration
 # opts.AddVariables still hardcoded however...
 PLUGINS = { # plugins with external dependencies
-            # configured by calling project, hence 'path':None
-            'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
-            'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
-            'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
-            'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
-            'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
-            # plugins without external dependencies requiring CheckLibWithHeader...
-            'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'geobuf':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'}
-            }
-
+    # configured by calling project, hence 'path':None
+    'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
+    'pgraster': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
+    'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
+    'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
+    'sqlite':  {'default':True,'path':'SQLITE','inc':'sqlite3.h','lib':'sqlite3','lang':'C'},
+    'tiles':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    # plugins without external dependencies requiring CheckLibWithHeader...
+    'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    'geobuf':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+    'topojson':{'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'}
+}
 
 def init_environment(env):
     env.Decider('MD5-timestamp')

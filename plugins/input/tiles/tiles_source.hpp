@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2024 Artem Pavlenko
+ * Copyright (C) 2025 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,23 +20,25 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_VERSION_HPP
-#define MAPNIK_VERSION_HPP
+#ifndef MAPNIK_TILE_SOURCE_HPP
+#define MAPNIK_TILE_SOURCE_HPP
 
-#include <mapnik/stringify_macro.hpp>
+#include <boost/json.hpp>
+#include <mapnik/geometry/envelope.hpp>
 
-#define MAPNIK_MAJOR_VERSION 4
-#define MAPNIK_MINOR_VERSION 0
-#define MAPNIK_PATCH_VERSION 8
+namespace mapnik {
 
-#define MAPNIK_VERSION MAPNIK_VERSION_ENCODE(MAPNIK_MAJOR_VERSION, MAPNIK_MINOR_VERSION, MAPNIK_PATCH_VERSION)
+class tiles_source
+{
+  public:
+    virtual std::uint8_t minzoom() const = 0;
+    virtual std::uint8_t maxzoom() const = 0;
+    virtual mapnik::box2d<double> const& extent() const = 0;
+    virtual boost::json::value metadata() const = 0;
+    virtual std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const = 0;
+    virtual ~tiles_source() = default;
+};
 
-#define MAPNIK_VERSION_STRING                                                                                          \
-    MAPNIK_STRINGIFY(MAPNIK_MAJOR_VERSION)                                                                             \
-    "." MAPNIK_STRINGIFY(MAPNIK_MINOR_VERSION) "." MAPNIK_STRINGIFY(MAPNIK_PATCH_VERSION)
+} // namespace mapnik
 
-#define MAPNIK_VERSION_AT_LEAST(major, minor, patch) (MAPNIK_VERSION >= MAPNIK_VERSION_ENCODE(major, minor, patch))
-
-#define MAPNIK_VERSION_ENCODE(major, minor, patch) ((major) * 100000 + (minor) * 100 + (patch))
-
-#endif // MAPNIK_VERSION_HPP
+#endif // MAPNIK_TILE_SOURCE_HPP

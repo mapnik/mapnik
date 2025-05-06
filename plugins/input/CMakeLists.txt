@@ -67,6 +67,10 @@ if(USE_PLUGIN_INPUT_TOPOJSON)
     add_subdirectory(topojson)
     list(APPEND m_build_plugins input-topojson)
 endif()
+if(USE_PLUGIN_INPUT_TILES)
+    add_subdirectory(tiles)
+    list(APPEND m_build_plugins input-tiles)
+endif()
 
 #
 # Copy all plugin dlls, so that these are in the main output dir, since cmake copies those into ${MAPNIK_OUTPUT_DIR}/plugins/input, too.

@@ -124,7 +124,7 @@ std::string datasource_cache::plugin_directories()
     return boost::algorithm::join(plugin_directories_, ", ");
 }
 
-bool datasource_cache::plugin_registered(const std::string& plugin_name) const
+bool datasource_cache::plugin_registered(std::string const& plugin_name) const
 {
 #ifdef MAPNIK_STATIC_PLUGINS
     const auto static_names = get_static_datasource_names();
