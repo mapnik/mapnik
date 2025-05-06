@@ -1,5 +1,7 @@
 mapnik_find_package(SQLite3 REQUIRED)
-mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS json)
+if(WIN32)
+    mapnik_find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS json)
+endif()
 
 add_plugin_target(input-tiles "tiles")
 add_compile_definitions(MAPNIK_VECTOR_TILE_LIBRARY=1)
