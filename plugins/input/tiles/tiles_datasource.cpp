@@ -244,9 +244,9 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     }
     auto datasource_hash = std::hash<std::string>{}(database_path_);
     mapnik::box2d<double> const& bbox = q.get_bbox();
-    //std::cerr << "bbox:" << bbox << " scale_denominator:" << q.scale_denominator() << std::endl;
+    // std::cerr << "bbox:" << bbox << " scale_denominator:" << q.scale_denominator() << std::endl;
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
-    //std::cerr << "zoom:" << zoom << std::endl;
+    // std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
     return mapnik::featureset_ptr(
       new tiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));
