@@ -18,5 +18,8 @@ target_include_directories(input-tiles ${_plugin_visibility} "${PROJECT_SOURCE_D
 target_link_libraries(input-tiles ${_plugin_visibility}
     mapnik::mapnik
     SQLite::SQLite3
-    Boost::json
 )
+
+if(WIN32)
+    target_link_libraries(input-tiles ${_plugin_visibility} Boost::json)
+endif()
