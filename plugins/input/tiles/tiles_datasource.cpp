@@ -103,7 +103,6 @@ void tiles_datasource::init(mapnik::parameters const& params)
     {
         throw mapnik::datasource_exception("Tiles Plugin: parameter 'layer' is missing.");
     }
-    std::cerr << "Database path:" << database_path_ << std::endl;
     if (database_path_.ends_with(".pmtiles"))
     {
         source_ptr_ = std::make_shared<mapnik::pmtiles_source>(database_path_);
@@ -152,7 +151,6 @@ void tiles_datasource::init(mapnik::parameters const& params)
             {
                 maxzoom_ = std::min(maxzoom_, p->as_int64());
             }
-            std::cerr << "====== Layer ID:" << id << " min/max zoom:" << minzoom_ << ":" << maxzoom_ << std::endl;
             for (auto const& field : layer.at("fields").as_object())
             {
                 std::string name{field.key_c_str()};
@@ -244,15 +242,11 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     {
         vector_tile_cache.clear();
     }
-    std::cerr << "Address of Datasource:" << std::addressof(*this) << " cache size:" << vector_tile_cache.size()
-              << std::endl;
     auto datasource_hash = std::hash<std::string>{}(database_path_);
-    std::cerr << "vector_tile_cache address:" << std::addressof(vector_tile_cache) << std::endl;
     mapnik::box2d<double> const& bbox = q.get_bbox();
-
-    std::cerr << "bbox:" << bbox << " scale_denominator:" << q.scale_denominator() << std::endl;
+    //std::cerr << "bbox:" << bbox << " scale_denominator:" << q.scale_denominator() << std::endl;
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
-    std::cerr << "zoom:" << zoom << std::endl;
+    //std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
     return mapnik::featureset_ptr(
       new tiles_featureset(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash));

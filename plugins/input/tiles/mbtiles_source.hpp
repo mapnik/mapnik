@@ -100,7 +100,6 @@ class mbtiles_source : public tiles_source
              "SELECT tile_data FROM tiles WHERE zoom_level = %1% AND tile_column = %2% AND tile_row = %3%") %
            (int)z % x % convert_y(y, z))
             .str();
-        std::cerr << sql << std::endl;
         std::shared_ptr<sqlite_resultset> result(dataset_->execute_query(sql));
         int size = 0;
         char const* blob = nullptr;

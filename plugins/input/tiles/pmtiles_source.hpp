@@ -407,11 +407,11 @@ class pmtiles_source : public tiles_source
         }
         else
         {
-            std::cerr << "Version:" << h.version() << std::endl;
-            std::cerr << "Min zoom:" << h.min_zoom() << std::endl;
-            std::cerr << "Max zoom:" << h.max_zoom() << std::endl;
-            std::cerr << "Min Lon/Lat:" << h.minx() << "," << h.miny() << std::endl;
-            std::cerr << "Max Lon/Lat:" << h.maxx() << "," << h.maxy() << std::endl;
+            // std::cerr << "Version:" << h.version() << std::endl;
+            // std::cerr << "Min zoom:" << h.min_zoom() << std::endl;
+            // std::cerr << "Max zoom:" << h.max_zoom() << std::endl;
+            // std::cerr << "Min Lon/Lat:" << h.minx() << "," << h.miny() << std::endl;
+            // std::cerr << "Max Lon/Lat:" << h.maxx() << "," << h.maxy() << std::endl;
 
             minzoom_ = h.min_zoom();
             maxzoom_ = h.max_zoom();
@@ -420,9 +420,9 @@ class pmtiles_source : public tiles_source
             root_dir_length_ = h.root_dir_length();
             tile_data_offset_ = h.tile_data_offset();
             leaf_directories_offset_ = h.leaf_directories_offset();
-            std::cerr << "Internal compression:" << (int)h.internal_compression() << std::endl;
-            std::cerr << "Tile compression:" << (int)h.tile_compression() << std::endl;
-            std::cerr << "Addressed tile count:" << h.addressed_tile_count() << std::endl;
+            // std::cerr << "Internal compression:" << (int)h.internal_compression() << std::endl;
+            // std::cerr << "Tile compression:" << (int)h.tile_compression() << std::endl;
+            // std::cerr << "Addressed tile count:" << h.addressed_tile_count() << std::endl;
         }
     }
 
