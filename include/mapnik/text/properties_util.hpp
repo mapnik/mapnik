@@ -87,14 +87,17 @@ struct set_property_from_xml_impl<std::string, false>
         try
         {
             const auto val_ = node.get_opt_attr<expression_ptr>(name);
-            if (val_)
-                val = *val_;
+            if (!val_)
+                throw config_error("Failed to extract property");
+            val = *val_;
         }
         catch (config_error const& ex)
         {
             const auto val_ = node.get_opt_attr<target_type>(name);
             if (val_)
+            {
                 val = *val_;
+            }
             else
             {
                 ex.append_context(std::string("set_property_from_xml'" + std::string(name) + "'"), node);

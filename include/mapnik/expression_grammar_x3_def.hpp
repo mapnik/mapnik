@@ -305,10 +305,12 @@ x3::rule<class regex_replace_expression, std::pair<std::string, std::string>> co
 
     auto const quoted_string = x3::rule<class quoted_string, std::string> {} = single_quoted_string | double_quoted_string;
 
-    auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[alpha > *alnum] - lit("not");
+    auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[char_("a-zA-Z_") > *char_("a-zA-Z0-9_-")];
 
     // start
     auto const expression_def = logical_expression [do_assign]
+        |
+        unquoted_ustring[do_unicode]
         ;
 
     auto const logical_expression_def = not_expression[do_assign] >
@@ -398,9 +400,6 @@ x3::rule<class regex_replace_expression, std::pair<std::string, std::string>> co
         binary_func_expression[do_assign]
         |
         ('(' > logical_expression[do_assign] > ')')
-        |
-        unquoted_ustring[do_unicode]
-        // ^ https://github.com/mapnik/mapnik/pull/3389
         ;
 // clang-format on
 BOOST_SPIRIT_DEFINE(expression,
