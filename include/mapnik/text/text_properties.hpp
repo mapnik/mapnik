@@ -154,8 +154,8 @@ struct MAPNIK_DECL text_layout_properties
     symbolizer_base::value_type halign;
     symbolizer_base::value_type jalign;
     symbolizer_base::value_type valign;
+    symbolizer_base::value_type lang;
     directions_e dir = EXACT_POSITION;
-    std::optional<std::string> lang;
 };
 
 struct text_properties_expressions
