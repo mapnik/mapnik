@@ -90,6 +90,7 @@ TEST_CASE("expressions")
     // unicode
     TRY_CHECK(parse_and_dump("''") == "''");
     TRY_CHECK(parse_and_dump("'single-quoted string'") == "'single-quoted string'");
+    TRY_CHECK(parse_and_dump("valid-unquoted-string") == "'valid-unquoted-string'");
     TRY_CHECK(parse_and_dump("\"double-quoted string\"") == "'double-quoted string'");
     TRY_CHECK(parse_and_dump("'escaped \\' apostrophe'") == "'escaped \\' apostrophe'");
     TRY_CHECK(parse_and_dump("'escaped \\\\ backslash'") == "'escaped \\\\ backslash'");
@@ -242,7 +243,7 @@ TEST_CASE("expressions")
 
     // string & value concatenation
     // this should evaluate as two strings concatenating
-    TRY_CHECK(eval("Hello + '!'") == eval("'Hello!'"));
+    TRY_CHECK(eval("'Hello' + '!'") == eval("'Hello!'"));
     // this should evaulate as a combination of an int value and string
-    TRY_CHECK(eval("[int]+m") == eval("'123m'"));
+    TRY_CHECK(eval("[int]+'m'") == eval("'123m'"));
 }
