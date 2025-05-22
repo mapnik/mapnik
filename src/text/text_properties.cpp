@@ -270,7 +270,7 @@ void text_layout_properties::from_xml(xml_node const& node, fontset_map const& f
     set_property_from_xml<vertical_alignment_e>(valign, "vertical-alignment", node);
     set_property_from_xml<horizontal_alignment_e>(halign, "horizontal-alignment", node);
     set_property_from_xml<justify_alignment_e>(jalign, "justify-alignment", node);
-    lang = node.get_opt_attr<std::string>("lang");
+    set_property_from_xml<std::string>(lang, "lang", node);
 }
 
 void text_layout_properties::to_xml(boost::property_tree::ptree& node,
@@ -301,8 +301,8 @@ void text_layout_properties::to_xml(boost::property_tree::ptree& node,
         serialize_property("rotate-displacement", rotate_displacement, node);
     if (!(orientation == dfl.orientation) || explicit_defaults)
         serialize_property("orientation", orientation, node);
-    if (lang)
-        set_attr(node, "lang", *lang);
+    if (!(lang == dfl.lang) || explicit_defaults)
+        serialize_property("lang", lang, node);
 }
 
 void text_layout_properties::add_expressions(expression_set& output) const
@@ -331,6 +331,8 @@ void text_layout_properties::add_expressions(expression_set& output) const
         output.insert(util::get<expression_ptr>(valign));
     if (is_expression(jalign))
         output.insert(util::get<expression_ptr>(jalign));
+    if (is_expression(lang))
+        output.insert(util::get<expression_ptr>(lang));
 }
 
 // text format properties
