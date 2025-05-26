@@ -172,7 +172,7 @@ struct symbolizer_icon
         return QIcon(pix);
     }
 
-    QIcon operator()(mapnik::point_symbolizer const& sym) const
+    QIcon operator()(mapnik::point_symbolizer const& /*sym*/) const
     {
         // FIXME!
         /*

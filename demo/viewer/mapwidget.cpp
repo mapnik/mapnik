@@ -19,7 +19,7 @@
 
 #include <QtGui>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -40,6 +40,7 @@
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
+using namespace boost::placeholders;
 using mapnik::box2d;
 using mapnik::coord2d;
 using mapnik::feature_kv_iterator;
@@ -129,8 +130,9 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
     {
         if (cur_tool_ == ZoomToBox || cur_tool_ == Pan)
         {
-            start_x_ = e->x();
-            start_y_ = e->y();
+            auto pos = e->position();
+            start_x_ = pos.x();
+            start_y_ = pos.y();
             drag_ = true;
         }
         else if (cur_tool_ == Info)
@@ -152,8 +154,9 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                     if (!layer.visible(scale_denom))
                         continue;
                     std::string name = layer.name();
-                    double x = e->x();
-                    double y = e->y();
+                    auto pos = e->position();
+                    double x = pos.x();
+                    double y = pos.y();
                     std::cout << "query at " << x << "," << y << "\n";
                     projection layer_proj(layer.srs(), true);
                     mapnik::proj_transform prj_trans(map_proj, layer_proj);
@@ -232,8 +235,9 @@ void MapWidget::mouseMoveEvent(QMouseEvent* e)
 {
     if (cur_tool_ == ZoomToBox || cur_tool_ == Pan)
     {
-        end_x_ = e->x();
-        end_y_ = e->y();
+        auto pos = e->position();
+        end_x_ = pos.x();
+        end_y_ = pos.y();
         update();
     }
 }
@@ -242,8 +246,9 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
 {
     if (e->button() == Qt::LeftButton)
     {
-        end_x_ = e->x();
-        end_y_ = e->y();
+        auto pos = e->position();
+        end_x_ = pos.x();
+        end_y_ = pos.y();
         if (cur_tool_ == ZoomToBox)
         {
             drag_ = false;
@@ -520,7 +525,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap& pix)
     }
 }
 
-void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap& pix)
+void render_grid(mapnik::Map const& /*map*/, double /*scaling_factor*/, QPixmap& /*pix*/)
 {
     std::cerr << "Not supported" << std::endl;
 }

@@ -24,7 +24,7 @@ LayerDelegate::LayerDelegate(QObject* parent)
     : QAbstractItemDelegate(parent)
 {}
 
-void LayerDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void LayerDelegate::paint(QPainter* painter, QStyleOptionViewItem const& option, QModelIndex const& /*index*/) const
 {
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setPen(QPen(QColor(255, 0, 0), 1));

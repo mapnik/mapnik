@@ -84,7 +84,7 @@ void LayerTab::layerInfo2(QModelIndex const& index)
 
 StyleTab::StyleTab(QWidget*) {}
 
-void StyleTab::contextMenuEvent(QContextMenuEvent* event)
+void StyleTab::contextMenuEvent(QContextMenuEvent* /*event*/)
 {
     qDebug("test");
 }

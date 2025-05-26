@@ -9,6 +9,7 @@ QMAKE_LINK = $$system(mapnik-config --cxx)
 QMAKE_CXXFLAGS += $$system(mapnik-config --cxxflags)
 QMAKE_CXXFLAGS += $$system(mapnik-config --includes --dep-includes --defines)
 QMAKE_LFLAGS += $$system(mapnik-config --ldflags)
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
 # Input
 
 CONFIG += qt debug_and_release
