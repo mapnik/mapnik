@@ -307,7 +307,7 @@ x3::rule<class regex_replace_expression, std::pair<std::string, std::string>> co
 
     auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[*(unesc_char[append] |
                                                                                    (lit('\\') >> escaped_unicode[append]) |
-                                                                                      (~char_('\''))[append])];
+                                                                                      (~char_(' '))[append])];
 
     // start
     auto const expression_def = logical_expression [do_assign]
