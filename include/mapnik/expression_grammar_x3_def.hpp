@@ -305,7 +305,9 @@ x3::rule<class regex_replace_expression, std::pair<std::string, std::string>> co
 
     auto const quoted_string = x3::rule<class quoted_string, std::string> {} = single_quoted_string | double_quoted_string;
 
-    auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[char_("a-zA-Z_") > *char_("a-zA-Z0-9_-")];
+    auto const unquoted_ustring = x3::rule<class ustring, std::string> {} = no_skip[*(unesc_char[append] |
+                                                                                   (lit('\\') >> escaped_unicode[append]) |
+                                                                                      (~char_('\''))[append])];
 
     // start
     auto const expression_def = logical_expression [do_assign]
