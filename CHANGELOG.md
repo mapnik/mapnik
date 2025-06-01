@@ -10,6 +10,8 @@ For a complete change history, see the git log.
 
 Released June 1st, 2025
 
+(Packaged from [a291b4230](https://github.com/mapnik/mapnik/commit/a291b4230))
+
 - tiles.input - *NEW* plugin for reading PMTiles and MBTiles.
   (based on https://github.com/geofabrik/mapnik-vector-tile-input)
 - Fixed 'nodata' handling by gdal.input (https://github.com/mapnik/mapnik/issues/4502)
