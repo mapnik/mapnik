@@ -6,6 +6,17 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Mapnik 4.1.0
+
+Released June 1st, 2025
+
+- tiles.input - *NEW* plugin for reading PMTiles and MBTiles.
+  (based on https://github.com/geofabrik/mapnik-vector-tile-input)
+- Fixed 'nodata' handling by gdal.input (https://github.com/mapnik/mapnik/issues/4502)
+- TextSymbolizer - make "lang" an expression (https://github.com/mapnik/mapnik/pull/4493)
+- Expression grammar - *BREAKING CHANGE* only allow "standalone" unquoted strings with no space
+  (https://github.com/mapnik/mapnik/issues/4508)
+
 ## Mapnik 4.0.7
 
 Released April 5th, 2025
