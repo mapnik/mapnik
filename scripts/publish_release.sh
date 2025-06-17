@@ -62,6 +62,7 @@ git submodule update --init deps/mapbox/variant
 git submodule update --init deps/mapbox/geometry
 git submodule update --init deps/mapbox/polylabel
 git submodule update --init deps/mapbox/protozero
+git submodule update --init deps/mapbox/mapnik-vector-tile
 
 rm -rf deps/mapbox/variant/.git*
 rm -rf deps/mapbox/variant/.mason
@@ -78,6 +79,9 @@ rm -f deps/mapbox/polylabel/.travis.yml
 
 rm -rf deps/mapbox/protozero/.git*
 rm -f deps/mapbox/protozero/.travis.yml
+
+rm -rf deps/mapbox/mapnik-vector-tile/.git*
+rm -f deps/mapbox/mapnik-vector-tile/.travis.yml
 
 function check_and_tag() {
     REPO_DIR=$1
