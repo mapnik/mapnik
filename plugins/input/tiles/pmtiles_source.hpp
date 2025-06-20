@@ -38,7 +38,24 @@
 
 namespace mapnik {
 
-enum class compression_type : std::uint8_t { UNKNOWN = 0x0, NONE = 0x1, GZIP = 0x2, BROTLI = 0x3, ZSTD = 0x4 };
+enum class compression_type : std::uint8_t
+{
+    UNKNOWN = 0x0,
+    NONE = 0x1,
+    GZIP = 0x2,
+    BROTLI = 0x3,
+    ZSTD = 0x4
+};
+
+enum class tile_type : std::uint8_t
+{
+    UNKNOWN = 0x00,
+    MVT = 0x01,
+    PNG = 0x02,
+    JPEG = 0x03,
+    WEBP = 0x04,
+    AVIF = 0x05
+};
 
 struct entryv3
 {
@@ -380,6 +397,7 @@ class pmtiles_source : public tiles_source
         double maxy() const { return read_int32_ndr(data_, 114) / 1e7; }
         compression_type internal_compression() const { return compression_type(data_[97]); }
         compression_type tile_compression() const { return compression_type(data_[98]); }
+        tile_type type() const { return tile_type(data_[99]); }
     };
 
   public:
@@ -420,13 +438,16 @@ class pmtiles_source : public tiles_source
             root_dir_length_ = h.root_dir_length();
             tile_data_offset_ = h.tile_data_offset();
             leaf_directories_offset_ = h.leaf_directories_offset();
+            compression_ = h.tile_compression();
+            type_ = h.type();
             // std::cerr << "Internal compression:" << (int)h.internal_compression() << std::endl;
             // std::cerr << "Tile compression:" << (int)h.tile_compression() << std::endl;
             // std::cerr << "Addressed tile count:" << h.addressed_tile_count() << std::endl;
         }
     }
 
-    inline bool is_good() { return (region_.get_size() > 0); }
+    inline bool is_good() const { return (region_.get_size() > 0); }
+    inline bool is_raster() const { return type_ != tile_type::MVT; }
 
   private:
     inline char const* data() const { return reinterpret_cast<char const*>(region_.get_address()); }
@@ -439,6 +460,8 @@ class pmtiles_source : public tiles_source
     std::uint8_t minzoom_ = 0;
     std::uint8_t maxzoom_ = 14;
     mapnik::box2d<double> extent_;
+    compression_type compression_;
+    tile_type type_;
 
     std::pair<uint64_t, uint32_t> get_tile_position(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
@@ -489,12 +512,15 @@ class pmtiles_source : public tiles_source
     std::string get_tile(std::uint8_t z, std::uint32_t x, std::uint32_t y) const
     {
         auto tile = get_tile_position(z, x, y);
-        if (mapnik::vector_tile_impl::is_gzip_compressed(data() + tile.first, tile.second) ||
-            mapnik::vector_tile_impl::is_zlib_compressed(data() + tile.first, tile.second))
+        if (compression_ == compression_type::GZIP)
         {
-            std::string decompressed;
-            mapnik::vector_tile_impl::zlib_decompress(data() + tile.first, tile.second, decompressed);
-            return decompressed;
+            if (mapnik::vector_tile_impl::is_gzip_compressed(data() + tile.first, tile.second) ||
+                mapnik::vector_tile_impl::is_zlib_compressed(data() + tile.first, tile.second))
+            {
+                std::string decompressed;
+                mapnik::vector_tile_impl::zlib_decompress(data() + tile.first, tile.second, decompressed);
+                return decompressed;
+            }
         }
         return std::string(data() + tile.first, tile.second);
     }

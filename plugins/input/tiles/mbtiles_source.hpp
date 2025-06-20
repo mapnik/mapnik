@@ -145,6 +145,7 @@ class mbtiles_source : public tiles_source
         }
         return json_value;
     }
+    bool is_raster() const { return false; } // TODO
 };
 
 } // namespace mapnik

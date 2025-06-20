@@ -36,6 +36,7 @@ plugin_sources = Split(
   """
   %(PLUGIN_NAME)s_datasource.cpp
   %(PLUGIN_NAME)s_featureset.cpp
+  raster_%(PLUGIN_NAME)s_featureset.cpp
   %(MAPNIK_VECTOR_TILE)s/vector_tile_compression.cpp
   %(MAPNIK_VECTOR_TILE)s/vector_tile_geometry_decoder.cpp
   mvt_io.cpp
