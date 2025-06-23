@@ -53,7 +53,8 @@ raster_tiles_featureset::raster_tiles_featureset(std::shared_ptr<mapnik::tiles_s
                                                  mapnik::box2d<double> const& extent,
                                                  std::string const& layer,
                                                  std::unordered_map<std::string, std::string>& vector_tile_cache,
-                                                 std::size_t datasource_hash)
+                                                 std::size_t datasource_hash,
+                                                 double filter_factor)
     : source_ptr_(source_ptr)
     , context_(ctx)
     , zoom_(zoom)
@@ -61,6 +62,7 @@ raster_tiles_featureset::raster_tiles_featureset(std::shared_ptr<mapnik::tiles_s
     , layer_(layer)
     , vector_tile_cache_(vector_tile_cache)
     , datasource_hash_(datasource_hash)
+    , filter_factor_(filter_factor)
 {
     int tile_count = 1 << zoom;
     xmin_ =
@@ -135,7 +137,7 @@ mapnik::feature_ptr raster_tiles_featureset::next_feature()
             mapnik::image_any data = reader->read(x_off, y_off, width, height);
             auto feature_raster_extent = t.backward(mapnik::box2d<double>(x_off, y_off, x_off + width, y_off + height));
             mapnik::raster_ptr raster =
-              std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), 1);
+              std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), filter_factor_);
             feature->set_raster(raster);
             return feature;
         }

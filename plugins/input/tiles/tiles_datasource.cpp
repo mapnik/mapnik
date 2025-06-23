@@ -262,7 +262,8 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
                                                          bbox,
                                                          layer_,
                                                          vector_tile_cache,
-                                                         datasource_hash);
+                                                         datasource_hash,
+                                                         q.get_filter_factor());
     }
     else
     {

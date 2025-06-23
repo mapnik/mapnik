@@ -42,7 +42,8 @@ class raster_tiles_featureset : public mapnik::Featureset
                             mapnik::box2d<double> const& extent,
                             std::string const& layer,
                             std::unordered_map<std::string, std::string>& vector_tile_cache,
-                            std::size_t datasource_hash);
+                            std::size_t datasource_hash,
+                            double filter_factor);
 
     virtual ~raster_tiles_featureset();
     mapnik::feature_ptr next();
@@ -65,6 +66,7 @@ class raster_tiles_featureset : public mapnik::Featureset
     int y_ = 0;
     bool status_;
     std::size_t datasource_hash_;
+    double filter_factor_;
     bool next_tile();
     bool open_tile();
 };
