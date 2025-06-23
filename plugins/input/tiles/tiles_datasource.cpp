@@ -253,9 +253,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     }
     auto datasource_hash = std::hash<std::string>{}(database_path_);
     mapnik::box2d<double>  bbox = q.get_bbox().intersect(extent_);
-    // std::cerr << "bbox:" << bbox << " scale_denominator:" << q.scale_denominator() << std::endl;
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
-    // std::cerr << "zoom:" << zoom << std::endl;
     mapnik::context_ptr context = get_query_context(q);
     if (source_ptr_->is_raster())
     {

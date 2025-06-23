@@ -62,17 +62,11 @@ raster_tiles_featureset::raster_tiles_featureset(std::shared_ptr<mapnik::tiles_s
     , vector_tile_cache_(vector_tile_cache)
     , datasource_hash_(datasource_hash)
 {
-    //extent_.set_minx(extent_.minx() + 1e-6);
-    //extent_.set_maxx(extent_.maxx() - 1e-6);
-    //extent_.set_miny(extent_.miny() + 1e-6);
-    //extent_.set_maxy(extent_.maxy() - 1e-6);
-
     int tile_count = 1 << zoom;
     xmin_ = static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     xmax_ = static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    std::cerr << "Tiles Bbox:" << mapnik::box2d<double>(xmin_, ymin_, xmax_, ymax_) << std::endl;
     x_ = xmin_;
     y_ = ymin_;
     status_ = true;
@@ -94,7 +88,6 @@ mapnik::feature_ptr raster_tiles_featureset::next_feature()
     if (itr != vector_tile_cache_.end())
     {
         std::string const& image_buffer = itr->second;
-        std::cerr << x_ << ":" << y_ << " zoom=" << zoom_ << " size:" << image_buffer.size() << std::endl;
         if (image_buffer.size() == 0) return mapnik::feature_ptr();
         std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(image_buffer.c_str(), image_buffer.size()));
         if (reader.get())
