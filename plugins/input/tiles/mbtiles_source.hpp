@@ -44,6 +44,7 @@ class mbtiles_source : public tiles_source
     mapnik::box2d<double> extent_;
     std::string database_path_;
     std::shared_ptr<sqlite_connection> dataset_;
+    std::string format_;
     inline std::uint8_t zoom_from_string(std::string const& str) { return std::stoi(str); }
     std::int32_t convert_y(std::int32_t y, std::uint8_t zoom) const { return (1 << zoom) - 1 - y; }
 
@@ -54,11 +55,17 @@ class mbtiles_source : public tiles_source
         int sqlite_mode = SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
         dataset_ = std::make_shared<sqlite_connection>(database_path_, sqlite_mode);
         auto result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'format';");
-        if (!result->is_valid() || !result->step_next() || result->column_type(0) != SQLITE_TEXT ||
-            strcmp(result->column_text(0), "pbf"))
+        if (!result->is_valid() || !result->step_next() || result->column_type(0) != SQLITE_TEXT)
+
         {
-            throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ +
-                                               " has unsupported vector tile format, expected 'pbf'.");
+            throw mapnik::datasource_exception("MBTiles Plugin: Can't infer tile format value from " + database_path_);
+        }
+        format_ = result->column_text(0);
+
+        if (format_ != "pbf" && format_ != "jpg" && format_ != "png" && format_ != "webp")
+        {
+            throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ + " has unsupported tile format '" +
+                                               format_ + "', expected 'pbf|jpg|png|webp'.");
         }
         result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'bounds';");
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)
@@ -125,26 +132,30 @@ class mbtiles_source : public tiles_source
     {
         std::string metadata;
         boost::json::value json_value;
-        auto result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'json';");
-        if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)
+        if (!is_raster())
         {
-            metadata = result->column_text(0);
-        }
-        if (metadata.empty())
-        {
-            throw mapnik::datasource_exception("PMTiles plugin: " + database_path_ +
-                                               " has no 'json' entry in metadata table.");
-        }
-        try
-        {
-            json_value = boost::json::parse(metadata);
-        }
-        catch (std::exception const& ex)
-        {
-            std::cerr << ex.what() << std::endl;
+            auto result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'json';");
+            if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)
+            {
+                metadata = result->column_text(0);
+            }
+            if (metadata.empty())
+            {
+                throw mapnik::datasource_exception("PMTiles plugin: " + database_path_ +
+                                                   " has no 'json' entry in metadata table.");
+            }
+            try
+            {
+                json_value = boost::json::parse(metadata);
+            }
+            catch (std::exception const& ex)
+            {
+                std::cerr << ex.what() << std::endl;
+            }
         }
         return json_value;
     }
+    bool is_raster() const { return format_ == "png" || format_ == "jpg" || format_ == "webp"; }
 };
 
 } // namespace mapnik
