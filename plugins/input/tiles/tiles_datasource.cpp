@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "tiles_datasource.hpp"
-#include "tiles_featureset.hpp"
+#include "vector_tiles_featureset.hpp"
 #include "raster_tiles_featureset.hpp"
 #include "pmtiles_source.hpp"
 #include "mbtiles_source.hpp"
@@ -263,7 +263,7 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
     }
     else
     {
-        return std::make_shared<tiles_featureset>(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash);
+        return std::make_shared<vector_tiles_featureset>(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash);
     }
 }
 
@@ -288,7 +288,7 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
     if (!source_ptr_->is_raster())
-        return std::make_shared<tiles_featureset>(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash);
+        return std::make_shared<vector_tiles_featureset>(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash);
     return mapnik::featureset_ptr();
 }
 

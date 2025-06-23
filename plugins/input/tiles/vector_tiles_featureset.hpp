@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef TILES_FEATURESET_HPP
-#define TILES_FEATURESET_HPP
+#ifndef VECTOR_TILES_FEATURESET_HPP
+#define VECTOR_TILES_FEATURESET_HPP
 
 #include <memory>
 // mapnik
@@ -33,10 +33,10 @@ namespace mapnik {
 class tiles_source; // fwd decl
 }
 
-class tiles_featureset : public mapnik::Featureset
+class vector_tiles_featureset : public mapnik::Featureset
 {
   public:
-    tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
+    vector_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
                      mapnik::context_ptr const& ctx,
                      int const zoom,
                      mapnik::box2d<double> const& extent,
@@ -44,7 +44,7 @@ class tiles_featureset : public mapnik::Featureset
                      std::unordered_map<std::string, std::string>& vector_tile_cache,
                      std::size_t datasource_hash);
 
-    virtual ~tiles_featureset();
+    virtual ~vector_tiles_featureset();
     mapnik::feature_ptr next();
 
   private:
@@ -70,4 +70,4 @@ class tiles_featureset : public mapnik::Featureset
     bool open_tile();
 };
 
-#endif // TILES_FEATURESET_HPP
+#endif // VECTOR_TILES_FEATURESET_HPP

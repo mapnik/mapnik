@@ -23,11 +23,11 @@
 // mapnik
 #include <mapnik/well_known_srs.hpp>
 #include "tiles_source.hpp"
-#include "tiles_featureset.hpp"
+#include "vector_tiles_featureset.hpp"
 // boost
 #include <boost/format.hpp>
 
-tiles_featureset::tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
+vector_tiles_featureset::vector_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
                                    mapnik::context_ptr const& ctx,
                                    const int zoom,
                                    mapnik::box2d<double> const& extent,
@@ -62,14 +62,14 @@ tiles_featureset::tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_
     open_tile();
 }
 
-tiles_featureset::~tiles_featureset() {}
+vector_tiles_featureset::~vector_tiles_featureset() {}
 
-bool tiles_featureset::valid() const
+bool vector_tiles_featureset::valid() const
 {
     return vector_tile_.get() != nullptr;
 }
 
-mapnik::feature_ptr tiles_featureset::next_feature()
+mapnik::feature_ptr vector_tiles_featureset::next_feature()
 {
     mapnik::feature_ptr f = mapnik::feature_ptr();
     if (valid())
@@ -79,7 +79,7 @@ mapnik::feature_ptr tiles_featureset::next_feature()
     return f;
 }
 
-mapnik::feature_ptr tiles_featureset::next()
+mapnik::feature_ptr vector_tiles_featureset::next()
 {
     // If current tile is processed completely, go forward to the next tile.
     // else step forward to the next feature
@@ -99,7 +99,7 @@ mapnik::feature_ptr tiles_featureset::next()
     return mapnik::feature_ptr();
 }
 
-bool tiles_featureset::next_tile()
+bool vector_tiles_featureset::next_tile()
 {
     ++x_;
     if (x_ <= xmax_)
@@ -111,7 +111,7 @@ bool tiles_featureset::next_tile()
     return y_ <= ymax_;
 }
 
-bool tiles_featureset::open_tile()
+bool vector_tiles_featureset::open_tile()
 {
     auto datasource_key = (boost::format("%1%-%2%-%3%-%4%") % datasource_hash_ % zoom_ % x_ % y_).str();
     auto itr = vector_tile_cache_.find(datasource_key);
