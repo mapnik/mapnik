@@ -214,11 +214,10 @@ mapnik::context_ptr tiles_datasource::get_query_context(mapnik::query const& q) 
 
 namespace {
 
-constexpr double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 17471320.7509,
-                             8735660.37545, 4367830.18772, 2183915.09386, 1091957.54693, 545978.773466,
-                             272989.386733, 136494.693366, 68247.3466832, 34123.6733416, 17061.8366708,
-                             8530.9183354,  4265.4591677,  2132.72958385, 1066.36479192, 533.182395962,
-                             266.59119798,  133.29559899,  66.6477994952};
+constexpr double scales[] = {279541132.014, 139770566.007, 69885283.0036, 34942641.5018, 17471320.7509, 8735660.37545,
+                             4367830.18772, 2183915.09386, 1091957.54693, 545978.773466, 272989.386733, 136494.693366,
+                             68247.3466832, 34123.6733416, 17061.8366708, 8530.9183354,  4265.4591677,  2132.72958385,
+                             1066.36479192, 533.182395962, 266.59119798,  133.29559899,  66.6477994952};
 
 std::int64_t scale_to_zoom(double scale, std::int64_t minzoom, std::int64_t maxzoom)
 {
@@ -252,16 +251,28 @@ mapnik::featureset_ptr tiles_datasource::features(mapnik::query const& q) const
         vector_tile_cache.clear();
     }
     auto datasource_hash = std::hash<std::string>{}(database_path_);
-    mapnik::box2d<double>  bbox = q.get_bbox().intersect(extent_);
+    mapnik::box2d<double> bbox = q.get_bbox().intersect(extent_);
     auto zoom = scale_to_zoom(q.scale_denominator(), minzoom_, maxzoom_);
     mapnik::context_ptr context = get_query_context(q);
     if (source_ptr_->is_raster())
     {
-        return std::make_shared<raster_tiles_featureset>(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash);
+        return std::make_shared<raster_tiles_featureset>(source_ptr_,
+                                                         context,
+                                                         zoom,
+                                                         bbox,
+                                                         layer_,
+                                                         vector_tile_cache,
+                                                         datasource_hash);
     }
     else
     {
-        return std::make_shared<vector_tiles_featureset>(source_ptr_, context, zoom, bbox, layer_, vector_tile_cache, datasource_hash);
+        return std::make_shared<vector_tiles_featureset>(source_ptr_,
+                                                         context,
+                                                         zoom,
+                                                         bbox,
+                                                         layer_,
+                                                         vector_tile_cache,
+                                                         datasource_hash);
     }
 }
 
@@ -286,7 +297,13 @@ mapnik::featureset_ptr tiles_datasource::features_at_point(mapnik::coord2d const
     double y1 = -(tile_y + 1) * (mapnik::EARTH_CIRCUMFERENCE / tile_count) + 0.5 * mapnik::EARTH_CIRCUMFERENCE;
     auto query_bbox = mapnik::box2d<double>{x0, y0, x1, y1};
     if (!source_ptr_->is_raster())
-        return std::make_shared<vector_tiles_featureset>(source_ptr_, context, maxzoom_, query_bbox, layer_, tile_cache(), datasource_hash);
+        return std::make_shared<vector_tiles_featureset>(source_ptr_,
+                                                         context,
+                                                         maxzoom_,
+                                                         query_bbox,
+                                                         layer_,
+                                                         tile_cache(),
+                                                         datasource_hash);
     return mapnik::featureset_ptr();
 }
 

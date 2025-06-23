@@ -36,7 +36,6 @@
 
 namespace mapnik {
 
-
 class mbtiles_source : public tiles_source
 {
   private:
@@ -65,8 +64,8 @@ class mbtiles_source : public tiles_source
 
         if (format_ != "pbf" && format_ != "jpg" && format_ != "png" && format_ != "webp")
         {
-            throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ +
-                                               " has unsupported tile format '" + format_ +"', expected 'pbf|jpg|png|webp'.");
+            throw mapnik::datasource_exception("MBTiles Plugin: " + database_path_ + " has unsupported tile format '" +
+                                               format_ + "', expected 'pbf|jpg|png|webp'.");
         }
         result = dataset_->execute_query("SELECT value FROM metadata WHERE name = 'bounds';");
         if (result->is_valid() && result->step_next() && result->column_type(0) == SQLITE_TEXT)

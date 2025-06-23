@@ -38,24 +38,9 @@
 
 namespace mapnik {
 
-enum class compression_type : std::uint8_t
-{
-    UNKNOWN = 0x0,
-    NONE = 0x1,
-    GZIP = 0x2,
-    BROTLI = 0x3,
-    ZSTD = 0x4
-};
+enum class compression_type : std::uint8_t { UNKNOWN = 0x0, NONE = 0x1, GZIP = 0x2, BROTLI = 0x3, ZSTD = 0x4 };
 
-enum class tile_type : std::uint8_t
-{
-    UNKNOWN = 0x00,
-    MVT = 0x01,
-    PNG = 0x02,
-    JPEG = 0x03,
-    WEBP = 0x04,
-    AVIF = 0x05
-};
+enum class tile_type : std::uint8_t { UNKNOWN = 0x00, MVT = 0x01, PNG = 0x02, JPEG = 0x03, WEBP = 0x04, AVIF = 0x05 };
 
 struct entryv3
 {

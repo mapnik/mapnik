@@ -45,15 +45,15 @@ inline mapnik::box2d<double> tile_envelope(int z, int x, int y)
     return mapnik::box2d<double>(x0, y0, x1, y1);
 }
 
-}
+} // namespace
 
 raster_tiles_featureset::raster_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
-                                   mapnik::context_ptr const& ctx,
-                                   int zoom,
-                                   mapnik::box2d<double> const& extent,
-                                   std::string const& layer,
-                                   std::unordered_map<std::string, std::string>& vector_tile_cache,
-                                   std::size_t datasource_hash)
+                                                 mapnik::context_ptr const& ctx,
+                                                 int zoom,
+                                                 mapnik::box2d<double> const& extent,
+                                                 std::string const& layer,
+                                                 std::unordered_map<std::string, std::string>& vector_tile_cache,
+                                                 std::size_t datasource_hash)
     : source_ptr_(source_ptr)
     , context_(ctx)
     , zoom_(zoom)
@@ -63,10 +63,14 @@ raster_tiles_featureset::raster_tiles_featureset(std::shared_ptr<mapnik::tiles_s
     , datasource_hash_(datasource_hash)
 {
     int tile_count = 1 << zoom;
-    xmin_ = static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    xmax_ = static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
-    ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    xmin_ =
+      static_cast<int>((extent_.minx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    xmax_ =
+      static_cast<int>((extent_.maxx() + mapnik::EARTH_CIRCUMFERENCE / 2) * (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    ymin_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.maxy()) *
+                             (tile_count / mapnik::EARTH_CIRCUMFERENCE));
+    ymax_ = static_cast<int>(((mapnik::EARTH_CIRCUMFERENCE / 2) - extent_.miny()) *
+                             (tile_count / mapnik::EARTH_CIRCUMFERENCE));
     x_ = xmin_;
     y_ = ymin_;
     status_ = true;
@@ -82,14 +86,17 @@ mapnik::feature_ptr raster_tiles_featureset::next_feature()
     {
         auto image_buffer = source_ptr_->get_tile(zoom_, x_, y_);
         auto result = vector_tile_cache_.emplace(tile_key, image_buffer);
-        if (result.second) itr = result.first;
+        if (result.second)
+            itr = result.first;
     }
 
     if (itr != vector_tile_cache_.end())
     {
         std::string const& image_buffer = itr->second;
-        if (image_buffer.size() == 0) return mapnik::feature_ptr();
-        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(image_buffer.c_str(), image_buffer.size()));
+        if (image_buffer.size() == 0)
+            return mapnik::feature_ptr();
+        std::unique_ptr<mapnik::image_reader> reader(
+          mapnik::get_image_reader(image_buffer.c_str(), image_buffer.size()));
         if (reader.get())
         {
             int image_width = reader->width();
@@ -127,7 +134,8 @@ mapnik::feature_ptr raster_tiles_featureset::next_feature()
             mapnik::feature_ptr feature(mapnik::feature_factory::create(context_, std::hash<std::string>{}(tile_key)));
             mapnik::image_any data = reader->read(x_off, y_off, width, height);
             auto feature_raster_extent = t.backward(mapnik::box2d<double>(x_off, y_off, x_off + width, y_off + height));
-            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), 1);
+            mapnik::raster_ptr raster =
+              std::make_shared<mapnik::raster>(feature_raster_extent, intersect, std::move(data), 1);
             feature->set_raster(raster);
             return feature;
         }
@@ -139,7 +147,8 @@ mapnik::feature_ptr raster_tiles_featureset::next()
 {
     while (true)
     {
-        if (!status_) return  mapnik::feature_ptr();
+        if (!status_)
+            return mapnik::feature_ptr();
         mapnik::feature_ptr feature = next_feature();
         status_ = next_tile();
         if (feature)

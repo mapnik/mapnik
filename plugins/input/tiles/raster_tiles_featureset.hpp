@@ -49,13 +49,13 @@ class raster_tiles_featureset : public mapnik::Featureset
 
   private:
     mapnik::feature_ptr next_feature();
-    //bool valid() const;
+    // bool valid() const;
     std::shared_ptr<mapnik::tiles_source> source_ptr_;
     mapnik::context_ptr context_;
     int zoom_;
     mapnik::box2d<double> extent_;
     std::string const layer_;
-    //std::unique_ptr<mvt_io> vector_tile_;
+    // std::unique_ptr<mvt_io> vector_tile_;
     std::unordered_map<std::string, std::string>& vector_tile_cache_;
     int xmin_;
     int xmax_;

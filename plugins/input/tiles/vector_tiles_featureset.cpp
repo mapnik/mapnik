@@ -28,12 +28,12 @@
 #include <boost/format.hpp>
 
 vector_tiles_featureset::vector_tiles_featureset(std::shared_ptr<mapnik::tiles_source> source_ptr,
-                                   mapnik::context_ptr const& ctx,
-                                   const int zoom,
-                                   mapnik::box2d<double> const& extent,
-                                   std::string const& layer,
-                                   std::unordered_map<std::string, std::string>& vector_tile_cache,
-                                   std::size_t datasource_hash)
+                                                 mapnik::context_ptr const& ctx,
+                                                 const int zoom,
+                                                 mapnik::box2d<double> const& extent,
+                                                 std::string const& layer,
+                                                 std::unordered_map<std::string, std::string>& vector_tile_cache,
+                                                 std::size_t datasource_hash)
     : source_ptr_(source_ptr)
     , context_(ctx)
     , zoom_(zoom)
