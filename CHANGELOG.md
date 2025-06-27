@@ -9,7 +9,7 @@ For a complete change history, see the git log.
 
 Released June 27th, 2025
 
-(Packaged from [xxxxxxxxx](https://github.com/mapnik/mapnik/commit/xxxxxxxxx))
+(Packaged from [8711342c8](https://github.com/mapnik/mapnik/commit/8711342c8))
 
 - tiles.input - *NEW* raster support (png/jpeg/webp)
   (https://github.com/mapnik/mapnik/pull/4510)
