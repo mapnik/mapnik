@@ -5,6 +5,14 @@ A simple log of core changes affecting Mapnik usage.
 Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
+## Mapnik 4.1.1
+
+Released June 27th, 2025
+
+(Packaged from [xxxxxxxxx](https://github.com/mapnik/mapnik/commit/xxxxxxxxx))
+
+- tiles.input - *NEW* raster support (png/jpeg/webp)
+  (https://github.com/mapnik/mapnik/pull/4510)
 
 ## Mapnik 4.1.0
 
