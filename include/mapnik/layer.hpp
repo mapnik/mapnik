@@ -237,6 +237,8 @@ class MAPNIK_DECL layer
     datasource_ptr ds_;
     std::optional<int> buffer_size_;
     std::optional<box2d<double>> maximum_extent_;
+
+
     std::optional<composite_mode_e> comp_op_;
     double opacity_;
 };
